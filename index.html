@@ -9,7 +9,7 @@
 <body>
 <title>Grug Digital</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Websites, TV menu boards, rewards apps and branded games for local Katy shops. $25 a month.">
+<meta name="description" content="Branded games, rewards apps, websites and TV menu boards for local Katy restaurants. Our first partners get 90 days free.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
@@ -228,6 +228,33 @@ body[data-page="business"] .subnav{display:flex}
 .lk:hover{transform:translateY(-2px)}.lk:active{transform:scale(.94)}
 .lk.pri{background:var(--acc);color:var(--acc-ink);border-color:transparent}
 .lk small{font:500 11px/1 var(--mono);opacity:.65}
+.pilot{margin-top:28px;padding:20px 24px}
+.pr{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:14px;padding:11px 0;border-bottom:1px solid var(--line)}
+.pr:last-of-type{border-bottom:0}
+.pr b{font-weight:700;font-size:15.5px}
+.pr span{color:var(--ink2);font-size:15px}
+.pr.free span{color:var(--acc-text);font-weight:800}
+@media (max-width:520px){.pr{grid-template-columns:1fr;gap:2px}}
+.passpg{padding-block:30px 90px}
+.loop{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:30px}
+.lstep{padding:22px}
+.lstep .ln{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--sun);color:var(--acc-ink);font:700 15px/1 var(--mono)}
+.lstep h3{font-size:24px;margin:14px 0 6px}
+.lstep p{margin:0;color:var(--ink2);font-size:15.5px}
+.tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:22px;align-items:stretch}
+.tier{padding:24px;display:flex;flex-direction:column;gap:6px}
+.tier.hot{background:var(--screen);color:var(--screen-ink);border-color:transparent}
+.tier.hot .tsub,.tier.hot li{color:var(--screen-mut)}
+.tier h3{font-size:24px}
+.tier .tp{font:800 44px/1 var(--display);letter-spacing:-.03em;margin-top:6px}
+.tier .tp small{font:500 15px/1 var(--body);margin-left:3px}
+.tier.hot .tp{color:var(--acc)}
+.tsub{color:var(--mut);font:500 12.5px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.tier ul{margin:10px 0 0;padding-left:18px;color:var(--ink2);font-size:15.5px}
+.tier li{margin-bottom:4px}
+.passcta{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:26px}
+.passcta p{margin:0;color:var(--mut);font-size:14px;max-width:56ch}
+@media (max-width:860px){.loop,.tiers{grid-template-columns:1fr}}
 .disc{margin-top:24px;font-size:14px;color:var(--mut);max-width:80ch}
 @media (max-width:860px){.grid{grid-template-columns:1fr}}
 
@@ -359,11 +386,11 @@ dialog img{display:block;max-width:100%;max-height:86vh;border-radius:8px;backgr
     <div class="doors">
       <a class="door glass lift" href="#games">
         <span class="doorpic"><img src="work/alchemy/desktop.jpg" alt=""><span class="soon">Coming soon</span></span>
-        <span class="doorbody"><b>Games</b><span>Play games made with Grug, our own game engine.</span><span class="go">See games →</span></span>
+        <span class="doorbody"><b>Games</b><span>Play games made with Grug, our own engine. Eat at a partner restaurant, earn points, unlock more play.</span><span class="go">See games →</span></span>
       </a>
       <a class="door glass lift" href="#business">
         <span class="doorpic"><img src="work/dulce/board.jpg" alt=""></span>
-        <span class="doorbody"><b>For businesses</b><span>Website, TV menu board, rewards app and your own game for $25 a month.</span><span class="go">See what we build →</span></span>
+        <span class="doorbody"><b>For businesses</b><span>A game starring your food, a rewards app and more. Our first partners get 90 days free.</span><span class="go">See what we build →</span></span>
       </a>
     </div>
   </div>
@@ -374,7 +401,7 @@ dialog img{display:block;max-width:100%;max-height:86vh;border-radius:8px;backgr
   <div class="wrap">
     <p class="kick">Games</p>
     <h2>Games are on the way.</h2>
-    <p class="lead">We're building games with Grug, our own engine. The first ones will be playable right here.</p>
+    <p class="lead">We're building games with Grug, our own engine. The first ones will be playable right here, and the points you earn at partner restaurants unlock more of them.</p>
     <div class="gamegrid">
       <article class="game glass lift">
         <button type="button" class="gpic" data-open="alchemy-site" aria-label="Open the Sugar Alchemist page"><img src="work/alchemy/desktop.jpg" alt="Sugar Alchemist game page"></button>
@@ -387,20 +414,38 @@ dialog img{display:block;max-width:100%;max-height:86vh;border-radius:8px;backgr
       </article>
       <article class="game glass">
         <div class="gpic ph2"><span>Coming soon</span></div>
-        <div class="gbody"><span class="st">Later</span><h3>Your shop, playable</h3><p>Every shop on our business plan gets its own game. They'll be playable here too.</p>
-        <a class="lk" href="#business">How it works</a></div>
+        <div class="gbody"><span class="st">Later</span><h3>Your shop, playable</h3><p>Every partner restaurant gets a game starring its own food. Scan the QR on your table to play while you wait, and keep playing here.</p>
+        <a class="lk" href="#pass">How points work</a></div>
       </article>
     </div>
   </div>
 </section>
+<section class="passpg" id="pass"><div class="wrap">
+  <p class="kick">Points and the Pass</p>
+  <h2>Every meal earns points. Every point unlocks play.</h2>
+  <p class="lead">One account works at every partner restaurant, so your points follow you around town.</p>
+  <div class="loop">
+    <div class="lstep glass"><span class="ln">1</span><h3>Eat at a partner</h3><p>Scan the QR on your table or receipt. Play that restaurant's game while you wait for your food.</p></div>
+    <div class="lstep glass"><span class="ln">2</span><h3>Earn points</h3><p>Every visit adds points to one balance that works at every partner.</p></div>
+    <div class="lstep glass"><span class="ln">3</span><h3>Spend them on play</h3><p>Unlock levels, items and new games here, or redeem them for food at the restaurant.</p></div>
+  </div>
+  <h3 style="font-size:clamp(26px,3.4vw,36px);margin-top:54px">The Pass is coming soon</h3>
+  <p class="lead" style="margin-top:10px">One monthly pass for every partner restaurant: our full game library, double points and a monthly treat.</p>
+  <div class="tiers">
+    <div class="tier glass"><span class="tsub">The start</span><h3>Free</h3><div class="tp">$0</div><ul><li>Earn points at every partner</li><li>Play each restaurant's game</li><li>Demo levels of our games</li></ul></div>
+    <div class="tier glass hot"><span class="tsub">Every partner</span><h3>Pass</h3><div class="tp">$4.99<small>/mo</small></div><ul><li>Our full game library</li><li>2x points at every partner</li><li>A free side, drink or dessert each month at any partner</li></ul></div>
+    <div class="tier glass"><span class="tsub">For the kids' table</span><h3>Family Pass</h3><div class="tp">$7.99<small>/mo</small></div><ul><li>Everything in the Pass</li><li>Up to 4 profiles, managed by a parent</li><li>Kid-safe mode with no chat</li></ul></div>
+  </div>
+  <div class="passcta"><a class="btn acc" href="sms:+19544596301?&amp;body=Add%20me%20to%20the%20Pass%20waitlist">Join the waitlist</a><p>Text us and we'll let you know when the Pass launches. Prices and perks are planned and may change before launch.</p></div>
+</div></section>
 </div>
 <div class="pg" data-page="business" hidden>
 <section class="hero"><div class="shapes" aria-hidden="true"><i class="sh c" style="left:-40px;top:60px;width:140px;height:140px;--s:70px;--c:var(--mint);background:var(--mint);--dx:14px;--dy:18px"></i><i class="sh sq" style="left:46%;top:8%;width:34px;height:34px;--s:17px;--c:var(--sun);background:var(--sun);--r0:12deg;--r1:40deg"></i><i class="sh tri" style="left:88%;top:4%;width:46px;height:46px;--s:23px;--c:var(--teal);background:var(--teal);--r0:-8deg;--r1:14deg"></i><i class="sh ring" style="left:92%;top:70%;width:90px;height:90px;--s:45px;--c:var(--acc);background:var(--acc);--dx:-12px"></i><i class="sh plus" style="left:40%;top:86%;width:30px;height:30px;--s:15px;--c:var(--olive);background:var(--olive);--r1:45deg"></i><i class="sh dots" style="left:2%;top:78%;width:90px;height:90px;--s:45px;--c:var(--acc);background:var(--acc);opacity:.5"></i><svg class="sh wave" style="left:60%;top:92%;width:120px;height:40px;" viewBox="0 0 120 40"><path d="M2 20 Q17 2 32 20 T62 20 T92 20 T122 20" fill="none" stroke="var(--teal)" stroke-width="7" stroke-linecap="round"/></svg></div><div class="wrap hg">
   <div>
-    <p class="kick">For local shops in Katy, Texas</p>
-    <h1>Your website, menu board, rewards app and <em>your own game.</em></h1>
-    <p class="lead">One local team builds all of it for your shop, keeps it running, and makes changes when you text us.</p>
-    <div class="price glass"><span>Everything, monthly</span><span class="dots" aria-hidden="true"></span><b>$25</b></div>
+    <p class="kick">For local restaurants in Katy, Texas</p>
+    <h1>Turn your restaurant into <em>a game.</em></h1>
+    <p class="lead">Guests play a game starring your food while they wait, earn points every visit, and come back for more. We build it, put a QR on your tables, and send you a monthly report on who came back.</p>
+    <div class="price glass"><span>First partners, 90 days</span><span class="dots" aria-hidden="true"></span><b>Free</b></div>
     <div class="cta"><a class="btn acc" href="#work">See our work</a><a class="btn" href="#contact">Text 954-459-6301</a></div>
   </div>
   <div class="tvwrap glass">
@@ -414,30 +459,26 @@ dialog img{display:block;max-width:100%;max-height:86vh;border-radius:8px;backgr
 <section id="included"><div class="shapes" aria-hidden="true"><i class="sh half" style="left:-30px;top:12%;width:120px;height:120px;--s:60px;--c:var(--sun);background:var(--sun);--r0:90deg;--r1:100deg"></i><i class="sh c" style="left:94%;top:6%;width:56px;height:56px;--s:28px;--c:var(--teal);background:var(--teal);"></i><i class="sh sq" style="left:47%;top:92%;width:26px;height:26px;--s:13px;--c:var(--acc);background:var(--acc);--r1:60deg"></i><i class="sh plus" style="left:96%;top:80%;width:34px;height:34px;--s:17px;--c:var(--sun);background:var(--sun);"></i></div><div class="wrap ig">
   <div>
     <p class="kick">What you get</p>
-    <h2>One flat price. No cut of your sales.</h2>
-    <p class="lead">The big ordering platforms charge a monthly plan plus a fee on every order. We charge $25 a month, and that's it.</p>
-    <div class="yearcard glass" role="img" aria-label="First-year cost before per-order fees: Grug Digital $300, Owner.com $2,988, ChowNow $2,748, Popmenu $2,148, Per Diem $1,188">
-      <p class="kick" style="margin:0 0 6px;color:var(--mut)">First year, before per-order fees</p>
-      <div class="yr you"><span class="yn">Grug Digital</span><div class="ytrack"><i style="--w:10.0%"></i></div><span class="yv">$300<small>flat</small></span></div><div class="yr"><span class="yn">Owner.com</span><div class="ytrack"><i style="--w:100.0%"></i></div><span class="yv">$2,988<small>+ 5% of each order</small></span></div><div class="yr"><span class="yn">ChowNow</span><div class="ytrack"><i style="--w:92.0%"></i></div><span class="yv">$2,748<small>+ 2.95% + 29¢ per order</small></span></div><div class="yr"><span class="yn">Popmenu</span><div class="ytrack"><i style="--w:71.9%"></i></div><span class="yv">$2,148<small>+ $1 per order</small></span></div><div class="yr"><span class="yn">Per Diem</span><div class="ytrack"><i style="--w:39.8%"></i></div><span class="yv">$1,188<small>+ fee per pickup</small></span></div>
-    </div>
-    <p class="src">Starting plans as listed on each company's pricing page, October 2026.</p>
+    <h2>Start free. Earn when your guests play.</h2>
+    <p class="lead">Our first 3 to 5 partners get the branded game, the setup and 90 days free. We'll agree on pricing with you before the pilot ends, and you earn a cut every time one of your guests buys the Pass.</p>
+    <div class="pilot glass"><p class="kick" style="margin:0 0 6px;color:var(--mut)">The pilot</p><div class="pr free"><b>Branded game and setup</b><span>Free</span></div><div class="pr free"><b>First 90 days</b><span>Free</span></div><div class="pr"><b>Your part</b><span>Room for QR cards on your tables, a quick mention from your servers, and sharing how it went</span></div><div class="pr"><b>What success looks like</b><span>1 in 10 tables scanning, and members coming back more often than other guests</span></div><div class="pr"><b>After 90 days</b><span>A monthly plan we agree on together, plus your cut of every Pass</span></div></div>
   </div>
   <div class="board lift" aria-label="Everything included">
     <h3>The menu</h3>
-    <ul><li><div class="ir"><b>Custom website</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>Your menu, hours, photos and directions, built for phones first.</p></li><li><div class="ir"><b>Order ahead, pay in store</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>Customers order online and pay at your counter. No card fees, no cut of sales.</p></li><li><div class="ir"><b>TV menu board</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>Change prices, sold-outs and specials from a tablet or laptop.</p></li><li><div class="ir"><b>Rewards app</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>A stamp card for your regulars, plus game tokens on every visit.</p></li><li><div class="ir"><b>Your own game</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>A playable version of your shop, modeled from photos of the real space.</p></li><li><div class="ir"><b>Free game tokens</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>Your customers earn them just by coming in. You never pay for them.</p></li><li><div class="ir"><b>Server maintenance</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>We keep the site, ordering and board online.</p></li><li><div class="ir"><b>App maintenance</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>Updates and fixes for the rewards app, handled for you.</p></li><li><div class="ir"><b>Edits by text</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>New item, new price, new hours: text us and it&#x27;s done.</p></li></ul>
-    <div class="total"><b>All of it</b><span class="dots" aria-hidden="true"></span><span>$25/mo</span></div>
+    <ul><li><div class="ir"><b>Your own game</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>A short, replayable game starring your food, played from a QR on the table. No download.</p></li><li><div class="ir"><b>Rewards app</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>Guests earn points on every visit and redeem them for food and play.</p></li><li><div class="ir"><b>Table QR cards</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>Table tents, kids&#x27; menus and receipt codes: &ldquo;Play while you wait.&rdquo;</p></li><li><div class="ir"><b>Monthly report</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>Members, visits, redemptions and Pass sign-ups, so you can see who came back.</p></li><li><div class="ir"><b>A cut of the Pass</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>When guests who joined at your place buy the Pass, you get a share.</p></li><li><div class="ir"><b>Pass network</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>Pass members from other partner restaurants come looking for new places to eat.</p></li><li><div class="ir"><b>Custom website</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>Your menu, hours, photos and directions, built for phones first.</p></li><li><div class="ir"><b>Order ahead, pay in store</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>Customers order online and pay at your counter. No card fees, no cut of sales.</p></li><li><div class="ir"><b>TV menu board</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>Change prices, sold-outs and specials from a tablet or laptop.</p></li><li><div class="ir"><b>Hosting and upkeep</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>We keep the game, app, site and board online, with updates and fixes handled for you.</p></li><li><div class="ir"><b>Edits by text</b><span class="dots" aria-hidden="true"></span><span class="ok">Included</span></div><p>New item, new price, new hours: text us and it&#x27;s done.</p></li></ul>
+    <div class="total"><b>First 90 days</b><span class="dots" aria-hidden="true"></span><span>Free</span></div>
   </div>
 </div></section>
 
 <section id="how"><div class="shapes" aria-hidden="true"><i class="sh tri" style="left:2%;top:10%;width:40px;height:40px;--s:20px;--c:var(--sun);background:var(--sun);--r1:30deg"></i><i class="sh ring" style="left:88%;top:4%;width:70px;height:70px;--s:35px;--c:var(--teal);background:var(--teal);"></i><i class="sh dots" style="left:80%;top:70%;width:110px;height:110px;--s:55px;--c:var(--acc);background:var(--acc);opacity:.45"></i><i class="sh c" style="left:30%;top:88%;width:22px;height:22px;--s:11px;--c:var(--olive);background:var(--olive);"></i></div><div class="wrap">
   <p class="kick">How it works</p>
-  <h2>We come to you. Then we're a text away.</h2>
+  <h2>We come to you. Then we report back.</h2>
   <div class="steps">
-    <div class="step glass lift"><span class="n">1</span><h3>We visit your shop</h3><p>We take photos, get your menu and prices, and look at where the TV will go.</p></div>
-    <div class="step glass lift"><span class="n">2</span><h3>We build it</h3><p>Your site, ordering, menu board, rewards app and game, in your colors, with your real menu.</p></div>
-    <div class="step glass lift"><span class="n">3</span><h3>You text, we update</h3><p>Sold out of something? New seasonal drink? Price change? Send a text and we handle it.</p></div>
+    <div class="step glass lift"><span class="n">1</span><h3>We visit your restaurant</h3><p>We take photos, get your menu and prices, and pick spots for the TV and the table QR cards.</p></div>
+    <div class="step glass lift"><span class="n">2</span><h3>We build it in days</h3><p>Your game, rewards app, site and menu board, in your colors, starring your real food.</p></div>
+    <div class="step glass lift"><span class="n">3</span><h3>Guests play, you see results</h3><p>Every month you get a report on scans, members and repeat visits. Need a change? Text us and we handle it.</p></div>
   </div>
-  <div class="need"><span>TO GET STARTED</span><b class="glass">Your logo</b><b class="glass">Full menu with prices</b><b class="glass">Where the TV will go</b><b class="glass">A few photos of the shop</b></div>
+  <div class="need"><span>TO GET STARTED</span><b class="glass">Your logo</b><b class="glass">Full menu with prices</b><b class="glass">Where the TV and QR cards will go</b><b class="glass">A few photos of the shop</b></div>
 </div></section>
 
 <section id="work"><div class="shapes" aria-hidden="true"><i class="sh c" style="left:95%;top:2%;width:120px;height:120px;--s:60px;--c:var(--mint);background:var(--mint);--dx:-16px"></i><i class="sh sq" style="left:-14px;top:30%;width:60px;height:60px;--s:30px;--c:var(--sun);background:var(--sun);--r0:20deg;--r1:-10deg"></i><i class="sh plus" style="left:97%;top:48%;width:36px;height:36px;--s:18px;--c:var(--teal);background:var(--teal);"></i><svg class="sh wave" style="left:1%;top:82%;width:130px;height:43px;" viewBox="0 0 120 40"><path d="M2 20 Q17 2 32 20 T62 20 T92 20 T122 20" fill="none" stroke="var(--acc)" stroke-width="7" stroke-linecap="round"/></svg><i class="sh tri" style="left:50%;top:1%;width:30px;height:30px;--s:15px;--c:var(--olive);background:var(--olive);--r1:-20deg"></i></div><div class="wrap">
@@ -563,11 +604,11 @@ dialog img{display:block;max-width:100%;max-height:86vh;border-radius:8px;backgr
     </div>
     <div class="mapcard glass">
       <div class="mapbox" style="aspect-ratio:1.0413">
-        <img src="community/map.jpg" alt="Map of west Katy from Elyson south to Franz Road, with the shops we've designed for">
+        <img src="community/map.jpg" alt="Map of west Katy from Elyson south to Franz Road, with the restaurants and shops we've designed for">
         <span class="home" style="left:34.85%;top:24.56%;width:40.8%"><b>Elyson</b></span>
-        <a class="pin" style="left:53.71%;top:27.37%" href="https://www.google.com/maps/search/?api=1&amp;query=Soluna+Coffee+22225+Elyson+Falls+Dr+Katy+TX" target="_blank" rel="noopener" aria-label="Soluna Coffee in Google Maps" data-side="R"><span class="dot"></span><span class="pl">Soluna</span></a><a class="pin" style="left:43.11%;top:26.92%" href="https://www.google.com/maps/search/?api=1&amp;query=Alchemy+Bake+Lab+Katy+TX" target="_blank" rel="noopener" aria-label="Alchemy Bake Lab in Google Maps" data-side="L"><span class="dot"></span><span class="pl">Alchemy</span></a><a class="pin" style="left:43.11%;top:65.47%" href="https://www.google.com/maps/search/?api=1&amp;query=Dulce+Donuts+23053+Clay+Rd+Katy+TX" target="_blank" rel="noopener" aria-label="Dulce Donuts in Google Maps"><span class="dot"></span><span class="pl">Dulce</span></a><a class="pin" style="left:30.45%;top:63.92%" href="https://www.google.com/maps/search/?api=1&amp;query=Shops+at+Katy+Pointe+Clay+Rd+Porter+Rd+Katy+TX" target="_blank" rel="noopener" aria-label="Karma Kolache in Google Maps"><span class="dot"></span><span class="pl">Karma</span></a><a class="pin" style="left:48.64%;top:72.65%" href="https://www.google.com/maps/search/?api=1&amp;query=Thien+An+Banh+Mi+Boba+3349+W+Grand+Pkwy+N+Katy+TX" target="_blank" rel="noopener" aria-label="Thien An Banh Mi & Boba in Google Maps"><span class="dot"></span><span class="pl">Thien An</span></a><a class="pin" style="left:72.5%;top:92.28%" href="https://www.google.com/maps/search/?api=1&amp;query=Mr.+Donut+20300+Franz+Rd+Katy+TX" target="_blank" rel="noopener" aria-label="Mr. Donut in Google Maps"><span class="dot"></span><span class="pl">Mr. Donut</span></a><a class="pin" style="left:91.14%;top:65.01%" href="https://www.google.com/maps/search/?api=1&amp;query=AT+Donuts+19560+Clay+Rd+Katy+TX" target="_blank" rel="noopener" aria-label="AT Donuts in Google Maps"><span class="dot"></span><span class="pl">AT Donuts</span></a>
+        <a class="pin" style="left:53.71%;top:27.37%" href="https://www.google.com/maps/search/?api=1&amp;query=Soluna+Coffee+22225+Elyson+Falls+Dr+Katy+TX" target="_blank" rel="noopener" aria-label="Soluna Coffee in Google Maps" data-side="R"><span class="dot"></span><span class="pl">Soluna</span></a><a class="pin" style="left:55.4%;top:31.6%" href="https://www.google.com/maps/search/?api=1&amp;query=Yoshi+Sushi+Asian+Fusion+22225+Elyson+Falls+Dr+Katy+TX" target="_blank" rel="noopener" aria-label="Yoshi Sushi Asian Fusion in Google Maps" data-side="R"><span class="dot"></span><span class="pl">Yoshi</span></a><a class="pin" style="left:43.11%;top:26.92%" href="https://www.google.com/maps/search/?api=1&amp;query=Alchemy+Bake+Lab+Katy+TX" target="_blank" rel="noopener" aria-label="Alchemy Bake Lab in Google Maps" data-side="L"><span class="dot"></span><span class="pl">Alchemy</span></a><a class="pin" style="left:43.11%;top:65.47%" href="https://www.google.com/maps/search/?api=1&amp;query=Dulce+Donuts+23053+Clay+Rd+Katy+TX" target="_blank" rel="noopener" aria-label="Dulce Donuts in Google Maps"><span class="dot"></span><span class="pl">Dulce</span></a><a class="pin" style="left:30.45%;top:63.92%" href="https://www.google.com/maps/search/?api=1&amp;query=Shops+at+Katy+Pointe+Clay+Rd+Porter+Rd+Katy+TX" target="_blank" rel="noopener" aria-label="Karma Kolache in Google Maps"><span class="dot"></span><span class="pl">Karma</span></a><a class="pin" style="left:48.64%;top:72.65%" href="https://www.google.com/maps/search/?api=1&amp;query=Thien+An+Banh+Mi+Boba+3349+W+Grand+Pkwy+N+Katy+TX" target="_blank" rel="noopener" aria-label="Thien An Banh Mi & Boba in Google Maps"><span class="dot"></span><span class="pl">Thien An</span></a><a class="pin" style="left:72.5%;top:92.28%" href="https://www.google.com/maps/search/?api=1&amp;query=Mr.+Donut+20300+Franz+Rd+Katy+TX" target="_blank" rel="noopener" aria-label="Mr. Donut in Google Maps"><span class="dot"></span><span class="pl">Mr. Donut</span></a><a class="pin" style="left:91.14%;top:65.01%" href="https://www.google.com/maps/search/?api=1&amp;query=AT+Donuts+19560+Clay+Rd+Katy+TX" target="_blank" rel="noopener" aria-label="AT Donuts in Google Maps"><span class="dot"></span><span class="pl">AT Donuts</span></a>
       </div>
-      <div class="mapfoot"><span>Tap a pin to open it in Google Maps</span><span>Map © OpenStreetMap contributors</span></div>
+      <div class="mapfoot"><span>Tap a pin to open it in Google Maps. Teahouse Express is just south of the map, at <a href="https://www.google.com/maps/search/?api=1&amp;query=Teahouse+Express+5000+Katy+Mills+Cir+Katy+TX" target="_blank" rel="noopener">Katy Mills</a>.</span><span>Map © OpenStreetMap contributors</span></div>
     </div>
   </div>
 </div></section>
@@ -577,7 +618,7 @@ dialog img{display:block;max-width:100%;max-height:86vh;border-radius:8px;backgr
     <p class="kick">Questions or ready to start?</p>
     <h2>Text us anytime.</h2>
     <div class="num"><output id="phone">954-459-6301</output><button type="button" class="btn" id="copy">Copy number</button></div>
-    <p>Tell us your shop's name and we'll set up a time to stop by. No contract, and the first look is free.</p>
+    <p>Tell us your restaurant's name and we'll set up a time to stop by. No contract, and our first partners get 90 days free.</p>
     <a class="btn dark" href="sms:+19544596301" style="margin-top:16px">Open in Messages</a>
   </div>
   <ul class="checklist"><li><h3>Have ready</h3></li><li class="t">Your logo file</li><li class="t">Full menu with prices</li><li class="t">Where the TV will go</li><li class="t">A few photos of the shop</li></ul>
@@ -717,8 +758,9 @@ dialog img{display:block;max-width:100%;max-height:86vh;border-radius:8px;backgr
     if(VIEWS[k])return;
     if(k==='games')return showPage('games');
     if(k==='business')return showPage('business');
-    var el=k&&document.getElementById(k), bp=document.querySelector('[data-page="business"]');
+    var el=k&&document.getElementById(k), bp=document.querySelector('[data-page="business"]'), gp=document.querySelector('[data-page="games"]');
     if(el&&bp.contains(el))return showPage('business',k);
+    if(el&&gp.contains(el))return showPage('games',k);
     showPage('home');
   }
   window.addEventListener('hashchange',function(){var k=location.hash.slice(1); if(VIEWS[k]){if(viewer.hidden)openView(k,false);return} if(viewer.hidden)route()});
