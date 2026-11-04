@@ -322,6 +322,17 @@ body[data-page="business"] .subnav{display:flex}
 footer{padding-block:12px 40px;font-size:13.5px;color:var(--mut)}
 footer .wrap{display:flex;flex-direction:column;gap:6px}
 
+/* please-text bar: business page only */
+.textbar{display:none;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 12px;margin:-10px 0 10px;padding:8px max(16px,env(safe-area-inset-left,0px));background:var(--acc-ink);color:#EAF7D6;font-size:14px;line-height:1.35;text-align:center;box-shadow:0 3px 0 0 var(--acc)}
+body[data-page="business"] .textbar{display:flex}
+.textbar a{color:inherit;font-weight:800;white-space:nowrap;text-decoration:none;border-bottom:2px solid var(--acc)}
+.textbar .tn{opacity:.75;white-space:nowrap}
+.textbar button{font:700 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:7px 10px;border-radius:6px;border:0;background:var(--acc);color:var(--acc-ink);cursor:pointer}
+.bizonly{display:none}
+body[data-page="business"] .bizonly{display:inline}
+section[id]{scroll-margin-top:90px}
+body[data-page="business"] section[id]{scroll-margin-top:150px}
+
 /* full-screen viewer */
 #viewer{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;background:var(--bg);animation:vin .45s var(--spring)}
 #viewer[hidden],[hidden]{display:none!important}
@@ -363,7 +374,7 @@ dialog img{display:block;max-width:100%;max-height:86vh;border-radius:8px;backgr
 </style>
 
 <div class="aura" aria-hidden="true"></div>
-<header><div class="wrap"><div class="nav glass">
+<header><div class="textbar" role="note"><span>Please text <a href="sms:+19544596301">954-459-6301</a> <span class="tn">(text only, please, no calls)</span></span><button type="button" data-copyphone>Copy</button></div><div class="wrap"><div class="nav glass">
   <a class="mark" href="#home" aria-label="Grug Digital, home"><span class="dino" aria-hidden="true"></span>Grug Digital</a>
   <nav class="tabsnav" aria-label="Main"><a href="#games" data-tab="games">Games</a><a href="#business" data-tab="business">For businesses</a></nav>
   <a class="btn acc" href="#contact">Text us</a>
@@ -460,8 +471,8 @@ dialog img{display:block;max-width:100%;max-height:86vh;border-radius:8px;backgr
   <div>
     <p class="kick">What you get</p>
     <h2>Start free. Earn when your guests play.</h2>
-    <p class="lead">Our first 3 to 5 partners get the branded game, the setup and 90 days free. We'll agree on pricing with you before the pilot ends, and you earn a cut every time one of your guests buys the Pass.</p>
-    <div class="pilot glass"><p class="kick" style="margin:0 0 6px;color:var(--mut)">The pilot</p><div class="pr free"><b>Branded game and setup</b><span>Free</span></div><div class="pr free"><b>First 90 days</b><span>Free</span></div><div class="pr"><b>Your part</b><span>Room for QR cards on your tables, a quick mention from your servers, and sharing how it went</span></div><div class="pr"><b>What success looks like</b><span>1 in 10 tables scanning, and members coming back more often than other guests</span></div><div class="pr"><b>After 90 days</b><span>A monthly plan we agree on together, plus your cut of every Pass</span></div></div>
+    <p class="lead">Our first 3 to 5 partners get the branded game, the setup and 90 days free. We'll agree on pricing with you before the pilot ends, and you earn a cut every time one of your guests buys the Pass. Some businesses may even qualify for a completely free plan.</p>
+    <div class="pilot glass"><p class="kick" style="margin:0 0 6px;color:var(--mut)">The pilot</p><div class="pr free"><b>Branded game and setup</b><span>Free</span></div><div class="pr free"><b>First 90 days</b><span>Free</span></div><div class="pr"><b>Your part</b><span>Room for QR cards on your tables, a quick mention from your servers, and sharing how it went</span></div><div class="pr"><b>What success looks like</b><span>1 in 10 tables scanning, and members coming back more often than other guests</span></div><div class="pr"><b>After 90 days</b><span>A monthly plan we agree on together, plus your cut of every Pass</span></div><div class="pr free"><b>Could be free for good</b><span>Some businesses qualify for a completely free plan, based on customer base size and other factors we can work out together</span></div></div>
   </div>
   <div class="board lift" aria-label="Everything included">
     <h3>The menu</h3>
@@ -627,7 +638,7 @@ dialog img{display:block;max-width:100%;max-height:86vh;border-radius:8px;backgr
 </main>
 
 <footer><div class="wrap">
-  <span>© 2026 Grug Digital · Katy, Texas · Text 954-459-6301</span>
+  <span>© 2026 Grug Digital · Katy, Texas<span class="bizonly"> · Text 954-459-6301</span></span>
   <span>Neighborhood photos: Unsplash. Map © OpenStreetMap contributors.</span>
 </div></footer>
 
@@ -771,6 +782,7 @@ dialog img{display:block;max-width:100%;max-height:86vh;border-radius:8px;backgr
   // copy number
   var t=document.getElementById('toast'), tt;
   function say(m){t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('on')},1800)}
+  document.querySelectorAll('[data-copyphone]').forEach(function(b){b.addEventListener('click',function(){document.getElementById('copy').click()})});
   document.getElementById('copy').addEventListener('click',function(){
     function sel(){var r=document.createRange();r.selectNodeContents(document.getElementById('phone'));var s=getSelection();s.removeAllRanges();s.addRange(r);say('Number selected. Copy it to text us.')}
     try{navigator.clipboard.writeText('954-459-6301').then(function(){say('Copied 954-459-6301')},sel)}catch(e){sel()}
