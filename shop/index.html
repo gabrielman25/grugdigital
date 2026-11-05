@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Shop · Grug</title>
+<meta name="description" content="Every piece of avatar clothing on Grug and how to earn it: play the games, eat at Katy partners.">
+<meta name="theme-color" content="#1C1714">
+<link rel="icon" href="../favicon.png">
+<link rel="stylesheet" href="../assets/grug.css">
+<style>
+.sh-head{padding:18px 0 10px;display:flex;flex-direction:column;gap:6px}
+.sh-head p{color:var(--ink2);max-width:56ch}
+.sh-filters{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:6px 2px 10px;margin:0 -16px;padding-left:16px;padding-right:16px}
+.sh-filters::-webkit-scrollbar{display:none}
+.sh-filters button{flex:none;min-height:40px;padding:0 14px;border-radius:999px;background:var(--card);font-weight:800;font-size:14.5px;color:var(--ink2);border:2px solid transparent}
+.sh-filters button[aria-pressed=true]{background:var(--moss);color:var(--moss-ink)}
+@media (min-width:860px){.sh-filters{margin:0;padding-left:0;padding-right:0;flex-wrap:wrap}}
+.sh-group{padding:10px 0 6px}
+.sh-group .g-section-h{align-items:center}
+.sh-group .g-section-h .g-chip{font-size:13px}
+.sh-dot{width:14px;height:14px;border-radius:4px;display:inline-block;flex:none}
+.sh-count{color:var(--mut);font-weight:700;font-size:14px}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="sh-head"><h1>Shop</h1><p>Nothing here costs money. Clothes are earned by playing, or bought with the points you get for eating at a partner.</p></div>
+  <div class="sh-filters" id="filters"></div>
+  <div id="groups"></div>
+</main>
+<script src="../assets/three.min.js"></script>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="../assets/games.js"></script>
+<script src="../assets/avatar3d.js"></script>
+<script src="../assets/grug.js"></script>
+<script>
+(function(){
+  const G = Grug, C = GrugCatalog, $ = s => document.querySelector(s);
+  G.ui.chrome('shop'); G.ensureSnaps();
+  let filter = /[?&]mine/.test(location.search) ? 'mine' : 'all';
+  const FILTERS = [['all', 'Everything'], ['mine', 'Mine'], ['hat', 'Hats'], ['hair', 'Hair'], ['face', 'Faces'], ['shirt', 'Shirts'], ['pants', 'Pants'], ['back', 'Back'], ['hand', 'Hand']];
+  $('#filters').innerHTML = FILTERS.map(f => '<button data-f="' + f[0] + '" aria-pressed="' + (f[0] === filter) + '">' + f[1] + '</button>').join('');
+  $('#filters').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; filter = b.dataset.f; document.querySelectorAll('#filters button').forEach(x => x.setAttribute('aria-pressed', x.dataset.f === filter)); render(); });
+
+  const GROUPS = [['grug', 'Grug', 'Free for everyone, plus milestones across all games.', '#9BE338'], ['yoshi', 'Yoshi · Sushi Swap', '', '#F26A1B'], ['cielito', 'Cielito Lindo · Taco Match', '', '#F2B544'], ['teahouse', 'Teahouse Express · Take a Tea', '', '#F6C445'], ['soluna', 'Soluna Coffee · Sunrise to Sunset', '', '#B08A57'], ['alchemy', 'Alchemy Bake Lab · Sugar Alchemist', '', '#FF8FB1']];
+  function render() {
+    const html = GROUPS.map(gr => {
+      let items = C.ITEMS.filter(it => (it.get.type === 'free' ? 'grug' : it.get.app) === gr[0]);
+      if (filter === 'mine') items = items.filter(it => G.owns(it.id)); else if (filter !== 'all') items = items.filter(it => it.slot === filter);
+      if (!items.length) return '';
+      const owned = items.filter(it => G.owns(it.id)).length;
+      const game = G.GAMES.find(g => g.app === gr[0]);
+      return '<section class="sh-group"><div class="g-section-h"><span class="sh-dot" style="background:' + gr[3] + '"></span><h2>' + G.esc(gr[1]) + '</h2><span class="sh-count">' + owned + '/' + items.length + '</span>' + (game ? '<a href="' + G.url('games/' + game.id + '/') + '">' + G.esc(game.title) + '</a>' : '') + '</div>' + (gr[2] ? '<p class="g-fine" style="margin:-6px 0 12px">' + gr[2] + '</p>' : '') + '<div class="g-items">' + items.map(it => G.ui.itemTile(it)).join('') + '</div></section>';
+    }).join('');
+    $('#groups').innerHTML = html || '<div class="g-empty">Nothing here yet. Play a game to start earning.</div>';
+    G.ui.fillThumbs($('#groups'));
+  }
+  async function open(it) {
+    const app = C.APPS[it.get.app] || C.APPS.grug, game = G.GAMES.find(g => g.app === it.get.app), pr = G.progress(it), owned = G.owns(it.id), wearing = G.profile.avatar[it.slot] === it.id;
+    const how = owned ? (it.get.type === 'free' ? 'Free. Yours from the start.' : 'Yours. ' + G.esc(C.howText(it)) + '.') : (it.get.type === 'points' ? 'Costs <b>' + it.get.cost + ' ' + G.esc(app.short) + ' points</b>. Buy it under Closet in the ' + G.esc(app.short) + ' app.' : G.esc(it.get.text) + (pr ? ' <span class="mut">(' + pr.have + ' of ' + pr.need + ' so far)</span>' : ''));
+    const actions = [{ label: 'Close', kind: 'quiet', value: null }];
+    if (owned && !wearing) actions.push({ label: 'Wear it', kind: 'primary', value: 'wear' });
+    else if (owned && wearing) actions.push({ label: 'Open avatar', kind: 'primary', value: 'avatar' });
+    else if (game) actions.push({ label: 'Open ' + (it.get.type === 'points' ? app.short : game.title), kind: 'primary', value: 'go' });
+    const pick = await G.ui.dialog({ title: it.name, html: '<div class="row"><span style="width:110px;height:110px;flex:none;border-radius:14px;background:var(--card2) center/cover no-repeat;background-image:url(' + GrugAvatar.thumb(it.id, G.profile.avatar, 160) + ')"></span><div><div class="g-tag" style="margin-bottom:8px">' + G.esc(C.slotName(it.slot)) + '</div><div>' + how + '</div>' + (pr && !owned ? '<div class="g-prog" style="margin-top:10px"><i style="width:' + pr.pct + '%"></i></div>' : '') + '</div></div>', actions });
+    if (pick === 'wear') { G.equip(it.id); G.ensureSnaps(true); G.ui.toast('Wearing ' + it.name, { icon: 'check' }); G.ui.buzz(); render(); }
+    else if (pick === 'avatar') location.href = G.url('avatar/#' + it.slot);
+    else if (pick === 'go' && game) location.href = G.url(game.play) + (it.get.type === 'points' && G.appState(game) && G.appState(game).store ? '#' + G.appState(game).store + '/rewards' : '');
+  }
+  $('#groups').addEventListener('click', e => { const b = e.target.closest('[data-item]'); if (b) open(C.get(b.dataset.item)); });
+  render();
+  const deep = C.get(location.hash.replace('#', '')); if (deep) { history.replaceState(null, '', location.pathname); setTimeout(() => open(deep), 200); }
+})();
+</script>
+</body>
+</html>

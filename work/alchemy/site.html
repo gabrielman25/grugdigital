@@ -150,7 +150,7 @@ footer a{color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
 <style>.toast{bottom:84px!important}</style></head>
-<body><div id="ed-concept" role="note" style="position:fixed;left:0;right:0;bottom:0;z-index:2147483000;background:rgba(24,28,18,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#F3F5EE;font:600 13px/1.35 system-ui,-apple-system,Segoe UI,sans-serif;padding:10px max(16px,env(safe-area-inset-left,0px)) calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center;box-shadow:0 -4px 18px rgba(0,0,0,.25)"><span>Concept by Grug Digital. Not the official Alchemy Bake Lab website. Orders here are a demo and aren't sent.</span><a href="../../index.html#work" onclick="if(window.parent!==window){window.parent.postMessage(&quot;ed-close&quot;,&quot;*&quot;);return false}" style="color:#82D121;text-decoration:underline">Back to Grug Digital</a></div><div aria-hidden="true" style="height:64px"></div>
+<body><div id="ed-concept" role="note" style="position:fixed;left:0;right:0;bottom:0;z-index:2147483000;background:rgba(24,28,18,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#F3F5EE;font:600 13px/1.35 system-ui,-apple-system,Segoe UI,sans-serif;padding:10px max(16px,env(safe-area-inset-left,0px)) calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center;box-shadow:0 -4px 18px rgba(0,0,0,.25)"><span>Concept by Grug Digital. Not the official Alchemy Bake Lab website. Orders here are a demo and aren't sent.</span><a href="../../partners/#work" onclick="if(window.parent!==window){window.parent.postMessage(&quot;ed-close&quot;,&quot;*&quot;);return false}" style="color:#82D121;text-decoration:underline">Back to Grug Digital</a></div><div aria-hidden="true" style="height:64px"></div>
 
 <header class="top">
   <div class="wrap">
@@ -641,8 +641,14 @@ function endDay(){
     <button class="btn go" id="again">Play again</button>`;
   P().innerHTML = flaskSVG("#2A984C",0.8,true,true);
   document.getElementById("again").onclick=newDay;
+  if(window.Grug){ try{ const won = Grug.track('alchemy','days',1); if(won.length){ Grug.celebrate(won); W().insertAdjacentHTML('beforeend','<p class="say" style="margin-top:10px">Unlocked for your Grug avatar: <b style="color:var(--gold)">'+won.map(i=>Grug.esc(i.name)).join(', ')+'</b>. <a href="../../avatar/" style="color:var(--gold)">Wear it</a></p>'); } }catch(e){} }
 }
 newDay();
 </script>
+<link rel="stylesheet" href="../../assets/grug-app.css">
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/grug.js"></script>
 <script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;var id=a.getAttribute('href').slice(1);e.preventDefault();var t=id?document.getElementById(id):null;if(t)t.scrollIntoView({behavior:'smooth'});else window.scrollTo({top:0,behavior:'smooth'})},true);</script></body>
 </html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Games · Grug</title>
+<meta name="description" content="Every Grug game, each one starring a real Katy restaurant.">
+<meta name="theme-color" content="#1C1714">
+<link rel="icon" href="../favicon.png">
+<link rel="stylesheet" href="../assets/grug.css">
+<style>
+.gl-head{padding:18px 0 4px;display:flex;flex-direction:column;gap:6px}
+.gl-head p{color:var(--ink2);max-width:56ch}
+.gl{display:grid;gap:14px;grid-template-columns:1fr;padding-top:14px}
+.gl .g-tile{flex-direction:row;align-items:stretch}
+.gl .g-tile .pic{aspect-ratio:auto;width:38%;min-width:130px;flex:none}
+.gl .g-tile .body{flex:1;justify-content:center;gap:6px;padding:14px 16px}
+.gl .g-tile .blurb{color:var(--ink2);font-size:14.5px;font-weight:500}
+.gl .g-tile .acts{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+@media (min-width:760px){.gl{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="gl-head"><h1>Games</h1><p>Each one is built with a Katy restaurant and runs right here in your browser. Points you earn at that restaurant buy power-ups and closet clothes.</p></div>
+  <div class="gl" id="list"></div>
+</main>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="../assets/games.js"></script>
+<script src="../assets/grug.js"></script>
+<script>
+(function(){
+  const G = Grug; G.ui.chrome('games');
+  const pts = {}; G.points().forEach(p => { pts[p.game.id] = p; });
+  document.getElementById('list').innerHTML = G.GAMES.map(g => {
+    const p = pts[g.id], live = g.status === 'live';
+    return '<div class="g-tile"><a class="pic" href="' + g.id + '/" style="background-image:url(' + G.url(g.thumb) + ')" aria-label="' + G.esc(g.title) + '"><span class="badge ' + (live ? 'live' : 'soon') + '">' + (live ? 'Live' : 'Preview') + '</span></a>' +
+      '<div class="body"><div class="title">' + G.esc(g.title) + '</div><div class="meta">' + G.icon('storefront') + G.esc(g.partner) + '<span>·</span>' + G.esc(g.kind) + '</div><div class="blurb">' + G.esc(g.blurb) + '</div>' +
+      (p && (p.points || p.best) ? '<div class="meta">' + G.icon('coins') + G.fmt(p.points) + ' points' + (p.best ? '<span>·</span>' + G.icon('trophy') + 'best ' + G.fmt(p.best) : '') + '</div>' : '') +
+      '<div class="acts"><a class="g-btn primary sm" href="' + G.url(g.play) + '">' + G.icon('play') + (live ? 'Play' : 'Demo') + '</a><a class="g-btn sm" href="' + g.id + '/">Details</a></div></div></div>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

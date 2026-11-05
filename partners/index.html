@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>For restaurants · Grug</title>
+<meta name="description" content="Turn your Katy restaurant into a game. Branded games, rewards apps, websites and TV menu boards, built by your neighbors. First partners get 90 days free.">
+<meta name="theme-color" content="#1C1714">
+<link rel="icon" href="../favicon.png">
+<link rel="stylesheet" href="../assets/grug.css">
+<style>
+.pt-hero{display:grid;gap:18px;grid-template-columns:1fr;padding:22px 0 10px;align-items:center}
+.pt-hero p{color:var(--ink2);font-size:17px;max-width:52ch}
+.pt-hero .pic{border-radius:var(--r);overflow:hidden;border:1px solid var(--line);aspect-ratio:16/10;background:var(--card2) center/cover no-repeat}
+.pt-free{display:inline-flex;align-items:baseline;gap:8px;padding:8px 14px;border-radius:12px;background:var(--moss-soft);color:var(--moss);font-weight:800}
+.pt-free b{font-size:26px}
+@media (min-width:860px){.pt-hero{grid-template-columns:1fr 1fr;gap:34px;padding:34px 0 16px}}
+.pt-cols{display:grid;gap:12px;grid-template-columns:1fr}
+@media (min-width:760px){.pt-cols{grid-template-columns:repeat(3,1fr)}}
+.pt-list{display:flex;flex-direction:column;gap:0}
+.pt-list div{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--line);align-items:flex-start}
+.pt-list div:first-child{border-top:0}
+.pt-list .gi{width:22px;height:22px;color:var(--moss);flex:none;margin-top:3px}
+.pt-list b{display:block}
+.pt-list span{color:var(--ink2);font-size:14.5px}
+.pt-table{display:grid;grid-template-columns:1fr;gap:0}
+.pt-table div{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
+.pt-table div:first-child{border-top:0}
+.pt-table b{color:var(--ink)}
+.pt-table span{color:var(--ink2)}
+.pt-steps{counter-reset:s;display:grid;gap:12px;grid-template-columns:1fr}
+.pt-steps div{padding:16px;background:var(--card);border-radius:var(--r);border:1px solid var(--line)}
+.pt-steps div::before{counter-increment:s;content:counter(s);display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--ember);color:var(--ember-ink);font-weight:800;margin-bottom:8px}
+.pt-steps b{display:block;font-size:17px}
+.pt-steps span{color:var(--ink2);font-size:14.5px}
+@media (min-width:760px){.pt-steps{grid-template-columns:repeat(3,1fr)}}
+.work{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.work .g-tile .pic{aspect-ratio:16/10}
+.work .links{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.work .links a{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;background:var(--card2);font-size:13px;font-weight:800;color:var(--ink2)}
+.work .links a.live{background:var(--moss-soft);color:var(--moss)}
+.about{display:grid;gap:14px;grid-template-columns:1fr}
+.about .pics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.about .pics img{aspect-ratio:1;object-fit:cover;border-radius:12px;width:100%}
+@media (min-width:760px){.about{grid-template-columns:1fr 1fr}}
+.contact{display:flex;flex-direction:column;gap:12px;align-items:flex-start;padding:24px;background:linear-gradient(135deg,var(--card2),var(--card));border-radius:var(--r);border:1px solid var(--line2)}
+.contact .num{font-size:clamp(26px,6vw,38px);font-weight:800;letter-spacing:.01em}
+footer{padding:28px 0 10px;color:var(--mut);font-size:13.5px;border-top:1px solid var(--line);margin-top:26px;display:flex;flex-wrap:wrap;gap:8px 18px}
+footer a{color:var(--ink2);font-weight:700}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="pt-hero" id="business">
+    <div>
+      <p class="g-fine" style="margin-bottom:8px">For local restaurants in Katy, Texas</p>
+      <h1>Turn your restaurant into a game.</h1>
+      <p style="margin-top:12px">Guests play a game starring your food while they wait, earn points every visit, and come back for more. We build it, put a QR on your tables, and send you a monthly report on who came back.</p>
+      <div class="row" style="margin-top:16px"><span class="pt-free">First partners, 90 days <b>Free</b></span></div>
+      <div class="row" style="margin-top:16px"><a class="g-btn primary big" href="sms:+19544596301">Text 954-459-6301</a><a class="g-btn big" href="#work">See our work</a></div>
+      <p class="g-fine" style="margin-top:10px">Text only, please, no calls. We'll set up a time to stop by.</p>
+    </div>
+    <div class="pic" style="background-image:url(../work/karma/board.jpg)" role="img" aria-label="A TV menu board we designed"></div>
+  </section>
+
+  <section class="g-section">
+    <div class="g-section-h" id="included"><h2>Start free. Earn when your guests play.</h2></div>
+    <p style="color:var(--ink2);max-width:70ch">Our first 3 to 5 partners get the branded game, the setup and 90 days free. We'll agree on pricing with you before the pilot ends, and you earn a cut every time one of your guests buys the Pass. Some businesses may even qualify for a completely free plan.</p>
+    <div class="pt-cols" style="margin-top:16px">
+      <div class="g-card"><h3 style="margin-bottom:8px">The pilot</h3>
+        <div class="pt-table">
+          <div><b>Branded game and setup</b><span>Free</span></div>
+          <div><b>First 90 days</b><span>Free</span></div>
+          <div><b>Your part</b><span>Room for QR cards on your tables, a quick mention from your servers, and sharing how it went</span></div>
+          <div><b>What success looks like</b><span>1 in 10 tables scanning, and members coming back more often than other guests</span></div>
+          <div><b>After 90 days</b><span>A monthly plan we agree on together, plus your cut of every Pass</span></div>
+          <div><b>Could be free for good</b><span>Some businesses qualify for a completely free plan, based on customer base size and other factors we can work out together</span></div>
+        </div>
+      </div>
+      <div class="g-card" style="grid-column:span 2"><h3 style="margin-bottom:8px">What's included</h3>
+        <div class="pt-list" id="menu"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="g-section">
+    <div class="g-section-h" id="pass"><h2>Points and the Pass</h2></div>
+    <p style="color:var(--ink2);max-width:70ch">Every meal earns points. Every point unlocks play. One profile works at every partner restaurant, so a guest's avatar and closet follow them around town, while each restaurant keeps its own points balance.</p>
+    <div class="pt-cols" style="margin-top:16px">
+      <div class="g-card"><p class="g-fine">The start</p><h3>Free</h3><p style="font-size:26px;font-weight:800">$0</p><div class="pt-list"><div><span id="i1"></span><span>Earn points at every partner</span></div><div><span id="i2"></span><span>Play each restaurant's game</span></div><div><span id="i3"></span><span>Demo levels of our games</span></div></div></div>
+      <div class="g-card"><p class="g-fine">Every partner</p><h3>Pass</h3><p style="font-size:26px;font-weight:800">$4.99<span class="g-fine">/mo</span></p><div class="pt-list"><div><span id="i4"></span><span>Our full game library</span></div><div><span id="i5"></span><span>2x points at every partner</span></div><div><span id="i6"></span><span>A free side, drink or dessert each month at any partner</span></div></div></div>
+      <div class="g-card"><p class="g-fine">For the kids' table</p><h3>Family Pass</h3><p style="font-size:26px;font-weight:800">$7.99<span class="g-fine">/mo</span></p><div class="pt-list"><div><span id="i7"></span><span>Everything in the Pass</span></div><div><span id="i8"></span><span>Up to 4 profiles, managed by a parent</span></div><div><span id="i9"></span><span>Kid-safe mode with no chat</span></div></div></div>
+    </div>
+    <p class="g-fine" style="margin-top:12px">The Pass is coming soon. <a href="sms:+19544596301?&body=Add%20me%20to%20the%20Pass%20waitlist" style="color:var(--ember);font-weight:800">Text us to join the waitlist.</a> Prices and perks are planned and may change before launch.</p>
+  </section>
+
+  <section class="g-section">
+    <div class="g-section-h" id="how"><h2>We come to you. Then we report back.</h2></div>
+    <div class="pt-steps">
+      <div><b>We visit your restaurant</b><span>We take photos, get your menu and prices, and pick spots for the TV and the table QR cards.</span></div>
+      <div><b>We build it in days</b><span>Your game, rewards app, site and menu board, in your colors, starring your real food.</span></div>
+      <div><b>Guests play, you see results</b><span>Every month you get a report on scans, members and repeat visits. Need a change? Text us and we handle it.</span></div>
+    </div>
+    <div class="g-card" style="margin-top:12px"><b>To get started, have ready:</b> <span style="color:var(--ink2)">your logo, the full menu with prices, where the TV and QR cards will go, and a few photos of the shop.</span></div>
+  </section>
+
+  <section class="g-section" id="work">
+    <div class="g-section-h"><h2>Made for Katy shops</h2></div>
+    <p style="color:var(--ink2);max-width:70ch;margin-bottom:14px">10 shops so far. Open a site and click around, or flip through the pitch pack we printed for the owner.</p>
+    <div class="work" id="workGrid"></div>
+    <p class="g-fine" style="margin-top:14px">These are concept designs we made to show local owners what we'd build for them. They aren't the shops' official websites, and the shops haven't endorsed them. Ordering on the concept sites is a demo and no order is sent. Shop photos and logos belong to each shop; other photos are from Unsplash.</p>
+  </section>
+
+  <section class="g-section">
+    <div class="g-section-h" id="about"><h2>Your neighbors in Elyson</h2></div>
+    <div class="about">
+      <div class="stack">
+        <p style="color:var(--ink2)">We live in Elyson, on the west side of Katy. We shop at the same coffee bars, walk the same trails and drive the same stretch of Clay Road you do. That's why we only work with shops close to home: if something needs fixing, we can be there in minutes.</p>
+        <div class="pt-list">
+          <div><span id="a1"></span><span><b>Local only</b>Shops within 20 minutes of home.</span></div>
+          <div><span id="a2"></span><span><b>Your customers are our neighbors</b>We live where they live.</span></div>
+          <div><span id="a3"></span><span><b>In person, then a text away</b>We set up at your shop and handle edits by text.</span></div>
+          <div><span id="a4"></span><span><b>Made in Katy</b>Every site, app and game is built right here.</span></div>
+        </div>
+      </div>
+      <div class="pics">
+        <img src="../community/aerial-lake.jpg" alt="Rooftops, green space and a lake in a master-planned neighborhood" loading="lazy">
+        <img src="../community/suburb-sunset.jpg" alt="Sunset over a suburban neighborhood with a water tower" loading="lazy">
+        <img src="../community/trail-walk.jpg" alt="Two people walking along a tree-lined park trail" loading="lazy">
+        <img src="../community/wildflowers.jpg" alt="Texas wildflowers in a field at sunset" loading="lazy">
+        <img src="../community/market.jpg" alt="Shoppers browsing fresh produce at an outdoor market" loading="lazy">
+        <img src="../community/driveway.jpg" alt="A pickup truck in a driveway in front of a suburban home" loading="lazy">
+      </div>
+    </div>
+    <p class="g-fine" style="margin-top:12px">Partners on the map: Soluna, Yoshi, Cielito Lindo, Alchemy, Dulce, Karma, Thien An, Mr. Donut and AT Donuts across west Katy, and Teahouse Express at Katy Mills. Neighborhood photos: Unsplash.</p>
+  </section>
+
+  <section class="g-section" id="contact">
+    <div class="contact">
+      <p class="g-fine">Questions or ready to start?</p>
+      <h2>Text us anytime.</h2>
+      <span class="num">954-459-6301</span>
+      <p style="color:var(--ink2);max-width:52ch">Tell us your restaurant's name and we'll set up a time to stop by. No contract, and our first partners get 90 days free.</p>
+      <div class="row"><a class="g-btn primary" href="sms:+19544596301">Open in Messages</a><button class="g-btn" id="copyNum">Copy number</button></div>
+    </div>
+  </section>
+
+  <footer><span>© 2026 Grug Digital · Katy, Texas · Text 954-459-6301</span><a href="../">Play the games</a></footer>
+</main>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="../assets/games.js"></script>
+<script src="../assets/grug.js"></script>
+<script>
+(function(){
+  const G = Grug; G.ui.chrome('home');
+  const MENU = [['game-controller', 'Your own game', 'A short, replayable game starring your food, played from a QR on the table. No download.'], ['coins', 'Rewards app', 'Guests earn points on every visit and redeem them for food and play.'], ['qr-code', 'Table QR cards', 'Table tents, kids\' menus and receipt codes: "Play while you wait."'], ['clipboard-text', 'Monthly report', 'Members, visits, redemptions and Pass sign-ups, so you can see who came back.'], ['ticket', 'A cut of the Pass', 'When guests who joined at your place buy the Pass, you get a share.'], ['users-three', 'Pass network', 'Pass members from other partner restaurants come looking for new places to eat.'], ['device-mobile', 'Custom website', 'Your menu, hours, photos and directions, built for phones first.'], ['shopping-bag', 'Order ahead, pay in store', 'Customers order online and pay at your counter. No card fees, no cut of sales.'], ['image', 'TV menu board', 'Change prices, sold-outs and specials from a tablet or laptop.'], ['wrench', 'Hosting and upkeep', 'We keep the game, app, site and board online, with updates and fixes handled for you.'], ['chat-circle', 'Edits by text', 'New item, new price, new hours: text us and it\'s done.']];
+  document.getElementById('menu').innerHTML = MENU.map(m => '<div>' + G.icon(m[0]) + '<span><b>' + m[1] + ' <span class="g-tag on" style="margin-left:4px">Included</span></b>' + m[2] + '</span></div>').join('');
+  for (let i = 1; i <= 9; i++) document.getElementById('i' + i).innerHTML = G.icon('check-circle');
+  [['a1', 'map-pin'], ['a2', 'users-three'], ['a3', 'chat-circle'], ['a4', 'house']].forEach(x => { document.getElementById(x[0]).innerHTML = G.icon(x[1]); });
+  const WORK = [
+    { id: 'soluna', name: 'Soluna Coffee', tag: 'Coffee shop · Elyson', status: 'Concept + live app', blurb: 'A seasonal-menu site, a fall menu board and a barista game built from the real shop.', site: 'site.html', es: 'site-es.html', pack: 'pitch-pack.pdf', packEs: 'pitch-pack-es.pdf', live: 'play/soluna/' },
+    { id: 'yoshi', name: 'Yoshi Sushi Asian Fusion', tag: 'Sushi & Asian fusion · Elyson Falls', status: 'Live', blurb: 'A rewards app with their full menu, order-ahead, NFC tap-to-earn points and Sushi Swap, a match-3 game paid for with points.', pic: 'app.jpg', live: 'play/yoshi/' },
+    { id: 'teahouse', name: 'Teahouse Express', tag: 'Tea & boba · Katy Mills', status: 'Live', blurb: 'A rewards app for the Katy Mills stand: tap-to-earn points, free toppings and upsizes, and Take a Tea, a 3D shop game with boosts.', pic: 'app.jpg', live: 'play/teahouse/' },
+    { id: 'cielito', name: 'Cielito Lindo Taqueria', tag: 'Tacos & breakfast · FM 529', status: 'Live', blurb: 'A rewards app built from their menu board: breakfast from 5 AM, tacos and plates, tap-to-earn points and Taco Match, a match-3 game paid for with points.', pic: 'app.jpg', live: 'play/cielito/' },
+    { id: 'alchemy', name: 'Alchemy Bake Lab', tag: 'Bakery game · Katy', status: 'Game in progress', blurb: 'Sugar Alchemist, a cupcake-shop game in the spirit of Papa\'s Pizzeria, made with the owner.', site: 'site.html', siteLabel: 'Open the game page' },
+    { id: 'dulce', name: 'Dulce Donuts', tag: 'Donuts & kolaches · Clay Rd', status: 'Concept', blurb: 'Real menu and prices from their ordering page, a build-a-dozen box and a bilingual version.', site: 'site.html', es: 'site-es.html', pack: 'pitch-pack.pdf', packEs: 'pitch-pack-es.pdf' },
+    { id: 'karma', name: 'Karma Kolache', tag: 'Kolaches & koffee · Katy Pointe', status: 'Concept', blurb: 'A site for the new Katy Pointe store with 30+ kolaches, Signature Six boxes and order ahead.', site: 'site.html', pack: 'pitch-pack.pdf' },
+    { id: 'thien-an', name: 'Thien An Banh Mi & Boba', tag: 'Banh mi & boba · W Grand Pkwy', status: 'Concept', blurb: 'A drink-heavy menu board, boba add-ons and the shop\'s mascots in the rewards app.', site: 'site.html', pack: 'pitch-pack.pdf' },
+    { id: 'mr-donut', name: 'Mr. Donut', tag: 'Donuts & kolaches · Franz Rd', status: 'Concept', blurb: 'Their whole menu board, from 4:30am donuts to boudin kolaches, on a phone-first site.', site: 'site.html', pack: 'pitch-pack.pdf' },
+    { id: 'at-donuts', name: 'AT Donuts', tag: 'Donuts & kolaches · Clay Rd', status: 'Concept', blurb: 'Chalkboard menu turned into a TV board, plus kolaches, croissants and biscuits to order ahead.', site: 'site.html', pack: 'pitch-pack.pdf' }
+  ];
+  document.getElementById('workGrid').innerHTML = WORK.map(w => {
+    const base = '../work/' + w.id + '/';
+    const links = [];
+    if (w.live) links.push('<a class="live" href="' + G.url(w.live) + '">' + G.icon('play') + 'Live rewards app</a>');
+    if (w.site) links.push('<a href="' + base + w.site + '">' + (w.siteLabel || 'Open the site') + '</a>');
+    if (w.es) links.push('<a href="' + base + w.es + '">En español</a>');
+    if (w.pack) links.push('<a href="' + base + w.pack + '">Pitch pack PDF</a>');
+    if (w.packEs) links.push('<a href="' + base + w.packEs + '">Folleto PDF</a>');
+    return '<div class="g-tile"><div class="pic" style="background-image:url(' + base + (w.pic || 'desktop.jpg') + ')"><span class="badge' + (w.status === 'Live' ? ' live' : '') + '">' + G.esc(w.status) + '</span></div><div class="body"><div class="title">' + G.esc(w.name) + '</div><div class="meta">' + G.esc(w.tag) + '</div><p class="g-fine">' + G.esc(w.blurb) + '</p><div class="links">' + links.join('') + '</div></div></div>';
+  }).join('');
+  document.getElementById('copyNum').addEventListener('click', async () => { try { await navigator.clipboard.writeText('954-459-6301'); G.ui.toast('Copied 954-459-6301', { icon: 'copy' }); } catch (e) { G.ui.toast('954-459-6301'); } });
+})();
+</script>
+</body>
+</html>

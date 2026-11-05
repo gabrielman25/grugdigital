@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Profile · Grug</title>
+<meta name="description" content="Your Grug profile: name, avatar, points at every partner, settings, and export/import to move to another phone.">
+<meta name="theme-color" content="#1C1714">
+<link rel="icon" href="../favicon.png">
+<link rel="stylesheet" href="../assets/grug.css">
+<style>
+.pf{display:grid;gap:16px;grid-template-columns:1fr;padding-top:16px}
+.pf-card{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center;background:var(--card);border-radius:var(--r);border:1px solid var(--line);padding:14px}
+.pf-card .g-view{height:190px;min-height:0;border-radius:14px}
+.pf-name{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pf-name h1{font-size:clamp(24px,5vw,32px)}
+.pf-since{color:var(--mut);font-size:14px;font-weight:600}
+.pf-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.pf-stats div{background:var(--bg2);border-radius:12px;padding:8px 6px;text-align:center}
+.pf-stats b{display:block;font-size:20px;line-height:1.1}
+.pf-stats span{color:var(--mut);font-size:12px;font-weight:700}
+@media (max-width:480px){.pf-card{grid-template-columns:1fr}.pf-card .g-view{height:220px}}
+@media (min-width:860px){.pf{grid-template-columns:1fr 1fr;align-items:start}.pf>.full{grid-column:1/-1}}
+.pf h2{font-size:21px;margin-bottom:10px}
+.pf-points{display:flex;flex-direction:column;gap:8px}
+.pf-points a{color:var(--ember);font-weight:800;font-size:14px}
+.pf-move{display:flex;flex-direction:column;gap:12px}
+.pf-move .row .g-btn{flex:1 1 140px}
+.pf-danger{border-color:rgba(255,107,107,.3)}
+.pf-code{font:500 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--mut);word-break:break-all}
+</style>
+</head>
+<body>
+<main class="wrap pf">
+  <section class="pf-card full">
+    <div class="g-view" id="view"></div>
+    <div>
+      <div class="pf-name"><h1 id="name"></h1><button class="g-icon-btn" id="rename" aria-label="Change your name"></button></div>
+      <div class="pf-since" id="since"></div>
+      <div class="pf-stats"><div><b id="sPlays">0</b><span>runs</span></div><div><b id="sVisits">0</b><span>check-ins</span></div><div><b id="sPartners">0</b><span>partners</span></div><div><b id="sItems">0</b><span>closet items</span></div></div>
+      <div class="row" style="margin-top:12px"><a class="g-btn sm" href="../avatar/">Edit avatar</a><a class="g-btn sm" href="../shop/?mine">My closet</a></div>
+    </div>
+  </section>
+
+  <section class="g-card">
+    <h2>Points at each partner</h2>
+    <p class="g-fine" style="margin-bottom:10px">Each restaurant keeps its own balance. Tap one to open its rewards app.</p>
+    <div class="pf-points" id="points"></div>
+  </section>
+
+  <section class="g-card full" id="earnedSec" hidden>
+    <h2>Earned</h2>
+    <p class="g-fine" style="margin-bottom:10px">Clothes you unlocked by playing and checking in. Free basics aren’t listed.</p>
+    <div class="g-items" id="earned"></div>
+  </section>
+
+  <section class="g-card">
+    <h2>Settings</h2>
+    <div class="g-pref"><span id="icMotion"></span><span><b>Animations</b><small>Celebrations, poses and count-ups</small></span><button class="g-switch" role="switch" data-pref="motion" aria-label="Animations"></button></div>
+    <div class="g-pref"><span id="icBuzz"></span><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button class="g-switch" role="switch" data-pref="haptics" aria-label="Vibrate on tap"></button></div>
+    <p class="g-fine" id="storageNote" style="margin-top:10px"></p>
+  </section>
+
+  <section class="g-card full">
+    <h2>Move to another phone</h2>
+    <div class="pf-move">
+      <p class="g-fine">Your profile lives on this device. Export it to a file to keep a copy or load it on another phone. The file holds your name, avatar, closet and your points at every partner.</p>
+      <div class="row"><button class="g-btn primary" id="export"></button><button class="g-btn" id="shareBtn" hidden></button><button class="g-btn" id="copy"></button></div>
+      <div class="row"><button class="g-btn" id="importFile"></button><button class="g-btn" id="importPaste"></button></div>
+      <input type="file" id="file" accept="application/json,.json" hidden>
+      <p class="g-fine">Loading a file replaces everything on this device, including points. Keep one profile per person.</p>
+    </div>
+  </section>
+
+  <section class="g-card pf-danger full">
+    <h2>Start over</h2>
+    <p class="g-fine" style="margin-bottom:10px">Clears your name, avatar and closet on this device. You can also clear the points at every partner.</p>
+    <div class="row"><button class="g-btn danger" id="resetBtn"></button></div>
+    <p class="pf-code" id="pid" style="margin-top:12px"></p>
+  </section>
+</main>
+<script src="../assets/three.min.js"></script>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="../assets/games.js"></script>
+<script src="../assets/avatar3d.js"></script>
+<script src="../assets/grug.js"></script>
+<script>
+(function(){
+  const G = Grug, C = GrugCatalog, $ = s => document.querySelector(s);
+  G.ui.chrome('profile'); G.ensureSnaps();
+  const view = GrugAvatar.mount($('#view'), G.profile.avatar, { yaw: 0.3, onTap: () => view.play('wave', { ms: 2000 }) });
+  $('#rename').innerHTML = G.icon('pencil-simple'); $('#icMotion').innerHTML = G.icon('sparkle'); $('#icBuzz').innerHTML = G.icon('device-mobile');
+  $('#export').innerHTML = G.icon('download-simple') + 'Export profile'; $('#copy').innerHTML = G.icon('copy') + 'Copy as text'; $('#shareBtn').innerHTML = G.icon('share-network') + 'Share file';
+  $('#importFile').innerHTML = G.icon('upload-simple') + 'Load a profile file'; $('#importPaste').innerHTML = G.icon('clipboard-text') + 'Paste profile text'; $('#resetBtn').innerHTML = G.icon('trash') + 'Start over';
+  if (navigator.canShare) $('#shareBtn').hidden = false;
+
+  function render() {
+    const p = G.profile, t = G.totals();
+    $('#name').textContent = p.name; $('#since').textContent = 'Playing since ' + new Date(p.created).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    $('#sPlays').textContent = G.fmt(t.plays); $('#sVisits').textContent = G.fmt(t.checkins); $('#sPartners').textContent = G.fmt(t.partners); $('#sItems').textContent = G.fmt(C.freeIds().length + p.inventory.length);
+    const pts = G.points();
+    $('#points').innerHTML = pts.map(x => '<a class="g-points" href="' + G.url(x.game.play) + (G.appState(x.game) && G.appState(x.game).store ? '#' + G.esc(G.appState(x.game).store) + '/rewards' : '') + '"><span class="logo" style="background:' + x.game.color + ';color:' + x.game.ink + '">' + G.esc(C.APPS[x.game.app].short.slice(0, 3).toUpperCase()) + '</span><span><b>' + G.fmt(x.points) + '</b><small>' + G.esc(x.game.partner) + (x.visits ? ' · ' + x.visits + ' check-in' + (x.visits === 1 ? '' : 's') : '') + '</small></span><span class="sp"></span><span>' + G.icon('caret-right') + '</span></a>').join('');
+    const earned = p.inventory.map(id => C.get(id)).filter(Boolean);
+    $('#earnedSec').hidden = !earned.length;
+    $('#earned').innerHTML = earned.map(it => G.ui.itemTile(it)).join('');
+    G.ui.fillThumbs($('#earned'));
+    document.querySelectorAll('[data-pref]').forEach(b => b.setAttribute('aria-checked', !!p.prefs[b.dataset.pref]));
+    $('#pid').textContent = 'Profile id ' + p.id + ' · saved in this browser as ' + G.KEY;
+    $('#storageNote').textContent = G.storageWorks() ? 'Everything is saved in this browser on this device.' : 'This browser isn’t saving (private mode or blocked storage). Changes will be lost when you close it.';
+  }
+  document.querySelectorAll('[data-pref]').forEach(b => b.addEventListener('click', () => { G.profile.prefs[b.dataset.pref] = !G.profile.prefs[b.dataset.pref]; G.save('prefs'); render(); G.ui.buzz(); }));
+
+  $('#rename').addEventListener('click', async () => {
+    let typed = '';
+    const v = await G.ui.dialog({ title: 'Your name', html: '<input class="g-input" id="nameIn" maxlength="20" autocomplete="off" value="' + G.esc(G.profile.name) + '"><p class="g-fine" style="margin-top:8px">Up to 20 letters. It shows on your profile and in games.</p><button type="button" class="g-btn sm" id="randName" style="margin-top:10px">Pick one for me</button>',
+      actions: [{ label: 'Cancel', kind: 'quiet', value: null }, { label: 'Save name', kind: 'primary', value: 'save' }],
+      onOpen: d => { const i = d.querySelector('#nameIn'); i.focus(); i.select(); d.querySelector('#randName').addEventListener('click', () => { i.value = G.randomName(); }); }, onClose: d => { typed = d.querySelector('#nameIn').value; } });
+    if (v === 'save') { const name = G.cleanName(typed); if (name && G.setName(name)) { render(); G.ui.toast('Saved as ' + name, { icon: 'check' }); } else G.ui.toast('Pick a name with letters or numbers', { icon: 'warning-circle' }); }
+  });
+
+  /* export */
+  $('#export').addEventListener('click', () => { const n = G.download(); G.ui.toast('Saved ' + n, { icon: 'download-simple', ms: 3500 }); });
+  $('#copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(G.exportText()); G.ui.toast('Copied. Paste it into Profile on your other phone.', { icon: 'copy', ms: 3500 }); } catch (e) { G.ui.dialog({ title: 'Copy this text', html: '<textarea class="g-input" readonly style="min-height:160px">' + G.esc(G.exportText()) + '</textarea>', onOpen: d => { const t = d.querySelector('textarea'); t.focus(); t.select(); } }); } });
+  $('#shareBtn').addEventListener('click', async () => { const r = await G.share(); if (r === 'unsupported') G.ui.toast('Sharing files isn’t supported here. Use Export instead.', { icon: 'warning-circle' }); });
+
+  /* import */
+  async function confirmImport(text) {
+    const r = G.parseImport(text);
+    if (!r.ok) { G.ui.dialog({ title: 'Couldn’t read that', text: r.error }); return; }
+    const s = r.summary, here = G.points().filter(x => x.points).map(x => G.esc(C.APPS[x.game.app].short) + ' ' + G.fmt(x.points)).join(', ');
+    const ok = await G.ui.dialog({ title: 'Load ' + s.name + '?', html: '<p>This replaces what’s on this device.</p><ul><li><b>In the file:</b> ' + G.esc(s.name) + ', ' + s.items + ' earned item' + (s.items === 1 ? '' : 's') + (s.points.length ? ', points: ' + s.points.map(x => G.esc(C.APPS[x.game.app].short) + ' ' + G.fmt(x.points)).join(', ') : '') + (s.exportedAt ? ' <span class="mut">(saved ' + G.esc(String(s.exportedAt).slice(0, 10)) + ')</span>' : '') + '</li><li><b>On this device now:</b> ' + G.esc(G.profile.name) + ', ' + G.profile.inventory.length + ' earned item' + (G.profile.inventory.length === 1 ? '' : 's') + (here ? ', points: ' + here : ', no points yet') + '</li></ul>', actions: [{ label: 'Keep mine', kind: 'quiet', value: false }, { label: 'Load it', kind: 'primary', value: true }] });
+    if (!ok) return;
+    G.applyImport(r.data); G.ensureSnaps(true); view.setAvatar(G.profile.avatar); render(); G.ui.toast('Welcome back, ' + G.profile.name, { icon: 'hand-waving', ms: 3500 }); view.play('wave', { ms: 2500 });
+  }
+  $('#importFile').addEventListener('click', () => $('#file').click());
+  $('#file').addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; confirmImport(await f.text()); e.target.value = ''; });
+  $('#importPaste').addEventListener('click', async () => {
+    let typed = '';
+    const v = await G.ui.dialog({ title: 'Paste your profile', html: '<textarea class="g-input" id="pasteIn" placeholder=\'{"format":"grug-profile", …}\'></textarea>', actions: [{ label: 'Cancel', kind: 'quiet', value: null }, { label: 'Next', kind: 'primary', value: 'go' }], onOpen: d => { d.querySelector('#pasteIn').focus(); }, onClose: d => { typed = d.querySelector('#pasteIn').value; } });
+    if (v === 'go') confirmImport(typed);
+  });
+
+  /* reset */
+  $('#resetBtn').addEventListener('click', async () => {
+    const v = await G.ui.dialog({ title: 'Start over?', text: 'This can’t be undone. Export first if you might want it back.', actions: [{ label: 'Cancel', kind: 'quiet', value: null }, { label: 'Profile only', kind: 'danger', value: 'profile' }, { label: 'Profile and all points', kind: 'danger', value: 'all' }] });
+    if (!v) return; G.reset(v === 'all'); G.ensureSnaps(true); view.setAvatar(G.profile.avatar); render(); G.ui.toast('Fresh start. Hi, ' + G.profile.name, { icon: 'sparkle', ms: 3500 });
+  });
+  $('#earned').addEventListener('click', e => { const b = e.target.closest('[data-item]'); if (b) location.href = '../shop/#' + b.dataset.item; });
+  G.on((p, what) => { if (what === 'external') { view.setAvatar(p.avatar); render(); } });
+  render();
+})();
+</script>
+</body>
+</html>

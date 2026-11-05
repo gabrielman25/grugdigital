@@ -1,0 +1,18 @@
+/* Grug · game detail pages */
+.gp-back{display:inline-flex;align-items:center;gap:6px;margin:14px 0 8px;color:var(--mut);font-weight:700}
+.gp-hero{display:grid;gap:16px;grid-template-columns:1fr}
+.gp-cover{aspect-ratio:16/10;border-radius:var(--r);background:var(--card2) center/cover no-repeat;position:relative;border:1px solid var(--line)}
+.gp-cover .badge{position:absolute;left:12px;top:12px}
+.gp-head{display:flex;flex-direction:column;gap:12px}
+.gp-head .lead{color:var(--ink2);font-size:17px}
+.gp-stats{display:flex;gap:10px;flex-wrap:wrap}
+.gp-stats div{display:flex;flex-direction:column;padding:10px 14px;border-radius:var(--r-s);background:var(--card);min-width:110px}
+.gp-stats b{font-size:22px;line-height:1.1}
+.gp-stats span{color:var(--mut);font-size:13px;font-weight:600}
+.gp-long{color:var(--ink2);max-width:70ch;font-size:16.5px}
+.gp-facts{display:grid;gap:10px;grid-template-columns:1fr;margin-top:14px}
+.gp-facts div{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:var(--card);border-radius:var(--r-s)}
+.gp-facts .gi{width:24px;height:24px;color:var(--ember);flex:none;margin-top:2px}
+.gp-facts b{display:block}
+.gp-facts span{color:var(--ink2);font-size:14.5px}
+@media (min-width:760px){.gp-hero{grid-template-columns:minmax(300px,460px) 1fr;gap:28px;align-items:start}.gp-facts{grid-template-columns:1fr 1fr}}
