@@ -1141,9 +1141,10 @@ const CONFIG = {
   notice: {
     enabled: true,
     tag: 'For the owner',
-    text: 'This rewards app is a working preview built for {business}. To talk about launching it for your business, please text',
+    text: 'This rewards app is a working preview built for {business}. To talk about launching it for your restaurant, please text',
     phone: '954-459-6301',
-    note: '(text only, please, no calls)'
+    note: '(text only, please, no calls)',
+    site: 'https://gabrielman25.github.io/grugdigital/partners/', siteLabel: 'See our work ↗'
   },
 
   stores: [{
@@ -2021,7 +2022,7 @@ document.addEventListener('click', e => { const b = e.target.closest('[data-copy
   const n = CONFIG.notice; if(!n || !n.enabled) return;
   const el = document.createElement('div'); el.className = 'owner-banner'; el.setAttribute('role', 'note');
   el.innerHTML = (n.tag ? '<span class="ob-tag">' + esc(n.tag) + '</span>' : '') +
-    '<p class="ob-txt">' + esc(String(n.text).replace('{business}', B.name)) + ' <a href="sms:+1' + String(n.phone).replace(/\D/g, '') + '">' + esc(n.phone) + '</a> <span class="ob-note">' + esc(n.note || '') + '</span></p>' +
+    '<p class="ob-txt">' + esc(String(n.text).replace('{business}', B.name)) + ' <a href="sms:+1' + String(n.phone).replace(/\D/g, '') + '">' + esc(n.phone) + '</a> <span class="ob-note">' + esc(n.note || '') + '</span>' + (n.site ? ' <a class="ob-site" href="' + esc(n.site) + '" target="_blank" rel="noopener">' + esc(n.siteLabel || 'See our work ↗') + '</a>' : '') + '</p>' +
     '<button class="ob-copy press" type="button">Copy</button>';
   document.body.prepend(el);
   el.querySelector('.ob-copy').addEventListener('click', e => {
