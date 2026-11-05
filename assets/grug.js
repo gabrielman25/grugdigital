@@ -190,25 +190,101 @@
   /* ---------- icons ---------- */
   function icon(name, cls) { const d = ICONS[name]; return '<svg class="gi' + (cls ? ' ' + cls : '') + '" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path d="' + (d || ICONS.question || '') + '"/></svg>'; }
 
-  /* ---------- UI chrome: header + tab bar ---------- */
+  /* ---------- UI chrome: floating top bar + dock (kubii theme) ---------- */
   const NAV = [
     ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'],
     ['shop', 'Shop', 'storefront', 'shop/'], ['profile', 'Profile', 'user', 'profile/']
   ];
+  // glossy dock icons (gradient ids are unique per page: there is only one dock)
+  const DOCK = {
+    home: '<svg class="k-ic" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="kdH" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ecfccb"/><stop offset=".5" stop-color="#a3e635"/><stop offset="1" stop-color="#4d7c0f"/></linearGradient></defs><path d="M24 4.5 43.5 20.5c1.6 1.3.7 4-1.4 4H41v14.8a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4V24.5H5.9c-2.1 0-3-2.7-1.4-4z" fill="url(#kdH)" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><rect x="18" y="27" width="12" height="16.3" rx="4.5" fill="#fff"/><path d="M12 22 24 12l7 5.6" stroke="#fff" stroke-opacity=".5" stroke-width="3" fill="none" stroke-linecap="round"/></svg>',
+    games: '<svg class="k-ic" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="kdG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#99f6e4"/><stop offset="1" stop-color="#0d9488"/></linearGradient></defs><path d="M15 12h18c7 0 11 6 12 14 1 8-1 12-5 12-3.5 0-5.5-3-7.5-5.5h-17C13.5 35 11.5 38 8 38c-4 0-6-4-5-12 1-8 5-14 12-14z" fill="url(#kdG)" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><rect x="11" y="20.5" width="10" height="3.6" rx="1.3" fill="#fff"/><rect x="14.2" y="17.3" width="3.6" height="10" rx="1.3" fill="#fff"/><circle cx="31" cy="20.5" r="2.5" fill="#fff"/><circle cx="36" cy="25.5" r="2.5" fill="#fff"/><path d="M14 15.5h20" stroke="#fff" stroke-opacity=".5" stroke-width="2.4" stroke-linecap="round"/></svg>',
+    avatar: '<svg class="k-ic" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="kdA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fed7aa"/><stop offset="1" stop-color="#fb7185"/></linearGradient></defs><rect x="6" y="6" width="36" height="36" rx="11" fill="url(#kdA)" stroke="#fff" stroke-width="2.6"/><rect x="16.5" y="17" width="4" height="7" rx="2" fill="#4c0519"/><rect x="27.5" y="17" width="4" height="7" rx="2" fill="#4c0519"/><path d="M16 29.5q8 7 16 0" stroke="#4c0519" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M12 15q0-4 4-4" stroke="#fff" stroke-opacity=".7" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg>',
+    shop: '<svg class="k-ic" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="kdS" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5d0fe"/><stop offset="1" stop-color="#d946ef"/></linearGradient></defs><path d="M17 16v-3a7 7 0 0 1 14 0v3" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M9.5 15h29l2.5 23.5a4 4 0 0 1-4 4.5H11a4 4 0 0 1-4-4.5z" fill="url(#kdS)" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><circle cx="17" cy="22" r="2.2" fill="#fff"/><circle cx="31" cy="22" r="2.2" fill="#fff"/><path d="M16 30q8 6 16 0" stroke="#fff" stroke-width="2.8" fill="none" stroke-linecap="round"/></svg>',
+    profile: '<svg class="k-ic" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="kdP" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fef08a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><circle cx="24" cy="17" r="10" fill="url(#kdP)" stroke="#fff" stroke-width="2.6"/><path d="M7 42c1.5-9 8.5-14 17-14s15.5 5 17 14z" fill="url(#kdP)" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><path d="M19 12.5q2-2.5 5-2.5" stroke="#fff" stroke-opacity=".7" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg>',
+  };
+  const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
   function chrome(active, opts) {
     opts = opts || {};
     const face = snaps(); const faceImg = face ? '<img class="g-face" alt="" src="' + face.bust + '">' : '<span class="g-face g-face-empty">' + icon('smiley') + '</span>';
+    const navLabel = (NAV.find(n => n[0] === active) || NAV[0])[1];
+    const titleBit = (document.title.split(' · ').find(x => x && x !== 'Grug') || navLabel);
+    const pageTitle = opts.title || (/^games made/i.test(titleBit) ? 'Home' : titleBit);
     const top = document.createElement('header'); top.className = 'g-top';
-    top.innerHTML = '<a class="g-logo" href="' + url('') + '" aria-label="Grug home">' + LOGO + '<span>Grug</span></a>' +
-      '<nav class="g-nav" aria-label="Site">' + NAV.map(n => '<a href="' + url(n[3]) + '"' + (n[0] === active ? ' aria-current="page"' : '') + '>' + icon(n[2]) + '<span>' + n[1] + '</span></a>').join('') + '</nav>' +
+    top.innerHTML = '<a class="g-logo k-glass" href="' + url('') + '" aria-label="Grug home">' + LOGO + '<span>Grug</span></a>' +
+      '<div class="g-title k-glass" aria-hidden="true"><small>' + esc(pageTitle === navLabel ? 'Grug' : navLabel) + '</small><b>' + esc(pageTitle) + '</b></div>' +
+      '<div class="g-status k-glass"><a class="g-pts" href="' + url('profile/') + '" title="Points at every partner">' + icon('coins') + '<span class="num">' + fmt(totalPoints()) + '</span></a><span class="g-sep"></span>' +
+      '<button type="button" class="g-gear" aria-label="Settings" title="Settings">' + icon('gear-six') + '</button></div>' +
       '<a class="g-me" href="' + url('profile/') + '" aria-label="Your profile"><span class="g-me-name">' + esc(profile.name) + '</span>' + faceImg + '</a>';
-    const tabs = document.createElement('nav'); tabs.className = 'g-tabs'; tabs.setAttribute('aria-label', 'Sections');
-    tabs.innerHTML = NAV.map(n => '<a href="' + url(n[3]) + '"' + (n[0] === active ? ' aria-current="page"' : '') + '>' + icon(n[2]) + '<span>' + n[1] + '</span></a>').join('');
+    const tabs = document.createElement('nav'); tabs.className = 'g-tabs k-glass'; tabs.setAttribute('aria-label', 'Sections');
+    tabs.innerHTML = '<span class="k-sb l" aria-hidden="true">LB</span><span class="k-sb r" aria-hidden="true">RB</span>' +
+      NAV.map(n => '<a href="' + url(n[3]) + '"' + (n[0] === active ? ' aria-current="page"' : '') + '>' + DOCK[n[0]] + '<span>' + n[1] + '</span></a>').join('');
     document.body.prepend(top); document.body.appendChild(tabs);
     document.body.classList.add('g-chrome');
+    $('.g-gear', top).addEventListener('click', () => settings());
     if (!$('#g-toast')) { const t = document.createElement('div'); t.id = 'g-toast'; t.className = 'g-toast'; t.setAttribute('role', 'status'); t.setAttribute('aria-live', 'polite'); document.body.appendChild(t); }
-    root.addEventListener('grug:change', () => { const s = snaps(); const el = $('.g-me', top); if (!el) return; el.innerHTML = '<span class="g-me-name">' + esc(profile.name) + '</span>' + (s ? '<img class="g-face" alt="" src="' + s.bust + '">' : '<span class="g-face g-face-empty">' + icon('smiley') + '</span>'); });
+    root.addEventListener('grug:change', () => {
+      const s = snaps(); const el = $('.g-me', top); if (!el) return;
+      el.innerHTML = '<span class="g-me-name">' + esc(profile.name) + '</span>' + (s ? '<img class="g-face" alt="" src="' + s.bust + '">' : '<span class="g-face g-face-empty">' + icon('smiley') + '</span>');
+      const pt = $('.g-pts .num', top); if (pt) pt.textContent = fmt(totalPoints());
+    });
+    // LB / RB: Q and E (or a controller's shoulder buttons) step through the dock
+    const idx = Math.max(0, NAV.findIndex(n => n[0] === active));
+    const go = d => { location.href = url(NAV[(idx + d + NAV.length) % NAV.length][3]); };
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey || e.altKey || e.repeat || document.querySelector('dialog[open]')) return;
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+      const k = e.key.toLowerCase(); if (k === 'q') go(-1); else if (k === 'e') go(1);
+    });
+    root.addEventListener('gamepadconnected', () => {
+      let prev = {};
+      (function poll() {
+        const p = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).find(Boolean);
+        if (p) { [[4, -1], [5, 1]].forEach(([i, d]) => { const on = !!(p.buttons[i] && p.buttons[i].pressed); if (on && !prev[i]) go(d); prev[i] = on; }); }
+        requestAnimationFrame(poll);
+      })();
+    }, { once: true });
     return top;
+  }
+
+  /* ---------- appearance: Light / Dark / Auto + themes (used by the gear sheet and Profile) ---------- */
+  function appearance(box) {
+    const T = root.GrugTheme; if (!T || !box) return;
+    const draw = () => {
+      const s = T.prefs(), t = T.THEMES[s.theme];
+      const L = 'hsl(' + t.h + ' 42% 93%)', D = 'hsl(' + t.h + ' 35% 9%)', LP = '#fff', DP = 'hsl(' + t.h + ' 24% 21%)', acc = 'linear-gradient(90deg,' + t.a + ',' + t.b + ')';
+      const pv = m => m === 'light' ? '<span class="pv" style="background:' + L + '"><i style="background:' + LP + '"></i><i style="background:' + acc + '"></i></span>'
+        : m === 'dark' ? '<span class="pv" style="background:' + D + '"><i style="background:' + DP + '"></i><i style="background:' + acc + '"></i></span>'
+        : '<span class="pv" style="background:linear-gradient(135deg,' + L + ' 50%,' + D + ' 50%)"><i style="background:linear-gradient(135deg,' + LP + ' 50%,' + DP + ' 50%)"></i><i style="background:' + acc + '"></i></span>';
+      box.innerHTML =
+        '<span class="k-set-h">Light or dark</span><div class="k-modes" role="radiogroup" aria-label="Light or dark">' +
+        [['light', 'Light'], ['dark', 'Dark'], ['auto', 'Auto']].map(m => '<button type="button" class="k-mode" role="radio" aria-checked="' + (s.mode === m[0]) + '" data-mode="' + m[0] + '">' + pv(m[0]) + m[1] + '</button>').join('') + '</div>' +
+        '<span class="k-set-h">Theme</span><div class="k-themes" role="radiogroup" aria-label="Theme">' +
+        Object.keys(T.THEMES).map(k => { const th = T.THEMES[k]; return '<button type="button" class="k-theme" role="radio" aria-checked="' + (s.theme === k) + '" data-theme-id="' + k + '"><span class="sw" style="background:linear-gradient(135deg,' + th.a + ',' + th.b + ')"></span><span class="dots"><i style="background:' + th.a + '"></i><i style="background:' + th.b + '"></i><i style="background:' + th.hotA + '"></i><i style="background:' + th.hotB + '"></i></span><span><b>' + th.name + '</b><br><small>' + th.note + '</small></span></button>'; }).join('') + '</div>' +
+        '<div class="g-pref" style="margin-top:8px"><span><b>Moving background</b><small>Slow waves in the backdrop</small></span><button type="button" class="g-switch" role="switch" aria-checked="' + s.backdrop + '" data-k="backdrop" aria-label="Moving background"></button></div>';
+    };
+    draw();
+    box.addEventListener('click', e => {
+      const m = e.target.closest('[data-mode]'), th = e.target.closest('[data-theme-id]'), sw = e.target.closest('[data-k]');
+      if (m) T.set({ mode: m.dataset.mode }); else if (th) T.set({ theme: th.dataset.themeId }); else if (sw) T.set({ [sw.dataset.k]: !T.prefs()[sw.dataset.k] }); else return;
+      buzz(); draw();
+    });
+  }
+  function settings() {
+    return dialog({
+      title: 'Settings', html: '<div id="kAppear"></div>' +
+        '<div class="g-pref"><span><b>Animations</b><small>Celebrations, poses and the moving backdrop</small></span><button type="button" class="g-switch" role="switch" data-pref="motion" aria-checked="' + !!profile.prefs.motion + '" aria-label="Animations"></button></div>' +
+        '<div class="g-pref"><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button type="button" class="g-switch" role="switch" data-pref="haptics" aria-checked="' + !!profile.prefs.haptics + '" aria-label="Vibrate on tap"></button></div>' +
+        '<p class="g-fine" style="margin-top:6px">Saved in your profile, so it comes along when you export it. More in <a href="' + url('profile/') + '" style="color:var(--ember);font-weight:800">Profile</a>.</p>',
+      actions: [{ label: 'Done', kind: 'primary', value: true }],
+      onOpen: d => {
+        d.classList.add('wide'); appearance($('#kAppear', d));
+        $$('[data-pref]', d).forEach(b => b.addEventListener('click', () => {
+          profile.prefs[b.dataset.pref] = !profile.prefs[b.dataset.pref]; save('prefs'); b.setAttribute('aria-checked', !!profile.prefs[b.dataset.pref]);
+          if (root.GrugTheme) root.GrugTheme.apply(); buzz();
+        }));
+      }
+    });
   }
   const LOGO = '<svg class="g-mark" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="16" fill="#9BE338"/><path d="M19.8 51C19.5 50.9 18.9 50.9 18.4 50.9C17.2 50.9 17.1 50.7 17 48.6C16.8 46.5 17 45.5 17.9 43.8C18.1 43.3 18.3 42.8 18.3 42.8C18.3 42.6 19 41.2 19.3 40.7C19.8 39.8 19.8 39.8 19.7 39.6C19.5 38.9 19.2 38.3 18.8 37.8C17.9 36.4 17.6 35.3 17.7 34C17.8 32.5 18.1 32 19.1 31.1C19.5 30.8 19.9 30.5 20 30.5C20.5 30 21.2 29.7 21.7 29.7C22.5 29.7 22.8 29.4 22.8 28.8C22.8 27.9 23.5 28.4 23.6 29.3C23.6 30 23.1 30.5 21.7 30.8C20.7 31 20.2 33 21 33.9C21.9 35 25.6 34.7 26.6 33.5C26.6 33.4 26.7 33.4 26.7 33.4C26.8 33.4 27 33.3 27.3 33.2C27.5 33.1 28 32.9 28.2 32.8C29.5 32.4 29.8 32.4 30 32.4C30 32.4 30.3 32.3 30.5 32.2C31 32.1 31.5 32 33 31.9C34.8 31.8 35.5 31.7 35.8 31.6C35.9 31.5 36.2 31.4 36.4 31.4C37.8 31 38.2 30.7 39 29.2C39.6 28.1 39.6 25.4 39 24.6C38.9 24.5 38.8 24.4 38.8 24.4C38.8 24.3 38.1 23 37.9 22.8C37.8 22.7 37.3 22.4 36.8 22.1C36.3 21.8 35.8 21.5 35.7 21.5C35.3 21.2 33.8 20.9 32.9 20.9C32.5 20.9 32 20.9 31.9 20.8C31.8 20.8 31.5 20.7 31.3 20.7C30.3 20.5 30 20.3 29.2 19.5C28 18.3 27.9 17.7 28.3 15.9C28.4 15.7 28.5 15.4 28.5 15.3C28.6 15.2 28.7 15 28.7 14.9C29.1 14.2 29.8 13.4 30.4 13.3C31.1 13.1 31.3 13.1 32.3 13C33.2 13 34.1 13.1 34.9 13.3C35.2 13.3 35.6 13.4 35.8 13.5C36.7 13.6 37.3 13.8 38.7 14.4C39.5 14.7 40.5 15.4 41.3 16.1C41.5 16.2 41.9 16.5 42.1 16.6C42.2 16.8 42.5 17 42.6 17.1C42.7 17.3 42.9 17.5 43 17.6C43.3 18 43.8 18.7 44 19.2C44.1 19.5 44.3 19.9 44.5 20.1C44.6 20.3 44.8 20.6 44.8 20.9C44.9 21.1 45.1 21.4 45.3 21.7C45.5 21.9 45.6 22.2 45.7 22.3C45.7 22.4 45.8 22.7 45.8 22.9C45.9 23.1 46 23.6 46.1 23.9C46.2 24.2 46.4 24.6 46.4 24.7C46.6 25.2 46.8 26.3 46.9 26.8C46.9 27 47 27.4 47 27.7C47.1 28.3 47.1 32.1 46.9 32.4C46.9 32.5 46.9 33.2 46.9 34C46.9 34.8 46.9 35.6 46.8 35.8C46.8 36 46.7 36.3 46.7 36.5C46.6 36.9 46.5 37.4 46.4 37.7C46.3 37.8 46.3 38.1 46.2 38.3C46.2 38.6 46.1 38.9 46.1 39C46 39.1 46 39.3 45.9 39.5C45.6 40.7 45.3 41.5 45 42.3C45 42.4 44.9 42.7 44.8 43C44.7 43.4 44.5 43.9 44.3 44.3C44.1 44.7 43.9 45.2 43.8 45.5C43.7 45.8 43.6 46.1 43.5 46.2C43.5 46.2 43.5 46.3 43.5 46.3C43.5 46.4 43.4 46.5 43.3 46.7C43.2 46.8 43.1 47.1 43 47.2C43 47.3 42.9 47.5 42.8 47.7C42.6 47.9 42.4 48.3 42.3 48.6C41.1 50.8 41.2 50.8 38.3 50.8C34.9 50.8 34.8 50.7 34.8 49.5C34.8 49 34.8 48.8 34.7 48.6C33.3 46.1 32.8 45.5 31.8 45.2C31.6 45.1 31.3 45 31.1 45C30.4 44.8 29.9 44.9 28.2 45.4C27.2 45.7 26 46.8 26 47.5C26 47.6 26 47.7 26 47.7C25.9 47.8 25.9 48 25.8 48.2C25.8 48.4 25.6 48.8 25.4 49.1C25.3 49.4 25.2 49.7 25.2 49.7C25.2 50.3 24.3 50.8 23.4 50.8C23 50.9 22.5 50.9 22.3 50.9C22 51 20.6 51 19.8 51Z" fill="#1F1A17"/></svg>';
 
@@ -285,6 +361,6 @@
     save, setName, setAvatar, equip, unequip, owns, grant, track, totals, statValue, progress, checkMilestones, celebrate,
     points, appState, exportData, exportText, exportFilename, download, share, parseImport, applyImport, reset,
     snaps, ensureSnaps, randomName, cleanName,
-    ui: { chrome, toast, buzz, dialog, itemTile, itemState, fillThumbs }
+    ui: { chrome, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings }
   };
 })(window);

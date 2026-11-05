@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Grug · games made with Katy restaurants</title>
 <meta name="description" content="Free games starring real Katy restaurants. Eat at a partner, earn points, spend them on power-ups and clothes for your avatar. No account needed.">
-<meta name="theme-color" content="#1C1714">
+<meta name="theme-color" content="#eaf6ee">
 <link rel="icon" href="favicon.png">
 <link rel="stylesheet" href="assets/grug.css">
+<script src="assets/theme.js"></script>
 <script>
 /* old links into the business half of the site (#business, #work, #contact …) now live on partners/ */
 (function(){ var h = location.hash.replace('#',''); if (/^(business|work|included|how|about|contact|pass|pricing)$/.test(h)) location.replace('partners/#' + h); })();
@@ -20,6 +21,7 @@
 .hero .cta{display:flex;gap:10px;flex-wrap:wrap}
 .hero .name{color:var(--moss)}
 @media (min-width:760px){.hero{grid-template-columns:minmax(300px,420px) 1fr;gap:28px;padding:28px 0 10px}.hero .g-view{height:420px}}
+@media (orientation:landscape) and (max-height:540px){.hero{grid-template-columns:minmax(220px,38%) 1fr;gap:22px;padding:8px 0 6px;align-items:center}.hero .g-view{height:calc(100vh - 110px);min-height:220px}.hero h1{font-size:30px}.hero .copy p{font-size:15px}.hero .g-btn.big{min-height:48px;font-size:18px;padding:0 20px}}
 .steps{display:grid;gap:10px;grid-template-columns:1fr}
 .step{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;background:var(--card);border-radius:var(--r);border:1px solid var(--line)}
 .step .n{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--ember-soft);color:var(--ember);flex:none}

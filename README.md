@@ -16,6 +16,7 @@ Games built with Katy restaurants, one local profile (no accounts), a 3D avatar 
 
 - `catalog.js` — the closet: every item, its slot, how it's earned (free / partner points / milestone). Add items here.
 - `avatar3d.js` — builds and animates the blocky avatar with three.js (`three.min.js`, r159, MIT). Used by the site pages, the closet thumbnails and the match-3 games' "chef".
+- `grug.css` + `theme.js` — the kubii look: frosted glass over a slow wavy backdrop (`backdrop.jpg`, recoloured per theme), Light / Dark / Auto and six colour themes (Tropical, Lagoon, Papaya, Hibiscus, Orchid, Coconut). Load `theme.js` in `<head>` right after `grug.css` so the theme is set before first paint. The choices are saved in the profile's `prefs` and change from the gear in the top bar or from Profile → Appearance.
 - `grug.js` — the local profile (`localStorage` key `grug.profile.v1`), milestones, points reader, export/import, shared header + tab bar. `games.js` is the game list.
 - `grug-app.js` / `grug-app.css` — the Grug layer inside a partner app (closet section, avatar chip, milestone hooks). `chef.js` — the avatar inside the match-3 games.
 - `icons.js` — Phosphor Icons 2.1.1 (MIT), bold weight.

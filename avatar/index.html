@@ -5,18 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Avatar · Grug</title>
 <meta name="description" content="Dress your Grug avatar: skin, face, hair, hat, shirt, pants and gear. Saved on this phone, no account needed.">
-<meta name="theme-color" content="#1C1714">
+<meta name="theme-color" content="#eaf6ee">
 <link rel="icon" href="../favicon.png">
 <link rel="stylesheet" href="../assets/grug.css">
+<script src="../assets/theme.js"></script>
 <style>
 body.g-chrome{padding-bottom:calc(var(--tabs) + var(--sab))}
 .av{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
 .av-stage,.av-panel{min-width:0}
-.av-stage{position:sticky;top:calc(var(--top) + var(--sat));z-index:5;background:var(--bg);padding:10px 0 8px}
+.av-stage{position:sticky;top:calc(var(--top) + var(--sat) + 6px);z-index:5;padding:6px 0 10px}
 .av-stage .g-view{height:min(44vh,420px)}
 .av-tools{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:8px}
 .av-poses{position:absolute;left:10px;bottom:10px;display:flex;gap:6px}
-.av-poses .g-btn{min-height:36px;padding:0 12px;font-size:14px;box-shadow:0 3px 0 #1a1411}
+.av-poses .g-btn{min-height:36px;padding:0 13px;font-size:14px;background:rgba(6,30,18,.42);color:#fff;border:1.5px solid rgba(255,255,255,.65);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .av-stage .g-view .hint{top:12px;bottom:auto}
 .av-saved{position:absolute;left:12px;top:12px;display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;background:rgba(0,0,0,.45);color:var(--moss);font-size:12.5px;font-weight:800;opacity:0;transition:opacity .3s}
 .av-saved.show{opacity:1}
@@ -26,12 +27,19 @@ body.g-chrome{padding-bottom:calc(var(--tabs) + var(--sab))}
 .av-slots::-webkit-scrollbar{display:none}
 .av-slot{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:0 14px;border-radius:999px;background:var(--card);font-weight:800;font-size:15px;color:var(--ink2);border:2px solid transparent;scroll-snap-align:start}
 .av-slot .gi{width:1.15em;height:1.15em}
-.av-slot[aria-selected=true]{background:var(--ember);color:var(--ember-ink)}
+.av-slot{border:1px solid var(--line)!important}
+.av-slot[aria-selected=true]{background:var(--ink);color:var(--bg)}
 .av-sub{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .av-sub h2{font-size:20px}
 .av-sub .g-fine{flex-basis:100%}
 .av-none .g-item-pic{display:grid;place-items:center;color:var(--mut)}
 .av-none .g-item-pic .gi{width:40%;height:40%}
+@media (orientation:landscape) and (max-height:540px){
+  .av{grid-template-columns:minmax(220px,40%) minmax(0,1fr);gap:18px;align-items:start}
+  .av-stage{position:sticky;top:calc(var(--top) + var(--sat) + 6px);padding:0}
+  .av-stage .g-view{height:calc(100vh - var(--top) - 40px)}
+  .av-slots{margin:0;padding-left:0;padding-right:0}
+}
 @media (min-width:860px){
   .av{grid-template-columns:minmax(340px,480px) minmax(0,1fr);gap:28px;align-items:start;padding-top:16px}
   .av-stage{position:sticky;top:calc(var(--top) + var(--sat) + 16px);padding:0}

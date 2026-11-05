@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Profile · Grug</title>
 <meta name="description" content="Your Grug profile: name, avatar, points at every partner, settings, and export/import to move to another phone.">
-<meta name="theme-color" content="#1C1714">
+<meta name="theme-color" content="#eaf6ee">
 <link rel="icon" href="../favicon.png">
 <link rel="stylesheet" href="../assets/grug.css">
+<script src="../assets/theme.js"></script>
 <style>
 .pf{display:grid;gap:16px;grid-template-columns:1fr;padding-top:16px}
 .pf-card{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center;background:var(--card);border-radius:var(--r);border:1px solid var(--line);padding:14px}
@@ -52,6 +53,11 @@
     <h2>Earned</h2>
     <p class="g-fine" style="margin-bottom:10px">Clothes you unlocked by playing and checking in. Free basics aren’t listed.</p>
     <div class="g-items" id="earned"></div>
+  </section>
+
+  <section class="g-card">
+    <h2>Appearance</h2>
+    <div id="appearance"></div>
   </section>
 
   <section class="g-card">
@@ -149,6 +155,7 @@
   $('#earned').addEventListener('click', e => { const b = e.target.closest('[data-item]'); if (b) location.href = '../shop/#' + b.dataset.item; });
   G.on((p, what) => { if (what === 'external') { view.setAvatar(p.avatar); render(); } });
   render();
+  G.ui.appearance(document.getElementById('appearance'));
 })();
 </script>
 </body>
