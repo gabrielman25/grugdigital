@@ -330,6 +330,18 @@
   let sped = false;
   function speed() {
     if (sped) return; sped = true;
+    // browsers without cross-page View Transitions: fade the page out, then go (theme.js fades the next one in)
+    if (document.documentElement.classList.contains('g-fade')) {
+      document.addEventListener('click', e => {
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        const a = e.target.closest && e.target.closest('a[href]'); if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+        let u; try { u = new URL(a.href); } catch (x) { return; }
+        if (u.origin !== location.origin || u.href.indexOf(ROOT) !== 0 || (u.pathname === location.pathname && u.search === location.search)) return;
+        e.preventDefault(); try { sessionStorage.setItem('grug.nav', '1'); } catch (x) {}
+        document.documentElement.classList.add('g-leave'); setTimeout(() => { location.href = u.href; }, 150);
+      });
+      root.addEventListener('pageshow', e => { if (e.persisted) document.documentElement.classList.remove('g-leave', 'g-arrive'); });
+    }
     const same = a => a && a.href && a.origin === location.origin && a.href.indexOf(ROOT) === 0 && !a.hasAttribute('download') && a.target !== '_blank' && !/#/.test(a.getAttribute('href') || '#');
     // Chrome: prerender site pages on hover/touch (not the heavy game apps or the 3D editor)
     try {

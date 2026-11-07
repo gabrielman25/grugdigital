@@ -35,6 +35,8 @@
   const isCalm = s => !s.motion || !!(calmMQ && calmMQ.matches);
   const hexHue = hex => { const n = parseInt(hex.slice(1), 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; if (!d) return 0; let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; return h < 0 ? h + 360 : h; };
 
+  // browsers without cross-page View Transitions get a short fade instead (grug.js marks the way out)
+  try { if (!('onpagereveal' in root)) { document.documentElement.classList.add('g-fade'); if (sessionStorage.getItem('grug.nav')) { sessionStorage.removeItem('grug.nav'); document.documentElement.classList.add('g-arrive'); } } } catch (e) {}
   // pages with the Grug top bar and dock: draw their skeletons right away (grug.css), so nothing jumps when they arrive
   try { if (!/[?&]mode=viewer/.test(location.search) && !/\/(play|work)\//.test(location.pathname)) document.documentElement.classList.add('g-pre'); } catch (e) {}
   function apply() {
@@ -55,6 +57,7 @@
      A 192×108 canvas, recoloured once per theme (hue-rotate + saturate + brightness applied to the pixels),
      then redrawn ~25×/s from sine-offset strips. Scaled up it reads as soft liquid colour. It pauses when the
      tab is hidden, when a dialog is open, when Animations are off, or when the visitor prefers reduced motion. */
+  const BG_CACHE = 'grug.bg.v1';
   const Backdrop = (function () {
     const W = 192, H = 108, M = 10;
     let cv, ctx, src, sx, buf, bx, img, ok = false, raf = 0, last = 0;
@@ -64,10 +67,14 @@
       wrap.innerHTML = '<canvas class="k-wave" width="' + W + '" height="' + H + '"></canvas><div class="k-scrim"></div>';
       document.body.prepend(wrap);
       cv = wrap.firstChild; ctx = cv.getContext('2d');
+      // carry the backdrop over from the last page: its last frame shows at once, and the drift keeps its place in time
+      try { const c = JSON.parse(localStorage.getItem(BG_CACHE) || 'null'), s0 = prefs(); if (c && c.k === s0.theme + '|' + isDark(s0) && /^data:image\//.test(c.u)) cv.style.background = 'url(' + c.u + ') center/100% 100% no-repeat'; } catch (e) {}
+      cv.style.animationDelay = -((Date.now() / 1000) % 80).toFixed(2) + 's';
+      root.addEventListener('pagehide', saveFrame);
       src = document.createElement('canvas'); sx = src.getContext('2d', { willReadFrequently: true });
       buf = document.createElement('canvas'); buf.width = W; buf.height = H; bx = buf.getContext('2d');
       img = new Image();
-      img.onload = () => { ok = true; src.width = img.width; src.height = img.height; retint(); kick(); };
+      img.onload = () => { ok = true; src.width = img.width; src.height = img.height; retint(); kick(); setTimeout(saveFrame, 400); };
       const me = document.querySelector('script[src*="theme.js"]');
       img.src = me ? me.src.replace(/theme\.js.*$/, 'backdrop.jpg') : 'assets/backdrop.jpg';
     }
@@ -94,9 +101,10 @@
       }
       draw(performance.now());
     }
+    function saveFrame() { if (!ok || !cv) return; try { const s0 = prefs(); localStorage.setItem(BG_CACHE, JSON.stringify({ k: s0.theme + '|' + isDark(s0), u: cv.toDataURL('image/jpeg', 0.75) })); } catch (e) {} }
     function draw(ts) {
       if (!ok) return;
-      const s = ts / 1000, iw = src.width, ih = src.height;
+      const s = ((performance.timeOrigin || 0) + ts) / 1000 % 100000, iw = src.width, ih = src.height;   // wall-clock time, so every page is in step
       bx.clearRect(0, 0, W, H);
       for (let y = 0; y < H; y += 2) {
         const dx = Math.sin(s * .55 + y * .055) * 3.2 + Math.sin(s * .31 + y * .02) * 2.4;

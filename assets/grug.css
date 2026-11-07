@@ -327,8 +327,14 @@ button.g-me{appearance:none;border:0;background:none;color:inherit;font:inherit;
 @keyframes g-vt-in{from{opacity:0;transform:translateY(10px)}}
 .g-top{view-transition-name:g-top}.g-tabs{view-transition-name:g-tabs}.k-bg{view-transition-name:g-bg}
 ::view-transition-group(g-top),::view-transition-group(g-tabs),::view-transition-group(g-bg){animation-duration:.2s}
-::view-transition-old(g-bg),::view-transition-new(g-bg){animation:none;mix-blend-mode:normal}
-::view-transition-old(g-bg){display:none}
+/* the backdrop: the old one stays put while the new one (already showing the same frame) settles in over it */
+::view-transition-old(g-bg){animation:none}
+::view-transition-new(g-bg){animation:g-vt-bg .4s ease both}
+@keyframes g-vt-bg{from{opacity:0}}
+/* fallback fade (browsers without cross-page transitions) */
+html.g-fade main{transition:opacity .15s ease,transform .15s ease}
+html.g-leave main{opacity:0;transform:translateY(-4px)}
+html.g-arrive main{animation:g-vt-in .3s cubic-bezier(.2,.75,.2,1) both}
 @media (prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
 
 /* ---------- skeletons: the top bar and dock are drawn before the script builds them, so nothing jumps ---------- */
