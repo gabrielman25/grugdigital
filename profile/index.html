@@ -95,7 +95,11 @@
 (function(){
   const G = Grug, C = GrugCatalog, $ = s => document.querySelector(s);
   G.ui.chrome('profile'); G.ensureSnaps();
-  const view = GrugAvatar.mount($('#view'), G.profile.avatar, { yaw: 0.3, onTap: () => view.play('wave', { ms: 2000 }) });
+  const view = G.ui.avatarPic($('#view'), { onTap: () => { view.play('wave', { ms: 2000 }); } });
+  // after loading a profile file with a look in it, redraw the pictures of that look
+  const redraw = () => { const c = (() => { try { return JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); } catch (e) { return null; } })(); if (!c) return;
+    const s = document.createElement('script'); s.src = G.url('assets/sandy-view.js'); s.onload = () => window.SandyView.makeSnaps(c).catch(() => {}); document.head.appendChild(s); };
+  G.on((p, what) => { if (what === 'import' && G.snaps().def) redraw(); });
   $('#rename').innerHTML = G.icon('pencil-simple'); $('#icMotion').innerHTML = G.icon('sparkle'); $('#icBuzz').innerHTML = G.icon('device-mobile');
   $('#export').innerHTML = G.icon('download-simple') + 'Export profile'; $('#copy').innerHTML = G.icon('copy') + 'Copy as text'; $('#shareBtn').innerHTML = G.icon('share-network') + 'Share file';
   $('#importFile').innerHTML = G.icon('upload-simple') + 'Load a profile file'; $('#importPaste').innerHTML = G.icon('clipboard-text') + 'Paste profile text'; $('#resetBtn').innerHTML = G.icon('trash') + 'Start over';

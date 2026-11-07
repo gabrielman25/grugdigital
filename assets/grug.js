@@ -129,7 +129,8 @@
   function exportData() {
     const apps = {};
     GAMES.forEach(g => { if (g.storageKey) { const v = localStorage.getItem(g.storageKey); if (v) { try { apps[g.storageKey] = JSON.parse(v); } catch (e) {} } } });
-    return { format: EXPORT_FORMAT, version: 1, exportedAt: new Date().toISOString(), site: ROOT, profile, apps };
+    const sandy = readJSON('grug.sandy.v1', null);   // the 3D avatar's look
+    return { format: EXPORT_FORMAT, version: 1, exportedAt: new Date().toISOString(), site: ROOT, profile, apps, sandy };
   }
   function exportText() { return JSON.stringify(exportData(), null, 2); }
   function exportFilename() { return 'grug-profile-' + profile.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + new Date().toISOString().slice(0, 10) + '.json'; }
@@ -155,36 +156,66 @@
     const p = normalize(d.profile);
     const apps = d.apps && typeof d.apps === 'object' ? d.apps : {};
     const pts = GAMES.filter(g => g.storageKey && apps[g.storageKey]).map(g => ({ game: g, points: Math.max(0, +apps[g.storageKey].points || 0) }));
-    return { ok: true, data: { profile: p, apps }, summary: { name: p.name, items: p.inventory.length, exportedAt: d.exportedAt || '', points: pts } };
+    const sandy = d.sandy && typeof d.sandy === 'object' && !Array.isArray(d.sandy) ? d.sandy : null;
+    return { ok: true, data: { profile: p, apps, sandy }, summary: { name: p.name, items: p.inventory.length, exportedAt: d.exportedAt || '', points: pts } };
   }
   // Replace everything on this device with the file's contents.
   function applyImport(data) {
     const p = normalize(data.profile); p.updated = Date.now();
     GAMES.forEach(g => { if (g.storageKey && data.apps[g.storageKey] && typeof data.apps[g.storageKey] === 'object') writeJSON(g.storageKey, data.apps[g.storageKey]); });
     profile = p; writeJSON(KEY, profile); try { localStorage.removeItem(SNAP_KEY); } catch (e) {}
+    if (data.sandy) { writeJSON('grug.sandy.v1', data.sandy); try { localStorage.removeItem('grug.sandy.snaps.v1'); } catch (e) {} }
     emit('import'); return true;
   }
   function reset(alsoPoints) {
     if (alsoPoints) GAMES.forEach(g => { if (g.storageKey) try { localStorage.removeItem(g.storageKey); } catch (e) {} });
-    try { localStorage.removeItem(KEY); localStorage.removeItem(SNAP_KEY); } catch (e) {}
+    try { localStorage.removeItem(KEY); localStorage.removeItem(SNAP_KEY); localStorage.removeItem('grug.sandy.v1'); localStorage.removeItem('grug.sandy.snaps.v1'); } catch (e) {}
     profile = fresh(); writeJSON(KEY, profile); emit('reset');
   }
 
-  /* ---------- avatar snapshots (PNG data URLs, cached per look) ---------- */
-  function snaps() { const s = readJSON(SNAP_KEY, null); return s && C && s.hash === C.hash(profile.avatar) ? s : null; }
-  function ensureSnaps(force) {
-    const A = root.GrugAvatar; if (!A) return snaps();
-    const cur = snaps(); if (cur && !force) return cur;
-    try {
-      const a = profile.avatar;
-      const s = { hash: C.hash(a), at: Date.now(),
-        bust: A.snapshot(a, { size: 160, bust: true, yaw: 0.3 }),
-        full: A.snapshot(a, { size: 200, height: 260, yaw: 0.35 }),
-        happy: A.snapshot(a, { size: 160, bust: true, yaw: 0.3, pose: 'happy' }),
-        sad: A.snapshot(a, { size: 160, bust: true, yaw: 0.3, pose: 'sad' }),
-        cheer: A.snapshot(a, { size: 200, height: 260, yaw: 0.2, pose: 'cheer' }) };
-      writeJSON(SNAP_KEY, s); emit('snaps'); return s;
-    } catch (e) { console.warn('snapshot failed', e); return null; }
+  /* ---------- avatar snapshots: pictures of the new 3D avatar (Sandy) ----------
+     The avatar editor (avatar/) renders them whenever the look changes and caches them in 'grug.sandy.snaps.v1'
+     (see assets/sandy-view.js). Until someone makes their own, everyone gets the default look's pictures. */
+  const SANDY_KEY = 'grug.sandy.v1', SANDY_SNAPS = 'grug.sandy.snaps.v1';
+  const sandyHash = (o) => { const s = JSON.stringify(o || null); let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+  function snaps() {
+    const s = readJSON(SANDY_SNAPS, null), c = readJSON(SANDY_KEY, null);
+    if (s && s.bust && (!c || s.hash === sandyHash(c))) return s;
+    const d = url('assets/sandy/');
+    return { def: true, bust: d + 'bust.png', full: d + 'full.png', happy: d + 'happy.png', sad: d + 'sad.png', cheer: d + 'cheer.png' };
+  }
+  function ensureSnaps() { return snaps(); }
+  root.addEventListener('storage', e => { if (e.key === SANDY_SNAPS) emit('snaps'); });
+  root.addEventListener('grug-sandy-snaps', () => emit('snaps'));
+
+  /* the avatar as a picture (home hero, profile card): tap = a little hop; play(pose) swaps to a matching picture.
+     Same shape as the old 3D view (play, setAvatar, el) so pages can swap it in. */
+  function avatarPic(host, opts) {
+    opts = opts || {};
+    if (!document.getElementById('g-avpic-css')) { const st = document.createElement('style'); st.id = 'g-avpic-css';
+      st.textContent = '.g-avpic{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}' +
+        '.g-avpic img{height:94%;width:auto;max-width:100%;object-fit:contain;transform-origin:50% 100%;filter:drop-shadow(0 14px 18px rgba(0,0,0,.18));animation:g-av-breathe 4s ease-in-out infinite}' +
+        '.g-avpic.hop img{animation:g-av-hop .6s cubic-bezier(.3,1.6,.5,1)}.g-avpic.dance img{animation:g-av-dance .5s ease-in-out 4}' +
+        '@keyframes g-av-breathe{50%{transform:translateY(-1.5%) scaleY(1.008)}}@keyframes g-av-hop{0%{transform:none}35%{transform:translateY(-9%) scale(1.03)}70%{transform:translateY(1%) scaleY(.97)}100%{transform:none}}' +
+        '@keyframes g-av-dance{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg) translateY(-2%)}75%{transform:rotate(4deg) translateY(-2%)}}' +
+        '@media (prefers-reduced-motion:reduce){.g-avpic img{animation:none!important}}';
+      document.head.appendChild(st); }
+    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+    const wrap = document.createElement('div'); wrap.className = 'g-avpic'; if (opts.bottom) wrap.style.bottom = opts.bottom + 'px'; wrap.setAttribute('role', 'img'); wrap.setAttribute('aria-label', 'Your avatar');
+    const img = document.createElement('img'); img.alt = ''; img.decoding = 'async'; wrap.appendChild(img); host.appendChild(wrap);
+    let t = 0;
+    const base = () => snaps().full;
+    function paint() { img.src = base(); }
+    function play(pose, o) {
+      const s = snaps(), ms = (o && o.ms) || 1400;
+      img.src = pose === 'sad' ? s.full : (pose === 'happy' || pose === 'wave' || pose === 'cheer' || pose === 'dance') ? s.cheer : s.full;
+      wrap.classList.remove('hop', 'dance'); void wrap.offsetWidth; wrap.classList.add(pose === 'dance' ? 'dance' : 'hop');
+      clearTimeout(t); t = setTimeout(() => { wrap.classList.remove('hop', 'dance'); paint(); }, ms);
+    }
+    wrap.addEventListener('click', () => { if (opts.onTap) opts.onTap(); else play('wave', { ms: 1600 }); });
+    root.addEventListener('grug:change', e => { if (e.detail && e.detail.what === 'snaps' || e.detail && e.detail.what === 'import' || e.detail && e.detail.what === 'reset') paint(); });
+    paint();
+    return { el: wrap, play, setAvatar: paint, renderer: null };
   }
 
   /* ---------- icons ---------- */
@@ -361,6 +392,6 @@
     save, setName, setAvatar, equip, unequip, owns, grant, track, totals, statValue, progress, checkMilestones, celebrate,
     points, appState, exportData, exportText, exportFilename, download, share, parseImport, applyImport, reset,
     snaps, ensureSnaps, randomName, cleanName,
-    ui: { chrome, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings }
+    ui: { chrome, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic }
   };
 })(window);

@@ -41,7 +41,7 @@ footer a{color:var(--ink2);font-weight:700}
 <body>
 <main class="wrap">
   <section class="hero">
-    <div class="g-view" id="heroView"><span class="hint">Drag to spin · tap to wave</span></div>
+    <div class="g-view" id="heroView"><span class="hint">Tap to wave · <a href="avatar/">edit your look</a></span></div>
     <div class="copy">
       <h1 id="heroTitle">Games made with Katy restaurants.</h1>
       <p id="heroText">Play free. Eat at a partner, tap the tag, and your points buy power-ups and clothes for your avatar. No account, nothing to sign up for.</p>
@@ -106,7 +106,7 @@ footer a{color:var(--ink2);font-weight:700}
   $('#icEat').innerHTML = G.icon('storefront'); $('#icPts').innerHTML = G.icon('coins'); $('#icSpend').innerHTML = G.icon('t-shirt');
 
   /* hero avatar */
-  const view = GrugAvatar.mount($('#heroView'), G.profile.avatar, { autoRotate: false, yaw: 0.35, onTap: () => { view.play(['wave','cheer','dance','happy'][Math.floor(Math.random()*4)], { ms: 2200 }); G.ui.buzz(); } });
+  const view = G.ui.avatarPic($('#heroView'), { bottom: 30, onTap: () => { view.play(['wave','cheer','dance','happy'][Math.floor(Math.random()*4)], { ms: 2200 }); G.ui.buzz(); } });
   setTimeout(() => view.play('wave', { ms: 2600 }), 600);
   G.on((p, what) => { if (what === 'avatar' || what === 'import' || what === 'external' || what === 'reset') view.setAvatar(p.avatar); });
 

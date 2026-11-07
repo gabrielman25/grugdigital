@@ -5380,6 +5380,8 @@ function drawWorld(partial) {
   // entities & particles
   buildEntityMesh(partial, ex, ey, ez);
   if (MBE.n) { uploadDyn(dynMesh, MBE); gl.uniform3f(mp.u.uOff, 0, 0, 0); gl.bindVertexArray(dynMesh.vao); gl.drawElements(gl.TRIANGLES, (MBE.n >> 2) * 6, gl.UNSIGNED_INT, 0); }
+  // Take a Tea's avatars (three.js on this same context), then back to this engine's state
+  if (typeof ttSandyRender === 'function' && typeof TTS !== 'undefined' && TTS.on) { ttSandyRender(view, fogS, fogE, fogC); gl.useProgram(mp.p); }
   // clouds
   if (!inWater && !inLava && ey < 108) {
     gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -8483,6 +8485,176 @@ function ttRigLo(mb, x, y, z, face, j, C, L, lying) { // far away: six boxes ins
 }
 function ttBurst(sp) { for (let i = 0; i < 16; i++) { const a = Math.random() * TAU, s = ttRand(1.5, 3.2); TT.fx.push({ x: sp.x, y: sp.y + 0.6, z: sp.z, vx: Math.cos(a) * s, vy: ttRand(2.5, 5), vz: Math.sin(a) * s, life: ttRand(0.6, 1.1), c: ttHue(Math.random()) }); } }
 
+/* ---------------- SANDY · the site's 3D avatar for every character in Take a Tea ----------------
+   The player is drawn as their own avatar (the look saved by the Grug avatar editor on this phone),
+   and the barista, rivals and shoppers are Sandys too, all with a female body. three.js (from the shared
+   sandy-runtime.js) draws them into this engine's own WebGL2 context after the opaque world, with the
+   engine's camera, fog and light, so they sit in the world and hide behind walls like everything else.
+   Until a character is ready (or if the runtime can't load) the old blocky rig stands in for it. */
+const TTS = { on: false, loading: false, failed: false, K: null, T: null, R: null, scene: null, cam: null, hemi: null, key: null, fill: null,
+  chars: new Map(), drawn: [], frame: 0, busy: false, lastMake: 0, S: 1.42 / 189, lodD: 75, ema: 16, lastT: 0, slowT: 0, fastT: 0,
+  v1: null, v2: null, v3: null, q1: null, q2: null, q3: null };
+function ttsBoot() {
+  if (TTS.loading || TTS.failed || TTS.on) return;
+  TTS.loading = true;
+  if (!gl || !glCanvas) { TTS.failed = true; return; }
+  const s = document.createElement('script'); s.src = '../../assets/sandy-runtime.js'; s.async = true;
+  s.onload = () => { try { ttsInit(); } catch (e) { console.warn('Take a Tea: avatars off', e); TTS.failed = true; } };
+  s.onerror = () => { TTS.failed = true; };
+  document.head.appendChild(s);
+}
+function ttsInit() {
+  const T = window.THREE, K = window.SandyKit; if (!T || !K) throw new Error('SandyKit missing');
+  const R = new T.WebGLRenderer({ canvas: glCanvas, context: gl, antialias: false, alpha: false, depth: true, stencil: false });
+  R.autoClear = false; R.outputEncoding = T.sRGBEncoding; R.setPixelRatio(1); R.shadowMap.enabled = false;
+  const scene = new T.Scene(); scene.fog = new T.Fog(0xffffff, 40, 200);
+  const hemi = new T.HemisphereLight(0xfff4e0, 0x4a4458, 0.85), key = new T.DirectionalLight(0xfff0dc, 0.95), fill = new T.DirectionalLight(0xbfd4ff, 0.35);
+  key.position.set(TT_LIGHT[0], TT_LIGHT[1], TT_LIGHT[2]); fill.position.set(-0.6, 0.35, -0.7);
+  scene.add(hemi, key, fill);
+  const cam = new T.PerspectiveCamera(); cam.matrixAutoUpdate = false;
+  Object.assign(TTS, { K, T, R, scene, cam, hemi, key, fill, on: true, loading: false,
+    v1: new T.Vector3(), v2: new T.Vector3(), v3: new T.Vector3(), q1: new T.Quaternion(), q2: new T.Quaternion(), q3: new T.Quaternion(), ax: new T.Vector3(), m: new T.Matrix4() });
+  ttsRestoreGL();
+  addEventListener('storage', e => { if (e.key === 'grug.sandy.v1') { const c = TTS.chars.get('player'); if (c && c.sandy) { try { c.sandy.apply(ttsPlayerCfg(), true); c.base = c.sandy.getConfig().expression; } catch (x) {} } } });
+}
+const ttsHex = c => '#' + c.map(v => Math.max(0, Math.min(255, v | 0)).toString(16).padStart(2, '0')).join('');
+function ttsPlayerCfg() { let c = null; try { c = JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); } catch (e) {} return TTS.K.merge(TTS.K.DEFAULT, c && typeof c === 'object' ? c : {}); }
+// every bot is a woman: a random female look from a fixed seed, so each one looks the same every visit
+function ttsBotCfg(seed, shirt, expr) {
+  const c = TTS.K.randomConfig('tt-' + seed, { body: 'female' });
+  c.weapon = null;
+  if (shirt) { c.top = null; c.legs = null; c.outfit = Object.assign({}, c.outfit, { shirt: ttsHex(shirt), shorts: '#24262b' }); }   // rivals wear their team colour
+  if (expr) c.expression = expr;
+  return c;
+}
+function ttsWant(id, mk, prio) {
+  let c = TTS.chars.get(id);
+  if (!c) { c = { id, mk, prio, sandy: null, state: 'queued', d: 0, b: null, rest: null, saved: [], anim: '', expr: '', base: '', tick: 0, acc: 0, posed: false, wR: 0, wL: 0, frame: -1, mwF: -1, br: 1 }; TTS.chars.set(id, c); }
+  return c;
+}
+// make one queued character at a time (each takes a moment), player first, then the barista, then whoever is nearest
+function ttsPump() {
+  if (TTS.busy || performance.now() - TTS.lastMake < 150) return;
+  let best = null;
+  for (const c of TTS.chars.values()) if (c.state === 'queued' && (!best || c.prio < best.prio || (c.prio === best.prio && c.d < best.d))) best = c;
+  if (!best) return;
+  TTS.busy = true; best.state = 'making';
+  Promise.resolve().then(() => TTS.K.create(best.mk())).then(s => {
+    const o = s.object3d; o.rotation.order = 'YXZ';
+    const g = n => o.getObjectByName(n);
+    best.b = { shR: g('arm_R_shldr_jnt'), shL: g('arm_L_shldr_jnt'), elR: g('arm_R_elbow_jnt'), elL: g('arm_L_elbow_jnt'), wrR: g('arm_R_wrist_jnt'), wrL: g('arm_L_wrist_jnt'),
+      upR: g('leg_R_upr_jnt'), upL: g('leg_L_upr_jnt'), knR: g('leg_R_knee_jnt'), knL: g('leg_L_knee_jnt'), neck: g('head_M_neck_jnt') };
+    s.play('idle'); s.update(0.5);
+    best.rest = {}; for (const k in best.b) if (best.b[k]) best.rest[k] = best.b[k].quaternion.clone();
+    best.base = (s.getConfig().expression) || 'neutral'; best.expr = best.base;
+    best.sandy = s; best.state = 'ready';
+  }).catch(e => { best.state = 'failed'; console.warn('Take a Tea: avatar failed', e); })
+    .then(() => { TTS.busy = false; TTS.lastMake = performance.now(); });
+}
+// rotate a joint by q (given in the character's own space), starting from base (its rest or animated pose), blended by w
+function ttsTurn(c, bone, axis, ang, base, w) {
+  if (!bone || w <= 0.001) return;
+  const T = TTS, P = T.q1.identity();
+  for (let n = bone.parent; n && n !== c.sandy.object3d; n = n.parent) P.premultiply(n.quaternion);
+  const q = T.q2.setFromAxisAngle(axis, ang);
+  // local' = inv(P) * q * P * base
+  const out = T.q3.copy(P).invert().multiply(q).multiply(P).multiply(base || bone.quaternion);
+  if (!c.saved.some(s => s[0] === bone)) c.saved.push([bone, bone.quaternion.clone()]);
+  if (w >= 0.999) bone.quaternion.copy(out); else bone.quaternion.slerp(out, w);
+}
+const TTS_X = { x: 1, y: 0, z: 0 }, TTS_Y = { x: 0, y: 1, z: 0 };
+/* draw character id this frame as a Sandy. p: x,y,z (camera-relative feet), face (the old rig's facing), d (distance),
+   dt, k (scale), anim, rate, armR/armL (old rig shoulder angles, or null to let the animation swing them), sit, down, hy, expr, L (light)
+   Returns the character when it will be drawn (the old rig must then be skipped), or null. */
+function ttsPut(id, mk, prio, p) {
+  if (!TTS.on) { if (!TTS.loading && !TTS.failed && TT.ready) ttsBoot(); return null; }
+  const c = ttsWant(id, mk, prio); c.d = p.d;
+  if (!c.sandy || (p.d > TTS.lodD && !p.keep)) return null;
+  const s = c.sandy, o = s.object3d, b = c.b, T = TTS;
+  for (let i = c.saved.length - 1; i >= 0; i--) c.saved[i][0].quaternion.copy(c.saved[i][1]);
+  c.saved.length = 0;
+  const anim = p.anim || 'idle'; if (anim !== c.anim) { s.play(anim); c.anim = anim; }
+  const ex = p.expr || c.base; if (ex !== c.expr) { c.expr = ex; try { s.setExpression(ex); } catch (e) {} }
+  // far away the animation steps less often
+  c.acc += p.dt * (p.rate || 1); c.tick++;
+  const every = p.d > 32 ? 4 : p.d > 15 ? 2 : 1;
+  if (!c.posed || c.tick % every === 0) { s.update(Math.min(0.2, c.acc)); c.acc = 0; c.posed = true; }
+  // the three.js scene stays in her own units (cm; her hair breaks at tiny scales): the camera does the blocks-to-cm scaling
+  const S = TTS.S; o.position.set(p.x / S, (p.y + (p.down ? 0.14 * (p.k || 1) : 0)) / S, p.z / S); o.scale.setScalar(p.k || 1);
+  o.rotation.set(p.down ? -Math.PI / 2 : 0, p.face + Math.PI, 0);
+  // arms that hold, carry, swing or wave: the old rig's shoulder angle, turned forward/up from the rest pose
+  c.wR += Math.max(-1, Math.min(1, (p.armR != null ? 1 : 0) - c.wR)) * Math.min(1, p.dt * 10);
+  c.wL += Math.max(-1, Math.min(1, (p.armL != null ? 1 : 0) - c.wL)) * Math.min(1, p.dt * 10);
+  if (p.armR != null) c.aR = p.armR; if (p.armL != null) c.aL = p.armL;
+  T.ax.set(1, 0, 0);
+  if (c.wR > 0.001) ttsTurn(c, b.shR, T.ax, -(c.aR || 0), c.rest.shR, c.wR);
+  if (c.wL > 0.001) ttsTurn(c, b.shL, T.ax, -(c.aL || 0), c.rest.shL, c.wL);
+  if (p.sit) { ttsTurn(c, b.upR, T.ax, -Math.PI / 2, c.rest.upR, 1); ttsTurn(c, b.upL, T.ax, -Math.PI / 2, c.rest.upL, 1);
+    ttsTurn(c, b.knR, T.ax, Math.PI / 2, c.rest.knR, 1); ttsTurn(c, b.knL, T.ax, Math.PI / 2, c.rest.knL, 1); }
+  if (p.hy) { T.ax.set(0, 1, 0); ttsTurn(c, b.neck, T.ax, p.hy * 0.8, null, 1); }
+  c.frame = TTS.frame; c.br = p.L ? ttsBr(p.L) : 1; c.k = p.k || 1;
+  TTS.drawn.push(c);
+  return c;
+}
+function ttsBr(L) { // the engine's own light curve (VS_MAIN), so avatars dim with the world
+  const l = Math.max(0, Math.min(15, Math.max(L[0] - (W.skySub || 0), L[1]))), f = 1 - l / 15; let br = (1 - f) / (f * 3 + 1) * 0.95 + 0.05;
+  const bi = 1 - br; br += ((1 - bi * bi * bi * bi) - br) * (opts.gamma || 0); return br;
+}
+function ttsMW(c) { if (c.mwF !== TTS.frame) { c.sandy.object3d.updateMatrixWorld(true); c.mwF = TTS.frame; } }
+// a frame at the hand like the old rig's arm (y up the forearm, x the character's right, stud scale), camera-relative
+function ttsHand(c, side) {
+  ttsMW(c);
+  const T = TTS, w = T.v1.setFromMatrixPosition(c.b['wr' + side].matrixWorld).multiplyScalar(T.S), e = T.v2.setFromMatrixPosition(c.b['el' + side].matrixWorld).multiplyScalar(T.S);
+  const Y = e.sub(w).normalize(), yaw = c.sandy.object3d.rotation.y, X = T.v3.set(-Math.cos(yaw), 0, Math.sin(yaw));
+  X.addScaledVector(Y, -X.dot(Y)).normalize();
+  const Zx = X.y * Y.z - X.z * Y.y, Zy = X.z * Y.x - X.x * Y.z, Zz = X.x * Y.y - X.y * Y.x, sc = S2B * (c.k || 1);
+  return [X.x * sc, Y.x * sc, Zx * sc, w.x, X.y * sc, Y.y * sc, Zy * sc, w.y, X.z * sc, Y.z * sc, Zz * sc, w.z];
+}
+// camera-relative point between the two hands (for drinks held overhead)
+function ttsHands(c) {
+  ttsMW(c);
+  const a = TTS.v1.setFromMatrixPosition(c.b.wrR.matrixWorld), b = TTS.v2.setFromMatrixPosition(c.b.wrL.matrixWorld);
+  return [(a.x + b.x) / 2 * TTS.S, Math.max(a.y, b.y) * TTS.S, (a.z + b.z) / 2 * TTS.S];
+}
+function ttsRestoreGL() {
+  gl.bindVertexArray(null); gl.useProgram(null); gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false); gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, atlasTex);
+  gl.disable(gl.CULL_FACE); gl.disable(gl.SCISSOR_TEST); gl.disable(gl.STENCIL_TEST); gl.disable(gl.POLYGON_OFFSET_FILL); gl.disable(gl.SAMPLE_ALPHA_TO_COVERAGE); gl.disable(gl.BLEND);
+  gl.colorMask(true, true, true, true); gl.depthMask(true); gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); gl.frontFace(gl.CCW);
+  gl.viewport(0, 0, glCanvas.width, glCanvas.height);
+}
+// called by drawWorld right after the opaque world and entities
+function ttSandyRender(view, fogS, fogE, fogC) {
+  if (!TTS.on) return;
+  ttsPump();
+  // keep the frame rate up: if the phone struggles, far characters go back to the simple rig
+  const now = performance.now(), dt = TTS.lastT ? now - TTS.lastT : 16; TTS.lastT = now; TTS.ema += (Math.min(100, dt) - TTS.ema) * 0.05;
+  if (TTS.ema > 34) { if ((TTS.slowT += dt) > 2500 && TTS.lodD > 14) { TTS.lodD = Math.max(14, TTS.lodD - 10); TTS.slowT = 0; } TTS.fastT = 0; }
+  else if (TTS.ema < 21) { if ((TTS.fastT += dt) > 6000 && TTS.lodD < 75) { TTS.lodD = Math.min(75, TTS.lodD + 10); TTS.fastT = 0; } TTS.slowT = 0; }
+  const drawn = TTS.drawn; if (!drawn.length) return;
+  const T = TTS.T, R = TTS.R, cam = TTS.cam, sc = TTS.scene;
+  cam.projectionMatrix.fromArray(projM); cam.projectionMatrixInverse.copy(cam.projectionMatrix).invert();
+  cam.matrix.fromArray(view).multiply(TTS.m.makeScale(TTS.S, TTS.S, TTS.S)).invert(); cam.matrixWorldNeedsUpdate = true;
+  const lin = v => Math.pow(Math.max(0, v), 2.2);
+  sc.fog.color.setRGB(lin(fogC[0]), lin(fogC[1]), lin(fogC[2])); sc.fog.near = fogS; sc.fog.far = Math.max(fogS + 1, fogE);
+  // one pass per light level (usually one)
+  const groups = new Map();
+  for (const c of drawn) { const q = Math.round(c.br * 12) / 12; if (!groups.has(q)) groups.set(q, []); groups.get(q).push(c); }
+  try {
+    R.resetState();
+    R.setViewport(0, 0, glCanvas.width, glCanvas.height);
+    for (const [br, list] of groups) {
+      // only this pass's characters sit in the scene (three updates every object in it each pass)
+      for (const c of TTS.chars.values()) if (c.sandy && c.sandy.object3d.parent === sc && !list.includes(c)) sc.remove(c.sandy.object3d);
+      for (const c of list) if (c.sandy.object3d.parent !== sc) sc.add(c.sandy.object3d);
+      TTS.hemi.intensity = 0.85 * br; TTS.key.intensity = 0.95 * br; TTS.fill.intensity = 0.35 * br;
+      R.render(sc, cam);
+    }
+  } catch (e) { console.warn('Take a Tea: avatars off', e); TTS.on = false; TTS.failed = true; }
+  ttsRestoreGL();
+}
+
 /* ---------------- the entity pass: drinks, rivals, carried drinks, sparkles ---------------- */
 const ttGrugAnimateBase = grugAnimate;
 grugAnimate = function (dt) {
@@ -8495,9 +8667,21 @@ grugAnimate = function (dt) {
 const ttEmitBase = emitMobs;
 let ttLastNow = 0;
 emitMobs = function (mb, partial, ex, ey, ez) {
-  ttEmitBase(mb, partial, ex, ey, ez);
-  if (!TT.ready) return;
   const now = performance.now() / 1000, dtf = Math.min(0.1, now - (ttLastNow || now)); ttLastNow = now;
+  TTS.frame++; TTS.drawn.length = 0;
+  // the player: their own avatar once it's ready, the blocky rig until then (and in first person, nothing)
+  const pcs = TTS.chars.get('player');
+  if (camState.third && pcs && pcs.sandy && TTS.on) {
+    const tn = performance.now(), gdt = Math.min(0.1, (tn - (grugLastT || tn)) / 1000); grugLastT = tn; grugAnimate(gdt);
+    const j = GRUG.joint, holding = !!(TT.carry || ttTool() || TT.swing > 0);
+    ttsPut('player', ttsPlayerCfg, 0, { x: lerp(P.px, P.x, partial) - ex, y: lerp(P.py, P.y, partial) - ey, z: lerp(P.pz, P.z, partial) - ez, face: GRUG.face, d: 0, dt: dtf, keep: true,
+      anim: GRUG.speed > 0.5 && !GRUG.air ? 'walk' : 'idle', rate: Math.max(0.6, Math.min(1.8, GRUG.speed / 16)),
+      armR: holding ? j.rs : null, armL: TT.carry ? j.ls : null, L: entLight(P.x, P.y + 1, P.z) });
+  } else {
+    ttEmitBase(mb, partial, ex, ey, ez);
+    if (TT.ready) { if (!TTS.on) ttsBoot(); else ttsWant('player', ttsPlayerCfg, 0); }
+  }
+  if (!TT.ready) return;
   const fy = Math.sin(camYaw), fx2 = Math.cos(camYaw);
   const vis = (x, z, lim) => { const dx = x - ex, dz = z - ez, d2 = dx * dx + dz * dz; if (d2 > lim * lim) return -1; return Math.sqrt(d2); };
   const draw = (id, mut, x, y, z, face, walk, opts) => {
@@ -8521,11 +8705,17 @@ emitMobs = function (mb, partial, ex, ey, ez) {
       const j = TT.bj || (TT.bj = { rs: 0, ls: 0, rh: 0, lh: 0 });
       const tg = serve ? { rs: 1.05, ls: 1.05 } : { rs: 2.45 + 0.28 * s, ls: 2.45 + 0.28 * s };
       for (const k of ['rs', 'ls']) j[k] += clamp(tg[k] - j[k], -14 * dtf, 14 * dtf);
-      const root = ttRig(mb, bx - ex, TT_FLOOR_Y - ey, bz - ez, -Math.PI / 2 + 0.12 * Math.sin(now * 0.7), j, { skin: GRUG.colors.skin, shirt: [31, 138, 59], pants: [30, 36, 44], cap: [246, 196, 69] }, [15, 0], false, null, 3.3);
-      // the apron: a white panel on the front of the torso
-      if (!TT_PART.box) TT_PART.box = ttBoxMesh();
-      ttEmit(mb, TT_PART.box, m3.mul(root, m3.mul(m3.t(0, -0.2, -0.53), [1.7, 0, 0, 0, 0, 1.7, 0, 0, 0, 0, 0.06, 0])), [15, 0], null, [250, 250, 245], 0);
-      if (!serve) ttEmit(mb, TT_PART.shaker, m3.mul(root, m3.mul(m3.t(0, 2.0 + 0.55 * s, -1.6), m3.mul(m3.rz(0.25 * s), m3.s(1.05)))), [15, 0], null, null, 0);
+      const bface = -Math.PI / 2 + 0.12 * Math.sin(now * 0.7);
+      const bc = ttsPut('barista', () => ttsBotCfg('barista', [31, 138, 59], 'happy'), 1, { x: bx - ex, y: TT_FLOOR_Y - ey, z: bz - ez, face: bface, d, dt: dtf, k: 2.8, keep: true, anim: 'idle', armR: j.rs, armL: j.ls, L: [15, 0] });
+      if (bc) { // she shakes the drink over her head
+        if (!serve) { const h = ttsHands(bc); ttEmit(mb, TT_PART.shaker, m3.mul(m3.t(h[0], h[1] + 0.2, h[2]), m3.mul(m3.ry(bface), m3.mul(m3.rz(0.25 * s), m3.s(S2B * 2.8 * 1.05)))), [15, 0], null, null, 0); }
+      } else {
+        const root = ttRig(mb, bx - ex, TT_FLOOR_Y - ey, bz - ez, bface, j, { skin: GRUG.colors.skin, shirt: [31, 138, 59], pants: [30, 36, 44], cap: [246, 196, 69] }, [15, 0], false, null, 3.3);
+        // the apron: a white panel on the front of the torso
+        if (!TT_PART.box) TT_PART.box = ttBoxMesh();
+        ttEmit(mb, TT_PART.box, m3.mul(root, m3.mul(m3.t(0, -0.2, -0.53), [1.7, 0, 0, 0, 0, 1.7, 0, 0, 0, 0, 0.06, 0])), [15, 0], null, [250, 250, 245], 0);
+        if (!serve) ttEmit(mb, TT_PART.shaker, m3.mul(root, m3.mul(m3.t(0, 2.0 + 0.55 * s, -1.6), m3.mul(m3.rz(0.25 * s), m3.s(1.05)))), [15, 0], null, null, 0);
+      }
     }
     draw('golden', null, TT_KX - 7 + 0.5, TT_G + 10, 0.5, now * 0.7, null, { scale: 4.2, hi: 1, lim: 170 });
   }
@@ -8540,10 +8730,10 @@ emitMobs = function (mb, partial, ex, ey, ez) {
   if (tool && camState.third && !TT.carry && TT_PART[tool.id]) {
     const px = lerp(P.px, P.x, partial) - ex, py = lerp(P.py, P.y, partial) - ey, pz = lerp(P.pz, P.z, partial) - ez;
     const root = m3.mul(m3.t(px, py + 3 * S2B, pz), m3.mul(m3.ry(GRUG.face), m3.s(S2B)));
-    const arm = m3.mul(root, m3.mul(m3.t(1.5, 0.5, 0), m3.mul(m3.rx(GRUG.joint.rs), m3.t(0, -0.5, 0))));
+    const arm = pcs && pcs.frame === TTS.frame ? m3.mul(ttsHand(pcs, 'R'), m3.t(0, 1.0, 0)) : m3.mul(root, m3.mul(m3.t(1.5, 0.5, 0), m3.mul(m3.rx(GRUG.joint.rs), m3.t(0, -0.5, 0))));
     ttEmit(mb, TT_PART[tool.id], m3.mul(arm, m3.mul(m3.t(0, -1.25, 0), m3.rx(-Math.PI / 2))), entLight(P.x, P.y + 1, P.z), null, null, now);
   }
-  if (TT.carry && camState.third) { const px = lerp(P.px, P.x, partial), py = lerp(P.py, P.y, partial), pz = lerp(P.pz, P.z, partial); draw(TT.carry.id, TT.carry.mut, px, py + 1.68, pz, GRUG.face, null, { air: 1 }); }
+  if (TT.carry && camState.third) { const px = lerp(P.px, P.x, partial), py = lerp(P.py, P.y, partial), pz = lerp(P.pz, P.z, partial); draw(TT.carry.id, TT.carry.mut, px, pcs && pcs.frame === TTS.frame ? ttsHands(pcs)[1] + ey + 0.04 : py + 1.68, pz, GRUG.face, null, { air: 1 }); }
   // everyone else: rivals and shoppers (NPC Kit)
   ttNpcDraw(mb, ex, ey, ez, now, dtf, vis, draw);
   // confetti
@@ -9406,14 +9596,20 @@ function ttNpcDraw(mb, ex, ey, ez, now, dtf, vis, draw) {
     if (n.flashT > 0) C.shirt = [255, 255, 255];
     const hy = U.clamp(U.angDiff(n.bodyYaw, n.yaw), -1.2, 1.2);
     const y = TT_FLOOR_Y - (sit ? 0.2 : 0);
-    const root = (d > 16 ? ttRigLo : ttRig)(mb, x - ex, y - ey, z - ez, n.bodyYaw, j, C, L, down, look.hat, 1, hy);
+    // every bot is a Sandy with a female body (rivals in their team colour); the blocky rig stands in until she's ready
+    const working = n.pose === 'work' || !!(n.data.raid && n.data.raid.hold > 0), holdR = working || !!n.data.carry || n.carry === 'cup' || armed || n.swingT > 0, holdL = working || !!n.data.carry;
+    const sc = ttsPut('npc:' + n.name, () => ttsBotCfg((n.data.rival ? 'rival-' : 'folk-') + n.name, n.data.rival ? look.shirt : null, n.data.rival ? 'smug' : null), 2,
+      { x: x - ex, y: (sit ? TT_FLOOR_Y - 0.3 : TT_FLOOR_Y) - ey, z: z - ez, face: n.bodyYaw, d, dt: dtf, sit, down, hy, L,
+        anim: down || sit ? 'idle' : n.wave > 0 && !holdR ? 'wave' : sp > 0.25 ? 'walk' : 'idle', rate: Math.max(0.5, Math.min(2, sp / 2.5)),
+        armR: holdR ? j.rs : null, armL: holdL ? j.ls : null, expr: down ? 'dizzy' : ttAngry(n) ? 'annoyed' : ttIsBuddy(n) ? 'happy' : null });
+    const root = sc ? null : (d > 16 ? ttRigLo : ttRig)(mb, x - ex, y - ey, z - ez, n.bodyYaw, j, C, L, down, look.hat, 1, hy);
     // what's in their hands
-    if (root && d < 30 && !down) {
-      const arm = m3.mul(root, m3.mul(m3.t(1.5, 0.5, 0), m3.mul(m3.rx(j.rs), m3.t(0, -0.5, 0))));
+    if ((root || sc) && d < 30 && !down) {
+      const arm = sc ? m3.mul(ttsHand(sc, 'R'), m3.t(0, 1.0, 0)) : m3.mul(root, m3.mul(m3.t(1.5, 0.5, 0), m3.mul(m3.rx(j.rs), m3.t(0, -0.5, 0))));
       if (armed && !n.data.carry) ttEmit(mb, TT_PART.bat, m3.mul(arm, m3.mul(m3.t(0, -1.25, 0), m3.rx(-Math.PI / 2))), L, null, null, now);
       else if (n.carry === 'cup' && !n.data.carry) ttEmit(mb, TT_MESH_LO.milk, m3.mul(arm, m3.mul(m3.t(0, -1.75, -0.2), m3.s(2.1))), L, null, null, now);
     }
-    if (n.data.carry) draw(n.data.carry.id, n.data.carry.mut, x, TT_FLOOR_Y + 1.68, z, n.bodyYaw, null, { air: 1 });
+    if (n.data.carry) draw(n.data.carry.id, n.data.carry.mut, x, sc ? ttsHands(sc)[1] + ey + 0.04 : TT_FLOOR_Y + 1.68, z, n.bodyYaw, null, { air: 1 });
   }
 }
 function ttNpcLabels(add) {
