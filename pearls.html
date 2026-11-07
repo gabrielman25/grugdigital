@@ -68,6 +68,24 @@
 .club .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 footer{padding:28px 0 10px;color:var(--mut);font-size:13.5px;display:flex;flex-wrap:wrap;gap:8px 18px;border-top:1px solid var(--line);margin-top:26px}
 footer a{color:var(--ink2);font-weight:700}
+/* storage guard + pre-purchase warning */
+.warnbox{margin-top:14px;border:2px solid #b4372b}
+.warnbox b{display:block;font-size:18px;color:#b4372b}
+.warnbox p{margin:6px 0 0}
+.saves{margin-top:12px;font-size:14px!important;text-align:center}
+.cf{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.5)}
+.cf[hidden]{display:none}
+.cf .card{width:100%;max-width:440px;max-height:calc(100vh - 32px);overflow:auto;padding:22px 20px 18px;background:var(--solid,var(--bg));color:var(--ink);border-radius:var(--r);border:1px solid var(--line2);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.cf h3{font-size:21px;margin:0 0 4px;color:var(--ink)}
+.cf .sum{font-size:15.5px;color:var(--ink2);margin:0 0 12px}
+.cf .alert{padding:12px 14px;border-radius:12px;border:2px solid #b4372b;background:rgba(180,55,43,.08)}
+.cf .alert>b{display:block;color:#b4372b;font-size:15px;margin-bottom:4px}
+.cf ul{margin:6px 0 0;padding-left:18px}
+.cf li{font-size:14.5px;color:var(--ink2);margin:4px 0;line-height:1.45}
+.cf label{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:14.5px;color:var(--ink);cursor:pointer;line-height:1.4}
+.cf input[type=checkbox]{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--ink)}
+.cf .row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+.cf .g-btn[disabled]{opacity:.45;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -86,7 +104,13 @@ footer a{color:var(--ink2);font-weight:700}
     <div class="from" id="from" hidden></div>
 
     <h2>Get Pearls</h2>
+    <div class="box warnbox" id="noStore" role="alert" hidden>
+      <b>Purchases are turned off in this browser</b>
+      <p>This browser isn’t letting the page save anything, so Pearls you bought would be lost straight away. This usually happens in private or incognito mode, when cookies and site data are blocked, or when your phone’s storage is full.</p>
+      <p>Open this page in a normal browser window with site data allowed, then try again. You haven’t been charged.</p>
+    </div>
     <div class="packs" id="packs"></div>
+    <p class="note saves" id="savesNote"><b>Pearls are saved on this device only.</b> They stay in this browser on this phone and don’t move to other phones, browsers or accounts.</p>
     <p class="note" id="payNote">You’ll pay on Stripe’s secure checkout page, then come straight back here.</p>
 
     <h2 id="clubH">Grug Club</h2>
@@ -112,6 +136,26 @@ footer a{color:var(--ink2);font-weight:700}
 
   <footer><span>© 2026 Grug Digital · Katy, Texas · Text 954-459-6301</span><a href="support.html">Customer support</a><a href="terms.html">Terms of service</a><a href="privacy.html">Privacy policy</a><a href="./">Play the games</a></footer>
 </main>
+<div class="cf" id="cf" role="dialog" aria-modal="true" aria-labelledby="cfH" hidden>
+  <div class="card">
+    <h3 id="cfH">Before you buy</h3>
+    <p class="sum" id="cfSum"></p>
+    <div class="alert">
+      <b>Your Pearls are saved on this device only</b>
+      <ul>
+        <li>They’re stored in <b>this browser on this phone</b>. They won’t appear on another phone, another browser or after switching accounts.</li>
+        <li>Clearing your browser’s history or site data, using private or incognito mode, or deleting the browser <b>will erase them</b>.</li>
+        <li>Buy on the same phone and browser you play on, and don’t close the Stripe page until it brings you back here.</li>
+        <li>Keep your purchase code <span class="code" id="cfCode"></span>. Support needs it to look into a purchase.</li>
+      </ul>
+    </div>
+    <label><input type="checkbox" id="cfOk"> I understand my Pearls are saved only in this browser on this device and can be lost if its data is cleared.</label>
+    <div class="row">
+      <button class="g-btn" id="cfNo" type="button">Cancel</button>
+      <button class="g-btn primary" id="cfGo" type="button" disabled>Continue to payment</button>
+    </div>
+  </div>
+</div>
 <script src="assets/catalog.js"></script>
 <script src="assets/icons.js"></script>
 <script src="assets/games.js"></script>
@@ -129,10 +173,10 @@ footer a{color:var(--ink2);font-weight:700}
    There is no server, so a typed return link gives free Pearls; Pearls only buy game items.
    ===================================================================================== */
 const PACKS = [
-  { id: 'p100',  pearls: 100,  price: '$1.99',  link: 'https://buy.stripe.com/test_bJe14o2bB1gte8ibnO9k404' },
-  { id: 'p275',  pearls: 275,  price: '$4.99',  link: 'https://buy.stripe.com/test_3cI6oI9E38IV9S28bC9k405', tag: 'Popular' },
-  { id: 'p600',  pearls: 600,  price: '$9.99',  link: 'https://buy.stripe.com/test_eVqbJ29E3cZbe8i4Zq9k406' },
-  { id: 'p1300', pearls: 1300, price: '$19.99', link: 'https://buy.stripe.com/test_aFa9AU8zZbV73tE1Ne9k407', tag: 'Best value' }
+  { id: 'p100',  pearls: 100,  price: '$1.99',  link: 'https://buy.stripe.com/00wfZh2owfhw9nv1Ww5J604' },
+  { id: 'p275',  pearls: 275,  price: '$4.99',  link: 'https://buy.stripe.com/3cI00jbZ64CS43b0Ss5J607', tag: 'Popular' },
+  { id: 'p600',  pearls: 600,  price: '$9.99',  link: 'https://buy.stripe.com/fZu9AT1ks3yO9nv7gQ5J603' },
+  { id: 'p1300', pearls: 1300, price: '$19.99', link: 'https://buy.stripe.com/5kQbJ17IQd9o9nvat25J602', tag: 'Best value' }
 ];
 /* GRUG CLUB · a monthly membership sold on Gumroad. Gumroad emails each member a license key; the member pastes it
    here, and this page asks Gumroad's public license check whether the membership is still active (no secret key needed).
@@ -162,6 +206,21 @@ function wallet(){
   if(typeof w.code !== 'string' || !/^GR-[A-Z0-9]{8}$/.test(w.code)){ const A = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'; w.code = 'GR-' + Array.from({length: 8}, () => A[Math.floor(Math.random() * 32)]).join(''); wSet(w); }
   return w;
 }
+/* STORAGE GUARD · Pearls live only in localStorage, so a browser that can't save (private mode, blocked site data,
+   full storage) would take the money and lose the Pearls. Purchases are blocked unless a real write → read → delete
+   works AND the wallet itself reads back. Checked on load and again right before leaving for Stripe. */
+function storageOK(){
+  try{
+    const ls = window.localStorage; if(!ls) return false;
+    const k = 'grug.storetest', v = String(Date.now()) + Math.random();
+    ls.setItem(k, v); const back = ls.getItem(k); ls.removeItem(k);
+    if(back !== v || ls.getItem(k) !== null) return false;
+    const w = wallet(); if(!wSet(w)) return false;
+    const r = JSON.parse(ls.getItem(WKEY) || 'null');
+    return !!(r && r.code === w.code);
+  }catch(e){ return false; }
+}
+try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); }catch(e){}   // ask the browser not to evict the wallet
 const okPath = p => typeof p === 'string' && p.indexOf(SITE) === 0 && p.indexOf('//') < 0 && !/[\s"'<>\\]/.test(p) && p.length < 300;
 
 /* where the guest came from (kept for two hours, long enough for a Stripe round trip) */
@@ -178,7 +237,8 @@ let arrived = null;
     if(!p) arrived = {bad: true};
     else if(csOK && w.buys.some(b => b.cs === csOK)) arrived = {dup: true, p};
     else { const t = clubTier(w), extra = t ? Math.round(p.pearls * t.bonus / 100) : 0;
-      w.balance += p.pearls + extra; w.buys.unshift({at: Date.now(), pack: p.id, n: p.pearls + extra, price: p.price, cs: csOK}); w.buys = w.buys.slice(0, 50); wSet(w); arrived = {p, extra, tier: t}; }
+      w.balance += p.pearls + extra; w.buys.unshift({at: Date.now(), pack: p.id, n: p.pearls + extra, price: p.price, cs: csOK}); w.buys = w.buys.slice(0, 50);
+      arrived = wSet(w) && storageOK() ? {p, extra, tier: t} : {nosave: true, p, cs: csOK}; }
   }
   if(id !== null || q.get('from') !== null) history.replaceState(null, '', location.pathname);   // a refresh can't add them twice
 }
@@ -263,21 +323,45 @@ function render(){
   $('#payNote').innerHTML = test ? '<b>Test mode:</b> no real money moves. Pay with card 4242 4242 4242 4242, any future date and any 3 digits.' : 'You’ll pay on Stripe’s secure checkout page, then come straight back here.';
   $('#from').hidden = !r || !!arrived;
   if(r) $('#from').innerHTML = '<p>Buying Pearls for <b>' + esc(r.app) + '</b>.</p><a class="g-btn" href="' + esc(r.path) + '">Back to ' + esc(r.app) + '</a>';
-  $('#packs').innerHTML = PACKS.map(p => '<button class="pack' + (p.tag ? ' hot' : '') + '" data-pack="' + p.id + '">' + (p.tag ? '<span class="tag">' + esc(p.tag) + '</span>' : '') +
+  const canSave = storageOK();
+  $('#noStore').hidden = canSave;
+  $('#payNote').hidden = !canSave;
+  $('#packs').innerHTML = PACKS.map(p => '<button class="pack' + (p.tag ? ' hot' : '') + '" data-pack="' + p.id + '"' + (canSave ? '' : ' disabled aria-disabled="true"') + '>' + (p.tag ? '<span class="tag">' + esc(p.tag) + '</span>' : '') +
     PEARL + '<b>' + fmt(p.pearls) + '</b><small>Pearls</small><span class="price">' + esc(p.price) + '</span></button>').join('');
   $('#histWrap').hidden = !w.buys.length;
   $('#hist').innerHTML = w.buys.slice(0, 8).map(b => '<div><span>' + esc(new Date(b.at).toLocaleDateString([], {month: 'short', day: 'numeric', year: 'numeric'})) + ' · ' + fmt(b.n) + ' Pearls</span><b>' + esc(b.price) + '</b></div>').join('');
   if(arrived){
     const t = $('#thanks'); t.hidden = false;
     const back = r ? '<a class="g-btn primary" href="' + esc(r.path) + '">Back to ' + esc(r.app) + '</a>' : '<a class="g-btn primary" href="games/">Play the games</a>';
-    t.innerHTML = arrived.bad ? '<b>That link isn’t one of ours</b><p>No Pearls were added. If you paid, message us with your purchase code.</p><div class="row"><a class="g-btn" href="support.html">Get help</a></div>'
+    t.innerHTML = arrived.nosave ? '<b>We couldn’t save your Pearls</b><p>Your payment went through, but this browser wouldn’t let us save ' + fmt(arrived.p.pearls) + ' Pearls. Don’t pay again. Message customer support with this checkout code so we can sort it out:</p><p><span class="code">' + esc(arrived.cs || 'none') + '</span></p><div class="row"><a class="g-btn primary" href="support.html">Get help</a></div>'
+      : arrived.bad ? '<b>That link isn’t one of ours</b><p>No Pearls were added. If you paid, message us with your purchase code.</p><div class="row"><a class="g-btn" href="support.html">Get help</a></div>'
       : arrived.dup ? '<b>Already added</b><p>Those ' + fmt(arrived.p.pearls) + ' Pearls are already on this phone.</p><div class="row">' + back + '</div>'
       : '<b>+' + fmt(arrived.p.pearls + (arrived.extra || 0)) + ' Pearls</b><p>Thank you! ' + (arrived.extra ? 'That includes ' + fmt(arrived.extra) + ' bonus Pearls for ' + esc(arrived.tier.name) + ' members. ' : '') + 'You now have ' + fmt(w.balance) + ' Pearls on this phone.</p><div class="row">' + back + '</div>';
   }
 }
+/* pre-purchase warning: the guest has to tick "I understand" before leaving for Stripe */
+let pending = null, lastFocus = null;
+function closeCf(){ $('#cf').hidden = true; pending = null; document.body.style.overflow = ''; if(lastFocus) try{ lastFocus.focus(); }catch(e){} }
+function openCf(p, from){
+  pending = p; lastFocus = from;
+  $('#cfSum').innerHTML = 'You’re buying <b>' + fmt(p.pearls) + ' Pearls</b> for <b>' + esc(p.price) + '</b>. You’ll pay on Stripe’s secure checkout page.';
+  $('#cfCode').textContent = wallet().code;
+  $('#cfOk').checked = false; $('#cfGo').disabled = true;
+  $('#cf').hidden = false; document.body.style.overflow = 'hidden'; $('#cfOk').focus();
+}
 $('#packs').addEventListener('click', e => {
-  const b = e.target.closest('[data-pack]'); if(!b) return; const p = PACKS.find(x => x.id === b.dataset.pack); if(!p) return;
-  b.disabled = true; b.querySelector('.price').textContent = 'Opening Stripe…';
+  const b = e.target.closest('[data-pack]'); if(!b || b.disabled) return; const p = PACKS.find(x => x.id === b.dataset.pack); if(!p) return;
+  if(!storageOK()){ render(); return; }
+  openCf(p, b);
+});
+$('#cfOk').addEventListener('change', () => { $('#cfGo').disabled = !$('#cfOk').checked; });
+$('#cfNo').addEventListener('click', closeCf);
+$('#cf').addEventListener('click', e => { if(e.target === $('#cf')) closeCf(); });
+addEventListener('keydown', e => { if(e.key === 'Escape' && !$('#cf').hidden) closeCf(); });
+$('#cfGo').addEventListener('click', () => {
+  const p = pending; if(!p || !$('#cfOk').checked) return;
+  if(!storageOK()){ closeCf(); render(); return; }   // storage broke while the dialog was open
+  $('#cfGo').disabled = true; $('#cfGo').textContent = 'Opening Stripe…';
   location.href = p.link + (p.link.indexOf('?') < 0 ? '?' : '&') + 'client_reference_id=' + encodeURIComponent(wallet().code);   // same tab, so the guest returns to this browser
 });
 addEventListener('pageshow', e => { if(e.persisted) location.reload(); });   // back from Stripe without paying
