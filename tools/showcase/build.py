@@ -127,6 +127,19 @@ for p in presets:   # pictures as webp (much smaller than the rendered png)
         im = Image.open(io.BytesIO(base64.b64decode(v.split(',', 1)[1]))); b = io.BytesIO(); im.save(b, 'WEBP', quality=90, method=6)
         p['snaps'][k] = 'data:image/webp;base64,' + base64.b64encode(b.getvalue()).decode()
 
+# a few full-pack prints for the 3D editor (the 10 quick prints are packed above)
+PACK_PRINTS = ['bubble-purple', 'star-gold', 'heart', 'lightning-bolt-yellow', 'sparkle', 'ghost-pink', 'snowman', 'dice', 'burger', 'candy',
+               'party-popper', 'trophy', 'planet-saturn', 'cactus', 'gift-box', 'clownfish', 'teddy-bear', 'music', 'ufo', 'moon']
+for pid in PACK_PRINTS:
+    if os.path.exists(os.path.join(REPO, 'assets/prints/pack/%s.webp' % pid)): img('assets/prints/pack/%s.webp' % pid, 192, 'WEBP', 90)
+pack_prints = [p for p in PACK_PRINTS if 'assets/prints/pack/%s.webp' % p in assets]
+
+# the 3D avatar engine: its own block, unpacked only when the Avatar tab opens
+rt = rd('assets/sandy-runtime.js')
+rt = re.sub(r"function decalUrl\(img\)\{.*?\n", "function decalUrl(img){const A=window.__GRUG_ASSETS||{};let m=/^print:([a-z0-9-]{1,32})$/.exec(img);if(m)return A['assets/prints/'+m[1]+'.png']||SR_BASE+'prints/'+m[1]+'.png';m=/^pack:([a-z0-9-]{1,48})$/.exec(img);if(m)return A['assets/prints/pack/'+m[1]+'.webp']||SR_BASE+'prints/pack/'+m[1]+'.webp';return img}\n", rt, count=1, flags=re.S)
+if "window.__GRUG_ASSETS" not in rt: raise SystemExit('runtime decal patch failed')
+engine = base64.b64encode(gzip.compress((rt + '\n;\n' + rd('assets/sandy-view.js')).encode(), 9)).decode()
+
 payload = {'libs': libs, 'pages': pages, 'assets': assets, 'presets': presets}
 raw = json.dumps(payload, separators=(',', ':')).encode()
 packed = base64.b64encode(gzip.compress(raw, 9)).decode()
@@ -136,7 +149,8 @@ meta = {'games': games, 'facts': facts, 'logo': re.search(r"const LOGO = '(<svg.
         'icons': json.loads(re.search(r'window\.GRUG_ICONS_SIMPLE = (\{.*?\});', libs['icons.js'], re.S).group(1)),
         'thumbs': {g['id']: assets.get(g['thumb'], '') for g in games}, 'presets': [{'id': p['id'], 'label': p['label'], 'bust': p['snaps']['bust'], 'full': p['snaps']['full']} for p in presets]}
 fonts = '\n'.join(m.group(0) for m in re.finditer(r'@font-face\s*\{[^}]*\}', libs['grug.css']))
-shell = shell.replace('/*@FONTS@*/', fonts).replace('"@META@"', json.dumps(meta, separators=(',', ':')).replace('</', '<\\/')).replace('@PACK@', packed)
+meta['packPrints'] = pack_prints
+shell = shell.replace('@ENGINE@', engine).replace('/*@FONTS@*/', fonts).replace('"@META@"', json.dumps(meta, separators=(',', ':')).replace('</', '<\\/')).replace('@PACK@', packed)
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 open(OUT, 'w', encoding='utf-8').write(shell)
-print('pages %d, images %d, raw %.1f MB, packed %.1f MB -> %s (%.1f MB)' % (len(pages), len(assets), len(raw) / 1e6, len(packed) / 1e6, OUT, os.path.getsize(OUT) / 1e6))
+print('pages %d, images %d, raw %.1f MB, packed %.1f MB, 3D engine %.1f MB -> %s (%.1f MB)' % (len(pages), len(assets), len(raw) / 1e6, len(packed) / 1e6, len(engine) / 1e6, OUT, os.path.getsize(OUT) / 1e6))

@@ -114,6 +114,26 @@ p{margin:0}
 .stats4{grid-template-columns:repeat(4,1fr)}
 .pk .price{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:999px;background:var(--ink);color:var(--surface);font:700 14px/1 var(--font)}
 .pearl{color:var(--pink)}
+/* 3D avatar editor */
+.v3d{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 30%,#fbfaf5 0%,#ece8dc 70%);touch-action:none}
+.v3d canvas{width:100%;height:100%;display:block;cursor:grab}
+.v3d canvas:active{cursor:grabbing}
+.v3d .hint{position:absolute;left:0;right:0;bottom:14px;text-align:center;font:600 13px/1.3 var(--font);color:var(--mut);pointer-events:none}
+.v3d .poses{position:absolute;left:10px;right:10px;top:12px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.v3d .poses button{appearance:none;border:1px solid var(--line2);background:var(--surface);border-radius:999px;padding:7px 11px;font:600 13px/1 var(--font);cursor:pointer}
+.v3d .poses button[aria-pressed=true]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.v3d .msg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font:600 15px/1.4 var(--font);color:var(--ink2)}
+.ed{display:grid;gap:16px}
+.ed h4{margin:0 0 8px;font:700 12px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opt{appearance:none;border:1px solid var(--line2);background:var(--surface);border-radius:999px;padding:8px 12px;font:600 14px/1 var(--font);cursor:pointer;text-transform:capitalize}
+.opt[aria-pressed=true]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.sw{appearance:none;width:34px;height:34px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line2);cursor:pointer;padding:0}
+.sw[aria-pressed=true]{box-shadow:0 0 0 3px var(--ink)}
+.prt{appearance:none;width:48px;height:48px;border-radius:12px;border:1px solid var(--line2);background:var(--surface);padding:5px;cursor:pointer;display:grid;place-items:center;font:700 11px/1 var(--font);color:var(--mut)}
+.prt img{width:100%;height:100%;object-fit:contain}
+.prt[aria-pressed=true]{border:2px solid var(--ink)}
+.edbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;position:sticky;top:calc(var(--top) + 8px);z-index:3;background:var(--bg);padding:8px 0}
 /* owners */
 .why{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:start}
 .why .n{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:#ece8dc}
@@ -145,6 +165,15 @@ p{margin:0}
   .avbig img{width:140px;height:196px}
   .packs{grid-template-columns:repeat(2,1fr)}
 }
+@media (max-width:960px){
+  /* avatar tab on phones: the character stays pinned at the top while the options scroll under it */
+  body.tab-avatar .stage{order:-1;position:sticky;top:var(--top);z-index:5;background:var(--bg);padding-bottom:6px;margin:0 -16px;padding-left:16px;padding-right:16px}
+  body.tab-avatar .device{height:44vh!important}
+  body.tab-avatar .stage-bar{display:none}
+  body.tab-avatar .stage.full .stage-bar{display:flex}
+  body.tab-avatar .edbar{position:static}
+  body.tab-avatar .v3d .poses button{padding:6px 9px;font-size:12px}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -158,7 +187,7 @@ p{margin:0}
 <main class="wrap">
   <section class="content" id="content" aria-live="polite"></section>
   <aside class="stage" id="stage" aria-label="Live preview">
-    <div class="devwrap" id="devwrap"><div class="device" id="device"><div class="loading" id="loading" hidden>Loading…</div></div></div>
+    <div class="devwrap" id="devwrap"><div class="device" id="device"><div class="loading" id="loading" hidden>Loading…</div><div class="v3d" id="v3d" hidden></div></div></div>
     <div class="stage-bar">
       <button class="sbtn" id="back" type="button" aria-label="Back"></button>
       <div class="addr" id="addr"><span id="addrIc"></span><span id="addrTxt">grugdigital/</span></div>
@@ -168,6 +197,7 @@ p{margin:0}
 </main>
 <div class="toast" id="toast" role="status"></div>
 <script type="application/octet-stream" id="pack">@PACK@</script>
+<script type="application/octet-stream" id="engine">@ENGINE@</script>
 <script>
 'use strict';
 const META = "@META@";
@@ -236,7 +266,7 @@ const win = () => frame && frame.contentWindow;
 window.__GRUG_ASSETS = null;
 window.__grugNav = (path, search, hash) => {
   path = String(path || '').replace(/^\/+/, '').replace(/(^|\/)index\.html$/, '$1');
-  if(/^avatar\/?$/.test(path)){ setTab('avatar'); return; }
+  if(/^avatar\/?$/.test(path)){ ED.mode = '3d'; setTab('avatar'); return; }
   const hit = pageByPath(path) || pageByPath(path + '/');
   if(hit) loadPage(hit[0], search, hash); else toast('That page isn’t in the showcase.');
 };
@@ -321,17 +351,40 @@ const R = {
       '<div class="places mt2">' + GAMES.map(placeCard).join('') + '</div>';
   },
   avatar(){
-    const P = META.presets, sel = P.find(p => p.id === avSel) || P[0];
+    const C = ED.cat, cfg = ED.cfg;
+    const P = META.presets;
+    const opt = (k, v, label, on) => '<button class="opt" data-ed="' + k + '" data-v="' + esc(v) + '" aria-pressed="' + !!on + '">' + esc(label) + '</button>';
+    const sw = (k, c, on) => '<button class="sw" data-ed="' + k + '" data-v="' + c + '" aria-pressed="' + !!on + '" style="background:' + c + '" aria-label="' + c + '"></button>';
+    const sec = (h, body) => '<div><h4>' + h + '</h4><div class="opts">' + body + '</div></div>';
+    let body = '';
+    if(!C){
+      body = '<div class="card mt2"><p class="note">' + esc(ED.status || 'Opening the 3D editor…') + '</p></div>';
+    }else{
+      const top = cfg.top && cfg.top.part, prt = cfg.decal && cfg.decal.image;
+      body = '<div class="edbar"><button class="btn" data-ed="random">' + ic('shuffle') + 'Randomize</button><button class="btn primary" data-ed="wear">' + ic('check') + 'Wear this look</button>' +
+        '<button class="btn" data-ed="site">' + ic('device-mobile') + (ED.mode === 'page' ? 'Back to 3D' : 'See it on the site') + '</button></div>' +
+        '<div class="ed">' +
+        sec('Quick looks', P.map(p => '<button class="opt" data-ed="preset" data-v="' + p.id + '">' + esc(p.label) + '</button>').join('')) +
+        sec('Body', C.bodies.map(v => opt('body', v, v, cfg.body === v)).join('')) +
+        sec('Skin', C.skinTones.map(c => sw('skin', c, cfg.skin === c)).join('')) +
+        sec('Hair', C.hairStyles.map((n, i) => opt('hair.style', i, n, cfg.hair.style === i)).join('')) +
+        sec('Hair colour', HAIR.map(c => sw('hair.colour', c, cfg.hair.colour === c)).join('')) +
+        sec('Face', FACES.map(v => opt('expression', v, v, cfg.expression === v)).join('')) +
+        sec('Hat', opt('hat.type', 'none', 'none', !cfg.hat || cfg.hat.type === 'none') + C.hats.map(h => opt('hat.type', h.id, h.label, cfg.hat && cfg.hat.type === h.id)).join('')) +
+        (cfg.hat && cfg.hat.type !== 'none' ? sec('Hat colour', CLOTH.map(c => sw('hat.colour', c, cfg.hat.colour === c)).join('')) : '') +
+        sec('Top', opt('top', '', 'tank top', !top) + opt('top', 'gen_tshirt', 'T-shirt', top === 'gen_tshirt') + opt('top', 'gen_longsleeve', 'long sleeve', top === 'gen_longsleeve')) +
+        sec('Top colour', CLOTH.map(c => sw('topcol', c, (top ? cfg.top.colour : cfg.outfit.shirt) === c)).join('')) +
+        sec('Shorts', CLOTH.map(c => sw('outfit.shorts', c, cfg.outfit.shorts === c)).join('')) +
+        sec('Shirt print', '<button class="prt" data-ed="print" data-v="" aria-pressed="' + !prt + '">none</button>' +
+          PRINTS.map(v => '<button class="prt" data-ed="print" data-v="' + v + '" aria-pressed="' + (prt === v) + '" title="' + v.replace(/^\w+:/, '') + '"><img src="' + printSrc(v) + '" alt=""></button>').join('')) +
+        '</div>';
+    }
     return '<p class="eyebrow">' + ic('t-shirt') + 'One look, every game</p><h1 class="h1">The avatar</h1>' +
-      '<p class="lead">Guests build one avatar and it follows them into every partner’s game and app. Here are a few ready-made looks; the live site has the full 3D editor.</p>' +
-      '<div class="card mt2 avbig"><img id="avImg" src="' + sel.full + '" alt="' + esc(sel.label) + ' look"><div><h3 style="font-size:24px" id="avName">' + esc(sel.label) + '</h3>' +
-        '<p class="note" style="margin:6px 0 14px">Wearing it updates the header picture, the profile and the avatar shown in the rewards apps.</p>' +
-        '<button class="btn primary" id="wear">' + ic('check') + 'Wear this look</button></div></div>' +
-      '<div class="looks mt">' + P.map(p => '<button class="look" data-look="' + p.id + '" aria-pressed="' + (p.id === sel.id) + '"><img src="' + p.bust + '" alt="">' + esc(p.label) + '</button>').join('') + '</div>' +
-      '<h2 class="h2">On the live site</h2><ul class="list">' +
-        '<li><b>Full 3D editor</b><span>Turn, zoom and pose the avatar</span></li>' +
-        '<li><b>Face, body and hair sliders</b><span>Height, head size, ears, hair style and colour</span></li>' +
-        '<li><b>Clothes, hats and shoes</b><span>Earned in games or bought with points</span></li>' +
+      '<p class="lead">Every guest builds one 3D character, and it follows them into every partner’s game and app. Try it: change anything and the character updates live. Drag to turn it around.</p>' +
+      body +
+      '<h2 class="h2">And on the live site</h2><ul class="list">' +
+        '<li><b>40+ fine-tuning sliders</b><span>Height, head, face shape, ears, hair position</span></li>' +
+        '<li><b>Clothes earned in games</b><span>Or bought with each restaurant’s points</span></li>' +
         '<li><b>1,186 shirt prints</b><span>Plus upload-your-own</span></li></ul>';
   },
   pearls(){
@@ -382,7 +435,126 @@ function placeCard(g){
     '</div></div></article>';
 }
 
-/* ---------- avatar looks (pictures made ahead of time; no 3D engine in the file) ---------- */
+/* ---------- 3D avatar editor: the real engine, unpacked the first time the Avatar tab opens ---------- */
+const HAIR = ['#141414', '#2a1a12', '#6a3a1a', '#9a3f1e', '#d6ae58', '#e8d7b0', '#ff5c8a', '#3fc1ff', '#9b7bff'];
+const CLOTH = ['#ffffff', '#141414', '#2b3350', '#e3101c', '#ff8a5c', '#ffcf4a', '#2ee59d', '#3fc1ff', '#9b7bff', '#ff5c8a'];
+const FACES = ['smug', 'happy', 'laugh', 'surprised', 'blush', 'curious', 'relaxed', 'sleepy', 'pout', 'annoyed'];
+const POSES = ['idle', 'wave', 'dance', 'jump', 'walk'];
+let PRINTS = [];
+const printSrc = v => { const A = PACK.assets, m = /^(print|pack):(.+)$/.exec(v); if(!m) return ''; return m[1] === 'print' ? A['assets/prints/' + m[2] + '.png'] : A['assets/prints/pack/' + m[2] + '.webp']; };
+const ED = {cat: null, cfg: null, status: '', mode: '3d', sandy: null, R: null, loading: null, raf: 0, pose: 'idle'};
+async function unpackEngine(){
+  const bin = atob($('#engine').textContent.trim()), u8 = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  const code = await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+  await new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = URL.createObjectURL(new Blob([code], {type: 'text/javascript'})); sc.onload = ok; sc.onerror = () => no(new Error('The 3D engine couldn’t start.')); document.head.appendChild(sc); });
+  if(!window.SandyKit || !window.THREE) throw new Error('The 3D engine couldn’t start.');
+}
+function startEditor(){
+  if(ED.loading) return ED.loading;
+  ED.status = 'Opening the 3D editor…'; showMsg('Loading the 3D character…');
+  ED.loading = (async () => {
+    await new Promise(r => setTimeout(r, 30));
+    await unpackEngine();
+    const K = window.SandyKit, T = window.THREE, host = $('#v3d');
+    PRINTS = Object.keys(PACK.assets).filter(k => /^assets\/prints\/[a-z0-9-]+\.png$/.test(k)).map(k => 'print:' + k.slice(14, -4))
+      .concat((META.packPrints || []).map(p => 'pack:' + p));
+    const renderer = new T.WebGLRenderer({antialias: true, alpha: true}); renderer.outputEncoding = T.sRGBEncoding; renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+    renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+    const scene = new T.Scene(), cam = new T.PerspectiveCamera(30, 1, 5, 5000);
+    scene.add(new T.HemisphereLight(0xfff4e0, 0x3a3456, 0.75));
+    const key = new T.DirectionalLight(0xfff0dc, 1.1); key.position.set(160, 320, 240); key.castShadow = true; key.shadow.mapSize.set(1024, 1024);
+    Object.assign(key.shadow.camera, {left: -120, right: 120, top: 220, bottom: -20, near: 50, far: 900}); key.shadow.bias = -0.0004; scene.add(key);
+    const rim = new T.DirectionalLight(0x9fc4ff, 0.55); rim.position.set(-200, 180, -260); scene.add(rim);
+    const fill = new T.DirectionalLight(0xffd6b0, 0.25); fill.position.set(-260, 80, 180); scene.add(fill);
+    const floor = new T.Mesh(new T.CircleGeometry(150, 64), new T.ShadowMaterial({opacity: 0.3})); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+    const ring = new T.Mesh(new T.RingGeometry(70, 74, 64), new T.MeshBasicMaterial({color: 0x9be338})); ring.rotation.x = -Math.PI / 2; ring.position.y = 0.2; scene.add(ring);
+    let start = null; try{ start = JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); }catch(e){}
+    const sandy = await K.create(K.merge(K.DEFAULT, start || PACK.presets[0].config));
+    scene.add(sandy.object3d);
+    host.innerHTML = ''; host.appendChild(renderer.domElement);
+    host.insertAdjacentHTML('beforeend', '<div class="poses">' + POSES.map(p => '<button type="button" data-pose="' + p + '" aria-pressed="' + (p === 'idle') + '">' + p[0].toUpperCase() + p.slice(1) + '</button>').join('') + '</div><div class="hint">Drag to turn · pinch or scroll to zoom</div>');
+    host.querySelector('.poses').addEventListener('click', e => { const b = e.target.closest('[data-pose]'); if(!b) return; ED.pose = b.dataset.pose; sandy.play(ED.pose);
+      for(const x of host.querySelectorAll('[data-pose]')) x.setAttribute('aria-pressed', String(x === b)); });
+    const O = {yaw: 0.35, pitch: 0.06, d: 440, ty: 102};
+    const size = () => { const r = host.getBoundingClientRect(); if(!r.width) return; renderer.setSize(r.width, r.height, false); cam.aspect = r.width / Math.max(1, r.height); cam.updateProjectionMatrix(); };
+    new ResizeObserver(size).observe(host); size();
+    { const cv = renderer.domElement, Pt = new Map(); let pinch = null;
+      cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); Pt.set(e.pointerId, {x: e.clientX, y: e.clientY}); if(Pt.size === 2){ const [a, b] = [...Pt.values()]; pinch = {d: Math.hypot(a.x - b.x, a.y - b.y), d0: O.d}; } });
+      cv.addEventListener('pointermove', e => { const p = Pt.get(e.pointerId); if(!p) return; const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
+        if(Pt.size === 2 && pinch){ const [a, b] = [...Pt.values()]; O.d = Math.min(700, Math.max(120, pinch.d0 * pinch.d / Math.max(20, Math.hypot(a.x - b.x, a.y - b.y)))); return; }
+        O.yaw -= dx * 0.008; O.pitch = Math.min(0.7, Math.max(-0.15, O.pitch + dy * 0.004)); });
+      const up = e => { Pt.delete(e.pointerId); if(Pt.size < 2) pinch = null; }; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+      cv.addEventListener('wheel', e => { e.preventDefault(); O.d = Math.min(700, Math.max(120, O.d * (1 + Math.sign(e.deltaY) * 0.08))); }, {passive: false}); }
+    let last = performance.now();
+    const loop = now => { ED.raf = requestAnimationFrame(loop); if(ED.mode !== '3d' || tab !== 'avatar') return;
+      const dt = Math.min(0.05, (now - last) / 1000); last = now; sandy.update(dt);
+      const ty = O.d < 250 ? 160 : O.ty;
+      cam.position.set(Math.sin(O.yaw) * Math.cos(O.pitch) * O.d, ty + Math.sin(O.pitch) * O.d, Math.cos(O.yaw) * Math.cos(O.pitch) * O.d); cam.lookAt(0, ty, 0);
+      renderer.render(scene, cam); };
+    ED.raf = requestAnimationFrame(loop);
+    ED.sandy = sandy; ED.cat = K.CATALOG; ED.cfg = sandy.getConfig(); ED.status = '';
+    if(tab === 'avatar') $('#content').innerHTML = R.avatar();
+  })().catch(e => { ED.status = (e && e.message) || 'The 3D editor couldn’t open on this device.'; showMsg(ED.status); if(tab === 'avatar') $('#content').innerHTML = R.avatar(); ED.loading = null; });
+  return ED.loading;
+}
+function showMsg(m){ $('#v3d').innerHTML = '<div class="msg">' + esc(m) + '</div>'; }
+function stageMode(m){
+  ED.mode = m;
+  const on3d = m === '3d' && tab === 'avatar';
+  $('#v3d').hidden = !on3d; if(frame) frame.style.visibility = on3d ? 'hidden' : '';
+  if(on3d) $('#addrTxt').textContent = SITE + 'avatar/';
+}
+async function edApply(patch, replace){
+  const sandy = ED.sandy; if(!sandy) return;
+  sandy.apply(replace ? window.SandyKit.merge(window.SandyKit.DEFAULT, patch) : patch, !!replace);
+  if(sandy.ready) try{ await sandy.ready; }catch(e){}
+  sandy.play(ED.pose);
+  ED.cfg = sandy.getConfig();
+  const y = scrollY; $('#content').innerHTML = R.avatar(); window.scrollTo({top: y});
+}
+function edPatch(k, v){
+  const c = ED.cfg;
+  if(k === 'body') return {body: v};
+  if(k === 'skin') return {skin: v, nails: v};
+  if(k === 'hair.style') return {hair: {style: +v}};
+  if(k === 'hair.colour') return {hair: {colour: v}};
+  if(k === 'expression') return {expression: v};
+  if(k === 'hat.type') return {hat: {type: v, colour: (c.hat && c.hat.colour) || '#ffffff'}};
+  if(k === 'hat.colour') return {hat: {colour: v}};
+  if(k === 'top') return {top: v ? {part: v, texture: v, colour: (c.top && c.top.colour) || c.outfit.shirt || '#ffffff'} : null};
+  if(k === 'topcol') return c.top && c.top.part ? {top: Object.assign({}, c.top, {colour: v})} : {outfit: {shirt: v}};
+  if(k === 'outfit.shorts') return {outfit: {shorts: v}};
+  if(k === 'print') return {decal: {image: v || null}};
+  return null;
+}
+function randomLook(){
+  const K = window.SandyKit, C = ED.cat, pick = a => a[Math.floor(Math.random() * a.length)];
+  const top = pick(['', 'gen_tshirt', 'gen_longsleeve']), shirt = pick(CLOTH);
+  return {body: pick(C.bodies), skin: pick(C.skinTones), hair: {style: Math.floor(Math.random() * C.hairStyles.length), colour: pick(HAIR)}, expression: pick(FACES),
+    hat: Math.random() < 0.5 ? {type: 'none'} : {type: pick(C.hats).id, colour: pick(CLOTH)}, outfit: {shirt, shorts: pick(CLOTH), belt: '#141414'},
+    top: top ? {part: top, texture: top, colour: shirt} : null, decal: {image: Math.random() < 0.8 ? pick(PRINTS) : null, size: 1, up: 0, side: 0}};
+}
+async function edWear(){
+  if(!ED.sandy || !window.SandyView) return;
+  toast('Saving the look and its pictures…');
+  const cfg = ED.sandy.getConfig();
+  try{ localStorage.setItem('grug.sandy.v1', JSON.stringify(cfg)); await window.SandyView.makeSnaps(cfg); }
+  catch(e){ return toast('Couldn’t save the look on this device.'); }
+  toast('Saved. Every page and game now shows this look.');
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-ed]'); if(!b || tab !== 'avatar') return;
+  const k = b.dataset.ed, v = b.dataset.v;
+  if(k === 'random') return edApply(randomLook(), true);
+  if(k === 'preset'){ const p = PACK.presets.find(x => x.id === v); return p && edApply(p.config, true); }
+  if(k === 'wear') return edWear();
+  if(k === 'site'){ if(ED.mode === '3d'){ stageMode('page'); loadPage('profile'); showStage(); } else stageMode('3d'); $('#content').innerHTML = R.avatar(); return; }
+  const patch = edPatch(k, v); if(patch) edApply(patch);
+});
+function showStage(){ if(innerWidth <= 960) $('#stage').scrollIntoView({block: 'start', behavior: 'smooth'}); }
+
+/* ---------- avatar looks (pictures made ahead of time, used before the 3D engine is open) ---------- */
 let avSel = 'classic';
 const sandyHash = o => { const s = JSON.stringify(o || null); let h = 2166136261; for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
 function wearLook(id, quiet){
@@ -399,9 +571,12 @@ function wearLook(id, quiet){
 const TAB_PAGE = {overview: 'home', how: 'app-teahouse', places: null, avatar: 'profile', pearls: 'pearls', owners: 'partners'};
 function setTab(t, quiet){
   tab = t;
+  document.body.classList.toggle('tab-avatar', t === 'avatar');
   for(const b of document.querySelectorAll('#tabs button')) b.setAttribute('aria-selected', String(b.dataset.tab === t));
   $('#content').innerHTML = R[t]();
-  if(!quiet){ const k = TAB_PAGE[t] || 'app-' + place; if(cur.key !== k) loadPage(k); }
+  if(t === 'avatar'){ stageMode(ED.mode); if(ED.mode === '3d') startEditor(); }
+  else { $('#v3d').hidden = true; if(frame) frame.style.visibility = ''; }
+  if(!quiet && t !== 'avatar'){ const k = TAB_PAGE[t] || 'app-' + place; if(cur.key !== k) loadPage(k); else $('#addrTxt').textContent = SITE + PACK.pages[cur.key].path + cur.search + cur.hash; }
   if(location.hash !== '#' + t) history.replaceState(null, '', '#' + t);
   window.scrollTo({top: 0});
 }
@@ -415,10 +590,6 @@ $('#content').addEventListener('click', e => {
   if(d.pts){ place = d.pts; markPlace(); return demoPoints(d.pts, 50); }
   if(d.app){ place = d.app; markPlace(); return demoOpen(d.app, d.tab); }
   if(d.page) return loadPage(d.page);
-  if(d.look){ avSel = d.look; const p = META.presets.find(x => x.id === avSel);
-    $('#avImg').src = p.full; $('#avImg').alt = p.label + ' look'; $('#avName').textContent = p.label;
-    for(const x of document.querySelectorAll('[data-look]')) x.setAttribute('aria-pressed', String(x.dataset.look === avSel)); return; }
-  if(b.id === 'wear') return wearLook(avSel);
 });
 function markPlace(){ for(const c of document.querySelectorAll('[data-placecard]')) c.setAttribute('aria-current', String(c.dataset.placecard === place)); }
 
