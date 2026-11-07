@@ -489,6 +489,9 @@
      (Server Settings → Integrations → Webhooks), make a new one and paste it here. */
   const DISCORD_WEBHOOK = '';   // paste your Discord webhook URL between the quotes ('' = feed off)
   const LOGON_GAP_MIN = 10, DKEY = 'grug.discord.v1';
+  // what Pearls cost in the store (the 100-Pearl pack: $1.99), used to show earned Pearls in dollars in the feed
+  const PEARL_USD = 1.99 / 100;
+  const usd = pearls => '$' + (pearls * PEARL_USD).toFixed(2);
   const plain = s => String(s == null ? '' : s).replace(/[^A-Za-z0-9 .,$'&·:+\-()]/g, '').slice(0, 80);   // no markdown, mentions or links
   function appLabel(app) {
     const g = GAMES.find(x => x.app === app || x.id === app);
@@ -512,7 +515,7 @@
       return postDiscord('🎮 ' + who + ' logged on to ' + appLabel(d.app));
     }
     if (kind === 'reward') {
-      const bits = []; if (+d.points > 0) bits.push('+' + fmt(d.points) + ' points'); if (+d.pearls > 0) bits.push('+' + fmt(d.pearls) + ' Pearls');
+      const bits = []; if (+d.points > 0) bits.push('+' + fmt(d.points) + ' points'); if (+d.pearls > 0) bits.push('+' + fmt(d.pearls) + ' Pearls (about ' + usd(+d.pearls) + ')');
       return postDiscord('🎁 ' + who + ' collected their daily reward at **' + partnerName(d.app) + '**' + (bits.length ? ': ' + bits.join(', ') : ''));
     }
     if (kind === 'purchase') return postDiscord('🫧 ' + who + ' bought **' + fmt(d.pearls) + ' Pearls**' + (d.price ? ' for ' + plain(d.price) : ''));
