@@ -9791,6 +9791,7 @@ const CONFIG = {
 
   points: {
     checkin: 5,              // points for the once-a-day check-in (NFC tag or board code)
+    tapPearls: 10,           // Pearls added by the once-a-day NFC tap (same daily reset). 0 = points only
     resetHour: 4,            // the daily check-in opens again at this hour (local time)
     nfc: true,               // NFC tags: write the links shown on the #setup page to your tags
     secret: 'teahouse-express-katy-mills-2026'   // makes this business's NFC links unique; change it once, before writing tags
@@ -10215,9 +10216,26 @@ $('#redeemBtn').addEventListener('click', () => { buzz(); redeemBoard(); });
 
 /* NFC: tags hold ?tap=<store>-<check>; any NFC phone opens the link, Chrome on Android can also read in-page */
 function tapClaim(s){
-  if(claimedToday()){ renderCollect(); toast('Today’s points are already in. More at ' + resetLabel() + '.'); buzz(8); return; }
-  st.lastClaimDay = rewardsDay(); toast('+' + checkinPts() + ' points. Thanks for stopping by!');
+  if(claimedToday()){ renderCollect(); toast('Today’s rewards are already in. More at ' + resetLabel() + '.'); buzz(8); return; }
+  st.lastClaimDay = rewardsDay();
+  const pl = tapPearls(s);
+  toast('+' + checkinPts() + ' points' + (pl ? ' and +' + pl + ' ' + PL.name : '') + '. Thanks for stopping by!');
   addPoints(checkinPts(), 'Tap · ' + s.name); GrugApp.onCheckin(); setTimeout(renderCollect, 1600);
+}
+/* daily tap Pearls: CONFIG.points.tapPearls per store per rewards day (resets at CONFIG.points.resetHour).
+   The cooldown is kept in the shared Pearls wallet itself, so clearing only this app's data can't claim twice. */
+function tapPearls(s){
+  const n = Math.max(0, Math.floor(+CONFIG.points.tapPearls || 0)); if(!PL_ON || !n) return 0;
+  const w = wRaw(), day = rewardsDay();
+  w.taps = w.taps && typeof w.taps === 'object' ? w.taps : {};
+  const k = (CONFIG.storageKey || 'app') + ':' + s.id;
+  if(w.taps[k] === day) return 0;
+  w.v = 1; w.taps[k] = day; w.balance = Math.max(0, Math.floor(+w.balance || 0)) + n;
+  wSet(w);
+  const back = wRaw();   // only count it if the wallet really saved
+  if(!back.taps || back.taps[k] !== day) return 0;
+  renderPoints(true); sendGameState();
+  return n;
 }
 function onTag(s){ if(!store || store.id !== s.id) location.hash = s.id + '/rewards'; else if(tab !== 'Rewards') setTab('Rewards'); setTimeout(() => tapClaim(s), 350); }
 const hasWebNFC = 'NDEFReader' in window;
