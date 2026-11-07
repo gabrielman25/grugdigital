@@ -167,7 +167,7 @@ const okPath = p => typeof p === 'string' && p.indexOf(SITE) === 0 && p.indexOf(
 /* where the guest came from (kept for two hours, long enough for a Stripe round trip) */
 const q = new URLSearchParams(location.search);
 { const from = q.get('from'), app = (q.get('app') || '').slice(0, 40);
-  if(from !== null && okPath(from)){ const w = wallet(); w.ret = {path: from, app: app || 'the game', at: Date.now()}; wSet(w); } }
+  if(from !== null && okPath(from) && !/pearls\.html/.test(from)){ const w = wallet(); w.ret = {path: from, app: app || 'the game', at: Date.now()}; wSet(w); } }
 const ret = () => { const r = wallet().ret; return r && okPath(r.path) && Date.now() - (+r.at || 0) < 2 * 3600e3 ? r : null; };
 
 /* coming back from Stripe */

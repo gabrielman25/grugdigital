@@ -23,6 +23,22 @@
 .sh-group .g-section-h .g-chip{font-size:13px}
 .sh-dot{width:14px;height:14px;border-radius:4px;display:inline-block;flex:none}
 .sh-count{color:var(--mut);font-weight:700;font-size:14px}
+.sh-pearls{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;min-height:250px;margin-top:14px;padding:116px 22px 22px;border-radius:calc(var(--r) + 6px);
+  background:radial-gradient(120% 90% at 85% 10%,color-mix(in srgb,var(--sel-b) 70%,#fff) 0%,transparent 55%),linear-gradient(135deg,var(--sel-a),var(--sel-b));color:var(--on-sel);text-decoration:none;box-shadow:var(--shadow)}
+.sh-pearls .orbs{position:absolute;right:-10px;top:-6px;width:210px;height:210px;pointer-events:none;transform:scale(.62);transform-origin:top right}
+.sh-pearls>*:not(.orbs){position:relative}
+.sh-pearls .orbs i{position:absolute;border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff 0 12%,#f7f1ff 20%,#d9cdea 62%,#a796c2 100%);box-shadow:0 12px 26px rgba(40,20,70,.28)}
+.sh-pearls .orbs i:nth-child(1){width:96px;height:96px;right:34px;top:30px}.sh-pearls .orbs i:nth-child(2){width:62px;height:62px;right:128px;top:92px}.sh-pearls .orbs i:nth-child(3){width:44px;height:44px;right:22px;top:128px}.sh-pearls .orbs i:nth-child(4){width:28px;height:28px;right:112px;top:34px}
+@media (prefers-reduced-motion:no-preference){.sh-pearls .orbs i{animation:sh-bob 4s ease-in-out infinite}.sh-pearls .orbs i:nth-child(2n){animation-delay:-2s}}
+@keyframes sh-bob{50%{transform:translateY(-6px)}}
+.sh-pearls small{font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12px;opacity:.8}
+.sh-pearls h2{margin:0;font-size:30px;line-height:1.05;max-width:13ch}
+.sh-pearls p{margin:0;max-width:34ch;font-size:15px;opacity:.9}
+.sh-pearls .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px}
+.sh-pearls .cta{display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 20px;border-radius:999px;background:var(--ink);color:var(--bg);font-weight:800}
+.sh-pearls .bal{font-weight:800;font-size:15px}
+@media (min-width:560px){.sh-pearls .orbs{transform:scale(.9)}}
+@media (min-width:860px){.sh-pearls{min-height:260px;padding:30px}.sh-pearls h2{font-size:38px}.sh-pearls .orbs{transform:scale(1.2)}}
 .sh-own{display:flex;gap:12px;align-items:center;padding:14px 16px;margin:4px 0 8px;background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
 .sh-own p{flex:1;min-width:0;color:var(--ink2);font-size:14.5px}
 .sh-own b{color:var(--ink)}
@@ -30,6 +46,13 @@
 </head>
 <body>
 <main class="wrap">
+  <a class="sh-pearls" id="pearlsBanner" href="../pearls.html">
+    <span class="orbs" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    <small>Pearls</small>
+    <h2>Get Pearls for every game</h2>
+    <p>One balance that works in all Grug games. Spend them on boosts and power-ups.</p>
+    <span class="row"><span class="cta">Get Pearls</span><span class="bal" id="pearlsBal"></span></span>
+  </a>
   <div class="sh-head"><h1>Shop</h1><p>Custom clothing for your avatar. Every design is a Roblox-style shirt or pants template, earned by playing or bought with the points you get for eating at a partner. Nothing here costs money.</p></div>
   <div class="sh-own"><p><b>Have your own Roblox template?</b> Upload any classic shirt or pants template in the avatar editor, under Custom.</p><a class="g-btn sm" href="../avatar/#custom">Upload</a></div>
   <div class="sh-filters" id="filters"></div>
@@ -43,6 +66,8 @@
 (function(){
   const G = Grug, C = GrugCatalog, $ = s => document.querySelector(s);
   G.ui.chrome('shop'); G.ensureSnaps();
+  const paintBanner = () => { $('#pearlsBanner').href = G.pearlsUrl('the Shop'); const n = G.pearlBalance(); $('#pearlsBal').textContent = n ? 'You have ' + G.fmt(n) : ''; };
+  paintBanner(); addEventListener('pageshow', paintBanner); addEventListener('storage', e => { if (e.key === 'grug.pearls.v1') paintBanner(); });
   let filter = /[?&]mine/.test(location.search) ? 'mine' : 'all';
   const FILTERS = [['all', 'Everything'], ['mine', 'Mine'], ['shirt', 'Shirts'], ['pants', 'Pants']];
   $('#filters').innerHTML = FILTERS.map(f => '<button data-f="' + f[0] + '" aria-pressed="' + (f[0] === filter) + '">' + f[1] + '</button>').join('');

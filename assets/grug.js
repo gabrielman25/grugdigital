@@ -225,7 +225,7 @@
       document.head.appendChild(st); }
     if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
     const wrap = document.createElement('div'); wrap.className = 'g-avpic'; if (opts.bottom) wrap.style.bottom = opts.bottom + 'px'; wrap.setAttribute('role', 'img'); wrap.setAttribute('aria-label', 'Your avatar');
-    const img = document.createElement('img'); img.alt = ''; img.decoding = 'async'; wrap.appendChild(img); host.appendChild(wrap);
+    const img = document.createElement('img'); img.alt = ''; img.decoding = 'async'; img.onload = img.onerror = () => img.classList.add('ld'); wrap.appendChild(img); host.appendChild(wrap);
     let t = 0;
     const base = () => snaps().full;
     function paint() { img.src = base(); }
@@ -258,6 +258,11 @@
     profile: '<svg class="k-ic" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="kdP" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fef08a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><circle cx="24" cy="17" r="10" fill="url(#kdP)" stroke="#fff" stroke-width="2.6"/><path d="M7 42c1.5-9 8.5-14 17-14s15.5 5 17 14z" fill="url(#kdP)" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><path d="M19 12.5q2-2.5 5-2.5" stroke="#fff" stroke-opacity=".7" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg>',
   };
   const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
+  /* ---------- Pearls (the site-wide currency, sold on pearls.html; wallet in 'grug.pearls.v1') ---------- */
+  const PEARL_KEY = 'grug.pearls.v1';
+  const pearlBalance = () => { const w = readJSON(PEARL_KEY, null); return Math.max(0, Math.floor(+(w && w.balance) || 0)); };
+  // the Pearls page, with a way back to where the guest is now
+  const pearlsUrl = app => /pearls\.html$/.test(location.pathname) ? location.pathname + location.search : url('pearls.html') + '?from=' + encodeURIComponent(location.pathname + location.search + location.hash) + '&app=' + encodeURIComponent(app || 'Grug');
   function chrome(active, opts) {
     opts = opts || {};
     const face = snaps(); const faceImg = face ? '<img class="g-face" alt="" src="' + face.bust + '">' : '<span class="g-face g-face-empty">' + icon('smiley') + '</span>';
@@ -267,20 +272,39 @@
     const top = document.createElement('header'); top.className = 'g-top';
     top.innerHTML = '<a class="g-logo k-glass" href="' + url('') + '" aria-label="Grug home">' + LOGO + '<span>Grug</span></a>' +
       '<div class="g-title k-glass" aria-hidden="true"><small>' + esc(pageTitle === navLabel ? 'Grug' : navLabel) + '</small><b>' + esc(pageTitle) + '</b></div>' +
-      '<div class="g-status k-glass"><a class="g-pts" href="' + url('profile/') + '" title="Points at every partner">' + icon('coins') + '<span class="num">' + fmt(totalPoints()) + '</span></a><span class="g-sep"></span>' +
+      '<div class="g-status k-glass"><a class="g-pts" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('coins') + '<span class="num">' + fmt(pearlBalance()) + '</span><span class="g-plus" aria-hidden="true">+</span></a><span class="g-sep"></span>' +
       '<button type="button" class="g-gear" aria-label="Settings" title="Settings">' + icon('gear-six') + '</button></div>' +
-      '<a class="g-me" href="' + url('profile/') + '" aria-label="Your profile"><span class="g-me-name">' + esc(profile.name) + '</span>' + faceImg + '</a>';
+      '<button type="button" class="g-me" aria-label="Your account menu" aria-haspopup="menu" aria-expanded="false"><span class="g-me-name">' + esc(profile.name) + '</span>' + faceImg + '</button>';
     const tabs = document.createElement('nav'); tabs.className = 'g-tabs k-glass'; tabs.setAttribute('aria-label', 'Sections');
     tabs.innerHTML = '<span class="k-sb l" aria-hidden="true">LB</span><span class="k-sb r" aria-hidden="true">RB</span>' +
       NAV.map(n => '<a href="' + url(n[3]) + '"' + (n[0] === active ? ' aria-current="page"' : '') + '>' + DOCK[n[0]] + '<span>' + n[1] + '</span></a>').join('');
     document.body.prepend(top); document.body.appendChild(tabs);
     document.body.classList.add('g-chrome');
     $('.g-gear', top).addEventListener('click', () => settings());
+    // the account menu under the avatar
+    const menu = document.createElement('div'); menu.className = 'g-menu'; menu.setAttribute('role', 'menu'); menu.hidden = true;
+    const paintMenu = () => { const f = snaps();
+      menu.innerHTML = '<div class="g-menu-h"><img alt="" src="' + f.bust + '"><div><b>' + esc(profile.name) + '</b><small>' + fmt(pearlBalance()) + ' Pearls · ' + fmt(totalPoints()) + ' partner points</small></div></div>' +
+        '<a role="menuitem" class="hot" href="' + pearlsUrl() + '">' + icon('coins') + '<span>Buy Pearls</span>' + icon('caret-right') + '</a>' +
+        '<a role="menuitem" href="' + url('profile/') + '">' + icon('user') + '<span>Profile</span></a>' +
+        '<a role="menuitem" href="' + url('avatar/') + '">' + icon('t-shirt') + '<span>Edit avatar</span></a>' +
+        '<a role="menuitem" href="' + url('shop/?mine') + '">' + icon('shopping-bag') + '<span>My closet</span></a>' +
+        '<button type="button" role="menuitem" data-m="settings">' + icon('gear-six') + '<span>Settings</span></button>'; };
+    document.body.appendChild(menu);
+    const meBtn = $('.g-me', top);
+    const setMenu = on => { if (on) paintMenu(); menu.hidden = !on; meBtn.setAttribute('aria-expanded', String(on)); if (on) { const f = $('[role=menuitem]', menu); if (f) f.focus({ preventScroll: true }); } };
+    meBtn.addEventListener('click', e => { e.stopPropagation(); buzz(); setMenu(menu.hidden); });
+    menu.addEventListener('click', e => { const b = e.target.closest('[data-m=settings]'); if (b) { setMenu(false); settings(); } });
+    document.addEventListener('click', e => { if (!menu.hidden && !menu.contains(e.target)) setMenu(false); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { setMenu(false); meBtn.focus(); } });
+    const paintPearls = () => { const pt = $('.g-pts .num', top); if (pt) pt.textContent = fmt(pearlBalance()); const a = $('.g-pts', top); if (a) a.href = pearlsUrl(); };
+    root.addEventListener('storage', e => { if (e.key === PEARL_KEY) paintPearls(); });
+    root.addEventListener('pageshow', paintPearls);
     if (!$('#g-toast')) { const t = document.createElement('div'); t.id = 'g-toast'; t.className = 'g-toast'; t.setAttribute('role', 'status'); t.setAttribute('aria-live', 'polite'); document.body.appendChild(t); }
     root.addEventListener('grug:change', () => {
       const s = snaps(); const el = $('.g-me', top); if (!el) return;
       el.innerHTML = '<span class="g-me-name">' + esc(profile.name) + '</span>' + (s ? '<img class="g-face" alt="" src="' + s.bust + '">' : '<span class="g-face g-face-empty">' + icon('smiley') + '</span>');
-      const pt = $('.g-pts .num', top); if (pt) pt.textContent = fmt(totalPoints());
+      paintPearls();
     });
     // LB / RB: Q and E (or a controller's shoulder buttons) step through the dock
     const idx = Math.max(0, NAV.findIndex(n => n[0] === active));
@@ -298,7 +322,30 @@
         requestAnimationFrame(poll);
       })();
     }, { once: true });
+    speed();
     return top;
+  }
+
+  /* ---------- fast pages: the next page starts loading as soon as a finger or mouse heads for its link ---------- */
+  let sped = false;
+  function speed() {
+    if (sped) return; sped = true;
+    const same = a => a && a.href && a.origin === location.origin && a.href.indexOf(ROOT) === 0 && !a.hasAttribute('download') && a.target !== '_blank' && !/#/.test(a.getAttribute('href') || '#');
+    // Chrome: prerender site pages on hover/touch (not the heavy game apps or the 3D editor)
+    try {
+      if (HTMLScriptElement.supports && HTMLScriptElement.supports('speculationrules')) {
+        const r = document.createElement('script'); r.type = 'speculationrules';
+        const base = new URL(ROOT).pathname;
+        r.textContent = JSON.stringify({ prerender: [{ where: { and: [{ href_matches: base + '*' }, { not: { href_matches: base + 'play/*' } }, { not: { href_matches: base + 'avatar/*' } }, { not: { href_matches: base + 'work/*' } }, { not: { href_matches: base + 'pearls.html*' } }] }, eagerness: 'moderate' }],
+          prefetch: [{ where: { href_matches: base + '*' }, eagerness: 'moderate' }] });
+        document.head.appendChild(r); return;
+      }
+    } catch (e) {}
+    // elsewhere: a plain prefetch on hover / touch
+    const done = new Set();
+    const pre = e => { const a = e.target.closest && e.target.closest('a[href]'); if (!same(a) || done.has(a.href)) return; done.add(a.href);
+      const l = document.createElement('link'); l.rel = 'prefetch'; l.href = a.href; document.head.appendChild(l); };
+    document.addEventListener('pointerover', pre, { passive: true }); document.addEventListener('touchstart', pre, { passive: true });
   }
 
   /* ---------- appearance: Light / Dark / Auto + themes (used by the gear sheet and Profile) ---------- */
@@ -392,7 +439,8 @@
   }
   // fill data-thumb placeholders with each design's picture (the avatar wearing it, made ahead of time)
   function fillThumbs(container) {
-    $$('[data-thumb]', container).forEach(el => { const it = C.get(el.dataset.thumb); if (it && !el.dataset.done) { el.style.backgroundImage = 'url(' + url(it.thumb) + ')'; el.dataset.done = '1'; } });
+    $$('[data-thumb]', container).forEach(el => { const it = C.get(el.dataset.thumb); if (!it || el.dataset.done) return; el.dataset.done = '1';
+      const src = url(it.thumb), im = new Image(); im.onload = im.onerror = () => { el.style.backgroundImage = 'url(' + src + ')'; el.classList.add('ld'); }; im.src = src; });
   }
 
   /* ---------- public ---------- */
@@ -402,7 +450,7 @@
     on(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },
     save, setName, setAvatar, equip, unequip, wearing, refreshPictures, owns, grant, track, totals, statValue, progress, checkMilestones, celebrate,
     points, appState, exportData, exportText, exportFilename, download, share, parseImport, applyImport, reset,
-    snaps, ensureSnaps, randomName, cleanName,
+    snaps, ensureSnaps, randomName, cleanName, pearlBalance, pearlsUrl,
     ui: { chrome, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic }
   };
 })(window);

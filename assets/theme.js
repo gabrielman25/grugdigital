@@ -35,6 +35,8 @@
   const isCalm = s => !s.motion || !!(calmMQ && calmMQ.matches);
   const hexHue = hex => { const n = parseInt(hex.slice(1), 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; if (!d) return 0; let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; return h < 0 ? h + 360 : h; };
 
+  // pages with the Grug top bar and dock: draw their skeletons right away (grug.css), so nothing jumps when they arrive
+  try { if (!/[?&]mode=viewer/.test(location.search) && !/\/(play|work)\//.test(location.pathname)) document.documentElement.classList.add('g-pre'); } catch (e) {}
   function apply() {
     const s = prefs(), t = THEMES[s.theme], el = document.documentElement, dark = isDark(s);
     el.setAttribute('data-theme', dark ? 'dark' : 'light'); // Auto resolves here, so CSS only needs two palettes

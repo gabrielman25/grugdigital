@@ -860,6 +860,7 @@ body.rg-embed #menu.tt-menu{padding-top:64px}
 .tt-use,.tt-buy{min-width:58px;min-height:42px;border-radius:11px;border:3px solid #11141a;font-size:15px;font-weight:700;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;padding:3px 8px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.2)}
 .tt-use{background:linear-gradient(#4aa8ff,#2a74d6)}
 .tt-buy{background:linear-gradient(#35c25a,#1f8a3b)}
+.tt-buy.short{background:linear-gradient(#7a7f8c,#505562)}
 .tt-use small,.tt-buy small{font-size:11px;opacity:.85;font-weight:600;margin-top:2px}
 .tt-card button[disabled]{filter:grayscale(1) brightness(.95);opacity:.45;cursor:default}
 .tt-use:hover:not([disabled]),.tt-buy:hover:not([disabled]),.tt-use.vc-hov,.tt-buy.vc-hov{filter:brightness(1.1)}
@@ -8082,6 +8083,8 @@ async function ttBuyBoost(id) {
   const it = ttItem(id); if (!it || TTW.busy) return;
   initAudio();
   if (TTW.mode === 'pending') return ttSay('Still connecting to your points…', true);
+  // short of points and Pearls: the rewards app offers to get Pearls (and brings the guest back to the game)
+  if (ttWallet() < it.cost && TTW.pearlName && TTW.mode === 'live') { ttSfx('no'); try { parent.postMessage({ rw: 1, t: 'needPearls', id }, '*'); } catch (e) {} return; }
   if (ttWallet() < it.cost) { ttSfx('no'); return ttSay('You need ' + (it.cost - ttWallet()) + ' more ' + (TTW.pearlName ? 'points or ' + TTW.pearlName : 'points') + ' for ' + it.name + '.', true); }
   if (TTW.mode === 'demo') { TTW.points -= it.cost; TTW.inv[id] = (TTW.inv[id] || 0) + 1; ttDemoSave(); ttSfx('buy'); return ttSay(it.name + ' added. Tap Use to switch it on.'); }
   TTW.busy = true; ttRefreshMenus();
@@ -8936,7 +8939,7 @@ function ttBoostRows() {
     return `<div class="tt-item${on ? ' on' : ''}"><span class="tt-ic">${ttFxIco(it.effect)}</span>
       <span class="tt-txt"><b>${escHTML(it.name)}</b><small>${escHTML(it.desc || '')}${on ? ' · on for ' + ttClock(TT.boost[it.effect]) : ''}</small></span>
       <button class="tt-use" data-use="${escHTML(it.id)}"${own && !TTW.busy ? '' : ' disabled'} title="${own ? 'Switch it on now' : 'Buy one first'}">Use<small>×${own}</small></button>
-      <button class="tt-buy" data-buy="${escHTML(it.id)}"${can ? '' : ' disabled'}>${it.cost}<small>pts</small></button></div>`;
+      <button class="tt-buy${can ? '' : ' short'}" data-buy="${escHTML(it.id)}"${can || (TTW.pearlName && TTW.mode === 'live' && !TTW.busy) ? '' : ' disabled'}>${it.cost}<small>pts</small></button></div>`;
   }).join('');
 }
 function ttWire() {
@@ -10361,7 +10364,7 @@ function pauseGame(){ toGame({t: 'pause'}); }
 function buyItem(id){
   const it = gameItem(id); if(!it) return {ok: false, reason: 'That power-up isn’t in the shop.'};
   if((st.inv[id] || 0) >= INV_MAX) return {ok: false, reason: 'You already have ' + INV_MAX + ' of those.'};
-  if(wallet() < it.cost) return {ok: false, reason: 'You need ' + (it.cost - wallet()) + ' more ' + (PL_ON ? 'points or ' + PL.name : 'points') + ' for ' + it.name + '.'};
+  if(wallet() < it.cost) return {ok: false, reason: 'You need ' + (it.cost - wallet()) + ' more ' + (PL_ON ? 'points or ' + PL.name : 'points') + ' for ' + it.name + '.', short: it.cost - wallet(), item: it.name};
   const fromPl = Math.min(pearls(), it.cost), fromPts = it.cost - fromPl;   // Pearls first, then points
   if(fromPl) pearlsChange(-fromPl); st.points -= fromPts; st.inv[id] = (st.inv[id] || 0) + 1;
   if(fromPts) hist(G.title + ' · ' + it.name, -fromPts);
@@ -10381,7 +10384,8 @@ addEventListener('message', e => {
   if(!gameFrame || e.source !== gameFrame.contentWindow) return;   // only the game this page opened
   const reply = r => toGame(Object.assign({t: 'reply', req: String(d.req || ''), state: gameState()}, r));
   if(d.t === 'hello'){ sendGameState(); GrugApp.onPlay(); announceJoin(); }
-  else if(d.t === 'buy'){ const r = buyItem(String(d.id)); reply(r); if(r.ok && store) renderRewards(); }
+  else if(d.t === 'buy'){ const r = buyItem(String(d.id)); reply(r); if(r.ok && store) renderRewards(); else if(r.short && PL_ON) offerPearls(r); }
+  else if(d.t === 'needPearls'){ const it = gameItem(String(d.id)); if(it && PL_ON && wallet() < it.cost) offerPearls({short: it.cost - wallet(), item: it.name}); }
   else if(d.t === 'use'){ const r = useItems(d.ids); reply(r); if(r.ok && store) renderRewards(); }
   else if(d.t === 'score'){
     const s = Math.max(0, Math.floor(+d.score || 0)); st.game.runs++; if(s > st.game.best) st.game.best = s; save();
@@ -10422,7 +10426,13 @@ function wSet(w){ try{ localStorage.setItem(WKEY, JSON.stringify(w)); }catch(e){
 const pearls = () => PL_ON ? Math.max(0, Math.floor(+wRaw().balance || 0)) : 0;
 function pearlsChange(d){ const w = wRaw(); w.v = 1; w.balance = Math.max(0, Math.floor(+w.balance || 0) + d); wSet(w); }
 if(PL_ON && st.pearls > 0){ pearlsChange(st.pearls); st.pearls = 0; save(); }   // Pearls bought in this app before the shared wallet move into it
-const pearlStore = () => (PL.store || '../../pearls.html') + '?from=' + encodeURIComponent(location.pathname + '#' + (store ? store.id + '/rewards' : '')) + '&app=' + encodeURIComponent(B.name);
+const pearlStore = tab => (PL.store || '../../pearls.html') + '?from=' + encodeURIComponent(location.pathname + '#' + (store ? store.id + '/' + (tab || 'rewards') : '')) + '&app=' + encodeURIComponent(B.name);
+// a boost the guest can't afford yet: offer Pearls, and come back to the game afterwards
+function offerPearls(r){
+  pauseGame(); buzz();
+  openSheet('<div class="grab"></div><span class="eyebrow">' + esc(PL.name) + '</span><h3>' + esc(r.short + ' short for ' + r.item) + '</h3><p>Get ' + esc(PL.name) + ' on the Grug ' + esc(PL.name) + ' page. They work in every Grug game, and you’ll come straight back to the game.</p>' +
+    '<div class="row2"><button class="btn quiet press" data-close>Not now</button><a class="btn primary press" href="' + esc(pearlStore('game')) + '">Get ' + esc(PL.name) + '</a></div>');
+}
 function renderPearls(){
   $('#pearlShop').hidden = !PL_ON; if(!PL_ON) return;
   const n = pearls(), code = (wRaw().code || '');
