@@ -141,5 +141,31 @@
   root.addEventListener('storage', e => { if (e.key === KEY) apply(); });
   root.addEventListener('grug:change', e => { const w = e.detail && e.detail.what; if (w === 'import' || w === 'reset' || w === 'external' || w === 'prefs') apply(); });
 
+  /* ---------- the page scrollbar: a slim themed bar that floats over the page (the system one is hidden in grug.css),
+     so content stays centred on the whole screen. Shows while scrolling or when the pointer is near; drag it or click its track. */
+  function scrollbar() {
+    if (document.querySelector('.k-sbar') || !document.body) return;
+    const bar = document.createElement('div'); bar.className = 'k-sbar'; bar.setAttribute('aria-hidden', 'true');
+    const th = document.createElement('i'); bar.appendChild(th); document.body.appendChild(bar);
+    const se = document.scrollingElement || document.documentElement;
+    let hideT = 0, drag = null, raf = 0;
+    const geo = () => { const H = se.scrollHeight, V = innerHeight, T = bar.clientHeight, h = Math.max(36, T * V / Math.max(H, 1)); return { H, V, T, h, max: Math.max(1, H - V) }; };
+    function paint() { raf = 0; const g = geo(), need = g.H > g.V + 2; bar.classList.toggle('need', need); th.style.display = need ? '' : 'none'; if (!need) return;
+      th.style.height = g.h + 'px'; th.style.top = ((g.T - g.h) * (se.scrollTop / g.max)) + 'px'; }
+    const queue = () => { if (!raf) raf = requestAnimationFrame(paint); };
+    const show = () => { bar.classList.add('on'); clearTimeout(hideT); hideT = setTimeout(() => bar.classList.remove('on'), 900); };
+    addEventListener('scroll', () => { queue(); show(); }, { passive: true });
+    addEventListener('resize', queue); new ResizeObserver(queue).observe(document.body);
+    addEventListener('pointermove', e => { if (e.pointerType === 'mouse' && innerWidth - e.clientX < 22) show(); }, { passive: true });
+    const jump = y => se.scrollTo({ top: y, behavior: 'instant' });
+    th.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); drag = { y: e.clientY, top: se.scrollTop }; bar.classList.add('hold'); th.setPointerCapture(e.pointerId); });
+    th.addEventListener('pointermove', e => { if (!drag) return; const g = geo(); jump(drag.top + (e.clientY - drag.y) * g.max / Math.max(1, g.T - g.h)); });
+    const end = () => { drag = null; bar.classList.remove('hold'); show(); };
+    th.addEventListener('pointerup', end); th.addEventListener('pointercancel', end);
+    bar.addEventListener('pointerdown', e => { if (e.target !== bar) return; const g = geo(), r = bar.getBoundingClientRect(), f = (e.clientY - r.top - g.h / 2) / Math.max(1, g.T - g.h); se.scrollTo({ top: f * g.max, behavior: 'smooth' }); show(); });
+    paint();
+  }
+  if (document.body) scrollbar(); else document.addEventListener('DOMContentLoaded', scrollbar);
+
   root.GrugTheme = { THEMES, prefs, set, apply, isDark: () => isDark(prefs()), kick: () => Backdrop.kick() };
 })(window);

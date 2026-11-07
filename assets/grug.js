@@ -338,7 +338,7 @@
         let u; try { u = new URL(a.href); } catch (x) { return; }
         if (u.origin !== location.origin || u.href.indexOf(ROOT) !== 0 || (u.pathname === location.pathname && u.search === location.search)) return;
         e.preventDefault(); try { sessionStorage.setItem('grug.nav', '1'); } catch (x) {}
-        document.documentElement.classList.add('g-leave'); setTimeout(() => { location.href = u.href; }, 150);
+        document.documentElement.classList.add('g-leave'); setTimeout(() => { location.href = u.href; }, 90);
       });
       root.addEventListener('pageshow', e => { if (e.persisted) document.documentElement.classList.remove('g-leave', 'g-arrive'); });
     }
@@ -349,7 +349,11 @@
         const r = document.createElement('script'); r.type = 'speculationrules';
         const base = new URL(ROOT).pathname;
         r.textContent = JSON.stringify({ prerender: [{ where: { and: [{ href_matches: base + '*' }, { not: { href_matches: base + 'play/*' } }, { not: { href_matches: base + 'avatar/*' } }, { not: { href_matches: base + 'work/*' } }, { not: { href_matches: base + 'pearls.html*' } }] }, eagerness: 'moderate' }],
-          prefetch: [{ where: { href_matches: base + '*' }, eagerness: 'moderate' }] });
+          prefetch: [{ where: { href_matches: base + '*' }, eagerness: 'moderate' }, { where: { selector_matches: '.g-tabs a' }, eagerness: 'immediate' }] });
+        // the dock's pages are one tap away all the time: get them ready as soon as the pointer comes near
+        const r2 = document.createElement('script'); r2.type = 'speculationrules';
+        r2.textContent = JSON.stringify({ prerender: [{ where: { and: [{ selector_matches: '.g-tabs a, .g-menu a' }, { not: { href_matches: base + 'avatar/*' } }] }, eagerness: 'eager' }] });
+        document.head.appendChild(r2);
         document.head.appendChild(r); return;
       }
     } catch (e) {}
