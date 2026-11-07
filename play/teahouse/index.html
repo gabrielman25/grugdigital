@@ -435,7 +435,7 @@ body.game-mode .fs-float{top:calc(12px + var(--bn-h,0px))}
         <button class="rv-later" id="reviewLater" type="button">Maybe later</button>
       </div>
 
-      <div class="rw-h"><h2>Rewards</h2><small id="rwHint">Show the screen at the counter<br>to use a reward</small></div>
+      <div class="rw-h" id="rwHead"><h2>Rewards</h2><small id="rwHint">Show the screen at the counter<br>to use a reward</small></div>
       <div class="vouchers" id="vouchers"></div>
       <div class="catalog" id="catalog"></div>
 
@@ -451,7 +451,7 @@ body.game-mode .fs-float{top:calc(12px + var(--bn-h,0px))}
       </div>
 
       <div id="pearlShop" hidden>
-        <div class="rw-h"><h2 id="plTitle">Pearls</h2><small id="plHint">Extra for boosts<br>your points stay saved for drinks</small></div>
+        <div class="rw-h"><h2 id="plTitle">Pearls</h2><small id="plHint">Extra for boosts<br>on top of your points</small></div>
         <div class="pl-bal card"><span class="rw-ic"><i data-icon="pearl"></i></span><div class="rw-txt"><b id="plBal"></b><span id="plSub"></span></div><span class="pl-test" id="plTest" hidden>Test mode</span></div>
         <div class="pl-grid" id="plGrid"></div>
         <p class="fine" id="plFine"></p>
@@ -9597,13 +9597,9 @@ const CONFIG = {
     secret: 'teahouse-express-katy-mills-2026'   // makes this business's NFC links unique; change it once, before writing tags
   },
 
-  // Rewards customers redeem at the counter. icon = any name from the ICONS list below.
-  rewards: [
-    { id: 'topping', name: 'Free topping', cost: 25, icon: 'drop', desc: 'Pearls, jelly or pudding on any drink' },
-    { id: 'upsize', name: 'Free upsize', cost: 45, icon: 'arrow-fat-up', desc: 'Go large on any drink' },
-    { id: 'drink', name: 'Free drink', cost: 100, icon: 'coffee-fill', desc: 'Any tea, slurpy or smoothie' },
-    { id: 'two', name: 'Two drinks', cost: 180, icon: 'gift-fill', desc: 'Bring a friend: two drinks, any size' }
-  ],
+  // Points are for the game only: they buy Boosts in Take a Tea (CONFIG.game.shop) and never drinks or merchandise.
+  // Leave rewards empty. (Anything listed here would show as a counter reward.)
+  rewards: [],
   redeemMinutes: 10,         // how long a redeemed reward screen stays valid
 
   // Optional paid membership tab. Joining is free and local until you wire up real payments.
@@ -9614,7 +9610,7 @@ const CONFIG = {
     fine: 'Nothing is charged during the preview. You’ll be asked before anything is.',
     perks: [
       ['star-four-fill', 'Double check-in points', 'Every visit counts twice.'],
-      ['gift-fill', 'A birthday drink', 'A free drink in your birthday month.']
+      ['gift-fill', 'A birthday boost', 'A free Double Shot in your birthday month.']
     ],
     doubleCheckin: true      // members earn 2× check-in points
   },
@@ -9641,7 +9637,7 @@ const CONFIG = {
   },
 
   // Pearls: a second balance guests BUY (Stripe Payment Links). Pearls only buy game Boosts and are spent
-  // before points, so points stay saved for drinks. They never turn into drinks, points or cash.
+  // before points. Like points, they never turn into drinks, merchandise or cash.
   // One Stripe Payment Link per pack. Open this app with #setup on the end for the exact Stripe settings.
   // link: paste the Payment Link from Stripe (https://buy.stripe.com/...). Test links contain /test_ .
   // price is only the label shown here: Stripe charges whatever the Payment Link is set to, so keep them the same.
@@ -9655,6 +9651,15 @@ const CONFIG = {
       { id: 'p300', pearls: 300, price: '$9.99', link: '', tag: 'Best value' }
     ],
     help: 'Trouble with a purchase? Ask at the counter and show your purchase code.'
+  },
+
+  // Discord: posts a message to this webhook when someone opens the game. '' = off.
+  // Anyone who views this page's source can see the webhook. If it ever gets spammed, delete it in Discord and paste a new one.
+  // cooldownMinutes: one message per phone in that window, so refreshing doesn't flood the channel.
+  discord: {
+    webhook: 'https://discord.com/api/webhooks/1568415342152130580/0FfNHO2Zbff9JHBxfHmnjIDR1Mo8QZZrxILI0l1T-IpspB76yOg1lyiW8EJxYKVuMMnA',
+    message: 'A player has logged on to {brand}.',
+    cooldownMinutes: 10
   },
 
   social: { instagram: '', tiktok: '', facebook: '', website: '' },
@@ -9935,15 +9940,16 @@ $('#refreshBtn').addEventListener('click', () => { buzz(); const left = REFRESH_
 
 /* ---------- points ---------- */
 let shownPts = st.points;
-const nextReward = () => CONFIG.rewards.slice().sort((a, b) => a.cost - b.cost).find(r => r.cost > st.points);
+const ladder = () => (CONFIG.rewards.length ? CONFIG.rewards : GSHOP).slice().sort((a, b) => a.cost - b.cost);
+const nextReward = () => ladder().find(r => r.cost > st.points);
 function renderPoints(animate){
   const to = st.points, from = animate && !calm() ? shownPts : to; shownPts = to;
   const el = $('#ptsNum'), t0 = performance.now();
   (function step(t){ const k = Math.min(1, (t - t0) / 700); el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3))); if(k < 1) requestAnimationFrame(step); })(t0);
-  const nx = nextReward(), sorted = CONFIG.rewards.slice().sort((a, b) => a.cost - b.cost), prev = sorted.filter(r => r.cost <= to).pop();
+  const nx = nextReward(), sorted = ladder(), prev = sorted.filter(r => r.cost <= to).pop();
   const lo = prev ? prev.cost : 0, hi = nx ? nx.cost : Math.max(1, lo);
   $('#ptsBar').style.width = (nx ? Math.max(4, (to - lo) / (hi - lo) * 100) : 100) + '%';
-  $('#ptsNext').innerHTML = nx ? '<b>' + (nx.cost - to) + ' more</b> to ' + esc(nx.name) : '<b>Every reward is open.</b> Pick one below.';
+  $('#ptsNext').innerHTML = nx ? '<b>' + (nx.cost - to) + ' more</b> to ' + esc(nx.name) : CONFIG.rewards.length ? '<b>Every reward is open.</b> Pick one below.' : '<b>Enough for any boost.</b> Spend them in ' + esc(G.title || 'the game') + '.';
   $('#ptsLabel').textContent = 'Your ' + B.name + ' points';
 }
 function celebrate(){
@@ -10069,6 +10075,7 @@ $('#reviewLater').addEventListener('click', () => { buzz(5); reviewSnoozed = tru
 /* rewards catalog + counter redemption */
 const liveVouchers = () => st.vouchers.filter(v => Date.now() - v.at < CONFIG.redeemMinutes * 60000);
 function renderCatalog(){
+  const any = CONFIG.rewards.length > 0; $('#rwHead').hidden = !any; $('#catalog').hidden = !any;
   st.vouchers = liveVouchers();
   $('#vouchers').innerHTML = st.vouchers.map((v, i) => { const r = CONFIG.rewards.find(x => x.id === v.reward) || {name: v.name}; const left = Math.ceil((v.at + CONFIG.redeemMinutes * 60000 - Date.now()) / 60000);
     return '<button class="voucher-row press" data-voucher="' + i + '">' + ic('ticket-fill') + '<span><b>' + esc(r.name) + '</b><small>Ready to show · ' + left + ' min left</small></span>' + ic('arrow-right') + '</button>'; }).join('');
@@ -10149,6 +10156,16 @@ function gameState(){
   return {points: st.points, pearls: PL_ON ? st.pearls : 0, pearlName: PL_ON ? PL.name : '', inv: st.inv, best: st.game.best, runs: st.game.runs, shop: GSHOP, title: G.title, collectible: G.collectible || 'beans',
     runSeconds: +G.runSeconds || 60, brand: {name: B.name, colors: B.colors, logo: B.logoImage || ''}, store: store ? B.name + ' · ' + store.name : B.name, avatar: GrugApp.avatar(), player: GrugApp.name(), look: GrugApp.look()};
 }
+/* Discord: one 'player has logged on' message per page visit, at most once per cooldown on this phone */
+let joinSent = false;
+function announceJoin(){
+  const D = CONFIG.discord || {}; if(joinSent || !/^https:\/\/(discord|discordapp)\.com\/api\/webhooks\//.test(D.webhook || '')) return;
+  joinSent = true;
+  const k = KEY + ':joinPing', gap = (+D.cooldownMinutes || 0) * 60000;
+  try{ if(gap && Date.now() - (+localStorage.getItem(k) || 0) < gap) return; localStorage.setItem(k, String(Date.now())); }catch(e){}
+  const f = new FormData(); f.append('payload_json', JSON.stringify({content: String(D.message || 'A player has logged on.').replace('{brand}', B.name), allowed_mentions: {parse: []}}));
+  try{ fetch(D.webhook, {method: 'POST', body: f, mode: 'no-cors', keepalive: true}).catch(() => {}); }catch(e){}
+}
 function toGame(m){ if(!gameFrame || !gameFrame.contentWindow) return; try{ gameFrame.contentWindow.postMessage(Object.assign({rw: 1}, m), '*'); }catch(e){} }
 function sendGameState(){ toGame(Object.assign({t: 'state'}, gameState())); }
 function pauseGame(){ toGame({t: 'pause'}); }
@@ -10156,7 +10173,7 @@ function buyItem(id){
   const it = gameItem(id); if(!it) return {ok: false, reason: 'That power-up isn’t in the shop.'};
   if((st.inv[id] || 0) >= INV_MAX) return {ok: false, reason: 'You already have ' + INV_MAX + ' of those.'};
   if(wallet() < it.cost) return {ok: false, reason: 'You need ' + (it.cost - wallet()) + ' more ' + (PL_ON ? 'points or ' + PL.name : 'points') + ' for ' + it.name + '.'};
-  const fromPl = PL_ON ? Math.min(st.pearls, it.cost) : 0, fromPts = it.cost - fromPl;   // Pearls first, so points stay saved for drinks
+  const fromPl = PL_ON ? Math.min(st.pearls, it.cost) : 0, fromPts = it.cost - fromPl;   // Pearls first, then points
   st.pearls -= fromPl; st.points -= fromPts; st.inv[id] = (st.inv[id] || 0) + 1;
   if(fromPts) hist(G.title + ' · ' + it.name, -fromPts);
   if(fromPl) hist(G.title + ' · ' + it.name, -fromPl, 'pl');
@@ -10174,7 +10191,7 @@ addEventListener('message', e => {
   const d = e.data; if(!d || d.rw !== 1 || typeof d.t !== 'string') return;
   if(!gameFrame || e.source !== gameFrame.contentWindow) return;   // only the game this page opened
   const reply = r => toGame(Object.assign({t: 'reply', req: String(d.req || ''), state: gameState()}, r));
-  if(d.t === 'hello'){ sendGameState(); GrugApp.onPlay(); }
+  if(d.t === 'hello'){ sendGameState(); GrugApp.onPlay(); announceJoin(); }
   else if(d.t === 'buy'){ const r = buyItem(String(d.id)); reply(r); if(r.ok && store) renderRewards(); }
   else if(d.t === 'use'){ const r = useItems(d.ids); reply(r); if(r.ok && store) renderRewards(); }
   else if(d.t === 'score'){
@@ -10238,7 +10255,7 @@ function renderPearls(){
   $('#plGrid').innerHTML = PL_PACKS.map(p => { const ok = plLinkOK(p.link);
     return '<button class="pl-pack card press' + (p.tag ? ' hot' : '') + '" data-pack="' + esc(p.id) + '"' + (ok ? '' : ' disabled') + '>' + (p.tag ? '<span class="pl-tag">' + esc(p.tag) + '</span>' : '') +
       ic('pearl') + '<b>' + (+p.pearls).toLocaleString() + '</b><small>' + esc(PL.name) + '</small><span class="pl-price">' + (ok ? esc(p.price) : 'Soon') + '</span></button>'; }).join('');
-  $('#plFine').innerHTML = esc(PL.name) + ' buy game boosts only. They can’t be swapped for drinks, points or cash, and they’re saved on this phone, so buy on the phone you play on. Payments are handled securely by Stripe.' +
+  $('#plFine').innerHTML = esc(PL.name) + ' buy game boosts only. They can’t be swapped for drinks, merchandise, points or cash, and they’re saved on this phone, so buy on the phone you play on. Payments are handled securely by Stripe.' +
     (PL.help ? '<br>' + esc(PL.help) : '') + '<br>Purchase code: <span class="pl-code">' + esc(guestCode()) + '</span>';
 }
 $('#plGrid').addEventListener('click', e => {
@@ -10266,7 +10283,7 @@ function pearlsArrived(r){
   buzz([10, 40, 18]); if(store) renderRewards(); sendGameState();
   openSheet('<div class="grab"></div><span class="eyebrow">Thank you!</span><h3>+' + (+p.pearls).toLocaleString() + ' ' + esc(PL.name) + '</h3>' +
     '<div class="pl-big">' + ic('pearl') + '<div><b>' + st.pearls.toLocaleString() + ' ' + esc(PL.name) + '</b><span>On this phone now</span></div></div>' +
-    '<p>Spend them on boosts in ' + esc(G.title || 'the game') + '. Your points stay saved for drinks.</p>' +
+    '<p>Spend them on boosts in ' + esc(G.title || 'the game') + '.</p>' +
     '<div class="row2">' + (TABS.includes('Game') ? '<button class="btn quiet press" data-close>Done</button><button class="btn primary press" id="plPlay">' + ic('game-controller') + 'Play</button>' : '<button class="btn primary press" data-close style="grid-column:1/-1">Done</button>') + '</div>');
   const pb = $('#plPlay'); if(pb) pb.onclick = () => { closeSheet(); setTab('Game'); };
 }
