@@ -183,7 +183,7 @@ h1,h2,h3{font-family:var(--fd);font-weight:600;line-height:1.08;letter-spacing:-
 .pl-bal{display:flex;align-items:center;gap:14px;padding:14px;margin-bottom:12px}
 .pl-bal .rw-ic{background:var(--brand);color:var(--on-brand)}
 .pl-test{flex:none;font:700 10px/1 var(--fu);letter-spacing:.14em;text-transform:uppercase;background:var(--accent);color:var(--ink);padding:6px 9px;border-radius:99px}
-.pl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding-top:6px}
+.pl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 10px;padding-top:6px}
 .pl-pack{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:20px 8px 12px;text-align:center;width:100%}
 .pl-pack .ic{width:30px;height:30px;color:var(--brand);margin-bottom:4px}
 .pl-pack b{font:600 28px/1 var(--fd)}
@@ -9646,11 +9646,12 @@ const CONFIG = {
     enabled: true,
     name: 'Pearls',
     packs: [
-      { id: 'p60', pearls: 60, price: '$2.99', link: '' },
-      { id: 'p130', pearls: 130, price: '$4.99', link: '', tag: 'Popular' },
-      { id: 'p300', pearls: 300, price: '$9.99', link: '', tag: 'Best value' }
+      { id: 'p40', pearls: 40, price: '$1.99', link: 'https://buy.stripe.com/test_28E6oIdUj0cp9S21Ne9k403' },
+      { id: 'p60', pearls: 60, price: '$2.99', link: 'https://buy.stripe.com/test_aFabJ24jJ6ANd4efE49k400' },
+      { id: 'p130', pearls: 130, price: '$4.99', link: 'https://buy.stripe.com/test_5kQ4gA4jJaR3d4efE49k401', tag: 'Popular' },
+      { id: 'p300', pearls: 300, price: '$9.99', link: 'https://buy.stripe.com/test_14AdRa5nN3oBggq0Ja9k402', tag: 'Best value' }
     ],
-    help: 'Trouble with a purchase? Ask at the counter and show your purchase code.'
+    help: 'Trouble with a purchase? Text 954-459-6301 or visit gabrielman25.github.io/grugdigital/support.html with your purchase code.'
   },
 
   // Discord: posts a message to this webhook when someone opens the game. '' = off.
@@ -10252,6 +10253,7 @@ function renderPearls(){
   $('#plBal').textContent = n.toLocaleString() + ' ' + PL.name;
   $('#plSub').textContent = n ? 'Spent before your points when you buy a boost.' : 'Grab a pack to buy boosts without touching your points.';
   $('#plTest').hidden = !PL_PACKS.some(p => plLinkOK(p.link) && plTest(p.link));
+  $('#plGrid').style.gridTemplateColumns = innerWidth < 360 ? '' : 'repeat(' + (PL_PACKS.length === 4 ? 2 : Math.min(3, PL_PACKS.length)) + ',minmax(0,1fr))';
   $('#plGrid').innerHTML = PL_PACKS.map(p => { const ok = plLinkOK(p.link);
     return '<button class="pl-pack card press' + (p.tag ? ' hot' : '') + '" data-pack="' + esc(p.id) + '"' + (ok ? '' : ' disabled') + '>' + (p.tag ? '<span class="pl-tag">' + esc(p.tag) + '</span>' : '') +
       ic('pearl') + '<b>' + (+p.pearls).toLocaleString() + '</b><small>' + esc(PL.name) + '</small><span class="pl-price">' + (ok ? esc(p.price) : 'Soon') + '</span></button>'; }).join('');
