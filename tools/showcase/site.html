@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#eef3e6">
+<title>Grug · games made with Katy restaurants</title>
+<link rel="icon" href="@FAVICON@">
+<style>
+/* the whole page is the site: one frame, edge to edge */
+html,body{margin:0;height:100%;background:#eef3e6;overflow:hidden}
+#site{position:fixed;inset:0}
+#site iframe{width:100%;height:100%;border:0;display:block}
+.boot{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:#eef3e6;font:600 16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;color:#3b4434;text-align:center;padding:24px}
+.boot[hidden]{display:none}
+.boot div{display:grid;gap:14px;justify-items:center}
+.boot svg{width:64px;height:64px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;z-index:20;background:#16210f;color:#f7f5ef;padding:12px 18px;border-radius:14px;font:600 15px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif;max-width:calc(100vw - 32px);transition:.25s;pointer-events:none;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div class="boot" id="boot" role="status"><div><span id="bootLogo">@LOGO@</span><span id="bootMsg">Opening Grug…</span></div></div>
+<div id="site"></div>
+<div class="toast" id="toast" role="status"></div>
+<script type="application/octet-stream" id="pack">@PACK@</script>
+<script type="application/octet-stream" id="engine">@ENGINE@</script>
+<script>
+/*@LOADER@*/
+(function(){
+  const $ = s => document.querySelector(s), box = $('#site');
+  let tT = 0;
+  GL.toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tT); tT = setTimeout(() => t.classList.remove('on'), 3200); };
+  // the address bar follows the page (#/games/, #/play/yoshi/…) so back/forward and reload work like the real site
+  const here = () => { const h = decodeURIComponent(location.hash.slice(1) || '/'); const m = /^\/?([^?#]*)(\?[^#]*)?(#.*)?$/.exec(h) || []; return {path: m[1] || '', search: m[2] || '', hash: m[3] || ''}; };
+  const needsEngine = key => key === 'avatar';
+  async function show(path, search, hash, push){
+    const key = GL.pathKey(path);
+    if(!key){ GL.toast('That page isn’t in this offline copy.'); return; }
+    if(needsEngine(key) && !GL.engineURL){ $('#boot').hidden = false; $('#bootMsg').textContent = 'Opening the avatar editor…'; await GL.unpackEngine(); $('#boot').hidden = true; }
+    const url = '#/' + GL.pack.pages[key].path + search + hash;
+    if(push) history.pushState(null, '', url); else history.replaceState(null, '', url);
+    GL.loadPage(key, search, hash, box);
+    document.title = (GL.frame.contentDocument && GL.frame.contentDocument.title) || document.title;
+  }
+  GL.onNav = (path, search, hash) => show(path, search, hash, true);
+  addEventListener('popstate', () => { const h = here(); show(h.path, h.search, h.hash, false); });
+  (async () => {
+    try{ await GL.unpack(); }
+    catch(e){ $('#bootMsg').textContent = e.message || 'This file couldn’t open.'; return; }
+    const h = here();
+    await show(GL.pathKey(h.path) ? h.path : '', h.search, h.hash, false);
+    $('#boot').hidden = true;
+    // the 3D engine unpacks in the background so the avatar editor and avatar pictures are ready when needed
+    setTimeout(() => { GL.unpackEngine().catch(() => {}); }, 1500);
+  })();
+})();
+</script>
+</body>
+</html>

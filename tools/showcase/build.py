@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """Grug showcase: packs the site, every rewards app and its game into ONE html file for demos.
 
-    python3 tools/showcase/build.py [out.html]
+    python3 tools/showcase/build.py site [out.html]       the site itself, one-to-one, in one offline file (dist/grug-offline.html)
+    python3 tools/showcase/build.py showcase [out.html]   the guided showcase around it (dist/grug-showcase.html)
+    python3 tools/showcase/build.py site --extra DIR      also pack the rewards-app previews in DIR (offline copy only):
+        every DIR/<Place name>/<slug>-rewards.html becomes local/<slug>/ and gets a card under the Games page list.
+        They are kept out of this repo so they never appear on the live site.
+
+Both keep everything in memory only: nothing is saved on the device, and reloading starts fresh.
 
 What goes in
   - site pages (home, games, game pages, shop, profile, Pearls, partners, terms/privacy/support)
@@ -23,7 +29,12 @@ from PIL import Image
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(REPO, 'dist', 'grug-showcase.html')
+ARGS = sys.argv[1:]
+EXTRA = None
+if '--extra' in ARGS: i = ARGS.index('--extra'); EXTRA = ARGS[i + 1]; del ARGS[i:i + 2]
+MODE = ARGS[0] if ARGS and ARGS[0] in ('site', 'showcase') else 'showcase'
+OUT = [a for a in ARGS if a not in ('site', 'showcase')]
+OUT = OUT[0] if OUT else os.path.join(REPO, 'dist', 'grug-offline.html' if MODE == 'site' else 'grug-showcase.html')
 rd = lambda p: open(os.path.join(REPO, p), encoding='utf-8').read()
 
 # ---------- images: path (from the site root) -> data URL ----------
@@ -43,6 +54,9 @@ for d, mx, fmt, q in [('assets/thumbs', 720, 'JPEG', 78), ('assets/clothing/thum
     for f in sorted(os.listdir(os.path.join(REPO, d))):
         if re.search(r'\.(jpe?g|png|webp)$', f, re.I): img(d + '/' + f, mx, fmt, q)
 img('assets/backdrop.jpg', None, 'JPEG', 85)
+if MODE == 'site':   # full clothing templates: the avatar editor dresses the 3D character with them
+    for f in sorted(os.listdir(os.path.join(REPO, 'assets/clothing'))):
+        if f.endswith('.png'): img('assets/clothing/' + f, None, 'WEBP', 92)
 img('favicon.png', 128, 'WEBP', 90)
 for f in os.listdir(os.path.join(REPO, 'assets/prints')):
     if f.endswith('.png'): img('assets/prints/' + f, 192, 'WEBP', 88)
@@ -69,6 +83,8 @@ g = libs['grug.js']
 g = re.sub(r"const ROOT = [^\n]*;", "const ROOT = 'https://grug.local/';   // showcase: the shell catches links to this host", g, count=1)
 g = patch(g, "const url = p => ROOT + String(p || '').replace(/^\\/+/, '');",
           "const url = p => { const k = String(p || '').replace(/^\\/+/, ''); return (root.GRUG_ASSETS && root.GRUG_ASSETS[k.split(/[?#]/)[0]]) || ROOT + k; };")
+g = patch(g, "const d = url('assets/sandy/');\n    return { def: true, bust: d + 'bust.png', full: d + 'full.png', happy: d + 'happy.png', sad: d + 'sad.png', cheer: d + 'cheer.png' };",
+          "const d = n => url('assets/sandy/' + n + '.png');   // showcase: each picture by its own path, so the packed copies are found\n    return { def: true, bust: d('bust'), full: d('full'), happy: d('happy'), sad: d('sad'), cheer: d('cheer') };")
 g = patch(g, "const colorful = () => !!(profile && profile.prefs && profile.prefs.colorIcons);", "const colorful = () => false;   // showcase: colourful icon pictures aren't packed")
 g = g.replace("'<div class=\"g-pref\"><span><b>Colorful icons</b>", "'<div class=\"g-pref\" hidden><span><b>Colorful icons</b>")
 libs['grug.js'] = g
@@ -83,6 +99,7 @@ PAGES = [('index.html', 'home'), ('games/index.html', 'games'), ('shop/index.htm
          ('play/yoshi/index.html', 'app-yoshi'), ('play/teahouse/index.html', 'app-teahouse'), ('play/cielito/index.html', 'app-cielito'),
          ('play/soluna/index.html', 'app-soluna'), ('work/alchemy/site.html', 'app-alchemy')]
 for gid in ['yoshi', 'teahouse', 'cielito', 'soluna', 'alchemy']: PAGES.append(('games/%s/index.html' % gid, 'game-' + gid))
+if MODE == 'site': PAGES.append(('avatar/index.html', 'avatar'))
 
 LIB_RE = re.compile(r'<script\s+src="(?:\.\./)*assets/([\w.-]+\.js)"\s*>\s*</script>', re.I)
 CSS_RE = re.compile(r'<link\s+rel="stylesheet"\s+href="(?:\.\./)*assets/([\w.-]+\.css)"\s*/?>', re.I)
@@ -92,6 +109,13 @@ def pack_page(path):
     s = LIB_RE.sub(lambda m: '<!--LIB:%s-->' % m.group(1) if m.group(1) in libs else m.group(0), s)
     s = CSS_RE.sub(lambda m: '<!--LIB:%s-->' % m.group(1) if m.group(1) in libs else m.group(0), s)
     s = re.sub(r'<link[^>]+rel="(?:icon|shortcut icon|apple-touch-icon|manifest)"[^>]*>', '', s)
+    # the 3D engine (avatar editor): one script URL made in the browser; sandy-view.js is inside it
+    s = re.sub(r'<script\s+src="(?:\.\./)*assets/sandy-runtime\.js"\s*>\s*</script>', '<!--ENGINE-->', s)
+    s = re.sub(r'<script\s+src="(?:\.\./)*assets/sandy-view\.js"\s*>\s*</script>', '', s)
+    # games inside the apps run in their own frame: same memory storage, same 3D engine
+    s = re.sub(r'(<script type="text/x-game" id="gameSource">.*?<head[^>]*>)', lambda m: m.group(1) +
+        '<script>try{var __T=top;Object.defineProperty(window,"localStorage",{configurable:true,get:function(){return __T.__grugLS}});Object.defineProperty(window,"sessionStorage",{configurable:true,get:function(){return __T.__grugSS}})}catch(e){}<\\/script>', s, count=1, flags=re.S)
+    s = s.replace("s.src = '../../assets/sandy-runtime.js'", "s.src = (top.__grugEngineURL || '../../assets/sandy-runtime.js')")
     # images referenced by a path in the page (attributes and JS strings): packed copy, if there is one
     def asset(m):
         p = os.path.normpath(os.path.join(base, m.group(2))).replace('\\', '/')
@@ -117,6 +141,45 @@ for path, key in PAGES:
     vpath = re.sub(r'index\.html$', '', path)
     pages[key] = {'path': vpath, 'html': pack_page(path)}
 
+# ---------- rewards-app previews (offline copy only) ----------
+previews = []
+if EXTRA and MODE == 'site':
+    for place in sorted(os.listdir(EXTRA)):
+        d = os.path.join(EXTRA, place)
+        if place.startswith('_') or not os.path.isdir(d): continue
+        for f in sorted(os.listdir(d)):
+            if not f.endswith('-rewards.html'): continue
+            slug = re.sub(r'[^a-z0-9-]+', '-', f[:-len('-rewards.html')].lower()).strip('-')
+            raw = open(os.path.join(d, f), encoding='utf-8').read()
+            vpath = 'local/%s/' % slug
+            tmp = os.path.join(REPO, vpath + 'index.html')   # pack_page reads from the repo; give it the file without keeping it
+            os.makedirs(os.path.dirname(tmp), exist_ok=True); open(tmp, 'w', encoding='utf-8').write(raw)
+            try: pages['local-' + slug] = {'path': vpath, 'html': pack_page(vpath + 'index.html')}
+            finally: os.remove(tmp); os.rmdir(os.path.dirname(tmp)); os.path.isdir(os.path.join(REPO, 'local')) and not os.listdir(os.path.join(REPO, 'local')) and os.rmdir(os.path.join(REPO, 'local'))
+            cfg = raw[raw.find('const CONFIG = {'):][:200000]
+            col = re.search(r'"colors"\s*:\s*\{[^}]*?"brand"\s*:\s*"(#[0-9a-fA-F]{3,8})"', cfg)
+            logo = re.search(r'"logoImage"\s*:\s*"data:image/[a-z+]+;base64,([A-Za-z0-9+/=]+)"', cfg)
+            short = re.search(r'"short"\s*:\s*"([^"]+)"', cfg)
+            lsrc = ''
+            if logo:   # the app's own logo, shrunk for the card
+                try:
+                    im = Image.open(io.BytesIO(base64.b64decode(logo.group(1)))); im.load(); im.thumbnail((240, 240), Image.LANCZOS)
+                    b = io.BytesIO(); im.save(b, 'WEBP', quality=88, method=6); lsrc = 'data:image/webp;base64,' + base64.b64encode(b.getvalue()).decode()
+                except Exception: lsrc = ''
+            previews.append({'slug': slug, 'name': place, 'short': short.group(1) if short else place, 'color': col.group(1) if col else '#5F5C37', 'logo': lsrc})
+    if previews:   # cards under the live games, in the Games page's own tile style
+        def tile(p):
+            ini = ''.join(w[0] for w in re.findall(r'[A-Za-z0-9&]+', p['name'])[:2]).upper()
+            face = ('<img src="%s" alt="" style="width:72%%;height:72%%;object-fit:contain">' % p['logo']) if p['logo'] else ini
+            return ('<div class="g-tile"><a class="pic" href="../local/%s/" style="background:%s;display:grid;place-items:center;color:#fff;font:600 44px/1 var(--display)" aria-label="%s">%s'
+                    '<span class="badge soon">Preview</span></a><div class="body"><div class="title">%s</div><div class="meta">Rewards app preview</div>'
+                    '<div class="acts"><a class="g-btn primary sm" href="../local/%s/">Open the app</a></div></div></div>') % (p['slug'], p['color'], p['name'], face, p['name'], p['slug'])
+        sec = ('<div class="gl-head" style="margin-top:26px"><h2>Rewards app previews</h2><p>Working rewards apps built for more Katy spots. '
+               'These are only in this offline copy.</p></div><div class="gl" id="previews">' + ''.join(tile(p) for p in previews) + '</div>')
+        gh = pages['games']['html']
+        if '<div class="gl" id="list"></div>' not in gh: raise SystemExit('games page anchor missing')
+        pages['games']['html'] = gh.replace('<div class="gl" id="list"></div>', '<div class="gl" id="list"></div>' + sec, 1)
+
 # ---------- app facts for the restaurant cards ----------
 games_js = libs['games.js']
 games = json.loads(os.popen("node -e 'global.window={};eval(require(\"fs\").readFileSync(process.argv[1],\"utf8\"));console.log(JSON.stringify(window.GRUG_GAMES))' " + os.path.join(REPO, 'assets/games.js')).read())
@@ -138,19 +201,23 @@ pack_prints = [p for p in PACK_PRINTS if 'assets/prints/pack/%s.webp' % p in ass
 rt = rd('assets/sandy-runtime.js')
 rt = re.sub(r"function decalUrl\(img\)\{.*?\n", "function decalUrl(img){const A=window.__GRUG_ASSETS||{};let m=/^print:([a-z0-9-]{1,32})$/.exec(img);if(m)return A['assets/prints/'+m[1]+'.png']||SR_BASE+'prints/'+m[1]+'.png';m=/^pack:([a-z0-9-]{1,48})$/.exec(img);if(m)return A['assets/prints/pack/'+m[1]+'.webp']||SR_BASE+'prints/pack/'+m[1]+'.webp';return img}\n", rt, count=1, flags=re.S)
 if "window.__GRUG_ASSETS" not in rt: raise SystemExit('runtime decal patch failed')
+rt = patch(rt, "function src(t) { return /^shop:/.test(t) ? ASSETS + 'clothing/' + t.slice(5).replace(/[^\\w-]/g, '') + '.png' : t; }",
+           "function src(t) { if (!/^shop:/.test(t)) return t; const id = t.slice(5).replace(/[^\\w-]/g, ''); return (window.__GRUG_ASSETS && window.__GRUG_ASSETS['assets/clothing/' + id + '.png']) || ASSETS + 'clothing/' + id + '.png'; }")
 engine = base64.b64encode(gzip.compress((rt + '\n;\n' + rd('assets/sandy-view.js')).encode(), 9)).decode()
 
 payload = {'libs': libs, 'pages': pages, 'assets': assets, 'presets': presets}
 raw = json.dumps(payload, separators=(',', ':')).encode()
 packed = base64.b64encode(gzip.compress(raw, 9)).decode()
 
-shell = open(os.path.join(HERE, 'shell.html'), encoding='utf-8').read()
+shell = open(os.path.join(HERE, 'site.html' if MODE == 'site' else 'shell.html'), encoding='utf-8').read()
+shell = shell.replace('/*@LOADER@*/', open(os.path.join(HERE, 'loader.js'), encoding='utf-8').read())
 meta = {'games': games, 'facts': facts, 'logo': re.search(r"const LOGO = '(<svg.*?</svg>)'", libs['grug.js'], re.S).group(1),
         'icons': json.loads(re.search(r'window\.GRUG_ICONS_SIMPLE = (\{.*?\});', libs['icons.js'], re.S).group(1)),
         'thumbs': {g['id']: assets.get(g['thumb'], '') for g in games}, 'presets': [{'id': p['id'], 'label': p['label'], 'bust': p['snaps']['bust'], 'full': p['snaps']['full']} for p in presets]}
 fonts = '\n'.join(m.group(0) for m in re.finditer(r'@font-face\s*\{[^}]*\}', libs['grug.css']))
 meta['packPrints'] = pack_prints
-shell = shell.replace('@ENGINE@', engine).replace('/*@FONTS@*/', fonts).replace('"@META@"', json.dumps(meta, separators=(',', ':')).replace('</', '<\\/')).replace('@PACK@', packed)
+shell = shell.replace('@ENGINE@', engine).replace('/*@FONTS@*/', fonts).replace('@LOGO@', meta['logo']).replace('@FAVICON@', assets.get('favicon.png', '')).replace('"@META@"', json.dumps(meta, separators=(',', ':')).replace('</', '<\\/')).replace('@PACK@', packed)
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 open(OUT, 'w', encoding='utf-8').write(shell)
+print('previews: %d' % len(previews)) if previews else None
 print('pages %d, images %d, raw %.1f MB, packed %.1f MB, 3D engine %.1f MB -> %s (%.1f MB)' % (len(pages), len(assets), len(raw) / 1e6, len(packed) / 1e6, len(engine) / 1e6, OUT, os.path.getsize(OUT) / 1e6))

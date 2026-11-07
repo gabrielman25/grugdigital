@@ -182,7 +182,7 @@ p{margin:0}
 <header class="top">
   <a class="brand" href="#overview" id="brand"><span id="logo"></span>Grug <small>Showcase</small></a>
   <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
-  <button class="reset" id="reset" type="button" title="Clear all demo points, Pearls and choices"><span id="icReset"></span><b>Reset demo</b></button>
+  <button class="reset" id="reset" type="button" title="Start the demo over"><span id="icReset"></span><b>Reset demo</b></button>
 </header>
 <main class="wrap">
   <section class="content" id="content" aria-live="polite"></section>
@@ -199,7 +199,7 @@ p{margin:0}
 <script type="application/octet-stream" id="pack">@PACK@</script>
 <script type="application/octet-stream" id="engine">@ENGINE@</script>
 <script>
-'use strict';
+/*@LOADER@*/
 const META = "@META@";
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -209,36 +209,13 @@ const SITE = 'gabrielman25.github.io/grugdigital/';
 let PACK = null;
 
 /* ---------- unpack: one gzip block holding every page, script and picture ---------- */
-async function unpack(){
-  if(!('DecompressionStream' in window)) throw new Error('This browser is too old to open the showcase. Use a current Chrome, Safari, Edge or Firefox.');
-  const b64 = $('#pack').textContent.trim(), bin = atob(b64), u8 = new Uint8Array(bin.length);
-  for(let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
-  const text = await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
-  return JSON.parse(text);
-}
-function storageOK(){ try{ localStorage.setItem('grug.showcase.t', '1'); localStorage.removeItem('grug.showcase.t'); return true; }catch(e){ return false; } }
+const unpack = () => GL.unpack();
+function storageOK(){ return true; }   // memory-only storage (see loader.js)
 
 /* ---------- the phone: each page is written into a fresh frame so it keeps its own address, routing and storage ---------- */
 let frame = null, cur = {key:'', search:'', hash:''}, hist = [];
 const pageByPath = p => Object.entries(PACK.pages).find(([k, v]) => v.path === p);
-function pageHTML(key, search, hash){
-  const pg = PACK.pages[key], L = PACK.libs;
-  const S = 'scr' + 'ipt';
-  const prelude = '<' + S + '>(function(){var P=parent;window.__grugShowcase=true;window.GRUG_ASSETS=P.__GRUG_ASSETS;' +
-    'var VP=' + JSON.stringify('https://grug.local/' + pg.path) + ';' +
-    'try{history.replaceState(null,"",location.pathname+' + JSON.stringify(search || '') + '+' + JSON.stringify(hash || '') + ')}catch(e){}' +
-    'function go(u){try{u=new URL(String(u),VP)}catch(e){return}' +
-      'if(u.hostname==="grug.local"){P.__grugNav(u.pathname.slice(1),u.search,u.hash);return}' +
-      'if(/(^|\\.)stripe\\.com$/.test(u.hostname)){P.__grugDemoBuy(u.href,window);return}' +
-      'if(/^https?:$/.test(u.protocol))window.open(u.href,"_blank","noopener")}' +
-    'window.__grugLoc={set href(u){go(u)},get href(){return location.href},replace:go,assign:go};' +
-    'addEventListener("click",function(e){var a=e.target&&e.target.closest&&e.target.closest("a[href]");if(!a||e.defaultPrevented)return;' +
-      'var h=a.getAttribute("href");if(!h||h.charAt(0)==="#"||/^(javascript|mailto|tel|sms|data|blob):/i.test(h)||a.hasAttribute("download"))return;' +
-      'e.preventDefault();e.stopImmediatePropagation();go(h)},true);' +
-    '})();</' + S + '>';
-  let html = pg.html.replace(/<!--LIB:([\w.-]+)-->/g, (m, n) => L[n] == null ? '' : n.endsWith('.css') ? '<style>' + L[n] + '</style>' : '<' + S + '>' + L[n] + '</' + S + '>');
-  return /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, m => m + prelude) : prelude + html;
-}
+const pageHTML = (key, search, hash) => GL.pageHTML(key, search, hash);
 let showNext = false;
 function loadPage(key, search, hash, opts){
   if(!PACK.pages[key]) return toast('That page isn’t in the showcase.');
@@ -264,7 +241,8 @@ const win = () => frame && frame.contentWindow;
 
 // links and code inside the pages land here
 window.__GRUG_ASSETS = null;
-window.__grugNav = (path, search, hash) => {
+window.__grugNav = (path, search, hash) => { setTimeout(() => grugNav(path, search, hash), 0); };   // deferred, see loader.js
+function grugNav(path, search, hash){
   path = String(path || '').replace(/^\/+/, '').replace(/(^|\/)index\.html$/, '$1');
   if(/^avatar\/?$/.test(path)){ ED.mode = '3d'; setTab('avatar'); return; }
   const hit = pageByPath(path) || pageByPath(path + '/');
@@ -444,10 +422,8 @@ let PRINTS = [];
 const printSrc = v => { const A = PACK.assets, m = /^(print|pack):(.+)$/.exec(v); if(!m) return ''; return m[1] === 'print' ? A['assets/prints/' + m[2] + '.png'] : A['assets/prints/pack/' + m[2] + '.webp']; };
 const ED = {cat: null, cfg: null, status: '', mode: '3d', sandy: null, R: null, loading: null, raf: 0, pose: 'idle'};
 async function unpackEngine(){
-  const bin = atob($('#engine').textContent.trim()), u8 = new Uint8Array(bin.length);
-  for(let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
-  const code = await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
-  await new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = URL.createObjectURL(new Blob([code], {type: 'text/javascript'})); sc.onload = ok; sc.onerror = () => no(new Error('The 3D engine couldn’t start.')); document.head.appendChild(sc); });
+  const url = await GL.unpackEngine();
+  await new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = url; sc.onload = ok; sc.onerror = () => no(new Error('The 3D engine couldn’t start.')); document.head.appendChild(sc); });
   if(!window.SandyKit || !window.THREE) throw new Error('The 3D engine couldn’t start.');
 }
 function startEditor(){
@@ -605,12 +581,7 @@ $('#back').addEventListener('click', () => { const h = hist.pop(); if(h) loadPag
 $('#full').addEventListener('click', () => { const s = $('#stage'); s.classList.toggle('full'); $('#full').innerHTML = ic(s.classList.contains('full') ? 'arrows-in' : 'arrows-out'); $('#full').setAttribute('aria-label', s.classList.contains('full') ? 'Exit full screen' : 'Full screen'); fit(); });
 addEventListener('keydown', e => { if(e.key === 'Escape' && $('#stage').classList.contains('full')) $('#full').click(); });
 $('#reset').addEventListener('click', () => {
-  if(!confirm('Reset the demo? This clears all demo points, Pearls, names and looks saved by the showcase on this device.')) return;
-  const keys = []; for(let i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
-  const own = new RegExp('^(grug\\.|' + GAMES.map(g => g.storageKey).filter(Boolean).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')|teahouse|yoshi|cielito|soluna|alchemy|sugar', 'i');
-  keys.forEach(k => { if(own.test(k)) localStorage.removeItem(k); });
-  try{ sessionStorage.clear(); }catch(e){}
-  location.reload();
+  if(confirm('Reset the demo? This clears all demo points, Pearls and looks. Nothing is ever saved on this device.')) location.reload();
 });
 let tT = 0;
 function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tT); tT = setTimeout(() => t.classList.remove('on'), 3200); }
