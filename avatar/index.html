@@ -139,7 +139,7 @@ Every field is optional; anything left out comes from `SandyKit.DEFAULT`.
 - `body`: `"female"` or `"male"` (`SandyKit.CATALOG.bodies`). Both bodies are Quaternius Universal Base Characters
   (Superhero, CC0) wearing her own head, sphere hands and feet; every outfit piece fits both. Changing `body` rebuilds
   her rig in place; `await sandy.ready` if you need to know when it's done.
-- `decal`: a chest print on her top: `image` (`"star"`, `"heart"`, `"bolt"`, `"smile"`, `"peace"`, an image data URL, or null), `size`, `up` and `side` (cm).
+- `decal`: a chest print on her top: `image` (`"star"`, `"heart"`, `"bolt"`, `"smile"`, `"peace"`, `"print:<name>"` for a ready-made print in assets/prints/ (fire, crown, rocket, gamepad, pearl, gem, rainbow, flower, paw, duck), an image data URL, or null), `size`, `up` and `side` (cm).
 - `hat`: `type` (`"none"` or one of `SandyKit.CATALOG.hats`: beanie, beret, bucketHat, cap, cowboyHat, sunHat, topHat, witchHat),
   `colour`, `size`, `up` and `forward` (cm), `tilt` (radians). Her hair is never changed by a hat. Hats: Chibi Hats by PaperPluto
   (itch.io; free for commercial use, not to be redistributed on their own).
@@ -290,6 +290,7 @@ textarea{width:100%;min-height:120px;font:12.5px/1.45 ui-monospace,Menlo,Consola
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chips button{appearance:none;min-height:34px;padding:0 13px;border-radius:999px;background:var(--card);color:var(--ink2);border:1px solid var(--line);cursor:pointer;font:700 13.5px/1 var(--font);text-transform:capitalize}
 .chips button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#decals .print{padding:4px 8px;line-height:0}#decals .print img{width:28px;height:28px;object-fit:contain;pointer-events:none}
 input[type=range]{flex:1;min-width:120px;accent-color:var(--ring-a)}
 input[type=checkbox]{width:20px;height:20px;accent-color:var(--ring-a)}
 .val{width:48px;text-align:right;font-variant-numeric:tabular-nums;color:var(--mut);font-size:13.5px}
@@ -565,7 +566,10 @@ document.querySelectorAll('[data-ccu]').forEach(inp=>inp.addEventListener('chang
   ccWear(slot,{template:url});inp.value=''};im.src=rd.result};rd.readAsDataURL(f)}));
 if(/custom/i.test(location.hash))setTimeout(()=>{const t=$('tabCustom');if(t)t.click()},0);
 addEventListener('load',()=>renderCustom());
-$('decals').innerHTML=['none','star','heart','bolt','smile','peace'].map(t=>`<button type="button" data-d="${t}" aria-pressed="false">${t}</button>`).join('');
+// chest prints: the drawn shapes, then ready-made prints from the icon pack (assets/prints/<name>.png, saved as 'print:<name>')
+const PRINTS=['fire','crown','rocket','gamepad','pearl','gem','rainbow','flower','paw','duck'];
+$('decals').innerHTML=['none','star','heart','bolt','smile','peace'].map(t=>`<button type="button" data-d="${t}" aria-pressed="false">${t}</button>`).join('')+
+  PRINTS.map(t=>`<button type="button" class="print" data-d="print:${t}" aria-pressed="false" title="${t}" aria-label="${t} print"><img src="../assets/prints/${t}.png" alt="" width="28" height="28" loading="lazy"></button>`).join('');
 $('decals').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b)apply({decal:{image:b.dataset.d==='none'?null:b.dataset.d}})});
 $('decFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const im=new Image(),rd=new FileReader();rd.onload=()=>{im.onload=()=>{
   // kept small (256 px) so the config stays a reasonable size
@@ -581,7 +585,14 @@ $('bodies').innerHTML=C.bodies.map(b=>`<button type="button" data-b="${b}" aria-
 $('bodies').addEventListener('click',e=>{const b=e.target.closest('[data-b]');if(b)apply({body:b.dataset.b})});
 $('exprs').innerHTML=C.expressions.map(e=>`<button type="button" data-e="${e}" aria-pressed="false">${e}</button>`).join('');
 $('exprs').addEventListener('click',e=>{const b=e.target.closest('[data-e]');if(b)apply({expression:b.dataset.e})});
-for(const r of document.querySelectorAll('[data-num]'))r.addEventListener('input',()=>apply(patchFor(r.dataset.num,+r.value)));
+// sliders: a drag fires many input events; apply only the newest values, at most once per screen frame
+const slidePend=new Map();let slideRaf=0;
+function slideFlush(){slideRaf=0;if(!slidePend.size)return;let patch={};for(const [k,v] of slidePend)patch=K.merge(patch,patchFor(k,v));slidePend.clear();apply(patch)}
+for(const r of document.querySelectorAll('[data-num]')){r.addEventListener('input',()=>{slidePend.set(r.dataset.num,+r.value);if(!slideRaf)slideRaf=requestAnimationFrame(slideFlush)});
+  r.addEventListener('change',()=>{if(slideRaf){cancelAnimationFrame(slideRaf);slideFlush()}})}
+// while a finger or mouse is on a control, the avatar pictures wait (see post())
+let editing=false;addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('input,button,select,.sw'))editing=true},true);
+for(const ev of ['pointerup','pointercancel','blur'])addEventListener(ev,()=>{editing=false},true);
 $('hairStyle').addEventListener('change',()=>apply({hair:{style:+$('hairStyle').value}}));
 const hairStep=d=>{const n=C.hairStyles.length||64;apply({hair:{style:((cfg.hair.style+d)%n+n)%n}})};$('hairPrev').addEventListener('click',()=>hairStep(-1));$('hairNext').addEventListener('click',()=>hairStep(1));
 for(const b of document.querySelectorAll('#feetType button'))b.addEventListener('click',()=>{const t=b.dataset.type,f=cfg.feet||{};
@@ -594,7 +605,7 @@ function sync(){if(!cfg)return;try{renderCustom()}catch(e){}
   for(const el of document.querySelectorAll('[data-colour]')){const v=(get(cfg,el.dataset.colour)||'').toLowerCase();let hit=false;for(const b of el.querySelectorAll('.sw')){const on=b.dataset.c.toLowerCase()===v;b.setAttribute('aria-pressed',String(on));hit=hit||on}const lab=el.querySelector('.pick'),pk=lab&&lab.querySelector('input');if(pk&&/^#[0-9a-f]{6}$/.test(v))pk.value=v;if(lab){const custom=!hit&&/^#[0-9a-f]{6}$/.test(v);lab.setAttribute('aria-pressed',String(custom));lab.style.setProperty('--c',custom?v:'transparent')}}
   for(const b of $('exprs').children)b.setAttribute('aria-pressed',String(b.dataset.e===cfg.expression));
   for(const b of $('bodies').children)b.setAttribute('aria-pressed',String(b.dataset.b===(cfg.body||'female')));
-  for(const b of $('decals').children)b.setAttribute('aria-pressed',String(b.dataset.d===((cfg.decal&&cfg.decal.image)?(['star','heart','bolt','smile','peace'].includes(cfg.decal.image)?cfg.decal.image:''):'none')));
+  {const im=cfg.decal&&cfg.decal.image,cur=im?((['star','heart','bolt','smile','peace'].includes(im)||/^print:/.test(im))?im:''):'none';for(const b of $('decals').children)b.setAttribute('aria-pressed',String(b.dataset.d===cur))}
   for(const b of $('hats').children)b.setAttribute('aria-pressed',String(b.dataset.h===((cfg.hat&&cfg.hat.type)||'none')));
   for(const b of $('rings').children)b.setAttribute('aria-pressed',String(b.dataset.r===((cfg.earrings&&cfg.earrings.type)||'none')));
   for(const r of document.querySelectorAll('[data-num]')){r.value=get(cfg,r.dataset.num);}for(const s of document.querySelectorAll('[data-show]')){const p=s.dataset.show,v=+get(cfg,p)||0;s.textContent=p==='faceY'?(v>=0?'+':'')+Math.round(v*100):/^(decal\.(up|side)|hair\.(up|forward)|hat\.(up|forward))$/.test(p)?v.toFixed(1)+' cm':/^(ears\.(up|forward|out)|earrings\.(drop|forward))$/.test(p)?v.toFixed(1)+' cm':/^(ears\.(twist|flare)|earrings\.angle|hat\.tilt)$/.test(p)?Math.round(v*57.2958)+'°':Math.round(v*100)+'%'};
@@ -635,11 +646,28 @@ $('bHelp').addEventListener('click',()=>{$('helpText').textContent=K.readme();$(
 $('bHelpClose').addEventListener('click',()=>{$('help').hidden=true;$('bHelp').focus()});$('help').addEventListener('click',e=>{if(e.target===$('help'))$('help').hidden=true});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('help').hidden){$('help').hidden=true;$('bHelp').focus()}});
 $('bCopyReadme').addEventListener('click',()=>copy(K.readme(),'Read-me copied'));
+// ---------- saving the look and its pictures ----------
+const SNAP_IDLE=4000;let snapGen=0,snapping=null,snapH;
+// the hash of the look the saved pictures show (read from storage once, then kept here: the pictures are big)
+function snapHash(){if(snapH===undefined){snapH=null;try{const s=JSON.parse(localStorage.getItem(window.SandyView.SNAP_KEY)||'null');snapH=s&&s.hash||null}catch(e){}}return snapH}
+function saveLook(){clearTimeout(saveLook.t);saveLook.t=0;if(!saveLook.c)return;try{localStorage.setItem('grug.sandy.v1',JSON.stringify(saveLook.c))}catch(e){}}
+function takeSnaps(c,gen){if(editing){post.snT=setTimeout(()=>takeSnaps(c,gen),1500);return}
+  const S=window.SandyView;if(!S||snapping)return;
+  snapping=S.makeSnaps(c,{step:true,cancelled:()=>gen!==snapGen}).then(r=>{if(r)snapH=r.hash}).catch(e=>console.warn('snapshots failed',e)).finally(()=>{snapping=null;if(gen!==snapGen&&cfg&&snapHash()!==S.hash(cfg))post.snT=setTimeout(()=>takeSnaps(cfg,snapGen),SNAP_IDLE)})}
+// leaving the editor: save now, and take the pictures straight away if they're out of date
+function flushOnLeave(){saveLook();if(!cfg||!window.SandyView)return;const S=window.SandyView;
+  if(snapHash()!==S.hash(cfg)){clearTimeout(post.snT);snapGen++;const c=cfg;S.makeSnaps(c).then(r=>{if(r)snapH=r.hash}).catch(()=>{})}}
+addEventListener('pagehide',flushOnLeave);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushOnLeave()});
 // ---------- talking to a parent page (when embedded in an iframe) ----------
-function post(m){if(m&&(m.sandy==='change'||m.sandy==='ready')&&m.config){try{localStorage.setItem('grug.sandy.v1',JSON.stringify(m.config))}catch(e){}
-  // pictures of the look for the rest of the site (header, home, profile, games), redrawn a moment after the last change
-  if(window.SandyView){const S=window.SandyView,c=m.config,cur=(()=>{try{return JSON.parse(localStorage.getItem(S.SNAP_KEY)||'null')}catch(e){return null}})();
-    if(!cur||cur.hash!==S.hash(c)){clearTimeout(post.snT);post.snT=setTimeout(()=>{S.makeSnaps(c).catch(e=>console.warn('snapshots failed',e))},m.sandy==='ready'?300:1200)}}}try{if(parent!==window)parent.postMessage(m,'*')}catch(e){}}
+function post(m){if(m&&(m.sandy==='change'||m.sandy==='ready')&&m.config){
+  // save the look on the phone, at most every 250 ms while editing
+  saveLook.c=m.config;if(m.sandy==='ready')saveLook();else if(!saveLook.t)saveLook.t=setTimeout(saveLook,250);
+  // pictures of the look for the rest of the site (header, home, profile, games). Taking them is heavy (about a second
+  // on a phone), so it waits until nothing has changed for SNAP_IDLE ms and no control is held, goes one picture at a time,
+  // and stops if anything changes in between. Leaving the page takes them right away (see pagehide below).
+  if(window.SandyView){const S=window.SandyView,c=m.config;
+    snapGen++;clearTimeout(post.snT);if(snapHash()!==S.hash(c))post.snT=setTimeout(()=>takeSnaps(c,snapGen),m.sandy==='ready'?600:SNAP_IDLE)}}
+  try{if(parent!==window)parent.postMessage(m,'*')}catch(e){}}
 addEventListener('message',e=>{const m=e.data;if(!m||typeof m!=='object'||!m.sandy||!sandy)return;const reply=x=>{try{e.source.postMessage(Object.assign({id:m.id},x),'*')}catch(_){}};
   if(m.sandy==='apply'){sandy.apply(m.replace?K.merge(K.DEFAULT,m.config):m.config||{},!!m.replace);cfg=sandy.getConfig();sync();reply({sandy:'config',config:cfg})}
   else if(m.sandy==='get')reply({sandy:'config',config:cfg});

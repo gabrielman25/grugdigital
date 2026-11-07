@@ -121,7 +121,7 @@
   // re-take the avatar's pictures after her look changed outside the editor (loads the 3D runtime once, in the background)
   let picBusy = null;
   function refreshPictures(c) {
-    const run = () => root.SandyView.makeSnaps(c || look()).then(() => emit('snaps')).catch(() => {});
+    const run = () => root.SandyView.makeSnaps(c || look(), { step: true }).then(() => emit('snaps')).catch(() => {});
     if (root.SandyView) { picBusy = (picBusy || Promise.resolve()).then(run); return picBusy; }
     picBusy = new Promise(ok => { const s = document.createElement('script'); s.src = url('assets/sandy-view.js'); s.onload = ok; s.onerror = ok; document.head.appendChild(s); }).then(() => root.SandyView && run());
     return picBusy;
@@ -222,13 +222,24 @@
      (see assets/sandy-view.js). Until someone makes their own, everyone gets the default look's pictures. */
   const SANDY_KEY = 'grug.sandy.v1', SANDY_SNAPS = 'grug.sandy.snaps.v1';
   const sandyHash = (o) => { const s = JSON.stringify(o || null); let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+  // the saved pictures; if the look changed since they were taken they're still shown (s.stale) until ensureSnaps redraws them
   function snaps() {
     const s = readJSON(SANDY_SNAPS, null), c = readJSON(SANDY_KEY, null);
-    if (s && s.bust && (!c || s.hash === sandyHash(c))) return s;
+    if (s && s.bust) { if (c && s.hash !== sandyHash(c)) s.stale = true; return s; }
     const d = url('assets/sandy/');
     return { def: true, bust: d + 'bust.png', full: d + 'full.png', happy: d + 'happy.png', sad: d + 'sad.png', cheer: d + 'cheer.png' };
   }
-  function ensureSnaps() { return snaps(); }
+  // pages that show the avatar call this: out-of-date pictures (the editor was closed before it finished) get redrawn
+  // in the background, a picture at a time, once the page has settled
+  let ensureT = 0;
+  function ensureSnaps(force) {
+    const s = snaps(), c = readJSON(SANDY_KEY, null);
+    if (c && (force || s.stale || s.def) && !ensureT && !picBusy) ensureT = setTimeout(() => {
+      const go = () => { ensureT = 0; refreshPictures(c); };
+      root.requestIdleCallback ? root.requestIdleCallback(go, { timeout: 3000 }) : go();
+    }, force ? 50 : 1500);
+    return s;
+  }
   root.addEventListener('storage', e => { if (e.key === SANDY_SNAPS) emit('snaps'); });
   root.addEventListener('grug-sandy-snaps', () => emit('snaps'));
 

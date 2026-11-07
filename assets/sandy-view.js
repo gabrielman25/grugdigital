@@ -6,7 +6,7 @@
    SandyView.config()            the saved look (or null)
    SandyView.load()              Promise: loads assets/sandy-runtime.js once (THREE r149 + SandyKit)
    SandyView.snaps()             cached pictures {bust, full, happy, sad, cheer} of the saved look, or the defaults
-   SandyView.makeSnaps(cfg)      Promise: renders and caches the pictures (call after the look changes)
+   SandyView.makeSnaps(cfg, o)   Promise: renders and caches the pictures (call after the look changes); o = {step, cancelled}
    SandyView.DEFAULT_SNAPS       picture URLs of the default look, shipped in assets/sandy/ */
 (function (root) {
   'use strict';
@@ -56,6 +56,7 @@
     if (o && o.expression) c.expression = o.expression;
     if (!r.sandy) { r.sandy = await r.K.create(c); r.scene.add(r.sandy.object3d); } else { r.sandy.apply(c, true); if (r.sandy.ready) await r.sandy.ready; }
     if (r.K.customReady) await r.K.customReady();   // custom clothing templates still loading
+    if (r.K.decalReady) await r.K.decalReady();     // chest print images still loading
     r.sandy.play((o && o.anim) || 'idle');
     for (let i = 0; i < 40; i++) r.sandy.update(((o && o.animT) || 0.6) / 40);   // settle the pose
     r.renderer.setSize(F.w, F.h, false); r.cam.aspect = F.w / F.h; r.cam.updateProjectionMatrix();
@@ -64,14 +65,19 @@
     r.renderer.render(r.scene, r.cam);
     return r.renderer.domElement.toDataURL('image/png');
   }
-  async function makeSnaps(cfg) {
-    cfg = cfg || config() || {};
-    const s = { hash: hash(cfg), at: Date.now(),
-      bust: await picture(cfg, 'bust'),
-      full: await picture(cfg, 'full'),
-      happy: await picture(cfg, 'bust', { expression: 'happy' }),
-      sad: await picture(cfg, 'bust', { expression: 'pout' }),
-      cheer: await picture(cfg, 'full', { expression: 'laugh', anim: 'wave', animT: 0.7 }) };
+  // o.step: give the page a moment between pictures (so taps and slider drags aren't blocked for the whole set)
+  // o.cancelled(): return true to stop early (the look changed again); nothing is saved then and it resolves to null
+  const breather = () => new Promise(ok => (root.requestIdleCallback ? root.requestIdleCallback(() => ok(), { timeout: 400 }) : setTimeout(ok, 30)));
+  async function makeSnaps(cfg, o) {
+    cfg = cfg || config() || {}; o = o || {};
+    const shots = [['bust', 'bust'], ['full', 'full'], ['happy', 'bust', { expression: 'happy' }], ['sad', 'bust', { expression: 'pout' }], ['cheer', 'full', { expression: 'laugh', anim: 'wave', animT: 0.7 }]];
+    const s = { hash: hash(cfg), at: Date.now() };
+    for (const [k, frame, opt] of shots) {
+      if (o.step) await breather();
+      if (o.cancelled && o.cancelled()) return null;
+      s[k] = await picture(cfg, frame, opt);
+    }
+    if (o.cancelled && o.cancelled()) return null;
     write(SNAP_KEY, s);
     try { root.dispatchEvent(new CustomEvent('grug-sandy-snaps', { detail: s })); } catch (e) {}
     return s;

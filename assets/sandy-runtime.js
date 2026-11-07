@@ -5822,8 +5822,13 @@ function decalCanvas(name){const c=document.createElement('canvas');c.width=c.he
     g.lineWidth=14;g.beginPath();g.arc(0,8,58,0.15*Math.PI,0.85*Math.PI);g.stroke()}
   else if(name==='peace'){g.lineWidth=18;g.strokeStyle=ink;g.beginPath();g.arc(0,0,100,0,Math.PI*2);g.moveTo(0,-100);g.lineTo(0,100);g.moveTo(0,0);g.lineTo(-71,71);g.moveTo(0,0);g.lineTo(71,71);g.stroke()}
   return c}
+// 'print:<name>' = a ready-made print shipped with the site (assets/prints/<name>.png); anything else not a shape is an image URL
+const SR_BASE=((document.currentScript&&document.currentScript.src)||'').replace(/sandy-runtime\.js[^/]*$/,'');
+const DECAL_PENDING=new Set();
+function decalUrl(img){const m=/^print:([a-z0-9-]{1,32})$/.exec(img);return m?SR_BASE+'prints/'+m[1]+'.png':img}
 function decalTexture(img){if(!img)return null;if(DECAL_TEX[img])return DECAL_TEX[img];let t;
-  if(DECAL_SHAPES.includes(img))t=new THREE.CanvasTexture(decalCanvas(img));else t=new THREE.TextureLoader().load(img);
+  if(DECAL_SHAPES.includes(img))t=new THREE.CanvasTexture(decalCanvas(img));
+  else{let done;const p=new Promise(ok=>{done=ok});DECAL_PENDING.add(p);t=new THREE.TextureLoader().load(decalUrl(img),()=>{DECAL_PENDING.delete(p);done()},undefined,()=>{DECAL_PENDING.delete(p);done()})}
   t.flipY=true;t.anisotropy=4;return DECAL_TEX[img]=t}
 function decalHook(mat,U){const prev=mat.onBeforeCompile;mat.onBeforeCompile=(sh,r)=>{if(prev&&prev!==THREE.Material.prototype.onBeforeCompile)prev.call(mat,sh,r);Object.assign(sh.uniforms,U);
     sh.vertexShader='varying vec3 vDecP;varying vec3 vDecN;\n'+sh.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvDecP=transformed;').replace('#include <beginnormal_vertex>','#include <beginnormal_vertex>\nvDecN=objectNormal;');
@@ -5838,6 +5843,7 @@ function applyDecal(M,d){d=d||{};const tex=decalTexture(d.image);const U=M.decal
   if(!target||!tex)return;
   if(!target.userData.decalOf||target.material.userData.decalBase!==target.userData.decalOf){const base=target.userData.decalOf&&target.material.userData.decalBase===target.userData.decalOf?target.userData.decalOf:target.material;
     const cl=base.clone();cl.onBeforeCompile=base.onBeforeCompile;cl.customProgramCacheKey=base.customProgramCacheKey;   // clone() drops the shader hooks (AO, cloth depth pull): keep them
+    cl.userData=Object.assign({},base.userData);   // clone() turns userData into plain JSON (a THREE.Color becomes {r,g,b}); keep the real uniform objects the hooks use
     const m=decalHook(cl,U);m.userData.decalBase=base;
     target.userData.decalOf=base;target.material=m}}
 
@@ -5959,7 +5965,7 @@ class Sandy{
   dispose(){const k=MARAS.indexOf(this.M);if(k>=0)MARAS.splice(k,1);this.object3d.parent&&this.object3d.parent.remove(this.object3d);
     this.object3d.traverse(o=>{if(o.isMesh&&o.geometry&&!Object.values(ARM_GEO).includes(o.geometry)&&!Object.values(WPN_GEO).includes(o.geometry))o.geometry.dispose()})}}
 
-window.SandyKit={version:'1.1.0',CATALOG,DEFAULT:clone(DEFAULT),texturesFor,_dbg:()=>({MH,mhHide,mhGeometry,VREG_M,VREGION,BODYTAB,ARMORPACK,BODYGEO,MARAS}),
+window.SandyKit={version:'1.1.0',CATALOG,decalReady:()=>Promise.all(Array.from(DECAL_PENDING)),DEFAULT:clone(DEFAULT),texturesFor,_dbg:()=>({MH,mhHide,mhGeometry,VREG_M,VREGION,BODYTAB,ARMORPACK,BODYGEO,MARAS}),
   // create a Sandy from a config (any missing field comes from DEFAULT). Resolves to a Sandy: add sandy.object3d to your scene.
   create:cfg=>build(cfg),
   // a saved character file: a URL, a JSON string, or the parsed object. Resolves to a Sandy (sandy.name is the file's name)
