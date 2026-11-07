@@ -348,6 +348,18 @@ body{padding-top:var(--bn-h,0px)}
 .toast:not(.show){visibility:hidden;transition:translate .4s var(--spring),visibility 0s .4s}
 body.game-mode .fs-float{top:calc(12px + var(--bn-h,0px))}
 .sheet{max-height:calc(92vh - var(--bn-h,0px))}
+
+/* game full view: on the Game tab the game fills the whole screen (no owner banner, no tab bar).
+   The Minimize button brings both back; the same button returns to the full view. */
+.gmin-float{position:fixed;z-index:31;top:calc(12px + var(--bn-h,0px) + env(safe-area-inset-top,0px));left:62px;height:42px;padding:0 14px 0 11px;border-radius:99px;display:none;align-items:center;gap:7px;background:rgba(0,0,0,.6);color:#fff;font:700 11.5px/1 var(--fu);letter-spacing:.1em;text-transform:uppercase}
+.gmin-float .ic{width:20px;height:20px}
+body.game-mode .gmin-float{display:flex}
+body.game-mode .ls-float{top:calc(12px + var(--bn-h,0px) + env(safe-area-inset-top,0px))}
+@media (pointer:coarse){.gmin-float{width:42px;padding:0;justify-content:center}.gmin-float span{display:none}body.game-mode .ls-float{left:112px}}
+body.game-full{--bn-h:0px}
+body.game-full .owner-banner,body.game-full .nav{display:none}
+body.game-full .gwrap{bottom:0}
+@media (orientation:portrait){body.force-land.game-mode .gmin-float{display:none}}
 </style>
 </head>
 <body class="pick-mode">
@@ -510,6 +522,7 @@ body.game-mode .fs-float{top:calc(12px + var(--bn-h,0px))}
 </div>
 
 <button class="fs-float press" data-fs aria-label="Full screen" hidden><i data-icon="arrows-out"></i></button>
+<button class="gmin-float press" id="gminBtn" type="button" aria-label="Minimize the game"></button>
 <button class="ls-float press" id="lsBtn" aria-label="Play in landscape"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M80,40h64a20,20,0,0,1,20,20v24h-24V64H84V192h24v24H80a20,20,0,0,1-20-20V60A20,20,0,0,1,80,40Zm56,72h80a20,20,0,0,1,20,20v64a20,20,0,0,1-20,20H136a20,20,0,0,1-20-20V132A20,20,0,0,1,136,112Zm4,24v56h72V136ZM196,40a52,52,0,0,1,40,44l12-12,14,14-36,36-36-36,14-14,13,13a28,28,0,0,0-21-21Z"/></svg></button>
 <nav class="nav" id="nav" role="tablist" aria-label="Sections"><span class="ind" id="ind"></span></nav>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -8637,10 +8650,14 @@ function ttSandyRender(view, fogS, fogE, fogC) {
   else if (TTS.ema < 21) { if ((TTS.fastT += dt) > 6000 && TTS.lodD < 75) { TTS.lodD = Math.min(75, TTS.lodD + 10); TTS.fastT = 0; } TTS.slowT = 0; }
   const drawn = TTS.drawn; if (!drawn.length) return;
   const T = TTS.T, R = TTS.R, cam = TTS.cam, sc = TTS.scene;
-  cam.projectionMatrix.fromArray(projM); cam.projectionMatrixInverse.copy(cam.projectionMatrix).invert();
-  cam.matrix.fromArray(view).multiply(TTS.m.makeScale(TTS.S, TTS.S, TTS.S)).invert(); cam.matrixWorldNeedsUpdate = true;
+  // view space stays in her centimetres too: the clothing shaders pull each garment's depth toward the camera by a few cm
+  // (so cloth wins over the skin under it). With view space in blocks that pull was ~133x too strong and garments drew
+  // inside-out (a skirt looked hollow, skin showed through). So the blocks-to-cm scale goes on the projection instead.
+  const Sm = TTS.m.makeScale(TTS.S, TTS.S, TTS.S);
+  cam.projectionMatrix.fromArray(projM).multiply(Sm); cam.projectionMatrixInverse.copy(cam.projectionMatrix).invert();
+  cam.matrix.fromArray(view).multiply(Sm).invert().multiply(Sm); cam.matrixWorldNeedsUpdate = true;
   const lin = v => Math.pow(Math.max(0, v), 2.2);
-  sc.fog.color.setRGB(lin(fogC[0]), lin(fogC[1]), lin(fogC[2])); sc.fog.near = fogS; sc.fog.far = Math.max(fogS + 1, fogE);
+  sc.fog.color.setRGB(lin(fogC[0]), lin(fogC[1]), lin(fogC[2])); sc.fog.near = fogS / TTS.S; sc.fog.far = Math.max(fogS + 1, fogE) / TTS.S;   // fog depth is in cm now
   // one pass per light level (usually one)
   const groups = new Map();
   for (const c of drawn) { const q = Math.round(c.br * 12) / 12; if (!groups.has(q)) groups.set(q, []); groups.get(q).push(c); }
@@ -10024,7 +10041,7 @@ function renderPicker(){
     '<span class="sc-go">' + ic('arrow-right') + '</span></button>').join('');
 }
 $('#storeList').addEventListener('click', e => { const b = e.target.closest('[data-store]'); if(!b) return; buzz(); location.hash = b.dataset.store; });
-function showPicker(){ store = null; showView('vPick'); document.body.classList.remove('game-mode'); window.scrollTo(0, 0); }
+function showPicker(){ store = null; showView('vPick'); document.body.classList.remove('game-mode', 'game-full'); window.scrollTo(0, 0); }
 function enterStore(s, wantTab){
   const fresh = !store || store.id !== s.id;
   store = s; st.store = s.id; save();
@@ -10062,6 +10079,8 @@ function setTab(t, instant){
   ['Menu', 'Rewards', 'Club', 'Game', 'Visit'].forEach(x => $('#p' + x).classList.toggle('on', x === t));
   if(t === 'Rewards'){ if($('#rwDot')) $('#rwDot').classList.remove('show'); renderRewards(); }
   document.body.classList.toggle('game-mode', t === 'Game');
+  if(t === 'Game') gameFull = true;   // the game always opens in its full view
+  renderGameFull();
   if(t === 'Game'){ window.scrollTo(0, 0); startGame(); } else pauseGame();
   if(store){ const h = '#' + store.id + (t === 'Menu' ? '' : '/' + t.toLowerCase()); if(location.hash !== h) history.replaceState(null, '', h); }
 }
@@ -10475,6 +10494,16 @@ document.querySelectorAll('[data-fs]').forEach(b => b.addEventListener('click', 
   try{ if(fsEl()) (document.exitFullscreen || document.webkitExitFullscreen).call(document); else { const p = (r.requestFullscreen || r.webkitRequestFullscreen).call(r, {navigationUI: 'hide'}); if(p && p.catch) p.catch(() => toast('Full screen isn’t available here')); } }catch(e){ toast('Full screen isn’t available here'); }
 }));
 document.addEventListener('fullscreenchange', renderFs); document.addEventListener('webkitfullscreenchange', renderFs);
+
+/* ---------- game full view: the game fills the screen; Minimize brings back the owner banner and the tab bar ---------- */
+var gameFull = true;
+function renderGameFull(){
+  document.body.classList.toggle('game-full', gameFull && tab === 'Game');
+  const b = $('#gminBtn'); if(!b) return;
+  b.innerHTML = gameFull ? ic('minus') + '<span>Minimize</span>' : ic('game-controller') + '<span>Full view</span>';
+  b.setAttribute('aria-label', gameFull ? 'Minimize the game' : 'Show the game full view');
+}
+$('#gminBtn').addEventListener('click', () => { buzz(6); gameFull = !gameFull; renderGameFull(); });
 
 
 /* ---------- landscape button (phones): real orientation lock where the browser allows it, otherwise the game turns sideways ---------- */
