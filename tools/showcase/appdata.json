@@ -1,0 +1,267 @@
+{
+ "yoshi": {
+  "points": {
+   "checkin": 10,
+   "resetHour": 4,
+   "nfc": true
+  },
+  "rewards": [
+   {
+    "name": "Starter Pack",
+    "cost": 18,
+    "desc": "One of every power-up"
+   },
+   {
+    "name": "Knife Set",
+    "cost": 12,
+    "desc": "Three Chef's Knives"
+   },
+   {
+    "name": "Marathon Pack",
+    "cost": 15,
+    "desc": "Three Extra Moves"
+   },
+   {
+    "name": "High Roller",
+    "cost": 22,
+    "desc": "Two Double Points and two Head Starts"
+   },
+   {
+    "name": "Cedar Geta",
+    "cost": 0,
+    "desc": "The original wooden sushi board"
+   },
+   {
+    "name": "Night Market",
+    "cost": 60,
+    "desc": "Lantern blues with neon pink"
+   },
+   {
+    "name": "Sakura",
+    "cost": 80,
+    "desc": "Cherry blossom pink, spring plates"
+   },
+   {
+    "name": "Gold Omakase",
+    "cost": 0,
+    "desc": "Gilded lacquer for Yoshi Club members"
+   }
+  ],
+  "shop": [
+   {
+    "name": "Extra Moves",
+    "cost": 6,
+    "desc": "+5 moves for the run"
+   },
+   {
+    "name": "Double Points",
+    "cost": 8,
+    "desc": "Every match scores twice"
+   },
+   {
+    "name": "Head Start",
+    "cost": 4,
+    "desc": "Start the run with 500 points"
+   },
+   {
+    "name": "Chef's Knife",
+    "cost": 5,
+    "desc": "Slice away any row of the board, once"
+   }
+  ],
+  "game": "Sushi Swap",
+  "club": {
+   "name": "Yoshi Club",
+   "price": "$4",
+   "per": "a month, once it launches",
+   "perks": [
+    "An extra life every course",
+    "A free power-up every day",
+    "Gold Omakase board",
+    "Double check-in points"
+   ]
+  },
+  "stores": [
+   "Elyson Falls"
+  ],
+  "rewardsTitle": "Point packs and boards"
+ },
+ "teahouse": {
+  "points": {
+   "checkin": 5,
+   "tapPearls": 10,
+   "resetHour": 4,
+   "nfc": true
+  },
+  "rewards": [],
+  "shop": [
+   {
+    "name": "Brown Sugar Rush",
+    "cost": 5,
+    "desc": "Move 35% faster"
+   },
+   {
+    "name": "Lucky Leaf",
+    "cost": 8,
+    "desc": "Rarer drinks on the Tea Bar"
+   },
+   {
+    "name": "Long Lock",
+    "cost": 8,
+    "desc": "Your shop lock lasts 60 s longer"
+   },
+   {
+    "name": "Tip Jar",
+    "cost": 10,
+    "desc": "Cash from every pedestal comes to you"
+   },
+   {
+    "name": "Double Shot",
+    "cost": 12,
+    "desc": "Every drink makes twice the cash"
+   }
+  ],
+  "game": "Take a Tea",
+  "club": {
+   "name": "Teahouse Club",
+   "price": "$4",
+   "per": "a month at launch",
+   "perks": [
+    "Double check-in points",
+    "A birthday boost"
+   ]
+  },
+  "stores": [
+   "Katy Mills"
+  ],
+  "extra": "Each daily tap also adds 10 Pearls (about $0.20) to the guest\u2019s site-wide wallet."
+ },
+ "cielito": {
+  "points": {
+   "checkin": 5,
+   "resetHour": 4,
+   "nfc": true
+  },
+  "rewards": [
+   {
+    "name": "Free breakfast taco",
+    "cost": 35,
+    "desc": "Any egg taco, corn or flour"
+   },
+   {
+    "name": "Free taco al gusto",
+    "cost": 45,
+    "desc": "Fajita and barbacoa included"
+   },
+   {
+    "name": "Free gordita",
+    "cost": 80,
+    "desc": "Your choice of meat"
+   },
+   {
+    "name": "Free burrito or torta",
+    "cost": 120,
+    "desc": "Built the way you like it"
+   },
+   {
+    "name": "Free lunch plate",
+    "cost": 140,
+    "desc": "Rice, beans, 2 meats, tortillas"
+   }
+  ],
+  "shop": [
+   {
+    "name": "Extra Salsa",
+    "cost": 6,
+    "desc": "+5 moves for the run"
+   },
+   {
+    "name": "Doble Queso",
+    "cost": 8,
+    "desc": "Every match scores twice"
+   },
+   {
+    "name": "Early Bird",
+    "cost": 4,
+    "desc": "Start the run with 500 points"
+   },
+   {
+    "name": "Tortilla Press",
+    "cost": 5,
+    "desc": "Flatten any row of the board, once"
+   }
+  ],
+  "game": "Taco Match",
+  "club": {
+   "name": "Club Cielito",
+   "price": "$4",
+   "per": "a month at launch",
+   "perks": [
+    "Double check-in points",
+    "A birthday taco"
+   ]
+  },
+  "stores": [
+   "Katy"
+  ]
+ },
+ "soluna": {
+  "points": {
+   "checkin": 5,
+   "resetHour": 4,
+   "nfc": true
+  },
+  "rewardsTitle": "Boost tiers",
+  "rewards": [
+   {
+    "name": "Pour-over",
+    "cost": 20,
+    "desc": "Pick 1 boost for the next shift"
+   },
+   {
+    "name": "Latte",
+    "cost": 40,
+    "desc": "Pick 2 boosts"
+   },
+   {
+    "name": "Signature",
+    "cost": 75,
+    "desc": "Pick 3 boosts"
+   }
+  ],
+  "shop": [
+   {
+    "name": "Extra Shot",
+    "cost": null,
+    "desc": "Espresso sweet spot twice as wide"
+   },
+   {
+    "name": "Steady Pitcher",
+    "cost": null,
+    "desc": "Wider, slower steam and pour gauges"
+   },
+   {
+    "name": "Patience Pastry",
+    "cost": null,
+    "desc": "Customers wait 30% longer"
+   },
+   {
+    "name": "Cold Brew",
+    "cost": null,
+    "desc": "Walk 30% faster all day"
+   }
+  ],
+  "game": "Sunrise to Sunset",
+  "note": "Points become boost codes for the game (the game itself is hosted on itch.io, so it needs internet).",
+  "stores": [
+   "Elyson Falls"
+  ]
+ },
+ "alchemy": {
+  "preview": true,
+  "rewards": [],
+  "shop": [],
+  "game": "Sugar Alchemist",
+  "note": "A one-day preview of a cupcake-shop game made with the owner. Finishing a day unlocks the Alchemist toque, the whisk and the cupcake tee for the avatar."
+ }
+}

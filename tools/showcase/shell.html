@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Grug · Showcase</title>
+<meta name="description" content="A walk-through of Grug: rewards apps, games and avatars made with Katy restaurants.">
+<style>
+/*@FONTS@*/
+:root{
+  --bg:#eef3e6;--surface:#f7f5ef;--line:#dcd8cb;--line2:#c9c4b4;--ink:#16210f;--ink2:#3b4434;--mut:#6a7163;
+  --lime:#9be338;--lime-d:#5f9e17;--teal:#2dd4bf;--pink:#d16be8;--gold:#f59e0b;--danger:#c2410c;
+  --r:22px;--r-s:14px;--font:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;--display:"Cal Sans","Outfit",system-ui,sans-serif;
+  --top:64px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 var(--font);-webkit-text-size-adjust:100%}
+body{min-height:100vh;overflow-x:hidden}
+button{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:-.01em;margin:0;line-height:1.1}
+p{margin:0}
+.ic{width:1.15em;height:1.15em;fill:currentColor;flex:none;vertical-align:-.2em}
+/* ---------- top bar ---------- */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;height:var(--top);padding:0 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:9px;flex:none;font:600 21px/1 var(--display);text-decoration:none;color:var(--ink)}
+.brand svg{width:34px;height:34px}
+.brand small{font:700 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;padding:5px 7px;border-radius:7px;background:var(--ink);color:var(--surface)}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;padding:4px 0}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{appearance:none;border:0;background:none;cursor:pointer;white-space:nowrap;font:600 15px/1 var(--font);color:var(--ink2);padding:10px 13px;border-radius:999px;display:flex;align-items:center;gap:7px}
+.tabs button:hover{background:#ece8dc}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--surface)}
+.reset{appearance:none;border:1px solid var(--line2);background:var(--surface);border-radius:999px;padding:9px 13px;font:600 14px/1 var(--font);cursor:pointer;display:flex;gap:6px;align-items:center;flex:none}
+.reset:hover{background:#ece8dc}
+/* ---------- layout ---------- */
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;max-width:1280px;margin:0 auto;padding:26px 24px 60px}
+.content{min-width:0;max-width:680px}
+.stage{position:sticky;top:calc(var(--top) + 18px);align-self:start}
+.devwrap{position:relative}
+.device{width:390px;height:844px;border-radius:44px;background:var(--surface);border:10px solid var(--ink);overflow:hidden;transform-origin:top left;position:relative}
+.device iframe{width:100%;height:100%;border:0;display:block;background:var(--bg)}
+.stage-bar{display:flex;align-items:center;gap:8px;margin-top:10px}
+.addr{flex:1;min-width:0;display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font:500 13px/1.2 var(--font);color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.addr span{overflow:hidden;text-overflow:ellipsis}
+.sbtn{appearance:none;border:1px solid var(--line2);background:var(--surface);border-radius:999px;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;flex:none}
+.sbtn:hover{background:#ece8dc}
+.loading{position:absolute;inset:10px;border-radius:34px;display:grid;place-items:center;background:var(--surface);font:600 15px var(--font);color:var(--mut);z-index:2}
+.loading[hidden]{display:none}
+/* full-screen phone */
+.stage.full{position:fixed;inset:0;z-index:50;background:var(--bg);padding:10px;display:flex;flex-direction:column;align-items:center}
+.stage.full .devwrap{flex:1;width:100%;max-width:480px;height:auto!important}
+.stage.full .device{width:100%!important;height:100%!important;transform:none!important;border-radius:28px;border-width:6px}
+.stage.full .stage-bar{width:100%;max-width:480px}
+/* ---------- content blocks ---------- */
+.eyebrow{font:700 12px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--lime-d);margin-bottom:12px;display:flex;gap:7px;align-items:center}
+.h1{font-size:clamp(34px,5vw,52px);margin-bottom:14px}
+.h1 em{font-style:normal;color:var(--lime-d)}
+.lead{font-size:18.5px;color:var(--ink2);max-width:58ch}
+.h2{font-size:28px;margin:34px 0 12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+.stat{display:flex;flex-direction:column;gap:3px}
+.stat b{font:600 30px/1 var(--display)}
+.stat span{color:var(--mut);font-size:14.5px}
+.btn{appearance:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);border-radius:999px;padding:11px 16px;font:600 15px/1 var(--font);cursor:pointer;text-decoration:none}
+.btn:hover{background:#ece8dc}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.btn.primary:hover{background:#2b3a22}
+.btn.lime{background:var(--lime);border-color:#86c92c;color:#13230a}
+.btn.lime:hover{background:#8fd52f}
+.btn.sm{padding:8px 12px;font-size:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mt{margin-top:18px}.mt2{margin-top:26px}
+.note{font-size:14px;color:var(--mut)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:#ece8dc;font:600 13px/1.2 var(--font);color:var(--ink2)}
+/* steps */
+.steps{counter-reset:s;display:grid;gap:10px}
+.step{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start}
+.step .n{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);color:var(--ink)}
+.step .n .ic{width:24px;height:24px}
+.step h3{font-size:19px;margin:2px 0 4px}
+.step p{color:var(--ink2)}
+.step .btn{margin-top:10px}
+/* restaurant cards */
+.places{display:grid;gap:14px}
+.place{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;padding:14px}
+.place img.th{width:120px;height:120px;object-fit:cover;border-radius:16px;display:block;background:#e5e0d2}
+.place h3{font-size:22px}
+.place .sub{color:var(--mut);font-size:14.5px;margin:2px 0 8px}
+.place[aria-current=true]{border:2px solid var(--ink)}
+.facts{display:grid;gap:10px;margin-top:12px}
+.facts h4{margin:0 0 6px;font:700 12px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.list{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.list li{display:flex;gap:10px;justify-content:space-between;font-size:15px;border-bottom:1px dashed var(--line);padding:4px 0;min-width:0}
+.list li>span:first-child{min-width:0}
+.list li span{color:var(--mut);font-size:13.5px}
+.list li b{white-space:nowrap}
+.cost{font:700 13px/1 var(--font);padding:5px 8px;border-radius:999px;background:#ece8dc;white-space:nowrap;align-self:center}
+/* avatar */
+.looks{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+.look{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:18px;padding:6px 6px 8px;cursor:pointer;display:grid;gap:4px;justify-items:center;font:600 13px/1.2 var(--font)}
+.look img{width:100%;aspect-ratio:1;object-fit:contain;border-radius:12px;background:#ece8dc}
+.look[aria-pressed=true]{border:2px solid var(--ink)}
+.avbig{display:grid;grid-template-columns:200px 1fr;gap:18px;align-items:center}
+.avbig img{width:200px;height:280px;object-fit:contain;background:#ece8dc;border-radius:18px}
+/* pearls */
+.packs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pk{text-align:center;padding:14px 8px}
+.pk b{display:block;font:600 24px/1 var(--display)}
+.pk span{font-size:13px;color:var(--mut)}
+.pk .pearl{color:var(--pink)}.pk .pearl .ic{width:30px;height:30px}
+.stats4{grid-template-columns:repeat(4,1fr)}
+.pk .price{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:999px;background:var(--ink);color:var(--surface);font:700 14px/1 var(--font)}
+.pearl{color:var(--pink)}
+/* owners */
+.why{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:start}
+.why .n{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:#ece8dc}
+.why h3{font-size:18px;margin-bottom:3px}
+.why p{color:var(--ink2);font-size:15.5px}
+/* toast */
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;z-index:60;background:var(--ink);color:var(--surface);padding:12px 18px;border-radius:14px;font:600 15px/1.3 var(--font);max-width:calc(100vw - 32px);transition:.25s;pointer-events:none;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%)}
+/* boot */
+.boot{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:var(--bg);font:600 17px var(--font);color:var(--ink2)}
+.boot[hidden]{display:none}
+.boot div{display:grid;gap:14px;justify-items:center;text-align:center;padding:24px}
+.boot svg{width:64px;height:64px}
+.boot.err{color:var(--danger)}
+:focus-visible{outline:3px solid #2b7bd8;outline-offset:2px}
+/* ---------- phone and tablet ---------- */
+@media (max-width:960px){
+  .wrap{grid-template-columns:minmax(0,1fr);padding:18px 16px 40px;gap:18px}
+  .content{max-width:none}
+  .stage{position:relative;top:0}
+  .device{width:100%!important;height:min(78vh,760px)!important;transform:none!important;border-width:6px;border-radius:28px}
+  .devwrap{height:auto!important}
+  .brand small{display:none}
+  .reset b{display:none}
+  .place{grid-template-columns:64px minmax(0,1fr);gap:12px}
+  .place img.th{width:64px;height:64px;border-radius:12px}
+  .stats4{grid-template-columns:repeat(2,1fr)!important}
+  .avbig{grid-template-columns:140px 1fr}
+  .avbig img{width:140px;height:196px}
+  .packs{grid-template-columns:repeat(2,1fr)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="boot" id="boot" role="status"><div><span id="bootLogo"></span><span id="bootMsg">Unpacking the showcase…</span></div></div>
+<header class="top">
+  <a class="brand" href="#overview" id="brand"><span id="logo"></span>Grug <small>Showcase</small></a>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
+  <button class="reset" id="reset" type="button" title="Clear all demo points, Pearls and choices"><span id="icReset"></span><b>Reset demo</b></button>
+</header>
+<main class="wrap">
+  <section class="content" id="content" aria-live="polite"></section>
+  <aside class="stage" id="stage" aria-label="Live preview">
+    <div class="devwrap" id="devwrap"><div class="device" id="device"><div class="loading" id="loading" hidden>Loading…</div></div></div>
+    <div class="stage-bar">
+      <button class="sbtn" id="back" type="button" aria-label="Back"></button>
+      <div class="addr" id="addr"><span id="addrIc"></span><span id="addrTxt">grugdigital/</span></div>
+      <button class="sbtn" id="full" type="button" aria-label="Full screen"></button>
+    </div>
+  </aside>
+</main>
+<div class="toast" id="toast" role="status"></div>
+<script type="application/octet-stream" id="pack">@PACK@</script>
+<script>
+'use strict';
+const META = "@META@";
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ic = (n, cls) => '<svg class="ic' + (cls ? ' ' + cls : '') + '" viewBox="0 0 16 16" aria-hidden="true">' + (META.icons[n] || META.icons.question || '') + '</svg>';
+const GAMES = META.games, FACTS = META.facts;
+const SITE = 'gabrielman25.github.io/grugdigital/';
+let PACK = null;
+
+/* ---------- unpack: one gzip block holding every page, script and picture ---------- */
+async function unpack(){
+  if(!('DecompressionStream' in window)) throw new Error('This browser is too old to open the showcase. Use a current Chrome, Safari, Edge or Firefox.');
+  const b64 = $('#pack').textContent.trim(), bin = atob(b64), u8 = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  const text = await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+  return JSON.parse(text);
+}
+function storageOK(){ try{ localStorage.setItem('grug.showcase.t', '1'); localStorage.removeItem('grug.showcase.t'); return true; }catch(e){ return false; } }
+
+/* ---------- the phone: each page is written into a fresh frame so it keeps its own address, routing and storage ---------- */
+let frame = null, cur = {key:'', search:'', hash:''}, hist = [];
+const pageByPath = p => Object.entries(PACK.pages).find(([k, v]) => v.path === p);
+function pageHTML(key, search, hash){
+  const pg = PACK.pages[key], L = PACK.libs;
+  const S = 'scr' + 'ipt';
+  const prelude = '<' + S + '>(function(){var P=parent;window.__grugShowcase=true;window.GRUG_ASSETS=P.__GRUG_ASSETS;' +
+    'var VP=' + JSON.stringify('https://grug.local/' + pg.path) + ';' +
+    'try{history.replaceState(null,"",location.pathname+' + JSON.stringify(search || '') + '+' + JSON.stringify(hash || '') + ')}catch(e){}' +
+    'function go(u){try{u=new URL(String(u),VP)}catch(e){return}' +
+      'if(u.hostname==="grug.local"){P.__grugNav(u.pathname.slice(1),u.search,u.hash);return}' +
+      'if(/(^|\\.)stripe\\.com$/.test(u.hostname)){P.__grugDemoBuy(u.href,window);return}' +
+      'if(/^https?:$/.test(u.protocol))window.open(u.href,"_blank","noopener")}' +
+    'window.__grugLoc={set href(u){go(u)},get href(){return location.href},replace:go,assign:go};' +
+    'addEventListener("click",function(e){var a=e.target&&e.target.closest&&e.target.closest("a[href]");if(!a||e.defaultPrevented)return;' +
+      'var h=a.getAttribute("href");if(!h||h.charAt(0)==="#"||/^(javascript|mailto|tel|sms|data|blob):/i.test(h)||a.hasAttribute("download"))return;' +
+      'e.preventDefault();e.stopImmediatePropagation();go(h)},true);' +
+    '})();</' + S + '>';
+  let html = pg.html.replace(/<!--LIB:([\w.-]+)-->/g, (m, n) => L[n] == null ? '' : n.endsWith('.css') ? '<style>' + L[n] + '</style>' : '<' + S + '>' + L[n] + '</' + S + '>');
+  return /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, m => m + prelude) : prelude + html;
+}
+let showNext = false;
+function loadPage(key, search, hash, opts){
+  if(!PACK.pages[key]) return toast('That page isn’t in the showcase.');
+  opts = opts || {}; if(showNext){ opts.show = true; showNext = false; }
+  if(cur.key && !opts.noHist) hist.push(Object.assign({}, cur));
+  cur = {key, search: search || '', hash: hash || ''};
+  const f = document.createElement('iframe');
+  f.title = 'Live preview of ' + (PACK.pages[key].path || 'home');
+  f.allow = 'autoplay; fullscreen; gamepad; clipboard-write';
+  const box = $('#device');
+  if(frame) frame.remove();
+  frame = f; box.appendChild(f);
+  $('#loading').hidden = false;
+  const d = f.contentDocument; d.open(); d.write(pageHTML(key, search, hash)); d.close();
+  setTimeout(() => { $('#loading').hidden = true; }, 60);
+  $('#addrTxt').textContent = SITE + PACK.pages[key].path + (search || '') + (hash || '');
+  if(opts.show && innerWidth <= 960) $('#stage').scrollIntoView({block: 'start', behavior: 'smooth'});
+  $('#back').disabled = !hist.length;
+  return f;
+}
+function reloadPage(hash){ return loadPage(cur.key, '', hash == null ? cur.hash : hash, {noHist: true}); }
+const win = () => frame && frame.contentWindow;
+
+// links and code inside the pages land here
+window.__GRUG_ASSETS = null;
+window.__grugNav = (path, search, hash) => {
+  path = String(path || '').replace(/^\/+/, '').replace(/(^|\/)index\.html$/, '$1');
+  if(/^avatar\/?$/.test(path)){ setTab('avatar'); return; }
+  const hit = pageByPath(path) || pageByPath(path + '/');
+  if(hit) loadPage(hit[0], search, hash); else toast('That page isn’t in the showcase.');
+};
+window.__grugDemoBuy = (link, w) => {
+  let packs = null; try{ packs = w.__grugPacks || null; }catch(e){}
+  const p = packs && packs.find(x => link.indexOf(x.link) === 0);
+  if(!p) return toast('Checkout is turned off in the showcase.');
+  toast('Demo checkout: no money is taken. On the live site this opens Stripe.');
+  setTimeout(() => loadPage('pearls', '?pack=' + encodeURIComponent(p.id) + '&cs=cs_demo_' + Math.random().toString(36).slice(2, 12), ''), 900);
+};
+
+/* ---------- demo helpers for the rewards apps ---------- */
+const gameOf = id => GAMES.find(g => g.id === id);
+function ensureApp(id){ const k = 'app-' + id; if(cur.key !== k) loadPage(k); return win(); }
+function storeId(){ try{ return (win().__grugStore && win().__grugStore()) || ''; }catch(e){ return ''; } }
+function demoTap(id){
+  ensureApp(id);
+  let q = ''; try{ q = (win().__grugTap && win().__grugTap()) || ''; }catch(e){}
+  if(!q) return toast('This app checks in with a code on the counter instead of a tag.');
+  loadPage('app-' + id, q, '', {noHist: true});
+  toast('Tag tapped: the phone opened the app and collected today’s check-in.');
+}
+function demoPoints(id, n){
+  ensureApp(id);
+  const g = gameOf(id);
+  let ok = false; try{ ok = !!(win().__grugAddPts && win().__grugAddPts(n)); }catch(e){}
+  if(!ok) return toast('This one doesn’t use points.');
+  const s = storeId(); reloadPage(s ? '#' + s + '/rewards' : '');
+  toast('+' + n + ' demo points at ' + g.partner + '.');
+}
+function demoOpen(id, tab){
+  ensureApp(id);
+  const s = storeId();
+  if(tab && s) reloadPage('#' + s + '/' + tab);
+}
+
+/* ---------- sections ---------- */
+const TABS = [
+  ['overview', 'Overview', 'house'], ['how', 'How it works', 'sparkle'], ['places', 'Restaurants', 'storefront'],
+  ['avatar', 'Avatar', 't-shirt'], ['pearls', 'Pearls', 'pearl'], ['owners', 'For owners', 'hand-waving']];
+let tab = 'overview', place = 'yoshi';
+const live = GAMES.filter(g => g.status === 'live');
+const visitPts = id => (FACTS[id] && FACTS[id].points && FACTS[id].points.checkin) || null;
+
+const R = {
+  overview(){
+    const pts = live.map(g => visitPts(g.id)).filter(Boolean);
+    return '<p class="eyebrow">' + ic('sparkle') + 'Katy, Texas</p>' +
+      '<h1 class="h1">Games made with <em>Katy restaurants.</em></h1>' +
+      '<p class="lead">Every partner gets its own rewards app and a game built from its menu. Guests tap a tag at the counter, earn points, and spend them on power-ups and rewards. One avatar and one wallet work across every game.</p>' +
+      '<div class="grid stats4 mt2">' +
+        stat(GAMES.length, 'partner games') + stat(Math.min.apply(null, pts) + '–' + Math.max.apply(null, pts), 'points per visit') + stat('1 tap', 'to check in, no account') + stat('1', 'avatar in every game') +
+      '</div>' +
+      '<div class="row mt2"><button class="btn primary" data-go="how">' + ic('play') + 'See how it works</button><button class="btn" data-go="places">' + ic('storefront') + 'Open a restaurant’s app</button></div>' +
+      '<h2 class="h2">The partners</h2><div class="grid g2">' + GAMES.map(g =>
+        '<button class="card place-mini btn" style="border-radius:18px;justify-content:flex-start;padding:10px;gap:12px;text-align:left" data-place="' + g.id + '"><img src="' + META.thumbs[g.id] + '" alt="" style="width:56px;height:56px;border-radius:12px;object-fit:cover">' +
+        '<span><b style="display:block;font-size:15.5px">' + esc(g.partner) + '</b><span class="note">' + esc(g.title) + ' · ' + esc(g.kind) + '</span></span></button>').join('') + '</div>' +
+      '<p class="note mt">The phone shows the real Grug site. Tap around: every link works inside the showcase.</p>';
+  },
+  how(){
+    const step = (n, icn, h, p, btn) => '<div class="step"><div class="n">' + ic(icn) + '</div><div><h3>' + n + '. ' + h + '</h3><p>' + p + '</p>' + (btn || '') + '</div></div>';
+    const tea = gameOf('teahouse');
+    return '<p class="eyebrow">' + ic('sparkle') + 'For guests</p><h1 class="h1">How it works</h1>' +
+      '<p class="lead">No app store, no sign-up. Everything runs in the phone’s browser, and progress is saved on the phone.</p>' +
+      '<div class="steps mt2">' +
+      step(1, 'storefront', 'Eat at a partner', 'Each restaurant has a small NFC tag (or a code on the counter board) by the register.', '') +
+      step(2, 'device-mobile', 'Tap the tag', 'The phone opens that restaurant’s rewards app and collects the visit. Once a day, reset at 4 AM, so points can’t be farmed.',
+        '<button class="btn lime sm" data-tap="teahouse">' + ic('device-mobile') + 'Tap the Teahouse tag</button>') +
+      step(3, 'coins', 'Points add up', 'Each restaurant keeps its own points: 5 or 10 a visit, set by the owner. Points stay with that restaurant.',
+        '<button class="btn sm" data-app="teahouse" data-tab="rewards">' + ic('coins') + 'See the points</button>') +
+      step(4, 'gift', 'Spend them', 'On rewards the owner picks (Cielito Lindo gives a free breakfast taco at 35 points) and on power-ups for the restaurant’s game.',
+        '<button class="btn sm" data-app="cielito" data-tab="rewards">' + ic('gift') + 'Cielito’s rewards</button>') +
+      step(5, 'game-controller', 'Play the game', 'Every partner has a game made from its menu. Power-ups bought with points make the next run better.',
+        '<button class="btn sm" data-app="yoshi" data-tab="game">' + ic('game-controller') + 'Play Sushi Swap</button>') +
+      step(6, 't-shirt', 'One avatar everywhere', 'Guests dress one avatar, and it shows up in every partner’s game. Clothes are earned by playing or bought with points.',
+        '<button class="btn sm" data-go="avatar">' + ic('t-shirt') + 'Try the avatar</button>') +
+      '</div>';
+  },
+  places(){
+    return '<p class="eyebrow">' + ic('storefront') + 'The partners</p><h1 class="h1">Restaurants</h1>' +
+      '<p class="lead">Each card opens that restaurant’s real rewards app in the phone. Use the buttons to tap its tag, add points and play its game.</p>' +
+      '<div class="places mt2">' + GAMES.map(placeCard).join('') + '</div>';
+  },
+  avatar(){
+    const P = META.presets, sel = P.find(p => p.id === avSel) || P[0];
+    return '<p class="eyebrow">' + ic('t-shirt') + 'One look, every game</p><h1 class="h1">The avatar</h1>' +
+      '<p class="lead">Guests build one avatar and it follows them into every partner’s game and app. Here are a few ready-made looks; the live site has the full 3D editor.</p>' +
+      '<div class="card mt2 avbig"><img id="avImg" src="' + sel.full + '" alt="' + esc(sel.label) + ' look"><div><h3 style="font-size:24px" id="avName">' + esc(sel.label) + '</h3>' +
+        '<p class="note" style="margin:6px 0 14px">Wearing it updates the header picture, the profile and the avatar shown in the rewards apps.</p>' +
+        '<button class="btn primary" id="wear">' + ic('check') + 'Wear this look</button></div></div>' +
+      '<div class="looks mt">' + P.map(p => '<button class="look" data-look="' + p.id + '" aria-pressed="' + (p.id === sel.id) + '"><img src="' + p.bust + '" alt="">' + esc(p.label) + '</button>').join('') + '</div>' +
+      '<h2 class="h2">On the live site</h2><ul class="list">' +
+        '<li><b>Full 3D editor</b><span>Turn, zoom and pose the avatar</span></li>' +
+        '<li><b>Face, body and hair sliders</b><span>Height, head size, ears, hair style and colour</span></li>' +
+        '<li><b>Clothes, hats and shoes</b><span>Earned in games or bought with points</span></li>' +
+        '<li><b>1,186 shirt prints</b><span>Plus upload-your-own</span></li></ul>';
+  },
+  pearls(){
+    const packs = [[100, '$1.99'], [275, '$4.99'], [600, '$9.99'], [1300, '$19.99']];
+    return '<p class="eyebrow">' + ic('pearl', 'pearl') + 'One wallet</p><h1 class="h1">Pearls</h1>' +
+      '<p class="lead">Points belong to one restaurant. Pearls are Grug’s own currency and work in every game, for boosts and power-ups. Guests buy them with a card through Stripe, and the daily Teahouse tag adds 10 free.</p>' +
+      '<div class="packs mt2">' + packs.map(p => '<div class="card pk"><span class="pearl">' + ic('pearl') + '</span><b>' + p[0].toLocaleString() + '</b><span>Pearls</span><br><span class="price">' + p[1] + '</span></div>').join('') + '</div>' +
+      '<div class="row mt"><button class="btn primary" data-page="pearls">' + ic('pearl') + 'Open Pearls in the phone</button></div>' +
+      '<p class="note mt">In the showcase the checkout is pretend: tapping a pack runs through the purchase without opening Stripe or taking money.</p>' +
+      '<h2 class="h2">Built in</h2><ul class="list">' +
+        '<li><b>Saved on the guest’s phone</b><span>No account needed</span></li>' +
+        '<li><b>Warning before paying</b><span>Guests confirm Pearls stay on that device</span></li>' +
+        '<li><b>Purchases blocked</b><span>If the browser can’t save (private mode)</span></li></ul>';
+  },
+  owners(){
+    const why = (icn, h, p) => '<div class="card why"><div class="n">' + ic(icn) + '</div><div><h3>' + h + '</h3><p>' + p + '</p></div></div>';
+    return '<p class="eyebrow">' + ic('hand-waving') + 'For restaurant owners</p><h1 class="h1">What your restaurant gets</h1>' +
+      '<p class="lead">A rewards app and a game made with you, from your menu, that brings regulars back and gives them a reason to tap in every visit.</p>' +
+      '<div class="grid mt2">' +
+      why('device-mobile', 'Your own rewards app', 'Your name, colours, menu, hours and locations. It opens straight from a tag at your register; guests don’t install anything.') +
+      why('game-controller', 'A game from your menu', 'Sushi Swap uses Yoshi’s real dishes; Taco Match uses Cielito Lindo’s breakfast board. Built with you, not from a template.') +
+      why('coins', 'Points on your terms', 'You choose points per visit and the rewards (a free taco at 35, a plate at 140). One check-in a day per phone.') +
+      why('gift', 'Power-ups keep them playing', 'Points buy boosts for your game, so every visit makes the next game better.') +
+      why('t-shirt', 'Part of a bigger world', 'Guests carry one avatar and one Pearl wallet across every Grug partner, so other partners’ players discover you too.') +
+      why('star', 'Clubs, when you want them', 'Each app has a members’ club ready (planned at $4 a month: double check-in points and perks), off until you choose to launch it.') +
+      '</div>' +
+      '<div class="row mt2"><button class="btn primary" data-go="places">' + ic('storefront') + 'See a partner’s app</button><button class="btn" data-page="partners">' + ic('info') + 'Partner page on the site</button></div>';
+  }
+};
+function stat(b, s){ return '<div class="card stat"><b>' + esc(b) + '</b><span>' + esc(s) + '</span></div>'; }
+function placeCard(g){
+  const f = FACTS[g.id] || {}, pts = f.points && f.points.checkin, tap = f.points && f.points.nfc;
+  const fmtCost = (c, r) => c == null ? '' : c === 0 ? (/member/i.test((r && r.desc) || '') ? 'Members' : 'Included') : c + ' pts';
+  const rw = (f.rewards || []), sh = (f.shop || []);
+  return '<article class="card place" data-placecard="' + g.id + '" aria-current="' + (place === g.id) + '"><img class="th" src="' + META.thumbs[g.id] + '" alt="">' +
+    '<div><h3>' + esc(g.partner) + '</h3><p class="sub">' + esc(g.place) + ' · <b>' + esc(g.title) + '</b>, ' + esc(g.kind) + (g.status === 'preview' ? ' · preview' : '') + '</p>' +
+    '<div class="row">' + (pts ? '<span class="chip">' + ic('coins') + pts + ' points a visit</span>' : '') + (tap ? '<span class="chip">' + ic('device-mobile') + 'NFC tag</span>' : '') + (f.club ? '<span class="chip">' + ic('star') + esc(f.club.name) + '</span>' : '') + '</div>' +
+    '<div class="row mt">' +
+      '<button class="btn primary sm" data-app="' + g.id + '">' + ic('device-mobile') + (g.status === 'preview' ? 'Open the preview' : 'Open the app') + '</button>' +
+      (tap ? '<button class="btn lime sm" data-tap="' + g.id + '">' + ic('hand') + 'Tap the tag</button>' : '') +
+      (g.storageKey ? '<button class="btn sm" data-pts="' + g.id + '">' + ic('plus') + '50 points</button>' : '') +
+      (g.status !== 'preview' ? '<button class="btn sm" data-app="' + g.id + '" data-tab="game">' + ic('play') + 'Play</button>' : '') +
+    '</div>' +
+    '<div class="facts">' +
+      (rw.length ? '<div><h4>' + esc(f.rewardsTitle || 'Rewards') + '</h4><ul class="list">' + rw.map(r => '<li><span><b style="color:var(--ink)">' + esc(r.name) + '</b> · ' + esc(r.desc || '') + '</span><span class="cost">' + fmtCost(r.cost, r) + '</span></li>').join('') + '</ul></div>' : '') +
+      (sh.length ? '<div><h4>Power-ups in ' + esc(f.game || g.title) + '</h4><ul class="list">' + sh.map(r => '<li><span><b style="color:var(--ink)">' + esc(r.name) + '</b> · ' + esc(r.desc || '') + '</span>' + (r.cost != null ? '<span class="cost">' + fmtCost(r.cost) + '</span>' : '') + '</li>').join('') + '</ul></div>' : '') +
+      (f.extra || f.note ? '<p class="note">' + esc(f.extra || f.note) + '</p>' : '') +
+    '</div></div></article>';
+}
+
+/* ---------- avatar looks (pictures made ahead of time; no 3D engine in the file) ---------- */
+let avSel = 'classic';
+const sandyHash = o => { const s = JSON.stringify(o || null); let h = 2166136261; for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+function wearLook(id, quiet){
+  const p = PACK.presets.find(x => x.id === id); if(!p) return;
+  if(!quiet) showNext = true;
+  try{
+    localStorage.setItem('grug.sandy.v1', JSON.stringify(p.config));
+    localStorage.setItem('grug.sandy.snaps.v1', JSON.stringify(Object.assign({hash: sandyHash(p.config), at: Date.now()}, p.snaps)));
+  }catch(e){ return toast('This browser isn’t letting the showcase save.'); }
+  if(!quiet){ loadPage('profile'); toast('Now wearing ' + p.label + '.'); }
+}
+
+/* ---------- tabs ---------- */
+const TAB_PAGE = {overview: 'home', how: 'app-teahouse', places: null, avatar: 'profile', pearls: 'pearls', owners: 'partners'};
+function setTab(t, quiet){
+  tab = t;
+  for(const b of document.querySelectorAll('#tabs button')) b.setAttribute('aria-selected', String(b.dataset.tab === t));
+  $('#content').innerHTML = R[t]();
+  if(!quiet){ const k = TAB_PAGE[t] || 'app-' + place; if(cur.key !== k) loadPage(k); }
+  if(location.hash !== '#' + t) history.replaceState(null, '', '#' + t);
+  window.scrollTo({top: 0});
+}
+$('#content').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  const d = b.dataset;
+  if(d.tap || d.pts || d.app || d.page) showNext = true;
+  if(d.go) return setTab(d.go);
+  if(d.place){ place = d.place; setTab('places', true); demoOpen(d.place); setTimeout(() => { const c = document.querySelector('[data-placecard="' + d.place + '"]'); c && c.scrollIntoView({block: 'start', behavior: 'smooth'}); }, 50); return; }
+  if(d.tap){ place = d.tap; markPlace(); return demoTap(d.tap); }
+  if(d.pts){ place = d.pts; markPlace(); return demoPoints(d.pts, 50); }
+  if(d.app){ place = d.app; markPlace(); return demoOpen(d.app, d.tab); }
+  if(d.page) return loadPage(d.page);
+  if(d.look){ avSel = d.look; const p = META.presets.find(x => x.id === avSel);
+    $('#avImg').src = p.full; $('#avImg').alt = p.label + ' look'; $('#avName').textContent = p.label;
+    for(const x of document.querySelectorAll('[data-look]')) x.setAttribute('aria-pressed', String(x.dataset.look === avSel)); return; }
+  if(b.id === 'wear') return wearLook(avSel);
+});
+function markPlace(){ for(const c of document.querySelectorAll('[data-placecard]')) c.setAttribute('aria-current', String(c.dataset.placecard === place)); }
+
+/* ---------- phone size, back, full screen ---------- */
+function fit(){
+  const dev = $('#device'), wrap = $('#devwrap');
+  if(innerWidth <= 960 || $('#stage').classList.contains('full')){ dev.style.transform = ''; wrap.style.height = ''; wrap.style.width = ''; return; }
+  const s = Math.min(1, (innerHeight - 64 - 18 - 70) / 864);
+  dev.style.transform = 'scale(' + s + ')'; wrap.style.height = (864 * s) + 'px'; wrap.style.width = (410 * s) + 'px';
+}
+addEventListener('resize', fit);
+$('#back').addEventListener('click', () => { const h = hist.pop(); if(h) loadPage(h.key, h.search, h.hash, {noHist: true}); $('#back').disabled = !hist.length; });
+$('#full').addEventListener('click', () => { const s = $('#stage'); s.classList.toggle('full'); $('#full').innerHTML = ic(s.classList.contains('full') ? 'arrows-in' : 'arrows-out'); $('#full').setAttribute('aria-label', s.classList.contains('full') ? 'Exit full screen' : 'Full screen'); fit(); });
+addEventListener('keydown', e => { if(e.key === 'Escape' && $('#stage').classList.contains('full')) $('#full').click(); });
+$('#reset').addEventListener('click', () => {
+  if(!confirm('Reset the demo? This clears all demo points, Pearls, names and looks saved by the showcase on this device.')) return;
+  const keys = []; for(let i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
+  const own = new RegExp('^(grug\\.|' + GAMES.map(g => g.storageKey).filter(Boolean).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')|teahouse|yoshi|cielito|soluna|alchemy|sugar', 'i');
+  keys.forEach(k => { if(own.test(k)) localStorage.removeItem(k); });
+  try{ sessionStorage.clear(); }catch(e){}
+  location.reload();
+});
+let tT = 0;
+function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tT); tT = setTimeout(() => t.classList.remove('on'), 3200); }
+
+/* ---------- go ---------- */
+(async function boot(){
+  $('#bootLogo').innerHTML = META.logo; $('#logo').innerHTML = META.logo;
+  $('#icReset').innerHTML = ic('arrow-counter-clockwise'); $('#back').innerHTML = ic('arrow-left'); $('#full').innerHTML = ic('arrows-out'); $('#addrIc').innerHTML = ic('lock-simple');
+  $('#tabs').innerHTML = TABS.map(t => '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="false">' + ic(t[2]) + t[1] + '</button>').join('');
+  $('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if(b) setTab(b.dataset.tab); });
+  $('#brand').addEventListener('click', e => { e.preventDefault(); setTab('overview'); });
+  try{ PACK = await unpack(); }
+  catch(e){ $('#boot').classList.add('err'); $('#bootMsg').textContent = e.message || 'The showcase couldn’t open.'; return; }
+  if(!storageOK()){ $('#boot').classList.add('err'); $('#bootMsg').textContent = 'This browser is blocking storage (private mode?). Open the showcase in a normal window.'; return; }
+  window.__GRUG_ASSETS = PACK.assets;
+  if(!localStorage.getItem('grug.sandy.v1')) wearLook('classic', true);   // a look with pictures, so pages never wait on the 3D engine
+  const t = location.hash.slice(1); setTab(R[t] ? t : 'overview');
+  addEventListener('hashchange', () => { const h = location.hash.slice(1); if(R[h] && h !== tab) setTab(h); });
+  fit(); $('#boot').hidden = true;
+})();
+</script>
+</body>
+</html>
