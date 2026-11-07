@@ -27,9 +27,26 @@
   const writeJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
   function storageWorks() { try { const k = '__grug_check'; localStorage.setItem(k, '1'); const ok = localStorage.getItem(k) === '1'; localStorage.removeItem(k); return ok; } catch (e) { return false; } }
 
-  const ADJ = ['Spicy', 'Sleepy', 'Mighty', 'Chill', 'Brave', 'Sunny', 'Turbo', 'Lucky', 'Cozy', 'Crunchy', 'Zesty', 'Golden', 'Sneaky', 'Jolly', 'Frosty', 'Rowdy'];
-  const NOUN = ['Kolache', 'Boba', 'Taco', 'Donut', 'Sushi', 'Latte', 'Cupcake', 'Dumpling', 'Pearl', 'Churro', 'Biscuit', 'Mango', 'Waffle', 'Pickle', 'Noodle', 'Pecan'];
-  const randomName = () => ADJ[Math.floor(Math.random() * ADJ.length)] + ' ' + NOUN[Math.floor(Math.random() * NOUN.length)];
+  /* NAMES · players pick one word from each list, plus an optional number (0–9999). No free text, so nobody can
+     type a slur or anything else that would show up on screen or in the Discord feed. Only add words that are safe
+     next to EVERY word in the other list (no colours, body words, or food words that double as insults). */
+  const ADJ = ['Spicy', 'Sleepy', 'Mighty', 'Chill', 'Brave', 'Sunny', 'Turbo', 'Lucky', 'Cozy', 'Crunchy', 'Zesty', 'Golden', 'Sneaky', 'Jolly', 'Frosty', 'Rowdy',
+    'Happy', 'Speedy', 'Fuzzy', 'Bouncy', 'Clever', 'Breezy', 'Snappy', 'Cheery', 'Toasty', 'Zippy', 'Witty', 'Sparkly', 'Mellow', 'Peppy', 'Plucky', 'Swift'];
+  const NOUN = ['Kolache', 'Boba', 'Taco', 'Donut', 'Sushi', 'Latte', 'Cupcake', 'Dumpling', 'Pearl', 'Churro', 'Biscuit', 'Mango', 'Waffle', 'Pickle', 'Noodle', 'Pecan',
+    'Panda', 'Otter', 'Dino', 'Falcon', 'Koala', 'Penguin', 'Tiger', 'Turtle', 'Pretzel', 'Muffin', 'Bagel', 'Lychee', 'Matcha', 'Mochi', 'Ramen', 'Pudding'];
+  const NAME_MAX_NUM = 9999;
+  const pickOf = a => a[Math.floor(Math.random() * a.length)];
+  const randomName = () => pickOf(ADJ) + ' ' + pickOf(NOUN);
+  // 'Spicy Boba' or 'Spicy Boba 42' (built from the lists only)
+  function makeName(adj, noun, num) {
+    const a = ADJ.find(w => w.toLowerCase() === String(adj || '').toLowerCase()), n = NOUN.find(w => w.toLowerCase() === String(noun || '').toLowerCase());
+    if (!a || !n) return '';
+    const s = String(num == null ? '' : num).trim();
+    if (s === '') return a + ' ' + n;
+    if (!/^\d{1,4}$/.test(s) || +s > NAME_MAX_NUM) return '';
+    return a + ' ' + n + ' ' + String(+s);
+  }
+  function parseName(name) { const m = /^\s*([A-Za-z]+)\s+([A-Za-z]+)(?:\s+(\d{1,4}))?\s*$/.exec(String(name == null ? '' : name)); return m && makeName(m[1], m[2], m[3]) ? { adj: m[1], noun: m[2], num: m[3] || '' } : null; }
 
   /* ---------- the profile ---------- */
   function fresh() {
@@ -61,11 +78,15 @@
     o.inventory = Array.from(new Set(o.inventory));
     return o;
   }
-  function cleanName(n) { return String(n == null ? '' : n).replace(/[^\w .'\-]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20); }
+  // Only names built from the word lists survive; anything else (old free-text names, edited files) becomes ''.
+  function cleanName(n) { const p = parseName(n); return p ? makeName(p.adj, p.noun, p.num) : ''; }
 
-  let profile = normalize(readJSON(KEY, null));
+  const stored = readJSON(KEY, null);
+  let profile = normalize(stored);
   let isNew = false;
   try { isNew = !localStorage.getItem(KEY); if (isNew) localStorage.setItem(KEY, JSON.stringify(profile)); } catch (e) {}   // a first visit gets its name and id right away
+  // an old free-text name was replaced with a word-list name: keep the new one so it doesn't change on every page
+  if (!isNew && stored && typeof stored === 'object' && stored.name !== profile.name) { profile.seen.renamed = Date.now(); writeJSON(KEY, profile); }
   const listeners = [];
   function emit(what) { listeners.forEach(fn => { try { fn(profile, what); } catch (e) { console.error(e); } }); try { root.dispatchEvent(new CustomEvent('grug:change', { detail: { what, profile } })); } catch (e) {} }
   function save(what) { profile.updated = Date.now(); const ok = writeJSON(KEY, profile); emit(what || 'save'); return ok; }
@@ -459,6 +480,45 @@
       const src = url(it.thumb), im = new Image(); im.onload = im.onerror = () => { el.style.backgroundImage = 'url(' + src + ')'; el.classList.add('ld'); }; im.src = src; });
   }
 
+  /* ---------- Discord feed ----------
+     One webhook for the whole site. announce(kind, detail) posts:
+       'logon'    {app}                     someone opened a game (once per game per phone every LOGON_GAP_MIN)
+       'reward'   {app, points, pearls}     someone collected a check-in / tap reward
+       'purchase' {pearls, price}           someone bought a Pearl pack
+     Anyone who reads the page source can see the webhook. If it gets spammed, delete it in Discord
+     (Server Settings → Integrations → Webhooks), make a new one and paste it here. */
+  const DISCORD_WEBHOOK = '';   // paste your Discord webhook URL between the quotes ('' = feed off)
+  const LOGON_GAP_MIN = 10, DKEY = 'grug.discord.v1';
+  const plain = s => String(s == null ? '' : s).replace(/[^A-Za-z0-9 .,$'&·:+\-()]/g, '').slice(0, 80);   // no markdown, mentions or links
+  function appLabel(app) {
+    const g = GAMES.find(x => x.app === app || x.id === app);
+    return g ? '**' + plain(g.title) + '** (' + plain(g.partner) + ')' : '**' + plain(app || 'a Grug game') + '**';
+  }
+  function partnerName(app) { const g = GAMES.find(x => x.app === app || x.id === app); return plain(g ? g.partner : app || 'a Grug partner'); }
+  function postDiscord(content) {
+    if (!/^https:\/\/(discord|discordapp)\.com\/api\/webhooks\//.test(DISCORD_WEBHOOK)) return false;
+    try {
+      const f = new FormData(); f.append('payload_json', JSON.stringify({ content: String(content).slice(0, 1900), allowed_mentions: { parse: [] } }));
+      fetch(DISCORD_WEBHOOK, { method: 'POST', body: f, mode: 'no-cors', keepalive: true }).catch(() => {});
+      return true;
+    } catch (e) { return false; }
+  }
+  function announce(kind, d) {
+    d = d || {}; const who = '**' + plain(profile.name) + '**';
+    if (kind === 'logon') {
+      const log = readJSON(DKEY, {}) || {}; log.logon = log.logon && typeof log.logon === 'object' ? log.logon : {};
+      const k = String(d.app || 'site'); if (Date.now() - (+log.logon[k] || 0) < LOGON_GAP_MIN * 60000) return false;
+      log.logon[k] = Date.now(); writeJSON(DKEY, log);
+      return postDiscord('🎮 ' + who + ' logged on to ' + appLabel(d.app));
+    }
+    if (kind === 'reward') {
+      const bits = []; if (+d.points > 0) bits.push('+' + fmt(d.points) + ' points'); if (+d.pearls > 0) bits.push('+' + fmt(d.pearls) + ' Pearls');
+      return postDiscord('🎁 ' + who + ' collected their daily reward at **' + partnerName(d.app) + '**' + (bits.length ? ': ' + bits.join(', ') : ''));
+    }
+    if (kind === 'purchase') return postDiscord('🫧 ' + who + ' bought **' + fmt(d.pearls) + ' Pearls**' + (d.price ? ' for ' + plain(d.price) : ''));
+    return false;
+  }
+
   /* ---------- public ---------- */
   root.Grug = {
     KEY, ROOT, url, esc, fmt, icon, GAMES, C,
@@ -466,7 +526,8 @@
     on(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },
     save, setName, setAvatar, equip, unequip, wearing, refreshPictures, owns, grant, track, totals, statValue, progress, checkMilestones, celebrate,
     points, appState, exportData, exportText, exportFilename, download, share, parseImport, applyImport, reset,
-    snaps, ensureSnaps, randomName, cleanName, pearlBalance, pearlsUrl,
+    snaps, ensureSnaps, randomName, cleanName, makeName, parseName, NAME_WORDS: { adj: ADJ.slice(), noun: NOUN.slice(), maxNum: NAME_MAX_NUM }, pearlBalance, pearlsUrl,
+    announce,
     ui: { chrome, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic }
   };
 })(window);

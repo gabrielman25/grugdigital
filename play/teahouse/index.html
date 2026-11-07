@@ -9846,14 +9846,7 @@ const CONFIG = {
     help: 'Trouble with a purchase? Text 954-459-6301 or visit gabrielman25.github.io/grugdigital/support.html with your purchase code.'
   },
 
-  // Discord: posts a message to this webhook when someone opens the game. '' = off.
-  // Anyone who views this page's source can see the webhook. If it ever gets spammed, delete it in Discord and paste a new one.
-  // cooldownMinutes: one message per phone in that window, so refreshing doesn't flood the channel.
-  discord: {
-    webhook: 'https://discord.com/api/webhooks/1568415342152130580/0FfNHO2Zbff9JHBxfHmnjIDR1Mo8QZZrxILI0l1T-IpspB76yOg1lyiW8EJxYKVuMMnA',
-    message: 'A player has logged on to {brand}.',
-    cooldownMinutes: 10
-  },
+  // Discord: the site-wide feed lives in assets/grug.js (Grug.announce): log-ons, rewards and Pearl purchases.
 
   social: { instagram: '', tiktok: '', facebook: '', website: '' },
   storageKey: 'teahouse-express-rewards-v1'      // change per business so two apps on one domain don't share points
@@ -10204,7 +10197,7 @@ async function redeemBoard(){
       if(st.wins.includes(key)) throw Object.assign(new Error('used'), {code: 'used'});
       st.wins.push(key); st.wins = st.wins.slice(-60); st.lastClaimDay = rewardsDay();
       $('#boxes').classList.add('good'); redeemMsg('+' + checkinPts() + ' points. Thanks for stopping by!', 'ok');
-      addPoints(checkinPts(), 'Visit · ' + s.name); GrugApp.onCheckin();
+      addPoints(checkinPts(), 'Visit · ' + s.name); GrugApp.onCheckin({points: checkinPts()});
       setTimeout(() => { boxes.forEach(b => b.value = ''); $('#boxes').classList.remove('good'); redeemMsg(''); renderCollect(); }, 1800);
     } else codeFail(r.reason === 'expired' ? 'That code just changed. Check the board for the new one.' : r.reason === 'busy' ? 'Lots of check-ins right now. Try again in a minute.' : 'That doesn’t match the board. Check the code and try again.');
   }catch(e){
@@ -10220,7 +10213,7 @@ function tapClaim(s){
   st.lastClaimDay = rewardsDay();
   const pl = tapPearls(s);
   toast('+' + checkinPts() + ' points' + (pl ? ' and +' + pl + ' ' + PL.name : '') + '. Thanks for stopping by!');
-  addPoints(checkinPts(), 'Tap · ' + s.name); GrugApp.onCheckin(); setTimeout(renderCollect, 1600);
+  addPoints(checkinPts(), 'Tap · ' + s.name); GrugApp.onCheckin({points: checkinPts(), pearls: pl}); setTimeout(renderCollect, 1600);
 }
 /* daily tap Pearls: CONFIG.points.tapPearls per store per rewards day (resets at CONFIG.points.resetHour).
    The cooldown is kept in the shared Pearls wallet itself, so clearing only this app's data can't claim twice. */
@@ -10366,16 +10359,6 @@ function gameState(){
   return {points: st.points, pearls: pearls(), pearlName: PL_ON ? PL.name : '', inv: st.inv, best: st.game.best, runs: st.game.runs, shop: GSHOP, title: G.title, collectible: G.collectible || 'beans',
     runSeconds: +G.runSeconds || 60, brand: {name: B.name, colors: B.colors, logo: B.logoImage || ''}, store: store ? B.name + ' · ' + store.name : B.name, avatar: GrugApp.avatar(), player: GrugApp.name(), look: GrugApp.look()};
 }
-/* Discord: one 'player has logged on' message per page visit, at most once per cooldown on this phone */
-let joinSent = false;
-function announceJoin(){
-  const D = CONFIG.discord || {}; if(joinSent || !/^https:\/\/(discord|discordapp)\.com\/api\/webhooks\//.test(D.webhook || '')) return;
-  joinSent = true;
-  const k = KEY + ':joinPing', gap = (+D.cooldownMinutes || 0) * 60000;
-  try{ if(gap && Date.now() - (+localStorage.getItem(k) || 0) < gap) return; localStorage.setItem(k, String(Date.now())); }catch(e){}
-  const f = new FormData(); f.append('payload_json', JSON.stringify({content: String(D.message || 'A player has logged on.').replace('{brand}', B.name), allowed_mentions: {parse: []}}));
-  try{ fetch(D.webhook, {method: 'POST', body: f, mode: 'no-cors', keepalive: true}).catch(() => {}); }catch(e){}
-}
 function toGame(m){ if(!gameFrame || !gameFrame.contentWindow) return; try{ gameFrame.contentWindow.postMessage(Object.assign({rw: 1}, m), '*'); }catch(e){} }
 function sendGameState(){ toGame(Object.assign({t: 'state'}, gameState())); }
 function pauseGame(){ toGame({t: 'pause'}); }
@@ -10401,7 +10384,7 @@ addEventListener('message', e => {
   const d = e.data; if(!d || d.rw !== 1 || typeof d.t !== 'string') return;
   if(!gameFrame || e.source !== gameFrame.contentWindow) return;   // only the game this page opened
   const reply = r => toGame(Object.assign({t: 'reply', req: String(d.req || ''), state: gameState()}, r));
-  if(d.t === 'hello'){ sendGameState(); GrugApp.onPlay(); announceJoin(); }
+  if(d.t === 'hello'){ sendGameState(); GrugApp.onPlay(); GrugApp.onLogon(); }
   else if(d.t === 'buy'){ const r = buyItem(String(d.id)); reply(r); if(r.ok && store) renderRewards(); else if(r.short && PL_ON) offerPearls(r); }
   else if(d.t === 'needPearls'){ const it = gameItem(String(d.id)); if(it && PL_ON && wallet() < it.cost) offerPearls({short: it.cost - wallet(), item: it.name}); }
   else if(d.t === 'use'){ const r = useItems(d.ids); reply(r); if(r.ok && store) renderRewards(); }

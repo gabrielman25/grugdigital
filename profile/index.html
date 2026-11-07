@@ -29,6 +29,14 @@
 .pf-move .row .g-btn{flex:1 1 140px}
 .pf-danger{border-color:rgba(255,107,107,.3)}
 .pf-code{font:500 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--mut);word-break:break-all}
+.nm-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nm-f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.nm-f>span{font-size:13px;font-weight:700;color:var(--g-ink2,inherit)}
+.nm-f small{font-weight:500;opacity:.75}
+.nm-f select.g-input{appearance:auto;-webkit-appearance:menulist;width:100%}
+.nm-num{grid-column:1/-1}
+.nm-num input{max-width:140px}
+.nm-prev{margin-top:12px;font-size:15px}
 </style>
 </head>
 <body>
@@ -120,11 +128,25 @@
   document.querySelectorAll('[data-pref]').forEach(b => b.addEventListener('click', () => { G.profile.prefs[b.dataset.pref] = !G.profile.prefs[b.dataset.pref]; G.save('prefs'); render(); G.ui.buzz(); }));
 
   $('#rename').addEventListener('click', async () => {
-    let typed = '';
-    const v = await G.ui.dialog({ title: 'Your name', html: '<input class="g-input" id="nameIn" maxlength="20" autocomplete="off" value="' + G.esc(G.profile.name) + '"><p class="g-fine" style="margin-top:8px">Up to 20 letters. It shows on your profile and in games.</p><button type="button" class="g-btn sm" id="randName" style="margin-top:10px">Pick one for me</button>',
+    // names are built from two word lists plus an optional number: no free text
+    const W = G.NAME_WORDS, cur = G.parseName(G.profile.name) || { adj: W.adj[0], noun: W.noun[0], num: '' };
+    const opts = (list, sel) => list.map(w => '<option' + (w.toLowerCase() === String(sel).toLowerCase() ? ' selected' : '') + '>' + G.esc(w) + '</option>').join('');
+    let picked = '';
+    const v = await G.ui.dialog({ title: 'Your name',
+      html: '<div class="nm-row"><label class="nm-f"><span>First word</span><select class="g-input" id="nmAdj">' + opts(W.adj, cur.adj) + '</select></label>' +
+        '<label class="nm-f"><span>Second word</span><select class="g-input" id="nmNoun">' + opts(W.noun, cur.noun) + '</select></label>' +
+        '<label class="nm-f nm-num"><span>Number <small>(optional)</small></span><input class="g-input" id="nmNum" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="0–' + W.maxNum + '" value="' + G.esc(cur.num) + '"></label></div>' +
+        '<p class="nm-prev">You’ll show up as <b id="nmPrev"></b></p>' +
+        '<p class="g-fine" style="margin-top:6px">Pick from the lists so every name is friendly. It shows on your profile, in games and in the Grug community feed.</p>' +
+        '<button type="button" class="g-btn sm" id="randName" style="margin-top:10px">Pick one for me</button>',
       actions: [{ label: 'Cancel', kind: 'quiet', value: null }, { label: 'Save name', kind: 'primary', value: 'save' }],
-      onOpen: d => { const i = d.querySelector('#nameIn'); i.focus(); i.select(); d.querySelector('#randName').addEventListener('click', () => { i.value = G.randomName(); }); }, onClose: d => { typed = d.querySelector('#nameIn').value; } });
-    if (v === 'save') { const name = G.cleanName(typed); if (name && G.setName(name)) { render(); G.ui.toast('Saved as ' + name, { icon: 'check' }); } else G.ui.toast('Pick a name with letters or numbers', { icon: 'warning-circle' }); }
+      onOpen: d => {
+        const a = d.querySelector('#nmAdj'), n = d.querySelector('#nmNoun'), num = d.querySelector('#nmNum'), prev = d.querySelector('#nmPrev');
+        const upd = () => { num.value = num.value.replace(/\D/g, '').slice(0, 4); picked = G.makeName(a.value, n.value, num.value); prev.textContent = picked || 'a number from 0 to ' + W.maxNum; };
+        [a, n, num].forEach(el => el.addEventListener('input', upd)); upd(); a.focus();
+        d.querySelector('#randName').addEventListener('click', () => { const r = G.parseName(G.randomName()); a.value = r.adj; n.value = r.noun; upd(); });
+      } });
+    if (v === 'save') { if (picked && G.setName(picked)) { render(); G.ui.toast('Saved as ' + picked, { icon: 'check' }); } else G.ui.toast('Pick a number from 0 to ' + W.maxNum + ', or leave it empty', { icon: 'warning-circle' }); }
   });
 
   /* export */

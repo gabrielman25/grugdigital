@@ -1403,7 +1403,7 @@ async function redeemBoard(){
       if(st.wins.includes(key)) throw Object.assign(new Error('used'), {code: 'used'});
       st.wins.push(key); st.wins = st.wins.slice(-60); st.lastClaimDay = rewardsDay();
       $('#boxes').classList.add('good'); redeemMsg('+' + checkinPts() + ' points. Thanks for stopping by!', 'ok');
-      addPoints(checkinPts(), 'Visit · ' + s.name); GrugApp.onCheckin();
+      addPoints(checkinPts(), 'Visit · ' + s.name); GrugApp.onCheckin({points: checkinPts()});
       setTimeout(() => { boxes.forEach(b => b.value = ''); $('#boxes').classList.remove('good'); redeemMsg(''); renderCollect(); }, 1800);
     } else codeFail(r.reason === 'expired' ? 'That code just changed. Check the board for the new one.' : r.reason === 'busy' ? 'Lots of check-ins right now. Try again in a minute.' : 'That doesn’t match the board. Check the code and try again.');
   }catch(e){
@@ -1417,7 +1417,7 @@ $('#redeemBtn').addEventListener('click', () => { buzz(); redeemBoard(); });
 function tapClaim(s){
   if(claimedToday()){ renderCollect(); toast('Today’s points are already in. More at ' + resetLabel() + '.'); buzz(8); return; }
   st.lastClaimDay = rewardsDay(); toast('+' + checkinPts() + ' points. Thanks for stopping by!');
-  addPoints(checkinPts(), 'Tap · ' + s.name); GrugApp.onCheckin(); setTimeout(renderCollect, 1600);
+  addPoints(checkinPts(), 'Tap · ' + s.name); GrugApp.onCheckin({points: checkinPts()}); setTimeout(renderCollect, 1600);
 }
 function onTag(s){ if(!store || store.id !== s.id) location.hash = s.id + '/rewards'; else if(tab !== 'Rewards') setTab('Rewards'); setTimeout(() => tapClaim(s), 350); }
 const hasWebNFC = 'NDEFReader' in window;
@@ -1567,7 +1567,7 @@ addEventListener('message', e => {
   const d = e.data; if(!d || d.rw !== 1 || typeof d.t !== 'string') return;
   if(!gameFrame || e.source !== gameFrame.contentWindow) return;   // only the game this page opened
   const reply = r => toGame(Object.assign({t: 'reply', req: String(d.req || ''), state: gameState()}, r));
-  if(d.t === 'hello') sendGameState();
+  if(d.t === 'hello'){ sendGameState(); GrugApp.onLogon(); }
   else if(d.t === 'buy'){ const r = buyItem(String(d.id)); reply(r); if(r.ok && store) renderRewards(); }
   else if(d.t === 'use'){ const r = useItems(d.ids); reply(r); if(r.ok && store) renderRewards(); }
   else if(d.t === 'score'){

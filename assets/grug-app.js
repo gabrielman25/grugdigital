@@ -85,8 +85,10 @@
     if (d.level) won.push(...G.track(A.app, 'course', +d.level || 0, 'max'));
     if (won.length) { G.celebrate(won); renderCloset(); A.sendGameState && A.sendGameState(); }
   }
-  function onCheckin() {
+  // d (optional): {points, pearls} for the Discord feed
+  function onCheckin(d) {
     if (!A) return;
+    try { G.announce('reward', Object.assign({ app: A.app }, d || {})); } catch (e) {}
     const won = G.track(A.app, 'checkins', 1);
     if (won.length) { setTimeout(() => G.celebrate(won), 1500); renderCloset(); }
   }
@@ -118,6 +120,8 @@
       hair: null, hat: null, back: null, hand: null, name: G.profile.name
     };
   }
+  // the game finished loading: post 'logged on' to the Discord feed (rate-limited in Grug.announce)
+  function onLogon() { if (A) try { G.announce('logon', { app: A.app }); } catch (e) {} }
   function onPlay() { if (!A) return; const won = G.track(A.app, 'plays', 1); if (won.length) { G.celebrate(won); renderCloset(); A.sendGameState && A.sendGameState(); } }
 
   function init(bridge) {
@@ -127,5 +131,5 @@
     if (!$('#g-toast')) { const t = document.createElement('div'); t.id = 'g-toast'; t.className = 'g-toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
   }
 
-  root.GrugApp = { init, onScore, onPlay, onCheckin, gameExtras, look, renderCloset, avatar: () => G.profile.avatar, name: () => G.profile.name };
+  root.GrugApp = { init, onScore, onPlay, onLogon, onCheckin, gameExtras, look, renderCloset, avatar: () => G.profile.avatar, name: () => G.profile.name };
 })(window);

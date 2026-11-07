@@ -238,7 +238,9 @@ let arrived = null;
     else if(csOK && w.buys.some(b => b.cs === csOK)) arrived = {dup: true, p};
     else { const t = clubTier(w), extra = t ? Math.round(p.pearls * t.bonus / 100) : 0;
       w.balance += p.pearls + extra; w.buys.unshift({at: Date.now(), pack: p.id, n: p.pearls + extra, price: p.price, cs: csOK}); w.buys = w.buys.slice(0, 50);
-      arrived = wSet(w) && storageOK() ? {p, extra, tier: t} : {nosave: true, p, cs: csOK}; }
+      arrived = wSet(w) && storageOK() ? {p, extra, tier: t} : {nosave: true, p, cs: csOK};
+      // Discord feed: real (live-mode) checkouts only; duplicates were already turned away above
+      if(!arrived.nosave && /^cs_live_/.test(csOK)) try{ window.Grug.announce('purchase', {pearls: p.pearls + extra, price: p.price}); }catch(e){} }
   }
   if(id !== null || q.get('from') !== null) history.replaceState(null, '', location.pathname);   // a refresh can't add them twice
 }

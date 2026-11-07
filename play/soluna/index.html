@@ -1249,7 +1249,7 @@ async function redeem(){
       st.wins.push(winKey); st.wins = st.wins.slice(-60);
       st.points += pts;
       st.lastClaimDay = rewardsDay();
-      st.history.unshift({at: Date.now(), pts, label: 'Visit · ' + s.name}); GrugApp.onCheckin();
+      st.history.unshift({at: Date.now(), pts, label: 'Visit · ' + s.name}); GrugApp.onCheckin({points: pts});
       st.history = st.history.slice(0, 40);
       save();
       $('#boxes').classList.add('good');
@@ -1286,7 +1286,7 @@ function parseTap(raw){
 function tapClaim(s){
   if(claimedToday()){ renderCollect(); toast('Today’s points are already in. More at 4 AM.'); buzz(8); return false; }
   st.points += TAP_POINTS; st.lastClaimDay = rewardsDay();
-  st.history.unshift({at: Date.now(), pts: TAP_POINTS, label: 'Tap · ' + s.name}); st.history = st.history.slice(0, 40); GrugApp.onCheckin();
+  st.history.unshift({at: Date.now(), pts: TAP_POINTS, label: 'Tap · ' + s.name}); st.history = st.history.slice(0, 40); GrugApp.onCheckin({points: TAP_POINTS});
   save();
   buzz([10, 40, 18]); toast('+' + TAP_POINTS + ' points. Thanks for stopping by!');
   celebrate(); renderRewards(); renderPoints(true); sendGameState();
@@ -1503,7 +1503,7 @@ addEventListener('message', e=>{
   const d = e.data; if(!d || d.soluna !== 1 || typeof d.t !== 'string') return;
   if(!GAME_ORIGIN.test(e.origin) || !e.source) return;
   gameWin = e.source; gameOrigin = e.origin === 'null' || e.origin.startsWith('file:') ? '*' : e.origin;
-  if(d.t === 'hello'){ sendGameState(); if(store) renderRewards(); }
+  if(d.t === 'hello'){ sendGameState(); GrugApp.onLogon(); if(store) renderRewards(); }
   else if(d.t === 'club'){ // joined or left from inside the game: the newer change wins
     const rev = +d.rev || 0;
     if(rev > (st.club.rev || 0)){ st.club = {active: !!d.active, since: d.active ? (+d.since || Date.now()) : 0, rev}; save(); renderClub(); }
