@@ -6121,40 +6121,23 @@ window.SandyKit={version:'1.1.0',CATALOG,DEFAULT:clone(DEFAULT),texturesFor,_dbg
         uv[i * 2] = px / W; uv[i * 2 + 1] = 1 - py / H;
       }
     }
-    // shirts fit loosely: below the chest the fabric hangs straight down, it bridges the gap between the breasts,
-    // and the sides fall straight from the armpits, instead of following every curve of the body
+    // shirts ease out a little below the chest (a touch more toward the hem), so they don't cling; the chest is left as made.
+    // Each point moves along its averaged normal, so the cloth stays smooth and seams stay closed.
     if (kind === 'shirt') {
       const idx = []; for (let t = 0; t < out.length; t++) if (out[t][0] === 't') for (let j = 0; j < 3; j++) idx.push(t * 3 + j);
-      let y0 = 1e9, y1 = -1e9, z0 = 1e9, z1 = -1e9; for (const i of idx) { const y = P.getY(i), z = P.getZ(i); y0 = Math.min(y0, y); y1 = Math.max(y1, y); z0 = Math.min(z0, z); z1 = Math.max(z1, z); }
-      const zc = (z0 + z1) / 2, BIN = 2, col = x => Math.round(x / BIN), row = y => Math.round(y / BIN), yArm = y0 + (y1 - y0) * 0.68;
-      // front: highest point at or above each spot in its column, then bridged across columns row by row
-      const front = idx.filter(i => P.getZ(i) > zc), hang = new Map();
-      const cols = new Map(); for (const i of front) { const c = col(P.getX(i)); if (!cols.has(c)) cols.set(c, []); cols.get(c).push(i); }
-      const prof = new Map();   // row -> Map(col -> hang z)
-      for (const [c, list] of cols) { list.sort((a, b) => P.getY(b) - P.getY(a)); let m = -1e9; for (const i of list) { if (P.getY(i) <= yArm + 4) m = Math.max(m, P.getZ(i)); const hz = Math.max(m, P.getZ(i)); hang.set(i, hz); const r = row(P.getY(i)); if (!prof.has(r)) prof.set(r, new Map()); const pr = prof.get(r); pr.set(c, Math.max(pr.get(c) || -1e9, hz)); } }
-      const bridged = new Map();
-      for (const [r, pr] of prof) { const cs = Array.from(pr.keys()).sort((a, b) => a - b), pre = [], suf = []; let m = -1e9; for (const c of cs) { m = Math.max(m, pr.get(c)); pre.push(m); } m = -1e9; for (let k = cs.length - 1; k >= 0; k--) { m = Math.max(m, pr.get(cs[k])); suf[k] = m; }
-        const b = new Map(); cs.forEach((c, k) => b.set(c, Math.min(pre[k], suf[k]))); bridged.set(r, b); }
-      const moved = new Set();
-      for (const i of front) { const z = P.getZ(i), r = bridged.get(row(P.getY(i))), tz = Math.max(hang.get(i), r ? (r.get(col(P.getX(i))) || -1e9) : -1e9);
-        // fade toward the collar so the neckline still sits on her
-        const k = Math.min(1, Math.max(0, (y1 - 3 - P.getY(i)) / 8)) * 0.92;
-        if (tz > z + 0.05) { P.setZ(i, z + (tz - z) * k); moved.add(i); } }
-      // sides: below the armpit the whole torso widens smoothly toward its armpit width (scaled about the middle, so prints stay whole)
-      const rows = new Map(); for (const i of idx) { const r = row(P.getY(i)); rows.set(r, Math.max(rows.get(r) || 0, Math.abs(P.getX(i)))); }
-      const rk = Array.from(rows.keys()).sort((p, q) => p - q), widthAt = y => { const f = y / BIN; let lo = rk[0], hi = rk[rk.length - 1]; for (const r of rk) { if (r <= f) lo = r; if (r >= f) { hi = r; break; } } const wl = rows.get(lo), wh = rows.get(hi); return hi === lo ? wl : wl + (wh - wl) * (f - lo) / (hi - lo); };
-      const wArm = widthAt(yArm);
-      for (const i of idx) { const y = P.getY(i); if (y >= yArm) continue; const wy = widthAt(y); if (!(wy > 1) || wArm <= wy) continue;
-        const fade = Math.min(1, (yArm - y) / 6), k = 1 + (wArm / wy - 1) * 0.75 * fade; P.setX(i, P.getX(i) * k); moved.add(i); }
-      // smooth shading where the cloth moved: average the faces around each (welded) point
-      if (moved.size) { const key = i => Math.round(P.getX(i) * 50) + ',' + Math.round(P.getY(i) * 50) + ',' + Math.round(P.getZ(i) * 50), acc = new Map(), a = new T.Vector3(), b2 = new T.Vector3(), c2 = new T.Vector3();
-        for (let t = 0; t < idx.length; t += 3) { const i0 = idx[t], i1 = idx[t + 1], i2 = idx[t + 2]; a.fromBufferAttribute(P, i0); b2.fromBufferAttribute(P, i1).sub(a); c2.fromBufferAttribute(P, i2).sub(a); const fn = new T.Vector3().crossVectors(b2, c2);
-          const o = new T.Vector3(N.getX(i0) + N.getX(i1) + N.getX(i2), N.getY(i0) + N.getY(i1) + N.getY(i2), N.getZ(i0) + N.getZ(i1) + N.getZ(i2)); if (fn.dot(o) < 0) fn.negate();
-          for (const i of [i0, i1, i2]) { const k2 = key(i); if (!acc.has(k2)) acc.set(k2, new T.Vector3()); acc.get(k2).add(fn); } }
-        for (const i of moved) { const v = acc.get(key(i)); if (v && v.lengthSq() > 0) { v.normalize(); N.setXYZ(i, v.x, v.y, v.z); } } }
+      let y0 = 1e9, y1 = -1e9; for (const i of idx) { const y = P.getY(i); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+      const yTop = y0 + (y1 - y0) * 0.5, LOOSE = 1.1;   // cm at the hem
+      const key = i => Math.round(P.getX(i) * 20) + ',' + Math.round(P.getY(i) * 20) + ',' + Math.round(P.getZ(i) * 20), nrm = new Map();
+      for (const i of idx) { const k2 = key(i); if (!nrm.has(k2)) nrm.set(k2, new T.Vector3()); nrm.get(k2).add(new T.Vector3(N.getX(i), N.getY(i), N.getZ(i))); }
+      for (const v of nrm.values()) { v.y = 0; if (v.lengthSq() > 1e-6) v.normalize(); }   // outward, not up or down
+      const moves = idx.map(i => { const y = P.getY(i); if (y >= yTop) return null; const f = Math.min(1, (yTop - y) / Math.max(1e-3, yTop - y0)), g = Math.max(0, (f - 0.78) / 0.22), e = f * f * (3 - 2 * f) * LOOSE + g * g * 1.0;   /* + a small flare at the hem */ const n2 = nrm.get(key(i)); return n2 ? [i, n2.x * e, n2.z * e] : null; });
+      for (const m of moves) if (m) P.setXYZ(m[0], P.getX(m[0]) + m[1], P.getY(m[0]), P.getZ(m[0]) + m[2]);
     }
     // the waist of pants tucks a hair under a shirt's hem
-    if (kind === 'pants') for (let t = 0; t < out.length; t++) if (out[t][0] === 't') for (let j = 0; j < 3; j++) { const i = t * 3 + j; P.setXYZ(i, P.getX(i) - N.getX(i) * 0.25, P.getY(i) - N.getY(i) * 0.25, P.getZ(i) - N.getZ(i) * 0.25); }
+    // (more at the top of the waistband, where a shirt's hem sits over it; hardly any lower down at the hips)
+    if (kind === 'pants') { let wy0 = 1e9, wy1 = -1e9; for (let t = 0; t < out.length; t++) if (out[t][0] === 't') for (let j = 0; j < 3; j++) { const y = P.getY(t * 3 + j); wy0 = Math.min(wy0, y); wy1 = Math.max(wy1, y); }
+      for (let t = 0; t < out.length; t++) if (out[t][0] === 't') for (let j = 0; j < 3; j++) { const i = t * 3 + j, f = Math.min(1, Math.max(0, (P.getY(i) - wy0) / Math.max(1e-3, wy1 - wy0))), d = 0.3 + 1.7 * f * f;
+        P.setXYZ(i, P.getX(i) - N.getX(i) * d, P.getY(i), P.getZ(i) - N.getZ(i) * d); } }
     geo.setAttribute('uv', new T.BufferAttribute(uv, 2));
     geo.computeBoundingSphere();
     GEO.set(src0, geo); return geo;
@@ -6173,7 +6156,7 @@ window.SandyKit={version:'1.1.0',CATALOG,DEFAULT:clone(DEFAULT),texturesFor,_dbg
       const geo = wrapped({ geometry: base.geo, skeleton: m.skeleton }, g.full, g.kind);
       const ud = base.mat.userData; base.mat.userData = {}; const mat = base.mat.clone(); base.mat.userData = ud;   // clone() can't copy circular userData mat.onBeforeCompile = base.mat.onBeforeCompile; mat.customProgramCacheKey = base.mat.customProgramCacheKey; mat.userData = Object.assign({}, ud);
       mat.map = texture(v.template, v.colour || '#ffffff'); mat.color.set(0xffffff); mat.roughness = 0.82; mat.metalness = 0; mat.needsUpdate = true;
-      if (g.kind === 'shirt') { mat.polygonOffset = true; mat.polygonOffsetFactor = -1; mat.polygonOffsetUnits = -4; }   // a shirt always wins over the pants' waistband
+      if (g.kind === 'shirt') { mat.polygonOffset = true; mat.polygonOffsetFactor = -2; mat.polygonOffsetUnits = -8; }   // a shirt always wins over the pants' waistband
       m.geometry = geo; m.material = mat; m.userData.custom = { key, geo: base.geo, mat: base.mat, mine: mat };
     }
   }
