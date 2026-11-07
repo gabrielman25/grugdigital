@@ -451,9 +451,9 @@ body.game-mode .fs-float{top:calc(12px + var(--bn-h,0px))}
       </div>
 
       <div id="pearlShop" hidden>
-        <div class="rw-h"><h2 id="plTitle">Pearls</h2><small id="plHint">Extra for boosts<br>on top of your points</small></div>
+        <div class="rw-h"><h2 id="plTitle">Pearls</h2><small id="plHint">One balance for<br>every Grug game</small></div>
         <div class="pl-bal card"><span class="rw-ic"><i data-icon="pearl"></i></span><div class="rw-txt"><b id="plBal"></b><span id="plSub"></span></div><span class="pl-test" id="plTest" hidden>Test mode</span></div>
-        <div class="pl-grid" id="plGrid"></div>
+        <a class="btn primary block press" id="plGet"><i data-icon="pearl"></i>Get Pearls</a>
         <p class="fine" id="plFine"></p>
       </div>
 
@@ -9636,21 +9636,13 @@ const CONFIG = {
     ]
   },
 
-  // Pearls: a second balance guests BUY (Stripe Payment Links). Pearls only buy game Boosts and are spent
-  // before points. Like points, they never turn into drinks, merchandise or cash.
-  // One Stripe Payment Link per pack. Open this app with #setup on the end for the exact Stripe settings.
-  // link: paste the Payment Link from Stripe (https://buy.stripe.com/...). Test links contain /test_ .
-  // price is only the label shown here: Stripe charges whatever the Payment Link is set to, so keep them the same.
-  // The store stays hidden until at least one pack has a link.
+  // Pearls: the site-wide currency guests BUY on the Grug site's Pearls page. One wallet on the phone is shared by
+  // every Grug app on this site. Pearls only buy game Boosts and are spent before points. They never turn into
+  // drinks, merchandise, points or cash. store: the Pearls page, relative to this file.
   pearls: {
     enabled: true,
     name: 'Pearls',
-    packs: [
-      { id: 'p40', pearls: 40, price: '$1.99', link: 'https://buy.stripe.com/test_28E6oIdUj0cp9S21Ne9k403' },
-      { id: 'p60', pearls: 60, price: '$2.99', link: 'https://buy.stripe.com/test_aFabJ24jJ6ANd4efE49k400' },
-      { id: 'p130', pearls: 130, price: '$4.99', link: 'https://buy.stripe.com/test_5kQ4gA4jJaR3d4efE49k401', tag: 'Popular' },
-      { id: 'p300', pearls: 300, price: '$9.99', link: 'https://buy.stripe.com/test_14AdRa5nN3oBggq0Ja9k402', tag: 'Best value' }
-    ],
+    store: '../../pearls.html',
     help: 'Trouble with a purchase? Text 954-459-6301 or visit gabrielman25.github.io/grugdigital/support.html with your purchase code.'
   },
 
@@ -10142,7 +10134,7 @@ $('#clubLeave').addEventListener('click', () => { buzz(); setClub(false); toast(
 const G = CONFIG.game;
 const GSHOP = (G.shop || []).filter(it => it && it.id && +it.cost > 0);
 const INV_MAX = 99;
-const wallet = () => st.points + (PL_ON ? st.pearls : 0);   // boosts can be paid with Pearls and points together
+const wallet = () => st.points + pearls();   // boosts can be paid with Pearls and points together
 const gameItem = id => GSHOP.find(it => it.id === id);
 let gameStarted = false, gameFrame = null;
 function startGame(){
@@ -10154,7 +10146,7 @@ function startGame(){
   gameFrame = f; $('#gameFrame').appendChild(f);
 }
 function gameState(){
-  return {points: st.points, pearls: PL_ON ? st.pearls : 0, pearlName: PL_ON ? PL.name : '', inv: st.inv, best: st.game.best, runs: st.game.runs, shop: GSHOP, title: G.title, collectible: G.collectible || 'beans',
+  return {points: st.points, pearls: pearls(), pearlName: PL_ON ? PL.name : '', inv: st.inv, best: st.game.best, runs: st.game.runs, shop: GSHOP, title: G.title, collectible: G.collectible || 'beans',
     runSeconds: +G.runSeconds || 60, brand: {name: B.name, colors: B.colors, logo: B.logoImage || ''}, store: store ? B.name + ' · ' + store.name : B.name, avatar: GrugApp.avatar(), player: GrugApp.name(), look: GrugApp.look()};
 }
 /* Discord: one 'player has logged on' message per page visit, at most once per cooldown on this phone */
@@ -10174,8 +10166,8 @@ function buyItem(id){
   const it = gameItem(id); if(!it) return {ok: false, reason: 'That power-up isn’t in the shop.'};
   if((st.inv[id] || 0) >= INV_MAX) return {ok: false, reason: 'You already have ' + INV_MAX + ' of those.'};
   if(wallet() < it.cost) return {ok: false, reason: 'You need ' + (it.cost - wallet()) + ' more ' + (PL_ON ? 'points or ' + PL.name : 'points') + ' for ' + it.name + '.'};
-  const fromPl = PL_ON ? Math.min(st.pearls, it.cost) : 0, fromPts = it.cost - fromPl;   // Pearls first, then points
-  st.pearls -= fromPl; st.points -= fromPts; st.inv[id] = (st.inv[id] || 0) + 1;
+  const fromPl = Math.min(pearls(), it.cost), fromPts = it.cost - fromPl;   // Pearls first, then points
+  if(fromPl) pearlsChange(-fromPl); st.points -= fromPts; st.inv[id] = (st.inv[id] || 0) + 1;
   if(fromPts) hist(G.title + ' · ' + it.name, -fromPts);
   if(fromPl) hist(G.title + ' · ' + it.name, -fromPl, 'pl');
   save();
@@ -10223,72 +10215,31 @@ $('#gshop').addEventListener('click', e => {
   renderRewards(); renderPoints(true); sendGameState();
 });
 
-/* ---------- Pearls: bought with Stripe Payment Links ----------
-   Buy:    the pack's Payment Link opens in this same tab, with ?client_reference_id=<purchase code>
-           so the payment in Stripe shows which phone bought it.
-   Return: Stripe sends the guest back to  <this page>?pearls=<pack id>&cs={CHECKOUT_SESSION_ID}
-           (set per link in Stripe: After payment → Don't show confirmation page → your website).
-           The app adds that pack once per checkout session, then tidies the address bar.
-   Nothing here can check that a payment really happened (no server), so anyone who types a return
-   link gets free Pearls. That is why Pearls only ever buy game boosts. */
-const PL = CONFIG.pearls || {}, PL_PARAM = 'pearls';
-const PL_PACKS = (PL.packs || []).filter(p => p && /^[a-z0-9-]+$/i.test(p.id || '') && +p.pearls > 0);
-const PL_ON = PL.enabled !== false && PL_PACKS.length > 0;
-const plLinkOK = l => /^https:\/\/\S+$/.test(String(l || ''));
-const plTest = l => /\/test_/.test(String(l || ''));
-const PL_LIVE = PL_ON && PL_PACKS.some(p => plLinkOK(p.link));
-const plPack = id => PL_PACKS.find(p => p.id === id);
-const plReturnUrl = p => siteBase() + '?' + PL_PARAM + '=' + p.id + '&cs={CHECKOUT_SESSION_ID}';
-function guestCode(){
-  if(!st.guest){
-    const pre = ((B.name || 'G').match(/\b[A-Za-z]/g) || ['G']).join('').toUpperCase().slice(0, 3);
-    st.guest = pre + '-' + Array.from({length: 8}, () => CODE_ABC[Math.floor(Math.random() * 32)]).join(''); save();
-  }
-  return st.guest;
-}
+/* ---------- Pearls: one wallet shared by every Grug app on this site ----------
+   Guests buy Pearls on the Grug site's Pearls page (CONFIG.pearls.store), which is where Stripe sends them back.
+   The balance lives in localStorage under 'grug.pearls.v1', so every app on this site sees the same Pearls. */
+const PL = CONFIG.pearls || {};
+const PL_ON = PL.enabled !== false;
+const WKEY = 'grug.pearls.v1';
+function wRaw(){ try{ const w = JSON.parse(localStorage.getItem(WKEY) || 'null'); return w && typeof w === 'object' ? w : {v: 1}; }catch(e){ return {v: 1}; } }
+function wSet(w){ try{ localStorage.setItem(WKEY, JSON.stringify(w)); }catch(e){} }
+const pearls = () => PL_ON ? Math.max(0, Math.floor(+wRaw().balance || 0)) : 0;
+function pearlsChange(d){ const w = wRaw(); w.v = 1; w.balance = Math.max(0, Math.floor(+w.balance || 0) + d); wSet(w); }
+if(PL_ON && st.pearls > 0){ pearlsChange(st.pearls); st.pearls = 0; save(); }   // Pearls bought in this app before the shared wallet move into it
+const pearlStore = () => (PL.store || '../../pearls.html') + '?from=' + encodeURIComponent(location.pathname + '#' + (store ? store.id + '/rewards' : '')) + '&app=' + encodeURIComponent(B.name);
 function renderPearls(){
-  const on = PL_LIVE; $('#pearlShop').hidden = !on; if(!on) return;
-  const n = st.pearls;
+  $('#pearlShop').hidden = !PL_ON; if(!PL_ON) return;
+  const n = pearls(), code = (wRaw().code || '');
   $('#plTitle').textContent = PL.name;
   $('#plBal').textContent = n.toLocaleString() + ' ' + PL.name;
-  $('#plSub').textContent = n ? 'Spent before your points when you buy a boost.' : 'Grab a pack to buy boosts without touching your points.';
-  $('#plTest').hidden = !PL_PACKS.some(p => plLinkOK(p.link) && plTest(p.link));
-  $('#plGrid').style.gridTemplateColumns = innerWidth < 360 ? '' : 'repeat(' + (PL_PACKS.length === 4 ? 2 : Math.min(3, PL_PACKS.length)) + ',minmax(0,1fr))';
-  $('#plGrid').innerHTML = PL_PACKS.map(p => { const ok = plLinkOK(p.link);
-    return '<button class="pl-pack card press' + (p.tag ? ' hot' : '') + '" data-pack="' + esc(p.id) + '"' + (ok ? '' : ' disabled') + '>' + (p.tag ? '<span class="pl-tag">' + esc(p.tag) + '</span>' : '') +
-      ic('pearl') + '<b>' + (+p.pearls).toLocaleString() + '</b><small>' + esc(PL.name) + '</small><span class="pl-price">' + (ok ? esc(p.price) : 'Soon') + '</span></button>'; }).join('');
-  $('#plFine').innerHTML = esc(PL.name) + ' buy game boosts only. They can’t be swapped for drinks, merchandise, points or cash, and they’re saved on this phone, so buy on the phone you play on. Payments are handled securely by Stripe.' +
-    (PL.help ? '<br>' + esc(PL.help) : '') + '<br>Purchase code: <span class="pl-code">' + esc(guestCode()) + '</span>';
+  $('#plSub').textContent = n ? 'Spent before your points when you buy a boost.' : 'Get Pearls to buy boosts without touching your points.';
+  $('#plTest').hidden = true;
+  $('#plGet').href = pearlStore();
+  $('#plFine').innerHTML = esc(PL.name) + ' work in every Grug game. They buy in-game items only and can’t be swapped for drinks, merchandise, points or cash. They’re saved on this phone.' +
+    (PL.help ? '<br>' + esc(PL.help) : '') + (/^GR-/.test(code) ? '<br>Purchase code: <span class="pl-code">' + esc(code) + '</span>' : '');
 }
-$('#plGrid').addEventListener('click', e => {
-  const b = e.target.closest('[data-pack]'); if(!b) return; const p = plPack(b.dataset.pack); if(!p || !plLinkOK(p.link)) return; buzz();
-  openSheet('<div class="grab"></div><span class="eyebrow">Buy ' + esc(PL.name) + '</span><h3>' + (+p.pearls).toLocaleString() + ' ' + esc(PL.name) + ' · ' + esc(p.price) + '</h3>' +
-    '<p>You’ll pay on Stripe’s secure checkout page, then come straight back here and your ' + esc(PL.name) + ' are added to this phone.</p>' +
-    '<div class="pl-big">' + ic('pearl') + '<div><b>' + (st.pearls + +p.pearls).toLocaleString() + ' ' + esc(PL.name) + '</b><span>Your balance after this pack</span></div></div>' +
-    (plTest(p.link) ? '<p class="pl-testnote"><b>Test mode.</b> No real money moves. Pay with card 4242 4242 4242 4242, any future date and any 3 digits.</p>' : '') +
-    '<p style="font-size:13px">' + esc(PL.name) + ' buy game boosts only and can’t be swapped for drinks, points or cash.</p>' +
-    '<div class="row2"><button class="btn quiet press" data-close>Not now</button><button class="btn primary press" id="doPay">' + ic('lock-simple-fill') + 'Pay</button></div>');
-  $('#doPay').onclick = () => {
-    const code = guestCode(); st.payStarted = {id: p.id, at: Date.now()}; save();
-    $('#doPay').disabled = true; $('#doPay').textContent = 'Opening Stripe…';
-    location.href = p.link + (p.link.indexOf('?') < 0 ? '?' : '&') + 'client_reference_id=' + encodeURIComponent(code);   // same tab: the guest comes back to this browser
-  };
-});
-function pearlsArrived(r){
-  if(!PL_ON) return;
-  const p = plPack(r.id);
-  if(!p){ toast('That ' + PL.name + ' link isn’t one of ours'); return; }
-  if(r.cs && st.buys.some(x => x.cs === r.cs)){ toast('Those ' + PL.name + ' are already on this phone'); return; }
-  st.pearls += +p.pearls; delete st.payStarted;
-  st.buys.unshift({at: Date.now(), id: p.id, n: +p.pearls, price: p.price, cs: r.cs || ''}); st.buys = st.buys.slice(0, 30);
-  hist(PL.name + ' pack · ' + p.price, +p.pearls, 'pl'); save();
-  buzz([10, 40, 18]); if(store) renderRewards(); sendGameState();
-  openSheet('<div class="grab"></div><span class="eyebrow">Thank you!</span><h3>+' + (+p.pearls).toLocaleString() + ' ' + esc(PL.name) + '</h3>' +
-    '<div class="pl-big">' + ic('pearl') + '<div><b>' + st.pearls.toLocaleString() + ' ' + esc(PL.name) + '</b><span>On this phone now</span></div></div>' +
-    '<p>Spend them on boosts in ' + esc(G.title || 'the game') + '.</p>' +
-    '<div class="row2">' + (TABS.includes('Game') ? '<button class="btn quiet press" data-close>Done</button><button class="btn primary press" id="plPlay">' + ic('game-controller') + 'Play</button>' : '<button class="btn primary press" data-close style="grid-column:1/-1">Done</button>') + '</div>');
-  const pb = $('#plPlay'); if(pb) pb.onclick = () => { closeSheet(); setTab('Game'); };
-}
+addEventListener('storage', e => { if(e.key === WKEY && store){ renderRewards(); sendGameState(); } });
+addEventListener('pageshow', e => { if(e.persisted && store){ renderRewards(); sendGameState(); } });
 
 /* ---------- visit ---------- */
 function renderVisit(){
@@ -10304,7 +10255,7 @@ function renderPrefs(){ document.querySelectorAll('[data-pref]').forEach(b => b.
 document.addEventListener('click', e => { const b = e.target.closest('[data-pref]'); if(!b) return; const k = b.dataset.pref; st.prefs[k] = !st.prefs[k]; save(); renderPrefs(); buzz(); });
 $('#clearBtn').addEventListener('click', () => {
   buzz();
-  openSheet('<div class="grab"></div><span class="eyebrow">This device</span><h3>Clear everything?</h3><p>Your ' + st.points + ' points' + (st.pearls ? ', ' + st.pearls + ' ' + esc(PL.name) : '') + ', rewards, activity and settings will be removed from this phone. This can’t be undone' + (st.pearls ? ', and bought ' + esc(PL.name) + ' can’t be put back' : '') + '.</p><div class="row2"><button class="btn quiet press" data-close>Keep</button><button class="btn primary press" id="doClear">Clear</button></div>');
+  openSheet('<div class="grab"></div><span class="eyebrow">This device</span><h3>Clear everything?</h3><p>Your ' + st.points + ' points, rewards, activity and settings will be removed from this phone. This can’t be undone. Your ' + esc(PL.name || 'Pearls') + ' stay in your Grug wallet.</p><div class="row2"><button class="btn quiet press" data-close>Keep</button><button class="btn primary press" id="doClear">Clear</button></div>');
   $('#doClear').onclick = () => { try{ localStorage.removeItem(KEY); }catch(_){} st = loadState(); shownPts = 0; reviewSnoozed = false; closeSheet(); renderPrefs(); if(store){ renderRewards(); renderClub(); } sendGameState(); toast('Cleared. Fresh start'); };
 });
 
@@ -10347,15 +10298,7 @@ function showSetup(){
       '<div class="lbl">Customer link</div><code>' + esc(siteBase() + '#' + s.id) + '</code></div>').join('') +
     '<div class="card"><h3>Rewards</h3><p>' + CONFIG.rewards.map(r => esc(r.name) + ' · ' + r.cost).join('<br>') + '</p><p>Check-in: ' + CONFIG.points.checkin + ' points a day, resets at ' + resetLabel() + '.</p></div>' +
     (G.enabled ? '<div class="card"><h3>Game shop · ' + esc(G.title) + '</h3><p>' + (G.src ? 'Game: ' + esc(G.src) : 'Built-in game') + '</p><p>' + GSHOP.map(it => esc(it.name) + ' · ' + it.cost).join('<br>') + '</p></div>' : '') +
-    (PL_ON ? '<div class="card"><h3>' + esc(PL.name) + ' store · Stripe</h3>' +
-      '<p>One Stripe Payment Link per pack. When you make each link in Stripe, open <b>After payment</b>, choose <b>Don’t show confirmation page</b>, and paste that pack’s return link below into the website box. Then paste the Payment Link Stripe gives you into <b>CONFIG.pearls.packs</b> in this file.</p>' +
-      (local ? '<p class="warn">These return links point at the file on your computer. Copy them from your published site instead.</p>' : '') +
-      PL_PACKS.map(p => { const l = p.link, test = siteBase() + '?' + PL_PARAM + '=' + p.id + '&cs=check-' + Math.random().toString(36).slice(2, 8);
-        return '<div class="lbl">' + (+p.pearls) + ' ' + esc(PL.name) + ' · ' + esc(p.price) + ' (id ' + esc(p.id) + ')</div>' +
-          (!l ? '<p class="warn">No Payment Link yet. Paste it into link: \'\' for id \'' + esc(p.id) + '\'.</p>' : !plLinkOK(l) ? '<p class="warn">That link doesn’t look right. It should start with https://buy.stripe.com/</p>' : '<p>' + (plTest(l) ? 'Test mode link: only Stripe’s test cards work, no real money.' : '<b>Live link: real payments.</b>') + '</p><code>' + esc(l) + '</code>') +
-          '<p>Return link for Stripe’s After payment box:</p><code>' + esc(plReturnUrl(p)) + '</code><div class="row"><button class="btn quiet press" data-copy="' + esc(plReturnUrl(p)) + '">' + ic('copy') + 'Copy</button>' +
-          '<a class="btn quiet press" href="' + esc(test) + '">' + ic('arrow-square-out') + 'Try the return</a></div>'; }).join('') +
-      '<p style="margin-top:14px">“Try the return” adds the pack to this phone without paying, the same way Stripe will. It is also how to give a guest back ' + esc(PL.name) + ' they lost: open it on their phone.</p></div>' : '') +
+    (PL_ON ? '<div class="card"><h3>' + esc(PL.name) + '</h3><p>Pearls are sold on the Grug site’s Pearls page, shared by every Grug app. This app links there and spends the shared balance.</p><div class="row"><a class="btn quiet press" href="' + esc(pearlStore()) + '">' + ic('arrow-square-out') + 'Open the Pearls page</a></div></div>' : '') +
     '<div class="row"><a class="btn primary press" href="#">Open the app</a></div>';
 }
 document.addEventListener('click', e => { const b = e.target.closest('[data-copy]'); if(!b) return; buzz(5); const t = b.dataset.copy; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast('Copied'), () => toast('Select the link and copy it')); });
@@ -10381,17 +10324,7 @@ paintIcons(); renderStorage(); renderPrefs(); renderPicker(); renderFs();
 const tapRaw = new URLSearchParams(location.search).get('tap'), tapStore = tapRaw === null ? null : parseTap(tapRaw);
 GrugApp.init({ app: 'teahouse', get: () => st, save, hist, renderPoints, renderRewards, buzz, sendGameState });
 if(tapRaw !== null){ const q = new URLSearchParams(location.search); q.delete('tap'); history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : '') + (tapStore ? '#' + tapStore.id + '/rewards' : location.hash)); }
-let plBack = null;
-{ const q = new URLSearchParams(location.search), raw = q.get(PL_PARAM);
-  if(raw !== null){
-    const cs = String(q.get('cs') || ''); plBack = {id: raw, cs: /^[A-Za-z0-9_-]{4,200}$/.test(cs) ? cs : ''};
-    [PL_PARAM, 'cs', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'].forEach(k => q.delete(k));
-    const s0 = storeById(st.store) || STORES[0];
-    history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : '') + (s0 ? '#' + s0.id + '/rewards' : location.hash));   // a refresh can't add them twice
-  }
-}
 route();
-if(plBack) setTimeout(() => pearlsArrived(plBack), 500);
 if(tapStore) setTimeout(() => tapClaim(tapStore), 700);
 else if(tapRaw !== null) setTimeout(() => toast('That tag isn’t a ' + B.name + ' rewards tag'), 700);
 renderNfc();
