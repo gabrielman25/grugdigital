@@ -139,7 +139,7 @@ Every field is optional; anything left out comes from `SandyKit.DEFAULT`.
 - `body`: `"female"` or `"male"` (`SandyKit.CATALOG.bodies`). Both bodies are Quaternius Universal Base Characters
   (Superhero, CC0) wearing her own head, sphere hands and feet; every outfit piece fits both. Changing `body` rebuilds
   her rig in place; `await sandy.ready` if you need to know when it's done.
-- `decal`: a chest print on her top: `image` (`"star"`, `"heart"`, `"bolt"`, `"smile"`, `"peace"`, `"print:<name>"` for a ready-made print in assets/prints/ (fire, crown, rocket, gamepad, pearl, gem, rainbow, flower, paw, duck), an image data URL, or null), `size`, `up` and `side` (cm).
+- `decal`: a chest print on her top: `image` (`"star"`, `"heart"`, `"bolt"`, `"smile"`, `"peace"`, `"print:<name>"` for a ready-made print in assets/prints/ (fire, crown, rocket, gamepad, pearl, gem, rainbow, flower, paw, duck), `"pack:<id>"` for any of the 1,176 icon-pack prints in assets/prints/pack/ (ids in its index.json), an image data URL, or null), `size`, `up` and `side` (cm).
 - `hat`: `type` (`"none"` or one of `SandyKit.CATALOG.hats`: beanie, beret, bucketHat, cap, cowboyHat, sunHat, topHat, witchHat),
   `colour`, `size`, `up` and `forward` (cm), `tilt` (radians). Her hair is never changed by a hat. Hats: Chibi Hats by PaperPluto
   (itch.io; free for commercial use, not to be redistributed on their own).
@@ -290,6 +290,15 @@ textarea{width:100%;min-height:120px;font:12.5px/1.45 ui-monospace,Menlo,Consola
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chips button{appearance:none;min-height:34px;padding:0 13px;border-radius:999px;background:var(--card);color:var(--ink2);border:1px solid var(--line);cursor:pointer;font:700 13.5px/1 var(--font);text-transform:capitalize}
 .chips button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+/* print pictures sit on a flat, opaque off-white tile (no shadows) so every colour reads clearly */
+#decals .print,#pkGrid button{background:#f6f4ee!important;border:1px solid #e2ddd0;box-shadow:none}
+#decals .print[aria-pressed=true],#pkGrid button[aria-pressed=true]{border:2px solid var(--ink);background:#f6f4ee!important}
+#decals .print img,#pkGrid img{filter:none}
+#pk{margin-top:8px;display:grid;gap:8px}
+#pkQ{width:100%;min-height:40px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:#f6f4ee;color:#1a2410;font:600 15px/1 var(--font)}
+#pkGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px;max-height:340px;overflow:auto;padding:2px}
+#pkGrid button{appearance:none;aspect-ratio:1;border-radius:12px;padding:6px;cursor:pointer;display:grid;place-items:center}
+#pkGrid img{width:100%;height:100%;object-fit:contain;pointer-events:none}
 #decals .print{padding:4px 8px;line-height:0}#decals .print img{width:28px;height:28px;object-fit:contain;pointer-events:none}
 input[type=range]{flex:1;min-width:120px;accent-color:var(--ring-a)}
 input[type=checkbox]{width:20px;height:20px;accent-color:var(--ring-a)}
@@ -404,6 +413,14 @@ body.viewer.clear,body.viewer.clear #stage{background:transparent}
           <div class="row"><span class="lab">Belt</span><div class="sws" data-colour="outfit.belt"></div></div></div>
         <div class="grp kit" data-slot="top"><h2 class="px">Top</h2></div>
         <div class="grp"><h2 class="px">Chest print</h2><p class="note">One picture on the front of her top (or her shirt).</p><div class="chips" id="decals"></div>
+          <div class="row"><button type="button" class="btn px" id="pkOpen" aria-expanded="false" aria-controls="pk">All prints…</button></div>
+          <div id="pk" hidden>
+            <input type="search" id="pkQ" placeholder="Search prints (star, cat, pizza…)" autocomplete="off" aria-label="Search prints">
+            <div class="chips" id="pkCats" role="group" aria-label="Print categories"></div>
+            <div id="pkGrid" role="group" aria-label="Prints"></div>
+            <p class="note" id="pkNone" hidden>No prints match that.</p>
+            <div class="row"><button type="button" class="btn px" id="pkMore" hidden>Show more</button></div>
+          </div>
           <div class="row"><label class="btn px" for="decFile" style="cursor:pointer">Upload image…</label><input type="file" id="decFile" accept="image/*" hidden></div>
           <div class="row"><label for="dS">Size</label><input type="range" id="dS" min="0.3" max="2" step="0.01" data-num="decal.size"><span class="val" data-show="decal.size"></span></div>
           <div class="row"><label for="dU">Up / down</label><input type="range" id="dU" min="-12" max="8" step="0.1" data-num="decal.up"><span class="val" data-show="decal.up"></span></div>
@@ -571,6 +588,22 @@ const PRINTS=['fire','crown','rocket','gamepad','pearl','gem','rainbow','flower'
 $('decals').innerHTML=['none','star','heart','bolt','smile','peace'].map(t=>`<button type="button" data-d="${t}" aria-pressed="false">${t}</button>`).join('')+
   PRINTS.map(t=>`<button type="button" class="print" data-d="print:${t}" aria-pressed="false" title="${t}" aria-label="${t} print"><img src="../assets/prints/${t}.png" alt="" width="28" height="28" loading="lazy"></button>`).join('');
 $('decals').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b)apply({decal:{image:b.dataset.d==='none'?null:b.dataset.d}})});
+// every print in the icon pack (1,176): loaded the first time the browser is opened, shown a page at a time
+const PK={list:null,cats:[],cat:-1,q:'',shown:0,PAGE:72};
+const pkMatches=()=>PK.list.filter(x=>(PK.cat<0||x[2]===PK.cat)&&(!PK.q||x[1].toLowerCase().includes(PK.q)||x[0].includes(PK.q)));
+function pkRender(reset){if(!PK.list)return;const all=pkMatches();if(reset){PK.shown=0;$('pkGrid').innerHTML='';$('pkGrid').scrollTop=0}
+  const cur=cfg&&cfg.decal&&cfg.decal.image,next=all.slice(PK.shown,PK.shown+PK.PAGE);PK.shown+=next.length;
+  $('pkGrid').insertAdjacentHTML('beforeend',next.map(x=>`<button type="button" data-d="pack:${x[0]}" aria-pressed="${cur==='pack:'+x[0]}" title="${x[1]}" aria-label="${x[1]} print"><img src="../assets/prints/pack/${x[0]}.webp" alt="" loading="lazy" decoding="async"></button>`).join(''));
+  $('pkNone').hidden=all.length>0;$('pkMore').hidden=PK.shown>=all.length;$('pkMore').textContent='Show more ('+(all.length-PK.shown)+' left)'}
+$('pkOpen').addEventListener('click',async()=>{const p=$('pk'),open=p.hidden;p.hidden=!open;$('pkOpen').setAttribute('aria-expanded',String(open));if(!open||PK.list)return;
+  try{const r=await fetch('../assets/prints/pack/index.json');const j=await r.json();PK.list=j.items;PK.cats=j.cats;
+    $('pkCats').innerHTML=['All'].concat(PK.cats).map((c,i)=>`<button type="button" data-c="${i-1}" aria-pressed="${i===0}">${c}</button>`).join('');pkRender(true)}
+  catch(e){$('pkNone').hidden=false;$('pkNone').textContent='Couldn’t load the prints. Check your connection and try again.';PK.list=null;p.hidden=true;$('pkOpen').setAttribute('aria-expanded','false')}});
+$('pkCats').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;PK.cat=+b.dataset.c;for(const x of $('pkCats').children)x.setAttribute('aria-pressed',String(x===b));pkRender(true)});
+$('pkQ').addEventListener('input',()=>{PK.q=$('pkQ').value.trim().toLowerCase();pkRender(true)});
+$('pkMore').addEventListener('click',()=>pkRender(false));
+$('pkGrid').addEventListener('scroll',()=>{const g=$('pkGrid');if(!$('pkMore').hidden&&g.scrollTop+g.clientHeight>g.scrollHeight-80)pkRender(false)});
+$('pkGrid').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b)apply({decal:{image:b.dataset.d}})});
 $('decFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const im=new Image(),rd=new FileReader();rd.onload=()=>{im.onload=()=>{
   // kept small (256 px) so the config stays a reasonable size
   const k=Math.min(1,256/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));
@@ -605,7 +638,7 @@ function sync(){if(!cfg)return;try{renderCustom()}catch(e){}
   for(const el of document.querySelectorAll('[data-colour]')){const v=(get(cfg,el.dataset.colour)||'').toLowerCase();let hit=false;for(const b of el.querySelectorAll('.sw')){const on=b.dataset.c.toLowerCase()===v;b.setAttribute('aria-pressed',String(on));hit=hit||on}const lab=el.querySelector('.pick'),pk=lab&&lab.querySelector('input');if(pk&&/^#[0-9a-f]{6}$/.test(v))pk.value=v;if(lab){const custom=!hit&&/^#[0-9a-f]{6}$/.test(v);lab.setAttribute('aria-pressed',String(custom));lab.style.setProperty('--c',custom?v:'transparent')}}
   for(const b of $('exprs').children)b.setAttribute('aria-pressed',String(b.dataset.e===cfg.expression));
   for(const b of $('bodies').children)b.setAttribute('aria-pressed',String(b.dataset.b===(cfg.body||'female')));
-  {const im=cfg.decal&&cfg.decal.image,cur=im?((['star','heart','bolt','smile','peace'].includes(im)||/^print:/.test(im))?im:''):'none';for(const b of $('decals').children)b.setAttribute('aria-pressed',String(b.dataset.d===cur))}
+  {const im=cfg.decal&&cfg.decal.image,cur=im?((['star','heart','bolt','smile','peace'].includes(im)||/^(print|pack):/.test(im))?im:''):'none';for(const b of $('decals').children)b.setAttribute('aria-pressed',String(b.dataset.d===cur));for(const b of $('pkGrid').children)b.setAttribute('aria-pressed',String(b.dataset.d===cur))}
   for(const b of $('hats').children)b.setAttribute('aria-pressed',String(b.dataset.h===((cfg.hat&&cfg.hat.type)||'none')));
   for(const b of $('rings').children)b.setAttribute('aria-pressed',String(b.dataset.r===((cfg.earrings&&cfg.earrings.type)||'none')));
   for(const r of document.querySelectorAll('[data-num]')){r.value=get(cfg,r.dataset.num);}for(const s of document.querySelectorAll('[data-show]')){const p=s.dataset.show,v=+get(cfg,p)||0;s.textContent=p==='faceY'?(v>=0?'+':'')+Math.round(v*100):/^(decal\.(up|side)|hair\.(up|forward)|hat\.(up|forward))$/.test(p)?v.toFixed(1)+' cm':/^(ears\.(up|forward|out)|earrings\.(drop|forward))$/.test(p)?v.toFixed(1)+' cm':/^(ears\.(twist|flare)|earrings\.angle|hat\.tilt)$/.test(p)?Math.round(v*57.2958)+'°':Math.round(v*100)+'%'};

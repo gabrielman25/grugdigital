@@ -5825,7 +5825,8 @@ function decalCanvas(name){const c=document.createElement('canvas');c.width=c.he
 // 'print:<name>' = a ready-made print shipped with the site (assets/prints/<name>.png); anything else not a shape is an image URL
 const SR_BASE=((document.currentScript&&document.currentScript.src)||'').replace(/sandy-runtime\.js[^/]*$/,'');
 const DECAL_PENDING=new Set();
-function decalUrl(img){const m=/^print:([a-z0-9-]{1,32})$/.exec(img);return m?SR_BASE+'prints/'+m[1]+'.png':img}
+// 'pack:<id>' = one of the full icon-pack prints (assets/prints/pack/<id>.webp, listed in assets/prints/pack/index.json)
+function decalUrl(img){let m=/^print:([a-z0-9-]{1,32})$/.exec(img);if(m)return SR_BASE+'prints/'+m[1]+'.png';m=/^pack:([a-z0-9-]{1,48})$/.exec(img);return m?SR_BASE+'prints/pack/'+m[1]+'.webp':img}
 function decalTexture(img){if(!img)return null;if(DECAL_TEX[img])return DECAL_TEX[img];let t;
   if(DECAL_SHAPES.includes(img))t=new THREE.CanvasTexture(decalCanvas(img));
   else{let done;const p=new Promise(ok=>{done=ok});DECAL_PENDING.add(p);t=new THREE.TextureLoader().load(decalUrl(img),()=>{DECAL_PENDING.delete(p);done()},undefined,()=>{DECAL_PENDING.delete(p);done()})}
