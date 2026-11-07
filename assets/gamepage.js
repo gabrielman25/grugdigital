@@ -31,7 +31,7 @@ window.GrugGamePage = function (id) {
     '</section>' +
     '<section class="g-section"><div class="g-section-h"><h2>About</h2></div><p class="gp-long">' + G.esc(g.long) + '</p>' +
       '<div class="gp-facts"><div>' + G.icon('smiley') + '<span><b>Your avatar</b>' + G.esc(g.avatar) + '</span></div><div>' + G.icon('coins') + '<span><b>Earning points</b>' + G.esc(g.earn) + '</span></div></div></section>' +
-    (items.length ? '<section class="g-section"><div class="g-section-h"><h2>Closet items from ' + G.esc(C.APPS[g.app].short) + '</h2><a href="' + G.url('shop/') + '">Shop</a></div><div class="g-items" id="gpItems">' + items.map(it => G.ui.itemTile(it)).join('') + '</div></section>' : '');
+    (items.length ? '<section class="g-section"><div class="g-section-h"><h2>Custom clothing from ' + G.esc(C.APPS[g.app].short) + '</h2><a href="' + G.url('shop/') + '">Shop</a></div><div class="g-items" id="gpItems">' + items.map(it => G.ui.itemTile(it)).join('') + '</div></section>' : '');
   document.body.insertBefore(main, document.querySelector('.g-tabs'));
   G.ui.fillThumbs($('#gpItems'));
   main.addEventListener('click', e => {

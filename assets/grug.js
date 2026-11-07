@@ -3,7 +3,7 @@
    browser's localStorage under grug.profile.v1. Partner rewards apps keep their own points under their own keys;
    the profile export bundles all of them so a player can move to another phone.
 
-   Load order on a page:  three.min.js (optional) → catalog.js → icons.js → games.js → avatar3d.js (optional) → grug.js
+   Load order on a page:  catalog.js → icons.js → games.js → grug.js
    Pages call Grug.ui.chrome('home') to get the shared header + tab bar.
 */
 (function (root) {
@@ -79,11 +79,32 @@
     profile.inventory.push(id); profile.earned[id] = { at: Date.now(), how: how || it.get.type };
     save('grant'); return true;
   }
+  /* wearing a design = dressing the 3D avatar's look ('grug.sandy.v1') in a custom garment with that template.
+     A garment of the same kind she already wears is kept (T-shirt or long sleeves, shorts or pants). */
+  const LOOK_KEY = 'grug.sandy.v1';
+  const look = () => { const c = readJSON(LOOK_KEY, null); return c && typeof c === 'object' ? c : {}; };
+  const wearing = it => !!it && C.wornIn(look(), it.slot) === it.id;
   function equip(id) {
     const it = C.get(id); if (!it || !owns(id)) return false;
-    profile.avatar[it.slot] = id; profile.avatar = C.normalize(profile.avatar); save('avatar'); return true;
+    const c = look(), key = C.CFG_KEY[it.slot], cur = c[key], G0 = C.GARMENTS[it.slot];
+    const g = (cur && G0.find(x => x.part === cur.part)) || G0[it.slot === 'shirt' ? 0 : 1];
+    c[key] = { part: g.part, texture: g.texture, colour: '#ffffff', template: it.template };
+    writeJSON(LOOK_KEY, c); profile.avatar[it.slot] = id; profile.avatar = C.normalize(profile.avatar); save('avatar');
+    refreshPictures(c); return true;
   }
-  function unequip(slot) { if (slot === 'face' || slot === 'shirt' || slot === 'pants') return false; profile.avatar[slot] = null; save('avatar'); return true; }
+  function unequip(slot) {
+    const c = look(), key = C.CFG_KEY[slot]; if (!key) return false;
+    if (c[key] && c[key].template) { c[key] = null; writeJSON(LOOK_KEY, c); refreshPictures(c); }
+    profile.avatar[slot] = null; save('avatar'); return true;
+  }
+  // re-take the avatar's pictures after her look changed outside the editor (loads the 3D runtime once, in the background)
+  let picBusy = null;
+  function refreshPictures(c) {
+    const run = () => root.SandyView.makeSnaps(c || look()).then(() => emit('snaps')).catch(() => {});
+    if (root.SandyView) { picBusy = (picBusy || Promise.resolve()).then(run); return picBusy; }
+    picBusy = new Promise(ok => { const s = document.createElement('script'); s.src = url('assets/sandy-view.js'); s.onload = ok; s.onerror = ok; document.head.appendChild(s); }).then(() => root.SandyView && run());
+    return picBusy;
+  }
   function setAvatar(patch) { profile.avatar = C.normalize(Object.assign({}, profile.avatar, patch)); save('avatar'); }
   function setName(name) { name = cleanName(name); if (!name) return false; profile.name = name; save('name'); return true; }
 
@@ -113,6 +134,8 @@
     });
     return won;
   }
+  // designs whose milestone was already reached (stats from before they existed) count right away
+  try { if (C && checkMilestones().length) writeJSON(KEY, profile); } catch (e) {}
   // progress toward a milestone item: {have, need, pct}
   function progress(it) { const g = it.get; if (g.type !== 'milestone') return null; const have = statValue(g.app, g.stat); return { have, need: g.value, pct: Math.min(100, Math.round(have / g.value * 100)) }; }
 
@@ -352,7 +375,7 @@
   // state: 'owned' | 'wearing' | 'buy' | 'locked' | 'progress'
   function itemState(it, ctx) {
     ctx = ctx || {};
-    if (profile.avatar[it.slot] === it.id) return 'wearing';
+    if (wearing(it)) return 'wearing';
     if (owns(it.id)) return 'owned';
     if (it.get.type === 'points') return ctx.canBuy ? 'buy' : 'buyElsewhere';
     return 'progress';
@@ -367,21 +390,9 @@
     else { const p = progress(it); foot = '<span class="g-tag lock">' + icon('lock-simple') + (p ? p.have + '/' + p.need : '') + '</span>'; }
     return '<button type="button" class="g-item ' + st + '" data-item="' + it.id + '" data-slot="' + it.slot + '"><span class="g-item-pic" data-thumb="' + it.id + '"></span><span class="g-item-name">' + esc(it.name) + '</span>' + foot + '</button>';
   }
-  // fill data-thumb placeholders with renders of the current avatar wearing each item, a few per frame
-  function fillThumbs(container, avatar) {
-    const A = root.GrugAvatar; if (!A) return;
-    const els = $$('[data-thumb]', container).filter(el => !el.dataset.done);
-    let i = 0;
-    function step() {
-      const t0 = performance.now();
-      while (i < els.length && performance.now() - t0 < 24) {
-        const el = els[i++]; const id = el.dataset.thumb; const it = C.get(id); if (!it) continue;
-        const a = Object.assign({}, avatar || profile.avatar);
-        try { el.style.backgroundImage = 'url(' + A.thumb(id, a, 128) + ')'; el.dataset.done = '1'; } catch (e) { el.dataset.done = 'x'; }
-      }
-      if (i < els.length) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
+  // fill data-thumb placeholders with each design's picture (the avatar wearing it, made ahead of time)
+  function fillThumbs(container) {
+    $$('[data-thumb]', container).forEach(el => { const it = C.get(el.dataset.thumb); if (it && !el.dataset.done) { el.style.backgroundImage = 'url(' + url(it.thumb) + ')'; el.dataset.done = '1'; } });
   }
 
   /* ---------- public ---------- */
@@ -389,7 +400,7 @@
     KEY, ROOT, url, esc, fmt, icon, GAMES, C,
     get profile() { return profile; }, get isNew() { return isNew; }, storageWorks,
     on(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },
-    save, setName, setAvatar, equip, unequip, owns, grant, track, totals, statValue, progress, checkMilestones, celebrate,
+    save, setName, setAvatar, equip, unequip, wearing, refreshPictures, owns, grant, track, totals, statValue, progress, checkMilestones, celebrate,
     points, appState, exportData, exportText, exportFilename, download, share, parseImport, applyImport, reset,
     snaps, ensureSnaps, randomName, cleanName,
     ui: { chrome, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic }

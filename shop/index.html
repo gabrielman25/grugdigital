@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Shop · Grug</title>
-<meta name="description" content="Every piece of avatar clothing on Grug and how to earn it: play the games, eat at Katy partners.">
+<meta name="description" content="Custom clothing for your Grug avatar: Roblox-style shirt and pants templates you earn by playing and eating at Katy partners.">
 <meta name="theme-color" content="#eaf6ee">
 <link rel="icon" href="../favicon.png">
 <link rel="stylesheet" href="../assets/grug.css">
@@ -23,26 +23,28 @@
 .sh-group .g-section-h .g-chip{font-size:13px}
 .sh-dot{width:14px;height:14px;border-radius:4px;display:inline-block;flex:none}
 .sh-count{color:var(--mut);font-weight:700;font-size:14px}
+.sh-own{display:flex;gap:12px;align-items:center;padding:14px 16px;margin:4px 0 8px;background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+.sh-own p{flex:1;min-width:0;color:var(--ink2);font-size:14.5px}
+.sh-own b{color:var(--ink)}
 </style>
 </head>
 <body>
 <main class="wrap">
-  <div class="sh-head"><h1>Shop</h1><p>Nothing here costs money. Clothes are earned by playing, or bought with the points you get for eating at a partner.</p></div>
+  <div class="sh-head"><h1>Shop</h1><p>Custom clothing for your avatar. Every design is a Roblox-style shirt or pants template, earned by playing or bought with the points you get for eating at a partner. Nothing here costs money.</p></div>
+  <div class="sh-own"><p><b>Have your own Roblox template?</b> Upload any classic shirt or pants template in the avatar editor, under Custom.</p><a class="g-btn sm" href="../avatar/#custom">Upload</a></div>
   <div class="sh-filters" id="filters"></div>
   <div id="groups"></div>
 </main>
-<script src="../assets/three.min.js"></script>
 <script src="../assets/catalog.js"></script>
 <script src="../assets/icons.js"></script>
 <script src="../assets/games.js"></script>
-<script src="../assets/avatar3d.js"></script>
 <script src="../assets/grug.js"></script>
 <script>
 (function(){
   const G = Grug, C = GrugCatalog, $ = s => document.querySelector(s);
   G.ui.chrome('shop'); G.ensureSnaps();
   let filter = /[?&]mine/.test(location.search) ? 'mine' : 'all';
-  const FILTERS = [['all', 'Everything'], ['mine', 'Mine'], ['hat', 'Hats'], ['hair', 'Hair'], ['face', 'Faces'], ['shirt', 'Shirts'], ['pants', 'Pants'], ['back', 'Back'], ['hand', 'Hand']];
+  const FILTERS = [['all', 'Everything'], ['mine', 'Mine'], ['shirt', 'Shirts'], ['pants', 'Pants']];
   $('#filters').innerHTML = FILTERS.map(f => '<button data-f="' + f[0] + '" aria-pressed="' + (f[0] === filter) + '">' + f[1] + '</button>').join('');
   $('#filters').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; filter = b.dataset.f; document.querySelectorAll('#filters button').forEach(x => x.setAttribute('aria-pressed', x.dataset.f === filter)); render(); });
 
@@ -60,15 +62,18 @@
     G.ui.fillThumbs($('#groups'));
   }
   async function open(it) {
-    const app = C.APPS[it.get.app] || C.APPS.grug, game = G.GAMES.find(g => g.app === it.get.app), pr = G.progress(it), owned = G.owns(it.id), wearing = G.profile.avatar[it.slot] === it.id;
+    const app = C.APPS[it.get.app] || C.APPS.grug, game = G.GAMES.find(g => g.app === it.get.app), pr = G.progress(it), owned = G.owns(it.id), wearing = G.wearing(it);
     const how = owned ? (it.get.type === 'free' ? 'Free. Yours from the start.' : 'Yours. ' + G.esc(C.howText(it)) + '.') : (it.get.type === 'points' ? 'Costs <b>' + it.get.cost + ' ' + G.esc(app.short) + ' points</b>. Buy it under Closet in the ' + G.esc(app.short) + ' app.' : G.esc(it.get.text) + (pr ? ' <span class="mut">(' + pr.have + ' of ' + pr.need + ' so far)</span>' : ''));
+    const kinds = it.slot === 'shirt' ? 'Wear it as a T-shirt or long sleeves' : 'Wear it as shorts or pants';
     const actions = [{ label: 'Close', kind: 'quiet', value: null }];
     if (owned && !wearing) actions.push({ label: 'Wear it', kind: 'primary', value: 'wear' });
-    else if (owned && wearing) actions.push({ label: 'Open avatar', kind: 'primary', value: 'avatar' });
+    else if (owned && wearing) { actions.push({ label: 'Take off', kind: 'quiet', value: 'off' }); actions.push({ label: 'Open avatar', kind: 'primary', value: 'avatar' }); }
     else if (game) actions.push({ label: 'Open ' + (it.get.type === 'points' ? app.short : game.title), kind: 'primary', value: 'go' });
-    const pick = await G.ui.dialog({ title: it.name, html: '<div class="row"><span style="width:110px;height:110px;flex:none;border-radius:14px;background:var(--card2) center/cover no-repeat;background-image:url(' + GrugAvatar.thumb(it.id, G.profile.avatar, 160) + ')"></span><div><div class="g-tag" style="margin-bottom:8px">' + G.esc(C.slotName(it.slot)) + '</div><div>' + how + '</div>' + (pr && !owned ? '<div class="g-prog" style="margin-top:10px"><i style="width:' + pr.pct + '%"></i></div>' : '') + '</div></div>', actions });
-    if (pick === 'wear') { G.equip(it.id); G.ensureSnaps(true); G.ui.toast('Wearing ' + it.name, { icon: 'check' }); G.ui.buzz(); render(); }
-    else if (pick === 'avatar') location.href = G.url('avatar/#' + it.slot);
+    const pick = await G.ui.dialog({ title: it.name, html: '<div class="row"><span style="width:110px;height:110px;flex:none;border-radius:14px;background:var(--card2) center/cover no-repeat;background-image:url(' + G.url(it.thumb) + ')"></span><div><div class="g-tag" style="margin-bottom:8px">' + G.esc(C.slotName(it.slot)) + ' template</div><div>' + how + '</div>' + (pr && !owned ? '<div class="g-prog" style="margin-top:10px"><i style="width:' + pr.pct + '%"></i></div>' : '') +
+      '<p class="g-fine" style="margin-top:8px">' + kinds + ' (pick in the avatar editor, under Custom).' + (owned ? ' <a href="' + G.url(it.png) + '" download="' + it.id + '-' + it.slot + '-template.png" style="font-weight:800;color:var(--ink)">Download the template</a> to remix it.' : '') + '</p></div></div>', actions });
+    if (pick === 'wear') { G.equip(it.id); G.ui.toast('Wearing ' + it.name, { icon: 'check' }); G.ui.buzz(); render(); }
+    else if (pick === 'off') { G.unequip(it.slot); G.ui.toast('Took off ' + it.name, { icon: 'check' }); render(); }
+    else if (pick === 'avatar') location.href = G.url('avatar/#custom');
     else if (pick === 'go' && game) location.href = G.url(game.play) + (it.get.type === 'points' && G.appState(game) && G.appState(game).store ? '#' + G.appState(game).store + '/rewards' : '');
   }
   $('#groups').addEventListener('click', e => { const b = e.target.closest('[data-item]'); if (b) open(C.get(b.dataset.item)); });

@@ -5971,5 +5971,222 @@ window.SandyKit={version:'1.1.0',CATALOG,DEFAULT:clone(DEFAULT),texturesFor,_dbg
   decode:s=>JSON.parse(decodeURIComponent(escape(atob(String(s).replace(/-/g,'+').replace(/_/g,'/'))))),
   readme:()=>{const el=document.getElementById('sandy-readme');return el?el.textContent:''}};
 })();
+;
+/* ---------------- SANDY CUSTOM CLOTHING · Roblox shirt and pants templates ----------------
+   Four garments take a standard Roblox classic clothing template (585 x 559) instead of their own texture:
+     top:  T-shirt (gen_tshirt) and Long-sleeve tee (gen_longsleeve)   <- a Roblox SHIRT template
+     legs: Shorts (mh_cortu_jeans_shorts) and Pants (Female_Peasant_Legs) <- a Roblox PANTS template
+   Config: top / legs = { part, texture, colour, template } where template is
+     'shop:<id>'  a design shipped in assets/clothing/<id>.png
+     'data:...'   an uploaded template image
+   colour fills the see-through parts of the template (Roblox shows skin there; here it's the garment's base colour).
+   The template is wrapped onto the garment the way Roblox wraps it onto a blocky body: every triangle is given to the
+   torso, an arm or a leg by its bones, then projected onto that part's box (front, back, left, right, top, bottom).
+   SandyKit.customReady() resolves when every template image asked for so far has loaded (for pictures). */
+(function () {
+  'use strict';
+  const K = window.SandyKit, T = window.THREE; if (!K || !T || K.CUSTOM) return;
+  const me = document.currentScript || Array.from(document.scripts).find(s => /sandy-(runtime|custom)\.js(\?|$)/.test(s.src));
+  const ASSETS = me && me.src ? me.src.replace(/[^/]*$/, '') : '';
+  const W = 585, H = 559;
+  const GARMENTS = {
+    gen_tshirt: { slot: 'top', kind: 'shirt', full: false, label: 'T-shirt' },
+    gen_longsleeve: { slot: 'top', kind: 'shirt', full: true, label: 'Long-sleeve tee' },
+    mh_cortu_jeans_shorts: { slot: 'legs', kind: 'pants', full: false, label: 'Shorts' },
+    Female_Peasant_Legs: { slot: 'legs', kind: 'pants', full: true, label: 'Pants' }
+  };
+  // the template's panels (x, y, w, h)
+  const R = (x, y, w, h) => [x, y, w, h];
+  const TORSO = { F: R(231, 74, 128, 128), B: R(427, 74, 128, 128), L: R(361, 74, 64, 128), Rt: R(165, 74, 64, 128), U: R(231, 8, 128, 64), D: R(231, 204, 128, 64) };
+  const LIMB_R = { Rt: R(151, 355, 64, 128), B: R(85, 355, 64, 128), L: R(19, 355, 64, 128), F: R(217, 355, 64, 128), U: R(217, 289, 64, 64), D: R(217, 485, 64, 64) };
+  const LIMB_L = { F: R(308, 355, 64, 128), L: R(374, 355, 64, 128), B: R(440, 355, 64, 128), Rt: R(506, 355, 64, 128), U: R(308, 289, 64, 64), D: R(308, 485, 64, 64) };
 
+  /* ---- template textures (cached by source + colour) ---- */
+  const TEX = new Map(), pending = new Set();
+  function src(t) { return /^shop:/.test(t) ? ASSETS + 'clothing/' + t.slice(5).replace(/[^\w-]/g, '') + '.png' : t; }
+  function texture(template, colour) {
+    const key = template.length > 200 ? template.length + ':' + template.slice(-120) + '|' + colour : template + '|' + colour;
+    if (TEX.has(key)) return TEX.get(key);
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const g = cv.getContext('2d'); g.fillStyle = colour || '#ffffff'; g.fillRect(0, 0, W, H);
+    const tex = new T.CanvasTexture(cv); tex.encoding = T.sRGBEncoding; tex.anisotropy = 4;
+    const im = new Image(); im.crossOrigin = 'anonymous';
+    const p = new Promise(ok => { im.onload = () => { try { g.drawImage(im, 0, 0, W, H); tex.needsUpdate = true; } catch (e) {} ok(); }; im.onerror = () => ok(); });
+    pending.add(p); p.then(() => pending.delete(p));
+    im.src = src(template);
+    TEX.set(key, tex); return tex;
+  }
 
+  /* ---- the garment re-wrapped for a template (cached per garment geometry) ----
+     1. each limb gets a clean cut plane (shoulder for arms, hip for legs), fitted to where its bones take over;
+     2. triangles that cross a cut are sliced along it, so the torso/limb divide is a straight seam, not a zig-zag;
+     3. every piece is box-projected onto its part's template panels, like Roblox does on a blocky body. */
+  const GEO = new WeakMap();
+  function wrapped(mesh, full, kind) {
+    const src0 = mesh.geometry; if (GEO.has(src0)) return GEO.get(src0);
+    const base = src0.index ? src0.toNonIndexed() : src0;
+    const names = Object.keys(base.attributes), A0 = {}; for (const k of names) A0[k] = base.attributes[k];
+    const bones = mesh.skeleton.bones, inv = mesh.skeleton.boneInverses;
+    const part = bones.map(b => /arm_L|hand_L|finger_.*_L/.test(b.name) ? 'aL' : /arm_R|hand_R|finger_.*_R/.test(b.name) ? 'aR' : /leg_L/.test(b.name) ? 'lL' : /leg_R/.test(b.name) ? 'lR' : 't');
+    const jp = n => { const i = bones.findIndex(b => b.name === n); return i < 0 ? null : new T.Vector3().setFromMatrixPosition(new T.Matrix4().copy(inv[i]).invert()); };
+    const LIMBS = kind === 'pants' ? [['lL', 'leg_L_uprTwist00_jnt', 'leg_L_foot_jnt', 1], ['lR', 'leg_R_uprTwist00_jnt', 'leg_R_foot_jnt', -1]]
+      : [['aL', 'arm_L_uprTwist00_jnt', 'arm_L_wrist_jnt', 1], ['aR', 'arm_R_uprTwist00_jnt', 'arm_R_wrist_jnt', -1]];
+    // vertices as plain records {a: {attr: [values]}}
+    const nv = base.attributes.position.count, V = new Array(nv);
+    for (let i = 0; i < nv; i++) { const a = {}; for (const k of names) { const at = A0[k], s = at.itemSize, o = []; for (let j = 0; j < s; j++) o.push(at.array[i * s + j]); a[k] = o; } V[i] = a; }
+    const label = v => { let bi = 0, bw = -1; for (let k = 0; k < 4; k++) if (v.skinWeight[k] > bw) { bw = v.skinWeight[k]; bi = v.skinIndex[k]; } return part[bi] || 't'; };
+    // frames and fitted cut planes: inside the limb when dot(n, p - o) > c (and, for legs, on its own side of the middle)
+    const frames = {}, cuts = [];
+    for (const [k, a, b, sx] of LIMBS) {
+      const o = jp(a), e = jp(b); if (!o || !e) continue;
+      const up = o.clone().sub(e), len = up.length(); up.normalize();
+      const s = new T.Vector3(1, 0, 0); s.addScaledVector(up, -s.dot(up)).normalize();
+      frames[k] = { o, up, s, f: new T.Vector3().crossVectors(s, up).normalize(), len };
+      let best = null;
+      for (let th = -0.7; th <= 0.701; th += 0.05) {
+        const n = kind === 'pants' ? new T.Vector3(sx * Math.sin(th), -Math.cos(th), 0) : new T.Vector3(sx * Math.cos(th), Math.sin(th), 0);
+        const d = V.map(v => n.x * (v.position[0] - o.x) + n.y * (v.position[1] - o.y) + n.z * (v.position[2] - o.z)), L = V.map(v => label(v) === k);
+        for (let c = -8; c <= 8.001; c += 0.25) { let err = 0; for (let i = 0; i < nv; i++) if ((d[i] > c && (kind !== 'pants' || sx * V[i].position[0] > 0)) !== L[i]) err++; if (!best || err < best.err) best = { err, n: n.clone(), c }; }
+      }
+      cuts.push({ k, o, n: best.n, c: best.c, sx });
+    }
+    // slicing: interpolate every attribute; bone weights are blended and the four biggest kept
+    const lerpV = (p, q, t) => { const a = {};
+      for (const k of names) { if (k === 'skinIndex' || k === 'skinWeight') continue; a[k] = p[k].map((x, j) => x + (q[k][j] - x) * t); }
+      const w = new Map(); for (let j = 0; j < 4; j++) { w.set(p.skinIndex[j], (w.get(p.skinIndex[j]) || 0) + p.skinWeight[j] * (1 - t)); w.set(q.skinIndex[j], (w.get(q.skinIndex[j]) || 0) + q.skinWeight[j] * t); }
+      const top = Array.from(w.entries()).sort((x, y) => y[1] - x[1]).slice(0, 4); while (top.length < 4) top.push([0, 0]); const sum = top.reduce((s, x) => s + x[1], 0) || 1;
+      a.skinIndex = top.map(x => x[0]); a.skinWeight = top.map(x => x[1] / sum); return a; };
+    // clip a polygon by f(v) > 0: returns [inside, outside] polygons
+    const clip = (poly, f) => { const IN = [], OUT = [], fv = poly.map(f);
+      for (let i = 0; i < poly.length; i++) { const j = (i + 1) % poly.length, a = poly[i], b = poly[j], fa = fv[i], fb = fv[j];
+        (fa > 0 ? IN : OUT).push(a);
+        if ((fa > 0) !== (fb > 0)) { const m = lerpV(a, b, fa / (fa - fb)); IN.push(m); OUT.push(m); } }
+      return [IN.length >= 3 ? IN : null, OUT.length >= 3 ? OUT : null]; };
+    const pieces = [];   // [owner, polygon]
+    for (let t = 0; t < nv / 3; t++) {
+      let rest = [[V[t * 3], V[t * 3 + 1], V[t * 3 + 2]]];
+      for (const C of cuts) {
+        const fPlane = v => C.n.x * (v.position[0] - C.o.x) + C.n.y * (v.position[1] - C.o.y) + C.n.z * (v.position[2] - C.o.z) - C.c;
+        const next = [];
+        for (const poly of rest) {
+          let [inn, out] = clip(poly, fPlane); if (out) next.push(out);
+          if (inn && kind === 'pants') { const [i2, o2] = clip(inn, v => C.sx * v.position[0]); if (o2) next.push(o2); inn = i2; }
+          if (inn) pieces.push([C.k, inn]);
+        }
+        rest = next;
+      }
+      for (const poly of rest) pieces.push(['t', poly]);
+    }
+    // each part's box in its own frame: A across (character's left +), Bv up, C forward
+    const loc = (k, p) => { const F = frames[k]; if (!F) return [p[0], p[1], p[2]]; const x = p[0] - F.o.x, y = p[1] - F.o.y, z = p[2] - F.o.z; return [x * F.s.x + y * F.s.y + z * F.s.z, x * F.up.x + y * F.up.y + z * F.up.z, x * F.f.x + y * F.f.y + z * F.f.z]; };
+    const bounds = {};
+    for (const [k, poly] of pieces) for (const v of poly) { const q = loc(k, v.position), B = bounds[k] || (bounds[k] = [1e9, 1e9, 1e9, -1e9, -1e9, -1e9]); for (let j = 0; j < 3; j++) { B[j] = Math.min(B[j], q[j]); B[j + 3] = Math.max(B[j + 3], q[j]); } }
+    // the side panels meet along the box's corners: slice along both diagonals, so front/side/back seams are straight
+    const faced = [];
+    for (const [k, poly] of pieces) {
+      const B = bounds[k], ac = (B[0] + B[3]) / 2, cc = (B[2] + B[5]) / 2, ha = Math.max(1e-3, (B[3] - B[0]) / 2), hc = Math.max(1e-3, (B[5] - B[2]) / 2);
+      const g1 = v => { const q = loc(k, v.position); return (q[2] - cc) / hc - (q[0] - ac) / ha; }, g2 = v => { const q = loc(k, v.position); return (q[2] - cc) / hc + (q[0] - ac) / ha; };
+      const [p1, m1] = clip(poly, g1);
+      for (const [pp, s1] of [[p1, 1], [m1, -1]]) { if (!pp) continue; const [p2, m2] = clip(pp, g2);
+        if (p2) faced.push([k, p2, s1 > 0 ? 'F' : 'L']); if (m2) faced.push([k, m2, s1 > 0 ? 'Rt' : 'B']); }
+    }
+    // build the new soup (fan-triangulate each piece)
+    const out = []; for (const [k, poly, face] of faced) for (let i = 1; i < poly.length - 1; i++) out.push([k, poly[0], poly[i], poly[i + 1], face]);
+    const geo = new T.BufferGeometry(), n = out.length * 3;
+    for (const k of names) { const s = A0[k].itemSize, arr = new A0[k].array.constructor(n * s); let w = 0; for (const tr of out) for (let j = 1; j <= 3; j++) for (let q = 0; q < s; q++) arr[w++] = tr[j][k][q]; geo.setAttribute(k, new T.BufferAttribute(arr, s, A0[k].normalized)); }
+    const P = geo.attributes.position, N = geo.attributes.normal;
+    const uv = new Float32Array(n * 2), vn = new T.Vector3();
+    for (let t = 0; t < out.length; t++) {
+      const k = out[t][0], B = bounds[k], F = frames[k];
+      // tops and bottoms (shoulders, sleeve and leg ends) by the way they face; the sides by where they are
+      vn.set(0, 0, 0); for (let j = 0; j < 3; j++) { const i = t * 3 + j; vn.x += N.getX(i); vn.y += N.getY(i); vn.z += N.getZ(i); } vn.normalize();
+      const nb = F ? vn.dot(F.up) : vn.y;
+      const face = nb > 0.8 ? 'U' : nb < -0.8 ? 'D' : out[t][4];
+      const rc = (k === 't' ? TORSO : (k === 'aL' || k === 'lL') ? LIMB_L : LIMB_R)[face];
+      const dA = Math.max(1e-3, B[3] - B[0]), dC = Math.max(1e-3, B[5] - B[2]);
+      for (let j = 0; j < 3; j++) {
+        const i = t * 3 + j, q = loc(k, out[t][j + 1].position), A = q[0], Bv = q[1], C = q[2];
+        let v;
+        if (k === 't') { const h = Math.max(1e-3, B[4] - B[1]), r = (B[4] - Bv) / h; v = kind === 'pants' ? 0.62 + 0.38 * r : r; }
+        else { const top = B[4], len = full ? Math.max(1e-3, top - B[1]) : F.len; v = Math.min(1, Math.max(0, (top - Bv) / len)); }
+        let u, w;
+        if (face === 'F') { u = (A - B[0]) / dA; w = v; }
+        else if (face === 'B') { u = (B[3] - A) / dA; w = v; }
+        else if (face === 'L') { u = (B[5] - C) / dC; w = v; }
+        else if (face === 'Rt') { u = (C - B[2]) / dC; w = v; }
+        else if (face === 'U') { u = (A - B[0]) / dA; w = (C - B[2]) / dC; }
+        else { u = (A - B[0]) / dA; w = (B[5] - C) / dC; }
+        u = Math.min(1, Math.max(0, u)); w = Math.min(1, Math.max(0, w));
+        const px = rc[0] + 0.75 + u * (rc[2] - 1.5), py = rc[1] + 0.75 + w * (rc[3] - 1.5);
+        uv[i * 2] = px / W; uv[i * 2 + 1] = 1 - py / H;
+      }
+    }
+    // shirts fit loosely: below the chest the fabric hangs straight down, it bridges the gap between the breasts,
+    // and the sides fall straight from the armpits, instead of following every curve of the body
+    if (kind === 'shirt') {
+      const idx = []; for (let t = 0; t < out.length; t++) if (out[t][0] === 't') for (let j = 0; j < 3; j++) idx.push(t * 3 + j);
+      let y0 = 1e9, y1 = -1e9, z0 = 1e9, z1 = -1e9; for (const i of idx) { const y = P.getY(i), z = P.getZ(i); y0 = Math.min(y0, y); y1 = Math.max(y1, y); z0 = Math.min(z0, z); z1 = Math.max(z1, z); }
+      const zc = (z0 + z1) / 2, BIN = 2, col = x => Math.round(x / BIN), row = y => Math.round(y / BIN), yArm = y0 + (y1 - y0) * 0.68;
+      // front: highest point at or above each spot in its column, then bridged across columns row by row
+      const front = idx.filter(i => P.getZ(i) > zc), hang = new Map();
+      const cols = new Map(); for (const i of front) { const c = col(P.getX(i)); if (!cols.has(c)) cols.set(c, []); cols.get(c).push(i); }
+      const prof = new Map();   // row -> Map(col -> hang z)
+      for (const [c, list] of cols) { list.sort((a, b) => P.getY(b) - P.getY(a)); let m = -1e9; for (const i of list) { if (P.getY(i) <= yArm + 4) m = Math.max(m, P.getZ(i)); const hz = Math.max(m, P.getZ(i)); hang.set(i, hz); const r = row(P.getY(i)); if (!prof.has(r)) prof.set(r, new Map()); const pr = prof.get(r); pr.set(c, Math.max(pr.get(c) || -1e9, hz)); } }
+      const bridged = new Map();
+      for (const [r, pr] of prof) { const cs = Array.from(pr.keys()).sort((a, b) => a - b), pre = [], suf = []; let m = -1e9; for (const c of cs) { m = Math.max(m, pr.get(c)); pre.push(m); } m = -1e9; for (let k = cs.length - 1; k >= 0; k--) { m = Math.max(m, pr.get(cs[k])); suf[k] = m; }
+        const b = new Map(); cs.forEach((c, k) => b.set(c, Math.min(pre[k], suf[k]))); bridged.set(r, b); }
+      const moved = new Set();
+      for (const i of front) { const z = P.getZ(i), r = bridged.get(row(P.getY(i))), tz = Math.max(hang.get(i), r ? (r.get(col(P.getX(i))) || -1e9) : -1e9);
+        // fade toward the collar so the neckline still sits on her
+        const k = Math.min(1, Math.max(0, (y1 - 3 - P.getY(i)) / 8)) * 0.92;
+        if (tz > z + 0.05) { P.setZ(i, z + (tz - z) * k); moved.add(i); } }
+      // sides: below the armpit the whole torso widens smoothly toward its armpit width (scaled about the middle, so prints stay whole)
+      const rows = new Map(); for (const i of idx) { const r = row(P.getY(i)); rows.set(r, Math.max(rows.get(r) || 0, Math.abs(P.getX(i)))); }
+      const rk = Array.from(rows.keys()).sort((p, q) => p - q), widthAt = y => { const f = y / BIN; let lo = rk[0], hi = rk[rk.length - 1]; for (const r of rk) { if (r <= f) lo = r; if (r >= f) { hi = r; break; } } const wl = rows.get(lo), wh = rows.get(hi); return hi === lo ? wl : wl + (wh - wl) * (f - lo) / (hi - lo); };
+      const wArm = widthAt(yArm);
+      for (const i of idx) { const y = P.getY(i); if (y >= yArm) continue; const wy = widthAt(y); if (!(wy > 1) || wArm <= wy) continue;
+        const fade = Math.min(1, (yArm - y) / 6), k = 1 + (wArm / wy - 1) * 0.75 * fade; P.setX(i, P.getX(i) * k); moved.add(i); }
+      // smooth shading where the cloth moved: average the faces around each (welded) point
+      if (moved.size) { const key = i => Math.round(P.getX(i) * 50) + ',' + Math.round(P.getY(i) * 50) + ',' + Math.round(P.getZ(i) * 50), acc = new Map(), a = new T.Vector3(), b2 = new T.Vector3(), c2 = new T.Vector3();
+        for (let t = 0; t < idx.length; t += 3) { const i0 = idx[t], i1 = idx[t + 1], i2 = idx[t + 2]; a.fromBufferAttribute(P, i0); b2.fromBufferAttribute(P, i1).sub(a); c2.fromBufferAttribute(P, i2).sub(a); const fn = new T.Vector3().crossVectors(b2, c2);
+          const o = new T.Vector3(N.getX(i0) + N.getX(i1) + N.getX(i2), N.getY(i0) + N.getY(i1) + N.getY(i2), N.getZ(i0) + N.getZ(i1) + N.getZ(i2)); if (fn.dot(o) < 0) fn.negate();
+          for (const i of [i0, i1, i2]) { const k2 = key(i); if (!acc.has(k2)) acc.set(k2, new T.Vector3()); acc.get(k2).add(fn); } }
+        for (const i of moved) { const v = acc.get(key(i)); if (v && v.lengthSq() > 0) { v.normalize(); N.setXYZ(i, v.x, v.y, v.z); } } }
+    }
+    // the waist of pants tucks a hair under a shirt's hem
+    if (kind === 'pants') for (let t = 0; t < out.length; t++) if (out[t][0] === 't') for (let j = 0; j < 3; j++) { const i = t * 3 + j; P.setXYZ(i, P.getX(i) - N.getX(i) * 0.25, P.getY(i) - N.getY(i) * 0.25, P.getZ(i) - N.getZ(i) * 0.25); }
+    geo.setAttribute('uv', new T.BufferAttribute(uv, 2));
+    geo.computeBoundingSphere();
+    GEO.set(src0, geo); return geo;
+  }
+
+  function meshFor(s, slot) { const M = s.M; return slot === 'top' ? (M.armorMeshes.body || M.armorMeshes.top) : M.armorMeshes.legs; }
+  // after every change: give custom garments their template (and put normal garments back)
+  function sync(s) {
+    for (const slot of ['top', 'legs']) {
+      const v = s.config && s.config[slot], m = meshFor(s, slot); if (!m) continue;
+      const g = v && GARMENTS[v.part];
+      if (!g || !v.template) { if (m.userData.custom) { m.geometry = m.userData.custom.geo; m.material = m.userData.custom.mat; m.userData.custom = null; } continue; }
+      const key = v.part + '|' + v.template.length + ':' + v.template.slice(-64) + '|' + (v.colour || '');
+      if (m.userData.custom && m.userData.custom.key === key && m.material === m.userData.custom.mine) continue;
+      const base = m.userData.custom && m.material === m.userData.custom.mine ? m.userData.custom : { geo: m.geometry, mat: m.material };
+      const geo = wrapped({ geometry: base.geo, skeleton: m.skeleton }, g.full, g.kind);
+      const ud = base.mat.userData; base.mat.userData = {}; const mat = base.mat.clone(); base.mat.userData = ud;   // clone() can't copy circular userData mat.onBeforeCompile = base.mat.onBeforeCompile; mat.customProgramCacheKey = base.mat.customProgramCacheKey; mat.userData = Object.assign({}, ud);
+      mat.map = texture(v.template, v.colour || '#ffffff'); mat.color.set(0xffffff); mat.roughness = 0.82; mat.metalness = 0; mat.needsUpdate = true;
+      if (g.kind === 'shirt') { mat.polygonOffset = true; mat.polygonOffsetFactor = -1; mat.polygonOffsetUnits = -4; }   // a shirt always wins over the pants' waistband
+      m.geometry = geo; m.material = mat; m.userData.custom = { key, geo: base.geo, mat: base.mat, mine: mat };
+    }
+  }
+  let patched = false;
+  function patch(proto) {
+    if (patched) return; patched = true;
+    const ap = proto.apply;
+    proto.apply = function (patch, force) { const r = ap.call(this, patch, force); try { sync(this); } catch (e) { console.warn('SandyKit custom clothing', e); } return r; };
+  }
+  const create = K.create;
+  K.create = cfg => create(cfg).then(s => { patch(Object.getPrototypeOf(s)); try { sync(s); } catch (e) { console.warn('SandyKit custom clothing', e); } return s; });
+  const load = K.loadCharacter;
+  if (load) K.loadCharacter = src0 => load(src0).then(s => { patch(Object.getPrototypeOf(s)); try { sync(s); } catch (e) {} return s; });
+  K.CUSTOM = { GARMENTS, W, H, panels: { TORSO, LIMB_R, LIMB_L }, src };
+  K.customReady = () => Promise.all(Array.from(pending));
+})();

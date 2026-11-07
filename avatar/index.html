@@ -294,6 +294,14 @@ input[type=range]{flex:1;min-width:120px;accent-color:var(--ring-a)}
 input[type=checkbox]{width:20px;height:20px;accent-color:var(--ring-a)}
 .val{width:48px;text-align:right;font-variant-numeric:tabular-nums;color:var(--mut);font-size:13.5px}
 .note{color:var(--mut);font-size:13px;margin:6px 0 0}
+.cc .seg{margin-bottom:10px}
+.ccg{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;margin:2px 0 8px}
+.ccg button{appearance:none;position:relative;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:4px;border-radius:14px;background:var(--card);border:1px solid var(--line);cursor:pointer;font:700 11.5px/1.15 var(--font);color:var(--ink2);text-align:center;min-width:0}
+.ccg button i{display:block;aspect-ratio:1;border-radius:10px;background:var(--card2) center/cover no-repeat}
+.ccg button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px 2px}
+.ccg button[aria-pressed=true]{border:2px solid var(--ink);padding:3px;color:var(--ink)}
+.ccg button.locked i{filter:grayscale(1) opacity(.45)}
+.ccg button.locked::after{content:"🔒";position:absolute;top:8px;right:8px;font-size:13px}
 .btns{display:flex;gap:8px;flex-wrap:wrap}
 .classic{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;margin:10px 0 2px;padding:12px 14px;border-radius:var(--r-s);background:var(--card2);border:1px solid var(--line)}
 .classic p{font-size:13.5px;color:var(--ink2);flex:1;min-width:180px}
@@ -325,11 +333,10 @@ body.viewer.clear,body.viewer.clear #stage{background:transparent}
   <aside id="panel" aria-label="Avatar editor">
     <div id="panelTop"><h1 class="px">Wardrobe</h1><button type="button" class="btn px" id="bRandom">Randomize</button><button type="button" class="btn px" id="bReset">Reset</button><button type="button" class="btn px" id="bHelp" aria-label="Read me" hidden>?</button></div>
     <div id="tabs" role="tablist">
-      <button class="tab px" role="tab" aria-selected="true" data-page="pLook">Look</button><button class="tab px" role="tab" aria-selected="false" data-page="pClothes">Clothes</button><button class="tab px" role="tab" aria-selected="false" data-page="pFeet">Feet</button><button class="tab px" role="tab" aria-selected="false" data-page="pSave">Save</button>
+      <button class="tab px" role="tab" aria-selected="true" data-page="pLook">Look</button><button class="tab px" role="tab" aria-selected="false" data-page="pClothes">Clothes</button><button class="tab px" role="tab" aria-selected="false" data-page="pCustom" id="tabCustom">Custom</button><button class="tab px" role="tab" aria-selected="false" data-page="pFeet">Feet</button><button class="tab px" role="tab" aria-selected="false" data-page="pSave">Save</button>
     </div>
     <div id="pages">
       <section class="page" id="pLook" role="tabpanel">
-        <div class="classic"><p>Your games still use your classic avatar for now.</p><a href="classic/">Edit classic avatar →</a></div>
         <div class="grp"><h2 class="px">Body</h2><div class="chips" id="bodies"></div></div>
         <div class="grp"><h2 class="px">Face</h2><div class="chips" id="exprs"></div>
           <div class="row"><label for="fsz">Face size</label><input type="range" id="fsz" min="0.3" max="1" step="0.005" data-num="faceScale"><span class="val" data-show="faceScale"></span></div>
@@ -405,6 +412,20 @@ body.viewer.clear,body.viewer.clear #stage{background:transparent}
         <div class="grp kit" data-slot="shoulderL"><h2 class="px">Left shoulder</h2></div>
         <div class="grp kit" data-slot="shoulderR"><h2 class="px">Right shoulder</h2></div>
       </section>
+      <section class="page" id="pCustom" role="tabpanel" hidden>
+        <p class="note" style="margin:10px 0 0">Custom clothing works like Roblox: any classic <b>shirt</b> or <b>pants</b> template (585 × 559 PNG) wraps onto her. Wear a design from your closet or upload your own.</p>
+        <div class="grp cc" data-cc="shirt"><h2 class="px">Shirt</h2>
+          <div class="seg" data-ccg="shirt" role="group" aria-label="Shirt type"><button type="button" class="px" data-g="">None</button><button type="button" class="px" data-g="gen_tshirt">T-shirt</button><button type="button" class="px" data-g="gen_longsleeve">Long sleeves</button></div>
+          <div class="ccg" data-ccd="shirt"></div>
+          <div class="row"><label class="btn px" for="ccFileShirt" style="cursor:pointer">Upload shirt template…</label><input type="file" id="ccFileShirt" accept="image/*" hidden data-ccu="shirt"><a class="btn px" href="../assets/clothing/template-shirt.png" download="grug-shirt-template.png">Blank template</a></div>
+          <div class="row"><span class="lab">Base colour</span><div class="sws" data-colour="top.colour"></div></div><p class="note">Shows through see-through parts of the template.</p></div>
+        <div class="grp cc" data-cc="pants"><h2 class="px">Pants</h2>
+          <div class="seg" data-ccg="pants" role="group" aria-label="Pants type"><button type="button" class="px" data-g="">None</button><button type="button" class="px" data-g="mh_cortu_jeans_shorts">Shorts</button><button type="button" class="px" data-g="Female_Peasant_Legs">Pants</button></div>
+          <div class="ccg" data-ccd="pants"></div>
+          <div class="row"><label class="btn px" for="ccFilePants" style="cursor:pointer">Upload pants template…</label><input type="file" id="ccFilePants" accept="image/*" hidden data-ccu="pants"><a class="btn px" href="../assets/clothing/template-pants.png" download="grug-pants-template.png">Blank template</a></div>
+          <div class="row"><span class="lab">Base colour</span><div class="sws" data-colour="legs.colour"></div></div></div>
+        <div class="grp"><p class="note">Earn more designs by playing and eating at partners. <a href="../shop/" style="font-weight:800;color:var(--ink)">See them in the shop</a>.</p></div>
+      </section>
       <section class="page" id="pFeet" role="tabpanel" hidden>
         <div class="grp"><h2 class="px">On her feet</h2><div class="seg" id="feetType" role="group" aria-label="Footwear"><button type="button" class="px" data-type="barefoot">Barefoot</button><button type="button" class="px" data-type="flipflops">Flip-flops</button><button type="button" class="px" data-type="boots">Boots</button></div></div>
         <div class="grp" id="ffGrp"><h2 class="px">Flip-flops</h2>
@@ -415,12 +436,6 @@ body.viewer.clear,body.viewer.clear #stage{background:transparent}
           <div class="row"><label for="bH">Height</label><input type="range" id="bH" min="0" max="1" step="0.01" data-num="feet.height"><span class="val" data-show="feet.height"></span></div>
           <div class="row"><label for="bAuto">Ankle height under trousers and long hems</label><input type="checkbox" id="bAuto"></div>
           <p class="note">0% is a shoe (cut just above the ankle), 100% is the boot as made.</p></div>
-      </section>
-      <section class="page" id="pWeapon" role="tabpanel" hidden style="display:none">
-        <div class="grp"><h2 class="px">In her right hand</h2>
-          <div class="row"><label for="wName">Weapon</label><select id="wName"></select></div>
-          <div class="row"><label for="wVar">Finish</label><select id="wVar"></select></div>
-          <div class="row"><span class="lab">Tint</span><div class="sws" data-colour="weapon.colour"></div></div><p class="note">White keeps the original colours.</p></div>
       </section>
       <section class="page" id="pSave" role="tabpanel" hidden>
         <div class="grp"><h2 class="px">Character file</h2>
@@ -518,11 +533,38 @@ function kitBlock(el){const slot=el.dataset.slot,parts=C.parts[slot];const h=el.
     <div class="row"><span class="lab">Tint</span><div class="sws" data-colour="${slot}.colour"></div></div>`;
   for(const s of el.querySelectorAll('select'))s.addEventListener('change',()=>{const cur=Object.assign({texture:null,colour:'#ffffff'},get(cfg,slot)||{}),v=s.value;
     if(s.dataset.f==='part'){if(!v){apply({[slot]:slot==='feet'?{type:'barefoot'}:null});return}const p=parts.find(x=>x.id===v);cur.part=v;if(!cur.texture||!cur.texture.startsWith(p.set))cur.texture=p.set}else cur.texture=v;
-    if(slot==='feet')cur.type='boots';if(!cur.part)return;apply({[slot]:cur})})}
+    if(slot==='feet')cur.type='boots';if(!cur.part)return;if(slot==='top'||slot==='legs')cur.template=null;apply({[slot]:cur})})}
 document.querySelectorAll('.kit').forEach(kitBlock);document.querySelectorAll('[data-colour]').forEach(swatches);
 // a colour pick on an empty slot: nothing to tint yet
 const origApply=apply;apply=function(patch){for(const k of ['top','legs','shoulderL','shoulderR','weapon'])if(patch[k]&&!patch[k].part&&!patch[k].name&&!get(cfg,k)&&Object.keys(patch[k]).every(x=>x==='colour')){toast('Pick a piece first, then tint it');return}
   if(patch.feet&&!patch.feet.type&&get(cfg,'feet.type')==='barefoot'){toast('Pick footwear first');return}origApply(patch)};
+// ---------- custom clothing (Roblox shirt / pants templates) ----------
+const CC={key:{shirt:'top',pants:'legs'},tex:{gen_tshirt:'gen_tshirt',gen_longsleeve:'gen_longsleeve',mh_cortu_jeans_shorts:'mh_cortu_jeans_shorts',Female_Peasant_Legs:'peasant'},def:{shirt:'gen_tshirt',pants:'Female_Peasant_Legs'},UP:'grug.sandy.uploads.v1'};
+const ccUploads=()=>{try{return JSON.parse(localStorage.getItem(CC.UP)||'{}')||{}}catch(e){return {}}};
+function ccWear(slot,o){const k=CC.key[slot],cur=get(cfg,k)||{},isCC=cur.template&&CC.tex[cur.part];
+  const part=o.part!==undefined?o.part:(isCC?cur.part:CC.def[slot]);if(!part){apply({[k]:null});return}
+  let tpl=o.template||(isCC?cur.template:null);
+  if(!tpl){const C2=window.GrugCatalog,G2=window.Grug;const own=C2&&G2?C2.inSlot(slot).filter(it=>G2.owns(it.id)):[];tpl=own.length?own[0].template:(slot==='shirt'?'shop:grug-tee':'shop:jeans')}
+  apply({[k]:{part,texture:CC.tex[part],colour:(isCC&&cur.colour)||'#ffffff',template:tpl}})}
+function renderCustom(){const C2=window.GrugCatalog,G2=window.Grug;if(!cfg||!C2||!G2)return;const up=ccUploads();
+  for(const slot of ['shirt','pants']){const cur=get(cfg,CC.key[slot])||{},isCC=!!(cur.template&&CC.tex[cur.part]);
+    for(const b of document.querySelectorAll(`[data-ccg="${slot}"] button`))b.setAttribute('aria-pressed',String(isCC?b.dataset.g===cur.part:b.dataset.g===''));
+    const box=document.querySelector(`[data-ccd="${slot}"]`);const tiles=[];
+    if(up[slot])tiles.push(`<button type="button" data-tpl="up:${slot}" aria-pressed="${isCC&&cur.template===up[slot]}"><i style="background-image:url(${up[slot]});background-size:contain;background-color:#fff"></i><span>Your upload</span></button>`);
+    for(const it of C2.inSlot(slot)){const own=G2.owns(it.id);tiles.push(`<button type="button" class="${own?'':'locked'}" data-tpl="${it.template}" data-id="${it.id}" aria-pressed="${isCC&&cur.template===it.template}" title="${own?it.name:it.name+' · '+C2.howText(it)}"><i style="background-image:url(${G2.url(it.thumb)})"></i><span>${it.name}</span></button>`)}
+    box.innerHTML=tiles.join('')}}
+document.querySelectorAll('[data-ccg]').forEach(seg=>seg.addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(b)ccWear(seg.dataset.ccg,{part:b.dataset.g||null})}));
+document.querySelectorAll('[data-ccd]').forEach(box=>box.addEventListener('click',e=>{const b=e.target.closest('[data-tpl]');if(!b)return;const slot=box.dataset.ccd;
+  if(b.classList.contains('locked')){const it=window.GrugCatalog&&window.GrugCatalog.get(b.dataset.id);toast((it?it.name+': '+window.GrugCatalog.howText(it):'Locked')+'. See the shop.');return}
+  const tpl=b.dataset.tpl.startsWith('up:')?ccUploads()[slot]:b.dataset.tpl;if(tpl)ccWear(slot,{template:tpl})}));
+// an uploaded template: any image, scaled to Roblox's 585 x 559 layout and kept on this phone
+document.querySelectorAll('[data-ccu]').forEach(inp=>inp.addEventListener('change',e=>{const f=inp.files&&inp.files[0],slot=inp.dataset.ccu;if(!f)return;const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{
+  const c=document.createElement('canvas');c.width=585;c.height=559;c.getContext('2d').drawImage(im,0,0,585,559);const url=c.toDataURL('image/png');
+  if(Math.abs(im.width/im.height-585/559)>0.08)toast('That image isn’t shaped like a Roblox template (585 × 559), so it may wrap oddly');
+  const up=ccUploads();up[slot]=url;try{localStorage.setItem(CC.UP,JSON.stringify(up))}catch(x){toast('Couldn’t save the upload on this phone (storage full)')}
+  ccWear(slot,{template:url});inp.value=''};im.src=rd.result};rd.readAsDataURL(f)}));
+if(/custom/i.test(location.hash))setTimeout(()=>{const t=$('tabCustom');if(t)t.click()},0);
+addEventListener('load',()=>renderCustom());
 $('decals').innerHTML=['none','star','heart','bolt','smile','peace'].map(t=>`<button type="button" data-d="${t}" aria-pressed="false">${t}</button>`).join('');
 $('decals').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b)apply({decal:{image:b.dataset.d==='none'?null:b.dataset.d}})});
 $('decFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const im=new Image(),rd=new FileReader();rd.onload=()=>{im.onload=()=>{
@@ -545,13 +587,10 @@ const hairStep=d=>{const n=C.hairStyles.length||64;apply({hair:{style:((cfg.hair
 for(const b of document.querySelectorAll('#feetType button'))b.addEventListener('click',()=>{const t=b.dataset.type,f=cfg.feet||{};
   if(t==='barefoot')apply({feet:{type:'barefoot'}});else if(t==='flipflops')apply({feet:{type:'flipflops',sole:f.sole||'#f2efe6',strap:f.strap||'#e3101c'}});
   else{const p=C.parts.feet.find(x=>x.id===f.part)||C.parts.feet[0];apply({feet:{type:'boots',part:p.id,texture:f.texture&&f.texture.startsWith(p.set)?f.texture:p.set,colour:f.colour||'#ffffff'}})}});
-$('wName').innerHTML='<option value="">Empty-handed</option>'+C.weapons.map(w=>`<option value="${w.id}">${w.id.replace(/([a-z])([A-Z])/g,'$1 $2')}</option>`).join('');
-$('wName').addEventListener('change',()=>{const v=$('wName').value;if(!v){apply({weapon:null});return}const w=C.weapons.find(x=>x.id===v),cur=cfg.weapon||{};apply({weapon:{name:v,variant:w.variants.includes(cur.variant)?cur.variant:w.variants[0],colour:cur.colour||'#ffffff'}})});
-$('wVar').addEventListener('change',()=>{if(cfg.weapon)apply({weapon:Object.assign({},cfg.weapon,{variant:$('wVar').value})})});
 // show the config in every control
 function fabricOptions(sel,slot,pid){const p=pid&&C.parts[slot].find(x=>x.id===pid),L=p?K.texturesFor(p.set):[],sig=L.join('|');if(sel.dataset.sig===sig)return;sel.dataset.sig=sig;
   sel.innerHTML=L.length?L.map(t=>`<option value="${t}">${p.clothes?'Plain':t.replace(/(\D)(\d)/,'$1 $2')}</option>`).join(''):'<option value="">—</option>';sel.disabled=L.length<2}
-function sync(){if(!cfg)return;
+function sync(){if(!cfg)return;try{renderCustom()}catch(e){}
   for(const el of document.querySelectorAll('[data-colour]')){const v=(get(cfg,el.dataset.colour)||'').toLowerCase();let hit=false;for(const b of el.querySelectorAll('.sw')){const on=b.dataset.c.toLowerCase()===v;b.setAttribute('aria-pressed',String(on));hit=hit||on}const lab=el.querySelector('.pick'),pk=lab&&lab.querySelector('input');if(pk&&/^#[0-9a-f]{6}$/.test(v))pk.value=v;if(lab){const custom=!hit&&/^#[0-9a-f]{6}$/.test(v);lab.setAttribute('aria-pressed',String(custom));lab.style.setProperty('--c',custom?v:'transparent')}}
   for(const b of $('exprs').children)b.setAttribute('aria-pressed',String(b.dataset.e===cfg.expression));
   for(const b of $('bodies').children)b.setAttribute('aria-pressed',String(b.dataset.b===(cfg.body||'female')));
@@ -562,7 +601,6 @@ function sync(){if(!cfg)return;
   const hs=$('hairStyle');if(hs.options.length!==C.hairStyles.length)hs.innerHTML=C.hairStyles.map((n,i)=>`<option value="${i}">${i+1}. ${n}</option>`).join('');hs.value=cfg.hair.style;
   for(const sel of document.querySelectorAll('select[data-kit]')){const v=get(cfg,sel.dataset.kit);const f=sel.dataset.f;if(f==='texture')fabricOptions(sel,sel.dataset.kit,v&&v.part);if(sel.dataset.kit==='feet'&&(!v||v.type!=='boots')){sel.value=f==='part'?'':sel.value;continue}sel.value=v&&v[f]?v[f]:(f==='part'?'':sel.value)}
   const ft=(cfg.feet&&cfg.feet.type)||'barefoot';for(const b of document.querySelectorAll('#feetType button'))b.setAttribute('aria-pressed',String(b.dataset.type===ft));$('ffGrp').hidden=ft!=='flipflops';$('bootGrp').hidden=ft!=='boots';$('bootHGrp').hidden=ft!=='boots';$('bAuto').checked=!(cfg.feet&&cfg.feet.auto===false);
-  const w=cfg.weapon;$('wName').value=w?w.name:'';const W=w&&C.weapons.find(x=>x.id===w.name);$('wVar').innerHTML=W?W.variants.map(v=>`<option>${v}</option>`).join(''):'<option>—</option>';$('wVar').disabled=!W;if(W)$('wVar').value=w.variant;
   if(document.activeElement!==$('json'))$('json').value=JSON.stringify(cfg,null,2);
   try{const u=new URL(location.href);u.searchParams.set('config',K.encode(cfg));history.replaceState(null,'',u)}catch(e){}}
 // tabs

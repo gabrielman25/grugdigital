@@ -47,17 +47,20 @@
   }
   const FRAMES = {
     bust: { w: 192, h: 192, t: [0, 174, 0], d: 168, yaw: 0.3, pitch: 0.04 },
-    full: { w: 300, h: 420, t: [0, 102, 0], d: 470, yaw: 0.35, pitch: 0.05 }
+    full: { w: 300, h: 420, t: [0, 102, 0], d: 470, yaw: 0.35, pitch: 0.05 },
+    shirt: { w: 240, h: 240, t: [0, 122, 0], d: 250, yaw: 0.3, pitch: 0.06 },   // closet tiles
+    pants: { w: 240, h: 240, t: [0, 68, 0], d: 300, yaw: 0.3, pitch: 0.06 }
   };
   async function picture(cfg, frame, o) {
     const r = await rig(), F = FRAMES[frame], c = r.K.merge(r.K.DEFAULT, cfg || {});
     if (o && o.expression) c.expression = o.expression;
     if (!r.sandy) { r.sandy = await r.K.create(c); r.scene.add(r.sandy.object3d); } else { r.sandy.apply(c, true); if (r.sandy.ready) await r.sandy.ready; }
+    if (r.K.customReady) await r.K.customReady();   // custom clothing templates still loading
     r.sandy.play((o && o.anim) || 'idle');
     for (let i = 0; i < 40; i++) r.sandy.update(((o && o.animT) || 0.6) / 40);   // settle the pose
     r.renderer.setSize(F.w, F.h, false); r.cam.aspect = F.w / F.h; r.cam.updateProjectionMatrix();
-    const T = r.T, tg = new T.Vector3(...F.t);
-    r.cam.position.set(tg.x + Math.sin(F.yaw) * Math.cos(F.pitch) * F.d, tg.y + Math.sin(F.pitch) * F.d, tg.z + Math.cos(F.yaw) * Math.cos(F.pitch) * F.d); r.cam.lookAt(tg);
+    const T = r.T, tg = new T.Vector3(...F.t), yaw = o && o.yaw != null ? o.yaw : F.yaw;
+    r.cam.position.set(tg.x + Math.sin(yaw) * Math.cos(F.pitch) * F.d, tg.y + Math.sin(F.pitch) * F.d, tg.z + Math.cos(yaw) * Math.cos(F.pitch) * F.d); r.cam.lookAt(tg);
     r.renderer.render(r.scene, r.cam);
     return r.renderer.domElement.toDataURL('image/png');
   }
