@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pearls · Grug</title>
+<meta name="description" content="Get Pearls, the in-game currency for every Grug game. Buy once and spend them in Take a Tea and other partner games.">
+<meta name="theme-color" content="#eaf6ee">
+<link rel="icon" href="favicon.png">
+<link rel="stylesheet" href="assets/grug.css">
+<script src="assets/theme.js"></script>
+<style>
+.pl{max-width:760px;padding:22px 0 10px}
+.pl h1{margin-bottom:8px}
+.pl .lede{color:var(--ink2);font-size:17px;max-width:56ch}
+.pl h2{font-size:22px;margin:30px 0 10px}
+.pl p{color:var(--ink2);font-size:15.5px;line-height:1.6}
+.pl a{color:var(--ink);font-weight:700}
+.box{padding:18px;background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+.bal{display:flex;align-items:center;gap:16px;margin-top:18px}
+.bal .orb{width:62px;height:62px;border-radius:18px;display:grid;place-items:center;background:var(--chip-bg);color:var(--chip-fg);flex:none}
+.bal .orb svg{width:34px;height:34px}
+.bal b{display:block;font-size:30px;line-height:1.1;color:var(--ink)}
+.bal span{color:var(--mut);font-size:14.5px}
+.bal .test{margin-left:auto;flex:none;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:6px 10px;border-radius:99px;background:var(--hot-a);color:#1b1300}
+.from{margin-top:12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.from p{margin:0;font-size:14.5px}
+.packs{display:grid;grid-template-columns:1fr 1fr;gap:16px 12px;margin-top:14px}
+@media (min-width:700px){.packs{grid-template-columns:repeat(4,1fr)}}
+.pack{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:22px 10px 14px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);cursor:pointer;font:inherit;color:inherit;text-align:center;width:100%}
+.pack:hover{border-color:var(--line2)}
+.pack.hot{border:2px solid var(--ink)}
+.pack svg{width:30px;height:30px;color:var(--ink);margin-bottom:4px}
+.pack b{font-size:28px;line-height:1.05;color:var(--ink)}
+.pack small{font-size:11.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.pack .price{display:block;width:100%;margin-top:10px;padding:10px 0;border-radius:99px;background:var(--ink);color:var(--bg);font-weight:800;font-size:15px}
+.pack .tag{position:absolute;top:-10px;left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--hot-a);color:#1b1300;font-weight:800;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:5px 9px;border-radius:99px}
+.pack[disabled]{opacity:.6;cursor:default}
+.note{font-size:13.5px!important;color:var(--mut)!important;margin-top:10px;text-align:center}
+.thanks{margin-top:18px;border:2px solid var(--ink)}
+.thanks b{display:block;font-size:26px;color:var(--ink)}
+.thanks .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.hist{margin-top:6px}
+.hist div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:14.5px;color:var(--ink2)}
+.hist div:first-child{border-top:0}
+.code{font-family:ui-monospace,Menlo,monospace;font-weight:700;color:var(--ink);letter-spacing:.04em}
+.fine{font-size:13.5px!important;color:var(--mut)!important}
+.badge{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:99px;background:var(--chip-bg);color:var(--chip-fg)}
+.tiers{display:grid;grid-template-columns:1fr;gap:16px;margin-top:14px}
+@media (min-width:700px){.tiers{grid-template-columns:repeat(3,1fr)}}
+.tier{position:relative;display:flex;flex-direction:column;gap:6px;padding:20px 16px 16px;background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+.tier.hot{border:2px solid var(--ink)}
+.tier h3{font-size:20px;color:var(--ink)}
+.tier .pr{font-size:26px;font-weight:800;color:var(--ink)}
+.tier .pr small{font-size:14px;font-weight:600;color:var(--mut)}
+.tier ul{padding-left:18px;margin:2px 0 6px}
+.tier li{font-size:14.5px;color:var(--ink2);margin:3px 0}
+.tier .g-btn{margin-top:auto}
+.tier .tag{position:absolute;top:-10px;left:16px;background:var(--hot-a);color:#1b1300;font-weight:800;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:5px 9px;border-radius:99px}
+.act{margin-top:14px}
+.act b{display:block;font-size:17px;color:var(--ink)}
+.act .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.act input{flex:1;min-width:220px;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);background:var(--solid);font:600 15px/1 ui-monospace,Menlo,monospace;color:var(--ink)}
+.msg{margin-top:8px;font-size:14.5px}
+.msg.err{color:#b4372b}.msg.ok{color:var(--ink)}
+.club{margin-top:14px;border:2px solid var(--ink)}
+.club b{display:block;font-size:20px;color:var(--ink)}
+.club .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+footer{padding:28px 0 10px;color:var(--mut);font-size:13.5px;display:flex;flex-wrap:wrap;gap:8px 18px;border-top:1px solid var(--line);margin-top:26px}
+footer a{color:var(--ink2);font-weight:700}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <article class="pl">
+    <h1>Pearls</h1>
+    <p class="lede">One balance for every Grug game. Buy Pearls once and spend them on in-game items in Take a Tea and other partner games.</p>
+
+    <div class="box thanks" id="thanks" hidden></div>
+
+    <div class="box bal">
+      <span class="orb" id="orb"></span>
+      <div><b id="bal">0 Pearls</b><span>On this phone</span><br><span class="badge" id="badge" hidden></span></div>
+      <span class="test" id="test" hidden>Test mode</span>
+    </div>
+    <div class="from" id="from" hidden></div>
+
+    <h2>Get Pearls</h2>
+    <div class="packs" id="packs"></div>
+    <p class="note" id="payNote">You’ll pay on Stripe’s secure checkout page, then come straight back here.</p>
+
+    <h2 id="clubH">Grug Club</h2>
+    <p>A monthly membership for every Grug game: Pearls every month, bonus Pearls on every pack and a member badge. Cancel any time.</p>
+    <div class="box club" id="club" hidden></div>
+    <div class="tiers" id="tiers"></div>
+    <div class="box act" id="act">
+      <b>Already a member?</b>
+      <p>Paste the license key from your Gumroad receipt email to switch on your perks on this phone.</p>
+      <div class="row"><input id="key" placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="License key"><button class="g-btn primary" id="actBtn">Activate</button></div>
+      <p class="msg" id="actMsg" role="status" aria-live="polite"></p>
+    </div>
+
+    <h2>Good to know</h2>
+    <p>Pearls buy in-game items only. They can’t be exchanged for food, drinks, merchandise, points or money. They’re saved in this browser on this phone, so buy on the phone and browser you play on. Points you earn at each restaurant stay separate. Grug Club memberships are sold and billed by Gumroad, and each membership works on up to two phones.</p>
+    <p class="fine" style="margin-top:10px">Need help with a purchase? Visit <a href="support.html">customer support</a> and include your purchase code: <span class="code" id="code"></span>. Purchases follow our <a href="terms.html">terms of service</a> and <a href="privacy.html">privacy policy</a>.</p>
+
+    <div id="histWrap" hidden>
+      <h2>Your purchases on this phone</h2>
+      <div class="box hist" id="hist"></div>
+    </div>
+  </article>
+
+  <footer><span>© 2026 Grug Digital · Katy, Texas · Text 954-459-6301</span><a href="support.html">Customer support</a><a href="terms.html">Terms of service</a><a href="privacy.html">Privacy policy</a><a href="./">Play the games</a></footer>
+</main>
+<script src="assets/catalog.js"></script>
+<script src="assets/icons.js"></script>
+<script src="assets/games.js"></script>
+<script src="assets/grug.js"></script>
+<script>
+(function(){
+'use strict';
+/* =====================================================================================
+   PEARLS · the site-wide currency. Every Grug app on this site reads the same wallet
+   (localStorage 'grug.pearls.v1'), so Pearls bought here work in every game.
+   Buy:    a pack's Stripe Payment Link opens with ?client_reference_id=<purchase code>.
+   Return: Stripe sends the guest to  pearls.html?pack=<id>&cs={CHECKOUT_SESSION_ID}
+           (set per link in Stripe: After payment → Don't show confirmation page).
+   Apps link here with ?from=<path on this site>&app=<name> so the guest can go back.
+   There is no server, so a typed return link gives free Pearls; Pearls only buy game items.
+   ===================================================================================== */
+const PACKS = [
+  { id: 'p100',  pearls: 100,  price: '$1.99',  link: 'https://buy.stripe.com/test_bJe14o2bB1gte8ibnO9k404' },
+  { id: 'p275',  pearls: 275,  price: '$4.99',  link: 'https://buy.stripe.com/test_3cI6oI9E38IV9S28bC9k405', tag: 'Popular' },
+  { id: 'p600',  pearls: 600,  price: '$9.99',  link: 'https://buy.stripe.com/test_eVqbJ29E3cZbe8i4Zq9k406' },
+  { id: 'p1300', pearls: 1300, price: '$19.99', link: 'https://buy.stripe.com/test_aFa9AU8zZbV73tE1Ne9k407', tag: 'Best value' }
+];
+/* GRUG CLUB · a monthly membership sold on Gumroad. Gumroad emails each member a license key; the member pastes it
+   here, and this page asks Gumroad's public license check whether the membership is still active (no secret key needed).
+   productId: Gumroad → the product's content page → License key module. link: each tier's Gumroad checkout link.
+   Tiers are matched by name to the tier Gumroad reports, so keep the names the same in both places. */
+const CLUB = {
+  name: 'Grug Club',
+  productId: '',
+  maxPhones: 2,                  // one membership works on this many phones
+  tiers: [
+    { id: 'pebble',  name: 'Pebble',  price: '$1.99', monthly: 150,  bonus: 5,  link: '' },
+    { id: 'stone',   name: 'Stone',   price: '$4.99', monthly: 450,  bonus: 10, link: '', tag: 'Popular' },
+    { id: 'boulder', name: 'Boulder', price: '$9.99', monthly: 1000, bonus: 20, link: '' }
+  ]
+};
+const WKEY = 'grug.pearls.v1', SITE = '/grugdigital/';
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const PEARL = '<svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><circle cx="128" cy="80" r="46"/><circle cx="76" cy="170" r="46"/><circle cx="180" cy="170" r="46"/><circle cx="114" cy="64" r="11" fill="#fff" opacity=".55"/><circle cx="62" cy="154" r="11" fill="#fff" opacity=".55"/><circle cx="166" cy="154" r="11" fill="#fff" opacity=".55"/></svg>';
+const fmt = n => (+n || 0).toLocaleString();
+
+function wRaw(){ try{ const w = JSON.parse(localStorage.getItem(WKEY) || 'null'); return w && typeof w === 'object' ? w : {v: 1}; }catch(e){ return {v: 1}; } }
+function wSet(w){ try{ localStorage.setItem(WKEY, JSON.stringify(w)); return true; }catch(e){ return false; } }
+function wallet(){
+  const w = wRaw();
+  w.v = 1; w.balance = Math.max(0, Math.floor(+w.balance || 0)); w.buys = Array.isArray(w.buys) ? w.buys.slice(0, 50) : [];
+  if(typeof w.code !== 'string' || !/^GR-[A-Z0-9]{8}$/.test(w.code)){ const A = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'; w.code = 'GR-' + Array.from({length: 8}, () => A[Math.floor(Math.random() * 32)]).join(''); wSet(w); }
+  return w;
+}
+const okPath = p => typeof p === 'string' && p.indexOf(SITE) === 0 && p.indexOf('//') < 0 && !/[\s"'<>\\]/.test(p) && p.length < 300;
+
+/* where the guest came from (kept for two hours, long enough for a Stripe round trip) */
+const q = new URLSearchParams(location.search);
+{ const from = q.get('from'), app = (q.get('app') || '').slice(0, 40);
+  if(from !== null && okPath(from)){ const w = wallet(); w.ret = {path: from, app: app || 'the game', at: Date.now()}; wSet(w); } }
+const ret = () => { const r = wallet().ret; return r && okPath(r.path) && Date.now() - (+r.at || 0) < 2 * 3600e3 ? r : null; };
+
+/* coming back from Stripe */
+let arrived = null;
+{ const id = q.get('pack');
+  if(id !== null){
+    const cs = String(q.get('cs') || ''), csOK = /^[A-Za-z0-9_-]{4,200}$/.test(cs) ? cs : '', p = PACKS.find(x => x.id === id), w = wallet();
+    if(!p) arrived = {bad: true};
+    else if(csOK && w.buys.some(b => b.cs === csOK)) arrived = {dup: true, p};
+    else { const t = clubTier(w), extra = t ? Math.round(p.pearls * t.bonus / 100) : 0;
+      w.balance += p.pearls + extra; w.buys.unshift({at: Date.now(), pack: p.id, n: p.pearls + extra, price: p.price, cs: csOK}); w.buys = w.buys.slice(0, 50); wSet(w); arrived = {p, extra, tier: t}; }
+  }
+  if(id !== null || q.get('from') !== null) history.replaceState(null, '', location.pathname);   // a refresh can't add them twice
+}
+
+/* ---------- Grug Club ---------- */
+const monthKey = (t) => { const d = new Date(t || Date.now()); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
+const monthName = () => new Date().toLocaleDateString([], {month: 'long'});
+function clubTier(w){ const c = (w || wallet()).club; if(!c || !c.active || Date.now() - (+c.checkedAt || 0) > 4 * 864e5) return null; return CLUB.tiers.find(t => t.id === c.tier) || null; }
+const future = v => !v || new Date(v).getTime() > Date.now();
+async function gumroad(key, count){
+  const body = new URLSearchParams({product_id: CLUB.productId, license_key: key, increment_uses_count: count ? 'true' : 'false'});
+  const r = await fetch('https://api.gumroad.com/v2/licenses/verify', {method: 'POST', body});
+  let j = null; try{ j = await r.json(); }catch(e){}
+  if(!j || !j.success) return {ok: false, missing: r.status === 404};
+  const pu = j.purchase || {}, v = String(pu.variants || '').toLowerCase();
+  const tier = CLUB.tiers.find(t => v.indexOf(t.name.toLowerCase()) >= 0) || CLUB.tiers.find(t => Math.round(parseFloat(t.price.replace(/[^0-9.]/g, '')) * 100) === +pu.price) || null;
+  const active = !pu.refunded && !pu.chargebacked && !pu.disputed && future(pu.subscription_ended_at) && future(pu.subscription_cancelled_at) && future(pu.subscription_failed_at);
+  return {ok: true, active, tier, uses: +j.uses || 0, ends: pu.subscription_cancelled_at || pu.subscription_ended_at || null};
+}
+function grantMonth(w){
+  const c = w.club, t = clubTier(w); if(!t) return 0;
+  c.granted = c.granted && typeof c.granted === 'object' ? c.granted : {};
+  const m = monthKey(); if(c.granted[m]) return 0;
+  c.granted[m] = t.monthly; w.balance += t.monthly; return t.monthly;
+}
+async function activate(){
+  const key = $('#key').value.trim().toUpperCase(), msg = (t, k) => { $('#actMsg').textContent = t; $('#actMsg').className = 'msg ' + (k || ''); };
+  if(!CLUB.productId) return msg('Memberships aren’t open yet.', 'err');
+  if(!/^[A-Z0-9-]{16,64}$/.test(key)) return msg('That doesn’t look like a license key. Copy it from your Gumroad receipt email.', 'err');
+  $('#actBtn').disabled = true; msg('Checking with Gumroad…');
+  try{
+    const g = await gumroad(key, true);
+    if(!g.ok) return msg(g.missing ? 'Gumroad doesn’t know that key. Check it and try again.' : 'Couldn’t reach Gumroad. Check your signal and try again.', 'err');
+    if(g.uses > CLUB.maxPhones) return msg('This membership is already switched on on ' + CLUB.maxPhones + ' phones. Message us if you got a new phone.', 'err');
+    if(!g.active) return msg('That membership has ended. Join again below to get your perks back.', 'err');
+    if(!g.tier) return msg('Your membership is active, but its tier didn’t match. Message us with your purchase code.', 'err');
+    const w = wallet(); w.club = Object.assign({}, w.club, {key, tier: g.tier.id, active: true, checkedAt: Date.now(), ends: g.ends, since: (w.club && w.club.since) || Date.now()});
+    const got = grantMonth(w); wSet(w); $('#key').value = '';
+    msg('Welcome to ' + CLUB.name + ' ' + g.tier.name + '!' + (got ? ' ' + fmt(got) + ' Pearls added for ' + monthName() + '.' : ''), 'ok');
+    render();
+  }catch(e){ msg('Couldn’t reach Gumroad. Check your signal and try again.', 'err'); }
+  finally{ $('#actBtn').disabled = false; }
+}
+$('#actBtn').addEventListener('click', activate);
+$('#key').addEventListener('keydown', e => { if(e.key === 'Enter') activate(); });
+async function recheck(force){
+  const w = wallet(), c = w.club; if(!c || !c.key || !CLUB.productId) return;
+  if(!force && Date.now() - (+c.checkedAt || 0) < 12 * 3600e3) return;
+  try{
+    const g = await gumroad(c.key, false); if(!g.ok && !g.missing) return;   // offline: keep the last answer for now
+    const w2 = wallet(); w2.club = Object.assign({}, w2.club, {active: !!(g.ok && g.active && g.tier), tier: g.tier ? g.tier.id : w2.club.tier, checkedAt: Date.now(), ends: g.ends || null});
+    wSet(w2); render();
+  }catch(e){}
+}
+function renderClub(w){
+  const t = clubTier(w), c = w.club;
+  $('#badge').hidden = !t; if(t) $('#badge').textContent = CLUB.name + ' · ' + t.name;
+  const box = $('#club'); box.hidden = !(c && c.key);
+  if(c && c.key){
+    const claimed = c.granted && c.granted[monthKey()];
+    box.innerHTML = t ? '<b>You’re a ' + esc(t.name) + ' member</b><p>' + fmt(t.monthly) + ' Pearls every month and +' + t.bonus + '% Pearls on every pack.' + (c.ends ? ' Your membership ends ' + esc(new Date(c.ends).toLocaleDateString([], {month: 'long', day: 'numeric'})) + '.' : '') + '</p>' +
+        '<div class="row">' + (claimed ? '<span class="g-btn" aria-disabled="true">' + esc(monthName()) + '’s Pearls claimed</span>' : '<button class="g-btn primary" id="claim">Claim ' + fmt(t.monthly) + ' Pearls for ' + esc(monthName()) + '</button>') + '</div>' +
+        '<p class="fine" style="margin-top:10px">To change tier or cancel, use the “Manage membership” link in your Gumroad receipt email, or message us.</p>'
+      : '<b>Your membership isn’t active</b><p>Gumroad says this membership has ended or a payment didn’t go through. Join again below, or message us if that’s wrong.</p><div class="row"><button class="g-btn" id="recheck">Check again</button></div>';
+    const cl = $('#claim'); if(cl) cl.onclick = () => { const w2 = wallet(); const got = grantMonth(w2); wSet(w2); render(); };
+    const rc = $('#recheck'); if(rc) rc.onclick = () => recheck(true);
+  }
+  $('#tiers').innerHTML = CLUB.tiers.map(x => '<div class="tier' + (x.tag ? ' hot' : '') + '">' + (x.tag ? '<span class="tag">' + esc(x.tag) + '</span>' : '') +
+    '<h3>' + esc(x.name) + '</h3><div class="pr">' + esc(x.price) + ' <small>a month</small></div><ul><li><b>' + fmt(x.monthly) + ' Pearls</b> every month</li><li><b>+' + x.bonus + '%</b> Pearls on every pack</li><li>A ' + esc(x.name) + ' member badge</li></ul>' +
+    (x.link && CLUB.productId ? '<a class="g-btn ' + (t && t.id === x.id ? '' : 'primary') + '" href="' + esc(x.link) + '">' + (t && t.id === x.id ? 'Your tier' : t ? 'Switch to ' + esc(x.name) : 'Join ' + esc(x.name)) + '</a>' : '<span class="g-btn" aria-disabled="true">Coming soon</span>') + '</div>').join('');
+  $('#act').hidden = !!t || !CLUB.productId;
+}
+
+function render(){
+  const w = wallet(), r = ret();
+  renderClub(w);
+  $('#orb').innerHTML = PEARL;
+  $('#bal').textContent = fmt(w.balance) + ' Pearls';
+  $('#code').textContent = w.code;
+  const test = PACKS.some(p => /\/test_/.test(p.link));
+  $('#test').hidden = !test;
+  $('#payNote').innerHTML = test ? '<b>Test mode:</b> no real money moves. Pay with card 4242 4242 4242 4242, any future date and any 3 digits.' : 'You’ll pay on Stripe’s secure checkout page, then come straight back here.';
+  $('#from').hidden = !r || !!arrived;
+  if(r) $('#from').innerHTML = '<p>Buying Pearls for <b>' + esc(r.app) + '</b>.</p><a class="g-btn" href="' + esc(r.path) + '">Back to ' + esc(r.app) + '</a>';
+  $('#packs').innerHTML = PACKS.map(p => '<button class="pack' + (p.tag ? ' hot' : '') + '" data-pack="' + p.id + '">' + (p.tag ? '<span class="tag">' + esc(p.tag) + '</span>' : '') +
+    PEARL + '<b>' + fmt(p.pearls) + '</b><small>Pearls</small><span class="price">' + esc(p.price) + '</span></button>').join('');
+  $('#histWrap').hidden = !w.buys.length;
+  $('#hist').innerHTML = w.buys.slice(0, 8).map(b => '<div><span>' + esc(new Date(b.at).toLocaleDateString([], {month: 'short', day: 'numeric', year: 'numeric'})) + ' · ' + fmt(b.n) + ' Pearls</span><b>' + esc(b.price) + '</b></div>').join('');
+  if(arrived){
+    const t = $('#thanks'); t.hidden = false;
+    const back = r ? '<a class="g-btn primary" href="' + esc(r.path) + '">Back to ' + esc(r.app) + '</a>' : '<a class="g-btn primary" href="games/">Play the games</a>';
+    t.innerHTML = arrived.bad ? '<b>That link isn’t one of ours</b><p>No Pearls were added. If you paid, message us with your purchase code.</p><div class="row"><a class="g-btn" href="support.html">Get help</a></div>'
+      : arrived.dup ? '<b>Already added</b><p>Those ' + fmt(arrived.p.pearls) + ' Pearls are already on this phone.</p><div class="row">' + back + '</div>'
+      : '<b>+' + fmt(arrived.p.pearls + (arrived.extra || 0)) + ' Pearls</b><p>Thank you! ' + (arrived.extra ? 'That includes ' + fmt(arrived.extra) + ' bonus Pearls for ' + esc(arrived.tier.name) + ' members. ' : '') + 'You now have ' + fmt(w.balance) + ' Pearls on this phone.</p><div class="row">' + back + '</div>';
+  }
+}
+$('#packs').addEventListener('click', e => {
+  const b = e.target.closest('[data-pack]'); if(!b) return; const p = PACKS.find(x => x.id === b.dataset.pack); if(!p) return;
+  b.disabled = true; b.querySelector('.price').textContent = 'Opening Stripe…';
+  location.href = p.link + (p.link.indexOf('?') < 0 ? '?' : '&') + 'client_reference_id=' + encodeURIComponent(wallet().code);   // same tab, so the guest returns to this browser
+});
+addEventListener('pageshow', e => { if(e.persisted) location.reload(); });   // back from Stripe without paying
+render();
+recheck(false);
+try{ Grug.ui.chrome('home'); }catch(e){}
+})();
+</script>
+</body>
+</html>
