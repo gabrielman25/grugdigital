@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Classic avatar · Grug</title>
+<meta name="description" content="Dress your Grug avatar: skin, face, hair, hat, shirt, pants and gear. Saved on this phone, no account needed.">
+<meta name="theme-color" content="#eaf6ee">
+<link rel="icon" href="../../favicon.png">
+<link rel="stylesheet" href="../../assets/grug.css">
+<script src="../../assets/theme.js"></script>
+<style>
+body.g-chrome{padding-bottom:calc(var(--tabs) + var(--sab))}
+.av{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+.av-stage,.av-panel{min-width:0}
+.av-stage{position:sticky;top:calc(var(--top) + var(--sat) + 6px);z-index:5;padding:6px 0 10px}
+.av-stage .g-view{height:min(44vh,420px)}
+.av-tools{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:8px}
+.av-poses{position:absolute;left:10px;bottom:10px;display:flex;gap:6px}
+.av-poses .g-btn{min-height:36px;padding:0 13px;font-size:14px;background:rgba(6,30,18,.42);color:#fff;border:1.5px solid rgba(255,255,255,.65);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.av-stage .g-view .hint{top:12px;bottom:auto}
+.av-saved{position:absolute;left:12px;top:12px;display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;background:rgba(0,0,0,.45);color:var(--moss);font-size:12.5px;font-weight:800;opacity:0;transition:opacity .3s}
+.av-saved.show{opacity:1}
+.av-saved .gi{width:1.1em;height:1.1em}
+.av-panel{padding:4px 0 24px;display:flex;flex-direction:column;gap:12px}
+.av-slots{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:4px 2px;margin:0 -16px;padding-left:16px;padding-right:16px;scroll-snap-type:x proximity}
+.av-slots::-webkit-scrollbar{display:none}
+.av-slot{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:0 14px;border-radius:999px;background:var(--card);font-weight:800;font-size:15px;color:var(--ink2);border:2px solid transparent;scroll-snap-align:start}
+.av-slot .gi{width:1.15em;height:1.15em}
+.av-slot{border:1px solid var(--line)!important}
+.av-slot[aria-selected=true]{background:var(--ink);color:var(--bg)}
+.av-sub{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.av-sub h2{font-size:20px}
+.av-sub .g-fine{flex-basis:100%}
+.av-none .g-item-pic{display:grid;place-items:center;color:var(--mut)}
+.av-none .g-item-pic .gi{width:40%;height:40%}
+@media (orientation:landscape) and (max-height:540px){
+  .av{grid-template-columns:minmax(220px,40%) minmax(0,1fr);gap:18px;align-items:start}
+  .av-stage{position:sticky;top:calc(var(--top) + var(--sat) + 6px);padding:0}
+  .av-stage .g-view{height:calc(100vh - var(--top) - 40px)}
+  .av-slots{margin:0;padding-left:0;padding-right:0}
+}
+@media (min-width:860px){
+  .av{grid-template-columns:minmax(340px,480px) minmax(0,1fr);gap:28px;align-items:start;padding-top:16px}
+  .av-stage{position:sticky;top:calc(var(--top) + var(--sat) + 16px);padding:0}
+  .av-stage .g-view{height:min(74vh,640px)}
+  .av-slots{margin:0;padding-left:0;padding-right:0;flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<main class="wrap av">
+  <div class="av-stage">
+    <div class="g-view" id="view">
+      <span class="av-saved" id="saved"></span>
+      <div class="av-tools"><button class="g-icon-btn" id="shuffle" aria-label="Random look" title="Random look"></button><button class="g-icon-btn" id="resetLook" aria-label="Start from the default look" title="Default look"></button></div>
+      <div class="av-poses"><button class="g-btn" data-pose="wave">Wave</button><button class="g-btn" data-pose="cheer">Cheer</button><button class="g-btn" data-pose="dance">Dance</button></div>
+      <span class="hint">Drag to spin</span>
+    </div>
+  </div>
+  <div class="av-panel">
+    <div class="av-slots" id="slots" role="tablist"></div>
+    <div class="av-sub"><h2 id="slotTitle">Skin</h2><span class="g-fine" id="slotHint"></span></div>
+    <div class="g-swatches" id="swatches" hidden></div>
+    <div class="g-items" id="items"></div>
+  </div>
+</main>
+<script src="../../assets/three.min.js"></script>
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/avatar3d.js"></script>
+<script src="../../assets/grug.js"></script>
+<script>
+(function(){
+  const G = Grug, C = GrugCatalog, $ = s => document.querySelector(s);
+  G.ui.chrome('avatar');
+  const SLOT_ICON = { skin: 'palette', face: 'smiley', hair: 'scissors', hat: 'baseball-cap', shirt: 't-shirt', pants: 'pants', back: 'backpack', hand: 'hand' };
+  const HINT = { skin: 'Pick a body color.', face: 'Faces you’ve unlocked.', hair: 'Tap a style, then a color.', hat: 'Hats hide the top of your hair.', shirt: 'Plain shirts can be any color.', pants: 'Plain pants can be any color.', back: 'Backpacks, buddies and capes.', hand: 'Something to hold.' };
+  const OPTIONAL = { hair: true, hat: true, back: true, hand: true };
+  const COLOR_KEY = { hair: 'hairColor', hat: 'hatColor', shirt: 'shirtColor', pants: 'pantsColor', back: 'backColor' };
+  let slot = location.hash.replace('#', '') in SLOT_ICON ? location.hash.replace('#', '') : 'skin';
+  $('#shuffle').innerHTML = G.icon('shuffle'); $('#resetLook').innerHTML = G.icon('arrow-counter-clockwise'); $('#saved').innerHTML = G.icon('check') + 'Saved';
+
+  const view = GrugAvatar.mount($('#view'), G.profile.avatar, { yaw: 0.3, zoom: 0.92, onTap: () => view.play('wave', { ms: 2000 }) });
+  let savedT;
+  function saved() { const s = $('#saved'); s.classList.add('show'); clearTimeout(savedT); savedT = setTimeout(() => s.classList.remove('show'), 1600); }
+  function apply(patch, pose) {
+    G.setAvatar(patch); view.setAvatar(G.profile.avatar); G.ensureSnaps(true); G.ui.buzz(); saved();
+    if (pose) view.play(pose, { ms: 1400 });
+  }
+
+  /* slot tabs */
+  $('#slots').innerHTML = C.SLOTS.map(s => '<button class="av-slot" role="tab" data-slot="' + s.id + '" aria-selected="' + (s.id === slot) + '">' + G.icon(SLOT_ICON[s.id]) + s.name + '</button>').join('');
+  $('#slots').addEventListener('click', e => { const b = e.target.closest('[data-slot]'); if (!b) return; slot = b.dataset.slot; document.querySelectorAll('.av-slot').forEach(x => x.setAttribute('aria-selected', x.dataset.slot === slot)); history.replaceState(null, '', '#' + slot); render(); b.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' }); });
+
+  function render() {
+    const a = G.profile.avatar;
+    $('#slotTitle').textContent = C.slotName(slot); $('#slotHint').textContent = HINT[slot] || '';
+    const sw = $('#swatches'), grid = $('#items');
+    if (slot === 'skin') {
+      sw.hidden = false; grid.innerHTML = '';
+      sw.innerHTML = C.SKINS.map(s => '<button class="g-swatch' + (a.skin === s[0] ? ' on' : '') + '" data-skin="' + s[0] + '" style="background:' + s[0] + '" aria-label="' + s[1] + '" title="' + s[1] + '"></button>').join('');
+      return;
+    }
+    const cur = C.get(a[slot]);
+    const recolor = !!(cur && cur.recolor) && COLOR_KEY[slot];
+    sw.hidden = !recolor;
+    if (recolor) sw.innerHTML = C.COLORS.map(c => '<button class="g-swatch' + (a[COLOR_KEY[slot]] === c[0] ? ' on' : '') + '" data-color="' + c[0] + '" style="background:' + c[0] + '" aria-label="' + c[1] + '" title="' + c[1] + '"></button>').join('');
+    const items = C.inSlot(slot).slice().sort((x, y) => (G.owns(y.id) - G.owns(x.id)));
+    let html = OPTIONAL[slot] ? '<button type="button" class="g-item av-none' + (!a[slot] ? ' wearing' : '') + '" data-none="1"><span class="g-item-pic">' + G.icon('x') + '</span><span class="g-item-name">None</span>' + (!a[slot] ? '<span class="g-tag on">' + G.icon('check') + 'Wearing</span>' : '') + '</button>' : '';
+    html += items.map(it => G.ui.itemTile(it)).join('');
+    grid.innerHTML = html;
+    G.ui.fillThumbs(grid);
+  }
+  $('#swatches').addEventListener('click', e => {
+    const b = e.target.closest('[data-skin],[data-color]'); if (!b) return;
+    if (b.dataset.skin) apply({ skin: b.dataset.skin }); else { const p = {}; p[COLOR_KEY[slot]] = b.dataset.color; apply(p); }
+    document.querySelectorAll('#swatches .g-swatch').forEach(x => x.classList.toggle('on', x === b));
+  });
+  $('#items').addEventListener('click', async e => {
+    const b = e.target.closest('[data-item],[data-none]'); if (!b) return;
+    if (b.dataset.none) { const p = {}; p[slot] = null; apply(p); render(); return; }
+    const it = C.get(b.dataset.item); if (!it) return;
+    if (G.owns(it.id)) { const p = {}; p[slot] = it.id; apply(p, slot === 'hand' ? 'wave' : (slot === 'hat' || slot === 'hair' ? 'happy' : 'cheer')); render(); return; }
+    /* locked: say how to get it */
+    const app = C.APPS[it.get.app] || C.APPS.grug, game = G.GAMES.find(g => g.app === it.get.app);
+    const pr = G.progress(it);
+    const how = it.get.type === 'points' ? 'Costs <b>' + it.get.cost + ' ' + G.esc(app.short) + ' points</b>. Buy it under Closet in the ' + G.esc(app.short) + ' app.' : G.esc(it.get.text) + (pr ? ' <span class="mut">(' + pr.have + ' of ' + pr.need + ' so far)</span>' : '');
+    const pick = await G.ui.dialog({ title: it.name, html: '<div class="row"><span class="g-item-pic" style="width:96px;height:96px;flex:none;border-radius:12px;background:var(--card2) center/cover no-repeat;background-image:url(' + GrugAvatar.thumb(it.id, G.profile.avatar, 128) + ')"></span><div>' + how + (pr ? '<div class="g-prog" style="margin-top:10px"><i style="width:' + pr.pct + '%"></i></div>' : '') + '</div></div>',
+      actions: game ? [{ label: 'Not now', kind: 'quiet', value: null }, { label: 'Open ' + (it.get.type === 'points' ? app.short : game.title), kind: 'primary', value: 'go' }] : [{ label: 'OK', kind: 'primary', value: null }] });
+    if (pick === 'go' && game) location.href = G.url(game.play) + (it.get.type === 'points' && G.appState(game) && G.appState(game).store ? '#' + G.appState(game).store + '/rewards' : '');
+  });
+
+  /* poses, shuffle, reset */
+  document.querySelectorAll('[data-pose]').forEach(b => b.addEventListener('click', () => { view.play(b.dataset.pose, { ms: 2600 }); G.ui.buzz(); }));
+  const pickOne = arr => arr[Math.floor(Math.random() * arr.length)];
+  $('#shuffle').addEventListener('click', () => {
+    const owned = s => C.inSlot(s).filter(it => G.owns(it.id));
+    const p = { skin: pickOne(C.SKINS)[0], face: pickOne(owned('face')).id, hair: Math.random() < 0.9 ? pickOne(owned('hair')).id : null, hairColor: pickOne(C.COLORS)[0],
+      hat: Math.random() < 0.5 ? pickOne(owned('hat')).id : null, hatColor: pickOne(C.COLORS)[0], shirt: pickOne(owned('shirt')).id, shirtColor: pickOne(C.COLORS)[0],
+      pants: pickOne(owned('pants')).id, pantsColor: pickOne(C.COLORS)[0], back: Math.random() < 0.4 ? pickOne(owned('back')).id : null, backColor: pickOne(C.COLORS)[0], hand: Math.random() < 0.4 ? pickOne(owned('hand')).id : null };
+    apply(p, 'dance'); render();
+  });
+  $('#resetLook').addEventListener('click', async () => { if (await G.ui.dialog({ title: 'Back to the default look?', text: 'Your closet stays yours. This only changes what you’re wearing.', actions: [{ label: 'Keep mine', kind: 'quiet', value: false }, { label: 'Use default', kind: 'primary', value: true }] })) { apply(Object.assign({}, C.DEFAULT_AVATAR), 'wave'); render(); } });
+  G.on((p, what) => { if (what === 'external' || what === 'import' || what === 'reset') { view.setAvatar(p.avatar); render(); } });
+  render();
+  G.ensureSnaps();
+})();
+</script>
+</body>
+</html>
