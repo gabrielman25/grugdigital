@@ -165,6 +165,10 @@ p{margin:0}
 :focus-visible{outline:3px solid var(--ring-a);outline-offset:3px;border-radius:var(--r-xs)}
 [hidden]{display:none!important}
 .gi{width:1.25em;height:1.25em;fill:currentColor;display:inline-block;vertical-align:-.3em;flex:none}
+/* full-colour pack icons (img). They keep their own colours, so colour rules for .gi don't apply */
+.gi-img{object-fit:contain;-webkit-user-drag:none;user-select:none;image-rendering:auto;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.18))}
+.g-toast .gi-img{background:none!important;padding:0!important;border-radius:0!important}
+img.k-ic{display:block;object-fit:contain;-webkit-user-drag:none;user-select:none}
 .wrap{width:100%;max-width:1160px;margin:0 auto;padding:0 max(16px,var(--sal)) 0 max(16px,var(--sar))}
 .mut{color:var(--mut)}
 .small{font-size:14px}
@@ -213,14 +217,14 @@ p{margin:0}
   width:min(calc(100% - 24px),460px);padding:8px 10px 10px;border-radius:26px}
 .g-tabs .k-sb.l{left:14px}.g-tabs .k-sb.r{right:14px}
 .g-tabs a{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:58px;border-radius:16px;font:700 11px/1 var(--font);color:var(--mut);transition:transform .2s var(--spring),background .2s}
-.g-tabs a svg.k-ic{width:34px;height:34px;filter:drop-shadow(0 3px 4px hsl(var(--h) 50% 15% / .25));transition:transform .25s var(--spring)}
+.g-tabs a .k-ic{width:34px;height:34px;filter:drop-shadow(0 3px 4px hsl(var(--h) 50% 15% / .25));transition:transform .25s var(--spring)}
 .g-tabs a::after{content:"";position:absolute;left:50%;bottom:-6px;width:0;height:4px;border-radius:3px;background:var(--ink);opacity:.85;transform:translateX(-50%);transition:width .25s}
 .g-tabs a[aria-current=page]{color:var(--ink)}
 .g-tabs a[aria-current=page]::after{width:30px}
-.g-tabs a[aria-current=page] svg.k-ic{transform:translateY(-2px) scale(1.06)}
+.g-tabs a[aria-current=page] .k-ic{transform:translateY(-2px) scale(1.06)}
 .g-tabs a:hover{background:var(--card2)}
-.g-tabs a:active svg.k-ic{transform:scale(.9)}
-@media (min-width:720px){.g-tabs{width:auto;gap:4px;padding:9px 14px 12px}.g-tabs a{flex:none;width:76px;height:62px}.g-tabs a svg.k-ic{width:38px;height:38px}}
+.g-tabs a:active .k-ic{transform:scale(.9)}
+@media (min-width:720px){.g-tabs{width:auto;gap:4px;padding:9px 14px 12px}.g-tabs a{flex:none;width:76px;height:62px}.g-tabs a .k-ic{width:38px;height:38px}}
 @media (orientation:landscape) and (max-height:540px){
   body.g-chrome{padding-left:calc(96px + var(--sal));padding-bottom:24px}
   .g-tabs{left:calc(10px + var(--sal));top:50%;bottom:auto;transform:translateY(-50%);flex-direction:column;width:auto;padding:14px 7px;max-height:calc(100% - 20px)}

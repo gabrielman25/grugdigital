@@ -263,21 +263,24 @@
   }
 
   /* ---------- icons ---------- */
-  function icon(name, cls) { const d = ICONS[name]; return '<svg class="gi' + (cls ? ' ' + cls : '') + '" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path d="' + (d || ICONS.question || '') + '"/></svg>'; }
+  /* Full-colour icons from the vector icon pack live in assets/icons/<name>.webp. Names listed in ICON_IMG use them;
+     anything else falls back to the single-colour Phosphor path in icons.js. To add one: drop a 128px webp in assets/icons/
+     and add its name here. */
+  const ICON_IMG = new Set(["arrow-counter-clockwise", "arrow-left", "arrow-right", "arrow-square-out", "arrows-clockwise", "arrows-in", "arrows-out", "backpack", "baseball-cap", "bell", "bowl-food", "calendar-check", "camera", "caret-left", "caret-right", "chat-circle", "check", "check-circle", "clipboard-text", "coffee", "coins", "confetti", "cookie", "copy", "crown-simple", "cube", "device-mobile", "dots-three", "download-simple", "export", "eye", "fire", "flag", "floppy-disk", "game-controller", "gear-six", "gift", "hamburger", "hand", "hand-waving", "heart", "hourglass", "house", "ice-cream", "image", "info", "lightning", "list", "lock-simple", "magic-wand", "map-pin", "map-trifold", "medal", "minus", "moon", "paint-brush", "palette", "pants", "pearl", "pencil-simple", "person", "phone", "play", "plus", "qr-code", "question", "rocket", "scissors", "seal-check", "share-network", "shopping-bag", "shuffle", "smiley", "sneaker", "sparkle", "star", "storefront", "sun", "t-shirt", "ticket", "timer", "trash", "trophy", "upload-simple", "user", "user-circle", "users-three", "warning-circle", "wrench", "x"]);
+  const iconSrc = name => url('assets/icons/' + name + '.webp?v=1');
+  function icon(name, cls) {
+    if (ICON_IMG.has(name)) return '<img class="gi gi-img' + (cls ? ' ' + cls : '') + '" src="' + iconSrc(name) + '" alt="" aria-hidden="true" draggable="false" decoding="async">';
+    const d = ICONS[name]; return '<svg class="gi' + (cls ? ' ' + cls : '') + '" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path d="' + (d || ICONS.question || '') + '"/></svg>';
+  }
 
   /* ---------- UI chrome: floating top bar + dock (kubii theme) ---------- */
   const NAV = [
     ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'],
     ['shop', 'Shop', 'storefront', 'shop/'], ['profile', 'Profile', 'user', 'profile/']
   ];
-  // glossy dock icons (gradient ids are unique per page: there is only one dock)
-  const DOCK = {
-    home: '<svg class="k-ic" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="kdH" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ecfccb"/><stop offset=".5" stop-color="#a3e635"/><stop offset="1" stop-color="#4d7c0f"/></linearGradient></defs><path d="M24 4.5 43.5 20.5c1.6 1.3.7 4-1.4 4H41v14.8a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4V24.5H5.9c-2.1 0-3-2.7-1.4-4z" fill="url(#kdH)" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><rect x="18" y="27" width="12" height="16.3" rx="4.5" fill="#fff"/><path d="M12 22 24 12l7 5.6" stroke="#fff" stroke-opacity=".5" stroke-width="3" fill="none" stroke-linecap="round"/></svg>',
-    games: '<svg class="k-ic" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="kdG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#99f6e4"/><stop offset="1" stop-color="#0d9488"/></linearGradient></defs><path d="M15 12h18c7 0 11 6 12 14 1 8-1 12-5 12-3.5 0-5.5-3-7.5-5.5h-17C13.5 35 11.5 38 8 38c-4 0-6-4-5-12 1-8 5-14 12-14z" fill="url(#kdG)" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><rect x="11" y="20.5" width="10" height="3.6" rx="1.3" fill="#fff"/><rect x="14.2" y="17.3" width="3.6" height="10" rx="1.3" fill="#fff"/><circle cx="31" cy="20.5" r="2.5" fill="#fff"/><circle cx="36" cy="25.5" r="2.5" fill="#fff"/><path d="M14 15.5h20" stroke="#fff" stroke-opacity=".5" stroke-width="2.4" stroke-linecap="round"/></svg>',
-    avatar: '<svg class="k-ic" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="kdA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fed7aa"/><stop offset="1" stop-color="#fb7185"/></linearGradient></defs><rect x="6" y="6" width="36" height="36" rx="11" fill="url(#kdA)" stroke="#fff" stroke-width="2.6"/><rect x="16.5" y="17" width="4" height="7" rx="2" fill="#4c0519"/><rect x="27.5" y="17" width="4" height="7" rx="2" fill="#4c0519"/><path d="M16 29.5q8 7 16 0" stroke="#4c0519" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M12 15q0-4 4-4" stroke="#fff" stroke-opacity=".7" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg>',
-    shop: '<svg class="k-ic" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="kdS" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5d0fe"/><stop offset="1" stop-color="#d946ef"/></linearGradient></defs><path d="M17 16v-3a7 7 0 0 1 14 0v3" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M9.5 15h29l2.5 23.5a4 4 0 0 1-4 4.5H11a4 4 0 0 1-4-4.5z" fill="url(#kdS)" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><circle cx="17" cy="22" r="2.2" fill="#fff"/><circle cx="31" cy="22" r="2.2" fill="#fff"/><path d="M16 30q8 6 16 0" stroke="#fff" stroke-width="2.8" fill="none" stroke-linecap="round"/></svg>',
-    profile: '<svg class="k-ic" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="kdP" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fef08a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><circle cx="24" cy="17" r="10" fill="url(#kdP)" stroke="#fff" stroke-width="2.6"/><path d="M7 42c1.5-9 8.5-14 17-14s15.5 5 17 14z" fill="url(#kdP)" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><path d="M19 12.5q2-2.5 5-2.5" stroke="#fff" stroke-opacity=".7" stroke-width="2.6" fill="none" stroke-linecap="round"/></svg>',
-  };
+  // dock icons: full-colour pictures from the icon pack (assets/icons/dock-*.webp)
+  const DOCK = {};
+  ['home', 'games', 'avatar', 'shop', 'profile'].forEach(k => { DOCK[k] = '<img class="k-ic" src="' + iconSrc('dock-' + k) + '" alt="" aria-hidden="true" draggable="false">'; });
   const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
   /* ---------- Pearls (the site-wide currency, sold on pearls.html; wallet in 'grug.pearls.v1') ---------- */
   const PEARL_KEY = 'grug.pearls.v1';
@@ -293,7 +296,7 @@
     const top = document.createElement('header'); top.className = 'g-top';
     top.innerHTML = '<a class="g-logo k-glass" href="' + url('') + '" aria-label="Grug home">' + LOGO + '<span>Grug</span></a>' +
       '<div class="g-title k-glass" aria-hidden="true"><small>' + esc(pageTitle === navLabel ? 'Grug' : navLabel) + '</small><b>' + esc(pageTitle) + '</b></div>' +
-      '<div class="g-status k-glass"><a class="g-pts" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('coins') + '<span class="num">' + fmt(pearlBalance()) + '</span><span class="g-plus" aria-hidden="true">+</span></a><span class="g-sep"></span>' +
+      '<div class="g-status k-glass"><a class="g-pts" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('pearl') + '<span class="num">' + fmt(pearlBalance()) + '</span><span class="g-plus" aria-hidden="true">+</span></a><span class="g-sep"></span>' +
       '<button type="button" class="g-gear" aria-label="Settings" title="Settings">' + icon('gear-six') + '</button></div>' +
       '<button type="button" class="g-me" aria-label="Your account menu" aria-haspopup="menu" aria-expanded="false"><span class="g-me-name">' + esc(profile.name) + '</span>' + faceImg + '</button>';
     const tabs = document.createElement('nav'); tabs.className = 'g-tabs k-glass'; tabs.setAttribute('aria-label', 'Sections');
@@ -306,7 +309,7 @@
     const menu = document.createElement('div'); menu.className = 'g-menu'; menu.setAttribute('role', 'menu'); menu.hidden = true;
     const paintMenu = () => { const f = snaps();
       menu.innerHTML = '<div class="g-menu-h"><img alt="" src="' + f.bust + '"><div><b>' + esc(profile.name) + '</b><small>' + fmt(pearlBalance()) + ' Pearls · ' + fmt(totalPoints()) + ' partner points</small></div></div>' +
-        '<a role="menuitem" class="hot" href="' + pearlsUrl() + '">' + icon('coins') + '<span>Buy Pearls</span>' + icon('caret-right') + '</a>' +
+        '<a role="menuitem" class="hot" href="' + pearlsUrl() + '">' + icon('pearl') + '<span>Buy Pearls</span>' + icon('caret-right') + '</a>' +
         '<a role="menuitem" href="' + url('profile/') + '">' + icon('user') + '<span>Profile</span></a>' +
         '<a role="menuitem" href="' + url('avatar/') + '">' + icon('t-shirt') + '<span>Edit avatar</span></a>' +
         '<a role="menuitem" href="' + url('shop/?mine') + '">' + icon('shopping-bag') + '<span>My closet</span></a>' +
