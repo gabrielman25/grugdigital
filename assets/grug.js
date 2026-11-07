@@ -57,7 +57,7 @@
       inventory: [],            // earned (non-free) item ids
       earned: {},               // item id → {at, how}
       stats: { plays: {}, checkins: {}, best: {}, course: {}, days: {}, lastGame: '', lastPlayed: 0 },
-      prefs: { motion: true, haptics: true },
+      prefs: { motion: true, haptics: true, colorIcons: false },
       seen: {}                  // one-time hints
     };
   }
@@ -274,14 +274,20 @@
   }
 
   /* ---------- icons ---------- */
-  /* Full-colour icons from the vector icon pack live in assets/icons/<name>.webp. Names listed in ICON_IMG use them;
-     anything else falls back to the single-colour Phosphor path in icons.js. To add one: drop a 128px webp in assets/icons/
-     and add its name here. */
-  const ICON_IMG = new Set(["arrow-counter-clockwise", "arrow-left", "arrow-right", "arrow-square-out", "arrows-clockwise", "arrows-in", "arrows-out", "backpack", "baseball-cap", "bell", "bowl-food", "calendar-check", "camera", "caret-left", "caret-right", "chat-circle", "check", "check-circle", "clipboard-text", "coffee", "coins", "confetti", "cookie", "copy", "crown-simple", "cube", "device-mobile", "dots-three", "download-simple", "export", "eye", "fire", "flag", "floppy-disk", "game-controller", "gear-six", "gift", "hamburger", "hand", "hand-waving", "heart", "hourglass", "house", "ice-cream", "image", "info", "lightning", "list", "lock-simple", "magic-wand", "map-pin", "map-trifold", "medal", "minus", "moon", "paint-brush", "palette", "pants", "pearl", "pencil-simple", "person", "phone", "play", "plus", "qr-code", "question", "rocket", "scissors", "seal-check", "share-network", "shopping-bag", "shuffle", "smiley", "sneaker", "sparkle", "star", "storefront", "sun", "t-shirt", "ticket", "timer", "trash", "trophy", "upload-simple", "user", "user-circle", "users-three", "warning-circle", "wrench", "x"]);
+  const ICON_IMG_LIST = ["arrow-counter-clockwise", "arrow-left", "arrow-right", "arrow-square-out", "arrows-clockwise", "arrows-in", "arrows-out", "backpack", "baseball-cap", "bell", "bowl-food", "calendar-check", "camera", "caret-left", "caret-right", "chat-circle", "check", "check-circle", "clipboard-text", "coffee", "coins", "confetti", "cookie", "copy", "crown-simple", "cube", "device-mobile", "dots-three", "download-simple", "export", "eye", "fire", "flag", "floppy-disk", "game-controller", "gear-six", "gift", "hamburger", "hand", "hand-waving", "heart", "hourglass", "house", "ice-cream", "image", "info", "lightning", "list", "lock-simple", "magic-wand", "map-pin", "map-trifold", "medal", "minus", "moon", "paint-brush", "palette", "pants", "pearl", "pencil-simple", "person", "phone", "play", "plus", "qr-code", "question", "rocket", "scissors", "seal-check", "share-network", "shopping-bag", "shuffle", "smiley", "sneaker", "sparkle", "star", "storefront", "sun", "t-shirt", "ticket", "timer", "trash", "trophy", "upload-simple", "user", "user-circle", "users-three", "warning-circle", "wrench", "x"];
+  /* Two icon styles, picked in Settings (profile.prefs.colorIcons):
+     simple (default)  the @icons set in icons.js (GRUG_ICONS_SIMPLE): small one-colour SVGs that follow the text colour
+     colorful          full-colour pictures from the vector icon pack, assets/icons/<name>.webp (names in ICON_IMG)
+     Any name missing from the chosen style falls back to the older Phosphor paths (GRUG_ICONS). */
+  const SIMPLE = root.GRUG_ICONS_SIMPLE || {};
+  const ICON_IMG = new Set(ICON_IMG_LIST);
   const iconSrc = name => url('assets/icons/' + name + '.webp?v=1');
+  const colorful = () => !!(profile && profile.prefs && profile.prefs.colorIcons);
   function icon(name, cls) {
-    if (ICON_IMG.has(name)) return '<img class="gi gi-img' + (cls ? ' ' + cls : '') + '" src="' + iconSrc(name) + '" alt="" aria-hidden="true" draggable="false" decoding="async">';
-    const d = ICONS[name]; return '<svg class="gi' + (cls ? ' ' + cls : '') + '" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path d="' + (d || ICONS.question || '') + '"/></svg>';
+    const c = cls ? ' ' + cls : '';
+    if (colorful() && ICON_IMG.has(name)) return '<img class="gi gi-img' + c + '" src="' + iconSrc(name) + '" alt="" aria-hidden="true" draggable="false" decoding="async">';
+    if (SIMPLE[name]) return '<svg class="gi gi-s' + c + '" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">' + SIMPLE[name] + '</svg>';
+    const d = ICONS[name]; return '<svg class="gi' + c + '" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path d="' + (d || ICONS.question || '') + '"/></svg>';
   }
 
   /* ---------- UI chrome: floating top bar + dock (kubii theme) ---------- */
@@ -290,8 +296,12 @@
     ['shop', 'Shop', 'storefront', 'shop/'], ['profile', 'Profile', 'user', 'profile/']
   ];
   // dock icons: full-colour pictures from the icon pack (assets/icons/dock-*.webp)
+  // dock icons: colourful pictures, or the simple set in one colour per tab
+  const DOCK_SIMPLE = { home: ['house', '#4f7cf3'], games: ['controller', '#22b455'], avatar: ['shirt', '#a45fe8'], shop: ['shop', '#f09a12'], profile: ['person', '#f25c5c'] };
+  const dockIcon = k => colorful() ? '<img class="k-ic" src="' + iconSrc('dock-' + k) + '" alt="" aria-hidden="true" draggable="false">'
+    : '<svg class="k-ic k-ic-s" viewBox="0 0 16 16" fill="currentColor" style="color:' + DOCK_SIMPLE[k][1] + '" aria-hidden="true" focusable="false">' + (SIMPLE['dock-' + DOCK_SIMPLE[k][0]] || '') + '</svg>';
   const DOCK = {};
-  ['home', 'games', 'avatar', 'shop', 'profile'].forEach(k => { DOCK[k] = '<img class="k-ic" src="' + iconSrc('dock-' + k) + '" alt="" aria-hidden="true" draggable="false">'; });
+  ['home', 'games', 'avatar', 'shop', 'profile'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
   const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
   /* ---------- Pearls (the site-wide currency, sold on pearls.html; wallet in 'grug.pearls.v1') ---------- */
   const PEARL_KEY = 'grug.pearls.v1';
@@ -427,6 +437,7 @@
       title: 'Settings', html: '<div id="kAppear"></div>' +
         '<div class="g-pref"><span><b>Animations</b><small>Celebrations, poses and the moving backdrop</small></span><button type="button" class="g-switch" role="switch" data-pref="motion" aria-checked="' + !!profile.prefs.motion + '" aria-label="Animations"></button></div>' +
         '<div class="g-pref"><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button type="button" class="g-switch" role="switch" data-pref="haptics" aria-checked="' + !!profile.prefs.haptics + '" aria-label="Vibrate on tap"></button></div>' +
+        '<div class="g-pref"><span><b>Colorful icons</b><small>Full-colour pictures instead of simple one-colour icons</small></span><button type="button" class="g-switch" role="switch" data-pref="colorIcons" aria-checked="' + !!profile.prefs.colorIcons + '" aria-label="Colorful icons"></button></div>' +
         '<p class="g-fine" style="margin-top:6px">Saved in your profile, so it comes along when you export it. More in <a href="' + url('profile/') + '" style="color:var(--ember);font-weight:800">Profile</a>.</p>',
       actions: [{ label: 'Done', kind: 'primary', value: true }],
       onOpen: d => {
@@ -434,6 +445,7 @@
         $$('[data-pref]', d).forEach(b => b.addEventListener('click', () => {
           profile.prefs[b.dataset.pref] = !profile.prefs[b.dataset.pref]; save('prefs'); b.setAttribute('aria-checked', !!profile.prefs[b.dataset.pref]);
           if (root.GrugTheme) root.GrugTheme.apply(); buzz();
+          if (b.dataset.pref === 'colorIcons') setTimeout(() => location.reload(), 250);   // every icon on the page is redrawn
         }));
       }
     });

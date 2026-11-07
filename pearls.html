@@ -195,7 +195,7 @@ const CLUB = {
 const WKEY = 'grug.pearls.v1', SITE = '/grugdigital/';
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const PEARL = window.Grug ? Grug.icon('pearl', 'pearl-ic') : '';   // the pearl from the icon pack (assets/icons/pearl.webp)
+const PEARL = window.Grug ? Grug.icon('pearl', 'pearl-ic') : '';   // the pearl icon in the player's icon style
 const fmt = n => (+n || 0).toLocaleString();
 
 function wRaw(){ try{ const w = JSON.parse(localStorage.getItem(WKEY) || 'null'); return w && typeof w === 'object' ? w : {v: 1}; }catch(e){ return {v: 1}; } }

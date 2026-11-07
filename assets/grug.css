@@ -168,6 +168,8 @@ p{margin:0}
 /* full-colour pack icons (img). They keep their own colours, so colour rules for .gi don't apply */
 .gi-img{object-fit:contain;-webkit-user-drag:none;user-select:none;image-rendering:auto;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.18))}
 .g-toast .gi-img{background:none!important;padding:0!important;border-radius:0!important}
+svg.k-ic-s{filter:drop-shadow(0 2px 3px hsl(var(--h) 50% 15% / .22))}
+.gi-s{fill:currentColor}
 img.k-ic{display:block;object-fit:contain;-webkit-user-drag:none;user-select:none}
 .wrap{width:100%;max-width:1160px;margin:0 auto;padding:0 max(16px,var(--sal)) 0 max(16px,var(--sar))}
 .mut{color:var(--mut)}
@@ -200,6 +202,7 @@ img.k-ic{display:block;object-fit:contain;-webkit-user-drag:none;user-select:non
 .g-status .k-sb{left:12px}
 .g-pts{display:flex;align-items:center;gap:6px;height:34px;padding:0 6px;border-radius:12px;font:600 15px/1 var(--display)}
 .g-pts .gi{color:var(--gold)}
+.g-pts .gi-s{color:#d16be8}
 .g-sep{width:1.5px;height:16px;background:var(--line2);border-radius:2px}
 .g-gear{display:grid;place-items:center;width:36px;height:36px;border-radius:50%}
 .g-gear .gi{width:21px;height:21px;transition:transform .4s}
