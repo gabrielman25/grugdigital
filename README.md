@@ -1,8 +1,8 @@
 # Grug
 
-The Grug game site: https://gabrielman25.github.io/grugdigital/
+The Grug game site: https://grugdigital.pages.dev/
 
-Games built with Katy restaurants, one local profile (no accounts), a 3D avatar that shows up in every game, and a closet of clothes earned by playing or by eating at a partner. Runs on GitHub Pages; everything is static HTML.
+Games built with Katy restaurants, one local profile (no accounts), a 3D avatar that shows up in every game, and a closet of clothes earned by playing or by eating at a partner. Hosted on Cloudflare Pages (deploys automatically on every push to `main`); everything is static HTML. The old GitHub Pages address forwards here.
 
 ## Map
 

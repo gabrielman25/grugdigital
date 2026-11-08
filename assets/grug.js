@@ -307,7 +307,7 @@
   const PEARL_KEY = 'grug.pearls.v1';
   const pearlBalance = () => { const w = readJSON(PEARL_KEY, null); return Math.max(0, Math.floor(+(w && w.balance) || 0)); };
   // the Pearls page, with a way back to where the guest is now
-  const pearlsUrl = app => /pearls\.html$/.test(location.pathname) ? location.pathname + location.search : url('pearls.html') + '?from=' + encodeURIComponent(location.pathname + location.search + location.hash) + '&app=' + encodeURIComponent(app || 'Grug');
+  const pearlsUrl = app => /\/pearls(\.html)?$/.test(location.pathname) ? location.pathname + location.search : url('pearls.html') + '?from=' + encodeURIComponent(location.pathname + location.search + location.hash) + '&app=' + encodeURIComponent(app || 'Grug');
   function chrome(active, opts) {
     opts = opts || {};
     const face = snaps(); const faceImg = face ? '<img class="g-face" alt="" src="' + face.bust + '">' : '<span class="g-face g-face-empty">' + icon('smiley') + '</span>';

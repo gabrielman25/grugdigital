@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f6f1e7">
 <title>Soluna Coffee</title>
@@ -740,7 +740,7 @@ const GAME = {
 // Pearls: the site-wide currency guests BUY on the Grug site's Pearls page. One wallet on the phone is shared by every
 // Grug app on this site. Pearls only buy game items and are spent before points. They never turn into drinks, merchandise,
 // points or cash.
-const PEARLS = { enabled: true, name: 'Pearls', store: '../../pearls.html', help: 'Trouble with a purchase? Visit gabrielman25.github.io/grugdigital/support.html with your purchase code.' };
+const PEARLS = { enabled: true, name: 'Pearls', store: '../../pearls.html', help: 'Trouble with a purchase? Visit grugdigital.pages.dev/support.html with your purchase code.' };
 const PEERJS_SRC = ['https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js','https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js'];
 const REFRESH_MS = 2 * 60 * 1000;              // refresh cooldown after a good check
 const RETRY_MS = 30 * 1000;                     // shorter when the board couldn't be reached
@@ -1638,7 +1638,7 @@ nfcInit();
 
 /* ---------- owner contact banner ---------- */
 (function ownerBanner(){
-  const n = { enabled: true, tag: 'For the owner', text: 'This rewards app is a working preview built for Soluna Coffee. To talk about launching it for your coffee shop, please text', phone: '954-459-6301', note: '(text only, please, no calls)', site: 'https://gabrielman25.github.io/grugdigital/partners/', siteLabel: 'See our work' }; // contact banner; set enabled: false to remove it
+  const n = { enabled: true, tag: 'For the owner', text: 'This rewards app is a working preview built for Soluna Coffee. To talk about launching it for your coffee shop, please text', phone: '954-459-6301', note: '(text only, please, no calls)', site: 'https://grugdigital.pages.dev/partners/', siteLabel: 'See our work' }; // contact banner; set enabled: false to remove it
   if(!n.enabled) return;
   const el = document.createElement('div'); el.className = 'owner-banner'; el.setAttribute('role', 'note');
   el.innerHTML = (n.tag ? '<span class="ob-tag">' + esc(n.tag) + '</span>' : '') +

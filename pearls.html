@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pearls · Grug</title>
 <meta name="description" content="Get Pearls, the in-game currency for every Grug game. Buy once and spend them in Take a Tea and other partner games.">
@@ -193,7 +193,7 @@ const CLUB = {
     { id: 'boulder', name: 'Boulder', price: '$9.99', monthly: 1000, bonus: 20, link: '' }
   ]
 };
-const WKEY = 'grug.pearls.v1', SITE = '/grugdigital/';
+const WKEY = 'grug.pearls.v1', SITE = location.pathname.replace(/[^/]*$/, '');   // '/' on Cloudflare, '/grugdigital/' on the old address
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const PEARL = window.Grug ? Grug.icon('pearl', 'pearl-ic') : '';   // the pearl icon in the player's icon style
@@ -227,7 +227,7 @@ const okPath = p => typeof p === 'string' && p.indexOf(SITE) === 0 && p.indexOf(
 /* where the guest came from (kept for two hours, long enough for a Stripe round trip) */
 const q = new URLSearchParams(location.search);
 { const from = q.get('from'), app = (q.get('app') || '').slice(0, 40);
-  if(from !== null && okPath(from) && !/pearls\.html/.test(from)){ const w = wallet(); w.ret = {path: from, app: app || 'the game', at: Date.now()}; wSet(w); } }
+  if(from !== null && okPath(from) && !/\/pearls(\.html)?(?=[?#]|$)/.test(from)){ const w = wallet(); w.ret = {path: from, app: app || 'the game', at: Date.now()}; wSet(w); } }
 const ret = () => { const r = wallet().ret; return r && okPath(r.path) && Date.now() - (+r.at || 0) < 2 * 3600e3 ? r : null; };
 
 /* coming back from Stripe */
