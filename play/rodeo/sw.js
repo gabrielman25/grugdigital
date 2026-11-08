@@ -1,6 +1,6 @@
 /* Rodeo Express demo: works offline after one visit. Network first (so updates show up right away), the saved copy
    when there's no signal. Only covers play/rodeo/ and the shared files it loads. */
-const CACHE = 'rodeo-demo-v4';
+const CACHE = 'rodeo-demo-v5';
 const CORE = ['./', './index.html', './game.html', './assets/logo.webp', './assets/westwood.webp', './assets/icon.png',
   '../../assets/catalog.js', '../../assets/icons.js', '../../assets/games.js', '../../assets/grug.js', '../../assets/grug-app.js', '../../assets/grug-app.css', '../../assets/sandy-runtime.js'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
