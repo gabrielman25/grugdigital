@@ -1,7 +1,10 @@
 /* Grug · game detail pages */
 .gp-back{display:inline-flex;align-items:center;gap:6px;margin:14px 0 8px;color:var(--mut);font-weight:700}
 .gp-hero{display:grid;gap:16px;grid-template-columns:1fr}
-.gp-cover{aspect-ratio:16/10;border-radius:var(--r);background:var(--card2) center/cover no-repeat;position:relative;border:1px solid var(--line)}
+.gp-cover{border-radius:var(--r);background:var(--glass-strong,var(--card2));position:relative;overflow:hidden;cursor:pointer}
+.gp-cover .f32-stage{aspect-ratio:4/3}
+.gp-sub{color:var(--mut);font:600 17px/1.2 var(--display);margin-top:-6px}
+.gp-feats{margin:12px 0 0;padding-left:20px;color:var(--ink2);font-size:15.5px;display:grid;gap:4px;max-width:70ch}
 .gp-cover .badge{position:absolute;left:12px;top:12px}
 .gp-head{display:flex;flex-direction:column;gap:12px}
 .gp-head .lead{color:var(--ink2);font-size:17px}
