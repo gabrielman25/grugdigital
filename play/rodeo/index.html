@@ -897,7 +897,8 @@ $('#sheet').addEventListener('click', e => { if(e.target.closest('#toRewards')){
 let gameFrame = null, gameLinked = false;
 function startGame(){
   const f = $('#gameFrame'); if(f.querySelector('iframe')) return;
-  const ifr = document.createElement('iframe'); ifr.src = GAME.src; ifr.title = 'Rodeo Express: ' + GAME.title;
+  // the offline single-file version carries the whole game inside this page (window.__GAME_DOC)
+  const ifr = document.createElement('iframe'); if(window.__GAME_DOC) ifr.srcdoc = window.__GAME_DOC; else ifr.src = GAME.src; ifr.title = 'Rodeo Express: ' + GAME.title;
   ifr.allow = 'fullscreen *; autoplay *; gamepad *'; ifr.setAttribute('allowfullscreen', '');
   ifr.onload = () => { const l = f.querySelector('.gload'); if(l) setTimeout(() => l.style.display = 'none', 400); };
   gameFrame = ifr; f.appendChild(ifr);
@@ -987,6 +988,8 @@ route();
 if(tapHit) setTimeout(() => tapClaim(tapHit), 700);
 else if(tapRaw !== null) setTimeout(() => toast('That tag isn’t a Rodeo Express bay tag'), 700);
 nfcInit();
+// online: keep a copy of the app and game on the phone so the demo still opens with no signal
+if('serviceWorker' in navigator && location.protocol === 'https:') addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 })();
 </script>
 </body>

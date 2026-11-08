@@ -49,11 +49,26 @@ canvas#view{position:fixed;inset:0;width:100%;height:100%;display:block}
 .pill .ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none}.pill .ic .vi{width:20px;height:20px}
 .pill small{display:block;font-weight:600;color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
 .pill.sm{font-size:17px;padding:5px 13px 5px 5px}.pill.sm .ic{width:30px;height:30px}.pill.sm .ic .vi{width:17px;height:17px}
-.soap{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;border-radius:999px;background:#fff}
+.hud-row{display:flex;gap:8px;align-items:flex-start}
+/* the soap tank: a tall glass of soapy water that sloshes at the top as it drains */
+.soap{width:66px;padding:6px 6px 8px;border-radius:24px;background:#fff;display:flex;flex-direction:column;align-items:center;gap:6px}
+.soap .glass{position:relative;width:54px;height:190px;border-radius:18px;background:#e3f2fb;overflow:hidden}
+.soap .fill{position:absolute;left:0;right:0;bottom:0;height:100%;background:linear-gradient(#38bdf8,#0284c7);transition:height .25s linear}
+.soap .wave{position:absolute;left:0;bottom:100%;width:216px;height:12px;margin-bottom:-1px;color:#38bdf8;animation:slosh 2.4s linear infinite}
+.soap .wave.b{opacity:.45;animation-duration:3.6s;animation-direction:reverse;height:14px}
+.soap .wave svg{display:block;width:100%;height:100%}
+.soap.spraying .wave{animation-duration:.9s}.soap.spraying .wave.b{animation-duration:1.4s}
+@keyframes slosh{from{transform:translateX(0)}to{transform:translateX(-108px)}}
+.soap .bub{position:absolute;bottom:4px;width:7px;height:7px;border-radius:50%;background:#ffffffaa;animation:bub 2.6s ease-in infinite}
+.soap .bub:nth-child(3){left:12px;animation-delay:.4s}.soap .bub:nth-child(4){left:30px;width:5px;height:5px;animation-delay:1.3s}.soap .bub:nth-child(5){left:40px;animation-delay:2s}
+@keyframes bub{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-150px);opacity:0}}
+.soap .lvl{position:absolute;left:0;right:0;top:8px;text-align:center;font-size:15px;font-weight:700;color:#0c4a6e;mix-blend-mode:normal}
 .soap .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--sky);color:#fff}.soap .ic .vi{width:16px;height:16px}
-.soap .tank{width:110px;height:12px;border-radius:9px;background:var(--card);overflow:hidden}.soap .tank b{display:block;height:100%;background:var(--sky);border-radius:9px}
-.soap.low .ic,.soap.low .tank b{background:var(--rose)}
-.soap span{font-size:13px;color:var(--mut);font-weight:700;min-width:30px}
+.soap.low .fill{background:linear-gradient(#fb7185,#e11d48)}.soap.low .wave{color:#fb7185}.soap.low .ic{background:var(--rose)}
+.soap.inf .fill{background:linear-gradient(#fcd34d,#e39b32)}.soap.inf .wave{color:#fcd34d}
+.boosts{flex-direction:column;align-items:flex-start}
+@media (max-height:520px){.soap .glass{height:120px}}
+@media (prefers-reduced-motion:reduce){.soap .wave,.soap .bub{animation:none}}
 .boosts{display:flex;flex-wrap:wrap;gap:6px;max-width:min(420px,60vw)}
 .bchip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 5px;border-radius:999px;background:#fff;font-size:14px;font-weight:700}
 .bchip i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:#fff}.bchip i .vi{width:14px;height:14px}
@@ -135,8 +150,8 @@ body.menu-open .spray,body.menu-open .ctx,body.menu-open .goal,body.menu-open .h
   <div class="hud" id="hud" hidden>
     <span class="pill"><span class="ic" style="background:var(--gold)" id="hudCoin"></span><span><small>Bucks</small><span id="hudBucks">0</span></span></span>
     <span class="pill sm"><span class="ic" style="background:var(--green)" id="hudCar"></span><span id="hudCars">0</span><small style="margin:0 0 0 2px" id="hudRate"></small></span>
-    <div class="soap" id="soap"><span class="ic" id="soapIc"></span><span class="tank"><b id="soapFill"></b></span><span id="soapTxt"></span></div>
-    <div class="boosts" id="boosts"></div>
+    <div class="hud-row"><div class="soap" id="soap"><div class="glass"><div class="fill" id="soapFill"><div class="wave b"><svg viewBox="0 0 216 12" preserveAspectRatio="none"><path fill="currentColor" d="M0 6 Q13.5 0 27 6 T54 6 T81 6 T108 6 T135 6 T162 6 T189 6 T216 6 V12 H0Z"/></svg></div><div class="wave"><svg viewBox="0 0 216 12" preserveAspectRatio="none"><path fill="currentColor" d="M0 6 Q13.5 0 27 6 T54 6 T81 6 T108 6 T135 6 T162 6 T189 6 T216 6 V12 H0Z"/></svg></div><i class="bub"></i><i class="bub"></i><i class="bub"></i></div><span class="lvl" id="soapTxt"></span></div><span class="ic" id="soapIc"></span></div>
+    <div class="boosts" id="boosts"></div></div>
   </div>
   <div class="side" id="side" hidden>
     <button class="sbtn round" id="pauseBtn" aria-label="Pause"></button>
@@ -259,8 +274,31 @@ const Avatars = (() => {
     throw new Error('Avatar runtime not found');
   }
   function playerConfig() { let c = null; try { c = JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); } catch (e) {} return K.merge(K.DEFAULT, c && typeof c === 'object' ? c : {}); }
-  function botConfig(i, shirt) { const c = K.randomConfig(SETTINGS.botSeed + '-' + i, { body: 'female' }); c.weapon = null; if (shirt) { c.top = null; c.legs = null; c.outfit = Object.assign({}, c.outfit, { shirt, shorts: '#3a2c22' }); } return c; }
+  function botConfig(i, shirt) { const c = K.randomConfig(SETTINGS.botSeed + '-' + i, { body: 'female' }); c.weapon = null; if (shirt) { c.top = Uniform.top(); c.legs = null; c.outfit = Object.assign({}, c.outfit, { shirt, shorts: '#3a2c22' }); } return c; }
   return { load, playerConfig, botConfig, get K() { return K; } };
+})();
+
+/* The Rodeo crew uniform: a brown tee with the Rodeo Express logo on the chest and RODEO CREW on the back, drawn into a
+   Roblox classic shirt template (585 x 559) that the avatar runtime wraps onto its T-shirt. Everyone on the crew wears it;
+   the player can swap back to their own clothes at the locker. */
+const LOGO_SRC = 'data:image/webp;base64,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';
+const Uniform = (() => {
+  let url = null;
+  async function make() {
+    try {
+      const img = new Image(); img.src = LOGO_SRC; await img.decode();
+      const c = document.createElement('canvas'); c.width = 585; c.height = 559; const g = c.getContext('2d');
+      g.fillStyle = '#4b3a2c'; g.fillRect(0, 0, 585, 559);
+      g.fillStyle = '#e39b32'; g.fillRect(231, 74, 128, 7); g.fillRect(427, 74, 128, 7);           // collar
+      const w = 90, h = w * img.height / img.width; g.drawImage(img, 231 + (128 - w) / 2, 74 + 22, w, h);   // chest logo
+      g.textAlign = 'center'; g.fillStyle = '#e39b32'; g.font = '700 30px Fredoka, sans-serif'; g.fillText('RODEO', 491, 140); g.fillStyle = '#e7dcc6'; g.font = '700 20px Fredoka, sans-serif'; g.fillText('CREW', 491, 166);
+      g.fillStyle = '#e39b32'; g.fillRect(0, 540, 585, 19);                                       // a gold hem on the arms
+      url = c.toDataURL('image/png');
+    } catch (e) { url = null; }
+    return url;
+  }
+  const top = () => url ? { part: 'gen_tshirt', texture: 'gen_tshirt', colour: '#4b3a2c', template: url } : null;
+  return { make, top };
 })();
 
 /* car models: Kenney Car Kit 2.0 (CC0), GLB, all sharing one 512 x 512 colour map */
@@ -302,68 +340,180 @@ const View = (() => {
 /* ---------- the lot (all sizes in cm) ----------
    Six wash bays in a row along x (cars face +z), a VIP bay on the right, the soap tank and the pads on the left.
    Cars come in on the back road (z = -2500) and leave by the front road (z = +2450). */
-const BAY_X = [-1625, -975, -325, 325, 975, 1625], VIP_X = 2600, BACK_Z = -2500, FRONT_Z = 2450;
+const BAY_X = [-1625, -975, -325, 325, 975, 1625], VIP_X = 2625, BACK_Z = -2500, FRONT_Z = 2450, ROAD_END = 4950;
 const TANK = { x: -2650, z: 450 }, PADS = [
   { id: 'up', x: -2650, z: -500, name: 'Upgrades', color: '#10b981', icon: 'wrench' },
   { id: 'store', x: -2650, z: -1250, name: 'Store', color: '#f59e0b', icon: 'shop' },
   { id: 'reb', x: -2650, z: 1250, name: 'Rebirth', color: '#7c3aed', icon: 'stars' }
 ];
-const LOT = { x0: -3150, x1: 3150, z0: -2150, z1: 2100 };
+const LOT = { x0: -3230, x1: 3150, z0: -2150, z1: 2100 };
+/* the express tunnel on the west side: cars come off the back road, stop at the pay station, roll to the conveyor,
+   get pulled through the machines on neutral, and drive off when the light turns green */
+const LANE_X = -3600, KIOSK = { x: -3375, z: -2075 }, KIOSK_STAND = { x: -3160, z: -2075 }, RAIL_Z = -1750, RAIL_STAND = { x: -3160, z: -1700 }, TUN = { z0: -1550, z1: 1550, exit: 1800 };
+const LOCKER = { x: -2650, z: 1850 };
+const MACH = [{ z: -1150, kind: 'foam', name: 'Triple Foam' }, { z: -550, kind: 'brush', name: 'Soft Wash brushes' }, { z: 0, kind: 'water', name: 'Rinse' }, { z: 500, kind: 'shine', name: 'Tire Shine + Ceramic' }, { z: 1050, kind: 'air', name: 'Power Dry' }];
 const solids = [];   // round posts the player can't walk through: {x, z, r}
 function canvasTex(w, h, draw) { const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); draw(g, w, h); const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t; }
 function box(w, h, d, mat, x, y, z, shadow) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); if (shadow !== false) { m.castShadow = true; m.receiveShadow = true; } scene.add(m); return m; }
 const MAT = {};
+/* ---------- the voxel world ----------
+   The whole map is one grid of 50 cm blocks (Minecraft style), turned into a single mesh by greedy meshing: only the
+   faces between a block and air are drawn, and touching faces of the same colour merge into big quads. Nothing is
+   ever drawn on top of anything else, so there's no z-fighting. A small shader darkens block edges and varies each
+   block's shade a little so the grid reads as blocks. Ground blocks sit under y = 0; everything else stands on it. */
+const VX = (() => {
+  const B = 50, X0 = -5400, Z0 = -5000, NX = 216, NZ = 192, NY = 26;
+  const g = new Uint8Array(NX * NY * NZ), pal = [null], idx = {};
+  const ci = hex => { if (!(hex in idx)) { idx[hex] = pal.length; pal.push(hex); } return idx[hex]; };
+  const at = (x, y, z) => (x < 0 || y < 0 || z < 0 || x >= NX || y >= NY || z >= NZ) ? 0 : g[x + NX * (z + NZ * y)];
+  const put = (x, y, z, c) => { if (x >= 0 && y >= 0 && z >= 0 && x < NX && y < NY && z < NZ) g[x + NX * (z + NZ * y)] = c; };
+  const cx = x => Math.round((x - X0) / B), cz = z => Math.round((z - Z0) / B), cy = y => Math.round(y / B) + 1;
+  // fill the blocks covering a world box (cm). hex = colour, or null to clear; f(ix, iy, iz) can pick a colour per block
+  function box(x0, x1, y0, y1, z0, z1, hex) {
+    const c = typeof hex === 'function' ? null : hex ? ci(hex) : 0;
+    for (let y = cy(y0); y < cy(y1); y++) for (let z = cz(z0); z < cz(z1); z++) for (let x = cx(x0); x < cx(x1); x++) put(x, y, z, c === null ? (hex(x, y, z) ? ci(hex(x, y, z)) : 0) : c);
+  }
+  const ground = (x0, x1, z0, z1, hex) => box(x0, x1, -B, 0, z0, z1, hex);
+  function disc(x, z, r, y0, y1, hex) { for (let iz = cz(z - r - B); iz <= cz(z + r + B); iz++) for (let ix = cx(x - r - B); ix <= cx(x + r + B); ix++) { const wx = X0 + (ix + 0.5) * B, wz = Z0 + (iz + 0.5) * B; if (Math.hypot(wx - x, wz - z) <= r) for (let y = cy(y0); y < cy(y1); y++) put(ix, y, iz, ci(hex)); } }
+  const hash = (a, b) => { let h = Math.imul(a * 374761393 + b * 668265263, 1274126177); h ^= h >>> 13; return ((h >>> 0) % 1000) / 1000; };
+  function mesh() {
+    const pos = [], col = [], nor = [], ind = [], dims = [NX, NY, NZ], C = pal.map(h => h ? lin(h) : null);
+    const get = c => at(c[0], c[1], c[2]);
+    for (let d = 0; d < 3; d++) {
+      const u = (d + 1) % 3, v = (d + 2) % 3, x = [0, 0, 0], q = [0, 0, 0]; q[d] = 1;
+      const mask = new Int16Array(dims[u] * dims[v]);
+      for (x[d] = -1; x[d] < dims[d];) {
+        let n = 0;
+        for (x[v] = 0; x[v] < dims[v]; x[v]++) for (x[u] = 0; x[u] < dims[u]; x[u]++) {
+          const a = x[d] >= 0 ? get(x) : 0, b = x[d] < dims[d] - 1 ? get([x[0] + q[0], x[1] + q[1], x[2] + q[2]]) : 0;
+          mask[n++] = a && !b ? a : !a && b ? -b : 0;
+        }
+        x[d]++; n = 0;
+        for (let j = 0; j < dims[v]; j++) for (let i = 0; i < dims[u];) {
+          const c = mask[n];
+          if (!c) { i++; n++; continue; }
+          let w = 1; while (i + w < dims[u] && mask[n + w] === c) w++;
+          let h = 1; grow: for (; j + h < dims[v]; h++) for (let k = 0; k < w; k++) if (mask[n + k + h * dims[u]] !== c) break grow;
+          x[u] = i; x[v] = j; const du = [0, 0, 0], dv = [0, 0, 0]; du[u] = w; dv[v] = h;
+          const P = k => [X0 + k[0] * B, (k[1] - 1) * B, Z0 + k[2] * B];
+          const p0 = P(x), p1 = P([x[0] + du[0], x[1] + du[1], x[2] + du[2]]), p2 = P([x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]]), p3 = P([x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]]);
+          const base = pos.length / 3, cc = C[Math.abs(c)], nn = [0, 0, 0]; nn[d] = c > 0 ? 1 : -1;
+          pos.push(...p0, ...p1, ...p2, ...p3); for (let k = 0; k < 4; k++) { col.push(cc.r, cc.g, cc.b); nor.push(...nn); }
+          if (c > 0) ind.push(base, base + 1, base + 2, base, base + 2, base + 3); else ind.push(base, base + 2, base + 1, base, base + 3, base + 2);
+          for (let l = 0; l < h; l++) for (let k = 0; k < w; k++) mask[n + k + l * dims[u]] = 0;
+          i += w; n += w;
+        }
+      }
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+    geo.setIndex(new THREE.Uint32BufferAttribute(ind, 1)); geo.computeBoundingSphere();
+    const m = new THREE.MeshLambertMaterial({ vertexColors: true });
+    m.onBeforeCompile = sh => {
+      sh.vertexShader = 'varying vec3 vWP; varying vec3 vWN;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvWP = (modelMatrix * vec4(transformed, 1.0)).xyz; vWN = normal;');
+      sh.fragmentShader = 'varying vec3 vWP; varying vec3 vWN;\nfloat vh(vec3 p){ p = fract(p * 0.1031); p += dot(p, p.yzx + 33.33); return fract((p.x + p.y) * p.z); }\n' + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+        { vec3 n = abs(vWN); vec2 uv = n.y > 0.5 ? vWP.xz : (n.x > 0.5 ? vWP.zy : vWP.xy);
+          vec2 f = fract(uv / ${B}.0); float e = min(min(f.x, 1.0 - f.x), min(f.y, 1.0 - f.y));
+          float edge = smoothstep(0.0, 0.07, e);
+          vec3 cell = floor((vWP - vWN * 2.0) / ${B}.0);
+          diffuseColor.rgb *= (0.92 + 0.12 * vh(cell)) * mix(n.y > 0.5 ? 0.86 : 0.78, 1.0, edge); }`);
+    };
+    const me = new THREE.Mesh(geo, m); me.castShadow = me.receiveShadow = true; return me;
+  }
+  return { B, box, ground, disc, put, ci, at, cx, cy, cz, hash, mesh, X0, Z0 };
+})();
 function makeWorld() {
   renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('view'), antialias: !touch, powerPreference: 'high-performance' });
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  scene = new THREE.Scene(); scene.background = lin('#a9d8f2'); scene.fog = new THREE.Fog(lin('#cfe6f2'), 4200, 9000);
-  camera = new THREE.PerspectiveCamera(55, 1, 10, 20000);
+  scene = new THREE.Scene(); scene.background = lin('#a9d8f2'); scene.fog = new THREE.Fog(lin('#cfe6f2'), 4500, 10000);
+  camera = new THREE.PerspectiveCamera(55, 1, 10, 22000);
   scene.add(new THREE.HemisphereLight(0xfff6e6, 0x6b5a48, 0.85));
   sun = new THREE.DirectionalLight(0xfff0d8, 1.05); sun.position.set(900, 1800, 700); sun.castShadow = true;
-  Object.assign(sun.shadow.camera, { left: -1500, right: 1500, top: 1500, bottom: -1500, near: 100, far: 5000 }); sun.shadow.mapSize.set(1024, 1024); sun.shadow.bias = -0.0006; scene.add(sun, sun.target);
+  Object.assign(sun.shadow.camera, { left: -1600, right: 1600, top: 1600, bottom: -1600, near: 100, far: 5000 }); sun.shadow.mapSize.set(1024, 1024); sun.shadow.bias = -0.0008; sun.shadow.normalBias = 2; scene.add(sun, sun.target);
   const L = c => new THREE.MeshLambertMaterial({ color: lin(c) });
-  Object.assign(MAT, { brown: L('#4b3a2c'), dark: L('#2b201a'), cream: L('#e7dcc6'), gold: L('#e39b32'), orange: L('#d2552b'), asphalt: L('#5a5e66'), road: L('#43464d'), concrete: L('#c8c2b6'), line: L('#f2c94c'), white: L('#f4f4f2'), dirt: L('#d2b98f'), grass: L('#93b45a'), cactus: L('#4f8a4b'), sky: L('#0ea5e9'), steel: L('#9aa3ad') });
-  // ground: dirt, lot asphalt, two roads
-  const plane = (w, d, mat, x, z, y) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), mat); m.rotation.x = -Math.PI / 2; m.position.set(x, y || 0, z); m.receiveShadow = true; scene.add(m); return m; };
-  plane(30000, 30000, MAT.dirt, 0, 0, -1);
-  plane(7000, 4900, MAT.asphalt, 0, -50, 0);
-  plane(12000, 560, MAT.road, 0, BACK_Z, 1); plane(12000, 560, MAT.road, 0, FRONT_Z, 1);
-  for (let x = -5800; x < 5800; x += 600) { plane(300, 18, MAT.line, x, BACK_Z, 2); plane(300, 18, MAT.line, x, FRONT_Z, 2); }
-  for (const [x, z] of [[-4500, 0], [4500, 0], [-4200, 3600], [3800, -3700], [-6000, -2000], [6200, 1800], [0, 4300], [-2600, 4100], [2500, 4200]]) plane(1800, 1400, MAT.grass, x, z, 0.5);
-  // the express tunnel behind the back road: a long brown building with a cream band and the sign
-  const T = new THREE.Group(); scene.add(T); T.position.set(-600, 0, -3500);
-  const tb = new THREE.Mesh(new THREE.BoxGeometry(5200, 620, 900), MAT.brown); tb.position.y = 310; tb.castShadow = tb.receiveShadow = true; T.add(tb);
-  const band = new THREE.Mesh(new THREE.BoxGeometry(5240, 70, 940), MAT.cream); band.position.y = 600; T.add(band);
-  const band2 = new THREE.Mesh(new THREE.BoxGeometry(5240, 22, 942), MAT.gold); band2.position.y = 548; T.add(band2);
-  for (const ex of [-2600, 2600]) { const ent = new THREE.Mesh(new THREE.BoxGeometry(40, 420, 520), MAT.dark); ent.position.set(ex, 210, 0); T.add(ent); }
-  for (let i = 0; i < 9; i++) { const w = new THREE.Mesh(new THREE.BoxGeometry(380, 150, 10), new THREE.MeshLambertMaterial({ color: lin('#9fd2ee'), emissive: lin('#1d3f55') })); w.position.set(-2000 + i * 500, 360, 452); T.add(w); }
-  const signTex = canvasTex(1024, 300, (g, w, h) => {
-    g.fillStyle = '#4b3a2c'; roundRect(g, 0, 0, w, h, 60); g.fill(); g.strokeStyle = '#e7dcc6'; g.lineWidth = 16; roundRect(g, 14, 14, w - 28, h - 28, 48); g.stroke();
-    g.fillStyle = '#e39b32'; for (let i = 0; i < 5; i++) star(g, w / 2 - 120 + i * 60, 62, i === 0 || i === 4 ? 18 : 13);
-    g.fillStyle = '#fff'; g.textAlign = 'center'; g.font = '700 128px Fredoka, sans-serif'; g.fillText('RODEO', w / 2, 200); g.font = '700 46px Fredoka, sans-serif'; g.fillStyle = '#e7dcc6'; g.fillText('EXPRESS CAR WASH', w / 2, 262);
-  });
-  const sign = new THREE.Mesh(new THREE.PlaneGeometry(1500, 440), new THREE.MeshBasicMaterial({ map: signTex, transparent: true })); sign.position.set(0, 860, 380); T.add(sign);
-  const post2 = new THREE.Mesh(new THREE.BoxGeometry(60, 260, 60), MAT.brown); post2.position.set(0, 640, 300); T.add(post2);
-  // longhorn horns on the sign
-  for (const s of [-1, 1]) {
-    const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(s * 640, 900, 380), new THREE.Vector3(s * 980, 980, 380), new THREE.Vector3(s * 1180, 1150, 380), new THREE.Vector3(s * 1260, 1320, 380)]);
-    const horn = new THREE.Mesh(new THREE.TubeGeometry(curve, 24, 42, 10, false), MAT.cream); T.add(horn);
-    const tip = new THREE.Mesh(new THREE.ConeGeometry(42, 120, 10), MAT.cream); tip.position.set(s * 1270, 1370, 380); tip.rotation.z = -s * 0.15; T.add(tip);
+  Object.assign(MAT, { brown: L('#4b3a2c'), dark: L('#2b201a'), cream: L('#e7dcc6'), gold: L('#e39b32'), orange: L('#d2552b'), white: L('#f4f4f2'), sky: L('#0ea5e9'), steel: L('#9aa3ad') });
+  const V = VX, H = V.hash;
+  // ground: dirt with grass patches, the lot, two roads with dashed centre lines
+  V.ground(-5400, 5400, -5000, 4600, (x, y, z) => H(x, z) < 0.12 ? '#cfb07c' : '#d9bf8f');
+  for (const [x, z, r] of [[-4050, 400, 220], [3800, 700, 450], [-3700, 3400, 650], [3600, 3500, 700], [-600, 3600, 550], [1700, 3300, 400], [-4000, -1500, 380], [3700, -1400, 420]])
+    V.box(x - r, x + r, -50, 0, z - r, z + r, (ix, iy, iz) => { const wx = V.X0 + (ix + 0.5) * 50, wz = V.Z0 + (iz + 0.5) * 50, d = Math.hypot(wx - x, (wz - z) * 1.3) / r + (H(ix, iz) - 0.5) * 0.3; return d < 1 ? (H(iz, ix) < 0.3 ? '#7fa34a' : '#93b45a') : (V.at(ix, 0, iz) ? V.at(ix, 0, iz) && null : null); });
+  V.ground(-3950, 3200, -2200, 2150, '#5d6168');
+  V.ground(-5400, 5400, -2800, -2200, '#45484f'); V.ground(-5400, 5400, 2150, 2750, '#45484f');
+  for (let x = -5400; x < 5400; x += 300) { V.ground(x, x + 150, -2500, -2450, '#f2c94c'); V.ground(x, x + 150, 2450, 2500, '#f2c94c'); }
+  // exit arrows painted in front of each bay
+  for (const bx of BAY_X.concat([VIP_X])) { V.ground(bx - 25, bx + 25, 450, 650, '#eeeae0'); V.ground(bx - 125, bx + 125, 650, 700, '#eeeae0'); V.ground(bx - 75, bx + 75, 700, 750, '#eeeae0'); V.ground(bx - 25, bx + 25, 750, 800, '#eeeae0'); }
+  // mesas on both sides; each road runs into a tunnel that turns away inside, out of sight
+  const STRATA = ['#c9733f', '#d98e57', '#b85a33', '#e0a46e', '#c46a3a'];
+  const mesa = (x0, x1, z0, z1, hMin, hMax) => V.box(x0, x1, 0, hMax, z0, z1, (ix, iy, iz) => { const top = hMin + Math.floor(H(ix >> 2, iz >> 2) * (hMax - hMin) / 50) * 50; return (iy - 1) * 50 < top ? STRATA[(iy + (H(ix >> 3, iz >> 3) > 0.7 ? 1 : 0)) % STRATA.length] : null; });
+  mesa(4300, 5400, -5000, 4600, 650, 950); mesa(-5400, -4300, -5000, 4600, 650, 950);
+  mesa(-5400, 5400, -5000, -4400, 700, 1000); mesa(-5400, 5400, 3950, 4600, 300, 550);
+  for (const s of [-1, 1]) for (const [z0, z1, out] of [[-2800, -2200, -1], [2150, 2750, 1]]) {
+    const mx = s > 0 ? 4300 : -4300, far = s > 0 ? [4300, 5000] : [-5000, -4300], bend = s > 0 ? [4600, 5000] : [-5000, -4600];
+    V.box(far[0], far[1], -50, 0, z0, z1, '#2f3035');
+    V.box(far[0] - 50, far[1] + 50, 0, 450, z0 - 50, z1 + 50, '#1c1612');                 // dark lining
+    V.box(far[0], far[1], 0, 400, z0, z1, null);                                         // the bore
+    const bz = out < 0 ? [z0 - 450, z0] : [z1, z1 + 450];                                // it bends off toward the edge
+    V.box(bend[0] - 50, bend[1] + 50, 0, 450, bz[0] - 50, bz[1] + 50, (ix, iy, iz) => V.at(ix, iy, iz) ? '#1c1612' : null);
+    V.box(bend[0], bend[1], 0, 400, bz[0], bz[1], null); V.box(bend[0], bend[1], -50, 0, bz[0], bz[1], '#2f3035');
+    const fx = s > 0 ? [mx, mx + 50] : [mx - 50, mx];                                     // stone portal
+    V.box(fx[0], fx[1], 0, 500, z0 - 100, z0 - 50, '#8a8178'); V.box(fx[0], fx[1], 0, 500, z1 + 50, z1 + 100, '#8a8178'); V.box(fx[0], fx[1], 400, 500, z0 - 100, z1 + 100, '#8a8178');
+    V.box(s > 0 ? mx - 50 : mx, s > 0 ? mx : mx + 50, 0, 400, z0 - 100, z0 - 50, '#9a9187'); V.box(s > 0 ? mx - 50 : mx, s > 0 ? mx : mx + 50, 0, 400, z1 + 50, z1 + 100, '#9a9187');
   }
-  // cacti and a few flags around the lot
-  for (const [x, z, s] of [[-3500, 1300, 1], [-3600, -900, 0.8], [3500, 1100, 1.1], [3600, -1400, 0.9], [-4400, -3300, 1.2], [4300, 3300, 1], [-1500, 3600, 0.9], [1600, -4300, 1.1]]) cactus(x, z, s);
-  for (const x of [-3050, 3050]) { box(10, 900, 10, MAT.steel, x, 450, -2100); const fl = new THREE.Mesh(new THREE.PlaneGeometry(260, 160), new THREE.MeshLambertMaterial({ map: canvasTex(256, 160, texasFlag), side: THREE.DoubleSide })); fl.position.set(x + 135 * Math.sign(-x), 800, -2100); scene.add(fl); }
+  // the express tunnel (west side of the lot)
+  V.ground(-3950, -3250, -2200, 1800, '#5d6168');
+  V.ground(-3900, -3300, -1550, 1550, '#c8c2b6'); V.ground(-3700, -3650, RAIL_Z, 1600, '#26272c');
+  for (let z = -2150; z < -1600; z += 150) { V.ground(-3950, -3900, z, z + 100, '#eeeae0'); }
+  V.box(-3950, -3850, 0, 450, -1550, 1550, '#4b3a2c');
+  for (let z = -1550; z < 1550; z += 400) V.box(-3350, -3300, 0, 450, z, z + 50, '#4b3a2c');
+  V.box(-3350, -3300, 0, 450, 1500, 1550, '#4b3a2c');
+  V.box(-3950, -3300, 450, 550, -1600, 1600, '#e7dcc6'); V.box(-3350, -3300, 450, 500, -1600, 1600, '#e39b32'); V.box(-3950, -3300, 550, 600, -1600, 1600, '#3a2c22');
+  V.box(-3400, -3350, 600, 1000, -800, 800, '#4b3a2c'); V.box(-3400, -3350, 1000, 1050, -850, 850, '#e39b32');
+  for (const s of [-1, 1]) [[0, 0], [1, 0], [2, 0], [3, 1], [4, 1], [5, 2], [6, 3], [6, 4], [7, 5]].forEach(([k, up], i) => { const z0 = s > 0 ? 800 + k * 50 : -800 - (k + 1) * 50; V.box(-3400, -3350, 900 + up * 50, 950 + up * 50 + (i < 3 ? 50 : 0), z0, z0 + 50, i >= 7 ? '#3a2a1c' : '#e7dcc6'); });
+  // pay station island and monitor
+  V.box(-3400, -3250, 0, 50, -2200, -1950, '#c8c2b6'); V.box(-3400, -3350, 50, 200, -2100, -2050, '#2b201a'); V.box(-3450, -3350, 150, 250, -2125, -2025, '#4b3a2c');
+  V.box(-3400, -3350, 250, 300, -2150, -2000, '#e39b32');
+  // exit light pole
+  V.box(-3300, -3250, 0, 300, 1600, 1650, '#2b201a');
+  // soap tank (round-ish, in blocks)
+  V.disc(TANK.x, TANK.z, 105, 0, 300, '#0ea5e9'); V.disc(TANK.x, TANK.z, 105, 50, 100, '#f4f4f2'); V.disc(TANK.x, TANK.z, 105, 250, 300, '#f4f4f2'); V.disc(TANK.x, TANK.z, 60, 300, 350, '#f4f4f2');
+  // the locker for the uniform
+  V.box(LOCKER.x - 100, LOCKER.x + 100, 0, 250, LOCKER.z + 100, LOCKER.z + 150, '#d2552b'); V.box(LOCKER.x - 100, LOCKER.x + 100, 250, 300, LOCKER.z + 100, LOCKER.z + 150, '#4b3a2c'); V.box(LOCKER.x - 25, LOCKER.x + 25, 0, 250, LOCKER.z + 100, LOCKER.z + 150, '#a63f1d');
+  // cacti and rocks
+  const cactus = (x, z, h) => { V.box(x, x + 50, 0, h, z, z + 50, '#4f8a4b'); V.box(x + 50, x + 100, h * 0.45, h * 0.45 + 50, z, z + 50, '#5f9a55'); V.box(x + 100, x + 150, h * 0.45, h * 0.75, z, z + 50, '#5f9a55'); V.box(x - 50, x, h * 0.6, h * 0.6 + 50, z, z + 50, '#5f9a55'); V.box(x - 100, x - 50, h * 0.6, h * 0.85, z, z + 50, '#5f9a55'); };
+  for (const [x, z, h] of [[-4100, 2000, 300], [-4150, -900, 250], [3500, 1100, 350], [3600, -1500, 250], [-4000, -3300, 350], [4000, 3300, 300], [-1500, 3500, 300], [1600, -4200, 350], [-2400, 3200, 250], [2600, 3000, 300], [0, -4200, 300]]) cactus(x, z, h);
+  for (const [x, z] of [[-3400, 2500], [3300, -2000], [-2000, -4300], [2500, 3800], [-4100, 2200], [3900, 300]]) { V.box(x, x + 100, 0, 50, z, z + 100, '#a39a8e'); V.box(x + 50, x + 100, 50, 100, z + 50, z + 100, '#b5ab9e'); }
+  makeBayBlocks();
+  scene.add(V.mesh());
+  // the outside world past the grid: a dirt plane just under the ground blocks
+  const out = new THREE.Mesh(new THREE.PlaneGeometry(60000, 60000), new THREE.MeshLambertMaterial({ color: lin('#d4b98a') })); out.rotation.x = -Math.PI / 2; out.position.y = -60; scene.add(out);
+  // the big sign's face, on the front of its board
+  const signTex = canvasTex(1024, 280, (g, w, h) => {
+    g.fillStyle = '#4b3a2c'; g.fillRect(0, 0, w, h); g.strokeStyle = '#e7dcc6'; g.lineWidth = 14; g.strokeRect(14, 14, w - 28, h - 28);
+    g.fillStyle = '#e39b32'; for (let i = 0; i < 5; i++) star(g, w / 2 - 120 + i * 60, 58, i === 0 || i === 4 ? 18 : 13);
+    g.fillStyle = '#fff'; g.textAlign = 'center'; g.font = '700 124px Fredoka, sans-serif'; g.fillText('RODEO', w / 2, 190); g.font = '700 44px Fredoka, sans-serif'; g.fillStyle = '#e7dcc6'; g.fillText('EXPRESS CAR WASH', w / 2, 248);
+  });
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(1440, 380), new THREE.MeshBasicMaterial({ map: signTex })); sign.rotation.y = Math.PI / 2; sign.position.set(-3347, 800, 0); scene.add(sign);
+  for (const x of [-2950, 3050]) { const pole = new THREE.Mesh(new THREE.BoxGeometry(12, 900, 12), MAT.steel); pole.position.set(x + 7, 450, -2107); scene.add(pole); const fl = new THREE.Mesh(new THREE.PlaneGeometry(260, 160), new THREE.MeshLambertMaterial({ map: canvasTex(256, 160, texasFlag), side: THREE.DoubleSide })); fl.position.set(x + 7 + 136 * Math.sign(-x), 800, -2107); scene.add(fl); }
   clock = new THREE.Clock(); resize(); addEventListener('resize', resize);
+}
+/* the bays in blocks: four posts, a frame on top, a two-row fascia with the dryers under it */
+function makeBayBlocks() {
+  const V = VX;
+  for (const bx of BAY_X.concat([VIP_X])) {
+    const vip = bx === VIP_X, post = vip ? '#e39b32' : '#4b3a2c', face = vip ? '#e39b32' : '#e7dcc6', stripe = vip ? '#4b3a2c' : '#e39b32';
+    V.ground(bx - 325, bx + 325, -350, 350, vip ? '#d9c38f' : '#c8c2b6'); V.ground(bx - 25, bx + 25, -250, 250, '#3a3430');
+    for (const px of [bx - 325, bx + 275]) for (const pz of [-350, 300]) V.box(px, px + 50, 0, 350, pz, pz + 50, post);
+    for (const px of [bx - 325, bx + 275]) V.box(px, px + 50, 350, 450, -350, 350, '#2b201a');
+    V.box(bx - 325, bx + 325, 400, 450, 300, 350, face); V.box(bx - 325, bx + 325, 350, 400, 300, 350, stripe);
+    V.box(bx - 325, bx + 325, 400, 450, -350, -300, '#e7dcc6');
+    for (const cz of [-150, 100]) V.box(bx - 275, bx + 275, 400, 450, cz, cz + 50, '#2b201a');
+    for (const dx of [-175, -25, 125]) V.box(bx + dx, bx + dx + 50, 300, 350, 300, 350, '#d2552b');
+  }
 }
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 function star(g, x, y, r) { g.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.45 : r; g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } g.closePath(); g.fill(); }
 function texasFlag(g, w, h) { g.fillStyle = '#fff'; g.fillRect(0, 0, w, h / 2); g.fillStyle = '#bf2b2b'; g.fillRect(0, h / 2, w, h / 2); g.fillStyle = '#20356b'; g.fillRect(0, 0, w / 3, h); g.fillStyle = '#fff'; star(g, w / 6, h / 2, 26); }
-function cactus(x, z, s) {
-  const g = new THREE.Group(); g.position.set(x, 0, z); g.scale.setScalar(s); scene.add(g);
-  const trunk = new THREE.Mesh(new THREE.CapsuleGeometry(34, 280, 4, 10), MAT.cactus); trunk.position.y = 170; trunk.castShadow = true; g.add(trunk);
-  for (const [ax, ay, h] of [[1, 160, 110], [-1, 210, 90]]) { const arm = new THREE.Mesh(new THREE.CapsuleGeometry(22, 60, 4, 8), MAT.cactus); arm.rotation.z = Math.PI / 2; arm.position.set(ax * 60, ay, 0); g.add(arm); const up = new THREE.Mesh(new THREE.CapsuleGeometry(22, h, 4, 8), MAT.cactus); up.position.set(ax * 92, ay + h / 2, 0); up.castShadow = true; g.add(up); }
-}
 function resize() { const w = innerWidth, h = innerHeight; View.apply(); camera.aspect = w / h; camera.updateProjectionMatrix(); CAM.dist = w < h ? 860 : 700; }
 
 /* ---------- input ---------- */
@@ -398,12 +548,12 @@ function moveInput() {
   if (k.has('KeyW') || k.has('ArrowUp')) y -= 1; if (k.has('KeyS') || k.has('ArrowDown')) y += 1; if (k.has('KeyA') || k.has('ArrowLeft')) x -= 1; if (k.has('KeyD') || k.has('ArrowRight')) x += 1;
   if (input.stick) { x += input.stick.dx; y += input.stick.dy; }
   const pad = navigator.getGamepads ? Array.from(navigator.getGamepads()).find(Boolean) : null;
-  input.padSpray = false;
+  input.padSpray = false; input.padB = false;
   if (pad) {
     const ax = pad.axes[0] || 0, ay = pad.axes[1] || 0; if (Math.hypot(ax, ay) > 0.18) { x += ax; y += ay; }
     const rx = pad.axes[2] || 0, ry = pad.axes[3] || 0; if (Math.abs(rx) > 0.2) CAM.yaw -= rx * 0.05; if (Math.abs(ry) > 0.2) CAM.pitch = Math.max(0.08, Math.min(1.15, CAM.pitch + ry * 0.03));
     const btn = i => !!(pad.buttons[i] && pad.buttons[i].pressed), was = i => !!padPrev[i];
-    input.padSpray = btn(0) || btn(7);
+    input.padSpray = btn(0) || btn(7); input.padB = btn(1);
     if (btn(9) && !was(9)) Game.togglePause(true);
     if (btn(2) && !was(2)) UI.open('up');
     if (btn(3) && !was(3)) UI.open('store');
@@ -468,13 +618,14 @@ const UPG = {
   tips: { name: 'Friendly Service', icon: 'coins', color: '#e39b32', max: 50, cost: l => 120 * Math.pow(1.75, l), val: l => 1 + 0.15 * l, unit: v => '+' + Math.round((v - 1) * 100) + '% Bucks' },
   line: { name: 'Faster Line', icon: 'car', color: '#10b981', max: 12, cost: l => 80 * Math.pow(1.85, l), val: l => 5 * Math.pow(0.84, l), unit: v => 'a car every ' + v.toFixed(1) + ' s' }
 };
+const EXPRESS_COST = 300, ATTEND_COST = 1500, GUIDE_COST = 3000, CONV_COST = l => 400 * Math.pow(1.8, l), CONV_SPEED = l => 240 * (1 + 0.15 * l), CONV_MAX = 12;
 const CREW_COST = n => 300 * Math.pow(3.6, n), TRAIN_COST = l => 600 * Math.pow(1.8, l), CREW_POWER = l => 3.2 * Math.pow(1.3, l);
 const REBIRTH_COST = r => 150000 * Math.pow(5, r), REBIRTH_MULT = r => 1 + 0.75 * r;
 const SAVE_KEY = 'rodeo-wash.v1';
 
 const Game = (() => {
   /* ---------- save (on this phone) ---------- */
-  const fresh = () => ({ v: 1, bucks: 0, life: 0, cars: 0, rebirths: 0, up: { power: 0, tank: 0, reach: 0, boots: 0, tips: 0, line: 0 }, bays: 1, tier: 0, crew: 0, crewLvl: 0, boosts: {}, daily: '', ipm: 0, last: Date.now(), soap: 100, best: 0, tut: 0 });
+  const fresh = () => ({ v: 1, bucks: 0, life: 0, cars: 0, rebirths: 0, up: { power: 0, tank: 0, reach: 0, boots: 0, tips: 0, line: 0 }, bays: 1, tier: 0, crew: 0, crewLvl: 0, express: false, conv: 0, attend: false, guide: false, uniform: true, boosts: {}, daily: '', ipm: 0, last: Date.now(), soap: 100, best: 0, tut: 0 });
   let S = fresh();
   try { const d = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (d && d.v === 1) { S = Object.assign(fresh(), d); S.up = Object.assign(fresh().up, d.up || {}); S.boosts = d.boosts && typeof d.boosts === 'object' ? d.boosts : {}; } } catch (e) {}
   let saveT = 0; const save = () => { S.last = Date.now(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} };
@@ -603,8 +754,8 @@ const Game = (() => {
     const cfg = CARS[kind] || CARS.sedan; let bm = null;
     model.traverse(o => {
       if (!o.isMesh) return; o.castShadow = true; o.receiveShadow = false;
-      const isWheel = /wheel/i.test(o.name) || (o.parent && /wheel/i.test(o.parent.name));
-      if (isWheel) { const wm = wheelMat(o.material); o.material = wm; const node = /wheel/i.test(o.name) ? o : o.parent; if (!car.wheels.find(w => w.node === node)) car.wheels.push({ node, mat: wm, mats: [wm] }); else car.wheels.find(w => w.node === node).mats.push(wm); }
+      const WH = /^wheel-(front|back)-(left|right)$/i, isWheel = WH.test(o.name) || (o.parent && WH.test(o.parent.name));
+      if (isWheel) { const wm = wheelMat(o.material); o.material = wm; const node = WH.test(o.name) ? o : o.parent; if (!car.wheels.find(w => w.node === node)) car.wheels.push({ node, mat: wm, mats: [wm] }); else car.wheels.find(w => w.node === node).mats.push(wm); }
       else { if (!bm) bm = bodyMat(o.material, paint, cfg.cell); o.material = bm; }
     });
     car.body = bm;
@@ -633,43 +784,61 @@ const Game = (() => {
     const all = BAY_X.map((x, i) => ({ i, x, vip: false })).concat([{ i: 6, x: VIP_X, vip: true }]);
     for (const b of all) {
       b.z = 0; b.car = null; b.timer = 1 + b.i * 0.6; b.g = new THREE.Group(); b.g.position.set(b.x, 0, 0); scene.add(b.g);
-      const floor = new THREE.Mesh(new THREE.BoxGeometry(600, 6, 660), b.vip ? new THREE.MeshLambertMaterial({ color: lin('#d9c38f') }) : MAT.concrete); floor.position.y = 3; floor.receiveShadow = true; b.g.add(floor);
-      const drain = new THREE.Mesh(new THREE.BoxGeometry(30, 2, 520), MAT.dark); drain.position.set(0, 7, 0); b.g.add(drain);
-      const postM = b.vip ? MAT.gold : MAT.brown;
-      for (const [px, pz] of [[-300, -330], [300, -330], [-300, 330], [300, 330]]) { const p = new THREE.Mesh(new THREE.BoxGeometry(34, 430, 34), postM); p.position.set(px, 215, pz); p.castShadow = true; b.g.add(p); solids.push({ x: b.x + px, z: pz, r: 32 }); }
-      for (const sx of [-1, 1]) { const beam = new THREE.Mesh(new THREE.BoxGeometry(30, 40, 720), MAT.dark); beam.position.set(sx * 315, 440, 0); beam.castShadow = true; b.g.add(beam); }
-      for (const bz of [-120, 120]) { const cb = new THREE.Mesh(new THREE.BoxGeometry(640, 16, 22), MAT.dark); cb.position.set(0, 452, bz); cb.castShadow = true; b.g.add(cb); }
-      const fas = new THREE.Mesh(new THREE.BoxGeometry(668, 64, 12), b.vip ? MAT.gold : MAT.cream); fas.position.set(0, 425, 362); b.g.add(fas);
-      const fasB = new THREE.Mesh(new THREE.BoxGeometry(668, 64, 12), MAT.cream); fasB.position.set(0, 425, -362); b.g.add(fasB);
-      const stripe = new THREE.Mesh(new THREE.BoxGeometry(670, 10, 14), b.vip ? MAT.brown : MAT.gold); stripe.position.set(0, 404, 362); b.g.add(stripe);
+      for (const [px, pz] of [[-300, -325], [300, -325], [-300, 325], [300, 325]]) solids.push({ x: b.x + px, z: pz, r: 36 });
       const tex = canvasTex(512, 64, (g, w, h) => { g.fillStyle = b.vip ? '#e39b32' : '#e7dcc6'; g.fillRect(0, 0, w, h); g.fillStyle = '#4b3a2c'; g.textAlign = 'center'; g.font = '700 44px Fredoka, sans-serif'; g.fillText(b.vip ? 'VIP BAY' : 'BAY ' + (b.i + 1), w / 2, 48); });
-      const sg = new THREE.Mesh(new THREE.PlaneGeometry(330, 41), new THREE.MeshBasicMaterial({ map: tex })); sg.position.set(0, 426, 369); b.g.add(sg);
+      const sg = new THREE.Mesh(new THREE.PlaneGeometry(340, 42), new THREE.MeshBasicMaterial({ map: tex })); sg.position.set(0, 425, 353); b.g.add(sg);
       // the NFC poster on the front-left post: what the guest taps for points in real life
       const ptex = canvasTex(160, 240, (g, w, h) => {
         g.fillStyle = '#4b3a2c'; g.fillRect(0, 0, w, h); g.fillStyle = '#e39b32'; g.fillRect(8, 8, w - 16, h - 16); g.fillStyle = '#4b3a2c'; g.fillRect(14, 14, w - 28, h - 28);
         g.strokeStyle = '#fff'; g.lineWidth = 7; g.lineCap = 'round'; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(58, 92, 16 + i * 15, -0.75, 0.75); g.stroke(); }
         g.fillStyle = '#fff'; g.textAlign = 'center'; g.font = '700 26px Fredoka, sans-serif'; g.fillText('TAP', w / 2, 168); g.font = '700 18px Fredoka, sans-serif'; g.fillStyle = '#e39b32'; g.fillText('FOR POINTS', w / 2, 196);
       });
-      const poster = new THREE.Mesh(new THREE.PlaneGeometry(56, 84), new THREE.MeshLambertMaterial({ map: ptex })); poster.position.set(-300, 150, 348); b.g.add(poster);
-      // the dryer arch at the exit: little blowers on a gold frame
-      for (const sx of [-170, 0, 170]) { const bl = new THREE.Mesh(new THREE.CylinderGeometry(20, 26, 46, 12), MAT.orange); bl.position.set(sx, 372, 330); b.g.add(bl); }
+      const poster = new THREE.Mesh(new THREE.PlaneGeometry(44, 66), new THREE.MeshLambertMaterial({ map: ptex })); poster.position.set(-300, 170, 353); b.g.add(poster);
       b.locked = new THREE.Group(); b.g.add(b.locked);
-      for (let k = 0; k < 2; k++) { const tape = new THREE.Mesh(new THREE.BoxGeometry(600, 14, 4), new THREE.MeshLambertMaterial({ color: lin(k ? '#111827' : '#f2c94c') })); tape.position.set(0, 90 + k * 40, -330); b.locked.add(tape); const tape2 = tape.clone(); tape2.position.z = 330; b.locked.add(tape2); }
+      for (let k = 0; k < 2; k++) for (const z of [-325, 325]) { const tape = new THREE.Mesh(new THREE.BoxGeometry(550, 14, 6), new THREE.MeshLambertMaterial({ color: lin(k ? '#111827' : '#f2c94c') })); tape.position.set(0, 90 + k * 40, z); b.locked.add(tape); }
       bays.push(b);
     }
-    // soap tank
-    const tk = new THREE.Group(); tk.position.set(TANK.x, 0, TANK.z); scene.add(tk);
-    const cyl = new THREE.Mesh(new THREE.CylinderGeometry(90, 90, 300, 20), MAT.sky); cyl.position.y = 150; cyl.castShadow = true; tk.add(cyl);
-    for (const y of [60, 240]) { const r = new THREE.Mesh(new THREE.CylinderGeometry(93, 93, 16, 20), MAT.white); r.position.y = y; tk.add(r); }
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(90, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), MAT.white); cap.position.y = 300; tk.add(cap);
-    solids.push({ x: TANK.x, z: TANK.z, r: 100 });
-    padRing(TANK.x, TANK.z, 230, '#0ea5e9');
+    solids.push({ x: TANK.x, z: TANK.z, r: 110 }, { x: LOCKER.x, z: LOCKER.z + 125, r: 110 }, { x: KIOSK.x + 25, z: KIOSK.z, r: 80 });
+    padRing(TANK.x, TANK.z, 240, '#0ea5e9');
     for (const p of PADS) padRing(p.x, p.z, 150, p.color, true);
+    padRing(LOCKER.x, LOCKER.z, 110, '#d2552b', true);
+    makeTunnel();
   }
   function padRing(x, z, r, color, solid) {
-    const m = new THREE.Mesh(solid ? new THREE.CircleGeometry(r, 40) : new THREE.RingGeometry(r - 22, r, 48), new THREE.MeshLambertMaterial({ color: lin(color), transparent: !solid, opacity: solid ? 1 : 0.85 }));
-    m.rotation.x = -Math.PI / 2; m.position.set(x, solid ? 4 : 3, z); m.receiveShadow = true; scene.add(m);
-    if (solid) { const rim = new THREE.Mesh(new THREE.RingGeometry(r, r + 16, 48), MAT.white); rim.rotation.x = -Math.PI / 2; rim.position.set(x, 4, z); scene.add(rim); }
+    if (solid) {   // a round pad: a low disc on a white rim (raised so nothing shares a surface with the ground)
+      const rim = new THREE.Mesh(new THREE.CylinderGeometry(r + 16, r + 16, 6, 48), MAT.white); rim.position.set(x, 3, z); rim.receiveShadow = true; scene.add(rim);
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 10, 48), new THREE.MeshLambertMaterial({ color: lin(color) })); m.position.set(x, 5, z); m.receiveShadow = true; scene.add(m);
+    } else { const m = new THREE.Mesh(new THREE.RingGeometry(r - 24, r, 48), new THREE.MeshLambertMaterial({ color: lin(color) })); m.rotation.x = -Math.PI / 2; m.position.set(x, 4, z); scene.add(m); }
+  }
+  /* ---------- the express tunnel's moving parts ---------- */
+  const TU = { brushes: [], rollers: [], lamps: null, barrier: null, screen: null };
+  function makeTunnel() {
+    const steel = MAT.steel;
+    for (const m of MACH) {
+      const g = new THREE.Group(); g.position.set(LANE_X, 0, m.z); scene.add(g);
+      for (const s of [-1, 1]) { const post = new THREE.Mesh(new THREE.BoxGeometry(18, 380, 18), steel); post.position.set(s * 205, 190, 0); post.castShadow = true; g.add(post); }
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(428, 18, 18), steel); bar.position.y = 380; g.add(bar);
+      const col = { foam: '#f43f5e', brush: '#0ea5e9', water: '#38bdf8', shine: '#e39b32', air: '#d2552b' }[m.kind];
+      for (const nx of [-140, 0, 140]) { const n = new THREE.Mesh(new THREE.BoxGeometry(30, 36, 30), new THREE.MeshLambertMaterial({ color: lin(col) })); n.position.set(nx, 352, 0); g.add(n); }
+      if (m.kind === 'brush') {
+        const stripes = canvasTex(64, 256, (c, w, h) => { for (let i = 0; i < 16; i++) { c.fillStyle = ['#0ea5e9', '#f43f5e', '#f2c94c', '#10b981'][i % 4]; c.fillRect(0, i * 16, w, 16); } });
+        stripes.wrapS = stripes.wrapT = THREE.RepeatWrapping;
+        for (const s of [-1, 1]) { const br = new THREE.Mesh(new THREE.CylinderGeometry(46, 46, 230, 14, 1, true), new THREE.MeshLambertMaterial({ map: stripes, side: THREE.DoubleSide })); br.position.set(s * 175, 135, 0); g.add(br); TU.brushes.push({ m: br, s }); }
+        const top = new THREE.Mesh(new THREE.CylinderGeometry(40, 40, 360, 14, 1, false), new THREE.MeshLambertMaterial({ map: stripes, side: THREE.DoubleSide })); top.rotation.z = Math.PI / 2; top.position.set(0, 255, 120); g.add(top); TU.brushes.push({ m: top, s: 0 });
+      }
+    }
+    for (let i = 0; i < 14; i++) { const r = new THREE.Mesh(new THREE.BoxGeometry(34, 8, 26), MAT.gold); r.position.set(-3675, 4, RAIL_Z + i * 250); scene.add(r); TU.rollers.push(r); }
+    // the exit light, both faces lit so the driver and you can see it
+    const house = new THREE.Mesh(new THREE.BoxGeometry(46, 100, 46), MAT.dark); house.position.set(-3275, 345, 1625); scene.add(house);
+    const red = new THREE.MeshBasicMaterial({ color: lin('#4a1010') }), green = new THREE.MeshBasicMaterial({ color: lin('#0f3a1c') });
+    for (const sx of [-1, 1]) { const a = new THREE.Mesh(new THREE.SphereGeometry(15, 12, 8), red); a.position.set(-3275 + sx * 22, 370, 1625); scene.add(a); const b = new THREE.Mesh(new THREE.SphereGeometry(15, 12, 8), green); b.position.set(-3275 + sx * 22, 322, 1625); scene.add(b); }
+    TU.lamps = { red, green };
+    // pay station screen (faces the driver) and the lane barrier while the tunnel is closed
+    const scr = canvasTex(256, 160, (c, w, h) => { c.fillStyle = '#10202e'; c.fillRect(0, 0, w, h); c.fillStyle = '#e39b32'; c.font = '700 40px Fredoka, sans-serif'; c.textAlign = 'center'; c.fillText('RODEO', w / 2, 60); c.fillStyle = '#fff'; c.font = '700 26px Fredoka, sans-serif'; c.fillText('PAY HERE', w / 2, 104); c.fillStyle = '#38bdf8'; c.fillText('Pick a ride', w / 2, 140); });
+    const sc = new THREE.Mesh(new THREE.PlaneGeometry(90, 90), new THREE.MeshBasicMaterial({ map: scr })); sc.rotation.y = -Math.PI / 2; sc.position.set(-3453, 200, -2075); scene.add(sc);
+    const sc2 = sc.clone(); sc2.rotation.y = Math.PI / 2; sc2.position.x = -3347; scene.add(sc2);
+    TU.barrier = new THREE.Group(); scene.add(TU.barrier);
+    for (let k = 0; k < 2; k++) { const t = new THREE.Mesh(new THREE.BoxGeometry(560, 14, 6), new THREE.MeshLambertMaterial({ color: lin(k ? '#111827' : '#f2c94c') })); t.position.set(LANE_X + 10, 90 + k * 40, -2180); TU.barrier.add(t); }
   }
   const bayOpen = b => b.vip ? has('vip') : b.i < S.bays;
 
@@ -706,13 +875,13 @@ const Game = (() => {
     c.pkg = pickPkg(b); c.stages = PKG[c.pkg].stages; c.stage = 0; c.prog = [0, 0, 0, 0]; c.rinse = 0; c.bay = b; c.vip = b.vip;
     c.hp = PKG[c.pkg].hp * (b.vip ? 1.5 : 1);
     const side = b.x > 0 && b.x > 1300 ? 1 : -1;
-    c.path = roundPath([[side * 4200, BACK_Z], [b.x, BACK_Z], [b.x, 0]], 420); c.s = 0; c.state = 'arrive'; c.v = 900; c.heading = side > 0 ? -Math.PI / 2 : Math.PI / 2;
+    c.path = roundPath([[side * ROAD_END, BACK_Z], [b.x, BACK_Z], [b.x, 0]], 420); c.s = 0; c.state = 'arrive'; c.v = 900; c.heading = side > 0 ? -Math.PI / 2 : Math.PI / 2;
     const p = pathAt(c.path, 0); c.x = p.x; c.z = p.z; c.root.position.set(c.x, 0, c.z); c.root.rotation.y = c.heading;
     b.car = c; cars.push(c); setLooks(c);
   }
   function leave(c) {
     const side = c.bay.x > 0 ? 1 : -1;
-    c.path = roundPath([[c.x, c.z], [c.x, FRONT_Z], [side * 4300, FRONT_Z]], 420); c.s = 0; c.state = 'leave'; c.v = 120;
+    c.path = roundPath([[c.x, c.z], [c.x, FRONT_Z], [side * ROAD_END, FRONT_Z]], 420); c.s = 0; c.state = 'leave'; c.v = 120;
     c.bay.car = null; c.bay.timer = lineDelay();
   }
   function removeCar(c) { scene.remove(c.root); const i = cars.indexOf(c); if (i >= 0) cars.splice(i, 1); }
@@ -766,8 +935,128 @@ const Game = (() => {
     save(); UI.hudNow();
   }
 
+  /* ---------- the express tunnel ----------
+     xArrive → xKiosk (wait for a check-in at the pay station) → xHold → xToRail → xRail (wait to be guided on) →
+     xConv (pulled through on neutral; the machines do the work) → xGreen (light turns green, pay) → xLeave */
+  const XQ = { k: null, r: null, timer: 2, green: 0 };
+  const convSpeed = () => CONV_SPEED(S.conv) * (boostOn('rush') ? 1.5 : 1);
+  function xSpawn() {
+    const kinds = ['sedan', 'suv', 'hatch', 'van', 'truck'], kind = kinds[Math.floor(Math.random() * kinds.length)], paint = PAINTS[Math.floor(Math.random() * PAINTS.length)];
+    const c = buildCar(kind, paint); c.paint = paint; c.express = true; c.pkg = pickPkg({}); c.stages = PKG[c.pkg].stages; c.stage = 0; c.prog = [0, 0, 0, 0]; c.rinse = 0; c.wait = 0;
+    c.path = roundPath([[-ROAD_END, BACK_Z], [LANE_X, BACK_Z], [LANE_X, KIOSK.z]], 380); c.s = 0; c.state = 'xArrive'; c.heading = Math.PI / 2;
+    const p = pathAt(c.path, 0); c.x = p.x; c.z = p.z; XQ.k = c; cars.push(c); setLooks(c); xLooks(c);
+  }
+  const railFree = () => !cars.some(c => c.state === 'xConv' && c.z < RAIL_Z + 560);
+  function checkIn(c, who) {
+    if (!c || c.state !== 'xKiosk') return false;
+    c.state = 'xHold'; Sound.pop(); UI.float(KIOSK.x, 260, KIOSK.z, PKG[c.pkg].name, 'checkmark'); return true;
+  }
+  function guideOn(c) {
+    if (!c || c.state !== 'xRail' || !railFree()) return false;
+    c.state = 'xConv'; XQ.r = null; Sound.pop(); return true;
+  }
+  // what the machines have done to the car by the time it reaches z
+  function xLooks(c) {
+    const z = c.z, k = (a, b) => clamp((z - a) / (b - a), 0, 1);
+    const inT = c.state === 'xConv' || c.state === 'xGreen' || c.state === 'xLeave';
+    const dirt = inT ? 1 - k(-800, -100) : 1, foam = inT ? k(-1350, -950) * (1 - k(-250, 150)) : 0;
+    const tire = inT && c.stages.includes('tires') ? k(250, 650) : 0, shine = inT && c.stages.includes('ceramic') ? k(350, 750) : 0;
+    if (c.body) { const u = c.body.userData.u; u.uDirt.value.setScalar(dirt); u.uFoam.value.setScalar(foam); u.uShine.value.setScalar(shine); }
+    c.wheels.forEach(w => w.mats.forEach(m => { m.userData.u.uWDirt.value = dirt; m.userData.u.uTire.value = tire; }));
+    if (c.fake) c.fake.material.color.copy(lin(c.paint)).lerp(lin('#5a3d22'), dirt * 0.7);
+  }
+  function xStep(c, dt, live) {
+    if (!live) return;
+    if (c.state === 'xKiosk') { c.wait += dt; if (S.attend && c.wait > 1.6) { checkIn(c); att[0].wave = 1.2; } }
+    else if (c.state === 'xHold') { if (!XQ.r) { XQ.r = c; XQ.k = null; XQ.timer = lineDelay(); c.path = roundPath([[c.x, c.z], [LANE_X, RAIL_Z]], 100); c.s = 0; c.state = 'xToRail'; } }
+    else if (c.state === 'xRail') { c.wait += dt; if (S.guide && c.wait > 1.4 && guideOn(c)) att[1].wave = 1.2; }
+    else if (c.state === 'xConv') {
+      const ahead = cars.filter(o => o !== c && (o.state === 'xConv' || o.state === 'xGreen') && o.z > c.z).reduce((m, o) => Math.min(m, o.z), 1e9);
+      const v = ahead - c.z < 520 ? 0 : convSpeed(); c.z += v * dt; c.v = v;
+      c.wheels.forEach(w => { w.node.rotation.x += v * dt / (w.r * U); });
+      for (const m of MACH) if (Math.abs(c.z - m.z) < 230) machineFx(m, c);
+      xLooks(c);
+      if (c.z >= TUN.exit) { c.state = 'xGreen'; c.t = 0; XQ.green = 1.4; pay(c); }
+    } else if (c.state === 'xGreen') { c.t += dt; if (c.t > 0.7) { c.path = roundPath([[c.x, c.z], [LANE_X, FRONT_Z], [-ROAD_END, FRONT_Z]], 380); c.s = 0; c.state = 'xLeave'; } }
+  }
+  function machineFx(m, c) {
+    if (Math.random() > 0.5 * View.q.parts + 0.2) return;
+    const top = { x: LANE_X + (Math.random() - 0.5) * 300, y: 350, z: m.z };
+    if (m.kind === 'foam') FX.spray(top.x, top.y, top.z, c.x + (Math.random() - 0.5) * 200, 150, c.z, 'foam', 2);
+    else if (m.kind === 'brush') { FX.splash(c.x + (Math.random() < 0.5 ? -1 : 1) * c.hw, 80 + Math.random() * 80, c.z, 'mud'); FX.spray(top.x, top.y, top.z, c.x, 120, c.z, 'water', 1); }
+    else if (m.kind === 'water') FX.spray(top.x, top.y, top.z, c.x + (Math.random() - 0.5) * 200, 100, c.z, 'water', 3);
+    else if (m.kind === 'shine') FX.spray(top.x, top.y, top.z, c.x, 110, c.z, c.stages.includes('ceramic') ? 'ceramic' : 'tires', 2);
+    else FX.spray(top.x, top.y, top.z, c.x + (Math.random() - 0.5) * 200, 140, c.z - 60, 'air', 2);
+  }
+  function tunnelFrame(dt, live) {
+    const busy = cars.some(c => c.state === 'xConv'), sp = live ? convSpeed() : 0;
+    for (const b of TU.brushes) { const near = cars.some(c => c.state === 'xConv' && Math.abs(c.z - MACH[1].z) < 400); if (b.s) b.m.rotation.y += dt * (near ? 9 : 1.5) * b.s; else b.m.rotation.x += dt * (near ? 7 : 1); }
+    if (S.express) for (const r of TU.rollers) { r.position.z += sp * dt; if (r.position.z > TUN.z1 + 60) r.position.z -= 3500; }
+    XQ.green = Math.max(0, XQ.green - dt);
+    const g = XQ.green > 0; TU.lamps.green.color.copy(lin(g ? '#22e05a' : '#0f3a1c')); TU.lamps.red.color.copy(lin(!g && busy ? '#ff3b30' : '#4a1010'));
+    TU.barrier.visible = !S.express;
+  }
+  function interactions() {   // what the context button would do right now
+    const near = (p, r) => Math.hypot(player.x - p.x, player.z - p.z) < (r || 230);
+    if (near(KIOSK_STAND) && !S.express) return { t: 'Open the Express Tunnel', sub: fmt(EXPRESS_COST) + ' Bucks', col: S.bucks >= EXPRESS_COST ? '#10b981' : '#9ca3af', ic: 'lock', act: () => buyExpress() };
+    if (near(KIOSK_STAND) && XQ.k && XQ.k.state === 'xKiosk') return { t: 'Check in', sub: PKG[XQ.k.pkg].name, col: '#d2552b', ic: 'checkmark', act: () => checkIn(XQ.k) };
+    if (near(RAIL_STAND) && XQ.r && XQ.r.state === 'xRail') return railFree() ? { t: 'Guide onto the conveyor', sub: 'Shift to neutral, please!', col: '#e39b32', ic: 'arrow_up', act: () => guideOn(XQ.r) } : { t: 'Wait for the car ahead', sub: 'The conveyor is busy', col: '#9ca3af', ic: 'clock', act: () => false };
+    if (near(LOCKER, 200)) return { t: S.uniform ? 'Wear your own shirt' : 'Put on the Rodeo uniform', sub: 'Locker', col: '#d2552b', ic: 'swatches', act: () => setUniform(!S.uniform) };
+    const b = bayNear(); if (b && b.i === S.bays) return { t: 'Open Bay ' + (b.i + 1), sub: fmt(BAY_COST[b.i]) + ' Bucks', col: S.bucks >= BAY_COST[b.i] ? '#10b981' : '#9ca3af', ic: 'lock', act: () => buyBay() };
+    return null;
+  }
+  function buyExpress() { if (S.express || S.bucks < EXPRESS_COST) return false; S.bucks -= EXPRESS_COST; S.express = true; XQ.timer = 1; save(); return true; }
+  function buyAttend(k) { const c = k === 'attend' ? ATTEND_COST : GUIDE_COST; if (!S.express || S[k] || S.bucks < c) return false; S.bucks -= c; S[k] = true; save(); return true; }
+  function buyConv() { if (!S.express || S.conv >= CONV_MAX) return false; const c = CONV_COST(S.conv); if (S.bucks < c) return false; S.bucks -= c; S.conv++; save(); return true; }
+  let ownTop;
+  function setUniform(on) {
+    S.uniform = !!on; save();
+    if (player && player.sandy) { try { player.sandy.apply({ top: on ? Uniform.top() : (ownTop === undefined ? null : ownTop) }); } catch (e) {} }
+    UI.toast(on ? 'Rodeo uniform on' : 'Back in your own clothes', 'good'); return true;
+  }
+
+  /* ---------- the arrow trail: points the way to wherever you should go next ---------- */
+  const TR = { mesh: null, beacon: null, N: 40 };
+  function makeTrail() {
+    const sh = new THREE.Shape(); sh.moveTo(-26, -14); sh.lineTo(0, 12); sh.lineTo(26, -14); sh.lineTo(26, -30); sh.lineTo(0, -4); sh.lineTo(-26, -30); sh.lineTo(-26, -14);
+    const geo = new THREE.ShapeGeometry(sh); geo.rotateX(-Math.PI / 2); geo.rotateY(Math.PI);
+    TR.mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95, depthWrite: false });
+    TR.mesh = new THREE.InstancedMesh(geo, TR.mat, TR.N); TR.mesh.frustumCulled = false; TR.mesh.count = 0; scene.add(TR.mesh);
+    TR.beacon = new THREE.Mesh(new THREE.ConeGeometry(34, 70, 4), new THREE.MeshBasicMaterial({ color: 0xffffff })); TR.beacon.rotation.x = Math.PI; scene.add(TR.beacon); TR.beacon.visible = false;
+    TR.m = new THREE.Matrix4(); TR.q = new THREE.Quaternion(); TR.v = new THREE.Vector3(); TR.sc = new THREE.Vector3(); TR.up = new THREE.Vector3(0, 1, 0);
+  }
+  function trailTarget() {
+    const inf = has('soap');
+    if (!inf && player.soap < tankCap() * 0.2) return { x: TANK.x, z: TANK.z + 230, col: '#0ea5e9', why: 'Low on soap: follow the arrows to the soap tank' };
+    if (XQ.k && XQ.k.state === 'xKiosk' && !S.attend) return { x: KIOSK_STAND.x, z: KIOSK_STAND.z, col: '#d2552b', why: 'A car is at the pay station: check it in' };
+    if (XQ.r && XQ.r.state === 'xRail' && !S.guide && railFree()) return { x: RAIL_STAND.x, z: RAIL_STAND.z, col: '#e39b32', why: 'Guide the car onto the conveyor' };
+    if (S.cars < 3 && !target) { let best = null, bd = 1e9; for (const c of cars) if (working(c)) { const d = Math.hypot(c.x - player.x, c.z - player.z); if (d < bd) { bd = d; best = c; } } if (best) { const p = standPoint(best, 0); return { x: p.x, z: p.z, col: '#10b981', why: S.cars ? 'Wash the next car' : 'Walk to the car in Bay 1' }; } }
+    const g = UI.goalInfo; if (g && g.can && S.cars < 80) {
+      if (g.where === 'bay') return { x: bays[S.bays].x, z: 0, col: '#f97316', why: 'Ready! Walk into Bay ' + (S.bays + 1) + ' to open it' };
+      if (g.where === 'express') return { x: KIOSK_STAND.x, z: KIOSK_STAND.z, col: '#10b981', why: 'Ready! Open the Express Tunnel at the pay station' };
+      if (g.where === 'reb') return { x: PADS[2].x, z: PADS[2].z, col: '#7c3aed', why: 'Ready to rebirth: step on the purple pad' };
+      return { x: PADS[0].x, z: PADS[0].z, col: '#10b981', why: 'Ready! Step on the green Upgrades pad' };
+    }
+    return null;
+  }
+  let trailT = null;
+  function trailFrame() {
+    const t = running && !paused ? trailTarget() : null; trailT = t;
+    const d = t ? Math.hypot(t.x - player.x, t.z - player.z) : 0;
+    if (!t || d < 200) { TR.mesh.count = 0; TR.beacon.visible = false; return; }
+    TR.mat.color.copy(lin(t.col)); TR.beacon.material.color.copy(lin(t.col));
+    const dx = (t.x - player.x) / d, dz = (t.z - player.z) / d, step = 85, off = (TIME.value * 140) % step;
+    TR.q.setFromAxisAngle(TR.up, Math.atan2(dx, dz)); let n = 0;
+    for (let s2 = 110 + off; s2 < d - 60 && n < TR.N; s2 += step) {
+      const fade = Math.min(1, (s2 - 110) / 120, (d - 60 - s2) / 160);
+      TR.v.set(player.x + dx * s2, 9, player.z + dz * s2); TR.sc.setScalar(Math.max(0.15, fade)); TR.m.compose(TR.v, TR.q, TR.sc); TR.mesh.setMatrixAt(n++, TR.m);
+    }
+    TR.mesh.count = n; TR.mesh.instanceMatrix.needsUpdate = true;
+    TR.beacon.visible = true; TR.beacon.position.set(t.x, 300 + Math.sin(TIME.value * 4) * 25, t.z); TR.beacon.rotation.y += 0.03;
+  }
+
   /* ---------- people: the player and the crew ---------- */
-  let player = null; const crew = [];
+  let player = null; const crew = [], att = [];
   const CREW_SHIRT = '#d2552b';
   function nozzle(color) {
     const g = new THREE.Group();
@@ -820,13 +1109,19 @@ const Game = (() => {
     await loadCars();
     makeBays();
     const K = Avatars.K;
-    let ps = null; try { ps = K ? await K.create(Avatars.playerConfig()) : null; } catch (e) { console.warn(e); }
-    player = makeChar(ps, 0x2b3350, '#e39b32'); player.x = -1625; player.z = 700; player.face = Math.PI; player.soap = Math.min(S.soap || 100, tankCap());
+    await Uniform.make();
+    const pc = K ? Avatars.playerConfig() : null; if (pc) { ownTop = pc.top === undefined ? null : pc.top; if (S.uniform && Uniform.top()) pc.top = Uniform.top(); }
+    let ps = null; try { ps = K ? await K.create(pc) : null; } catch (e) { console.warn(e); }
+    player = makeChar(ps, 0x2b3350, '#e39b32'); player.x = -1625; player.z = 760; player.face = Math.PI; player.soap = Math.min(S.soap || 100, tankCap());
     for (let i = 0; i < 7; i++) {
       let s = null; try { s = K ? await K.create(Avatars.botConfig(i, CREW_SHIRT)) : null; } catch (e) {}
       const b = makeChar(s, new THREE.Color(CREW_SHIRT), '#0ea5e9'); b.root.visible = false; b.i = i; crew.push(b);
     }
-    FX.init(); UI.buildLabels(bays);
+    for (let i = 0; i < 2; i++) {
+      let s = null; try { s = K ? await K.create(Avatars.botConfig(10 + i, CREW_SHIRT)) : null; } catch (e) {}
+      const a = makeChar(s, new THREE.Color(CREW_SHIRT), '#e39b32'); a.root.visible = false; const sp = i ? RAIL_STAND : KIOSK_STAND; a.x = sp.x + 40; a.z = sp.z + (i ? 60 : -40); a.face = -Math.PI / 2; a.noz.visible = false; att.push(a);
+    }
+    FX.init(); makeTrail(); UI.buildLabels(bays);
     // money your crew made while you were away (half rate, up to 2 hours)
     const away = Math.min(7200, (Date.now() - (S.last || Date.now())) / 1000);
     if (S.crew > 0 && away > 60) {
@@ -836,7 +1131,8 @@ const Game = (() => {
     const ob = bays.filter(bayOpen); crew.forEach((w, i) => { const b = ob[i] || bays[0]; w.x = b.x - 230; w.z = 420; });
     place(player); crew.forEach(place);
   }
-  let offline = null;
+  let offline = null, ctxNow = null, ctxLatch = false;
+  function doCtx() { const c = ctxNow; if (!c) return false; const ok = c.act(); if (ok) { Sound.buy(); UI.hudNow(); } else if (/Bucks/.test(c.sub)) UI.toast('Not enough Bucks yet.', 'bad'); return ok; }
 
   /* ---------- the loop ---------- */
   let running = false, paused = true, camT = null, lastScore = 0, tipT = 0, padIn = null, soapWarn = 0, target = null, spraying = false, autoT = 0;
@@ -851,17 +1147,20 @@ const Game = (() => {
       if (!live || !open || b.car) continue;
       b.timer -= dt; if (b.timer <= 0) spawn(b);
     }
+    // the express tunnel calls in its next car
+    if (live && S.express && !XQ.k) { XQ.timer -= dt; if (XQ.timer <= 0) xSpawn(); }
     // cars: drive, rinse, dry, leave
     for (let i = cars.length - 1; i >= 0; i--) {
       const c = cars[i];
-      if (c.state === 'arrive' || c.state === 'leave') {
+      if (c.state === 'arrive' || c.state === 'leave' || c.state === 'xArrive' || c.state === 'xToRail' || c.state === 'xLeave') {
         if (!live) continue;
         const left = c.path.total - c.s;
-        const vmax = c.state === 'arrive' ? Math.min(900, 140 + left * 1.4) : Math.min(1000, 160 + c.s * 1.6);
+        const vmax = c.state === 'arrive' || c.state === 'xArrive' || c.state === 'xToRail' ? Math.min(c.state === 'xToRail' ? 260 : 900, 120 + left * 1.4) : Math.min(1000, 160 + c.s * 1.6);
         c.v = vmax; c.s += c.v * dt;
         const p = pathAt(c.path, c.s); c.x = p.x; c.z = p.z; c.heading += angDiff(c.heading, p.h) * Math.min(1, dt * 10);
         c.wheels.forEach(w => { w.node.rotation.x += c.v * dt / (w.r * U); });
-        if (c.s >= c.path.total) { if (c.state === 'arrive') { c.state = 'parked'; c.heading = 0; c.x = c.bay.x; c.z = 0; } else { removeCar(c); continue; } }
+        if (c.s >= c.path.total) { if (c.state === 'arrive') { c.state = 'parked'; c.heading = 0; c.x = c.bay.x; c.z = 0; } else if (c.state === 'xArrive') { c.state = 'xKiosk'; c.heading = 0; c.wait = 0; } else if (c.state === 'xToRail') { c.state = 'xRail'; c.heading = 0; c.wait = 0; } else { removeCar(c); continue; } }
+      } else if (c.express) { xStep(c, dt, live);
       } else if (c.state === 'rinse') {
         if (live) { c.t += dt; c.rinse = Math.max(0, 1 - c.t / 0.9); if (Math.random() < 0.6) FX.spray(c.x + (Math.random() - 0.5) * c.hw * 2, 330, c.z + (Math.random() - 0.5) * c.hl * 2, c.x, 0, c.z, 'water', 3); setLooks(c); if (c.t >= 0.9) { c.rinse = 0; nextStage(c); setLooks(c); } }
       } else if (c.state === 'dry') {
@@ -924,6 +1223,13 @@ const Game = (() => {
       collide(w, 26); place(w);
       if (w.root.visible) { animate(w, moving, dt, 0.9, aiming); holdNozzle(w, aiming ? w.aim : null); } else w.noz.visible = false;
     });
+    // the two tunnel attendants (once hired) stand at their posts and wave the cars through
+    att.forEach((a, i) => { const on = i ? S.guide : S.attend; a.root.visible = on; if (!on) return; a.wave = Math.max(0, (a.wave || 0) - dt);
+      if (a.sandy) { const an = a.wave > 0 ? 'wave' : 'idle'; if (an !== a.anim) { a.sandy.play(an); a.anim = an; } a.sandy.update(dt); } place(a); });
+    tunnelFrame(dt, live); trailFrame();
+    // context button: F, gamepad B, or tap it
+    ctxNow = live && !UI.blocking() ? interactions() : null;
+    if (ctxNow && (input.keys.has('KeyF') || input.padB) && !ctxLatch) { ctxLatch = true; doCtx(); } if (!input.keys.has('KeyF') && !input.padB) ctxLatch = false;
     // boosts tick while you play
     if (live) { for (const k in S.boosts) { S.boosts[k] -= dt; if (S.boosts[k] <= 0) delete S.boosts[k]; } }
     // Bucks a minute (for packs and gifts), saves, score
@@ -936,6 +1242,7 @@ const Game = (() => {
     camera.position.set(camT.x + Math.sin(CAM.yaw) * cd2, CAM.height + Math.sin(CAM.pitch) * D, camT.z + Math.cos(CAM.yaw) * cd2);
     camera.lookAt(camT.x, CAM.height, camT.z);
     sun.position.set(camT.x + 900, 1800, camT.z + 700); sun.target.position.set(camT.x, 0, camT.z);
+    camera.updateMatrixWorld();   // so the screen labels line up with this frame, not the last one
     UI.frame();
   }
   function togglePause(force) { if (!running) return; paused = force === true ? true : !paused; if (paused) { input.spray = false; Sound.spray(false); S.soap = player.soap; save(); if (S.cars !== lastScore) { lastScore = S.cars; Bridge.score(S.cars, S.cars, S.rebirths); } } UI.paused(paused); }
@@ -949,7 +1256,8 @@ const Game = (() => {
   function train() { const c = TRAIN_COST(S.crewLvl); if (S.bucks < c) return false; S.bucks -= c; S.crewLvl++; save(); return true; }
   function rebirth() {
     const c = REBIRTH_COST(S.rebirths); if (S.bucks < c) return false;
-    const keep = { rebirths: S.rebirths + 1, cars: S.cars, life: S.life, daily: S.daily, boosts: S.boosts, best: S.best, tut: S.tut };
+    const keep = { rebirths: S.rebirths + 1, cars: S.cars, life: S.life, daily: S.daily, boosts: S.boosts, best: S.best, tut: S.tut, uniform: S.uniform };
+    XQ.k = XQ.r = null;
     S = Object.assign(fresh(), keep);
     for (const c2 of cars.slice()) { if (c2.bay && c2.bay.car === c2) c2.bay.car = null; removeCar(c2); }
     bays.forEach((b, i) => b.timer = 1 + i * 0.5); player.soap = tankCap(); save();
@@ -968,7 +1276,7 @@ const Game = (() => {
   function bayNear() { for (const b of bays) if (!b.vip && !bayOpen(b) && Math.abs(player.x - b.x) < 300 && Math.abs(player.z) < 330) return b; return null; }
 
   return {
-    setup, begin, step, togglePause, buyUp, buyBay, buyTier, hire, train, rebirth, apply, daily, claimDaily, has, boostOn, onsite, mult, estPerMin, bayNear, bayOpen, crewMax, crewPower, power, tankCap, lineDelay,
+    setup, begin, step, togglePause, doCtx, buyExpress, buyAttend, buyConv, setUniform, convSpeed, get ctx() { return ctxNow; }, get trail() { return trailT; }, get XQ() { return XQ; }, railFree, buyUp, buyBay, buyTier, hire, train, rebirth, apply, daily, claimDaily, has, boostOn, onsite, mult, estPerMin, bayNear, bayOpen, crewMax, crewPower, power, tankCap, lineDelay,
     get S() { return S; }, get running() { return running; }, get paused() { return paused; }, get player() { return player; }, get target() { return target; }, get spraying() { return spraying; },
     debug: { setLooks, spawn },
     get onsiteLeft() { return Math.max(0, onsiteUntil - Date.now()); }, get rank() { return rank; }, get offline() { const o = offline; offline = null; return o; }, get bays() { return bays; }, get cars() { return cars; }
@@ -986,7 +1294,7 @@ const FX = (() => {
     geo.setAttribute('size', new THREE.BufferAttribute(new Float32Array(N), 1));
     const mat = new THREE.ShaderMaterial({
       uniforms: { uScale: { value: 1 } }, transparent: true, depthWrite: false,
-      vertexShader: 'attribute float size; attribute vec3 color; varying vec3 vC; uniform float uScale; void main(){ vC = color; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = size * uScale / -mv.z; gl_Position = projectionMatrix * mv; }',
+      vertexShader: 'attribute float size; attribute vec3 color; varying vec3 vC; uniform float uScale; void main(){ vC = color; if (size <= 0.01) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); gl_PointSize = 0.0; return; } vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = size * uScale / -mv.z; gl_Position = projectionMatrix * mv; }',
       fragmentShader: 'varying vec3 vC; void main(){ vec2 d = gl_PointCoord - 0.5; float r = dot(d, d); if (r > 0.25) discard; gl_FragColor = vec4(vC, 1.0 - smoothstep(0.12, 0.25, r)); }'
     });
     pts = new THREE.Points(geo, mat); pts.frustumCulled = false; scene.add(pts);
@@ -1012,7 +1320,7 @@ const FX = (() => {
     const pos = geo.attributes.position.array, col = geo.attributes.color.array, sz = geo.attributes.size.array;
     for (let i = 0; i < N; i++) {
       const p = P[i];
-      if (p.life <= 0) { sz[i] = 0; continue; }
+      if (p.life <= 0) { if (sz[i]) { sz[i] = 0; pos[i * 3 + 1] = -9999; } continue; }
       p.life -= dt; p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; if (p.y < 4) { p.y = 4; p.vy *= -0.2; p.vx *= 0.6; p.vz *= 0.6; }
       pos[i * 3] = p.x; pos[i * 3 + 1] = p.y; pos[i * 3 + 2] = p.z; col[i * 3] = p.col.r; col[i * 3 + 1] = p.col.g; col[i * 3 + 2] = p.col.b;
       sz[i] = p.size * Math.min(1, p.life / p.max * 2.5);
@@ -1042,10 +1350,15 @@ const UI = (() => {
     const box = $('labels');
     bays.forEach(b => { const el = document.createElement('div'); el.className = 'lb'; box.appendChild(el); LB.push({ el, kind: 'bay', b, x: b.x, y: 250, z: 0, key: '' }); });
     for (const p of PADS) { const el = document.createElement('div'); el.className = 'lb pad'; el.innerHTML = '<span class="chip" style="background:' + p.color + '">' + vi(p.icon) + esc(p.name) + '</span>'; box.appendChild(el); LB.push({ el, kind: 'pad', x: p.x, y: 120, z: p.z }); }
+    const dyn = (x, y, z, fn) => { const e = document.createElement('div'); e.className = 'lb pad'; box.appendChild(e); LB.push({ el: e, kind: 'dyn', x, y, z, fn, key: '' }); };
+    const chip = (c, ic, t, sub) => '<span class="chip" style="background:' + c + '">' + vi(ic) + esc(t) + '</span>' + (sub ? '<span class="st">' + esc(sub) + '</span>' : '');
+    dyn(KIOSK.x, 330, KIOSK.z, () => { const s = S(), q = Game.XQ; if (!s.express) return chip('#111827cc', 'lock', 'Express Tunnel · ' + fmt(EXPRESS_COST) + ' Bucks', 'Walk up to the pay station to open it'); if (q.k && q.k.state === 'xKiosk') return chip('#d2552b', 'checkmark', 'Pay station: check in!', s.attend ? 'Your attendant is on it' : PKG[q.k.pkg].name + ' waiting'); return chip('#4b3a2c', 'mobile_phone', 'Pay station', s.attend ? 'Attendant on duty' : 'Waiting for a car'); });
+    dyn(RAIL_STAND.x - 160, 300, RAIL_Z, () => { const s = S(), q = Game.XQ; if (!s.express) return ''; if (q.r && q.r.state === 'xRail') return Game.railFree() ? chip('#e39b32', 'arrow_up', 'Guide it onto the conveyor', s.guide ? 'Your guide is on it' : 'Shift to neutral!') : chip('#9ca3af', 'clock', 'Conveyor busy', 'Next car in a moment'); return chip('#4b3a2c', 'car', 'Conveyor', s.guide ? 'Guide on duty' : 'Express Tunnel'); });
+    dyn(LOCKER.x, 360, LOCKER.z + 125, () => chip('#d2552b', 'swatches', 'Locker', S().uniform ? 'Wearing the Rodeo uniform' : 'Wearing your own clothes'));
     const el = document.createElement('div'); el.className = 'lb pad'; el.innerHTML = '<span class="chip" style="background:#0ea5e9">' + vi('droplet') + 'Soap tank</span>'; box.appendChild(el); LB.push({ el, kind: 'pad', x: TANK.x, y: 420, z: TANK.z });
     for (let i = 0; i < 14; i++) { const f = document.createElement('div'); f.className = 'ft'; f.hidden = true; box.appendChild(f); FT.push({ el: f, t: 0 }); }
   }
-  const v3 = { x: 0, y: 0, z: 0 }; let _v = null;
+  const v3 = { x: 0, y: 0, z: 0 }; let _v = null, goalInfo = null;
   function project(x, y, z) { _v = _v || new THREE.Vector3(); _v.set(x, y, z).project(camera); return { x: (_v.x + 1) / 2 * innerWidth, y: (1 - _v.y) / 2 * innerHeight, ok: _v.z < 1 && _v.z > -1 }; }
   function labelHTML(L) {
     const b = L.b;
@@ -1065,14 +1378,15 @@ const UI = (() => {
     for (const L of LB) {
       const p = project(L.x, L.y, L.z), d = Math.hypot(L.x - camera.position.x, L.z - camera.position.z);
       const show = p.ok && d < 4200 && !menu; L.el.hidden = !show; if (!show) continue;
-      if (L.kind === 'bay') { const h = labelHTML(L); const key = h.cls + h.html; if (key !== L.key) { L.key = key; L.el.className = h.cls; L.el.innerHTML = h.html; } }
-      const py = L.kind === 'bay' ? Math.max(p.y, (innerWidth < 640 ? 150 : 96) + L.el.offsetHeight) : p.y;
-      L.el.style.transform = 'translate(' + p.x.toFixed(1) + 'px,' + py.toFixed(1) + 'px) translate(-50%,-100%)';
+      if (L.kind === 'bay') { const h = labelHTML(L); const key = h.cls + h.html; if (key !== L.key) { L.key = key; L.el.className = h.cls; L.el.innerHTML = h.html; L.h = L.el.offsetHeight; } }
+      else if (L.kind === 'dyn') { const h = L.fn(); if (h !== L.key) { L.key = h; L.el.innerHTML = h; } if (!h) { L.el.hidden = true; continue; } }
+      const py = L.kind === 'bay' ? Math.max(p.y, (innerWidth < 640 ? 150 : 96) + (L.h || 40)) : p.y;
+      L.el.style.transform = 'translate3d(' + Math.round(p.x) + 'px,' + Math.round(py) + 'px,0) translate(-50%,-100%)';
     }
     for (const f of FT) {
       if (f.el.hidden) continue; f.t += 1 / 60; const p = project(f.x, f.y + f.t * 120, f.z);
       if (f.t > 1.2 || !p.ok) { f.el.hidden = true; continue; }
-      f.el.style.opacity = String(Math.min(1, (1.2 - f.t) * 3)); f.el.style.transform = 'translate(' + p.x.toFixed(1) + 'px,' + p.y.toFixed(1) + 'px) translate(-50%,-50%) scale(' + (1 + Math.min(0.2, f.t)) + ')';
+      f.el.style.opacity = String(Math.min(1, (1.2 - f.t) * 3)); f.el.style.transform = 'translate3d(' + Math.round(p.x) + 'px,' + Math.round(p.y) + 'px,0) translate(-50%,-50%) scale(' + (1 + Math.min(0.2, f.t)) + ')';
     }
     hudFrame();
   }
@@ -1101,21 +1415,23 @@ const UI = (() => {
   function hudFrame() {
     const p = Game.player; if (!p) return;
     const cap = Game.tankCap(), inf = Game.has('soap');
-    $('soapFill').style.width = (inf ? 100 : p.soap / cap * 100).toFixed(1) + '%'; $('soapTxt').textContent = inf ? '∞' : fmt(p.soap); $('soap').classList.toggle('low', !inf && p.soap < cap * 0.2);
+    $('soapFill').style.height = (inf ? 100 : Math.max(3, p.soap / cap * 100)).toFixed(1) + '%'; $('soapTxt').textContent = inf ? '∞' : Math.round(p.soap / cap * 100) + '%';
+    const sp = $('soap'); sp.classList.toggle('low', !inf && p.soap < cap * 0.2); sp.classList.toggle('inf', inf); sp.classList.toggle('spraying', Game.spraying);
     const t = Game.target, st = t ? t.stages[t.stage] : 'mud', S2 = STAGES[st] || STAGES.mud;
     const key = st + (t ? 1 : 0) + (Game.has('auto') ? 'a' : '');
     const sb = $('sprayBtn'); if (sb.dataset.k !== key) { sb.dataset.k = key; sb.style.background = t ? S2.color : '#0ea5e9'; sb.innerHTML = vi(S2.icon) + '<span>' + esc(t ? S2.name : 'Spray') + '</span>' + (touch ? '' : '<small>hold Space</small>'); }
-    // contextual: standing in the next locked bay
-    const b = Game.bayNear(), cx = $('ctx');
-    if (b && b.i === S().bays && !menu) { const c = BAY_COST[b.i], can = S().bucks >= c; const k = 'b' + b.i + can; if (cx.dataset.k !== k) { cx.dataset.k = k; cx.innerHTML = vi('lock') + '<span>Open Bay ' + (b.i + 1) + '<small>' + fmt(c) + ' Bucks</small></span>'; cx.style.background = can ? 'var(--green)' : '#9ca3af'; } cx.hidden = false; }
+    // contextual button: whatever's right here (check in, guide, locker, open a bay)
+    const cx = $('ctx'), C = !menu && Game.ctx;
+    if (C) { const k = C.t + C.sub + C.col; if (cx.dataset.k !== k) { cx.dataset.k = k; cx.innerHTML = vi(C.ic) + '<span>' + esc(C.t) + '<small>' + esc(C.sub) + (touch ? '' : ' · F') + '</small></span>'; cx.style.background = C.col; } cx.hidden = false; }
     else cx.hidden = true;
     // tutorial hint
     const s = S(), h = $('hint'); let msg = '';
     if (!menu && Game.running) {
-      if (s.cars === 0 && !t) msg = touch ? 'Walk to the car in Bay 1 with the left thumb' : 'Walk to the car in Bay 1 (WASD)';
+      if (Game.trail && /soap|pay station|conveyor/.test(Game.trail.why)) msg = Game.trail.why;
+      else if (s.cars === 0 && !t) msg = touch ? 'Follow the arrows to the car in Bay 1 (left thumb moves)' : 'Follow the arrows to the car in Bay 1 (WASD)';
       else if (s.cars === 0 && t && !Game.spraying) msg = touch ? 'Hold the Spray button to wash' : 'Hold Space to spray';
       else if (s.cars < 2 && t && Game.spraying) msg = 'Walk around the car to wash every side';
-      else if (!Game.has('soap') && p.soap < cap * 0.15 && s.cars < 6) msg = 'Low on soap: refill at the blue tank';
+      else if (Game.trail) msg = Game.trail.why;
     }
     h.hidden = !msg; if (msg && h.textContent !== msg) h.textContent = msg;
     hudT += 1 / 60; if (hudT > 0.25) { hudT = 0; hudNow(); }
@@ -1126,9 +1442,13 @@ const UI = (() => {
     if (s.bays < 6) c.push({ t: 'Open Bay ' + (s.bays + 1), cost: BAY_COST[s.bays], tab: 'lot', ic: 'house', col: '#f97316' });
     if (s.tier < 3) c.push({ t: 'Open ' + PKG[s.tier + 1].name, cost: PKG[s.tier + 1].cost, tab: 'lot', ic: 'car', col: PKG[s.tier + 1].color });
     if (s.crew < Game.crewMax() && s.crew < 7) c.push({ t: 'Hire a washer', cost: CREW_COST(s.crew), tab: 'crew', ic: 'users', col: '#0ea5e9' });
+    if (!s.express) c.push({ t: 'Open the Express Tunnel', cost: EXPRESS_COST * (s.cars < 3 ? 4 : 1), real: EXPRESS_COST, tab: 'lot', ic: 'car', col: '#d2552b', where: 'express' });
+    else { if (!s.attend) c.push({ t: 'Hire a pay station attendant', cost: ATTEND_COST, tab: 'crew', ic: 'users', col: '#d2552b' }); if (!s.guide) c.push({ t: 'Hire a conveyor guide', cost: GUIDE_COST, tab: 'crew', ic: 'users', col: '#e39b32' }); }
     if (!c.length) c.push({ t: 'Rebirth for x' + REBIRTH_MULT(s.rebirths + 1).toFixed(2), cost: REBIRTH_COST(s.rebirths), tab: 'reb', ic: 'stars', col: '#7c3aed' });
-    c.sort((a, b) => a.cost - b.cost); it = c[0];
-    const can = s.bucks >= it.cost, pct = Math.min(100, s.bucks / it.cost * 100);
+    c.sort((a, b) => a.cost - b.cost); it = c[0]; if (it.real) it.cost = it.real;
+    if (!it.where) it.where = /^Open Bay/.test(it.t) ? 'bay' : it.tab === 'reb' ? 'reb' : 'pad';
+    const can = s.bucks >= it.cost; goalInfo = { can, where: it.where, t: it.t };
+    const pct = Math.min(100, s.bucks / it.cost * 100);
     const key = it.t + can + Math.round(pct / 4);
     if (g.dataset.k !== key) { g.dataset.k = key; g.dataset.tab = it.tab; g.innerHTML = '<span class="ic" style="background:' + it.col + '">' + vi(can ? 'checkmark' : it.ic) + '</span><span class="gt"><b>' + (can ? 'Ready: ' : 'Next: ') + esc(it.t) + '</b><span class="gbar"><i style="width:' + pct.toFixed(0) + '%;background:' + it.col + '"></i></span></span>'; }
   }
@@ -1144,6 +1464,7 @@ const UI = (() => {
     return '<div class="h" style="color:var(--sky)">Settings<small>lower the quality if the game feels slow</small></div><div class="items">' +
       '<div class="item set">' + tile('gauge', 'var(--sky)') + '<div class="txt"><b>Quality</b><small>' + (View.o.quality === 'auto' ? 'Auto is using ' + View.Q[View.level].n + (View.fps ? ' · ' + View.fps + ' fps' : '') : 'Low turns off shadows and draws fewer pixels.') + '</small></div>' + seg([['auto', 'Auto'], ['low', 'Low'], ['medium', 'Medium'], ['high', 'High']], View.o.quality, 'data-gfx', 'var(--sky)') + '</div>' +
       '<div class="item set">' + tile('star', 'var(--indigo)') + '<div class="txt"><b>Sharpness</b><small>Fewer pixels runs faster.</small></div>' + seg([[0.6, '60%'], [0.8, '80%'], [1, '100%']], View.o.scale, 'data-scale', 'var(--indigo)') + '</div>' +
+      '<div class="item set">' + tile('swatches', '#d2552b') + '<div class="txt"><b>Rodeo uniform</b><small>Or wear your own avatar’s shirt. The locker by the pads does this too.</small></div><div class="seg">' + [[1, 'Uniform'], [0, 'My shirt']].map(([v, n]) => '<button class="pillb' + ((S().uniform ? 1 : 0) === v ? ' on' : '') + '" style="' + ((S().uniform ? 1 : 0) === v ? 'background:#d2552b' : '') + '" data-uni="' + v + '">' + n + '</button>').join('') + '</div></div>' +
       '<div class="item set">' + tile(View.o.sound ? 'speaker' : 'speaker_mute', 'var(--teal)') + '<div class="txt"><b>Sound</b><small>Spray hiss and coin chimes.</small></div>' + seg([[1, 'On'], [0, 'Off']], View.o.sound ? 1 : 0, 'data-sound', 'var(--teal)') + '</div></div>';
   }
   function wallet() {
@@ -1166,13 +1487,14 @@ const UI = (() => {
         '<div class="h" style="color:var(--gold)">How it works</div><div class="how">' +
         '<div>' + tile('droplet', '#0ea5e9') + '<p>Walk up to a car and hold <b>Spray</b>. Walk around it to clean every side.</p></div>' +
         '<div>' + tile('wrench', '#10b981') + '<p>Spend Bucks on upgrades, more bays, bigger wash packages and a crew that washes for you.</p></div>' +
+        '<div>' + tile('car', '#d2552b') + '<p>Open the <b>Express Tunnel</b>: check cars in at the pay station, guide them onto the conveyor, and the machines do the rest.</p></div>' +
         '<div>' + tile('stars', '#7c3aed') + '<p>Rebirth to start over with a bigger Bucks multiplier, forever.</p></div>' +
         '<div>' + tile('gem', '#f59e0b') + '<p>Tap the NFC poster at your bay for Rodeo points. They buy boosts and passes in the Store.</p></div></div>' +
         '<p class="note">A demo made for Rodeo Express Car Wash. Bucks are play money: they aren’t dollars and can’t be traded for washes.</p>' + settings() + '</div>';
     } else if (menu === 'pause') {
       el.innerHTML = head('pause', '#64748b', 'Paused', 'The wash waits for you.', false) + '<div class="body"><button class="go" id="resumeBtn">' + vi('play') + 'Keep washing</button>' +
         '<div class="stats"><div class="stat"><b style="color:var(--gold)">' + fmt(s.bucks) + '</b><small>Bucks</small></div><div class="stat"><b style="color:var(--green)">' + fmt(s.cars) + '</b><small>Cars washed</small></div><div class="stat"><b style="color:var(--indigo)">x' + Game.mult().toFixed(2) + '</b><small>Bucks multiplier</small></div></div>' +
-        settings() + '<p class="note">Move: WASD, arrows, left thumb or left stick. Camera: drag, or the right stick. Spray: hold Space, E, the Spray button or A. Upgrades: X · Store: Y · Pause: P, Esc or Start.</p></div>';
+        settings() + '<p class="note">Move: WASD, arrows, left thumb or left stick. Camera: drag, or the right stick. Spray: hold Space, E, the Spray button or A. Interact (check in, guide, locker): F, the action button or B. Upgrades: U or X · Store: Y · Pause: P, Esc or Start.</p></div>';
     } else if (menu === 'up') {
       const T = (id, n, c) => '<button style="' + (tab === id ? 'background:' + c + ';color:#fff' : '') + '" data-tab="' + id + '">' + n + '</button>';
       let html = head('wrench', 'var(--green)', 'Upgrades', 'Spend your Bucks') + '<div class="body">' + wallet() + '<div class="tabs">' + T('gear', 'Gear', '#10b981') + T('lot', 'Lot', '#f97316') + T('crew', 'Crew', '#0ea5e9') + '</div><div class="h" style="color:var(--green)"></div><div class="items">';
@@ -1180,6 +1502,10 @@ const UI = (() => {
         for (const k in UPG) { const u = UPG[k], l = s.up[k], max = l >= u.max; html += row(u.icon, u.color, u.name, esc(u.unit(u.val(l))) + (max ? '' : ' → ' + esc(u.unit(u.val(l + 1)))), max ? '<span class="own">' + vi('checkmark') + 'Max</span>' : coinBtn(u.cost(l), 'data-up="' + k + '"', u.color), l); }
       } else if (tab === 'lot') {
         for (let i = 1; i < 6; i++) { const open = i < s.bays, next = i === s.bays; html += row('house', '#f97316', 'Bay ' + (i + 1), open ? 'Open: cars pull in here' : next ? 'Another car at a time' : 'Open Bay ' + i + ' first', open ? '<span class="own">' + vi('checkmark') + 'Open</span>' : next ? coinBtn(BAY_COST[i], 'data-bay', '#f97316') : '<button class="dim" disabled>' + vi('lock') + fmt(BAY_COST[i]) + '</button>'); }
+        html += '</div><div class="h" style="color:#d2552b">Express Tunnel<small>the drive-through: check in, guide on, the machines wash</small></div><div class="items">';
+        html += row('car', '#d2552b', 'Express Tunnel', s.express ? 'Open: cars check in at the pay station' : 'Opens a second line of cars through the tunnel', s.express ? '<span class="own">' + vi('checkmark') + 'Open</span>' : coinBtn(EXPRESS_COST, 'data-express', '#d2552b'));
+        if (s.express) html += row('gauge', '#e39b32', 'Conveyor Speed', Math.round(Game.convSpeed() / 100 * 10) / 10 + ' m a second' + (s.conv < CONV_MAX ? ' → ' + Math.round(CONV_SPEED(s.conv + 1) / 100 * 10) / 10 : ''), s.conv >= CONV_MAX ? '<span class="own">' + vi('checkmark') + 'Max</span>' : coinBtn(CONV_COST(s.conv), 'data-conv', '#e39b32'), s.conv);
+        html += '</div><div class="h" style="color:#f97316">More</div><div class="items">';
         html += row('stars', '#e39b32', 'VIP Bay', 'Show cars that pay x3. From the Store.', Game.has('vip') ? '<span class="own">' + vi('checkmark') + 'Open</span>' : '<button style="background:var(--amber)" data-open="store">' + vi('shop') + 'Store</button>');
         html += '</div><div class="h" style="color:#7c3aed">Wash packages<small>bigger packages pay more</small></div><div class="items">';
         PKG.forEach((p, i) => { const open = i <= s.tier, next = i === s.tier + 1; html += row(i === 0 ? 'droplet' : STAGES[p.stages[p.stages.length - 1]].icon, p.color, esc(p.name), esc(p.adds) + ' · pays ' + fmt(p.pay) + '+', open ? '<span class="own">' + vi('checkmark') + 'Open</span>' : next ? coinBtn(p.cost, 'data-tier', p.color) : '<button class="dim" disabled>' + vi('lock') + fmt(p.cost) + '</button>'); });
@@ -1187,6 +1513,8 @@ const UI = (() => {
         const max = Math.min(7, Game.crewMax());
         html += row('users', '#0ea5e9', 'Hire a washer', s.crew + ' of ' + max + ' hired · one per open bay', s.crew >= max ? '<span class="own">' + vi('checkmark') + 'Full</span>' : coinBtn(CREW_COST(s.crew), 'data-hire', '#0ea5e9'));
         html += row('medal', '#6366f1', 'Crew Training', 'Each washer cleans ' + fmt(Game.crewPower()) + ' a second → ' + fmt(CREW_POWER(s.crewLvl + 1) * (Game.has('crew') ? 2 : 1)), coinBtn(TRAIN_COST(s.crewLvl), 'data-train', '#6366f1'), s.crewLvl);
+        html += row('mobile_phone', '#d2552b', 'Pay station attendant', s.express ? 'Checks in every car at the pay station for you' : 'Open the Express Tunnel first', s.attend ? '<span class="own">' + vi('checkmark') + 'Hired</span>' : s.express ? coinBtn(ATTEND_COST, 'data-attend="attend"', '#d2552b') : '<button class="dim" disabled>' + vi('lock') + fmt(ATTEND_COST) + '</button>');
+        html += row('arrow_up', '#e39b32', 'Conveyor guide', s.express ? 'Guides every car onto the conveyor for you' : 'Open the Express Tunnel first', s.guide ? '<span class="own">' + vi('checkmark') + 'Hired</span>' : s.express ? coinBtn(GUIDE_COST, 'data-attend="guide"', '#e39b32') : '<button class="dim" disabled>' + vi('lock') + fmt(GUIDE_COST) + '</button>');
         html += row('lightning_bolt', '#f59e0b', 'Crew Pro Gear', 'Your crew washes twice as fast, forever.', Game.has('crew') ? '<span class="own">' + vi('checkmark') + 'Owned</span>' : '<button style="background:var(--amber)" data-open="store">' + vi('shop') + 'Store</button>');
       }
       el.innerHTML = html + '</div><p class="note">Upgrades reset when you rebirth. Store passes never do.</p></div>';
@@ -1224,6 +1552,10 @@ const UI = (() => {
     if (b.dataset.open) { open(b.dataset.open); return; }
     if (b.dataset.up) { if (Game.buyUp(b.dataset.up)) { Sound.buy(); toast(UPG[b.dataset.up].name + ' up!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }
     if (b.dataset.bay != null) { if (Game.buyBay()) { Sound.buy(); toast('Bay ' + S().bays + ' is open!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }
+    if (b.dataset.express != null) { if (Game.buyExpress()) { Sound.buy(); toast('The Express Tunnel is open!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }
+    if (b.dataset.conv != null) { if (Game.buyConv()) { Sound.buy(); toast('Conveyor sped up!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }
+    if (b.dataset.attend) { if (Game.buyAttend(b.dataset.attend)) { Sound.buy(); toast(b.dataset.attend === 'attend' ? 'Your pay station attendant is on duty!' : 'Your conveyor guide is on duty!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }
+    if (b.dataset.uni) { Game.setUniform(b.dataset.uni === '1'); render(); return; }
     if (b.dataset.tier != null) { if (Game.buyTier()) { Sound.buy(); toast(PKG[S().tier].name + ' is on the menu!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }
     if (b.dataset.hire != null) { if (Game.hire()) { Sound.buy(); toast('A new washer joined your crew!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }
     if (b.dataset.train != null) { if (Game.train()) { Sound.buy(); toast('Crew trained!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }
@@ -1252,12 +1584,12 @@ const UI = (() => {
     if (b.id === 'storeBtn') { open('store'); return; }
     if (b.id === 'rebBtn') { open('reb'); return; }
     if (b.id === 'goal') { const t = b.dataset.tab; if (t === 'reb') open('reb'); else open('up', t); return; }
-    if (b.id === 'ctx') { if (Game.buyBay()) { Sound.buy(); toast('Bay ' + S().bays + ' is open!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); hudNow(); return; }
+    if (b.id === 'ctx') { Game.doCtx(); hudNow(); return; }
     if (b.id === 'giftBtn') { const a = Game.claimDaily(); if (a) { Sound.coin(); toast('Daily gift: +' + fmt(a) + ' Bucks!', 'gold'); FX.burst(Game.player.x, 200, Game.player.z, 'gold', 30); } hudNow(); return; }
     if (b.id === 'rebGo') { if (Game.rebirth()) { Sound.buy(); close(); toast('Rebirth! Bucks now pay x' + REBIRTH_MULT(S().rebirths).toFixed(2), 'gold'); hudNow(); } return; }
   });
   Bridge.on(() => { if (menu === 'store' || menu === 'title' || menu === 'up') render(); hudNow(); if (!Game.running && !menu) open('title'); });
-  return { open, close, render, hud, hudNow, frame, float, toast, paused, buildLabels, blocking, get kind() { return menu; } };
+  return { open, close, render, hud, hudNow, frame, float, toast, paused, buildLabels, blocking, get kind() { return menu; }, get goalInfo() { return goalInfo; } };
 })();
 
 /* ---------- boot ---------- */
