@@ -25,7 +25,8 @@
     alchemy:  { name: 'Alchemy Bake Lab',         short: 'Alchemy',  game: 'Sugar Alchemist' },
     rodeo:    { name: 'Rodeo Express Car Wash',   short: 'Rodeo',    game: 'Rodeo Wash Simulator' },
     runway:   { name: 'Runway Ready',             short: 'Runway',   game: 'Runway Ready' },
-    chestquest: { name: 'Chest Quest',            short: 'Chest Quest', game: 'Chest Quest' }
+    chestquest: { name: 'Chest Quest',            short: 'Chest Quest', game: 'Chest Quest' },
+    glowupspa: { name: 'Glow Up Spa',             short: 'Glow Up Spa', game: 'Glow Up Spa' }
   };
 
   const free = () => ({ type: 'free' });

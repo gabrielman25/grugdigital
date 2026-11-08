@@ -85,6 +85,18 @@ window.GRUG_GAMES = [
     avatar: 'You play as your avatar', earn: 'Power-ups use Pearls, the Grug currency'
   },
   {
+    // A Grug original (standalone: true): play/glowupspa/ hosts it in place of a rewards app; Store items cost Pearls only.
+    // Its host save ('grug-glowupspa-v1') holds owned items and best cash a second, not partner points, so no storageKey here.
+    id: 'glowupspa', app: 'glowupspa', standalone: true,
+    title: 'Glow Up Spa', kind: '3D tycoon', status: 'live',
+    partner: 'Grug Original', place: 'Plays anywhere',
+    blurb: 'Run a salon and spa, sneak eggs out of the Beauty Store, and hatch pets that earn cash.',
+    long: 'Build your own salon and spa: your staff give haircuts, pedicures, hair color and face masks while you grab the cash, add chairs, hire staff and open new rooms. Train your Speed on the treadmill, sneak eggs out of the six-zone Beauty Store mall past the clerks, and hatch pets that roam your field and earn cash on their own. Fuse matching pets to grow them, collect gold, rainbow and colour variants, and rebirth for a bigger multiplier. You play as your own avatar, and Pearls buy speed, passes, boosts and cash packs in the Store.',
+    play: 'play/glowupspa/', game: 'play/glowupspa/', storageKey: '', old: '',
+    thumb: 'assets/thumbs/glowupspa.jpg', color: '#EC4899', ink: '#FFFFFF',
+    avatar: 'You play as your avatar', earn: 'Store items use Pearls, the Grug currency'
+  },
+  {
     id: 'alchemy', app: 'alchemy',
     title: 'Sugar Alchemist', kind: '3D bakery sim', status: 'live',
     partner: 'Alchemy Bake Lab', place: 'Peek Rd, Katy',
