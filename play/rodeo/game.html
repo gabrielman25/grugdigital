@@ -340,7 +340,7 @@ const View = (() => {
 /* ---------- the lot (all sizes in cm) ----------
    Six wash bays in a row along x (cars face +z), a VIP bay on the right, the soap tank and the pads on the left.
    Cars come in on the back road (z = -2500) and leave by the front road (z = +2450). */
-const BAY_X = [-1625, -975, -325, 325, 975, 1625], VIP_X = 2625, BACK_Z = -2500, FRONT_Z = 2450, ROAD_END = 4950;
+const BAY_X = [-1625, -975, -325, 325, 975, 1625], VIP_X = 2625, BACK_Z = -2500, FRONT_Z = 2450, ROAD_END = 4850, TURN = 950;
 const TANK = { x: -2650, z: 450 }, PADS = [
   { id: 'up', x: -2650, z: -500, name: 'Upgrades', color: '#10b981', icon: 'wrench' },
   { id: 'store', x: -2650, z: -1250, name: 'Store', color: '#f59e0b', icon: 'shop' },
@@ -361,6 +361,7 @@ const MAT = {};
    faces between a block and air are drawn, and touching faces of the same colour merge into big quads. Nothing is
    ever drawn on top of anything else, so there's no z-fighting. A small shader darkens block edges and varies each
    block's shade a little so the grid reads as blocks. Ground blocks sit under y = 0; everything else stands on it. */
+const LAMPS = [];
 const VX = (() => {
   const B = 50, X0 = -5400, Z0 = -5000, NX = 216, NZ = 192, NY = 26;
   const g = new Uint8Array(NX * NY * NZ), pal = [null], idx = {};
@@ -371,7 +372,7 @@ const VX = (() => {
   // fill the blocks covering a world box (cm). hex = colour, or null to clear; f(ix, iy, iz) can pick a colour per block
   function box(x0, x1, y0, y1, z0, z1, hex) {
     const c = typeof hex === 'function' ? null : hex ? ci(hex) : 0;
-    for (let y = cy(y0); y < cy(y1); y++) for (let z = cz(z0); z < cz(z1); z++) for (let x = cx(x0); x < cx(x1); x++) put(x, y, z, c === null ? (hex(x, y, z) ? ci(hex(x, y, z)) : 0) : c);
+    for (let y = cy(y0); y < cy(y1); y++) for (let z = cz(z0); z < cz(z1); z++) for (let x = cx(x0); x < cx(x1); x++) { if (c !== null) { put(x, y, z, c); continue; } const v = hex(x, y, z); if (v !== undefined) put(x, y, z, v ? ci(v) : 0); }
   }
   const ground = (x0, x1, z0, z1, hex) => box(x0, x1, -B, 0, z0, z1, hex);
   function disc(x, z, r, y0, y1, hex) { for (let iz = cz(z - r - B); iz <= cz(z + r + B); iz++) for (let ix = cx(x - r - B); ix <= cx(x + r + B); ix++) { const wx = X0 + (ix + 0.5) * B, wz = Z0 + (iz + 0.5) * B; if (Math.hypot(wx - x, wz - z) <= r) for (let y = cy(y0); y < cy(y1); y++) put(ix, y, iz, ci(hex)); } }
@@ -437,7 +438,7 @@ function makeWorld() {
   // ground: dirt with grass patches, the lot, two roads with dashed centre lines
   V.ground(-5400, 5400, -5000, 4600, (x, y, z) => H(x, z) < 0.12 ? '#cfb07c' : '#d9bf8f');
   for (const [x, z, r] of [[-4050, 400, 220], [3800, 700, 450], [-3700, 3400, 650], [3600, 3500, 700], [-600, 3600, 550], [1700, 3300, 400], [-4000, -1500, 380], [3700, -1400, 420]])
-    V.box(x - r, x + r, -50, 0, z - r, z + r, (ix, iy, iz) => { const wx = V.X0 + (ix + 0.5) * 50, wz = V.Z0 + (iz + 0.5) * 50, d = Math.hypot(wx - x, (wz - z) * 1.3) / r + (H(ix, iz) - 0.5) * 0.3; return d < 1 ? (H(iz, ix) < 0.3 ? '#7fa34a' : '#93b45a') : (V.at(ix, 0, iz) ? V.at(ix, 0, iz) && null : null); });
+    V.box(x - r, x + r, -50, 0, z - r, z + r, (ix, iy, iz) => { const wx = V.X0 + (ix + 0.5) * 50, wz = V.Z0 + (iz + 0.5) * 50, d = Math.hypot(wx - x, (wz - z) * 1.3) / r + (H(ix, iz) - 0.5) * 0.3; return d < 1 ? (H(iz, ix) < 0.3 ? '#7fa34a' : '#93b45a') : undefined; });
   V.ground(-3950, 3200, -2200, 2150, '#5d6168');
   V.ground(-5400, 5400, -2800, -2200, '#45484f'); V.ground(-5400, 5400, 2150, 2750, '#45484f');
   for (let x = -5400; x < 5400; x += 300) { V.ground(x, x + 150, -2500, -2450, '#f2c94c'); V.ground(x, x + 150, 2450, 2500, '#f2c94c'); }
@@ -448,17 +449,27 @@ function makeWorld() {
   const mesa = (x0, x1, z0, z1, hMin, hMax) => V.box(x0, x1, 0, hMax, z0, z1, (ix, iy, iz) => { const top = hMin + Math.floor(H(ix >> 2, iz >> 2) * (hMax - hMin) / 50) * 50; return (iy - 1) * 50 < top ? STRATA[(iy + (H(ix >> 3, iz >> 3) > 0.7 ? 1 : 0)) % STRATA.length] : null; });
   mesa(4300, 5400, -5000, 4600, 650, 950); mesa(-5400, -4300, -5000, 4600, 650, 950);
   mesa(-5400, 5400, -5000, -4400, 700, 1000); mesa(-5400, 5400, 3950, 4600, 300, 550);
+  const wx = ix => V.X0 + (ix + 0.5) * 50;
+  const stone = ix => { const d = Math.abs(wx(ix)) - 4300; return d < 250 ? '#9a9187' : d < 500 ? '#857d73' : d < 700 ? '#6f6860' : '#5c5650'; };
+  const floor = (ix, iz) => { const d = Math.abs(wx(ix)) - 4300; return d < 300 ? '#45484f' : d < 600 ? '#3d4046' : '#36383d'; };
   for (const s of [-1, 1]) for (const [z0, z1, out] of [[-2800, -2200, -1], [2150, 2750, 1]]) {
-    const mx = s > 0 ? 4300 : -4300, far = s > 0 ? [4300, 5000] : [-5000, -4300], bend = s > 0 ? [4600, 5000] : [-5000, -4600];
-    V.box(far[0], far[1], -50, 0, z0, z1, '#2f3035');
-    V.box(far[0] - 50, far[1] + 50, 0, 450, z0 - 50, z1 + 50, '#1c1612');                 // dark lining
-    V.box(far[0], far[1], 0, 400, z0, z1, null);                                         // the bore
-    const bz = out < 0 ? [z0 - 450, z0] : [z1, z1 + 450];                                // it bends off toward the edge
-    V.box(bend[0] - 50, bend[1] + 50, 0, 450, bz[0] - 50, bz[1] + 50, (ix, iy, iz) => V.at(ix, iy, iz) ? '#1c1612' : null);
-    V.box(bend[0], bend[1], 0, 400, bz[0], bz[1], null); V.box(bend[0], bend[1], -50, 0, bz[0], bz[1], '#2f3035');
+    const mx = s > 0 ? 4300 : -4300, A = (a, b) => s > 0 ? [a, b] : [-b, -a];
+    const bore = A(4300, 5150), turnX = A(4550, 5150), tz = out < 0 ? [z0 - 750, z0] : [z1, z1 + 750];
+    // stone lining wherever the rock meets the hole, darker deeper in
+    V.box(bore[0] - 50, bore[1] + 50, 0, 450, z0 - 50, z1 + 50, (ix, iy, iz) => V.at(ix, iy, iz) ? stone(ix) : undefined);
+    V.box(turnX[0] - 50, turnX[1] + 50, 0, 450, tz[0] - 50, tz[1] + 50, (ix, iy, iz) => V.at(ix, iy, iz) ? stone(ix) : undefined);
+    V.box(bore[0], bore[1], 0, 400, z0, z1, null); V.box(turnX[0], turnX[1], 0, 400, tz[0], tz[1], null);
+    // the road carries on inside and turns with the bore
+    V.box(bore[0], bore[1], -50, 0, z0, z1, (ix, iy, iz) => floor(ix, iz)); V.box(turnX[0], turnX[1], -50, 0, tz[0], tz[1], (ix, iy, iz) => floor(ix, iz));
+    const roadZ = out < 0 ? -2500 : 2450;
+    for (let x = 4300; x < 4800; x += 300) V.ground(s > 0 ? x : -x - 150, s > 0 ? x + 150 : -x, roadZ, roadZ + 50, '#c9a83c');
+    for (let z = tz[0]; z < tz[1]; z += 300) V.ground(s > 0 ? 4850 : -4900, s > 0 ? 4900 : -4850, z, z + 150, '#c9a83c');
     const fx = s > 0 ? [mx, mx + 50] : [mx - 50, mx];                                     // stone portal
     V.box(fx[0], fx[1], 0, 500, z0 - 100, z0 - 50, '#8a8178'); V.box(fx[0], fx[1], 0, 500, z1 + 50, z1 + 100, '#8a8178'); V.box(fx[0], fx[1], 400, 500, z0 - 100, z1 + 100, '#8a8178');
     V.box(s > 0 ? mx - 50 : mx, s > 0 ? mx : mx + 50, 0, 400, z0 - 100, z0 - 50, '#9a9187'); V.box(s > 0 ? mx - 50 : mx, s > 0 ? mx : mx + 50, 0, 400, z1 + 50, z1 + 100, '#9a9187');
+    // warm ceiling lamps along the way
+    for (let x = 4450; x < 5100; x += 220) LAMPS.push([s * x, (z0 + z1) / 2]);
+    for (let z = tz[0] + 100; z < tz[1]; z += 220) LAMPS.push([s * 4850, z]);
   }
   // the express tunnel (west side of the lot)
   V.ground(-3950, -3250, -2200, 1800, '#5d6168');
@@ -482,9 +493,11 @@ function makeWorld() {
   // cacti and rocks
   const cactus = (x, z, h) => { V.box(x, x + 50, 0, h, z, z + 50, '#4f8a4b'); V.box(x + 50, x + 100, h * 0.45, h * 0.45 + 50, z, z + 50, '#5f9a55'); V.box(x + 100, x + 150, h * 0.45, h * 0.75, z, z + 50, '#5f9a55'); V.box(x - 50, x, h * 0.6, h * 0.6 + 50, z, z + 50, '#5f9a55'); V.box(x - 100, x - 50, h * 0.6, h * 0.85, z, z + 50, '#5f9a55'); };
   for (const [x, z, h] of [[-4100, 2000, 300], [-4150, -900, 250], [3500, 1100, 350], [3600, -1500, 250], [-4000, -3300, 350], [4000, 3300, 300], [-1500, 3500, 300], [1600, -4200, 350], [-2400, 3200, 250], [2600, 3000, 300], [0, -4200, 300]]) cactus(x, z, h);
-  for (const [x, z] of [[-3400, 2500], [3300, -2000], [-2000, -4300], [2500, 3800], [-4100, 2200], [3900, 300]]) { V.box(x, x + 100, 0, 50, z, z + 100, '#a39a8e'); V.box(x + 50, x + 100, 50, 100, z + 50, z + 100, '#b5ab9e'); }
+  for (const [x, z] of [[-3400, 3150], [3500, -3300], [-2000, -4300], [2500, 3800], [-4000, 3300], [3900, 300]]) { V.box(x, x + 100, 0, 50, z, z + 100, '#a39a8e'); V.box(x + 50, x + 100, 50, 100, z + 50, z + 100, '#b5ab9e'); }
   makeBayBlocks();
   scene.add(V.mesh());
+  const lampG = new THREE.BoxGeometry(60, 10, 30), lampM = new THREE.MeshBasicMaterial({ color: lin('#ffe2a0') });
+  for (const [x, z] of LAMPS) { const l = new THREE.Mesh(lampG, lampM); l.position.set(x, 393, z); scene.add(l); }
   // the outside world past the grid: a dirt plane just under the ground blocks
   const out = new THREE.Mesh(new THREE.PlaneGeometry(60000, 60000), new THREE.MeshLambertMaterial({ color: lin('#d4b98a') })); out.rotation.x = -Math.PI / 2; out.position.y = -60; scene.add(out);
   // the big sign's face, on the front of its board
@@ -613,7 +626,7 @@ const BAY_COST = [0, 150, 900, 5000, 25000, 120000];
 const UPG = {
   power: { name: 'Nozzle Power', icon: 'gauge', color: '#0ea5e9', max: 60, cost: l => 25 * Math.pow(1.62, l), val: l => 8 * Math.pow(1.28, l), unit: v => fmt(v) + ' a second' },
   tank: { name: 'Soap Tank', icon: 'droplet', color: '#14b8a6', max: 40, cost: l => 20 * Math.pow(1.55, l), val: l => 100 * Math.pow(1.35, l), unit: v => fmt(v) + ' soap' },
-  reach: { name: 'Long Wand', icon: 'arrow_right', color: '#6366f1', max: 8, cost: l => 60 * Math.pow(2.3, l), val: l => 230 + 45 * l, unit: v => (v / 100).toFixed(1) + ' m reach' },
+  reach: { name: 'Long Wand', icon: 'arrow_right', color: '#6366f1', max: 8, cost: l => 60 * Math.pow(2.3, l), val: l => 460 + 60 * l, unit: v => (v / 100).toFixed(1) + ' m reach' },
   boots: { name: 'Quick Step', icon: 'footsteps', color: '#f97316', max: 10, cost: l => 40 * Math.pow(1.9, l), val: l => 1 + 0.08 * l, unit: v => Math.round(v * 100) + '% speed' },
   tips: { name: 'Friendly Service', icon: 'coins', color: '#e39b32', max: 50, cost: l => 120 * Math.pow(1.75, l), val: l => 1 + 0.15 * l, unit: v => '+' + Math.round((v - 1) * 100) + '% Bucks' },
   line: { name: 'Faster Line', icon: 'car', color: '#10b981', max: 12, cost: l => 80 * Math.pow(1.85, l), val: l => 5 * Math.pow(0.84, l), unit: v => 'a car every ' + v.toFixed(1) + ' s' }
@@ -875,13 +888,13 @@ const Game = (() => {
     c.pkg = pickPkg(b); c.stages = PKG[c.pkg].stages; c.stage = 0; c.prog = [0, 0, 0, 0]; c.rinse = 0; c.bay = b; c.vip = b.vip;
     c.hp = PKG[c.pkg].hp * (b.vip ? 1.5 : 1);
     const side = b.x > 0 && b.x > 1300 ? 1 : -1;
-    c.path = roundPath([[side * ROAD_END, BACK_Z], [b.x, BACK_Z], [b.x, 0]], 420); c.s = 0; c.state = 'arrive'; c.v = 900; c.heading = side > 0 ? -Math.PI / 2 : Math.PI / 2;
+    c.path = roundPath([[side * ROAD_END, BACK_Z - TURN], [side * ROAD_END, BACK_Z], [b.x, BACK_Z], [b.x, 0]], 420); c.s = 0; c.state = 'arrive'; c.v = 900; c.heading = 0;
     const p = pathAt(c.path, 0); c.x = p.x; c.z = p.z; c.root.position.set(c.x, 0, c.z); c.root.rotation.y = c.heading;
     b.car = c; cars.push(c); setLooks(c);
   }
   function leave(c) {
     const side = c.bay.x > 0 ? 1 : -1;
-    c.path = roundPath([[c.x, c.z], [c.x, FRONT_Z], [side * ROAD_END, FRONT_Z]], 420); c.s = 0; c.state = 'leave'; c.v = 120;
+    c.path = roundPath([[c.x, c.z], [c.x, FRONT_Z], [side * ROAD_END, FRONT_Z], [side * ROAD_END, FRONT_Z + TURN]], 420); c.s = 0; c.state = 'leave'; c.v = 120;
     c.bay.car = null; c.bay.timer = lineDelay();
   }
   function removeCar(c) { scene.remove(c.root); const i = cars.indexOf(c); if (i >= 0) cars.splice(i, 1); }
@@ -943,7 +956,7 @@ const Game = (() => {
   function xSpawn() {
     const kinds = ['sedan', 'suv', 'hatch', 'van', 'truck'], kind = kinds[Math.floor(Math.random() * kinds.length)], paint = PAINTS[Math.floor(Math.random() * PAINTS.length)];
     const c = buildCar(kind, paint); c.paint = paint; c.express = true; c.pkg = pickPkg({}); c.stages = PKG[c.pkg].stages; c.stage = 0; c.prog = [0, 0, 0, 0]; c.rinse = 0; c.wait = 0;
-    c.path = roundPath([[-ROAD_END, BACK_Z], [LANE_X, BACK_Z], [LANE_X, KIOSK.z]], 380); c.s = 0; c.state = 'xArrive'; c.heading = Math.PI / 2;
+    c.path = roundPath([[-ROAD_END, BACK_Z - TURN], [-ROAD_END, BACK_Z], [LANE_X, BACK_Z], [LANE_X, KIOSK.z]], 380); c.s = 0; c.state = 'xArrive'; c.heading = 0;
     const p = pathAt(c.path, 0); c.x = p.x; c.z = p.z; XQ.k = c; cars.push(c); setLooks(c); xLooks(c);
   }
   const railFree = () => !cars.some(c => c.state === 'xConv' && c.z < RAIL_Z + 560);
@@ -967,9 +980,11 @@ const Game = (() => {
   }
   function xStep(c, dt, live) {
     if (!live) return;
-    if (c.state === 'xKiosk') { c.wait += dt; if (S.attend && c.wait > 1.6) { checkIn(c); att[0].wave = 1.2; } }
+    if (c.state === 'xKiosk') { c.wait += dt; const here = Math.hypot(player.x - KIOSK_STAND.x, player.z - KIOSK_STAND.z) < 260;
+      if (here && c.wait > 0.8) checkIn(c);                                   // just stand at the pay station: it checks cars in for you
+      else if (S.attend && c.wait > 1.6) { checkIn(c); att[0].wave = 1.2; } }
     else if (c.state === 'xHold') { if (!XQ.r) { XQ.r = c; XQ.k = null; XQ.timer = lineDelay(); c.path = roundPath([[c.x, c.z], [LANE_X, RAIL_Z]], 100); c.s = 0; c.state = 'xToRail'; } }
-    else if (c.state === 'xRail') { c.wait += dt; if (S.guide && c.wait > 1.4 && guideOn(c)) att[1].wave = 1.2; }
+    else if (c.state === 'xRail') { c.wait += dt; if (c.wait > 0.5) guideOn(c); }   // rolls onto the conveyor on its own once it's clear
     else if (c.state === 'xConv') {
       const ahead = cars.filter(o => o !== c && (o.state === 'xConv' || o.state === 'xGreen') && o.z > c.z).reduce((m, o) => Math.min(m, o.z), 1e9);
       const v = ahead - c.z < 520 ? 0 : convSpeed(); c.z += v * dt; c.v = v;
@@ -977,7 +992,7 @@ const Game = (() => {
       for (const m of MACH) if (Math.abs(c.z - m.z) < 230) machineFx(m, c);
       xLooks(c);
       if (c.z >= TUN.exit) { c.state = 'xGreen'; c.t = 0; XQ.green = 1.4; pay(c); }
-    } else if (c.state === 'xGreen') { c.t += dt; if (c.t > 0.7) { c.path = roundPath([[c.x, c.z], [LANE_X, FRONT_Z], [-ROAD_END, FRONT_Z]], 380); c.s = 0; c.state = 'xLeave'; } }
+    } else if (c.state === 'xGreen') { c.t += dt; if (c.t > 0.7) { c.path = roundPath([[c.x, c.z], [LANE_X, FRONT_Z], [-ROAD_END, FRONT_Z], [-ROAD_END, FRONT_Z + TURN]], 380); c.s = 0; c.state = 'xLeave'; } }
   }
   function machineFx(m, c) {
     if (Math.random() > 0.5 * View.q.parts + 0.2) return;
@@ -1000,7 +1015,6 @@ const Game = (() => {
     const near = (p, r) => Math.hypot(player.x - p.x, player.z - p.z) < (r || 230);
     if (near(KIOSK_STAND) && !S.express) return { t: 'Open the Express Tunnel', sub: fmt(EXPRESS_COST) + ' Bucks', col: S.bucks >= EXPRESS_COST ? '#10b981' : '#9ca3af', ic: 'lock', act: () => buyExpress() };
     if (near(KIOSK_STAND) && XQ.k && XQ.k.state === 'xKiosk') return { t: 'Check in', sub: PKG[XQ.k.pkg].name, col: '#d2552b', ic: 'checkmark', act: () => checkIn(XQ.k) };
-    if (near(RAIL_STAND) && XQ.r && XQ.r.state === 'xRail') return railFree() ? { t: 'Guide onto the conveyor', sub: 'Shift to neutral, please!', col: '#e39b32', ic: 'arrow_up', act: () => guideOn(XQ.r) } : { t: 'Wait for the car ahead', sub: 'The conveyor is busy', col: '#9ca3af', ic: 'clock', act: () => false };
     if (near(LOCKER, 200)) return { t: S.uniform ? 'Wear your own shirt' : 'Put on the Rodeo uniform', sub: 'Locker', col: '#d2552b', ic: 'swatches', act: () => setUniform(!S.uniform) };
     const b = bayNear(); if (b && b.i === S.bays) return { t: 'Open Bay ' + (b.i + 1), sub: fmt(BAY_COST[b.i]) + ' Bucks', col: S.bucks >= BAY_COST[b.i] ? '#10b981' : '#9ca3af', ic: 'lock', act: () => buyBay() };
     return null;
@@ -1028,8 +1042,7 @@ const Game = (() => {
   function trailTarget() {
     const inf = has('soap');
     if (!inf && player.soap < tankCap() * 0.2) return { x: TANK.x, z: TANK.z + 230, col: '#0ea5e9', why: 'Low on soap: follow the arrows to the soap tank' };
-    if (XQ.k && XQ.k.state === 'xKiosk' && !S.attend) return { x: KIOSK_STAND.x, z: KIOSK_STAND.z, col: '#d2552b', why: 'A car is at the pay station: check it in' };
-    if (XQ.r && XQ.r.state === 'xRail' && !S.guide && railFree()) return { x: RAIL_STAND.x, z: RAIL_STAND.z, col: '#e39b32', why: 'Guide the car onto the conveyor' };
+    if (XQ.k && XQ.k.state === 'xKiosk' && !S.attend) return { x: KIOSK_STAND.x, z: KIOSK_STAND.z, col: '#d2552b', why: 'A car is at the pay station: stand there to check it in' };
     if (S.cars < 3 && !target) { let best = null, bd = 1e9; for (const c of cars) if (working(c)) { const d = Math.hypot(c.x - player.x, c.z - player.z); if (d < bd) { bd = d; best = c; } } if (best) { const p = standPoint(best, 0); return { x: p.x, z: p.z, col: '#10b981', why: S.cars ? 'Wash the next car' : 'Walk to the car in Bay 1' }; } }
     const g = UI.goalInfo; if (g && g.can && S.cars < 80) {
       if (g.where === 'bay') return { x: bays[S.bays].x, z: 0, col: '#f97316', why: 'Ready! Walk into Bay ' + (S.bays + 1) + ' to open it' };
@@ -1117,7 +1130,7 @@ const Game = (() => {
       let s = null; try { s = K ? await K.create(Avatars.botConfig(i, CREW_SHIRT)) : null; } catch (e) {}
       const b = makeChar(s, new THREE.Color(CREW_SHIRT), '#0ea5e9'); b.root.visible = false; b.i = i; crew.push(b);
     }
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 1; i++) {
       let s = null; try { s = K ? await K.create(Avatars.botConfig(10 + i, CREW_SHIRT)) : null; } catch (e) {}
       const a = makeChar(s, new THREE.Color(CREW_SHIRT), '#e39b32'); a.root.visible = false; const sp = i ? RAIL_STAND : KIOSK_STAND; a.x = sp.x + 40; a.z = sp.z + (i ? 60 : -40); a.face = -Math.PI / 2; a.noz.visible = false; att.push(a);
     }
@@ -1224,7 +1237,7 @@ const Game = (() => {
       if (w.root.visible) { animate(w, moving, dt, 0.9, aiming); holdNozzle(w, aiming ? w.aim : null); } else w.noz.visible = false;
     });
     // the two tunnel attendants (once hired) stand at their posts and wave the cars through
-    att.forEach((a, i) => { const on = i ? S.guide : S.attend; a.root.visible = on; if (!on) return; a.wave = Math.max(0, (a.wave || 0) - dt);
+    att.forEach((a, i) => { const on = S.attend; a.root.visible = on; if (!on) return; a.wave = Math.max(0, (a.wave || 0) - dt);
       if (a.sandy) { const an = a.wave > 0 ? 'wave' : 'idle'; if (an !== a.anim) { a.sandy.play(an); a.anim = an; } a.sandy.update(dt); } place(a); });
     tunnelFrame(dt, live); trailFrame();
     // context button: F, gamepad B, or tap it
@@ -1352,8 +1365,8 @@ const UI = (() => {
     for (const p of PADS) { const el = document.createElement('div'); el.className = 'lb pad'; el.innerHTML = '<span class="chip" style="background:' + p.color + '">' + vi(p.icon) + esc(p.name) + '</span>'; box.appendChild(el); LB.push({ el, kind: 'pad', x: p.x, y: 120, z: p.z }); }
     const dyn = (x, y, z, fn) => { const e = document.createElement('div'); e.className = 'lb pad'; box.appendChild(e); LB.push({ el: e, kind: 'dyn', x, y, z, fn, key: '' }); };
     const chip = (c, ic, t, sub) => '<span class="chip" style="background:' + c + '">' + vi(ic) + esc(t) + '</span>' + (sub ? '<span class="st">' + esc(sub) + '</span>' : '');
-    dyn(KIOSK.x, 330, KIOSK.z, () => { const s = S(), q = Game.XQ; if (!s.express) return chip('#111827cc', 'lock', 'Express Tunnel · ' + fmt(EXPRESS_COST) + ' Bucks', 'Walk up to the pay station to open it'); if (q.k && q.k.state === 'xKiosk') return chip('#d2552b', 'checkmark', 'Pay station: check in!', s.attend ? 'Your attendant is on it' : PKG[q.k.pkg].name + ' waiting'); return chip('#4b3a2c', 'mobile_phone', 'Pay station', s.attend ? 'Attendant on duty' : 'Waiting for a car'); });
-    dyn(RAIL_STAND.x - 160, 300, RAIL_Z, () => { const s = S(), q = Game.XQ; if (!s.express) return ''; if (q.r && q.r.state === 'xRail') return Game.railFree() ? chip('#e39b32', 'arrow_up', 'Guide it onto the conveyor', s.guide ? 'Your guide is on it' : 'Shift to neutral!') : chip('#9ca3af', 'clock', 'Conveyor busy', 'Next car in a moment'); return chip('#4b3a2c', 'car', 'Conveyor', s.guide ? 'Guide on duty' : 'Express Tunnel'); });
+    dyn(KIOSK.x, 330, KIOSK.z, () => { const s = S(), q = Game.XQ; if (!s.express) return chip('#111827cc', 'lock', 'Express Tunnel · ' + fmt(EXPRESS_COST) + ' Bucks', 'Walk up to the pay station to open it'); if (q.k && q.k.state === 'xKiosk') return chip('#d2552b', 'checkmark', 'Pay station: check in!', s.attend ? 'Your attendant is on it' : 'Stand here to check in the ' + PKG[q.k.pkg].name); return chip('#4b3a2c', 'mobile_phone', 'Pay station', s.attend ? 'Attendant on duty' : 'Waiting for a car'); });
+    dyn(RAIL_STAND.x - 160, 300, RAIL_Z, () => { const s = S(), q = Game.XQ; if (!s.express) return ''; if (q.r && q.r.state === 'xRail' && !Game.railFree()) return chip('#9ca3af', 'clock', 'Conveyor busy', 'Next car in a moment'); return chip('#4b3a2c', 'car', 'Conveyor', 'Cars roll on in neutral'); });
     dyn(LOCKER.x, 360, LOCKER.z + 125, () => chip('#d2552b', 'swatches', 'Locker', S().uniform ? 'Wearing the Rodeo uniform' : 'Wearing your own clothes'));
     const el = document.createElement('div'); el.className = 'lb pad'; el.innerHTML = '<span class="chip" style="background:#0ea5e9">' + vi('droplet') + 'Soap tank</span>'; box.appendChild(el); LB.push({ el, kind: 'pad', x: TANK.x, y: 420, z: TANK.z });
     for (let i = 0; i < 14; i++) { const f = document.createElement('div'); f.className = 'ft'; f.hidden = true; box.appendChild(f); FT.push({ el: f, t: 0 }); }
@@ -1420,7 +1433,7 @@ const UI = (() => {
     const t = Game.target, st = t ? t.stages[t.stage] : 'mud', S2 = STAGES[st] || STAGES.mud;
     const key = st + (t ? 1 : 0) + (Game.has('auto') ? 'a' : '');
     const sb = $('sprayBtn'); if (sb.dataset.k !== key) { sb.dataset.k = key; sb.style.background = t ? S2.color : '#0ea5e9'; sb.innerHTML = vi(S2.icon) + '<span>' + esc(t ? S2.name : 'Spray') + '</span>' + (touch ? '' : '<small>hold Space</small>'); }
-    // contextual button: whatever's right here (check in, guide, locker, open a bay)
+    // contextual button: whatever's right here (check in, locker, open a bay)
     const cx = $('ctx'), C = !menu && Game.ctx;
     if (C) { const k = C.t + C.sub + C.col; if (cx.dataset.k !== k) { cx.dataset.k = k; cx.innerHTML = vi(C.ic) + '<span>' + esc(C.t) + '<small>' + esc(C.sub) + (touch ? '' : ' · F') + '</small></span>'; cx.style.background = C.col; } cx.hidden = false; }
     else cx.hidden = true;
@@ -1443,7 +1456,7 @@ const UI = (() => {
     if (s.tier < 3) c.push({ t: 'Open ' + PKG[s.tier + 1].name, cost: PKG[s.tier + 1].cost, tab: 'lot', ic: 'car', col: PKG[s.tier + 1].color });
     if (s.crew < Game.crewMax() && s.crew < 7) c.push({ t: 'Hire a washer', cost: CREW_COST(s.crew), tab: 'crew', ic: 'users', col: '#0ea5e9' });
     if (!s.express) c.push({ t: 'Open the Express Tunnel', cost: EXPRESS_COST * (s.cars < 3 ? 4 : 1), real: EXPRESS_COST, tab: 'lot', ic: 'car', col: '#d2552b', where: 'express' });
-    else { if (!s.attend) c.push({ t: 'Hire a pay station attendant', cost: ATTEND_COST, tab: 'crew', ic: 'users', col: '#d2552b' }); if (!s.guide) c.push({ t: 'Hire a conveyor guide', cost: GUIDE_COST, tab: 'crew', ic: 'users', col: '#e39b32' }); }
+    else if (!s.attend) c.push({ t: 'Hire a pay station attendant', cost: ATTEND_COST, tab: 'crew', ic: 'users', col: '#d2552b' });
     if (!c.length) c.push({ t: 'Rebirth for x' + REBIRTH_MULT(s.rebirths + 1).toFixed(2), cost: REBIRTH_COST(s.rebirths), tab: 'reb', ic: 'stars', col: '#7c3aed' });
     c.sort((a, b) => a.cost - b.cost); it = c[0]; if (it.real) it.cost = it.real;
     if (!it.where) it.where = /^Open Bay/.test(it.t) ? 'bay' : it.tab === 'reb' ? 'reb' : 'pad';
@@ -1487,14 +1500,14 @@ const UI = (() => {
         '<div class="h" style="color:var(--gold)">How it works</div><div class="how">' +
         '<div>' + tile('droplet', '#0ea5e9') + '<p>Walk up to a car and hold <b>Spray</b>. Walk around it to clean every side.</p></div>' +
         '<div>' + tile('wrench', '#10b981') + '<p>Spend Bucks on upgrades, more bays, bigger wash packages and a crew that washes for you.</p></div>' +
-        '<div>' + tile('car', '#d2552b') + '<p>Open the <b>Express Tunnel</b>: check cars in at the pay station, guide them onto the conveyor, and the machines do the rest.</p></div>' +
+        '<div>' + tile('car', '#d2552b') + '<p>Open the <b>Express Tunnel</b>: stand at the pay station to check cars in, and the conveyor pulls them through while the machines wash.</p></div>' +
         '<div>' + tile('stars', '#7c3aed') + '<p>Rebirth to start over with a bigger Bucks multiplier, forever.</p></div>' +
         '<div>' + tile('gem', '#f59e0b') + '<p>Tap the NFC poster at your bay for Rodeo points. They buy boosts and passes in the Store.</p></div></div>' +
         '<p class="note">A demo made for Rodeo Express Car Wash. Bucks are play money: they aren’t dollars and can’t be traded for washes.</p>' + settings() + '</div>';
     } else if (menu === 'pause') {
       el.innerHTML = head('pause', '#64748b', 'Paused', 'The wash waits for you.', false) + '<div class="body"><button class="go" id="resumeBtn">' + vi('play') + 'Keep washing</button>' +
         '<div class="stats"><div class="stat"><b style="color:var(--gold)">' + fmt(s.bucks) + '</b><small>Bucks</small></div><div class="stat"><b style="color:var(--green)">' + fmt(s.cars) + '</b><small>Cars washed</small></div><div class="stat"><b style="color:var(--indigo)">x' + Game.mult().toFixed(2) + '</b><small>Bucks multiplier</small></div></div>' +
-        settings() + '<p class="note">Move: WASD, arrows, left thumb or left stick. Camera: drag, or the right stick. Spray: hold Space, E, the Spray button or A. Interact (check in, guide, locker): F, the action button or B. Upgrades: U or X · Store: Y · Pause: P, Esc or Start.</p></div>';
+        settings() + '<p class="note">Move: WASD, arrows, left thumb or left stick. Camera: drag, or the right stick. Spray: hold Space, E, the Spray button or A. Interact (check in, locker): F, the action button or B. Upgrades: U or X · Store: Y · Pause: P, Esc or Start.</p></div>';
     } else if (menu === 'up') {
       const T = (id, n, c) => '<button style="' + (tab === id ? 'background:' + c + ';color:#fff' : '') + '" data-tab="' + id + '">' + n + '</button>';
       let html = head('wrench', 'var(--green)', 'Upgrades', 'Spend your Bucks') + '<div class="body">' + wallet() + '<div class="tabs">' + T('gear', 'Gear', '#10b981') + T('lot', 'Lot', '#f97316') + T('crew', 'Crew', '#0ea5e9') + '</div><div class="h" style="color:var(--green)"></div><div class="items">';
@@ -1502,7 +1515,7 @@ const UI = (() => {
         for (const k in UPG) { const u = UPG[k], l = s.up[k], max = l >= u.max; html += row(u.icon, u.color, u.name, esc(u.unit(u.val(l))) + (max ? '' : ' → ' + esc(u.unit(u.val(l + 1)))), max ? '<span class="own">' + vi('checkmark') + 'Max</span>' : coinBtn(u.cost(l), 'data-up="' + k + '"', u.color), l); }
       } else if (tab === 'lot') {
         for (let i = 1; i < 6; i++) { const open = i < s.bays, next = i === s.bays; html += row('house', '#f97316', 'Bay ' + (i + 1), open ? 'Open: cars pull in here' : next ? 'Another car at a time' : 'Open Bay ' + i + ' first', open ? '<span class="own">' + vi('checkmark') + 'Open</span>' : next ? coinBtn(BAY_COST[i], 'data-bay', '#f97316') : '<button class="dim" disabled>' + vi('lock') + fmt(BAY_COST[i]) + '</button>'); }
-        html += '</div><div class="h" style="color:#d2552b">Express Tunnel<small>the drive-through: check in, guide on, the machines wash</small></div><div class="items">';
+        html += '</div><div class="h" style="color:#d2552b">Express Tunnel<small>the drive-through: stand at the pay station, the machines wash</small></div><div class="items">';
         html += row('car', '#d2552b', 'Express Tunnel', s.express ? 'Open: cars check in at the pay station' : 'Opens a second line of cars through the tunnel', s.express ? '<span class="own">' + vi('checkmark') + 'Open</span>' : coinBtn(EXPRESS_COST, 'data-express', '#d2552b'));
         if (s.express) html += row('gauge', '#e39b32', 'Conveyor Speed', Math.round(Game.convSpeed() / 100 * 10) / 10 + ' m a second' + (s.conv < CONV_MAX ? ' → ' + Math.round(CONV_SPEED(s.conv + 1) / 100 * 10) / 10 : ''), s.conv >= CONV_MAX ? '<span class="own">' + vi('checkmark') + 'Max</span>' : coinBtn(CONV_COST(s.conv), 'data-conv', '#e39b32'), s.conv);
         html += '</div><div class="h" style="color:#f97316">More</div><div class="items">';
@@ -1513,8 +1526,7 @@ const UI = (() => {
         const max = Math.min(7, Game.crewMax());
         html += row('users', '#0ea5e9', 'Hire a washer', s.crew + ' of ' + max + ' hired · one per open bay', s.crew >= max ? '<span class="own">' + vi('checkmark') + 'Full</span>' : coinBtn(CREW_COST(s.crew), 'data-hire', '#0ea5e9'));
         html += row('medal', '#6366f1', 'Crew Training', 'Each washer cleans ' + fmt(Game.crewPower()) + ' a second → ' + fmt(CREW_POWER(s.crewLvl + 1) * (Game.has('crew') ? 2 : 1)), coinBtn(TRAIN_COST(s.crewLvl), 'data-train', '#6366f1'), s.crewLvl);
-        html += row('mobile_phone', '#d2552b', 'Pay station attendant', s.express ? 'Checks in every car at the pay station for you' : 'Open the Express Tunnel first', s.attend ? '<span class="own">' + vi('checkmark') + 'Hired</span>' : s.express ? coinBtn(ATTEND_COST, 'data-attend="attend"', '#d2552b') : '<button class="dim" disabled>' + vi('lock') + fmt(ATTEND_COST) + '</button>');
-        html += row('arrow_up', '#e39b32', 'Conveyor guide', s.express ? 'Guides every car onto the conveyor for you' : 'Open the Express Tunnel first', s.guide ? '<span class="own">' + vi('checkmark') + 'Hired</span>' : s.express ? coinBtn(GUIDE_COST, 'data-attend="guide"', '#e39b32') : '<button class="dim" disabled>' + vi('lock') + fmt(GUIDE_COST) + '</button>');
+        html += row('mobile_phone', '#d2552b', 'Pay station attendant', s.express ? 'Checks in every car at the pay station, even while you’re away washing' : 'Open the Express Tunnel first', s.attend ? '<span class="own">' + vi('checkmark') + 'Hired</span>' : s.express ? coinBtn(ATTEND_COST, 'data-attend="attend"', '#d2552b') : '<button class="dim" disabled>' + vi('lock') + fmt(ATTEND_COST) + '</button>');
         html += row('lightning_bolt', '#f59e0b', 'Crew Pro Gear', 'Your crew washes twice as fast, forever.', Game.has('crew') ? '<span class="own">' + vi('checkmark') + 'Owned</span>' : '<button style="background:var(--amber)" data-open="store">' + vi('shop') + 'Store</button>');
       }
       el.innerHTML = html + '</div><p class="note">Upgrades reset when you rebirth. Store passes never do.</p></div>';
@@ -1554,7 +1566,7 @@ const UI = (() => {
     if (b.dataset.bay != null) { if (Game.buyBay()) { Sound.buy(); toast('Bay ' + S().bays + ' is open!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }
     if (b.dataset.express != null) { if (Game.buyExpress()) { Sound.buy(); toast('The Express Tunnel is open!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }
     if (b.dataset.conv != null) { if (Game.buyConv()) { Sound.buy(); toast('Conveyor sped up!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }
-    if (b.dataset.attend) { if (Game.buyAttend(b.dataset.attend)) { Sound.buy(); toast(b.dataset.attend === 'attend' ? 'Your pay station attendant is on duty!' : 'Your conveyor guide is on duty!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }
+    if (b.dataset.attend) { if (Game.buyAttend(b.dataset.attend)) { Sound.buy(); toast('Your pay station attendant is on duty!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }
     if (b.dataset.uni) { Game.setUniform(b.dataset.uni === '1'); render(); return; }
     if (b.dataset.tier != null) { if (Game.buyTier()) { Sound.buy(); toast(PKG[S().tier].name + ' is on the menu!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }
     if (b.dataset.hire != null) { if (Game.hire()) { Sound.buy(); toast('A new washer joined your crew!', 'good'); } else toast('Not enough Bucks yet.', 'bad'); render(); hudNow(); return; }

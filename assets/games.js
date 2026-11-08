@@ -50,8 +50,8 @@ window.GRUG_GAMES = [
     id: 'rodeo', app: 'rodeo',
     title: 'Rodeo Wash Simulator', kind: '3D simulator', status: 'preview',
     partner: 'Rodeo Express Car Wash', place: 'Peek Rd, Katy',
-    blurb: 'Hand-wash muddy cars, run the Express Tunnel conveyor, hire a crew and rebirth for bigger Bucks.',
-    long: 'A demo made for Rodeo Express Car Wash, in a blocky voxel world. Hand-wash muddy cars in your bays with a pressure wand (Soft Wash, Triple Foam, Tire Shine and Rodeo Ceramic, the steps of their real menu), and run the Express Tunnel: check drivers in at the pay station, guide them onto the conveyor and let the machines wash. Bucks buy upgrades, bays, packages, attendants and a crew; rebirth for a bigger multiplier. You wear the Rodeo crew tee, or your own shirt from the locker. Tapping the poster at your bay earns Rodeo points and doubles your Bucks for 15 minutes.',
+    blurb: 'Hand-wash muddy cars, run the Express Tunnel from the pay station, hire a crew and rebirth for bigger Bucks.',
+    long: 'A demo made for Rodeo Express Car Wash, in a blocky voxel world. Hand-wash muddy cars in your bays with a pressure wand (Soft Wash, Triple Foam, Tire Shine and Rodeo Ceramic, the steps of their real menu), and run the Express Tunnel: stand at the pay station to check drivers in, and the conveyor pulls them through the machines. Bucks buy upgrades, bays, packages, attendants and a crew; rebirth for a bigger multiplier. You wear the Rodeo crew tee, or your own shirt from the locker. Tapping the poster at your bay earns Rodeo points and doubles your Bucks for 15 minutes.',
     play: 'play/rodeo/', game: 'play/rodeo/#katy/game', storageKey: 'rodeo-express-rewards-v1', old: '',
     thumb: 'assets/thumbs/rodeo.jpg', color: '#E39B32', ink: '#4B3A2C',
     avatar: 'You play as your avatar', earn: 'Wash at Rodeo Express, tap the poster at your bay, 10 points a visit (demo)'
