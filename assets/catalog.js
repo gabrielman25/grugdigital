@@ -26,7 +26,8 @@
     rodeo:    { name: 'Rodeo Express Car Wash',   short: 'Rodeo',    game: 'Rodeo Wash Simulator' },
     runway:   { name: 'Runway Ready',             short: 'Runway',   game: 'Runway Ready' },
     chestquest: { name: 'Chest Quest',            short: 'Chest Quest', game: 'Chest Quest' },
-    glowupspa: { name: 'Glow Up Spa',             short: 'Glow Up Spa', game: 'Glow Up Spa' }
+    glowupspa: { name: 'Glow Up Spa',             short: 'Glow Up Spa', game: 'Glow Up Spa' },
+    petmountainrescue: { name: 'Pet Mountain Rescue',     short: 'Pet Rescue', game: 'Pet Mountain Rescue' }
   };
 
   const free = () => ({ type: 'free' });

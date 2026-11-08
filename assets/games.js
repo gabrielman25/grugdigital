@@ -97,6 +97,18 @@ window.GRUG_GAMES = [
     avatar: 'You play as your avatar', earn: 'Store items use Pearls, the Grug currency'
   },
   {
+    // A Grug original (standalone: true): play/petmountainrescue/ hosts it in place of a rewards app; Store items cost Pearls only.
+    // Its host save ('grug-petmountainrescue-v1') holds owned items and best height, not partner points, so no storageKey here.
+    id: 'petmountainrescue', app: 'petmountainrescue', standalone: true,
+    title: 'Pet Mountain Rescue', kind: '3D climber + pet tycoon', status: 'live',
+    partner: 'Grug Original', place: 'Plays anywhere',
+    blurb: 'Climb an endless block mountain with a climbing partner, rescue stranded pets, and watch them earn gems at your Pet Haven.',
+    long: 'You can’t jump, but your partner can boost you: set her down by a ledge, hop up on her head, then pull her up after you. Pets are stranded all the way up the mountain, rarer the higher you go: lead them to a camp’s Rescue Hut and they move into your Pet Haven, where they settle in and earn gems, even while you’re away. Pick one of three climbing partners (Booster, Pet Whisperer or Scout) who levels up as you climb together, spend gems on climbing and walking upgrades, Haven pads and her wardrobe, and climb as your own avatar. Pearls buy forever passes like x2 Gems and x2 Settle Speed, boosts, gem packs and a camp skip.',
+    play: 'play/petmountainrescue/', game: 'play/petmountainrescue/', storageKey: '', old: '',
+    thumb: 'assets/thumbs/petmountainrescue.jpg', color: '#f97316', ink: '#FFFFFF',
+    avatar: 'You play as your avatar', earn: 'Store items use Pearls, the Grug currency'
+  },
+  {
     id: 'alchemy', app: 'alchemy',
     title: 'Sugar Alchemist', kind: '3D bakery sim', status: 'live',
     partner: 'Alchemy Bake Lab', place: 'Peek Rd, Katy',
