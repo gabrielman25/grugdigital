@@ -791,5 +791,107 @@
     0.12
    ]
   ]
+ },
+ "aim": {
+  "w": 1000,
+  "h": 1300,
+  "fov": 24,
+  "target": [
+   0,
+   100,
+   0
+  ],
+  "dist": 660,
+  "yaw": -0.9,
+  "rim": "#22D3EE",
+  "cfg": {
+   "body": "female",
+   "expression": "curious",
+   "hair": {
+    "style": 1,
+    "colour": "#1b1a19"
+   },
+   "skin": "#8a5a3c",
+   "top": {
+    "part": "gen_longsleeve",
+    "texture": "gen_longsleeve",
+    "colour": "#2b3a67"
+   },
+   "legs": {
+    "part": "mh_rehmanpolanski_viking_pants",
+    "texture": "mh_rehmanpolanski_viking_pants",
+    "colour": "#3b5a8a"
+   },
+   "feet": {
+    "type": "boots",
+    "part": "mh_culturalibre_hero_boots_1",
+    "texture": "mh_culturalibre_hero_boots_1",
+    "colour": "#222222",
+    "height": 1,
+    "auto": true
+   }
+  },
+  "pose": [
+   [
+    "spine_M_01_jnt",
+    "x",
+    0.1
+   ],
+   [
+    "leg_L_upr_jnt",
+    "x",
+    -0.45
+   ],
+   [
+    "leg_L_knee_jnt",
+    "x",
+    0.55
+   ],
+   [
+    "leg_R_upr_jnt",
+    "x",
+    0.35
+   ],
+   [
+    "leg_R_knee_jnt",
+    "x",
+    0.3
+   ],
+   [
+    "arm_R_shldr_jnt",
+    "x",
+    -1.5
+   ],
+   [
+    "arm_R_shldr_jnt",
+    "y",
+    0.0
+   ],
+   [
+    "arm_R_shldr_jnt",
+    "z",
+    0.12
+   ],
+   [
+    "arm_L_shldr_jnt",
+    "x",
+    -1.5
+   ],
+   [
+    "arm_L_shldr_jnt",
+    "z",
+    -0.12
+   ],
+   [
+    "head_M_head_jnt",
+    "y",
+    0.45
+   ],
+   [
+    "head_M_head_jnt",
+    "x",
+    0.05
+   ]
+  ]
  }
 }
