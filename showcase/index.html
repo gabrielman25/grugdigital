@@ -474,7 +474,7 @@ const R = {
         stat(GAMES.length, 'partner games') + stat(Math.min.apply(null, pts) + '–' + Math.max.apply(null, pts), 'points per visit') + stat('1 tap', 'to check in, no account') + stat('1', 'avatar in every game') +
       '</div>' +
       '<div class="row mt2"><button class="btn primary" data-go="how">' + ic('play') + 'See how it works</button><button class="btn" data-go="places">' + ic('storefront') + 'Open a restaurant’s app</button></div>' +
-      '<h2 class="h2">The partners</h2><div class="grid g2">' + GAMES.map(g =>
+      '<h2 class="h2">The partners</h2><div class="grid g2">' + GAMES.filter(g => g.status !== 'legacy').map(g =>
         '<button class="card place-mini btn" style="border-radius:18px;justify-content:flex-start;padding:10px;gap:12px;text-align:left" data-place="' + g.id + '"><img src="' + META.thumbs[g.id] + '" alt="" style="width:56px;height:56px;border-radius:12px;object-fit:cover">' +
         '<span><b style="display:block;font-size:15.5px">' + esc(g.partner) + '</b><span class="note">' + esc(g.title) + ' · ' + esc(g.kind) + '</span></span></button>').join('') + '</div>' +
       '<p class="note mt">The phone shows the real Grug site. Tap around: every link works inside the showcase.</p>';
@@ -501,7 +501,7 @@ const R = {
   places(){
     return '<p class="eyebrow">' + ic('storefront') + 'The partners</p><h1 class="h1">Restaurants</h1>' +
       '<p class="lead">Each card opens that restaurant’s real rewards app in the phone. Use the buttons to tap its tag, add points and play its game.</p>' +
-      '<div class="places mt2">' + GAMES.map(placeCard).join('') + '</div>';
+      '<div class="places mt2">' + GAMES.filter(g => g.status !== 'legacy').map(placeCard).join('') + '</div>';
   },
   avatar(){
     const C = ED.cat, cfg = ED.cfg;

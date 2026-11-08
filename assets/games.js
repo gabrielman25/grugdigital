@@ -16,12 +16,12 @@ window.GRUG_GAMES = [
   },
   {
     id: 'teahouse', app: 'teahouse',
-    title: 'Take a Tea', kind: '3D tycoon', status: 'live',
+    title: 'Steal a Sip', kind: '3D tycoon', status: 'live',
     partner: 'Teahouse Express', place: 'Katy Mills',
-    blurb: 'Run a boba shop in a blocky 3D world. Serve customers, grow your stand and race the clock.',
-    long: 'A third-person tycoon on Grug’s own voxel engine. Walk the mall, lock a shop, pour drinks and watch the cash tick up. Teahouse points buy five-minute boosts: speed, luck, longer locks, a tip jar and double cash. Your avatar is the character you play as.',
+    blurb: 'Grab drinks on the Tea Trail, outrun the Keepers, and run the richest patio shack.',
+    long: 'Ride down a winding Tea Trail through six zones, grab sealed Teahouse Express drinks and bring them home to your patio shack, where they brew and customers buy them. Copies stack and earn more, faster rides get you past the Keepers to the rare drinks, and you play as your own avatar. Points from Teahouse Express (or Pearls) buy speed boosts, passes and cash packs in the Store.',
     play: 'play/teahouse/', storageKey: 'teahouse-express-rewards-v1', old: 'https://gabrielman25.github.io/teahouse-express/',
-    thumb: 'assets/thumbs/teahouse.jpg', color: '#F6C445', ink: '#1E6B35',
+    thumb: 'assets/thumbs/stealasip.jpg', color: '#1E6B35', ink: '#FFFFFF',
     avatar: 'You play as your avatar', earn: 'Eat at Teahouse Express, tap the tag, 5 points a visit'
   },
   {
@@ -53,5 +53,18 @@ window.GRUG_GAMES = [
     play: 'work/alchemy/site.html', storageKey: '', old: '',
     thumb: 'assets/thumbs/alchemy.jpg', color: '#FF8FB1', ink: '#3B2314',
     avatar: 'Unlocks closet items', earn: 'Finish a day to unlock closet items'
+  },
+  {
+    // Legacy: the Teahouse app's first game, still playable from the Games page (the app runs it with ?game=takeatea).
+    // status 'legacy' = listed on the Games page only, not on the home page. No storageKey: its points are Teahouse's,
+    // already listed under Steal a Sip.
+    id: 'takeatea', app: 'teahouse',
+    title: 'Take a Tea', kind: '3D tycoon', status: 'legacy',
+    partner: 'Teahouse Express', place: 'Katy Mills',
+    blurb: 'The original Teahouse game: run a boba shop in a blocky 3D world, serve customers and race the clock.',
+    long: 'The first Teahouse Express game, kept playable as a classic. A third-person tycoon on Grug’s own voxel engine: walk the mall, lock a shop, pour drinks and watch the cash tick up. Teahouse points still buy its five-minute boosts: speed, luck, longer locks, a tip jar and double cash. Your avatar is the character you play as.',
+    play: 'play/teahouse/?game=takeatea#katy-mills/game', storageKey: '', old: '',
+    thumb: 'assets/thumbs/teahouse.jpg', color: '#F6C445', ink: '#1E6B35',
+    avatar: 'You play as your avatar', earn: 'Uses your Teahouse Express points'
   }
 ];

@@ -10,12 +10,12 @@ window.GrugGamePage = function (id) {
   const st = G.profile.stats;
   const plays = +(st.plays[g.app] || 0), best = Math.max(+(st.best[g.app] || 0), p ? p.best : 0);
   const items = C.forApp(g.app);
-  const live = g.status === 'live';
+  const live = g.status === 'live' || g.status === 'legacy', legacy = g.status === 'legacy';
   const main = document.createElement('main'); main.className = 'wrap gp';
   main.innerHTML =
     '<a class="gp-back" href="' + G.url('games/') + '">' + G.icon('arrow-left') + 'All games</a>' +
     '<section class="gp-hero">' +
-      '<div class="gp-cover" style="background-image:url(' + G.url(g.thumb) + ')"><span class="badge ' + (live ? 'live' : 'soon') + '">' + (live ? 'Live' : 'Preview') + '</span></div>' +
+      '<div class="gp-cover" style="background-image:url(' + G.url(g.thumb) + ')"><span class="badge ' + (legacy ? 'legacy' : live ? 'live' : 'soon') + '"' + (legacy ? ' style="background:#6b7280;color:#fff"' : '') + '>' + (legacy ? 'Legacy' : live ? 'Live' : 'Preview') + '</span></div>' +
       '<div class="gp-head">' +
         '<h1>' + G.esc(g.title) + '</h1>' +
         '<div class="row mut"><span class="g-chip">' + G.icon('storefront') + G.esc(g.partner) + '</span><span class="g-chip">' + G.icon('game-controller') + G.esc(g.kind) + '</span><span class="g-chip">' + G.icon('map-pin') + G.esc(g.place) + '</span></div>' +
