@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6efe3">
+<title>Rodeo Express · Rewards demo</title>
+<meta name="description" content="A demo rewards app and car wash game made for Rodeo Express Car Wash in Katy, TX. For presentation only.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/grug-app.css">
+<style>
+/* Rodeo Express colours, taken from their logo: saddle brown, cream, gold stars, the Westwood car's orange */
+:root{
+  --bg:#f6efe3; --surface:#fffbf4; --soft:#efe4d2; --line:#e3d5bf; --ink:#2b201a; --muted:#7a6a5a;
+  --brown:#4b3a2c; --brown-deep:#33271e; --cream:#e7dcc6; --gold:#e39b32; --gold-deep:#b8751c; --rodeo:#d2552b; --rodeo-deep:#a63f1d; --ok:#3e7a4f;
+  --fd:'Rye',Georgia,serif; --fc:'Barlow Condensed','Arial Narrow',system-ui,sans-serif; --fu:'Barlow',system-ui,-apple-system,sans-serif;
+  --r-md:16px; --r-lg:24px; --r-xl:30px;
+  --ledge:0 3px 0 0 var(--line); --ledge-dark:0 3px 0 0 #000;
+  --ease:cubic-bezier(.2,.8,.2,1); --spring:cubic-bezier(.34,1.5,.64,1);
+  --nav-h:60px; --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{min-height:100vh;background:var(--bg);color:var(--ink);font:500 16px/1.5 var(--fu);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overflow-x:hidden;padding-top:var(--bn-h,0px)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+svg{display:block}
+img{max-width:100%;height:auto}
+.ic{width:22px;height:22px;flex:none}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:10px}
+[hidden]{display:none!important}
+.app{max-width:640px;margin:0 auto;min-height:100vh;padding:0 20px calc(var(--nav-h) + 44px + var(--safe-b))}
+.pick-mode .app{padding-bottom:48px}
+.calm *,.calm *::before,.calm *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+.press{transition:transform .25s var(--spring),box-shadow .25s var(--ease),background-color .2s,color .2s;-webkit-user-select:none;user-select:none}
+.press:active{transform:translateY(2px);transition-duration:.06s}
+.logo{display:block;aspect-ratio:480/328;background:url(assets/logo.webp) center/contain no-repeat}
+h1,h2{font-family:var(--fd);font-weight:400;line-height:1.05;letter-spacing:.01em}
+h3{font:700 22px/1.1 var(--fc);letter-spacing:.02em;text-transform:uppercase}
+.eyebrow{display:flex;align-items:center;gap:10px;font:700 13px/1 var(--fc);letter-spacing:.2em;text-transform:uppercase;color:var(--gold-deep)}
+.eyebrow.c{justify-content:center}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--ledge)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:54px;padding:0 24px;border-radius:99px;font:700 17px/1 var(--fc);letter-spacing:.08em;text-transform:uppercase}
+.btn .ic{width:20px;height:20px}
+.btn.primary{background:var(--brown);color:var(--cream);box-shadow:var(--ledge-dark)}
+.btn.gold{background:var(--gold);color:var(--brown-deep);box-shadow:0 3px 0 0 var(--gold-deep)}
+.btn.rodeo{background:var(--rodeo);color:#fff;box-shadow:0 3px 0 0 var(--rodeo-deep)}
+.btn.quiet{background:var(--soft);color:var(--ink)}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.icon-btn{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--soft);position:relative}
+.fine{margin-top:16px;color:var(--muted);font-size:13px;text-align:center;line-height:1.5}
+
+/* ---------- demo / owner bar: fixed above everything on every page ---------- */
+.demo-bar{position:fixed;left:0;right:0;top:0;z-index:70;display:flex;align-items:center;justify-content:center;gap:12px;padding:9px max(14px,env(safe-area-inset-right,0px)) 9px max(14px,env(safe-area-inset-left,0px));padding-top:calc(9px + env(safe-area-inset-top,0px));background:var(--brown-deep);color:var(--cream);box-shadow:0 3px 0 0 var(--gold)}
+.db-tag{flex:none;font:700 12px/1 var(--fc);letter-spacing:.16em;text-transform:uppercase;background:var(--gold);color:var(--brown-deep);padding:6px 9px;border-radius:6px}
+.db-txt{min-width:0;max-width:760px;font-size:13.5px;line-height:1.4}
+.db-txt b{color:#fff}
+.db-txt a{color:#fff;font-weight:700;white-space:nowrap;border-bottom:2px solid var(--gold)}
+.db-copy{flex:none;height:32px;padding:0 12px;border-radius:6px;background:var(--gold);color:var(--brown-deep);font:700 13px/1 var(--fc);letter-spacing:.1em;text-transform:uppercase}
+.db-short{display:none}
+@media (max-width:620px){.db-txt{font-size:12.5px}.db-copy{display:none}.db-long{display:none}.db-short{display:inline}.db-note{display:none}}
+
+/* ---------- store picker ---------- */
+.view{display:none}
+.view.on{display:block;animation:viewIn .5s var(--ease) both}
+@keyframes viewIn{from{opacity:0;translate:0 12px}}
+.pick-top{padding:30px 0 0;display:flex;flex-direction:column;align-items:center;text-align:center}
+.pick-top .logo{width:min(210px,52vw)}
+.pick-top h1{font-size:26px;margin-top:12px;color:var(--brown);max-width:16ch}
+.hero-car{width:62%;max-width:300px;margin:10px auto 0;display:block}
+.pick-head{margin:20px 0 14px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.pick-head h2{font-size:28px}
+.store-card{display:flex;align-items:center;gap:16px;width:100%;text-align:left;padding:14px 16px 14px 14px}
+.sc-pic{width:72px;height:72px;flex:none;border-radius:var(--r-md);background:var(--brown);display:grid;place-items:center}
+.sc-pic .logo{width:60px}
+.sc-txt{flex:1;min-width:0}
+.sc-txt small{display:block;font:700 12px/1 var(--fc);letter-spacing:.2em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:6px}
+.sc-txt strong{display:block;font:400 24px/1.05 var(--fd)}
+.sc-txt span{display:block;color:var(--muted);font-size:14px;margin-top:6px;line-height:1.35}
+.sc-go{width:46px;height:46px;border-radius:50%;background:var(--brown);color:var(--cream);display:grid;place-items:center;flex:none}
+.store-soon{margin-top:12px;padding:16px;border-radius:var(--r-lg);background:var(--soft);color:var(--muted);text-align:center;font-size:14px}
+.pick-foot{margin-top:30px;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font-size:13px;text-align:center}
+
+/* ---------- store view ---------- */
+.topbar{position:sticky;top:var(--bn-h,0px);z-index:20;margin:0 -20px;padding:10px 12px;display:grid;grid-template-columns:100px 1fr 100px;align-items:center;gap:8px;background:var(--bg);box-shadow:0 1.5px 0 0 transparent;transition:box-shadow .25s}
+.topbar.scrolled{box-shadow:0 1.5px 0 0 var(--line)}
+.topbar .logo{width:84px;justify-self:center}
+.tb-r,.tb-l{display:flex;gap:8px;justify-content:flex-end;align-items:center}.tb-l{justify-content:flex-start}
+.shead{padding:14px 0 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.shead h1{font-size:40px;color:var(--brown)}
+.status{display:inline-flex;align-items:center;gap:9px;padding:8px 14px;border-radius:99px;background:var(--surface);border:1.5px solid var(--line);font:600 14px/1.25 var(--fu)}
+.status i{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.status.open i{background:var(--ok)}
+.panel{display:none;padding-top:14px}
+.panel.on{display:block;animation:viewIn .45s var(--ease) both}
+.sec-h{display:flex;align-items:center;gap:14px;margin:30px 0 12px}
+.sec-h h2{font-size:26px;white-space:nowrap}
+.sec-h::after{content:"";flex:1;height:2px;background:var(--brown);margin-top:4px}
+.sec-note{color:var(--muted);font-size:15px;margin:-4px 0 12px}
+
+/* ---------- wash menu ---------- */
+.howdy{position:relative;overflow:hidden;border-radius:var(--r-xl);background:var(--brown);color:var(--cream);padding:22px 22px 0;box-shadow:0 3px 0 0 var(--brown-deep)}
+.howdy h2{font-size:28px;color:#fff;max-width:13ch}
+.howdy p{margin-top:8px;font-size:15px;max-width:34ch;color:var(--cream)}
+.howdy img{display:block;width:66%;max-width:300px;height:auto;margin:-6px -6px -4px auto}
+.pkgs{display:grid;gap:12px}
+.pkg{padding:18px 18px 16px;position:relative}
+.pkg.top{border-color:var(--gold);box-shadow:0 3px 0 0 var(--gold-deep)}
+.pkg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.pkg-head h3{font-size:26px}
+.pkg-head small{display:block;font:600 14px/1.3 var(--fu);color:var(--muted);margin-top:3px;text-transform:none;letter-spacing:0}
+.price{text-align:right;flex:none}
+.price b{display:block;font:400 30px/1 var(--fd);color:var(--brown)}
+.price span{display:block;font:700 14px/1.2 var(--fc);letter-spacing:.04em;color:var(--rodeo);margin-top:5px;text-transform:uppercase}
+.tagline{position:absolute;top:-11px;left:16px;padding:4px 10px;border-radius:99px;background:var(--gold);color:var(--brown-deep);font:700 12px/1 var(--fc);letter-spacing:.14em;text-transform:uppercase}
+.svc{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.svc span{display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:99px;background:var(--soft);font:600 13.5px/1.2 var(--fu)}
+.svc span.new{background:#f8e3c2;color:var(--brown-deep)}
+.svc .ic{width:14px;height:14px;color:var(--ok)}
+.club{margin-top:16px;padding:22px;border-radius:var(--r-xl);background:var(--rodeo);color:#fff;box-shadow:0 3px 0 0 var(--rodeo-deep)}
+.club .eyebrow{color:#ffe1c8}
+.club h2{font-size:30px;margin-top:10px}
+.club p{margin-top:8px;font-size:15.5px;color:#fff3ea}
+.club ul{margin:14px 0 18px;display:grid;gap:8px}
+.club li{display:flex;gap:10px;align-items:flex-start;font-size:15px}
+.club li .ic{width:20px;height:20px;margin-top:1px}
+.club .btn{background:#fff;color:var(--rodeo-deep);box-shadow:0 3px 0 0 var(--rodeo-deep)}
+.free{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.free div{padding:16px 8px;text-align:center}
+.free i{width:48px;height:48px;margin:0 auto 8px;border-radius:14px;background:var(--brown);color:var(--gold);display:grid;place-items:center}
+.free b{display:block;font:700 17px/1.1 var(--fc);text-transform:uppercase;letter-spacing:.03em}
+.free span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.vac{margin-top:16px;display:flex;align-items:center;gap:14px;padding:16px}
+.vac .pc-ic{background:var(--gold);color:var(--brown-deep)}
+.menu-foot{margin-top:22px;text-align:center;color:var(--muted);font-size:13px}
+
+/* ---------- rewards ---------- */
+.pts{position:relative;overflow:hidden;border-radius:var(--r-xl);background:var(--brown);color:var(--cream);padding:22px 22px 24px;box-shadow:0 3px 0 0 var(--brown-deep)}
+.pts .eyebrow{color:var(--gold)}
+.pts-stars{position:absolute;right:18px;top:18px;display:flex;gap:6px;color:var(--gold)}
+.pts-stars .ic{width:16px;height:16px}.pts-stars .ic:nth-child(2){width:22px;height:22px;margin-top:-3px}
+.pts-num{display:flex;align-items:baseline;gap:10px;margin-top:14px}
+.pts-num b{font:400 64px/1 var(--fd);color:#fff;font-variant-numeric:tabular-nums}
+.pts-num span{font:700 18px/1 var(--fc);letter-spacing:.08em;text-transform:uppercase;color:var(--cream)}
+.pts.bump .pts-num b{animation:bump .6s var(--spring)}
+@keyframes bump{35%{transform:scale(1.14)}}
+.prog{margin-top:16px}
+.prog-bar{height:10px;border-radius:99px;background:var(--brown-deep);overflow:hidden}
+.prog-bar i{display:block;height:100%;width:0;border-radius:inherit;background:var(--gold);transition:width 1s var(--ease)}
+.prog-txt{margin-top:10px;font-size:14px;color:var(--cream)}
+.prog-txt b{color:#fff;font-weight:700}
+.burst{position:absolute;pointer-events:none;z-index:5}
+.onsite{margin-top:12px;display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--r-lg);background:#fbe3d6;color:var(--rodeo-deep);font-size:14.5px;line-height:1.35}
+.onsite .ic{width:26px;height:26px}
+.onsite b{display:block;font:700 18px/1.15 var(--fc);text-transform:uppercase;letter-spacing:.03em}
+.tap-card{margin-top:16px;padding:22px}
+.tap-card h3{font-size:24px;margin-top:8px}
+.tap-card p{color:var(--muted);font-size:15px;margin-top:6px}
+.nfc-row{display:flex;align-items:center;gap:12px;width:100%;margin:16px 0 0;padding:12px 14px;border-radius:var(--r-md);background:var(--soft);text-align:left}
+.nfc-row>span:nth-child(2){flex:1;min-width:0}
+.nfc-row b{display:block;font:700 18px/1.15 var(--fc);letter-spacing:.02em}
+.nfc-row small{display:block;font-size:13px;color:var(--muted);margin-top:2px;line-height:1.35}
+.nfc-ic{width:44px;height:44px;border-radius:50%;background:var(--brown);color:var(--gold);display:grid;place-items:center;flex:none}
+.nfc-row.ready{background:#f6e4c6}
+.done-note{display:none;margin-top:14px;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--r-md);background:#e3eedf;color:var(--ok);font-size:14px;font-weight:600}
+.done .done-note{display:flex}
+.done-note .ic{width:22px;height:22px}
+.demo-card{margin-top:14px;padding:16px;border-radius:var(--r-lg);border:2px dashed var(--gold);background:#fff6e6}
+.demo-card b{display:block;font:700 18px/1.2 var(--fc);letter-spacing:.03em;text-transform:uppercase;color:var(--brown)}
+.demo-card p{font-size:14px;color:var(--muted);margin-top:4px}
+.bays{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.bays button{width:44px;height:44px;border-radius:12px;background:var(--surface);border:1.5px solid var(--line);font:700 17px/1 var(--fc)}
+.bays button[aria-pressed="true"]{background:var(--brown);color:var(--gold);border-color:var(--brown)}
+.rank{margin-top:16px;padding:20px}
+.rank-top{display:flex;align-items:center;gap:14px}
+.rank-badge{width:58px;height:58px;border-radius:18px;background:var(--gold);color:var(--brown-deep);display:grid;place-items:center;flex:none;box-shadow:0 3px 0 0 var(--gold-deep)}
+.rank-badge .ic{width:30px;height:30px}
+.rank-top h3{font-size:26px;margin-top:4px}
+.rank-top small{display:block;color:var(--muted);font-size:14px;margin-top:2px}
+.ladder{margin-top:14px}
+.ladder li{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1.5px solid var(--line)}
+.ladder .n{width:44px;flex:none;text-align:center;font:400 20px/1 var(--fd)}
+.ladder .n small{display:block;font:700 10px/1 var(--fc);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.ladder .t{flex:1;min-width:0}
+.ladder .t b{display:block;font:700 17px/1.2 var(--fc);text-transform:uppercase;letter-spacing:.03em}
+.ladder .t span{display:block;font-size:13.5px;color:var(--muted)}
+.ladder .s{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--muted);flex:none}
+.ladder .s .ic{width:15px;height:15px}
+.ladder li.got .s{background:var(--brown);color:var(--gold)}
+.rw-h{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:32px 0 12px}
+.rw-h h2{font-size:28px}
+.rw-h small{color:var(--muted);font-size:13px;text-align:right;line-height:1.35}
+.play-card{display:flex;align-items:center;gap:14px;padding:16px}
+.pc-ic{width:52px;height:52px;border-radius:16px;background:var(--brown);color:var(--gold);display:grid;place-items:center;flex:none}
+.pc-ic .ic{width:28px;height:28px}
+.pc-txt{flex:1;min-width:0}
+.pc-txt b{display:block;font:700 19px/1.15 var(--fc);text-transform:uppercase;letter-spacing:.02em}
+.pc-txt span{display:block;font-size:13.5px;color:var(--muted);line-height:1.35;margin-top:2px}
+.play-card .btn{height:46px;padding:0 18px}
+.shop{margin-top:14px;padding:18px}
+.shop>p{font-size:14px;color:var(--muted);margin-top:4px}
+.gs-h{margin:18px 0 8px;font:700 13px/1 var(--fc);letter-spacing:.18em;text-transform:uppercase;color:var(--gold-deep)}
+.gsi{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1.5px solid var(--line)}
+.gsi-ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:#fff;flex:none}
+.gsi-ic .ic{width:24px;height:24px}
+.gsi-txt{flex:1;min-width:0}
+.gsi-txt b{display:block;font:700 17px/1.2 var(--fc);text-transform:uppercase;letter-spacing:.02em}
+.gsi-txt span{display:block;font-size:13.5px;color:var(--muted);line-height:1.3}
+.gsi-txt em{display:block;font-style:normal;font-size:12.5px;color:var(--gold-deep);font-weight:700;margin-top:2px}
+.gsi .btn{height:40px;padding:0 14px;font-size:15px;flex:none}
+.own{display:inline-flex;align-items:center;gap:5px;font:700 14px/1 var(--fc);letter-spacing:.1em;text-transform:uppercase;color:var(--ok);flex:none}
+.own .ic{width:16px;height:16px}
+.pearl-card{margin-top:14px;padding:18px}
+.pl-top{display:flex;align-items:center;gap:12px}
+.pl-ic{width:48px;height:48px;border-radius:50%;background:#f3e3f7;color:#b04cc8;display:grid;place-items:center;flex:none}
+.pl-ic .ic{width:28px;height:28px}
+.pl-top b{display:block;font:700 20px/1.1 var(--fc);text-transform:uppercase;letter-spacing:.02em}
+.pl-top span{display:block;font-size:13.5px;color:var(--muted)}
+.soon{flex:none;margin-left:auto;padding:6px 10px;border-radius:99px;background:var(--brown);color:var(--gold);font:700 12px/1 var(--fc);letter-spacing:.12em;text-transform:uppercase}
+.packs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+@media (min-width:520px){.packs{grid-template-columns:repeat(4,1fr)}}
+.pack{position:relative;padding:14px 8px 10px;border-radius:var(--r-md);background:var(--soft);text-align:center;opacity:.8}
+.pack .ic{width:26px;height:26px;margin:0 auto 4px;color:#b04cc8}
+.pack b{display:block;font:400 22px/1 var(--fd)}
+.pack small{display:block;font:700 11px/1.2 var(--fc);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.pack span{display:block;margin-top:10px;padding:8px 0;border-radius:99px;background:var(--line);color:var(--muted);font:700 14px/1 var(--fc);letter-spacing:.06em}
+.pack em{position:absolute;top:-9px;left:50%;translate:-50% 0;white-space:nowrap;padding:3px 8px;border-radius:99px;background:var(--gold);color:var(--brown-deep);font:700 10.5px/1 var(--fc);letter-spacing:.1em;text-transform:uppercase;font-style:normal}
+.hist{padding:4px 18px}
+.hist li{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1.5px solid var(--line);font-size:14px}
+.hist li:last-child{border-bottom:0}
+.hist li span{color:var(--muted)}
+.hist li b{font-weight:700}
+.hist li b.neg{color:var(--rodeo)}
+.hist .empty{justify-content:center;color:var(--muted)}
+
+/* ---------- game tab: the game fills the screen under the demo bar ---------- */
+body.game-mode{overflow:hidden;overscroll-behavior:none}
+body.game-mode .view.on,body.game-mode .app{animation:none!important;transform:none!important}
+body.game-mode .topbar,body.game-mode .shead{display:none}
+#pGame.on{position:fixed;left:0;right:0;bottom:0;top:var(--bn-h,0px);z-index:15;padding:0;background:#a9d8f2;animation:none}
+.gwrap{position:absolute;inset:0;background:#a9d8f2}
+.gwrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:transparent}
+.gload{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--brown);text-align:center;padding:24px 24px 140px;background:var(--bg)}
+.gload .logo{width:180px}
+.gload p{font:700 20px/1.3 var(--fc);text-transform:uppercase;letter-spacing:.06em}
+body.game-full .nav{display:none}
+.gmin{position:fixed;z-index:31;left:calc(12px + env(safe-area-inset-left,0px));bottom:calc(12px + var(--safe-b));height:40px;padding:0 14px 0 11px;border-radius:99px;display:none;align-items:center;gap:7px;background:rgba(43,32,26,.78);color:#fff;font:700 13px/1 var(--fc);letter-spacing:.08em;text-transform:uppercase}
+.gmin .ic{width:18px;height:18px}
+body.game-mode .gmin{display:flex}
+body.game-mode:not(.game-full) .gmin{bottom:calc(var(--nav-h) + 24px + var(--safe-b))}
+body.game-mode:not(.game-full) #pGame.on{bottom:calc(var(--nav-h) + 26px + var(--safe-b))}
+
+/* ---------- visit ---------- */
+.vcard{overflow:hidden}
+.vtop{background:var(--brown);padding:18px 18px 0;display:flex;justify-content:center}
+.vtop img{width:100%;max-width:440px;display:block}
+.vbody{padding:20px}
+.vbody h3{font-size:28px;margin-top:8px}
+.vline{display:flex;gap:12px;align-items:flex-start;margin-top:14px;font-size:15.5px}
+.vline .ic{color:var(--gold-deep);margin-top:1px}
+.hours{margin-top:4px;font-size:15px}
+.hours div{display:flex;justify-content:space-between;gap:12px;padding:3px 0}
+.hours div.today{font-weight:700}
+.vbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.vbtns .btn{height:50px;padding:0 12px;font-size:16px}
+.social{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.social a{height:46px;padding:0 8px;font-size:14px;gap:6px}
+.prefs{margin-top:16px;padding:6px 20px 10px}
+.prefs h3{font-size:22px;padding:14px 0 6px}
+.pref{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1.5px solid var(--line)}
+.pref:last-of-type{border-bottom:0}
+.pref .ic{color:var(--gold-deep)}
+.pref span{flex:1;font-size:15px}
+.pref small{display:block;font-size:13px;color:var(--muted)}
+.sw{width:52px;height:32px;border-radius:99px;background:var(--soft);position:relative;flex:none;transition:background-color .2s}
+.sw::after{content:"";position:absolute;left:4px;top:4px;width:24px;height:24px;border-radius:50%;background:var(--surface);box-shadow:0 2px 0 0 var(--line);transition:transform .3s var(--spring)}
+.sw[aria-checked="true"]{background:var(--brown)}
+.sw[aria-checked="true"]::after{transform:translateX(20px)}
+.store-ok{display:flex;align-items:center;gap:8px;margin:4px 0 10px;padding:10px 14px;border-radius:var(--r-md);font:600 13.5px/1.35 var(--fu)}
+.store-ok .ic{width:20px;height:20px}
+.store-ok.yes{background:var(--soft);color:var(--ok)}
+.store-ok.no{background:var(--rodeo);color:#fff}
+.clear{margin:6px 0 10px;width:100%;height:46px;border-radius:99px;font:700 14px/1 var(--fc);letter-spacing:.12em;text-transform:uppercase;color:var(--rodeo-deep);background:var(--soft)}
+.tags{margin-top:16px;padding:18px}
+.tags summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px}
+.tags summary::-webkit-details-marker{display:none}
+.tags summary b{display:block;font:700 19px/1.15 var(--fc);text-transform:uppercase;letter-spacing:.02em}
+.tags summary span{display:block;font-size:13.5px;color:var(--muted)}
+.tag-list{margin-top:12px;display:grid;gap:6px}
+.tag-list div{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:var(--soft);font-size:12.5px}
+.tag-list b{font:700 15px/1 var(--fc);width:52px;flex:none;text-transform:uppercase}
+.tag-list code{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.tag-list button{flex:none;height:30px;padding:0 10px;border-radius:8px;background:var(--brown);color:var(--cream);font:700 12px/1 var(--fc);letter-spacing:.1em;text-transform:uppercase}
+
+/* ---------- bottom nav ---------- */
+.nav{position:fixed;left:50%;bottom:calc(14px + var(--safe-b));translate:-50% 0;z-index:30;width:min(440px,calc(100% - 20px));height:var(--nav-h);display:grid;grid-template-columns:repeat(4,1fr);padding:5px;border-radius:99px;background:var(--brown-deep);box-shadow:var(--ledge-dark)}
+.pick-mode .nav{display:none}
+.nav .ind{position:absolute;top:5px;bottom:5px;left:5px;width:calc((100% - 10px)/4);border-radius:99px;background:var(--gold);transition:transform .5s var(--spring)}
+.tab{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:99px;color:var(--cream);font:700 12px/1 var(--fc);letter-spacing:.1em;text-transform:uppercase;transition:color .25s}
+.tab .ic{width:21px;height:21px}
+.tab.on{color:var(--brown-deep)}
+.tab .dot{position:absolute;top:6px;right:calc(50% - 20px);width:9px;height:9px;border-radius:50%;background:var(--rodeo);box-shadow:0 0 0 2px var(--brown-deep);display:none}
+.tab .dot.show{display:block}
+
+/* ---------- toast + sheet ---------- */
+.toast{position:fixed;left:50%;top:calc(var(--bn-h,0px) + 14px);translate:-50% -20px;z-index:60;display:flex;align-items:center;gap:10px;max-width:calc(100% - 32px);padding:12px 20px;border-radius:99px;background:var(--brown-deep);color:var(--cream);font-size:14.5px;font-weight:600;box-shadow:var(--ledge-dark);opacity:0;pointer-events:none;transition:opacity .25s,translate .45s var(--spring)}
+.toast::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--gold);flex:none}
+.toast.show{opacity:1;translate:-50% 0}
+.sheet-bg{position:fixed;inset:0;z-index:50;background:rgba(43,32,26,.5);opacity:0;pointer-events:none;transition:opacity .25s;display:flex;align-items:flex-end;justify-content:center}
+.sheet-bg.on{opacity:1;pointer-events:auto}
+.sheet{width:min(520px,100%);max-height:calc(100% - var(--bn-h,0px) - 20px);overflow:auto;background:var(--bg);border-radius:32px 32px 0 0;padding:14px 22px calc(26px + var(--safe-b));transform:translateY(100%);transition:transform .5s var(--spring);text-align:center}
+.sheet-bg.on .sheet{transform:none}
+.grab{width:44px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 16px}
+.big-art{width:96px;height:96px;margin:4px auto 14px;border-radius:var(--r-lg);background:var(--gold);color:var(--brown-deep);display:grid;place-items:center;box-shadow:0 4px 0 0 var(--gold-deep)}
+.big-art .ic{width:50px;height:50px}
+.sheet h3{font-size:26px;margin-top:8px}
+.sheet p{color:var(--muted);font-size:15px;margin:8px auto 0;max-width:40ch}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.row2.one{grid-template-columns:1fr}
+@media (min-width:700px){.app{padding-left:28px;padding-right:28px}.topbar{margin:0 -28px;padding:12px 20px}.shead h1{font-size:48px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body class="pick-mode">
+
+<div class="app">
+  <!-- =================== STORE PICKER =================== -->
+  <section class="view on" id="vPick" aria-label="Choose your Rodeo Express">
+    <div class="pick-top">
+      <span class="logo" role="img" aria-label="Rodeo Express Car Wash"></span>
+      <h1>Choose a wash and let the good times roll!</h1>
+      <img class="hero-car" src="assets/westwood.webp" alt="The Rodeo Express longhorn driving an orange convertible" width="760" height="445">
+    </div>
+    <div class="pick-head">
+      <span class="eyebrow c">Rewards + game demo</span>
+      <h2>Pick your wash</h2>
+    </div>
+    <div id="storeList"></div>
+    <div class="pick-foot">
+      <span>Earn points every visit by tapping the poster at your bay, then spend them in Rodeo Wash Simulator.</span>
+    </div>
+  </section>
+
+  <!-- =================== STORE =================== -->
+  <section class="view" id="vStore">
+    <header class="topbar" id="topbar">
+      <div class="tb-l" id="tbL"><button class="icon-btn press" id="backBtn" aria-label="Choose another location"><i data-icon="arrow-left"></i></button></div>
+      <span class="logo" role="img" aria-label="Rodeo Express Car Wash"></span>
+      <div class="tb-r"><button class="icon-btn press" data-fs aria-label="Full screen" hidden><i data-icon="arrows-out"></i></button></div>
+    </header>
+    <div class="shead">
+      <span class="eyebrow c" id="sEyebrow">Rodeo Express · Katy, TX</span>
+      <h1 id="sName"></h1>
+      <div class="status" id="status"><i></i><span id="statusTxt"></span></div>
+    </div>
+
+    <!-- WASH -->
+    <div class="panel on" id="pWash" role="tabpanel" aria-label="Wash menu">
+      <div class="howdy">
+        <span class="eyebrow" style="color:var(--gold)">Howdy, Katy neighbors</span>
+        <h2>Quick, quality washes</h2>
+        <p>Pick a ride below. Tap the poster at your bay for points, and play the game while you vacuum.</p>
+        <img src="assets/westwood.webp" alt="" width="760" height="445">
+      </div>
+      <div class="sec-h"><h2>Wash menu</h2></div>
+      <p class="sec-note">One wash, or the Unlimited Club price for the month.</p>
+      <div class="pkgs" id="pkgs"></div>
+      <div class="club" id="clubCard">
+        <span class="eyebrow">Unlimited Club</span>
+        <h2>Wash as often as you like</h2>
+        <p>One flat monthly rate with no contracts. Plans start at $20 a month, and you can sign up at the bay or online.</p>
+        <ul>
+          <li><i data-icon="check-circle-fill"></i><span>Unlimited washes on your plan, every month</span></li>
+          <li><i data-icon="users-three"></i><span>Family Plans: add more of your cars at a discount</span></li>
+          <li><i data-icon="calendar-check"></i><span>No contracts</span></li>
+        </ul>
+        <a class="btn block press" id="clubGo" target="_blank" rel="noopener"><i data-icon="arrow-square-out"></i>See the club on their site</a>
+      </div>
+      <div class="sec-h"><h2>Free with every wash</h2></div>
+      <div class="free">
+        <div class="card"><i><i data-icon="wind"></i></i><b>Vacuums</b><span>Free, every visit</span></div>
+        <div class="card"><i><i data-icon="sparkle"></i></i><b>Mat cleaning</b><span>Free</span></div>
+        <div class="card"><i><i data-icon="drop"></i></i><b>Air fresheners</b><span>Free</span></div>
+      </div>
+      <div class="vac card"><span class="pc-ic"><i data-icon="game-controller"></i></span><div class="pc-txt"><b>Vacuuming? Play a round</b><span>Rodeo Wash Simulator runs right here. A tap at your bay doubles your Bucks for 15 minutes.</span></div><button class="btn primary press" id="vacGo">Play</button></div>
+      <p class="menu-foot">Prices and services from rodeoexpresscarwash.com. Ask at the pay station for today’s offers.</p>
+    </div>
+
+    <!-- REWARDS -->
+    <div class="panel" id="pRewards" role="tabpanel" aria-label="Rewards">
+      <div class="pts" id="ptsCard">
+        <span class="pts-stars" aria-hidden="true"><i data-icon="star-fill"></i><i data-icon="star-fill"></i><i data-icon="star-fill"></i></span>
+        <span class="eyebrow">Your Rodeo points</span>
+        <div class="pts-num"><b id="ptsNum">0</b><span>points</span></div>
+        <div class="prog"><div class="prog-bar"><i id="progFill"></i></div><div class="prog-txt" id="progTxt"></div></div>
+      </div>
+      <div class="onsite" id="onsite" hidden><i data-icon="house"></i><div><b>You’re at the wash: x2 Bucks</b><span id="onsiteTxt"></span></div></div>
+
+      <div id="collect" class="tap-card card">
+        <span class="eyebrow">At the wash?</span>
+        <h3>Tap the poster at your bay</h3>
+        <p>Every bay has a Rodeo poster with an NFC tag. Hold your phone to it once a day for <b>10 points</b>, plus <b>x2 Bucks</b> in the game for 15 minutes.</p>
+        <button class="nfc-row press" id="nfcRow" type="button"><span class="nfc-ic"><i data-icon="contactless-payment"></i></span><span><b id="nfcT">Tap your phone on the poster</b><small id="nfcS">Your phone opens this page and adds the points</small></span></button>
+        <div class="done-note"><i data-icon="calendar-check"></i><span id="resetIn"></span></div>
+        <div class="demo-card">
+          <b>Demo: pretend you’re at the wash</b>
+          <p>Pick a bay and tap its poster. In the demo this works any time; the real tag pays once a day.</p>
+          <div class="bays" id="bayPick"></div>
+          <button class="btn gold block press" id="demoTap"><i data-icon="contactless-payment"></i><span>Tap the Bay 1 poster</span></button>
+        </div>
+      </div>
+
+      <div class="rank card" id="rankCard"></div>
+
+      <div class="rw-h"><h2>Store</h2><small>Boosts and passes<br>for the game</small></div>
+      <div class="play-card card">
+        <span class="pc-ic"><i data-icon="game-controller"></i></span>
+        <div class="pc-txt"><b>Spend right in the game</b><span id="linkTxt">Open the Game tab and tap the Store. Your points are already there.</span></div>
+        <button class="btn primary press" id="goGame">Play</button>
+      </div>
+      <div class="shop card">
+        <h3>Rodeo Store</h3>
+        <p id="gshopNote">Passes last forever. Boosts and Bucks go into your bag in the game.</p>
+        <div id="gshop"></div>
+      </div>
+      <div class="pearl-card card" id="pearlShop">
+        <div class="pl-top"><span class="pl-ic"><i data-icon="pearl"></i></span><div><b>Pearls</b><span id="plSub">Grug’s currency for every game</span></div><span class="soon">Coming soon</span></div>
+        <div class="packs" id="packs"></div>
+        <p class="fine" id="plFine"></p>
+      </div>
+
+      <div id="closet" class="grug-closet" hidden></div>
+
+      <div class="rw-h"><h2>Activity</h2></div>
+      <ul class="hist card" id="hist"></ul>
+      <p class="fine">Points, items and settings are saved in this browser. This is a demo: nothing here is a real Rodeo Express reward yet.</p>
+    </div>
+
+    <!-- GAME -->
+    <div class="panel" id="pGame" role="tabpanel" aria-label="Game">
+      <div class="gwrap" id="gameFrame">
+        <div class="gload"><span class="logo" role="img" aria-label="Rodeo Express"></span><p>Opening Rodeo Wash Simulator…</p></div>
+      </div>
+    </div>
+
+    <!-- VISIT -->
+    <div class="panel" id="pVisit" role="tabpanel" aria-label="Visit">
+      <div class="vcard card">
+        <div class="vtop"><img src="assets/westwood.webp" alt="" width="760" height="445"></div>
+        <div class="vbody">
+          <span class="eyebrow">Visit us</span>
+          <h3 id="vName"></h3>
+          <div class="vline"><i data-icon="map-pin"></i><span id="vAddr"></span></div>
+          <div class="vline"><i data-icon="clock"></i><div class="hours" id="vHours"></div></div>
+          <div class="vbtns" id="vBtns"></div>
+          <div class="social" id="social"></div>
+        </div>
+      </div>
+
+      <details class="tags card" id="tagLinks">
+        <summary><span class="pc-ic"><i data-icon="contactless-payment"></i></span><span><b>For the owner: bay tag links</b><span>The link to write on each bay’s NFC tag</span></span></summary>
+        <div class="tag-list" id="tagList"></div>
+        <p class="fine">Write each link to a cheap NTAG213 sticker and put it on that bay’s poster. Any NFC phone (iPhone XS or newer, most Androids) opens the link with a tap. Change the bay count in CONFIG.</p>
+      </details>
+
+      <div class="prefs card" id="prefs">
+        <h3>On this device</h3>
+        <div class="store-ok" data-storage></div>
+        <div class="pref"><i data-icon="vibrate"></i><span>Vibrate on tap<small>A light buzz on Android phones</small></span><button class="sw" role="switch" data-pref="haptics" aria-label="Vibrate on tap"></button></div>
+        <div class="pref"><i data-icon="sparkle"></i><span>Animations<small>Celebrations, slides and count-ups</small></span><button class="sw" role="switch" data-pref="motion" aria-label="Animations"></button></div>
+        <div class="pref"><i data-icon="sliders-horizontal"></i><span>Open where I left off<small>Remember my location and last tab</small></span><button class="sw" role="switch" data-pref="remember" aria-label="Open where I left off"></button></div>
+        <button class="clear press" id="clearBtn">Clear my points and settings</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<button class="gmin press" id="gminBtn" type="button" aria-label="Show the tabs"></button>
+<nav class="nav" id="nav" role="tablist" aria-label="Sections">
+  <span class="ind" id="ind"></span>
+  <button class="tab on" role="tab" data-tab="Wash"><i data-icon="drop"></i>Wash</button>
+  <button class="tab" role="tab" data-tab="Rewards"><i data-icon="gift"></i>Rewards<i class="dot" id="rwDot"></i></button>
+  <button class="tab" role="tab" data-tab="Game"><i data-icon="game-controller"></i>Game</button>
+  <button class="tab" role="tab" data-tab="Visit"><i data-icon="map-pin"></i>Visit</button>
+</nav>
+
+<div class="toast" id="toast" role="status"></div>
+<div class="sheet-bg" id="sheetBg"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/grug.js"></script>
+<script src="../../assets/grug-app.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* =====================================================================================
+   CONFIG · everything a Rodeo Express owner would change lives here
+   ===================================================================================== */
+const CONFIG = {
+  // The bar across the top of every screen. This whole app is a demonstration, so it stays on.
+  demoBar: {
+    tag: 'Demo',
+    text: 'For demonstration only: a concept rewards app and game made for Rodeo Express Car Wash. Not affiliated with Rodeo Express yet, and points, Pearls and Bucks aren’t real. Questions? Text',
+    phone: '954-459-6301',
+    note: '(text only, please)',
+    short: 'Demo only: a concept app + game for Rodeo Express Car Wash. Not affiliated yet; points aren’t real. Text'
+  },
+  stores: [{
+    id: 'katy',
+    name: 'Peek Road',
+    area: 'Katy, TX',
+    address: '6802 Peek Rd., Katy, TX 77449',
+    // [day 0–6 (Sun–Sat)]: [opens, closes] in minutes after midnight
+    hours: { 0: [480, 1140], 1: [450, 1170], 2: [450, 1170], 3: [450, 1170], 4: [450, 1170], 5: [450, 1170], 6: [450, 1170] },
+    phone: '+12815742920', phoneText: '281-574-2920',
+    maps: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Rodeo Express Car Wash 6802 Peek Rd Katy TX 77449'),
+    bays: 12                       // one NFC poster per bay
+  }],
+  site: 'https://rodeoexpresscarwash.com/katy-tx',
+  social: { facebook: 'https://www.facebook.com/profile.php?id=61568933644334', instagram: 'https://www.instagram.com/rodeoexpresscw/' },
+  // The wash menu, from rodeoexpresscarwash.com/katy-tx (single wash / Unlimited Club a month)
+  packages: [
+    { name: 'Ultimate Ride', price: '25', club: '40', tag: 'Top of the line', svc: ['Rodeo Ceramic', 'Turbo Shine Foam Bath', 'Rodeo Bubble Shine', 'Tire dressing', 'Dry N Shine', 'Triple foam conditioner', 'Underbody rinse', 'Wheel brightening', 'Soft wash', 'Rinse', 'Power dry'], adds: 1 },
+    { name: 'Deluxe Ride', price: '20', club: '35', svc: ['Turbo Shine Foam Bath', 'Rodeo Bubble Shine', 'Tire dressing', 'Dry N Shine', 'Triple foam conditioner', 'Underbody rinse', 'Wheel brightening', 'Soft wash', 'Rinse', 'Power dry'], adds: 4 },
+    { name: 'Express Wash', price: '15', club: '30', svc: ['Triple foam conditioner', 'Underbody rinse', 'Wheel brightening', 'Soft wash', 'Rinse', 'Power dry'], adds: 3 },
+    { name: 'Basic Wash', price: '10', club: '20', svc: ['Soft wash', 'Rinse', 'Power dry'], adds: 0 }
+  ],
+  points: { tap: 10, resetHour: 4, onsiteMinutes: 15, secret: 'rodeo-katy-peek-7m2x' },
+  // Rodeo Ranks: earned by visit days (one tap a day = one visit). Ranks can't be bought. The perk is a Bucks bonus in the game.
+  ranks: [
+    { at: 1, name: 'Greenhorn', bonus: 0, icon: 'star' },
+    { at: 3, name: 'Ranch Hand', bonus: 0.10, icon: 'medal' },
+    { at: 6, name: 'Wrangler', bonus: 0.25, icon: 'medal' },
+    { at: 12, name: 'Trail Boss', bonus: 0.5, icon: 'trophy' },
+    { at: 24, name: 'Rodeo Legend', bonus: 1, icon: 'crown-simple-fill' }
+  ],
+  // The game (play/rodeo/game.html). The Store below is shared with it. Prices are in Rodeo points.
+  // effect: pass (forever; amount = cash | auto | soap | vip | boots | crew) · boost (runSeconds each; amount = cash2 | rush | turbo | tips)
+  //         bucks (amount = minutes of the player's Bucks a minute) · skip (opens the next wash package)
+  game: {
+    title: 'Rodeo Wash Simulator',
+    src: 'game.html',
+    collectible: 'cars washed',
+    runSeconds: 300,
+    shop: [
+      { id: 'pass_cash',  name: 'x2 Bucks',        desc: 'Every car pays double, forever',                 cost: 60, effect: 'pass',  amount: 'cash',  icon: 'coins' },
+      { id: 'pass_auto',  name: 'Auto Spray',      desc: 'Sprays on its own when you’re by a car, forever', cost: 40, effect: 'pass',  amount: 'auto',  icon: 'lightning' },
+      { id: 'pass_soap',  name: 'Bottomless Soap', desc: 'Your soap tank never runs dry, forever',         cost: 30, effect: 'pass',  amount: 'soap',  icon: 'drop' },
+      { id: 'pass_vip',   name: 'VIP Bay',         desc: 'A gold bay for show cars that pay x3, forever',  cost: 50, effect: 'pass',  amount: 'vip',   icon: 'crown-simple-fill' },
+      { id: 'pass_boots', name: 'Rodeo Boots',     desc: 'Walk 50% faster, forever',                       cost: 20, effect: 'pass',  amount: 'boots', icon: 'sneaker-move-fill' },
+      { id: 'pass_crew',  name: 'Crew Pro Gear',   desc: 'Your crew washes twice as fast, forever',        cost: 35, effect: 'pass',  amount: 'crew',  icon: 'users-three' },
+      { id: 'b_cash',     name: 'Double Bucks',    desc: 'x2 Bucks for 5 minutes',                         cost: 8,  effect: 'boost', amount: 'cash2', icon: 'coins' },
+      { id: 'b_rush',     name: 'Rush Hour',       desc: 'Cars pull in 3x faster for 5 minutes',           cost: 5,  effect: 'boost', amount: 'rush',  icon: 'car' },
+      { id: 'b_turbo',    name: 'Turbo Nozzle',    desc: 'Spray 3x stronger for 5 minutes',                cost: 6,  effect: 'boost', amount: 'turbo', icon: 'rocket' },
+      { id: 'b_tips',     name: 'Big Tippers',     desc: 'Customers tip 50% more for 5 minutes',           cost: 5,  effect: 'boost', amount: 'tips',  icon: 'star-four-fill' },
+      { id: 'c_jar',      name: 'Tip Jar',         desc: '10 minutes of your Bucks',                       cost: 5,  effect: 'bucks', amount: 10,      icon: 'coins' },
+      { id: 'c_bucket',   name: 'Bucket of Bucks', desc: '30 minutes of your Bucks',                       cost: 10, effect: 'bucks', amount: 30,      icon: 'coins' },
+      { id: 'c_bag',      name: 'Saddlebag',       desc: '2 hours of your Bucks',                          cost: 25, effect: 'bucks', amount: 120,     icon: 'shopping-bag' },
+      { id: 'skip_lane',  name: 'Open the Next Lane', desc: 'Unlock the next wash package right now',      cost: 15, effect: 'skip',  amount: 1,       icon: 'arrow-right' }
+    ]
+  },
+  // Pearls: Grug's site-wide currency, sold on the Pearls page. Shown here so the owner sees the plan, but switched off:
+  // in this demo nobody can buy Pearls or spend them. Pack sizes and prices match the site's Pearls page.
+  pearls: { name: 'Pearls', locked: true, packs: [{ n: 100, price: '$1.99' }, { n: 275, price: '$4.99', tag: 'Popular' }, { n: 600, price: '$9.99' }, { n: 1300, price: '$19.99', tag: 'Best value' }] },
+  storageKey: 'rodeo-express-rewards-v1'
+};
+/* ===================================== end of CONFIG ===================================== */
+
+const ICONS = {"arrow-left":"<g transform=\"matrix(-1 0 0 1 16 0)\"><path fill=\"currentColor\" d=\"M7.293 1.293a1 1 0 0 1 1.414 0l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414-1.414L11.586 9H2a1 1 0 0 1 0-2h9.586L7.293 2.707a1 1 0 0 1 0-1.414\"></path></g>","arrow-right":"<path fill=\"currentColor\" d=\"M7.293 1.293a1 1 0 0 1 1.414 0l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414-1.414L11.586 9H2a1 1 0 0 1 0-2h9.586L7.293 2.707a1 1 0 0 1 0-1.414\"></path>","arrow-square-out":"<g transform=\"rotate(45 8 8)\"><path fill=\"currentColor\" d=\"M8 1a1 1 0 0 1 .707.293l6 6a1 1 0 1 1-1.414 1.414L9 4.414V14a1 1 0 0 1-2 0V4.414L2.707 8.707a1 1 0 1 1-1.414-1.414l6-6 .073-.066A1 1 0 0 1 8 1\"></path></g>","arrows-in":"<path d=\"M6 2v4H2M14 6h-4V2M10 14v-4h4M2 10h4v4\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>","arrows-out":"<path d=\"M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>","calendar-check":"<path fill=\"currentColor\" d=\"M15 9h-3a3 3 0 0 0-3 3v3H3a2 2 0 0 1-2-2V7h14z\"></path> <path fill=\"currentColor\" d=\"M10 15v-3a2 2 0 0 1 2-2h3zM12 1a1 1 0 0 1 1 1v1a2 2 0 0 1 2 2v1H1V5a2 2 0 0 1 2-2V2a1 1 0 0 1 2 0v1h6V2a1 1 0 0 1 1-1\"></path>","car":"<path fill=\"currentColor\" d=\"M4.5 11a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3M11.5 11a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3\"></path> <path fill=\"currentColor\" d=\"M9.323 3a1 1 0 0 1 .928.629L12 8l2.316.772a1 1 0 0 1 .684.949V12h-1.05a2.501 2.501 0 0 0-4.9 0h-2.1a2.501 2.501 0 0 0-4.9 0H1V8.192a1 1 0 0 1 .071-.37L2.75 3.628A1 1 0 0 1 3.677 3zM2 8h4V4H3.5zm5 0h4L9.5 4H7z\"></path>","check":"<path fill=\"currentColor\" d=\"M13.293 3.293a1 1 0 1 1 1.414 1.414l-8 8a1 1 0 0 1-1.414 0l-4-4a1 1 0 1 1 1.414-1.414L6 10.586z\"></path>","check-circle":"<path fill=\"currentColor\" d=\"M13.293 3.293a1 1 0 1 1 1.414 1.414l-8 8a1 1 0 0 1-1.414 0l-4-4a1 1 0 1 1 1.414-1.414L6 10.586z\"></path>","check-circle-fill":"<path fill=\"currentColor\" d=\"M13.293 3.293a1 1 0 1 1 1.414 1.414l-8 8a1 1 0 0 1-1.414 0l-4-4a1 1 0 1 1 1.414-1.414L6 10.586z\"></path>","clock":"<path fill=\"currentColor\" d=\"M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1M7 3v5a1 1 0 0 0 .293.707L10 11.414 11.414 10 9 7.586V3z\"></path>","coins":"<path fill=\"currentColor\" d=\"M14 13c0 1.105-2.239 2-5 2s-5-.895-5-2v-.363q.445.117.923.197a12.8 12.8 0 0 0 3.076.127q.49.037 1.001.039c1.475 0 2.857-.237 3.907-.657.395-.158.77-.354 1.093-.594zM2 8.749c.322.24.698.436 1.093.594C4.143 9.763 5.525 10 7 10q.51-.001 1-.04.496.04 1 .04c.708 0 1.413-.056 2.077-.166q.478-.08.923-.197V10c0 1.105-2.239 2-5 2s-5-.895-5-2zM14 7c0 1.105-2.239 2-5 2s-5-.895-5-2V5.749c.32.238.695.435 1.093.594a9 9 0 0 0 1.83.491C7.587 6.944 8.293 7 9 7c.708 0 1.413-.056 2.077-.166a9 9 0 0 0 1.83-.491c.398-.16.773-.356 1.093-.594z\"></path> <path fill=\"currentColor\" d=\"M9 2c2.761 0 5 .895 5 2 0 .262-.129.522-.38.766-.252.242-.62.462-1.085.648a8 8 0 0 1-1.622.434C10.306 5.948 9.656 6 9 6s-1.307-.052-1.913-.152a8 8 0 0 1-1.622-.434C5 5.228 4.632 5.008 4.38 4.766 4.129 4.522 4 4.262 4 4c0-1.105 2.239-2 5-2M8 5h2V3H8z\"></path>","contactless-payment":"<circle cx=\"3\" cy=\"8\" r=\"1.7\" fill=\"currentColor\"/><path d=\"M6 4.6a4.8 4.8 0 0 1 0 6.8M9 2.6a7.6 7.6 0 0 1 0 10.8M12 .9a10 10 0 0 1 0 14.2\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.7\"/>","crown-simple-fill":"<path fill=\"currentColor\" d=\"M9 2h2v2H9v2.052a3.5 3.5 0 1 1 3 5.912v.536l1 1V15H3v-1.5l1-1v-.536a3.5 3.5 0 1 1 3-5.912V4H5V2h2V0h2z\"></path>","drop":"<path fill=\"currentColor\" d=\"M8 1.2c.3 0 .55.15.72.4C9.9 3.35 13 7.6 13 10.2A5 5 0 0 1 3 10.2c0-2.6 3.1-6.85 4.28-8.6A.87.87 0 0 1 8 1.2z\"/>","game-controller":"<path fill=\"currentColor\" fill-rule=\"evenodd\" d=\"M12.26 3a3 3 0 0 1 2.988 2.729l.57 6.264a1.84 1.84 0 0 1-3.364 1.188L11 11H5l-1.454 2.18a1.84 1.84 0 0 1-3.364-1.187l.57-6.264A3 3 0 0 1 3.74 3zM12 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2M4 5a2 2 0 1 0 0 4 2 2 0 0 0 0-4m6 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m4 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2m-2-2a1 1 0 1 0 0 2 1 1 0 0 0 0-2\" clip-rule=\"evenodd\"></path>","gift":"<path fill=\"currentColor\" d=\"M7 15H3a1 1 0 0 1-1-1V9h5zM14 14a1 1 0 0 1-1 1H9V9h5zM7 8H1V6a1 1 0 0 1 1-1h5zM14 5a1 1 0 0 1 1 1v2H9V5zM4.282 1.312a1.784 1.784 0 0 1 2.242.212L8 3l1.238-1.352c.605-.66 1.6-.781 2.345-.285l.06.04A1.75 1.75 0 0 1 12 4H4c-.776-.776-.63-2.08.282-2.688\"></path>","house":"<path fill=\"currentColor\" d=\"M7.316 1.14a1 1 0 0 1 1.368 0l6.394 5.995a.5.5 0 0 1-.342.865H13v7h-3v-3a2 2 0 0 0-4 0v3H3V8H1.264a.5.5 0 0 1-.341-.865z\"></path>","instagram-logo":"<rect x=\"1.8\" y=\"1.8\" width=\"12.4\" height=\"12.4\" rx=\"3.6\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.7\"/><circle cx=\"8\" cy=\"8\" r=\"2.9\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.7\"/><circle cx=\"11.8\" cy=\"4.2\" r=\"1\" fill=\"currentColor\"/>","lightning":"<path fill=\"currentColor\" d=\"M9 7h2.898a.5.5 0 0 1 .376.83L6 15l1-6H4.102a.5.5 0 0 1-.377-.83L10 1z\"></path>","list":"<path d=\"M2.5 4h11M2.5 8h11M2.5 12h11\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\"/>","lock-simple":"<path fill=\"currentColor\" d=\"M8 1a4 4 0 0 1 4 4v2l.204.01A2 2 0 0 1 14 9v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2V5a4 4 0 0 1 4-4m0 8a1 1 0 0 0-1 1v2a1 1 0 1 0 2 0v-2a1 1 0 0 0-1-1m0-6a2 2 0 0 0-2 2v2h4V5a2 2 0 0 0-2-2\"></path>","map-pin":"<path fill=\"currentColor\" d=\"M8 .8a5.6 5.6 0 0 0-5.6 5.6c0 4 4.6 8.3 5 8.7.3.3.9.3 1.2 0 .4-.4 5-4.7 5-8.7A5.6 5.6 0 0 0 8 .8zm0 7.7a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2z\"/>","map-trifold":"<path fill=\"currentColor\" d=\"M6 2.09c.133.008.266.042.388.103L9.598 3.8a1 1 0 0 0 .402.104V13.91a1 1 0 0 1-.388-.102L6.402 12.2A1 1 0 0 0 6 12.096zM13.629 2.549A1 1 0 0 1 15 3.477v7.98a1 1 0 0 1-.653.938L11 13.63V3.6zM5 12.4 2.371 13.45A1 1 0 0 1 1 12.523v-7.98a1 1 0 0 1 .653-.939L5 2.37z\"></path>","medal":"<path fill=\"currentColor\" d=\"M8 7a4 4 0 1 1 0 8 4 4 0 0 1 0-8M14 3l-3.61 3.608a4.98 4.98 0 0 0-3.52-.48L12 1zM7.293 4.293l-2 2L2 3l2-2zM8.586 3H7.414l-2-2h5.172z\"></path>","minus":"<rect x=\"2\" y=\"6.9\" width=\"12\" height=\"2.2\" rx=\"1.1\" fill=\"currentColor\"/>","pearl":"<circle cx=\"8\" cy=\"8.3\" r=\"6.3\" fill=\"currentColor\" opacity=\".3\"/><circle cx=\"8\" cy=\"8.3\" r=\"6.1\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.6\"/><circle cx=\"5.8\" cy=\"6.1\" r=\"1.6\" fill=\"currentColor\"/>","phone":"<path fill=\"currentColor\" d=\"M11 11H5V3h6z\"></path> <path fill=\"currentColor\" d=\"M11 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zM7.5 13a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1zM5 2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z\"></path>","rocket":"<path fill=\"currentColor\" d=\"M3 11c1.236-.412 2.412.764 2 2a1.58 1.58 0 0 1-1 1l-3 1 1-3a1.58 1.58 0 0 1 1-1\"></path> <path fill=\"currentColor\" d=\"M14 1a1 1 0 0 1 1 1v.513a9 9 0 0 1-6.134 8.53c.32.744.092 1.652-.63 2.134L7 14H6v-2l-2-2H2V9l.823-1.235a1.74 1.74 0 0 1 2.132-.632A9 9 0 0 1 13.487 1zm-3 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4\"></path>","shopping-bag":"<path fill=\"currentColor\" d=\"M13.883 6a1 1 0 0 1 .994 1.11l-.778 7a1 1 0 0 1-.994.89H2.895a1 1 0 0 1-.993-.89l-.778-7A1 1 0 0 1 2.118 6zM5 7a1 1 0 1 0 0 2 1 1 0 0 0 0-2m6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2M8 1a4 4 0 0 1 4 4h-2a2 2 0 0 0-4 0H4a4 4 0 0 1 4-4\"></path>","sliders-horizontal":"<path fill=\"currentColor\" d=\"M6 8a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1zM3 12H2a1 1 0 1 1 0-2h1zM14 10a1 1 0 1 1 0 2H8v-2zM11 2a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zM8 6H2a1 1 0 0 1 0-2h6zM14 4a1 1 0 1 1 0 2h-1V4z\"></path>","sneaker-move-fill":"<path fill=\"currentColor\" d=\"M7 13a1 1 0 0 1-1 1H.651a.651.651 0 0 1-.361-1.193L3 11l-.5-5H7zM13 11l2.71 1.807A.651.651 0 0 1 15.349 14H10a1 1 0 0 1-1-1V6h4.5zM6 2a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zM14 2a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z\"></path>","sparkle":"<path fill=\"currentColor\" d=\"M8 0c.4 0 .7.3.8.7l.7 3.3c.2.9.9 1.6 1.8 1.8l3.3.7c.4.1.7.4.7.8s-.3.7-.7.8l-3.3.7c-.9.2-1.6.9-1.8 1.8l-.7 3.3c-.1.4-.4.7-.8.7s-.7-.3-.8-.7l-.7-3.3c-.2-.9-.9-1.6-1.8-1.8L.7 8.8C.3 8.7 0 8.4 0 8s.3-.7.7-.8l3.3-.7c.9-.2 1.6-.9 1.8-1.8L6.5.7C6.6.3 6.9 0 8 0z\"/>","star":"<path fill=\"currentColor\" d=\"M7.536 1.16a.5.5 0 0 1 .928 0L9.896 4.74a.5.5 0 0 0 .382.308l4.466.744a.5.5 0 0 1 .193.91L11.61 8.896a.5.5 0 0 0-.215.515l.846 4.274a.5.5 0 0 1-.797.492L8.307 11.74a.5.5 0 0 0-.614 0l-3.135 2.438a.5.5 0 0 1-.798-.492l.846-4.274a.5.5 0 0 0-.215-.515L1.063 6.701a.5.5 0 0 1 .193-.91l4.466-.744a.5.5 0 0 0 .383-.308z\"></path>","star-fill":"<path fill=\"currentColor\" d=\"M7.536 1.16a.5.5 0 0 1 .928 0L9.896 4.74a.5.5 0 0 0 .382.308l4.466.744a.5.5 0 0 1 .193.91L11.61 8.896a.5.5 0 0 0-.215.515l.846 4.274a.5.5 0 0 1-.797.492L8.307 11.74a.5.5 0 0 0-.614 0l-3.135 2.438a.5.5 0 0 1-.798-.492l.846-4.274a.5.5 0 0 0-.215-.515L1.063 6.701a.5.5 0 0 1 .193-.91l4.466-.744a.5.5 0 0 0 .383-.308z\"></path>","star-four-fill":"<path fill=\"currentColor\" d=\"M6.5 8.75 9 10l-2.5 1.25L5 15l-1.5-3.75L1 10l2.5-1.25L5 5zM10 12a1 1 0 1 1 0 2 1 1 0 0 1 0-2M13 9a1 1 0 1 1 0 2 1 1 0 0 1 0-2M13.269 3.308 15 4l-1.731.691L12.5 7l-.77-2.309L10 4l1.73-.692L12.5 1zM3 2a1 1 0 1 1 0 2 1 1 0 0 1 0-2\"></path>","trophy":"<path fill=\"currentColor\" d=\"M12.91 2H15a1 1 0 0 1 1 1v2a3 3 0 0 1-3 3h-.636l-.002.017A4.38 4.38 0 0 1 9 11.884V13h2l1 1v1H4v-1l1-1h2v-1.116a4.38 4.38 0 0 1-3.362-3.867L3.636 8H3l-.154-.004A3 3 0 0 1 0 5V3a1 1 0 0 1 .897-.995L1 2h2.09L3 1h10zM2 5a1 1 0 0 0 1 1h.454l-.182-2H2zm10.546 1H13a1 1 0 0 0 1-1V4h-1.273z\"></path>","users-three":"<path fill=\"currentColor\" d=\"M5.5 2a2.75 2.75 0 1 1 0 5.5 2.75 2.75 0 0 1 0-5.5zM11 3.5a2.25 2.25 0 1 1 0 4.5 2.25 2.25 0 0 1 0-4.5zM0 13.2C0 10.6 2.5 9 5.5 9s5.5 1.6 5.5 4.2c0 .45-.35.8-.8.8H.8a.8.8 0 0 1-.8-.8zm11.6.8c.25-.25.4-.45.4-.8 0-1.4-.6-2.6-1.6-3.5.2 0 .4-.03.6-.03 2.6 0 5 1.3 5 3.53 0 .45-.35.8-.8.8z\"/>","vibrate":"<path fill=\"currentColor\" d=\"M11 11H5V3h6z\"></path> <path fill=\"currentColor\" d=\"M11 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zM7.5 13a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1zM5 2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z\"></path>","warning-circle":"<path fill=\"currentColor\" d=\"M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1M6 6a1 1 0 0 0 0 2h1v3H6a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2H9V7a1 1 0 0 0-1-1zm2-3a1 1 0 1 0 0 2 1 1 0 0 0 0-2\"></path>","wind":"<path d=\"M1.5 6h8a2.2 2.2 0 1 0-2.2-2.2M1.5 9.2h10.5a2.2 2.2 0 1 1-2.2 2.2M1.5 12.4h4\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.7\"/>"};
+// the same @icons vector set as the game (16 x 16, one colour), so the app and the game match
+const ic = name => { const d = ICONS[name]; return d ? '<svg class="ic" viewBox="0 0 16 16" fill="none" aria-hidden="true">' + d + '</svg>' : ''; };
+function paintIcons(root){ (root || document).querySelectorAll('i[data-icon]').forEach(el => { el.outerHTML = ic(el.dataset.icon); }); }
+const $ = (s, r) => (r || document).querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => Math.floor(+n || 0).toLocaleString();
+const sysReduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const KEY = CONFIG.storageKey, GAME = CONFIG.game, PEARLS = CONFIG.pearls;
+const STORES = CONFIG.stores;
+
+/* ======================= Saved on this device ======================= */
+function loadState(){
+  let s = null; try{ s = JSON.parse(localStorage.getItem(KEY) || 'null'); }catch(e){}
+  s = s && typeof s === 'object' ? s : {};
+  const p = s.prefs && typeof s.prefs === 'object' ? s.prefs : {};
+  return {
+    store: typeof s.store === 'string' ? s.store : '',
+    tab: typeof s.tab === 'string' ? s.tab : 'Wash',
+    points: Math.max(0, +s.points || 0),
+    lastClaimDay: typeof s.lastClaimDay === 'string' ? s.lastClaimDay : '',
+    days: Array.isArray(s.days) ? s.days.slice(-400) : [],
+    history: Array.isArray(s.history) ? s.history.slice(0, 40) : [],
+    inv: s.inv && typeof s.inv === 'object' ? s.inv : {},
+    game: { best: Math.max(0, +(s.game && s.game.best) || 0), runs: Math.max(0, +(s.game && s.game.runs) || 0) },
+    onsiteUntil: +s.onsiteUntil || 0, lastBay: +s.lastBay || 1,
+    prefs: { haptics: p.haptics !== false, motion: p.motion !== false, remember: p.remember !== false }
+  };
+}
+let st = loadState();
+const calm = () => sysReduce || !st.prefs.motion;
+const buzz = ms => { if(!st.prefs.haptics || (navigator.userActivation && !navigator.userActivation.hasBeenActive)) return; try{ if(navigator.vibrate) navigator.vibrate(ms || 8); }catch(e){} };
+function storageWorks(){ try{ const k = '__rodeo_check'; localStorage.setItem(k, '1'); const ok = localStorage.getItem(k) === '1'; localStorage.removeItem(k); return ok; }catch(e){ return false; } }
+let storageOK = storageWorks();
+function renderStorage(){
+  document.querySelectorAll('[data-storage]').forEach(el => {
+    el.className = 'store-ok ' + (storageOK ? 'yes' : 'no');
+    el.innerHTML = ic(storageOK ? 'check-circle' : 'warning-circle') + '<span>' + (storageOK ? 'Saving to this device is working' : 'This browser isn’t saving (private mode or blocked storage). Points will be lost when you close it.') + '</span>';
+  });
+}
+function save(){ let ok = true; try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){ ok = false; } if(ok !== storageOK){ storageOK = ok; renderStorage(); } }
+function hist(label, pts){ st.history.unshift({at: Date.now(), pts, label}); st.history = st.history.slice(0, 40); }
+let toastT;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2800); }
+const clockTime = t => new Date(t).toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'});
+const minsText = m => { const h = Math.floor(m / 60), mm = m % 60, d = new Date(); d.setHours(h, mm, 0, 0); return d.toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'}); };
+
+/* ======================= Days and ranks ======================= */
+function rewardsDay(t){ const d = new Date((t || Date.now()) - CONFIG.points.resetHour * 3600e3); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function nextReset(){ const now = new Date(), r = new Date(now); r.setHours(CONFIG.points.resetHour, 0, 0, 0); if(r <= now) r.setDate(r.getDate() + 1); return r.getTime(); }
+const claimedToday = () => st.lastClaimDay === rewardsDay();
+const visits = () => st.days.length;
+function rankOf(v){ let r = null; for(const k of CONFIG.ranks) if(v >= k.at) r = k; return r; }
+function nextRank(v){ return CONFIG.ranks.find(k => k.at > v) || null; }
+const onsiteLeft = () => Math.max(0, st.onsiteUntil - Date.now());
+
+/* ======================= Store routing + tabs ======================= */
+let store = null, tab = 'Wash';
+const storeById = id => STORES.find(s => s.id === id);
+function renderPicker(){
+  $('#storeList').innerHTML = STORES.map(s => '<button class="store-card card press" data-store="' + s.id + '"><span class="sc-pic"><span class="logo"></span></span><span class="sc-txt"><small>' + esc(s.area) + '</small><strong>' + esc(s.name) + '</strong><span>' + esc(s.address.split(',')[0]) + '<br>' + esc(openText(s)) + '</span></span><span class="sc-go">' + ic('arrow-right') + '</span></button>').join('') +
+    '<div class="store-soon">More Rodeo Express locations would appear here.</div>';
+}
+$('#storeList').addEventListener('click', e => { const b = e.target.closest('[data-store]'); if(!b) return; buzz(); location.hash = b.dataset.store; });
+function openNow(s){ const d = new Date(), h = s.hours[d.getDay()], m = d.getHours() * 60 + d.getMinutes(); return !!h && m >= h[0] && m < h[1]; }
+function openText(s){
+  const d = new Date(), h = s.hours[d.getDay()], m = d.getHours() * 60 + d.getMinutes();
+  if(openNow(s)) return 'Open now · until ' + minsText(h[1]);
+  if(h && m < h[0]) return 'Closed · opens at ' + minsText(h[0]);
+  const t = s.hours[(d.getDay() + 1) % 7]; return 'Closed · opens tomorrow at ' + minsText(t[0]);
+}
+function showPicker(){
+  store = null; document.body.classList.add('pick-mode'); document.body.classList.remove('game-mode', 'game-full');
+  $('#vStore').classList.remove('on'); $('#vPick').classList.add('on'); document.title = 'Rodeo Express · Rewards demo'; window.scrollTo(0, 0);
+}
+function enterStore(s, wantTab){
+  const fresh = !store || store.id !== s.id;
+  store = s; st.store = s.id; save();
+  document.body.classList.remove('pick-mode'); $('#vPick').classList.remove('on'); $('#vStore').classList.add('on');
+  document.title = 'Rodeo Express · ' + s.name;
+  $('#sName').textContent = s.name; $('#sEyebrow').textContent = 'Rodeo Express · ' + s.area;
+  renderStatus(); renderVisit(); renderRewards(); renderCollect();
+  setTab(wantTab || (fresh ? (st.prefs.remember ? st.tab : 'Wash') : tab), true);
+  if(fresh) window.scrollTo(0, 0);
+}
+function route(){
+  const parts = location.hash.replace(/^#\/?/, '').split('/');
+  const s = storeById(parts[0]);
+  const t = ({wash: 'Wash', rewards: 'Rewards', game: 'Game', visit: 'Visit'})[(parts[1] || '').toLowerCase()];
+  if(s) return enterStore(s, t);
+  if(!location.hash && st.prefs.remember && st.store && storeById(st.store)){ history.replaceState(null, '', '#' + st.store); return enterStore(storeById(st.store)); }
+  showPicker();
+}
+addEventListener('hashchange', route);
+$('#backBtn').addEventListener('click', () => { buzz(); st.store = ''; save(); history.pushState(null, '', location.pathname + location.search); showPicker(); });
+const TABS = ['Wash', 'Rewards', 'Game', 'Visit'];
+let gameFull = true;
+function renderGameFull(){
+  document.body.classList.toggle('game-full', gameFull && tab === 'Game');
+  $('#gminBtn').innerHTML = gameFull ? ic('list') + '<span>Tabs</span>' : ic('minus') + '<span>Hide tabs</span>';
+}
+$('#gminBtn').addEventListener('click', () => { buzz(6); gameFull = !gameFull; renderGameFull(); });
+function setTab(t, instant){
+  if(TABS.indexOf(t) < 0) t = 'Wash';
+  if(tab === 'Game' && t !== 'Game') pauseGame();
+  tab = t; st.tab = t; save();
+  const i = TABS.indexOf(t);
+  document.querySelectorAll('.tab').forEach((b, k) => { b.classList.toggle('on', k === i); b.setAttribute('aria-selected', k === i); });
+  const ind = $('#ind'); if(instant){ ind.style.transition = 'none'; requestAnimationFrame(() => { ind.style.transition = ''; }); }
+  ind.style.transform = 'translateX(' + (i * 100) + '%)';
+  TABS.forEach(x => $('#p' + x).classList.toggle('on', x === t));
+  if(t === 'Rewards') $('#rwDot').classList.remove('show');
+  document.body.classList.toggle('game-mode', t === 'Game');
+  if(t === 'Game'){ gameFull = true; window.scrollTo(0, 0); startGame(); }
+  renderGameFull();
+  if(store){ const h = '#' + store.id + (t === 'Wash' ? '' : '/' + t.toLowerCase()); if(location.hash !== h) history.replaceState(null, '', h); }
+}
+$('#nav').addEventListener('click', e => {
+  const b = e.target.closest('[data-tab]'); if(!b) return; buzz(6);
+  if(b.dataset.tab === tab){ window.scrollTo({top: 0, behavior: calm() ? 'auto' : 'smooth'}); return; }
+  setTab(b.dataset.tab); window.scrollTo({top: 0, behavior: 'auto'});
+});
+addEventListener('scroll', () => $('#topbar').classList.toggle('scrolled', window.scrollY > 8), {passive: true});
+function renderStatus(){ if(!store) return; const o = openNow(store); $('#status').className = 'status' + (o ? ' open' : ''); $('#statusTxt').textContent = openText(store); }
+setInterval(renderStatus, 60000);
+
+/* ======================= Wash menu ======================= */
+function renderWash(){
+  const all = CONFIG.packages;
+  $('#pkgs').innerHTML = all.map((p, i) => {
+    const below = all[i + 1], newOnes = below ? p.svc.filter(x => below.svc.indexOf(x) < 0) : p.svc;
+    return '<article class="pkg card' + (p.tag ? ' top' : '') + '">' + (p.tag ? '<span class="tagline">' + esc(p.tag) + '</span>' : '') +
+      '<div class="pkg-head"><div><h3>' + esc(p.name) + '</h3><small>' + p.svc.length + ' services' + (below ? ' · everything in ' + esc(below.name) + ', plus:' : '') + '</small></div>' +
+      '<div class="price"><b>$' + esc(p.price) + '</b><span>or $' + esc(p.club) + '/mo unlimited</span></div></div>' +
+      '<div class="svc">' + (below ? newOnes : p.svc).map(x => '<span class="' + (below ? 'new' : '') + '">' + ic('check') + esc(x) + '</span>').join('') + '</div></article>';
+  }).join('');
+  $('#clubGo').href = CONFIG.site;
+}
+$('#vacGo').addEventListener('click', () => { buzz(); setTab('Game'); });
+
+/* ======================= Rewards ======================= */
+const GSHOP = GAME.shop.filter(it => it && it.id && +it.cost > 0);
+const gameItem = id => GSHOP.find(it => it.id === id);
+const INV_MAX = 99;
+const GCOL = {pass: '#7c3aed', boost: '#0ea5e9', bucks: '#e39b32', skip: '#10b981'};
+let shownPts = 0;
+function nextTier(){ return GSHOP.filter(it => !(it.effect === 'pass' && st.inv[it.id] > 0)).sort((a, b) => a.cost - b.cost).find(it => it.cost > st.points) || null; }
+function renderPoints(animate){
+  const target = st.points, el = $('#ptsNum');
+  if(animate && !calm() && target !== shownPts){
+    const from = shownPts, t0 = performance.now(), dur = 900;
+    const step = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(from + (target - from) * e); if(k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  } else el.textContent = fmt(target);
+  shownPts = target;
+  const nx = nextTier();
+  if(nx){
+    const prev = GSHOP.filter(it => it.cost < nx.cost && it.cost <= st.points).map(it => it.cost).sort((a, b) => a - b).pop() || 0;
+    $('#progFill').style.width = Math.max(4, Math.min(100, (st.points - prev) / Math.max(1, nx.cost - prev) * 100)) + '%';
+    $('#progTxt').innerHTML = '<b>' + (nx.cost - st.points) + ' more</b> for ' + esc(nx.name) + ' in the game';
+  } else { $('#progFill').style.width = '100%'; $('#progTxt').innerHTML = '<b>Everything in the Store is open to you.</b>'; }
+}
+function renderShop(){
+  const row = it => {
+    const own = st.inv[it.id] || 0, pass = it.effect === 'pass', owned = pass && own > 0, can = st.points >= it.cost && own < INV_MAX && !owned;
+    return '<div class="gsi"><span class="gsi-ic" style="background:' + (GCOL[it.effect] || '#e39b32') + '">' + ic(it.icon || 'sparkle') + '</span><div class="gsi-txt"><b>' + esc(it.name) + '</b><span>' + esc(it.desc || '') + '</span>' +
+      '<em>' + it.cost + ' points' + (own && !pass ? ' · ' + own + ' waiting in the game' : '') + '</em></div>' +
+      (owned ? '<span class="own">' + ic('check-circle-fill') + 'Owned</span>' : '<button class="btn ' + (can ? 'primary' : 'quiet') + ' press" data-buy="' + esc(it.id) + '">' + (can ? 'Buy' : (it.cost - st.points) + ' more') + '</button>') + '</div>';
+  };
+  const grp = (t, list) => list.length ? '<div class="gs-h">' + t + '</div>' + list.map(row).join('') : '';
+  $('#gshop').innerHTML = grp('Forever passes', GSHOP.filter(it => it.effect === 'pass')) + grp('5-minute boosts', GSHOP.filter(it => it.effect === 'boost')) + grp('Bucks', GSHOP.filter(it => it.effect === 'bucks')) + grp('Skip ahead', GSHOP.filter(it => it.effect === 'skip'));
+}
+$('#gshop').addEventListener('click', e => {
+  const b = e.target.closest('[data-buy]'); if(!b) return;
+  const it = gameItem(b.dataset.buy), r = buyItem(b.dataset.buy);
+  if(!r.ok){ buzz([20, 50, 20]); if(r.short) offerPearls(r); else toast(r.reason); return; }
+  buzz([10, 30, 10]); toast(it.name + (it.effect === 'pass' ? ' unlocked in the game' : ' is waiting in the game'));
+  renderRewards(); renderPoints(true); sendGameState();
+});
+function renderRank(){
+  const v = visits(), r = rankOf(v), nx = nextRank(v);
+  $('#rankCard').innerHTML = '<div class="rank-top"><span class="rank-badge">' + ic(r ? r.icon : 'star') + '</span><div><span class="eyebrow">Rodeo Rank</span><h3>' + esc(r ? r.name : 'No rank yet') + '</h3><small>' +
+    (v ? v + (v === 1 ? ' visit' : ' visits') : 'Your first tap makes you a Greenhorn') + (nx ? ' · ' + (nx.at - v) + ' more to ' + esc(nx.name) : ' · the top rank') + '</small></div></div>' +
+    '<ul class="ladder">' + CONFIG.ranks.map(k => '<li class="' + (v >= k.at ? 'got' : '') + '"><span class="n">' + k.at + '<small>' + (k.at === 1 ? 'visit' : 'visits') + '</small></span><span class="t"><b>' + esc(k.name) + '</b><span>' + (k.bonus ? '+' + Math.round(k.bonus * 100) + '% Bucks in the game, always' : 'Your first rank') + '</span></span><span class="s">' + ic(v >= k.at ? 'check' : 'lock-simple') + '</span></li>').join('') + '</ul>' +
+    '<p class="fine" style="text-align:left">One visit a day counts. Ranks are earned by coming back, never bought.</p>';
+}
+function renderOnsite(){
+  const left = onsiteLeft(), el = $('#onsite'); el.hidden = !left;
+  if(left) $('#onsiteTxt').textContent = 'From your bay tap: ' + Math.ceil(left / 60000) + ' minutes left. Open the Game tab to use it.';
+}
+setInterval(() => { if(store){ renderOnsite(); renderCollect(); } }, 20000);
+function renderPearls(){
+  $('#packs').innerHTML = PEARLS.packs.map(p => '<div class="pack">' + (p.tag ? '<em>' + esc(p.tag) + '</em>' : '') + ic('pearl') + '<b>' + fmt(p.n) + '</b><small>Pearls</small><span>' + esc(p.price) + '</span></div>').join('');
+  $('#plFine').innerHTML = 'Pearls are Grug’s currency for every game on the site. They buy in-game items only and are never traded for washes, cash or anything real. <b>Buying and spending Pearls is switched off in this demo.</b>';
+}
+function renderRewards(){
+  renderPoints(false); renderShop(); renderRank(); renderOnsite(); renderPearls();
+  const H = st.history;
+  $('#hist').innerHTML = H.length ? H.slice(0, 12).map(h => '<li><span>' + esc(h.label) + ' · ' + esc(new Date(h.at).toLocaleDateString([], {month: 'short', day: 'numeric'})) + ', ' + esc(clockTime(h.at)) + '</span><b class="' + (h.pts < 0 ? 'neg' : '') + '">' + (h.pts > 0 ? '+' : '') + h.pts + '</b></li>').join('')
+    : '<li class="empty">Your visits and Store buys will show up here.</li>';
+  $('#rwDot').classList.toggle('show', GSHOP.some(it => it.cost <= st.points && !(it.effect === 'pass' && st.inv[it.id] > 0)) && tab !== 'Rewards' && tab !== 'Game');
+  $('#linkTxt').textContent = gameLinked ? 'The game is linked: tap the Store in the game to spend your ' + st.points + ' points.' : 'Open the Game tab and tap the Store. Your points are already there.';
+}
+function renderCollect(){
+  const done = claimedToday(); $('#collect').classList.toggle('done', done);
+  if(done){ const ms = nextReset() - Date.now(), h = Math.floor(ms / 3600e3), m = Math.ceil((ms % 3600e3) / 60e3); $('#resetIn').textContent = 'Today’s points are in. Your next tap pays again in ' + (h ? h + ' hr ' : '') + m + ' min.'; }
+}
+$('#goGame').addEventListener('click', () => { buzz(); setTab('Game'); });
+
+/* ======================= NFC bay tags =======================
+   Each bay's poster holds one link: …/play/rodeo/?tap=<store>-b<bay>-<check>. Tapping a phone on it opens this page,
+   adds today's points and starts the x2 Bucks bonus in the game. The check stops people from typing made-up links. */
+const CODE_ABC = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+function codeHash(str){
+  let h1 = 0xdeadbeef ^ str.length, h2 = 0x41c6ce57 ^ str.length;
+  for(let i = 0; i < str.length; i++){ const c = str.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+function tapCheck(id){ let v = codeHash(CONFIG.points.secret + ':tap:' + id), s = ''; for(let i = 0; i < 6; i++){ s = CODE_ABC[v % 32] + s; v = Math.floor(v / 32); } return s; }
+const tapId = (s, bay) => s.id + '-b' + bay;
+const tapUrl = (s, bay) => location.origin + location.pathname + '?tap=' + tapId(s, bay) + '-' + tapCheck(tapId(s, bay));
+function parseTap(raw){
+  let v = String(raw || '').trim();
+  try{ if(/^https?:\/\//i.test(v)) v = new URL(v).searchParams.get('tap') || ''; }catch(e){ return null; }
+  const m = /^([a-z0-9]+)-b(\d{1,2})-([0-9a-z]{6})$/i.exec(v); if(!m) return null;
+  const s = storeById(m[1].toLowerCase()), bay = +m[2];
+  return s && bay >= 1 && bay <= s.bays && m[3].toUpperCase() === tapCheck(tapId(s, bay)) ? {store: s, bay} : null;
+}
+function tapClaim(t, demo){
+  st.onsiteUntil = Date.now() + CONFIG.points.onsiteMinutes * 60000; st.lastBay = t.bay;
+  if(claimedToday() && !demo){ save(); renderOnsite(); sendGameState(); renderCollect(); toast('Today’s points are in. Your x2 Bucks restarted for ' + CONFIG.points.onsiteMinutes + ' minutes.'); buzz(8); return false; }
+  const pts = CONFIG.points.tap, day = rewardsDay(), before = rankOf(visits());
+  // one visit a day; in the demo every tap counts as a visit, so the ranks can be shown in one sitting
+  if(!claimedToday()) st.days.push(day); else if(demo) st.days.push(day + '#' + st.days.length);
+  st.points += pts; st.lastClaimDay = day;
+  hist((demo ? 'Demo tap' : 'Tap') + ' · Bay ' + t.bay, pts); save();
+  try{ GrugApp.onCheckin({points: pts}); }catch(e){}
+  const after = rankOf(visits());
+  buzz([10, 40, 18]); toast('+' + pts + ' points at Bay ' + t.bay + '. x2 Bucks in the game for ' + CONFIG.points.onsiteMinutes + ' minutes!');
+  if(after && (!before || after.at !== before.at)) setTimeout(() => toast('New Rodeo Rank: ' + after.name + (after.bonus ? ' (+' + Math.round(after.bonus * 100) + '% Bucks)' : '')), 2900);
+  celebrate(); renderRewards(); renderPoints(true); sendGameState(); setTimeout(renderCollect, 1200);
+  return true;
+}
+function onTag(t){
+  if(!store || store.id !== t.store.id) location.hash = t.store.id + '/rewards'; else if(tab !== 'Rewards') setTab('Rewards');
+  setTimeout(() => tapClaim(t), 350);
+}
+const hasWebNFC = 'NDEFReader' in window;
+let nfcCtl = null, nfcState = hasWebNFC ? 'off' : 'na';
+function renderNfc(){
+  const row = $('#nfcRow'); row.className = 'nfc-row press ' + nfcState;
+  const [t, s] = ({ na: ['Tap your phone on the poster', 'Your phone opens this page and adds the points'], off: ['Turn on tap to collect', 'Then hold your phone to the poster'], ready: ['Ready: hold your phone to the poster', 'Keep this page open while you tap'], denied: ['NFC is blocked for this page', 'Tapping still works: your phone opens the page itself'] })[nfcState];
+  $('#nfcT').textContent = t; $('#nfcS').textContent = s;
+}
+async function nfcStart(byUser){
+  if(!hasWebNFC || nfcCtl) return;
+  const ctl = new AbortController(); nfcCtl = ctl;
+  try{
+    const reader = new NDEFReader();
+    reader.addEventListener('reading', e => {
+      for(const rec of e.message.records){ if(rec.recordType !== 'url' && rec.recordType !== 'absolute-url' && rec.recordType !== 'text') continue; let txt = ''; try{ txt = new TextDecoder(rec.encoding || 'utf-8').decode(rec.data); }catch(_){} const t = parseTap(txt); if(t){ onTag(t); return; } }
+      buzz([20, 50, 20]); toast('That isn’t a Rodeo Express bay tag');
+    });
+    await reader.scan({signal: ctl.signal});
+    if(nfcCtl === ctl){ nfcState = 'ready'; renderNfc(); if(byUser) toast('Ready. Hold your phone to the bay poster'); }
+  }catch(e){ if(nfcCtl === ctl) nfcCtl = null; nfcState = e && e.name === 'NotAllowedError' ? 'denied' : 'off'; renderNfc(); if(byUser) toast(nfcState === 'denied' ? 'NFC was blocked for this page' : 'Couldn’t start NFC. Is it on in your phone’s settings?'); }
+}
+async function nfcInit(){ renderNfc(); if(!hasWebNFC) return; try{ if((await navigator.permissions.query({name: 'nfc'})).state === 'granted') nfcStart(false); }catch(e){} }
+$('#nfcRow').addEventListener('click', () => { buzz(6); if(nfcState === 'off') nfcStart(true); else if(nfcState === 'ready') toast('Hold the top of your phone to the poster'); else toast('Unlock your phone and hold it to the bay poster. It opens this page and adds the points.'); });
+// demo: pretend to tap a bay's poster
+let demoBay = 1;
+function renderBayPick(){
+  const n = store ? store.bays : 12;
+  $('#bayPick').innerHTML = Array.from({length: n}, (_, i) => '<button class="press" data-bay="' + (i + 1) + '" aria-pressed="' + (demoBay === i + 1) + '">' + (i + 1) + '</button>').join('');
+  $('#demoTap span').textContent = 'Tap the Bay ' + demoBay + ' poster';
+}
+$('#bayPick').addEventListener('click', e => { const b = e.target.closest('[data-bay]'); if(!b) return; buzz(5); demoBay = +b.dataset.bay; renderBayPick(); });
+$('#demoTap').addEventListener('click', () => { if(!store) return; tapClaim({store, bay: demoBay}, true); });
+
+function celebrate(){
+  const card = $('#ptsCard'); card.classList.remove('bump'); void card.offsetWidth; card.classList.add('bump');
+  card.scrollIntoView({behavior: calm() ? 'auto' : 'smooth', block: 'center'});
+  if(calm()) return;
+  const colors = ['#e39b32', '#fff', '#e7dcc6', '#d2552b'], r = card.getBoundingClientRect(), cx = r.width * .25, cy = r.height * .45;
+  for(let i = 0; i < 24; i++){
+    const p = document.createElement('i'); p.className = 'burst'; const a = Math.random() * Math.PI * 2, d = 60 + Math.random() * 130, sz = 6 + Math.random() * 8;
+    p.style.cssText = 'left:' + cx + 'px;top:' + cy + 'px;width:' + sz + 'px;height:' + sz + 'px;background:' + colors[i % colors.length] + ';border-radius:' + (i % 2 ? '50%' : '2px');
+    card.appendChild(p);
+    p.animate([{transform: 'translate(0,0)', opacity: 1}, {transform: 'translate(' + Math.cos(a) * d + 'px,' + (Math.sin(a) * d - 30) + 'px) rotate(' + (Math.random() * 360) + 'deg)', opacity: 0}], {duration: 900 + Math.random() * 500, easing: 'cubic-bezier(.2,.8,.2,1)'}).onfinish = () => p.remove();
+  }
+}
+
+/* ======================= Sheet ======================= */
+function openSheet(html){ $('#sheet').innerHTML = html; $('#sheetBg').classList.add('on'); }
+function closeSheet(){ $('#sheetBg').classList.remove('on'); }
+$('#sheetBg').addEventListener('click', e => { if(e.target.id === 'sheetBg' || e.target.closest('[data-close]')) closeSheet(); });
+addEventListener('keydown', e => { if(e.key === 'Escape') closeSheet(); });
+// short on points: how to earn more, and the Pearl packs (shown, switched off in this demo)
+function offerPearls(r){
+  pauseGame(); buzz();
+  openSheet('<div class="grab"></div><div class="big-art">' + ic('contactless-payment') + '</div><span class="eyebrow c">Rodeo points</span><h3>' + esc(r.short + ' points short for ' + r.item) + '</h3>' +
+    '<p>Tap the poster at your bay on your next wash for ' + CONFIG.points.tap + ' more points.' + (store ? ' (In this demo, use “Tap the Bay poster” on the Rewards tab.)' : '') + '</p>' +
+    '<div class="pearl-card card" style="text-align:left;margin-top:18px"><div class="pl-top"><span class="pl-ic">' + ic('pearl') + '</span><div><b>Or use Pearls</b><span>Grug’s currency for every game</span></div><span class="soon">Coming soon</span></div>' +
+    '<div class="packs">' + PEARLS.packs.map(p => '<div class="pack">' + (p.tag ? '<em>' + esc(p.tag) + '</em>' : '') + ic('pearl') + '<b>' + fmt(p.n) + '</b><small>Pearls</small><span>' + esc(p.price) + '</span></div>').join('') + '</div>' +
+    '<p class="fine">Pearl purchases are switched off in this demo. No payment can be made here.</p></div>' +
+    '<div class="row2"><button class="btn quiet press" data-close>Back to the game</button><button class="btn primary press" id="toRewards">Rewards tab</button></div>');
+}
+$('#sheet').addEventListener('click', e => { if(e.target.closest('#toRewards')){ closeSheet(); setTab('Rewards'); setTimeout(() => $('#collect').scrollIntoView({behavior: calm() ? 'auto' : 'smooth', block: 'center'}), 80); } });
+
+/* ======================= Game (play/rodeo/game.html) =======================
+   GAME PROTOCOL (window.postMessage between this page and the game frame; every message carries rw:1):
+     game → app  {t:'hello'}                ← {t:'state', points, pearls, pearlName, pearlsLocked, inv, best, runs, shop, title, collectible, runSeconds, store, storeId, onsite, rank, avatar, player, look}
+                 {t:'buy', id, req}         ← {t:'reply', req, ok, reason?, state}   (points only in the demo; inv[id] + 1)
+                 {t:'use', ids:[…], req}    ← {t:'reply', req, ok, reason?, state}   (inv - 1 each; passes stay)
+                 {t:'score', score, beans, level}   keeps the best (cars washed)
+                 {t:'needPearls', id}       the player is short: show how to earn points (Pearls shown, switched off)
+     app → game  {t:'pause'} when the guest leaves the Game tab; a fresh {t:'state'} whenever points change. */
+let gameFrame = null, gameLinked = false;
+function startGame(){
+  const f = $('#gameFrame'); if(f.querySelector('iframe')) return;
+  const ifr = document.createElement('iframe'); ifr.src = GAME.src; ifr.title = 'Rodeo Express: ' + GAME.title;
+  ifr.allow = 'fullscreen *; autoplay *; gamepad *'; ifr.setAttribute('allowfullscreen', '');
+  ifr.onload = () => { const l = f.querySelector('.gload'); if(l) setTimeout(() => l.style.display = 'none', 400); };
+  gameFrame = ifr; f.appendChild(ifr);
+}
+function gameState(){
+  const r = rankOf(visits());
+  return {points: st.points, pearls: 0, pearlName: PEARLS.name, pearlsLocked: !!PEARLS.locked, inv: st.inv, best: st.game.best, runs: st.game.runs, shop: GSHOP, title: GAME.title, collectible: GAME.collectible, runSeconds: GAME.runSeconds,
+    store: store ? 'Rodeo Express · ' + store.name : 'Rodeo Express', storeId: store ? store.id : '', onsite: onsiteLeft(), rank: r ? {name: r.name, bonus: r.bonus} : null,
+    brand: {name: 'Rodeo Express Car Wash', colors: ['#4b3a2c', '#e39b32']}, avatar: GrugApp.avatar(), player: GrugApp.name(), look: GrugApp.look()};
+}
+function toGame(m){ if(!gameFrame || !gameFrame.contentWindow) return; try{ gameFrame.contentWindow.postMessage(Object.assign({rw: 1}, m), '*'); }catch(e){} }
+function sendGameState(){ toGame(Object.assign({t: 'state'}, gameState())); }
+function pauseGame(){ toGame({t: 'pause'}); }
+function buyItem(id){
+  const it = gameItem(id); if(!it) return {ok: false, reason: 'That isn’t in the Store.'};
+  if(it.effect === 'pass' && st.inv[id] > 0) return {ok: false, reason: 'You already have ' + it.name + '.'};
+  if((st.inv[id] || 0) >= INV_MAX) return {ok: false, reason: 'You already have ' + INV_MAX + ' of those.'};
+  if(st.points < it.cost) return {ok: false, reason: 'You need ' + (it.cost - st.points) + ' more points for ' + it.name + '.', short: it.cost - st.points, item: it.name};
+  st.points -= it.cost; st.inv[id] = (st.inv[id] || 0) + 1; hist('Store · ' + it.name, -it.cost); save(); return {ok: true};
+}
+function useItems(ids){
+  ids = Array.isArray(ids) ? [...new Set(ids.map(String))] : [];
+  const miss = ids.find(id => !gameItem(id) || !(st.inv[id] > 0)); if(miss) return {ok: false, reason: 'You’re out of ' + ((gameItem(miss) || {}).name || 'that') + '.'};
+  ids.forEach(id => { if(gameItem(id).effect === 'pass') return; st.inv[id]--; if(!st.inv[id]) delete st.inv[id]; });
+  save(); return {ok: true};
+}
+addEventListener('message', e => {
+  const d = e.data; if(!d || d.rw !== 1 || typeof d.t !== 'string') return;
+  if(!gameFrame || e.source !== gameFrame.contentWindow) return;
+  const reply = r => toGame(Object.assign({t: 'reply', req: String(d.req || ''), state: gameState()}, r));
+  if(d.t === 'hello'){ gameLinked = true; sendGameState(); GrugApp.onPlay(); GrugApp.onLogon(); if(store) renderRewards(); }
+  else if(d.t === 'buy'){ const r = buyItem(String(d.id)); reply(r); if(r.ok){ buzz([10, 30, 10]); if(store){ renderRewards(); renderPoints(false); } } else if(r.short) offerPearls(r); }
+  else if(d.t === 'needPearls'){ const it = gameItem(String(d.id)); if(it && st.points < it.cost) offerPearls({short: it.cost - st.points, item: it.name}); }
+  else if(d.t === 'use'){ const r = useItems(d.ids); reply(r); if(r.ok && store) renderRewards(); }
+  else if(d.t === 'score'){ const sc = Math.max(0, Math.floor(+d.score || 0)); st.game.runs++; if(sc > st.game.best) st.game.best = sc; save(); GrugApp.onScore(d, {play: false}); }
+});
+document.addEventListener('visibilitychange', () => { if(document.hidden) pauseGame(); });
+
+/* ======================= Visit + preferences ======================= */
+function renderVisit(){
+  const s = store; $('#vName').textContent = 'Rodeo Express · ' + s.name; $('#vAddr').textContent = s.address;
+  const D = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], today = new Date().getDay();
+  $('#vHours').innerHTML = [1, 2, 3, 4, 5, 6, 0].map(d => '<div class="' + (d === today ? 'today' : '') + '"><span>' + D[d] + '</span><span>' + (s.hours[d] ? minsText(s.hours[d][0]) + ' – ' + minsText(s.hours[d][1]) : 'Closed') + '</span></div>').join('');
+  $('#vBtns').innerHTML = '<a class="btn primary press" href="' + esc(s.maps) + '" target="_blank" rel="noopener">' + ic('map-trifold') + 'Directions</a><a class="btn quiet press" href="tel:' + esc(s.phone) + '">' + ic('phone') + 'Call</a>';
+  $('#social').innerHTML = '<a class="btn quiet press" href="' + esc(CONFIG.site) + '" target="_blank" rel="noopener">' + ic('arrow-square-out') + 'Website</a>' + (CONFIG.social.instagram ? '<a class="btn quiet press" href="' + esc(CONFIG.social.instagram) + '" target="_blank" rel="noopener">' + ic('instagram-logo') + 'Instagram</a>' : '') + (CONFIG.social.facebook ? '<a class="btn quiet press" href="' + esc(CONFIG.social.facebook) + '" target="_blank" rel="noopener">' + ic('arrow-square-out') + 'Facebook</a>' : '');
+  $('#tagList').innerHTML = Array.from({length: s.bays}, (_, i) => { const u = tapUrl(s, i + 1); return '<div><b>Bay ' + (i + 1) + '</b><code>' + esc(u) + '</code><button class="press" data-copy="' + esc(u) + '">Copy</button></div>'; }).join('');
+  renderBayPick();
+}
+$('#tagList').addEventListener('click', e => { const b = e.target.closest('[data-copy]'); if(!b) return; (navigator.clipboard ? navigator.clipboard.writeText(b.dataset.copy) : Promise.reject()).then(() => toast('Link copied'), () => toast('Couldn’t copy. Press and hold the link instead.')); });
+function renderPrefs(){ document.querySelectorAll('[data-pref]').forEach(s => s.setAttribute('aria-checked', !!st.prefs[s.dataset.pref])); document.documentElement.classList.toggle('calm', !st.prefs.motion); }
+$('#prefs').addEventListener('click', e => {
+  const s = e.target.closest('[data-pref]');
+  if(s){ const k = s.dataset.pref; st.prefs[k] = !st.prefs[k]; save(); renderPrefs(); if(k === 'haptics' && st.prefs.haptics) buzz(12); return; }
+  if(e.target.closest('#clearBtn')){ buzz(); openSheet('<div class="grab"></div><span class="eyebrow c">This device</span><h3>Clear everything?</h3><p>Your ' + st.points + ' points, Store items, visits and settings will be removed from this phone. Your game progress stays.</p><div class="row2"><button class="btn quiet press" data-close>Keep</button><button class="btn primary press" id="doClear">Clear</button></div>'); }
+});
+$('#sheet').addEventListener('click', e => {
+  if(!e.target.closest('#doClear')) return;
+  try{ localStorage.removeItem(KEY); }catch(_){}
+  st = loadState(); shownPts = 0; closeSheet(); renderPrefs(); if(store){ renderRewards(); renderCollect(); } sendGameState(); toast('Cleared. Fresh start');
+});
+
+/* ======================= Full screen ======================= */
+const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+const fsOK = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+function renderFs(){ const on = !!fsEl(); document.querySelectorAll('[data-fs]').forEach(b => { b.hidden = !fsOK; b.innerHTML = ic(on ? 'arrows-in' : 'arrows-out'); }); }
+document.querySelectorAll('[data-fs]').forEach(b => b.addEventListener('click', () => { const r = document.documentElement; try{ if(fsEl()) (document.exitFullscreen || document.webkitExitFullscreen).call(document); else { const p = (r.requestFullscreen || r.webkitRequestFullscreen).call(r); if(p && p.catch) p.catch(() => toast('Full screen isn’t available here')); } }catch(e){ toast('Full screen isn’t available here'); } }));
+document.addEventListener('fullscreenchange', renderFs); document.addEventListener('webkitfullscreenchange', renderFs);
+
+/* ======================= The demo bar ======================= */
+(function demoBar(){
+  const n = CONFIG.demoBar, el = document.createElement('div'); el.className = 'demo-bar'; el.setAttribute('role', 'note');
+  el.innerHTML = '<span class="db-tag">' + esc(n.tag) + '</span><p class="db-txt"><span class="db-long">' + esc(n.text) + '</span><span class="db-short">' + esc(n.short) + '</span> <a href="sms:+1' + n.phone.replace(/\D/g, '') + '">' + esc(n.phone) + '</a> <span class="db-note">' + esc(n.note) + '</span></p><button class="db-copy press" type="button">Copy</button>';
+  document.body.prepend(el);
+  el.querySelector('.db-copy').addEventListener('click', e => { const b = e.currentTarget; (navigator.clipboard ? navigator.clipboard.writeText(n.phone) : Promise.reject()).then(() => { b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy', 2000); }, () => toast('Text ' + n.phone)); });
+  const set = () => document.documentElement.style.setProperty('--bn-h', el.offsetHeight + 'px');
+  set(); if(window.ResizeObserver) new ResizeObserver(set).observe(el); else addEventListener('resize', set);
+})();
+
+/* ======================= Boot ======================= */
+paintIcons(); renderStorage(); renderPrefs(); renderPicker(); renderWash(); renderFs();
+GrugApp.init({ app: 'rodeo', get: () => st, save, hist, renderPoints, renderRewards, buzz, sendGameState });
+{ const gh = document.querySelector('#topbar > .grug-home'); if(gh) $('#tbL').appendChild(gh); }
+// arrived from a bay tag? collect, then tidy the address so a refresh or shared link doesn't tap again
+const tapRaw = new URLSearchParams(location.search).get('tap'), tapHit = tapRaw === null ? null : parseTap(tapRaw);
+if(tapRaw !== null){ const q = new URLSearchParams(location.search); q.delete('tap'); history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : '') + (tapHit ? '#' + tapHit.store.id + '/rewards' : location.hash)); }
+route();
+if(tapHit) setTimeout(() => tapClaim(tapHit), 700);
+else if(tapRaw !== null) setTimeout(() => toast('That tag isn’t a Rodeo Express bay tag'), 700);
+nfcInit();
+})();
+</script>
+</body>
+</html>

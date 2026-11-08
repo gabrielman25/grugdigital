@@ -22,7 +22,8 @@
     cielito:  { name: 'Cielito Lindo Taqueria',   short: 'Cielito',  game: 'Taco Match' },
     teahouse: { name: 'Teahouse Express',         short: 'Teahouse', game: 'Take a Tea' },
     soluna:   { name: 'Soluna Coffee',            short: 'Soluna',   game: 'Sunrise to Sunset' },
-    alchemy:  { name: 'Alchemy Bake Lab',         short: 'Alchemy',  game: 'Sugar Alchemist' }
+    alchemy:  { name: 'Alchemy Bake Lab',         short: 'Alchemy',  game: 'Sugar Alchemist' },
+    rodeo:    { name: 'Rodeo Express Car Wash',   short: 'Rodeo',    game: 'Rodeo Wash Simulator' }
   };
 
   const free = () => ({ type: 'free' });

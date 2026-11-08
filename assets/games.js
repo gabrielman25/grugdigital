@@ -46,6 +46,17 @@ window.GRUG_GAMES = [
     avatar: 'Plays as your avatar', earn: 'Visit Soluna, enter the board code, 5 points a visit'
   },
   {
+    // Demo made to pitch Rodeo Express Car Wash: not a live partner yet. The app shows a "Demo" bar on every screen.
+    id: 'rodeo', app: 'rodeo',
+    title: 'Rodeo Wash Simulator', kind: '3D simulator', status: 'preview',
+    partner: 'Rodeo Express Car Wash', place: 'Peek Rd, Katy',
+    blurb: 'Spray muddy cars clean, open more bays and wash packages, hire a crew and rebirth for bigger Bucks.',
+    long: 'A demo made for Rodeo Express Car Wash. Cars pull into your bays covered in mud, and you walk around each one with a pressure wand: Soft Wash, Triple Foam, Tire Shine and Rodeo Ceramic, the steps of their real wash menu. Bucks buy upgrades, bays, bigger packages and a crew; rebirth for a bigger multiplier. At the wash, tapping the poster at your bay earns Rodeo points for passes and boosts, and doubles your Bucks for 15 minutes.',
+    play: 'play/rodeo/', game: 'play/rodeo/#katy/game', storageKey: 'rodeo-express-rewards-v1', old: '',
+    thumb: 'assets/thumbs/rodeo.jpg', color: '#E39B32', ink: '#4B3A2C',
+    avatar: 'You play as your avatar', earn: 'Wash at Rodeo Express, tap the poster at your bay, 10 points a visit (demo)'
+  },
+  {
     id: 'alchemy', app: 'alchemy',
     title: 'Sugar Alchemist', kind: 'Bakery sim', status: 'preview',
     partner: 'Alchemy Bake Lab', place: 'Katy',
