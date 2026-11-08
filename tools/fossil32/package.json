@@ -1,0 +1,12 @@
+{
+  "name": "grug-fossil32",
+  "private": true,
+  "description": "Builds assets/fossil32/fossil32.js (the 3D FOSSIL32 boxes, cartridge and console) from src/. Run: npm install && npm run build",
+  "scripts": {
+    "build": "esbuild src/fossil32.js --bundle --format=esm --minify --target=es2020 --legal-comments=eof --outfile=../../assets/fossil32/fossil32.js"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.0",
+    "three": "0.170.0"
+  }
+}

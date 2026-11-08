@@ -1,5 +1,5 @@
 /* Grug · shared styles — kubii theme
-   Frosted glass over a slow, wavy backdrop tinted to the visitor's theme. Light by default; Dark and Auto
+   Flat off-white (light) / off-black (dark) background tinted to the visitor's theme. Light by default; Dark and Auto
    live in Settings (gear in the top bar, or Profile). theme.js sets the theme variables before first paint:
    --h (hue of every neutral), --sel-a / --sel-b (accent pair), --on-sel (ink on the accent), --hot-a / --hot-b.
    The old token names (--card, --ember, --moss …) are kept and re-pointed, so page styles theme themselves. */
@@ -98,10 +98,10 @@
   --h:150; --sel-a:#a3e635; --sel-b:#2dd4bf; --on-sel:#0f2a14; --hot-a:#ffb020; --hot-b:#ff6b6b;
 
   /* light neutrals */
-  --bg:hsl(var(--h) 42% 93%);
+  --bg:hsl(var(--h) 24% 95%);   /* off-white, tinted by the theme */
   --scrim:hsl(var(--h) 50% 97% / .3);
   /* surfaces that hold icons are flat and opaque, a slightly off-white, so icons read clearly */
-  --icon-bg:#f7f5ef;
+  --icon-bg:hsl(var(--h) 30% 99%);
   --glass:var(--icon-bg);
   --glass-strong:var(--icon-bg);
   --solid:var(--icon-bg);
@@ -131,9 +131,9 @@
   color-scheme:light;
 }
 :root[data-theme="dark"]{
-  --bg:hsl(var(--h) 35% 7%);
+  --bg:hsl(var(--h) 14% 7%);    /* off-black, tinted by the theme */
   --scrim:hsl(var(--h) 40% 5% / .3);
-  --icon-bg:hsl(var(--h) 26% 15%);
+  --icon-bg:hsl(var(--h) 16% 13%);
   --glass:var(--icon-bg);
   --glass-strong:var(--icon-bg);
   --solid:var(--icon-bg);
@@ -154,7 +154,7 @@
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;background:var(--bg)}
-body{margin:0;background:transparent;color:var(--ink);font:500 16px/1.45 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.45 var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh}
 body.g-chrome{padding-top:calc(var(--top) + var(--sat) + 8px);padding-bottom:calc(var(--tabs) + var(--sab) + 26px)}
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
@@ -182,12 +182,6 @@ img.k-ic{display:block;object-fit:contain;-webkit-user-drag:none;user-select:non
 .sp{flex:1}
 .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* ---------- backdrop (theme.js draws the waves) ---------- */
-.k-bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
-.k-wave{position:absolute;left:-8%;top:-8%;width:116%;height:116%;object-fit:cover;animation:k-drift 40s ease-in-out infinite alternate}
-.k-scrim{position:absolute;inset:0;background:radial-gradient(hsl(var(--h) 40% 22% / .09) 1.1px,transparent 1.5px) 0 0/16px 16px,linear-gradient(var(--scrim),var(--scrim))}
-:root[data-theme="dark"] .k-scrim{background:radial-gradient(hsl(0 0% 100% / .06) 1.1px,transparent 1.5px) 0 0/16px 16px,linear-gradient(var(--scrim),var(--scrim))}
-@keyframes k-drift{0%{transform:scale(1.02) translate(0,0) rotate(0)}50%{transform:scale(1.08) translate(-1.6%,1%) rotate(1deg)}100%{transform:scale(1.04) translate(1.4%,-1.2%) rotate(-.8deg)}}
 .k-glass{background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow)}
 .k-sb{position:absolute;top:-9px;z-index:2;font:600 9.5px/1 var(--display);letter-spacing:.06em;padding:4px 6px 3px;border-radius:7px;background:var(--chip-bg);color:var(--chip-fg);box-shadow:0 2px 6px rgba(0,0,0,.2);pointer-events:none}
 
@@ -422,12 +416,8 @@ button.g-me{appearance:none;border:0;background:none;color:inherit;font:inherit;
 ::view-transition-new(root){animation:g-vt-in .2s cubic-bezier(.2,.75,.2,1) both}
 @keyframes g-vt-out{to{opacity:0}}
 @keyframes g-vt-in{from{opacity:0;transform:translateY(6px)}}
-.g-top{view-transition-name:g-top}.g-tabs{view-transition-name:g-tabs}.k-bg{view-transition-name:g-bg}
-::view-transition-group(g-top),::view-transition-group(g-tabs),::view-transition-group(g-bg){animation-duration:.15s}
-/* the backdrop: the old one stays put while the new one (already showing the same frame) settles in over it */
-::view-transition-old(g-bg){animation:none}
-::view-transition-new(g-bg){animation:g-vt-bg .2s ease both}
-@keyframes g-vt-bg{from{opacity:0}}
+.g-top{view-transition-name:g-top}.g-tabs{view-transition-name:g-tabs}
+::view-transition-group(g-top),::view-transition-group(g-tabs){animation-duration:.15s}
 /* fallback fade (browsers without cross-page transitions) */
 html.g-fade main{transition:opacity .09s ease,transform .09s ease}
 html.g-leave main{opacity:0;transform:translateY(-4px)}

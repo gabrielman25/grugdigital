@@ -1,0 +1,51 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#888}</style></head><body>
+<script src="../../assets/sandy-runtime.js"></script>
+<script>
+let R = null;
+async function rig() {
+  if (R) return R;
+  const T = THREE, K = SandyKit;
+  const renderer = new T.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.outputEncoding = T.sRGBEncoding; renderer.setPixelRatio(1); renderer.setClearColor(0x000000, 0);
+  document.body.appendChild(renderer.domElement);
+  const scene = new T.Scene(), cam = new T.PerspectiveCamera(22, 1, 5, 6000);
+  const hemi = new T.HemisphereLight(0xfff4e0, 0x3a3456, 0.75); scene.add(hemi);
+  const key = new T.DirectionalLight(0xfff0dc, 1.15); key.position.set(220, 340, 300); scene.add(key);
+  const rim = new T.DirectionalLight(0x9fc4ff, 0.9); rim.position.set(-260, 200, -260); scene.add(rim);
+  const rim2 = new T.DirectionalLight(0xffffff, 0.5); rim2.position.set(300, 120, -200); scene.add(rim2);
+  const fill = new T.DirectionalLight(0xffd6b0, 0.35); fill.position.set(-260, 60, 220); scene.add(fill);
+  R = { T, K, renderer, scene, cam, rim, rim2, key, hemi };
+  return R;
+}
+const AX = () => ({ x: new THREE.Vector3(1,0,0), y: new THREE.Vector3(0,1,0), z: new THREE.Vector3(0,0,1) });
+function applyPose(sd, turns) {
+  const B = sd.n3.bones, root = sd.n3.root, ax = AX();
+  root.updateMatrixWorld(true);
+  const rootQ = root.getWorldQuaternion(new THREE.Quaternion());
+  const depth = b => { let d = 0; for (let p = b.parent; p; p = p.parent) d++; return d; };
+  const list = turns.map(([n, a, v]) => [B[n], a, v, n]).filter(t => { if (!t[0]) console.warn('no bone', t[3]); return t[0]; });
+  list.sort((a, b) => depth(a[0]) - depth(b[0]));
+  const q = new THREE.Quaternion(), v = new THREE.Vector3();
+  for (const [bn, axis, a] of list) { bn.parent.updateMatrixWorld(true);
+    v.copy(ax[axis]).applyQuaternion(rootQ).applyQuaternion(bn.parent.getWorldQuaternion(q).invert());
+    bn.quaternion.premultiply(q.setFromAxisAngle(v.normalize(), a)); bn.updateMatrixWorld(true); }
+}
+// o: {cfg, pose:[[bone,axis,angle]...], yaw (body), camYaw, camPitch, w, h, target:[x,y,z], dist, rim:'#hex', anim, animT, objRot:[x,y,z], lift}
+window.render = async function (o) {
+  const r = await rig(), T = r.T;
+  const c = r.K.merge(r.K.DEFAULT, o.cfg || {});
+  if (r.sd) { r.scene.remove(r.sd.object3d); }
+  r.sd = await r.K.create(c); r.scene.add(r.sd.object3d); if (r.sd.ready) await r.sd.ready;
+  const wcfg = (o.cfg || {}).weapon; if (wcfg && r.sd._weapon) { r.sd._weapon(wcfg); if (r.sd.M.weaponMesh) r.sd.M.weaponMesh.scale.multiplyScalar(o.weaponScale || 1.8); } await new Promise(k => setTimeout(k, 400)); if (r.K.customReady) await r.K.customReady(); if (r.K.decalReady) await r.K.decalReady();
+  r.sd.play(o.anim || 'idle'); for (let i = 0; i < 40; i++) r.sd.update((o.animT || 0.6) / 40);
+  const ob = r.sd.object3d; ob.rotation.set(...(o.objRot || [0, o.yaw || 0, 0])); ob.position.y = o.lift || 0;
+  applyPose(r.sd, o.pose || []);
+  if (o.rim) { r.rim.color.set(o.rim); r.rim2.color.set(o.rim); }
+  const w = o.w || 900, h = o.h || 1200; r.renderer.setSize(w, h, false); r.cam.aspect = w / h; r.cam.fov = o.fov || 22; r.cam.updateProjectionMatrix();
+  const tg = new T.Vector3(...(o.target || [0, 100, 0])), yw = o.camYaw || 0, pt = o.camPitch || 0.05, d = o.dist || 560;
+  r.cam.position.set(tg.x + Math.sin(yw) * Math.cos(pt) * d, tg.y + Math.sin(pt) * d, tg.z + Math.cos(yw) * Math.cos(pt) * d); r.cam.lookAt(tg);
+  r.renderer.render(r.scene, r.cam);
+  return r.renderer.domElement.toDataURL('image/png');
+};
+window.studioReady = true;
+</script></body></html>
