@@ -71,13 +71,13 @@ window.GRUG_GAMES = [
   },
   {
     id: 'alchemy', app: 'alchemy',
-    title: 'Sugar Alchemist', kind: 'Bakery sim', status: 'preview',
-    partner: 'Alchemy Bake Lab', place: 'Katy',
-    blurb: 'Take the order, mix it, frost it, serve it. Play one day of the cupcake shop while the full game is in the works.',
-    long: 'A cupcake-shop game in the spirit of Papa’s Pizzeria, made with the owner of Alchemy Bake Lab. The one-day demo is playable now; finishing a day unlocks the Alchemist toque, the whisk and the cupcake tee.',
-    play: 'work/alchemy/site.html', storageKey: '', old: '',
-    thumb: 'assets/thumbs/alchemy.jpg', color: '#FF8FB1', ink: '#3B2314',
-    avatar: 'Unlocks closet items', earn: 'Finish a day to unlock closet items'
+    title: 'Sugar Alchemist', kind: '3D bakery sim', status: 'live',
+    partner: 'Alchemy Bake Lab', place: 'Peek Rd, Katy',
+    blurb: 'Run the counter at Alchemy Bake Lab: mix, bake, frost and sparkle treats to match every ticket.',
+    long: 'A 3D bakery game in the spirit of Papa’s Pizzeria. Take the order, stir the batter in the flask, pull the tray when it’s golden, frost it, add the sparkle and box it up; the closer it matches the ticket, the bigger the tip. Tips buy oven upgrades and decor for your lab, ranks unlock layer cakes, cake pops, macarons and custom cakes, and you play as your own avatar. Alchemy points (or Pearls) buy boosts, passes and tip packs in the Store. Points are for the game only.',
+    play: 'play/alchemy/', game: 'play/alchemy/#katy/game', storageKey: 'alchemy-bake-lab-rewards-v1', old: '',
+    thumb: 'assets/thumbs/alchemy.jpg', color: '#0B0B0C', ink: '#F7F7F2',
+    avatar: 'You play as your avatar', earn: 'Visit Alchemy Bake Lab, tap the tag, 10 points a visit'
   },
   {
     // Legacy: the Teahouse app's first game, still playable from the Games page (the app runs it with ?game=takeatea).
