@@ -124,7 +124,7 @@ footer a{color:var(--ink2);font-weight:700}
   const pts = {}; G.points().forEach(p => { pts[p.game.id] = p; });
   function tile(g) {
     const p = pts[g.id];
-    const meta = [G.icon('storefront') + G.esc(g.partner), '<span>·</span>', G.esc(g.kind)].join('');
+    const meta = [G.icon(g.standalone ? 'sparkle' : 'storefront') + G.esc(g.partner), '<span>·</span>', G.esc(g.kind)].join('');
     const best = p && p.best ? '<div class="meta">' + G.icon('trophy') + 'Your best ' + G.fmt(p.best) + '</div>' : (p && p.points ? '<div class="meta">' + G.icon('coins') + G.fmt(p.points) + ' points</div>' : '');
     return '<a class="g-tile" href="games/' + g.id + '/"><div class="pic" style="background-image:url(' + g.thumb + ')"><span class="badge ' + (g.status === 'live' ? 'live' : 'soon') + '">' + (g.status === 'live' ? 'Live' : 'Preview') + '</span></div><div class="body"><div class="title">' + G.esc(g.title) + '</div><div class="meta">' + meta + '</div>' + best + '</div></a>';
   }
@@ -141,7 +141,7 @@ footer a{color:var(--ink2);font-weight:700}
   $('#closetPicks').addEventListener('click', e => { const b = e.target.closest('[data-item]'); if (b) location.href = 'shop/#' + b.dataset.item; });
 
   /* partners */
-  $('#partnerList').innerHTML = G.GAMES.filter(g => g.status !== 'legacy').map(g => '<a class="partner" href="games/' + g.id + '/"><span class="dot" style="background:' + g.color + '"></span><span><b>' + G.esc(g.partner) + '</b><small>' + G.esc(g.place) + ' · ' + G.esc(g.title) + '</small></span></a>').join('');
+  $('#partnerList').innerHTML = G.GAMES.filter(g => g.status !== 'legacy' && !g.standalone).map(g => '<a class="partner" href="games/' + g.id + '/"><span class="dot" style="background:' + g.color + '"></span><span><b>' + G.esc(g.partner) + '</b><small>' + G.esc(g.place) + ' · ' + G.esc(g.title) + '</small></span></a>').join('');
 })();
 </script>
 </body>

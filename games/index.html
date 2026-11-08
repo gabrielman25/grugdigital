@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Games · Grug</title>
-<meta name="description" content="Every Grug game, each one starring a real Katy restaurant.">
+<meta name="description" content="Every Grug game: Katy restaurant games and Grug originals.">
 <meta name="theme-color" content="#eaf6ee">
 <link rel="icon" href="../favicon.png">
 <link rel="stylesheet" href="../assets/grug.css">
@@ -25,7 +25,7 @@
 </head>
 <body>
 <main class="wrap">
-  <div class="gl-head"><h1>Games</h1><p>Each one is built with a Katy restaurant and runs right here in your browser. Points you earn at that restaurant buy power-ups and closet clothes.</p></div>
+  <div class="gl-head"><h1>Games</h1><p>Most are built with a Katy restaurant, and they all run right here in your browser. Points you earn at a restaurant buy its power-ups and closet clothes; Grug originals use Pearls.</p></div>
   <div class="gl" id="list"></div>
   <div class="gl-head" id="legacyH" hidden><h2>Legacy games</h2><p>Earlier games from our partners, kept so you can still play them.</p></div>
   <div class="gl" id="legacy"></div>
@@ -42,7 +42,7 @@
   const card = g => {
     const p = pts[g.id], live = g.status === 'live' || g.status === 'legacy';
     return '<div class="g-tile"><a class="pic" href="' + g.id + '/" style="background-image:url(' + G.url(g.thumb) + ')" aria-label="' + G.esc(g.title) + '">' + badge(g) + '</a>' +
-      '<div class="body"><div class="title">' + G.esc(g.title) + '</div><div class="meta">' + G.icon('storefront') + G.esc(g.partner) + '<span>·</span>' + G.esc(g.kind) + '</div><div class="blurb">' + G.esc(g.blurb) + '</div>' +
+      '<div class="body"><div class="title">' + G.esc(g.title) + '</div><div class="meta">' + G.icon(g.standalone ? 'sparkle' : 'storefront') + G.esc(g.partner) + '<span>·</span>' + G.esc(g.kind) + '</div><div class="blurb">' + G.esc(g.blurb) + '</div>' +
       (p && (p.points || p.best) ? '<div class="meta">' + G.icon('coins') + G.fmt(p.points) + ' points' + (p.best ? '<span>·</span>' + G.icon('trophy') + 'best ' + G.fmt(p.best) : '') + '</div>' : '') +
       '<div class="acts"><a class="g-btn primary sm" href="' + G.url(g.game || g.play) + '">' + G.icon('play') + (live ? 'Play' : 'Demo') + '</a><a class="g-btn sm" href="' + g.id + '/">Details</a></div></div></div>';
   };

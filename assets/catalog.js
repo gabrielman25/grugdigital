@@ -23,7 +23,8 @@
     teahouse: { name: 'Teahouse Express',         short: 'Teahouse', game: 'Take a Tea' },
     soluna:   { name: 'Soluna Coffee',            short: 'Soluna',   game: 'Sunrise to Sunset' },
     alchemy:  { name: 'Alchemy Bake Lab',         short: 'Alchemy',  game: 'Sugar Alchemist' },
-    rodeo:    { name: 'Rodeo Express Car Wash',   short: 'Rodeo',    game: 'Rodeo Wash Simulator' }
+    rodeo:    { name: 'Rodeo Express Car Wash',   short: 'Rodeo',    game: 'Rodeo Wash Simulator' },
+    runway:   { name: 'Runway Ready',             short: 'Runway',   game: 'Runway Ready' }
   };
 
   const free = () => ({ type: 'free' });

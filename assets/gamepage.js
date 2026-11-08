@@ -18,7 +18,7 @@ window.GrugGamePage = function (id) {
       '<div class="gp-cover" style="background-image:url(' + G.url(g.thumb) + ')"><span class="badge ' + (legacy ? 'legacy' : live ? 'live' : 'soon') + '"' + (legacy ? ' style="background:#6b7280;color:#fff"' : '') + '>' + (legacy ? 'Legacy' : live ? 'Live' : 'Preview') + '</span></div>' +
       '<div class="gp-head">' +
         '<h1>' + G.esc(g.title) + '</h1>' +
-        '<div class="row mut"><span class="g-chip">' + G.icon('storefront') + G.esc(g.partner) + '</span><span class="g-chip">' + G.icon('game-controller') + G.esc(g.kind) + '</span><span class="g-chip">' + G.icon('map-pin') + G.esc(g.place) + '</span></div>' +
+        '<div class="row mut"><span class="g-chip">' + G.icon(g.standalone ? 'sparkle' : 'storefront') + G.esc(g.partner) + '</span><span class="g-chip">' + G.icon('game-controller') + G.esc(g.kind) + '</span><span class="g-chip">' + G.icon('map-pin') + G.esc(g.place) + '</span></div>' +
         '<p class="lead">' + G.esc(g.blurb) + '</p>' +
         '<div class="row"><a class="g-btn primary big" id="playBtn" href="' + G.url(g.game || g.play) + '">' + G.icon('play') + (live ? 'Play' : 'Try the demo') + '</a>' +
         (g.storageKey ? '<a class="g-btn" href="' + G.url(g.play) + '#' + (G.appState(g) && G.appState(g).store ? G.esc(G.appState(g).store) + '/rewards' : '') + '">' + G.icon('coins') + 'Rewards</a>' : '') + '</div>' +
@@ -30,7 +30,7 @@ window.GrugGamePage = function (id) {
       '</div>' +
     '</section>' +
     '<section class="g-section"><div class="g-section-h"><h2>About</h2></div><p class="gp-long">' + G.esc(g.long) + '</p>' +
-      '<div class="gp-facts"><div>' + G.icon('smiley') + '<span><b>Your avatar</b>' + G.esc(g.avatar) + '</span></div><div>' + G.icon('coins') + '<span><b>Earning points</b>' + G.esc(g.earn) + '</span></div></div></section>' +
+      '<div class="gp-facts"><div>' + G.icon('smiley') + '<span><b>Your avatar</b>' + G.esc(g.avatar) + '</span></div><div>' + G.icon(g.standalone ? 'pearl' : 'coins') + '<span><b>' + (g.standalone ? 'Power-ups' : 'Earning points') + '</b>' + G.esc(g.earn) + '</span></div></div></section>' +
     (items.length ? '<section class="g-section"><div class="g-section-h"><h2>Custom clothing from ' + G.esc(C.APPS[g.app].short) + '</h2><a href="' + G.url('shop/') + '">Shop</a></div><div class="g-items" id="gpItems">' + items.map(it => G.ui.itemTile(it)).join('') + '</div></section>' : '');
   document.body.insertBefore(main, document.querySelector('.g-tabs'));
   G.ui.fillThumbs($('#gpItems'));

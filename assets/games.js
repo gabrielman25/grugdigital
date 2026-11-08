@@ -57,6 +57,19 @@ window.GRUG_GAMES = [
     avatar: 'You play as your avatar', earn: 'Wash at Rodeo Express, tap the poster at your bay, 10 points a visit (demo)'
   },
   {
+    // A Grug original: no restaurant behind it (standalone: true). play/runway/ hosts it in place of a rewards app;
+    // power-ups cost Pearls only. Its save ('grug-runway-v1') holds power-ups and best score, not partner points,
+    // so it has no storageKey here (that field means "partner points live there").
+    id: 'runway', app: 'runway', standalone: true,
+    title: 'Runway Ready', kind: '3D dress-up', status: 'live',
+    partner: 'Grug Original', place: 'Plays anywhere',
+    blurb: 'Dress to the theme in a voxel fashion house, then walk the runway against four rivals.',
+    long: 'A theme appears (Ocean Blue, Cowgirl, Red Carpet and more). Run through six wardrobe rooms full of pieces from the Grug avatar closet, pick their colours and beat the clock, then strut the runway. Matching the theme earns up to 70 points and the judges add up to 30. Pearls buy Extra Time, Style Hints, Fast Feet and Spotlight, and you play as your own avatar.',
+    play: 'play/runway/', game: 'play/runway/', storageKey: '', old: '',
+    thumb: 'assets/thumbs/runway.jpg', color: '#F43F5E', ink: '#FFFFFF',
+    avatar: 'You play as your avatar', earn: 'Power-ups use Pearls, the Grug currency'
+  },
+  {
     id: 'alchemy', app: 'alchemy',
     title: 'Sugar Alchemist', kind: 'Bakery sim', status: 'preview',
     partner: 'Alchemy Bake Lab', place: 'Katy',
