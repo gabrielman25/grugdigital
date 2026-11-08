@@ -109,6 +109,18 @@ window.GRUG_GAMES = [
     avatar: 'You play as your avatar', earn: 'Store items use Pearls, the Grug currency'
   },
   {
+    // A Grug original (standalone: true): play/mysteryblasters/ hosts it in place of a rewards app; Store items cost Pearls only.
+    // Its host save ('grug-mysteryblasters-v1') holds owned items and best round, not partner points, so no storageKey here.
+    id: 'mysteryblasters', app: 'mysteryblasters', standalone: true,
+    title: 'Mystery Blasters', kind: '3D party game', status: 'live',
+    partner: 'Grug Original', place: 'Plays anywhere',
+    blurb: 'One player is the Murderer, one is the Sheriff: find the Murderer before everyone is tagged, then unbox wild blaster skins and hatch pets.',
+    long: 'A Murder Mystery-style party game against eight bots on three blocky maps (Whispering Forest, Moonlit Mansion and Blockrock Prison) with fog of war: you only see the room you’re in, and next door through an open doorway. Be the Murderer, the Sheriff or an Innocent. The Murderer’s foam blaster knocks players down, then she has to walk up and finish them off, or drag the body into a closet. Innocents fix five fuse boxes to open an escape hatch, hide in lockers and boxes (watch your air!), and crawl through vents once they’re down. Every coin you grab goes to blaster crates (millions of skins with colours, patterns, glows, trails and rare mutations) and pet eggs with powers like Dash and Vanish. You play as your own avatar, and Pearls buy role chances, double coins, a VIP pass and more.',
+    play: 'play/mysteryblasters/', game: 'play/mysteryblasters/', storageKey: '', old: '',
+    thumb: 'assets/thumbs/mysteryblasters.jpg', color: '#F43F5E', ink: '#FFFFFF',
+    avatar: 'You play as your avatar', earn: 'Store items use Pearls, the Grug currency'
+  },
+  {
     id: 'alchemy', app: 'alchemy',
     title: 'Sugar Alchemist', kind: '3D bakery sim', status: 'live',
     partner: 'Alchemy Bake Lab', place: 'Peek Rd, Katy',

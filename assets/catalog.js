@@ -27,7 +27,8 @@
     runway:   { name: 'Runway Ready',             short: 'Runway',   game: 'Runway Ready' },
     chestquest: { name: 'Chest Quest',            short: 'Chest Quest', game: 'Chest Quest' },
     glowupspa: { name: 'Glow Up Spa',             short: 'Glow Up Spa', game: 'Glow Up Spa' },
-    petmountainrescue: { name: 'Pet Mountain Rescue',     short: 'Pet Rescue', game: 'Pet Mountain Rescue' }
+    petmountainrescue: { name: 'Pet Mountain Rescue',     short: 'Pet Rescue', game: 'Pet Mountain Rescue' },
+    mysteryblasters: { name: 'Mystery Blasters',       short: 'Mystery Blasters', game: 'Mystery Blasters' }
   };
 
   const free = () => ({ type: 'free' });
