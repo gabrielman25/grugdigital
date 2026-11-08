@@ -39,11 +39,11 @@ window.GRUG_GAMES = [
     id: 'soluna', app: 'soluna',
     title: 'Sunrise to Sunset', kind: 'Barista sim', status: 'live',
     partner: 'Soluna Coffee', place: 'Elyson Falls, Katy',
-    blurb: 'Open the shop at sunrise, pour the orders and close at sunset. Boosts come from Soluna points.',
-    long: 'Soluna’s coffee-shop game, playable on the Game tab of the Soluna app. Rewards points turn into boost codes for the game. The game is hosted on itch.io, so your avatar shows up in the Soluna app rather than inside the game itself.',
+    blurb: 'Open the shop at sunrise, pour the orders and close at sunset. Buy boosts and passes with Pearls or Soluna points.',
+    long: 'Soluna’s coffee-shop game, on the Game tab of the Soluna app. You work the bar as your own Grug avatar, and every customer is a Sandy. The Store sells shift boosts, packs and forever passes for Pearls (spent first) or Soluna points.',
     play: 'play/soluna/', game: 'play/soluna/#elyson/game', storageKey: 'soluna-site-v2', old: 'https://gabrielman25.github.io/soluna-coffee/',
     thumb: 'assets/thumbs/soluna.jpg', color: '#B08A57', ink: '#5F5C37',
-    avatar: 'Shows in the Soluna app', earn: 'Visit Soluna, enter the board code, 5 points a visit'
+    avatar: 'Plays as your avatar', earn: 'Visit Soluna, enter the board code, 5 points a visit'
   },
   {
     id: 'alchemy', app: 'alchemy',
