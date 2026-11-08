@@ -20,7 +20,7 @@ window.GrugGamePage = function (id) {
         '<h1>' + G.esc(g.title) + '</h1>' +
         '<div class="row mut"><span class="g-chip">' + G.icon('storefront') + G.esc(g.partner) + '</span><span class="g-chip">' + G.icon('game-controller') + G.esc(g.kind) + '</span><span class="g-chip">' + G.icon('map-pin') + G.esc(g.place) + '</span></div>' +
         '<p class="lead">' + G.esc(g.blurb) + '</p>' +
-        '<div class="row"><a class="g-btn primary big" id="playBtn" href="' + G.url(g.play) + '">' + G.icon('play') + (live ? 'Play' : 'Try the demo') + '</a>' +
+        '<div class="row"><a class="g-btn primary big" id="playBtn" href="' + G.url(g.game || g.play) + '">' + G.icon('play') + (live ? 'Play' : 'Try the demo') + '</a>' +
         (g.storageKey ? '<a class="g-btn" href="' + G.url(g.play) + '#' + (G.appState(g) && G.appState(g).store ? G.esc(G.appState(g).store) + '/rewards' : '') + '">' + G.icon('coins') + 'Rewards</a>' : '') + '</div>' +
         '<div class="gp-stats">' +
           (p ? '<div><b>' + G.fmt(p.points) + '</b><span>' + G.esc(C.APPS[g.app].short) + ' points</span></div>' : '') +

@@ -44,7 +44,7 @@
     return '<div class="g-tile"><a class="pic" href="' + g.id + '/" style="background-image:url(' + G.url(g.thumb) + ')" aria-label="' + G.esc(g.title) + '">' + badge(g) + '</a>' +
       '<div class="body"><div class="title">' + G.esc(g.title) + '</div><div class="meta">' + G.icon('storefront') + G.esc(g.partner) + '<span>·</span>' + G.esc(g.kind) + '</div><div class="blurb">' + G.esc(g.blurb) + '</div>' +
       (p && (p.points || p.best) ? '<div class="meta">' + G.icon('coins') + G.fmt(p.points) + ' points' + (p.best ? '<span>·</span>' + G.icon('trophy') + 'best ' + G.fmt(p.best) : '') + '</div>' : '') +
-      '<div class="acts"><a class="g-btn primary sm" href="' + G.url(g.play) + '">' + G.icon('play') + (live ? 'Play' : 'Demo') + '</a><a class="g-btn sm" href="' + g.id + '/">Details</a></div></div></div>';
+      '<div class="acts"><a class="g-btn primary sm" href="' + G.url(g.game || g.play) + '">' + G.icon('play') + (live ? 'Play' : 'Demo') + '</a><a class="g-btn sm" href="' + g.id + '/">Details</a></div></div></div>';
   };
   const now = G.GAMES.filter(g => g.status !== 'legacy'), old = G.GAMES.filter(g => g.status === 'legacy');
   document.getElementById('list').innerHTML = now.map(card).join('');

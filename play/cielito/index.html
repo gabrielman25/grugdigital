@@ -339,6 +339,16 @@ body{padding-top:var(--bn-h,0px)}
 .toast:not(.show){visibility:hidden;transition:translate .4s var(--spring),visibility 0s .4s}
 body.game-mode .fs-float{top:calc(12px + var(--bn-h,0px))}
 .sheet{max-height:calc(92vh - var(--bn-h,0px))}
+
+/* game full view: on the Game tab the game fills the whole screen (no owner banner, no tab bar).
+   The Minimize button brings both back; the same button returns to the full view. */
+body.game-full{--bn-h:0px}
+body.game-full .owner-banner,body.game-full .nav{display:none}
+body.game-full .gwrap{bottom:0}
+.gmin-float{position:fixed;z-index:31;top:calc(12px + var(--bn-h,0px) + env(safe-area-inset-top,0px));left:62px;height:42px;padding:0 14px 0 11px;border-radius:99px;display:none;align-items:center;gap:7px;background:rgba(0,0,0,.6);color:#fff;border:0;cursor:pointer;font:700 11.5px/1 var(--fu);letter-spacing:.1em;text-transform:uppercase}
+.gmin-float .ic{width:20px;height:20px}
+body.game-mode .gmin-float{display:flex}
+@media (pointer:coarse){.gmin-float{width:42px;padding:0;justify-content:center}.gmin-float span{display:none}}
 </style>
 </head>
 <body class="pick-mode">
@@ -493,6 +503,7 @@ body.game-mode .fs-float{top:calc(12px + var(--bn-h,0px))}
   <section class="view setup" id="vSetup" aria-label="Setup"></section>
 </div>
 
+<button class="gmin-float press" id="gminBtn" type="button" aria-label="Minimize the game"></button>
 <button class="fs-float press" data-fs aria-label="Full screen" hidden><i data-icon="arrows-out"></i></button>
 <nav class="nav" id="nav" role="tablist" aria-label="Sections"><span class="ind" id="ind"></span></nav>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1082,6 +1093,16 @@ const B = CONFIG.brand, STORES = CONFIG.stores, KEY = CONFIG.storageKey;
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ic = name => '<svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">' + (ICONS[name] || ICONS['sparkle-fill'] || '') + '</svg>';
+
+/* ---------- game full view: the game fills the screen; Minimize brings back the owner banner and the tab bar ---------- */
+var gameFull = true;
+function renderGameFull(){
+  document.body.classList.toggle('game-full', gameFull && tab === 'Game');
+  const b = document.getElementById('gminBtn'); if(!b) return;
+  b.innerHTML = gameFull ? ic('minus') + '<span>Minimize</span>' : ic('game-controller') + '<span>Full view</span>';
+  b.setAttribute('aria-label', gameFull ? 'Minimize the game' : 'Show the game full view');
+}
+document.getElementById('gminBtn').addEventListener('click', () => { try{ buzz(6); }catch(e){} gameFull = !gameFull; renderGameFull(); });
 function paintIcons(root){ (root || document).querySelectorAll('i[data-icon]').forEach(el => { el.outerHTML = ic(el.dataset.icon); }); }
 const money = v => (/^\d/.test(String(v)) ? B.currency : '') + v;
 
@@ -1232,7 +1253,7 @@ function renderPicker(){
     '<span class="sc-go">' + ic('arrow-right') + '</span></button>').join('');
 }
 $('#storeList').addEventListener('click', e => { const b = e.target.closest('[data-store]'); if(!b) return; buzz(); location.hash = b.dataset.store; });
-function showPicker(){ store = null; showView('vPick'); document.body.classList.remove('game-mode'); window.scrollTo(0, 0); }
+function showPicker(){ store = null; showView('vPick'); document.body.classList.remove('game-mode', 'game-full'); window.scrollTo(0, 0); }
 function enterStore(s, wantTab){
   const fresh = !store || store.id !== s.id;
   store = s; st.store = s.id; save();
@@ -1270,6 +1291,8 @@ function setTab(t, instant){
   ['Menu', 'Rewards', 'Club', 'Game', 'Visit'].forEach(x => $('#p' + x).classList.toggle('on', x === t));
   if(t === 'Rewards'){ if($('#rwDot')) $('#rwDot').classList.remove('show'); renderRewards(); }
   document.body.classList.toggle('game-mode', t === 'Game');
+  if(t === 'Game') gameFull = true;   // the game always opens in its full view
+  renderGameFull();
   if(t === 'Game'){ window.scrollTo(0, 0); startGame(); } else pauseGame();
   if(store){ const h = '#' + store.id + (t === 'Menu' ? '' : '/' + t.toLowerCase()); if(location.hash !== h) history.replaceState(null, '', h); }
 }

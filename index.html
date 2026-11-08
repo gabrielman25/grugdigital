@@ -117,7 +117,7 @@ footer a{color:var(--ink2);font-weight:700}
     $('#heroTitle').innerHTML = 'Hi, <span class="name">' + G.esc(G.profile.name) + '</span>. Games made with Katy restaurants.';
   }
   const last = G.GAMES.find(g => g.id === G.profile.stats.lastGame) || G.GAMES[0];
-  $('#heroPlay').href = last.play; $('#heroPlay').innerHTML = G.icon('play') + 'Play ' + G.esc(last.title);
+  $('#heroPlay').href = last.game || last.play; $('#heroPlay').innerHTML = G.icon('play') + 'Play ' + G.esc(last.title);
   if (!G.storageWorks()) $('#heroFine').textContent = 'This browser isn’t saving (private mode or blocked storage). Your avatar and points will be lost when you close it.';
 
   /* game tiles */
