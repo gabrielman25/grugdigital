@@ -414,7 +414,7 @@
     const T = root.GrugTheme; if (!T || !box) return;
     const draw = () => {
       const s = T.prefs(), t = T.THEMES[s.theme];
-      const L = 'hsl(' + t.h + ' 42% 93%)', D = 'hsl(' + t.h + ' 35% 9%)', LP = '#fff', DP = 'hsl(' + t.h + ' 24% 21%)', acc = 'linear-gradient(90deg,' + t.a + ',' + t.b + ')';
+      const L = 'hsl(' + t.h + ' 24% 95%)', D = 'hsl(' + t.h + ' 14% 7%)', LP = '#fff', DP = 'hsl(' + t.h + ' 24% 21%)', acc = 'linear-gradient(90deg,' + t.a + ',' + t.b + ')';
       const pv = m => m === 'light' ? '<span class="pv" style="background:' + L + '"><i style="background:' + LP + '"></i><i style="background:' + acc + '"></i></span>'
         : m === 'dark' ? '<span class="pv" style="background:' + D + '"><i style="background:' + DP + '"></i><i style="background:' + acc + '"></i></span>'
         : '<span class="pv" style="background:linear-gradient(135deg,' + L + ' 50%,' + D + ' 50%)"><i style="background:linear-gradient(135deg,' + LP + ' 50%,' + DP + ' 50%)"></i><i style="background:' + acc + '"></i></span>';
@@ -422,8 +422,7 @@
         '<span class="k-set-h">Light or dark</span><div class="k-modes" role="radiogroup" aria-label="Light or dark">' +
         [['light', 'Light'], ['dark', 'Dark'], ['auto', 'Auto']].map(m => '<button type="button" class="k-mode" role="radio" aria-checked="' + (s.mode === m[0]) + '" data-mode="' + m[0] + '">' + pv(m[0]) + m[1] + '</button>').join('') + '</div>' +
         '<span class="k-set-h">Theme</span><div class="k-themes" role="radiogroup" aria-label="Theme">' +
-        Object.keys(T.THEMES).map(k => { const th = T.THEMES[k]; return '<button type="button" class="k-theme" role="radio" aria-checked="' + (s.theme === k) + '" data-theme-id="' + k + '"><span class="sw" style="background:linear-gradient(135deg,' + th.a + ',' + th.b + ')"></span><span class="dots"><i style="background:' + th.a + '"></i><i style="background:' + th.b + '"></i><i style="background:' + th.hotA + '"></i><i style="background:' + th.hotB + '"></i></span><span><b>' + th.name + '</b><br><small>' + th.note + '</small></span></button>'; }).join('') + '</div>' +
-        '<div class="g-pref" style="margin-top:8px"><span><b>Moving background</b><small>Slow waves in the backdrop</small></span><button type="button" class="g-switch" role="switch" aria-checked="' + s.backdrop + '" data-k="backdrop" aria-label="Moving background"></button></div>';
+        Object.keys(T.THEMES).map(k => { const th = T.THEMES[k]; return '<button type="button" class="k-theme" role="radio" aria-checked="' + (s.theme === k) + '" data-theme-id="' + k + '"><span class="sw" style="background:linear-gradient(135deg,' + th.a + ',' + th.b + ')"></span><span class="dots"><i style="background:' + th.a + '"></i><i style="background:' + th.b + '"></i><i style="background:' + th.hotA + '"></i><i style="background:' + th.hotB + '"></i></span><span><b>' + th.name + '</b><br><small>' + th.note + '</small></span></button>'; }).join('') + '</div>' ;
     };
     draw();
     box.addEventListener('click', e => {
@@ -435,7 +434,7 @@
   function settings() {
     return dialog({
       title: 'Settings', html: '<div id="kAppear"></div>' +
-        '<div class="g-pref"><span><b>Animations</b><small>Celebrations, poses and the moving backdrop</small></span><button type="button" class="g-switch" role="switch" data-pref="motion" aria-checked="' + !!profile.prefs.motion + '" aria-label="Animations"></button></div>' +
+        '<div class="g-pref"><span><b>Animations</b><small>Celebrations and poses</small></span><button type="button" class="g-switch" role="switch" data-pref="motion" aria-checked="' + !!profile.prefs.motion + '" aria-label="Animations"></button></div>' +
         '<div class="g-pref"><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button type="button" class="g-switch" role="switch" data-pref="haptics" aria-checked="' + !!profile.prefs.haptics + '" aria-label="Vibrate on tap"></button></div>' +
         '<div class="g-pref"><span><b>Colorful icons</b><small>Full-colour pictures instead of simple one-colour icons</small></span><button type="button" class="g-switch" role="switch" data-pref="colorIcons" aria-checked="' + !!profile.prefs.colorIcons + '" aria-label="Colorful icons"></button></div>' +
         '<p class="g-fine" style="margin-top:6px">Saved in your profile, so it comes along when you export it. More in <a href="' + url('profile/') + '" style="color:var(--ember);font-weight:800">Profile</a>.</p>',
@@ -489,6 +488,18 @@
     if (owns(it.id)) return 'owned';
     if (it.get.type === 'points') return ctx.canBuy ? 'buy' : 'buyElsewhere';
     return 'progress';
+  }
+  /* a game as a FOSSIL32 box tile (assets/fossil32/: fossil32.js turns [data-f32] into a floating 3D box and opens the
+     white game stage on tap; without it the link goes to the game's page). opts.extra = more HTML for the body. */
+  function boxTile(g, opts) {
+    opts = opts || {};
+    const st = g.status === 'live' ? ['live', 'Live'] : g.status === 'legacy' ? ['legacy', 'Classic'] : ['soon', 'Demo'];
+    const badge = '<span class="badge ' + st[0] + '"' + (st[0] === 'legacy' ? ' style="background:#6b7280;color:#fff"' : '') + '>' + st[1] + '</span>';
+    const art = g.box && g.box.art ? g.box.art : g.thumb;
+    const meta = icon(g.standalone ? 'sparkle' : 'storefront') + esc(g.standalone ? 'Grug Original' : g.partner) + '<span>·</span>' + esc(g.kind);
+    return '<a class="g-tile f32-tile" data-f32="' + esc(g.id) + '" href="' + url('games/' + g.id + '/') + '" aria-label="' + esc(g.title) + ' (' + esc(g.kind) + ')">' +
+      '<div class="f32-stage">' + badge + '<img class="f32-flat" src="' + url(art) + '" alt="" loading="lazy" decoding="async"></div>' +
+      '<div class="body"><div class="title">' + esc(g.title) + '</div><div class="meta">' + meta + '</div>' + (opts.extra || '') + '</div></a>';
   }
   function itemTile(it, ctx) {
     ctx = ctx || {}; const st = itemState(it, ctx); const app = C.APPS[it.get.app] || C.APPS.grug;
@@ -557,6 +568,6 @@
     points, appState, exportData, exportText, exportFilename, download, share, parseImport, applyImport, reset,
     snaps, ensureSnaps, randomName, cleanName, makeName, parseName, NAME_WORDS: { adj: ADJ.slice(), noun: NOUN.slice(), maxNum: NAME_MAX_NUM }, pearlBalance, pearlsUrl,
     announce,
-    ui: { chrome, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic }
+    ui: { chrome, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile }
   };
 })(window);

@@ -9,6 +9,7 @@
 <link rel="icon" href="favicon.png">
 <link rel="stylesheet" href="assets/grug.css">
 <script src="assets/theme.js"></script>
+<link rel="stylesheet" href="assets/fossil32/fossil32.css">
 <script>
 /* old links into the business half of the site (#business, #work, #contact …) now live on partners/ */
 (function(){ var h = location.hash.replace('#',''); if (/^(business|work|included|how|about|contact|pass|pricing)$/.test(h)) location.replace('partners/#' + h); })();
@@ -55,12 +56,12 @@ footer a{color:var(--ink2);font-weight:700}
 
   <section class="g-section" id="continueSec" hidden>
     <div class="g-section-h"><h2>Jump back in</h2></div>
-    <div class="g-grid wide" id="continueGrid"></div>
+    <div class="g-grid wide f32-grid" id="continueGrid"></div>
   </section>
 
   <section class="g-section">
     <div class="g-section-h"><h2>Games</h2><a href="games/">All games</a></div>
-    <div class="g-grid wide" id="gameGrid"></div>
+    <div class="g-grid wide f32-grid" id="gameGrid"></div>
   </section>
 
   <section class="g-section">
@@ -124,9 +125,8 @@ footer a{color:var(--ink2);font-weight:700}
   const pts = {}; G.points().forEach(p => { pts[p.game.id] = p; });
   function tile(g) {
     const p = pts[g.id];
-    const meta = [G.icon(g.standalone ? 'sparkle' : 'storefront') + G.esc(g.partner), '<span>·</span>', G.esc(g.kind)].join('');
     const best = p && p.best ? '<div class="meta">' + G.icon('trophy') + 'Your best ' + G.fmt(p.best) + '</div>' : (p && p.points ? '<div class="meta">' + G.icon('coins') + G.fmt(p.points) + ' points</div>' : '');
-    return '<a class="g-tile" href="games/' + g.id + '/"><div class="pic" style="background-image:url(' + g.thumb + ')"><span class="badge ' + (g.status === 'live' ? 'live' : 'soon') + '">' + (g.status === 'live' ? 'Live' : 'Preview') + '</span></div><div class="body"><div class="title">' + G.esc(g.title) + '</div><div class="meta">' + meta + '</div>' + best + '</div></a>';
+    return G.ui.boxTile(g, { extra: best });   // a FOSSIL32 box (assets/fossil32/)
   }
   $('#gameGrid').innerHTML = G.GAMES.filter(g => g.status !== 'legacy' && g.listed !== false).map(tile).join('');
   if (G.profile.stats.lastGame && G.GAMES.find(g => g.id === G.profile.stats.lastGame)) {
@@ -144,5 +144,6 @@ footer a{color:var(--ink2);font-weight:700}
   $('#partnerList').innerHTML = G.GAMES.filter(g => g.status !== 'legacy' && !g.standalone).map(g => '<a class="partner" href="games/' + g.id + '/"><span class="dot" style="background:' + g.color + '"></span><span><b>' + G.esc(g.partner) + '</b><small>' + G.esc(g.place) + ' · ' + G.esc(g.title) + '</small></span></a>').join('');
 })();
 </script>
+<script type="module" src="assets/fossil32/fossil32.js"></script>
 </body>
 </html>
