@@ -116,7 +116,7 @@ footer a{color:var(--ink2);font-weight:700}
   } else {
     $('#heroTitle').innerHTML = 'Hi, <span class="name">' + G.esc(G.profile.name) + '</span>. Games made with Katy restaurants.';
   }
-  const last = G.GAMES.find(g => g.id === G.profile.stats.lastGame) || G.GAMES[0];
+  const last = G.GAMES.find(g => g.id === G.profile.stats.lastGame) || G.GAMES.find(g => g.listed !== false) || G.GAMES[0];
   $('#heroPlay').href = last.game || last.play; $('#heroPlay').innerHTML = G.icon('play') + 'Play ' + G.esc(last.title);
   if (!G.storageWorks()) $('#heroFine').textContent = 'This browser isn’t saving (private mode or blocked storage). Your avatar and points will be lost when you close it.';
 
@@ -128,7 +128,7 @@ footer a{color:var(--ink2);font-weight:700}
     const best = p && p.best ? '<div class="meta">' + G.icon('trophy') + 'Your best ' + G.fmt(p.best) + '</div>' : (p && p.points ? '<div class="meta">' + G.icon('coins') + G.fmt(p.points) + ' points</div>' : '');
     return '<a class="g-tile" href="games/' + g.id + '/"><div class="pic" style="background-image:url(' + g.thumb + ')"><span class="badge ' + (g.status === 'live' ? 'live' : 'soon') + '">' + (g.status === 'live' ? 'Live' : 'Preview') + '</span></div><div class="body"><div class="title">' + G.esc(g.title) + '</div><div class="meta">' + meta + '</div>' + best + '</div></a>';
   }
-  $('#gameGrid').innerHTML = G.GAMES.filter(g => g.status !== 'legacy').map(tile).join('');
+  $('#gameGrid').innerHTML = G.GAMES.filter(g => g.status !== 'legacy' && g.listed !== false).map(tile).join('');
   if (G.profile.stats.lastGame && G.GAMES.find(g => g.id === G.profile.stats.lastGame)) {
     $('#continueSec').hidden = false; $('#continueGrid').innerHTML = tile(G.GAMES.find(g => g.id === G.profile.stats.lastGame));
   }

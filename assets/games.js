@@ -3,10 +3,12 @@
    play = the app (its Rewards tab etc. are reached from here); game = where the Play buttons go: straight to the
    game in its full view. storageKey = the localStorage key that partner's rewards app saves to (the app's CONFIG.storageKey).
    Paths are relative to the site root; Grug.url() turns them into links from any page.
+   listed: false keeps a game off the Games page and the home page's game tiles (it stays playable in its app).
 */
 window.GRUG_GAMES = [
   {
-    id: 'yoshi', app: 'yoshi',
+    // listed: false = kept out of the Games page and the home page's game tiles; it lives on in its rewards app.
+    id: 'yoshi', app: 'yoshi', listed: false,
     title: 'Sushi Swap', kind: 'Match-3', status: 'live',
     partner: 'Yoshi Sushi Asian Fusion', place: 'Elyson Falls, Katy',
     blurb: 'Swap sushi to line up three, clear the board and climb the courses before your moves run out.',
@@ -26,7 +28,8 @@ window.GRUG_GAMES = [
     avatar: 'You play as your avatar', earn: 'Eat at Teahouse Express, tap the tag, 5 points a visit'
   },
   {
-    id: 'cielito', app: 'cielito',
+    // listed: false = kept out of the Games page and the home page's game tiles; it lives on in its rewards app.
+    id: 'cielito', app: 'cielito', listed: false,
     title: 'Taco Match', kind: 'Match-3', status: 'live',
     partner: 'Cielito Lindo Taqueria', place: 'FM 529, Katy',
     blurb: 'Match tacos, eggs and chilaquiles from the real breakfast board. Combos score big.',
@@ -67,6 +70,18 @@ window.GRUG_GAMES = [
     long: 'A theme appears (Ocean Blue, Cowgirl, Red Carpet and more). Run through six wardrobe rooms full of pieces from the Grug avatar closet, pick their colours and beat the clock, then strut the runway. Matching the theme earns up to 70 points and the judges add up to 30. Pearls buy Extra Time, Style Hints, Fast Feet and Spotlight, and you play as your own avatar.',
     play: 'play/runway/', game: 'play/runway/', storageKey: '', old: '',
     thumb: 'assets/thumbs/runway.jpg', color: '#F43F5E', ink: '#FFFFFF',
+    avatar: 'You play as your avatar', earn: 'Power-ups use Pearls, the Grug currency'
+  },
+  {
+    // A Grug original (standalone: true): play/chestquest/ hosts it in place of a rewards app; power-ups cost Pearls only.
+    // Its save ('grug-chestquest-v1') holds power-ups and best score, not partner points, so no storageKey here.
+    id: 'chestquest', app: 'chestquest', standalone: true,
+    title: 'Chest Quest', kind: '3D dungeon roguelike', status: 'live',
+    partner: 'Grug Original', place: 'Plays anywhere',
+    blurb: "Delve floor after floor of a blocky dungeon, crypt and caves: open every chest, then race back to the stairs while monsters you can't beat hunt you.",
+    long: "A Dandy's World-style roguelike. Every floor is a new place (a dungeon, a crypt, caves, catacombs, a library, crystal caves and the ember depths): pick the lock on every chest, grab the gold, then get back to the stairs. Monsters can't be beaten: duck behind a column or a stack of crates, break their line of sight and they give up. Sprint, carry three items, shop with the merchant, and see how deep you can get as your own avatar. Pearls buy power-ups like Extra Heart, Quick Fingers and Second Wind.",
+    play: 'play/chestquest/', game: 'play/chestquest/', storageKey: '', old: '',
+    thumb: 'assets/thumbs/chestquest.jpg', color: '#2A2438', ink: '#FBBF24',
     avatar: 'You play as your avatar', earn: 'Power-ups use Pearls, the Grug currency'
   },
   {
