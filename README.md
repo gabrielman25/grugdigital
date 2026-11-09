@@ -6,7 +6,7 @@ Games built with Katy restaurants, one local profile (no accounts), a 3D avatar 
 
 ## Map
 
-- `index.html` — home (game tiles, your avatar). `games/` lists them; `games/<id>/` is each game's page. Every game is shown as a 3D **FOSSIL32** cartridge box (see below).
+- `index.html` — home (your avatar, then one carousel of every game as a bare 3D cartridge, starting on the one you played last). `games/` is the library: a looping vertical carousel of cartridge boxes with the selected game's details beside it; `games/<id>/` is each game's page. Every game is shown as a 3D **FOSSIL32** cartridge box (see below).
 - `avatar/` — the 3D avatar editor. `shop/` — every closet item and how to earn it. `profile/` — name, stats, points at each partner, settings, **export / import** of the profile as JSON (moves everything, points included, to another phone).
 - `partners/` — the "for restaurants" pitch, our work and contact (the old front page).
 - `play/<name>/` — the partner rewards apps, moved here from their own repos: `yoshi`, `cielito`, `teahouse`, `soluna`. Each old URL redirects here and keeps `?tap=` NFC links and `#store/tab` hashes.
@@ -17,11 +17,11 @@ Games built with Katy restaurants, one local profile (no accounts), a 3D avatar 
 
 - `catalog.js` — the closet: every item, its slot, how it's earned (free / partner points / milestone). Add items here.
 - `avatar3d.js` — builds and animates the blocky avatar with three.js (`three.min.js`, r159, MIT). Used by the site pages, the closet thumbnails and the match-3 games' "chef".
-- `grug.css` + `theme.js` — the kubii look: a flat off-white (light) or off-black (dark) background tinted by the theme, Light / Dark / Auto and six colour themes (Tropical, Lagoon, Papaya, Hibiscus, Orchid, Coconut). Load `theme.js` in `<head>` right after `grug.css` so the theme is set before first paint. The choices are saved in the profile's `prefs` and change from the gear in the top bar or from Profile → Appearance.
+- `grug.css` + `theme.js` + `fogbg.js` — the look: always dark, on a blue smoky fog with little lights that wander through it trailing comet tails (`fogbg.js`, loaded by `theme.js` on every site page except the games under `play/`). Seven colour themes (Classic, Tropical, Lagoon, Papaya, Hibiscus, Orchid, Coconut) pick the colours of the lights and the button accent; the fog stays blue. Load `theme.js` in `<head>` right after `grug.css` so the theme is set before first paint. The choice is saved in the profile's `prefs` and changes from the gear in the top bar (Lights) or from Profile → Appearance. The lights hold still when Animations are off or the device asks for reduced motion.
 - `grug.js` — the local profile (`localStorage` key `grug.profile.v1`), milestones, points reader, export/import, shared header + tab bar. `games.js` is the game list.
 - `grug-app.js` / `grug-app.css` — the Grug layer inside a partner app (closet section, avatar chip, milestone hooks). `chef.js` — the avatar inside the match-3 games.
 - `icons.js` — Phosphor Icons 2.1.1 (MIT), bold weight.
-- `fossil32/` — the FOSSIL32 boxes: `fossil32.js` (built from `tools/fossil32/src/`, three.js r170 bundled in) turns every `[data-f32="<id>"]` tile into a floating 3D cartridge box. Tapping one fades to white, pulls the cartridge out and shows the game panel; Play puts the cartridge in the console, zooms into the screen and opens the game. `Grug.ui.boxTile(game)` writes the tile. Rebuild with `cd tools/fossil32 && npm install && npm run build`.
+- `fossil32/` — the FOSSIL32 boxes: `fossil32.js` (built from `tools/fossil32/src/`, three.js r170 bundled in) turns every `[data-f32="<id>"]` tile into a floating 3D cartridge box. Tapping one darkens and blurs the page, pulls the cartridge out and shows the game panel; Play puts the cartridge in the console, zooms into the screen and opens the game. `Fossil32.rack(el, state)` draws the Games page carousel and `Fossil32.launch(id)` plays straight from it. `Grug.ui.boxTile(game)` writes the tile. Rebuild with `cd tools/fossil32 && npm install && npm run build`.
 - `boxart/` — each game's 1580×950 cover art (the avatar in an action pose over a shot of the game) and back-of-box screenshots. Made with `tools/boxart/` (see its README).
 
 ## Adding a game or partner app

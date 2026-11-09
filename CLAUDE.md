@@ -2,17 +2,34 @@
 
 The Grug game site (static HTML, Cloudflare Pages, deploys on push to `main`). See `README.md` for the map of the site.
 
+## The look: always dark, blue smoky fog
+
+Every site page (not the games under `play/`) sits on a blue smoky fog with little lights trailing through it, drawn by
+`assets/fogbg.js` (theme.js loads it). There is no light mode. A colour theme (Settings → Lights; `THEMES` in
+`assets/theme.js`, default `classic`) sets the colours of the lights (`orbs`) and the button accent; the fog and every
+neutral stay blue. Cards and bars are dark see-through glass so the fog shows through. Don't add white page backgrounds.
+
 ## Games are FOSSIL32 cartridges
 
-Everywhere a game is showcased (home page game tiles and "Jump back in", the Games page, each `games/<id>/` page) it is
-shown as a floating 3D **FOSSIL32** cartridge box (Grug Digital's fantasy console). Tapping a box fades the page to white,
-pulls the cartridge out and shows the game panel; **Play** drops the cartridge into the FOSSIL32 console, zooms into its
-screen and opens the game.
+Everywhere a game is showcased (the home page games carousel, the Games page, each `games/<id>/` page) it is
+shown as a floating 3D **FOSSIL32** cartridge box (Grug Digital's fantasy console). Tapping a box darkens the page and
+blurs it out of focus, pulls the cartridge out and shows the game panel; **Play** drops the cartridge into the FOSSIL32
+console, zooms into its screen and opens the game. A pool of the game's colour follows the cartridge the whole way.
+
+The **Games page** is a looping vertical carousel of boxes on the left half (`Fossil32.rack`, the page drives
+`state.pos`), with the selected game's details on the right (below it on phones). Scroll, swipe, arrow keys or a
+controller browse; Play / Enter / tapping the front box calls `Fossil32.launch(id)` (box opens → cartridge → console → game).
+The panel shows each game's short `blurb` (the full `long` write-up is on its game page); keep blurbs to a sentence or two.
+
+The **home page** is the one place games show as bare cartridges (no box, no card behind them), in one horizontal
+carousel right under the welcome message: `boxTile(g, { kind: 'cart', ribbon })` (`data-f32-kind="cart"`). The
+last-played game comes first, centred, glowing in its cartridge colour with a "Last played" ribbon; the rest follow.
+Tapping a cartridge glides it straight to the game panel.
 
 - Code: `tools/fossil32/src/fossil32.js` → bundled to `assets/fossil32/fossil32.js` (`cd tools/fossil32 && npm install && npm run build`).
   Never edit the bundle by hand. Styles: `assets/fossil32/fossil32.css`. Tiles come from `Grug.ui.boxTile(game)` in `assets/grug.js`.
 - Cartridge/console models and textures are in `assets/fossil32/` (cartridge model: Pavel Kutejnikov, CC BY 4.0, keep the credit).
-- The overlay's text (title, description, features) uses the site's header font in plain black with plain black bullets.
+- The overlay's text (title, description, features) uses the site's header font in plain white on the dark stage.
   The retro lettering and colours belong on the box art only.
 
 ## Adding a game (do all of this, every time)

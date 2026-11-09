@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Grug · games made with Katy restaurants</title>
 <meta name="description" content="Free games starring real Katy restaurants. Eat at a partner, earn points, spend them on power-ups and clothes for your avatar. No account needed.">
-<meta name="theme-color" content="#eaf6ee">
+<meta name="theme-color" content="#03050f">
 <meta name='impact-site-verification' value='c5aa1990-f972-4278-9ccf-b03ba19f790b'>
 <link rel="icon" href="favicon.png">
 <link rel="stylesheet" href="assets/grug.css">
@@ -36,6 +36,36 @@
 .partner .dot{width:12px;height:12px;border-radius:50%;flex:none}
 .partner b{display:block;font-size:15px}
 .partner small{color:var(--mut);font-size:13px}
+/* games: one horizontal carousel of bare FOSSIL32 cartridges floating in the fog (no card behind them), the middle one big
+   and lit in its cartridge colour; it opens on the last-played game */
+.hc-sec{padding-top:6px}
+.hc{position:relative;margin-inline:calc(50% - 50vw)}
+.hc-row{--tw:min(330px,72vw);--gap:16px;display:flex;gap:var(--gap);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;
+  padding:20px calc(50vw - var(--tw) / 2) 26px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
+.hc-row::-webkit-scrollbar{display:none}
+.hc-row.drag{scroll-snap-type:none;cursor:grabbing}
+.hc-row>.g-tile{flex:none;width:var(--tw);scroll-snap-align:center;transform:scale(calc(1 - var(--d,1) * .16));opacity:calc(1 - var(--d,1) * .45);
+  background:none;border:0;box-shadow:none;border-radius:0;overflow:visible;will-change:transform}
+.hc-row>.g-tile:hover,.hc-row>.g-tile:focus-within{transform:scale(calc(1 - var(--d,1) * .16));box-shadow:none}
+.hc-row>.g-tile:focus-visible{outline:none}
+.hc-row>.g-tile:focus-visible .f32-stage{outline:3px solid var(--ring-a);outline-offset:-6px;border-radius:24px}
+.hc-row .f32-stage{overflow:visible;background:radial-gradient(ellipse 50% 46% at 50% 50%,color-mix(in srgb,var(--hc-c) 20%,transparent),transparent 72%);transition:background .4s}
+.hc-row>.g-tile.on .f32-stage{background:radial-gradient(ellipse 66% 60% at 50% 50%,color-mix(in srgb,var(--hc-c) 45%,transparent),color-mix(in srgb,var(--hc-c) 14%,transparent) 52%,transparent 76%)}
+.hc-row>.g-tile.on.lp .f32-stage{background:radial-gradient(ellipse 74% 68% at 50% 50%,color-mix(in srgb,var(--hc-c) 62%,transparent),color-mix(in srgb,var(--hc-c) 20%,transparent) 50%,transparent 78%)}
+.hc-row .body{align-items:center;text-align:center;padding:2px 10px 0}
+.hc-row .g-tile .meta{justify-content:center}
+.hc-row .f32-stage .badge{left:50%;top:2px;transform:translateX(-50%)}
+.hc-row .f32-ribbon{right:auto;left:50%;top:auto;bottom:2px;transform:translateX(-50%)}
+.hc-row .f32-flat{left:22%;width:56%;top:20%;height:50%}
+.hc-nav{position:absolute;top:50%;z-index:3;display:grid;place-items:center;width:46px;height:46px;margin-top:-23px;border-radius:50%;background:var(--glass-strong);border:1px solid var(--line2);color:var(--ink);
+  box-shadow:var(--shadow);transition:transform .15s var(--spring),opacity .2s}
+.hc-nav:hover{transform:scale(1.07)}
+.hc-nav:disabled{opacity:0;pointer-events:none}
+.hc-nav .gi{width:22px;height:22px}
+.hc-nav.prev{left:calc(50vw - var(--tw,330px) / 2 - 64px)}
+.hc-nav.next{right:calc(50vw - var(--tw,330px) / 2 - 64px)}
+.hc{--tw:min(330px,72vw)}
+@media (max-width:640px){.hc-nav{display:none}}
 footer{padding:28px 0 10px;color:var(--mut);font-size:13.5px;display:flex;flex-wrap:wrap;gap:8px 18px;border-top:1px solid var(--line);margin-top:26px}
 footer a{color:var(--ink2);font-weight:700}
 </style>
@@ -55,14 +85,13 @@ footer a{color:var(--ink2);font-weight:700}
     </div>
   </section>
 
-  <section class="g-section" id="continueSec" hidden>
-    <div class="g-section-h"><h2>Jump back in</h2></div>
-    <div class="g-grid wide f32-grid" id="continueGrid"></div>
-  </section>
-
-  <section class="g-section">
+  <section class="g-section hc-sec">
     <div class="g-section-h"><h2>Games</h2><a href="games/">All games</a></div>
-    <div class="g-grid wide f32-grid" id="gameGrid"></div>
+    <div class="hc">
+      <button type="button" class="hc-nav prev" id="hcPrev" aria-label="Previous game"></button>
+      <div class="hc-row" id="gameRow"></div>
+      <button type="button" class="hc-nav next" id="hcNext" aria-label="Next game"></button>
+    </div>
   </section>
 
   <section class="g-section">
@@ -122,17 +151,48 @@ footer a{color:var(--ink2);font-weight:700}
   $('#heroPlay').href = last.game || last.play; $('#heroPlay').innerHTML = G.icon('play') + 'Play ' + G.esc(last.title);
   if (!G.storageWorks()) $('#heroFine').textContent = 'This browser isn’t saving (private mode or blocked storage). Your avatar and points will be lost when you close it.';
 
-  /* game tiles */
+  /* games: one carousel, the last-played game first (centred and lit, "Last played"), then the rest */
   const pts = {}; G.points().forEach(p => { pts[p.game.id] = p; });
-  function tile(g) {
+  function tile(g, opts) {
     const p = pts[g.id];
     const best = p && p.best ? '<div class="meta">' + G.icon('trophy') + 'Your best ' + G.fmt(p.best) + '</div>' : (p && p.points ? '<div class="meta">' + G.icon('coins') + G.fmt(p.points) + ' points</div>' : '');
-    return G.ui.boxTile(g, { extra: best });   // a FOSSIL32 box (assets/fossil32/)
+    return G.ui.boxTile(g, Object.assign({ extra: best }, opts));   // a FOSSIL32 box (assets/fossil32/)
   }
-  $('#gameGrid').innerHTML = G.GAMES.filter(g => g.status !== 'legacy' && g.listed !== false).map(tile).join('');
-  if (G.profile.stats.lastGame && G.GAMES.find(g => g.id === G.profile.stats.lastGame)) {
-    $('#continueSec').hidden = false; $('#continueGrid').innerHTML = tile(G.GAMES.find(g => g.id === G.profile.stats.lastGame));
+  const lastG = G.GAMES.find(g => g.id === G.profile.stats.lastGame && g.listed !== false);
+  const list = (lastG ? [lastG] : []).concat(G.GAMES.filter(g => g.status !== 'legacy' && g.listed !== false && g !== lastG));
+  const row = $('#gameRow');
+  row.innerHTML = list.map(g => tile(g, Object.assign({ kind: 'cart' }, g === lastG ? { ribbon: 'Last played' } : {}))).join('');   // bare cartridges here, boxes elsewhere
+  [...row.children].forEach((el, i) => { const g = list[i]; el.style.setProperty('--hc-c', (g.box && g.box.shell) || g.color || 'var(--sel-a)'); if (g === lastG) el.classList.add('lp'); });
+
+  // how far each box is from the middle → its size, fade and the lit one
+  let rq = 0;
+  function paint() {
+    rq = 0;
+    const r = row.getBoundingClientRect(), mid = r.left + r.width / 2, tiles = [...row.children];
+    if (!tiles.length) return;
+    const step = tiles[0].offsetWidth + 16; let best = null, bd = 1e9;
+    tiles.forEach(el => { const b = el.getBoundingClientRect(), dx = Math.abs(b.left + b.width / 2 - mid);
+      el.style.setProperty('--d', Math.min(1, dx / step).toFixed(3)); if (dx < bd) { bd = dx; best = el; } });
+    tiles.forEach(el => el.classList.toggle('on', el === best));
+    $('#hcPrev').disabled = row.scrollLeft < 4; $('#hcNext').disabled = row.scrollLeft > row.scrollWidth - row.clientWidth - 4;
   }
+  const queue = () => { if (!rq) rq = requestAnimationFrame(paint); };
+  row.addEventListener('scroll', queue, { passive: true }); addEventListener('resize', queue); paint();
+  const centre = el => row.scrollTo({ left: el.offsetLeft + el.offsetWidth / 2 - row.clientWidth / 2, behavior: 'smooth' });
+  const nudge = d => { const tiles = [...row.children], i = tiles.findIndex(t => t.classList.contains('on')); const t = tiles[Math.max(0, Math.min(tiles.length - 1, i + d))]; if (t) centre(t); G.ui.buzz(6); };
+  $('#hcPrev').innerHTML = G.icon('caret-left'); $('#hcNext').innerHTML = G.icon('caret-right');
+  $('#hcPrev').onclick = () => nudge(-1); $('#hcNext').onclick = () => nudge(1);
+  // a box off to the side slides to the middle first; the middle one opens (FOSSIL32 handles that click)
+  let dragged = false;
+  row.addEventListener('click', e => {
+    const t = e.target.closest('.g-tile'); if (!t) return;
+    if (dragged || !t.classList.contains('on')) { e.preventDefault(); e.stopPropagation(); if (!dragged) centre(t); }
+  }, true);
+  // mouse users can drag the row sideways too (touch already swipes it)
+  let drag = null;
+  row.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' || e.button) return; drag = { x: e.clientX, left: row.scrollLeft }; dragged = false; });
+  addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x; if (Math.abs(dx) > 6) { dragged = true; row.classList.add('drag'); } if (dragged) row.scrollLeft = drag.left - dx; });
+  addEventListener('pointerup', () => { if (!drag) return; drag = null; if (row.classList.contains('drag')) { row.classList.remove('drag'); const on = row.querySelector('.on'); if (on) centre(on); } setTimeout(() => { dragged = false; }, 0); });
 
   /* closet picks: closest milestones first, then cheapest buys */
   const picks = C.ITEMS.filter(it => !G.owns(it.id)).map(it => { const pr = G.progress(it); return { it, score: pr ? (100 - pr.pct) : 60 + (it.get.cost || 0) / 10 }; })
