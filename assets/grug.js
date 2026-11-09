@@ -488,14 +488,16 @@
   }
   /* a game as a FOSSIL32 box tile (assets/fossil32/: fossil32.js turns [data-f32] into a floating 3D box and opens the
      dark game stage on tap; without it the link goes to the game's page). opts.extra = more HTML for the body;
-     opts.ribbon = a short label pinned to the top of the box (the home carousel's "Last played"). */
+     opts.ribbon = a short label pinned to the box (the home carousel's "Last played");
+     opts.kind = 'cart' shows the bare cartridge instead of the box (the home page). */
   function boxTile(g, opts) {
     opts = opts || {};
     const st = g.status === 'live' ? ['live', 'Live'] : g.status === 'legacy' ? ['legacy', 'Classic'] : ['soon', 'Demo'];
     const badge = '<span class="badge ' + st[0] + '"' + (st[0] === 'legacy' ? ' style="background:#6b7280;color:#fff"' : '') + '>' + st[1] + '</span>';
     const art = g.box && g.box.art ? g.box.art : g.thumb;
     const meta = icon(g.standalone ? 'sparkle' : 'storefront') + esc(g.standalone ? 'Grug Original' : g.partner) + '<span>·</span>' + esc(g.kind);
-    return '<a class="g-tile f32-tile" data-f32="' + esc(g.id) + '" href="' + url('games/' + g.id + '/') + '" aria-label="' + esc(g.title) + ' (' + esc(g.kind) + ')">' +
+    const cart = opts.kind === 'cart';
+    return '<a class="g-tile f32-tile' + (cart ? ' f32-cart' : '') + '" data-f32="' + esc(g.id) + '"' + (cart ? ' data-f32-kind="cart"' : '') + ' href="' + url('games/' + g.id + '/') + '" aria-label="' + esc(g.title) + ' (' + esc(g.kind) + ')">' +
       '<div class="f32-stage">' + badge + (opts.ribbon ? '<span class="f32-ribbon">' + icon('arrow-counter-clockwise') + esc(opts.ribbon) + '</span>' : '') + '<img class="f32-flat" src="' + url(art) + '" alt="" loading="lazy" decoding="async"></div>' +
       '<div class="body"><div class="title">' + esc(g.title) + '</div><div class="meta">' + meta + '</div>' + (opts.extra || '') + '</div></a>';
   }

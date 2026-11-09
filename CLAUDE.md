@@ -21,8 +21,10 @@ The **Games page** is a looping vertical carousel of boxes on the left half (`Fo
 controller browse; Play / Enter / tapping the front box calls `Fossil32.launch(id)` (box opens → cartridge → console → game).
 The panel shows each game's short `blurb` (the full `long` write-up is on its game page); keep blurbs to a sentence or two.
 
-The **home page** has one horizontal carousel of boxes right under the welcome message: the last-played game comes first,
-centred, lit in its cartridge colour with a "Last played" ribbon (`boxTile(g, { ribbon })`); the rest follow.
+The **home page** is the one place games show as bare cartridges (no box, no card behind them), in one horizontal
+carousel right under the welcome message: `boxTile(g, { kind: 'cart', ribbon })` (`data-f32-kind="cart"`). The
+last-played game comes first, centred, glowing in its cartridge colour with a "Last played" ribbon; the rest follow.
+Tapping a cartridge glides it straight to the game panel.
 
 - Code: `tools/fossil32/src/fossil32.js` → bundled to `assets/fossil32/fossil32.js` (`cd tools/fossil32 && npm install && npm run build`).
   Never edit the bundle by hand. Styles: `assets/fossil32/fossil32.css`. Tiles come from `Grug.ui.boxTile(game)` in `assets/grug.js`.

@@ -306,9 +306,9 @@ function drawFaces(set, c, im){
   drawSpine(set.spineV, c, s); drawSpine(set.spineH, c, s);
   if (set.label) drawLabel(set.label, set.front, c);
 }
-function faceSet(scale, withLabel){
-  const S = v => Math.round(v * scale);
-  return { scale, front: mk(S(1920), S(1200)), back: mk(S(1920), S(1200)), spineV: mk(S(336), S(1600)), spineH: mk(S(1600), S(210)), label: withLabel ? mk(1490, 1160) : null };
+function faceSet(scale, withLabel, labelScale){
+  const S = v => Math.round(v * scale), L = labelScale || 1;
+  return { scale, front: mk(S(1920), S(1200)), back: mk(S(1920), S(1200)), spineV: mk(S(336), S(1600)), spineH: mk(S(1600), S(210)), label: withLabel ? mk(Math.round(1490 * L), Math.round(1160 * L)) : null };
 }
 
 /* ═════════════════ RENDERER ═════════════════ */
@@ -348,9 +348,9 @@ if (renderer){
   shelf.cam = new THREE.PerspectiveCamera(28, 1, 0.1, 100);
 }
 const SHELF_FOV = 28;
-function shelfCamFor(cam, aspect){
+function shelfCamFor(cam, aspect, w, h){
   const half = Math.tan(THREE.MathUtils.degToRad(SHELF_FOV / 2));
-  const d = Math.max((BH * 1.3) / 2 / half, (BW * 1.12) / 2 / half / aspect);
+  const d = Math.max(((h || BH) * 1.3) / 2 / half, ((w || BW) * 1.12) / 2 / half / aspect);
   cam.fov = SHELF_FOV; cam.aspect = aspect; cam.position.set(0, d * 0.07, d); cam.lookAt(0, -0.02, 0); cam.updateProjectionMatrix();
   return cam;
 }
@@ -376,10 +376,24 @@ async function mount(el){
   });
   await common;
   const im = await gameImages(it.c);
-  const set = faceSet(0.5, false); drawFaces(set, it.c, im);
-  const { T, mats } = boxMaterials(set);
-  const group = new THREE.Group(), box = new THREE.Mesh(boxGeo, mats); group.add(box); group.visible = false; shelf.scene.add(group);
-  Object.assign(it, { set, T, mats, group, box, ready: true });
+  const group = new THREE.Group(); group.visible = false;
+  if (el.dataset.f32Kind === "cart"){
+    // a bare cartridge (the home page): the game's label on plastic in its shell colour, centred on its own middle
+    const A = await cartAssets().catch(() => null); if (!A){ it.cv.remove(); el.__f32 = null; return; }
+    const set = faceSet(0.5, true, 0.5); drawFaces(set, it.c, im);
+    const T = { label: ctex(set.label) }, shell = { value: new THREE.Color(it.c.shell) }, mat = cartMaterial(A, T.label, shell);
+    const holder = cartHolder(A, mat, false), size = new THREE.Vector3(), mid = new THREE.Vector3();
+    holder.updateMatrixWorld(true); const bb = new THREE.Box3().setFromObject(holder); bb.getSize(size); bb.getCenter(mid);
+    holder.position.sub(mid); group.add(holder);
+    Object.assign(it, { kind: "cart", set, T, mats: [mat], box: holder, fw: size.x, fh: size.y });
+  } else {
+    const set = faceSet(0.5, false); drawFaces(set, it.c, im);
+    const { T, mats } = boxMaterials(set);
+    const box = new THREE.Mesh(boxGeo, mats); group.add(box);
+    Object.assign(it, { set, T, mats, box });
+  }
+  shelf.scene.add(group);
+  Object.assign(it, { group, ready: true });
   el.classList.add("f32-on");
   shelf.items.add(it);
   kick();
@@ -413,7 +427,7 @@ function renderShelf(t, dt){
   for (const it of list){
     poseShelf(it, t, dt);
     shelf.items.forEach(o => o.group && (o.group.visible = o === it));
-    shelfCamFor(shelf.cam, it.pw / it.ph);
+    shelfCamFor(shelf.cam, it.pw / it.ph, it.fw, it.kind === "cart" ? it.fh * 1.2 : it.fh);   // a cartridge leaves room above and below for its tags
     shelf.rig.rim.color.set(it.c.accent);
     renderer.setViewport(0, 0, it.pw, it.ph); renderer.setScissor(0, 0, it.pw, it.ph);
     renderer.setClearColor(0x000000, 0); renderer.clear();
@@ -629,14 +643,25 @@ async function buildOverlay3D(){
   return O;
 }
 const shellUniform = { value: new THREE.Color("#9BE338") };
-async function buildCartridge(){
-  if (O.cart) return O.cart;
+/* the cartridge model and its textures, loaded once and shared by the overlay and the home page's cartridges */
+let cartAssetsP = null;
+function cartAssets(){
+  if (cartAssetsP) return cartAssetsP;
   const lt = (src, srgb) => new Promise((res, rej) => new THREE.TextureLoader().load(src, t => { t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace; t.anisotropy = ANISO; res(t); }, undefined, rej));
-  const [base, pack, normal, orm, objText] = await Promise.all([lt(BASE + "cart-base.jpg", true), lt(BASE + "cart-pack.png", false), lt(BASE + "cart-normal.jpg", false), lt(BASE + "cart-orm.jpg", false),
-    fetch(BASE + "cartridge.obj").then(r => r.text())]);
-  const mat = new THREE.MeshStandardMaterial({ map: base, normalMap: normal, aoMap: orm, roughnessMap: orm, metalnessMap: orm, roughness: 1, metalness: 1 });
+  cartAssetsP = Promise.all([lt(BASE + "cart-base.jpg", true), lt(BASE + "cart-pack.png", false), lt(BASE + "cart-normal.jpg", false), lt(BASE + "cart-orm.jpg", false),
+    fetch(BASE + "cartridge.obj").then(r => r.text())]).then(([base, pack, normal, orm, objText]) => {
+      const obj = new OBJLoader().parse(objText);
+      obj.traverse(o => { if (o.isMesh) o.geometry.computeVertexNormals(); });
+      return { base, pack, normal, orm, obj };
+    });
+  cartAssetsP.catch(() => { cartAssetsP = null; });
+  return cartAssetsP;
+}
+/* a cartridge material: the plastic in `shell` (a {value: Color} uniform), the game's label from `labelTex` */
+function cartMaterial(A, labelTex, shell){
+  const mat = new THREE.MeshStandardMaterial({ map: A.base, normalMap: A.normal, aoMap: A.orm, roughnessMap: A.orm, metalnessMap: A.orm, roughness: 1, metalness: 1 });
   mat.onBeforeCompile = sh => {
-    Object.assign(sh.uniforms, { packMap: { value: pack }, labelMap: { value: O.T.label }, shellColor: shellUniform, labelRect: { value: new THREE.Vector4(LABEL.u0, LABEL.v0, LABEL.u1, LABEL.v1) } });
+    Object.assign(sh.uniforms, { packMap: { value: A.pack }, labelMap: { value: labelTex }, shellColor: shell, labelRect: { value: new THREE.Vector4(LABEL.u0, LABEL.v0, LABEL.u1, LABEL.v1) } });
     sh.fragmentShader = sh.fragmentShader
       .replace("#include <common>", `#include <common>
         uniform sampler2D packMap; uniform sampler2D labelMap; uniform vec3 shellColor; uniform vec4 labelRect;`)
@@ -652,11 +677,20 @@ async function buildCartridge(){
       .replace("#include <metalnessmap_fragment>", `#include <metalnessmap_fragment>
         metalnessFactor *= (1.0 - max(pk.b, pk.g));`);
   };
-  const obj = new OBJLoader().parse(objText);
-  obj.traverse(o => { if (o.isMesh){ o.material = mat; o.castShadow = o.receiveShadow = true; o.geometry.computeVertexNormals(); } });
+  return mat;
+}
+function cartHolder(A, mat, shadows){
+  const obj = A.obj.clone();
+  obj.traverse(o => { if (o.isMesh){ o.material = mat; o.castShadow = o.receiveShadow = !!shadows; } });
   obj.position.set(0.15, -4.08, 0);
   const pivot = new THREE.Group(); pivot.add(obj); pivot.rotation.y = Math.PI / 2;
-  const holder = new THREE.Group(); holder.add(pivot); holder.scale.setScalar(0.128); holder.visible = false;
+  const holder = new THREE.Group(); holder.add(pivot); holder.scale.setScalar(0.128);
+  return holder;
+}
+async function buildCartridge(){
+  if (O.cart) return O.cart;
+  const A = await cartAssets();
+  const holder = cartHolder(A, cartMaterial(A, O.T.label, shellUniform), true); holder.visible = false;
   O.show.add(holder); O.cart = holder; return holder;
 }
 
@@ -837,7 +871,19 @@ function renderOverlay(now){
   const t = (now - ov.tStart) / 1000, dpr = Math.min(devicePixelRatio || 1, 2), W = innerWidth, H = innerHeight;
   const full = { x: 0, y: 0, w: W, h: H };
   let rect = full;
-  if (ov.phase === "fly"){
+  if (ov.phase === "fly" && ov.cartFly){
+    // a bare cartridge from the home page: it glides from its tile to where the unbox leaves it, then the panel comes in
+    const k = ease.io(seg(t, 0, FLY)), r0 = ov.fromRect;
+    rect = { x: lerp(r0.x, 0, k), y: lerp(r0.y, 0, k), w: lerp(r0.w, W, k), h: lerp(r0.h, H, k) };
+    ov.cam.aspect = rect.w / rect.h; ov.cam.fov = lerp(SHELF_FOV, W / H < 1 ? 46 : 30, k); ov.cam.updateProjectionMatrix();
+    poseUnbox(UNBOX_END); O.box.visible = false;
+    const end = unboxCam(); new THREE.Box3().setFromObject(O.cart).getCenter(focusV);   // the tile framed the cartridge's middle
+    shelfCamFor(ov.tileCam, r0.w / r0.h, ov.fromSize.w, ov.fromSize.h * 1.2);
+    vA.copy(ov.tileCam.position).add(focusV); vB.copy(focusV).add(new THREE.Vector3(0, -0.02, 0));
+    camNow.pos.lerpVectors(vA, end.pos, k); camNow.target.lerpVectors(vB, end.target, k);
+    const r = ov.fromRot; O.cart.rotation.set(lerp(r.x, O.cart.rotation.x, k), lerp(r.y, O.cart.rotation.y, k), lerp(r.z, O.cart.rotation.z, k));
+    if (t >= FLY){ ov.phase = "panel"; ov.tStart = now - UNBOX_END * 1000; sizeOverlay(); showPanel(); }
+  } else if (ov.phase === "fly"){
     const k = ease.io(seg(t, 0, FLY)), r0 = ov.fromRect;
     rect = { x: lerp(r0.x, 0, k), y: lerp(r0.y, 0, k), w: lerp(r0.w, W, k), h: lerp(r0.h, H, k) };
     ov.cam.aspect = rect.w / rect.h; ov.cam.fov = lerp(SHELF_FOV, W / H < 1 ? 46 : 30, k); ov.cam.updateProjectionMatrix();
@@ -926,11 +972,13 @@ async function open(id, it, opts){
     ov.fromRect = { x: rect.left, y: rect.top, w: rect.width, h: rect.height };
     ov.fromRot = from ? from.rot : it.group ? it.group.rotation.clone() : new THREE.Euler(0, -0.3, 0);
     ov.fromY = from ? from.y : it.group ? it.group.position.y : 0;
-    ov.phase = "fly";
+    ov.phase = "fly"; ov.cartFly = !!(it && it.kind === "cart");
+    if (ov.cartFly){ ov.fromSize = { w: it.fw, h: it.fh }; poseUnbox(UNBOX_END); O.cart.updateMatrixWorld(true); }
     if (it){ it.hidden = true; it.el.classList.add("f32-away"); }
     if (opts && opts.onAway) opts.onAway();
-  } else { ov.phase = "unbox"; camFrom.pos.copy(CAM_HOME.pos); camFrom.target.copy(CAM_HOME.target); }
-  ov.tStart = performance.now();
+  } else { ov.phase = "unbox"; ov.cartFly = false; camFrom.pos.copy(CAM_HOME.pos); camFrom.target.copy(CAM_HOME.target);
+    if (it && it.kind === "cart"){ ov.phase = "panel"; ov.tStart = performance.now() - UNBOX_END * 1000; showPanel(); } }
+  if (ov.phase !== "panel") ov.tStart = performance.now();
   if (reduceMotion()) ov.tStart -= UNBOX_END * 1000;
   ov.active = true; opening = false;
   if (!(opts && (opts.noHistory || opts.launch))) try { history.pushState({ f32: id }, "", "#box/" + id); ov.pushed = true; } catch (e) {}

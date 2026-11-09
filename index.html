@@ -35,18 +35,27 @@
 .partner .dot{width:12px;height:12px;border-radius:50%;flex:none}
 .partner b{display:block;font-size:15px}
 .partner small{color:var(--mut);font-size:13px}
-/* games: one horizontal carousel of FOSSIL32 boxes, full width, the middle one big and lit; it opens on the last-played game */
+/* games: one horizontal carousel of bare FOSSIL32 cartridges floating in the fog (no card behind them), the middle one big
+   and lit in its cartridge colour; it opens on the last-played game */
 .hc-sec{padding-top:6px}
 .hc{position:relative;margin-inline:calc(50% - 50vw)}
 .hc-row{--tw:min(330px,72vw);--gap:16px;display:flex;gap:var(--gap);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;
   padding:20px calc(50vw - var(--tw) / 2) 26px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
 .hc-row::-webkit-scrollbar{display:none}
 .hc-row.drag{scroll-snap-type:none;cursor:grabbing}
-.hc-row>.g-tile{flex:none;width:var(--tw);scroll-snap-align:center;transform:scale(calc(1 - var(--d,1) * .13));opacity:calc(1 - var(--d,1) * .42);
-  transition:box-shadow .35s ease;will-change:transform}
-.hc-row>.g-tile:hover{transform:scale(calc(1 - var(--d,1) * .13))}
-.hc-row>.g-tile.on{box-shadow:0 0 0 3px var(--bezel),0 0 0 6px color-mix(in srgb,var(--hc-c) 60%,transparent),0 20px 50px color-mix(in srgb,var(--hc-c) 30%,transparent)}
-.hc-row>.g-tile.on.lp{box-shadow:0 0 0 3px color-mix(in srgb,var(--hc-c) 85%,#fff),0 0 0 8px color-mix(in srgb,var(--hc-c) 35%,transparent),0 0 60px color-mix(in srgb,var(--hc-c) 45%,transparent)}
+.hc-row>.g-tile{flex:none;width:var(--tw);scroll-snap-align:center;transform:scale(calc(1 - var(--d,1) * .16));opacity:calc(1 - var(--d,1) * .45);
+  background:none;border:0;box-shadow:none;border-radius:0;overflow:visible;will-change:transform}
+.hc-row>.g-tile:hover,.hc-row>.g-tile:focus-within{transform:scale(calc(1 - var(--d,1) * .16));box-shadow:none}
+.hc-row>.g-tile:focus-visible{outline:none}
+.hc-row>.g-tile:focus-visible .f32-stage{outline:3px solid var(--ring-a);outline-offset:-6px;border-radius:24px}
+.hc-row .f32-stage{overflow:visible;background:radial-gradient(ellipse 50% 46% at 50% 50%,color-mix(in srgb,var(--hc-c) 20%,transparent),transparent 72%);transition:background .4s}
+.hc-row>.g-tile.on .f32-stage{background:radial-gradient(ellipse 66% 60% at 50% 50%,color-mix(in srgb,var(--hc-c) 45%,transparent),color-mix(in srgb,var(--hc-c) 14%,transparent) 52%,transparent 76%)}
+.hc-row>.g-tile.on.lp .f32-stage{background:radial-gradient(ellipse 74% 68% at 50% 50%,color-mix(in srgb,var(--hc-c) 62%,transparent),color-mix(in srgb,var(--hc-c) 20%,transparent) 50%,transparent 78%)}
+.hc-row .body{align-items:center;text-align:center;padding:2px 10px 0}
+.hc-row .g-tile .meta{justify-content:center}
+.hc-row .f32-stage .badge{left:50%;top:2px;transform:translateX(-50%)}
+.hc-row .f32-ribbon{right:auto;left:50%;top:auto;bottom:2px;transform:translateX(-50%)}
+.hc-row .f32-flat{left:22%;width:56%;top:20%;height:50%}
 .hc-nav{position:absolute;top:50%;z-index:3;display:grid;place-items:center;width:46px;height:46px;margin-top:-23px;border-radius:50%;background:var(--glass-strong);border:1px solid var(--line2);color:var(--ink);
   box-shadow:var(--shadow);transition:transform .15s var(--spring),opacity .2s}
 .hc-nav:hover{transform:scale(1.07)}
@@ -151,7 +160,7 @@ footer a{color:var(--ink2);font-weight:700}
   const lastG = G.GAMES.find(g => g.id === G.profile.stats.lastGame && g.listed !== false);
   const list = (lastG ? [lastG] : []).concat(G.GAMES.filter(g => g.status !== 'legacy' && g.listed !== false && g !== lastG));
   const row = $('#gameRow');
-  row.innerHTML = list.map(g => tile(g, g === lastG ? { ribbon: 'Last played' } : {})).join('');
+  row.innerHTML = list.map(g => tile(g, Object.assign({ kind: 'cart' }, g === lastG ? { ribbon: 'Last played' } : {}))).join('');   // bare cartridges here, boxes elsewhere
   [...row.children].forEach((el, i) => { const g = list[i]; el.style.setProperty('--hc-c', (g.box && g.box.shell) || g.color || 'var(--sel-a)'); if (g === lastG) el.classList.add('lp'); });
 
   // how far each box is from the middle → its size, fade and the lit one
