@@ -8097,9 +8097,10 @@ async function ttBuyBoost(id) {
   initAudio();
   if (TTW.mode === 'pending') return ttSay('Still connecting to your points…', true);
   // short of points and Pearls: the rewards app offers to get Pearls (and brings the guest back to the game)
-  if (ttWallet() < it.cost && TTW.pearlName && TTW.mode === 'live') { ttSfx('no'); try { parent.postMessage({ rw: 1, t: 'needPearls', id }, '*'); } catch (e) {} return; }
-  if (ttWallet() < it.cost) { ttSfx('no'); return ttSay('You need ' + (it.cost - ttWallet()) + ' more ' + (TTW.pearlName ? 'points or ' + TTW.pearlName : 'points') + ' for ' + it.name + '.', true); }
-  if (TTW.mode === 'demo') { TTW.points -= it.cost; TTW.inv[id] = (TTW.inv[id] || 0) + 1; ttDemoSave(); ttSfx('buy'); return ttSay(it.name + ' added. Tap Use to switch it on.'); }
+  const ttShopFree = !!(window.Grug && Grug.freeShop());   // Free Shop Token
+  if (!ttShopFree && ttWallet() < it.cost && TTW.pearlName && TTW.mode === 'live') { ttSfx('no'); try { parent.postMessage({ rw: 1, t: 'needPearls', id }, '*'); } catch (e) {} return; }
+  if (!ttShopFree && ttWallet() < it.cost) { ttSfx('no'); return ttSay('You need ' + (it.cost - ttWallet()) + ' more ' + (TTW.pearlName ? 'points or ' + TTW.pearlName : 'points') + ' for ' + it.name + '.', true); }
+  if (TTW.mode === 'demo') { TTW.points -= ttShopFree ? 0 : it.cost; TTW.inv[id] = (TTW.inv[id] || 0) + 1; ttDemoSave(); ttSfx('buy'); return ttSay(it.name + ' added. Tap Use to switch it on.'); }
   TTW.busy = true; ttRefreshMenus();
   try {
     const r = await ttAsk({ t: 'buy', id }); TTW.busy = false;
@@ -10425,6 +10426,7 @@ function pauseGame(){ toGame({t: 'pause'}); }
 function buyItem(id){
   const it = gameItem(id); if(!it) return {ok: false, reason: 'That power-up isn’t in the shop.'};
   if((st.inv[id] || 0) >= INV_MAX) return {ok: false, reason: 'You already have ' + INV_MAX + ' of those.'};
+  if (window.Grug && Grug.freeShop()) { st.inv[id] = (st.inv[id] || 0) + 1; save(); return { ok: true, free: true }; }   // Free Shop Token: everything is free
   if(wallet() < it.cost) return {ok: false, reason: 'You need ' + (it.cost - wallet()) + ' more ' + (PL_ON ? 'points or ' + PL.name : 'points') + ' for ' + it.name + '.', short: it.cost - wallet(), item: it.name};
   const fromPl = Math.min(pearls(), it.cost), fromPts = it.cost - fromPl;   // Pearls first, then points
   if(fromPl) pearlsChange(-fromPl); st.points -= fromPts; st.inv[id] = (st.inv[id] || 0) + 1;

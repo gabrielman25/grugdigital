@@ -576,6 +576,8 @@ const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&a
 
 const CAM_HOME = { pos: new THREE.Vector3(0.35, 0.5, 8.1), target: new THREE.Vector3(0.15, -0.1, 0.2) };
 const FLY = 0.8, UNBOX_END = 4.5, PANEL_AT = 3.9, LAUNCH_AT = 3.3;
+// snappier: the unbox runs this much faster when launching straight into a game, and the console boot runs this much faster always
+const LAUNCH_SPEED = 1.35, BOOT_SPEED = 1.75;
 let O = null;   // overlay 3D objects, built on first open
 
 function buildOverlayDom(){
@@ -584,11 +586,15 @@ function buildOverlayDom(){
     <section class="f32-panel" aria-live="polite"></section>
     <button class="f32-close" type="button" aria-label="Close">✕</button>
     <button class="f32-skip" type="button">Skip ▸▸</button>
+    <button class="f32-bootskip" type="button" aria-label="Skip the boot sequence and play now"><span class="f32-bootskip-k">SKIP</span><span class="f32-bootskip-s">straight to the game ▸▸</span></button>
     <div class="f32-flash"></div>
     <div class="f32-credit">Cartridge model by Pavel Kutejnikov (Drumdorf), <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>, modified</div>`;
   document.body.appendChild(el);
   el.querySelector(".f32-close").onclick = () => close(true);
   el.querySelector(".f32-skip").onclick = () => skip();
+  el.querySelector(".f32-bootskip").onclick = () => { if (ov.phase === "boot" && boot && !boot.went){ boot.went = true; go(ov.c); } };
+  // Space or Enter during the boot also skips it
+  el.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && ov.phase === "boot" && boot && !boot.went){ e.preventDefault(); boot.went = true; go(ov.c); } });
   el.querySelector(".f32-gl").addEventListener("click", () => { if (!ov.launch && (ov.phase === "fly" || ov.phase === "unbox")) skip(); });
   el.addEventListener("keydown", e => { if (e.key === "Escape") close(true); });
   // keep the page underneath still (without hiding its scrollbar, which would shift the tiles)
@@ -826,6 +832,7 @@ function poseUnbox(t){
 let boot = null;
 function poseBoot(t){
   // 0 → 0.8: bridge (console rises, cartridge glides over, camera swings round); then the showcase console timeline
+  t *= BOOT_SPEED;   // the whole boot runs faster (players found it drawn out)
   const con = O.con, c = ov.c, B = 0.8, cart = O.cart;
   const inY = con.slotTopW - 0.42 + CART_HALF_H;
   const rise = ease.out(seg(t, 0, 0.7));
@@ -896,8 +903,9 @@ function renderOverlay(now){
     O.cart.visible = false;
     if (t >= FLY){ ov.phase = "unbox"; ov.tStart = now; camFrom.pos.copy(CAM_HOME.pos); camFrom.target.copy(CAM_HOME.target); sizeOverlay(); }
   } else if (ov.phase === "unbox" || ov.phase === "panel"){
-    poseUnbox(ov.phase === "panel" ? Math.max(t, UNBOX_END) : t);
-    if (ov.launch){ if (t >= LAUNCH_AT) startBoot(); }
+    const tu = ov.launch ? t * LAUNCH_SPEED : t;
+    poseUnbox(ov.phase === "panel" ? Math.max(tu, UNBOX_END) : tu);
+    if (ov.launch){ if (tu >= LAUNCH_AT) startBoot(); }
     else if (ov.phase === "unbox" && t >= PANEL_AT){ ov.phase = "panel"; ov.tStart = now - PANEL_AT * 1000; showPanel(); }
   } else if (ov.phase === "boot"){
     poseBoot(t);

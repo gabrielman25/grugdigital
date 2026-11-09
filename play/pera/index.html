@@ -1878,6 +1878,7 @@ function pauseGame(){ toGame({t: 'pause'}); }
 function buyItem(id){
   const it = gameItem(id); if(!it) return {ok: false, reason: 'That power-up isn’t in the shop.'};
   if((st.inv[id] || 0) >= INV_MAX) return {ok: false, reason: 'You already have ' + INV_MAX + ' of those.'};
+  if (window.Grug && Grug.freeShop()) { st.inv[id] = (st.inv[id] || 0) + 1; save(); return { ok: true, free: true }; }   // Free Shop Token: everything is free
   if(st.points < it.cost) return {ok: false, reason: 'You need ' + (it.cost - st.points) + ' more tokens for ' + it.name + '. Check in at the bar for more.'};
   st.points -= it.cost; st.inv[id] = (st.inv[id] || 0) + 1; hist(it.name, -it.cost, '−' + it.cost + ' tokens'); save();
   return {ok: true};

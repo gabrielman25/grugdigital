@@ -5650,7 +5650,46 @@ const ANIMS={
     R('spine_M_00_jnt','z',0.12*s);R('spine_M_03_jnt','z',-0.16*s);R('head_M_head_jnt','z',0.1*s);
     R('arm_L_shldr_jnt','z',1.2+0.6*Math.max(0,s));R('arm_R_shldr_jnt','z',-1.2-0.6*Math.max(0,-s));R('arm_L_elbow_jnt','z',0.9);R('arm_R_elbow_jnt','z',-0.9);
     for(const [S,g] of [['L',1],['R',-1]]){const b=Math.max(0,g*s);R(`leg_${S}_upr_jnt`,'x',-0.3*b);R(`leg_${S}_knee_jnt`,'x',0.6*b)}
-    return {lift:-2.5*Math.abs(s2)}}};
+    return {lift:-2.5*Math.abs(s2)}},
+  // ---- emotes (Grug's emote wheel: assets/grug.js EMOTES). Loop, like the dances above. ----
+  // disco: one finger to the sky, then the other, hips going the other way
+  disco:(t,R)=>{const w=t*Math.PI*2*1.0,s=Math.sin(w),up=Math.max(0,s),dn=Math.max(0,-s);
+    R('arm_R_shldr_jnt','z',-(0.5+2.5*up));R('arm_R_shldr_jnt','x',-0.25*up);R('arm_R_elbow_jnt','z',-0.15-0.5*dn);
+    R('arm_L_shldr_jnt','z',0.5+2.5*dn);R('arm_L_shldr_jnt','x',-0.25*dn);R('arm_L_elbow_jnt','z',0.15+0.5*up);
+    R('spine_M_00_jnt','z',0.16*s);R('spine_M_03_jnt','z',-0.12*s);R('head_M_head_jnt','z',-0.12*s);R('head_M_head_jnt','x',-0.15*Math.abs(s));
+    for(const [S,g] of [['L',1],['R',-1]]){const b=Math.max(0,g*s);R(`leg_${S}_upr_jnt`,'x',-0.2*b);R(`leg_${S}_knee_jnt`,'x',0.45*b)}
+    return {lift:-3*Math.abs(Math.sin(w*2))}},
+  // shuffle: the running man, feet sliding back and forth, arms pumping
+  shuffle:(t,R)=>{const w=t*Math.PI*2*1.7,s=Math.sin(w),c=Math.cos(w);
+    R('leg_L_upr_jnt','x',-0.55*Math.max(0,s)+0.15*Math.max(0,-s));R('leg_R_upr_jnt','x',-0.55*Math.max(0,-s)+0.15*Math.max(0,s));
+    R('leg_L_knee_jnt','x',0.9*Math.max(0,s)+0.1);R('leg_R_knee_jnt','x',0.9*Math.max(0,-s)+0.1);
+    R('leg_L_foot_jnt','x',-0.3*Math.max(0,s));R('leg_R_foot_jnt','x',-0.3*Math.max(0,-s));
+    R('arm_L_shldr_jnt','x',-0.55*s);R('arm_R_shldr_jnt','x',0.55*s);R('arm_L_elbow_jnt','z',0.95);R('arm_R_elbow_jnt','z',-0.95);
+    R('spine_M_01_jnt','x',0.14);R('spine_M_03_jnt','y',0.08*s);R('head_M_head_jnt','x',-0.1);
+    return {lift:-5*Math.abs(c)}},
+  // robot: arms squared off, moves snapping from pose to pose
+  robot:(t,R)=>{const step=Math.floor(t*2.4),f=t*2.4-step,k=Math.min(1,f/0.18),e=k*k*(3-2*k),q=step%4,q0=(step+3)%4;
+    const P=[[1.3,-1.3,1.5,-1.5,0.35,0],[1.3,-1.3,0.3,-1.5,-0.35,-0.5],[1.3,-1.3,1.5,-0.3,0.35,0.5],[0.4,-0.4,1.5,-1.5,-0.35,0]];
+    const a=P[q0],b=P[q],m=(i)=>a[i]+(b[i]-a[i])*e;
+    R('arm_L_shldr_jnt','z',m(0));R('arm_R_shldr_jnt','z',m(1));R('arm_L_elbow_jnt','z',m(2));R('arm_R_elbow_jnt','z',m(3));
+    R('spine_M_03_jnt','y',m(4)*0.4);R('head_M_head_jnt','y',m(5));R('head_M_head_jnt','x',0.08*Math.sin(t*9));
+    R('leg_L_knee_jnt','x',0.12);R('leg_R_knee_jnt','x',0.12);return {lift:-1.2*e}},
+  // cheer: both arms up, pumping, little hops
+  cheer:(t,R)=>{const w=t*Math.PI*2*2.0,p=Math.max(0,Math.sin(w)),s=Math.sin(w);
+    R('arm_L_shldr_jnt','z',2.55+0.25*s);R('arm_R_shldr_jnt','z',-2.55+0.25*s);R('arm_L_shldr_jnt','x',-0.2+0.25*p);R('arm_R_shldr_jnt','x',-0.2+0.25*p);
+    R('arm_L_elbow_jnt','z',0.35);R('arm_R_elbow_jnt','z',-0.35);R('spine_M_01_jnt','x',-0.08);R('head_M_head_jnt','x',-0.22);
+    for(const S of ['L','R']){R(`leg_${S}_knee_jnt`,'x',0.25*(1-p))}return {lift:-2+7*p}},
+  // bow: a deep bow, one hand over the heart, then up again (loops slowly)
+  bow:(t,R)=>{const c=t%2.6,sm=x=>{x=Math.min(1,Math.max(0,x));return x*x*(3-2*x)},e=sm(c/0.55)*(1-sm((c-1.55)/0.55));
+    R('spine_M_01_jnt','x',0.55*e);R('spine_M_03_jnt','x',0.35*e);R('head_M_head_jnt','x',0.25*e);
+    R('arm_R_shldr_jnt','x',-0.9*e);R('arm_R_shldr_jnt','z',-0.25*e);R('arm_R_elbow_jnt','z',-1.6*e);
+    R('arm_L_shldr_jnt','x',0.5*e);R('arm_L_shldr_jnt','z',0.35*e);return {lift:-1.5*e}},
+  // flex: both biceps, with a pump
+  flex:(t,R)=>{const w=t*Math.PI*2*1.4,p=0.5+0.5*Math.sin(w);
+    R('arm_L_shldr_jnt','z',1.5);R('arm_R_shldr_jnt','z',-1.5);R('arm_L_shldr_jnt','x',-0.35);R('arm_R_shldr_jnt','x',-0.35);
+    R('arm_L_elbow_jnt','z',2.0+0.25*p);R('arm_R_elbow_jnt','z',-2.0-0.25*p);
+    R('spine_M_03_jnt','z',0.06*Math.sin(w*0.5));R('spine_M_01_jnt','x',-0.06);R('head_M_head_jnt','x',-0.1);R('head_M_head_jnt','y',0.25*Math.sin(w*0.5));
+    for(const S of ['L','R']){R(`leg_${S}_knee_jnt`,'x',0.1+0.08*p)}return {lift:-1.5*p}}};
 const _q=new THREE.Quaternion(),_q2=new THREE.Quaternion(),_v=new THREE.Vector3();
 function animLayer(M,name,t,wgt){const n3=M.n3,B=n3.bones,base=M.animBase||(M.animBase=new Map());
   for(const [bn,q] of base)bn.quaternion.copy(q);base.clear();
@@ -5948,7 +5987,7 @@ class Sandy{
     if(!(lo<1e8)&&M.stance)lo=Math.min(...[0,1].map(i=>n3.foot[i].foot.getWorldPosition(v).y-M.stance.hB[i]))-2.5;
     {const ft=M.inv.equip.feet;if(ft&&MH[ft.part]&&lo<1e8)lo-=MH[ft.part][BT(M)==='male'?'m':'f'].drop}
     const base=this.object3d.getWorldPosition(v).y;if(lo<1e8)this._dy=-(lo-base);n3.root.position.y=this._dy||0}
-  // preview animation: 'idle', 'walk', 'wave', 'jump' or 'dance' (SandyKit.CATALOG.animations); returns this
+  // preview animation: 'idle', 'walk', 'wave', 'jump', 'dance' or an emote: disco, shuffle, robot, cheer, bow, flex (SandyKit.CATALOG.animations); returns this
   play(name){name=ANIMS.hasOwnProperty(name)?name:'idle';if(name!==this._anim){this._animPrev=this._anim||'idle';this._anim=name;this._animT=0;this._animMix=0}return this}
   get animation(){return this._anim||'idle'}
   getConfig(){return clone(this.config)}

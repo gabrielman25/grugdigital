@@ -99,6 +99,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#0b0e14}
   function buy(id) {
     const it = item(id); if (!it) return { ok: false, reason: 'That power-up isn’t in the shop.' };
     if ((st.inv[id] || 0) >= INV_MAX) return { ok: false, reason: 'You already have ' + INV_MAX + ' of those.' };
+    if (window.Grug && Grug.freeShop()) { st.inv[id] = (st.inv[id] || 0) + 1; save(); return { ok: true, free: true }; }   // Free Shop Token: everything is free
     if (pearls() < it.cost) return { ok: false, reason: 'You need ' + (it.cost - pearls()) + ' more Pearls for ' + it.name + '.', short: it.cost - pearls(), item: it.name };
     pearlsChange(-it.cost); st.inv[id] = (st.inv[id] || 0) + 1; save(); return { ok: true };
   }

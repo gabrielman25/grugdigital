@@ -91,18 +91,23 @@
     const how = owned ? (it.get.type === 'free' ? 'Free. Yours from the start.' : 'Yours. ' + G.esc(C.howText(it)) + '.') : (it.get.type === 'points' ? 'Costs <b>' + it.get.cost + ' ' + G.esc(app.short) + ' points</b>. Buy it under Closet in the ' + G.esc(app.short) + ' app.' : G.esc(it.get.text) + (pr ? ' <span class="mut">(' + pr.have + ' of ' + pr.need + ' so far)</span>' : ''));
     const kinds = it.slot === 'shirt' ? 'Wear it as a T-shirt or long sleeves' : 'Wear it as shorts or pants';
     const actions = [{ label: 'Close', kind: 'quiet', value: null }];
-    if (owned && !wearing) actions.push({ label: 'Wear it', kind: 'primary', value: 'wear' });
+    const free = !owned && G.freeShop();   // a Free Shop Token is running: everything in the catalog is free to claim
+    if (free) actions.push({ label: 'Claim free', kind: 'primary', value: 'claim' });
+    else if (owned && !wearing) actions.push({ label: 'Wear it', kind: 'primary', value: 'wear' });
     else if (owned && wearing) { actions.push({ label: 'Take off', kind: 'quiet', value: 'off' }); actions.push({ label: 'Open avatar', kind: 'primary', value: 'avatar' }); }
     else if (game) actions.push({ label: 'Open ' + (it.get.type === 'points' ? app.short : game.title), kind: 'primary', value: 'go' });
-    const pick = await G.ui.dialog({ title: it.name, html: '<div class="row"><span style="width:110px;height:110px;flex:none;border-radius:14px;background:var(--card2) center/cover no-repeat;background-image:url(' + G.url(it.thumb) + ')"></span><div><div class="g-tag" style="margin-bottom:8px">' + G.esc(C.slotName(it.slot)) + ' template</div><div>' + how + '</div>' + (pr && !owned ? '<div class="g-prog" style="margin-top:10px"><i style="width:' + pr.pct + '%"></i></div>' : '') +
+    const pick = await G.ui.dialog({ title: it.name, html: (free ? '<p class="g-tag free" style="margin-bottom:10px">' + G.icon('ticket') + 'Free Shop is on: ' + Math.ceil(G.freeShopLeft() / 1000) + 's left</p>' : '') + '<div class="row"><span style="width:110px;height:110px;flex:none;border-radius:14px;background:var(--card2) center/cover no-repeat;background-image:url(' + G.url(it.thumb) + ')"></span><div><div class="g-tag" style="margin-bottom:8px">' + G.esc(C.slotName(it.slot)) + ' template</div><div>' + how + '</div>' + (pr && !owned ? '<div class="g-prog" style="margin-top:10px"><i style="width:' + pr.pct + '%"></i></div>' : '') +
       '<p class="g-fine" style="margin-top:8px">' + kinds + ' (pick in the avatar editor, under Custom).' + (owned ? ' <a href="' + G.url(it.png) + '" download="' + it.id + '-' + it.slot + '-template.png" style="font-weight:800;color:var(--ink)">Download the template</a> to remix it.' : '') + '</p></div></div>', actions });
-    if (pick === 'wear') { G.equip(it.id); G.ui.toast('Wearing ' + it.name, { icon: 'check' }); G.ui.buzz(); render(); }
+    if (pick === 'claim') { if (G.freeShop() && G.grant(it.id, 'free-shop')) { G.ui.toast('Claimed: ' + it.name, { icon: 'confetti', ms: 3500 }); G.ui.buzz([12, 40, 20]); } else G.ui.toast('The free shop just ended', { icon: 'hourglass' }); render(); }
+    else if (pick === 'wear') { G.equip(it.id); G.ui.toast('Wearing ' + it.name, { icon: 'check' }); G.ui.buzz(); render(); }
     else if (pick === 'off') { G.unequip(it.slot); G.ui.toast('Took off ' + it.name, { icon: 'check' }); render(); }
     else if (pick === 'avatar') location.href = G.url('avatar/#custom');
     else if (pick === 'go' && game) location.href = G.url(game.play) + (it.get.type === 'points' && G.appState(game) && G.appState(game).store ? '#' + G.appState(game).store + '/rewards' : '');
   }
   $('#groups').addEventListener('click', e => { const b = e.target.closest('[data-item]'); if (b) open(C.get(b.dataset.item)); });
   render();
+  addEventListener('grug:change', e => { if (e.detail && (e.detail.what === 'boost' || e.detail.what === 'grant')) render(); });
+  setInterval(() => { if (document.querySelector('.g-tag.free') && !G.freeShop()) render(); }, 1000);
   const deep = C.get(location.hash.replace('#', '')); if (deep) { history.replaceState(null, '', location.pathname); setTimeout(() => open(deep), 200); }
 })();
 </script>

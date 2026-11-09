@@ -57,6 +57,7 @@
     const short = C.APPS[A.app].short;
     let how, actions = [{ label: 'Close', kind: 'quiet', value: null }];
     if (owned) { how = wearing ? 'You’re wearing it.' : 'It’s yours. Put it on?'; if (!wearing) actions.push({ label: 'Wear it', kind: 'primary', value: 'wear' }); }
+    else if (G.freeShop()) { how = '<span class="g-tag free">' + G.icon('ticket') + 'Free Shop is on</span> Everything is free for ' + Math.ceil(G.freeShopLeft() / 1000) + ' more seconds.'; actions.push({ label: 'Claim free', kind: 'primary', value: 'free' }); }
     else if (it.get.type === 'points') {
       const can = st.points >= it.get.cost;
       how = '<b>' + it.get.cost + ' ' + G.esc(short) + ' points</b>. You have ' + G.fmt(st.points) + '.' + (can ? '' : ' Check in on your next visit to earn more.');
@@ -65,6 +66,13 @@
     const thumb = G.url(it.thumb);
     const pick = await G.ui.dialog({ title: it.name, html: '<div class="row"><span style="width:104px;height:104px;flex:none;border-radius:14px;background:var(--g-card2) center/cover no-repeat;background-image:url(' + thumb + ')"></span><div><div class="g-tag" style="margin-bottom:8px">' + G.esc(C.slotName(it.slot)) + '</div><div>' + how + '</div>' + (pr && !owned ? '<div class="g-prog" style="margin-top:10px"><i style="width:' + pr.pct + '%"></i></div>' : '') + '</div></div>', actions: actions.filter(a => !a.disabled) });
     if (pick === 'wear') { G.equip(id); G.ui.toast('Wearing ' + it.name, { icon: 'check' }); A.buzz && A.buzz(); renderCloset(); paintChip(); A.sendGameState && A.sendGameState(); }
+    else if (pick === 'free') {
+      if (!G.freeShop() || !G.grant(id, 'free-shop')) return G.ui.toast('The free shop just ended', { icon: 'hourglass' });
+      A.buzz && A.buzz([10, 40, 18]); A.sendGameState && A.sendGameState(); G.ui.toast('Claimed: ' + it.name, { icon: 'confetti', ms: 3500 });
+      const wear = await G.ui.dialog({ title: 'Claimed!', html: '<b>' + G.esc(it.name) + '</b> is in your closet. Wear it now?', actions: [{ label: 'Later', kind: 'quiet', value: null }, { label: 'Wear it', kind: 'primary', value: 'wear' }] });
+      if (wear === 'wear') { G.equip(id); paintChip(); A.sendGameState && A.sendGameState(); }
+      renderCloset();
+    }
     else if (pick === 'buy') {
       const s2 = A.get(); if (s2.points < it.get.cost) return G.ui.toast('Not enough points yet', { icon: 'warning-circle' });
       s2.points -= it.get.cost; A.hist && A.hist('Closet · ' + it.name, -it.get.cost); A.save(); G.grant(id, 'points');
@@ -106,7 +114,7 @@
     const won = G.checkMilestones(); G.save('backfill');
     if (won.length) setTimeout(() => G.celebrate(won), 1200);
   }
-  function gameExtras() { return { avatar: G.profile.avatar, player: G.profile.name, look: look(), grug: ROOT }; }
+  function gameExtras() { return { avatar: G.profile.avatar, player: G.profile.name, look: look(), grug: ROOT, freeShopUntil: G.freeShopLeft() ? Date.now() + G.freeShopLeft() : 0, uiScale: G.profile.prefs.uiScale || 1, emotes: G.emotes }; }
   // A flat, catalog-free version of the look for games that draw their own character (Take a Tea's voxel rig)
   const hexRgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
   // (only used until the 3D avatar loads: the blocky stand-in wears the main colours of what's on)
@@ -127,7 +135,8 @@
   function init(bridge) {
     A = bridge; chips(); backfill(); renderCloset();
     document.addEventListener('click', e => { const b = e.target.closest('#closet [data-item]'); if (b) { e.preventDefault(); openItem(b.dataset.item); } });
-    root.addEventListener('grug:change', e => { const w = e.detail && e.detail.what; if (w === 'external' || w === 'import' || w === 'reset') { renderCloset(); paintChip(); A.sendGameState && A.sendGameState(); } if (w === 'snaps') paintChip(); });
+    root.addEventListener('grug:change', e => { const w = e.detail && e.detail.what; if (w === 'external' || w === 'import' || w === 'reset') { renderCloset(); paintChip(); A.sendGameState && A.sendGameState(); } if (w === 'snaps') paintChip(); if (w === 'boost' || w === 'items' || w === 'emotes' || w === 'prefs') { renderCloset(); A.sendGameState && A.sendGameState(); } });
+    G.ui.freeBar(); root.addEventListener('grug:change', e => { if (e.detail && e.detail.what === 'boost') G.ui.freeBar(); });
     if (!$('#g-toast')) { const t = document.createElement('div'); t.id = 'g-toast'; t.className = 'g-toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
   }
 

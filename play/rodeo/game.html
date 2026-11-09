@@ -171,6 +171,8 @@ body.menu-open .spray,body.menu-open .ctx,body.menu-open .goal,body.menu-open .h
 </div>
 <div class="loading" id="loading"><div>Opening the wash…<small>Loading your avatar and the cars</small></div></div>
 
+<!-- Grug site-wide layer: UI size, centred hints, free-shop timer, tutorials, emotes, crate drops (assets/gamekit.js) -->
+<script src="../../assets/gamekit.js"></script>
 <script>
 'use strict';
 /* =====================================================================================
@@ -243,11 +245,12 @@ const Bridge = (() => {
   const wallet = () => (state ? (+state.points || 0) + (+state.pearls || 0) : 0);
   async function buy(id) {
     const it = (state.shop || []).find(x => x.id === id); if (!it) return { ok: false, reason: 'Not in the shop.' };
-    if (wallet() < it.cost) {
+    const cost = (window.GK && GK.free()) ? 0 : it.cost;   // a Free Shop Token (site-wide item) makes everything free
+    if (wallet() < cost) {
       if (mode === 'live' && state.pearlName) { post({ t: 'needPearls', id }); return { ok: false, reason: '', asked: true }; }
       return { ok: false, reason: 'You need ' + (it.cost - wallet()) + ' more points for ' + it.name + '.' };
     }
-    if (mode === 'demo') { state.points -= it.cost; state.inv[id] = (state.inv[id] || 0) + 1; demoSave(); setState(state); return { ok: true }; }
+    if (mode === 'demo') { state.points -= cost; state.inv[id] = (state.inv[id] || 0) + 1; demoSave(); setState(state); return { ok: true }; }
     return ask({ t: 'buy', id });
   }
   async function use(ids) {
@@ -810,7 +813,8 @@ const Game = (() => {
       });
       const poster = new THREE.Mesh(new THREE.PlaneGeometry(44, 66), new THREE.MeshLambertMaterial({ map: ptex })); poster.position.set(-300, 170, 353); b.g.add(poster);
       b.locked = new THREE.Group(); b.g.add(b.locked);
-      for (let k = 0; k < 2; k++) for (const z of [-325, 325]) { const tape = new THREE.Mesh(new THREE.BoxGeometry(550, 14, 6), new THREE.MeshLambertMaterial({ color: lin(k ? '#111827' : '#f2c94c') })); tape.position.set(0, 90 + k * 40, z); b.locked.add(tape); }
+      if (window.GK && GK.lockedCube) { b.cubeKind = ''; }   // the solid LOCKED / COMING SOON block is kept up to date in step()
+      else for (let k = 0; k < 2; k++) for (const z of [-325, 325]) { const tape = new THREE.Mesh(new THREE.BoxGeometry(550, 14, 6), new THREE.MeshLambertMaterial({ color: lin(k ? '#111827' : '#f2c94c') })); tape.position.set(0, 90 + k * 40, z); b.locked.add(tape); }
       bays.push(b);
     }
     solids.push({ x: TANK.x, z: TANK.z, r: 110 }, { x: LOCKER.x, z: LOCKER.z + 125, r: 110 }, { x: KIOSK.x + 25, z: KIOSK.z, r: 80 });
@@ -1101,7 +1105,8 @@ const Game = (() => {
   }
   const _qx = (() => { let q = null; return a => { q = q || new THREE.Quaternion(); return q.setFromAxisAngle(new THREE.Vector3(1, 0, 0), a); }; })();
   function animate(c, moving, dt, rate, aiming) {
-    const a = moving ? 'walk' : 'idle';
+    const emo = c === player && window.GK ? GK.emotes.anim(moving || aiming || !running || paused) : null;
+    const a = emo || (moving ? 'walk' : 'idle');
     if (!c.sandy) return;
     if (c.posed) { c.shoulder.quaternion.copy(c.sq); c.elbow.quaternion.copy(c.eq); c.posed = false; }
     if (a !== c.anim) { c.sandy.play(a); c.anim = a; }
@@ -1131,6 +1136,13 @@ const Game = (() => {
   async function setup() {
     await loadCars();
     makeBays();
+    // low-key props round the lot (one block or smaller, no collision): cones and buckets by the bays, planters and a bench by the kiosk
+    if (window.GK && GK.prop) {
+      const r = GK.rng('rodeo-props'), BS = 100, spots = [];
+      for (const bx of BAY_X) { spots.push([bx + (r() < 0.5 ? -420 : 420), r() < 0.5 ? -470 : 470, ['cone', 'bucket', 'barrel']]); }
+      spots.push([KIOSK.x + 220, KIOSK.z + 320, 'bench'], [KIOSK.x - 120, KIOSK.z - 330, 'plant'], [TANK.x + 260, TANK.z + 240, 'sign'], [LOCKER.x + 280, LOCKER.z + 60, 'plant'], [VIP_X + 450, -480, 'cone'], [VIP_X + 450, 480, 'plant']);
+      for (const [x, z, kind] of spots) { if (r() > 0.75) continue; const pr = GK.prop(THREE, kind, Math.round(x * 3 + z), { block: BS, scale: 0.8 }); pr.position.set(x, 0, z); scene.add(pr); }
+    }
     const K = Avatars.K;
     await Uniform.make();
     const pc = K ? Avatars.playerConfig() : null; if (pc) { ownTop = pc.top === undefined ? null : pc.top; if (S.uniform && Uniform.top()) pc.top = Uniform.top(); }
@@ -1159,7 +1171,15 @@ const Game = (() => {
 
   /* ---------- the loop ---------- */
   let running = false, paused = true, camT = null, lastScore = 0, tipT = 0, padIn = null, soapWarn = 0, target = null, spraying = false, autoT = 0;
-  function begin() { running = true; paused = false; UI.hud(true); save(); }
+  function begin() { running = true; paused = false; UI.hud(true); save();
+    if (window.GK && GK.tutorial) setTimeout(() => GK.tutorial('rodeo', [
+      { title: 'Turbo Suds', text: matchMedia('(pointer:coarse)').matches ? 'Drag on the left to walk. Try it!' : 'Walk with W A S D. Try it now!', skill: 'move', until: () => moveInput().mag > 0.05, hideNext: true },
+      { title: 'Pay station', text: 'Stand in the gold ring at the pay station: every car that pulls up gets checked in and rolls through the tunnel wash. Bucks for each one!' },
+      { title: 'Hand-wash', text: 'Open Bay 1 and walk up to a muddy car: hold Spray and work all the way around it. Hold Shift (or tap Run) to sprint between jobs.' },
+      { title: 'Grow', text: 'Spend Bucks on upgrades, more bays, bigger packages and a crew. Locked bays open in order.', target: '#upBtn', doneLabel: 'Got it!' }
+    ]), 1200); }
+  if (window.GK && GK.emotes) GK.emotes.install({ canEmote: () => running && !paused && !UI.blocking() && !spraying });
+  if (window.GK && GK.center) GK.center('#hint', { toast: true });   // the bottom hint moves to just below centre and shakes in
   function step(dt) {
     TIME.value += dt;
     if (!camT) camT = new THREE.Vector3(player.x, 0, player.z);
@@ -1167,6 +1187,11 @@ const Game = (() => {
     // bays: unlocked ones call in the next car
     for (const b of bays) {
       const open = bayOpen(b); b.locked.visible = !open;
+      if (b.cubeKind != null && !open) {   // a bay you haven't opened: a solid block with LOCKED (the next one, with its price) or COMING SOON on its sides
+        const want = b.vip ? 'vip' : b.i === S.bays ? 'next' : 'later';
+        if (b.cubeKind !== want) { b.cubeKind = want; while (b.locked.children.length) b.locked.remove(b.locked.children[0]);
+          const cube = GK.lockedCube(THREE, { size: { x: 520, y: 300, z: 560 }, text: want === 'later' ? 'COMING SOON' : 'LOCKED', sub: want === 'next' ? fmt(BAY_COST[b.i]) + ' Bucks' : want === 'vip' ? 'VIP pass in the Store' : 'Open the bay before it', color: want === 'later' ? '#3b2f4a' : '#2a2f3a', accent: want === 'vip' ? '#e39b32' : want === 'next' ? '#f97316' : '#fbbf24' });
+          cube.position.set(0, 150, 0); b.locked.add(cube); } }
       if (!live || !open || b.car) continue;
       b.timer -= dt; if (b.timer <= 0) spawn(b);
     }
@@ -1193,7 +1218,13 @@ const Game = (() => {
     }
     // player: walk, spray, pads
     const mv = live && !UI.blocking() ? moveInput() : { x: 0, z: 0, mag: 0 };
-    if (mv.mag > 0.05) { player.x += mv.x * walk() * dt; player.z += mv.z * walk() * dt; player.face += angDiff(player.face, Math.atan2(mv.x, mv.z)) * Math.min(1, dt * 12); }
+    // sprint (Shift, the Run button or a stick click): 1.4x while the stamina bar lasts
+    if (player.st == null) player.st = 100;
+    const run = window.GK && mv.mag > 0.05 && !spraying && GK.stamina.wantRun() && player.st > 0 && !player.winded;
+    if (run) { player.st -= 22 * dt; if (player.st <= 0) { player.st = 0; player.winded = true; GK.stamina.stopRun(); } } else { player.st = Math.min(100, player.st + (mv.mag > 0.05 ? 14 : 24) * dt); if (player.winded && player.st > 35) player.winded = false; }
+    if (window.GK) { GK.stamina.show(live && !UI.blocking(), { button: true }); GK.stamina.set(player.st / 100, run ? 'boost' : undefined); }
+    const spd = walk() * (run ? 1.4 : 1); player.sprinting = !!run;
+    if (mv.mag > 0.05) { player.x += mv.x * spd * dt; player.z += mv.z * spd * dt; player.face += angDiff(player.face, Math.atan2(mv.x, mv.z)) * Math.min(1, dt * 12); }
     collide(player, 30);
     // what can we spray? the nearest car in a bay that still needs work, within reach
     target = null; let bestD = 1e9;
@@ -1225,7 +1256,7 @@ const Game = (() => {
     let on = null; for (const p of PADS) if (Math.hypot(player.x - p.x, player.z - p.z) < 150) on = p.id;
     if (live && on && on !== padIn) UI.open(on);
     padIn = on;
-    place(player); animate(player, mv.mag > 0.05, dt, 0.6 + mv.mag * up('boots') * (has('boots') ? 1.5 : 1), spraying); holdNozzle(player, player.aim);
+    place(player); animate(player, mv.mag > 0.05, dt, (0.6 + mv.mag * up('boots') * (has('boots') ? 1.5 : 1)) * (player.sprinting ? 1.3 : 1), spraying); holdNozzle(player, player.aim);
     // crew: one washer per bay (in hire order). She stands at her spot beside the car and points her wand at it while
     // the wash fills up at the same steady pace for every car (each stage takes crewStageTime() seconds).
     const openBays = bays.filter(bayOpen);
@@ -1285,7 +1316,7 @@ const Game = (() => {
     Bridge.score(S.cars, S.cars, S.rebirths); return true;
   }
   function daily() { const d = new Date(Date.now() - 4 * 3600e3).toDateString(); return S.daily !== d; }
-  function claimDaily() { if (!daily()) return 0; const amt = Math.round(estPerMin() * 5); S.bucks += amt; S.life += amt; S.daily = new Date(Date.now() - 4 * 3600e3).toDateString(); save(); return amt; }
+  function claimDaily() { if (!daily()) return 0; const amt = Math.round(estPerMin() * 5); S.bucks += amt; S.life += amt; S.daily = new Date(Date.now() - 4 * 3600e3).toDateString(); save(); if (window.GK && GK.crate) setTimeout(() => GK.crate('rodeo'), 700); return amt; }
   /* Store items: what each effect does in this game */
   function apply(it) {
     if (it.effect === 'boost') { S.boosts[it.amount] = (S.boosts[it.amount] || 0) + (+(Bridge.state && Bridge.state.runSeconds) || SETTINGS.runSeconds); }
@@ -1607,7 +1638,12 @@ const UI = (() => {
     if (b.id === 'giftBtn') { const a = Game.claimDaily(); if (a) { Sound.coin(); toast('Daily gift: +' + fmt(a) + ' Bucks!', 'gold'); FX.burst(Game.player.x, 200, Game.player.z, 'gold', 30); } hudNow(); return; }
     if (b.id === 'rebGo') { if (Game.rebirth()) { Sound.buy(); close(); toast('Rebirth! Bucks now pay x' + REBIRTH_MULT(S().rebirths).toFixed(2), 'gold'); hudNow(); } return; }
   });
-  Bridge.on(() => { if (menu === 'store' || menu === 'title' || menu === 'up') render(); hudNow(); if (!Game.running && !menu) open('title'); });
+  // straight to the wash: no title screen. Offline earnings and the on-site bonus arrive as toasts instead.
+  let autoStarted = false;
+  Bridge.on(() => { if (menu === 'store' || menu === 'title' || menu === 'up') render(); hudNow();
+    if (!Game.running && !menu && !autoStarted) { autoStarted = true; Game.begin(); hud(true);
+      const off = Game.offline; if (off && off.amt) setTimeout(() => toast('Your crew made ' + fmt(off.amt) + ' Bucks while you were away', 'gold'), 1200);
+      if (Game.onsite()) setTimeout(() => toast('You’re at the wash: x2 Bucks for ' + Math.ceil(Game.onsiteLeft / 60000) + ' min', 'gold'), 3200); } });
   return { open, close, render, hud, hudNow, frame, float, toast, paused, buildLabels, blocking, get kind() { return menu; }, get goalInfo() { return goalInfo; } };
 })();
 

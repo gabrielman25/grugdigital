@@ -68,8 +68,15 @@
     <div id="appearance"></div>
   </section>
 
+  <section class="g-card full" id="invSec">
+    <h2>Inventory</h2>
+    <p class="g-fine" style="margin-bottom:10px">Site-wide items you won from crates, eggs and loot boxes in any game. They work everywhere on Grug.</p>
+    <div id="inventory"></div>
+  </section>
+
   <section class="g-card">
     <h2>Settings</h2>
+    <div id="uiSize"></div>
     <div class="g-pref"><span id="icMotion"></span><span><b>Animations</b><small>Celebrations, poses and count-ups</small></span><button class="g-switch" role="switch" data-pref="motion" aria-label="Animations"></button></div>
     <div class="g-pref"><span id="icBuzz"></span><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button class="g-switch" role="switch" data-pref="haptics" aria-label="Vibrate on tap"></button></div>
     <div class="g-pref"><span id="icColor"></span><span><b>Colorful icons</b><small>Full-colour pictures instead of simple one-colour icons</small></span><button class="g-switch" role="switch" data-pref="colorIcons" aria-label="Colorful icons"></button></div>
@@ -181,6 +188,10 @@
   G.on((p, what) => { if (what === 'external') { view.setAvatar(p.avatar); render(); } });
   render();
   G.ui.appearance(document.getElementById('appearance'));
+  $('#uiSize').innerHTML = G.ui.uiSizeHtml(); G.ui.wireUiSize($('#uiSize'));
+  const paintInv = () => { $('#inventory').innerHTML = G.ui.inventoryHtml().replace('<span class="k-set-h">Inventory</span>', ''); };
+  paintInv(); G.ui.wireInventory($('#inventory'), paintInv);
+  G.on((p, what) => { if (what === 'items' || what === 'boost' || what === 'external' || what === 'import' || what === 'reset') paintInv(); });
 })();
 </script>
 </body>

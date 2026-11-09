@@ -916,6 +916,7 @@ function buyItem(id){
   const it = gameItem(id); if(!it) return {ok: false, reason: 'That isn’t in the Store.'};
   if(it.effect === 'pass' && st.inv[id] > 0) return {ok: false, reason: 'You already have ' + it.name + '.'};
   if((st.inv[id] || 0) >= INV_MAX) return {ok: false, reason: 'You already have ' + INV_MAX + ' of those.'};
+  if (window.Grug && Grug.freeShop()) { st.inv[id] = (st.inv[id] || 0) + 1; save(); return { ok: true, free: true }; }   // Free Shop Token: everything is free
   if(st.points < it.cost) return {ok: false, reason: 'You need ' + (it.cost - st.points) + ' more points for ' + it.name + '.', short: it.cost - st.points, item: it.name};
   st.points -= it.cost; st.inv[id] = (st.inv[id] || 0) + 1; hist('Store · ' + it.name, -it.cost); save(); return {ok: true};
 }

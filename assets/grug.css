@@ -462,3 +462,29 @@ html::-webkit-scrollbar{width:0;height:0;display:none}
 *::-webkit-scrollbar-track{background:transparent}
 *::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--ink) 30%,transparent);border-radius:99px;border:2px solid transparent;background-clip:padding-box}
 *::-webkit-scrollbar-thumb:hover{background:linear-gradient(var(--sel-a),var(--sel-b));background-clip:padding-box}
+
+/* ---------- UI size (Settings): a zoom on the page's UI; the fog and the 3D box stage stay as they are ---------- */
+:root{--g-ui:1}
+html.g-scaled body>*:not(#g-fog):not(.f32-ov):not(.f32-shelf):not(canvas):not(script):not(.g-freebar){zoom:var(--g-ui)}
+html.g-scaled .g-dialog{zoom:var(--g-ui)}
+.g-seg{display:flex;gap:6px;flex-wrap:wrap}
+.g-seg button{min-height:40px;padding:0 14px;border-radius:999px;background:var(--card2);border:2px solid transparent;color:var(--ink2);font:600 15px/1 var(--display)}
+.g-seg button[aria-checked=true]{background:linear-gradient(135deg,var(--sel-a),var(--sel-b));color:var(--on-sel)}
+.g-pref.g-pref-col{flex-wrap:wrap}.g-pref.g-pref-col>span{flex:1 1 100%}
+/* ---------- site-wide items: the inventory and the free-shop timer ---------- */
+.g-inv{display:grid;gap:10px}
+.g-inv-it{display:flex;align-items:center;gap:12px;padding:12px;border-radius:18px;background:var(--card2)}
+.g-inv-ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--c) 28%,transparent);color:var(--c)}
+.g-inv-ic .gi{width:24px;height:24px}
+.g-inv-tx{flex:1;min-width:0}.g-inv-tx b{display:block}.g-inv-tx small{display:block;color:var(--mut);font-size:13px;line-height:1.3}
+.g-inv-empty{display:flex;align-items:flex-start;gap:8px}.g-inv-empty span{flex:1}.g-inv-empty .gi{width:20px;height:20px;flex:none}
+.g-freebar{position:fixed;left:50%;top:calc(var(--sat,0px) + var(--top,52px) + 6px);transform:translateX(-50%);z-index:55;display:flex;align-items:center;gap:8px;padding:8px 16px 8px 10px;border-radius:999px;
+  background:linear-gradient(135deg,#f59e0b,#f97316);color:#1a1205;font:800 15px/1 var(--display);box-shadow:0 10px 28px rgba(245,158,11,.45);animation:g-freein .5s var(--spring) both;pointer-events:none;letter-spacing:.04em}
+.g-freebar .gi{width:22px;height:22px}
+.g-freebar .t{font-variant-numeric:tabular-nums;font-size:17px}
+.g-freebar.low{animation:g-freein .5s var(--spring) both,g-freelow .8s ease-in-out infinite}
+@keyframes g-freein{from{transform:translate(-50%,-20px) scale(.8);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
+@keyframes g-freelow{50%{filter:brightness(1.35)}}
+/* a price with the free-shop token on */
+.g-free-price{text-decoration:line-through;opacity:.6;margin-right:6px}
+.g-tag.free{background:linear-gradient(135deg,#f59e0b,#f97316);color:#1a1205}

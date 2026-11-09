@@ -206,6 +206,8 @@ body.menu-open .acts,body.menu-open .tr,body.menu-open .prompt,body.menu-open .h
   <div class="toast" id="toast" role="status"></div>
 </div>
 <div class="loading" id="loading"><div><div class="logo" id="logo"></div>Mystery Blasters<small id="loadTxt">Loading…</small></div></div>
+<!-- Grug site-wide layer: UI size, centred hints, free-shop timer, tutorials, emotes, crate drops (assets/gamekit.js) -->
+<script src="../../assets/gamekit.js"></script>
 <script>
 'use strict';
 /* =====================================================================================
@@ -285,11 +287,12 @@ const Bridge = (() => {
   const wallet = () => (state ? (+state.points || 0) + (+state.pearls || 0) : 0);
   async function buy(id) {
     const it = (state.shop || []).find(x => x.id === id); if (!it) return { ok: false, reason: 'Not in the shop.' };
-    if (wallet() < it.cost) {
+    const cost = (window.GK && GK.free()) ? 0 : it.cost;   // a Free Shop Token (site-wide item) makes everything free
+    if (wallet() < cost) {
       if (mode === 'live' && state.pearlName) { post({ t: 'needPearls', id }); return { ok: false, reason: '', asked: true }; }
       return { ok: false, reason: 'You need ' + (it.cost - wallet()) + ' more points for ' + it.name + '.' };
     }
-    if (mode === 'demo') { state.points -= it.cost; state.inv[id] = (state.inv[id] || 0) + 1; demoSave(); setState(state); return { ok: true }; }
+    if (mode === 'demo') { state.points -= cost; state.inv[id] = (state.inv[id] || 0) + 1; demoSave(); setState(state); return { ok: true }; }
     return ask({ t: 'buy', id });
   }
   async function use(ids) {
@@ -2298,7 +2301,7 @@ const Chars = (() => {
     else if (!c.alive) { play(c, 'idle'); expr(c, 'dead'); if (c.downT > 1.2) return; }
     else if (c.downed) play(c, c.moving ? 'walk' : 'idle');
     else if (c.dance) play(c, 'dance');
-    else play(c, c.moving ? 'walk' : 'idle');
+    else { const emo = c.isPlayer && window.GK ? GK.emotes.anim(c.moving || !!c.hiding || !!(window.Game && Game.G && Game.G.cine)) : null; play(c, emo || (c.moving ? 'walk' : 'idle')); }
     c.sandy.update(adt * (c.downed ? (c.moving ? 0.6 : 0.3) : c.moving ? clamp(c.speed / 240, 0.7, 2.6) : 1));
     if (c.alive) expr(c, c.downed ? 'wince' : c.stuck > 0 ? 'dizzy' : c.fear > 0 ? 'scared' : c.gunShown ? (c.role === 'murderer' ? 'smug' : 'annoyed') : c.dance ? 'happy' : 'neutral');
     if ((c.alive && c.downed) || (c.stumble && c.stumble.how === 'crawl')) { const s = Math.sin(t * 6) * (c.moving ? 25 : 4); Poser.apply(c.rig, { armL: [-160 + s, 0, 18], foreL: [-170, 0, 6], armR: [-160 - s, 0, -18], foreR: [-170, 0, -6] }, 'crawl'); }
@@ -2385,7 +2388,7 @@ const Game = (() => {
       bots.push(b);
       // bots carry random blasters, and some bring pets
       b.guns = { sheriff: { s: strSeed('bs' + i) % 999999, r: Math.min(7, Math.floor(Math.random() * Math.random() * 7)), mu: Math.random() < 0.15 ? [pick(Math.random, MUTS).id] : [] }, murderer: { s: strSeed('bm' + i) % 999999, r: Math.min(7, Math.floor(Math.random() * Math.random() * 8)), mu: Math.random() < 0.2 ? [pick(Math.random, MUTS).id] : [] } };
-      if (i % 3 === 0) Chars.setPets(b, [{ id: PETS[(i * 7) % PETS.length].id, v: i === 3 ? 'gold' : '' }]);
+      if (i % 3 === 0) Chars.setPets(b, [{ id: PETS[(i * 7) % PETS.length].id, v: i === 0 ? 'rainbow' : i === 3 ? 'gold' : i === 6 ? 'shadow' : '' }]);   // a couple of bots show off rare pets
       Chars.setGun(b, b.guns.sheriff);
     }
     // the shopkeepers (female avatars, not part of any round)
@@ -2602,6 +2605,15 @@ const Game = (() => {
       // where the escape hatch can open: the middle of a room
       const [mx, mz] = [Math.floor((R.x0 + R.x1) / 2), Math.floor((R.z0 + R.z1) / 2)];
       for (const [dx, dz] of [[0, 0], [1, 0], [0, 1], [-1, 0], [0, -1], [2, 2], [-2, -2]]) if (L.walkCell(mx + dx, mz + dz) && !taken.has((mz + dz) * NX + mx + dx)) { L.exitSpots.push({ x: (mx + dx + 0.5) * BS, z: (mz + dz + 0.5) * BS, room: i }); break; }
+      // one or two low-key props in the open part of the room (one block or smaller, no collision: they never touch nav)
+      if (window.GK && GK.prop && L.id !== 'lobby') for (let t = 0, n = 0; t < 12 && n < 2; t++) {
+        const x = R.x0 + 1 + Math.floor(rng() * Math.max(1, R.x1 - R.x0 - 1)), z = R.z0 + 1 + Math.floor(rng() * Math.max(1, R.z1 - R.z0 - 1)), k = z * NX + x;
+        if (!L.walkCell(x, z) || taken.has(k) || Math.abs(x - mx) + Math.abs(z - mz) < 3) continue;
+        let clear = true; for (let dz = -1; dz <= 1 && clear; dz++) for (let dx = -1; dx <= 1; dx++) if (!L.walkCell(x + dx, z + dz)) { clear = false; break; } if (!clear) continue;
+        const pr = GK.prop(THREE, L.id === 'forest' ? 'outdoor' : L.id === 'prison' ? ['crate', 'bucket', 'cone', 'box', 'bench'] : ['plant', 'stool', 'lamp', 'box', 'flower', 'bench'], L.id + i * 31 + t, { block: BS, scale: 0.8 });
+        pr.traverse(o => { if (o.isMesh) o.material = fogify(o.material); });   // props hide in the fog of war like everything else
+        pr.position.set((x + 0.5) * BS, 0, (z + 0.5) * BS); L.group.add(pr); taken.add(k); n++;
+      }
     });
   }
   function makeExitMesh() {
@@ -2813,7 +2825,14 @@ const Game = (() => {
     if (G.phase === 'round') input.act = false;
     if (P.hiding) { P.moving = false; input.shoot = false; input.shootAt = null; input.equip = false; return; }
     const m = frozen || UI.sheet || G.cine || (A && A.hold && held) ? { x: 0, z: 0, mag: 0 } : moveInput();
-    const sp = Chars.PLAYER_SPEED * (1 + perk('speed')) * (P.dash > 0 ? 1.6 : 1) * (P.stuck > 0 ? 0 : 1) * (P.downed ? 0.5 * (P.slowT > 0 ? 0.25 : 1) : 1) * (P.drag ? 0.7 : 1); P.slowT = Math.max(0, (P.slowT || 0) - dt);
+    let sp = Chars.PLAYER_SPEED * (1 + perk('speed')) * (P.dash > 0 ? 1.6 : 1) * (P.stuck > 0 ? 0 : 1) * (P.downed ? 0.5 * (P.slowT > 0 ? 0.25 : 1) : 1) * (P.drag ? 0.7 : 1); P.slowT = Math.max(0, (P.slowT || 0) - dt);
+    // sprint (Shift, the Run button or a stick click): 1.35x while the stamina bar lasts (not while downed or dragging a body)
+    if (P.st == null) P.st = 100;
+    const run = window.GK && m.mag > 0.05 && !P.downed && !P.drag && GK.stamina.wantRun() && P.st > 0 && !P.winded;
+    if (run) { sp *= 1.35; P.st -= 24 * dt; if (P.st <= 0) { P.st = 0; P.winded = true; GK.stamina.stopRun(); } }
+    else { P.st = Math.min(100, P.st + (m.mag > 0.05 ? 14 : 24) * dt); if (P.winded && P.st > 35) P.winded = false; }
+    if (window.GK) { GK.stamina.show(!UI.sheet && !G.cine && inPlay(P), { button: true }); GK.stamina.set(P.st / 100, run ? 'boost' : undefined); }
+    P.sprinting = !!run;
     Chars.move(P, L, m.x, m.z, sp * m.mag, dt);
     const canGun = G.phase === 'lobby' ? true : P.armed && !P.downed;
     if (input.equip) { input.equip = false; if (canGun && !frozen) { P.gunShown = !P.gunShown; Sfx.play('click'); } }
@@ -3139,6 +3158,7 @@ const Game = (() => {
     const g = addGunTo(S, { s: Math.floor(rng() * 1e9), r, mu: rollMutations(rng, r, L) });
     S.stats.crates++; save();
     cine('crate', { id, gun: g, free });
+    if (window.GK && GK.crate) setTimeout(() => GK.crate('mysteryblasters'), 2600);   // a chance at a site-wide item with every crate
     return true;
   }
   function hatchEgg(id) {
@@ -3151,6 +3171,7 @@ const Game = (() => {
     for (const [k, p] of odds) { if ((x -= p) <= 0) { pid = k; break; } }
     let y = Math.random(), v = ''; for (const [k, p] of varOdds(L)) { if ((y -= p) <= 0) { v = k; break; } }
     const pet = { u: S.u++, id: pid, v }; S.pets.push(pet); S.stats.eggs++;
+    if (window.GK && GK.crate) setTimeout(() => GK.crate('mysteryblasters'), 2600);
     if (!S.petEq.length) S.petEq = [pet.u];
     save(); refreshPlayerPets();
     cine('egg', { id, pet, free: !paid });
@@ -3267,6 +3288,7 @@ const Game = (() => {
     if (S.daily.day === today()) return; const yest = new Date(Date.now() - 864e5).toDateString();
     S.daily.streak = S.daily.day === yest ? S.daily.streak + 1 : 1; S.daily.day = today();
     const r = DAILY[(S.daily.streak - 1) % DAILY.length]; grant(typeof r === 'number' ? { c: r } : r);
+    if (window.GK && GK.crate) setTimeout(() => GK.crate('mysteryblasters'), 800);
   }
   /* ---------- inventory actions ---------- */
   const Inv = {
@@ -3295,6 +3317,7 @@ const Game = (() => {
     release(u) { const p = S.pets.find(q => q.u === u); if (!p) return; S.pets.splice(S.pets.indexOf(p), 1); S.petEq = S.petEq.filter(x => x !== u); S.coins += 50 * (PETB[p.id].r + 1); save(); refreshPlayerPets(); UI.toast('Released. +' + 50 * (PETB[p.id].r + 1) + ' coins', 'good'); }
   };
 
+  if (window.GK && GK.emotes) GK.emotes.install({ canEmote: () => G.started && !G.paused && !UI.sheet && !G.cine && player && player.alive && !player.hiding && !player.downed });
   /* ---------- the frame ---------- */
   function step(dt) {
     if (!player) return;
@@ -3332,7 +3355,14 @@ const Game = (() => {
     coinMesh.instanceMatrix.needsUpdate = true;
   }
   function feed(text, kind) { UI.feed(text, kind); }
-  function start() { G.started = true; G.paused = false; Sfx.unlock(); if (G.phase === 'lobby') G.timer = Math.max(G.timer, 12); }
+  function start() { const first = !G.started; G.started = true; G.paused = false; Sfx.unlock();
+    if (first && window.GK && GK.tutorial) setTimeout(() => GK.tutorial('mysteryblasters', [
+      { title: 'Mystery Blasters', text: TOUCH ? 'Drag on the left to walk around the lobby. Try it!' : 'Walk with W A S D. Try it now!', skill: 'move', until: () => player.moving, hideNext: true },
+      { title: 'Roles', text: 'Every round one player is the Murderer and one is the Sheriff; everyone else is Innocent. Your role shows when the round starts.' },
+      { title: 'Innocents', text: 'Fix five fuse boxes (hold Use next to one) to open the escape hatch, or hide in a locker or box. Hold Shift (or tap Run) to sprint.' },
+      { title: 'Sheriff', text: 'Find and tag the Murderer with your blaster. Tag an Innocent and you’re out.' },
+      { title: 'Coins', text: 'Grab coins in every round. They open crates (blaster skins) and eggs (pets with powers) from these buttons.', target: '[data-hb=crates]', doneLabel: 'Got it!' }
+    ]), 1500); if (G.phase === 'lobby') G.timer = Math.max(G.timer, 12); }
   function togglePause(force) { if (!G.started) return; G.paused = typeof force === 'boolean' ? force : !G.paused; UI.paused(G.paused); if (G.paused) save(); }
   Bridge.on((s, ev) => { if (ev === 'pause') togglePause(true); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) { togglePause(true); save(); } });
@@ -3683,7 +3713,7 @@ const UI = (() => {
   Bridge.start();
   document.getElementById('loading').classList.add('done');
   UI.hud(true);
-  setTimeout(() => UI.open('welcome'), 60);
+  Game.start();   // straight into the lobby map: no welcome screen (the crate shop, egg shop and store have their own buttons)
   window.READY = true;
   const tick = () => {
     const raw = clock.getDelta(), dt = Math.min(0.05, raw) * (window.DBG_SPEED || 1);

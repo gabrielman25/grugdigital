@@ -53,3 +53,16 @@ When a new game is added to `assets/games.js` and listed, also make its box. Don
    Also save 1–3 back-of-box screenshots to `assets/boxart/shots/`.
 4. Point `thumb` at the box art too, and add a `games/<id>/index.html` like the others (it calls `GrugGamePage('<id>')`).
 5. Check it in a browser: the box on the Games page, the unbox, the panel, and Play (cartridge → console → game).
+
+## Site-wide game layer (`assets/gamekit.js`)
+
+Every `play/<name>/game.html` loads `../../assets/gamekit.js` before its own script and gets, with no code: the UI size
+zoom (Settings → UI size), the kit's `#banner` / `#toast` moved to just below dead centre and shaken in whenever they
+appear or change, folded "how to play" blocks, and the Free Shop Token timer. Games call into `window.GK` for the rest:
+`GK.tutorial(key, steps)` (tag shared lessons with `skill: 'move'` / `'sprint'` so they show once site-wide),
+`GK.stamina` (`wantRun()`, `set(frac)`, `show(on, {button:true})`), `GK.emotes.install({canEmote})` + `GK.emotes.anim(moving)`
+in the player's animation pick, `GK.crate(game)` whenever a crate, egg, loot box or daily gift opens, `GK.lockedCube` for
+plots that aren't open yet (never a blank plate), `GK.prop` for low-key ≤ 1-block props with no collision, and `GK.pet`
+for a flashy pet on one or two bots. Players land straight in the game: no lobby screen. The power-up shop opens from a
+Shop button in the HUD / pause menu (`lobby()` in run mode) and from the run-over screen.
+

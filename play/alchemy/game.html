@@ -218,6 +218,8 @@ body.embedded .sheet{top:calc(50% + 28px);max-height:calc(100% - 88px - var(--sa
   <div class="toast" id="toast" role="status"></div>
 </div>
 <div class="loading" id="loading"><div>Opening the lab…<small>Getting your avatar dressed</small></div></div>
+<!-- Grug site-wide layer: UI size, centred hints, free-shop timer, tutorials, emotes, crate drops (assets/gamekit.js) -->
+<script src="../../assets/gamekit.js"></script>
 <script>
 'use strict';
 /* =====================================================================================
@@ -302,11 +304,12 @@ const Bridge = (() => {
   const wallet = () => (state ? (+state.points || 0) + (+state.pearls || 0) : 0);
   async function buy(id) {
     const it = (state.shop || []).find(x => x.id === id); if (!it) return { ok: false, reason: 'Not in the shop.' };
-    if (wallet() < it.cost) {
+    const cost = (window.GK && GK.free()) ? 0 : it.cost;   // a Free Shop Token (site-wide item) makes everything free
+    if (wallet() < cost) {
       if (mode === 'live' && state.pearlName) { post({ t: 'needPearls', id }); return { ok: false, reason: '', asked: true }; }
       return { ok: false, reason: 'You need ' + (it.cost - wallet()) + ' more points for ' + it.name + '.' };
     }
-    if (mode === 'demo') { state.points -= it.cost; state.inv[id] = (state.inv[id] || 0) + 1; demoSave(); setState(state); return { ok: true }; }
+    if (mode === 'demo') { state.points -= cost; state.inv[id] = (state.inv[id] || 0) + 1; demoSave(); setState(state); return { ok: true }; }
     return ask({ t: 'buy', id });
   }
   async function use(ids) {
@@ -1331,8 +1334,16 @@ const Game = (() => {
   }
 
   /* ---------- a shift ---------- */
+  // a boost switched on from the in-game menu works right away this shift
+  function applyFx(it) { if (!it || !G.on) return false; const a = +it.amount || 1; if (it.effect === 'time') { G.fx.time = (G.fx.time || 0) + a; G.left += a; } else G.fx[it.effect] = a; return true; }
   function begin(fx) {
     G.fx = fx || {}; G.on = true; G.paused = false; G.t = 0; G.open = true;
+    if (S.shifts < 1 && window.GK && GK.tutorial) setTimeout(() => GK.tutorial('alchemy', [
+      { title: 'Sugar Alchemist', text: 'Customers line up at the counter. Tap Order to take the first ticket: it shows exactly what they want.', target: '#act [data-main]' },
+      { title: 'Mix and bake', text: 'Pick what the ticket says, then hold the big button and let go in the green zone. Pull trays out when they turn golden.' },
+      { title: 'Finish', text: 'Frost it, add the sparkle and box it up. The closer it matches the ticket, the bigger the tip.' },
+      { title: 'Follow the glow', text: 'The glowing button at the bottom always shows what needs you next. Tips buy oven upgrades in the Lab Shop.', doneLabel: 'Open the lab!' }
+    ]), 1500);
     G.left = ((Bridge.state && +Bridge.state.runSeconds) || SETTINGS.runSeconds) + (G.fx.time || 0); G.closing = SETTINGS.closingSeconds;
     G.tickets.forEach(disposeModel); G.tickets = []; G.nid = 1; G.tips = 0; G.served = 0; G.scores = []; G.vip = false; G.perfects = 0; G.boxing = null;
     G.ovens = []; G.nextArrive = 1.2; G.station = 'order'; CAM.yaw = 0; CAM.pitch = 0; CAM.zoom = 1;
@@ -1468,7 +1479,7 @@ const Game = (() => {
   }
 
   return {
-    setup, begin, step, togglePause, finish, A, holdStart, holdEnd, H, G, ST, ORDER, TREATS, BATTERS, FROSTS, TOPS, UPG, DECOR, RANKS, SEASON,
+    setup, begin, applyFx, step, togglePause, finish, A, holdStart, holdEnd, H, G, ST, ORDER, TREATS, BATTERS, FROSTS, TOPS, UPG, DECOR, RANKS, SEASON,
     treatOf, batterOf, frostOf, topOf, curAt, ticketsAt, ovenCount, bakeT, goldenHalf, zoneW, bakeState, open, rank, rankIx, lvl, tipMult, decorCount,
     storeBuy, shopBuy, owned, daily, KNOWN, TIMED, PASS_KEY, helperOn, atCounter, pool, refreshDecor,
     get S() { return S; }, get running() { return G.on; }, get player() { return player; }
@@ -1703,20 +1714,20 @@ const UI = (() => {
     const s = Bridge.state; if (!s) return; const sv = S();
     const timed = shopItems().filter(it => Game.TIMED.includes(it.effect)), FXI = { time: ['stopwatch', 'var(--amber)'], goldoven: ['fire', 'var(--orange)'], steady: ['sliders', 'var(--green)'], double: ['coins', 'var(--green)'], rush: ['person_run', 'var(--sky)'] };
     const dailyOn = sv.daily.day !== new Date().toDateString();
-    show('lobby', '<div class="top">' + tile('flask', 'var(--bubble)', true) + '<div><h1>' + esc(s.title || SETTINGS.title) + '</h1><small>' + esc(s.store || (s.demo ? SETTINGS.partner + ' · demo mode, pretend points' : SETTINGS.partner)) + '</small></div></div><div class="body">' +
-      '<p class="lead">' + esc(SETTINGS.tagline) + '</p>' +
+    const inRun = G.on;   // opened mid-shift from the pause menu: boosts switch on right away
+    show('lobby', '<div class="top">' + tile('flask', 'var(--bubble)', true) + '<div><h1>' + (inRun ? 'Boosts' : 'Between days') + '</h1><small>' + esc(inRun ? 'Switched on now, for this shift' : s.store || (s.demo ? SETTINGS.partner + ' · demo mode, pretend points' : SETTINGS.partner)) + '</small></div>' + (inRun ? '<button class="x" id="lobbyClose" aria-label="Close">' + vi('cross') + '</button>' : '') + '</div><div class="body">' +
       '<div class="stats"><div class="stat"><b style="color:var(--violet)">' + (s.points || 0) + '</b><small>Points</small></div>' + (s.pearlName ? '<div class="stat"><b style="color:var(--sky)">' + (s.pearls || 0) + '</b><small>' + esc(s.pearlName) + '</small></div>' : '') +
       '<div class="stat"><b style="color:var(--green)">' + money(sv.bank) + '</b><small>Tips to spend</small></div><div class="stat"><b style="color:var(--amber)">' + money(Math.max(sv.best, s.best || 0)) + '</b><small>Best shift</small></div></div>' +
       rankCard() +
       '<div class="unlock" style="background:#2a1d10">' + tile('leaf', Game.SEASON.col) + '<div><b>' + esc(Game.SEASON.n) + ' season</b><br><small style="color:var(--mut)">' + esc(Game.SEASON.top.n) + ' are on the topping bar' + (Game.rank() < 3 ? ' from rank 3' : '') + '.</small></div></div>' +
-      (sv.shifts < 3 ? '<div class="h" style="color:var(--rose)">How to play</div><div class="items">' +
+      (false ? '<div class="h" style="color:var(--rose)">How to play</div><div class="items">' +
         [['receipt', ST.order.c, 'Take the order', 'Customers line up at the counter. The ticket shows what they want.'], ['flask', ST.mix.c, 'Mix, bake, frost', 'Pick what the ticket says. Hold the button and let go in the green. Pull trays out when they’re golden.'], ['stars', ST.sparkle.c, 'Sparkle and serve', 'Add the toppings, box it and call them up. Closer to the ticket = bigger tip.']]
           .map(([ic, c, b, t]) => '<div class="item">' + tile(ic, c) + '<div class="txt"><b>' + b + '</b><small>' + t + '</small></div></div>').join('') + '<p class="note" style="margin-top:4px">The glowing button at the bottom always shows what needs you next.</p></div>' : '') +
       (timed.length ? '<div class="h" style="color:var(--violet)">Boosts<small>last one shift</small></div><div class="items">' + timed.map(it => { const own = +(s.inv || {})[it.id] || 0, can = Bridge.wallet() >= it.cost, [ic, c] = FXI[it.effect] || ['star', 'var(--rose)'];
         return '<div class="item' + (picked.has(it.id) ? ' on' : '') + '">' + tile(ic, c) + '<div class="txt"><b>' + esc(it.name) + '</b><small>' + esc(it.desc || '') + (own ? ' · you have ' + own : '') + '</small></div><div class="btns">' +
-          (own ? '<button class="' + (picked.has(it.id) ? '' : 'ghost') + '" data-pick="' + esc(it.id) + '">' + (picked.has(it.id) ? vi('checkmark') + 'On' : 'Use') + '</button>' : '') +
+          (own ? '<button class="' + (picked.has(it.id) ? '' : 'ghost') + '" data-pick="' + esc(it.id) + '">' + (picked.has(it.id) ? vi('checkmark') + 'On' : inRun ? 'Use now' : 'Use') + '</button>' : '') +
           '<button class="' + (can ? '' : 'dim') + '" style="' + (can ? 'background:' + c : '') + '" data-buy="' + esc(it.id) + '">' + price(it) + '</button></div></div>'; }).join('') + '</div>' : '') +
-      '<button class="go" id="goBtn" style="background:var(--bubble)">' + vi('play') + 'Open the lab: day ' + sv.day + (picked.size ? ' (' + picked.size + ' boost' + (picked.size > 1 ? 's' : '') + ')' : '') + '</button>' +
+      '<button class="go" id="goBtn" style="background:var(--bubble)">' + vi('play') + (inRun ? 'Back to the counter' : 'Open the lab: day ' + sv.day + (picked.size ? ' (' + picked.size + ' boost' + (picked.size > 1 ? 's' : '') + ')' : '')) + '</button>' +
       '<div class="row" style="margin-top:12px"><button class="half" data-open="shop" style="background:var(--green)">' + vi('shop') + 'Lab Shop</button><button class="half" data-open="store" style="background:var(--violet)">' + vi('gem') + 'Store</button></div>' +
       (dailyOn ? '<div class="row" style="margin-top:12px"><button class="half" data-daily="1" style="background:var(--amber)">' + vi('gift') + 'Daily tip jar</button></div>' : '') +
       '<p class="note">Boosts and Store items cost ' + esc(cur()) + '. Points come from visiting ' + esc(SETTINGS.partner) + '. Tips are earned in the game.</p>' + settings() + '</div>', 'lobby');
@@ -1727,12 +1738,12 @@ const UI = (() => {
       '<div class="stats"><div class="stat"><b style="color:var(--green)">' + money(r.tips) + '</b><small>Tips today</small></div><div class="stat"><b style="color:var(--sky)">' + r.served + '</b><small>Served</small></div><div class="stat"><b style="color:var(--violet)">' + r.perfects + '</b><small>Perfect</small></div><div class="stat"><b style="color:var(--amber)">' + money(sv.bank) + '</b><small>Tips to spend</small></div></div>' +
       (r.rankUp ? '<div class="unlock">' + tile('medal', 'var(--violet)') + '<div><b>Rank up! You’re a ' + esc(Game.RANKS[Game.rankIx()][0]) + '.</b><br><small style="color:var(--mut)">' + (r.unlocked.length ? 'New: ' + esc(r.unlocked.map(u => u.n).join(', ')) : 'Keep going!') + '</small></div></div>' : '') +
       rankCard() +
-      '<button class="go" id="againBtn" style="background:var(--bubble)">' + vi('arrow_right') + 'Next day</button>' +
+      '<button class="go" id="againBtn" style="background:var(--bubble)">' + vi('arrow_right') + 'Next day</button><button class="go ghost" id="boostsBtn">' + vi('stars') + 'Boosts and daily tip jar</button>' +
       '<div class="row" style="margin-top:12px"><button class="half" data-open="shop" style="background:var(--green)">' + vi('shop') + 'Lab Shop</button><button class="half" data-open="store" style="background:var(--violet)">' + vi('gem') + 'Store</button></div></div>', 'results');
   }
   function paused(on) {
     if (on) show('lobby', '<div class="top">' + tile('pause', '#64748b') + '<div><h1>Paused</h1><small>The ovens are waiting for you.</small></div></div><div class="body"><button class="go" id="resumeBtn">' + vi('play') + 'Keep going</button>' +
-      '<div class="row" style="margin-top:12px"><button class="half" data-open="store" style="background:var(--violet)">' + vi('gem') + 'Store</button><button class="half ghost" id="endBtn">' + vi('flag_checkered') + 'End shift</button></div>' + settings() + '</div>', 'pause');
+      '<div class="row" style="margin-top:12px"><button class="half" id="boostsBtn" style="background:var(--amber)">' + vi('stars') + 'Boosts</button><button class="half" data-open="store" style="background:var(--violet)">' + vi('gem') + 'Store</button></div><div class="row" style="margin-top:12px"><button class="half ghost" id="endBtn">' + vi('flag_checkered') + 'End shift</button></div>' + settings() + '</div>', 'pause');
     else { hideAll(); input.keys.clear(); dirty(); }
   }
   function shopSheet() {
@@ -1778,6 +1789,9 @@ const UI = (() => {
     if (d.serve) return A.serve();
     if (d.pull) return A.pull(+d.pull);
     if (d.hold) return;   // handled by pointer events
+    if (d.pick && G.on) { const it = (Bridge.state.shop || []).find(x => x.id === d.pick); b.disabled = true;
+      let r; try { r = await Bridge.use([d.pick]); } catch (x) { r = { ok: false, reason: 'The rewards app didn’t answer.' }; }
+      if (!r.ok) toast(r.reason || 'Couldn’t use that.', 'bad'); else { Game.applyFx(it); toast(it.name + ' is on!', 'good'); } lobby(); return; }
     if (d.pick) { picked.has(d.pick) ? picked.delete(d.pick) : picked.add(d.pick); Sfx.play('tap'); lobby(); return; }
     if (d.buy) { b.disabled = true; let r; try { r = await Bridge.buy(d.buy); } catch (x) { r = { ok: false, reason: 'The rewards app didn’t answer. Try again.' }; } if (r.ok) { toast('Added. Tap Use to switch it on for your shift.', 'good'); Sfx.play('buy'); } else if (r.reason) toast(r.reason, 'bad'); lobby(); return; }
     if (d.store) { b.disabled = true; await Game.storeBuy(d.store); if (mode === 'store') storeSheet(); return; }
@@ -1786,15 +1800,10 @@ const UI = (() => {
     if (d.tab) { shopTab = d.tab; Sfx.play('tap'); return shopSheet(); }
     if (d.upg) { Game.shopBuy('upg', d.upg); return shopSheet(); }
     if (d.dec) { Game.shopBuy('dec', d.dec); return shopSheet(); }
-    if (d.daily) { const a = Game.daily(); if (a) toast('Daily tip jar: +' + money(a) + ' tips! Streak: ' + Game.S.daily.streak + ' day' + (Game.S.daily.streak > 1 ? 's' : ''), 'good'); return lobby(); }
-    if (b.id === 'goBtn') {
-      const ids = [...picked]; b.disabled = true;
-      let r; try { r = await Bridge.use(ids); } catch (x) { r = { ok: false, reason: 'The rewards app didn’t answer.' }; }
-      if (!r.ok) { toast(r.reason || 'Couldn’t start.', 'bad'); lobby(); return; }
-      const fx = {}; ids.forEach(id => { const it = Bridge.state.shop.find(x => x.id === id); if (it) fx[it.effect] = it.effect === 'time' ? (fx.time || 0) + (+it.amount || 0) : (+it.amount || 1); });
-      picked.clear(); hideAll(); input.keys.clear(); Game.begin(fx);
-    }
-    else if (b.id === 'againBtn') { lastResults = null; lobby(); }
+    if (d.daily) { const a = Game.daily(); if (a) { toast('Daily tip jar: +' + money(a) + ' tips! Streak: ' + Game.S.daily.streak + ' day' + (Game.S.daily.streak > 1 ? 's' : ''), 'good'); if (window.GK && GK.crate) setTimeout(() => GK.crate('alchemy'), 700); } return lobby(); }
+    if (b.id === 'goBtn' || b.id === 'lobbyClose') { b.disabled = true; if (G.on) { hideAll(); input.keys.clear(); if (G.paused) Game.togglePause(false); } else startRun(); }
+    else if (b.id === 'boostsBtn') { if (G.on && !G.paused) Game.togglePause(true); lastResults = null; lobby(); }
+    else if (b.id === 'againBtn') { lastResults = null; startRun(); }
     else if (b.id === 'resumeBtn' || b.id === 'pauseBtn') Game.togglePause();
     else if (b.id === 'endBtn') { Game.togglePause(false); Game.finish(); }
   });
@@ -1846,7 +1855,17 @@ const UI = (() => {
     if (!on) { View.setCover(0, 0); $('score').classList.remove('on'); }
     dirty();
   }
-  Bridge.on(() => { if (!G.on && mode === 'lobby') lobby(); else if (!G.on && !mode && !lastResults) lobby(); else if (mode === 'store') storeSheet(); });
+  // a new day with the picked boosts; the game opens the lab this way as soon as it loads (no first screen)
+  let starting = false;
+  async function startRun() {
+    if (starting) return; starting = true; const ids = [...picked];
+    let r; try { r = await Bridge.use(ids); } catch (x) { r = { ok: false, reason: 'The rewards app didn’t answer.' }; }
+    if (!r.ok) { toast(r.reason || 'Couldn’t start.', 'bad'); picked.clear(); starting = false; if (ids.length) startRun(); return; }
+    const fx = {}; ids.forEach(id => { const it = Bridge.state.shop.find(x => x.id === id); if (it) fx[it.effect] = it.effect === 'time' ? (fx.time || 0) + (+it.amount || 0) : (+it.amount || 1); });
+    picked.clear(); hideAll(); input.keys.clear(); Game.begin(fx); starting = false;
+  }
+  let autoStarted = false;
+  Bridge.on(() => { if (!G.on && mode === 'lobby') lobby(); else if (!G.on && !mode && !lastResults && !autoStarted && !starting) { autoStarted = true; startRun(); } else if (mode === 'store') storeSheet(); });
   return { lobby, results: r => { lastResults = r; results(r); }, paused, toast, dirty, floaty, banner, scoreCard, holding, release, shift, tick, get mode() { return mode; } };
 })();
 

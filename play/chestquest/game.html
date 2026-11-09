@@ -46,6 +46,9 @@ canvas#view{position:fixed;inset:0;width:100%;height:100%;display:block}
 #map{width:100%;height:100%;border-radius:16px;display:block;background:#1a1d26}
 .pause{position:fixed;top:calc(var(--sat) + 172px);right:calc(var(--sar) + 12px);width:52px;height:52px;border-radius:50%;border:0;background:#fff;color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0;min-height:0}
 .pause .vi{width:22px;height:22px}
+.pause.shopb{top:calc(var(--sat) + 232px);background:var(--violet);color:#fff}
+@media (max-width:520px){.pause.shopb{top:calc(var(--sat) + 198px)}}
+@media (max-height:500px){.pause.shopb{top:calc(var(--sat) + 190px)}}
 body.bigmap .pause{display:none}
 /* bottom bar: stamina + item slots */
 .bar{position:fixed;left:50%;bottom:calc(var(--sab) + 14px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
@@ -158,6 +161,7 @@ body.menu-open .toast{top:auto;bottom:calc(var(--sab) + 18px)}
   </div>
   <div id="mapWrap" hidden aria-label="Map"><canvas id="map" width="300" height="300"></canvas></div>
   <button class="pause" id="pauseBtn" hidden aria-label="Pause"></button>
+  <button class="pause shopb" id="shopBtn" hidden aria-label="Power-ups shop" title="Power-ups"></button>
   <div class="prompt" id="prompt"></div>
   <div class="pick" id="pick"><canvas id="ring" width="300" height="300"></canvas><div class="pbar"><i id="pickBar"></i></div><div class="lbl" id="pickLbl">Picking the lock</div></div>
   <div class="bar" id="bar" hidden>
@@ -178,6 +182,8 @@ body.menu-open .toast{top:auto;bottom:calc(var(--sab) + 18px)}
 </div>
 <div class="loading" id="loading">Lighting the torches…</div>
 
+<!-- Grug site-wide layer: UI size, centred hints, free-shop timer, tutorials, emotes, crate drops (assets/gamekit.js) -->
+<script src="../../assets/gamekit.js"></script>
 <script>
 'use strict';
 /* =====================================================================================
@@ -203,7 +209,7 @@ const vi = k => '<svg class="vi" viewBox="0 0 16 16" fill="none" aria-hidden="tr
 
 const SETTINGS = {
   title: 'Chest Quest',
-  tagline: 'Open every chest on the floor, then run back to the stairs. Monsters chase you when they see you: break their line of sight to lose them.',
+  tagline: 'Pick every chest on the floor, then race back to the stairs before the monsters catch you.',
   runSeconds: 600,                     // not a timer here: a run lasts until you run out of hearts
   collectible: 'gold',
   botSeed: 'chestquest',               // fixed seed: the merchant looks the same every visit
@@ -259,11 +265,12 @@ const Bridge = (() => {
   const wallet = () => (state ? (+state.points || 0) + (+state.pearls || 0) : 0);
   async function buy(id) {
     const it = (state.shop || []).find(x => x.id === id); if (!it) return { ok: false, reason: 'Not in the shop.' };
-    if (wallet() < it.cost) {
+    const cost = (window.GK && GK.free()) ? 0 : it.cost;   // a Free Shop Token (site-wide item) makes everything free
+    if (wallet() < cost) {
       if (mode === 'live' && state.pearlName) { post({ t: 'needPearls', id }); return { ok: false, reason: '', asked: true }; }
       return { ok: false, reason: 'You need ' + (it.cost - wallet()) + ' more points for ' + it.name + '.' };
     }
-    if (mode === 'demo') { state.points -= it.cost; state.inv[id] = (state.inv[id] || 0) + 1; demoSave(); setState(state); return { ok: true }; }
+    if (mode === 'demo') { state.points -= cost; state.inv[id] = (state.inv[id] || 0) + 1; demoSave(); setState(state); return { ok: true }; }
     return ask({ t: 'buy', id });
   }
   async function use(ids) {
@@ -782,27 +789,27 @@ const World = (() => {
     return true;
   }
   // breadth-first distance field to a cell, for monsters finding their way (4-way, warded cells closed to monsters)
-  function field(out, tx, tz) {
+  function field(out, tx, tz, friend) {   // friend: a fellow delver, who may walk through the wards
     out.fill(65535); let h = 0, t = 0; let k0 = tz * NX + tx;
     if (!inMap(tx, tz)) return out;
     out[k0] = 0; Q[t++] = k0;
     while (h < t) { const k = Q[h++], d = out[k] + 1, x = k % NX;
-      for (const nk of [x > 0 ? k - 1 : -1, x < NX - 1 ? k + 1 : -1, k >= NX ? k - NX : -1, k < N2 - NX ? k + NX : -1]) if (nk >= 0 && walk[nk] && !ward[nk] && out[nk] > d) { out[nk] = d; Q[t++] = nk; } }
+      for (const nk of [x > 0 ? k - 1 : -1, x < NX - 1 ? k + 1 : -1, k >= NX ? k - NX : -1, k < N2 - NX ? k + NX : -1]) if (nk >= 0 && walk[nk] && (friend || !ward[nk]) && out[nk] > d) { out[nk] = d; Q[t++] = nk; } }
     return out;
   }
   // the next cell centre (cm) to head for, going down a distance field, looking a few cells ahead
-  function stepDown(fl, x, z, r) {
-    let cx = cellOf(x), cz = cellOf(z), first = null;
+  function stepDown(fl, x, z, r, friend) {
+    let cx = cellOf(x), cz = cellOf(z), first = null; const mon = !friend;
     for (let s = 0; s < 5; s++) {
       const k = cz * NX + cx; let best = fl[k], bx = cx, bz = cz;
       for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
         const nx = cx + dx, nz = cz + dz; if (!inMap(nx, nz)) continue;
-        if (dx && dz && (blocked(cx + dx, cz, true) || blocked(cx, cz + dz, true))) continue;
+        if (dx && dz && (blocked(cx + dx, cz, mon) || blocked(cx, cz + dz, mon))) continue;
         const v = fl[nz * NX + nx]; if (v < best) { best = v; bx = nx; bz = nz; }
       }
       if (bx === cx && bz === cz) break;
       cx = bx; cz = bz; const p = [(cx + 0.5) * BS, (cz + 0.5) * BS];
-      if (!first) first = p; else if (!clear(x, z, p[0], p[1], r, true)) break; else first = p;
+      if (!first) first = p; else if (!clear(x, z, p[0], p[1], r, mon)) break; else first = p;
     }
     return first;
   }
@@ -1242,7 +1249,7 @@ const Act = (() => {
     const wm = moving && !P.dead && !inWard ? wallInfo(P.x, P.z, 75, true) : null;   // a wall right beside you while you walk
     if (P.dead) mode = 'dead';
     else if (P.picking) mode = 'pick';
-    else if (inWard) mode = 'safe';            // the safe room: her normal walk and idle, no acting
+    else if (inWard || P.emoting) mode = 'safe';            // the safe room (or an emote): her normal walk and idle, no acting
     else if (moving) mode = chased ? 'panic' : P.hearts <= 1 ? 'tired' : 'walk';
     else if (wi && wi.h <= 2) mode = near ? 'hide' : 'tiptoe';   // a box two blocks high or lower: duck behind it, or look over it
     else if (wi && near) mode = 'back';
@@ -1337,6 +1344,10 @@ const Game = (() => {
   const G = { mode: 'idle', paused: false, floor: 1, t: 0, grace: 0, exitOpen: false, fx: {}, gold: 0, goldTotal: 0, chestsOpened: 0, floorsCleared: 0, usedRevive: false, offered: false,
     shake: 0, beatT: 0, fieldT: 0, fieldCell: -1, pField: null, nextCheck: 0, check: null, owlT: 0, smokeT: 0, chaseN: 0, hint: {}, root: null, seed: 0, revealT: 0 };
   let P = null, merchant = null, monsters = [], chests = [], items = [], coins = null, coinList = [], exit = null, world = null, floorObjs = [];
+  // fellow delvers: two friendly Sandys who wander the floor with you, poke into rooms and point out chests (never hurt, never seen by monsters)
+  const DELVERS = [{ name: 'Mia', shirt: '#0ea5e9', hat: null }, { name: 'Pip', shirt: '#f59e0b', hat: { type: 'cap', colour: '#1e3a8a' } }];
+  let pals = [];
+  const escT = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const camT = { x: 0, z: 0, set: false };
   function makeChar(sandy, colour) {
     const o = sandy ? sandy.object3d : part([[46, 110, 30, 0, 55, 0, colour || '#2b3350'], [36, 36, 36, 0, 132, 0, '#e8b48a']]);
@@ -1349,6 +1360,9 @@ const Game = (() => {
     P = makeChar(ps, '#2b3350'); if (ps) Act.prime(ps);
     let ms = null; try { if (K) { const c = Avatars.botConfig('merchant', '#7c3aed'); c.hat = { type: 'beret', colour: '#6d28d9' }; c.outfit = Object.assign({}, c.outfit, { shorts: '#3b0764' }); ms = await K.create(c); } } catch (e) { console.warn(e); }
     merchant = makeChar(ms, '#7c3aed');
+    pals = [];
+    for (let i = 0; i < DELVERS.length; i++) { let bs = null; try { if (K) { const c = Avatars.botConfig('delver-' + i, DELVERS[i].shirt); if (DELVERS[i].hat) c.hat = Object.assign({ size: 1, up: 0, forward: 0, tilt: 0 }, DELVERS[i].hat); bs = await K.create(c); } } catch (e) { console.warn(e); }
+      const pal = makeChar(bs, DELVERS[i].shirt); Object.assign(pal, { name: DELVERS[i].name, r: 28, st: 'wait', timer: 1 + i, goal: null, gField: new Uint16Array(NX * NZ), say: '', sayT: 0, found: null, ph: i * 2.3, sprint: false }); pals.push(pal); }
     loadFloor(1, true);                    // a floor to stand in behind the lobby
   }
   const animate = (c, a, dt, rate) => { if (!c.sandy) return; if (a !== c.anim) { c.sandy.play(a); c.anim = a; } c.sandy.update(dt * (rate || 1)); };
@@ -1430,6 +1444,15 @@ const Game = (() => {
     merchant.x = (S.merchant.x + 0.5) * BS; merchant.z = (S.merchant.z + 0.5) * BS; merchant.face = Math.PI / 2; place(merchant);
     Tags.add({ pos: v => { v.set(merchant.x, 215, merchant.z); return G.mode === 'play' || G.mode === 'shop'; }, max: 1300, html: () => '<div class="bub" style="background:var(--violet)">' + vi('shop') + '</div><div class="nm">Merchant</div>' });
     P.x = (S.cx + 0.5) * BS; P.z = (S.cz + 3.5) * BS; P.face = Math.PI; place(P); CAM.yaw = 0; camT.set = false;
+    // the delvers start beside you and set off once the floor begins
+    pals.forEach((pal, i) => { pal.x = (S.cx + (i ? 2.2 : -1.2)) * BS; pal.z = (S.cz + 3.2) * BS; pal.face = Math.PI; pal.st = 'wait'; pal.timer = 2 + i * 1.5; pal.goal = null; pal.found = null; pal.say = ''; pal.sayT = 0; place(pal);
+      Tags.add({ pos: v => { v.set(pal.x, 215, pal.z); return G.mode === 'play' || G.mode === 'shop'; }, max: 1500, html: () => (pal.sayT > 0 ? '<div class="nm" style="background:var(--sky);color:#fff">' + escT(pal.say) + '</div>' : '<div class="nm">' + escT(pal.name) + '</div>') }); });
+    // low-key props in the open parts of rooms: one block or smaller, never on the walk mask (no collision), away from doors and chests
+    if (window.GK && GK.prop) { const kind = T.cave ? 'cave' : 'dungeon'; let placed = 0;
+      for (const [cx, cz] of g.roomNodes) { if (placed > 34) break; if (World.ward[cz * NX + cx] || rng() > 0.42) continue;
+        let open = true; for (let dz = -1; dz <= 1 && open; dz++) for (let dx = -1; dx <= 1; dx++) if (!World.walk[(cz + dz) * NX + cx + dx]) { open = false; break; }
+        if (!open || g.chests.some(c => Math.abs(c.x - cx) <= 4 && Math.abs(c.z - cz) <= 4) || Math.abs(cx - S.cx) + Math.abs(cz - S.cz) < 6) continue;
+        const pr = GK.prop(THREE, kind, g.seed + cx * 131 + cz * 7, { block: BS, scale: 0.7 + rng() * 0.25 }); pr.position.set((cx + 0.5 + (rng() - 0.5) * 1.2) * BS, 0, (cz + 0.5 + (rng() - 0.5) * 1.2) * BS); add(pr); placed++; } }
     G.exitOpen = false; G.grace = 3; G.check = null; if (P.picking) P.picking = null; G.owlT = 0; G.smokeT = 0;
     World.reveal(P.x, P.z, 6);
   }
@@ -1442,13 +1465,36 @@ const Game = (() => {
     P.st = P.stBase; (fx.kit || []).forEach(k => { if (ITEMS[k]) give(k, true); });
     Act.reset();
   }
+  // a power-up switched on from the in-game shop takes effect right away
+  function applyFx(it) {
+    if (!it || !P || G.mode !== 'play') return false; const a = +it.amount;
+    if (it.effect === 'heart') { P.hearts += a || 1; P.maxHearts += a || 1; G.fx.heart = (G.fx.heart || 0) + (a || 1); }
+    else if (it.effect === 'stamina') { P.stBase = Math.round(P.stBase * (a || 1.4)); P.st = Math.min(stMax(), P.st + 40); G.fx.stamina = (G.fx.stamina || 1) * (a || 1.4); }
+    else if (it.effect === 'unlock') G.fx.unlock = (G.fx.unlock || 1) * (a || 1.3);
+    else if (it.effect === 'speed') G.fx.speed = (G.fx.speed || 1) * (a || 1.12);
+    else if (it.effect === 'double') G.fx.double = Math.max(G.fx.double || 1, a || 2);
+    else if (it.effect === 'radar') G.fx.radar = 1;
+    else if (it.effect === 'revive') G.fx.revive = a || 2;
+    else if (it.effect === 'kit') { const ks = String(it.amount || '').split(',').map(x => x.trim()).filter(Boolean); if (ks.some(k => ITEMS[k]) && P.inv.indexOf(null) < 0) return 'full'; ks.forEach(k => { if (ITEMS[k]) give(k, true); }); }
+    return true;
+  }
   function begin(fx) {
     G.fx = fx; G.gold = 0; G.goldTotal = 0; G.chestsOpened = 0; G.floorsCleared = 0; G.usedRevive = false; G.offered = false; G.hint = {};
     input.runToggle = false; newPlayer(fx); loadFloor(1); G.mode = 'play'; G.paused = false; UI.hud(true); intro();
   }
   function intro() {
     UI.banner('Floor ' + G.floor, World.theme.n + ' · ' + chests.length + ' chest' + (chests.length > 1 ? 's' : '') + ' · ' + monsters.length + ' monster' + (monsters.length > 1 ? 's' : ''));
-    if (G.floor === 1 && !G.hint.start) { G.hint.start = 1; setTimeout(() => UI.toast('Head for a chest marker: you can see them through walls, and every chest is on your map. This room is safe: monsters can\'t pass the glowing doorways.'), 2400); }
+    if (G.floor === 1 && !G.hint.start) { G.hint.start = 1;
+      const tutOn = window.GK && GK.tutorial && GK.tutorial('chestquest', [
+        { title: 'Chest Quest', text: TOUCH ? 'Drag on the left of the screen to walk. Try it now!' : 'Walk with W A S D or the arrow keys. Try it now!', skill: 'move', until: () => P.moving, hideNext: true },
+        { title: 'Sprint', skill: 'sprint', text: TOUCH ? 'Tap the runner to sprint. It drains the stamina bar, but no monster can keep up.' : 'Hold Shift to sprint. It drains the stamina bar, but no monster can keep up.', target: TOUCH ? '#runBtn' : '#stam', until: () => P.sprinting, hideNext: true },
+        { title: 'Chests', text: 'Follow a chest marker: you see them through walls, and every chest is on the map. Mia and Pip will point them out too.', target: '#mapWrap' },
+        { title: 'Locks', text: TOUCH ? 'Stand by a chest to pick its lock. When the needle sweeps into the gold, tap the ring.' : 'Stand by a chest to pick its lock. When the needle sweeps into the gold, press Space.' },
+        { title: 'Monsters', text: 'Monsters can\'t be beaten. Break their line of sight (duck behind a column or a crate) and they give up. This start room is safe.' },
+        { title: 'Stairs', text: 'Open every chest, then run back here and take the stairs down. Good luck, delver!', doneLabel: 'Let\'s go!' }
+      ]);
+      if (!tutOn || tutOn === false) setTimeout(() => UI.toast('Follow a chest marker. This room is safe.'), 2400);
+    }
   }
   const stMax = () => P.stBase + (P.boostT > 0 ? P.boost : 0);
   function give(kind, quiet) {
@@ -1514,6 +1560,7 @@ const Game = (() => {
   }
   function openChest(ch) {
     ch.open = true; P.picking = null; G.check = null; G.chestsOpened++; Sfx.play('open');
+    if (window.GK && GK.crate) setTimeout(() => GK.crate('chestquest'), 900);   // every chest is a loot box: a chance at a site-wide item
     ch.glow.visible = false; ch.m.visible = false;   // the chest bursts into a pile of gold coins
     burstCoins(ch.x, ch.z, 16); const p = add(glowPoints(Array.from({ length: 22 }, () => [ch.x + rand(-70, 70), rand(10, 130), ch.z + rand(-70, 70)]), '#fde047', 150)); p.userData.fade = 1.2;
     if (!G.hint.burst) { G.hint.burst = 1; setTimeout(() => UI.toast('Grab the gold! Spend it with the merchant.', 'good'), 600); }
@@ -1607,6 +1654,61 @@ const Game = (() => {
     G.revealT -= dt; if (G.revealT <= 0) { G.revealT = 0.2; World.reveal(P.x, P.z, 6); for (const c of chests) if (!c.found && Math.hypot(c.x - P.x, c.z - P.z) < 1500 && World.los(P.x, P.z, c.x, c.z)) { c.found = true; } }
     G.owlT = Math.max(0, G.owlT - dt); G.smokeT = Math.max(0, G.smokeT - dt);
     return { moving, sp };
+  }
+  /* ---------- the fellow delvers ---------- */
+  const PAL_LINES = { go: ['This way!', 'Let\'s look in here', 'Come on!', 'Stay close', 'I\'ll check that room'], found: ['A chest! Over here!', 'Found one!', 'Chest! Come pick it!', 'Here, here!'], safe: ['Phew, safe room', 'Made it back'], open: ['Nice one!', 'Shiny!', 'Woo, gold!'], scared: ['Eek, hide!', 'Run!', 'Don\'t let it see you!'] };
+  const palSay = (pal, k, t) => { pal.say = PAL_LINES[k][Math.floor(Math.random() * PAL_LINES[k].length)]; pal.sayT = t || 2.2; };
+  function palGoal(pal, x, z) { pal.goal = [x, z]; World.field(pal.gField, World.cellOf(x), World.cellOf(z), true); pal.stuckT = 0; }
+  function movePal(pal, tx, tz, sp, dt) {
+    let aim = null;
+    if (World.clear(pal.x, pal.z, tx, tz, pal.r, false)) aim = [tx, tz]; else aim = World.stepDown(pal.gField, pal.x, pal.z, pal.r, true);
+    if (!aim) return false;
+    const dx = aim[0] - pal.x, dz = aim[1] - pal.z, d = Math.hypot(dx, dz); if (d < 4) return false;
+    const s = Math.min(d, sp * dt); pal.x += dx / d * s; pal.z += dz / d * s; World.collide(pal, pal.r, false);
+    pal.face += angDiff(pal.face, Math.atan2(dx, dz)) * Math.min(1, dt * 8); return true;
+  }
+  function palGoalRoom(pal) {
+    // a random room node, preferring rooms the player isn't in (so they go poking about)
+    const g = World.g, pr = World.roomAt[cellK(P.x, P.z)]; let best = null;
+    for (let t = 0; t < 8; t++) { const [cx, cz] = g.roomNodes[Math.floor(Math.random() * g.roomNodes.length)]; if (!World.walk[cz * NX + cx]) continue; best = [cx, cz]; if (World.roomAt[cz * NX + cx] !== pr) break; }
+    if (best) palGoal(pal, (best[0] + 0.5) * BS, (best[1] + 0.5) * BS);
+  }
+  function stepPals(dt) {
+    const chase = monsters.some(m => m.st === 'chase');
+    for (const pal of pals) {
+      pal.timer -= dt; pal.moving = false; pal.sprint = false;
+      const dP = Math.hypot(P.x - pal.x, P.z - pal.z), closed = chests.filter(c => !c.open);
+      // a chest nearby that's still shut: stop and point at it for the player
+      const near = closed.find(c => Math.hypot(c.x - pal.x, c.z - pal.z) < 520);
+      if (near && pal.st !== 'point' && pal.st !== 'wait' && pal.found !== near) { pal.st = 'point'; pal.found = near; pal.timer = 4.5; pal.goal = null; palSay(pal, 'found', 3); }
+      switch (pal.st) {
+        case 'wait': if (pal.timer <= 0) { pal.st = Math.random() < 0.5 ? 'follow' : 'explore'; pal.timer = rand(8, 16); pal.goal = null; if (pal.st === 'explore') palSay(pal, 'go'); } break;
+        case 'follow': {
+          // walk alongside the player: a step behind and to one side, sprinting if left behind
+          const side = pals.indexOf(pal) ? -1 : 1, tx = P.x - Math.sin(P.face) * 170 + Math.cos(P.face) * 95 * side, tz = P.z - Math.cos(P.face) * 170 - Math.sin(P.face) * 95 * side;
+          const d = Math.hypot(tx - pal.x, tz - pal.z);
+          if (d > 70) { pal.sprint = d > 600; const k = cellK(tx, tz); if (pal.goalK !== k || G.t - (pal.gT || 0) > 0.6) { palGoal(pal, World.walk[k] ? tx : P.x, World.walk[k] ? tz : P.z); pal.goalK = k; pal.gT = G.t; }
+            pal.moving = movePal(pal, pal.goal[0], pal.goal[1], WALK * (pal.sprint ? 1.45 : 0.98), dt); }
+          else pal.face += angDiff(pal.face, P.face) * Math.min(1, dt * 3);
+          if (pal.timer <= 0) { pal.st = 'explore'; pal.timer = rand(10, 20); pal.goal = null; palSay(pal, 'go'); }
+          break; }
+        case 'explore': {
+          // go poke into a random room; head toward a shut chest's room now and then (they help find them)
+          if (!pal.goal) { if (closed.length && Math.random() < 0.45) { const c = closed[Math.floor(Math.random() * closed.length)]; palGoal(pal, c.x + rand(-220, 220), c.z + rand(-220, 220)); } else palGoalRoom(pal); }
+          pal.sprint = dP > 2600; pal.moving = movePal(pal, pal.goal[0], pal.goal[1], WALK * (pal.sprint ? 1.4 : 0.85), dt);
+          if (!pal.moving || Math.hypot(pal.goal[0] - pal.x, pal.goal[1] - pal.z) < 90) { pal.goal = null; if (Math.random() < 0.3) { pal.st = 'look'; pal.timer = rand(1.5, 3); } }
+          if (pal.timer <= 0 || dP > 3600) { pal.st = 'follow'; pal.timer = rand(8, 14); pal.goal = null; pal.goalK = -1; }
+          break; }
+        case 'look': pal.face += dt * 1.2; if (pal.timer <= 0) { pal.st = 'explore'; pal.timer = rand(8, 14); pal.goal = null; } break;
+        case 'point': { const c = pal.found; if (c) pal.face += angDiff(pal.face, Math.atan2(c.x - pal.x, c.z - pal.z)) * Math.min(1, dt * 6);
+          if (pal.timer <= 0 || (c && c.open)) { if (c && c.open) { pal.st = 'cheer'; pal.timer = 1.6; palSay(pal, 'open', 1.6); } else { pal.st = 'follow'; pal.timer = rand(6, 12); pal.goal = null; pal.goalK = -1; } }
+          break; }
+        case 'cheer': if (pal.timer <= 0) { pal.st = 'explore'; pal.timer = rand(8, 14); pal.goal = null; } break;
+      }
+      if (chase && pal.sayT <= 0 && Math.random() < dt * 0.15) palSay(pal, 'scared', 1.5);
+      // never stand in the player
+      const dx = P.x - pal.x, dz = P.z - pal.z, d = Math.hypot(dx, dz); if (d < 55 && d > 0.1) { pal.x = P.x - dx / d * 55; pal.z = P.z - dz / d * 55; }
+    }
   }
   function canSee(m) {
     if (P.dead || G.smokeT > 0 || inWard(P.x, P.z) || G.grace > 0) return false;
@@ -1710,19 +1812,21 @@ const Game = (() => {
     G.t += dt;
     const live = G.mode === 'play' && !G.paused;
     let mv = { moving: false, sp: 0 };
-    if (live) { mv = stepPlayer(dt); stepMonsters(dt); }
+    if (live) { mv = stepPlayer(dt); stepMonsters(dt); stepPals(dt); }
     if (G.mode === 'down' && !G.paused) { G.downT -= dt; if (G.downT <= 0) { G.mode = 'wait'; afterDown(); } }
     if (!G.paused || G.mode !== 'play') {
       // the player's avatar
       place(P); P.root.visible = !(P.invuln > 0 && !P.dead && Math.floor(G.t * 12) % 2 === 0 && G.mode === 'play');
       const chasedNow = monsters.some(m => m.st === 'chase');
-      animate(P, P.dead || Act.mode === 'shimmy' ? 'idle' : mv.moving ? 'walk' : 'idle', dt, mv.moving ? clamp(mv.sp / 300, 0.7, 2.2) * (chasedNow ? 1.3 : P.hearts <= 1 ? 0.8 : 1) : (P.hearts <= 1 ? 0.7 : 1));
+      const emo = window.GK && GK.emotes ? GK.emotes.anim(mv.moving || P.dead || !!P.picking || G.mode !== 'play' || Act.mode === 'shimmy') : null; P.emoting = !!emo;
+      animate(P, emo || (P.dead || Act.mode === 'shimmy' ? 'idle' : mv.moving ? 'walk' : 'idle'), dt, mv.moving ? clamp(mv.sp / 300, 0.7, 2.2) * (chasedNow ? 1.3 : P.hearts <= 1 ? 0.8 : 1) : (P.hearts <= 1 ? 0.7 : 1));
       Act.frame(P, G, dt, mv, monsters, inWard(P.x, P.z));
       if (P.dead && P.sandy) P.root.rotation.z = Math.min(1.4, (P.root.rotation.z || 0) + dt * 3); else P.root.rotation.z = 0;
       // the merchant looks at you when you're close
       const dm = Math.hypot(merchant.x - P.x, merchant.z - P.z);
       merchant.face += angDiff(merchant.face, dm < 700 ? Math.atan2(P.x - merchant.x, P.z - merchant.z) : Math.PI / 2) * Math.min(1, dt * 4); place(merchant);
       animate(merchant, 'idle', dt, 1);
+      for (const pal of pals) { place(pal); animate(pal, pal.st === 'point' ? 'wave' : pal.st === 'cheer' ? 'cheer' : pal.moving ? 'walk' : 'idle', dt, pal.moving ? (pal.sprint ? 1.9 : 1.15) : 1); pal.sayT = Math.max(0, pal.sayT - dt); }
       if (merchant.sandy && merchant.sandy.lookAt) { try { merchant.sandy.lookAt(dm < 700 ? new THREE.Vector3(P.x, 150, P.z) : null); } catch (e) {} }
       animMonsters(live ? dt : 0);
       // chests, items, coins, the stair hatch
@@ -1761,7 +1865,8 @@ const Game = (() => {
   }
   Bridge.on((s, ev) => { if (ev === 'pause') togglePause(true); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) togglePause(true); });
-  return { setup, begin, step, togglePause, revive, finish, nextFloor, closeShop, buyFromMerchant, useItem, stMax: () => stMax(),
+  if (window.GK && GK.emotes) GK.emotes.install({ play: () => { if (P) P.picking = null; }, canEmote: () => G.mode === 'play' && !G.paused && P && !P.dead });
+  return { setup, begin, step, togglePause, revive, finish, nextFloor, closeShop, buyFromMerchant, useItem, applyFx, stMax: () => stMax(),
     get G() { return G; }, get P() { return P; }, get running() { return G.mode === 'play'; }, get chests() { return chests; }, get monsters() { return monsters; }, get exit() { return exit; } };
 })();
 
@@ -1778,7 +1883,7 @@ const UI = (() => {
   // a Grug original (standalone: no restaurant) is paid in Pearls only
   const solo = () => !!(Bridge.state && Bridge.state.standalone), price = c => solo() ? c + ' ' + ((Bridge.state && Bridge.state.pearlName) || 'Pearls') : c + ' pts';
   const picked = new Set(); let toastT = 0, bannerT = 0, sheet = null, stock = null, stockFloor = -1;
-  $('hudFloorIc').innerHTML = vi('stairs'); $('hudChestIc').innerHTML = vi('chest'); $('hudGoldIc').innerHTML = vi('coin'); $('pauseBtn').innerHTML = vi('pause');
+  $('hudFloorIc').innerHTML = vi('stairs'); $('hudChestIc').innerHTML = vi('chest'); $('hudGoldIc').innerHTML = vi('coin'); $('pauseBtn').innerHTML = vi('pause'); $('shopBtn').innerHTML = vi('shopping_bag');
   $('actBtn').innerHTML = vi('hand'); $('runBtn').innerHTML = vi('person_run');
   if (TOUCH) document.body.classList.add('touch');
   function toast(t, kind) { const el = $('toast'); el.textContent = t; el.className = 'toast on ' + (kind || ''); clearTimeout(toastT); toastT = setTimeout(() => el.className = 'toast', 3000); }
@@ -1801,20 +1906,34 @@ const UI = (() => {
     '<div>' + tile('person_run', 'var(--green)') + '<span>' + keyName('Hold <b>Shift</b> to sprint', 'Tap the <b>runner</b> to sprint') + ': faster than any monster, but it uses stamina.</span></div>' +
     '<div>' + tile('shopping_bag', 'var(--violet)') + '<span>Carry up to 3 items' + keyName(' (keys <b>1 2 3</b>)', '') + '. The merchant sells more for gold.</span></div>' +
     '<div>' + tile('stairs', 'var(--indigo)') + '<span>Then run back to the stairs and go deeper. The start room is safe: monsters can\'t pass its glowing doorways.</span></div></div>';
+  /* the power-up shop. Players land straight in the dungeon (no first screen): this opens from the Shop button in the HUD
+     (mid-run: a power-up switched on works right away) or from the run-over screen (for the next run). */
   function lobby() {
     const s = Bridge.state; if (!s) return;
-    const cur = s.pearlName ? 'points or ' + s.pearlName : 'points';
-    show('lobby', '<div class="top">' + tile('chest', 'var(--amber)') + '<div><h1>' + esc(s.title || SETTINGS.title) + '</h1><small>' + esc(s.store || (s.demo ? 'Demo mode · pretend points' : '')) + '</small></div></div><div class="body">' +
-      '<p class="lead">' + esc(SETTINGS.tagline) + '</p>' + howto() +
+    const cur = s.pearlName ? 'points or ' + s.pearlName : 'points', inRun = Game.G.mode === 'play';
+    show('lobby', '<div class="top">' + tile('shopping_bag', 'var(--violet)') + '<div><h1>Power-ups</h1><small>' + esc(inRun ? 'Switched on now, they last this run' : 'Picked ones start with your next run') + '</small></div>' + (inRun ? '<button class="x" id="lobbyClose" aria-label="Close">' + vi('cross') + '</button>' : '') + '</div><div class="body">' +
       '<div class="stats">' + (solo() ? '' : '<div class="stat"><b style="color:var(--violet)">' + (s.points || 0) + '</b><small>Points</small></div>') + (s.pearlName ? '<div class="stat"><b style="color:var(--sky)">' + (s.pearls || 0) + '</b><small>' + esc(s.pearlName) + '</small></div>' : '') + '<div class="stat"><b style="color:var(--amber)">' + (s.best || 0) + '</b><small>Best score</small></div></div>' +
       '<div class="h" style="color:var(--violet)">Power-ups<small>each lasts one run</small></div><div class="items">' + s.shop.map(it => { const own = +(s.inv || {})[it.id] || 0, can = Bridge.wallet() >= it.cost, [ic, c] = fxOf(it);
         return '<div class="item' + (picked.has(it.id) ? ' on' : '') + '">' + tile(ic, c) + '<div class="txt"><b>' + esc(it.name) + '</b><small>' + esc(it.desc || '') + (own ? ' · you have ' + own : '') + '</small></div><div class="btns">' +
-          (own ? '<button class="' + (picked.has(it.id) ? '' : 'ghost') + '" data-pick="' + esc(it.id) + '">' + (picked.has(it.id) ? vi('checkmark') + 'On' : 'Use') + '</button>' : '') +
+          (own ? '<button class="' + (picked.has(it.id) ? '' : 'ghost') + '" data-pick="' + esc(it.id) + '">' + (picked.has(it.id) ? vi('checkmark') + 'On' : inRun ? 'Use now' : 'Use') + '</button>' : '') +
           '<button class="' + (can ? '' : 'dim') + '" style="' + (can ? 'background:' + c : '') + '" data-buy="' + esc(it.id) + '">' + price(it.cost) + '</button></div></div>'; }).join('') + '</div>' +
-      '<button class="go" id="goBtn">' + vi('play') + 'Start' + (picked.size ? ' with ' + picked.size + ' power-up' + (picked.size > 1 ? 's' : '') : '') + '</button>' +
-      '<p class="note">' + (solo() ? 'Power-ups cost ' + esc(s.pearlName || 'Pearls') + ', the Grug currency. They work in every Grug game.' : 'Power-ups cost ' + esc(cur) + '. Points come from eating at the partner.') + '</p>' +
-      '<p class="note">' + (TOUCH ? 'Left thumb moves, drag on the right turns the camera, the hand opens chests and talks, the runner sprints.' : 'WASD moves · drag turns the camera · Shift sprints · E opens chests and talks · Space for lock checks · 1 2 3 items · M map · P pause') + '</p>' + settings() + '</div>');
+      '<button class="go" id="goBtn">' + vi('play') + (inRun ? 'Back to the dungeon' : 'Start' + (picked.size ? ' with ' + picked.size + ' power-up' + (picked.size > 1 ? 's' : '') : '')) + '</button>' +
+      '<p class="note">' + (solo() ? 'Power-ups cost ' + esc(s.pearlName || 'Pearls') + ', the Grug currency. They work in every Grug game.' : 'Power-ups cost ' + esc(cur) + '. Points come from eating at the partner.') + '</p></div>');
   }
+  // a new run with the picked power-ups (the game starts this way as soon as it loads: there is no first screen)
+  async function startRun() {
+    const ids = [...picked];
+    let r; try { r = await Bridge.use(ids); } catch (x) { r = { ok: false, reason: 'The rewards app didn’t answer.' }; }
+    if (!r.ok) { toast(r.reason || 'Couldn’t start.', 'bad'); picked.clear(); if (Game.G.mode === 'idle') startRun(); return; }
+    const fx = { heart: 0, stamina: 1, unlock: 1, speed: 1, double: 1, radar: 0, revive: 0, kit: [] };
+    ids.forEach(id => { const it = Bridge.state.shop.find(x => x.id === id); if (!it) return; const a = +it.amount;
+      if (it.effect === 'heart') fx.heart += a || 1; else if (it.effect === 'stamina') fx.stamina *= a || 1.4; else if (it.effect === 'unlock') fx.unlock *= a || 1.3;
+      else if (it.effect === 'speed') fx.speed *= a || 1.12; else if (it.effect === 'double') fx.double = Math.max(fx.double, a || 2); else if (it.effect === 'radar') fx.radar = 1;
+      else if (it.effect === 'revive') fx.revive = a || 2; else if (it.effect === 'kit') fx.kit.push(...String(it.amount || '').split(',').map(x => x.trim()).filter(Boolean)); });
+    picked.clear(); closeSheets(); Game.begin(fx);
+  }
+  // the Shop button in the HUD: pause and open the power-ups
+  function openShopBtn() { if (Game.G.mode !== 'play') return; if (!Game.G.paused) Game.togglePause(true); lobby(); }
   function shop() {
     const G = Game.G, P = Game.P;
     if (stockFloor !== G.floor) { stockFloor = G.floor; const seen = new Set(); stock = []; for (let t = 0; t < 40 && stock.length < 4; t++) { const k = rollItem(G.floor); if (!seen.has(k)) { seen.add(k); stock.push({ kind: k, sold: false }); } } }
@@ -1846,11 +1965,11 @@ const UI = (() => {
     show('results', '<div class="top">' + tile(r.cleared ? 'trophy' : 'chest', r.cleared ? 'var(--amber)' : 'var(--sky)', 1) + '<div><h1>Run over</h1><small>You reached floor ' + r.floor + (r.score >= best && r.score > 0 ? ' · new best!' : '') + '</small></div></div><div class="body">' +
       '<div class="stats"><div class="stat"><b style="color:var(--violet)">' + r.score + '</b><small>Score</small></div><div class="stat"><b style="color:var(--indigo)">' + r.floor + '</b><small>Floor</small></div><div class="stat"><b style="color:var(--amber)">' + r.chests + '</b><small>Chests</small></div><div class="stat"><b style="color:#ca8a04">' + r.gold + '</b><small>Gold</small></div></div>' +
       '<p class="note">Score: 100 a floor cleared, 25 a chest, 1 a gold coin.</p>' +
-      '<button class="go" id="againBtn">' + vi('arrows_clockwise') + 'Play again</button></div>');
+      '<button class="go" id="againBtn">' + vi('arrows_clockwise') + 'Play again</button><button class="go ghost" id="powerBtn">' + vi('shopping_bag') + 'Power-ups for the next run</button></div>');
   }
   function paused(on) {
     if (on) show('results', '<div class="top">' + tile('pause', '#64748b') + '<div><h1>Paused</h1><small>Floor ' + Game.G.floor + ' · the monsters are waiting too.</small></div></div><div class="body"><button class="go" id="resumeBtn">' + vi('play') + 'Keep going</button>' +
-      '<button class="go ghost" id="quitBtn">' + vi('flag_checkered') + 'End the run</button>' + howto() + settings() + '</div>');
+      '<button class="go ghost" id="shopBtn">' + vi('shopping_bag') + 'Power-ups</button><button class="go ghost" id="quitBtn">' + vi('flag_checkered') + 'End the run</button>' + howto() + settings() + '</div>');
     else closeSheets();
   }
   // clicks
@@ -1860,22 +1979,20 @@ const UI = (() => {
     Sfx.unlock();
     if (b.dataset.gfx || b.dataset.scale || b.dataset.sound) {
       if (b.dataset.gfx) View.set('quality', b.dataset.gfx); else if (b.dataset.scale) View.set('scale', +b.dataset.scale); else View.set('sound', b.dataset.sound === 'on');
-      if (Game.G.mode === 'play') paused(true); else lobby(); return;
+      if (Game.G.mode === 'play') paused(true); else if (sheet === 'lobby') lobby(); return;
     }
-    if (b.dataset.pick) { picked.has(b.dataset.pick) ? picked.delete(b.dataset.pick) : picked.add(b.dataset.pick); lobby(); }
+    if (b.dataset.pick && Game.G.mode === 'play') {
+      const it = (Bridge.state.shop || []).find(x => x.id === b.dataset.pick); b.disabled = true;
+      let r; try { r = await Bridge.use([b.dataset.pick]); } catch (x) { r = { ok: false, reason: 'The rewards app didn’t answer.' }; }
+      if (!r.ok) toast(r.reason || 'Couldn’t use that.', 'bad'); else { const ok = Game.applyFx(it); if (ok === 'full') toast('Your bag is full: the satchel items wait for the next run.', 'bad'); else toast(it.name + ' is on!', 'good'); }
+      lobby();
+    }
+    else if (b.dataset.pick) { picked.has(b.dataset.pick) ? picked.delete(b.dataset.pick) : picked.add(b.dataset.pick); lobby(); }
     else if (b.dataset.buy) { b.disabled = true; try { const r = await Bridge.buy(b.dataset.buy); if (r.ok) toast('Added. Tap Use to take it into the run.', 'good'); else if (r.reason) toast(r.reason, 'bad'); } catch (x) { toast('The rewards app didn’t answer. Try again.', 'bad'); } if (sheet === 'lobby') lobby(); }
-    else if (b.id === 'goBtn') {
-      const ids = [...picked]; b.disabled = true;
-      let r; try { r = await Bridge.use(ids); } catch (x) { r = { ok: false, reason: 'The rewards app didn’t answer.' }; }
-      if (!r.ok) { toast(r.reason || 'Couldn’t start.', 'bad'); lobby(); return; }
-      const fx = { heart: 0, stamina: 1, unlock: 1, speed: 1, double: 1, radar: 0, revive: 0, kit: [] };
-      ids.forEach(id => { const it = Bridge.state.shop.find(x => x.id === id); if (!it) return; const a = +it.amount;
-        if (it.effect === 'heart') fx.heart += a || 1; else if (it.effect === 'stamina') fx.stamina *= a || 1.4; else if (it.effect === 'unlock') fx.unlock *= a || 1.3;
-        else if (it.effect === 'speed') fx.speed *= a || 1.12; else if (it.effect === 'double') fx.double = Math.max(fx.double, a || 2); else if (it.effect === 'radar') fx.radar = 1;
-        else if (it.effect === 'revive') fx.revive = a || 2; else if (it.effect === 'kit') fx.kit.push(...String(it.amount || '').split(',').map(x => x.trim()).filter(Boolean)); });
-      picked.clear(); closeSheets(); Game.begin(fx);
-    }
-    else if (b.id === 'againBtn') lobby();
+    else if (b.id === 'goBtn' || b.id === 'lobbyClose') { b.disabled = true; if (Game.G.mode === 'play') { closeSheets(); if (Game.G.paused) Game.togglePause(false); } else startRun(); }
+    else if (b.id === 'shopBtn') openShopBtn();
+    else if (b.id === 'againBtn') startRun();
+    else if (b.id === 'powerBtn') lobby();
     else if (b.id === 'pauseBtn' || b.id === 'resumeBtn') Game.togglePause();
     else if (b.id === 'quitBtn') { closeSheets(); Game.finish(); }
     else if (b.id === 'shopClose' || b.id === 'shopBack') { closeSheets(); Game.closeShop(); }
@@ -1918,7 +2035,7 @@ const UI = (() => {
   slotsEl.addEventListener('pointerdown', e => { slotPtr = e.pointerType || 'mouse'; });
   slotsEl.addEventListener('pointerover', e => { const b = e.target.closest('.slot'); if (b && e.pointerType === 'mouse') showTip(+b.dataset.slot, false); });
   slotsEl.addEventListener('pointerout', e => { const b = e.target.closest('.slot'); if (b && e.pointerType === 'mouse' && !b.contains(e.relatedTarget)) hideTip(); });
-  function hud(on) { hideTip(); for (const id of ['hud', 'pauseBtn', 'bar', 'mapWrap']) $(id).hidden = !on; document.body.classList.toggle('playing', on); if (!on) { $('prompt').style.display = 'none'; $('pick').style.display = 'none'; $('vign').classList.remove('on'); } }
+  function hud(on) { hideTip(); for (const id of ['hud', 'pauseBtn', 'shopBtn', 'bar', 'mapWrap']) $(id).hidden = !on; document.body.classList.toggle('playing', on); if (!on) { $('prompt').style.display = 'none'; $('pick').style.display = 'none'; $('vign').classList.remove('on'); } }
   let last = {}, ringRes = null, ringResT = 0;
   const setIf = (k, v, f) => { if (last[k] !== v) { last[k] = v; f(v); } };
   function heartsBump() { const el = $('hudHearts'); el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); }
@@ -1988,8 +2105,8 @@ const UI = (() => {
     setIf('vign', live && G.chaseN > 0, v => $('vign').classList.toggle('on', v));
     drawMap(dt, G, P, chests, monsters);
   }
-  Bridge.on(() => { if (sheet === 'lobby' || (sheet === null && Game.G.mode === 'idle')) lobby(); else if (Game.G.mode === 'offer' && sheet === 'results') { const sw = (Bridge.state.shop || []).find(x => x.effect === 'revive'); if (sw) down(sw); } });
-  return { lobby, hud, frame, toast, banner, results, floorDone, shop, down, paused, closeSheets, heartsBump, hurt, checkResult, get sheet() { return sheet; } };
+  Bridge.on(() => { if (sheet === 'lobby') lobby(); else if (sheet === null && Game.G.mode === 'idle' && !UI.starting) { UI.starting = true; startRun(); } else if (Game.G.mode === 'offer' && sheet === 'results') { const sw = (Bridge.state.shop || []).find(x => x.effect === 'revive'); if (sw) down(sw); } });
+  return { lobby, startRun, openShopBtn, hud, frame, toast, banner, results, floorDone, shop, down, paused, closeSheets, heartsBump, hurt, checkResult, starting: false, get sheet() { return sheet; } };
 })();
 
 /* ---------- boot ---------- */

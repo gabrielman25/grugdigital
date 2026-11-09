@@ -57,10 +57,27 @@
       inventory: [],            // earned (non-free) item ids
       earned: {},               // item id → {at, how}
       stats: { plays: {}, checkins: {}, best: {}, course: {}, days: {}, lastGame: '', lastPlayed: 0 },
-      prefs: { motion: true, haptics: true, colorIcons: false },
+      prefs: { motion: true, haptics: true, colorIcons: false, uiScale: 1 },
+      items: {},                // site-wide items (inventory on the settings page): item id → {n, at}; see ITEMS below
+      emotes: EMOTE_DEFAULT.slice(),   // the emotes brought into games (ids from EMOTES, in wheel order)
       seen: {}                  // one-time hints
     };
   }
+  /* ---------- emotes: played in any game you can walk around in (the emote wheel), picked in the avatar editor ----------
+     anim = the SandyKit animation name (assets/sandy-runtime.js ANIMS). Everyone owns all of them; a loadout holds up to EMOTE_MAX. */
+  const EMOTES = [
+    { id: 'wave',   name: 'Wave',       anim: 'wave',    icon: 'hand-waving', hue: '#3b82f6' },
+    { id: 'dance',  name: 'Groove',     anim: 'dance',   icon: 'sparkle',     hue: '#ec4899' },
+    { id: 'disco',  name: 'Disco',      anim: 'disco',   icon: 'star',        hue: '#a855f7' },
+    { id: 'shuffle', name: 'Shuffle',   anim: 'shuffle', icon: 'sneaker',     hue: '#22c55e' },
+    { id: 'robot',  name: 'Robot',      anim: 'robot',   icon: 'lightning',   hue: '#06b6d4' },
+    { id: 'cheer',  name: 'Cheer',      anim: 'cheer',   icon: 'confetti',    hue: '#f59e0b' },
+    { id: 'bow',    name: 'Bow',        anim: 'bow',     icon: 'crown-simple', hue: '#f43f5e' },
+    { id: 'flex',   name: 'Flex',       anim: 'flex',    icon: 'fire',        hue: '#f97316' },
+    { id: 'jump',   name: 'Hop',        anim: 'jump',    icon: 'rocket',      hue: '#14b8a6' }
+  ];
+  const EMOTE_DEFAULT = ['wave', 'dance', 'cheer', 'bow'], EMOTE_MAX = 6;
+  const emoteOf = id => EMOTES.find(e => e.id === id) || null;
   function normalize(p) {
     const f = fresh(); p = p && typeof p === 'object' ? p : {};
     const o = {
@@ -72,11 +89,73 @@
       earned: p.earned && typeof p.earned === 'object' ? p.earned : {},
       stats: Object.assign(f.stats, p.stats && typeof p.stats === 'object' ? p.stats : {}),
       prefs: Object.assign(f.prefs, p.prefs && typeof p.prefs === 'object' ? p.prefs : {}),
+      items: p.items && typeof p.items === 'object' && !Array.isArray(p.items) ? p.items : {},
+      emotes: Array.isArray(p.emotes) ? p.emotes.filter(id => emoteOf(id)).slice(0, EMOTE_MAX) : EMOTE_DEFAULT.slice(),
       seen: p.seen && typeof p.seen === 'object' ? p.seen : {}
     };
     ['plays', 'checkins', 'best', 'course', 'days'].forEach(k => { if (!o.stats[k] || typeof o.stats[k] !== 'object') o.stats[k] = {}; });
     o.inventory = Array.from(new Set(o.inventory));
+    o.emotes = Array.from(new Set(o.emotes)); if (!o.emotes.length) o.emotes = EMOTE_DEFAULT.slice();
+    o.prefs.uiScale = UI_SCALES.includes(+o.prefs.uiScale) ? +o.prefs.uiScale : 1;
+    Object.keys(o.items).forEach(k => { const v = o.items[k]; if (!ITEMS[k] || !v || typeof v !== 'object' || !(+v.n > 0)) delete o.items[k]; else v.n = Math.min(ITEMS[k].max, Math.floor(+v.n)); });
     return o;
+  }
+  /* ---------- site-wide items: dropped by crates and eggs in every game, kept here, used from Settings (or wherever they're shown).
+     max = how many can be held (1 = doesn't stack). use(id) runs the effect and takes one.
+     free-shop: everything in the Shop catalog and every game store is free for 3 minutes; a timer shows at the top of the screen. */
+  const UI_SCALES = [0.85, 1, 1.15, 1.3];
+  const BOOST_KEY = 'grug.boost.v1';   // live effects, in their own key so games (iframes) and other tabs see them change
+  const ITEMS = {
+    'free-shop': { id: 'free-shop', name: 'Free Shop Token', icon: 'ticket', hue: '#f59e0b', max: 1, minutes: 3,
+      desc: 'Everything in every shop is free for 3 minutes: the closet, Pearl power-ups, passes, the lot. Only one can be held at a time.',
+      effect: 'freeShop' }
+  };
+  const ITEM_DROP = 0.06;   // chance each crate, egg or loot box in any game drops the token (when none is held)
+  const boostRaw = () => { const b = readJSON(BOOST_KEY, null); return b && typeof b === 'object' ? b : {}; };
+  const freeShopLeft = () => { const b = boostRaw(); return Math.max(0, Math.floor((+b.freeShopUntil || 0) - Date.now())); };
+  const freeShop = () => freeShopLeft() > 0;
+  const itemCount = id => +((profile.items[id] || {}).n) || 0;
+  // true if one was added (a non-stacking item that's already held, or a full stack, says false)
+  function grantItem(id, how) {
+    const it = ITEMS[id]; if (!it) return false;
+    const cur = profile.items[id] || { n: 0, at: 0 };
+    if (cur.n >= it.max) return false;
+    cur.n++; cur.at = Date.now(); cur.how = how || 'crate'; profile.items[id] = cur; save('items'); return true;
+  }
+  function useItem(id) {
+    const it = ITEMS[id]; if (!it || itemCount(id) < 1) return false;
+    if (it.effect === 'freeShop') {
+      if (freeShop()) return false;    // one at a time: wait for the timer
+      const b = boostRaw(); b.freeShopUntil = Date.now() + it.minutes * 60000; writeJSON(BOOST_KEY, b);
+    }
+    profile.items[id].n--; if (profile.items[id].n <= 0) delete profile.items[id]; save('items');
+    emit('boost'); return true;
+  }
+  // a crate opened somewhere: roll for a site item. Returns the item won (and shows a toast on site pages), or null
+  function crateRoll(how) {
+    for (const id in ITEMS) { if (itemCount(id) >= ITEMS[id].max) continue; if (Math.random() < ITEM_DROP) { if (grantItem(id, how)) return ITEMS[id]; } }
+    return null;
+  }
+  // a Pearl / point / coin price with the free-shop token on
+  const priceNow = cost => freeShop() ? 0 : cost;
+  /* the free-shop timer at the top of the screen (site pages; games draw their own with gamekit.js) */
+  let barT = 0;
+  function freeBar() {
+    let bar = $('#g-freebar');
+    const left = freeShopLeft();
+    if (!left) { if (bar) bar.remove(); clearTimeout(barT); barT = 0; return; }
+    if (!bar) { bar = document.createElement('div'); bar.id = 'g-freebar'; bar.className = 'g-freebar'; bar.setAttribute('role', 'status'); bar.setAttribute('aria-live', 'polite');
+      bar.innerHTML = icon('ticket') + '<b>FREE SHOP</b><span class="t"></span>'; document.body.appendChild(bar); }
+    const s = Math.ceil(left / 1000); bar.querySelector('.t').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    bar.classList.toggle('low', s <= 20);
+    clearTimeout(barT); barT = setTimeout(freeBar, 250);
+  }
+  root.addEventListener('storage', e => { if (e.key === BOOST_KEY) { freeBar(); emit('boost'); } });
+  /* ---------- UI size: a zoom on the page's UI, picked in Settings (the 3D scenes and the fog stay as they are) ---------- */
+  function applyUiScale() {
+    const z = profile.prefs.uiScale || 1;
+    document.documentElement.style.setProperty('--g-ui', String(z));
+    document.documentElement.classList.toggle('g-scaled', z !== 1);
   }
   // Only names built from the word lists survive; anything else (old free-text names, edited files) becomes ''.
   function cleanName(n) { const p = parseName(n); return p ? makeName(p.adj, p.noun, p.num) : ''; }
@@ -87,6 +166,7 @@
   try { isNew = !localStorage.getItem(KEY); if (isNew) localStorage.setItem(KEY, JSON.stringify(profile)); } catch (e) {}   // a first visit gets its name and id right away
   // an old free-text name was replaced with a word-list name: keep the new one so it doesn't change on every page
   if (!isNew && stored && typeof stored === 'object' && stored.name !== profile.name) { profile.seen.renamed = Date.now(); writeJSON(KEY, profile); }
+  try { applyUiScale(); } catch (e) {}
   const listeners = [];
   function emit(what) { listeners.forEach(fn => { try { fn(profile, what); } catch (e) { console.error(e); } }); try { root.dispatchEvent(new CustomEvent('grug:change', { detail: { what, profile } })); } catch (e) {} }
   function save(what) { profile.updated = Date.now(); const ok = writeJSON(KEY, profile); emit(what || 'save'); return ok; }
@@ -367,7 +447,8 @@
         requestAnimationFrame(poll);
       })();
     }, { once: true });
-    speed();
+    speed(); freeBar();
+    root.addEventListener('grug:change', e => { if (e.detail && e.detail.what === 'boost') freeBar(); });
     return top;
   }
 
@@ -428,16 +509,53 @@
       buzz(); draw();
     });
   }
+  /* the UI size row (Settings and Profile): four sizes, applied everywhere on the site and in every game */
+  function uiSizeHtml() {
+    const names = { 0.85: 'Small', 1: 'Normal', 1.15: 'Large', 1.3: 'Huge' };
+    return '<div class="g-pref g-pref-col"><span><b>UI size</b><small>Buttons, text and menus in every game and on the site</small></span>' +
+      '<div class="g-seg" role="radiogroup" aria-label="UI size">' + UI_SCALES.map(z => '<button type="button" role="radio" data-ui="' + z + '" aria-checked="' + (profile.prefs.uiScale === z) + '">' + names[z] + '</button>').join('') + '</div></div>';
+  }
+  function wireUiSize(box, after) {
+    $$('[data-ui]', box).forEach(b => b.addEventListener('click', () => {
+      profile.prefs.uiScale = +b.dataset.ui; save('prefs'); applyUiScale(); buzz();
+      $$('[data-ui]', box).forEach(x => x.setAttribute('aria-checked', String(x === b)));
+      if (after) after();
+    }));
+  }
+  /* the inventory: site-wide items won from crates, with a Use button */
+  function inventoryHtml() {
+    const have = Object.keys(ITEMS).filter(id => itemCount(id) > 0);
+    const left = freeShopLeft();
+    let h = '<span class="k-set-h">Inventory</span>';
+    if (!have.length) h += '<p class="g-fine g-inv-empty">' + icon('gift') + '<span>Nothing here yet. Every crate, egg and loot box in every game has a chance to drop a <b>' + ITEMS['free-shop'].name + '</b>.</span></p>';
+    else h += '<div class="g-inv">' + have.map(id => { const it = ITEMS[id]; const busy = it.effect === 'freeShop' && left > 0;
+      return '<div class="g-inv-it" data-inv="' + id + '"><span class="g-inv-ic" style="--c:' + it.hue + '">' + icon(it.icon) + '</span><span class="g-inv-tx"><b>' + esc(it.name) + (it.max > 1 ? ' ×' + itemCount(id) : '') + '</b><small>' + esc(it.desc) + '</small></span>' +
+        '<button type="button" class="g-btn primary sm" data-use="' + id + '"' + (busy ? ' disabled' : '') + '>' + (busy ? 'Running' : 'Use') + '</button></div>'; }).join('') + '</div>';
+    if (left > 0) h += '<p class="g-fine">' + icon('ticket') + 'Free shop is on: ' + Math.ceil(left / 1000) + 's left.</p>';
+    return h;
+  }
+  function wireInventory(box, rerender) {
+    box.addEventListener('click', async e => {
+      const b = e.target.closest('[data-use]'); if (!b) return;
+      const it = ITEMS[b.dataset.use]; if (!it) return;
+      const ok = await dialog({ title: 'Use ' + it.name + '?', html: '<p>' + esc(it.desc) + '</p><p class="g-fine">The timer starts right away, so head to a shop first if you want every second.</p>', actions: [{ label: 'Not yet', kind: 'quiet', value: null }, { label: 'Use it now', kind: 'primary', value: true }] });
+      if (!ok) return;
+      if (useItem(it.id)) { toast('Free shop! Everything is free for ' + it.minutes + ' minutes', { icon: 'ticket', ms: 4000 }); buzz([12, 40, 20]); freeBar(); } else toast('Wait for the current one to end', { icon: 'hourglass' });
+      if (rerender) rerender();
+    });
+  }
   function settings() {
     return dialog({
-      title: 'Settings', html: '<div id="kAppear"></div>' +
+      title: 'Settings', html: '<div id="kAppear"></div>' + uiSizeHtml() +
         '<div class="g-pref"><span><b>Animations</b><small>Celebrations and poses</small></span><button type="button" class="g-switch" role="switch" data-pref="motion" aria-checked="' + !!profile.prefs.motion + '" aria-label="Animations"></button></div>' +
         '<div class="g-pref"><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button type="button" class="g-switch" role="switch" data-pref="haptics" aria-checked="' + !!profile.prefs.haptics + '" aria-label="Vibrate on tap"></button></div>' +
         '<div class="g-pref"><span><b>Colorful icons</b><small>Full-colour pictures instead of simple one-colour icons</small></span><button type="button" class="g-switch" role="switch" data-pref="colorIcons" aria-checked="' + !!profile.prefs.colorIcons + '" aria-label="Colorful icons"></button></div>' +
-        '<p class="g-fine" style="margin-top:6px">Saved in your profile, so it comes along when you export it. More in <a href="' + url('profile/') + '" style="color:var(--ember);font-weight:800">Profile</a>.</p>',
+        '<div id="kInv"></div>' +
+        '<p class="g-fine" style="margin-top:6px">Saved in your profile, so it comes along when you export it. Emotes are picked in the <a href="' + url('avatar/#emotes') + '" style="color:var(--ember);font-weight:800">avatar editor</a>. More in <a href="' + url('profile/') + '" style="color:var(--ember);font-weight:800">Profile</a>.</p>',
       actions: [{ label: 'Done', kind: 'primary', value: true }],
       onOpen: d => {
-        d.classList.add('wide'); appearance($('#kAppear', d));
+        d.classList.add('wide'); appearance($('#kAppear', d)); wireUiSize(d);
+        const inv = $('#kInv', d), paintInv = () => { inv.innerHTML = inventoryHtml(); }; paintInv(); wireInventory(inv, paintInv);
         $$('[data-pref]', d).forEach(b => b.addEventListener('click', () => {
           profile.prefs[b.dataset.pref] = !profile.prefs[b.dataset.pref]; save('prefs'); b.setAttribute('aria-checked', !!profile.prefs[b.dataset.pref]);
           if (root.GrugTheme) root.GrugTheme.apply(); buzz();
@@ -506,6 +624,7 @@
     let foot = '';
     if (st === 'wearing') foot = '<span class="g-tag on">' + icon('check') + 'Wearing</span>';
     else if (st === 'owned') foot = '<span class="g-tag">Yours</span>';
+    else if (freeShop()) foot = '<span class="g-tag free">' + icon('ticket') + 'FREE now</span>';
     else if (st === 'buy') foot = '<span class="g-tag pts">' + icon('coins') + fmt(it.get.cost) + ' points</span>';
     else if (st === 'buyElsewhere') foot = '<span class="g-tag pts">' + icon('coins') + fmt(it.get.cost) + ' at ' + esc(app.short) + '</span>';
     else { const p = progress(it); foot = '<span class="g-tag lock">' + icon('lock-simple') + (p ? p.have + '/' + p.need : '') + '</span>'; }
@@ -568,6 +687,12 @@
     points, appState, exportData, exportText, exportFilename, download, share, parseImport, applyImport, reset,
     snaps, ensureSnaps, randomName, cleanName, makeName, parseName, NAME_WORDS: { adj: ADJ.slice(), noun: NOUN.slice(), maxNum: NAME_MAX_NUM }, pearlBalance, pearlsUrl,
     announce,
-    ui: { chrome, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile }
+    // site-wide items and live effects (see ITEMS above)
+    ITEMS, itemCount, grantItem, useItem, crateRoll, freeShop, freeShopLeft, priceNow, BOOST_KEY, ITEM_DROP,
+    // emotes: the catalog, the loadout and its limit
+    EMOTES, EMOTE_MAX, emoteOf, get emotes() { return profile.emotes.slice(); },
+    setEmotes(ids) { ids = Array.isArray(ids) ? Array.from(new Set(ids.filter(id => emoteOf(id)))).slice(0, EMOTE_MAX) : []; if (!ids.length) return false; profile.emotes = ids; save('emotes'); return true; },
+    UI_SCALES, applyUiScale,
+    ui: { chrome, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile, uiSizeHtml, wireUiSize, inventoryHtml, wireInventory, freeBar }
   };
 })(window);

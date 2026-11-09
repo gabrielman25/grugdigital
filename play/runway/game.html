@@ -44,6 +44,7 @@ canvas#view{position:fixed;inset:0;width:100%;height:100%;display:block}
 .pill small{font-weight:600;color:var(--mut);font-size:14px;text-transform:uppercase;letter-spacing:.08em}
 .pill.time.low .ic{background:var(--rose)!important}
 .pause{position:fixed;top:calc(var(--sat) + 72px);right:12px;width:52px;height:52px;border-radius:50%;border:0;background:#fff;color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0}
+.pause.shopb{right:72px;background:var(--violet);color:#fff}
 .pause .vi{width:22px;height:22px}
 /* menus: white panel, off-white cards, game blurred behind */
 #veil{position:fixed;inset:0;display:none;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);background:rgba(20,24,34,.16);pointer-events:none}
@@ -138,6 +139,7 @@ ul.checks li{background:var(--card);border-radius:14px;padding:8px 12px 8px 8px;
     <div class="right"><span class="pill time" id="hudTimeWrap"><span class="ic" style="background:var(--sky)" id="hudClock"></span><span id="hudTime">90</span></span></div>
   </div>
   <button class="pause" id="pauseBtn" hidden aria-label="Pause"></button>
+  <button class="pause shopb" id="shopBtn" hidden aria-label="Power-ups shop" title="Power-ups"></button>
   <button class="ready" id="readyBtn" hidden aria-label="I'm ready: start the runway"></button>
   <div class="dock nopass" id="dock"><div class="pal" id="palette" hidden></div><div class="pcard" id="prompt" hidden></div></div>
   <div class="banner" id="banner" hidden></div>
@@ -150,6 +152,8 @@ ul.checks li{background:var(--card);border-radius:14px;padding:8px 12px 8px 8px;
 </div>
 <div class="loading" id="loading">Getting dressed…</div>
 
+<!-- Grug site-wide layer: UI size, centred hints, free-shop timer, tutorials, emotes, crate drops (assets/gamekit.js) -->
+<script src="../../assets/gamekit.js"></script>
 <script>
 'use strict';
 /* =====================================================================================
@@ -212,11 +216,12 @@ const Bridge = (() => {
   const wallet = () => (state ? (+state.points || 0) + (+state.pearls || 0) : 0);
   async function buy(id) {
     const it = (state.shop || []).find(x => x.id === id); if (!it) return { ok: false, reason: 'Not in the shop.' };
-    if (wallet() < it.cost) {
+    const cost = (window.GK && GK.free()) ? 0 : it.cost;   // a Free Shop Token (site-wide item) makes everything free
+    if (wallet() < cost) {
       if (mode === 'live' && state.pearlName) { post({ t: 'needPearls', id }); return { ok: false, reason: '', asked: true }; }
       return { ok: false, reason: 'You need ' + (it.cost - wallet()) + ' more points for ' + it.name + '.' };
     }
-    if (mode === 'demo') { state.points -= it.cost; state.inv[id] = (state.inv[id] || 0) + 1; demoSave(); setState(state); return { ok: true }; }
+    if (mode === 'demo') { state.points -= cost; state.inv[id] = (state.inv[id] || 0) + 1; demoSave(); setState(state); return { ok: true }; }
     return ask({ t: 'buy', id });
   }
   async function use(ids) {
@@ -1123,6 +1128,12 @@ const Game = (() => {
   }
 
   /* ---------- a round ---------- */
+  // a power-up switched on from the in-game shop works right away in this round
+  function applyFx(it) {
+    if (!it || !(G.phase === 'intro' || G.phase === 'dress' || G.phase === 'show')) return false; const a = +it.amount || 1;
+    if (it.effect === 'time') { G.fx.time = (G.fx.time || 0) + a; G.timeLeft += a; } else G.fx[it.effect] = a;
+    return true;
+  }
   function begin(fx) {
     G.fx = fx || {};
     let last = ''; try { last = localStorage.getItem('runway-ready.lastTheme') || ''; } catch (e) {}
@@ -1131,6 +1142,12 @@ const Game = (() => {
     G.cast.forEach(c => { c.outfit = newOutfit(); dress(c); c.plan = null; c.faceTo = null; if (c.sandy) { c.sandy.play('idle'); c.anim = 'idle'; } });
     toStage(); G.sel = null; G.near = null; G.lastPad = null; G.show = null; G.results = null; G.area = 'hub';
     G.timeLeft = (+(Bridge.state && Bridge.state.runSeconds) || SETTINGS.runSeconds) + (G.fx.time || 0);
+    if (window.GK && GK.tutorial) setTimeout(() => GK.tutorial('runway', [
+      { title: 'Catwalk Craze', text: matchMedia('(pointer:coarse)').matches ? 'Drag on the left to walk. Try it!' : 'Walk with W A S D. Try it now!', skill: 'move', until: () => moveInput().mag > 0.05, hideNext: true },
+      { title: 'The theme', text: 'The card shows this round’s theme and its five checks. Dress to match before the clock runs out.', target: '#tcard' },
+      { title: 'Wardrobe', text: 'Six rooms hold the pieces. Walk onto a pad and press Wear; change its colour with the palette. Hold Shift (or tap Run) to sprint between rooms.' },
+      { title: 'Ready', text: 'Happy with your look? Press Ready and strut the runway against four rivals.', target: '#readyBtn', doneLabel: 'Let’s go!' }
+    ]), 3600);
     G.cast.filter(c => !c.isPlayer).forEach((b, i) => { b.plan = { rooms: shuffle(ROOMS.map(r => r.id)), i: 0, state: 'think', wait: 0.6 + i * 0.5, path: [], stuck: 0 }; });
     G.phase = 'intro'; G.intro = 3.2; G.paused = false;
     UI.hud(true); UI.rules(); UI.banner(G.theme.name, G.theme.desc, G.theme.accent, 3);
@@ -1288,7 +1305,13 @@ const Game = (() => {
     const dressing = G.phase === 'dress' && live;
     // player
     const p = G.player, mv = dressing ? moveInput() : (moveInput(), { x: 0, z: 0, mag: 0 });
-    const sp = 430 * (G.fx.speed || 1);
+    // sprint (Shift, the Run button or a stick click): 1.35x while the stamina bar lasts
+    if (p.st == null) p.st = 100;
+    const run = window.GK && dressing && mv.mag > 0.05 && GK.stamina.wantRun() && p.st > 0 && !p.winded;
+    if (run) { p.st -= 20 * dt; if (p.st <= 0) { p.st = 0; p.winded = true; GK.stamina.stopRun(); } } else { p.st = Math.min(100, p.st + (mv.mag > 0.05 ? 14 : 24) * dt); if (p.winded && p.st > 35) p.winded = false; }
+    if (window.GK) { GK.stamina.show(dressing && !G.paused && document.getElementById('lobby').hidden && document.getElementById('results').hidden, { button: true }); GK.stamina.set(p.st / 100, run ? 'boost' : undefined); }
+    p.sprinting = !!run;
+    const sp = 430 * (G.fx.speed || 1) * (run ? 1.35 : 1);
     if (mv.mag > 0.05) { move(p, mv.x * sp * dt, mv.z * sp * dt); p.face += angDiff(p.face, Math.atan2(mv.x, mv.z)) * Math.min(1, dt * 12); }
     // rivals
     for (const c of G.cast) if (!c.isPlayer) {
@@ -1300,7 +1323,8 @@ const Game = (() => {
     }
     if (dressing) separate();
     G.cast.forEach(place);
-    animate(p, G.phase === 'results' && p === G.winner ? 'dance' : mv.mag > 0.05 ? 'walk' : 'idle', dt, 0.6 + mv.mag * (G.fx.speed || 1) * 0.55);
+    const emo = window.GK ? GK.emotes.anim(mv.mag > 0.05 || !dressing || G.paused) : null;
+    animate(p, emo || (G.phase === 'results' && p === G.winner ? 'dance' : mv.mag > 0.05 ? 'walk' : 'idle'), dt, (0.6 + mv.mag * (G.fx.speed || 1) * 0.55) * (p.sprinting ? 1.3 : 1));
     if (dressing) {
       // which room am I in?
       const a = World.areaAt(p.x, p.z); if (a && a !== G.area) { G.area = a; if (a !== 'hub') UI.banner(ROOM[a].name, null, ROOM[a].accent, 1.4); }
@@ -1331,13 +1355,14 @@ const Game = (() => {
     if (shift !== G.shift) { G.shift = shift; if (shift) camera.setViewOffset(innerWidth, innerHeight, shift, 0, innerWidth, innerHeight); else camera.clearViewOffset(); }
     UI.frame();
   }
+  if (window.GK && GK.emotes) GK.emotes.install({ canEmote: () => G.phase === 'dress' && !G.paused && document.getElementById('lobby').hidden && document.getElementById('results').hidden });
   function togglePause(force) {
     if (!(G.phase === 'intro' || G.phase === 'dress' || G.phase === 'show')) return;
     G.paused = force === true ? true : !G.paused; UI.paused(G.paused);
   }
   Bridge.on((s, ev) => { if (ev === 'pause') togglePause(true); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) togglePause(true); });
-  return { layout, setup, begin, step, togglePause, ready, cycleColour, setColour, skipShow, wear, remove, wearing, G, get running() { return G.phase === 'intro' || G.phase === 'dress' || G.phase === 'show'; } };
+  return { layout, setup, begin, applyFx, step, togglePause, ready, cycleColour, setColour, skipShow, wear, remove, wearing, G, get running() { return G.phase === 'intro' || G.phase === 'dress' || G.phase === 'show'; } };
 })();
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const angDiff = (a, b) => { let d = (b - a) % (Math.PI * 2); if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2; return d; };
@@ -1357,7 +1382,7 @@ const UI = (() => {
   const fx = it => FX[it.effect] || ['star', 'var(--rose)'];
   const tile = (k, c, cls) => '<span class="tile' + (cls ? ' ' + cls : '') + '" style="background:' + c + '">' + vi(k) + '</span>';
   const picked = new Set(); let toastT = 0, bannerT = 0;
-  $('hudClock').innerHTML = vi('stopwatch'); $('pauseBtn').innerHTML = vi('pause'); $('readyBtn').innerHTML = vi('checkmark') + 'Ready';
+  $('hudClock').innerHTML = vi('stopwatch'); $('pauseBtn').innerHTML = vi('pause'); $('shopBtn').innerHTML = vi('star'); $('readyBtn').innerHTML = vi('checkmark') + 'Ready';
   function toast(t, kind) { const el = $('toast'); el.textContent = t; el.className = 'toast on ' + (kind || ''); clearTimeout(toastT); toastT = setTimeout(() => el.className = 'toast', 2200); }
   function menuOpen() { document.body.classList.toggle('menu-open', !$('lobby').hidden || !$('results').hidden); }
   const seg = (opts, cur, attr, c) => '<div class="seg">' + opts.map(([v, n]) => '<button class="pillb' + (cur === v ? ' on' : '') + '" style="' + (cur === v ? 'background:' + c : '') + '" ' + attr + '="' + v + '">' + n + '</button>').join('') + '</div>';
@@ -1374,17 +1399,15 @@ const UI = (() => {
     const s = Bridge.state; if (!s) return;
     // standalone (a Grug original, no restaurant): power-ups cost Pearls only
     const solo = !!s.standalone, cur = solo ? s.pearlName || 'Pearls' : s.pearlName ? 'points or ' + s.pearlName : 'points', unit = solo ? ' ' + (s.pearlName || 'Pearls') : ' pts';
-    $('lobby').innerHTML = '<div class="top">' + tile('hanger', 'var(--rose)') + '<div><h1>' + esc(s.title || SETTINGS.title) + '</h1><small>' + esc(s.store || (s.demo ? 'Demo mode · pretend points' : '')) + '</small></div></div><div class="body">' +
-      '<p class="lead">' + esc(SETTINGS.tagline) + '</p>' +
-      '<div class="how">' + HOW.map(([k, c, t]) => '<div>' + tile(k, c, 'sm') + '<span>' + esc(t) + '</span></div>').join('') + '</div>' +
+    const inRun = Game.running;   // opened from the Shop button mid-round: power-ups switch on right away
+    $('lobby').innerHTML = '<div class="top">' + tile('hanger', 'var(--rose)') + '<div><h1>Power-ups</h1><small>' + esc(inRun ? 'Switched on now, for this round' : 'Picked ones start with your next round') + '</small></div>' + (inRun ? '<button class="x" id="lobbyClose" aria-label="Close">' + vi('cross') + '</button>' : '') + '</div><div class="body">' +
       '<div class="stats">' + (solo ? '' : '<div class="stat"><b style="color:var(--violet)">' + (s.points || 0) + '</b><small>Points</small></div>') + (s.pearlName ? '<div class="stat"><b style="color:var(--sky)">' + (s.pearls || 0) + '</b><small>' + esc(s.pearlName) + '</small></div>' : '') + '<div class="stat"><b style="color:var(--amber)">' + (s.best || 0) + '</b><small>Best</small></div></div>' +
       '<div class="h" style="color:var(--violet)">Power-ups<small>used up when the round starts</small></div><div class="items">' + s.shop.map(it => { const own = +(s.inv || {})[it.id] || 0, can = Bridge.wallet() >= it.cost, [ic, c] = fx(it);
         return '<div class="item' + (picked.has(it.id) ? ' on' : '') + '">' + tile(ic, c) + '<div class="txt"><b>' + esc(it.name) + '</b><small>' + esc(it.desc || '') + (own ? ' · you have ' + own : '') + '</small></div><div class="btns">' +
-          (own ? '<button class="' + (picked.has(it.id) ? '' : 'ghost') + '" data-pick="' + esc(it.id) + '">' + (picked.has(it.id) ? vi('checkmark') + 'On' : 'Use') + '</button>' : '') +
+          (own ? '<button class="' + (picked.has(it.id) ? '' : 'ghost') + '" data-pick="' + esc(it.id) + '">' + (picked.has(it.id) ? vi('checkmark') + 'On' : inRun ? 'Use now' : 'Use') + '</button>' : '') +
           '<button class="' + (can ? '' : 'dim') + '" style="' + (can ? 'background:' + c : '') + '" data-buy="' + esc(it.id) + '">' + it.cost + unit + '</button></div></div>'; }).join('') + '</div>' +
-      '<button class="go" id="goBtn">' + vi('play') + 'Start' + (picked.size ? ' with ' + picked.size + ' power-up' + (picked.size > 1 ? 's' : '') : '') + '</button>' +
-      '<p class="note">' + (solo ? 'Power-ups cost ' + esc(cur) + ', the Grug currency. They work in every Grug game.' : 'Power-ups cost ' + esc(cur) + '. Points come from eating at the partner.') + '</p>' +
-      '<p class="note">' + (touch ? 'Left thumb walks, drag on the right turns the camera.' : 'WASD or arrows walk, drag to turn the camera, E wears, Q / R change colour, Enter when you’re ready, P pauses.') + '</p>' + settings() + '</div>';
+      '<button class="go" id="goBtn">' + vi('play') + (inRun ? 'Back to the round' : 'Start' + (picked.size ? ' with ' + picked.size + ' power-up' + (picked.size > 1 ? 's' : '') : '')) + '</button>' +
+      '<p class="note">' + (solo ? 'Power-ups cost ' + esc(cur) + ', the Grug currency. They work in every Grug game.' : 'Power-ups cost ' + esc(cur) + '. Points come from eating at the partner.') + '</p></div>';
     $('lobby').hidden = false; menuOpen();
   }
   document.addEventListener('click', async e => {
@@ -1392,16 +1415,18 @@ const UI = (() => {
     b.blur();   // otherwise Space (or Enter) would click it again mid-round
     if (b.dataset.gfx || b.dataset.scale) { if (b.dataset.gfx) View.set('quality', b.dataset.gfx); else View.set('scale', +b.dataset.scale); if (Game.running) paused(true); else lobby(); return; }
     if (b.dataset.col) { Game.setColour(b.dataset.col); return; }
-    if (b.dataset.pick) { picked.has(b.dataset.pick) ? picked.delete(b.dataset.pick) : picked.add(b.dataset.pick); lobby(); }
-    else if (b.dataset.buy) { b.disabled = true; try { const r = await Bridge.buy(b.dataset.buy); if (r.ok) toast('Added. Tap Use to take it into the round.', 'good'); else if (r.reason) toast(r.reason, 'bad'); } catch (x) { toast('The rewards app didn’t answer. Try again.', 'bad'); } lobby(); }
-    else if (b.id === 'goBtn') {
-      const ids = [...picked]; b.disabled = true;
-      let r; try { r = await Bridge.use(ids); } catch (x) { r = { ok: false, reason: 'The rewards app didn’t answer.' }; }
-      if (!r.ok) { toast(r.reason || 'Couldn’t start.', 'bad'); lobby(); return; }
-      const f = {}; ids.forEach(id => { const it = Bridge.state.shop.find(x => x.id === id); if (it) f[it.effect] = it.effect === 'time' ? (f.time || 0) + (+it.amount || 0) : (+it.amount || 1); });
-      picked.clear(); $('lobby').hidden = true; $('results').hidden = true; menuOpen(); input.keys.clear(); Game.begin(f);
+    if (b.dataset.pick && Game.running) {
+      const it = (Bridge.state.shop || []).find(x => x.id === b.dataset.pick); b.disabled = true;
+      let r; try { r = await Bridge.use([b.dataset.pick]); } catch (x) { r = { ok: false, reason: 'The rewards app didn’t answer.' }; }
+      if (!r.ok) toast(r.reason || 'Couldn’t use that.', 'bad'); else { Game.applyFx(it); toast(it.name + ' is on!', 'good'); }
+      lobby();
     }
-    else if (b.id === 'againBtn') { $('results').hidden = true; Game.G.phase = 'lobby'; lobby(); }
+    else if (b.dataset.pick) { picked.has(b.dataset.pick) ? picked.delete(b.dataset.pick) : picked.add(b.dataset.pick); lobby(); }
+    else if (b.dataset.buy) { b.disabled = true; try { const r = await Bridge.buy(b.dataset.buy); if (r.ok) toast('Added. Tap Use to take it into the round.', 'good'); else if (r.reason) toast(r.reason, 'bad'); } catch (x) { toast('The rewards app didn’t answer. Try again.', 'bad'); } lobby(); }
+    else if (b.id === 'goBtn' || b.id === 'lobbyClose') { b.disabled = true; if (Game.running) { $('lobby').hidden = true; menuOpen(); input.keys.clear(); if (Game.G.paused) Game.togglePause(false); } else startRun(); }
+    else if (b.id === 'shopBtn') { if (Game.running) { if (!Game.G.paused) Game.togglePause(true); $('results').hidden = true; lobby(); } }
+    else if (b.id === 'powerBtn') { $('results').hidden = true; Game.G.phase = 'lobby'; lobby(); }
+    else if (b.id === 'againBtn') { $('results').hidden = true; Game.G.phase = 'lobby'; startRun(); }
     else if (b.id === 'pauseBtn' || b.id === 'resumeBtn') Game.togglePause();
     else if (b.id === 'readyBtn') Game.ready();
     else if (b.id === 'wearBtn') input.act = true;
@@ -1409,9 +1434,19 @@ const UI = (() => {
     else if (b.id === 'skipBtn') Game.skipShow();
   });
   $('tcard').addEventListener('click', () => $('tcard').classList.toggle('mini'));
+  // a new round with the picked power-ups; the game starts this way as soon as it loads (no first screen)
+  let starting = false;
+  async function startRun() {
+    if (starting) return; starting = true;
+    const ids = [...picked];
+    let r; try { r = await Bridge.use(ids); } catch (x) { r = { ok: false, reason: 'The rewards app didn’t answer.' }; }
+    if (!r.ok) { toast(r.reason || 'Couldn’t start.', 'bad'); picked.clear(); starting = false; if (ids.length) startRun(); return; }
+    const f = {}; ids.forEach(id => { const it = Bridge.state.shop.find(x => x.id === id); if (it) f[it.effect] = it.effect === 'time' ? (f.time || 0) + (+it.amount || 0) : (+it.amount || 1); });
+    picked.clear(); $('lobby').hidden = true; $('results').hidden = true; menuOpen(); input.keys.clear(); Game.begin(f); starting = false;
+  }
 
   /* ---------- HUD ---------- */
-  function hud(on) { $('hud').hidden = !on; $('pauseBtn').hidden = !on; $('readyBtn').hidden = !on; if (!on) { prompt(null); palette(false); } }
+  function hud(on) { $('hud').hidden = !on; $('pauseBtn').hidden = !on; $('shopBtn').hidden = !on; $('readyBtn').hidden = !on; if (!on) { prompt(null); palette(false); } }
   function tick(t) { $('hudTime').textContent = Math.ceil(t); $('hudTimeWrap').classList.toggle('low', t < 10 && Game.G.phase === 'dress'); }
   // the theme card: the five checks; with Style Hints, each shows whether you pass it right now
   function rules() {
@@ -1489,17 +1524,17 @@ const UI = (() => {
       '<div class="stats"><div class="stat"><b style="color:var(--green)">' + p.fit + '<small style="display:inline;font-size:16px"> / 70</small></b><small>Theme fit</small></div><div class="stat"><b style="color:var(--violet)">' + p.flair + '<small style="display:inline;font-size:16px"> / 30</small></b><small>Judges’ flair</small></div><div class="stat"><b style="color:var(--amber)">' + p.total + '</b><small>Score</small></div></div>' +
       '<div class="h" style="color:var(--green)">Your theme checks</div><ul class="checks">' + th.rules.map((r, i) => '<li class="' + (p.pass[i] ? 'ok' : 'no') + '"><i>' + vi(p.pass[i] ? 'checkmark' : 'cross') + '</i><span>' + esc(r.t) + '</span><b>' + (p.pass[i] ? '+14' : '0') + '</b></li>').join('') + '</ul>' +
       '<div class="h" style="color:var(--amber)">Leaderboard</div><div class="items">' + R.rank.map((k, i) => '<div class="item' + (k.isPlayer ? ' on' : '') + '"><span class="tile" style="background:' + (i === 0 ? 'var(--amber)' : i === 1 ? '#94a3b8' : i === 2 ? '#c2763a' : 'var(--card2)') + ';color:' + (i > 2 ? 'var(--ink)' : '#fff') + ';font-size:22px">' + (i + 1) + '</span><div class="txt"><b>' + esc(k.isPlayer ? 'You' : k.name) + '</b><small>Theme ' + k.fit + ' + flair ' + k.flair + '</small></div><b class="score">' + k.total + '</b></div>').join('') + '</div>' +
-      '<button class="go" id="againBtn">' + vi('arrows_clockwise') + 'Play again</button></div>';
+      '<button class="go" id="againBtn">' + vi('arrows_clockwise') + 'Play again</button><button class="go ghost" id="powerBtn">' + vi('star') + 'Power-ups for the next round</button></div>';
     $('results').hidden = false; $('results').scrollTop = 0; menuOpen();
   }
   function paused(on) {
     $('results').hidden = !on;
-    if (on) $('results').innerHTML = '<div class="top">' + tile('pause', '#64748b') + '<div><h1>Paused</h1><small>Take a breather.</small></div></div><div class="body"><button class="go" id="resumeBtn">' + vi('play') + 'Keep going</button>' + settings() + '</div>';
+    if (on) $('results').innerHTML = '<div class="top">' + tile('pause', '#64748b') + '<div><h1>Paused</h1><small>Take a breather.</small></div></div><div class="body"><button class="go" id="resumeBtn">' + vi('play') + 'Keep going</button><button class="go ghost" id="shopBtn">' + vi('star') + 'Power-ups</button>' + settings() + '</div>';
     else input.keys.clear();
     menuOpen();
   }
-  Bridge.on(() => { if (Game.G.phase === 'lobby' && $('results').hidden) lobby(); });
-  return { lobby, hud, tick, rules, prompt, palette, togglePalette, banner, pop, frame, showCard, showSkip, results, paused, toast, calm };
+  Bridge.on(() => { if (Game.G.phase === 'lobby' && $('results').hidden && !$('lobby').hidden) lobby(); else if (Game.G.phase === 'lobby' && $('results').hidden && !starting && !UI.started) { UI.started = true; startRun(); } });
+  return { lobby, startRun, started: false, hud, tick, rules, prompt, palette, togglePalette, banner, pop, frame, showCard, showSkip, results, paused, toast, calm };
 })();
 
 /* ---------- boot ---------- */

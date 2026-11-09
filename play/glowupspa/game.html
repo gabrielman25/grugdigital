@@ -494,6 +494,8 @@ html,body{background:#7fd6ff}
 </div>
 <div class="loading" id="loading"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%20160%22%3E%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22144%22%20height%3D%22144%22%20rx%3D%2236%22%20fill%3D%22%23ec4899%22%2F%3E%3Cg%20fill%3D%22%23fff%22%3E%3Cellipse%20cx%3D%2280%22%20cy%3D%2246%22%20rx%3D%2220%22%20ry%3D%2228%22%20transform%3D%22rotate(0%2080%2080)%22%2F%3E%3Cellipse%20cx%3D%2280%22%20cy%3D%2246%22%20rx%3D%2220%22%20ry%3D%2228%22%20transform%3D%22rotate(72%2080%2080)%22%2F%3E%3Cellipse%20cx%3D%2280%22%20cy%3D%2246%22%20rx%3D%2220%22%20ry%3D%2228%22%20transform%3D%22rotate(144%2080%2080)%22%2F%3E%3Cellipse%20cx%3D%2280%22%20cy%3D%2246%22%20rx%3D%2220%22%20ry%3D%2228%22%20transform%3D%22rotate(216%2080%2080)%22%2F%3E%3Cellipse%20cx%3D%2280%22%20cy%3D%2246%22%20rx%3D%2220%22%20ry%3D%2228%22%20transform%3D%22rotate(288%2080%2080)%22%2F%3E%3C%2Fg%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%2280%22%20r%3D%2217%22%20fill%3D%22%23facc15%22%2F%3E%3Cpath%20d%3D%22M120%2024l5%2011%2011%205-11%205-5%2011-5-11-11-5%2011-5z%22%20fill%3D%22%23fde68a%22%2F%3E%3C%2Fsvg%3E" alt=""><h1>Glow Up Spa</h1><span id="loadTxt">Loading…</span><small style="font-size:15px">v1</small></div>
 
+<!-- Grug site-wide layer: UI size, centred hints, free-shop timer, tutorials, emotes, crate drops (assets/gamekit.js) -->
+<script src="../../assets/gamekit.js"></script>
 <script>
 'use strict';
 /* =====================================================================================
@@ -578,11 +580,12 @@ const Bridge = (() => {
   const wallet = () => (state ? (+state.points || 0) + (+state.pearls || 0) : 0);
   async function buy(id) {
     const it = (state.shop || []).find(x => x.id === id); if (!it) return { ok: false, reason: 'Not in the shop.' };
-    if (wallet() < it.cost) {
+    const cost = (window.GK && GK.free()) ? 0 : it.cost;   // a Free Shop Token (site-wide item) makes everything free
+    if (wallet() < cost) {
       if (mode === 'live' && state.pearlName) { post({ t: 'needPearls', id }); return { ok: false, reason: '', asked: true }; }
       return { ok: false, reason: 'You need ' + (it.cost - wallet()) + ' more points for ' + it.name + '.' };
     }
-    if (mode === 'demo') { state.points -= it.cost; state.inv[id] = (state.inv[id] || 0) + 1; demoSave(); setState(state); return { ok: true }; }
+    if (mode === 'demo') { state.points -= cost; state.inv[id] = (state.inv[id] || 0) + 1; demoSave(); setState(state); return { ok: true }; }
     return ask({ t: 'buy', id });
   }
   async function use(ids) {
@@ -832,12 +835,16 @@ const World = (() => {
   }
 
   /* ---------- the spa ---------- */
+  // the cells a locked room's block fills (the 3 cells nearest the hall door stay open, for the build pad)
+  function lockedSpan(id) { const R = RECT[id], west = R.x1 < SX(0); return { x0: west ? R.x0 + 1 : R.x0 + 4, x1: west ? R.x1 - 4 : R.x1 - 1, z0: R.z0 + 1, z1: R.z1 - 1 }; }
   function floorRoom(id, built) {
     const R = RECT[id], F = FLOORS[id];
     for (let z = R.z0; z <= R.z1; z++) for (let x = R.x0; x <= R.x1; x++) {
       const b = built ? (((x + z) & 1) ? F[0] : F[1]) : (x === R.x0 || x === R.x1 || z === R.z0 || z === R.z1) ? (((x + z) & 1) ? 'c_yellow' : 'c_black') : 'smooth';
       set(x, 0, z, b);
     }
+    // a room you haven't built yet is a solid block (its LOCKED / COMING SOON sides are a mesh, see Game.refreshSpa), not an empty plate
+    if (['nails', 'color', 'mask'].includes(id)) { const L = lockedSpan(id); for (let z = L.z0; z <= L.z1; z++) for (let x = L.x0; x <= L.x1; x++) for (let y = 1; y <= 3; y++) set(x, y, z, built ? 0 : 'c_black'); }
   }
   function buildLot() {
     // grass under everything first, then the floors
@@ -881,7 +888,9 @@ const World = (() => {
     if (World.chunks) rebuild(x0, z0, x1, z1);
   }
   const inPen = (x, z) => { const P = penNow; if (!P) return false; const cx = Math.floor(x / BS), cz = Math.floor(z / BS); return (cx >= P.x0 && cx <= P.x1 + 1 && cz >= P.z0 - 1 && cz <= P.z1 + 1) || (cx >= YARD.x0 && cx <= YARD.x1 && cz >= YARD.z0 && cz <= YARD.z1); };
-  function setRoomBuilt(id) { floorRoom(id, true); const R = RECT[id]; rebuild(R.x0, R.z0, R.x1, R.z1); }
+  function setRoomBuilt(id) { floorRoom(id, true); const R = RECT[id];
+    for (let z = R.z0; z <= R.z1; z++) for (let x = R.x0; x <= R.x1; x++) { let h = 0; while (h + 1 < NY && solidB(get(x, h + 1, z))) h++; hmap[(z - Z0) * NX + (x - X0)] = h; if (navIn(x, z)) nav[ni(x, z)] = solidB(get(x, 1, z)) ? 1 : 0; }
+    rebuild(R.x0, R.z0, R.x1, R.z1); }
 
   /* ---------- the Beauty Store: an indoor mall ----------
      Full-height walls and a ceiling (with skylights and lamps). Window shops line both sides: you can look in through
@@ -1161,7 +1170,7 @@ const World = (() => {
   }
 
   return {
-    generate, groundAt, groundOut, inMapCm, buildPen, inPen, inTycoon: (x, z) => inLot(x, z) || inPen(x, z), get pen() { return penNow; }, zoneAt, SHOPS, MALL_H, inLot, inStore, inLotCells, hmapAt, get, set, setRoomBuilt, rebuild: (...a) => rebuild(...a),
+    generate, lockedSpan, groundAt, groundOut, inMapCm, buildPen, inPen, inTycoon: (x, z) => inLot(x, z) || inPen(x, z), get pen() { return penNow; }, zoneAt, SHOPS, MALL_H, inLot, inStore, inLotCells, hmapAt, get, set, setRoomBuilt, rebuild: (...a) => rebuild(...a),
     initMeshes: (t, c) => initMeshes(t, c), buildNav, block, walk, path, clearLine, PEDESTALS, ZONE_STYLE, inRect
   };
 })();
@@ -2061,6 +2070,14 @@ const Game = (() => {
       while (A.decor.length > (r.built ? r.decor : 0)) scene.remove(A.decor.pop());
       if (r.built && !A.floor) { A.floor = 1; World.setRoomBuilt(R.id); }
       if (!r.built && A.floor) { A.floor = 0; World.setRoomBuilt && World.rebuildRoom && World.rebuildRoom(R.id); }
+      // the locked block: LOCKED (build for $X) once the room before it is open, COMING SOON until then
+      if (window.GK && GK.lockedCube && ['nails', 'color', 'mask'].includes(R.id)) {
+        const prevBuilt = ri === 0 || room(SVC[ri - 1].id).built, want = r.built ? '' : prevBuilt ? 'locked' : 'soon';
+        if (A.cubeKind !== want) { if (A.cube) { scene.remove(A.cube); A.cube = null; } A.cubeKind = want;
+          if (want) { const L = World.lockedSpan(R.id), w = (L.x1 - L.x0 + 1) * BS, d = (L.z1 - L.z0 + 1) * BS;
+            A.cube = GK.lockedCube(THREE, { size: { x: w + 6, y: 3 * BS + 4, z: d + 6 }, text: want === 'locked' ? 'LOCKED' : 'COMING SOON', sub: want === 'locked' ? 'Build for ' + money(R.build) : R.n, color: want === 'locked' ? '#2a2f3a' : '#3b2f4a', accent: want === 'locked' ? R.col : '#fbbf24' });
+            A.cube.position.set((L.x0 + L.x1 + 1) / 2 * BS, 1.5 * BS + 2, (L.z0 + L.z1 + 1) / 2 * BS); scene.add(A.cube); } }
+      }
     });
     // treadmill colour = its tier
     if (treadMesh) scene.remove(treadMesh);
@@ -2080,7 +2097,7 @@ const Game = (() => {
     const L = [];
     SVC.forEach((R, ri) => {
       const r = room(R.id), Rc = RECT[R.id];
-      if (!r.built) { if (ri === 0 || room(SVC[ri - 1].id).built) L.push({ id: 'build:' + R.id, cell: [(Rc.x0 + Rc.x1) / 2, (Rc.z0 + Rc.z1) / 2], t: 'Build the ' + R.n, s: 'With a chair and a ' + R.who.toLowerCase(), cost: R.build, icon: 'shop', go: () => Shop.build(R.id), pad: 1 }); return; }
+      if (!r.built) { if (ri === 0 || room(SVC[ri - 1].id).built) L.push({ id: 'build:' + R.id, cell: [Rc.x1 < SX(0) ? Rc.x1 - 1 : Rc.x0 + 1, (Rc.z0 + Rc.z1) / 2], t: 'Build the ' + R.n, s: 'With a chair and a ' + R.who.toLowerCase(), cost: R.build, icon: 'shop', go: () => Shop.build(R.id), pad: 1 }); return; }
       if (r.staff < r.chairs) L.push({ id: 'hire:' + R.id, cell: STATIONS[R.id][r.staff].idle, t: 'Hire a ' + R.who, s: 'One more ' + R.svc.toLowerCase() + ' at a time', cost: hireCost(R, r.staff), icon: 'run', go: () => Shop.hire(R.id), pad: 1 });
       else if (r.chairs < MAX_CHAIRS) L.push({ id: 'chair:' + R.id, cell: STATIONS[R.id][r.chairs].seat, t: 'Add a chair', s: R.n, cost: chairCost(R, r.chairs), icon: 'upgrade', go: () => Shop.chair(R.id), pad: 1 });
       if (r.tool < TOOL_MAX) L.push({ id: 'tool:' + R.id, t: R.tool + ' ' + (r.tool + 1), s: R.svc + ' price x1.5', cost: toolCost(R, r.tool), icon: 'upgrade', go: () => Shop.tool(R.id) });
@@ -2388,6 +2405,7 @@ const Game = (() => {
     const { id, v, f } = rollPet(e), msg = addPet(id, v, f); S.idx.p[id] = 1;
     const [x, z] = C(INCUB[0], INCUB[1]); Parts.burst(x, 120, z, 34, ['#ffc727', '#5fe06b', '#ff5ca8', '#3ea6ff', '#ffffff'], { size: 13, speed: 300, up: 500 });
     UI.banner('It’s a ' + petName({ id, v, f }) + '!', msg, PETB[id].r >= 4 || v || f ? 'event' : 'ok'); Sfx.play('pop');
+    if (window.GK && GK.crate) setTimeout(() => GK.crate('glowupspa'), 1500);   // every hatch is a loot box: a chance at a site-wide item
   }
   // add a pet: it joins the zoo if there's room; if not, it fuses with a matching pet; otherwise it replaces your weakest
   function addPet(id, v, f, s) {
@@ -2473,8 +2491,15 @@ const Game = (() => {
     const P = player, live = G.started && !G.paused && !UI.modal();
     const mv = live && P.stun <= 0 ? moveInput() : { x: 0, z: 0, mag: 0 };
     let sp = moveSpeed(myS()); if (boostOn('speed')) sp *= boostAmt('speed'); if (P.carry) sp *= 0.85;
-    G.pSpeed = sp;
     P.moving = mv.mag > 0.05;
+    // sprint (Shift, the Run button or a stick click): 1.4x while the stamina bar lasts; it refills when you walk or stand
+    if (P.st == null) P.st = 100;
+    const run = window.GK && live && P.moving && GK.stamina.wantRun() && P.st > 0 && !P.winded;
+    if (run) { sp *= 1.4; P.st -= 22 * dt; if (P.st <= 0) { P.st = 0; P.winded = true; GK.stamina.stopRun(); } }
+    else { P.st = Math.min(100, P.st + (P.moving ? 14 : 24) * dt); if (P.winded && P.st > 35) P.winded = false; }
+    if (window.GK) { GK.stamina.show(live && !UI.modal(), { button: true }); GK.stamina.set(P.st / 100, run ? 'boost' : undefined); }
+    P.sprinting = !!run;
+    G.pSpeed = sp;
     if (P.moving) { moveBy(P, mv.x * sp * mv.mag * dt, mv.z * sp * mv.mag * dt); P.face += angDiff(P.face, Math.atan2(mv.x, mv.z)) * Math.min(1, dt * 14); }
     P.speed = P.moving ? sp * mv.mag : 0;
     if (input.jump) { input.jump = false; if (live && P.grounded && P.stun <= 0) { P.vy = 820; P.grounded = false; } }
@@ -2534,13 +2559,15 @@ const Game = (() => {
     const adt = c.acc; c.acc = 0;
     let pose = null;
     const running = c === player && G.running;
+    const emo = c === player && window.GK ? GK.emotes.anim(c.moving || running || !!c.carry || c.stun > 0 || !G.started || G.paused) : null;
+    if (emo) { play(c, emo); c.sandy.update(adt); return; }
     if (c.stun > 0) { play(c, 'idle'); pose = 'dizzy'; expr(c, 'dizzy'); }
     else if (sm) { play(c, 'idle'); pose = sm === 'lie' ? 'lie' : sm; }
     else if (c.poseName) { play(c, 'idle'); pose = c.poseName; }
     else play(c, c.moving || running ? 'walk' : 'idle');
     if (c.carry && c.stun <= 0) pose = 'carry';
     if (c.grabbing) pose = 'grab';
-    c.sandy.update(adt * (running ? 2.4 : c.moving ? clamp(c.speed / 240, 0.7, 2.4) : 1));
+    c.sandy.update(adt * (running ? 2.4 : c.moving ? clamp(c.speed / 240, 0.7, 2.4) * (c === player && c.sprinting ? 1.3 : 1) : 1));
     if (c === player && c.stun <= 0) expr(c, c.carry ? 'smug' : running ? 'happy' : 'neutral');
     if (c.kind === 'clerk' && c.stun <= 0) expr(c, c.chasing ? 'annoyed' : 'neutral');
     const W = pose ? Object.assign({}, Poser.pose(pose, G.t + (c.seed || 0), 0)) : {};
@@ -2555,6 +2582,21 @@ const Game = (() => {
     v3 = new THREE.Vector3(); wpos = new THREE.Vector3(); epos = new THREE.Vector3(); dirV = new THREE.Vector3(); rightV = new THREE.Vector3(); upV = new THREE.Vector3(); mtx = new THREE.Matrix4(); camLook = new THREE.Vector3();
     S = load(); Sfx.on = S.sound; G.boosts = Object.assign({}, S.boosts || {});
     setupSpa(); refreshIncub();
+    // low-key props (one block or smaller, no collision): furnishings in the Beauty Store's lanes, and bits on the lawns and plaza
+    if (window.GK && GK.prop) {
+      const rng = GK.rng(SETTINGS.botSeed + '-props'), open3 = (x, z) => { for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) if (World.get(x + dx, 1, z + dz)) return false; return true; };
+      for (let k = 0; k < STORE.n; k++) { const a = zoneZ0(k), b = a + STORE.d - 2;
+        for (let z = a + 1; z <= b - 1; z += 3) for (let x = STORE.x0 + 2; x <= STORE.x1 - 2; x += 4) {
+          if (Math.abs(x - STORE.cx) < 5 || rng() > 0.26 || !open3(x, z)) continue;   // never in the middle lane, never against shelves
+          if (World.PEDESTALS && World.PEDESTALS.some(pd => Math.abs(pd.x / BS - x) < 2.5 && Math.abs(pd.z / BS - z) < 2.5)) continue;
+          const pr = GK.prop(THREE, 'mall', k * 977 + x * 31 + z, { block: BS, scale: 0.75 + rng() * 0.2 }); pr.position.set((x + 0.5 + (rng() - 0.5) * 0.6) * BS, 0, (z + 0.5 + (rng() - 0.5) * 0.6) * BS); scene.add(pr); } }
+      // the plaza and sidewalk: benches, lamps and planters; the lawns: rocks and flowers
+      for (let x = MAP.X0 + 6; x < MAP.X0 + MAP.NX - 6; x += 7) { if (rng() > 0.5) continue; const z = 8 + Math.floor(rng() * 4), kind = z === 8 ? 'bench' : ['plant', 'lamp', 'sign', 'cone'][Math.floor(rng() * 4)]; if (!open3(x, z) || World.inLotCells(x, z)) continue;
+        const pr = GK.prop(THREE, kind, x * 7 + z, { block: BS, scale: 0.9 }); pr.position.set((x + 0.5) * BS, 0, (z + 0.5) * BS); scene.add(pr); }
+      for (let t = 0; t < 30; t++) { const x = MAP.X0 + 4 + Math.floor(rng() * (MAP.NX - 8)), z = MAP.Z0 + 4 + Math.floor(rng() * (MAP.NZ - 8)); if (z > -2 && z < 14) continue; if (World.inLotCells(x, z) || World.inStore((x + 0.5) * BS, (z + 0.5) * BS) || !open3(x, z)) continue;
+        if (World.pen && x >= World.pen.x0 - 1 && x <= World.pen.x1 + 1 && z >= World.pen.z0 - 1 && z <= World.pen.z1 + 1) continue;
+        const pr = GK.prop(THREE, 'garden', x * 13 + z * 3, { block: BS, scale: 0.8 }); pr.position.set((x + 0.5) * BS, 0, (z + 0.5) * BS); scene.add(pr); }
+    }
     const K = Avatars.K;
     const mk = async cfg => { try { return K ? await K.create(cfg) : null; } catch (e) { console.warn(e); return null; } };
     const setLoad = t => { const el = document.getElementById('loadTxt'); if (el) el.textContent = t; };
@@ -2572,6 +2614,9 @@ const Game = (() => {
     }
     setLoad('Guests are on their way…');
     for (let i = 0; i < 3; i++) await newCustomer();
+    // two guests arrive with a flashy pet in tow (so you want one too)
+    if (window.GK && GK.pet) custs.slice(0, 2).forEach((c, i) => { const pt = GK.pet(THREE, SETTINGS.botSeed + '-pet-' + i, { block: BS, light: i === 0 }); c.pet = pt; pt.group.visible = false; scene.add(pt.group);
+      Tags.add({ pos: v => { if (!c.root.visible) return false; v.set(pt.group.position.x, pt.group.position.y + 95, pt.group.position.z); return true; }, max: 1400, pri: 0, cls: 'who', html: () => '<b>' + pt.look.name + '</b><u class="op">' + c.name + '’s pet</u>' }); });
     ZONES.forEach((Z, zi) => { spawnIn(zi); spawnIn(zi); spawnIn(zi); });
     // offline earnings: pets keep earning and the salon runs at half speed, for up to 2 hours
     const gap = Math.min(OFFLINE_CAP, Math.max(0, (Date.now() - (S.t || Date.now())) / 1000));
@@ -2602,6 +2647,7 @@ const Game = (() => {
         if (lam > 0 && active < custCap() && waiting < SEATS.length + 2 * staffedAll()) { if (!spawnCustomer() && custs.length < custCap() && !making) newCustomer().then(() => spawnCustomer()); }
       }
       custs.forEach(c => stepCust(c, dt)); staff.forEach(s => stepStaff(s, dt)); clerks.forEach(k => stepClerk(k, dt));
+      custs.forEach(c => { if (!c.pet) return; c.pet.group.visible = c.root.visible; if (c.root.visible) c.pet.update(dt, c.root.position, c.face); });
       // the incubator
       if (S.incub.length) { S.incub[0].left -= dt * hatchMult(); if (S.incub[0].left <= 0) { hatch(S.incub.shift()); refreshIncub(); save(); } }
       // boosts tick down
@@ -2766,11 +2812,19 @@ const Game = (() => {
     const [x, z] = C(STORE.cx, 9); P.x = x; P.z = z; P.y = 0; P.face = 0; CAM.yaw = Math.PI; Sfx.play('whoosh');
   }
   function collectWelcome() { const W = G.welcome; if (!W) return; G.welcome = null; S.cash += W.tot; save(); Sfx.play('cash'); Parts.burst(player.x, 200, player.z, 40, ['#10b981', '#f59e0b', '#ffffff'], { size: 14, speed: 400, up: 600 }); }
-  function start() { if (!G.started) { player.face = Math.PI; CAM.yaw = 0; } G.started = true; G.paused = false; Sfx.unlock(); if (S.justReb) { S.justReb = 0; save(); setTimeout(() => UI.banner('Rebirth ' + S.reb + '!', 'All cash x' + (1 + 0.5 * S.reb) + ' from now on. Your pets came with you!', 'event'), 400); } }
+  function start() { const first = !G.started; if (!G.started) { player.face = Math.PI; CAM.yaw = 0; } G.started = true; G.paused = false; Sfx.unlock();
+    if (first && window.GK && GK.tutorial) setTimeout(() => GK.tutorial('glowupspa', [
+      { title: 'Glow Up Spa', text: matchMedia('(pointer:coarse)').matches ? 'Drag on the left to walk around your salon. Try it!' : 'Walk with W A S D. Try it now!', skill: 'move', until: () => player.moving, hideNext: true },
+      { title: 'Cash', text: 'Your stylist does the haircuts. Walk over the front desk to scoop up the cash.', target: '#hud' },
+      { title: 'Build', text: 'Step onto a glowing green pad to buy what it shows: chairs, staff and new rooms. Locked rooms open in order.' },
+      { title: 'Eggs', text: 'Cross the street into the Beauty Store: grab an egg from a pedestal and bring it home to hatch a pet. Clerks chase slow thieves, so train Speed on the treadmill.' },
+      { title: 'Shops', text: 'The Shop, Store, Pets and Index live on these buttons. Hold Shift (or tap Run) to sprint.', target: '[data-side=shop]', doneLabel: 'Got it!' }
+    ]), 1200); if (S.justReb) { S.justReb = 0; save(); setTimeout(() => UI.banner('Rebirth ' + S.reb + '!', 'All cash x' + (1 + 0.5 * S.reb) + ' from now on. Your pets came with you!', 'event'), 400); } }
   function togglePause(force) { if (!G.started) return; G.paused = typeof force === 'boolean' ? force : !G.paused; UI.paused(G.paused); if (G.paused) save(); }
   Bridge.on((s, ev) => { if (ev === 'pause') togglePause(true); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) { togglePause(true); save(); } });
   addEventListener('pagehide', save);
+  if (window.GK && GK.emotes) GK.emotes.install({ canEmote: () => G.started && !G.paused && !UI.modal() && player && !player.carry && player.stun <= 0 });
   return {
     setup, step, start, togglePause, warpHome, goStore, collectWelcome, Shop, save, storeBuy, owned, cashPack, TIMED, buyables, bestBuy,
     get S() { return S; }, get G() { return G; }, get player() { return player; }, staff, custs, clerks, ST, petArt,
@@ -2804,7 +2858,7 @@ const UI = (() => {
     sheet = ''; $('sheet').hidden = true; $('sheet').className = 'sheet'; document.body.classList.remove('menu-open');
     input.act = false; input.jump = false; input.keys.clear();
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-    if (!Game.G.started) { open('lobby'); return; }
+    if (!Game.G.started) { Game.start(); hud(true); return; }   // straight into the game: no lobby screen
     if (Game.G.paused) Game.togglePause(false);
   }
   const modal = () => !!sheet;
@@ -3004,7 +3058,7 @@ const UI = (() => {
     if (b.blur) b.blur();
     Sfx.unlock();
     const d = b.dataset, Sh = Game.Shop;
-    if (b.id === 'welcomeBtn') { Game.collectWelcome(); toast('Cash collected!', 'good'); sheet = ''; open('lobby'); return; }
+    if (b.id === 'welcomeBtn') { Game.collectWelcome(); toast('Cash collected!', 'good'); close(); return; }
     if (b.id === 'goBtn') { Game.start(); close(); hud(true); return; }
     if ('close' in d) { close(); return; }
     if (b.id === 'resumeBtn') { close(); return; }
@@ -3019,7 +3073,7 @@ const UI = (() => {
     else if (d.store || d.buy) { if (busy) return; busy = true; b.disabled = true; try { await Game.storeBuy(d.store || d.buy); } catch (x) { toast('The rewards app didn’t answer. Try again.', 'bad'); } busy = false; }
     else if (d.use) { b.disabled = true; await Sh.boost(d.use); }
     else if (b.id === 'rebBtn') { Sh.rebirth(); return; }
-    else if (b.id === 'giftBtn') Sh.daily();
+    else if (b.id === 'giftBtn') { Sh.daily(); if (window.GK && GK.crate) setTimeout(() => GK.crate(GK.GAME), 700); }   // the daily gift box counts as a crate: a chance at a site-wide item
     else if (d.gfx) View.set('quality', d.gfx); else if (d.scale) View.set('scale', +d.scale); else if (d.layout) View.set('layout', d.layout);
     else if (d.nudge) { $('nudge').classList.remove('on'); document.body.classList.remove('nudging'); nudgeT = 0; if (d.nudge === 'go' && nudgeGo) nudgeGo(); return; }
     else if (d.tips) View.set('tips', d.tips === 'on');
@@ -3125,7 +3179,8 @@ const UI = (() => {
   await Game.setup();
   Bridge.start();
   load.classList.add('done');
-  setTimeout(() => { UI.open(Game.G.welcome ? 'welcome' : 'lobby'); }, 50);
+  // no first screen: straight into the game. Offline earnings are collected on the way in and announced.
+  setTimeout(() => { const W = Game.G.welcome; Game.start(); UI.hud(true); if (W) { Game.collectWelcome(); setTimeout(() => UI.banner('Welcome back!', 'Your place made ' + money(W.tot) + ' while you were away', 'event'), 900); } }, 50);
   const tick = () => { const raw = clock.getDelta(), dt = Math.min(0.05, raw) * (window.DBG_SPEED || 1); Game.step(dt); UI.frame(); renderer.render(scene, camera); if (Game.G.started && !Game.G.paused) View.tick(raw, clock.elapsedTime); requestAnimationFrame(tick); };
   tick();
 })();
