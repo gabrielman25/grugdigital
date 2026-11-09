@@ -1,7 +1,7 @@
-/* Grug · shared styles — kubii theme
-   Flat off-white (light) / off-black (dark) background tinted to the visitor's theme. Light by default; Dark and Auto
-   live in Settings (gear in the top bar, or Profile). theme.js sets the theme variables before first paint:
-   --h (hue of every neutral), --sel-a / --sel-b (accent pair), --on-sel (ink on the accent), --hot-a / --hot-b.
+/* Grug · shared styles — always dark, over the blue smoky fog drawn by fogbg.js (#g-fog, behind everything).
+   theme.js sets the theme variables before first paint: --h (the fog's blue, fixed), --sel-a / --sel-b (accent pair),
+   --on-sel (ink on the accent), --hot-a / --hot-b. The colour theme also picks the colours of the lights in the fog.
+   Cards and bars are dark see-through glass so the fog shows through. (The light palette below is no longer used.)
    The old token names (--card, --ember, --moss …) are kept and re-pointed, so page styles theme themselves. */
 /* fonts: Cal Sans and Outfit (SIL Open Font License), served from assets/fonts so pages don't wait on another site */
 @font-face {
@@ -131,26 +131,35 @@
   color-scheme:light;
 }
 :root[data-theme="dark"]{
-  --bg:hsl(var(--h) 14% 7%);    /* off-black, tinted by the theme */
-  --scrim:hsl(var(--h) 40% 5% / .3);
-  --icon-bg:hsl(var(--h) 16% 13%);
-  --glass:var(--icon-bg);
-  --glass-strong:var(--icon-bg);
-  --solid:var(--icon-bg);
-  --bg2:hsl(var(--h) 30% 9% / .85);
+  --bg:#03050f;                 /* deep navy under the fog (and the colour of solid things that sit on it) */
+  --scrim:hsl(var(--h) 60% 3% / .45);
+  --icon-bg:hsl(var(--h) 40% 11% / .8);
+  --glass:hsl(var(--h) 42% 9% / .66);
+  --glass-strong:hsl(var(--h) 42% 10% / .8);
+  --solid:hsl(var(--h) 36% 11%);
+  --bg2:hsl(var(--h) 40% 8% / .85);
   --card:var(--icon-bg);
-  --card2:hsl(0 0% 100% / .07);
-  --card3:hsl(0 0% 100% / .13);
-  --line:hsl(0 0% 100% / .1); --line2:hsl(0 0% 100% / .18);
-  --bezel:hsl(0 0% 100% / .92);
-  --ink:hsl(var(--h) 30% 96%); --ink2:hsl(var(--h) 18% 90% / .86); --mut:hsl(var(--h) 18% 88% / .62);
-  --chip-bg:hsl(0 0% 100% / .93); --chip-fg:hsl(var(--h) 40% 11%);
+  --card2:hsl(var(--h) 60% 80% / .08);
+  --card3:hsl(var(--h) 60% 80% / .14);
+  --line:hsl(var(--h) 70% 85% / .12); --line2:hsl(var(--h) 70% 85% / .2);
+  --bezel:hsl(var(--h) 80% 86% / .3);
+  --ink:hsl(var(--h) 40% 97%); --ink2:hsl(var(--h) 30% 92% / .86); --mut:hsl(var(--h) 28% 88% / .62);
+  --chip-bg:hsl(0 0% 100% / .93); --chip-fg:hsl(var(--h) 50% 11%);
   --ring-a:var(--sel-a); --ring-b:var(--sel-b);
-  --shadow:0 18px 44px hsl(var(--h) 50% 2% / .5);
+  --shadow:0 18px 44px hsl(var(--h) 70% 2% / .55);
   --moss:#4ade80; --moss-dark:#16a34a; --moss-ink:#052e16; --moss-soft:color-mix(in srgb,#4ade80 16%,transparent);
   --gold:#fbbf24; --danger:#fb7185;
   color-scheme:dark;
 }
+
+/* ---------- the fog: fixed behind the page (fogbg.js fills the two canvases; this gradient shows until it does) ---------- */
+html.g-fogged{background:#03050f radial-gradient(ellipse 70% 60% at 50% 46%,#16288a 0%,#0a1347 34%,#040824 64%,#03050f 100%) fixed}
+html.g-fogged body{background:transparent}
+#g-fog{position:fixed;inset:0;z-index:-1;pointer-events:none;transition:filter .9s ease}
+#g-fog canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#g-fog .g-fog-smoke{animation:g-fog-in .8s ease both}
+#g-fog.nogl .g-fog-smoke{display:none}
+@keyframes g-fog-in{from{opacity:0}}
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;background:var(--bg)}
@@ -183,6 +192,7 @@ img.k-ic{display:block;object-fit:contain;-webkit-user-drag:none;user-select:non
 .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 .k-glass{background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow)}
+:root[data-theme="dark"] .g-tabs,:root[data-theme="dark"] .g-top .k-glass,:root[data-theme="dark"] button.g-me{background:hsl(var(--h) 45% 8% / .86);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3)}
 .k-sb{position:absolute;top:-9px;z-index:2;font:600 9.5px/1 var(--display);letter-spacing:.06em;padding:4px 6px 3px;border-radius:7px;background:var(--chip-bg);color:var(--chip-fg);box-shadow:0 2px 6px rgba(0,0,0,.2);pointer-events:none}
 
 /* ---------- top bar: floating pills ---------- */
@@ -335,9 +345,9 @@ textarea.g-input{min-height:120px;font-size:14px;font-family:ui-monospace,SFMono
 .k-themes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 @media (min-width:480px){.k-themes{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .k-theme{display:flex;flex-direction:column;gap:8px;padding:9px;border-radius:16px;background:var(--card2);border:2px solid transparent;text-align:left;color:var(--ink)}
-.k-theme .sw{height:40px;border-radius:11px}
-.k-theme .dots{display:flex;gap:5px}
-.k-theme .dots i{width:13px;height:13px;border-radius:50%;box-shadow:0 0 0 1.5px var(--bezel)}
+.k-theme .sw{position:relative;height:52px;border-radius:11px;overflow:hidden;background:#03050f radial-gradient(ellipse 80% 90% at 50% 50%,#1b30a0 0%,#0b1550 40%,#03050f 100%)}
+.k-theme .sw i{position:absolute;width:7px;height:7px;margin:-3.5px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px var(--c),0 0 10px 3px var(--c)}
+.k-theme .sw i::after{content:"";position:absolute;right:5px;top:50%;width:26px;height:3px;margin-top:-1.5px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--c));transform-origin:right center;transform:rotate(var(--a))}
 .k-theme b{font:600 15px/1 var(--display)}
 .k-theme small{font-size:11.5px;color:var(--mut)}
 .k-theme[aria-checked=true]{border-color:var(--ring-a);background:color-mix(in srgb,var(--sel-a) 14%,transparent)}

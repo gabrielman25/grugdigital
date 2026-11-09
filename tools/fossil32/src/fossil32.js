@@ -2,7 +2,7 @@
    FOSSIL32 · the Grug Digital fantasy console, on the site
    ───────────────────────────────────────────────────────────────────────────────────────────
    Every listed game is shown as a floating 3D cartridge box. Tapping a box:
-     page fades to white (the box stays) → the box flies to the middle → its side flap opens →
+     the page behind goes dark and out of focus (the box stays sharp) → the box flies to the middle → its side flap opens →
      the cartridge slides out and hovers on the left → the game panel (description, features,
      genre, Play) slides in on the right.
    Play: the cartridge drops into the FOSSIL32 console → the screen boots → the camera pushes
@@ -18,7 +18,11 @@
    (Grug.ui.boxTile(game) in grug.js writes that markup.) Elements with data-f32 are picked up
    automatically, also when added later. Without WebGL the links just work as plain links.
 
-   window.Fossil32 = { ok, open(id, fromEl?), boot(id), close() }
+   The Games page shows them as a vertical carousel instead (Fossil32.rack, see RACK below); its Play button calls
+   Fossil32.launch(id): the selected box opens, the cartridge slides out with a pool of light following it while the page
+   drifts out of focus, and it goes straight into the console and the game.
+
+   window.Fossil32 = { ok, open(id, fromEl?), boot(id), close(), rack(el, state), launch(id) }
 
    Build: tools/fossil32 → npm install && npm run build  (bundles three.js r170 into one file)
    Cartridge model: "Game Cartridge" by Pavel Kutejnikov (Drumdorf), CC BY 4.0, modified.
@@ -422,7 +426,133 @@ function renderShelf(t, dt){
   return true;
 }
 
-/* ═════════════════ OVERLAY: white stage, unbox, game panel, console boot ═════════════════ */
+/* ═════════════════ RACK: the Games page's vertical carousel of boxes ═════════════════
+   Fossil32.rack(el, state) draws every game in state.ids as a column of floating boxes inside `el`. The page owns the
+   scrolling: it sets state.pos (a float index, animated, any size) and the rack follows it every frame. The list loops:
+   pos wraps around state.ids, so the last game sits just above the first. The box at the rounded pos is the selected one:
+   centred, big, facing the viewer; the others shrink back along an arc and fade out.
+   rack.pick(clientX, clientY) → the index of the box under the pointer (or -1). Fossil32.launch(id) plays from it. */
+const rack = { el: null, cv: null, ctx: null, state: null, scene: null, cam: null, rig: null, items: [], w: 0, h: 0, ready: false,
+  hx: 0, hy: 0, tx: 0, ty: 0, accent: new THREE.Color("#8aa6ff"), ray: renderer ? new THREE.Raycaster() : null };
+const RACK_FOV = 30;
+function rackLayout(o){
+  // o = this box's offset from the selected one (…-2, -1, 0, 1, 2… and everything in between while scrolling)
+  const a = Math.abs(o), s = Math.sign(o), a1 = Math.min(a, 1), a2 = Math.max(0, a - 1);
+  return {
+    y: -s * (a1 * BH * 1.16 + a2 * BH * 0.92),
+    x: -0.42 * Math.pow(Math.min(a, 2.6), 1.3),
+    z: -1.1 * Math.min(a, 3.4),
+    scale: 1 - 0.3 * a1 - 0.07 * Math.min(a2, 2),
+    yaw: -0.3 - 0.26 * a1 - 0.05 * a2,
+    pitch: 0.06 + 0.13 * Math.max(-2, Math.min(2, o)),
+    fade: a < 1.7 ? 1 : Math.max(0, 1 - (a - 1.7) / 1.3)
+  };
+}
+const wrapIdx = (i, n) => ((i % n) + n) % n;
+const wrapOff = (o, n) => { o = wrapIdx(o, n); return o >= n / 2 ? o - n : o; };   // shortest way round the loop
+function rackCam(){
+  const aspect = rack.w / Math.max(1, rack.h), half = Math.tan(THREE.MathUtils.degToRad(RACK_FOV / 2));
+  // the selected box takes ~56% of the width, or ~30% of the height, whichever comes first
+  const ph = rack.w > innerWidth * 0.75;   // phones (the rack spans the screen above the details): the rack is short and wide, so the box can take more of the width (and keeps clear of the rail on the right)
+  const d = Math.max(BW / (ph ? 0.66 : 0.56) / 2 / half / aspect, BH / (ph ? 0.42 : 0.3) / 2 / half), cx = ph ? 0.32 : -0.25;
+  rack.cam.fov = RACK_FOV; rack.cam.aspect = aspect; rack.cam.position.set(cx, d * 0.035, d); rack.cam.lookAt(cx, 0, 0); rack.cam.updateProjectionMatrix();
+}
+async function mountRack(el, state){
+  if (!renderer) return null;
+  if (rack.el) unmountRack();
+  rack.el = el; rack.state = state; rack.items = [];
+  rack.scene = new THREE.Scene(); rack.rig = lightRig(rack.scene, "#ffffff", false); rack.rig.rim.intensity = 1.6;
+  rack.rig.key.intensity = 2.1;
+  rack.cam = new THREE.PerspectiveCamera(RACK_FOV, 1, 0.1, 100);
+  const cv = document.createElement("canvas"); cv.className = "f32-rackcv"; cv.setAttribute("aria-hidden", "true"); el.appendChild(cv);
+  rack.cv = cv; rack.ctx = cv.getContext("2d");
+  const r = el.getBoundingClientRect(); rack.w = r.width; rack.h = r.height;
+  rack.ro = new ResizeObserver(es => es.forEach(e => { rack.w = e.contentRect.width; rack.h = e.contentRect.height; kick(); })); rack.ro.observe(el);
+  el.addEventListener("pointermove", rack.onMove = e => { if (e.pointerType !== "mouse") return; const b = el.getBoundingClientRect(); rack.tx = (e.clientX - b.left) / b.width - .5; rack.ty = (e.clientY - b.top) / b.height - .5; });
+  el.addEventListener("pointerleave", rack.onLeave = () => { rack.tx = rack.ty = 0; });
+  await common;
+  // the boxes nearest the start come first, so the page fills in from the middle out
+  const order = state.ids.map((id, i) => i).sort((a, b) => Math.abs(wrapOff(a - state.pos, state.ids.length)) - Math.abs(wrapOff(b - state.pos, state.ids.length)));
+  for (const i of order){
+    if (rack.el !== el) return null;
+    const g = gameById(state.ids[i]); if (!g) continue;
+    const c = cfgOf(g), im = await gameImages(c);
+    const set = faceSet(0.5, false); drawFaces(set, c, im);
+    const { T, mats } = boxMaterials(set);
+    mats.forEach(m => { m.transparent = true; });
+    const group = new THREE.Group(), box = new THREE.Mesh(boxGeo, mats); box.userData.index = i; group.add(box);
+    rack.scene.add(group);
+    rack.items[i] = { i, id: g.id, c, set, T, mats, group, box, phase: Math.random() * 10, away: false, shown: 0 };
+    rack.ready = true; el.classList.add("f32-rack-on"); kick();
+  }
+  return rack;
+}
+function unmountRack(){
+  if (!rack.el) return;
+  rack.ro && rack.ro.disconnect();
+  rack.el.removeEventListener("pointermove", rack.onMove); rack.el.removeEventListener("pointerleave", rack.onLeave);
+  rack.items.forEach(it => { if (!it) return; it.mats.forEach(m => m.dispose()); Object.values(it.T).forEach(t => t.dispose()); });
+  rack.cv && rack.cv.remove(); rack.el = null; rack.items = []; rack.ready = false;
+}
+function poseRack(t, dt){
+  const st = rack.state, k = 1 - Math.exp(-dt * 6), still = reduceMotion();
+  rack.hx += (rack.tx - rack.hx) * k; rack.hy += (rack.ty - rack.hy) * k;
+  const n = st.ids.length, sel = wrapIdx(Math.round(st.pos), n);
+  for (const it of rack.items){
+    if (!it) continue;
+    const o = wrapOff(it.i - st.pos, n), L = rackLayout(o), focus = Math.max(0, 1 - Math.abs(o));
+    it.shown += (1 - it.shown) * Math.min(1, dt * 5);
+    const sway = still ? 0 : Math.sin(t * 0.8 + it.phase) * 0.12 * (0.4 + focus * 0.6);
+    const bob = still ? 0 : Math.sin(t * 1.1 + it.phase) * 0.05;
+    it.group.visible = !it.away && L.fade > 0.01;
+    it.group.position.set(L.x, L.y + bob, L.z);
+    it.group.scale.setScalar(L.scale * (0.92 + 0.08 * it.shown));
+    it.group.rotation.set(L.pitch + rack.hy * 0.3 * focus, L.yaw + sway + rack.hx * 0.6 * focus, Math.sin(t * .7 + it.phase) * .012);
+    const op = L.fade * it.shown;
+    it.mats.forEach(m => { m.opacity = op; m.depthWrite = op > 0.6; });
+    if (it.i === sel) rack.accent.lerp(new THREE.Color(it.c.accent), Math.min(1, dt * 4));
+  }
+  rack.rig.rim.color.copy(rack.accent);
+}
+function renderRack(t, dt){
+  if (!rack.el || !rack.ready || !rack.el.isConnected || rack.w < 4 || rack.h < 4) return false;
+  const dpr = Math.min(devicePixelRatio || 1, 2), pw = Math.round(rack.w * dpr), ph = Math.round(rack.h * dpr);
+  if (pw > shelf.bufW || ph > shelf.bufH){ shelf.bufW = Math.max(pw, shelf.bufW); shelf.bufH = Math.max(ph, shelf.bufH); renderer.setSize(shelf.bufW, shelf.bufH, false); }
+  poseRack(t, dt); rackCam();
+  renderer.shadowMap.enabled = false; renderer.setScissorTest(true);
+  renderer.setViewport(0, 0, pw, ph); renderer.setScissor(0, 0, pw, ph);
+  renderer.setClearColor(0x000000, 0); renderer.clear();
+  renderer.render(rack.scene, rack.cam);
+  renderer.setScissorTest(false);
+  if (rack.cv.width !== pw || rack.cv.height !== ph){ rack.cv.width = pw; rack.cv.height = ph; }
+  rack.ctx.clearRect(0, 0, pw, ph);
+  rack.ctx.drawImage(renderer.domElement, 0, shelf.bufH - ph, pw, ph, 0, 0, pw, ph);
+  return true;
+}
+function rackPick(x, y){
+  if (!rack.el || !rack.ready) return -1;
+  const b = rack.el.getBoundingClientRect();
+  rack.ray.setFromCamera(new THREE.Vector2(((x - b.left) / b.width) * 2 - 1, -((y - b.top) / b.height) * 2 + 1), rack.cam);
+  const hits = rack.ray.intersectObjects(rack.items.filter(it => it && it.group.visible).map(it => it.box), false);
+  return hits.length ? hits[0].object.userData.index : -1;
+}
+/* where the selected box sits on screen, framed the way the overlay's first frame expects (a 4:3 "tile" around it) */
+function rackFrom(it){
+  const b = rack.el.getBoundingClientRect();
+  it.group.updateMatrixWorld(true);
+  const p = v => { v.applyMatrix4(it.group.matrixWorld).project(rack.cam); return { x: b.left + (v.x + 1) / 2 * b.width, y: b.top + (1 - v.y) / 2 * b.height }; };
+  const c = p(new THREE.Vector3(0, 0, 0)), l = p(new THREE.Vector3(-BW / 2, 0, 0)), r = p(new THREE.Vector3(BW / 2, 0, 0));
+  const w = Math.hypot(r.x - l.x, r.y - l.y) * 1.12, h = w * 3 / 4;
+  return { rect: { x: c.x - w / 2, y: c.y - h / 2, w, h }, rot: it.group.rotation.clone(), y: 0 };
+}
+function launch(id){
+  const it = rack.items.find(x => x && x.id === id);
+  if (!it || !renderer){ const g = gameById(id); if (g) location.href = siteUrl(g.game || g.play); return; }
+  const from = rackFrom(it);
+  open(id, null, { launch: true, from, onAway: () => { it.away = true; }, onBack: () => { it.away = false; it.shown = 0.4; } });
+}
+
+/* ═════════════════ OVERLAY: dark focus stage, unbox, game panel, console boot ═════════════════ */
 const ov = { el: null, active: false, scene: null, cam: null, c: null, it: null, phase: "", t: 0, tStart: 0, built: false };
 const ease = { io: k => k < .5 ? 4*k*k*k : 1 - Math.pow(-2*k + 2, 3) / 2, in: k => k*k, out: k => 1 - Math.pow(1 - k, 3),
   back: k => { const c1 = 1.4, c3 = c1 + 1; return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); } };
@@ -431,12 +561,12 @@ const lerp = (a, b, k) => a + (b - a) * k;
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 const CAM_HOME = { pos: new THREE.Vector3(0.35, 0.5, 8.1), target: new THREE.Vector3(0.15, -0.1, 0.2) };
-const FLY = 0.8, UNBOX_END = 4.5, PANEL_AT = 3.9;
+const FLY = 0.8, UNBOX_END = 4.5, PANEL_AT = 3.9, LAUNCH_AT = 3.3;
 let O = null;   // overlay 3D objects, built on first open
 
 function buildOverlayDom(){
   const el = document.createElement("div"); el.className = "f32-ov"; el.hidden = true; el.tabIndex = -1; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
-  el.innerHTML = `<div class="f32-white"></div><div class="f32-gl"></div>
+  el.innerHTML = `<div class="f32-white"></div><div class="f32-focus"></div><div class="f32-gl"></div>
     <section class="f32-panel" aria-live="polite"></section>
     <button class="f32-close" type="button" aria-label="Close">✕</button>
     <button class="f32-skip" type="button">Skip ▸▸</button>
@@ -445,7 +575,7 @@ function buildOverlayDom(){
   document.body.appendChild(el);
   el.querySelector(".f32-close").onclick = () => close(true);
   el.querySelector(".f32-skip").onclick = () => skip();
-  el.querySelector(".f32-gl").addEventListener("click", () => { if (ov.phase === "fly" || ov.phase === "unbox") skip(); });
+  el.querySelector(".f32-gl").addEventListener("click", () => { if (!ov.launch && (ov.phase === "fly" || ov.phase === "unbox")) skip(); });
   el.addEventListener("keydown", e => { if (e.key === "Escape") close(true); });
   // keep the page underneath still (without hiding its scrollbar, which would shift the tiles)
   const stop = e => { if (!e.target.closest(".f32-panel")) e.preventDefault(); };
@@ -638,7 +768,8 @@ function setBoxOpacity(o){ O.boxMats.concat(O.flapMats).forEach(m => { m.transpa
 function unboxCam(){   // where the camera ends up: the cartridge left of centre (or above centre on a tall screen)
   O.cart.getWorldPosition(focusV);
   const n = narrow();
-  tmpV.copy(focusV).add(n ? new THREE.Vector3(0, -1.0, 0) : new THREE.Vector3(1.2, 0, 0));
+  // with the game panel: the cartridge sits left of centre (above it on a tall screen); launching: right in the middle
+  tmpV.copy(focusV).add(ov.launch ? new THREE.Vector3(0.25, 0, 0) : n ? new THREE.Vector3(0, -1.0, 0) : new THREE.Vector3(1.2, 0, 0));
   return { target: tmpV.clone(), pos: tmpV.clone().add(new THREE.Vector3(0.12, 0.3, n ? 6.6 : 5.4)) };
 }
 function poseUnbox(t){
@@ -720,12 +851,19 @@ function renderOverlay(now){
     if (t >= FLY){ ov.phase = "unbox"; ov.tStart = now; camFrom.pos.copy(CAM_HOME.pos); camFrom.target.copy(CAM_HOME.target); sizeOverlay(); }
   } else if (ov.phase === "unbox" || ov.phase === "panel"){
     poseUnbox(ov.phase === "panel" ? Math.max(t, UNBOX_END) : t);
-    if (ov.phase === "unbox" && t >= PANEL_AT){ ov.phase = "panel"; ov.tStart = now - PANEL_AT * 1000; showPanel(); }
+    if (ov.launch){ if (t >= LAUNCH_AT) startBoot(); }
+    else if (ov.phase === "unbox" && t >= PANEL_AT){ ov.phase = "panel"; ov.tStart = now - PANEL_AT * 1000; showPanel(); }
   } else if (ov.phase === "boot"){
     poseBoot(t);
   }
   ov.cam.position.copy(camNow.pos); ov.cam.lookAt(camNow.target);
   O.rig.rim.color.set(ov.c.accent);
+  // the pool of light that follows the cartridge (the box, before it's out), so the eye goes with it
+  (O.cart.visible ? O.cart : O.box).getWorldPosition(focusV);
+  ov.cam.updateMatrixWorld(); focusV.project(ov.cam);
+  const fx = rect.x + (focusV.x + 1) / 2 * rect.w, fy = rect.y + (1 - focusV.y) / 2 * rect.h;
+  ov.fx = ov.fx == null ? fx : lerp(ov.fx, fx, 0.25); ov.fy = ov.fy == null ? fy : lerp(ov.fy, fy, 0.25);
+  ov.el.style.setProperty("--f32-fx", ov.fx.toFixed(1) + "px"); ov.el.style.setProperty("--f32-fy", ov.fy.toFixed(1) + "px");
   renderer.shadowMap.enabled = true;
   const bh = Math.round(H * dpr);
   renderer.setScissorTest(true);
@@ -742,6 +880,7 @@ function showPanel(){
   ov.el.querySelector(".f32-skip").hidden = true;
 }
 function skip(){
+  if (ov.launch){ go(ov.c); return; }     // launching: skip straight to the game
   if (ov.phase === "fly"){ ov.phase = "unbox"; camFrom.pos.copy(CAM_HOME.pos); camFrom.target.copy(CAM_HOME.target); sizeOverlay(); }
   if (ov.phase === "unbox"){ ov.tStart = performance.now() - UNBOX_END * 1000; }
 }
@@ -771,6 +910,9 @@ async function open(id, it, opts){
   ov.el.querySelector(".f32-panel .f32-play").onclick = () => startBoot();
   ov.el.classList.remove("f32-panel-on", "f32-on", "f32-booting"); ov.el.querySelector(".f32-flash").style.opacity = 0;
   ov.el.querySelector(".f32-skip").hidden = false;
+  ov.launch = !!(opts && opts.launch); ov.onBack = opts && opts.onBack; ov.fx = ov.fy = null;
+  ov.el.classList.toggle("f32-launch", ov.launch);
+  ov.el.querySelector(".f32-skip").textContent = ov.launch ? "Skip to game ▸▸" : "Skip ▸▸";
   ov.el.hidden = false; document.documentElement.classList.add("f32-lock");
   void ov.el.offsetWidth; ov.el.classList.add("f32-on");           // white fades in while the box flies
   ov.cam = O.cam; ov.tileCam = ov.tileCam || new THREE.PerspectiveCamera();
@@ -778,17 +920,20 @@ async function open(id, it, opts){
   sizeOverlay();
   O.hinge.rotation.y = 0; O.box.visible = true; setBoxOpacity(1); O.cart.visible = false; O.show.rotation.set(0, 0, 0);
   ov.it = it || null;
-  const rect = it && it.stage ? it.stage.getBoundingClientRect() : null;
+  const from = opts && opts.from;
+  const rect = from ? { left: from.rect.x, top: from.rect.y, width: from.rect.w, height: from.rect.h, bottom: from.rect.y + from.rect.h } : it && it.stage ? it.stage.getBoundingClientRect() : null;
   if (rect && rect.width > 10 && rect.bottom > 0 && rect.top < innerHeight && !reduceMotion()){
     ov.fromRect = { x: rect.left, y: rect.top, w: rect.width, h: rect.height };
-    ov.fromRot = it.group ? it.group.rotation.clone() : new THREE.Euler(0, -0.3, 0);
-    ov.fromY = it.group ? it.group.position.y : 0;
-    ov.phase = "fly"; it.hidden = true; it.el.classList.add("f32-away");
+    ov.fromRot = from ? from.rot : it.group ? it.group.rotation.clone() : new THREE.Euler(0, -0.3, 0);
+    ov.fromY = from ? from.y : it.group ? it.group.position.y : 0;
+    ov.phase = "fly";
+    if (it){ it.hidden = true; it.el.classList.add("f32-away"); }
+    if (opts && opts.onAway) opts.onAway();
   } else { ov.phase = "unbox"; camFrom.pos.copy(CAM_HOME.pos); camFrom.target.copy(CAM_HOME.target); }
   ov.tStart = performance.now();
   if (reduceMotion()) ov.tStart -= UNBOX_END * 1000;
   ov.active = true; opening = false;
-  if (!(opts && opts.noHistory)) try { history.pushState({ f32: id }, "", "#box/" + id); ov.pushed = true; } catch (e) {}
+  if (!(opts && (opts.noHistory || opts.launch))) try { history.pushState({ f32: id }, "", "#box/" + id); ov.pushed = true; } catch (e) {}
   if (opts && opts.play){ ov.phase = "panel"; ov.tStart = performance.now() - UNBOX_END * 1000; poseUnbox(UNBOX_END); startBoot(true); }
   kick();
   setTimeout(() => { try { ov.el.focus({ preventScroll: true }); } catch (e) {} }, 50);
@@ -808,6 +953,7 @@ function close(fromUser){
   ov.el.classList.remove("f32-on", "f32-panel-on", "f32-booting");
   document.documentElement.classList.remove("f32-lock");
   if (ov.it){ ov.it.hidden = false; ov.it.el.classList.remove("f32-away"); try { ov.it.el.focus({ preventScroll: true }); } catch (e) {} }
+  if (ov.onBack){ try { ov.onBack(); } catch (e) {} ov.onBack = null; }
   setTimeout(() => { if (!ov.active){ ov.el.hidden = true; renderer.domElement.remove(); } }, 320);
   if (fromUser && ov.pushed && history.state && history.state.f32){ ov.pushed = false; history.back(); }
   ov.pushed = false;
@@ -825,7 +971,7 @@ function loop(now){
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   let busy = false;
   if (ov.active && O) { renderOverlay(now); busy = true; }
-  else if (!document.hidden) busy = renderShelf(now / 1000, dt);
+  else if (!document.hidden){ const a = renderShelf(now / 1000, dt), b = renderRack(now / 1000, dt); busy = a || b; }
   idleFrames = busy ? 0 : idleFrames + 1;
   if (idleFrames > 30){ running = false; return; }
   requestAnimationFrame(loop);
@@ -837,8 +983,9 @@ document.addEventListener("scroll", kick, { passive: true });
 /* ═════════════════ BOOT ═════════════════ */
 function scan(root){ (root.querySelectorAll ? root.querySelectorAll("[data-f32]") : []).forEach(el => mount(el)); if (root.dataset && root.dataset.f32) mount(root); }
 function start(){
-  if (!renderer){ document.documentElement.classList.add("f32-nogl"); window.Fossil32 = { ok: false, open: (id, el, o) => open(id, null, o), boot: id => open(id, null, { play: true }), close() {} }; return; }
-  window.Fossil32 = { ok: true, open: (id, el) => open(id, el && el.__f32 ? el.__f32 : (el && el.closest && el.closest("[data-f32]") ? el.closest("[data-f32]").__f32 : null)), boot: id => open(id, null, { play: true }), close: () => close(true) };
+  if (!renderer){ document.documentElement.classList.add("f32-nogl"); window.Fossil32 = { ok: false, open: (id, el, o) => open(id, null, o), boot: id => open(id, null, { play: true }), close() {}, rack: () => null, launch: id => launch(id), pick: () => -1 }; return; }
+  window.Fossil32 = { ok: true, open: (id, el) => open(id, el && el.__f32 ? el.__f32 : (el && el.closest && el.closest("[data-f32]") ? el.closest("[data-f32]").__f32 : null)), boot: id => open(id, null, { play: true }), close: () => close(true),
+    rack: (el, state) => mountRack(el, state), pick: (x, y) => rackPick(x, y), launch: id => launch(id), kick };
   scan(document);
   new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => n.nodeType === 1 && scan(n)))).observe(document.body, { childList: true, subtree: true });
   // deep link: …#box/<id>

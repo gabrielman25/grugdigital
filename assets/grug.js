@@ -409,25 +409,22 @@
     document.addEventListener('pointerover', pre, { passive: true }); document.addEventListener('touchstart', pre, { passive: true });
   }
 
-  /* ---------- appearance: Light / Dark / Auto + themes (used by the gear sheet and Profile) ---------- */
+  /* ---------- appearance: the colour themes (used by the gear sheet and Profile). The site is always dark; a theme picks
+     the colours of the lights that float through the fog and the accent on buttons. ---------- */
   function appearance(box) {
     const T = root.GrugTheme; if (!T || !box) return;
+    const sw = th => { const o = th.orbs || [th.a, th.b, th.hotA, th.hotB], pos = [[18, 64, 22], [44, 30, 34], [70, 58, 18], [86, 26, 26]];
+      return '<span class="sw">' + pos.map((p, i) => '<i style="left:' + p[0] + '%;top:' + p[1] + '%;--c:' + o[i % o.length] + ';--a:' + p[2] + 'deg"></i>').join('') + '</span>'; };
     const draw = () => {
-      const s = T.prefs(), t = T.THEMES[s.theme];
-      const L = 'hsl(' + t.h + ' 24% 95%)', D = 'hsl(' + t.h + ' 14% 7%)', LP = '#fff', DP = 'hsl(' + t.h + ' 24% 21%)', acc = 'linear-gradient(90deg,' + t.a + ',' + t.b + ')';
-      const pv = m => m === 'light' ? '<span class="pv" style="background:' + L + '"><i style="background:' + LP + '"></i><i style="background:' + acc + '"></i></span>'
-        : m === 'dark' ? '<span class="pv" style="background:' + D + '"><i style="background:' + DP + '"></i><i style="background:' + acc + '"></i></span>'
-        : '<span class="pv" style="background:linear-gradient(135deg,' + L + ' 50%,' + D + ' 50%)"><i style="background:linear-gradient(135deg,' + LP + ' 50%,' + DP + ' 50%)"></i><i style="background:' + acc + '"></i></span>';
+      const s = T.prefs();
       box.innerHTML =
-        '<span class="k-set-h">Light or dark</span><div class="k-modes" role="radiogroup" aria-label="Light or dark">' +
-        [['light', 'Light'], ['dark', 'Dark'], ['auto', 'Auto']].map(m => '<button type="button" class="k-mode" role="radio" aria-checked="' + (s.mode === m[0]) + '" data-mode="' + m[0] + '">' + pv(m[0]) + m[1] + '</button>').join('') + '</div>' +
-        '<span class="k-set-h">Theme</span><div class="k-themes" role="radiogroup" aria-label="Theme">' +
-        Object.keys(T.THEMES).map(k => { const th = T.THEMES[k]; return '<button type="button" class="k-theme" role="radio" aria-checked="' + (s.theme === k) + '" data-theme-id="' + k + '"><span class="sw" style="background:linear-gradient(135deg,' + th.a + ',' + th.b + ')"></span><span class="dots"><i style="background:' + th.a + '"></i><i style="background:' + th.b + '"></i><i style="background:' + th.hotA + '"></i><i style="background:' + th.hotB + '"></i></span><span><b>' + th.name + '</b><br><small>' + th.note + '</small></span></button>'; }).join('') + '</div>' ;
+        '<span class="k-set-h">Lights</span><div class="k-themes" role="radiogroup" aria-label="Colour of the lights">' +
+        Object.keys(T.THEMES).map(k => { const th = T.THEMES[k]; return '<button type="button" class="k-theme" role="radio" aria-checked="' + (s.theme === k) + '" data-theme-id="' + k + '">' + sw(th) + '<span><b>' + th.name + '</b><br><small>' + th.note + '</small></span></button>'; }).join('') + '</div>';
     };
     draw();
     box.addEventListener('click', e => {
-      const m = e.target.closest('[data-mode]'), th = e.target.closest('[data-theme-id]'), sw = e.target.closest('[data-k]');
-      if (m) T.set({ mode: m.dataset.mode }); else if (th) T.set({ theme: th.dataset.themeId }); else if (sw) T.set({ [sw.dataset.k]: !T.prefs()[sw.dataset.k] }); else return;
+      const th = e.target.closest('[data-theme-id]'), sw = e.target.closest('[data-k]');
+      if (th) T.set({ theme: th.dataset.themeId }); else if (sw) T.set({ [sw.dataset.k]: !T.prefs()[sw.dataset.k] }); else return;
       buzz(); draw();
     });
   }
