@@ -11,7 +11,7 @@ neutral stay blue. Cards and bars are dark see-through glass so the fog shows th
 
 ## Games are FOSSIL32 cartridges
 
-Everywhere a game is showcased (home page game tiles and "Jump back in", the Games page, each `games/<id>/` page) it is
+Everywhere a game is showcased (the home page games carousel, the Games page, each `games/<id>/` page) it is
 shown as a floating 3D **FOSSIL32** cartridge box (Grug Digital's fantasy console). Tapping a box darkens the page and
 blurs it out of focus, pulls the cartridge out and shows the game panel; **Play** drops the cartridge into the FOSSIL32
 console, zooms into its screen and opens the game. A pool of the game's colour follows the cartridge the whole way.
@@ -19,6 +19,10 @@ console, zooms into its screen and opens the game. A pool of the game's colour f
 The **Games page** is a looping vertical carousel of boxes on the left half (`Fossil32.rack`, the page drives
 `state.pos`), with the selected game's details on the right (below it on phones). Scroll, swipe, arrow keys or a
 controller browse; Play / Enter / tapping the front box calls `Fossil32.launch(id)` (box opens → cartridge → console → game).
+The panel shows each game's short `blurb` (the full `long` write-up is on its game page); keep blurbs to a sentence or two.
+
+The **home page** has one horizontal carousel of boxes right under the welcome message: the last-played game comes first,
+centred, lit in its cartridge colour with a "Last played" ribbon (`boxTile(g, { ribbon })`); the rest follow.
 
 - Code: `tools/fossil32/src/fossil32.js` → bundled to `assets/fossil32/fossil32.js` (`cd tools/fossil32 && npm install && npm run build`).
   Never edit the bundle by hand. Styles: `assets/fossil32/fossil32.css`. Tiles come from `Grug.ui.boxTile(game)` in `assets/grug.js`.
