@@ -372,16 +372,16 @@
 
   /* ---------- UI chrome: floating top bar + dock (kubii theme) ---------- */
   const NAV = [
-    ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'],
+    ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['create', 'Create', 'cube', 'create/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'],
     ['shop', 'Shop', 'storefront', 'shop/'], ['profile', 'Profile', 'user', 'profile/']
   ];
   // dock icons: full-colour pictures from the icon pack (assets/icons/dock-*.webp)
   // dock icons: colourful pictures, or the simple set in one colour per tab
-  const DOCK_SIMPLE = { home: ['house', '#4f7cf3'], games: ['controller', '#22b455'], avatar: ['shirt', '#a45fe8'], shop: ['shop', '#f09a12'], profile: ['person', '#f25c5c'] };
+  const DOCK_SIMPLE = { home: ['house', '#4f7cf3'], games: ['controller', '#22b455'], create: ['cube', '#14b8c4'], avatar: ['shirt', '#a45fe8'], shop: ['shop', '#f09a12'], profile: ['person', '#f25c5c'] };
   const dockIcon = k => colorful() ? '<img class="k-ic" src="' + iconSrc('dock-' + k) + '" alt="" aria-hidden="true" draggable="false">'
     : '<svg class="k-ic k-ic-s" viewBox="0 0 16 16" fill="currentColor" style="color:' + DOCK_SIMPLE[k][1] + '" aria-hidden="true" focusable="false">' + (SIMPLE['dock-' + DOCK_SIMPLE[k][0]] || '') + '</svg>';
   const DOCK = {};
-  ['home', 'games', 'avatar', 'shop', 'profile'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
+  ['home', 'games', 'create', 'avatar', 'shop', 'profile'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
   const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
   /* ---------- Pearls (the site-wide currency, sold on pearls.html; wallet in 'grug.pearls.v1') ---------- */
   const PEARL_KEY = 'grug.pearls.v1';

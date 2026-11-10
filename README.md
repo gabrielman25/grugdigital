@@ -7,6 +7,7 @@ Games built with Katy restaurants, one local profile (no accounts), a 3D avatar 
 ## Map
 
 - `index.html` — home (your avatar, then one carousel of every game as a bare 3D cartridge, starting on the one you played last). `games/` is the library: a looping vertical carousel of cartridge boxes with the selected game's details beside it; `games/<id>/` is each game's page. Every game is shown as a 3D **FOSSIL32** cartridge box (see below).
+- `create/` — the **Create** tab: free preset 3D models and scenes to download (GLB, OBJ, STL or the project file), each with a live 3D preview, and a button that opens **Model Kit** (`create/modelkit/`), our pixel-to-3D model editor. See `tools/modelkit/README.md`.
 - `avatar/` — the 3D avatar editor. `shop/` — every closet item and how to earn it. `profile/` — name, stats, points at each partner, settings, **export / import** of the profile as JSON (moves everything, points included, to another phone).
 - `partners/` — the "for restaurants" pitch, our work and contact (the old front page).
 - `play/<name>/` — the partner rewards apps, moved here from their own repos: `yoshi`, `cielito`, `teahouse`, `soluna`. Each old URL redirects here and keeps `?tap=` NFC links and `#store/tab` hashes.

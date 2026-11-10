@@ -54,6 +54,13 @@ When a new game is added to `assets/games.js` and listed, also make its box. Don
 4. Point `thumb` at the box art too, and add a `games/<id>/index.html` like the others (it calls `GrugGamePage('<id>')`).
 5. Check it in a browser: the box on the Games page, the unbox, the panel, and Play (cartridge → console → game).
 
+## Create tab and Model Kit
+
+The dock's **Create** tab (`create/`, cube icon) is a gallery of free preset models and scenes, made with **Model Kit**
+(Grug Digital's pixel-to-3D editor, `create/modelkit/index.html`, a single prebuilt file). Previews and downloads are
+built in the browser by `create/modelkit-core.js`, the editor's own mesher. Presets live in `tools/modelkit/presets/`.
+After changing them, run `make-presets.js` and `thumbs.js` (see `tools/modelkit/README.md`). "Model Kit" is a working name.
+
 ## Site-wide game layer (`assets/gamekit.js`)
 
 Every `play/<name>/game.html` loads `../../assets/gamekit.js` before its own script and gets, with no code: the UI size

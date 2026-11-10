@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Create · Grug</title>
+<meta name="description" content="Free low-poly 3D models to download (GLB, OBJ, STL), and Model Kit: draw a pixel grid, push it into 3D and export a game-ready model, right in your browser.">
+<meta name="theme-color" content="#eaf6ee">
+<link rel="icon" href="../favicon.png">
+<link rel="stylesheet" href="../assets/grug.css">
+<script src="../assets/theme.js"></script>
+<style>
+.mk-hero{position:relative;overflow:hidden;display:grid;grid-template-columns:1fr;gap:6px;margin-top:14px;padding:22px 22px 24px;border-radius:calc(var(--r) + 6px);background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow)}
+.mk-hero .txt{position:relative;z-index:1;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.mk-hero small{font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12px;color:var(--mut)}
+.mk-hero h1{margin:0;font-size:34px;line-height:1.05;max-width:14ch}
+.mk-hero p{margin:0;max-width:44ch;color:var(--ink2);font-size:15.5px}
+.mk-hero .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.mk-hero .stage{position:relative;height:230px;margin:-6px -10px -10px;touch-action:none}
+.mk-hero canvas{width:100%;height:100%;display:block;cursor:grab}
+.mk-hero canvas:active{cursor:grabbing}
+@media (min-width:760px){.mk-hero{grid-template-columns:1.1fr 1fr;align-items:center;padding:34px 36px;min-height:330px}.mk-hero h1{font-size:46px}.mk-hero .stage{height:300px;margin:-20px -16px -24px 0}}
+.mk-sec{padding:26px 0 4px}
+.mk-sec .g-section-h{align-items:center}
+.mk-count{color:var(--mut);font-weight:700;font-size:14px}
+.mk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+@media (min-width:860px){.mk-grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}}
+@media (min-width:560px){.mk-grid.scenes{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}}
+.mk-card{position:relative;display:flex;flex-direction:column;text-align:left;padding:10px 10px 12px;border-radius:var(--r);background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .2s var(--spring),background .2s}
+.mk-card:hover{transform:translateY(-3px);background:var(--glass-strong)}
+.mk-card:active{transform:scale(.97)}
+.mk-card .pic{aspect-ratio:1;border-radius:calc(var(--r) - 6px);background:radial-gradient(circle at 50% 62%,color-mix(in srgb,var(--sel-a) 22%,transparent),transparent 68%);display:grid;place-items:center;overflow:hidden}
+.mk-card .pic img{width:92%;height:92%;object-fit:contain;transition:transform .3s var(--spring)}
+.mk-card:hover .pic img{transform:scale(1.06) rotate(-2deg)}
+.mk-card b{display:block;margin:8px 4px 2px;font-size:16px}
+.mk-card .meta{margin:0 4px;color:var(--mut);font-size:12.5px;font-weight:700}
+.mk-card .dl{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--card2);color:var(--ink);opacity:0;transform:scale(.85);transition:opacity .2s,transform .2s var(--spring)}
+.mk-card:hover .dl,.mk-card:focus-visible .dl{opacity:1;transform:none}
+@media (hover:none){.mk-card .dl{opacity:1;transform:none}}
+.mk-card .dl .gi{width:18px;height:18px}
+.mk-view{position:relative;height:min(52vh,380px);margin:-4px -6px 12px;border-radius:var(--r);background:radial-gradient(circle at 50% 60%,color-mix(in srgb,var(--sel-a) 20%,transparent),transparent 70%);touch-action:none}
+.mk-view canvas{width:100%;height:100%;display:block;cursor:grab}
+.mk-view canvas:active{cursor:grabbing}
+.mk-view img{position:absolute;inset:8%;width:84%;height:84%;object-fit:contain}
+.mk-dl{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
+@media (min-width:520px){.mk-dl{grid-template-columns:repeat(4,1fr)}}
+.mk-dl button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px;border-radius:14px;background:var(--card2);border:1px solid var(--line);font-weight:800;font-size:15px;color:var(--ink)}
+.mk-dl button:hover{background:var(--glass-strong)}
+.mk-dl button small{font-weight:700;font-size:11.5px;color:var(--mut)}
+.mk-blurb{color:var(--ink2);margin:0}
+.mk-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="mk-hero">
+    <div class="txt">
+      <small>Model Kit</small>
+      <h1>Want to make your own?</h1>
+      <p>Draw it in pixels, give every block a shape and a depth, and Model Kit turns it into a clean, game-ready 3D model. Free, right in your browser.</p>
+      <div class="row"><a class="g-btn primary big" id="openKit" href="modelkit/">Use Model Kit</a></div>
+      <p class="g-fine" id="kitNote">Best on a computer with a mouse.</p>
+    </div>
+    <div class="stage" aria-hidden="true"><canvas id="heroGL"></canvas></div>
+  </section>
+
+  <section class="mk-sec">
+    <div class="g-section-h"><h2>Scenes</h2><span class="mk-count" id="nScenes"></span></div>
+    <div class="mk-grid scenes" id="scenes"></div>
+  </section>
+  <section class="mk-sec">
+    <div class="g-section-h"><h2>Models</h2><span class="mk-count" id="nModels"></span></div>
+    <div class="mk-grid" id="models"></div>
+    <p class="g-fine" style="margin:16px 2px 0">Every model is free to use in your own games. Downloads are GLB, OBJ or STL, one unit per block, with the origin at the bottom. Made with Model Kit.</p>
+  </section>
+</main>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="../assets/games.js"></script>
+<script src="../assets/grug.js"></script>
+<script src="modelkit-core.js"></script>
+<script src="presets.js"></script>
+<script src="create.js"></script>
+<script>
+(function(){
+  const G = Grug, $ = s => document.querySelector(s), P = MK_PRESETS;
+  G.ui.chrome('create');
+  const thumb = (kind, id) => 'thumbs/' + (kind === 'scene' ? 'scene-' : '') + id + '.webp?v=1';
+  const meta = (kind, id) => { try { const s = MK.stats(kind, id); return s.w + ' × ' + s.h + ' blocks · ' + G.fmt(s.tris) + ' tris'; } catch (e) { return ''; } };
+  const card = (kind, p) => '<button type="button" class="mk-card" data-kind="' + kind + '" data-id="' + p.id + '" aria-label="' + G.esc(p.title) + '">' +
+    '<span class="pic"><img src="' + thumb(kind, p.id) + '" alt="" loading="lazy" decoding="async" draggable="false"></span><b>' + G.esc(p.title) + '</b><span class="meta">' + meta(kind, p.id) + '</span>' +
+    '<span class="dl" data-quick="1" title="Download GLB">' + G.icon('download-simple') + '</span></button>';
+  $('#scenes').innerHTML = P.scenes.map(p => card('scene', p)).join(''); $('#nScenes').textContent = P.scenes.length;
+  $('#models').innerHTML = P.models.map(p => card('model', p)).join(''); $('#nModels').textContent = P.models.length;
+
+  // hero: the knight scene turning slowly (drag to spin it)
+  const hero = new MK.Viewer($('#heroGL'), { spin: 0.35, drag: true, yaw: 0.5, pitch: 0.28 });
+  if (hero.ok) { hero.set(MK.mesh('scene', 'knight')); hero.run(); } else $('.mk-hero .stage').innerHTML = '<img src="' + thumb('scene', 'knight') + '" alt="" style="width:100%;height:100%;object-fit:contain">';
+  if (matchMedia('(hover:hover) and (pointer:fine)').matches) $('#kitNote').hidden = true;
+
+  async function open(kind, id) {
+    const p = MK.preset(kind, id), proj = kind === 'scene' ? '.bash.json' : '.shape.json';
+    const fmts = [['glb', 'GLB', 'Unity, Godot, Blender'], ['obj', 'OBJ', 'zip with .mtl'], ['stl', 'STL', '3D printing'], ['project', 'Project', proj]];
+    let v = null;
+    const done = G.ui.dialog({ title: p.title,
+      html: '<div class="mk-view" id="mkView"><canvas></canvas></div>' + (p.blurb ? '<p class="mk-blurb">' + G.esc(p.blurb) + '</p>' : '') +
+        '<div class="mk-chips"><span class="g-chip">' + meta(kind, id) + '</span>' + (kind === 'scene' ? '<span class="g-chip">' + Object.keys(p.data.parts).length + ' parts</span>' : '') + '</div>' +
+        '<div class="mk-dl">' + fmts.map(f => '<button type="button" data-fmt="' + f[0] + '">' + G.icon('download-simple') + f[1] + '<small>' + f[2] + '</small></button>').join('') + '</div>',
+      actions: [{ label: 'Close', kind: 'quiet', value: null }, { label: 'Edit in Model Kit', kind: 'primary', value: 'edit' }] });
+    const dlg = document.querySelector('dialog.g-dialog:last-of-type');
+    if (dlg) {
+      const c = dlg.querySelector('#mkView canvas');
+      v = new MK.Viewer(c, { spin: 0.45, drag: true });
+      if (v.ok) { v.set(MK.mesh(kind, id)); v.run(); } else c.outerHTML = '<img src="' + thumb(kind, id) + '" alt="">';
+      dlg.querySelector('.mk-dl').addEventListener('click', e => { const b = e.target.closest('[data-fmt]'); if (!b) return; MK.download(kind, id, b.dataset.fmt); G.ui.toast('Downloading ' + p.title, { icon: 'download-simple' }); G.ui.buzz(); });
+    }
+    const pick = await done; if (v) v.stop();
+    if (pick === 'edit') location.href = 'modelkit/#' + (kind === 'scene' ? 'scene' : 'model') + '=' + id;
+  }
+  document.addEventListener('click', e => {
+    const c = e.target.closest('.mk-card'); if (!c) return;
+    if (e.target.closest('[data-quick]')) { MK.download(c.dataset.kind, c.dataset.id, 'glb'); G.ui.toast('Downloading ' + MK.preset(c.dataset.kind, c.dataset.id).title + '.glb', { icon: 'download-simple' }); return; }
+    open(c.dataset.kind, c.dataset.id);
+  });
+})();
+</script>
+</body>
+</html>
