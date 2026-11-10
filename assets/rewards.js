@@ -142,6 +142,89 @@
     return '<svg viewBox="-2 -2 ' + (n + 4) + ' ' + (n + 4) + '" shape-rendering="crispEdges" role="img" aria-label="QR code"><rect x="-2" y="-2" width="' + (n + 4) + '" height="' + (n + 4) + '" fill="#fff"/><path d="' + d + '" fill="#1E1B16"/></svg>';
   }
 
+  /* ---------- a still picture of a card (the builder's preview, the Rewards tab's sample) ---------- */
+  function passVars(c) { return '--a:' + c + ';--a-lo:' + lo(c) + ';--a-ink:' + inkOn(c) + ';--a-soft:' + mix(c, '#FFFFFF', .8) + ';--a-tint:' + mix(c, '#FFFFFF', .94); }
+  function passHtml(cfg, have) {
+    cfg = normalize(cfg); const esc = Grug.esc, n = cfg.s; have = Math.max(0, Math.min(n, have || 0));
+    let g = '';
+    for (let i = 0; i < n; i++) { const on = i < have, last = i === n - 1; g += '<div class="rw-slot' + (on ? ' on' : '') + (last ? ' gift' : '') + '">' + (on ? esc(cfg.i) : last ? '🎁' : (i + 1)) + '</div>'; }
+    return '<div class="rw-pass" style="' + passVars(cfg.color) + '"><div class="rw-band"><span class="rw-ic">' + esc(cfg.i) + '</span><div class="rw-who"><b>' + esc(cfg.n) + '</b><small>Rewards card</small></div><b class="rw-count">' + have + '/' + n + '</b></div>' +
+      '<div class="rw-pass-body"><div class="rw-grid" style="grid-template-columns:repeat(' + ((n === 6 || n === 9) ? 3 : (n === 5 || n === 10) ? 5 : 4) + ',1fr)">' + g + '</div>' +
+      '<p class="rw-goal">Collect ' + n + ' <span class="rw-emo">' + esc(cfg.i) + '</span> → <b>' + esc(rewardText(cfg.r)) + '</b></p></div></div>';
+  }
+
+  /* ---------- the printable counter card as a PDF ----------
+     cardCanvas draws a 5×7 in card at 200 dpi (the QR holds the stamp link); cardPdf puts it on a US Letter page with
+     cut marks. Written by hand (one JPEG image + a few lines of text), so no PDF library is needed. */
+  async function cardCanvas(cfg, link) {
+    cfg = normalize(cfg);
+    try { await Promise.all(['500 34px', '600 64px', '700 64px'].map(f => document.fonts.load(f + ' Fredoka'))); } catch (e) {}
+    const W = 1000, H = 1400, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const x = cv.getContext('2d'), EMO = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
+    const font = (w, px) => w + ' ' + px + 'px Fredoka, ' + EMO + ', sans-serif';
+    const rr = (X, Y, w, h, r) => { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); };
+    const fit = (text, w, px, max) => { do { x.font = font(w, px); px -= 2; } while (x.measureText(text).width > max && px > 20); };
+    const ink = inkOn(cfg.color), dark = lo(cfg.color);
+    x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, W, H);
+    // the shop's band
+    x.fillStyle = cfg.color; x.fillRect(0, 0, W, 250); x.fillStyle = dark; x.fillRect(0, 236, W, 14);
+    rr(60, 52, 132, 132, 32); x.fillStyle = dark; x.fill();
+    x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = '84px ' + EMO + ', sans-serif'; x.fillText(cfg.i, 126, 124);
+    x.textAlign = 'left'; x.fillStyle = ink; fit(cfg.n, '600', 66, 720); x.fillText(cfg.n, 224, 100);
+    x.globalAlpha = .85; x.font = font('600', 34); x.fillText('Rewards card', 224, 160); x.globalAlpha = 1;
+    // heading + QR
+    x.textAlign = 'center'; x.fillStyle = '#1E1B16'; fit('Scan for your stamp', '600', 66, 880); x.fillText('Scan for your stamp', W / 2, 335);
+    const q = root.qrcode(0, 'M'); q.addData(link); q.make(); const n = q.getModuleCount();
+    const box = 560, bx = (W - box) / 2, by = 400;
+    rr(bx, by, box, box, 40); x.fillStyle = cfg.color; x.fill(); rr(bx + 14, by + 14, box - 28, box - 28, 28); x.fillStyle = '#FFFFFF'; x.fill();
+    const pad = 30, qs = box - 28 - 2 * pad, cell = qs / n, qx = bx + 14 + pad, qy = by + 14 + pad;
+    x.fillStyle = '#1E1B16';
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) x.fillRect(Math.floor(qx + c * cell), Math.floor(qy + r * cell), Math.ceil(cell) + 1, Math.ceil(cell) + 1);
+    // the reward + how it works
+    const goal = 'Collect ' + cfg.s + ' ' + cfg.i + '  →  ' + rewardText(cfg.r);
+    x.fillStyle = '#1E1B16'; fit(goal, '600', 46, 880); x.fillText(goal, W / 2, 1040);
+    const lines = ['Point your phone camera at the code', 'One stamp per visit, once a day', '+10 Pearls for any game on Grug'].concat(cfg.j ? ['First scan? Your welcome stamp is on us'] : []);
+    x.fillStyle = '#55514A'; x.font = font('500', 33); lines.forEach((t, i) => x.fillText(t, W / 2, 1110 + i * 48));
+    x.fillStyle = '#EEE9E0'; x.fillRect(0, 1318, W, 3);
+    x.fillStyle = '#8A857C'; x.font = font('600', 27); x.textAlign = 'left'; x.fillText('No app needed', 50, 1362); x.textAlign = 'right'; x.fillText('Made with Grug', W - 50, 1362);
+    return cv;
+  }
+  async function cardPdf(cfg, link) {
+    const cv = await cardCanvas(cfg, link);
+    const jpg = new Uint8Array(await (await new Promise(r => cv.toBlob(r, 'image/jpeg', .93))).arrayBuffer());
+    const enc = new TextEncoder(), parts = [], offs = []; let len = 0;
+    const add = d => { const b = typeof d === 'string' ? enc.encode(d) : d; parts.push(b); len += b.length; };
+    const obj = (i, body) => { offs[i] = len; add(i + ' 0 obj\n'); (Array.isArray(body) ? body : [body]).forEach(add); add('\nendobj\n'); };
+    const pdfText = s => String(s).replace(/[^\x20-\x7E]/g, '').replace(/([()\\])/g, '\\$1');
+    // page 612×792 pt; the card 360×504 pt (5×7 in) in the middle; cut marks at its corners
+    const cw = 360, ch = 504, x0 = 126, y0 = 160, m = 18, gap = 6;
+    let ops = 'q ' + cw + ' 0 0 ' + ch + ' ' + x0 + ' ' + y0 + ' cm /Im1 Do Q\n0.55 0.55 0.55 RG 0.6 w\n';
+    [[x0, y0], [x0 + cw, y0], [x0, y0 + ch], [x0 + cw, y0 + ch]].forEach(([X, Y], i) => {
+      const sx = i % 2 ? 1 : -1, sy = i < 2 ? -1 : 1;
+      ops += (X + sx * gap) + ' ' + Y + ' m ' + (X + sx * (gap + m)) + ' ' + Y + ' l S\n' + X + ' ' + (Y + sy * gap) + ' m ' + X + ' ' + (Y + sy * (gap + m)) + ' l S\n';
+    });
+    ops += 'BT /F1 11 Tf 0.35 0.35 0.35 rg ' + x0 + ' ' + (y0 - 40) + ' Td (' + pdfText('Cut along the marks. Fits a 5 x 7 in frame or table stand.') + ') Tj ET\n';
+    ops += 'BT /F1 9 Tf 0.5 0.5 0.5 rg ' + x0 + ' ' + (y0 - 56) + ' Td (' + pdfText(cfg.n + ' rewards card - made with Grug') + ') Tj ET\n';
+    add('%PDF-1.4\n'); add(new Uint8Array([37, 226, 227, 207, 211, 10]));   // the binary-file marker line
+    obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+    obj(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+    obj(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Im1 4 0 R >> /Font << /F1 6 0 R >> >> /Contents 5 0 R >>');
+    obj(4, ['<< /Type /XObject /Subtype /Image /Width ' + cv.width + ' /Height ' + cv.height + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + jpg.length + ' >>\nstream\n', jpg, '\nendstream']);
+    const cs = enc.encode(ops); obj(5, ['<< /Length ' + cs.length + ' >>\nstream\n', cs, '\nendstream']);
+    obj(6, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+    const xref = len;
+    add('xref\n0 7\n0000000000 65535 f \n' + [1, 2, 3, 4, 5, 6].map(i => String(offs[i]).padStart(10, '0') + ' 00000 n \n').join(''));
+    add('trailer\n<< /Size 7 /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF\n');
+    return new Blob(parts, { type: 'application/pdf' });
+  }
+  async function downloadPdf(cfg, link) {
+    const blob = await cardPdf(cfg, link), u = URL.createObjectURL(blob);
+    const name = (normalize(cfg).n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'shop') + '-rewards-card.pdf';
+    const a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(u); a.remove(); }, 4000);
+    return name;
+  }
+
   /* ---------- the guest's card on screen ----------
      mountCard(root, { cfg, c, store, pearls: { grant() → n, balance() → n }, now, inPhone, onChange })
      → { scan(k), setConfig(cfg), reset(), refresh(), state() }
@@ -239,6 +322,6 @@
     KEY, TAP_PEARLS, DAY_CAP, RESET_HOUR, VOUCHER_MIN, KINDS, ICONS, COLORS, REWARDS, PCTS,
     rewardText, normalize, encode, decode, check, shopId, links, cardBase,
     load, cards, cardStore, removeCard, mine, saveMine, removeMine,
-    dayKey, balance, grantPearls, inkOn, lo, mix, themeVars, bandStyle, qrSvg, mountCard
+    dayKey, balance, grantPearls, inkOn, lo, mix, themeVars, bandStyle, qrSvg, mountCard, passHtml, cardCanvas, cardPdf, downloadPdf
   };
 })(window);

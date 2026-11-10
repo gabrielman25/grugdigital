@@ -11,23 +11,37 @@
 <script src="../assets/theme.js"></script>
 <link rel="stylesheet" href="../assets/rewards.css">
 <style>
-.rw-owner{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;justify-content:space-between;padding:20px;border-radius:var(--r);background:#26262B;border:1px solid var(--line2);margin-top:14px}
-.rw-owner h3{font-size:20px}
-.rw-owner p{color:var(--ink2);font-size:15px;margin-top:4px;max-width:56ch}
 .g-section-h .n{color:var(--mut);font-weight:600;font-size:15px}
 </style>
 </head>
 <body>
-<main class="wrap">
-  <section class="rw-head">
-    <h1>Rewards</h1>
-    <p class="lead">Every shop you've tapped in at, all in one place. Each visit fills your card and adds Pearls you can spend in any Grug game.</p>
+<main class="wrap" id="main">
+  <!-- for shop owners first: this page is the link we hand to owners -->
+  <section class="rw-hero" id="hero">
+    <div class="copy">
+      <p class="kick">For cafés, bars and restaurants · Free</p>
+      <h1>Turn first-time guests into regulars.</h1>
+      <p class="lead">Make a free rewards card for your shop in two minutes.</p>
+      <div class="row"><a class="g-btn primary big" href="create/" id="heroGo">Make my rewards card</a><a class="g-btn big" href="#features">How it works</a></div>
+      <p class="g-fine">No app, no hardware, no sign-up.</p>
+    </div>
+    <div class="art" id="heroArt" aria-hidden="true"></div>
   </section>
 
-  <div class="rw-pearls" id="pearls"></div>
+  <section class="g-section" id="features">
+    <div class="g-section-h"><h2>Why guests keep coming back</h2></div>
+    <div class="rw-feats" id="featList"></div>
+    <p class="rw-more">Want a whole game starring your menu? <a href="../partners/">See Custom</a></p>
+  </section>
+
+  <section class="g-section" id="mine">
+    <div class="g-section-h"><h2>My creations</h2><a href="create/">Make another</a></div>
+    <div class="rw-tiles" id="mineList"></div>
+  </section>
 
   <section class="g-section" id="cards">
     <div class="g-section-h"><h2>Your cards</h2><span class="n" id="cardsN"></span></div>
+    <div class="rw-pearls" id="pearls" style="margin-bottom:14px"></div>
     <div class="rw-tiles" id="cardList"></div>
   </section>
 
@@ -36,14 +50,6 @@
     <div class="rw-tiles" id="placeList"></div>
   </section>
 
-  <section class="g-section" id="mine">
-    <div class="g-section-h"><h2>My creations</h2><a href="create/">Make a card</a></div>
-    <div class="rw-tiles" id="mineList"></div>
-    <div class="rw-owner" id="ownerCta">
-      <div><h3>Own a café, bar or restaurant?</h3><p>Make a free rewards card for your shop in two minutes. Print the QR, and your regulars collect stamps and Pearls every visit.</p></div>
-      <a class="g-btn primary" href="create/">Make a rewards card</a>
-    </div>
-  </section>
 </main>
 <script src="../assets/catalog.js"></script>
 <script src="../assets/icons.js"></script>
@@ -104,13 +110,13 @@
 
     /* the cards this person made */
     const mine = RW.mine();
-    $('#mineList').hidden = !mine.length;
+    $('#mine').hidden = !mine.length;
     $('#mineList').innerHTML = mine.map(m => { const L = RW.links(m.cfg);
       return '<div class="rw-tile" ' + tileVars(m.cfg.color) + '>' + band(m.cfg.color, esc(m.cfg.i), m.cfg.n, 'Your card · made ' + when(m.at)) +
         '<div class="body"><div class="line"><span>' + m.cfg.s + ' stamps</span><span><b>' + esc(RW.rewardText(m.cfg.r)) + '</b></span></div>' +
         '<div class="acts"><a class="g-btn sm primary" href="create/?c=' + m.c + '">' + G.icon('pencil-simple') + 'Edit</a><a class="g-btn sm" href="create/?c=' + m.c + '#print">' + G.icon('qr-code') + 'Print QR</a>' +
         '<a class="g-btn sm" href="' + esc(L.open) + '">Open card</a><button type="button" class="g-btn sm quiet del" data-del="' + m.c + '" aria-label="Remove ' + esc(m.cfg.n) + '">' + G.icon('trash') + 'Remove</button></div></div></div>'; }).join('');
-    $('#ownerCta').querySelector('h3').textContent = mine.length ? 'Make another card' : 'Own a café, bar or restaurant?';
+    if (mine.length) $('#heroGo').textContent = 'Make another card';
   }
   $('#mineList').addEventListener('click', async e => {
     const b = e.target.closest('[data-del]'); if (!b) return;
@@ -119,6 +125,24 @@
       actions: [{ label: 'Keep it', kind: 'quiet', value: null }, { label: 'Remove', kind: 'danger', value: 'go' }] });
     if (ok === 'go') { RW.removeMine(b.dataset.del); paint(); G.ui.toast('Removed from My creations', { icon: 'trash' }); }
   });
+  /* the hero's picture: two sample cards and the Pearls they come with */
+  $('#heroArt').innerHTML = '<div class="c1">' + RW.passHtml({ n: 'Pebble Coffee Bar', t: 'c', s: 8 }, 5) + '</div><div class="c2">' + RW.passHtml({ n: 'The Rusty Tap', t: 'b', s: 6, color: '#2FAE5A' }, 2) + '</div>' +
+    '<span class="chip">' + G.icon('pearl') + '+10 Pearls every visit</span>';
+  const FEATS = [
+    ['pearl', '#C59BFF', 'A reward they actually want', 'Every visit gives guests 10 Pearls to spend on polished games on Grug. High value for them, no cost to you.'],
+    ['qr-code', '#FF9F5A', 'No app. No hardware.', 'Print your card and put it by the register. Guests scan it with their phone camera.'],
+    ['timer', '#7EE081', 'Ready in two minutes', 'Pick your colors, icon and reward, then download a print-ready PDF.'],
+    ['seal-check', '#4FD8C4', 'Rewards your staff can trust', 'A full card opens a live 10-minute reward screen that a screenshot can\u2019t fake.']
+  ];
+  $('#featList').innerHTML = FEATS.map(f => '<div class="rw-feat"><span class="ic" style="background:' + f[1] + '">' + G.icon(f[0]) + '</span><b>' + esc(f[2]) + '</b><p>' + esc(f[3]) + '</p></div>').join('');
+
+  /* players see their own cards right under the hero; everyone else sees the owner pitch first */
+  function order() {
+    const ids = G.role === 'player' ? ['hero', 'cards', 'places', 'features', 'mine'] : ['hero', 'features', 'mine', 'cards', 'places'];
+    ids.forEach(id => $('#main').appendChild(document.getElementById(id)));
+  }
+  order(); G.on((p, what) => { if (what === 'role' || what === 'external') order(); });
+
   paint();
   addEventListener('storage', e => { if (!e.key || e.key === RW.KEY || e.key === 'grug.pearls.v1') paint(); });
   addEventListener('pageshow', paint);

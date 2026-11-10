@@ -4,208 +4,99 @@
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Make a rewards card · Grug</title>
-<meta name="description" content="Make a free rewards card for your café, bar or restaurant. Print one QR, and guests collect stamps and Pearls on their phone. No app, no sign-up.">
+<meta name="description" content="Make a free rewards card for your café, bar or restaurant in seven quick questions. Download it as a PDF and put it by your register.">
 <meta name="theme-color" content="#17171A">
 <link rel="icon" href="../../favicon.png">
 <link rel="stylesheet" href="../../assets/grug.css">
 <script src="../../assets/theme.js"></script>
 <link rel="stylesheet" href="../../assets/rewards.css">
 <style>
-.mk-steps{display:grid;gap:12px;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:20px}
-.mk-steps div{padding:16px;background:#232327;border-radius:var(--r);border:1px solid var(--line)}
-.mk-steps b{display:block;font-size:17px;margin-top:8px}
-.mk-steps span{color:var(--ink2);font-size:14.5px}
-.mk-steps i{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--mode);color:var(--on-sel);font-style:normal;font-weight:700}
-@media (max-width:760px){.mk-steps{grid-template-columns:minmax(0,1fr)}}
-
-.mk-build{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:24px;align-items:start}
-.mk-phone-col{position:sticky;top:calc(var(--top) + var(--sat) + 16px);display:flex;flex-direction:column;align-items:center;gap:12px}
-@media (max-width:940px){.mk-build{grid-template-columns:minmax(0,1fr)}.mk-phone-col{position:static}}
-.mk-form{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
-.mk-f{display:grid;grid-template-columns:minmax(0,1fr);gap:9px;min-width:0}
-.mk-f>.lbl{font-weight:600;font-size:15px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.mk-f>.lbl small{font-weight:500;color:var(--mut);font-size:13px}
-.mk-sw{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.mk-sw button{width:34px;height:34px;border-radius:50%;border:0;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
-.mk-sw button[aria-pressed=true]{outline:3px solid var(--ink);outline-offset:3px}
-.mk-sw label{position:relative;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#303036;color:var(--ink);font-weight:700;font-size:20px;cursor:pointer;overflow:hidden}
-.mk-sw label[data-on=true]{outline:3px solid var(--ink);outline-offset:3px}
-.mk-sw label input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.mk-emo{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;max-width:420px}
-.mk-emo button{min-width:0;padding:0;aspect-ratio:1;border-radius:12px;border:0;background:var(--card2);font-size:21px;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;display:grid;place-items:center}
-.mk-emo button[aria-pressed=true]{background:var(--mode);box-shadow:0 3px 0 var(--mode-lo)}
-.mk-range{display:flex;align-items:center;gap:14px}
-.mk-range input{flex:1;accent-color:var(--mode);height:28px}
-.mk-range output{font-weight:700;font-size:22px;min-width:2ch;text-align:right}
-.mk-reward{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.mk-reward select{flex:1 1 220px;width:auto;appearance:auto}
-.mk-reward select#fPct{flex:0 0 110px}
-.mk-toggle{display:flex;gap:12px;align-items:center;font-weight:600;font-size:15px;color:var(--ink2);cursor:pointer;background:none;border:0;padding:0;text-align:left}
-.mk-pearls{display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:16px;background:#2F2A3D}
-.mk-pearls .pi{width:44px;height:44px;border-radius:13px;background:#3D3552;display:grid;place-items:center;flex:none}
-.mk-pearls .pi .gi{width:26px;height:26px;color:#d16be8}
-.mk-pearls b{display:block;font-size:16px}
-.mk-pearls p{color:var(--ink2);font-size:14px;margin-top:4px}
-.mk-pearls .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.mk-pearls .chips span{font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:999px;background:#3D3552;color:var(--ink)}
-.mk-save{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding-top:4px;border-top:1px solid var(--line)}
-.mk-save p{flex:1;min-width:200px}
-
-.mk-phone{width:340px;height:700px;border-radius:48px;background:#0A0A0C;padding:11px;box-shadow:0 0 0 2px #2E2E34;flex:none}
-.mk-screen{position:relative;width:100%;height:100%;border-radius:38px;overflow:hidden;background:#17171A;display:flex;flex-direction:column}
-.mk-notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:100px;height:28px;border-radius:999px;background:#0A0A0C;z-index:30}
-.mk-bar{flex:none;display:flex;align-items:center;justify-content:space-between;padding:46px 14px 10px}
-.mk-bar .lg{display:flex;align-items:center;gap:6px;font-weight:600;font-size:17px}
-.mk-bar .lg .g-mark{width:24px;height:24px}
-.mk-bar .pl{display:flex;align-items:center;gap:5px;font-weight:600;font-size:14px;background:#232327;border-radius:999px;padding:5px 10px}
-.mk-bar .pl .gi{width:16px;height:16px;color:#d16be8}
-.mk-scroll{flex:1;overflow:auto;padding:4px 12px 18px}
-.mk-try{width:340px;max-width:100%;display:grid;gap:8px}
-.mk-try .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.mk-try p{text-align:center}
-@media (max-width:380px){.mk-phone{width:316px;height:660px}}
-
-.mk-print{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:start}
-@media (max-width:820px){.mk-print{grid-template-columns:minmax(0,1fr)}}
-.pc{width:330px;max-width:100%;background:#fff;color:#1E1B16;border-radius:20px;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.pc-top{padding:16px 20px;display:flex;align-items:center;gap:12px}
-.pc-top .rw-ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:25px}
-.pc-top b{display:block;font-size:19px;font-weight:600;line-height:1.15}
-.pc-top small{font-size:13px;opacity:.85;font-weight:600}
-.pc-body{padding:18px 22px 20px;text-align:center}
-.pc-body h3{font-size:24px;margin-bottom:12px;color:#1E1B16}
-.pc-qr{width:210px;margin:0 auto;padding:8px;border-radius:16px;border:3px solid}
-.pc-qr svg{display:block;width:100%;height:auto}
-.pc-goal{margin-top:14px;font-size:17px;font-weight:500}
-.pc-goal b{font-weight:600}
-.pc ul{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:5px;font-size:14px;color:#55514A;font-weight:500}
-.pc-foot{padding:9px 20px;font-size:12px;display:flex;justify-content:space-between;color:#8A857C;border-top:1px solid #EEE9E0;font-weight:600}
-.mk-links{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;min-width:0}
-.mk-link{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0}
-.mk-link .lbl{font-weight:600;font-size:15px}
-.mk-link .lbl small{font-weight:500;color:var(--mut);font-size:13px;margin-left:6px}
-.mk-link .box{display:flex;gap:8px;align-items:center;background:var(--card2);border-radius:14px;padding:6px 6px 6px 14px;min-width:0}
-.mk-link code{flex:1;min-width:0;font:500 13px/1.45 ui-monospace,Menlo,monospace;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mk-tip{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:14px;background:#232327;border:1px solid var(--line);color:var(--ink2);font-size:14.5px}
-.mk-tip .gi{width:22px;height:22px;color:var(--mode);flex:none;margin-top:1px}
-.mk-tip b{color:var(--ink)}
-
-.mk-cmp{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
-@media (max-width:760px){.mk-cmp{grid-template-columns:minmax(0,1fr)}}
-.mk-cmp .g-card{background:#232327}
-.mk-cmp h3{margin:4px 0 2px;font-size:22px}
-.mk-cmp .price{font-size:26px;font-weight:700;margin-bottom:6px}
-.mk-cmp .pro{border:2px solid var(--mode)}
-.mk-list{display:flex;flex-direction:column}
-.mk-list div{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:15px;color:var(--ink2);align-items:flex-start}
-.mk-list div:first-child{border-top:0}
-.mk-list .gi{width:20px;height:20px;flex:none;margin-top:1px}
-.mk-contact{display:flex;flex-direction:column;gap:12px;align-items:flex-start;padding:24px;background:#26262B;border-radius:var(--r);border:1px solid var(--line2);margin-top:14px}
-.mk-contact .num{font-size:clamp(26px,6vw,36px);font-weight:700}
-@media print{
-  html,body{background:#fff!important}
-  body *{visibility:hidden}
-  #printCard,#printCard *{visibility:visible}
-  #printCard{position:absolute;left:0;top:0;border:1px solid #ddd}
+/* one question per slide: the answers on the left, the question (and a live preview) on the right; stacked on phones */
+.wz{max-width:1040px;padding-top:10px}
+.wz-top{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.wz-top a{display:inline-flex;align-items:center;gap:6px;color:var(--ink2);font-weight:700;font-size:15px;flex:none}
+.wz-top a .gi{width:18px;height:18px}
+.wz-bar{flex:1;height:10px;border-radius:999px;background:#2C2C31;overflow:hidden}
+.wz-bar i{display:block;height:100%;width:0;background:var(--mode);border-radius:999px;transition:width .35s var(--spring)}
+.wz-count{flex:none;color:var(--mut);font-weight:700;font-size:14px;min-width:84px;text-align:right}
+.wz-slide{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:40px;align-items:start;min-height:440px}
+.wz-slide.in{animation:wz-in .32s var(--spring)}
+@keyframes wz-in{from{opacity:0;transform:translateX(18px)}}
+.wz-slide.back.in{animation-name:wz-back}
+@keyframes wz-back{from{opacity:0;transform:translateX(-18px)}}
+.wz-q{position:sticky;top:calc(var(--top) + var(--sat) + 20px)}
+.wz-q .n{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--mode);color:var(--on-sel);font-weight:700;font-size:18px;box-shadow:0 3px 0 var(--mode-lo)}
+.wz-q h1{font-size:clamp(30px,4.6vw,44px);margin:14px 0 8px}
+.wz-q p{color:var(--ink2);font-size:17px;max-width:34ch}
+.wz-prev{margin-top:22px;max-width:340px}
+.wz-prev .rw-slot.on{font-size:22px}
+.wz-a{display:flex;flex-direction:column;gap:10px;max-width:520px}
+.wz-opt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px 16px;border-radius:18px;background:#232327;border:2px solid var(--line2);color:var(--ink);font:600 18px var(--display);cursor:pointer;transition:border-color .15s,transform .15s var(--spring),background .15s}
+.wz-opt:hover{border-color:#55555D;transform:translateX(3px)}
+.wz-opt .ic{width:44px;height:44px;border-radius:13px;background:#2F2F35;display:grid;place-items:center;font-size:24px;flex:none;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.wz-opt .ic .gi{width:22px;height:22px}
+.wz-opt .t{flex:1;min-width:0}
+.wz-opt small{display:block;font:500 14px var(--font);color:var(--mut);margin-top:2px}
+.wz-opt .tag{font:700 12px var(--font);padding:4px 10px;border-radius:999px;background:var(--mode);color:var(--on-sel);flex:none}
+.wz-opt .ck{width:26px;height:26px;border-radius:50%;border:2px solid var(--line2);flex:none;display:grid;place-items:center;color:var(--on-sel)}
+.wz-opt .ck .gi{width:16px;height:16px;opacity:0}
+.wz-opt[aria-checked=true]{border-color:var(--mode);background:#2A2520}
+.wz-opt[aria-checked=true] .ck{background:var(--mode);border-color:var(--mode)}
+.wz-opt[aria-checked=true] .ck .gi{opacity:1}
+.wz-opt.ghost{border-style:dashed;background:none;color:var(--ink2)}
+.wz-name{font:600 26px var(--display);min-height:66px;padding:12px 18px;border-radius:18px}
+.wz-sw{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;max-width:420px}
+.wz-sw button,.wz-sw label{aspect-ratio:1;border-radius:50%;border:0;box-shadow:inset 0 -5px 0 rgba(0,0,0,.25);cursor:pointer;position:relative}
+.wz-sw [aria-checked=true]{outline:4px solid var(--ink);outline-offset:4px}
+.wz-sw label{background:#303036;display:grid;place-items:center;color:var(--ink);font-size:28px;font-weight:700;overflow:hidden}
+.wz-sw label input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.wz-emo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;max-width:400px}
+.wz-emo button{aspect-ratio:1;border-radius:18px;border:2px solid var(--line2);background:#232327;font-size:38px;display:grid;place-items:center;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;cursor:pointer;transition:transform .15s var(--spring)}
+.wz-emo button:hover{transform:scale(1.05)}
+.wz-emo button[aria-checked=true]{border-color:var(--mode);background:#2A2520;box-shadow:0 4px 0 var(--mode-lo)}
+.wz-pct{display:flex;flex-wrap:wrap;gap:8px;padding:6px 2px 4px}
+.wz-pct button{min-width:64px;min-height:46px;border-radius:14px;border:2px solid var(--line2);background:#232327;color:var(--ink);font:700 17px var(--display);cursor:pointer}
+.wz-pct button[aria-checked=true]{background:var(--mode);border-color:var(--mode);color:var(--on-sel)}
+.wz-pct-l{font-weight:600;color:var(--ink2);margin:8px 2px 0}
+.wz-nav{display:flex;justify-content:space-between;gap:10px;margin:28px 0 10px;max-width:520px}
+.wz-nav .g-btn{min-width:130px}
+/* the last slide */
+.wz-done .wz-q img{display:block;width:100%;max-width:330px;border-radius:16px;margin-top:20px;box-shadow:0 0 0 1px var(--line2)}
+.wz-big{min-height:66px;font-size:21px;width:100%}
+.wz-acts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wz-acts .g-btn{width:100%}
+.wz-saved{display:flex;align-items:center;gap:10px;color:var(--ink2);font-size:15px}
+.wz-saved .gi{width:20px;height:20px;color:var(--mode);flex:none}
+.wz-saved a{color:var(--mode);font-weight:700}
+.wz-share{border-radius:18px;background:#232327;border:1px solid var(--line);padding:4px 16px}
+.wz-share h3{font-size:17px;padding:12px 0 2px}
+.wz-row{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
+.wz-row:first-of-type{border-top:0}
+.wz-row .ic{width:38px;height:38px;border-radius:11px;background:#2F2F35;display:grid;place-items:center;flex:none}
+.wz-row .ic .gi{width:20px;height:20px;color:var(--mode)}
+.wz-row div{flex:1;min-width:0}
+.wz-row b{display:block;font-size:16px}
+.wz-row span{display:block;color:var(--ink2);font-size:14px;margin-top:2px}
+.wz-row .g-btn{flex:none;margin-top:2px}
+.wz-up{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:16px;border-radius:18px;border:2px solid var(--mode)}
+.wz-up b{display:block;font-size:17px}
+.wz-up span{color:var(--ink2);font-size:14px}
+@media (max-width:820px){
+  .wz-slide{grid-template-columns:minmax(0,1fr);gap:18px;min-height:0}
+  .wz-q{position:static;order:-1}
+  .wz-q h1{margin:10px 0 4px}
+  .wz-prev{display:none}
+  .wz-done .wz-q img{max-width:260px}
+  .wz-a,.wz-nav{max-width:none}
 }
+@media (prefers-reduced-motion:reduce){.wz-slide.in{animation:none}}
 </style>
 </head>
 <body>
-<main class="wrap">
-  <section class="rw-head">
-    <p class="g-fine" style="margin-bottom:8px"><a href="../" style="color:var(--mode);font-weight:700">Rewards</a> · For shop owners · Free</p>
-    <h1 id="pageTitle">Make a rewards card for your shop.</h1>
-    <p class="lead">Pick your colors and your reward, print one QR, and guests collect stamps on their phone every visit. No app, no sign-up, no hardware.</p>
-  </section>
-  <div class="mk-steps">
-    <div><i>1</i><b>Set it up</b><span>Name, color, stamp icon and the reward. Two minutes.</span></div>
-    <div><i>2</i><b>Print your QR</b><span>Put it by the register or on the tables. Guests scan it with their camera.</span></div>
-    <div><i>3</i><b>Guests come back</b><span>A stamp and 10 Pearls every visit. A full card gets your reward.</span></div>
-  </div>
-
-  <section class="g-section" id="make">
-    <div class="g-section-h"><h2>Set up your card</h2></div>
-    <div class="mk-build">
-      <div class="g-card mk-form" style="background:#232327">
-        <div class="mk-f"><label class="lbl" for="fName">Shop name <small id="nameCount"></small></label><input class="g-input" id="fName" maxlength="28" autocomplete="off"></div>
-        <div class="mk-f"><span class="lbl">What kind of place?</span><div class="g-seg" id="fKind" role="radiogroup" aria-label="Kind of place"></div><p class="g-fine" id="kindNote" hidden></p></div>
-        <div class="mk-f"><span class="lbl">Brand color</span><div class="mk-sw" id="fColor"></div></div>
-        <div class="mk-f"><span class="lbl">Stamp icon</span><div class="mk-emo" id="fIcon"></div></div>
-        <div class="mk-f"><span class="lbl">Stamps for a reward</span><div class="mk-range"><input type="range" id="fNeed" min="4" max="12" step="1" aria-label="Stamps for a reward"><output id="needOut"></output></div></div>
-        <div class="mk-f"><label class="lbl" for="fReward">The reward</label>
-          <div class="mk-reward">
-            <select class="g-input" id="fReward"></select>
-            <select class="g-input" id="fPct" aria-label="Percent off" hidden></select>
-            <button type="button" class="g-btn sm" id="customBtn">Something else?</button>
-          </div>
-        </div>
-        <button type="button" class="mk-toggle" id="fJoinBtn"><span class="g-switch" id="fJoin" role="switch" aria-checked="true" aria-label="Welcome stamp"></span>Give new guests a free welcome stamp</button>
-        <div class="mk-pearls">
-          <span class="pi" id="pearlIc"></span>
-          <div><b>Every visit also gives your guest 10 Pearls</b>
-            <p>Pearls are Grug's premium currency. Your guests spend them in any game on Grug, so your card comes with a whole game library at no cost to you.</p>
-            <div class="chips" id="gameChips"></div></div>
-        </div>
-        <div class="mk-save"><p class="g-fine" id="saveNote">Saved cards live in Rewards → My creations on this device.</p><button type="button" class="g-btn primary" id="saveBtn">Save to My creations</button></div>
-      </div>
-
-      <div class="mk-phone-col">
-        <div class="mk-phone"><div class="mk-screen" id="screen"><div class="mk-notch"></div>
-          <div class="mk-bar"><span class="lg" id="mkLogo"></span><span class="pl" id="mkPearls"></span></div>
-          <div class="mk-scroll"><div id="phoneCard"></div></div>
-        </div></div>
-        <div class="mk-try">
-          <button class="g-btn primary block" id="simScan">Try it: scan as a guest</button>
-          <div class="two"><button class="g-btn sm" id="simDay">Next day</button><button class="g-btn sm" id="simReset">Start over</button></div>
-          <p class="g-fine" id="simLbl">This is what your guests see after they scan.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="g-section" id="print">
-    <div class="g-section-h"><h2>Print your QR</h2></div>
-    <div class="mk-print">
-      <div class="pc" id="printCard">
-        <div class="pc-top" id="pcTop"><span class="rw-ic" id="pcIc"></span><div><b id="pcName"></b><small>Rewards card</small></div></div>
-        <div class="pc-body">
-          <h3>Scan for your stamp</h3>
-          <div class="pc-qr" id="pcQr"></div>
-          <p class="pc-goal" id="pcGoal"></p>
-          <ul id="pcList"></ul>
-        </div>
-        <div class="pc-foot"><span>No app needed</span><span>Made with Grug</span></div>
-      </div>
-      <div class="mk-links">
-        <div class="row"><button class="g-btn primary" id="printBtn">Print the card</button><a class="g-btn" id="openApp" target="_blank" rel="noopener">See your guest card</a></div>
-        <div class="mk-link"><span class="lbl">Stamp link<small>what the QR opens · one stamp a day</small></span><div class="box"><code id="stampLink"></code><button class="g-btn sm" data-copy="stampLink">Copy</button></div></div>
-        <div class="mk-link"><span class="lbl">Share link<small>for Instagram or receipts · joins without a stamp</small></span><div class="box"><code id="joinLink"></code><button class="g-btn sm" data-copy="joinLink">Copy</button></div></div>
-        <div class="mk-tip"><span id="nfcIc"></span><span><b>Have an NFC sticker?</b> Write the stamp link to it, and guests can tap their phone instead of scanning.</span></div>
-        <p class="g-fine">Everything you set up is saved inside the link, so there's no account to make. Change something? Print a fresh QR. Your guests keep their stamps.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="g-section" id="more">
-    <div class="g-section-h"><h2>Want your own game?</h2></div>
-    <div class="mk-cmp">
-      <div class="g-card">
-        <p class="g-fine">What you're making</p><h3>Rewards card</h3><p class="price">Free</p>
-        <div class="mk-list" id="listFree"></div>
-      </div>
-      <div class="g-card pro">
-        <p class="g-fine">We build it with you</p><h3>Custom</h3><p class="price" style="color:var(--mode)">90 days free</p>
-        <div class="mk-list" id="listPro"></div>
-      </div>
-    </div>
-    <div class="mk-contact">
-      <p class="g-fine">Questions or ready to upgrade?</p>
-      <h2>Text us anytime.</h2>
-      <span class="num">954-459-6301</span>
-      <p style="color:var(--ink2);max-width:52ch">Tell us your shop's name and we'll set up a time to stop by. No contract, and our first partners get 90 days free.</p>
-      <div class="row"><a class="g-btn primary" href="sms:+19544596301">Open in Messages</a><a class="g-btn" href="../../partners/#work">See our work</a></div>
-    </div>
-  </section>
+<main class="wrap wz">
+  <div class="wz-top"><a href="../" id="exit"></a><div class="wz-bar"><i id="bar"></i></div><span class="wz-count" id="count"></span></div>
+  <section class="wz-slide" id="slide"></section>
+  <div class="wz-nav" id="nav"><button type="button" class="g-btn" id="backBtn">Back</button><button type="button" class="g-btn primary" id="nextBtn">Next</button></div>
 </main>
 <script src="../../assets/catalog.js"></script>
 <script src="../../assets/icons.js"></script>
@@ -216,122 +107,149 @@
 <script>
 (function(){
   const G = Grug, RW = GrugRewards, esc = G.esc, $ = s => document.querySelector(s);
-  G.ui.chrome('rewards', { title: 'Make a card' });
+  G.ui.chrome('rewards', { title: 'Make a card', noRole: true });   // someone making a card doesn't need the "who are you?" question first
+  $('#exit').innerHTML = G.icon('arrow-left') + 'Rewards';
 
-  /* start from ?c= (Edit from My creations) or a café */
+  /* the answers so far (?c= = editing a saved card: start on the last slide) */
   const editing = new URLSearchParams(location.search).get('c');
-  const start = editing && RW.decode(editing);
-  let cfg = start || RW.normalize({ n: 'Your Shop Name', t: 'c', j: 1 });
-  let saved = start ? editing : null;
-  const touched = new Set(start ? ['i', 's', 'r', 'color'] : []);
-  if (start) { $('#pageTitle').textContent = 'Edit ' + cfg.n + '.'; document.title = 'Edit ' + cfg.n + ' · Grug'; }
+  let cfg = (editing && RW.decode(editing)) || RW.normalize({ n: '', t: 'c', j: 1 });
+  let named = !!(editing && RW.decode(editing)), saved = named ? editing : null;
+  const touched = new Set(named ? ['i', 's', 'r', 'color'] : []);
+  let pctOpen = /^p\d+$/.test(cfg.r);
 
-  /* the phone: a pretend guest, so trying it never touches your own stamps or Pearls */
-  let dayOffset = 0, demoPearls = 0, demoDay = '', demoStore = null;
-  const pearlsDemo = { grant() { const d = RW.dayKey(Date.now() + dayOffset * 864e5); if (demoDay === d) return 0; demoDay = d; demoPearls += RW.TAP_PEARLS; paintBar(); return RW.TAP_PEARLS; }, balance: () => demoPearls };
-  const phone = RW.mountCard($('#phoneCard'), { cfg, store: { get: () => demoStore, set: v => { demoStore = JSON.parse(JSON.stringify(v)); }, clear: () => { demoStore = null; } },
-    pearls: pearlsDemo, inPhone: true, now: () => Date.now() + dayOffset * 864e5 });
-  function paintBar() { $('#mkPearls').innerHTML = G.icon('pearl') + G.fmt(demoPearls); }
-  $('#mkLogo').innerHTML = '<svg class="g-mark" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="16" fill="#9BE338"/></svg>Grug';
-  paintBar();
+  const opt = (key, val, icon, label, sub, extra) => '<button type="button" class="wz-opt" role="radio" data-' + key + '="' + val + '" aria-checked="false">' +
+    (icon ? '<span class="ic">' + icon + '</span>' : '') + '<span class="t">' + esc(label) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span>' + (extra || '') + '<span class="ck">' + G.icon('check') + '</span></button>';
 
-  /* the form */
-  const fName = $('#fName'), fNeed = $('#fNeed'), fReward = $('#fReward'), fPct = $('#fPct');
-  $('#fKind').innerHTML = Object.keys(RW.KINDS).map(k => '<button type="button" role="radio" data-k="' + k + '"><span class="rw-emo">' + RW.KINDS[k].i + '</span> ' + RW.KINDS[k].label + '</button>').join('');
-  $('#fColor').innerHTML = RW.COLORS.map(c => '<button type="button" data-c="' + c + '" style="background:' + c + '" aria-label="Color ' + c + '"></button>').join('') + '<label title="Any color" id="fCustomL">+<input type="color" id="fCustom" aria-label="Pick any color"></label>';
-  $('#fIcon').innerHTML = RW.ICONS.map(i => '<button type="button" data-i="' + i + '" aria-label="' + i + '">' + i + '</button>').join('');
-  fReward.innerHTML = Object.keys(RW.REWARDS).map(k => '<option value="' + k + '">' + esc(RW.REWARDS[k]) + '</option>').join('') + '<option value="p">A percent off an item</option>';
-  fPct.innerHTML = RW.PCTS.map(p => '<option value="' + p + '">' + p + '% off</option>').join('');
-  $('#pearlIc').innerHTML = G.icon('pearl'); $('#nfcIc').innerHTML = G.icon('device-mobile');
-  $('#gameChips').innerHTML = G.GAMES.filter(g => g.listed !== false && g.status !== 'legacy').slice(0, 6).map(g => '<span>' + esc(g.title) + '</span>').join('') + '<span>+ more</span>';
+  /* the questions */
+  const STEPS = [
+    { id: 'name', q: 'What’s your shop called?', hint: 'It goes at the top of your card.',
+      ok: () => named && cfg.n.trim().length > 0,
+      html: () => '<input class="g-input wz-name" id="aName" maxlength="28" autocomplete="organization" placeholder="e.g. Pebble Coffee Bar" value="' + (named ? esc(cfg.n) : '') + '">',
+      wire: () => { const i = $('#aName'); i.focus(); i.addEventListener('input', () => { named = i.value.trim().length > 0; set({ n: i.value }); paintNav(); }); } },
+    { id: 'kind', q: 'What kind of place is it?', hint: 'We’ll suggest the rest from here.', auto: true,
+      html: () => Object.keys(RW.KINDS).map(k => opt('k', k, RW.KINDS[k].i, RW.KINDS[k].label)).join(''),
+      pick: el => el.dataset.k, sel: () => cfg.t,
+      apply: k => { const d = RW.KINDS[k], p = { t: k }; ['i', 's', 'r', 'color'].forEach(f => { if (!touched.has(f)) p[f] = d[f === 'color' ? 'color' : f]; }); cfg = RW.normalize(Object.assign({}, cfg, p)); pctOpen = /^p\d+$/.test(cfg.r); } },
+    { id: 'color', q: 'Choose a brand color', hint: 'Your card and its QR frame use it.',
+      html: () => '<div class="wz-sw">' + RW.COLORS.map(c => '<button type="button" role="radio" data-c="' + c + '" style="background:' + c + '" aria-label="Color ' + c + '" aria-checked="false"></button>').join('') +
+        '<label title="Any color" id="aCustom" role="radio" aria-checked="false">+<input type="color" aria-label="Pick any color"></label></div>',
+      pick: el => el.dataset.c, sel: () => cfg.color, apply: c => set({ color: c }),
+      wire: () => { const l = $('#aCustom'), inp = l.querySelector('input'); inp.value = cfg.color.toLowerCase(); inp.addEventListener('input', () => { set({ color: inp.value }); mark(); }); } },
+    { id: 'icon', q: 'Choose a stamp icon', hint: 'Guests collect one of these every visit.',
+      html: () => '<div class="wz-emo">' + RW.ICONS.map(i => '<button type="button" role="radio" data-i="' + i + '" aria-label="' + i + '" aria-checked="false">' + i + '</button>').join('') + '</div>',
+      pick: el => el.dataset.i, sel: () => cfg.i, apply: i => set({ i }) },
+    { id: 'stamps', q: 'How many stamps for a reward?', hint: 'Fewer stamps bring people back sooner.', auto: true,
+      html: () => [[5, 'Quick to earn'], [6, 'Good for bars'], [8, 'Most popular', true], [10, 'For weekly regulars'], [12, 'For daily regulars']].map(([n, sub, pop]) =>
+        opt('s', n, '<b style="font:700 20px var(--display)">' + n + '</b>', n + ' stamps', sub, pop ? '<span class="tag">Popular</span>' : '')).join(''),
+      pick: el => +el.dataset.s, sel: () => cfg.s, apply: s => set({ s }) },
+    { id: 'reward', q: 'What’s the reward?', hint: 'What guests get when the card is full.',
+      ok: () => !pctOpen || /^p\d+$/.test(cfg.r),
+      html: () => Object.keys(RW.REWARDS).map(k => opt('r', k, ({ d: '🥤', f: '🍽️', s: '🍰', b: '🎁' })[k], RW.REWARDS[k])).join('') +
+        opt('r', 'p', '🏷️', 'A percent off an item') +
+        '<div id="pctBox"' + (pctOpen ? '' : ' hidden') + '><p class="wz-pct-l">How much off?</p><div class="wz-pct">' + RW.PCTS.map(p => '<button type="button" role="radio" data-p="' + p + '" aria-checked="false">' + p + '%</button>').join('') + '</div></div>' +
+        '<button type="button" class="wz-opt ghost" id="aCustomReward"><span class="ic">' + G.icon('chat-circle') + '</span><span class="t">Something else?<small>Talk to us about a custom reward</small></span></button>',
+      pick: el => el.dataset.r, sel: () => pctOpen ? 'p' : cfg.r,
+      apply: r => { if (r === 'p') { pctOpen = true; if (!/^p\d+$/.test(cfg.r)) set({ r: 'p10' }); return 'stay'; } pctOpen = false; set({ r }); },
+      wire: () => {
+        document.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => { set({ r: 'p' + b.dataset.p }); mark(); G.ui.buzz(); setTimeout(() => go(cur + 1), 320); }));
+        $('#aCustomReward').addEventListener('click', customReward);
+      } },
+    { id: 'welcome', q: 'Give new guests a free welcome stamp?', hint: 'A head start makes people more likely to come back.', auto: true,
+      html: () => opt('j', '1', '👋', 'Yes, start them with a stamp', 'Their first scan counts twice', '<span class="tag">Recommended</span>') + opt('j', '0', '🙂', 'No, start at zero'),
+      pick: el => el.dataset.j, sel: () => String(cfg.j), apply: j => set({ j: j === '1' }) },
+    { id: 'done', done: true }
+  ];
+  const QUESTIONS = STEPS.length - 1;
 
-  function syncForm() {
-    fName.value = cfg.n; fNeed.value = cfg.s; $('#needOut').textContent = cfg.s;
-    const pct = /^p\d+$/.test(cfg.r); fReward.value = pct ? 'p' : cfg.r; fPct.hidden = !pct; if (pct) fPct.value = cfg.r.slice(1);
-    $('#fJoin').setAttribute('aria-checked', String(!!cfg.j));
-    document.querySelectorAll('#fKind [data-k]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.k === cfg.t)));
-    let preset = false;
-    document.querySelectorAll('#fColor [data-c]').forEach(b => { const on = b.dataset.c.toUpperCase() === cfg.color; preset = preset || on; b.setAttribute('aria-pressed', String(on)); });
-    const cl = $('#fCustomL'); cl.dataset.on = String(!preset); cl.style.background = preset ? '' : cfg.color; cl.style.color = preset ? '' : RW.inkOn(cfg.color);
-    document.querySelectorAll('#fIcon [data-i]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.i === cfg.i)));
-    $('#fCustom').value = cfg.color.toLowerCase();
-    $('#nameCount').textContent = fName.value.length + '/28';
-  }
-  function set(patch) { Object.keys(patch).forEach(k => touched.add(k)); cfg = RW.normalize(Object.assign({}, cfg, patch)); update(); }
-  fName.addEventListener('input', () => { $('#nameCount').textContent = fName.value.length + '/28'; set({ n: fName.value }); });
-  fName.addEventListener('focus', () => { if (fName.value === 'Your Shop Name') fName.select(); });
-  fNeed.addEventListener('input', () => { $('#needOut').textContent = fNeed.value; set({ s: fNeed.value }); });
-  fReward.addEventListener('change', () => { set({ r: fReward.value === 'p' ? 'p' + fPct.value : fReward.value }); syncForm(); });
-  fPct.addEventListener('change', () => set({ r: 'p' + fPct.value }));
-  $('#fJoinBtn').addEventListener('click', () => { set({ j: !cfg.j }); syncForm(); });
-  $('#fKind').addEventListener('click', e => {
-    const b = e.target.closest('[data-k]'); if (!b) return;
-    const d = RW.KINDS[b.dataset.k], p = { t: b.dataset.k };
-    if (!touched.has('i')) p.i = d.i; if (!touched.has('s')) p.s = d.s; if (!touched.has('r')) p.r = d.r; if (!touched.has('color')) p.color = d.color;
-    cfg = RW.normalize(Object.assign({}, cfg, p)); syncForm(); update();
-  });
-  $('#fColor').addEventListener('click', e => { const b = e.target.closest('[data-c]'); if (b) { set({ color: b.dataset.c }); syncForm(); } });
-  $('#fCustom').addEventListener('input', e => { set({ color: e.target.value }); syncForm(); });
-  $('#fIcon').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) { set({ i: b.dataset.i }); syncForm(); } });
-
-  /* a reward that isn't in the list: that's a Custom card */
-  $('#customBtn').addEventListener('click', async () => {
+  function set(patch) { Object.keys(patch).forEach(k => touched.add(k)); cfg = RW.normalize(Object.assign({}, cfg, patch)); paintPreview(); }
+  async function customReward() {
     const go = await G.ui.dialog({ title: 'Want a custom reward?',
-      html: '<p>A named menu item, a free class, a members’ perk or anything else is part of a Custom card we set up with you, along with your own game.</p><p style="margin-top:8px">Text us at <b>954-459-6301</b> and tell us what you’d like to give. Until then, pick the closest reward from the list.</p>',
+      html: '<p>A named menu item, a free class, a members’ perk or anything else is part of a Custom card we set up with you, along with your own game.</p><p style="margin-top:8px">Text us at <b>954-459-6301</b> and tell us what you’d like to give. For now, pick the closest one from the list.</p>',
       actions: [{ label: 'Not now', kind: 'quiet', value: null }, { label: 'Text us', kind: 'primary', value: 'go' }] });
-    if (go === 'go') location.href = 'sms:+19544596301?&body=' + encodeURIComponent('Hi! I made a rewards card for ' + cfg.n + ' and I’d like a custom reward: ');
-  });
-
-  /* save to My creations (Rewards tab) */
-  function paintSave() {
-    const c = RW.encode(cfg), done = saved === c;
-    $('#saveBtn').disabled = done; $('#saveBtn').textContent = done ? 'Saved' : saved ? 'Save changes' : 'Save to My creations';
-    $('#saveNote').innerHTML = done ? 'Saved on this device. Find it in <a href="../#mine" style="color:var(--mode);font-weight:700">Rewards → My creations</a>.' : 'Saved cards live in Rewards → My creations on this device.';
-  }
-  function saveNow(quiet) {
-    const c = RW.encode(cfg); if (saved === c) return;
-    RW.saveMine(c, saved); saved = c;
-    try { history.replaceState(null, '', '?c=' + c + location.hash); } catch (e) {}
-    paintSave(); if (!quiet) G.ui.toast('Saved to My creations', { icon: 'check-circle' });
-  }
-  $('#saveBtn').addEventListener('click', () => saveNow());
-
-  /* print card + links */
-  let L = null, qrT = 0;
-  function update() {
-    L = RW.links(cfg);
-    phone.setConfig(cfg);
-    $('#stampLink').textContent = L.stamp; $('#stampLink').title = L.stamp;
-    $('#joinLink').textContent = L.join; $('#joinLink').title = L.join;
-    $('#openApp').href = L.open;
-    const kd = RW.KINDS[cfg.t]; $('#kindNote').hidden = !kd.note; $('#kindNote').textContent = kd.note || '';
-    const top = $('#pcTop'); top.style.cssText = RW.bandStyle(cfg.color);
-    $('#pcIc').textContent = cfg.i; $('#pcIc').style.background = RW.lo(cfg.color);
-    $('#pcName').textContent = cfg.n; $('#pcQr').style.borderColor = cfg.color;
-    $('#pcGoal').innerHTML = 'Collect <b>' + cfg.s + ' <span class="rw-emo">' + esc(cfg.i) + '</span></b> → <b>' + esc(RW.rewardText(cfg.r)) + '</b>';
-    $('#pcList').innerHTML = ['Point your phone camera here', 'One stamp per visit, once a day', '+10 Pearls for any game on Grug'].concat(cfg.j ? ['First scan? Your welcome stamp is on us'] : []).map(t => '<li>' + t + '</li>').join('');
-    clearTimeout(qrT); qrT = setTimeout(() => { $('#pcQr').innerHTML = RW.qrSvg(L.stamp); }, 120);
-    paintSave();
+    if (go === 'go') location.href = 'sms:+19544596301?&body=' + encodeURIComponent('Hi! I’m making a rewards card for ' + (named ? cfg.n : 'my shop') + ' and I’d like a custom reward: ');
   }
 
-  $('#simScan').onclick = () => phone.scan(L.k);
-  $('#simReset').onclick = () => { dayOffset = 0; demoPearls = 0; demoDay = ''; paintBar(); $('#simLbl').textContent = 'Fresh phone. Scan to join as a new guest.'; phone.reset(); };
-  $('#simDay').onclick = () => { dayOffset++; $('#simLbl').textContent = 'It’s ' + new Date(Date.now() + dayOffset * 864e5).toLocaleDateString([], { weekday: 'long' }) + ' on this phone. Scan again.'; phone.refresh(); };
-  $('#printBtn').onclick = () => { saveNow(true); window.print(); };
-  document.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => {
-    saveNow(true);
-    const t = $('#' + b.dataset.copy).textContent;
-    try { await navigator.clipboard.writeText(t); b.textContent = 'Copied'; } catch (e) { const r = document.createRange(); r.selectNodeContents($('#' + b.dataset.copy)); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
-    setTimeout(() => { b.textContent = 'Copy'; }, 1400);
-  });
+  /* slides */
+  let cur = 0, prevIdx = -1;
+  const slide = $('#slide');
+  function show(i) {
+    i = Math.max(0, Math.min(STEPS.length - 1, i));
+    if (i > 0 && !named) i = 0;   // the name comes first
+    const st = STEPS[i], back = i < prevIdx; prevIdx = cur = i;
+    $('#bar').style.width = (Math.min(i, QUESTIONS) / QUESTIONS * 100) + '%';
+    $('#count').textContent = st.done ? 'Done!' : 'Step ' + (i + 1) + ' of ' + QUESTIONS;
+    slide.className = 'wz-slide' + (st.done ? ' wz-done' : '') + (back ? ' back' : '');
+    void slide.offsetWidth; slide.classList.add('in');
+    if (st.done) return showDone();
+    slide.innerHTML = '<div class="wz-a" role="radiogroup" aria-labelledby="qh">' + st.html() + '</div>' +
+      '<div class="wz-q"><span class="n">' + (i + 1) + '</span><h1 id="qh">' + esc(st.q) + '</h1><p>' + esc(st.hint) + '</p><div class="wz-prev" id="prev"></div></div>';
+    if (st.pick) slide.querySelectorAll('[role=radio]:not([data-p]):not(#aCustom)').forEach(b => b.addEventListener('click', () => {
+      const r = st.apply(st.pick(b)); mark(); G.ui.buzz();
+      if (r === 'stay') { $('#pctBox').hidden = false; paintNav(); return; }
+      if (st.id === 'reward') $('#pctBox').hidden = true;
+      if (st.auto || st.id === 'reward') setTimeout(() => { if (cur === i) go(i + 1); }, 320);
+      paintNav();
+    }));
+    if (st.wire) st.wire();
+    mark(); paintPreview(); paintNav();
+    $('#nav').hidden = false;
+  }
+  function mark() {
+    const st = STEPS[cur]; if (!st.sel) return;
+    const v = String(st.sel());
+    slide.querySelectorAll('[role=radio]:not([data-p]):not(#aCustom)').forEach(b => { const k = Object.keys(b.dataset)[0]; b.setAttribute('aria-checked', String(String(b.dataset[k]).toUpperCase() === v.toUpperCase())); });
+    slide.querySelectorAll('[data-p]').forEach(b => b.setAttribute('aria-checked', String('p' + b.dataset.p === cfg.r)));
+    const cl = $('#aCustom'); if (cl) { const preset = RW.COLORS.some(c => c.toUpperCase() === cfg.color); cl.setAttribute('aria-checked', String(!preset)); cl.style.background = preset ? '' : cfg.color; cl.style.color = preset ? '' : RW.inkOn(cfg.color); }
+  }
+  function paintPreview() { const p = $('#prev'); if (p) p.innerHTML = RW.passHtml(Object.assign({}, cfg, { n: named ? cfg.n : 'Your shop' }), Math.min(3, cfg.s - 1)); }
+  function paintNav() {
+    const st = STEPS[cur];
+    $('#backBtn').style.visibility = cur === 0 ? 'hidden' : '';
+    $('#nextBtn').disabled = st.ok ? !st.ok() : false;
+    $('#nextBtn').textContent = cur === QUESTIONS - 1 ? 'Finish' : 'Next';
+  }
+  // each slide gets its own history entry, so the phone's back button goes back a question
+  function go(i) { const h = '#' + STEPS[Math.max(0, Math.min(STEPS.length - 1, i))].id; if (location.hash !== h) location.hash = h; else show(i); }
+  const fromHash = () => { const k = location.hash.slice(1); if (k === 'print') return STEPS.length - 1; const i = STEPS.findIndex(s => s.id === k); return i < 0 ? 0 : i; };
+  addEventListener('hashchange', () => show(fromHash()));
+  $('#backBtn').addEventListener('click', () => go(cur - 1));
+  $('#nextBtn').addEventListener('click', () => { if (!$('#nextBtn').disabled) go(cur + 1); });
+  addEventListener('keydown', e => { if (e.key === 'Enter' && !document.querySelector('dialog[open]') && !STEPS[cur].done && !$('#nextBtn').disabled) { e.preventDefault(); go(cur + 1); } });
 
-  const FREE = ['A stamp card with your name, color and icon', 'Your pick of reward: free item, BOGO or a percent off', 'One printed QR or NFC sticker, one stamp a day per guest', '10 Pearls a visit for every game on Grug'];
-  const PRO = ['A full game starring your real menu, like Sushi Swap or Boba Bandit', 'Any reward you like, plus a points menu and members’ club', 'Menu-board codes that a photo can’t reuse', 'Your own app with menu, photos and order ahead', 'A monthly report on scans, members and repeat visits'];
-  $('#listFree').innerHTML = FREE.map(t => '<div><span style="color:var(--mut)">' + G.icon('check-circle') + '</span>' + t + '</div>').join('');
-  $('#listPro').innerHTML = PRO.map(t => '<div><span style="color:var(--mode)">' + G.icon('check-circle') + '</span><span style="color:var(--ink)">' + t + '</span></div>').join('');
+  /* the last slide: the card, the PDF, and what the links are for */
+  function showDone() {
+    $('#nav').hidden = true;
+    const c = RW.encode(cfg); if (saved !== c) { RW.saveMine(c, saved); saved = c; try { history.replaceState(null, '', '?c=' + c + '#done'); } catch (e) {} }
+    const L = RW.links(cfg);
+    slide.innerHTML =
+      '<div class="wz-a">' +
+        '<button type="button" class="g-btn primary wz-big" id="pdfBtn">' + G.icon('download-simple') + 'Download your card (PDF)</button>' +
+        '<div class="wz-acts"><a class="g-btn" href="' + esc(L.open) + '" target="_blank" rel="noopener">See it as a guest</a><button type="button" class="g-btn" id="redo">' + G.icon('pencil-simple') + 'Change answers</button></div>' +
+        '<p class="wz-saved">' + G.icon('check-circle') + '<span>Saved to <a href="../#mine">Rewards → My creations</a> on this device.</span></p>' +
+        '<div class="wz-share"><h3>Sharing it online?</h3>' +
+          '<div class="wz-row"><span class="ic">' + G.icon('qr-code') + '</span><div><b>The QR on your card</b><span>Keep it in your shop. Guests scan it at the counter to collect a stamp, once a day.</span></div></div>' +
+          '<div class="wz-row"><span class="ic">' + G.icon('share-network') + '</span><div><b>Invite link</b><span>Post it on Instagram or your website. People can save your card, but stamps only come from the QR in your shop.</span></div><button type="button" class="g-btn sm" data-copy="join">Copy</button></div>' +
+          '<div class="wz-row"><span class="ic">' + G.icon('device-mobile') + '</span><div><b>NFC sticker</b><span>Optional. Copy the QR’s link onto an NFC sticker so guests can tap instead of scan.</span></div><button type="button" class="g-btn sm" data-copy="stamp">Copy</button></div>' +
+        '</div>' +
+        '<div class="wz-up"><div><b>Want your own game?</b><span>We build one starring your menu. First partners get 90 days free.</span></div><a class="g-btn sm" href="sms:+19544596301">Text us</a></div>' +
+      '</div>' +
+      '<div class="wz-q"><span class="n">' + G.icon('check') + '</span><h1>Your card is ready!</h1><p>Download it, print it, and put it by your register.</p><img id="cardImg" alt="Your printable rewards card"></div>';
+    RW.cardCanvas(cfg, L.stamp).then(cv => { const im = $('#cardImg'); if (im) im.src = cv.toDataURL('image/png'); });
+    $('#pdfBtn').addEventListener('click', async e => {
+      const b = e.currentTarget; b.disabled = true;
+      try { await RW.downloadPdf(cfg, L.stamp); G.ui.toast('Your card is downloading', { icon: 'download-simple' }); } catch (err) { G.ui.toast('Couldn’t make the PDF. Try again.', { icon: 'warning-circle' }); }
+      b.disabled = false;
+    });
+    $('#redo').addEventListener('click', () => go(0));
+    slide.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => {
+      const t = b.dataset.copy === 'join' ? L.join : L.stamp;
+      try { await navigator.clipboard.writeText(t); b.textContent = 'Copied'; } catch (err) { prompt('Copy this link:', t); }
+      setTimeout(() => { b.textContent = 'Copy'; }, 1500);
+    }));
+  }
 
-  syncForm(); update();
-  if (location.hash === '#print') setTimeout(() => $('#print').scrollIntoView(), 50);
+  show(named ? (fromHash() || STEPS.length - 1) : 0);
+  if (!named && location.hash) history.replaceState(null, '', location.pathname + location.search);
 })();
 </script>
 </body>

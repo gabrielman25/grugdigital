@@ -11,6 +11,15 @@
   const C = root.GrugCatalog, GAMES = root.GRUG_GAMES || [], ICONS = root.GRUG_ICONS || {};
   const KEY = 'grug.profile.v1', SNAP_KEY = 'grug.snaps.v1';
   const REWARDS_KEY = 'grug.rewards.v1';   // stamp cards from shops (rewards/), see assets/rewards.js
+  /* ---------- who's visiting: picked once (askRole), kept in profile.prefs.role, changed in Settings ----------
+     Each role sees only the dock tabs it needs ('' = not asked yet, 'all' = everything). A page reached by link still
+     shows its own tab. theme.js puts the role on <html data-role> so pages can show or hide parts with
+     [data-only-for="owner dev"] / [data-hide-for="owner"] (rules in grug.css). */
+  const ROLES = {
+    player: { label: 'Player', icon: 'game-controller', color: '#7EE081', text: 'Play games, earn rewards at shops and dress up your avatar', tabs: ['home', 'games', 'rewards', 'avatar', 'shop', 'profile'] },
+    owner: { label: 'Restaurant owner', icon: 'storefront', color: '#FF9F5A', text: 'Make a free rewards card that brings guests back', tabs: ['home', 'games', 'rewards', 'profile'] },
+    dev: { label: 'Game developer', icon: 'cube', color: '#4FD8C4', text: 'Free 3D models, Model Kit and the game library', tabs: ['home', 'games', 'create', 'avatar', 'shop', 'profile'] }
+  };
   const EXPORT_FORMAT = 'grug-profile';
 
   /* ---------- where the site lives (works from /, /grugdigital/, play/yoshi/, …) ---------- */
@@ -58,7 +67,7 @@
       inventory: [],            // earned (non-free) item ids
       earned: {},               // item id → {at, how}
       stats: { plays: {}, checkins: {}, best: {}, course: {}, days: {}, lastGame: '', lastPlayed: 0 },
-      prefs: { motion: true, haptics: true, colorIcons: false, uiScale: 1 },
+      prefs: { motion: true, haptics: true, colorIcons: false, uiScale: 1, role: '' },
       items: {},                // site-wide items (inventory on the settings page): item id → {n, at}; see ITEMS below
       emotes: EMOTE_DEFAULT.slice(),   // the emotes brought into games (ids from EMOTES, in wheel order)
       seen: {}                  // one-time hints
@@ -98,6 +107,7 @@
     o.inventory = Array.from(new Set(o.inventory));
     o.emotes = Array.from(new Set(o.emotes)); if (!o.emotes.length) o.emotes = EMOTE_DEFAULT.slice();
     o.prefs.uiScale = UI_SCALES.includes(+o.prefs.uiScale) ? +o.prefs.uiScale : 1;
+    o.prefs.role = ROLES[o.prefs.role] || o.prefs.role === 'all' ? o.prefs.role : '';
     Object.keys(o.items).forEach(k => { const v = o.items[k]; if (!ITEMS[k] || !v || typeof v !== 'object' || !(+v.n > 0)) delete o.items[k]; else v.n = Math.min(ITEMS[k].max, Math.floor(+v.n)); });
     return o;
   }
@@ -374,6 +384,9 @@
     const d = ICONS[name]; return '<svg class="gi' + c + '" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path d="' + (d || ICONS.question || '') + '"/></svg>';
   }
 
+  const roleOf = () => profile.prefs.role || '';
+  const showsTab = k => { const r = ROLES[roleOf()]; return !r || r.tabs.includes(k); };
+
   /* ---------- UI chrome: floating top bar + dock (kubii theme) ---------- */
   const NAV = [
     ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['rewards', 'Rewards', 'gift', 'rewards/'], ['create', 'Create', 'cube', 'create/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'],
@@ -407,8 +420,10 @@
       '<button type="button" class="g-gear" aria-label="Settings" title="Settings">' + icon('gear-six') + '</button></div>' +
       '<button type="button" class="g-me" aria-label="Your account menu" aria-haspopup="menu" aria-expanded="false"><span class="g-me-name">' + esc(profile.name) + '</span>' + faceImg + '</button>';
     const tabs = document.createElement('nav'); tabs.className = 'g-tabs k-glass'; tabs.setAttribute('aria-label', 'Sections');
-    tabs.innerHTML = '<span class="k-sb l" aria-hidden="true">LB</span><span class="k-sb r" aria-hidden="true">RB</span>' +
-      NAV.map(n => '<a href="' + url(n[3]) + '" style="--tab:' + DOCK_SIMPLE[n[0]][1] + ';--tab-lo:' + DOCK_LO[n[0]] + '"' + (n[0] === active ? ' aria-current="page"' : '') + '>' + DOCK[n[0]] + '<span>' + n[1] + '</span></a>').join('');
+    const navNow = () => NAV.filter(n => showsTab(n[0]) || n[0] === active);
+    const paintTabs = () => { tabs.innerHTML = '<span class="k-sb l" aria-hidden="true">LB</span><span class="k-sb r" aria-hidden="true">RB</span>' +
+      navNow().map(n => '<a href="' + url(n[3]) + '" style="--tab:' + DOCK_SIMPLE[n[0]][1] + ';--tab-lo:' + DOCK_LO[n[0]] + '"' + (n[0] === active ? ' aria-current="page"' : '') + '>' + DOCK[n[0]] + '<span>' + n[1] + '</span></a>').join(''); };
+    paintTabs(); chromeTabs = paintTabs;
     document.body.prepend(top); document.body.appendChild(tabs);
     document.body.classList.add('g-chrome');
     $('.g-gear', top).addEventListener('click', () => settings());
@@ -438,8 +453,7 @@
       paintPearls();
     });
     // LB / RB: Q and E (or a controller's shoulder buttons) step through the dock
-    const idx = Math.max(0, NAV.findIndex(n => n[0] === active));
-    const go = d => { location.href = url(NAV[(idx + d + NAV.length) % NAV.length][3]); };
+    const go = d => { const nav = navNow(), idx = Math.max(0, nav.findIndex(n => n[0] === active)); location.href = url(nav[(idx + d + nav.length) % nav.length][3]); };
     document.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.altKey || e.repeat || document.querySelector('dialog[open]')) return;
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
@@ -454,6 +468,8 @@
       })();
     }, { once: true });
     speed(); freeBar();
+    // first visit: who are you? (not on pages a guest reaches from a shop's QR, which pass noRole)
+    if (!roleOf() && !opts.noRole && storageWorks()) setTimeout(() => { if (!roleOf() && !document.querySelector('dialog[open]')) askRole(); }, 700);
     root.addEventListener('grug:change', e => { if (e.detail && e.detail.what === 'boost') freeBar(); });
     return top;
   }
@@ -536,7 +552,7 @@
   }
   function settings() {
     return dialog({
-      title: 'Settings', html: uiSizeHtml() +
+      title: 'Settings', html: roleHtml() + uiSizeHtml() +
         '<div class="g-pref"><span><b>Animations</b><small>Celebrations and poses</small></span><button type="button" class="g-switch" role="switch" data-pref="motion" aria-checked="' + !!profile.prefs.motion + '" aria-label="Animations"></button></div>' +
         '<div class="g-pref"><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button type="button" class="g-switch" role="switch" data-pref="haptics" aria-checked="' + !!profile.prefs.haptics + '" aria-label="Vibrate on tap"></button></div>' +
         '<div class="g-pref"><span><b>Colorful icons</b><small>Full-colour pictures instead of simple one-colour icons</small></span><button type="button" class="g-switch" role="switch" data-pref="colorIcons" aria-checked="' + !!profile.prefs.colorIcons + '" aria-label="Colorful icons"></button></div>' +
@@ -545,6 +561,7 @@
       actions: [{ label: 'Done', kind: 'primary', value: true }],
       onOpen: d => {
         d.classList.add('wide'); wireUiSize(d);
+        $$('[data-role-set]', d).forEach(b => b.addEventListener('click', () => { setRole(b.dataset.roleSet); $$('[data-role-set]', d).forEach(x => x.setAttribute('aria-checked', String(x === b))); buzz(); }));
         const inv = $('#kInv', d), paintInv = () => { inv.innerHTML = inventoryHtml(); }; paintInv(); wireInventory(inv, paintInv);
         $$('[data-pref]', d).forEach(b => b.addEventListener('click', () => {
           profile.prefs[b.dataset.pref] = !profile.prefs[b.dataset.pref]; save('prefs'); b.setAttribute('aria-checked', !!profile.prefs[b.dataset.pref]);
@@ -553,6 +570,34 @@
         }));
       }
     });
+  }
+  let chromeTabs = null;
+  function setRole(r) {
+    if (!(ROLES[r] || r === 'all')) return;
+    profile.prefs.role = r; save('role');
+    document.documentElement.setAttribute('data-role', r);
+    if (chromeTabs) chromeTabs();
+  }
+  // the first-visit picker; resolves with the role picked ('all' if they skip it)
+  function askRole() {
+    let picked = null;
+    const html = '<p class="g-fine" style="margin:-4px 0 12px">We\u2019ll show you the parts of Grug made for you. You can change this anytime in Settings.</p><div class="g-roles">' +
+      Object.keys(ROLES).map(k => { const r = ROLES[k];
+        return '<button type="button" data-role-pick="' + k + '" style="--rc:' + r.color + '"><span class="ic">' + icon(r.icon) + '</span><span><b>' + esc(r.label) + '</b><small>' + esc(r.text) + '</small></span>' + icon('caret-right') + '</button>'; }).join('') +
+      '</div><button type="button" class="g-roles-all" data-role-pick="all">Show me everything</button>';
+    return dialog({ title: 'Welcome to Grug! Who are you?', html, actions: [],
+      onOpen: d => { d.classList.add('g-role-dialog'); $$('[data-role-pick]', d).forEach(b => b.addEventListener('click', () => { picked = b.dataset.rolePick; buzz(); d.close(''); })); }
+    }).then(() => {
+      const r = picked || 'all'; setRole(r);
+      if (picked && picked !== 'all') toast('Set up for ' + ROLES[r].label.toLowerCase() + 's. Change it in Settings.', { icon: ROLES[r].icon, ms: 3600 });
+      return r;
+    });
+  }
+  function roleHtml() {
+    const cur = roleOf() || 'all';
+    return '<div class="g-pref g-pref-col"><span><b>I\u2019m a\u2026</b><small>Shows the tabs made for you</small></span><div class="g-seg" role="radiogroup" aria-label="I am a">' +
+      Object.keys(ROLES).map(k => '<button type="button" role="radio" data-role-set="' + k + '" aria-checked="' + (cur === k) + '">' + esc(ROLES[k].label) + '</button>').join('') +
+      '<button type="button" role="radio" data-role-set="all" aria-checked="' + (cur === 'all') + '">Everything</button></div></div>';
   }
   const LOGO = '<svg class="g-mark" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="16" fill="#9BE338"/><path d="M19.8 51C19.5 50.9 18.9 50.9 18.4 50.9C17.2 50.9 17.1 50.7 17 48.6C16.8 46.5 17 45.5 17.9 43.8C18.1 43.3 18.3 42.8 18.3 42.8C18.3 42.6 19 41.2 19.3 40.7C19.8 39.8 19.8 39.8 19.7 39.6C19.5 38.9 19.2 38.3 18.8 37.8C17.9 36.4 17.6 35.3 17.7 34C17.8 32.5 18.1 32 19.1 31.1C19.5 30.8 19.9 30.5 20 30.5C20.5 30 21.2 29.7 21.7 29.7C22.5 29.7 22.8 29.4 22.8 28.8C22.8 27.9 23.5 28.4 23.6 29.3C23.6 30 23.1 30.5 21.7 30.8C20.7 31 20.2 33 21 33.9C21.9 35 25.6 34.7 26.6 33.5C26.6 33.4 26.7 33.4 26.7 33.4C26.8 33.4 27 33.3 27.3 33.2C27.5 33.1 28 32.9 28.2 32.8C29.5 32.4 29.8 32.4 30 32.4C30 32.4 30.3 32.3 30.5 32.2C31 32.1 31.5 32 33 31.9C34.8 31.8 35.5 31.7 35.8 31.6C35.9 31.5 36.2 31.4 36.4 31.4C37.8 31 38.2 30.7 39 29.2C39.6 28.1 39.6 25.4 39 24.6C38.9 24.5 38.8 24.4 38.8 24.4C38.8 24.3 38.1 23 37.9 22.8C37.8 22.7 37.3 22.4 36.8 22.1C36.3 21.8 35.8 21.5 35.7 21.5C35.3 21.2 33.8 20.9 32.9 20.9C32.5 20.9 32 20.9 31.9 20.8C31.8 20.8 31.5 20.7 31.3 20.7C30.3 20.5 30 20.3 29.2 19.5C28 18.3 27.9 17.7 28.3 15.9C28.4 15.7 28.5 15.4 28.5 15.3C28.6 15.2 28.7 15 28.7 14.9C29.1 14.2 29.8 13.4 30.4 13.3C31.1 13.1 31.3 13.1 32.3 13C33.2 13 34.1 13.1 34.9 13.3C35.2 13.3 35.6 13.4 35.8 13.5C36.7 13.6 37.3 13.8 38.7 14.4C39.5 14.7 40.5 15.4 41.3 16.1C41.5 16.2 41.9 16.5 42.1 16.6C42.2 16.8 42.5 17 42.6 17.1C42.7 17.3 42.9 17.5 43 17.6C43.3 18 43.8 18.7 44 19.2C44.1 19.5 44.3 19.9 44.5 20.1C44.6 20.3 44.8 20.6 44.8 20.9C44.9 21.1 45.1 21.4 45.3 21.7C45.5 21.9 45.6 22.2 45.7 22.3C45.7 22.4 45.8 22.7 45.8 22.9C45.9 23.1 46 23.6 46.1 23.9C46.2 24.2 46.4 24.6 46.4 24.7C46.6 25.2 46.8 26.3 46.9 26.8C46.9 27 47 27.4 47 27.7C47.1 28.3 47.1 32.1 46.9 32.4C46.9 32.5 46.9 33.2 46.9 34C46.9 34.8 46.9 35.6 46.8 35.8C46.8 36 46.7 36.3 46.7 36.5C46.6 36.9 46.5 37.4 46.4 37.7C46.3 37.8 46.3 38.1 46.2 38.3C46.2 38.6 46.1 38.9 46.1 39C46 39.1 46 39.3 45.9 39.5C45.6 40.7 45.3 41.5 45 42.3C45 42.4 44.9 42.7 44.8 43C44.7 43.4 44.5 43.9 44.3 44.3C44.1 44.7 43.9 45.2 43.8 45.5C43.7 45.8 43.6 46.1 43.5 46.2C43.5 46.2 43.5 46.3 43.5 46.3C43.5 46.4 43.4 46.5 43.3 46.7C43.2 46.8 43.1 47.1 43 47.2C43 47.3 42.9 47.5 42.8 47.7C42.6 47.9 42.4 48.3 42.3 48.6C41.1 50.8 41.2 50.8 38.3 50.8C34.9 50.8 34.8 50.7 34.8 49.5C34.8 49 34.8 48.8 34.7 48.6C33.3 46.1 32.8 45.5 31.8 45.2C31.6 45.1 31.3 45 31.1 45C30.4 44.8 29.9 44.9 28.2 45.4C27.2 45.7 26 46.8 26 47.5C26 47.6 26 47.7 26 47.7C25.9 47.8 25.9 48 25.8 48.2C25.8 48.4 25.6 48.8 25.4 49.1C25.3 49.4 25.2 49.7 25.2 49.7C25.2 50.3 24.3 50.8 23.4 50.8C23 50.9 22.5 50.9 22.3 50.9C22 51 20.6 51 19.8 51Z" fill="#1F1A17"/></svg>';
 
@@ -683,6 +728,7 @@
     EMOTES, EMOTE_MAX, emoteOf, get emotes() { return profile.emotes.slice(); },
     setEmotes(ids) { ids = Array.isArray(ids) ? Array.from(new Set(ids.filter(id => emoteOf(id)))).slice(0, EMOTE_MAX) : []; if (!ids.length) return false; profile.emotes = ids; save('emotes'); return true; },
     UI_SCALES, applyUiScale,
-    ui: { chrome, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile, uiSizeHtml, wireUiSize, inventoryHtml, wireInventory, freeBar }
+    ROLES, get role() { return roleOf(); }, setRole, showsTab,
+    ui: { chrome, askRole, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile, uiSizeHtml, wireUiSize, inventoryHtml, wireInventory, freeBar }
   };
 })(window);

@@ -66,13 +66,27 @@
 .hc-nav.next{right:calc(50vw - var(--tw,330px) / 2 - 64px)}
 .hc{--tw:min(330px,72vw)}
 @media (max-width:640px){.hc-nav{display:none}}
+.role-hero{margin-top:18px;padding:26px;border-radius:var(--r);background:#232327;border:1px solid var(--line2);display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;justify-content:space-between}
+.role-hero h1{font-size:clamp(28px,5vw,42px)}
+.role-hero p{color:var(--ink2);font-size:17px;margin-top:8px;max-width:52ch}
+.role-hero .row{flex:none}
 footer{padding:28px 0 10px;color:var(--mut);font-size:13.5px;display:flex;flex-wrap:wrap;gap:8px 18px;border-top:1px solid var(--line);margin-top:26px}
 footer a{color:var(--ink2);font-weight:700}
 </style>
 </head>
 <body>
 <main class="wrap">
-  <section class="hero">
+  <!-- who's visiting (Settings → I'm a…): owners and developers get their own front door -->
+  <div data-only-for="owner"><section class="role-hero">
+    <div><p class="g-fine" style="margin:0 0 6px;color:#FF9F5A;font-weight:700">For restaurant owners</p><h1>Bring your guests back.</h1><p>Make a free rewards card in two minutes. Every visit gives your guests a stamp and Pearls for polished games.</p></div>
+    <div class="row"><a class="g-btn primary big" href="rewards/" style="background:#FF9F5A;box-shadow:0 4px 0 #E0782F">Make my rewards card</a><a class="g-btn big" href="partners/">Get a custom game</a></div>
+  </section></div>
+  <div data-only-for="dev"><section class="role-hero">
+    <div><p class="g-fine" style="margin:0 0 6px;color:#4FD8C4;font-weight:700">For game developers</p><h1>Free 3D models, ready to use.</h1><p>Grab presets from the asset library, or make your own with Model Kit, our pixel-to-3D editor.</p></div>
+    <div class="row"><a class="g-btn primary big" href="create/" style="background:#4FD8C4;box-shadow:0 4px 0 #25A893">Open the library</a><a class="g-btn big" href="create/modelkit/">Open Model Kit</a></div>
+  </section></div>
+
+  <section class="hero" data-hide-for="owner">
     <div class="g-view" id="heroView"><span class="hint">Tap to wave · <a href="avatar/">edit your look</a></span></div>
     <div class="copy">
       <h1 id="heroTitle">Games made with Katy restaurants.</h1>
@@ -94,13 +108,13 @@ footer a{color:var(--ink2);font-weight:700}
     </div>
   </section>
 
-  <section class="g-section">
+  <section class="g-section" data-hide-for="owner">
     <div class="g-section-h"><h2>Closet picks</h2><a href="shop/">Shop</a></div>
     <p class="g-fine" style="margin:-6px 0 12px">Custom clothing you can earn next: Roblox-style shirt and pants designs from playing or eating local.</p>
     <div class="g-items" id="closetPicks"></div>
   </section>
 
-  <section class="g-section">
+  <section class="g-section" data-hide-for="owner dev">
     <div class="g-section-h"><h2>How points work</h2></div>
     <div class="steps">
       <div class="step"><span class="n" id="icEat"></span><div><b>Eat at a partner</b><span>Scan the QR on the table or tap the tag with your phone. Play while you wait.</span></div></div>

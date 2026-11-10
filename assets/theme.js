@@ -31,7 +31,7 @@
     let p = {};
     try { p = (JSON.parse(localStorage.getItem(KEY) || 'null') || {}).prefs || {}; } catch (e) { }
     if (root.Grug && root.Grug.profile) p = root.Grug.profile.prefs || p;
-    return { mode: 'dark', backdrop: p.backdrop !== false, motion: p.motion !== false };
+    return { mode: 'dark', backdrop: p.backdrop !== false, motion: p.motion !== false, role: /^(player|owner|dev|all)$/.test(p.role) ? p.role : 'all' };
   }
   const isCalm = s => !s.motion || !!(calmMQ && calmMQ.matches);
   function sectionOf(path) {
@@ -61,6 +61,7 @@
   function apply() {
     const s = prefs(), t = SECTIONS[section], el = document.documentElement;
     el.setAttribute('data-theme', 'dark'); el.setAttribute('data-section', section);
+    el.setAttribute('data-role', s.role);   // who's visiting (Settings → I'm a…): pages show or hide parts with [data-only-for] / [data-hide-for]
     el.style.setProperty('--h', HUE);
     el.style.setProperty('--sel-a', t.a); el.style.setProperty('--sel-b', t.a); el.style.setProperty('--on-sel', INK);
     el.style.setProperty('--mode', t.a); el.style.setProperty('--mode-lo', t.lo);

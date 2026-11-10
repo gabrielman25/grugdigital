@@ -41,7 +41,7 @@
 <script>
 (function(){
   const G = Grug, RW = GrugRewards, $ = s => document.querySelector(s);
-  G.ui.chrome('rewards', { title: 'Rewards card' });
+  G.ui.chrome('rewards', { title: 'Rewards card', noRole: true });   // guests here came from a shop's QR: no "who are you?" first
   const p = new URLSearchParams(location.hash.slice(1)), c = p.get('c'), k = p.get('k');
   const cfg = c && RW.decode(c);
   if (!cfg) { $('#bad').hidden = false; return; }
