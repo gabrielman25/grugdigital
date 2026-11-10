@@ -34,7 +34,7 @@
   const editing = new URLSearchParams(location.search).get('c');
   let cfg = (editing && RW.decode(editing)) || RW.normalize({ n: '', t: 'c', j: 1 });
   let named = !!(editing && RW.decode(editing)), saved = named ? editing : null;
-  const touched = new Set(named ? ['i', 's', 'r', 'color'] : []);
+  const touched = new Set(named ? ['i', 's', 'r', 'color', 'f'] : []);
   let pctOpen = /^p\d+$/.test(cfg.r);
 
   const opt = (key, val, icon, label, sub, extra) => '<button type="button" class="wz-opt" role="radio" data-' + key + '="' + val + '" aria-checked="false">' +
@@ -49,12 +49,19 @@
     { id: 'kind', q: 'What kind of place is it?', hint: 'We’ll suggest the rest from here.', auto: true,
       html: () => Object.keys(RW.KINDS).map(k => opt('k', k, RW.KINDS[k].i, RW.KINDS[k].label)).join(''),
       pick: el => el.dataset.k, sel: () => cfg.t,
-      apply: k => { const d = RW.KINDS[k], p = { t: k }; ['i', 's', 'r', 'color'].forEach(f => { if (!touched.has(f)) p[f] = d[f === 'color' ? 'color' : f]; }); cfg = RW.normalize(Object.assign({}, cfg, p)); pctOpen = /^p\d+$/.test(cfg.r); } },
+      apply: k => { const d = RW.KINDS[k], p = { t: k }; ['i', 's', 'r', 'color'].forEach(f => { if (!touched.has(f)) p[f] = d[f === 'color' ? 'color' : f]; }); if (!touched.has('f')) p.f = d.font; cfg = RW.normalize(Object.assign({}, cfg, p)); pctOpen = /^p\d+$/.test(cfg.r); } },
     { id: 'color', q: 'Choose a brand color', hint: 'Your card and its QR frame use it.',
       html: () => '<div class="wz-sw">' + RW.COLORS.map(c => '<button type="button" role="radio" data-c="' + c + '" style="background:' + c + '" aria-label="Color ' + c + '" aria-checked="false"></button>').join('') +
         '<label title="Any color" id="aCustom" role="radio" aria-checked="false">+<input type="color" aria-label="Pick any color"></label></div>',
       pick: el => el.dataset.c, sel: () => cfg.color, apply: c => set({ color: c }),
       wire: () => { const l = $('#aCustom'), inp = l.querySelector('input'); inp.value = cfg.color.toLowerCase(); inp.addEventListener('input', () => { set({ color: inp.value }); mark(); }); } },
+    { id: 'font', q: 'Pick a font', hint: 'Your shop’s name is written in it, on your card and while guests play.', auto: true,
+      html: () => '<div class="wz-fonts">' + Object.keys(RW.FONTS).map(k => { const F = RW.FONTS[k];
+        return '<button type="button" class="wz-opt wz-font" role="radio" data-f="' + k + '" aria-checked="false">' +
+          '<span class="t"><span class="wz-font-n" style="font-family:\'' + F.css + '\',Fredoka,sans-serif;font-weight:' + F.w + ';font-size:' + (22 * F.size).toFixed(1) + 'px">' + esc(named ? cfg.n : 'Your shop') + '</span>' +
+          '<small><b>' + esc(F.label) + '</b> · ' + esc(F.sub) + '</small></span><span class="ck">' + G.icon('check') + '</span></button>'; }).join('') + '</div>',
+      pick: el => el.dataset.f, sel: () => cfg.f, apply: f => { set({ f }); RW.fontReady(cfg).then(paintPreview); },
+      wire: () => { RW.loadFonts(); Object.keys(RW.FONTS).forEach(k => RW.fontReady({ f: k, n: cfg.n })); RW.fontReady(cfg).then(paintPreview); } },
     { id: 'icon', q: 'Choose a stamp icon', hint: 'Guests collect one of these every visit.',
       html: () => '<div class="wz-emo">' + RW.ICONS.map(i => '<button type="button" role="radio" data-i="' + i + '" aria-label="' + i + '" aria-checked="false">' + i + '</button>').join('') + '</div>',
       pick: el => el.dataset.i, sel: () => cfg.i, apply: i => set({ i }) },
@@ -141,8 +148,8 @@
     const cl = $('#aCustom'); if (cl) { const preset = RW.COLORS.some(c => c.toUpperCase() === cfg.color); cl.setAttribute('aria-checked', String(!preset)); cl.style.background = preset ? '' : cfg.color; cl.style.color = preset ? '' : RW.inkOn(cfg.color); }
   }
   /* the 3D picture beside each question (assets/wizard3d.js): one stage moved from slide to slide.
-     The storefront for the first four questions, the phone and the reward for the rest. A flat card if there's no 3D. */
-  const SCENE = { name: 'shop', kind: 'shop', color: 'shop', icon: 'shop', stamps: 'phone', reward: 'phone', welcome: 'phone' };
+     The storefront for the first five questions, the phone and the reward for the rest. A flat card if there's no 3D. */
+  const SCENE = { name: 'shop', kind: 'shop', color: 'shop', font: 'shop', icon: 'shop', stamps: 'phone', reward: 'phone', welcome: 'phone' };
   const stage = document.createElement('div'); stage.className = 'wz-stage';
   let w3d = null, w3dFailed = false;
   (async () => {

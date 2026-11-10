@@ -28,6 +28,9 @@
     function canvasTex(w, h, draw) { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; t.anisotropy = 4; return t; }
     function rr(x, X, Y, w, h, r) { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); }
     function fit(x, text, w, px, max) { do { x.font = w + ' ' + px + 'px Fredoka, ' + EMO + ', sans-serif'; px -= 2; } while (x.measureText(text).width > max && px > 14); }
+    // the shop's name in the lettering it picked (RW.FONTS)
+    function fitName(x, cfg, px, max) { const F = RW.fontOf(cfg), t = nameOf(cfg); px = Math.round(px * F.size); do { x.font = F.w + ' ' + px + 'px "' + F.css + '", Fredoka, ' + EMO + ', sans-serif'; px -= 2; } while (x.measureText(t).width > max && px > 14); }
+    const fontIn = cfg => { const F = RW.fontOf(cfg); try { return document.fonts.check(F.w + ' 40px "' + F.css + '"'); } catch (e) { return true; } };
     const nameOf = cfg => cfg.named === false ? 'Your shop' : cfg.n;
 
     /* ======================= the storefront ======================= */
@@ -92,14 +95,14 @@
         [awning, ...scallops].forEach(m => m.material.color.set(col)); door.material.color.set(dark);
         if (kind !== cfg.t) { if (props[kind]) props[kind].visible = false; kind = cfg.t; prop(kind).visible = true; }
         prop(kind).userData.brand.forEach(m => m.color.set(col));
-        const k2 = nameOf(cfg) + '|' + cfg.i + '|' + col;
+        const k2 = nameOf(cfg) + '|' + cfg.i + '|' + col + '|' + cfg.f + '|' + fontIn(cfg);
         if (k2 !== key) {
           key = k2; if (signMat.map) signMat.map.dispose();
           signMat.map = canvasTex(740, 164, (x, w, h) => {
             x.fillStyle = col; x.fillRect(0, 0, w, h); x.fillStyle = dark; x.fillRect(0, h - 12, w, 12);
             rr(x, 18, 18, 116, 116, 26); x.fillStyle = dark; x.fill();
             x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = '74px ' + EMO; x.fillText(cfg.i, 76, 80);
-            x.textAlign = 'left'; x.fillStyle = RW.inkOn(col); fit(x, nameOf(cfg), '700', 70, w - 180); x.fillText(nameOf(cfg), 158, 80);
+            x.textAlign = 'left'; x.fillStyle = RW.inkOn(col); fitName(x, cfg, 70, w - 180); x.fillText(nameOf(cfg), 158, 80);
           });
           signMat.needsUpdate = true;
         }
@@ -158,7 +161,7 @@
           x.save(); rr(x, 20, 100, w - 40, 470, 26); x.clip(); x.fillStyle = cfg.color; x.fillRect(20, 100, w - 40, 104); x.fillStyle = RW.lo(cfg.color); x.fillRect(20, 196, w - 40, 8); x.restore();
           rr(x, 38, 118, 68, 68, 16); x.fillStyle = RW.lo(cfg.color); x.fill();
           x.textAlign = 'center'; x.font = '42px ' + EMO; x.fillText(cfg.i, 72, 154);
-          x.textAlign = 'left'; x.fillStyle = RW.inkOn(cfg.color); fit(x, nameOf(cfg), '700', 30, 250); x.fillText(nameOf(cfg), 120, 144);
+          x.textAlign = 'left'; x.fillStyle = RW.inkOn(cfg.color); fitName(x, cfg, 30, 250); x.fillText(nameOf(cfg), 120, 144);
           x.font = '600 18px Fredoka, sans-serif'; x.globalAlpha = .85; x.fillText('Rewards card', 120, 174); x.globalAlpha = 1;
           const n = cfg.s, cols = (n === 6 || n === 9) ? 3 : (n === 5 || n === 10) ? 5 : 4, rows = Math.ceil(n / cols);
           const cell = Math.min((w - 80) / cols, 280 / rows), r = cell * .42, gx = (w - cell * cols) / 2;

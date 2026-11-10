@@ -70,7 +70,7 @@
       inventory: [],            // earned (non-free) item ids
       earned: {},               // item id → {at, how}
       stats: { plays: {}, checkins: {}, best: {}, course: {}, days: {}, lastGame: '', lastPlayed: 0 },
-      prefs: { motion: true, haptics: true, colorIcons: false, uiScale: 1, role: '' },
+      prefs: { motion: true, haptics: true, colorIcons: false, uiScale: 1, role: '', mode: 'light' },
       items: {},                // site-wide items (inventory on the settings page): item id → {n, at}; see ITEMS below
       emotes: EMOTE_DEFAULT.slice(),   // the emotes brought into games (ids from EMOTES, in wheel order)
       seen: {}                  // one-time hints
@@ -111,6 +111,7 @@
     o.emotes = Array.from(new Set(o.emotes)); if (!o.emotes.length) o.emotes = EMOTE_DEFAULT.slice();
     o.prefs.uiScale = UI_SCALES.includes(+o.prefs.uiScale) ? +o.prefs.uiScale : 1;
     o.prefs.role = ROLES[o.prefs.role] || o.prefs.role === 'all' ? o.prefs.role : '';
+    o.prefs.mode = o.prefs.mode === 'dark' ? 'dark' : 'light';   // light unless they picked dark
     Object.keys(o.items).forEach(k => { const v = o.items[k]; if (!ITEMS[k] || !v || typeof v !== 'object' || !(+v.n > 0)) delete o.items[k]; else v.n = Math.min(ITEMS[k].max, Math.floor(+v.n)); });
     return o;
   }
@@ -388,22 +389,39 @@
   }
 
   const roleOf = () => profile.prefs.role || '';
-  const showsTab = k => { const r = ROLES[roleOf()]; return r ? r.tabs.includes(k) : !ROLE_ONLY_TABS[k]; };
+  const showsTab = () => true;   // the dock shows everything to everyone now (Me and Make keep it short)
 
-  /* ---------- UI chrome: floating top bar + dock (kubii theme) ---------- */
+  /* ---------- UI chrome: floating top bar + dock ----------
+     The dock has four tabs: Home, Games, and two groups that open a small tray of pages:
+       Me   → Avatar, Shop, Profile
+       Make → Link page (creators), Rewards card (shop owners), 3D models (Model Kit + the asset library)
+     Everyone sees every tab (the role picked in Settings only changes what the home page shows first). */
   const NAV = [
-    ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['rewards', 'Rewards', 'gift', 'rewards/'], ['links', 'Links', 'share-network', 'links/'], ['create', 'Create', 'cube', 'create/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'],
-    ['shop', 'Shop', 'storefront', 'shop/'], ['profile', 'Profile', 'user', 'profile/']
+    ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'], ['shop', 'Shop', 'storefront', 'shop/'], ['profile', 'Profile', 'user', 'profile/'],
+    ['links', 'Link page', 'share-network', 'links/'], ['rewards', 'Rewards card', 'gift', 'rewards/'], ['create', '3D models', 'cube', 'create/'],
+    ['me', 'Me', 'user', 'me/'], ['make', 'Make', 'magic-wand', 'make/']   // the groups' own pages: a simple list of where to go
   ];
-  // dock icons: full-colour pictures from the icon pack (assets/icons/dock-*.webp)
+  // what's in the dock, left to right; a group opens its tray of pages
+  const DOCK_GROUPS = [
+    { id: 'home' }, { id: 'games' },
+    { id: 'me', label: 'Me', items: ['avatar', 'shop', 'profile'] },
+    { id: 'make', label: 'Make', items: ['links', 'rewards', 'create'] }
+  ];
+  // the dock's stops, left to right: what a swipe (or Q / E, LB / RB) steps through
+  const STOPS = ['home', 'games', 'me', 'make'];
+  const SUB_TEXT = { avatar: 'Dress up your 3D avatar', shop: 'Clothes and how to earn them', profile: 'Stats, inventory and settings',
+    links: 'A link page or 3D world for your socials', rewards: 'A free stamp card for your shop', create: 'Model Kit and free 3D presets' };
+  const groupOf = k => DOCK_GROUPS.find(g => g.id === k || (g.items && g.items.includes(k))) || DOCK_GROUPS[0];
   // dock icons: colourful pictures, or the simple set in one colour per tab
   // one colour per section, the same accents theme.js gives each section (Model Kit style)
-  const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], rewards: ['gift', '#FF9F5A'], links: ['share-network', '#5AB0FF'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'] };
-  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', rewards: '#E0782F', links: '#2F86D6', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E' };
-  const dockIcon = k => colorful() ? '<img class="k-ic" src="' + iconSrc('dock-' + k) + '" alt="" aria-hidden="true" draggable="false">'
+  const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], rewards: ['gift', '#FF9F5A'], links: ['share-network', '#5AB0FF'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'],
+    me: ['person', '#FF8FC2'], make: ['magic-wand', '#4FD8C4'] };
+  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', rewards: '#E0782F', links: '#2F86D6', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E', me: '#E0669E', make: '#25A893' };
+  const DOCK_PIC = { me: 'profile', make: 'create' };   // the colourful pictures the groups borrow
+  const dockIcon = k => colorful() ? '<img class="k-ic" src="' + iconSrc('dock-' + (DOCK_PIC[k] || k)) + '" alt="" aria-hidden="true" draggable="false">'
     : '<svg class="k-ic k-ic-s" viewBox="0 0 16 16" fill="currentColor" style="color:' + DOCK_SIMPLE[k][1] + '" aria-hidden="true" focusable="false">' + (SIMPLE['dock-' + DOCK_SIMPLE[k][0]] || SIMPLE[DOCK_SIMPLE[k][0]] || '') + '</svg>';
   const DOCK = {};
-  ['home', 'games', 'rewards', 'links', 'create', 'avatar', 'shop', 'profile'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
+  ['home', 'games', 'rewards', 'links', 'create', 'avatar', 'shop', 'profile', 'me', 'make'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
   const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
   /* ---------- Pearls (the site-wide currency, sold on pearls.html; wallet in 'grug.pearls.v1') ---------- */
   const PEARL_KEY = 'grug.pearls.v1';
@@ -417,19 +435,56 @@
     const titleBit = (document.title.split(' · ').find(x => x && x !== 'Grug') || navLabel);
     const pageTitle = opts.title || (/^games made/i.test(titleBit) ? 'Home' : titleBit);
     const top = document.createElement('header'); top.className = 'g-top';
-    top.innerHTML = '<a class="g-logo k-glass" href="' + url('') + '" aria-label="Grug home">' + LOGO + '<span>Grug</span></a>' +
-      '<div class="g-title k-glass" aria-hidden="true"><small>' + esc(pageTitle === navLabel ? 'Grug' : navLabel) + '</small><b>' + esc(pageTitle) + '</b></div>' +
+    const brand = root.GrugTheme && root.GrugTheme.brand();
+    top.innerHTML = (brand ? '<a class="g-logo k-glass is-brand" href="' + url('') + '" aria-label="' + esc(brand.n) + ' home"><span class="g-brand-mark" aria-hidden="true">' + esc(brand.i) + '</span><span class="g-brand-name">' + esc(brand.n) + '</span></a>'
+        : '<a class="g-logo k-glass" href="' + url('') + '" aria-label="Grug home">' + LOGO + '<span>Grug</span></a>') +
+      '<div class="g-title k-glass" aria-hidden="true"><small>' + esc(((DOCK_GROUPS.find(g => g.id === (opts.dockAs || groupOf(active).id)) || {}).label) || (pageTitle === navLabel ? (brand ? brand.n : 'Grug') : navLabel)) + '</small><b>' + esc(pageTitle) + '</b></div>' +
       '<div class="g-status k-glass"><a class="g-pts" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('pearl') + '<span class="num">' + fmt(pearlBalance()) + '</span><span class="g-plus" aria-hidden="true">+</span></a><span class="g-sep"></span>' +
+      '<button type="button" class="g-gear g-modebtn" aria-label="Switch light or dark mode" title="Light or dark">' + icon(isLight() ? 'moon' : 'sun') + '</button>' +
       '<button type="button" class="g-gear" aria-label="Settings" title="Settings">' + icon('gear-six') + '</button></div>' +
       '<button type="button" class="g-me" aria-label="Your account menu" aria-haspopup="menu" aria-expanded="false"><span class="g-me-name">' + esc(profile.name) + '</span>' + faceImg + '</button>';
     const tabs = document.createElement('nav'); tabs.className = 'g-tabs k-glass'; tabs.setAttribute('aria-label', 'Sections');
-    const navNow = () => NAV.filter(n => showsTab(n[0]) || n[0] === active);
+    const navNow = () => NAV;
+    const navOf = k => NAV.find(n => n[0] === k);
+    const here = opts.dockAs || groupOf(active).id;   // a page can light up another tab (the guest's stamp card sits under Me, or Home in shop mode)
+    // a tab's colours: the open section's own accent when it's the current tab
+    const tabStyle = (k, on) => { const c = on || brand ? (root.GrugTheme && root.GrugTheme.accent ? root.GrugTheme.accent() : null) : null;
+      return 'style="--tab:' + (c ? c.a : DOCK_SIMPLE[k][1]) + ';--tab-lo:' + (c ? c.lo : DOCK_LO[k]) + '"'; };
     const paintTabs = () => { tabs.innerHTML = '<span class="k-sb l" aria-hidden="true">LB</span><span class="k-sb r" aria-hidden="true">RB</span>' +
-      navNow().map(n => '<a href="' + url(n[3]) + '" style="--tab:' + DOCK_SIMPLE[n[0]][1] + ';--tab-lo:' + DOCK_LO[n[0]] + '"' + (n[0] === active ? ' aria-current="page"' : '') + '>' + DOCK[n[0]] + '<span>' + n[1] + '</span></a>').join(''); };
+      DOCK_GROUPS.map(g => { const on = g.id === here;
+        if (!g.items) { const n = navOf(g.id); return '<a href="' + url(n[3]) + '" ' + tabStyle(g.id, on) + (on ? ' aria-current="page"' : '') + '>' + DOCK[g.id] + '<span>' + n[1] + '</span></a>'; }
+        const cur = on ? navOf(active) : null;
+        return '<button type="button" class="g-grp" data-grp="' + g.id + '" aria-haspopup="menu" aria-expanded="false" ' + tabStyle(g.id, on) + (on ? ' aria-current="page"' : '') + '>' + DOCK[on ? active : g.id] +
+          '<span>' + esc(g.label) + (cur ? '<i> · ' + esc(cur[1]) + '</i>' : '') + '</span><svg class="g-grp-up" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 5l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'; }).join(''); };
     paintTabs(); chromeTabs = paintTabs;
+    // the tray a group opens: its pages, big enough to tap, each in its own colour
+    const tray = document.createElement('div'); tray.className = 'g-tray k-glass'; tray.setAttribute('role', 'menu'); tray.hidden = true;
+    let trayFor = null;
+    const closeTray = () => { if (tray.hidden) return; tray.hidden = true; trayFor = null; $$('.g-grp', tabs).forEach(b => b.setAttribute('aria-expanded', 'false')); };
+    const openTray = (btn, byKey) => {
+      const g = DOCK_GROUPS.find(x => x.id === btn.dataset.grp); if (!g) return;
+      if (trayFor === g.id) { closeTray(); return; }
+      trayFor = g.id;
+      tray.innerHTML = '<b class="g-tray-h">' + esc(g.label) + '</b>' + g.items.map(k => { const n = navOf(k);
+        return '<a role="menuitem" href="' + url(n[3]) + '" style="--tab:' + (brand ? brand.color : DOCK_SIMPLE[k][1]) + ';--tab-lo:' + DOCK_LO[k] + '"' + (k === active ? ' aria-current="page"' : '') + '>' +
+          '<span class="g-tray-ic">' + DOCK[k] + '</span><span class="g-tray-tx"><b>' + esc(n[1]) + '</b><small>' + esc(SUB_TEXT[k] || '') + '</small></span>' + icon('caret-right') + '</a>'; }).join('');
+      tray.hidden = false; $$('.g-grp', tabs).forEach(b => b.setAttribute('aria-expanded', String(b === btn)));
+      // sit just above the dock, over the group's tab (beside the rail in landscape)
+      const r = btn.getBoundingClientRect(), d = tabs.getBoundingClientRect(), tw = tray.offsetWidth, th = tray.offsetHeight;
+      if (d.height > d.width) { tray.style.left = (d.right + 10) + 'px'; tray.style.top = Math.max(10, Math.min(innerHeight - th - 10, r.top + r.height / 2 - th / 2)) + 'px'; tray.style.bottom = 'auto'; }
+      else { tray.style.left = Math.max(10, Math.min(innerWidth - tw - 10, r.left + r.width / 2 - tw / 2)) + 'px'; tray.style.top = 'auto'; tray.style.bottom = (innerHeight - d.top + 10) + 'px'; }
+      if (byKey) { const f = $('a[role=menuitem]', tray); if (f) f.focus({ preventScroll: true }); }   // keyboard users land in the tray
+      buzz();
+    };
+    tabs.addEventListener('click', e => { const b = e.target.closest('.g-grp'); if (b) { e.stopPropagation(); openTray(b, e.detail === 0); } });
+    document.addEventListener('click', e => { if (!tray.hidden && !tray.contains(e.target)) closeTray(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !tray.hidden) { const g = trayFor; closeTray(); const b = $('.g-grp[data-grp="' + g + '"]', tabs); if (b) b.focus(); } });
+    root.addEventListener('resize', closeTray); root.addEventListener('scroll', closeTray, { passive: true });
+    document.body.appendChild(tray);
     document.body.prepend(top); document.body.appendChild(tabs);
     document.body.classList.add('g-chrome');
-    $('.g-gear', top).addEventListener('click', () => settings());
+    $('.g-gear:not(.g-modebtn)', top).addEventListener('click', () => settings());
+    $('.g-modebtn', top).addEventListener('click', () => { setMode(isLight() ? 'dark' : 'light'); buzz(); });
     // the account menu under the avatar
     const menu = document.createElement('div'); menu.className = 'g-menu'; menu.setAttribute('role', 'menu'); menu.hidden = true;
     const paintMenu = () => { const f = snaps();
@@ -456,26 +511,65 @@
       paintPearls();
     });
     // LB / RB: Q and E (or a controller's shoulder buttons) step through the dock
-    const go = d => { const nav = navNow(), idx = Math.max(0, nav.findIndex(n => n[0] === active)); location.href = url(nav[(idx + d + nav.length) % nav.length][3]); };
+    // step to the next or previous dock tab (Me and Make open their list pages); wrap = Q / E and the shoulder buttons go round
+    const go = (d, wrap) => { let i = STOPS.indexOf(here) + d; if (wrap) i = (i + STOPS.length) % STOPS.length; if (i < 0 || i >= STOPS.length) return false;
+      try { sessionStorage.setItem('grug.swipe', d > 0 ? 'next' : 'prev'); } catch (e) {}
+      closeTray(); location.href = url(navOf(STOPS[i])[3]); return true; };
+    // swipe sideways anywhere on the page to change tabs (not on sliders, 3D views, maps or rows that scroll sideways)
+    let sw = null;
+    const scrollsX = el => { for (; el && el !== document.body; el = el.parentElement) { if (el.scrollWidth > el.clientWidth + 2) { const o = getComputedStyle(el).overflowX; if (o === 'auto' || o === 'scroll') return true; } } return false; };
+    document.addEventListener('touchstart', e => {
+      sw = null; if (e.touches.length !== 1 || document.querySelector('dialog[open]') || document.documentElement.classList.contains('f32-lock')) return;
+      const t = e.target; if (t.closest && t.closest('input,textarea,select,canvas,video,iframe,[data-noswipe],.g-tray,.g-menu,.g-tabs')) return;
+      if (scrollsX(t)) return;
+      const p = e.touches[0]; sw = { x: p.clientX, y: p.clientY, t: performance.now() };
+    }, { passive: true });
+    document.addEventListener('touchmove', e => { if (!sw) return; const p = e.touches[0]; if (Math.abs(p.clientY - sw.y) > 40 && Math.abs(p.clientY - sw.y) > Math.abs(p.clientX - sw.x)) sw = null; }, { passive: true });
+    document.addEventListener('touchend', e => {
+      if (!sw) return; const p = e.changedTouches[0], dx = p.clientX - sw.x, dy = p.clientY - sw.y, dt = performance.now() - sw.t; sw = null;
+      if (Math.abs(dx) < Math.max(64, innerWidth * .18) || Math.abs(dx) < Math.abs(dy) * 1.8 || dt > 700) return;
+      if (go(dx < 0 ? 1 : -1)) buzz(6);
+    }, { passive: true });
     document.addEventListener('keydown', e => {
       if (e.ctrlKey || e.metaKey || e.altKey || e.repeat || document.querySelector('dialog[open]')) return;
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
-      const k = e.key.toLowerCase(); if (k === 'q') go(-1); else if (k === 'e') go(1);
+      const k = e.key.toLowerCase(); if (k === 'q') go(-1, true); else if (k === 'e') go(1, true);
     });
     root.addEventListener('gamepadconnected', () => {
       let prev = {};
       (function poll() {
         const p = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).find(Boolean);
-        if (p) { [[4, -1], [5, 1]].forEach(([i, d]) => { const on = !!(p.buttons[i] && p.buttons[i].pressed); if (on && !prev[i]) go(d); prev[i] = on; }); }
+        if (p) { [[4, -1], [5, 1]].forEach(([i, d]) => { const on = !!(p.buttons[i] && p.buttons[i].pressed); if (on && !prev[i]) go(d, true); prev[i] = on; }); }
         requestAnimationFrame(poll);
       })();
     }, { once: true });
     speed(); freeBar();
     // first visit: who are you? (not on pages a guest reaches from a shop's QR, which pass noRole)
-    if (!roleOf() && !opts.noRole && storageWorks()) setTimeout(() => { if (!roleOf() && !document.querySelector('dialog[open]')) askRole(); }, 700);
+    if (!roleOf() && !opts.noRole && !(root.GrugTheme && root.GrugTheme.brand()) && storageWorks()) setTimeout(() => { if (!roleOf() && !document.querySelector('dialog[open]')) askRole(); }, 700);
     root.addEventListener('grug:change', e => { if (e.detail && e.detail.what === 'boost') freeBar(); });
     return top;
   }
+
+  /* ---------- the Me and Make pages: a plain list of where to go, like a link page. The picked row fills with its colour
+     and slides on, then the page opens. ---------- */
+  function hub(id, host) {
+    const g = DOCK_GROUPS.find(x => x.id === id); if (!g || !host) return;
+    const brand = root.GrugTheme && root.GrugTheme.brand();
+    const face = snaps();
+    const head = id === 'me'
+      ? '<div class="g-hub-h"><img class="g-hub-face" alt="" src="' + face.bust + '"><h1>' + esc(profile.name) + '</h1><p>Your look, your closet and your settings.</p></div>'
+      : '<div class="g-hub-h"><span class="g-hub-ic">' + DOCK.make + '</span><h1>Make</h1><p>Free tools for creators, shops and game makers.</p></div>';
+    host.innerHTML = head + '<nav class="g-hub-list" aria-label="' + esc(g.label) + '">' + g.items.map(k => { const n = navOf(k);
+      return '<a href="' + url(n[3]) + '" style="--tab:' + (brand ? brand.color : DOCK_SIMPLE[k][1]) + ';--tab-lo:' + (brand ? brand.color : DOCK_LO[k]) + '"><span class="g-hub-ico">' + DOCK[k] + '</span><span class="g-hub-tx"><b>' + esc(n[1]) + '</b><small>' + esc(SUB_TEXT[k] || '') + '</small></span>' + icon('caret-right') + '</a>'; }).join('') + '</nav>';
+    host.addEventListener('click', e => {
+      const a = e.target.closest('.g-hub-list a'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+      e.preventDefault(); e.stopPropagation(); buzz();
+      host.classList.add('going'); a.classList.add('go');
+      try { sessionStorage.setItem('grug.swipe', 'next'); } catch (x) {}
+      setTimeout(() => { location.href = a.href; }, document.documentElement.classList.contains('calm') ? 0 : 260);
+    }, true);
+  }
+  const navOf = k => NAV.find(n => n[0] === k);
 
   /* ---------- fast pages: the next page starts loading as soon as a finger or mouse heads for its link ---------- */
   let sped = false;
@@ -514,6 +608,28 @@
       const l = document.createElement('link'); l.rel = 'prefetch'; l.href = a.href; document.head.appendChild(l); };
     document.addEventListener('pointerover', pre, { passive: true }); document.addEventListener('touchstart', pre, { passive: true });
   }
+
+  /* ---------- light or dark (prefs.mode; theme.js applies it, the Games section stays dark either way) ---------- */
+  const isLight = () => profile.prefs.mode !== 'dark';
+  function setMode(m) {
+    profile.prefs.mode = m === 'light' ? 'light' : 'dark'; save('prefs');
+    if (root.GrugTheme) root.GrugTheme.apply();
+    $$('.g-modebtn').forEach(b => { b.innerHTML = icon(isLight() ? 'moon' : 'sun'); });
+    $$('[data-mode-set]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.modeSet === profile.prefs.mode)));
+  }
+  function modeHtml() {
+    const cur = isLight() ? 'light' : 'dark';
+    return '<div class="g-pref g-pref-col"><span><b>Light or dark</b><small>How the site looks. Games keep their own look</small></span><div class="g-seg" role="radiogroup" aria-label="Light or dark">' +
+      [['light', 'Light', 'sun'], ['dark', 'Dark', 'moon']].map(([k, l, ic]) => '<button type="button" role="radio" data-mode-set="' + k + '" aria-checked="' + (cur === k) + '">' + icon(ic) + ' ' + l + '</button>').join('') + '</div></div>';
+  }
+  function wireMode(box) { $$('[data-mode-set]', box).forEach(b => b.addEventListener('click', () => { setMode(b.dataset.modeSet); buzz(); })); }
+  /* shop mode (theme.js): the row in Settings that says whose site this looks like, and a way out */
+  function brandHtml() {
+    const b = root.GrugTheme && root.GrugTheme.brand(); if (!b) return '';
+    return '<div class="g-pref g-brand-pref"><span class="g-brand-ic" aria-hidden="true">' + esc(b.i) + '</span><span><b>Visiting ' + esc(b.n) + '</b><small>The site wears their colours while you browse. Refreshing the page also ends it</small></span>' +
+      '<button type="button" class="g-btn sm" data-brand-leave>Leave</button></div>';
+  }
+  function wireBrand(box) { const b = $('[data-brand-leave]', box); if (b) b.addEventListener('click', () => { root.GrugTheme.leaveBrand(); location.reload(); }); }
 
   /* ---------- appearance: nothing to pick any more. Each section has its own accent (theme.js), like Model Kit's modes.
      Kept so older pages that call it still work. ---------- */
@@ -555,7 +671,7 @@
   }
   function settings() {
     return dialog({
-      title: 'Settings', html: roleHtml() + uiSizeHtml() +
+      title: 'Settings', html: brandHtml() + modeHtml() + (root.GrugTheme && root.GrugTheme.brand() ? '' : roleHtml()) + uiSizeHtml() +
         '<div class="g-pref"><span><b>Animations</b><small>Celebrations and poses</small></span><button type="button" class="g-switch" role="switch" data-pref="motion" aria-checked="' + !!profile.prefs.motion + '" aria-label="Animations"></button></div>' +
         '<div class="g-pref"><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button type="button" class="g-switch" role="switch" data-pref="haptics" aria-checked="' + !!profile.prefs.haptics + '" aria-label="Vibrate on tap"></button></div>' +
         '<div class="g-pref"><span><b>Colorful icons</b><small>Full-colour pictures instead of simple one-colour icons</small></span><button type="button" class="g-switch" role="switch" data-pref="colorIcons" aria-checked="' + !!profile.prefs.colorIcons + '" aria-label="Colorful icons"></button></div>' +
@@ -563,7 +679,7 @@
         '<p class="g-fine" style="margin-top:6px">Saved in your profile, so it comes along when you export it. Emotes are picked in the <a href="' + url('avatar/#emotes') + '" style="color:var(--ember);font-weight:800">avatar editor</a>. More in <a href="' + url('profile/') + '" style="color:var(--ember);font-weight:800">Profile</a>.</p>',
       actions: [{ label: 'Done', kind: 'primary', value: true }],
       onOpen: d => {
-        d.classList.add('wide'); wireUiSize(d);
+        d.classList.add('wide'); wireUiSize(d); wireMode(d); wireBrand(d);
         $$('[data-role-set]', d).forEach(b => b.addEventListener('click', () => { setRole(b.dataset.roleSet); $$('[data-role-set]', d).forEach(x => x.setAttribute('aria-checked', String(x === b))); buzz(); }));
         const inv = $('#kInv', d), paintInv = () => { inv.innerHTML = inventoryHtml(); }; paintInv(); wireInventory(inv, paintInv);
         $$('[data-pref]', d).forEach(b => b.addEventListener('click', () => {
@@ -598,7 +714,7 @@
   }
   function roleHtml() {
     const cur = roleOf() || 'all';
-    return '<div class="g-pref g-pref-col"><span><b>I\u2019m a\u2026</b><small>Shows the tabs made for you</small></span><div class="g-seg" role="radiogroup" aria-label="I am a">' +
+    return '<div class="g-pref g-pref-col"><span><b>I\u2019m a\u2026</b><small>Puts what\u2019s made for you first on the home page</small></span><div class="g-seg" role="radiogroup" aria-label="I am a">' +
       Object.keys(ROLES).map(k => '<button type="button" role="radio" data-role-set="' + k + '" aria-checked="' + (cur === k) + '">' + esc(ROLES[k].label) + '</button>').join('') +
       '<button type="button" role="radio" data-role-set="all" aria-checked="' + (cur === 'all') + '">Everything</button></div></div>';
   }
@@ -732,6 +848,6 @@
     setEmotes(ids) { ids = Array.isArray(ids) ? Array.from(new Set(ids.filter(id => emoteOf(id)))).slice(0, EMOTE_MAX) : []; if (!ids.length) return false; profile.emotes = ids; save('emotes'); return true; },
     UI_SCALES, applyUiScale,
     ROLES, get role() { return roleOf(); }, setRole, showsTab,
-    ui: { chrome, askRole, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile, uiSizeHtml, wireUiSize, inventoryHtml, wireInventory, freeBar }
+    ui: { chrome, hub, askRole, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile, uiSizeHtml, wireUiSize, modeHtml, wireMode, setMode, brandHtml, wireBrand, inventoryHtml, wireInventory, freeBar }
   };
 })(window);

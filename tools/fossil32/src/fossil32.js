@@ -312,6 +312,9 @@ function faceSet(scale, withLabel, labelScale){
 }
 
 /* ═════════════════ RENDERER ═════════════════ */
+// every 3D view here (tiles, the Games rack, the unbox stage) renders at half the screen's resolution so phones stay smooth
+const RES = 0.5;
+const DPR = () => Math.min(devicePixelRatio || 1, 2) * RES;
 let renderer = null, ANISO = 1;
 try {
   const cv = document.createElement("canvas");
@@ -413,7 +416,7 @@ function poseShelf(it, t, dt){
   it.stage.style.setProperty("--f32-bob", (Math.sin(t * 1.1 + it.phase) * 0.5 + 0.5 + it.lift).toFixed(3));
 }
 function renderShelf(t, dt){
-  const dpr = Math.min(devicePixelRatio || 1, 2);
+  const dpr = DPR();
   let needW = 0, needH = 0; const list = [];
   for (const it of shelf.items){
     if (!it.el.isConnected){ unmount(it); continue; }
@@ -530,7 +533,7 @@ function poseRack(t, dt){
 }
 function renderRack(t, dt){
   if (!rack.el || !rack.ready || !rack.el.isConnected || rack.w < 4 || rack.h < 4) return false;
-  const dpr = Math.min(devicePixelRatio || 1, 2), pw = Math.round(rack.w * dpr), ph = Math.round(rack.h * dpr);
+  const dpr = DPR(), pw = Math.round(rack.w * dpr), ph = Math.round(rack.h * dpr);
   if (pw > shelf.bufW || ph > shelf.bufH){ shelf.bufW = Math.max(pw, shelf.bufW); shelf.bufH = Math.max(ph, shelf.bufH); renderer.setSize(shelf.bufW, shelf.bufH, false); }
   poseRack(t, dt); rackCam();
   renderer.shadowMap.enabled = false; renderer.setScissorTest(true);
@@ -870,12 +873,12 @@ function go(c){
 }
 
 function sizeOverlay(){
-  const dpr = Math.min(devicePixelRatio || 1, 2), w = innerWidth, h = innerHeight;
+  const dpr = DPR(), w = innerWidth, h = innerHeight;
   renderer.setSize(Math.round(w * dpr), Math.round(h * dpr), false);
   ov.cam.aspect = w / h; ov.cam.fov = w / h < 1 ? 46 : 30; ov.cam.updateProjectionMatrix();
 }
 function renderOverlay(now){
-  const t = (now - ov.tStart) / 1000, dpr = Math.min(devicePixelRatio || 1, 2), W = innerWidth, H = innerHeight;
+  const t = (now - ov.tStart) / 1000, dpr = DPR(), W = innerWidth, H = innerHeight;
   const full = { x: 0, y: 0, w: W, h: H };
   let rect = full;
   if (ov.phase === "fly" && ov.cartFly){

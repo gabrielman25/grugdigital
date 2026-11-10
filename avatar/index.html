@@ -510,7 +510,7 @@ const $=id=>document.getElementById(id),Q=new URLSearchParams(location.search),K
 if(Q.get('mode')==='viewer')document.body.classList.add('viewer');if(Q.get('bg')==='transparent')document.body.classList.add('clear');
 // ---------- the stage ----------
 const stage=$('stage'),renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});renderer.outputEncoding=THREE.sRGBEncoding;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.setPixelRatio(Math.min(2,devicePixelRatio||1));stage.prepend(renderer.domElement);
+renderer.setPixelRatio(Math.min(2,devicePixelRatio||1)*0.5)/* 3D at half resolution */;stage.prepend(renderer.domElement);
 const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(30,1,5,5000);
 scene.add(new THREE.HemisphereLight(0xfff4e0,0x3a3456,0.75));
 const key=new THREE.DirectionalLight(0xfff0dc,1.1);key.position.set(160,320,240);key.castShadow=true;key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-120,right:120,top:220,bottom:-20,near:50,far:900});key.shadow.bias=-0.0004;scene.add(key);

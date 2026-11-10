@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Make · Grug</title>
+<meta name="description" content="Free tools on Grug: a link page for creators, a rewards card for shops, and 3D models for game makers.">
+<meta name="theme-color" content="#F3F3F5">
+<link rel="icon" href="../favicon.png">
+<link rel="stylesheet" href="../assets/grug.css">
+<script src="../assets/theme.js"></script>
+</head>
+<body>
+<!-- the dock's Make tab: a plain list of its pages (Grug.ui.hub in assets/grug.js) -->
+<main class="wrap"><div class="g-hub" id="hub"></div></main>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="../assets/games.js"></script>
+<script src="../assets/grug.js"></script>
+<script>Grug.ui.chrome('make'); Grug.ui.hub('make', document.getElementById('hub'));</script>
+</body>
+</html>

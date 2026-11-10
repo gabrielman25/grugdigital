@@ -4,9 +4,12 @@ The Grug game site (static HTML, Cloudflare Pages, deploys on push to `main`). S
 
 ## The look: Model Kit's theme, one accent per section
 
-The site uses the same look as **Model Kit** (Grug Digital's editor, `create/modelkit/`): dark neutral greys (`#17171A`
-page, `#232327`/`#26262B` cards), **Fredoka** for all text, flat solid accents with a darker "lip" shadow (no gradients),
-and `#1E1B16` text on anything filled with an accent. There is no light mode and no theme picker.
+The site uses the same look as **Model Kit** (Grug Digital's editor, `create/modelkit/`): flat neutral greys, **Fredoka**
+for all text, flat solid accents with a darker "lip" shadow (no gradients), and `#1E1B16` text on anything filled with an
+accent. **Light mode is the default** (`#F3F3F5` page, white cards); dark (`#17171A` page, `#232327`/`#26262B` cards) is
+picked with the sun/moon button in the top bar, Settings or Profile (`profile.prefs.mode`). Colours come from variables
+in `grug.css` (`--page`, `--card-solid`, `--card`, `--ink`, `--line` …): never hard-code a dark or light surface.
+`--mode-text` is the accent nudged to read on the current background (theme.js), for accent text and focus rings.
 
 - **Each section owns one accent** (`SECTIONS` in `assets/theme.js`, picked from the URL): Home `#9BE338`, Games
   `#7EE081`, Rewards `#FF9F5A`, Links `#5AB0FF`, Create `#4FD8C4`, Avatar `#C59BFF`, Shop `#FFBE1A`, Profile `#FF8FC2` (Pearls uses purple). theme.js sets
@@ -17,7 +20,29 @@ and `#1E1B16` text on anything filled with an accent. There is no light mode and
   The **Rewards** and **Links** sections are the exception: solid `#17171A`, no pattern (`solid: true` in `SECTIONS`), and its pages use
   solid colours only (no gradients, blur or decoration).
 - **The blue smoky fog (`assets/fogbg.js`) is only for the Games section** (`games/` and `games/<id>/`), where the
-  FOSSIL32 boxes float in it. Don't bring it back to other pages, and don't add white page backgrounds.
+  FOSSIL32 boxes float in it, with small solid 3D cubes in Grug colours tumbling through it (no glowing orbs). It stays a
+  dark stage in light mode, but the top bar, dock and menus stay white there (`html.g-chrome-light`).
+- **All 3D renders at half resolution** (device pixel ratio × 0.5, capped at 2): FOSSIL32 (`RES` in its source), the
+  avatar editor, the asset library previews, Model Kit's 3D views, the rewards/links builders and the fog cubes.
+  Keep it that way for anything new.
+
+## The dock: Home, Games, Me, Make
+
+Four tabs for everyone (the role in Settings → I'm a… only changes what the home page shows first). **Me** and **Make**
+are groups: tapping one opens a tray of its pages, and each has its own page (`me/`, `make/`), a plain Linktree-style
+list (`Grug.ui.hub`) whose picked row fills with its colour and slides on. Me = Avatar, Shop, Profile. Make = Link page
+(`links/`), Rewards card (`rewards/`), 3D models (`create/`). `DOCK_GROUPS` / `NAV` in `assets/grug.js`.
+Swiping sideways anywhere (not on sliders, canvases or sideways-scrolling rows; mark others `data-noswipe`) or Q / E /
+LB / RB steps Home ↔ Games ↔ Me ↔ Make, and the next page slides in from that side (`grug.swipe` → `html.g-swipe-*`).
+
+## Shop mode (Ziosk-style)
+
+A guest who arrives from a shop's rewards card link (`rewards/card/#c=…`, its QR or NFC sticker) sees the whole site in
+that shop's name, emoji, colour and font while they browse and play (`theme.js`, sessionStorage `grug.brand.v1`,
+`html[data-brand]`). A refresh, opening the site normally, or Settings → Leave ends it. Hide pitch-to-restaurants bits in
+shop mode with `data-hide-brand`; `data-only-brand` shows something only then. The shop's font is picked in the card
+builder (`FONTS` in `assets/rewards.js`, files in `assets/fonts/shop/`, `assets/shop-fonts.css`) and rides in the link as
+an optional 9th field; in shop mode it sets `--display` (headings). Keep any new font easy to read on a phone.
 
 ## Games are FOSSIL32 cartridges
 
@@ -31,9 +56,9 @@ The **Games page** is a looping vertical carousel of boxes on the left half (`Fo
 controller browse; Play / Enter / tapping the front box calls `Fossil32.launch(id)` (box opens → cartridge → console → game).
 The panel shows each game's short `blurb` (the full `long` write-up is on its game page); keep blurbs to a sentence or two.
 
-The **home page** is the one place games show as bare cartridges (no box, no card behind them), in one horizontal
-carousel right under the welcome message: `boxTile(g, { kind: 'cart', ribbon })` (`data-f32-kind="cart"`). The
-last-played game comes first, centred, glowing in its cartridge colour with a "Last played" ribbon; the rest follow.
+The **home page** is the one place games show as bare cartridges (no box, no card and no glow behind them), in one
+horizontal carousel right under the welcome message: `boxTile(g, { kind: 'cart', ribbon })` (`data-f32-kind="cart"`). The
+last-played game comes first, centred, with a "Last played" ribbon; the rest follow.
 Tapping a cartridge glides it straight to the game panel.
 
 - Code: `tools/fossil32/src/fossil32.js` → bundled to `assets/fossil32/fossil32.js` (`cd tools/fossil32 && npm install && npm run build`).
@@ -66,7 +91,7 @@ When a new game is added to `assets/games.js` and listed, also make its box. Don
 
 ## Create tab and Model Kit
 
-The dock's **Create** tab (`create/`, cube icon) is a marketplace-style **asset library** (category list, search with
+**Make → 3D models** (`create/`, cube icon) is a marketplace-style **asset library** (category list, search with
 suggestions and `#tags`, genre / theme / type / triangle filters, sorting, favourites, item pages with Get, all kept in the URL;
 `create/market.js`) of free preset models and scenes, made with **Model Kit**
 (Grug Digital's pixel-to-3D editor, `create/modelkit/index.html`, a single prebuilt file). Previews and downloads are

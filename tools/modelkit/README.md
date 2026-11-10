@@ -4,7 +4,8 @@ The **Create** tab (`create/`) shows free preset models and scenes, and opens **
 pixel-to-3D model editor, at `create/modelkit/`.
 
 - `create/modelkit/index.html`: the editor, one self-contained file. It's built outside this repo (from the
-  ShapeForge source folder) and dropped in as is. On the site its menu gets a "Back to Grug" item, and it opens a
+  ShapeForge source folder) and dropped in as is. One local change to keep when dropping in a new build: its 3D views render at half resolution
+  (`DPR() * 0.5` in the viewer's draw and the flip preview; search for "Grug: 3D at half resolution"). On the site its menu gets a "Back to Grug" item, and it opens a
   preset straight away from a link: `modelkit/#model=<id>` or `modelkit/#scene=<id>`.
 - `create/modelkit-core.js`: the editor's own core (shapes, mesher, exporters), copied from the same build. The
   Create page uses it, so previews and downloads are made exactly the way the editor makes them.

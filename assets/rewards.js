@@ -4,11 +4,12 @@
    THE LINK. Nothing is stored on a server: a shop's whole setup rides in its link, kept short on purpose.
      rewards/card/#c=<setup>&k=<check>      the printed QR / NFC sticker: adds a stamp (once a day) and 10 Pearls
      rewards/card/#c=<setup>                 share link: opens the card without a stamp
-     setup = base64url(UTF-8 of '2~<name>~<type>~<RRGGBB>~<icon>~<stamps>~<reward>~<welcome>')
+     setup = base64url(UTF-8 of '2~<name>~<type>~<RRGGBB>~<icon>~<stamps>~<reward>~<welcome>[~<font>]')
        type    c café · t boba & tea · b bar · f restaurant · k bakery · o other
        reward  n Pearls only (the default: 10 Pearls a visit, nothing at the counter) · d free drink · f free food item
                s free dessert · b buy one get one · p<N> N% off an item
        welcome 1 = new guests start with a free stamp
+       font    the card's lettering (FONTS below; left off for Fredoka, so older links still read the same)
      check = 6 characters from the same cyrb53 hash the partner apps use for their ?tap= links (on the setup text),
      so a hand-edited link won't stamp. It stops casual edits, not someone who reads this file.
 
@@ -26,13 +27,34 @@
   const RESET_HOUR = 4, TAP_PEARLS = 10, DAY_CAP = 30, VOUCHER_MIN = 10;
 
   const KINDS = {
-    c: { label: 'Café', i: '☕', s: 8, r: 'n', color: '#C8924F' },
-    t: { label: 'Boba & tea', i: '🧋', s: 8, r: 'n', color: '#2FAE5A' },
-    b: { label: 'Bar', i: '🍺', s: 6, r: 'n', color: '#F2B544', note: 'For bars: one stamp per visit, not per drink. Each guest in a group scans with their own phone.' },
-    f: { label: 'Restaurant', i: '🌮', s: 8, r: 'n', color: '#F26A1B' },
-    k: { label: 'Bakery', i: '🍩', s: 10, r: 'n', color: '#FF8FC2' },
-    o: { label: 'Other', i: '⭐', s: 8, r: 'n', color: '#4FD8C4' }
+    c: { label: 'Café', i: '☕', s: 8, r: 'n', color: '#C8924F', font: 'l' },
+    t: { label: 'Boba & tea', i: '🧋', s: 8, r: 'n', color: '#2FAE5A', font: 'b' },
+    b: { label: 'Bar', i: '🍺', s: 6, r: 'n', color: '#F2B544', font: 'o', note: 'For bars: one stamp per visit, not per drink. Each guest in a group scans with their own phone.' },
+    f: { label: 'Restaurant', i: '🌮', s: 8, r: 'n', color: '#F26A1B', font: 'b' },
+    k: { label: 'Bakery', i: '🍩', s: 10, r: 'n', color: '#FF8FC2', font: 'h' },
+    o: { label: 'Other', i: '⭐', s: 8, r: 'n', color: '#4FD8C4', font: 'f' }
   };
+  /* lettering a shop can pick for its card (and, in shop mode, the site's headings). Easy to read first, then a style each:
+     css = the family in assets/shop-fonts.css, w = its one weight, size = how big it sets next to Fredoka */
+  const FONTS = {
+    f: { label: 'Friendly', sub: 'Round and easygoing (our house font)', css: 'Fredoka', w: 600, size: 1 },
+    l: { label: 'Café', sub: 'A warm serif for coffee and brunch', css: 'Shop Lora', w: 600, size: .96 },
+    h: { label: 'Bakery', sub: 'Neat handwriting, like a chalkboard', css: 'Shop Patrick Hand', w: 400, size: 1.1 },
+    o: { label: 'Bar & pub', sub: 'Tall sign lettering', css: 'Shop Oswald', w: 600, size: 1 },
+    p: { label: 'Fine dining', sub: 'An elegant, classic serif', css: 'Shop Playfair', w: 700, size: .95 },
+    b: { label: 'Bold & fun', sub: 'Chunky and cheerful, for tacos and boba', css: 'Shop Lilita', w: 400, size: 1 },
+    r: { label: 'Retro diner', sub: 'A 50s neon-sign feel', css: 'Shop Righteous', w: 400, size: .94 },
+    m: { label: 'Modern', sub: 'Clean and geometric', css: 'Shop Outfit', w: 700, size: .96 }
+  };
+  const fontOf = cfg => FONTS[cfg && cfg.f] || FONTS.f;
+  const fontStack = cfg => { const F = fontOf(cfg); return '"' + F.css + '", Fredoka, system-ui, sans-serif'; };
+  // the stylesheet with the shop fonts, added to the page the first time a card needs it
+  function loadFonts() {
+    if (document.getElementById('g-shop-fonts')) return;
+    const me = Array.from(document.scripts).find(x => /rewards\.js(\?|$)/.test(x.src)); if (!me) return;
+    const l = document.createElement('link'); l.id = 'g-shop-fonts'; l.rel = 'stylesheet'; l.href = me.src.replace(/rewards\.js.*$/, 'shop-fonts.css'); document.head.appendChild(l);
+  }
+  async function fontReady(cfg) { loadFonts(); const F = fontOf(cfg); try { await document.fonts.load(F.w + ' 40px "' + F.css + '"', cfg.n || 'Aa'); } catch (e) {} }
   const ICONS = ['☕', '🧋', '🍵', '🍺', '🍷', '🍸', '🌮', '🍕', '🍔', '🍣', '🍜', '🥗', '🍩', '🥐', '🧁', '🍦'];
   const COLORS = ['#C8924F', '#2FAE5A', '#F2B544', '#F26A1B', '#E5484D', '#FF8FC2', '#C59BFF', '#4FD8C4', '#3B82F6', '#2B2B33'];
   const REWARDS = { d: 'A free drink', f: 'A free food item', s: 'A free dessert', b: 'Buy one, get one free' };
@@ -63,13 +85,13 @@
     else if (!REWARDS[r] && r !== 'n') r = d.r;
     const col = String(o.color || '').replace('#', '');
     return { n: clip(o.n, 28, 'Your shop'), t, color: /^[0-9a-f]{6}$/i.test(col) ? '#' + col.toUpperCase() : d.color,
-      i: clip(o.i, 8, d.i), s: Math.max(4, Math.min(12, parseInt(o.s, 10) || d.s)), r, j: o.j ? 1 : 0 };
+      i: clip(o.i, 8, d.i), s: Math.max(4, Math.min(12, parseInt(o.s, 10) || d.s)), r, j: o.j ? 1 : 0, f: FONTS[o.f] ? o.f : 'f' };
   }
-  function encode(cfg) { cfg = normalize(cfg); return b64e(['2', cfg.n, cfg.t, cfg.color.slice(1), cfg.i, cfg.s, cfg.r, cfg.j].join('~')); }
+  function encode(cfg) { cfg = normalize(cfg); return b64e(['2', cfg.n, cfg.t, cfg.color.slice(1), cfg.i, cfg.s, cfg.r, cfg.j].concat(cfg.f !== 'f' ? [cfg.f] : []).join('~')); }
   function decode(c) {
     try {
       const p = b64d(String(c || '')).split('~'); if (p[0] !== '2' || p.length < 8) return null;
-      return normalize({ n: p[1], t: p[2], color: p[3], i: p[4], s: p[5], r: p[6], j: p[7] === '1' });
+      return normalize({ n: p[1], t: p[2], color: p[3], i: p[4], s: p[5], r: p[6], j: p[7] === '1', f: p[8] });
     } catch (e) { return null; }
   }
   const check = c => code(String(c) + ':stamp', 6);
@@ -147,7 +169,7 @@
   /* ---------- a still picture of a card (the builder's preview, the Rewards tab's sample) ---------- */
   function passVars(c) { return '--a:' + c + ';--a-lo:' + lo(c) + ';--a-ink:' + inkOn(c) + ';--a-soft:' + mix(c, '#FFFFFF', .8) + ';--a-tint:' + mix(c, '#FFFFFF', .94); }
   function passHtml(cfg, have) {
-    cfg = normalize(cfg); const esc = Grug.esc, n = cfg.s; have = Math.max(0, Math.min(n, have || 0));
+    cfg = normalize(cfg); loadFonts(); const esc = Grug.esc, n = cfg.s; have = Math.max(0, Math.min(n, have || 0));
     let g = '';
     for (let i = 0; i < n; i++) { const on = i < have, last = i === n - 1; g += '<div class="rw-slot' + (on ? ' on' : '') + (last ? ' gift' : '') + '">' + (on ? esc(cfg.i) : last ? '🎁' : (i + 1)) + '</div>'; }
     return '<div class="rw-pass" style="' + passVars(cfg.color) + '"><div class="rw-band"><span class="rw-ic">' + esc(cfg.i) + '</span><div class="rw-who"><b>' + esc(cfg.n) + '</b><small>Rewards card</small></div><b class="rw-count">' + have + '/' + n + '</b></div>' +
@@ -161,6 +183,7 @@
   async function cardCanvas(cfg, link) {
     cfg = normalize(cfg);
     try { await Promise.all(['500 34px', '600 64px', '700 64px'].map(f => document.fonts.load(f + ' Fredoka'))); } catch (e) {}
+    await fontReady(cfg);
     const W = 1000, H = 1400, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     const x = cv.getContext('2d'), EMO = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji"';
     const font = (w, px) => w + ' ' + px + 'px Fredoka, ' + EMO + ', sans-serif';
@@ -172,7 +195,8 @@
     x.fillStyle = cfg.color; x.fillRect(0, 0, W, 250); x.fillStyle = dark; x.fillRect(0, 236, W, 14);
     rr(60, 52, 132, 132, 32); x.fillStyle = dark; x.fill();
     x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = '84px ' + EMO + ', sans-serif'; x.fillText(cfg.i, 126, 124);
-    x.textAlign = 'left'; x.fillStyle = ink; fit(cfg.n, '600', 66, 720); x.fillText(cfg.n, 224, 100);
+    const SF = fontOf(cfg), nameFit = (px) => { do { x.font = SF.w + ' ' + Math.round(px * SF.size) + 'px "' + SF.css + '", Fredoka, ' + EMO + ', sans-serif'; px -= 2; } while (x.measureText(cfg.n).width > 720 && px > 20); };
+    x.textAlign = 'left'; x.fillStyle = ink; nameFit(66); x.fillText(cfg.n, 224, 100);   // the shop's name in its own lettering
     x.globalAlpha = .85; x.font = font('600', 34); x.fillText('Rewards card', 224, 160); x.globalAlpha = 1;
     // heading + QR
     x.textAlign = 'center'; x.fillStyle = '#1E1B16'; fit('Scan for your stamp', '600', 66, 880); x.fillText('Scan for your stamp', W / 2, 335);
@@ -252,7 +276,8 @@
 
     function render(fresh) {
       themeVars(app, cfg.color);
-      R.icon.textContent = cfg.i; R.name.textContent = cfg.n;
+      R.icon.textContent = cfg.i; R.name.textContent = cfg.n; loadFonts();
+      R.name.style.fontFamily = fontStack(cfg); R.name.style.fontWeight = fontOf(cfg).w; R.name.style.fontSize = fontOf(cfg).size + 'em';
       const n = cfg.s, have = Math.min(st.stamps, n), full = have >= n;
       R.count.textContent = have + '/' + n;
       R.grid.style.gridTemplateColumns = 'repeat(' + ((n === 6 || n === 9) ? 3 : (n === 5 || n === 10) ? 5 : 4) + ',1fr)';
@@ -322,7 +347,7 @@
     };
   }
 
-  root.GrugRewards = {
+  root.GrugRewards = { FONTS, fontOf, fontStack, fontReady, loadFonts,
     KEY, TAP_PEARLS, DAY_CAP, RESET_HOUR, VOUCHER_MIN, KINDS, ICONS, COLORS, REWARDS, PCTS,
     rewardText, pearlsOnly, normalize, encode, decode, check, shopId, links, cardBase, code, b64e, b64d,
     load, cards, cardStore, removeCard, mine, saveMine, removeMine,

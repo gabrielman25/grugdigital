@@ -1,7 +1,8 @@
-/* Grug · fogbg.js — the site background: a blue smoky fog (think an old console's boot screen) with little balls of light
-   that wander around trailing comet tails, and a few dim boxes drifting in the haze.
+/* Grug · fogbg.js — the Games background: a blue smoky fog (think an old console's boot screen) with little solid 3D cubes
+   in Grug colours that tumble as they wander around, and a few dim boxes drifting in the haze. No glow, no tails.
+   Drawn at half resolution (3D is half-res everywhere on the site so phones stay smooth).
    theme.js loads this on every site page (not inside the games under play/ or work/).
-   The fog is always blue, with lights in Grug colours (ORBS in theme.js). It is only drawn in the Games section.
+   The fog is always blue, with cubes in Grug colours (ORBS in theme.js). It is only drawn in the Games section.
    Still frame when Animations are off or the system asks for reduced motion. Paused while the tab is hidden or a
    FOSSIL32 cartridge is open over the page (html.f32-lock).
 */
@@ -85,7 +86,8 @@
     for (let i = 0; i < n; i++) {
       const z = rnd(.6, 1), c = cols[i % cols.length];
       orbs.push({ x: rnd(.1, .9) * W, y: rnd(.12, .88) * H, z, a: rnd(0, Math.PI * 2), turn: 0, sp: rnd(38, 70) * z * (W < 700 ? .8 : 1),
-        col: c.slice(), to: c.slice(), trail: [], phase: rnd(0, 9) });
+        col: c.slice(), to: c.slice(), trail: [], phase: rnd(0, 9),
+        rx: rnd(0, 6), ry: rnd(0, 6), rz: rnd(0, 6), vx: rnd(.5, 1.2) * (Math.random() < .5 ? -1 : 1), vy: rnd(.6, 1.4) * (Math.random() < .5 ? -1 : 1), vz: rnd(-.4, .4) });
     }
   }
   function recolor() {
@@ -111,26 +113,32 @@
     const sp = o.sp * (1 + Math.sin(o.phase + performance.now() / 1700) * .25);
     o.x += Math.cos(o.a) * sp * dt; o.y += Math.sin(o.a) * sp * dt;
     for (let k = 0; k < 3; k++) o.col[k] += (o.to[k] - o.col[k]) * Math.min(1, dt * 3);
-    o.trail.unshift(o.x, o.y);
-    const max = Math.round(46 * (W < 700 ? .8 : 1)) * 2;
-    if (o.trail.length > max) o.trail.length = max;
   }
   const rgba = (c, a) => 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + a.toFixed(3) + ')';
-  function drawOrb(o) {
-    const r = 5.2 * o.z * (W < 700 ? .9 : 1), tr = o.trail, n = tr.length / 2;
-    fx.lineCap = 'round';
-    for (let i = 1; i < n; i++) {
-      const k = 1 - i / n;
-      fx.strokeStyle = rgba(o.col, .75 * k * k);
-      fx.lineWidth = Math.max(.6, r * 1.5 * k);
-      fx.beginPath(); fx.moveTo(tr[i * 2 - 2], tr[i * 2 - 1]); fx.lineTo(tr[i * 2], tr[i * 2 + 1]); fx.stroke();
-    }
-    const halo = fx.createRadialGradient(o.x, o.y, 0, o.x, o.y, r * 9);
-    halo.addColorStop(0, rgba(o.col, .32)); halo.addColorStop(1, rgba(o.col, 0));
-    fx.fillStyle = halo; fx.beginPath(); fx.arc(o.x, o.y, r * 9, 0, 7); fx.fill();
-    const g = fx.createRadialGradient(o.x, o.y, 0, o.x, o.y, r * 2.2);
-    g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.35, rgba(o.col, 1)); g.addColorStop(1, rgba(o.col, 0));
-    fx.fillStyle = g; fx.beginPath(); fx.arc(o.x, o.y, r * 2.2, 0, 7); fx.fill();
+  // each light is a small solid cube that tumbles as it goes: flat faces shaded by a light from the top left, no glow
+  function drawOrb(o, dt) {
+    o.rx += o.vx * dt; o.ry += o.vy * dt; o.rz += o.vz * dt;
+    const s = 9 * o.z * (W < 700 ? .9 : 1);
+    const ca = Math.cos(o.rx), sa = Math.sin(o.rx), cb = Math.cos(o.ry), sb = Math.sin(o.ry), cc = Math.cos(o.rz), sc = Math.sin(o.rz);
+    const P = CUBE.map(([x, y, z]) => {
+      let y1 = y * ca - z * sa, z1 = y * sa + z * ca;          // about x
+      let x2 = x * cb + z1 * sb, z2 = -x * sb + z1 * cb;       // about y
+      const x3 = x2 * cc - y1 * sc, y3 = x2 * sc + y1 * cc;    // about z
+      const k = 5 / (5 + z2); return [o.x + x3 * s * k, o.y + y3 * s * k, z2, x3, y3];
+    });
+    fx.lineJoin = 'round';
+    FACES.forEach(f => {
+      const a = P[f[0]], c = P[f[1]], d = P[f[2]];
+      if ((c[0] - a[0]) * (d[1] - a[1]) - (c[1] - a[1]) * (d[0] - a[0]) <= 0) return;   // facing away
+      // the face's normal (from the unprojected corners) against a light up, left and towards the viewer
+      const ux = c[3] - a[3], uy = c[4] - a[4], uz = c[2] - a[2], vx = d[3] - a[3], vy = d[4] - a[4], vz = d[2] - a[2];
+      let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx; const nl = Math.hypot(nx, ny, nz) || 1; nx /= nl; ny /= nl; nz /= nl;
+      const lit = Math.max(0, -(nx * -.45 + ny * -.6 + nz * -.66));
+      const m = .5 + .62 * lit, col = o.col.map(v => Math.min(255, v * m));
+      fx.beginPath(); f.forEach((i, j) => fx[j ? 'lineTo' : 'moveTo'](P[i][0], P[i][1])); fx.closePath();
+      fx.fillStyle = rgba(col, 1); fx.fill();
+      fx.strokeStyle = rgba(o.col.map(v => v * .45), .9); fx.lineWidth = .8; fx.stroke();
+    });
   }
 
   // dim boxes floating in the fog (plain 3D → 2D, back faces culled)
@@ -156,12 +164,12 @@
   /* ---------- size, loop ---------- */
   let fogW = 0, fogH = 0;
   function size() {
-    W = innerWidth; H = innerHeight; DPR = Math.min(devicePixelRatio || 1, 1.75);
+    W = innerWidth; H = innerHeight; DPR = Math.min(devicePixelRatio || 1, 2) * .5;   // half resolution
     fxCv.width = Math.round(W * DPR); fxCv.height = Math.round(H * DPR);
     const k = Math.min(.5, 900 / Math.max(W, 1));
     fogW = Math.max(2, Math.round(W * k)); fogH = Math.max(2, Math.round(H * k));
     fogCv.width = fogW; fogCv.height = fogH;
-    if (!orbs.length) makeOrbs(); else orbs.forEach(o => { o.x = Math.min(o.x, W - 10); o.y = Math.min(o.y, H - 10); o.trail.length = 0; });
+    if (!orbs.length) makeOrbs(); else orbs.forEach(o => { o.x = Math.min(o.x, W - 10); o.y = Math.min(o.y, H - 10); });
     makeBoxes();
   }
   function drawFog(t) {
@@ -172,17 +180,15 @@
     fx.setTransform(DPR, 0, 0, DPR, 0, 0); fx.clearRect(0, 0, W, H);
     fx.globalCompositeOperation = 'source-over';
     boxes.forEach(b => drawBox(b, advance ? dt : 0));
-    fx.globalCompositeOperation = 'lighter';
-    orbs.forEach(o => { if (advance) stepOrb(o, dt); drawOrb(o); });
-    fx.globalCompositeOperation = 'source-over';
+    orbs.sort((a, b) => a.z - b.z).forEach(o => { if (advance) stepOrb(o, dt); drawOrb(o, advance ? dt : 0); });
   }
 
   const calm = () => html.classList.contains('calm');
   const held = () => doc.hidden || html.classList.contains('f32-lock');
   let still = false, raf = 0, last = 0, t0 = performance.now(), frame = 0;
   function paintStill() {
-    // run the lights forward a moment so they have tails, then draw once
-    orbs.forEach(o => { o.trail.length = 0; for (let i = 0; i < 45; i++) stepOrb(o, 1 / 60); o.col = o.to.slice(); });
+    // settle the colours, then draw once
+    orbs.forEach(o => { o.col = o.to.slice(); });
     drawFog(12); drawFx(0, false);
   }
   function tick(now) {

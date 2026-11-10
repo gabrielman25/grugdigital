@@ -79,7 +79,7 @@ void main(){
   };
   Viewer.prototype.draw = function () {
     const gl = this.gl; if (!gl || !this.count) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1), W = Math.max(1, Math.round(this.c.clientWidth * dpr)), H = Math.max(1, Math.round(this.c.clientHeight * dpr));
+    const dpr = Math.min(2, window.devicePixelRatio || 1) * 0.5 /* 3D at half resolution */, W = Math.max(1, Math.round(this.c.clientWidth * dpr)), H = Math.max(1, Math.round(this.c.clientHeight * dpr));
     if (!this.fixed && (this.c.width !== W || this.c.height !== H)) { this.c.width = W; this.c.height = H; }
     gl.viewport(0, 0, this.c.width, this.c.height); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);

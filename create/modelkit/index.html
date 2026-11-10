@@ -1709,7 +1709,7 @@ class Viewer {
       if (k >= 1) this.anim = null;
     }
     if (this.o.auto && this.o.auto()) { this.yaw += dt * 0.0005; this.dirty = true; }
-    const c = this.c, d = DPR(), w = Math.max(1, Math.round(c.clientWidth * d)), h = Math.max(1, Math.round(c.clientHeight * d));
+    const c = this.c, d = DPR() * 0.5 /* Grug: 3D at half resolution */, w = Math.max(1, Math.round(c.clientWidth * d)), h = Math.max(1, Math.round(c.clientHeight * d));
     if (c.width !== w || c.height !== h) { c.width = w; c.height = h; this.dirty = true; }
     if (!this.dirty || !c.clientWidth) return;
     this.dirty = false; this.draw(w, h);
@@ -1827,7 +1827,7 @@ const flip = {
     if (!gl) { done(); return; }
     const ed = $('#editor'), wrap = $('#canvasWrap');
     const wr = wrap.getBoundingClientRect(), er = gridRect();
-    const d = DPR(), W = wr.width, H = wr.height;
+    const d = DPR() * 0.5 /* Grug: 3D at half resolution */, W = wr.width, H = wr.height;
     this.c.width = Math.round(W * d); this.c.height = Math.round(H * d);
     const other = S.side === 'front' ? 'back' : 'front';
     this.tex(this.ta, cardTexture(S.side)); this.tex(this.tb, cardTexture(other));

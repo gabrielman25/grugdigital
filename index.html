@@ -31,13 +31,8 @@
 .step b{display:block;font-size:17px}
 .step span{color:var(--mut);font-size:14.5px}
 @media (min-width:760px){.steps{grid-template-columns:repeat(3,1fr)}}
-.partners{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
-.partner{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-s);background:var(--card);border:1px solid var(--line)}
-.partner .dot{width:12px;height:12px;border-radius:50%;flex:none}
-.partner b{display:block;font-size:15px}
-.partner small{color:var(--mut);font-size:13px}
 /* games: one horizontal carousel of bare FOSSIL32 cartridges floating in the fog (no card behind them), the middle one big
-   and lit in its cartridge colour; it opens on the last-played game */
+   with nothing behind it; it opens on the last-played game */
 .hc-sec{padding-top:6px}
 .hc{position:relative;margin-inline:calc(50% - 50vw)}
 .hc-row{--tw:min(330px,72vw);--gap:16px;display:flex;gap:var(--gap);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;
@@ -49,9 +44,8 @@
 .hc-row>.g-tile:hover,.hc-row>.g-tile:focus-within{transform:scale(calc(1 - var(--d,1) * .16));box-shadow:none}
 .hc-row>.g-tile:focus-visible{outline:none}
 .hc-row>.g-tile:focus-visible .f32-stage{outline:3px solid var(--ring-a);outline-offset:-6px;border-radius:24px}
-.hc-row .f32-stage{overflow:visible;background:radial-gradient(ellipse 50% 46% at 50% 50%,color-mix(in srgb,var(--hc-c) 20%,transparent),transparent 72%);transition:background .4s}
-.hc-row>.g-tile.on .f32-stage{background:radial-gradient(ellipse 66% 60% at 50% 50%,color-mix(in srgb,var(--hc-c) 45%,transparent),color-mix(in srgb,var(--hc-c) 14%,transparent) 52%,transparent 76%)}
-.hc-row>.g-tile.on.lp .f32-stage{background:radial-gradient(ellipse 74% 68% at 50% 50%,color-mix(in srgb,var(--hc-c) 62%,transparent),color-mix(in srgb,var(--hc-c) 20%,transparent) 50%,transparent 78%)}
+/* bare cartridges: no glow or colour pool behind them */
+.hc-row .f32-stage{overflow:visible;background:none}
 .hc-row .body{align-items:center;text-align:center;padding:2px 10px 0}
 .hc-row .g-tile .meta{justify-content:center}
 .hc-row .f32-stage .badge{left:50%;top:2px;transform:translateX(-50%)}
@@ -66,27 +60,37 @@
 .hc-nav.next{right:calc(50vw - var(--tw,330px) / 2 - 64px)}
 .hc{--tw:min(330px,72vw)}
 @media (max-width:640px){.hc-nav{display:none}}
-.role-hero{margin-top:18px;padding:26px;border-radius:var(--r);background:#232327;border:1px solid var(--line2);display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;justify-content:space-between}
+.role-hero{margin-top:18px;padding:26px;border-radius:var(--r);background:var(--card-solid);border:1px solid var(--line2);display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;justify-content:space-between}
 .role-hero h1{font-size:clamp(28px,5vw,42px)}
 .role-hero p{color:var(--ink2);font-size:17px;margin-top:8px;max-width:52ch}
 .role-hero .row{flex:none}
+.brand-hero{border:0;background:var(--brand);color:var(--brand-ink)}
+.brand-hero .em{font-size:54px;line-height:1;width:84px;height:84px;display:grid;place-items:center;border-radius:24px;background:rgba(255,255,255,.22);flex:none}
+.brand-hero .who{display:flex;gap:18px;align-items:center}
+.brand-hero p{color:inherit!important;opacity:.85}
+.brand-hero .g-btn.primary{background:var(--brand-ink);color:var(--brand);box-shadow:none}
+.brand-hero .g-btn:not(.primary){background:rgba(255,255,255,.2);color:inherit;border-color:transparent}
+html[data-brand] [data-only-for]{display:none!important}
+html[data-brand] .hero[data-hide-for]{display:grid!important}
 footer{padding:28px 0 10px;color:var(--mut);font-size:13.5px;display:flex;flex-wrap:wrap;gap:8px 18px;border-top:1px solid var(--line);margin-top:26px}
 footer a{color:var(--ink2);font-weight:700}
 </style>
 </head>
 <body>
 <main class="wrap">
+  <!-- shop mode (a guest who came from a shop's rewards card): the front door is the shop's -->
+  <div data-only-brand><section class="role-hero brand-hero" id="brandHero"></section></div>
   <!-- who's visiting (Settings → I'm a…): owners and developers get their own front door -->
-  <div data-only-for="owner"><section class="role-hero">
+  <div data-only-for="owner" data-hide-brand><section class="role-hero">
     <div><p class="g-fine" style="margin:0 0 6px;color:#FF9F5A;font-weight:700">For restaurant owners</p><h1>Bring your guests back.</h1><p>Make a free rewards card in two minutes. Every visit gives your guests a stamp and Pearls for polished games.</p></div>
     <div class="row"><a class="g-btn primary big" href="rewards/" style="background:#FF9F5A;box-shadow:0 4px 0 #E0782F">Make my rewards card</a><a class="g-btn big" href="partners/">Get a custom game</a></div>
   </section></div>
-  <div data-only-for="dev"><section class="role-hero">
+  <div data-only-for="dev" data-hide-brand><section class="role-hero">
     <div><p class="g-fine" style="margin:0 0 6px;color:#4FD8C4;font-weight:700">For game developers</p><h1>Free 3D models, ready to use.</h1><p>Grab presets from the asset library, or make your own with Model Kit, our pixel-to-3D editor.</p></div>
     <div class="row"><a class="g-btn primary big" href="create/" style="background:#4FD8C4;box-shadow:0 4px 0 #25A893">Open the library</a><a class="g-btn big" href="create/modelkit/">Open Model Kit</a></div>
   </section></div>
 
-  <div data-only-for="creator"><section class="role-hero">
+  <div data-only-for="creator" data-hide-brand><section class="role-hero">
     <div><p class="g-fine" style="margin:0 0 6px;color:#5AB0FF;font-weight:700">For online creators</p><h1>Turn your followers into players.</h1><p>Make a link page for all your socials, or a little 3D world your followers walk through. Every visit gives them 10 Pearls.</p></div>
     <div class="row"><a class="g-btn primary big" href="links/" style="background:#5AB0FF;box-shadow:0 4px 0 #2F86D6">Make my link page</a></div>
   </section></div>
@@ -119,7 +123,7 @@ footer a{color:var(--ink2);font-weight:700}
     <div class="g-items" id="closetPicks"></div>
   </section>
 
-  <section class="g-section" data-hide-for="owner dev">
+  <section class="g-section" data-hide-for="owner dev" data-hide-brand>
     <div class="g-section-h"><h2>How points work</h2></div>
     <div class="steps">
       <div class="step"><span class="n" id="icEat"></span><div><b>Eat at a partner</b><span>Scan the QR on the table or tap the tag with your phone. Play while you wait.</span></div></div>
@@ -128,14 +132,9 @@ footer a{color:var(--ink2);font-weight:700}
     </div>
   </section>
 
-  <section class="g-section">
-    <div class="g-section-h"><h2>Katy partners</h2><a href="partners/">For restaurants</a></div>
-    <div class="partners" id="partnerList"></div>
-  </section>
-
   <footer>
     <span>© 2026 Grug Digital · Katy, Texas</span>
-    <a href="partners/">Put your restaurant in a game</a>
+    <a href="partners/" data-hide-brand>Put your restaurant in a game</a>
     <a href="profile/">Profile &amp; settings</a>
     <span class="sp"></span>
     <span>Made with Grug, our own engine.</span>
@@ -158,6 +157,12 @@ footer a{color:var(--ink2);font-weight:700}
   setTimeout(() => view.play('wave', { ms: 2600 }), 600);
   G.on((p, what) => { if (what === 'avatar' || what === 'import' || what === 'external' || what === 'reset') view.setAvatar(p.avatar); });
 
+  /* shop mode: the shop's welcome, with a way back to its card */
+  const B = window.GrugTheme && GrugTheme.brand();
+  if (B) document.title = B.n + ' · Games';
+  if (B) $('#brandHero').innerHTML = '<div class="who"><span class="em" aria-hidden="true">' + G.esc(B.i) + '</span><div><p class="g-fine" style="margin:0 0 6px;font-weight:700">Welcome to</p><h1>' + G.esc(B.n) + '</h1><p>Play a game while you wait. Every visit stamps your card and adds Pearls you can spend in any game.</p></div></div>' +
+    '<div class="row"><a class="g-btn primary big" href="rewards/card/#c=' + encodeURIComponent(B.c) + '">' + G.icon('ticket') + 'My stamp card</a><a class="g-btn big" href="games/">' + G.icon('game-controller') + 'Play</a></div>';
+
   /* greeting */
   const t = G.totals();
   if (!G.isNew && (t.plays > 0 || t.checkins > 0)) {
@@ -166,6 +171,7 @@ footer a{color:var(--ink2);font-weight:700}
   } else {
     $('#heroTitle').innerHTML = 'Hi, <span class="name">' + G.esc(G.profile.name) + '</span>. Games made with Katy restaurants.';
   }
+  if (B) { $('#heroTitle').innerHTML = 'Hi, <span class="name">' + G.esc(G.profile.name) + '</span>.'; $('#heroText').textContent = 'Pick a game below, or dress up your avatar. Your stamps and Pearls stay on this phone.'; }
   const last = G.GAMES.find(g => g.id === G.profile.stats.lastGame) || G.GAMES.find(g => g.listed !== false) || G.GAMES[0];
   $('#heroPlay').href = last.game || last.play; $('#heroPlay').innerHTML = G.icon('play') + 'Play ' + G.esc(last.title);
   if (!G.storageWorks()) $('#heroFine').textContent = 'This browser isn’t saving (private mode or blocked storage). Your avatar and points will be lost when you close it.';
@@ -220,8 +226,6 @@ footer a{color:var(--ink2);font-weight:700}
   G.ui.fillThumbs($('#closetPicks'));
   $('#closetPicks').addEventListener('click', e => { const b = e.target.closest('[data-item]'); if (b) location.href = 'shop/#' + b.dataset.item; });
 
-  /* partners */
-  $('#partnerList').innerHTML = G.GAMES.filter(g => g.status !== 'legacy' && !g.standalone).map(g => '<a class="partner" href="games/' + g.id + '/"><span class="dot" style="background:' + g.color + '"></span><span><b>' + G.esc(g.partner) + '</b><small>' + G.esc(g.place) + ' · ' + G.esc(g.title) + '</small></span></a>').join('');
 })();
 </script>
 <script type="module" src="assets/fossil32/fossil32.js"></script>

@@ -1,0 +1,11 @@
+/* Grug · shop fonts — the lettering a shop picks for its rewards card (rewards/create/ → "Pick a font"). The choice rides
+   in the card link (assets/rewards.js → FONTS) and, in shop mode, sets the site's headings (theme.js loads this file).
+   All SIL Open Font License, latin subset, one weight each, served from assets/fonts/shop (via Fontsource).
+   Each is picked to stay easy to read at a glance on a phone. Fredoka (the house font) is in grug.css. */
+@font-face{font-family:'Shop Lora';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/shop/lora-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Shop Oswald';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/shop/oswald-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Shop Playfair';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/shop/playfair-display-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Shop Patrick Hand';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/shop/patrick-hand-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Shop Lilita';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/shop/lilita-one-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Shop Righteous';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/shop/righteous-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Shop Outfit';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/shop/outfit-latin-700-normal.woff2) format('woff2')}

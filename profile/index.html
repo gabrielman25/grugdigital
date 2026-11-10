@@ -21,7 +21,9 @@
 .pf-stats b{display:block;font-size:20px;line-height:1.1}
 .pf-stats span{color:var(--mut);font-size:12px;font-weight:700}
 @media (max-width:480px){.pf-card{grid-template-columns:1fr}.pf-card .g-view{height:220px}}
-@media (min-width:860px){.pf{grid-template-columns:1fr 1fr;align-items:start}.pf>.full{grid-column:1/-1}}
+/* every section stacks at the same full width (no two-column rows) */
+.pf>section{width:100%;min-width:0}
+.g-pref>span[id^="ic"]{flex:none;display:grid;place-items:center;width:28px}
 .pf h2{font-size:21px;margin-bottom:10px}
 .pf-points{display:flex;flex-direction:column;gap:8px}
 .pf-points a{color:var(--ember);font-weight:800;font-size:14px}
@@ -71,6 +73,7 @@
 
   <section class="g-card">
     <h2>Settings</h2>
+    <div id="modeRow"></div>
     <div id="uiSize"></div>
     <div class="g-pref"><span id="icMotion"></span><span><b>Animations</b><small>Celebrations, poses and count-ups</small></span><button class="g-switch" role="switch" data-pref="motion" aria-label="Animations"></button></div>
     <div class="g-pref"><span id="icBuzz"></span><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button class="g-switch" role="switch" data-pref="haptics" aria-label="Vibrate on tap"></button></div>
@@ -182,6 +185,7 @@
   $('#earned').addEventListener('click', e => { const b = e.target.closest('[data-item]'); if (b) location.href = '../shop/#' + b.dataset.item; });
   G.on((p, what) => { if (what === 'external') { view.setAvatar(p.avatar); render(); } });
   render();
+  $('#modeRow').innerHTML = G.ui.brandHtml() + G.ui.modeHtml(); G.ui.wireMode($('#modeRow')); G.ui.wireBrand($('#modeRow'));
   $('#uiSize').innerHTML = G.ui.uiSizeHtml(); G.ui.wireUiSize($('#uiSize'));
   const paintInv = () => { $('#inventory').innerHTML = G.ui.inventoryHtml().replace('<span class="k-set-h">Inventory</span>', ''); };
   paintInv(); G.ui.wireInventory($('#inventory'), paintInv);

@@ -4,7 +4,7 @@
 
 /* a list of link buttons (the follower's page and the builder's preview) */
 .lk-list{display:flex;flex-direction:column;gap:10px}
-.lk-btn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:18px;background:#232327;border:2px solid var(--line2);color:var(--ink);text-decoration:none;transition:transform .15s var(--spring),border-color .15s}
+.lk-btn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:18px;background:var(--card-solid);border:2px solid var(--line2);color:var(--ink);text-decoration:none;transition:transform .15s var(--spring),border-color .15s}
 .lk-btn:hover{transform:translateY(-2px);border-color:var(--lc,var(--mode))}
 .lk-btn .t{flex:1;min-width:0}
 .lk-btn b{display:block;font-size:17px}
@@ -17,22 +17,22 @@
 .lk-head h1{font-size:clamp(22px,4vw,30px);color:var(--a-ink)}
 .lk-head small{font-weight:600;opacity:.85}
 .lk-head>div{flex:1;min-width:0}
-.lk-earn{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:16px;background:#2F2A3D;color:var(--ink2);font-size:14.5px}
+.lk-earn{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:16px;background:color-mix(in srgb,#C59BFF 16%,var(--card-solid));color:var(--ink2);font-size:14.5px}
 .lk-earn .gi{width:22px;height:22px;color:#d16be8;flex:none}
 .lk-earn b{color:var(--ink)}
 
 /* the 3D world on a follower's page */
-.lk-world{position:relative;height:min(68vh,580px);min-height:360px;border-radius:24px;overflow:hidden;background:#17171A}
+.lk-world{position:relative;height:min(68vh,580px);min-height:360px;border-radius:24px;overflow:hidden;background:var(--page)}
 .lk-world canvas{display:block;width:100%;height:100%}
 .lk-start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px;background:rgba(14,12,20,.72)}
 .lk-start[hidden]{display:none}
 .lk-start h2{color:#fff;font-size:clamp(24px,4.4vw,34px)}
 .lk-start p{color:#E6E2F0;max-width:34ch}
-.lk-hint{position:absolute;left:12px;bottom:12px;padding:7px 12px;border-radius:999px;background:#17171A;color:var(--ink);font-weight:700;font-size:13px;pointer-events:none}
+.lk-hint{position:absolute;left:12px;bottom:12px;padding:7px 12px;border-radius:999px;background:var(--page);color:var(--ink);font-weight:700;font-size:13px;pointer-events:none}
 
 /* builder bits */
 .lk-rows{display:flex;flex-direction:column;gap:8px}
-.lk-row{display:flex;align-items:center;gap:12px;padding:8px 10px 8px 12px;border-radius:16px;background:#232327;border:2px solid var(--line2)}
+.lk-row{display:flex;align-items:center;gap:12px;padding:8px 10px 8px 12px;border-radius:16px;background:var(--card-solid);border:2px solid var(--line2)}
 .lk-row.ok{border-color:var(--mode)}
 .lk-row b{width:84px;flex:none;font-size:15px}
 .lk-row input{flex:1;min-width:0;min-height:42px;font-size:16px}
@@ -49,7 +49,7 @@
 .lk-mock .lk-btn small{font-size:12.5px}
 .lk-worlds{display:flex;gap:6px;margin-left:auto}
 .lk-worlds i{width:18px;height:18px;border-radius:50%;display:block;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
-.lk-3d{position:relative;width:100%;aspect-ratio:4/3;margin-top:18px;border-radius:22px;overflow:hidden;background:#17171A}
+.lk-3d{position:relative;width:100%;aspect-ratio:4/3;margin-top:18px;border-radius:22px;overflow:hidden;background:var(--page)}
 .lk-3d canvas{display:block;width:100%;height:100%}
 
 /* the Links tab hero art: a stack of link buttons */

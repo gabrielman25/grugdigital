@@ -41,7 +41,7 @@
 <script>
 (function(){
   const G = Grug, RW = GrugRewards, $ = s => document.querySelector(s);
-  G.ui.chrome('rewards', { title: 'Rewards card', noRole: true });   // guests here came from a shop's QR: no "who are you?" first
+  G.ui.chrome('rewards', { title: 'Rewards card', noRole: true, dockAs: window.GrugTheme && GrugTheme.brand() ? 'home' : 'me' });   // guests here came from a shop's QR: no "who are you?" first
   const p = new URLSearchParams(location.hash.slice(1)), c = p.get('c'), k = p.get('k');
   const cfg = c && RW.decode(c);
   if (!cfg) { $('#bad').hidden = false; return; }
@@ -58,7 +58,8 @@
     if (r.ok) { try { G.announce('reward', { app: cfg.n, pearls: r.pearls }); } catch (e) {} }
     try { history.replaceState(null, '', location.pathname + location.search + '#c=' + c); } catch (e) {}
   }
-  addEventListener('hashchange', () => location.reload());
+  // another shop's link opened in this tab: switch shop mode to that shop, then reload into it
+  addEventListener('hashchange', () => { const nc = new URLSearchParams(location.hash.slice(1)).get('c'); if (nc && window.GrugTheme) GrugTheme.setBrand(nc, true); location.reload(); });
 
   // where to spend the Pearls: the game library as FOSSIL32 boxes
   const list = G.GAMES.filter(g => g.status !== 'legacy' && g.listed !== false).slice(0, 6);
