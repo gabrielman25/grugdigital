@@ -9,11 +9,13 @@ page, `#232327`/`#26262B` cards), **Fredoka** for all text, flat solid accents w
 and `#1E1B16` text on anything filled with an accent. There is no light mode and no theme picker.
 
 - **Each section owns one accent** (`SECTIONS` in `assets/theme.js`, picked from the URL): Home `#9BE338`, Games
-  `#7EE081`, Create `#4FD8C4`, Avatar `#C59BFF`, Shop `#FFBE1A`, Profile `#FF8FC2` (Pearls uses purple). theme.js sets
+  `#7EE081`, Rewards `#FF9F5A`, Create `#4FD8C4`, Avatar `#C59BFF`, Shop `#FFBE1A`, Profile `#FF8FC2` (Pearls uses purple). theme.js sets
   `--mode` / `--mode-lo` and points the old `--sel-a` / `--sel-b` pair at the same colour, so older gradient rules come
   out solid. The dock's tab for each section uses the same colour, and the current tab fills with it.
 - **Backgrounds:** every site page sits on a **very faint, static pixel pattern** (a PatternMix tile tinted with the
   section's accent at alpha 7/255, `assets/patterns/<section>.png`, 96px). Keep it faint so text always reads clearly.
+  The **Rewards** section is the exception: solid `#17171A`, no pattern (`solid: true` in `SECTIONS`), and its pages use
+  solid colours only (no gradients, blur or decoration).
 - **The blue smoky fog (`assets/fogbg.js`) is only for the Games section** (`games/` and `games/<id>/`), where the
   FOSSIL32 boxes float in it. Don't bring it back to other pages, and don't add white page backgrounds.
 

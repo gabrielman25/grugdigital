@@ -10,6 +10,7 @@
   'use strict';
   const C = root.GrugCatalog, GAMES = root.GRUG_GAMES || [], ICONS = root.GRUG_ICONS || {};
   const KEY = 'grug.profile.v1', SNAP_KEY = 'grug.snaps.v1';
+  const REWARDS_KEY = 'grug.rewards.v1';   // stamp cards from shops (rewards/), see assets/rewards.js
   const EXPORT_FORMAT = 'grug-profile';
 
   /* ---------- where the site lives (works from /, /grugdigital/, play/yoshi/, …) ---------- */
@@ -253,6 +254,7 @@
   function exportData() {
     const apps = {};
     GAMES.forEach(g => { if (g.storageKey) { const v = localStorage.getItem(g.storageKey); if (v) { try { apps[g.storageKey] = JSON.parse(v); } catch (e) {} } } });
+    { const v = localStorage.getItem(REWARDS_KEY); if (v) { try { apps[REWARDS_KEY] = JSON.parse(v); } catch (e) {} } }   // saved Rewards cards + My creations
     const sandy = readJSON('grug.sandy.v1', null);   // the 3D avatar's look
     return { format: EXPORT_FORMAT, version: 1, exportedAt: new Date().toISOString(), site: ROOT, profile, apps, sandy };
   }
@@ -287,12 +289,14 @@
   function applyImport(data) {
     const p = normalize(data.profile); p.updated = Date.now();
     GAMES.forEach(g => { if (g.storageKey && data.apps[g.storageKey] && typeof data.apps[g.storageKey] === 'object') writeJSON(g.storageKey, data.apps[g.storageKey]); });
+    if (data.apps[REWARDS_KEY] && typeof data.apps[REWARDS_KEY] === 'object') writeJSON(REWARDS_KEY, data.apps[REWARDS_KEY]);
     profile = p; writeJSON(KEY, profile); try { localStorage.removeItem(SNAP_KEY); } catch (e) {}
     if (data.sandy) { writeJSON('grug.sandy.v1', data.sandy); try { localStorage.removeItem('grug.sandy.snaps.v1'); } catch (e) {} }
     emit('import'); return true;
   }
   function reset(alsoPoints) {
     if (alsoPoints) GAMES.forEach(g => { if (g.storageKey) try { localStorage.removeItem(g.storageKey); } catch (e) {} });
+    if (alsoPoints) try { localStorage.removeItem(REWARDS_KEY); } catch (e) {}
     try { localStorage.removeItem(KEY); localStorage.removeItem(SNAP_KEY); localStorage.removeItem('grug.sandy.v1'); localStorage.removeItem('grug.sandy.snaps.v1'); } catch (e) {}
     profile = fresh(); writeJSON(KEY, profile); emit('reset');
   }
@@ -372,18 +376,18 @@
 
   /* ---------- UI chrome: floating top bar + dock (kubii theme) ---------- */
   const NAV = [
-    ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['create', 'Create', 'cube', 'create/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'],
+    ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['rewards', 'Rewards', 'gift', 'rewards/'], ['create', 'Create', 'cube', 'create/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'],
     ['shop', 'Shop', 'storefront', 'shop/'], ['profile', 'Profile', 'user', 'profile/']
   ];
   // dock icons: full-colour pictures from the icon pack (assets/icons/dock-*.webp)
   // dock icons: colourful pictures, or the simple set in one colour per tab
   // one colour per section, the same accents theme.js gives each section (Model Kit style)
-  const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'] };
-  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E' };
+  const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], rewards: ['gift', '#FF9F5A'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'] };
+  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', rewards: '#E0782F', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E' };
   const dockIcon = k => colorful() ? '<img class="k-ic" src="' + iconSrc('dock-' + k) + '" alt="" aria-hidden="true" draggable="false">'
-    : '<svg class="k-ic k-ic-s" viewBox="0 0 16 16" fill="currentColor" style="color:' + DOCK_SIMPLE[k][1] + '" aria-hidden="true" focusable="false">' + (SIMPLE['dock-' + DOCK_SIMPLE[k][0]] || '') + '</svg>';
+    : '<svg class="k-ic k-ic-s" viewBox="0 0 16 16" fill="currentColor" style="color:' + DOCK_SIMPLE[k][1] + '" aria-hidden="true" focusable="false">' + (SIMPLE['dock-' + DOCK_SIMPLE[k][0]] || SIMPLE[DOCK_SIMPLE[k][0]] || '') + '</svg>';
   const DOCK = {};
-  ['home', 'games', 'create', 'avatar', 'shop', 'profile'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
+  ['home', 'games', 'rewards', 'create', 'avatar', 'shop', 'profile'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
   const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
   /* ---------- Pearls (the site-wide currency, sold on pearls.html; wallet in 'grug.pearls.v1') ---------- */
   const PEARL_KEY = 'grug.pearls.v1';

@@ -1,0 +1,106 @@
+/* Grug · Rewards pages (rewards/, rewards/create/, rewards/card/). Solid colours only: the Rewards section has no
+   pattern behind it (theme.js → SECTIONS.rewards.solid), and nothing here uses gradients, blur or decoration.
+   The guest's card (.rw-app) takes its colours from the shop: --a, --a-lo, --a-ink, --a-soft, --a-tint (GrugRewards.themeVars). */
+.rw-emo,.rw-ic,.rw-slot.on,.rw-slot.gift{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+
+/* ---------- page bits shared by the three pages ---------- */
+.rw-head{padding:18px 0 4px;max-width:720px}
+.rw-head p.lead{color:var(--ink2);font-size:17px;max-width:56ch;margin-top:10px}
+.rw-head .row{margin-top:16px}
+.rw-empty{padding:22px;border-radius:var(--r);background:#232327;border:1px dashed var(--line2);color:var(--ink2);display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.rw-empty b{color:var(--ink);font-size:17px}
+
+/* a card tile on the Rewards tab (a shop's colour band on top) */
+.rw-tiles{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rw-tile{display:flex;flex-direction:column;border-radius:var(--r);overflow:hidden;background:#232327;border:1px solid var(--line);color:var(--ink);text-decoration:none;transition:transform .2s var(--spring)}
+a.rw-tile:hover{transform:translateY(-2px)}
+.rw-tile .band{display:flex;align-items:center;gap:12px;padding:14px 16px;box-shadow:inset 0 -4px 0 var(--a-lo,rgba(0,0,0,.2))}
+.rw-tile .band .rw-ic{width:42px;height:42px;border-radius:12px;background:var(--a-lo);display:grid;place-items:center;font-size:23px;flex:none}
+.rw-tile .band .rw-ic .gi{width:24px;height:24px;color:var(--a-ink)}
+.rw-tile .band b{display:block;font-size:17px;font-weight:600;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rw-tile .band small{font-size:13px;opacity:.85;font-weight:600}
+.rw-tile .band>div{min-width:0;flex:1}
+.rw-tile .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.rw-dots{display:flex;flex-wrap:wrap;gap:5px}
+.rw-dots i{width:14px;height:14px;border-radius:50%;background:var(--card3)}
+.rw-dots i.on{background:var(--a)}
+.rw-tile .line{display:flex;justify-content:space-between;gap:10px;font-size:14.5px;color:var(--ink2)}
+.rw-tile .line b{color:var(--ink);font-weight:600}
+.rw-tile .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
+.rw-tile .acts .g-btn{width:100%;padding:0 10px}
+.rw-tile .acts .del{grid-column:1/-1;min-height:34px;color:var(--mut)}
+.rw-tile .tag{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--a-lo);color:var(--a-ink);white-space:nowrap}
+
+/* Pearls strip on the Rewards tab and the card page */
+.rw-pearls{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;padding:18px;border-radius:var(--r);background:#232327;border:1px solid var(--line)}
+.rw-pearls .pi{width:52px;height:52px;border-radius:16px;background:#2F2A3D;display:grid;place-items:center;flex:none}
+.rw-pearls .pi .gi{width:30px;height:30px;color:#d16be8}
+.rw-pearls .num{font-size:30px;font-weight:700;line-height:1}
+.rw-pearls .num small{font-size:15px;font-weight:600;color:var(--mut);margin-left:6px}
+.rw-pearls .txt{flex:1;min-width:220px;color:var(--ink2);font-size:14.5px}
+.rw-pearls .txt b{color:var(--ink)}
+
+/* ---------- the guest's card (rewards/card/ and the phone preview) ---------- */
+.rw-app{--a:#C8924F;--a-lo:#8C6232;--a-ink:#1E1B16;--a-soft:#F1E4D3;--a-tint:#FAF6F0;position:relative;display:flex;flex-direction:column;gap:12px}
+.rw-pass{border-radius:24px;overflow:hidden;background:#fff;color:#1E1B16}
+.rw-band{display:flex;align-items:center;gap:12px;padding:16px 18px;background:var(--a);color:var(--a-ink);box-shadow:inset 0 -4px 0 var(--a-lo)}
+.rw-band .rw-ic{width:48px;height:48px;border-radius:14px;background:var(--a-lo);display:grid;place-items:center;font-size:27px;flex:none}
+.rw-who{min-width:0;flex:1}
+.rw-who b{display:block;font-size:20px;font-weight:600;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rw-who small{font-size:13px;opacity:.85;font-weight:600}
+.rw-count{font-size:18px;font-weight:700;background:var(--a-lo);color:#fff;border-radius:999px;padding:5px 12px;flex:none}
+.rw-pass-body{padding:16px 16px 18px}
+.rw-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 2px 14px}
+.rw-slot{aspect-ratio:1;border-radius:50%;border:2px solid var(--a-soft);background:var(--a-tint);display:grid;place-items:center;color:var(--a-lo);font-weight:700;font-size:15px}
+.rw-slot.on{border:0;background:var(--a);box-shadow:inset 0 -4px 0 var(--a-lo);font-size:26px}
+.rw-slot.gift{font-size:21px}
+.rw-slot.new{animation:rw-thunk .55s var(--spring) both}
+@keyframes rw-thunk{0%{transform:scale(1.9) rotate(-24deg);opacity:0}60%{opacity:1}100%{transform:none}}
+.rw-goal{font-size:15px;color:#55514A;text-align:center;margin:0;font-weight:500}
+.rw-goal b{color:#1E1B16;font-weight:600}
+.rw-redeem{width:100%;margin-top:14px;border:0;border-radius:16px;padding:15px;background:var(--a);color:var(--a-ink);font:600 18px var(--display);box-shadow:0 4px 0 var(--a-lo);animation:rw-pulse 1.6s ease-in-out infinite;cursor:pointer}
+.rw-redeem:active{transform:translateY(3px);box-shadow:0 1px 0 var(--a-lo)}
+@keyframes rw-pulse{50%{transform:scale(1.03)}}
+.rw-msg{display:flex;gap:12px;align-items:center;background:#232327;border:1px solid var(--line);border-radius:18px;padding:12px 14px;font-size:14.5px;color:var(--ink2)}
+.rw-msg .i{width:36px;height:36px;border-radius:11px;background:var(--card3);display:grid;place-items:center;flex:none;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-size:18px}
+.rw-msg b{color:var(--ink);font-weight:600;display:block}
+.rw-earn{display:flex;gap:12px;align-items:center;background:#2F2A3D;border-radius:18px;padding:12px 14px;font-size:13.5px;color:var(--ink2)}
+.rw-earn b{color:var(--ink);font-weight:600;display:block;font-size:15px}
+.rw-earn>div{flex:1;min-width:0}
+.rw-earn-ic{width:36px;height:36px;border-radius:11px;background:#3D3552;display:grid;place-items:center;flex:none}
+.rw-earn-ic .gi{width:22px;height:22px;color:#d16be8}
+.rw-bal{font-size:20px;font-weight:700;text-align:right;line-height:1;flex:none}
+.rw-bal small{display:block;font-size:11px;font-weight:600;color:var(--mut);margin-top:3px}
+.rw-toast{position:fixed;left:50%;top:calc(var(--top) + var(--sat) + 12px);width:min(440px,calc(100% - 24px));z-index:70;display:flex;gap:12px;align-items:center;background:#F4F1EA;color:#1E1B16;border-radius:18px;padding:12px 14px;font-size:14.5px;
+  transform:translate(-50%,-24px) scale(.96);opacity:0;pointer-events:none;transition:opacity .2s,transform .35s var(--spring);box-shadow:0 12px 30px rgba(0,0,0,.4)}
+.rw-toast.show{opacity:1;transform:translate(-50%,0)}
+.rw-toast .i{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;flex:none;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-size:19px;background:var(--a)}
+.rw-toast.err .i{background:#E5484D}
+.rw-toast.warn .i{background:#FFBE1A}
+.rw-toast b{display:block;font-weight:600}
+.rw-toast span{font-size:13.5px;color:#55514A}
+.rw-voucher{position:fixed;inset:0;z-index:80;background:var(--a);color:var(--a-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:30px 22px}
+.rw-voucher[hidden]{display:none}
+.rw-voucher h3{color:var(--a-ink);font-size:30px;font-weight:600;line-height:1.1}
+.rw-ring{position:relative;width:160px;height:160px;margin-bottom:8px}
+.rw-ring::before{content:"";position:absolute;inset:0;border-radius:50%;border:12px solid var(--a-lo);border-top-color:var(--a-ink);animation:rw-spin 1.4s linear infinite}
+.rw-ring .c{position:absolute;inset:20px;border-radius:50%;background:#fff;display:grid;place-items:center;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-size:54px;animation:rw-bob 1.4s ease-in-out infinite}
+@keyframes rw-spin{to{transform:rotate(360deg)}}
+@keyframes rw-bob{50%{transform:translateY(-5px) rotate(-4deg)}}
+.rw-voucher .k{font-size:13px;text-transform:uppercase;letter-spacing:.12em;opacity:.85;font-weight:700}
+.rw-voucher .shop{opacity:.85;font-weight:600}
+.rw-clock{font:700 36px/1 var(--display);margin-top:8px;font-variant-numeric:tabular-nums;background:var(--a-lo);color:#fff;padding:10px 16px;border-radius:16px}
+.rw-left{font-weight:700;font-variant-numeric:tabular-nums}
+.rw-voucher .f{font-size:13px;opacity:.85;max-width:30ch;font-weight:500}
+.rw-vdone{margin-top:8px;border:0;border-radius:16px;padding:13px 30px;background:#fff;color:#1E1B16;font:600 18px var(--display);box-shadow:0 4px 0 var(--a-lo);cursor:pointer}
+@media (prefers-reduced-motion:reduce){.rw-ring::before,.rw-ring .c,.rw-redeem,.rw-slot.new{animation-duration:0s}.rw-ring::before{animation:rw-spin 4s linear infinite}}
+
+/* inside the phone preview on rewards/create/: the guest's screen, drawn at phone size
+   (.rw-in-phone is not positioned, so its toast and voucher sit on the phone's screen, which is) */
+.rw-in-phone{position:static;gap:10px}
+.rw-in-phone .rw-toast{position:absolute;top:46px;width:calc(100% - 20px)}
+.rw-in-phone .rw-voucher{position:absolute;inset:0}
+.rw-in-phone .rw-band{padding:14px}
+.rw-in-phone .rw-who b{font-size:17px}
+.rw-in-phone .rw-slot.on{font-size:22px}
+.rw-in-phone .rw-msg,.rw-in-phone .rw-earn{font-size:13px}

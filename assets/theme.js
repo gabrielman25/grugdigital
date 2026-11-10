@@ -1,6 +1,6 @@
 /* Grug · theme.js — the look, matched to Model Kit: dark #17171A with a static pixel pattern, and each section of the
    site owns one accent colour (like Model Kit's modes): Home lime, Games green, Create teal, Avatar purple, Shop yellow,
-   Profile pink. The accent fills the active dock tab, primary buttons, switches and highlights, and tints the pattern.
+   Profile pink, Rewards orange. The accent fills the active dock tab, primary buttons, switches and highlights, and tints the pattern.
    Text on an accent is always #1E1B16. The blue smoky fog (fogbg.js) is only for the Games section.
    Load it in <head> (no defer) right after grug.css so the look is set before the first paint.
    Choices live in the profile (grug.profile.v1 → prefs), so they travel with Profile → Export like everything else.
@@ -18,6 +18,8 @@
     avatar: { name: 'Avatar', a: '#C59BFF', lo: '#9A6FE0' },
     shop: { name: 'Shop', a: '#FFBE1A', lo: '#D99A00' },
     profile: { name: 'Profile', a: '#FF8FC2', lo: '#E0669E' },
+    // solid: plain #17171A behind the page, no pattern tile
+    rewards: { name: 'Rewards', a: '#FF9F5A', lo: '#E0782F', solid: true },
     pearls: { name: 'Pearls', a: '#C59BFF', lo: '#9A6FE0' }
   };
   // the lights that drift through the Games fog
@@ -33,6 +35,7 @@
   }
   const isCalm = s => !s.motion || !!(calmMQ && calmMQ.matches);
   function sectionOf(path) {
+    if (/\/rewards(\/|$)/.test(path)) return 'rewards';   // before the others: rewards/create/ is not the Create tab
     const m = /\/(games|create|avatar|shop|profile)(\/|$)/.exec(path); if (m) return m[1];
     if (/\/pearls(\.html)?$/.test(path)) return 'pearls';
     return 'home';
@@ -51,7 +54,7 @@
   if (sitePage && SECTIONS[section].fog) {
     document.documentElement.classList.add('g-fogged');
     try { if (me) { const s = document.createElement('script'); s.src = me.replace(/theme\.js(\?.*)?$/, 'fogbg.js'); s.defer = true; document.head.appendChild(s); } } catch (e) {}
-  } else if (sitePage) {
+  } else if (sitePage && !SECTIONS[section].solid) {
     document.documentElement.classList.add('g-patterned');
     try { if (me) document.documentElement.style.setProperty('--pattern', 'url("' + me.replace(/theme\.js(\?.*)?$/, 'patterns/' + section + '.png?v=2') + '")'); } catch (e) {}
   }

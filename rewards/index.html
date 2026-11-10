@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Rewards · Grug</title>
+<meta name="description" content="Your rewards cards from every shop you've tapped in at, your Pearls, and the cards you've made for your own shop.">
+<meta name="theme-color" content="#17171A">
+<link rel="icon" href="../favicon.png">
+<link rel="stylesheet" href="../assets/grug.css">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/rewards.css">
+<style>
+.rw-owner{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;justify-content:space-between;padding:20px;border-radius:var(--r);background:#26262B;border:1px solid var(--line2);margin-top:14px}
+.rw-owner h3{font-size:20px}
+.rw-owner p{color:var(--ink2);font-size:15px;margin-top:4px;max-width:56ch}
+.g-section-h .n{color:var(--mut);font-weight:600;font-size:15px}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="rw-head">
+    <h1>Rewards</h1>
+    <p class="lead">Every shop you've tapped in at, all in one place. Each visit fills your card and adds Pearls you can spend in any Grug game.</p>
+  </section>
+
+  <div class="rw-pearls" id="pearls"></div>
+
+  <section class="g-section" id="cards">
+    <div class="g-section-h"><h2>Your cards</h2><span class="n" id="cardsN"></span></div>
+    <div class="rw-tiles" id="cardList"></div>
+  </section>
+
+  <section class="g-section" id="places">
+    <div class="g-section-h"><h2>More places to earn</h2></div>
+    <div class="rw-tiles" id="placeList"></div>
+  </section>
+
+  <section class="g-section" id="mine">
+    <div class="g-section-h"><h2>My creations</h2><a href="create/">Make a card</a></div>
+    <div class="rw-tiles" id="mineList"></div>
+    <div class="rw-owner" id="ownerCta">
+      <div><h3>Own a café, bar or restaurant?</h3><p>Make a free rewards card for your shop in two minutes. Print the QR, and your regulars collect stamps and Pearls every visit.</p></div>
+      <a class="g-btn primary" href="create/">Make a rewards card</a>
+    </div>
+  </section>
+</main>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="../assets/games.js"></script>
+<script src="../assets/grug.js"></script>
+<script src="../assets/rewards.js"></script>
+<script>
+(function(){
+  const G = Grug, RW = GrugRewards, esc = G.esc, $ = s => document.querySelector(s);
+  G.ui.chrome('rewards');
+
+  function when(t) {
+    if (!t) return '';
+    const day = RW.dayKey(t), today = RW.dayKey(Date.now()), y = RW.dayKey(Date.now() - 864e5);
+    if (day === today) return 'today'; if (day === y) return 'yesterday';
+    const d = new Date(t); return Date.now() - t < 6 * 864e5 ? d.toLocaleDateString([], { weekday: 'long' }) : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+  const dots = (have, n) => '<div class="rw-dots" aria-label="' + have + ' of ' + n + ' stamps">' + Array.from({ length: n }, (_, i) => '<i class="' + (i < have ? 'on' : '') + '"></i>').join('') + '</div>';
+  const tileVars = color => 'style="--a:' + color + ';--a-lo:' + RW.lo(color) + ';--a-ink:' + RW.inkOn(color) + '"';
+  const band = (color, icon, name, sub) => '<div class="band" style="' + RW.bandStyle(color) + '"><span class="rw-ic">' + icon + '</span><div><b>' + esc(name) + '</b><small>' + esc(sub) + '</small></div></div>';
+
+  function paintPearls() {
+    $('#pearls').innerHTML = '<span class="pi">' + G.icon('pearl') + '</span><div><div class="num">' + G.fmt(RW.balance()) + '<small>Pearls</small></div></div>' +
+      '<p class="txt"><b>+' + RW.TAP_PEARLS + ' Pearls every time you tap in</b> at a shop (once a day each). Pearls are Grug’s premium currency: spend them in any game on Grug.</p>' +
+      '<div class="row"><a class="g-btn primary" href="' + G.url('games/') + '">' + G.icon('game-controller') + 'Play a game</a><a class="g-btn" href="' + G.pearlsUrl() + '">Get more</a></div>';
+  }
+
+  function paint() {
+    paintPearls();
+    /* your cards: stamp cards saved on this phone + partner apps you've used */
+    const stamp = RW.cards().map(x => {
+      const have = Math.min(x.st.stamps, x.cfg.s), full = have >= x.cfg.s;
+      return { at: x.st.seen || 0, html: '<a class="rw-tile" ' + tileVars(x.cfg.color) + ' href="card/#c=' + x.st.c + '">' + band(x.cfg.color, esc(x.cfg.i), x.cfg.n, 'Stamp card') +
+        '<div class="body">' + dots(have, x.cfg.s) +
+        '<div class="line"><span>' + (full ? '<b>Reward ready</b>' : '<b>' + have + ' of ' + x.cfg.s + '</b> stamps') + '</span><span>' + esc(RW.rewardText(x.cfg.r)) + '</span></div>' +
+        '<div class="line"><span>Last visit ' + esc(when(x.st.seen)) + '</span><span>' + G.fmt(x.st.pearls || 0) + ' Pearls earned</span></div></div></a>' };
+    });
+    const pts = G.points().filter(p => !p.game.standalone && p.game.status !== 'legacy');
+    const visited = pts.filter(p => p.has && (p.points > 0 || p.visits > 0 || p.runs > 0));
+    const partner = visited.map(p => {
+      const g = p.game, s = G.appState(g) || {}, last = Array.isArray(s.history) && s.history[0] ? +s.history[0].at || 0 : 0;
+      return { at: last, html: '<a class="rw-tile" href="' + G.url(g.play) + '">' + band(g.color, G.icon('storefront'), g.partner, 'Grug partner · ' + g.place) +
+        '<div class="body"><div class="line"><span><b>' + G.fmt(p.points) + '</b> points</span><span>' + G.fmt(p.visits) + ' visit' + (p.visits === 1 ? '' : 's') + '</span></div>' +
+        '<div class="line"><span>' + esc(g.earn || 'Earn points every visit') + '</span></div>' +
+        '<div class="line"><span>' + (last ? 'Last visit ' + esc(when(last)) : 'Open the app') + '</span><span>' + esc(g.title) + '</span></div></div></a>' };
+    });
+    const all = stamp.concat(partner).sort((a, b) => b.at - a.at);
+    $('#cardsN').textContent = all.length ? all.length + ' card' + (all.length > 1 ? 's' : '') : '';
+    $('#cardList').innerHTML = all.length ? all.map(x => x.html).join('') :
+      '<div class="rw-empty"><b>No cards yet</b><span>Scan the QR or tap the tag at a shop and its card shows up here, with your stamps and Pearls.</span></div>';
+
+    /* partners you haven't visited yet */
+    const rest = pts.filter(p => visited.indexOf(p) < 0 && p.game.status === 'live');
+    $('#places').hidden = !rest.length;
+    $('#placeList').innerHTML = rest.map(p => { const g = p.game;
+      return '<a class="rw-tile" href="' + G.url(g.play) + '">' + band(g.color, G.icon('storefront'), g.partner, 'Grug partner · ' + g.place) +
+        '<div class="body"><div class="line"><span>' + esc(g.earn || 'Earn points every visit') + '</span></div><div class="line"><span>Play ' + esc(g.title) + '</span><span>Not visited yet</span></div></div></a>'; }).join('');
+
+    /* the cards this person made */
+    const mine = RW.mine();
+    $('#mineList').hidden = !mine.length;
+    $('#mineList').innerHTML = mine.map(m => { const L = RW.links(m.cfg);
+      return '<div class="rw-tile" ' + tileVars(m.cfg.color) + '>' + band(m.cfg.color, esc(m.cfg.i), m.cfg.n, 'Your card · made ' + when(m.at)) +
+        '<div class="body"><div class="line"><span>' + m.cfg.s + ' stamps</span><span><b>' + esc(RW.rewardText(m.cfg.r)) + '</b></span></div>' +
+        '<div class="acts"><a class="g-btn sm primary" href="create/?c=' + m.c + '">' + G.icon('pencil-simple') + 'Edit</a><a class="g-btn sm" href="create/?c=' + m.c + '#print">' + G.icon('qr-code') + 'Print QR</a>' +
+        '<a class="g-btn sm" href="' + esc(L.open) + '">Open card</a><button type="button" class="g-btn sm quiet del" data-del="' + m.c + '" aria-label="Remove ' + esc(m.cfg.n) + '">' + G.icon('trash') + 'Remove</button></div></div></div>'; }).join('');
+    $('#ownerCta').querySelector('h3').textContent = mine.length ? 'Make another card' : 'Own a café, bar or restaurant?';
+  }
+  $('#mineList').addEventListener('click', async e => {
+    const b = e.target.closest('[data-del]'); if (!b) return;
+    const cfg = RW.decode(b.dataset.del);
+    const ok = await G.ui.dialog({ title: 'Remove ' + (cfg ? cfg.n : 'this card') + '?', html: '<p>It comes off your list here. Printed QR codes keep working, and guests keep their stamps.</p>',
+      actions: [{ label: 'Keep it', kind: 'quiet', value: null }, { label: 'Remove', kind: 'danger', value: 'go' }] });
+    if (ok === 'go') { RW.removeMine(b.dataset.del); paint(); G.ui.toast('Removed from My creations', { icon: 'trash' }); }
+  });
+  paint();
+  addEventListener('storage', e => { if (!e.key || e.key === RW.KEY || e.key === 'grug.pearls.v1') paint(); });
+  addEventListener('pageshow', paint);
+})();
+</script>
+</body>
+</html>

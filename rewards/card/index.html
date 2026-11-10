@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Rewards card · Grug</title>
+<meta name="description" content="Your rewards card: a stamp every visit, 10 Pearls for any game on Grug.">
+<meta name="theme-color" content="#17171A">
+<link rel="icon" href="../../favicon.png">
+<link rel="stylesheet" href="../../assets/grug.css">
+<script src="../../assets/theme.js"></script>
+<link rel="stylesheet" href="../../assets/fossil32/fossil32.css">
+<link rel="stylesheet" href="../../assets/rewards.css">
+<style>
+.cd{max-width:520px;margin:0 auto;padding-top:14px;display:flex;flex-direction:column;gap:12px}
+.cd-back{display:inline-flex;align-items:center;gap:6px;color:var(--ink2);font-weight:700;font-size:15px}
+.cd-back .gi{width:18px;height:18px}
+.cd-games{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.cd-bad{max-width:520px;margin:30px auto;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.cd-bad p{color:var(--ink2)}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div id="bad" class="cd-bad" hidden><h1>This card link doesn't work</h1><p>It may have been typed by hand or cut short. Ask the shop for their QR, or open your saved cards.</p><a class="g-btn primary" href="../">Open Rewards</a></div>
+  <div class="cd" id="cd" hidden>
+    <a class="cd-back" href="../" id="back"></a>
+    <div id="card"></div>
+  </div>
+  <section class="g-section" id="games" hidden>
+    <div class="g-section-h"><h2>Spend your Pearls</h2><a href="../../games/">All games</a></div>
+    <p style="color:var(--ink2);margin:-6px 2px 14px;max-width:60ch">Pearls work in every game on Grug: buy boosts, passes and power-ups.</p>
+    <div class="cd-games" id="gameList"></div>
+  </section>
+</main>
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/grug.js"></script>
+<script src="../../assets/rewards.js"></script>
+<script>
+(function(){
+  const G = Grug, RW = GrugRewards, $ = s => document.querySelector(s);
+  G.ui.chrome('rewards', { title: 'Rewards card' });
+  const p = new URLSearchParams(location.hash.slice(1)), c = p.get('c'), k = p.get('k');
+  const cfg = c && RW.decode(c);
+  if (!cfg) { $('#bad').hidden = false; return; }
+
+  document.title = cfg.n + ' · Rewards card · Grug';
+  $('#cd').hidden = false; $('#games').hidden = false;
+  $('#back').innerHTML = G.icon('arrow-left') + 'All your cards';
+  const id = RW.shopId(cfg);
+  const card = RW.mountCard($('#card'), { cfg, c, store: RW.cardStore(id, c), pearls: { grant: () => RW.grantPearls(id), balance: RW.balance } });
+
+  // a stamp link (from the QR or an NFC sticker): stamp once, then drop &k= so a refresh doesn't try again
+  if (k) {
+    const r = card.scan(k);
+    if (r.ok) { try { G.announce('reward', { app: cfg.n, pearls: r.pearls }); } catch (e) {} }
+    try { history.replaceState(null, '', location.pathname + location.search + '#c=' + c); } catch (e) {}
+  }
+  addEventListener('hashchange', () => location.reload());
+
+  // where to spend the Pearls: the game library as FOSSIL32 boxes
+  const list = G.GAMES.filter(g => g.status !== 'legacy' && g.listed !== false).slice(0, 6);
+  $('#gameList').innerHTML = list.map(g => G.ui.boxTile(g)).join('');
+})();
+</script>
+<script type="module" src="../../assets/fossil32/fossil32.js"></script>
+</body>
+</html>
