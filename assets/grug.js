@@ -18,8 +18,11 @@
   const ROLES = {
     player: { label: 'Player', icon: 'game-controller', color: '#7EE081', text: 'Play games, earn rewards at shops and dress up your avatar', tabs: ['home', 'games', 'rewards', 'avatar', 'shop', 'profile'] },
     owner: { label: 'Restaurant owner', icon: 'storefront', color: '#FF9F5A', text: 'Make a free rewards card that brings guests back', tabs: ['home', 'games', 'rewards', 'profile'] },
-    dev: { label: 'Game developer', icon: 'cube', color: '#4FD8C4', text: 'Free 3D models, Model Kit and the game library', tabs: ['home', 'games', 'create', 'avatar', 'shop', 'profile'] }
+    dev: { label: 'Game developer', icon: 'cube', color: '#4FD8C4', text: 'Free 3D models, Model Kit and the game library', tabs: ['home', 'games', 'create', 'avatar', 'shop', 'profile'] },
+    creator: { label: 'Online creator', icon: 'camera', color: '#5AB0FF', text: 'Make a link page or a 3D world for your socials', tabs: ['home', 'games', 'links', 'avatar', 'shop', 'profile'] }
   };
+  // tabs only some roles get; everyone else (and 'all') never sees them in the dock
+  const ROLE_ONLY_TABS = { links: ['creator'] };
   const EXPORT_FORMAT = 'grug-profile';
 
   /* ---------- where the site lives (works from /, /grugdigital/, play/yoshi/, …) ---------- */
@@ -385,22 +388,22 @@
   }
 
   const roleOf = () => profile.prefs.role || '';
-  const showsTab = k => { const r = ROLES[roleOf()]; return !r || r.tabs.includes(k); };
+  const showsTab = k => { const r = ROLES[roleOf()]; return r ? r.tabs.includes(k) : !ROLE_ONLY_TABS[k]; };
 
   /* ---------- UI chrome: floating top bar + dock (kubii theme) ---------- */
   const NAV = [
-    ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['rewards', 'Rewards', 'gift', 'rewards/'], ['create', 'Create', 'cube', 'create/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'],
+    ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['rewards', 'Rewards', 'gift', 'rewards/'], ['links', 'Links', 'share-network', 'links/'], ['create', 'Create', 'cube', 'create/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'],
     ['shop', 'Shop', 'storefront', 'shop/'], ['profile', 'Profile', 'user', 'profile/']
   ];
   // dock icons: full-colour pictures from the icon pack (assets/icons/dock-*.webp)
   // dock icons: colourful pictures, or the simple set in one colour per tab
   // one colour per section, the same accents theme.js gives each section (Model Kit style)
-  const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], rewards: ['gift', '#FF9F5A'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'] };
-  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', rewards: '#E0782F', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E' };
+  const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], rewards: ['gift', '#FF9F5A'], links: ['share-network', '#5AB0FF'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'] };
+  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', rewards: '#E0782F', links: '#2F86D6', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E' };
   const dockIcon = k => colorful() ? '<img class="k-ic" src="' + iconSrc('dock-' + k) + '" alt="" aria-hidden="true" draggable="false">'
     : '<svg class="k-ic k-ic-s" viewBox="0 0 16 16" fill="currentColor" style="color:' + DOCK_SIMPLE[k][1] + '" aria-hidden="true" focusable="false">' + (SIMPLE['dock-' + DOCK_SIMPLE[k][0]] || SIMPLE[DOCK_SIMPLE[k][0]] || '') + '</svg>';
   const DOCK = {};
-  ['home', 'games', 'rewards', 'create', 'avatar', 'shop', 'profile'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
+  ['home', 'games', 'rewards', 'links', 'create', 'avatar', 'shop', 'profile'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
   const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
   /* ---------- Pearls (the site-wide currency, sold on pearls.html; wallet in 'grug.pearls.v1') ---------- */
   const PEARL_KEY = 'grug.pearls.v1';

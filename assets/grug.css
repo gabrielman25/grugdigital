@@ -509,8 +509,8 @@ html.g-scaled .g-dialog{zoom:var(--g-ui)}
    [data-only-for="owner dev"] shows only for those roles; [data-hide-for="owner"] hides for them. 'all' sees everything
    that isn't role-only. */
 [data-only-for]{display:none!important}
-html[data-role="player"] [data-only-for~="player"],html[data-role="owner"] [data-only-for~="owner"],html[data-role="dev"] [data-only-for~="dev"]{display:revert!important}
-html[data-role="player"] [data-hide-for~="player"],html[data-role="owner"] [data-hide-for~="owner"],html[data-role="dev"] [data-hide-for~="dev"]{display:none!important}
+html[data-role="player"] [data-only-for~="player"],html[data-role="owner"] [data-only-for~="owner"],html[data-role="dev"] [data-only-for~="dev"],html[data-role="creator"] [data-only-for~="creator"]{display:revert!important}
+html[data-role="player"] [data-hide-for~="player"],html[data-role="owner"] [data-hide-for~="owner"],html[data-role="dev"] [data-hide-for~="dev"],html[data-role="creator"] [data-hide-for~="creator"]{display:none!important}
 .g-role-dialog .g-dialog-actions{display:none}
 .g-roles{display:flex;flex-direction:column;gap:10px}
 .g-roles button{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px;border-radius:18px;background:#26262B;border:2px solid var(--line2);color:var(--ink);transition:border-color .15s,transform .15s var(--spring)}

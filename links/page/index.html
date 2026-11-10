@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Links · Grug</title>
+<meta name="description" content="All my links in one place, on Grug. Stop by for 10 Pearls.">
+<meta name="theme-color" content="#17171A">
+<link rel="icon" href="../../favicon.png">
+<link rel="stylesheet" href="../../assets/grug.css">
+<script src="../../assets/theme.js"></script>
+<link rel="stylesheet" href="../../assets/rewards.css">
+<link rel="stylesheet" href="../../assets/links.css">
+<style>
+.lp{max-width:760px;margin:0 auto;padding-top:14px;display:flex;flex-direction:column;gap:14px}
+.lp-sub{color:var(--mut);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.08em;margin:6px 2px -4px}
+.lp-foot{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:10px}
+.lp-bad{max-width:520px;margin:30px auto;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.lp-bad p{color:var(--ink2)}
+.lp-go{display:flex;width:100%;margin-top:12px}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div id="bad" class="lp-bad" hidden><h1>This link doesn't work</h1><p>It may have been cut short. Ask the creator for their link again.</p><a class="g-btn primary" href="../../">Go to Grug</a></div>
+  <div class="lp" id="lp" hidden>
+    <div class="lk-head" id="head"></div>
+    <div class="lk-earn" id="earn"></div>
+    <div class="lk-world" id="world" hidden>
+      <div class="lk-start" id="start"><h2 id="startT"></h2><p>Each room is one of their socials. Walk into a doorway to visit it.</p><button type="button" class="g-btn primary big" id="startBtn">Start exploring</button></div>
+      <span class="lk-hint" id="hint" hidden>Tap where to go · or use WASD / arrow keys</span>
+    </div>
+    <p class="lp-sub" id="listLbl">Links</p>
+    <div class="lk-list" id="list"></div>
+    <div class="lp-foot"><a class="g-btn" href="../../games/">Spend your Pearls</a><a class="g-btn quiet" href="../">Make your own link page</a></div>
+  </div>
+</main>
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/grug.js"></script>
+<script src="../../assets/rewards.js"></script>
+<script src="../../assets/links.js"></script>
+<script>
+(function(){
+  const G = Grug, RW = GrugRewards, LK = GrugLinks, esc = G.esc, $ = s => document.querySelector(s);
+  G.ui.chrome('links', { title: 'Links', noRole: true });   // followers arrive from a creator's bio: no "who are you?" first
+  const c = new URLSearchParams(location.hash.slice(1)).get('c'), cfg = c && LK.decode(c);
+  if (!cfg) { $('#bad').hidden = false; return; }
+  addEventListener('hashchange', () => location.reload());
+  document.title = cfg.n + ' · Links · Grug';
+  $('#lp').hidden = false;
+  const links = LK.linksOf(cfg);
+
+  // the creator's colours and header
+  const head = $('#head'); RW.themeVars(head, cfg.color);
+  head.innerHTML = '<span class="lk-av">' + esc(cfg.n.replace(/^@/, '').charAt(0).toUpperCase()) + '</span><div><h1>' + esc(cfg.n) + '</h1><small>' + links.length + ' link' + (links.length > 1 ? 's' : '') + (cfg.mode === 'g' ? ' · ' + esc(LK.WORLDS[cfg.world].label) : '') + '</small></div>';
+
+  // 10 Pearls for stopping by, once a day per page
+  const got = LK.visitPearls(cfg); LK.markSeen(cfg, c);
+  $('#earn').innerHTML = G.icon('pearl') + '<span>' + (got ? '<b>+' + got + ' Pearls for stopping by!</b> Spend them in any game on Grug.' : 'Stop by once a day for <b>10 Pearls</b> to spend in any game on Grug.') + '</span>';
+  if (got) setTimeout(() => G.ui.toast('+' + got + ' Pearls for stopping by!', { icon: 'pearl', ms: 3200 }), 500);
+
+  // the plain buttons (always here, and the whole page when it's a link page)
+  $('#list').innerHTML = links.map(L => '<a class="lk-btn" style="--lc:' + L.color + '" href="' + esc(L.url) + '" target="_blank" rel="noopener noreferrer">' +
+    '<span class="lk-badge" style="background:' + L.color + ';color:' + L.ink + '">' + esc(L.badge) + '</span><span class="t"><b>' + esc(L.label) + '</b><small>' + esc(L.handle) + '</small></span>' + G.icon('arrow-square-out') + '</a>').join('');
+
+  // the 3D world: walk into a room, then we ask before leaving Grug
+  if (cfg.mode === 'g') {
+    $('#world').hidden = false; $('#listLbl').textContent = 'Or pick a link';
+    $('#startT').textContent = cfg.n + '’s world';
+    let world = null;
+    const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+    async function door(L) {
+      const go = await G.ui.dialog({ title: 'Visit ' + L.label + '?', html: '<p>' + esc(L.handle) + '</p><p class="g-fine" style="margin-top:6px">You’re leaving Grug for ' + esc(LK.host(L.url)) + '.</p>' +
+        '<a class="g-btn primary block lp-go" href="' + esc(L.url) + '" target="_blank" rel="noopener noreferrer" data-go>Go to ' + esc(L.label) + '</a>',
+        actions: [{ label: 'Keep exploring', kind: 'quiet', value: null }], onOpen: d => { const a = d.querySelector('[data-go]'); a.addEventListener('click', () => setTimeout(() => d.close(''), 50)); } });
+      if (world) world.back();
+    }
+    $('#startBtn').addEventListener('click', async () => {
+      $('#startBtn').disabled = true; $('#startBtn').textContent = 'Loading…';
+      try {
+        await load('../../assets/three.min.js'); await load('../../assets/linkworld.js');
+        world = GrugLinkWorld.mount($('#world'), { cfg, links, onDoor: door });
+        if (!world) throw new Error('no webgl');
+        $('#start').hidden = true; $('#hint').hidden = false; setTimeout(() => { $('#hint').hidden = true; }, 7000);
+      } catch (e) { $('#start').innerHTML = '<h2>This phone can’t show the 3D world</h2><p>Pick a link below instead.</p>'; }
+    });
+  }
+})();
+</script>
+</body>
+</html>

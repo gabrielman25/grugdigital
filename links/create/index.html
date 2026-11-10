@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Make a link page · Grug</title>
+<meta name="description" content="Make a free link page for all your socials, or a little 3D world your followers walk through.">
+<meta name="theme-color" content="#17171A">
+<link rel="icon" href="../../favicon.png">
+<link rel="stylesheet" href="../../assets/grug.css">
+<script src="../../assets/theme.js"></script>
+<link rel="stylesheet" href="../../assets/rewards.css">
+<link rel="stylesheet" href="../../assets/links.css">
+<link rel="stylesheet" href="../../assets/wizard.css">
+</head>
+<body>
+<main class="wrap wz">
+  <div class="wz-top"><a href="../" id="exit"></a><div class="wz-bar"><i id="bar"></i></div><span class="wz-count" id="count"></span></div>
+  <section class="wz-slide" id="slide"></section>
+  <div class="wz-nav" id="nav"><button type="button" class="g-btn" id="backBtn">Back</button><button type="button" class="g-btn primary" id="nextBtn">Next</button></div>
+</main>
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/grug.js"></script>
+<script src="../../assets/rewards.js"></script>
+<script src="../../assets/links.js"></script>
+<script>
+(function(){
+  const G = Grug, RW = GrugRewards, LK = GrugLinks, esc = G.esc, $ = s => document.querySelector(s);
+  G.ui.chrome('links', { title: 'Make a page', noRole: true });
+  $('#exit').innerHTML = G.icon('arrow-left') + 'Links';
+
+  const editing = new URLSearchParams(location.search).get('c');
+  let cfg = (editing && LK.decode(editing)) || LK.normalize({ n: '', mode: 'g', world: 'c' });
+  let named = !!(editing && LK.decode(editing)), saved = named ? editing : null;
+  const handles = {}; cfg.links.forEach(l => { handles[l.p] = l.h; });
+
+  const opt = (key, val, icon, label, sub, extra) => '<button type="button" class="wz-opt" role="radio" data-' + key + '="' + val + '" aria-checked="false">' +
+    (icon ? '<span class="ic">' + icon + '</span>' : '') + '<span class="t">' + esc(label) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span>' + (extra || '') + '<span class="ck">' + G.icon('check') + '</span></button>';
+  const set = patch => { cfg = LK.normalize(Object.assign({}, cfg, patch)); paintPreview(); };
+  const syncLinks = () => set({ links: LK.ORDER.map(p => ({ p, h: handles[p] || '' })) });
+
+  const STEPS = [
+    { id: 'name', q: 'What’s your name or handle?', hint: 'It goes at the top of your page.',
+      ok: () => named && cfg.n.trim().length > 0,
+      html: () => '<input class="g-input wz-name" id="aName" maxlength="28" autocomplete="nickname" placeholder="e.g. @maya.makes" value="' + (named ? esc(cfg.n) : '') + '">',
+      wire: () => { const i = $('#aName'); i.focus(); i.addEventListener('input', () => { named = i.value.trim().length > 0; set({ n: i.value }); paintNav(); }); } },
+    { id: 'links', q: 'Where can people find you?', hint: 'Just your handle, not the whole link. Fill in as many as you like.',
+      ok: () => cfg.links.length > 0,
+      html: () => '<div class="lk-rows">' + LK.ORDER.map(p => { const P = LK.PLATFORMS[p];
+        return '<label class="lk-row" data-row="' + p + '"><span class="lk-badge sm" style="background:' + P.color + ';color:' + P.ink + '">' + P.badge + '</span><b>' + P.label + '</b>' +
+          '<input class="g-input" data-h="' + p + '" placeholder="' + esc(P.ph) + '" value="' + esc(handles[p] || '') + '" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="' + (p === 'web' ? 'url' : 'text') + '"><span class="ck">' + G.icon('check') + '</span></label>'; }).join('') + '</div>',
+      wire: () => {
+        const paintRows = () => document.querySelectorAll('[data-row]').forEach(r => r.classList.toggle('ok', !!LK.cleanHandle(r.dataset.row, handles[r.dataset.row])));
+        document.querySelectorAll('[data-h]').forEach(i => i.addEventListener('input', () => { handles[i.dataset.h] = i.value; syncLinks(); paintRows(); paintNav(); }));
+        paintRows(); const first = document.querySelector('[data-h]'); if (first && !cfg.links.length) first.focus();
+      } },
+    { id: 'color', q: 'Pick your color', hint: 'Your page and your world use it.',
+      html: () => '<div class="wz-sw">' + LK.COLORS.map(c => '<button type="button" role="radio" data-c="' + c + '" style="background:' + c + '" aria-label="Color ' + c + '" aria-checked="false"></button>').join('') +
+        '<label title="Any color" id="aCustom" role="radio" aria-checked="false">+<input type="color" aria-label="Pick any color"></label></div>',
+      pick: el => el.dataset.c, sel: () => cfg.color, apply: c => set({ color: c }),
+      wire: () => { const inp = $('#aCustom input'); inp.value = cfg.color.toLowerCase(); inp.addEventListener('input', () => { set({ color: inp.value }); mark(); }); } },
+    { id: 'mode', q: 'How should your page work?', hint: 'You can change this anytime.', auto: true,
+      html: () => opt('m', 'g', '🎮', 'A 3D world', 'Followers walk into a room to visit each of your socials', '<span class="tag">Popular</span>') + opt('m', 'l', '🔗', 'A simple link page', 'A list of buttons'),
+      pick: el => el.dataset.m, sel: () => cfg.mode, apply: m => set({ mode: m }) },
+    { id: 'world', q: 'Pick a world', hint: 'Where your followers walk around.', auto: true, skip: () => cfg.mode !== 'g',
+      html: () => Object.keys(LK.WORLDS).map(k => { const w = LK.WORLDS[k];
+        return opt('w', k, '', w.label, w.blurb, '<span class="lk-worlds"><i style="background:' + w.sky + '"></i><i style="background:' + w.wall + '"></i><i style="background:' + w.accent + '"></i></span>'); }).join(''),
+      pick: el => el.dataset.w, sel: () => cfg.world, apply: w => set({ world: w }) },
+    { id: 'done', done: true }
+  ];
+  const QUESTIONS = STEPS.length - 1;
+
+  /* preview on the right: the page as a phone sees it, or the live 3D world on the world step */
+  let world = null;
+  const load = src => new Promise((ok, no) => { if (document.querySelector('script[src="' + src + '"]')) return ok(); const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+  function mock() {
+    const L = LK.linksOf(cfg), name = named ? cfg.n : 'Your name';
+    const rows = (L.length ? L : [LK.PLATFORMS.ig, LK.PLATFORMS.yt].map(P => ({ label: P.label, badge: P.badge, color: P.color, ink: P.ink, handle: '@yourname' }))).slice(0, 5);
+    return '<div class="lk-mock"><div class="lk-head" style="' + RW.bandStyle(cfg.color) + ';--a-lo:' + RW.lo(cfg.color) + '"><span class="lk-av">' + esc(name.replace(/^@/, '').charAt(0).toUpperCase()) + '</span><div><h1>' + esc(name) + '</h1><small>' + (cfg.mode === 'g' ? '3D world' : 'Links') + '</small></div></div>' +
+      rows.map(x => '<span class="lk-btn"><span class="lk-badge sm" style="background:' + x.color + ';color:' + x.ink + '">' + esc(x.badge) + '</span><span class="t"><b>' + esc(x.label) + '</b><small>' + esc(x.handle) + '</small></span></span>').join('') + '</div>';
+  }
+  async function show3d(box) {
+    try {
+      await load('../../assets/three.min.js'); await load('../../assets/linkworld.js');
+      if (world) world.dispose();
+      const L = LK.linksOf(cfg).length ? LK.linksOf(cfg) : LK.linksOf(LK.normalize({ links: [{ p: 'ig', h: 'yourname' }, { p: 'yt', h: 'yourname' }, { p: 'tt', h: 'yourname' }] }));
+      world = GrugLinkWorld.mount(box, { cfg: Object.assign({}, cfg, { n: named ? cfg.n : 'Your world' }), links: L, preview: true });
+      if (!world) box.outerHTML = mock();
+    } catch (e) { box.outerHTML = mock(); }
+  }
+  function paintPreview() {
+    const p = $('#prev'); if (!p) return;
+    const st = STEPS[cur];
+    if (st.id === 'world' || (st.done && cfg.mode === 'g')) { if (world) world.dispose(); world = null; p.innerHTML = '<div class="lk-3d" id="w3d"></div>'; show3d($('#w3d')); }
+    else { if (world) { world.dispose(); world = null; } p.innerHTML = mock(); }
+  }
+  let previewT = 0; const softPreview = () => { clearTimeout(previewT); previewT = setTimeout(paintPreview, 250); };
+
+  /* slides (same flow as the rewards builder) */
+  let cur = 0, prevIdx = -1;
+  const slide = $('#slide');
+  const visible = i => !(STEPS[i].skip && STEPS[i].skip());
+  function show(i) {
+    i = Math.max(0, Math.min(STEPS.length - 1, i));
+    if (i > 0 && !named) i = 0;
+    if (i > 1 && !cfg.links.length) i = 1;
+    const st = STEPS[i], back = i < prevIdx; prevIdx = cur = i;
+    const shown = STEPS.filter((s, k) => !s.done && visible(k)).length, pos = STEPS.slice(0, i + 1).filter((s, k) => !s.done && visible(k)).length;
+    $('#bar').style.width = (st.done ? 100 : (pos - 1) / shown * 100) + '%';
+    $('#count').textContent = st.done ? 'Done!' : 'Step ' + pos + ' of ' + shown;
+    slide.className = 'wz-slide' + (st.done ? ' wz-done' : '') + (back ? ' back' : ''); void slide.offsetWidth; slide.classList.add('in');
+    if (st.done) return showDone();
+    slide.innerHTML = '<div class="wz-a" role="radiogroup" aria-labelledby="qh">' + st.html() + '</div>' +
+      '<div class="wz-q"><span class="n">' + pos + '</span><h1 id="qh">' + esc(st.q) + '</h1><p>' + esc(st.hint) + '</p><div class="wz-prev" id="prev"></div></div>';
+    if (st.pick) slide.querySelectorAll('[role=radio]:not(#aCustom)').forEach(b => b.addEventListener('click', () => {
+      st.apply(st.pick(b)); mark(); G.ui.buzz(); paintNav();
+      if (st.id === 'world') softPreview();
+      if (st.auto) setTimeout(() => { if (cur === i) go(next(i)); }, st.id === 'world' ? 900 : 320);
+    }));
+    if (st.wire) st.wire();
+    mark(); paintPreview(); paintNav(); $('#nav').hidden = false;
+  }
+  const next = i => { let k = i + 1; while (k < STEPS.length - 1 && !visible(k)) k++; return k; };
+  const prev = i => { let k = i - 1; while (k > 0 && !visible(k)) k--; return k; };
+  function mark() {
+    const st = STEPS[cur]; if (!st.sel) return; const v = String(st.sel()).toUpperCase();
+    slide.querySelectorAll('[role=radio]:not(#aCustom)').forEach(b => { const k = Object.keys(b.dataset)[0]; b.setAttribute('aria-checked', String(String(b.dataset[k]).toUpperCase() === v)); });
+    const cl = $('#aCustom'); if (cl) { const preset = LK.COLORS.some(c => c.toUpperCase() === cfg.color); cl.setAttribute('aria-checked', String(!preset)); cl.style.background = preset ? '' : cfg.color; cl.style.color = preset ? '' : RW.inkOn(cfg.color); }
+  }
+  function paintNav() { const st = STEPS[cur]; $('#backBtn').style.visibility = cur === 0 ? 'hidden' : ''; $('#nextBtn').disabled = st.ok ? !st.ok() : false; $('#nextBtn').textContent = next(cur) === STEPS.length - 1 ? 'Finish' : 'Next'; }
+  function go(i) { const h = '#' + STEPS[Math.max(0, Math.min(STEPS.length - 1, i))].id; if (location.hash !== h) location.hash = h; else show(i); }
+  const fromHash = () => { const i = STEPS.findIndex(s => s.id === location.hash.slice(1)); return i < 0 ? 0 : i; };
+  addEventListener('hashchange', () => show(fromHash()));
+  $('#backBtn').addEventListener('click', () => go(prev(cur)));
+  $('#nextBtn').addEventListener('click', () => { if (!$('#nextBtn').disabled) go(next(cur)); });
+  addEventListener('keydown', e => { if (e.key === 'Enter' && !document.querySelector('dialog[open]') && !STEPS[cur].done && !$('#nextBtn').disabled) { e.preventDefault(); go(next(cur)); } });
+
+  function showDone() {
+    $('#nav').hidden = true;
+    const c = LK.encode(cfg); if (saved !== c) { LK.saveMine(c, saved); saved = c; try { history.replaceState(null, '', '?c=' + c + '#done'); } catch (e) {} }
+    const S = LK.share(cfg);
+    slide.innerHTML = '<div class="wz-a">' +
+        '<button type="button" class="g-btn primary wz-big" id="copyBtn">' + G.icon('copy') + 'Copy your link</button>' +
+        '<div class="wz-acts"><a class="g-btn" href="' + esc(S.open) + '" target="_blank" rel="noopener">Open your page</a><button type="button" class="g-btn" id="redo">' + G.icon('pencil-simple') + 'Change answers</button></div>' +
+        '<p class="wz-saved">' + G.icon('check-circle') + '<span>Saved to <a href="../#mine">Links → My link pages</a> on this device.</span></p>' +
+        '<div class="wz-share"><h3>What to do with it</h3>' +
+          '<div class="wz-row"><span class="ic">' + G.icon('share-network') + '</span><div><b>Put it in your bio</b><span>Paste the link into your Instagram, TikTok or X bio, or anywhere you share links.</span></div></div>' +
+          '<div class="wz-row"><span class="ic">' + G.icon('pearl') + '</span><div><b>Followers get 10 Pearls</b><span>Each follower gets 10 Pearls a day for stopping by, to spend in any game on Grug. Free for you.</span></div></div>' +
+          '<div class="wz-row"><span class="ic">' + G.icon('pencil-simple') + '</span><div><b>Changing it later</b><span>Edit it from My link pages, then share the new link. The old one keeps working.</span></div></div>' +
+        '</div></div>' +
+      '<div class="wz-q"><span class="n">' + G.icon('check') + '</span><h1>Your page is ready!</h1><p>' + (cfg.mode === 'g' ? 'This is your world. Followers walk into a room to reach each of your socials.' : 'This is what your followers see.') + '</p><div class="wz-prev" id="prev" style="display:block"></div></div>';
+    paintPreview();
+    $('#copyBtn').addEventListener('click', async e => { try { await navigator.clipboard.writeText(S.url); e.currentTarget.innerHTML = G.icon('check') + 'Copied!'; } catch (err) { prompt('Copy your link:', S.url); } });
+    $('#redo').addEventListener('click', () => go(0));
+  }
+
+  show(named ? (fromHash() || STEPS.length - 1) : 0);
+  if (!named && location.hash) history.replaceState(null, '', location.pathname + location.search);
+})();
+</script>
+</body>
+</html>

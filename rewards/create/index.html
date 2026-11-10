@@ -10,87 +10,7 @@
 <link rel="stylesheet" href="../../assets/grug.css">
 <script src="../../assets/theme.js"></script>
 <link rel="stylesheet" href="../../assets/rewards.css">
-<style>
-/* one question per slide: the answers on the left, the question (and a live preview) on the right; stacked on phones */
-.wz{max-width:1040px;padding-top:10px}
-.wz-top{display:flex;align-items:center;gap:14px;margin-bottom:22px}
-.wz-top a{display:inline-flex;align-items:center;gap:6px;color:var(--ink2);font-weight:700;font-size:15px;flex:none}
-.wz-top a .gi{width:18px;height:18px}
-.wz-bar{flex:1;height:10px;border-radius:999px;background:#2C2C31;overflow:hidden}
-.wz-bar i{display:block;height:100%;width:0;background:var(--mode);border-radius:999px;transition:width .35s var(--spring)}
-.wz-count{flex:none;color:var(--mut);font-weight:700;font-size:14px;min-width:84px;text-align:right}
-.wz-slide{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:40px;align-items:start;min-height:440px}
-.wz-slide.in{animation:wz-in .32s var(--spring)}
-@keyframes wz-in{from{opacity:0;transform:translateX(18px)}}
-.wz-slide.back.in{animation-name:wz-back}
-@keyframes wz-back{from{opacity:0;transform:translateX(-18px)}}
-.wz-q{position:sticky;top:calc(var(--top) + var(--sat) + 20px)}
-.wz-q .n{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--mode);color:var(--on-sel);font-weight:700;font-size:18px;box-shadow:0 3px 0 var(--mode-lo)}
-.wz-q h1{font-size:clamp(30px,4.6vw,44px);margin:14px 0 8px}
-.wz-q p{color:var(--ink2);font-size:17px;max-width:34ch}
-.wz-prev{margin-top:22px;max-width:340px}
-.wz-prev .rw-slot.on{font-size:22px}
-.wz-a{display:flex;flex-direction:column;gap:10px;max-width:520px}
-.wz-opt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px 16px;border-radius:18px;background:#232327;border:2px solid var(--line2);color:var(--ink);font:600 18px var(--display);cursor:pointer;transition:border-color .15s,transform .15s var(--spring),background .15s}
-.wz-opt:hover{border-color:#55555D;transform:translateX(3px)}
-.wz-opt .ic{width:44px;height:44px;border-radius:13px;background:#2F2F35;display:grid;place-items:center;font-size:24px;flex:none;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
-.wz-opt .ic .gi{width:22px;height:22px}
-.wz-opt .t{flex:1;min-width:0}
-.wz-opt small{display:block;font:500 14px var(--font);color:var(--mut);margin-top:2px}
-.wz-opt .tag{font:700 12px var(--font);padding:4px 10px;border-radius:999px;background:var(--mode);color:var(--on-sel);flex:none}
-.wz-opt .ck{width:26px;height:26px;border-radius:50%;border:2px solid var(--line2);flex:none;display:grid;place-items:center;color:var(--on-sel)}
-.wz-opt .ck .gi{width:16px;height:16px;opacity:0}
-.wz-opt[aria-checked=true]{border-color:var(--mode);background:#2A2520}
-.wz-opt[aria-checked=true] .ck{background:var(--mode);border-color:var(--mode)}
-.wz-opt[aria-checked=true] .ck .gi{opacity:1}
-.wz-opt.ghost{border-style:dashed;background:none;color:var(--ink2)}
-.wz-name{font:600 26px var(--display);min-height:66px;padding:12px 18px;border-radius:18px}
-.wz-sw{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;max-width:420px}
-.wz-sw button,.wz-sw label{aspect-ratio:1;border-radius:50%;border:0;box-shadow:inset 0 -5px 0 rgba(0,0,0,.25);cursor:pointer;position:relative}
-.wz-sw [aria-checked=true]{outline:4px solid var(--ink);outline-offset:4px}
-.wz-sw label{background:#303036;display:grid;place-items:center;color:var(--ink);font-size:28px;font-weight:700;overflow:hidden}
-.wz-sw label input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
-.wz-emo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;max-width:400px}
-.wz-emo button{aspect-ratio:1;border-radius:18px;border:2px solid var(--line2);background:#232327;font-size:38px;display:grid;place-items:center;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;cursor:pointer;transition:transform .15s var(--spring)}
-.wz-emo button:hover{transform:scale(1.05)}
-.wz-emo button[aria-checked=true]{border-color:var(--mode);background:#2A2520;box-shadow:0 4px 0 var(--mode-lo)}
-.wz-pct{display:flex;flex-wrap:wrap;gap:8px;padding:6px 2px 4px}
-.wz-pct button{min-width:64px;min-height:46px;border-radius:14px;border:2px solid var(--line2);background:#232327;color:var(--ink);font:700 17px var(--display);cursor:pointer}
-.wz-pct button[aria-checked=true]{background:var(--mode);border-color:var(--mode);color:var(--on-sel)}
-.wz-pct-l{font-weight:600;color:var(--ink2);margin:8px 2px 0}
-.wz-nav{display:flex;justify-content:space-between;gap:10px;margin:28px 0 10px;max-width:520px}
-.wz-nav .g-btn{min-width:130px}
-/* the last slide */
-.wz-done .wz-q img{display:block;width:100%;max-width:330px;border-radius:16px;margin-top:20px;box-shadow:0 0 0 1px var(--line2)}
-.wz-big{min-height:66px;font-size:21px;width:100%}
-.wz-acts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.wz-acts .g-btn{width:100%}
-.wz-saved{display:flex;align-items:center;gap:10px;color:var(--ink2);font-size:15px}
-.wz-saved .gi{width:20px;height:20px;color:var(--mode);flex:none}
-.wz-saved a{color:var(--mode);font-weight:700}
-.wz-share{border-radius:18px;background:#232327;border:1px solid var(--line);padding:4px 16px}
-.wz-share h3{font-size:17px;padding:12px 0 2px}
-.wz-row{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
-.wz-row:first-of-type{border-top:0}
-.wz-row .ic{width:38px;height:38px;border-radius:11px;background:#2F2F35;display:grid;place-items:center;flex:none}
-.wz-row .ic .gi{width:20px;height:20px;color:var(--mode)}
-.wz-row div{flex:1;min-width:0}
-.wz-row b{display:block;font-size:16px}
-.wz-row span{display:block;color:var(--ink2);font-size:14px;margin-top:2px}
-.wz-row .g-btn{flex:none;margin-top:2px}
-.wz-up{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:16px;border-radius:18px;border:2px solid var(--mode)}
-.wz-up b{display:block;font-size:17px}
-.wz-up span{color:var(--ink2);font-size:14px}
-@media (max-width:820px){
-  .wz-slide{grid-template-columns:minmax(0,1fr);gap:18px;min-height:0}
-  .wz-q{position:static;order:-1}
-  .wz-q h1{margin:10px 0 4px}
-  .wz-prev{display:none}
-  .wz-done .wz-q img{max-width:260px}
-  .wz-a,.wz-nav{max-width:none}
-}
-@media (prefers-reduced-motion:reduce){.wz-slide.in{animation:none}}
-</style>
+<link rel="stylesheet" href="../../assets/wizard.css">
 </head>
 <body>
 <main class="wrap wz">
@@ -142,17 +62,26 @@
       html: () => [[5, 'Quick to earn'], [6, 'Good for bars'], [8, 'Most popular', true], [10, 'For weekly regulars'], [12, 'For daily regulars']].map(([n, sub, pop]) =>
         opt('s', n, '<b style="font:700 20px var(--display)">' + n + '</b>', n + ' stamps', sub, pop ? '<span class="tag">Popular</span>' : '')).join(''),
       pick: el => +el.dataset.s, sel: () => cfg.s, apply: s => set({ s }) },
-    { id: 'reward', q: 'What’s the reward?', hint: 'What guests get when the card is full.',
+    { id: 'reward', q: 'What\u2019s the reward?', hint: 'Pearls come with every card. Add a reward of your own if you like.',
       ok: () => !pctOpen || /^p\d+$/.test(cfg.r),
-      html: () => Object.keys(RW.REWARDS).map(k => opt('r', k, ({ d: '🥤', f: '🍽️', s: '🍰', b: '🎁' })[k], RW.REWARDS[k])).join('') +
+      html: () => '<div class="wz-opt pearls"><span class="ic">' + G.icon('pearl') + '</span><span class="t">10 Pearls every visit<span class="vh"> (always included)</span><small>This one\u2019s on the house</small></span>' +
+          '<button type="button" class="wz-help" id="pearlHelp" aria-label="What are Pearls?">?</button><span class="ck" aria-hidden="true">' + G.icon('check') + '</span></div>' +
+        '<p class="wz-sub">Add your own reward (optional)</p>' +
+        Object.keys(RW.REWARDS).map(k => opt('r', k, ({ d: '🥤', f: '🍽️', s: '🍰', b: '🎁' })[k], RW.REWARDS[k])).join('') +
         opt('r', 'p', '🏷️', 'A percent off an item') +
         '<div id="pctBox"' + (pctOpen ? '' : ' hidden') + '><p class="wz-pct-l">How much off?</p><div class="wz-pct">' + RW.PCTS.map(p => '<button type="button" role="radio" data-p="' + p + '" aria-checked="false">' + p + '%</button>').join('') + '</div></div>' +
         '<button type="button" class="wz-opt ghost" id="aCustomReward"><span class="ic">' + G.icon('chat-circle') + '</span><span class="t">Something else?<small>Talk to us about a custom reward</small></span></button>',
       pick: el => el.dataset.r, sel: () => pctOpen ? 'p' : cfg.r,
-      apply: r => { if (r === 'p') { pctOpen = true; if (!/^p\d+$/.test(cfg.r)) set({ r: 'p10' }); return 'stay'; } pctOpen = false; set({ r }); },
+      // tapping the reward that's already picked takes it off again (Pearls only)
+      apply: r => {
+        if (r === (pctOpen ? 'p' : cfg.r)) { pctOpen = false; set({ r: 'n' }); return 'off'; }
+        if (r === 'p') { pctOpen = true; if (!/^p\d+$/.test(cfg.r)) set({ r: 'p10' }); return 'stay'; }
+        pctOpen = false; set({ r });
+      },
       wire: () => {
         document.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => { set({ r: 'p' + b.dataset.p }); mark(); G.ui.buzz(); setTimeout(() => go(cur + 1), 320); }));
         $('#aCustomReward').addEventListener('click', customReward);
+        $('#pearlHelp').addEventListener('click', pearlHelp);
       } },
     { id: 'welcome', q: 'Give new guests a free welcome stamp?', hint: 'A head start makes people more likely to come back.', auto: true,
       html: () => opt('j', '1', '👋', 'Yes, start them with a stamp', 'Their first scan counts twice', '<span class="tag">Recommended</span>') + opt('j', '0', '🙂', 'No, start at zero'),
@@ -162,6 +91,15 @@
   const QUESTIONS = STEPS.length - 1;
 
   function set(patch) { Object.keys(patch).forEach(k => touched.add(k)); cfg = RW.normalize(Object.assign({}, cfg, patch)); paintPreview(); }
+  // what Pearls are, for a shop owner
+  function pearlHelp() {
+    G.ui.dialog({ title: 'What are Pearls?',
+      html: '<p>Pearls are Grug\u2019s premium currency. Players buy them in our store (100 for $1.99) and spend them on boosts, passes and power-ups in every game on Grug.</p>' +
+        '<p style="margin-top:10px"><b>Every time a guest scans your card, we give them 10 Pearls.</b> It\u2019s on the house, so it costs you nothing.</p>' +
+        '<p style="margin-top:10px"><b>Why it helps your shop</b></p><ul style="margin:6px 0 0 18px;color:var(--ink2);display:grid;gap:4px">' +
+        '<li>Guests get something worth having on every visit, not just when the card is full.</li><li>That gives them a reason to scan each time, and to pick you over the shop next door.</li><li>Your card lives on their phone in Rewards, right next to their games: a reminder to come back.</li></ul>',
+      actions: [{ label: 'Got it', kind: 'primary', value: true }] });
+  }
   async function customReward() {
     const go = await G.ui.dialog({ title: 'Want a custom reward?',
       html: '<p>A named menu item, a free class, a members’ perk or anything else is part of a Custom card we set up with you, along with your own game.</p><p style="margin-top:8px">Text us at <b>954-459-6301</b> and tell us what you’d like to give. For now, pick the closest one from the list.</p>',
@@ -182,10 +120,11 @@
     void slide.offsetWidth; slide.classList.add('in');
     if (st.done) return showDone();
     slide.innerHTML = '<div class="wz-a" role="radiogroup" aria-labelledby="qh">' + st.html() + '</div>' +
-      '<div class="wz-q"><span class="n">' + (i + 1) + '</span><h1 id="qh">' + esc(st.q) + '</h1><p>' + esc(st.hint) + '</p><div class="wz-prev" id="prev"></div></div>';
+      '<div class="wz-q"><span class="n">' + (i + 1) + '</span><h1 id="qh">' + esc(st.q) + '</h1><p>' + esc(st.hint) + '</p><div class="wz-prev has-stage" id="prev"></div></div>';
     if (st.pick) slide.querySelectorAll('[role=radio]:not([data-p]):not(#aCustom)').forEach(b => b.addEventListener('click', () => {
       const r = st.apply(st.pick(b)); mark(); G.ui.buzz();
       if (r === 'stay') { $('#pctBox').hidden = false; paintNav(); return; }
+      if (r === 'off') { $('#pctBox').hidden = true; paintNav(); return; }
       if (st.id === 'reward') $('#pctBox').hidden = true;
       if (st.auto || st.id === 'reward') setTimeout(() => { if (cur === i) go(i + 1); }, 320);
       paintNav();
@@ -201,7 +140,22 @@
     slide.querySelectorAll('[data-p]').forEach(b => b.setAttribute('aria-checked', String('p' + b.dataset.p === cfg.r)));
     const cl = $('#aCustom'); if (cl) { const preset = RW.COLORS.some(c => c.toUpperCase() === cfg.color); cl.setAttribute('aria-checked', String(!preset)); cl.style.background = preset ? '' : cfg.color; cl.style.color = preset ? '' : RW.inkOn(cfg.color); }
   }
-  function paintPreview() { const p = $('#prev'); if (p) p.innerHTML = RW.passHtml(Object.assign({}, cfg, { n: named ? cfg.n : 'Your shop' }), Math.min(3, cfg.s - 1)); }
+  /* the 3D picture beside each question (assets/wizard3d.js): one stage moved from slide to slide.
+     The storefront for the first four questions, the phone and the reward for the rest. A flat card if there's no 3D. */
+  const SCENE = { name: 'shop', kind: 'shop', color: 'shop', icon: 'shop', stamps: 'phone', reward: 'phone', welcome: 'phone' };
+  const stage = document.createElement('div'); stage.className = 'wz-stage';
+  let w3d = null, w3dFailed = false;
+  (async () => {
+    try { await loadScript('../../assets/three.min.js'); await loadScript('../../assets/wizard3d.js'); w3d = GrugWizard3D.mount(stage); if (!w3d) w3dFailed = true; }
+    catch (e) { w3dFailed = true; }
+    paintPreview();
+  })();
+  function paintPreview() {
+    const p = $('#prev'), st = STEPS[cur]; if (!p || st.done) return;
+    if (w3dFailed) { p.classList.remove('has-stage'); p.innerHTML = RW.passHtml(Object.assign({}, cfg, { n: named ? cfg.n : 'Your shop' }), Math.min(3, cfg.s - 1)); return; }
+    if (stage.parentNode !== p) { p.innerHTML = ''; p.appendChild(stage); }
+    if (w3d) { w3d.show(SCENE[st.id], Object.assign({}, cfg, { named }), st.id); w3d.kick(); }
+  }
   function paintNav() {
     const st = STEPS[cur];
     $('#backBtn').style.visibility = cur === 0 ? 'hidden' : '';
@@ -233,8 +187,9 @@
         '</div>' +
         '<div class="wz-up"><div><b>Want your own game?</b><span>We build one starring your menu. First partners get 90 days free.</span></div><a class="g-btn sm" href="sms:+19544596301">Text us</a></div>' +
       '</div>' +
-      '<div class="wz-q"><span class="n">' + G.icon('check') + '</span><h1>Your card is ready!</h1><p>Download it, print it, and put it by your register.</p><img id="cardImg" alt="Your printable rewards card"></div>';
-    RW.cardCanvas(cfg, L.stamp).then(cv => { const im = $('#cardImg'); if (im) im.src = cv.toDataURL('image/png'); });
+      '<div class="wz-q"><span class="n">' + G.icon('check') + '</span><h1>Your card is ready!</h1><p>Print it and stand it on your tables or by the register. Guests scan it with their phone camera.</p>' +
+        '<div class="wz-3d" id="cafe" role="img" aria-label="Your printed card standing in a holder on a café table"><div class="cap"><span>Print it</span><span>Put it on the table</span><span>Guests scan</span></div></div></div>';
+    RW.cardCanvas(cfg, L.stamp).then(cv => showCafe(cv));
     $('#pdfBtn').addEventListener('click', async e => {
       const b = e.currentTarget; b.disabled = true;
       try { await RW.downloadPdf(cfg, L.stamp); G.ui.toast('Your card is downloading', { icon: 'download-simple' }); } catch (err) { G.ui.toast('Couldn’t make the PDF. Try again.', { icon: 'warning-circle' }); }
@@ -247,6 +202,20 @@
       setTimeout(() => { b.textContent = 'Copy'; }, 1500);
     }));
   }
+
+  /* the café table on the last slide: the printed card in a stand (assets/cafe3d.js + three.min.js, loaded on demand) */
+  let cafe = null;
+  function loadScript(src) { return new Promise((ok, no) => { if (document.querySelector('script[src="' + src + '"]')) return ok(); const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
+  async function showCafe(cv) {
+    const box = $('#cafe'); if (!box) return;
+    const flat = () => { box.style.aspectRatio = 'auto'; box.style.background = 'none'; const im = new Image(); im.src = cv.toDataURL('image/png'); im.alt = 'Your printable rewards card'; box.innerHTML = ''; box.appendChild(im); };
+    try {
+      await loadScript('../../assets/three.min.js'); await loadScript('../../assets/cafe3d.js');
+      if (cafe) cafe.dispose();
+      cafe = GrugCafe3D.mount(box, { card: cv, color: cfg.color }); if (!cafe) flat();
+    } catch (e) { flat(); }
+  }
+  addEventListener('hashchange', () => { if (cafe && !document.getElementById('cafe')) { cafe.dispose(); cafe = null; } });
 
   show(named ? (fromHash() || STEPS.length - 1) : 0);
   if (!named && location.hash) history.replaceState(null, '', location.pathname + location.search);

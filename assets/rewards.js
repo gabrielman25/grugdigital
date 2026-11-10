@@ -6,7 +6,8 @@
      rewards/card/#c=<setup>                 share link: opens the card without a stamp
      setup = base64url(UTF-8 of '2~<name>~<type>~<RRGGBB>~<icon>~<stamps>~<reward>~<welcome>')
        type    c café · t boba & tea · b bar · f restaurant · k bakery · o other
-       reward  d free drink · f free food item · s free dessert · b buy one get one · p<N> N% off an item
+       reward  n Pearls only (the default: 10 Pearls a visit, nothing at the counter) · d free drink · f free food item
+               s free dessert · b buy one get one · p<N> N% off an item
        welcome 1 = new guests start with a free stamp
      check = 6 characters from the same cyrb53 hash the partner apps use for their ?tap= links (on the setup text),
      so a hand-edited link won't stamp. It stops casual edits, not someone who reads this file.
@@ -25,18 +26,19 @@
   const RESET_HOUR = 4, TAP_PEARLS = 10, DAY_CAP = 30, VOUCHER_MIN = 10;
 
   const KINDS = {
-    c: { label: 'Café', i: '☕', s: 8, r: 'd', color: '#C8924F' },
-    t: { label: 'Boba & tea', i: '🧋', s: 8, r: 'd', color: '#2FAE5A' },
-    b: { label: 'Bar', i: '🍺', s: 6, r: 'd', color: '#F2B544', note: 'For bars: one stamp per visit, not per drink. Each guest in a group scans with their own phone.' },
-    f: { label: 'Restaurant', i: '🌮', s: 8, r: 'f', color: '#F26A1B' },
-    k: { label: 'Bakery', i: '🍩', s: 10, r: 's', color: '#FF8FC2' },
-    o: { label: 'Other', i: '⭐', s: 8, r: 'f', color: '#4FD8C4' }
+    c: { label: 'Café', i: '☕', s: 8, r: 'n', color: '#C8924F' },
+    t: { label: 'Boba & tea', i: '🧋', s: 8, r: 'n', color: '#2FAE5A' },
+    b: { label: 'Bar', i: '🍺', s: 6, r: 'n', color: '#F2B544', note: 'For bars: one stamp per visit, not per drink. Each guest in a group scans with their own phone.' },
+    f: { label: 'Restaurant', i: '🌮', s: 8, r: 'n', color: '#F26A1B' },
+    k: { label: 'Bakery', i: '🍩', s: 10, r: 'n', color: '#FF8FC2' },
+    o: { label: 'Other', i: '⭐', s: 8, r: 'n', color: '#4FD8C4' }
   };
   const ICONS = ['☕', '🧋', '🍵', '🍺', '🍷', '🍸', '🌮', '🍕', '🍔', '🍣', '🍜', '🥗', '🍩', '🥐', '🧁', '🍦'];
   const COLORS = ['#C8924F', '#2FAE5A', '#F2B544', '#F26A1B', '#E5484D', '#FF8FC2', '#C59BFF', '#4FD8C4', '#3B82F6', '#2B2B33'];
   const REWARDS = { d: 'A free drink', f: 'A free food item', s: 'A free dessert', b: 'Buy one, get one free' };
   const PCTS = [5, 10, 15, 20, 25, 30, 40, 50];
-  const rewardText = r => /^p\d+$/.test(r) ? r.slice(1) + '% off an item' : (REWARDS[r] || REWARDS.f);
+  const pearlsOnly = r => r === 'n';
+  const rewardText = r => r === 'n' ? '+' + TAP_PEARLS + ' Pearls a visit' : /^p\d+$/.test(r) ? r.slice(1) + '% off an item' : (REWARDS[r] || REWARDS.f);
 
   /* ---------- hashing: cyrb53 + base-32, as in the partner apps' tapCheck ---------- */
   const ABC = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
@@ -58,7 +60,7 @@
     const clip = (v, n, dv) => { v = String(v == null ? '' : v).replace(/[~\s]+/g, ' ').trim().slice(0, n); return v || dv; };
     let r = String(o.r || d.r);
     if (/^p\d+$/.test(r)) r = 'p' + PCTS.reduce((a, b) => Math.abs(b - +r.slice(1)) < Math.abs(a - +r.slice(1)) ? b : a, 10);
-    else if (!REWARDS[r]) r = d.r;
+    else if (!REWARDS[r] && r !== 'n') r = d.r;
     const col = String(o.color || '').replace('#', '');
     return { n: clip(o.n, 28, 'Your shop'), t, color: /^[0-9a-f]{6}$/i.test(col) ? '#' + col.toUpperCase() : d.color,
       i: clip(o.i, 8, d.i), s: Math.max(4, Math.min(12, parseInt(o.s, 10) || d.s)), r, j: o.j ? 1 : 0 };
@@ -150,7 +152,7 @@
     for (let i = 0; i < n; i++) { const on = i < have, last = i === n - 1; g += '<div class="rw-slot' + (on ? ' on' : '') + (last ? ' gift' : '') + '">' + (on ? esc(cfg.i) : last ? '🎁' : (i + 1)) + '</div>'; }
     return '<div class="rw-pass" style="' + passVars(cfg.color) + '"><div class="rw-band"><span class="rw-ic">' + esc(cfg.i) + '</span><div class="rw-who"><b>' + esc(cfg.n) + '</b><small>Rewards card</small></div><b class="rw-count">' + have + '/' + n + '</b></div>' +
       '<div class="rw-pass-body"><div class="rw-grid" style="grid-template-columns:repeat(' + ((n === 6 || n === 9) ? 3 : (n === 5 || n === 10) ? 5 : 4) + ',1fr)">' + g + '</div>' +
-      '<p class="rw-goal">Collect ' + n + ' <span class="rw-emo">' + esc(cfg.i) + '</span> → <b>' + esc(rewardText(cfg.r)) + '</b></p></div></div>';
+      '<p class="rw-goal">' + (pearlsOnly(cfg.r) ? 'Every visit: <b>+' + TAP_PEARLS + ' Pearls</b> for any game on Grug' : 'Collect ' + n + ' <span class="rw-emo">' + esc(cfg.i) + '</span> → <b>' + esc(rewardText(cfg.r)) + '</b>') + '</p></div></div>';
   }
 
   /* ---------- the printable counter card as a PDF ----------
@@ -181,9 +183,9 @@
     x.fillStyle = '#1E1B16';
     for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) x.fillRect(Math.floor(qx + c * cell), Math.floor(qy + r * cell), Math.ceil(cell) + 1, Math.ceil(cell) + 1);
     // the reward + how it works
-    const goal = 'Collect ' + cfg.s + ' ' + cfg.i + '  →  ' + rewardText(cfg.r);
+    const goal = pearlsOnly(cfg.r) ? 'Every visit: +' + TAP_PEARLS + ' Pearls for your games' : 'Collect ' + cfg.s + ' ' + cfg.i + '  →  ' + rewardText(cfg.r);
     x.fillStyle = '#1E1B16'; fit(goal, '600', 46, 880); x.fillText(goal, W / 2, 1040);
-    const lines = ['Point your phone camera at the code', 'One stamp per visit, once a day', '+10 Pearls for any game on Grug'].concat(cfg.j ? ['First scan? Your welcome stamp is on us'] : []);
+    const lines = ['Point your phone camera at the code', 'One stamp per visit, once a day', pearlsOnly(cfg.r) ? 'Spend Pearls in any game on Grug' : '+' + TAP_PEARLS + ' Pearls for any game on Grug'].concat(cfg.j ? ['First scan? Your welcome stamp is on us'] : []);
     x.fillStyle = '#55514A'; x.font = font('500', 33); lines.forEach((t, i) => x.fillText(t, W / 2, 1110 + i * 48));
     x.fillStyle = '#EEE9E0'; x.fillRect(0, 1318, W, 3);
     x.fillStyle = '#8A857C'; x.font = font('600', 27); x.textAlign = 'left'; x.fillText('No app needed', 50, 1362); x.textAlign = 'right'; x.fillText('Made with Grug', W - 50, 1362);
@@ -261,8 +263,9 @@
       }
       R.grid.innerHTML = g;
       const rw = rewardText(cfg.r);
-      R.goal.innerHTML = full ? 'Card full! <b>' + esc(rw) + '</b> is yours.' : 'Collect ' + n + ' <span class="rw-emo">' + esc(cfg.i) + '</span> → <b>' + esc(rw) + '</b>';
-      R.redeem.hidden = !full; R.redeem.textContent = 'Redeem: ' + rw;
+      if (pearlsOnly(cfg.r)) R.goal.innerHTML = full ? 'Card full! You\u2019re a regular here. Your next visit starts a new card.' : 'Every visit: <b>+' + TAP_PEARLS + ' Pearls</b> for any game on Grug';
+      else R.goal.innerHTML = full ? 'Card full! <b>' + esc(rw) + '</b> is yours.' : 'Collect ' + n + ' <span class="rw-emo">' + esc(cfg.i) + '</span> → <b>' + esc(rw) + '</b>';
+      R.redeem.hidden = !full || pearlsOnly(cfg.r); R.redeem.textContent = 'Redeem: ' + rw;
       const today = dayKey(now());
       if (!st.joined) R.msg.innerHTML = '<span class="i">👋</span><span><b>Welcome to ' + esc(cfg.n) + '</b>Scan the QR or tap the tag at the counter to get your ' + (cfg.j ? 'first stamps (one is on us).' : 'first stamp.') + '</span>';
       else if (st.lastDay === today) R.msg.innerHTML = '<span class="i">✅</span><span><b>Stamped today</b>Your next stamp unlocks after ' + RESET_HOUR + ' AM tomorrow.</span>';
@@ -281,11 +284,12 @@
       st.joined = true; st.lastDay = today; st.visits++; st.seen = Date.now(); if (!st.first) st.first = st.seen;
       const pl = o.pearls.grant(); st.pearls = (st.pearls || 0) + pl;
       const plText = pl ? ' +' + pl + ' Pearls.' : '';
+      if (before >= cfg.s && pearlsOnly(cfg.r)) { st.stamps = 1; st.rewards++; save(); render([0, 1]); toast(cfg.i, 'New card started!', 'You filled your last one.' + plText); return { ok: true, pearls: pl }; }
       if (before >= cfg.s) { save(); render(); toast('🎁', 'Your card is full!', 'Redeem your reward at the counter.' + plText); return { ok: true, pearls: pl }; }
       const add = 1 + (first && cfg.j ? 1 : 0);
       st.stamps = Math.min(cfg.s, before + add); save(); render([before, st.stamps]);
-      if (st.stamps >= cfg.s) toast('🎉', 'Card complete!', rewardText(cfg.r) + ' is ready.' + plText);
-      else toast(cfg.i, (first ? 'Welcome! +' : '+') + add + ' stamp' + (add > 1 ? 's' : ''), (cfg.s - st.stamps) + ' more for ' + rewardText(cfg.r).toLowerCase() + '.' + plText);
+      if (st.stamps >= cfg.s) toast('🎉', 'Card complete!', (pearlsOnly(cfg.r) ? 'You\u2019re a regular here.' : rewardText(cfg.r) + ' is ready.') + plText);
+      else toast(cfg.i, (first ? 'Welcome! +' : '+') + add + ' stamp' + (add > 1 ? 's' : ''), (pearlsOnly(cfg.r) ? '' : (cfg.s - st.stamps) + ' more for ' + rewardText(cfg.r).toLowerCase() + '.') + plText);
       return { ok: true, pearls: pl, first };
     }
     R.redeem.addEventListener('click', async () => {
@@ -320,7 +324,7 @@
 
   root.GrugRewards = {
     KEY, TAP_PEARLS, DAY_CAP, RESET_HOUR, VOUCHER_MIN, KINDS, ICONS, COLORS, REWARDS, PCTS,
-    rewardText, normalize, encode, decode, check, shopId, links, cardBase,
+    rewardText, pearlsOnly, normalize, encode, decode, check, shopId, links, cardBase, code, b64e, b64d,
     load, cards, cardStore, removeCard, mine, saveMine, removeMine,
     dayKey, balance, grantPearls, inkOn, lo, mix, themeVars, bandStyle, qrSvg, mountCard, passHtml, cardCanvas, cardPdf, downloadPdf
   };

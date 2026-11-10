@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Links · Grug</title>
+<meta name="description" content="Make a free link page for all your socials, or a little 3D world your followers walk through. Every visit gives them 10 Pearls.">
+<meta name="theme-color" content="#17171A">
+<link rel="icon" href="../favicon.png">
+<link rel="stylesheet" href="../assets/grug.css">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/rewards.css">
+<link rel="stylesheet" href="../assets/links.css">
+</head>
+<body>
+<main class="wrap" id="main">
+  <section class="rw-hero" id="hero">
+    <div class="copy">
+      <p class="kick">For online creators · Free</p>
+      <h1>Turn your followers into players.</h1>
+      <p class="lead">One link for all your socials, as a page or a little 3D world. Every visit gives your followers 10 Pearls.</p>
+      <div class="row"><a class="g-btn primary big" href="create/" id="heroGo">Make my link page</a><a class="g-btn big" href="#features">How it works</a></div>
+      <p class="g-fine">No app, no account, no sign-up.</p>
+    </div>
+    <div class="lk-art" id="heroArt" aria-hidden="true"></div>
+  </section>
+
+  <section class="g-section" id="features">
+    <div class="g-section-h"><h2>Why followers keep clicking</h2></div>
+    <div class="rw-feats" id="featList"></div>
+  </section>
+
+  <section class="g-section" id="mine">
+    <div class="g-section-h"><h2>My link pages</h2><a href="create/">Make another</a></div>
+    <div class="rw-tiles" id="mineList"></div>
+  </section>
+
+  <section class="g-section" id="visited">
+    <div class="g-section-h"><h2>Creators you've visited</h2></div>
+    <div class="rw-tiles" id="seenList"></div>
+  </section>
+</main>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="../assets/games.js"></script>
+<script src="../assets/grug.js"></script>
+<script src="../assets/rewards.js"></script>
+<script src="../assets/links.js"></script>
+<script>
+(function(){
+  const G = Grug, RW = GrugRewards, LK = GrugLinks, esc = G.esc, $ = s => document.querySelector(s);
+  G.ui.chrome('links');
+  const badges = cfg => '<div class="row" style="gap:6px">' + LK.linksOf(cfg).map(L => '<span class="lk-badge sm" style="background:' + L.color + ';color:' + L.ink + '">' + esc(L.badge) + '</span>').join('') + '</div>';
+  const band = (cfg, sub) => '<div class="band" style="' + RW.bandStyle(cfg.color) + '"><span class="rw-ic" style="font:700 20px var(--display);color:#fff">' + esc(cfg.n.replace(/^@/, '').charAt(0).toUpperCase()) + '</span><div><b>' + esc(cfg.n) + '</b><small>' + esc(sub) + '</small></div></div>';
+  const kind = cfg => cfg.mode === 'g' ? '3D world · ' + LK.WORLDS[cfg.world].label : 'Link page';
+
+  $('#heroArt').innerHTML = ['ig', 'yt', 'tt', 'x'].map(p => { const P = LK.PLATFORMS[p];
+    return '<span class="lk-btn" style="--lc:' + P.color + '"><span class="lk-badge" style="background:' + P.color + ';color:' + P.ink + '">' + P.badge + '</span><span class="t"><b>' + P.label + '</b><small>@yourname</small></span></span>'; }).join('') +
+    '<span class="chip">' + G.icon('pearl') + '+10 Pearls a visit</span>';
+  const FEATS = [
+    ['share-network', '#5AB0FF', 'One link for everything', 'X, Instagram, YouTube, TikTok, Twitch, Discord and your site, on one page for your bio.'],
+    ['game-controller', '#7EE081', 'A world to explore', 'Turn it into a little 3D world: followers walk into a room to reach each of your socials.'],
+    ['pearl', '#C59BFF', '10 Pearls a visit', 'Every follower who stops by gets 10 Pearls to spend in any game on Grug. Free for you.'],
+    ['timer', '#FFBE1A', 'Ready in a minute', 'Type your handles, pick a color and a world, and copy your link.']
+  ];
+  $('#featList').innerHTML = FEATS.map(f => '<div class="rw-feat"><span class="ic" style="background:' + f[1] + '">' + G.icon(f[0]) + '</span><b>' + esc(f[2]) + '</b><p>' + esc(f[3]) + '</p></div>').join('');
+
+  function paint() {
+    const mine = LK.mine();
+    $('#mine').hidden = !mine.length;
+    if (mine.length) $('#heroGo').textContent = 'Make another page';
+    $('#mineList').innerHTML = mine.map(m => { const S = LK.share(m.cfg);
+      return '<div class="rw-tile">' + band(m.cfg, kind(m.cfg)) + '<div class="body">' + badges(m.cfg) +
+        '<div class="acts"><a class="g-btn sm primary" href="create/?c=' + m.c + '">' + G.icon('pencil-simple') + 'Edit</a><a class="g-btn sm" href="' + esc(S.open) + '">Open</a>' +
+        '<button type="button" class="g-btn sm" data-copy="' + esc(S.url) + '">' + G.icon('copy') + 'Copy link</button><button type="button" class="g-btn sm quiet del" data-del="' + m.c + '">' + G.icon('trash') + 'Remove</button></div></div></div>'; }).join('');
+    const seen = LK.seen().filter(s => !mine.some(m => m.c === s.c));
+    $('#visited').hidden = !seen.length;
+    $('#seenList').innerHTML = seen.map(s => '<a class="rw-tile" href="page/#c=' + s.c + '">' + band(s.cfg, kind(s.cfg)) + '<div class="body">' + badges(s.cfg) + '</div></a>').join('');
+  }
+  $('#mineList').addEventListener('click', async e => {
+    const cp = e.target.closest('[data-copy]');
+    if (cp) { try { await navigator.clipboard.writeText(cp.dataset.copy); G.ui.toast('Link copied', { icon: 'copy' }); } catch (err) { prompt('Copy your link:', cp.dataset.copy); } return; }
+    const b = e.target.closest('[data-del]'); if (!b) return;
+    const cfg = LK.decode(b.dataset.del);
+    const ok = await G.ui.dialog({ title: 'Remove ' + (cfg ? cfg.n : 'this page') + '?', html: '<p>It comes off your list here. Links you’ve shared keep working.</p>', actions: [{ label: 'Keep it', kind: 'quiet', value: null }, { label: 'Remove', kind: 'danger', value: 'go' }] });
+    if (ok === 'go') { LK.removeMine(b.dataset.del); paint(); }
+  });
+  paint(); addEventListener('pageshow', paint);
+})();
+</script>
+</body>
+</html>
