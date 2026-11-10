@@ -2,34 +2,36 @@
 // Run: node tools/modelkit/make-presets.js   (then node tools/modelkit/thumbs.js to redraw the thumbnails)
 const fs = require('fs'), path = require('path');
 const dir = path.join(__dirname, 'presets'), out = path.join(__dirname, '../../create/presets.js');
-// display names, blurbs and order. Anything not listed still shows, after these, titled from its file name.
+// display names, blurbs, catalog data and order. Anything not listed still shows, after these, titled from its file name.
+// [title, blurb, category, genres, themes, tags]   (the catalog searches all of them)
 const META = {
-  knight: ['Knight', 'A knight in plate armour with a red plume and a blue tabard.'],
-  broadsword: ['Broadsword', 'A wide double-edged blade with a gold crossguard.'],
-  sword: ['Short sword', 'A simple sword for a hero just starting out.'],
-  shield: ['Shield', 'A crimson heater shield with a gold cross.'],
-  axe: ['Battle axe', 'A heavy axe on a wrapped wooden handle.'],
-  potion: ['Potion', 'A round bottle full of something purple, with a cork.'],
-  key: ['Key', 'A big gold dungeon key.'],
-  heart: ['Heart', 'A chunky pickup heart.'],
-  mushroom: ['Mushroom', 'A red toadstool with white spots.'],
-  pine: ['Pine tree', 'A layered pine for forests and villages.'],
-  house: ['House', 'A little cottage with a chimney.'],
-  car: ['Car', 'A boxy little blue car.'],
-  rocket: ['Rocket', 'A retro rocket with fins and a porthole.'],
-  ground: ['Ground tile', 'A grass tile to stand everything else on.']
+  knight: ['Knight', 'A knight in plate armour with a red plume and a blue tabard.', 'Characters', ['RPG', 'Adventure'], ['Medieval', 'Fantasy'], ['knight', 'armor', 'hero', 'humanoid', 'npc', 'soldier']],
+  broadsword: ['Broadsword', 'A wide double-edged blade with a gold crossguard.', 'Weapons', ['RPG', 'Action'], ['Medieval', 'Fantasy'], ['sword', 'blade', 'melee', 'loot']],
+  sword: ['Short sword', 'A simple sword for a hero just starting out.', 'Weapons', ['RPG', 'Action'], ['Medieval', 'Fantasy'], ['sword', 'blade', 'melee', 'starter']],
+  shield: ['Shield', 'A crimson heater shield with a gold cross.', 'Weapons', ['RPG', 'Action'], ['Medieval', 'Fantasy'], ['shield', 'armor', 'defense', 'crest']],
+  axe: ['Battle axe', 'A heavy axe on a wrapped wooden handle.', 'Weapons', ['RPG', 'Survival'], ['Medieval', 'Fantasy'], ['axe', 'melee', 'tool', 'lumber']],
+  potion: ['Potion', 'A round bottle full of something purple, with a cork.', 'Items', ['RPG', 'Adventure'], ['Fantasy', 'Magic'], ['potion', 'health', 'pickup', 'consumable', 'alchemy', 'bottle']],
+  key: ['Key', 'A big gold dungeon key.', 'Items', ['Adventure', 'Puzzle'], ['Medieval', 'Dungeon'], ['key', 'pickup', 'unlock', 'door', 'gold']],
+  heart: ['Heart', 'A chunky pickup heart.', 'Items', ['Platformer', 'Arcade'], ['Retro'], ['heart', 'health', 'pickup', 'life', 'love']],
+  mushroom: ['Mushroom', 'A red toadstool with white spots.', 'Nature', ['Platformer', 'Adventure'], ['Fantasy', 'Forest'], ['mushroom', 'toadstool', 'plant', 'decor']],
+  pine: ['Pine tree', 'A layered pine for forests and villages.', 'Nature', ['Adventure', 'Survival'], ['Forest', 'Village'], ['tree', 'pine', 'forest', 'plant', 'decor']],
+  house: ['House', 'A little cottage with a chimney.', 'Buildings', ['Simulation', 'RPG'], ['Village', 'Cozy'], ['house', 'cottage', 'home', 'building']],
+  car: ['Car', 'A boxy little blue car.', 'Vehicles', ['Racing', 'Simulation'], ['Modern', 'City'], ['car', 'vehicle', 'drive', 'traffic']],
+  rocket: ['Rocket', 'A retro rocket with fins and a porthole.', 'Vehicles', ['Arcade', 'Shooter'], ['Sci-fi', 'Space', 'Retro'], ['rocket', 'spaceship', 'space', 'ship']],
+  ground: ['Ground tile', 'A grass tile to stand everything else on.', 'Terrain', ['Platformer', 'Simulation'], ['Forest', 'Village'], ['ground', 'tile', 'grass', 'terrain', 'base', 'floor']]
 };
 const SCENES = {
-  knight: ['Knight in arms', 'The knight with a broadsword and shield, standing on a ground tile.'],
-  village: ['Village', 'A cottage, pine trees and mushrooms on a patch of grass.'],
-  loot: ['Loot pile', 'Weapons, a key, a potion and a heart left on the grass.']
+  knight: ['Knight in arms', 'The knight with a broadsword and shield, standing on a ground tile.', 'Scenes', ['RPG', 'Adventure'], ['Medieval', 'Fantasy'], ['knight', 'hero', 'diorama', 'kitbash', 'character']],
+  village: ['Village', 'A cottage, pine trees and mushrooms on a patch of grass.', 'Scenes', ['Simulation', 'Adventure'], ['Village', 'Cozy', 'Forest'], ['village', 'house', 'diorama', 'kitbash']],
+  loot: ['Loot pile', 'Weapons, a key, a potion and a heart left on the grass.', 'Scenes', ['RPG', 'Adventure'], ['Fantasy', 'Dungeon'], ['loot', 'treasure', 'diorama', 'kitbash', 'pickup']]
 };
 const ord = (meta) => (a, b) => { const k = Object.keys(meta), ia = k.indexOf(a), ib = k.indexOf(b); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b); };
+const info = (m, id, cat, i) => { m = m || []; return { title: m[0] || title(id), blurb: m[1] || '', category: m[2] || cat, genres: m[3] || [], themes: m[4] || [], tags: m[5] || [], order: i }; };
 const title = (id) => id.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 const models = fs.readdirSync(dir).filter(f => f.endsWith('.shape.json')).map(f => f.slice(0, -11)).sort(ord(META))
-  .map(id => ({ id, title: (META[id] || [title(id)])[0], blurb: (META[id] || [])[1] || '', data: fs.readFileSync(path.join(dir, id + '.shape.json'), 'utf8').trim() }));
+  .map((id, i) => ({ id, ...info(META[id], id, 'Models', i), data: fs.readFileSync(path.join(dir, id + '.shape.json'), 'utf8').trim() }));
 const sdir = path.join(dir, 'scenes');
 const scenes = fs.readdirSync(sdir).filter(f => f.endsWith('.bash.json')).map(f => f.slice(0, -10)).sort(ord(SCENES))
-  .map(id => ({ id, title: (SCENES[id] || [title(id)])[0], blurb: (SCENES[id] || [])[1] || '', data: JSON.parse(fs.readFileSync(path.join(sdir, id + '.bash.json'), 'utf8')) }));
+  .map((id, i) => ({ id, ...info(SCENES[id], id, 'Scenes', i), data: JSON.parse(fs.readFileSync(path.join(sdir, id + '.bash.json'), 'utf8')) }));
 fs.writeFileSync(out, '/* generated by tools/modelkit/make-presets.js: do not edit by hand */\nwindow.MK_PRESETS = ' + JSON.stringify({ models, scenes }) + ';\n');
 console.log('create/presets.js:', models.length, 'models,', scenes.length, 'scenes,', (fs.statSync(out).size / 1024 | 0) + ' KB');

@@ -4,51 +4,139 @@
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Create · Grug</title>
-<meta name="description" content="Free low-poly 3D models to download (GLB, OBJ, STL), and Model Kit: draw a pixel grid, push it into 3D and export a game-ready model, right in your browser.">
-<meta name="theme-color" content="#eaf6ee">
+<meta name="description" content="A free marketplace of low-poly 3D models and scenes for your games (GLB, OBJ, STL), searchable by category, genre, theme and tag, plus Model Kit to make your own in the browser.">
+<meta name="theme-color" content="#17171A">
 <link rel="icon" href="../favicon.png">
 <link rel="stylesheet" href="../assets/grug.css">
 <script src="../assets/theme.js"></script>
 <style>
-.mk-hero{position:relative;overflow:hidden;display:grid;grid-template-columns:1fr;gap:6px;margin-top:14px;padding:22px 22px 24px;border-radius:calc(var(--r) + 6px);background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow)}
+/* ---------- Model Kit call to action ---------- */
+.mk-hero{position:relative;overflow:hidden;display:grid;grid-template-columns:1fr;gap:6px;margin-top:14px;padding:22px 22px 24px;border-radius:var(--r);background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow)}
 .mk-hero .txt{position:relative;z-index:1;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
-.mk-hero small{font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:12px;color:var(--mut)}
+.mk-hero small{font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:12px;color:var(--mode)}
 .mk-hero h1{margin:0;font-size:34px;line-height:1.05;max-width:14ch}
 .mk-hero p{margin:0;max-width:44ch;color:var(--ink2);font-size:15.5px}
-.mk-hero .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
-.mk-hero .stage{position:relative;height:230px;margin:-6px -10px -10px;touch-action:none}
+.mk-hero .row{margin-top:6px}
+.mk-hero .stage{position:relative;height:210px;margin:-6px -10px -10px;touch-action:none}
 .mk-hero canvas{width:100%;height:100%;display:block;cursor:grab}
 .mk-hero canvas:active{cursor:grabbing}
-@media (min-width:760px){.mk-hero{grid-template-columns:1.1fr 1fr;align-items:center;padding:34px 36px;min-height:330px}.mk-hero h1{font-size:46px}.mk-hero .stage{height:300px;margin:-20px -16px -24px 0}}
-.mk-sec{padding:26px 0 4px}
-.mk-sec .g-section-h{align-items:center}
-.mk-count{color:var(--mut);font-weight:700;font-size:14px}
-.mk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-@media (min-width:860px){.mk-grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}}
-@media (min-width:560px){.mk-grid.scenes{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}}
-.mk-card{position:relative;display:flex;flex-direction:column;text-align:left;padding:10px 10px 12px;border-radius:var(--r);background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .2s var(--spring),background .2s}
-.mk-card:hover{transform:translateY(-3px);background:var(--glass-strong)}
+@media (min-width:760px){.mk-hero{grid-template-columns:1.1fr 1fr;align-items:center;padding:30px 36px;min-height:300px}.mk-hero h1{font-size:44px}.mk-hero .stage{height:280px;margin:-20px -16px -24px 0}}
+
+/* ---------- marketplace ---------- */
+.mk-market{padding-top:26px}
+.mk-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.mk-head h2{flex:1;min-width:10ch}
+.mk-bar{display:flex;gap:8px;align-items:stretch;margin-bottom:12px;position:relative;z-index:5}
+.mk-search{position:relative;flex:1;min-width:0}
+.mk-search .gi{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:var(--mut);pointer-events:none}
+.mk-search input{width:100%;height:50px;border-radius:14px;border:1px solid var(--line2);background:var(--solid);color:var(--ink);padding:0 44px 0 46px;font:600 16px/1 var(--font);outline:none}
+.mk-search input:focus{border-color:var(--mode);box-shadow:0 0 0 3px color-mix(in srgb,var(--mode) 25%,transparent)}
+.mk-search input::placeholder{color:var(--mut)}
+.mk-search .clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:var(--mut)}
+.mk-search .clr:hover{background:var(--card2);color:var(--ink)}
+.mk-sugg{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--solid);border:1px solid var(--line2);border-radius:14px;box-shadow:0 1rem 3rem rgba(0,0,0,.55);padding:6px;display:none}
+.mk-sugg.on{display:block}
+.mk-sugg button{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:10px;text-align:left;font-weight:600;font-size:15px}
+.mk-sugg button[aria-selected=true],.mk-sugg button:hover{background:var(--card2)}
+.mk-sugg img{width:36px;height:36px;border-radius:8px;background:var(--card);object-fit:contain;flex:none}
+.mk-sugg .k{display:grid;place-items:center;width:36px;height:36px;border-radius:8px;background:var(--card);color:var(--mode);flex:none;font-weight:800;font-size:13px}
+.mk-sugg small{margin-left:auto;color:var(--mut);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.mk-sort{height:50px;border-radius:14px;border:1px solid var(--line2);background:var(--solid);color:var(--ink);font:700 15px/1 var(--font);padding:0 36px 0 14px;appearance:none;-webkit-appearance:none;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,var(--mut) 50%),linear-gradient(135deg,var(--mut) 50%,transparent 50%);background-position:calc(100% - 20px) 22px,calc(100% - 15px) 22px;background-size:5px 5px;background-repeat:no-repeat}
+.mk-filters-btn{display:none;height:50px;padding:0 14px;border-radius:14px;border:1px solid var(--line2);background:var(--solid);font-weight:700;align-items:center;gap:6px}
+.mk-filters-btn b{min-width:20px;height:20px;border-radius:10px;background:var(--mode);color:var(--on-sel);font-size:12px;display:grid;place-items:center;padding:0 5px}
+.mk-cats{display:none;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 10px;padding:2px 16px 4px}
+.mk-cats::-webkit-scrollbar{display:none}
+.mk-cats button{flex:none;min-height:38px;padding:0 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-weight:700;font-size:14.5px;color:var(--ink2)}
+.mk-cats button[aria-pressed=true]{background:var(--mode);border-color:transparent;color:var(--on-sel)}
+.mk-body{display:grid;grid-template-columns:1fr;gap:20px;align-items:start}
+.mk-side{display:none}
+@media (min-width:900px){.mk-body{grid-template-columns:230px 1fr}.mk-side{display:block;position:sticky;top:calc(var(--top) + var(--sat) + 16px)}}
+@media (max-width:899px){.mk-filters-btn{display:inline-flex}.mk-cats{display:flex}}
+.mk-fgroup{margin-bottom:18px}
+.mk-fgroup h3{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin:0 4px 8px}
+.mk-catlist button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:12px;font-weight:700;font-size:15px;color:var(--ink2);text-align:left}
+.mk-catlist button:hover{background:var(--card2);color:var(--ink)}
+.mk-catlist button[aria-pressed=true]{background:var(--mode);color:var(--on-sel)}
+.mk-catlist button .gi{width:18px;height:18px}
+.mk-catlist button small{margin-left:auto;font-weight:700;font-size:12.5px;opacity:.7}
+.mk-checks{display:flex;flex-wrap:wrap;gap:6px}
+.mk-checks button{min-height:34px;padding:0 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-weight:700;font-size:13.5px;color:var(--ink2)}
+.mk-checks button:hover{color:var(--ink)}
+.mk-checks button[aria-pressed=true]{background:var(--mode);border-color:transparent;color:var(--on-sel)}
+.mk-status{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 2px 12px;min-height:34px}
+.mk-count{color:var(--ink2);font-weight:700;font-size:15px;margin-right:4px}
+.mk-pill{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 6px 0 12px;border-radius:999px;background:var(--card);border:1px solid var(--line2);font-weight:700;font-size:13.5px}
+.mk-pill span{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--card2)}
+.mk-pill:hover span{background:var(--mode);color:var(--on-sel)}
+.mk-clear{font-weight:800;font-size:14px;color:var(--mode);padding:4px 6px}
+.mk-search input::-webkit-search-cancel-button,.mk-search input::-webkit-search-decoration{-webkit-appearance:none;display:none}
+#market{scroll-margin-top:calc(var(--top) + var(--sat) + 16px)}
+@media (max-width:899px){.mk-bar{flex-wrap:wrap}.mk-search{flex:1 1 100%}.mk-filters-btn,.mk-sort{flex:1}}
+.g-dialog.mk-item .g-dialog-body,.mk-ip,.mk-more{flex:none}
+/* item cards: a square thumbnail on a lighter tile, name, creator with a check badge, price */
+.mk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px 12px}
+@media (min-width:1100px){.mk-grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}}
+.mk-card{position:relative;display:flex;flex-direction:column;text-align:left;border-radius:14px;padding:0;transition:transform .2s var(--spring)}
+.mk-card:hover{transform:translateY(-3px)}
 .mk-card:active{transform:scale(.97)}
-.mk-card .pic{aspect-ratio:1;border-radius:calc(var(--r) - 6px);background:radial-gradient(circle at 50% 62%,color-mix(in srgb,var(--sel-a) 22%,transparent),transparent 68%);display:grid;place-items:center;overflow:hidden}
-.mk-card .pic img{width:92%;height:92%;object-fit:contain;transition:transform .3s var(--spring)}
-.mk-card:hover .pic img{transform:scale(1.06) rotate(-2deg)}
-.mk-card b{display:block;margin:8px 4px 2px;font-size:16px}
-.mk-card .meta{margin:0 4px;color:var(--mut);font-size:12.5px;font-weight:700}
-.mk-card .dl{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--card2);color:var(--ink);opacity:0;transform:scale(.85);transition:opacity .2s,transform .2s var(--spring)}
-.mk-card:hover .dl,.mk-card:focus-visible .dl{opacity:1;transform:none}
-@media (hover:none){.mk-card .dl{opacity:1;transform:none}}
-.mk-card .dl .gi{width:18px;height:18px}
-.mk-view{position:relative;height:min(52vh,380px);margin:-4px -6px 12px;border-radius:var(--r);background:radial-gradient(circle at 50% 60%,color-mix(in srgb,var(--sel-a) 20%,transparent),transparent 70%);touch-action:none}
+.mk-card .pic{position:relative;aspect-ratio:1;border-radius:14px;background:#2C2C32;display:grid;place-items:center;overflow:hidden;border:1px solid var(--line);transition:border-color .2s}
+.mk-card:hover .pic{border-color:color-mix(in srgb,var(--mode) 60%,transparent)}
+.mk-card .pic img{width:86%;height:86%;object-fit:contain;transition:transform .3s var(--spring)}
+.mk-card:hover .pic img{transform:scale(1.06)}
+.mk-card .kind{position:absolute;left:8px;top:8px;padding:3px 8px;border-radius:7px;background:rgba(0,0,0,.5);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff}
+.mk-fav{position:absolute;right:6px;top:6px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.4);color:#fff;opacity:0;transition:opacity .15s,transform .2s var(--spring)}
+.mk-card:hover .mk-fav,.mk-fav[aria-pressed=true]{opacity:1}
+@media (hover:none){.mk-fav{opacity:1}}
+.mk-fav[aria-pressed=true]{color:#FF8FC2}
+.mk-fav:active{transform:scale(.85)}
+.mk-fav .gi{width:18px;height:18px}
+.mk-card .name{margin:8px 2px 0;font-weight:700;font-size:15.5px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mk-by{display:flex;align-items:center;gap:4px;margin:3px 2px 0;font-size:13px;color:var(--mut);font-weight:600}
+.mk-by .chk{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:50%;background:#3d8bff;color:#fff;flex:none}
+.mk-by .chk .gi{width:10px;height:10px}
+.mk-price{margin:4px 2px 0;font-weight:800;font-size:15px;color:var(--ink)}
+.mk-price small{color:var(--mut);font-weight:700;font-size:12.5px;margin-left:4px}
+.mk-empty{padding:40px 10px;text-align:center;color:var(--ink2)}
+.mk-empty b{display:block;font-size:20px;color:var(--ink);margin-bottom:6px}
+/* item page */
+.g-dialog.mk-item .g-dialog-in{gap:0}
+@media (min-width:760px){.g-dialog.mk-item{max-width:min(94vw,1000px)}}
+.mk-ip{display:flex;flex-direction:column;gap:18px}
+@media (min-width:760px){.mk-ip{flex-direction:row;align-items:flex-start;gap:26px}.mk-ip>.mk-view{flex:1.05 1 0;min-width:0}.mk-ip>.mk-info{flex:1 1 0;min-width:0}}
+.mk-view{position:relative;aspect-ratio:1;max-height:56vh;width:100%;border-radius:16px;background:#2C2C32;touch-action:none}
 .mk-view canvas{width:100%;height:100%;display:block;cursor:grab}
 .mk-view canvas:active{cursor:grabbing}
 .mk-view img{position:absolute;inset:8%;width:84%;height:84%;object-fit:contain}
-.mk-dl{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
-@media (min-width:520px){.mk-dl{grid-template-columns:repeat(4,1fr)}}
-.mk-dl button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px;border-radius:14px;background:var(--card2);border:1px solid var(--line);font-weight:800;font-size:15px;color:var(--ink)}
-.mk-dl button:hover{background:var(--glass-strong)}
-.mk-dl button small{font-weight:700;font-size:11.5px;color:var(--mut)}
-.mk-blurb{color:var(--ink2);margin:0}
-.mk-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.mk-view .hint{position:absolute;left:12px;bottom:10px;font-size:12px;font-weight:700;color:var(--mut);pointer-events:none}
+.mk-info h2{font-size:28px;margin:0 0 4px;color:var(--ink)}
+.mk-info .mk-by{font-size:14.5px;margin:0 0 12px}
+.mk-info .mk-by .chk{width:17px;height:17px}
+.mk-buy{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.mk-buy .p{font-size:24px;font-weight:700;color:var(--ink);margin-right:auto}
+.mk-buy .g-btn{min-width:130px}
+.mk-fmt{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 4px}
+.mk-fmt button{min-height:36px;padding:0 12px;border-radius:10px;background:var(--card);border:1px solid var(--line);font-weight:700;font-size:14px;color:var(--ink2)}
+.mk-fmt button[aria-pressed=true]{background:var(--mode);border-color:transparent;color:var(--on-sel)}
+.mk-fmt-note{font-size:12.5px;color:var(--mut);margin:0 0 4px}
+.mk-desc{color:var(--ink2);margin:12px 0}
+.mk-dets{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;margin:10px 0 12px}
+.mk-dets dt{color:var(--mut);font-weight:600}
+.mk-dets dd{margin:0;color:var(--ink);font-weight:700}
+.mk-dets dd button{color:var(--mode);font-weight:700}
+.mk-dets dd button:hover{text-decoration:underline}
+.mk-tags{display:flex;gap:6px;flex-wrap:wrap}
+.mk-tags button{min-height:30px;padding:0 10px;border-radius:8px;background:var(--card);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink2)}
+.mk-tags button:hover{border-color:var(--mode);color:var(--ink)}
+.mk-tags button::before{content:"#";color:var(--mut);margin-right:1px}
+.mk-more{margin-top:20px}
+.mk-more h3{font-size:16px;margin:0 0 10px;color:var(--ink)}
+.mk-more .mk-grid{grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+.mk-more .mk-card .name{font-size:14px}
+.mk-row{display:flex;gap:8px;align-items:center;margin-top:12px}
+.mk-row .g-btn{flex:1}
+.mk-heart{flex:none!important;width:48px;padding:0!important}
+.mk-heart[aria-pressed=true]{color:#FF8FC2}
 </style>
 </head>
 <body>
@@ -64,14 +152,34 @@
     <div class="stage" aria-hidden="true"><canvas id="heroGL"></canvas></div>
   </section>
 
-  <section class="mk-sec">
-    <div class="g-section-h"><h2>Scenes</h2><span class="mk-count" id="nScenes"></span></div>
-    <div class="mk-grid scenes" id="scenes"></div>
-  </section>
-  <section class="mk-sec">
-    <div class="g-section-h"><h2>Models</h2><span class="mk-count" id="nModels"></span></div>
-    <div class="mk-grid" id="models"></div>
-    <p class="g-fine" style="margin:16px 2px 0">Every model is free to use in your own games. Downloads are GLB, OBJ or STL, one unit per block, with the origin at the bottom. Made with Model Kit.</p>
+  <section class="mk-market" id="market">
+    <div class="mk-head"><h2>Asset library</h2></div>
+    <div class="mk-bar">
+      <div class="mk-search" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-owns="mkSugg">
+        <span id="mkSearchIc"></span>
+        <input id="mkQ" type="search" placeholder="Search models, genres, themes or #tags" autocomplete="off" spellcheck="false" aria-label="Search the asset library" aria-controls="mkSugg">
+        <button type="button" class="clr" id="mkClr" aria-label="Clear search" hidden></button>
+        <div class="mk-sugg" id="mkSugg" role="listbox"></div>
+      </div>
+      <button type="button" class="mk-filters-btn" id="mkFiltersBtn" aria-label="Filters"><span id="mkFiltersIc"></span>Filters<b id="mkFiltersN" hidden></b></button>
+      <select class="mk-sort" id="mkSort" aria-label="Sort by">
+        <option value="relevance">Relevance</option>
+        <option value="newest">Newest</option>
+        <option value="az">Name A–Z</option>
+        <option value="lowpoly">Fewest triangles</option>
+        <option value="detail">Most detailed</option>
+        <option value="size">Biggest</option>
+      </select>
+    </div>
+    <div class="mk-cats" id="mkCatsChips"></div>
+    <div class="mk-body">
+      <aside class="mk-side" id="mkSide" aria-label="Filters"></aside>
+      <div>
+        <div class="mk-status" id="mkStatus"></div>
+        <div class="mk-grid" id="mkGrid"></div>
+        <p class="g-fine" style="margin:20px 2px 0">Every asset is free to use in your own games. Downloads are GLB, OBJ or STL, one unit per block, with the origin at the bottom. Made with Model Kit.</p>
+      </div>
+    </div>
   </section>
 </main>
 <script src="../assets/catalog.js"></script>
@@ -81,48 +189,7 @@
 <script src="modelkit-core.js"></script>
 <script src="presets.js"></script>
 <script src="create.js"></script>
-<script>
-(function(){
-  const G = Grug, $ = s => document.querySelector(s), P = MK_PRESETS;
-  G.ui.chrome('create');
-  const thumb = (kind, id) => 'thumbs/' + (kind === 'scene' ? 'scene-' : '') + id + '.webp?v=1';
-  const meta = (kind, id) => { try { const s = MK.stats(kind, id); return s.w + ' × ' + s.h + ' blocks · ' + G.fmt(s.tris) + ' tris'; } catch (e) { return ''; } };
-  const card = (kind, p) => '<button type="button" class="mk-card" data-kind="' + kind + '" data-id="' + p.id + '" aria-label="' + G.esc(p.title) + '">' +
-    '<span class="pic"><img src="' + thumb(kind, p.id) + '" alt="" loading="lazy" decoding="async" draggable="false"></span><b>' + G.esc(p.title) + '</b><span class="meta">' + meta(kind, p.id) + '</span>' +
-    '<span class="dl" data-quick="1" title="Download GLB">' + G.icon('download-simple') + '</span></button>';
-  $('#scenes').innerHTML = P.scenes.map(p => card('scene', p)).join(''); $('#nScenes').textContent = P.scenes.length;
-  $('#models').innerHTML = P.models.map(p => card('model', p)).join(''); $('#nModels').textContent = P.models.length;
-
-  // hero: the knight scene turning slowly (drag to spin it)
-  const hero = new MK.Viewer($('#heroGL'), { spin: 0.35, drag: true, yaw: 0.5, pitch: 0.28 });
-  if (hero.ok) { hero.set(MK.mesh('scene', 'knight')); hero.run(); } else $('.mk-hero .stage').innerHTML = '<img src="' + thumb('scene', 'knight') + '" alt="" style="width:100%;height:100%;object-fit:contain">';
-  if (matchMedia('(hover:hover) and (pointer:fine)').matches) $('#kitNote').hidden = true;
-
-  async function open(kind, id) {
-    const p = MK.preset(kind, id), proj = kind === 'scene' ? '.bash.json' : '.shape.json';
-    const fmts = [['glb', 'GLB', 'Unity, Godot, Blender'], ['obj', 'OBJ', 'zip with .mtl'], ['stl', 'STL', '3D printing'], ['project', 'Project', proj]];
-    let v = null;
-    const done = G.ui.dialog({ title: p.title,
-      html: '<div class="mk-view" id="mkView"><canvas></canvas></div>' + (p.blurb ? '<p class="mk-blurb">' + G.esc(p.blurb) + '</p>' : '') +
-        '<div class="mk-chips"><span class="g-chip">' + meta(kind, id) + '</span>' + (kind === 'scene' ? '<span class="g-chip">' + Object.keys(p.data.parts).length + ' parts</span>' : '') + '</div>' +
-        '<div class="mk-dl">' + fmts.map(f => '<button type="button" data-fmt="' + f[0] + '">' + G.icon('download-simple') + f[1] + '<small>' + f[2] + '</small></button>').join('') + '</div>',
-      actions: [{ label: 'Close', kind: 'quiet', value: null }, { label: 'Edit in Model Kit', kind: 'primary', value: 'edit' }] });
-    const dlg = document.querySelector('dialog.g-dialog:last-of-type');
-    if (dlg) {
-      const c = dlg.querySelector('#mkView canvas');
-      v = new MK.Viewer(c, { spin: 0.45, drag: true });
-      if (v.ok) { v.set(MK.mesh(kind, id)); v.run(); } else c.outerHTML = '<img src="' + thumb(kind, id) + '" alt="">';
-      dlg.querySelector('.mk-dl').addEventListener('click', e => { const b = e.target.closest('[data-fmt]'); if (!b) return; MK.download(kind, id, b.dataset.fmt); G.ui.toast('Downloading ' + p.title, { icon: 'download-simple' }); G.ui.buzz(); });
-    }
-    const pick = await done; if (v) v.stop();
-    if (pick === 'edit') location.href = 'modelkit/#' + (kind === 'scene' ? 'scene' : 'model') + '=' + id;
-  }
-  document.addEventListener('click', e => {
-    const c = e.target.closest('.mk-card'); if (!c) return;
-    if (e.target.closest('[data-quick]')) { MK.download(c.dataset.kind, c.dataset.id, 'glb'); G.ui.toast('Downloading ' + MK.preset(c.dataset.kind, c.dataset.id).title + '.glb', { icon: 'download-simple' }); return; }
-    open(c.dataset.kind, c.dataset.id);
-  });
-})();
-</script>
+<script src="market-icons.js"></script>
+<script src="market.js"></script>
 </body>
 </html>

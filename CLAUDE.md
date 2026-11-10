@@ -2,12 +2,20 @@
 
 The Grug game site (static HTML, Cloudflare Pages, deploys on push to `main`). See `README.md` for the map of the site.
 
-## The look: always dark, blue smoky fog
+## The look: Model Kit's theme, one accent per section
 
-Every site page (not the games under `play/`) sits on a blue smoky fog with little lights trailing through it, drawn by
-`assets/fogbg.js` (theme.js loads it). There is no light mode. A colour theme (Settings → Lights; `THEMES` in
-`assets/theme.js`, default `classic`) sets the colours of the lights (`orbs`) and the button accent; the fog and every
-neutral stay blue. Cards and bars are dark see-through glass so the fog shows through. Don't add white page backgrounds.
+The site uses the same look as **Model Kit** (Grug Digital's editor, `create/modelkit/`): dark neutral greys (`#17171A`
+page, `#232327`/`#26262B` cards), **Fredoka** for all text, flat solid accents with a darker "lip" shadow (no gradients),
+and `#1E1B16` text on anything filled with an accent. There is no light mode and no theme picker.
+
+- **Each section owns one accent** (`SECTIONS` in `assets/theme.js`, picked from the URL): Home `#9BE338`, Games
+  `#7EE081`, Create `#4FD8C4`, Avatar `#C59BFF`, Shop `#FFBE1A`, Profile `#FF8FC2` (Pearls uses purple). theme.js sets
+  `--mode` / `--mode-lo` and points the old `--sel-a` / `--sel-b` pair at the same colour, so older gradient rules come
+  out solid. The dock's tab for each section uses the same colour, and the current tab fills with it.
+- **Backgrounds:** every site page sits on a **very faint, static pixel pattern** (a PatternMix tile tinted with the
+  section's accent at alpha 7/255, `assets/patterns/<section>.png`, 96px). Keep it faint so text always reads clearly.
+- **The blue smoky fog (`assets/fogbg.js`) is only for the Games section** (`games/` and `games/<id>/`), where the
+  FOSSIL32 boxes float in it. Don't bring it back to other pages, and don't add white page backgrounds.
 
 ## Games are FOSSIL32 cartridges
 
@@ -56,7 +64,9 @@ When a new game is added to `assets/games.js` and listed, also make its box. Don
 
 ## Create tab and Model Kit
 
-The dock's **Create** tab (`create/`, cube icon) is a gallery of free preset models and scenes, made with **Model Kit**
+The dock's **Create** tab (`create/`, cube icon) is a marketplace-style **asset library** (category list, search with
+suggestions and `#tags`, genre / theme / type / triangle filters, sorting, favourites, item pages with Get, all kept in the URL;
+`create/market.js`) of free preset models and scenes, made with **Model Kit**
 (Grug Digital's pixel-to-3D editor, `create/modelkit/index.html`, a single prebuilt file). Previews and downloads are
 built in the browser by `create/modelkit-core.js`, the editor's own mesher. Presets live in `tools/modelkit/presets/`.
 After changing them, run `make-presets.js` and `thumbs.js` (see `tools/modelkit/README.md`). "Model Kit" is a working name.

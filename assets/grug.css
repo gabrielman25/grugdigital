@@ -1,9 +1,17 @@
-/* Grug · shared styles — always dark, over the blue smoky fog drawn by fogbg.js (#g-fog, behind everything).
-   theme.js sets the theme variables before first paint: --h (the fog's blue, fixed), --sel-a / --sel-b (accent pair),
-   --on-sel (ink on the accent), --hot-a / --hot-b. The colour theme also picks the colours of the lights in the fog.
-   Cards and bars are dark see-through glass so the fog shows through. (The light palette below is no longer used.)
+/* Grug · shared styles — the Model Kit look: dark #17171A neutrals, Fredoka, flat solid accents (no gradients) and a
+   static pixel pattern behind every page. Each section owns one accent (theme.js sets --mode / --mode-lo and points
+   --sel-a, --sel-b at it, with --on-sel = #1E1B16), so older gradient rules come out as solid accent fills.
+   The Games section sits on the blue smoky fog (fogbg.js) instead of a pattern. (The light palette below is no longer used.)
    The old token names (--card, --ember, --moss …) are kept and re-pointed, so page styles theme themselves. */
-/* fonts: Cal Sans and Outfit (SIL Open Font License), served from assets/fonts so pages don't wait on another site */
+/* fonts: Fredoka (the Grug Digital / Model Kit face) for everything; Cal Sans and Outfit stay for older bits.
+   All SIL Open Font License, served from assets/fonts so pages don't wait on another site */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url(fonts/fredoka.woff2) format('woff2');
+}
 @font-face {
   font-family: 'Cal Sans';
   font-style: normal;
@@ -122,37 +130,42 @@
   --moss:#16a34a; --moss-dark:#166534; --moss-ink:#fff; --moss-soft:color-mix(in srgb,#22c55e 16%,transparent);
   --gold:#f59e0b; --gold-dark:#b45309; --sky:var(--ring-b); --danger:#e11d48; --danger-dark:#9f1239;
 
-  --r:22px; --r-s:16px; --r-xs:10px;
-  --font:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --display:"Cal Sans","Outfit",system-ui,sans-serif;
+  --r:18px; --r-s:14px; --r-xs:10px;
+  --font:"Fredoka",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --display:"Fredoka",system-ui,sans-serif;
   --top:64px; --tabs:76px;
   --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px); --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px);
   --spring:cubic-bezier(.34,1.56,.64,1);
   color-scheme:light;
 }
 :root[data-theme="dark"]{
-  --bg:#03050f;                 /* deep navy under the fog (and the colour of solid things that sit on it) */
-  --scrim:hsl(var(--h) 60% 3% / .45);
-  --icon-bg:hsl(var(--h) 40% 11% / .8);
-  --glass:hsl(var(--h) 42% 9% / .66);
-  --glass-strong:hsl(var(--h) 42% 10% / .8);
-  --solid:hsl(var(--h) 36% 11%);
-  --bg2:hsl(var(--h) 40% 8% / .85);
+  /* Model Kit neutrals: flat greys, no blue tint */
+  --bg:#17171A;
+  --scrim:rgba(0,0,0,.45);
+  --icon-bg:#26262B;
+  --glass:rgba(35,35,39,.9);
+  --glass-strong:rgba(48,48,54,.94);
+  --solid:#232327;
+  --bg2:rgba(32,32,36,.9);
   --card:var(--icon-bg);
-  --card2:hsl(var(--h) 60% 80% / .08);
-  --card3:hsl(var(--h) 60% 80% / .14);
-  --line:hsl(var(--h) 70% 85% / .12); --line2:hsl(var(--h) 70% 85% / .2);
-  --bezel:hsl(var(--h) 80% 86% / .3);
-  --ink:hsl(var(--h) 40% 97%); --ink2:hsl(var(--h) 30% 92% / .86); --mut:hsl(var(--h) 28% 88% / .62);
-  --chip-bg:hsl(0 0% 100% / .93); --chip-fg:hsl(var(--h) 50% 11%);
-  --ring-a:var(--sel-a); --ring-b:var(--sel-b);
-  --shadow:0 18px 44px hsl(var(--h) 70% 2% / .55);
-  --moss:#4ade80; --moss-dark:#16a34a; --moss-ink:#052e16; --moss-soft:color-mix(in srgb,#4ade80 16%,transparent);
-  --gold:#fbbf24; --danger:#fb7185;
+  --card2:rgba(255,255,255,.06);
+  --card3:rgba(255,255,255,.11);
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --bezel:rgba(255,255,255,.22);
+  --ink:#ECECEF; --ink2:#C9C9CF; --mut:#9A9AA3;
+  --chip-bg:#ECECEF; --chip-fg:#1E1B16;
+  --ring-a:var(--mode,var(--sel-a)); --ring-b:var(--mode,var(--sel-a));
+  --shadow:0 .4rem 1.2rem rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.04);
+  --moss:#7EE081; --moss-dark:#4FB357; --moss-ink:#1E1B16; --moss-soft:color-mix(in srgb,#7EE081 16%,transparent);
+  --gold:#FFBE1A; --danger:#FF5A5A;
   color-scheme:dark;
 }
 
-/* ---------- the fog: fixed behind the page (fogbg.js fills the two canvases; this gradient shows until it does) ---------- */
+/* ---------- the pixel pattern: every site page outside Games (theme.js sets --pattern to the section's tinted tile) ---------- */
+html.g-patterned{background:#17171A var(--pattern,none) repeat fixed;background-size:96px 96px;image-rendering:pixelated}
+html.g-patterned body{background:transparent}
+
+/* ---------- the fog (Games only): fixed behind the page (fogbg.js fills the two canvases; this gradient shows until it does) ---------- */
 html.g-fogged{background:#03050f radial-gradient(ellipse 70% 60% at 50% 46%,#16288a 0%,#0a1347 34%,#040824 64%,#03050f 100%) fixed}
 html.g-fogged body{background:transparent}
 #g-fog{position:fixed;inset:0;z-index:-1;pointer-events:none;transition:filter .9s ease}
@@ -192,7 +205,7 @@ img.k-ic{display:block;object-fit:contain;-webkit-user-drag:none;user-select:non
 .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 .k-glass{background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow)}
-:root[data-theme="dark"] .g-tabs,:root[data-theme="dark"] .g-top .k-glass,:root[data-theme="dark"] button.g-me{background:hsl(var(--h) 45% 8% / .86);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3)}
+:root[data-theme="dark"] .g-tabs,:root[data-theme="dark"] .g-top .k-glass,:root[data-theme="dark"] button.g-me{background:rgba(32,32,36,.86);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3)}
 .k-sb{position:absolute;top:-9px;z-index:2;font:600 9.5px/1 var(--display);letter-spacing:.06em;padding:4px 6px 3px;border-radius:7px;background:var(--chip-bg);color:var(--chip-fg);box-shadow:0 2px 6px rgba(0,0,0,.2);pointer-events:none}
 
 /* ---------- top bar: floating pills ---------- */
@@ -229,10 +242,11 @@ img.k-ic{display:block;object-fit:contain;-webkit-user-drag:none;user-select:non
 .g-tabs a{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:58px;border-radius:16px;font:700 11px/1 var(--font);color:var(--mut);transition:transform .2s var(--spring),background .2s}
 .g-tabs a .k-ic{width:34px;height:34px;filter:none;transition:transform .25s var(--spring)}
 .g-tabs a::after{content:"";position:absolute;left:50%;bottom:-6px;width:0;height:4px;border-radius:3px;background:var(--ink);opacity:.85;transform:translateX(-50%);transition:width .25s}
-.g-tabs a[aria-current=page]{color:var(--ink)}
-.g-tabs a[aria-current=page]::after{width:30px}
-.g-tabs a[aria-current=page] .k-ic{transform:translateY(-2px) scale(1.06)}
-.g-tabs a:hover{background:var(--card2)}
+.g-tabs a[aria-current=page]{color:var(--on-sel);background:var(--tab,var(--mode));transform:translateY(-3px);box-shadow:0 3px 0 var(--tab-lo,var(--mode-lo))}
+.g-tabs a[aria-current=page] .k-ic-s{color:var(--on-sel)!important}
+.g-tabs a[aria-current=page]::after{width:0}
+.g-tabs a[aria-current=page] .k-ic{transform:scale(1.04)}
+.g-tabs a:not([aria-current]):hover{background:var(--card2)}
 .g-tabs a:active .k-ic{transform:scale(.9)}
 @media (min-width:720px){.g-tabs{width:auto;gap:4px;padding:9px 14px 12px}.g-tabs a{flex:none;width:76px;height:62px}.g-tabs a .k-ic{width:38px;height:38px}}
 @media (orientation:landscape) and (max-height:540px){
@@ -241,19 +255,21 @@ img.k-ic{display:block;object-fit:contain;-webkit-user-drag:none;user-select:non
   .g-tabs a{flex:none;width:62px;height:52px}
   .g-tabs a span{display:none}
   .g-tabs a::after{left:-5px;top:50%;bottom:auto;width:4px;height:0;transform:translateY(-50%)}
-  .g-tabs a[aria-current=page]::after{width:4px;height:28px}
+  .g-tabs a[aria-current=page]::after{width:0;height:0}
+  .g-tabs a[aria-current=page]{transform:translateX(3px)}
   .g-tabs .k-sb.l{left:50%;transform:translateX(-50%)}
   .g-tabs .k-sb.r{top:auto;bottom:-9px;right:auto;left:50%;transform:translateX(-50%)}
   .g-top{padding-left:calc(96px + var(--sal))}
 }
 
 /* ---------- buttons ---------- */
-.g-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:999px;font:600 17px/1 var(--display);
+.g-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:14px;font:600 17px/1 var(--display);
   background:var(--card);color:var(--ink);border:1px solid var(--line);transition:transform .15s var(--spring),background .15s,box-shadow .15s;white-space:nowrap;user-select:none}
 .g-btn:hover{background:var(--glass-strong);transform:translateY(-1px)}
 .g-btn:active,.g-btn.down{transform:scale(.97)}
-.g-btn.primary{background:linear-gradient(135deg,var(--sel-a),var(--sel-b));color:var(--on-sel);border:0;box-shadow:0 8px 22px color-mix(in srgb,var(--sel-a) 38%,transparent)}
-.g-btn.primary:hover{box-shadow:0 10px 26px color-mix(in srgb,var(--sel-a) 50%,transparent)}
+.g-btn.primary{background:var(--mode,var(--sel-a));color:var(--on-sel);border:0;box-shadow:0 4px 0 var(--mode-lo,rgba(0,0,0,.35))}
+.g-btn.primary:hover{background:var(--mode,var(--sel-a));filter:brightness(1.05)}
+.g-btn.primary:active,.g-btn.primary.down{transform:translateY(3px);box-shadow:0 1px 0 var(--mode-lo,rgba(0,0,0,.35))}
 .g-btn.moss{background:var(--moss);color:var(--moss-ink);border:0}
 .g-btn.danger{background:var(--danger);color:#fff;border:0}
 .g-btn.quiet{background:transparent;border-color:transparent;color:var(--ink2)}
@@ -356,7 +372,7 @@ textarea.g-input{min-height:120px;font-size:14px;font-family:ui-monospace,SFMono
 
 /* ---------- dialog (bottom sheet on phones) & toast ---------- */
 .g-dialog{border:0;padding:0;background:transparent;width:100%;max-width:100%;margin:auto auto 0;color:var(--ink);max-height:calc(100% - 24px)}
-.g-dialog::backdrop{background:hsl(var(--h) 40% 10% / .38);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+.g-dialog::backdrop{background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
 .g-dialog-in{position:relative;background:var(--solid);border-radius:28px 28px 0 0;padding:26px 18px calc(18px + var(--sab));border:1px solid var(--line);border-bottom:0;display:flex;flex-direction:column;gap:14px;animation:k-sheet .36s cubic-bezier(.2,.9,.25,1);box-shadow:var(--shadow)}
 .g-dialog-in::before{content:"";position:absolute;top:9px;left:50%;width:42px;height:5px;border-radius:3px;background:var(--line2);transform:translateX(-50%)}
 .g-dialog h2{font-size:24px}
@@ -479,7 +495,7 @@ html.g-scaled .g-dialog{zoom:var(--g-ui)}
 .g-inv-tx{flex:1;min-width:0}.g-inv-tx b{display:block}.g-inv-tx small{display:block;color:var(--mut);font-size:13px;line-height:1.3}
 .g-inv-empty{display:flex;align-items:flex-start;gap:8px}.g-inv-empty span{flex:1}.g-inv-empty .gi{width:20px;height:20px;flex:none}
 .g-freebar{position:fixed;left:50%;top:calc(var(--sat,0px) + var(--top,52px) + 6px);transform:translateX(-50%);z-index:55;display:flex;align-items:center;gap:8px;padding:8px 16px 8px 10px;border-radius:999px;
-  background:linear-gradient(135deg,#f59e0b,#f97316);color:#1a1205;font:800 15px/1 var(--display);box-shadow:0 10px 28px rgba(245,158,11,.45);animation:g-freein .5s var(--spring) both;pointer-events:none;letter-spacing:.04em}
+  background:#FFBE1A;color:#1E1B16;font:800 15px/1 var(--display);box-shadow:0 10px 28px rgba(245,158,11,.45);animation:g-freein .5s var(--spring) both;pointer-events:none;letter-spacing:.04em}
 .g-freebar .gi{width:22px;height:22px}
 .g-freebar .t{font-variant-numeric:tabular-nums;font-size:17px}
 .g-freebar.low{animation:g-freein .5s var(--spring) both,g-freelow .8s ease-in-out infinite}
@@ -487,4 +503,4 @@ html.g-scaled .g-dialog{zoom:var(--g-ui)}
 @keyframes g-freelow{50%{filter:brightness(1.35)}}
 /* a price with the free-shop token on */
 .g-free-price{text-decoration:line-through;opacity:.6;margin-right:6px}
-.g-tag.free{background:linear-gradient(135deg,#f59e0b,#f97316);color:#1a1205}
+.g-tag.free{background:#FFBE1A;color:#1E1B16}

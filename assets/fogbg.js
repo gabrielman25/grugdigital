@@ -1,7 +1,7 @@
 /* Grug · fogbg.js — the site background: a blue smoky fog (think an old console's boot screen) with little balls of light
    that wander around trailing comet tails, and a few dim boxes drifting in the haze.
    theme.js loads this on every site page (not inside the games under play/ or work/).
-   The fog is always blue; the colour theme (Settings → Lights) picks the colours of the lights (THEMES[x].orbs in theme.js).
+   The fog is always blue, with lights in Grug colours (ORBS in theme.js). It is only drawn in the Games section.
    Still frame when Animations are off or the system asks for reduced motion. Paused while the tab is hidden or a
    FOSSIL32 cartridge is open over the page (html.f32-lock).
 */
@@ -71,7 +71,7 @@
   const hex = c => { c = String(c || '#fff').replace('#', ''); if (c.length === 3) c = c.split('').map(x => x + x).join(''); const v = parseInt(c, 16) || 0; return [v >> 16 & 255, v >> 8 & 255, v & 255]; };
   function themeColors() {
     const T = window.GrugTheme; let list = null;
-    try { const t = T.THEMES[T.prefs().theme]; list = t.orbs || [t.a, t.b, t.hotA, t.hotB]; } catch (e) {}
+    try { list = T.ORBS; } catch (e) {}
     return (list && list.length ? list : ['#9be338', '#ffd23f', '#5ab0ff', '#e8f0ff']).map(hex);
   }
 

@@ -15,6 +15,7 @@ pixel-to-3D model editor, at `create/modelkit/`.
 
 1. Put the model in `tools/modelkit/presets/<id>.shape.json`, or a scene in `presets/scenes/<id>.bash.json`
    (make them in Model Kit: Menu → Save project, or Export → Project in the Bash tab).
-2. Give it a title and a one-line blurb in `META` / `SCENES` at the top of `make-presets.js`.
+2. Give it a title, a one-line blurb, a category, genres, themes and search tags in `META` / `SCENES` at the top of
+   `make-presets.js` (the library's filters and search are built from these).
 3. `node tools/modelkit/make-presets.js` then `node tools/modelkit/thumbs.js` (needs Playwright with Chromium).
 4. Also add the same file to the editor build's examples, so "Edit in Model Kit" can open it.

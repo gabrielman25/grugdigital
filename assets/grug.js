@@ -377,7 +377,9 @@
   ];
   // dock icons: full-colour pictures from the icon pack (assets/icons/dock-*.webp)
   // dock icons: colourful pictures, or the simple set in one colour per tab
-  const DOCK_SIMPLE = { home: ['house', '#4f7cf3'], games: ['controller', '#22b455'], create: ['cube', '#14b8c4'], avatar: ['shirt', '#a45fe8'], shop: ['shop', '#f09a12'], profile: ['person', '#f25c5c'] };
+  // one colour per section, the same accents theme.js gives each section (Model Kit style)
+  const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'] };
+  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E' };
   const dockIcon = k => colorful() ? '<img class="k-ic" src="' + iconSrc('dock-' + k) + '" alt="" aria-hidden="true" draggable="false">'
     : '<svg class="k-ic k-ic-s" viewBox="0 0 16 16" fill="currentColor" style="color:' + DOCK_SIMPLE[k][1] + '" aria-hidden="true" focusable="false">' + (SIMPLE['dock-' + DOCK_SIMPLE[k][0]] || '') + '</svg>';
   const DOCK = {};
@@ -402,7 +404,7 @@
       '<button type="button" class="g-me" aria-label="Your account menu" aria-haspopup="menu" aria-expanded="false"><span class="g-me-name">' + esc(profile.name) + '</span>' + faceImg + '</button>';
     const tabs = document.createElement('nav'); tabs.className = 'g-tabs k-glass'; tabs.setAttribute('aria-label', 'Sections');
     tabs.innerHTML = '<span class="k-sb l" aria-hidden="true">LB</span><span class="k-sb r" aria-hidden="true">RB</span>' +
-      NAV.map(n => '<a href="' + url(n[3]) + '"' + (n[0] === active ? ' aria-current="page"' : '') + '>' + DOCK[n[0]] + '<span>' + n[1] + '</span></a>').join('');
+      NAV.map(n => '<a href="' + url(n[3]) + '" style="--tab:' + DOCK_SIMPLE[n[0]][1] + ';--tab-lo:' + DOCK_LO[n[0]] + '"' + (n[0] === active ? ' aria-current="page"' : '') + '>' + DOCK[n[0]] + '<span>' + n[1] + '</span></a>').join('');
     document.body.prepend(top); document.body.appendChild(tabs);
     document.body.classList.add('g-chrome');
     $('.g-gear', top).addEventListener('click', () => settings());
@@ -490,25 +492,9 @@
     document.addEventListener('pointerover', pre, { passive: true }); document.addEventListener('touchstart', pre, { passive: true });
   }
 
-  /* ---------- appearance: the colour themes (used by the gear sheet and Profile). The site is always dark; a theme picks
-     the colours of the lights that float through the fog and the accent on buttons. ---------- */
-  function appearance(box) {
-    const T = root.GrugTheme; if (!T || !box) return;
-    const sw = th => { const o = th.orbs || [th.a, th.b, th.hotA, th.hotB], pos = [[18, 64, 22], [44, 30, 34], [70, 58, 18], [86, 26, 26]];
-      return '<span class="sw">' + pos.map((p, i) => '<i style="left:' + p[0] + '%;top:' + p[1] + '%;--c:' + o[i % o.length] + ';--a:' + p[2] + 'deg"></i>').join('') + '</span>'; };
-    const draw = () => {
-      const s = T.prefs();
-      box.innerHTML =
-        '<span class="k-set-h">Lights</span><div class="k-themes" role="radiogroup" aria-label="Colour of the lights">' +
-        Object.keys(T.THEMES).map(k => { const th = T.THEMES[k]; return '<button type="button" class="k-theme" role="radio" aria-checked="' + (s.theme === k) + '" data-theme-id="' + k + '">' + sw(th) + '<span><b>' + th.name + '</b><br><small>' + th.note + '</small></span></button>'; }).join('') + '</div>';
-    };
-    draw();
-    box.addEventListener('click', e => {
-      const th = e.target.closest('[data-theme-id]'), sw = e.target.closest('[data-k]');
-      if (th) T.set({ theme: th.dataset.themeId }); else if (sw) T.set({ [sw.dataset.k]: !T.prefs()[sw.dataset.k] }); else return;
-      buzz(); draw();
-    });
-  }
+  /* ---------- appearance: nothing to pick any more. Each section has its own accent (theme.js), like Model Kit's modes.
+     Kept so older pages that call it still work. ---------- */
+  function appearance(box) { if (box) box.innerHTML = ''; }
   /* the UI size row (Settings and Profile): four sizes, applied everywhere on the site and in every game */
   function uiSizeHtml() {
     const names = { 0.85: 'Small', 1: 'Normal', 1.15: 'Large', 1.3: 'Huge' };
@@ -546,7 +532,7 @@
   }
   function settings() {
     return dialog({
-      title: 'Settings', html: '<div id="kAppear"></div>' + uiSizeHtml() +
+      title: 'Settings', html: uiSizeHtml() +
         '<div class="g-pref"><span><b>Animations</b><small>Celebrations and poses</small></span><button type="button" class="g-switch" role="switch" data-pref="motion" aria-checked="' + !!profile.prefs.motion + '" aria-label="Animations"></button></div>' +
         '<div class="g-pref"><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button type="button" class="g-switch" role="switch" data-pref="haptics" aria-checked="' + !!profile.prefs.haptics + '" aria-label="Vibrate on tap"></button></div>' +
         '<div class="g-pref"><span><b>Colorful icons</b><small>Full-colour pictures instead of simple one-colour icons</small></span><button type="button" class="g-switch" role="switch" data-pref="colorIcons" aria-checked="' + !!profile.prefs.colorIcons + '" aria-label="Colorful icons"></button></div>' +
@@ -554,7 +540,7 @@
         '<p class="g-fine" style="margin-top:6px">Saved in your profile, so it comes along when you export it. Emotes are picked in the <a href="' + url('avatar/#emotes') + '" style="color:var(--ember);font-weight:800">avatar editor</a>. More in <a href="' + url('profile/') + '" style="color:var(--ember);font-weight:800">Profile</a>.</p>',
       actions: [{ label: 'Done', kind: 'primary', value: true }],
       onOpen: d => {
-        d.classList.add('wide'); appearance($('#kAppear', d)); wireUiSize(d);
+        d.classList.add('wide'); wireUiSize(d);
         const inv = $('#kInv', d), paintInv = () => { inv.innerHTML = inventoryHtml(); }; paintInv(); wireInventory(inv, paintInv);
         $$('[data-pref]', d).forEach(b => b.addEventListener('click', () => {
           profile.prefs[b.dataset.pref] = !profile.prefs[b.dataset.pref]; save('prefs'); b.setAttribute('aria-checked', !!profile.prefs[b.dataset.pref]);

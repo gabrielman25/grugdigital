@@ -7,8 +7,8 @@
 <!--
   PET MOUNTAIN RESCUE · a Grug game built from the kit's starter (template/game.html)
   Pets are stranded all over an endless mountain. Rescue them and they move into your Pet Haven, where they earn gems.
-  You can't jump. Your buddy Ivy holds your hand: set her down by a ledge, hop up on her head to reach it, then reach
-  down and pull her up after you. The mountain never ends: it is built block by block as you climb, through Meadow,
+  You can't jump. Your buddy Ivy holds your hand: keep walking into a ledge and she boosts you onto it, then you reach
+  down and pull her straight up after you (or do each step with the action button). The mountain never ends: it is built block by block as you climb, through Meadow,
   Dunes, Canyon, Snowcaps and Starlight, then round again a little steeper. Big mountains wall the trail on both sides.
   Sections, top to bottom:
     1. SETTINGS         names, the demo Store list (the partner app's CONFIG.game.shop replaces it when embedded)
@@ -1188,7 +1188,7 @@ const lvOf = xp => { let l = 0; while (l < XP_AT.length && xp >= XP_AT[l]) l++; 
 Object.defineProperty(SETTINGS, 'buddyName', { get: () => (PBY[Save.S.partner] || PARTNERS[0]).n });
 
 const Game = (() => {
-  const G = { carry: [], mode: 'idle', paused: false, t: 0, seq: null, say: null, sayT: 0, dizzy: 0, ctx: null, callCool: 0, hintT: 0, sess: null, lastCamp: -1, camT: { x: 0, y: 0, z: 0, set: false }, idleT: 0, waveT: 4, shakeT: 0 };
+  const G = { auto: null, carry: [], mode: 'idle', paused: false, t: 0, seq: null, say: null, sayT: 0, dizzy: 0, ctx: null, callCool: 0, hintT: 0, sess: null, lastCamp: -1, camT: { x: 0, y: 0, z: 0, set: false }, idleT: 0, waveT: 4, shakeT: 0 };
   let P = null, B = null, hats = []; const PT = {};
   const S = () => Save.S;
   /* ---------- characters ---------- */
@@ -1273,7 +1273,7 @@ const Game = (() => {
     // were climbing with walks back to the spot she left
     const walk = !!old && G.mode === 'play' && atHaven() && nb.root.visible && !G.seq && Math.hypot(nb.x - P.x, nb.z - P.z) < 2500;
     if (old) { old.st = 'stand'; old.slot = nb.slot != null ? nb.slot : old.slot; old.walkHome = walk; old.L = null; old.below = false; old.goal = null; }
-    nb.slot = null; nb.L = null; nb.below = false; nb.vy = 0; nb.air = false; nb.left = false; nb.stuck = 0; B = nb; G.seq = null; G.poseB = null;
+    nb.slot = null; nb.L = null; nb.below = false; nb.vy = 0; nb.air = false; nb.left = false; nb.stuck = 0; B = nb; G.seq = null; G.auto = null; G.poseB = null;
     if (walk) { nb.y = World.groundAt(nb.x, nb.z, 3); nb.st = 'go'; nb.goal = { x: P.x, z: P.z, toHand: true }; }
     else { if (old) { nb.x = old.x; nb.y = old.y; nb.z = old.z; nb.face = old.face; } nb.st = 'hold'; nb.side = 1; nb.goal = null; }
     Save.save(); return walk ? 'walk' : true;
@@ -1322,7 +1322,7 @@ const Game = (() => {
   function spawn(k) {
     const s = campSpot(k); P.x = s.x; P.z = s.z; P.y = World.groundAt(P.x, P.z, 8); P.vy = 0; P.face = 0; P.air = false;
     B.x = P.x - 62; B.z = P.z; B.y = World.groundAt(B.x, B.z, 18); B.vy = 0; B.face = 0; B.st = 'hold'; B.side = 1; B.L = null; B.below = false;
-    G.seq = null; CAM.yaw = Math.PI; G.camT.set = false; G.lastCamp = k;
+    G.seq = null; G.auto = null; CAM.yaw = Math.PI; G.camT.set = false; G.lastCamp = k;
   }
   const fwd = a => [Math.sin(a), Math.cos(a)];
   const rightOf = a => [-Math.cos(a), Math.sin(a)];
@@ -1423,7 +1423,7 @@ const Game = (() => {
     if (dh >= 3) steps.push({ d: 0.36 / q, s: () => { steps[3].m.s(); G.poseB = 'liftHigh'; Sfx.play('boing'); }, f: k => steps[3].m.f(k), m: mover(P, sx, y0 + 222, sz, 0, faceWall) });
     const hop = mover(P, lx, L.top, lz, 40, faceWall);
     steps.push({ d: 0.42 / q, s: () => { hop.s(); G.poseP = 'climb'; Sfx.play('boing'); }, f: k => hop.f(k), e: () => { Sfx.play('land'); G.poseP = null; Parts.burst(P.x, P.y + 5, P.z, 8, ['#ffffff', '#e5e7eb'], { speed: 120, up: 120, life: 0.5, g: 300 }); } });
-    steps.push({ d: 0.22, s: () => { G.poseB = 'reachUp'; actorExpr(B.A, 'happy'); }, f: k => { P.face = faceWall + angDiff(faceWall, faceWall + Math.PI) * k; }, e: () => { B.st = 'wait'; B.below = true; G.poseB = null; say(pick(SAYS.waitUp), 2.2); G.climbs = (G.climbs || 0) + 1; xp(10); } });
+    steps.push({ d: 0.22, s: () => { G.poseB = 'reachUp'; actorExpr(B.A, 'happy'); }, f: k => { P.face = faceWall + angDiff(faceWall, faceWall + Math.PI) * k; }, e: () => { B.st = 'wait'; B.below = true; G.poseB = null; if (G.auto !== 'climb') say(pick(SAYS.waitUp), 2.2); G.climbs = (G.climbs || 0) + 1; xp(10); } });
     // the first step's start
     steps[0].s = (s => () => { s(); G.poseB = 'brace'; })(steps[0].s);
     run(steps);
@@ -1459,7 +1459,7 @@ const Game = (() => {
     if (G.callCool > 0) return; G.callCool = 1.2;
     Parts.burst(B.x, B.y + 100, B.z, 18, ['#ffffff', '#c4b5fd', '#7dd3fc'], { speed: 200, up: 200, life: 0.6, g: 200 });
     const sp = [1, -1, 0].map(s => [s, sideSpot(s)]).find(([s, p]) => level(p[0], p[1], P.y)) || [0, [P.x, P.z]];
-    B.x = sp[1][0]; B.z = sp[1][1]; B.y = P.y; B.vy = 0; B.left = false; B.st = 'hold'; B.side = sp[0]; B.L = null; B.below = false; G.seq = null; G.poseB = null;
+    B.x = sp[1][0]; B.z = sp[1][1]; B.y = P.y; B.vy = 0; B.left = false; B.st = 'hold'; B.side = sp[0]; B.L = null; B.below = false; G.seq = null; G.auto = null; G.poseB = null;
     Parts.burst(B.x, B.y + 100, B.z, 18, ['#ffffff', '#c4b5fd', '#7dd3fc'], { speed: 200, up: 200, life: 0.6, g: 200 });
     Sfx.play('call'); if (!free) say(pick(SAYS.call), 1.2);
   }
@@ -1541,6 +1541,31 @@ const Game = (() => {
     const L = findLedge(B.x, B.z, B.y, B.face);
     if (L && L.dh <= reach()) { const [bx, bz] = at(L, L.wall - L.sg * 34, latOf(L, B.x, B.z)); if (level(bx, bz, B.y)) { B.x = bx; B.z = bz; B.face = Math.atan2(L.ax, L.az) + Math.PI; B.L = L; say(pick(SAYS.place), 1.4); return; } }
     B.L = null; say('Here!', 1);
+  }
+  /* ---------- walk-in climbing: hold forward against a ledge and the whole move plays by itself ----------
+     Holding her hand and pushing into a wall she can boost you up: she's set down at it, boosts you, you hop on top and
+     pull her straight up after you (G.auto steps through 'place' -> 'climb' -> 'pull'). If she's already braced at a
+     ledge, walking into it starts at the boost. The action button still does each step by hand. */
+  let pushT = 0, highT = 0;
+  function walkIn(mv, dt) {
+    highT = Math.max(0, highT - dt);
+    if (G.seq || G.auto || P.air || G.dizzy > 0 || G.point || mv.mag < 0.5 || (B.st !== 'hold' && B.st !== 'wait')) { pushT = 0; return; }
+    const dir = Math.atan2(mv.x, mv.z), L = findLedge(P.x, P.z, P.y, dir);
+    // right up against the wall, and pushing mostly into it
+    const into = L ? (mv.x * L.ax + mv.z * L.az) / Math.max(0.001, mv.mag) : 0;
+    if (!L || into < 0.7 || Math.abs(L.wall - alongOf(L, P.x, P.z)) > 60) { pushT = 0; return; }
+    if (L.dh > reach()) { if (B.st === 'hold' && L.dh <= 3 && !highT) { highT = 4; Sfx.play('nope'); UI.toast(reach() >= 3 ? 'Too high, even with a Big Boost. Find another way up.' : 'That’s ' + L.dh + ' blocks: Super Lift or Big Boost reaches 3.', 'bad'); } pushT = 0; return; }
+    if (!ledgeOK(L)) { pushT = 0; return; }
+    pushT += dt; if (pushT < 0.16) return;
+    pushT = 0;
+    if (B.st === 'hold') { G.auto = 'place'; P.face = dir; doPlace({ k: 'place', L }); if (!G.seq) G.auto = null; }
+    else if (B.L && ledgeOK(B.L) && Math.hypot(B.x - P.x, B.z - P.z) < 240 && Math.abs(P.y - B.y) < 30 && B.L.wall === L.wall && B.L.ax === L.ax && B.L.az === L.az) { G.auto = 'climb'; doClimb(); }
+  }
+  function autoTick() {
+    if (!G.auto || G.seq) return;
+    if (G.auto === 'place') { if (B.st === 'wait' && B.L && ledgeOK(B.L)) { G.auto = 'climb'; doClimb(); } else G.auto = null; }
+    else if (G.auto === 'climb') { if (B.st === 'wait' && B.below) { G.auto = 'pull'; doPull(); if (!G.seq) G.auto = null; } else G.auto = null; }
+    else G.auto = null;
   }
   function act(c) {
     if (!c) return;
@@ -1813,19 +1838,19 @@ const Game = (() => {
   /* ---------- a climb (from a camp, until you rest) ---------- */
   function begin(fromCamp) {
     const k = fromCamp == null ? S().camp : fromCamp;
-    G.mode = 'play'; G.paused = false; G.t = 0; G.seq = null; G.dizzy = 0; G.say = null; G.poseP = G.poseB = null;
+    G.mode = 'play'; G.paused = false; G.t = 0; G.seq = null; G.auto = null; G.dizzy = 0; G.say = null; G.poseP = G.poseB = null;
     World.clear(dropCh); spawn(k); World.stream(P.z, 99, addCh, dropCh); Gems.reset(); Pets.reset();
     Pets.clearCarry(); Pets.warp(); G.sess = { from: Math.round(P.y / BS), top: Math.round(P.y / BS), gems: 0, camps: 0, t: 0, pets: 0 };
     S().climbs++; Save.save();
     UI.hud(true); UI.closeSheets(); placeCamera(true);
     if (window.GK && GK.tutorial) setTimeout(() => GK.tutorial('petmountainrescue', [
       { title: 'Peak Pals', text: TOUCH ? 'Drag on the left to walk. Try it!' : 'Walk with W A S D. Try it now!', skill: 'move', until: () => G.moving, hideNext: true },
-      { title: 'Your buddy', text: 'You can’t jump, but ' + SETTINGS.buddyName + ' can boost you: walk to a ledge and press the big button to hop onto her, then pull her up after you.', target: '#actBtn' },
+      { title: 'Your buddy', text: 'You can’t jump, but ' + SETTINGS.buddyName + ' can boost you: holding her hand, just keep walking into a ledge. She lifts you up and you pull her up after you.', target: '#actBtn' },
       { title: 'Pets', text: 'Pets are stranded up the mountain. Walk up to one and it follows you; bring it to a camp’s Rescue Hut to send it to your Pet Haven.' },
       { title: 'Camps', text: 'Each camp saves your progress. Gems you find buy upgrades in the Gem Shop. Hold Shift (or tap Run) to sprint on flat ground.', target: '#shopBtn', doneLabel: 'Let’s climb!' }
     ]), 1400);
     actorAnim(B.A, 'idle'); say(k ? 'Back at ' + ZN(k).n + ' camp!' : 'Let’s climb!', 2);
-    UI.banner(zoneName(k), k ? 'Camp · ' + zoneStart(k) + ' m' : 'Hold hands, find a ledge, set ' + SETTINGS.buddyName + ' down', ZN(k));
+    UI.banner(zoneName(k), k ? 'Camp · ' + zoneStart(k) + ' m' : 'Hold hands and walk into a ledge to climb', ZN(k));
   }
   function finish() {
     if (G.mode !== 'play') return;
@@ -1857,7 +1882,7 @@ const Game = (() => {
     const k = Math.max(S().camp, curZone()) + 1; Rows.camp(k);
     if (G.mode === 'play') {
       Parts.burst(P.x, P.y + 100, P.z, 30, ['#ffffff', '#c4b5fd', '#7dd3fc'], { speed: 260, up: 300, life: 0.7, g: 200 });
-      const s = campSpot(k); P.x = s.x; P.z = s.z; P.y = World.groundAt(P.x, P.z, 22) + 5; P.vy = 0; G.seq = null; G.poseP = G.poseB = null;
+      const s = campSpot(k); P.x = s.x; P.z = s.z; P.y = World.groundAt(P.x, P.z, 22) + 5; P.vy = 0; G.seq = null; G.auto = null; G.poseP = G.poseB = null;
       World.clear(dropCh); World.stream(P.z, 99, addCh, dropCh); Gems.reset(); Pets.reset(); doCall(true); Pets.warp(); G.camT.set = false; placeCamera(true); S().camp = Math.max(S().camp, k); S().seen = Math.max(S().seen, k);
     } else { S().camp = k; S().seen = Math.max(S().seen, k); S().best = Math.max(S().best, zoneStart(k)); Save.save(); }
   }
@@ -1990,6 +2015,7 @@ const Game = (() => {
         P.face += angDiff(P.face, Math.atan2(mv.x, mv.z)) * Math.min(1, dt * 12);
         tryMove(P, mv.x * sp * dt, mv.z * sp * dt, 20); moving = true;
       }
+      walkIn(mv, dt);
       const fell = physics(P, dt, 3); pushOut(P, 20);
       if (fell > 380) { G.dizzy = 0.9; Sfx.play('oof'); Parts.burst(P.x, P.y + 10, P.z, 14, ['#e5e7eb', '#ffffff'], { speed: 220, up: 150, life: 0.5, g: 300 }); }
       else if (fell > 60) Sfx.play('land');
@@ -2023,6 +2049,7 @@ const Game = (() => {
       if (B.below && perk('ivy', 6) && P.y - B.y < 130 && d < 320 && !P.air) { const sp = [1, -1, 0].map(s => [s, sideSpot(s)]).find(([s, q]) => level(q[0], q[1], P.y)); if (sp) { B.st = 'busy'; run([Object.assign(mover(B, sp[1][0], P.y, sp[1][1], 70, P.face), { d: 0.45, s0: 1, e: () => { B.st = 'hold'; B.side = sp[0]; B.below = false; B.L = null; say('Hup! Got it!', 1.2); Sfx.play('boing'); } })]); } }
       if (B.below && d > 600 && G.sayT < -3) say('Wait for me!', 1.6);
     }
+    autoTick();
     // the action
     G.ctx = context();
     if (input.tap && G.point) { const tp = input.tap; input.tap = null; sendTo(tp.x, tp.y); }
@@ -2129,9 +2156,9 @@ const UI = (() => {
       '<div class="item set">' + tile(View.o.sound ? 'speaker' : 'speaker_mute', 'var(--teal)') + '<div class="txt"><b>Sound</b><small>Boings, chimes and camp tunes.</small></div>' + seg([['on', 'On'], ['off', 'Off']], View.o.sound ? 'on' : 'off', 'data-sound', 'var(--teal)') + '</div></div>';
   }
   const howto = () => '<div class="howto">' +
-    '<div>' + tile('hand', 'var(--green)') + '<span>Walk up to a ledge holding ' + SETTINGS.buddyName + '’s hand and ' + keyName('press <b>E</b>', 'tap <b>Set down</b>') + ': she waits there with her hands cupped.</span></div>' +
-    '<div>' + tile('arrow_up', 'var(--violet)') + '<span>' + keyName('Press <b>E</b> or click her', 'Tap her') + ' to climb up on her head and onto the ledge. She can boost you 2 blocks.</span></div>' +
-    '<div>' + tile('pals', 'var(--orange)') + '<span>Up top, ' + keyName('press <b>E</b> or click her', 'tap her') + ' again to pull her up after you. Lost her? ' + keyName('<b>Q</b>', 'The <b>call</b> button') + ' brings her back.</span></div>' +
+    '<div>' + tile('hand', 'var(--green)') + '<span>Holding ' + SETTINGS.buddyName + '’s hand, keep walking into a ledge: she cups her hands, lifts you onto it and you pull her up after you. She can boost you 2 blocks.</span></div>' +
+    '<div>' + tile('arrow_up', 'var(--violet)') + '<span>Rather do it step by step? ' + keyName('Press <b>E</b>', 'Tap <b>Set down</b>') + ' to set her down by a ledge, ' + keyName('press <b>E</b> or click her', 'tap her') + ' to climb on, then again up top to pull her up.</span></div>' +
+    '<div>' + tile('pals', 'var(--orange)') + '<span>Lost her? ' + keyName('<b>Q</b>', 'The <b>call</b> button') + ' brings her back.</span></div>' +
     '<div>' + tile('speech_bubble_exclamation', 'var(--rose)') + '<span>' + keyName('Press <b>R</b>', 'Tap <b>Talk</b>') + ' to cheer ' + SETTINGS.buddyName + ' on (kind words make her climb faster for a bit), high five, dance, or send her to a spot.</span></div>' +
     '<div>' + tile('pals', 'var(--violet)') + '<span>Three climbing partners wait at the Haven: Ivy the Booster, June the Pet Whisperer and Skye the Scout. Tap one there (or pick here) to climb with her. Each levels up as you climb together.</span></div>' +
     '<div>' + tile('paw', 'var(--orange)') + '<span>Walk up to a stranded pet to rescue it: it follows you. Bring your pets to any camp’s Rescue Hut and they move into your <b>Pet Haven</b>.</span></div>' +
