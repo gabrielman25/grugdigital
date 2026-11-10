@@ -19,9 +19,9 @@
     player: { label: 'Player', icon: 'game-controller', color: '#7EE081', text: 'Play games, earn rewards at shops and dress up your avatar', tabs: ['home', 'games', 'rewards', 'avatar', 'shop', 'profile'] },
     owner: { label: 'Restaurant owner', icon: 'storefront', color: '#FF9F5A', text: 'Make a free rewards card that brings guests back', tabs: ['home', 'games', 'rewards', 'profile'] },
     dev: { label: 'Game developer', icon: 'cube', color: '#4FD8C4', text: 'Free 3D models, Model Kit and the game library', tabs: ['home', 'games', 'create', 'avatar', 'shop', 'profile'] },
-    creator: { label: 'Online creator', icon: 'camera', color: '#5AB0FF', text: 'Make a link page or a 3D world for your socials', tabs: ['home', 'games', 'links', 'avatar', 'shop', 'profile'] }
+    creator: { label: 'Online creator', icon: 'camera', color: '#5AB0FF', text: 'Make a 3D world for your socials, with a game if you like', tabs: ['home', 'games', 'links', 'avatar', 'shop', 'profile'] }
   };
-  // tabs only some roles get; everyone else (and 'all') never sees them in the dock
+  // tabs only some roles get (and 'all', Everything); nobody else sees them in the dock
   const ROLE_ONLY_TABS = { links: ['creator'] };
   const EXPORT_FORMAT = 'grug-profile';
 
@@ -388,7 +388,7 @@
   }
 
   const roleOf = () => profile.prefs.role || '';
-  const showsTab = k => { const r = ROLES[roleOf()]; return r ? r.tabs.includes(k) : !ROLE_ONLY_TABS[k]; };
+  const showsTab = k => { const role = roleOf(), r = ROLES[role]; return r ? r.tabs.includes(k) : role === 'all' || !ROLE_ONLY_TABS[k]; };   // 'all' (Everything) shows every tab, Links and Rewards included
 
   /* ---------- UI chrome: floating top bar + dock (kubii theme) ---------- */
   const NAV = [
@@ -418,6 +418,7 @@
     const pageTitle = opts.title || (/^games made/i.test(titleBit) ? 'Home' : titleBit);
     const top = document.createElement('header'); top.className = 'g-top';
     top.innerHTML = '<a class="g-logo k-glass" href="' + url('') + '" aria-label="Grug home">' + LOGO + '<span>Grug</span></a>' +
+      '<a class="g-dc k-glass" href="' + esc(discordInvite()) + '" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord" title="Join the Grug Digital Discord"><span class="g-dc-b">' + DC_SVG + '</span><span class="g-dc-n" hidden><i></i><b></b><small>online</small></span></a>' +
       '<div class="g-title k-glass" aria-hidden="true"><small>' + esc(pageTitle === navLabel ? 'Grug' : navLabel) + '</small><b>' + esc(pageTitle) + '</b></div>' +
       '<div class="g-status k-glass"><a class="g-pts" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('pearl') + '<span class="num">' + fmt(pearlBalance()) + '</span><span class="g-plus" aria-hidden="true">+</span></a><span class="g-sep"></span>' +
       '<button type="button" class="g-gear" aria-label="Settings" title="Settings">' + icon('gear-six') + '</button></div>' +
@@ -428,6 +429,7 @@
       navNow().map(n => '<a href="' + url(n[3]) + '" style="--tab:' + DOCK_SIMPLE[n[0]][1] + ';--tab-lo:' + DOCK_LO[n[0]] + '"' + (n[0] === active ? ' aria-current="page"' : '') + '>' + DOCK[n[0]] + '<span>' + n[1] + '</span></a>').join(''); };
     paintTabs(); chromeTabs = paintTabs;
     document.body.prepend(top); document.body.appendChild(tabs);
+    paintDiscord(discordData()); setTimeout(() => discordSync(), 600);
     document.body.classList.add('g-chrome');
     $('.g-gear', top).addEventListener('click', () => settings());
     // the account menu under the avatar
@@ -674,6 +676,80 @@
       const src = url(it.thumb), im = new Image(); im.onload = im.onerror = () => { el.style.backgroundImage = 'url(' + src + ')'; el.classList.add('ld'); }; im.src = src; });
   }
 
+  /* ---------- Discord: the live server (top-bar button and online count, and the ambient NPCs in games) ----------
+     The server's public widget (Server Settings → Widget → Enable Server Widget) says how many people are online and
+     lists some of them. It is read at most every 2 minutes and kept in 'grug.dcw.v1' = { v:1, at, name, online, invite,
+     members: [{n, s}], avs: { <name>: {img, c:[main, second], at} } }. For up to DCW_PICS online members we keep a 64 px
+     picture (a data URL) and its two main colours, which games turn into ambient NPCs (GK.npcs in assets/gamekit.js), so a
+     game never calls Discord itself. Names pass a word filter; anyone it catches is left out everywhere. */
+  const DISCORD_GUILD = '1425296734963109992', DISCORD_INVITE = 'https://discord.gg/v5CgKm2YkR';
+  const DCW_KEY = 'grug.dcw.v1', DCW_TTL = 2 * 60 * 1000, DCW_PICS = 16;
+  const DC_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.11 13.11 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>';
+  const BAD_ROOT = /(fuck|fuk|phuk|shit|bitch|cunt|dick|cock|pussy|porn|sex|nude|naked|nazi|hitler|slut|whore|fag|nigg|niga|retard|penis|vagina|boob|tits|balls|dildo|jizz|twat|wank|bastard|hentai|nsfw|onlyfans|suicide|horny|milf|incel|terroris|cocaine)/;
+  const BAD_WORD = /(^|[^a-z])(ass|cum|anal|rape|raped|kys|kill|weed|69|420|18\+|xxx)([^a-z]|$)/;
+  function discordName(n) {
+    n = String(n || '').replace(/[\u0000-\u001f\u007f​-‏‪-‮⁠-⁯﻿]/g, '').replace(/\s+/g, ' ').trim().slice(0, 32);
+    if ([...n.replace(/\s/g, '')].length < 2) return '';
+    const low = n.normalize('NFKC').toLowerCase(), flat = low.replace(/[0134578@$!|]/g, c => ({ 0: 'o', 1: 'i', 3: 'e', 4: 'a', 5: 's', 7: 't', 8: 'b', '@': 'a', $: 's', '!': 'i', '|': 'i' }[c])).replace(/[^a-z]/g, '');
+    if (/hook|\bbots?\b|bot$|\butils?\b|\bmee6\b|dyno|carl-?bot|\bapp\b/i.test(n)) return '';   // bots and integrations aren't people
+    return BAD_ROOT.test(flat) || BAD_WORD.test(low) ? '' : n;
+  }
+  function discordData() { const v = readJSON(DCW_KEY, null); return v && typeof v === 'object' && v.v === 1 ? v : null; }
+  const discordInvite = () => DISCORD_INVITE || ((discordData() || {}).invite) || 'https://discord.com/channels/' + DISCORD_GUILD;
+  // the picture's two main colours: the biggest patch of similar colour, then the biggest one clearly different from it
+  function twoColours(px) {
+    const B = {}; let n = 0;
+    for (let i = 0; i < px.length; i += 4) { if (px[i + 3] < 128) continue; const k = (px[i] >> 5) << 6 | (px[i + 1] >> 5) << 3 | (px[i + 2] >> 5), b = B[k] || (B[k] = [0, 0, 0, 0]); b[0] += px[i]; b[1] += px[i + 1]; b[2] += px[i + 2]; b[3]++; n++; }
+    const list = Object.values(B).map(b => [b[0] / b[3], b[1] / b[3], b[2] / b[3], b[3]]).sort((a, b) => b[3] - a[3]);
+    const hex = c => '#' + c.slice(0, 3).map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('');
+    if (!list.length) return ['#5865f2', '#2b2d31'];
+    const main = list[0], dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+    let second = list.find(c => c !== main && c[3] >= n * 0.03 && dist(c, main) > 70);
+    if (!second) { const light = main[0] * 0.3 + main[1] * 0.59 + main[2] * 0.11 > 128; second = main.slice(0, 3).map(v => light ? v * 0.6 : v + (255 - v) * 0.45); }
+    return [hex(main), hex(second)];
+  }
+  function discordPicture(src) {
+    return new Promise(res => {
+      if (!/^https:\/\/cdn\.discordapp\.com\//.test(src)) return res(null);
+      let done = false; const fin = v => { if (!done) { done = true; res(v); } }; setTimeout(() => fin(null), 8000);
+      const im = new Image(); im.crossOrigin = 'anonymous'; im.referrerPolicy = 'no-referrer'; im.decoding = 'async';
+      im.onload = () => { try {
+        const S = 64, a = document.createElement('canvas'); a.width = a.height = S; const x = a.getContext('2d', { willReadFrequently: true }); x.drawImage(im, 0, 0, S, S);
+        const c = twoColours(x.getImageData(0, 0, S, S).data), b = document.createElement('canvas'); b.width = b.height = S; const y = b.getContext('2d'); y.fillStyle = c[0]; y.fillRect(0, 0, S, S); y.drawImage(a, 0, 0);
+        fin({ img: b.toDataURL('image/jpeg', 0.82), c, at: Date.now() });
+      } catch (e) { fin(null); } };
+      im.onerror = () => fin(null); im.src = src;
+    });
+  }
+  let dcwBusy = null;
+  function discordSync(force) {
+    const c = discordData(); if (!force && c && Date.now() - c.at < DCW_TTL) { paintDiscord(c); return Promise.resolve(c); }
+    if (dcwBusy) return dcwBusy; if (!root.fetch) return Promise.resolve(c);
+    dcwBusy = fetch('https://discord.com/api/guilds/' + DISCORD_GUILD + '/widget.json', { cache: 'no-store', credentials: 'omit' })
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
+      .then(async w => {
+        const members = (Array.isArray(w.members) ? w.members : []).map(m => ({ n: discordName(m && m.username), s: m && m.status, a: m && typeof m.avatar_url === 'string' ? m.avatar_url : '' })).filter(m => m.n);
+        const old = (c && c.avs) || {}, avs = {};
+        members.forEach(m => { if (old[m.n]) avs[m.n] = old[m.n]; });   // keep the pictures of people still online
+        let d = { v: 1, at: Date.now(), name: String(w.name || '').slice(0, 60), online: Math.max(0, Math.floor(+w.presence_count || 0)), invite: DISCORD_INVITE || (typeof w.instant_invite === 'string' ? w.instant_invite : ''), members: members.map(m => ({ n: m.n, s: m.s })), avs };
+        writeJSON(DCW_KEY, d); paintDiscord(d);
+        const todo = members.filter(m => m.a && !avs[m.n]).sort(() => Math.random() - 0.5).slice(0, Math.max(0, DCW_PICS - Object.keys(avs).length));
+        for (let i = 0; i < todo.length; i += 4) {   // four at a time, saved after each batch so games can start using them
+          const got = await Promise.all(todo.slice(i, i + 4).map(m => discordPicture(m.a)));
+          got.forEach((p, k) => { if (p) avs[todo[i + k].n] = p; });
+          d = Object.assign({}, discordData() || d, { avs }); writeJSON(DCW_KEY, d);
+        }
+        return d;
+      }).catch(() => { if (c) paintDiscord(c); return c; }).finally(() => { dcwBusy = null; });
+    return dcwBusy;
+  }
+  function paintDiscord(d) {
+    const a = document.querySelector('.g-dc'); if (!a) return;
+    a.href = discordInvite();
+    const on = d && Date.now() - d.at < 30 * 60 * 1000 && d.online > 0, n = a.querySelector('.g-dc-n');
+    n.hidden = !on; if (on) { n.querySelector('b').textContent = fmt(d.online); a.title = fmt(d.online) + ' online in the Grug Digital Discord · tap to join'; a.setAttribute('aria-label', 'Join our Discord: ' + fmt(d.online) + ' online'); }
+  }
+
   /* ---------- Discord feed ----------
      One webhook for the whole site. announce(kind, detail) posts:
        'logon'    {app}                     someone opened a game (once per game per phone every LOGON_GAP_MIN)
@@ -716,6 +792,9 @@
     return false;
   }
 
+  // pages without the top bar (game hosts) still keep the Discord data fresh, for the NPCs in the games
+  setTimeout(() => { if (!document.querySelector('.g-dc')) discordSync(); }, 2500);
+
   /* ---------- public ---------- */
   root.Grug = {
     KEY, ROOT, url, esc, fmt, icon, GAMES, C,
@@ -724,7 +803,7 @@
     save, setName, setAvatar, equip, unequip, wearing, refreshPictures, owns, grant, track, totals, statValue, progress, checkMilestones, celebrate,
     points, appState, exportData, exportText, exportFilename, download, share, parseImport, applyImport, reset,
     snaps, ensureSnaps, randomName, cleanName, makeName, parseName, NAME_WORDS: { adj: ADJ.slice(), noun: NOUN.slice(), maxNum: NAME_MAX_NUM }, pearlBalance, pearlsUrl,
-    announce,
+    announce, discord: { sync: discordSync, data: discordData, invite: discordInvite, name: discordName, KEY: DCW_KEY },
     // site-wide items and live effects (see ITEMS above)
     ITEMS, itemCount, grantItem, useItem, crateRoll, freeShop, freeShopLeft, priceNow, BOOST_KEY, ITEM_DROP,
     // emotes: the catalog, the loadout and its limit

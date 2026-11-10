@@ -48,7 +48,7 @@
   // browsers without cross-page View Transitions get a short fade instead (grug.js marks the way out)
   try { if (!('onpagereveal' in root)) { document.documentElement.classList.add('g-fade'); if (sessionStorage.getItem('grug.nav')) { sessionStorage.removeItem('grug.nav'); document.documentElement.classList.add('g-arrive'); } } } catch (e) {}
   // pages with the Grug top bar and dock: draw their skeletons right away (grug.css), so nothing jumps when they arrive
-  try { if (!/[?&]mode=viewer/.test(location.search) && !/\/(play|work)\//.test(location.pathname)) document.documentElement.classList.add('g-pre'); } catch (e) {}
+  try { if (!/[?&]mode=viewer/.test(location.search) && !/\/(play|work)\/|\/links\/page\//.test(location.pathname)) document.documentElement.classList.add('g-pre'); } catch (e) {}
   // backdrop: the fog for the Games section, a pixel pattern everywhere else (not the games themselves or embedded viewers)
   let sitePage = false;
   try { sitePage = !/[?&]mode=viewer/.test(location.search) && !/\/(play|work|tools|showcase)\//.test(location.pathname); } catch (e) {}

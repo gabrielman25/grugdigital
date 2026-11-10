@@ -4,7 +4,7 @@
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Links · Grug</title>
-<meta name="description" content="Make a free link page for all your socials, or a little 3D world your followers walk through. Every visit gives them 10 Pearls.">
+<meta name="description" content="Make a free 3D world for your socials, with a game attached if you like. Followers walk in as their own avatar, and every visit gives them 10 Pearls.">
 <meta name="theme-color" content="#17171A">
 <link rel="icon" href="../favicon.png">
 <link rel="stylesheet" href="../assets/grug.css">
@@ -18,8 +18,8 @@
     <div class="copy">
       <p class="kick">For online creators · Free</p>
       <h1>Turn your followers into players.</h1>
-      <p class="lead">One link for all your socials, as a page or a little 3D world. Every visit gives your followers 10 Pearls.</p>
-      <div class="row"><a class="g-btn primary big" href="create/" id="heroGo">Make my link page</a><a class="g-btn big" href="#features">How it works</a></div>
+      <p class="lead">One link that drops followers straight into your own little 3D world: every room is one of your socials. Add a game if you like. Every visit gives them 10 Pearls.</p>
+      <div class="row"><a class="g-btn primary big" href="create/" id="heroGo">Make my world</a><a class="g-btn big" href="#features">How it works</a></div>
       <p class="g-fine">No app, no account, no sign-up.</p>
     </div>
     <div class="lk-art" id="heroArt" aria-hidden="true"></div>
@@ -31,7 +31,7 @@
   </section>
 
   <section class="g-section" id="mine">
-    <div class="g-section-h"><h2>My link pages</h2><a href="create/">Make another</a></div>
+    <div class="g-section-h"><h2>My worlds</h2><a href="create/">Make another</a></div>
     <div class="rw-tiles" id="mineList"></div>
   </section>
 
@@ -52,14 +52,15 @@
   G.ui.chrome('links');
   const badges = cfg => '<div class="row" style="gap:6px">' + LK.linksOf(cfg).map(L => '<span class="lk-badge sm" style="background:' + L.color + ';color:' + L.ink + '">' + esc(L.badge) + '</span>').join('') + '</div>';
   const band = (cfg, sub) => '<div class="band" style="' + RW.bandStyle(cfg.color) + '"><span class="rw-ic" style="font:700 20px var(--display);color:#fff">' + esc(cfg.n.replace(/^@/, '').charAt(0).toUpperCase()) + '</span><div><b>' + esc(cfg.n) + '</b><small>' + esc(sub) + '</small></div></div>';
-  const kind = cfg => cfg.mode === 'g' ? '3D world · ' + LK.WORLDS[cfg.world].label : 'Link page';
+  const kind = cfg => LK.MODES[cfg.mode].label + ' · ' + LK.WORLDS[cfg.world].label;
 
   $('#heroArt').innerHTML = ['ig', 'yt', 'tt', 'x'].map(p => { const P = LK.PLATFORMS[p];
     return '<span class="lk-btn" style="--lc:' + P.color + '"><span class="lk-badge" style="background:' + P.color + ';color:' + P.ink + '">' + P.badge + '</span><span class="t"><b>' + P.label + '</b><small>@yourname</small></span></span>'; }).join('') +
     '<span class="chip">' + G.icon('pearl') + '+10 Pearls a visit</span>';
   const FEATS = [
-    ['share-network', '#5AB0FF', 'One link for everything', 'X, Instagram, YouTube, TikTok, Twitch, Discord and your site, on one page for your bio.'],
-    ['game-controller', '#7EE081', 'A world to explore', 'Turn it into a little 3D world: followers walk into a room to reach each of your socials.'],
+    ['share-network', '#5AB0FF', 'One link for everything', 'X, Instagram, YouTube, TikTok, Twitch, Discord and your site, behind one link for your bio.'],
+    ['game-controller', '#7EE081', 'They land in your world', 'Your link opens like a Grug game. Followers walk in as their own avatar and step on a pad to reach each social.'],
+    ['coins', '#FF9F5A', 'Add a game if you like', 'Pick “hub with a game” and your world gets a 90-second coin rush, with power-ups bought with Pearls.'],
     ['pearl', '#C59BFF', '10 Pearls a visit', 'Every follower who stops by gets 10 Pearls to spend in any game on Grug. Free for you.'],
     ['timer', '#FFBE1A', 'Ready in a minute', 'Type your handles, pick a color and a world, and copy your link.']
   ];

@@ -2398,6 +2398,15 @@ const Game = (() => {
       const v = Chars.make(await mk(cfg), { name: s.n, colour: s.col, vendor: s });
       Chars.list.splice(Chars.list.indexOf(v), 1); v.x = s.vendor[0]; v.z = s.vendor[1]; v.face = s.face; G.vendors.push(v);
     }
+    // a few real members of the Grug Discord hang around the lobby as block figures (GK.npcs in assets/gamekit.js):
+    // some sit on the benches by the fountain, the rest wander. Tap one to see who it is and join the Discord.
+    if (window.GK && GK.npcs) {
+      const LB = G.levels.lobby, seats = [];
+      for (const [x, z, r] of [[18, 16, 0], [26, 16, 0], [18, 28, 2], [26, 28, 2]]) for (const dx of [-45, 45]) seats.push({ x: (x + 0.5) * BS + dx, z: (z + 0.5) * BS, y: 45, face: r ? Math.PI : 0 });
+      G.npcs = GK.npcs.install({ THREE, scene, camera, canvas: renderer.domElement, units: 100, seats, max: 5, seed: 'mb-lobby',
+        wander: () => { const [x, z] = LB.randomCell(Math.random); return [(x + 0.5) * BS, (z + 0.5) * BS]; }, path: (x0, z0, x1, z1) => LB.path(x0, z0, x1, z1), collide: (x, z) => LB.collide(x, z, 28, 0),
+        active: () => G.phase === 'lobby' && !G.cine, onOpen: () => { G.npcOpen = true; }, onClose: () => { G.npcOpen = false; input.shootAt = null; input.shoot = false; } });
+    }
     // the goods on the counters: three eggs and three crates you can see from across the plaza
     const eg = SHOPB.eggs, cr = SHOPB.crates;
     EGGS.forEach((e, i) => { const m = eggMesh(e, 1.5); m.position.set(eg.goods[i][0], 103, eg.goods[i][1]); scene.add(m); G.lobbyBits.push(m); m.userData.spin = i; });
@@ -3321,7 +3330,7 @@ const Game = (() => {
   /* ---------- the frame ---------- */
   function step(dt) {
     if (!player) return;
-    const live = G.started && !G.paused;
+    const live = G.started && !G.paused && !G.npcOpen;
     const sdt = live ? dt * (G.phase === 'round' && !inPlay(player) ? G.ff : 1) : 0;
     if (live) G.t += sdt;
     GunKit.U_TIME.value = performance.now() / 1000; rainbowTick(performance.now() / 1000);
@@ -3337,6 +3346,7 @@ const Game = (() => {
     const t = performance.now() / 1000;
     Chars.list.forEach(c => Chars.render(c, dt, camera.position, G.phase !== 'lobby' ? L : null, t));
     if (G.phase === 'lobby') G.vendors.forEach(v => { v.hidden = !!G.cine; Chars.render(v, dt, camera.position, null, t); });
+    if (G.npcs) G.npcs.update(live ? dt : 0);
     drawCoins(t);
     if (dropMesh) { dropMesh.visible = !!G.dropped && G.phase === 'round' && L.fogAt(G.dropped.x, G.dropped.z) > 0.3; if (G.dropped) { dropMesh.position.set(G.dropped.x, 40 + Math.sin(t * 3) * 10, G.dropped.z); dropMesh.children[0].rotation.y = t * 1.5; } }
     placeCamera(focus.x, 110, focus.z, dt);

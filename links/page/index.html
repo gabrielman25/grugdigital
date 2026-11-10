@@ -2,39 +2,52 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Links · Grug</title>
-<meta name="description" content="All my links in one place, on Grug. Stop by for 10 Pearls.">
-<meta name="theme-color" content="#17171A">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Creator world · Grug</title>
+<meta name="description" content="Walk through my world on Grug: every room is one of my socials. Stop by for 10 Pearls.">
+<meta name="theme-color" content="#ffffff">
 <link rel="icon" href="../../favicon.png">
 <link rel="stylesheet" href="../../assets/grug.css">
 <script src="../../assets/theme.js"></script>
 <link rel="stylesheet" href="../../assets/rewards.css">
 <link rel="stylesheet" href="../../assets/links.css">
+<!--
+  A CREATOR'S LINK · links/page/#c=<setup>  (setup format: assets/links.js)
+  Followers land straight inside the creator's world, like any Grug game: this page opens play/creatorworld/game.html
+  full screen with the same setup and stands in for a partner's rewards app (the game kit's PROTOCOL.md), Pearls only:
+  power-ups for the coin rush come out of the site-wide wallet ('grug.pearls.v1'); owned power-ups, runs and the best
+  score per world are kept in 'grug-creatorworld-v1'. A visit adds 10 Pearls once a day per creator (GrugLinks.visitPearls).
+  The world isn't listed in the Games library: it only appears from a creator's link. The Links button in the bar lists
+  every social as plain buttons too (and is the whole page on a phone that can't show 3D).
+-->
 <style>
-.lp{max-width:760px;margin:0 auto;padding-top:14px;display:flex;flex-direction:column;gap:14px}
-.lp-sub{color:var(--mut);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.08em;margin:6px 2px -4px}
-.lp-foot{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:10px}
-.lp-bad{max-width:520px;margin:30px auto;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
-.lp-bad p{color:var(--ink2)}
-.lp-go{display:flex;width:100%;margin-top:12px}
+html,body{margin:0;height:100%;overflow:hidden;background:#0b0e14}
+.rr-bar{position:fixed;left:0;right:0;top:0;height:calc(52px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 10px 0;display:flex;align-items:center;gap:10px;background:#fff;z-index:2}
+.rr-bar a,.rr-bar button{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#111827;font:700 16px/1 var(--g-font, system-ui, sans-serif);border:0;cursor:pointer}
+.rr-back{width:42px;height:42px;border-radius:50%;justify-content:center;background:#ebedf2;flex:none}
+.rr-back svg,.rr-pl svg,.rr-lk svg{width:20px;height:20px}
+.rr-t{flex:1;min-width:0;display:flex;align-items:center;gap:9px}
+.rr-t i{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font:700 16px/1 var(--g-font, system-ui, sans-serif);font-style:normal;flex:none}
+.rr-t b{font:700 18px/1.1 var(--g-font, system-ui, sans-serif);color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rr-pl,.rr-lk{height:42px;padding:0 14px 0 10px;border-radius:999px;background:#ebedf2;flex:none}
+.rr-pl b{font-weight:700}.rr-pl i{font-style:normal;color:#6b7280;font-weight:700}
+@media (max-width:420px){.rr-lk span{display:none}.rr-lk{padding:0 11px}}
+#rrFrame{position:fixed;left:0;right:0;bottom:0;top:calc(52px + env(safe-area-inset-top));width:100%;height:calc(100% - 52px - env(safe-area-inset-top));border:0;display:block;background:#0b0e14}
+.lp-bad{position:fixed;inset:0;display:grid;place-items:center;padding:24px;background:#17171A;color:#fff;text-align:center}
+.lp-bad div{max-width:460px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.lp-list{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.lp-list .lk-btn{text-align:left}
 </style>
 </head>
 <body>
-<main class="wrap">
-  <div id="bad" class="lp-bad" hidden><h1>This link doesn't work</h1><p>It may have been cut short. Ask the creator for their link again.</p><a class="g-btn primary" href="../../">Go to Grug</a></div>
-  <div class="lp" id="lp" hidden>
-    <div class="lk-head" id="head"></div>
-    <div class="lk-earn" id="earn"></div>
-    <div class="lk-world" id="world" hidden>
-      <div class="lk-start" id="start"><h2 id="startT"></h2><p>Each room is one of their socials. Walk into a doorway to visit it.</p><button type="button" class="g-btn primary big" id="startBtn">Start exploring</button></div>
-      <span class="lk-hint" id="hint" hidden>Tap where to go · or use WASD / arrow keys</span>
-    </div>
-    <p class="lp-sub" id="listLbl">Links</p>
-    <div class="lk-list" id="list"></div>
-    <div class="lp-foot"><a class="g-btn" href="../../games/">Spend your Pearls</a><a class="g-btn quiet" href="../">Make your own link page</a></div>
-  </div>
-</main>
+<div class="lp-bad" id="bad" hidden><div><h1>This link doesn’t work</h1><p>It may have been cut short. Ask the creator for their link again.</p><a class="g-btn primary" href="../../">Go to Grug</a></div></div>
+<div class="rr-bar" id="bar" hidden>
+  <a class="rr-back" id="rrBack" href="../../" aria-label="Grug home"></a>
+  <div class="rr-t"><i id="rrAv"></i><b id="rrName"></b></div>
+  <button type="button" class="rr-lk" id="rrLinks" aria-label="All links"></button>
+  <a class="rr-pl" id="rrPearls" href="../../pearls.html" aria-label="Your Pearls: get more"></a>
+</div>
+<iframe id="rrFrame" title="Creator world" allow="autoplay *; fullscreen *; gamepad *" hidden></iframe>
 <script src="../../assets/catalog.js"></script>
 <script src="../../assets/icons.js"></script>
 <script src="../../assets/games.js"></script>
@@ -42,51 +55,102 @@
 <script src="../../assets/rewards.js"></script>
 <script src="../../assets/links.js"></script>
 <script>
-(function(){
-  const G = Grug, RW = GrugRewards, LK = GrugLinks, esc = G.esc, $ = s => document.querySelector(s);
-  G.ui.chrome('links', { title: 'Links', noRole: true });   // followers arrive from a creator's bio: no "who are you?" first
+'use strict';
+(function () {
+  const G = Grug, RW = GrugRewards, LK = GrugLinks, esc = G.esc, $ = id => document.getElementById(id);
   const c = new URLSearchParams(location.hash.slice(1)).get('c'), cfg = c && LK.decode(c);
-  if (!cfg) { $('#bad').hidden = false; return; }
+  if (!cfg) { $('bad').hidden = false; return; }
   addEventListener('hashchange', () => location.reload());
-  document.title = cfg.n + ' · Links · Grug';
-  $('#lp').hidden = false;
-  const links = LK.linksOf(cfg);
+  const id = LK.pageId(cfg), links = LK.linksOf(cfg), play = cfg.mode === 'p';
+  document.title = cfg.n + ' · Grug';
+  $('bar').hidden = false; $('rrFrame').hidden = false;
+  $('rrBack').innerHTML = G.icon('arrow-left');
+  $('rrAv').textContent = cfg.n.replace(/^@/, '').charAt(0).toUpperCase(); $('rrAv').style.background = cfg.color; $('rrAv').style.color = RW.inkOn(cfg.color);
+  $('rrName').textContent = cfg.n;
+  $('rrLinks').innerHTML = G.icon('list') + '<span>Links</span>';
 
-  // the creator's colours and header
-  const head = $('#head'); RW.themeVars(head, cfg.color);
-  head.innerHTML = '<span class="lk-av">' + esc(cfg.n.replace(/^@/, '').charAt(0).toUpperCase()) + '</span><div><h1>' + esc(cfg.n) + '</h1><small>' + links.length + ' link' + (links.length > 1 ? 's' : '') + (cfg.mode === 'g' ? ' · ' + esc(LK.WORLDS[cfg.world].label) : '') + '</small></div>';
+  const GAME = {
+    title: cfg.n + '’s world', src: '../../play/creatorworld/game.html#c=' + c, collectible: 'coins', runSeconds: 90, storageKey: 'grug-creatorworld-v1',
+    // Pearls only. effect / amount are what game.html does with each one.
+    shop: [
+      { id: 'speed', name: 'Sprint Shoes', desc: 'Run 35% faster', cost: 5, effect: 'speed', amount: 1.35, icon: 'boots' },
+      { id: 'double', name: 'Double Coins', desc: 'Every coin counts twice', cost: 8, effect: 'double', amount: 2, icon: 'coins' },
+      { id: 'time', name: 'Extra Time', desc: '+15 seconds', cost: 4, effect: 'time', amount: 15, icon: 'stopwatch' },
+      { id: 'magnet', name: 'Coin Magnet', desc: 'Coins fly to you', cost: 6, effect: 'magnet', amount: 1, icon: 'magnet' }
+    ]
+  };
+  const INV_MAX = 99, WKEY = 'grug.pearls.v1';
 
-  // 10 Pearls for stopping by, once a day per page
-  const got = LK.visitPearls(cfg); LK.markSeen(cfg, c);
-  $('#earn').innerHTML = G.icon('pearl') + '<span>' + (got ? '<b>+' + got + ' Pearls for stopping by!</b> Spend them in any game on Grug.' : 'Stop by once a day for <b>10 Pearls</b> to spend in any game on Grug.') + '</span>';
-  if (got) setTimeout(() => G.ui.toast('+' + got + ' Pearls for stopping by!', { icon: 'pearl', ms: 3200 }), 500);
+  /* ---------- saved on this phone: owned power-ups, runs, best per world ---------- */
+  function load() { let s = null; try { s = JSON.parse(localStorage.getItem(GAME.storageKey) || 'null'); } catch (e) {} s = s && typeof s === 'object' ? s : {};
+    return { v: 1, inv: s.inv && typeof s.inv === 'object' ? s.inv : {}, best: s.best && typeof s.best === 'object' ? s.best : {}, runs: +s.runs || 0 }; }
+  let st = load();
+  const save = () => { try { localStorage.setItem(GAME.storageKey, JSON.stringify(st)); } catch (e) {} };
 
-  // the plain buttons (always here, and the whole page when it's a link page)
-  $('#list').innerHTML = links.map(L => '<a class="lk-btn" style="--lc:' + L.color + '" href="' + esc(L.url) + '" target="_blank" rel="noopener noreferrer">' +
-    '<span class="lk-badge" style="background:' + L.color + ';color:' + L.ink + '">' + esc(L.badge) + '</span><span class="t"><b>' + esc(L.label) + '</b><small>' + esc(L.handle) + '</small></span>' + G.icon('arrow-square-out') + '</a>').join('');
+  /* ---------- Pearls: the site-wide wallet ---------- */
+  function wRaw() { try { const w = JSON.parse(localStorage.getItem(WKEY) || 'null'); return w && typeof w === 'object' ? w : { v: 1 }; } catch (e) { return { v: 1 }; } }
+  const pearls = () => Math.max(0, Math.floor(+wRaw().balance || 0));
+  function pearlsChange(d) { const w = wRaw(); w.v = 1; w.balance = Math.max(0, Math.floor(+w.balance || 0) + d); try { localStorage.setItem(WKEY, JSON.stringify(w)); } catch (e) {} paintPearls(); }
+  const pearlsLink = () => G.pearlsUrl(GAME.title);
+  function paintPearls() { const a = $('rrPearls'); a.innerHTML = G.icon('pearl') + '<b>' + G.fmt(pearls()) + '</b><i>+</i>'; a.href = pearlsLink(); }
 
-  // the 3D world: walk into a room, then we ask before leaving Grug
-  if (cfg.mode === 'g') {
-    $('#world').hidden = false; $('#listLbl').textContent = 'Or pick a link';
-    $('#startT').textContent = cfg.n + '’s world';
-    let world = null;
-    const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
-    async function door(L) {
-      const go = await G.ui.dialog({ title: 'Visit ' + L.label + '?', html: '<p>' + esc(L.handle) + '</p><p class="g-fine" style="margin-top:6px">You’re leaving Grug for ' + esc(LK.host(L.url)) + '.</p>' +
-        '<a class="g-btn primary block lp-go" href="' + esc(L.url) + '" target="_blank" rel="noopener noreferrer" data-go>Go to ' + esc(L.label) + '</a>',
-        actions: [{ label: 'Keep exploring', kind: 'quiet', value: null }], onOpen: d => { const a = d.querySelector('[data-go]'); a.addEventListener('click', () => setTimeout(() => d.close(''), 50)); } });
-      if (world) world.back();
-    }
-    $('#startBtn').addEventListener('click', async () => {
-      $('#startBtn').disabled = true; $('#startBtn').textContent = 'Loading…';
-      try {
-        await load('../../assets/three.min.js'); await load('../../assets/linkworld.js');
-        world = GrugLinkWorld.mount($('#world'), { cfg, links, onDoor: door });
-        if (!world) throw new Error('no webgl');
-        $('#start').hidden = true; $('#hint').hidden = false; setTimeout(() => { $('#hint').hidden = true; }, 7000);
-      } catch (e) { $('#start').innerHTML = '<h2>This phone can’t show the 3D world</h2><p>Pick a link below instead.</p>'; }
-    });
+  // 10 Pearls for stopping by, once a day per creator (shared 30-a-day cap with the stamp cards)
+  const got = LK.visitPearls(cfg); LK.markSeen(cfg, c); paintPearls();
+  if (got) setTimeout(() => G.ui.toast('+' + got + ' Pearls for stopping by! Spend them in any game on Grug.', { icon: 'pearl', ms: 3600 }), 1200);
+
+  /* ---------- every social as a plain button (the bar's Links button) ---------- */
+  function showLinks() {
+    toGame({ t: 'pause' });
+    G.ui.dialog({ title: cfg.n, html: '<p class="g-fine" style="margin:0 0 4px">Each one opens in a new tab.</p><div class="lp-list">' + links.map(L => '<a class="lk-btn" style="--lc:' + L.color + '" href="' + esc(L.url) + '" target="_blank" rel="noopener noreferrer">' +
+      '<span class="lk-badge" style="background:' + L.color + ';color:' + L.ink + '">' + esc(L.badge) + '</span><span class="t"><b>' + esc(L.label) + '</b><small>' + esc(L.handle) + '</small></span>' + G.icon('arrow-square-out') + '</a>').join('') + '</div>' +
+      '<p class="g-fine" style="margin-top:12px"><a href="../">Make your own world</a> · <a href="../../games/">Spend your Pearls</a></p>',
+      actions: [{ label: 'Back to the world', kind: 'primary', value: null }] });
   }
+  $('rrLinks').addEventListener('click', showLinks);
+
+  /* ---------- the world ---------- */
+  const f = $('rrFrame');
+  const shop = GAME.shop, item = id => shop.find(it => it.id === id);
+  function state() {
+    return Object.assign({ points: 0, pearls: pearls(), pearlName: 'Pearls', standalone: true, inv: st.inv, best: +st.best[id] || 0, runs: st.runs, shop: play ? shop : [], title: GAME.title,
+      collectible: GAME.collectible, runSeconds: GAME.runSeconds, brand: { name: cfg.n, colors: [cfg.color, '#111827'] }, store: 'Made with Grug Links' }, window.GrugApp ? GrugApp.gameExtras() : {});
+  }
+  const toGame = m => { try { f.contentWindow.postMessage(Object.assign({ rw: 1 }, m), '*'); } catch (e) {} };
+  const sendState = () => toGame(Object.assign({ t: 'state' }, state()));
+  function buy(k) {
+    const it = item(k); if (!it || !play) return { ok: false, reason: 'That power-up isn’t in the shop.' };
+    if ((st.inv[k] || 0) >= INV_MAX) return { ok: false, reason: 'You already have ' + INV_MAX + ' of those.' };
+    if (G.freeShop && G.freeShop()) { st.inv[k] = (st.inv[k] || 0) + 1; save(); return { ok: true, free: true }; }
+    if (pearls() < it.cost) return { ok: false, reason: 'You need ' + (it.cost - pearls()) + ' more Pearls for ' + it.name + '.', short: it.cost - pearls(), item: it.name };
+    pearlsChange(-it.cost); st.inv[k] = (st.inv[k] || 0) + 1; save(); return { ok: true };
+  }
+  function use(ids) {
+    ids = Array.isArray(ids) ? [...new Set(ids.map(String))] : [];
+    const miss = ids.find(k => !item(k) || !(st.inv[k] > 0));
+    if (miss) return { ok: false, reason: 'You’re out of ' + ((item(miss) || {}).name || 'that power-up') + '.' };
+    ids.forEach(k => { st.inv[k]--; if (!st.inv[k]) delete st.inv[k]; }); save(); return { ok: true };
+  }
+  async function offerPearls(short, name) {
+    toGame({ t: 'pause' });
+    const go = await G.ui.dialog({ title: short + ' Pearls short for ' + name, html: '<p>Get Pearls on the Grug Pearls page. They work in every Grug game, and you’ll come straight back here.</p>',
+      actions: [{ label: 'Not now', kind: 'quiet', value: null }, { label: 'Get Pearls', kind: 'primary', value: 'go' }] });
+    if (go === 'go') location.href = pearlsLink();
+  }
+  addEventListener('message', e => {
+    const d = e.data; if (!d || d.rw !== 1 || typeof d.t !== 'string' || e.source !== f.contentWindow) return;
+    const reply = r => toGame(Object.assign({ t: 'reply', req: String(d.req || ''), state: state() }, r));
+    if (d.t === 'hello') sendState();
+    else if (d.t === 'buy') { const r = buy(String(d.id)); reply(r); if (r.short) offerPearls(r.short, r.item); }
+    else if (d.t === 'needPearls') { const it = item(String(d.id)); if (it && pearls() < it.cost) offerPearls(it.cost - pearls(), it.name); }
+    else if (d.t === 'use') reply(use(d.ids));
+    else if (d.t === 'score') { const s = Math.max(0, Math.floor(+d.score || 0)); st.runs++; if (s > (+st.best[id] || 0)) st.best[id] = s; save(); sendState(); }
+  });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) toGame({ t: 'pause' }); });
+  addEventListener('storage', e => { if (e.key === WKEY) { paintPearls(); sendState(); } if (e.key === GAME.storageKey) { st = load(); sendState(); } });
+  addEventListener('pageshow', e => { paintPearls(); if (e.persisted) sendState(); });
+  f.title = GAME.title;
+  f.addEventListener('load', () => { try { f.contentWindow.focus(); } catch (e) {} });   // keys go straight to the game
+  f.src = GAME.src;
 })();
 </script>
 </body>

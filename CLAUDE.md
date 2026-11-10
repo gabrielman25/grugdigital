@@ -85,3 +85,15 @@ plots that aren't open yet (never a blank plate), `GK.prop` for low-key ≤ 1-bl
 for a flashy pet on one or two bots. Players land straight in the game: no lobby screen. The power-up shop opens from a
 Shop button in the HUD / pause menu (`lobby()` in run mode) and from the run-over screen.
 
+## Creator worlds and the Discord
+
+- A creator's link (`links/page/#c=…`, format in `assets/links.js`) opens `play/creatorworld/game.html`, a kit game built
+  from `template/game-topdown.html`: a lit lobby with a door (pad + arch) per social and, for hub + game (`mode p`), a big
+  door in the middle to a coin rush in a 3×3 fog-of-war arena. It is deliberately **not** in `assets/games.js`.
+  `links/page/` is its standalone host (Pearls only, like `play/runway/`). Each map must report `ZF_REPORT` 0.
+- `Grug.discord` (grug.js) reads the server widget (guild `1425296734963109992`, invite `https://discord.gg/v5CgKm2YkR`)
+  for the top bar's Discord button and online count, and caches member pictures for `GK.npcs`. Ambient Discord NPCs are
+  plain faceless block figures (picture printed on the torso, torso = main colour, head and arms = second colour, legs
+  black or grey) that only sit or wander; tapping one shows their name and a Join button. Only ever show the online
+  count the widget reports (never a made-up number), and keep names going through `discordName()` (word filter, bots left out).
+

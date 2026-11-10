@@ -1,11 +1,12 @@
-/* Grug · Links: link pages that online creators make for their socials (links/create/), opened by followers
-   (links/page/), either as a plain page of buttons or as a small 3D world where each social is a room to walk into
-   (assets/linkworld.js). Listed on the Links tab (links/). Needs assets/rewards.js (hashing, link text, Pearls).
+/* Grug · Links: worlds that online creators make for their socials (links/create/). A follower's link (links/page/)
+   opens straight into the creator's world, a Grug game built from the kit's top-down template (play/creatorworld/):
+   the follower walks in as their own avatar, and every room is one of the creator's socials. The creator picks a
+   plain hub, or the hub with a coin rush attached. Listed on the Links tab (links/). Needs assets/rewards.js.
 
    THE LINK. Like the Rewards cards, the whole page rides in the link, nothing on a server:
      links/page/#c=<setup>
      setup = base64url(UTF-8 of '1~<name>~<RRGGBB>~<mode>~<world>~<p:handle>|<p:handle>…')
-       mode   g = 3D world · l = plain link page
+       mode   h = a hub for the socials · p = the hub with a game attached (a coin rush)   (older links: g / l = h)
        world  c Cozy Cabin · a Neon Arcade · b Sunny Boardwalk
        p      x X · ig Instagram · yt YouTube · tt TikTok · tw Twitch · dc Discord (invite code) · web a website
      Only handles are stored (not whole URLs), which keeps the link short and means every button goes where its
@@ -31,6 +32,10 @@
     web: { label: 'Website', badge: 'WWW', color: '#4FD8C4', ink: '#1E1B16', ph: 'yoursite.com', url: h => 'https://' + h, show: h => h.replace(/\/$/, '') }
   };
   const ORDER = ['ig', 'tt', 'yt', 'x', 'tw', 'dc', 'web'];
+  const MODES = {
+    h: { label: 'Just a hub', blurb: 'Followers walk into a room to visit each of your socials' },
+    p: { label: 'A hub with a game', blurb: 'The same hub, plus a 90-second coin rush. Power-ups cost Pearls.' }
+  };
   const WORLDS = {
     c: { label: 'Cozy Cabin', blurb: 'Warm wood, lanterns and pine trees', sky: '#2B1E16', ground: '#5C4030', wall: '#A86F43', trim: '#6E4A2C', accent: '#FFB86B' },
     a: { label: 'Neon Arcade', blurb: 'Glowing pillars on a midnight floor', sky: '#0E0B1F', ground: '#1B1640', wall: '#2A2160', trim: '#140F33', accent: '#FF4FD8' },
@@ -54,7 +59,7 @@
     const seen = new Set(), links = (Array.isArray(o.links) ? o.links : []).map(l => ({ p: l && l.p, h: cleanHandle(l && l.p, l && l.h) }))
       .filter(l => PLATFORMS[l.p] && l.h && !seen.has(l.p) && seen.add(l.p)).slice(0, MAX_LINKS);
     return { n: String(o.n || '').replace(/[~|\s]+/g, ' ').trim().slice(0, 28) || 'My links', color: /^[0-9a-f]{6}$/i.test(col) ? '#' + col.toUpperCase() : COLORS[0],
-      mode: o.mode === 'l' ? 'l' : 'g', world: WORLDS[o.world] ? o.world : 'c', links };
+      mode: o.mode === 'p' ? 'p' : 'h', world: WORLDS[o.world] ? o.world : 'c', links };
   }
   function encode(cfg) { cfg = normalize(cfg); return RW.b64e(['1', cfg.n, cfg.color.slice(1), cfg.mode, cfg.world, cfg.links.map(l => l.p + ':' + l.h).join('|')].join('~')); }
   function decode(c) {
@@ -83,6 +88,6 @@
   function seen() { const s = load(); return Object.keys(s.seen).map(id => ({ id, at: s.seen[id].at, c: s.seen[id].c, cfg: decode(s.seen[id].c) })).filter(x => x.cfg).sort((a, b) => b.at - a.at); }
   const visitPearls = cfg => RW.grantPearls('link-' + pageId(cfg));
 
-  root.GrugLinks = { KEY, MAX_LINKS, PLATFORMS, ORDER, WORLDS, COLORS, cleanHandle, normalize, encode, decode, pageId, linksOf, share, host,
+  root.GrugLinks = { KEY, MAX_LINKS, PLATFORMS, ORDER, MODES, WORLDS, COLORS, cleanHandle, normalize, encode, decode, pageId, linksOf, share, host,
     load, mine, saveMine, removeMine, markSeen, seen, visitPearls };
 })(window);

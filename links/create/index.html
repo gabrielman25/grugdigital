@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Make a link page · Grug</title>
-<meta name="description" content="Make a free link page for all your socials, or a little 3D world your followers walk through.">
+<title>Make your world · Grug</title>
+<meta name="description" content="Make a free 3D world for your socials, with a game attached if you like.">
 <meta name="theme-color" content="#17171A">
 <link rel="icon" href="../../favicon.png">
 <link rel="stylesheet" href="../../assets/grug.css">
@@ -28,11 +28,11 @@
 <script>
 (function(){
   const G = Grug, RW = GrugRewards, LK = GrugLinks, esc = G.esc, $ = s => document.querySelector(s);
-  G.ui.chrome('links', { title: 'Make a page', noRole: true });
+  G.ui.chrome('links', { title: 'Make a world', noRole: true });
   $('#exit').innerHTML = G.icon('arrow-left') + 'Links';
 
   const editing = new URLSearchParams(location.search).get('c');
-  let cfg = (editing && LK.decode(editing)) || LK.normalize({ n: '', mode: 'g', world: 'c' });
+  let cfg = (editing && LK.decode(editing)) || LK.normalize({ n: '', mode: 'h', world: 'c' });
   let named = !!(editing && LK.decode(editing)), saved = named ? editing : null;
   const handles = {}; cfg.links.forEach(l => { handles[l.p] = l.h; });
 
@@ -61,10 +61,10 @@
         '<label title="Any color" id="aCustom" role="radio" aria-checked="false">+<input type="color" aria-label="Pick any color"></label></div>',
       pick: el => el.dataset.c, sel: () => cfg.color, apply: c => set({ color: c }),
       wire: () => { const inp = $('#aCustom input'); inp.value = cfg.color.toLowerCase(); inp.addEventListener('input', () => { set({ color: inp.value }); mark(); }); } },
-    { id: 'mode', q: 'How should your page work?', hint: 'You can change this anytime.', auto: true,
-      html: () => opt('m', 'g', '🎮', 'A 3D world', 'Followers walk into a room to visit each of your socials', '<span class="tag">Popular</span>') + opt('m', 'l', '🔗', 'A simple link page', 'A list of buttons'),
+    { id: 'mode', q: 'What should your link open?', hint: 'Followers land right inside it. You can change this anytime.', auto: true,
+      html: () => opt('m', 'h', '🏠', LK.MODES.h.label, LK.MODES.h.blurb) + opt('m', 'p', '🎮', LK.MODES.p.label, LK.MODES.p.blurb, '<span class="tag">Popular</span>'),
       pick: el => el.dataset.m, sel: () => cfg.mode, apply: m => set({ mode: m }) },
-    { id: 'world', q: 'Pick a world', hint: 'Where your followers walk around.', auto: true, skip: () => cfg.mode !== 'g',
+    { id: 'world', q: 'Pick a world', hint: 'Where your followers walk around. Have a look, then press Next.',
       html: () => Object.keys(LK.WORLDS).map(k => { const w = LK.WORLDS[k];
         return opt('w', k, '', w.label, w.blurb, '<span class="lk-worlds"><i style="background:' + w.sky + '"></i><i style="background:' + w.wall + '"></i><i style="background:' + w.accent + '"></i></span>'); }).join(''),
       pick: el => el.dataset.w, sel: () => cfg.world, apply: w => set({ world: w }) },
@@ -72,29 +72,25 @@
   ];
   const QUESTIONS = STEPS.length - 1;
 
-  /* preview on the right: the page as a phone sees it, or the live 3D world on the world step */
-  let world = null;
-  const load = src => new Promise((ok, no) => { if (document.querySelector('script[src="' + src + '"]')) return ok(); const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+  /* preview on the right: a card of the socials, or (on the world step and at the end) the real world, live */
   function mock() {
     const L = LK.linksOf(cfg), name = named ? cfg.n : 'Your name';
     const rows = (L.length ? L : [LK.PLATFORMS.ig, LK.PLATFORMS.yt].map(P => ({ label: P.label, badge: P.badge, color: P.color, ink: P.ink, handle: '@yourname' }))).slice(0, 5);
-    return '<div class="lk-mock"><div class="lk-head" style="' + RW.bandStyle(cfg.color) + ';--a-lo:' + RW.lo(cfg.color) + '"><span class="lk-av">' + esc(name.replace(/^@/, '').charAt(0).toUpperCase()) + '</span><div><h1>' + esc(name) + '</h1><small>' + (cfg.mode === 'g' ? '3D world' : 'Links') + '</small></div></div>' +
+    return '<div class="lk-mock"><div class="lk-head" style="' + RW.bandStyle(cfg.color) + ';--a-lo:' + RW.lo(cfg.color) + '"><span class="lk-av">' + esc(name.replace(/^@/, '').charAt(0).toUpperCase()) + '</span><div><h1>' + esc(name) + '</h1><small>' + esc(LK.MODES[cfg.mode].label) + '</small></div></div>' +
       rows.map(x => '<span class="lk-btn"><span class="lk-badge sm" style="background:' + x.color + ';color:' + x.ink + '">' + esc(x.badge) + '</span><span class="t"><b>' + esc(x.label) + '</b><small>' + esc(x.handle) + '</small></span></span>').join('') + '</div>';
   }
-  async function show3d(box) {
-    try {
-      await load('../../assets/three.min.js'); await load('../../assets/linkworld.js');
-      if (world) world.dispose();
-      const L = LK.linksOf(cfg).length ? LK.linksOf(cfg) : LK.linksOf(LK.normalize({ links: [{ p: 'ig', h: 'yourname' }, { p: 'yt', h: 'yourname' }, { p: 'tt', h: 'yourname' }] }));
-      world = GrugLinkWorld.mount(box, { cfg: Object.assign({}, cfg, { n: named ? cfg.n : 'Your world' }), links: L, preview: true });
-      if (!world) box.outerHTML = mock();
-    } catch (e) { box.outerHTML = mock(); }
-  }
+  // the same game followers get (play/creatorworld/), in preview mode: no tutorial, nothing added to anyone's Pearls
+  function worldSrc() { const c = LK.encode(Object.assign({}, cfg, { n: named ? cfg.n : 'Your world', links: cfg.links.length ? cfg.links : [{ p: 'ig', h: 'yourname' }, { p: 'yt', h: 'yourname' }, { p: 'tt', h: 'yourname' }] })); return { c, src: '../../play/creatorworld/game.html#c=' + c + '&preview=1' }; }
   function paintPreview() {
     const p = $('#prev'); if (!p) return;
     const st = STEPS[cur];
-    if (st.id === 'world' || (st.done && cfg.mode === 'g')) { if (world) world.dispose(); world = null; p.innerHTML = '<div class="lk-3d" id="w3d"></div>'; show3d($('#w3d')); }
-    else { if (world) { world.dispose(); world = null; } p.innerHTML = mock(); }
+    if (st.id === 'world' || st.done) {
+      const w = worldSrc(), f = p.querySelector('iframe');
+      if (f && f.dataset.c === w.c) return;
+      p.innerHTML = '<div class="lk-3d"><span class="lk-load">Building your world…</span><iframe title="Your world" allow="autoplay *; fullscreen *; gamepad *" data-c="' + w.c + '"></iframe>' +
+        '<a class="g-btn lk-full" href="' + esc(w.src.replace('&preview=1', '')) + '" target="_blank" rel="noopener">' + G.icon('arrow-square-out') + 'Full screen</a></div>';
+      p.querySelector('iframe').src = w.src;
+    } else p.innerHTML = mock();
   }
   let previewT = 0; const softPreview = () => { clearTimeout(previewT); previewT = setTimeout(paintPreview, 250); };
 
@@ -117,7 +113,7 @@
     if (st.pick) slide.querySelectorAll('[role=radio]:not(#aCustom)').forEach(b => b.addEventListener('click', () => {
       st.apply(st.pick(b)); mark(); G.ui.buzz(); paintNav();
       if (st.id === 'world') softPreview();
-      if (st.auto) setTimeout(() => { if (cur === i) go(next(i)); }, st.id === 'world' ? 900 : 320);
+      if (st.auto) setTimeout(() => { if (cur === i) go(next(i)); }, 320);
     }));
     if (st.wire) st.wire();
     mark(); paintPreview(); paintNav(); $('#nav').hidden = false;
@@ -143,14 +139,14 @@
     const S = LK.share(cfg);
     slide.innerHTML = '<div class="wz-a">' +
         '<button type="button" class="g-btn primary wz-big" id="copyBtn">' + G.icon('copy') + 'Copy your link</button>' +
-        '<div class="wz-acts"><a class="g-btn" href="' + esc(S.open) + '" target="_blank" rel="noopener">Open your page</a><button type="button" class="g-btn" id="redo">' + G.icon('pencil-simple') + 'Change answers</button></div>' +
-        '<p class="wz-saved">' + G.icon('check-circle') + '<span>Saved to <a href="../#mine">Links → My link pages</a> on this device.</span></p>' +
+        '<div class="wz-acts"><a class="g-btn" href="' + esc(S.open) + '" target="_blank" rel="noopener">Open your world</a><button type="button" class="g-btn" id="redo">' + G.icon('pencil-simple') + 'Change answers</button></div>' +
+        '<p class="wz-saved">' + G.icon('check-circle') + '<span>Saved to <a href="../#mine">Links → My worlds</a> on this device.</span></p>' +
         '<div class="wz-share"><h3>What to do with it</h3>' +
           '<div class="wz-row"><span class="ic">' + G.icon('share-network') + '</span><div><b>Put it in your bio</b><span>Paste the link into your Instagram, TikTok or X bio, or anywhere you share links.</span></div></div>' +
           '<div class="wz-row"><span class="ic">' + G.icon('pearl') + '</span><div><b>Followers get 10 Pearls</b><span>Each follower gets 10 Pearls a day for stopping by, to spend in any game on Grug. Free for you.</span></div></div>' +
-          '<div class="wz-row"><span class="ic">' + G.icon('pencil-simple') + '</span><div><b>Changing it later</b><span>Edit it from My link pages, then share the new link. The old one keeps working.</span></div></div>' +
+          '<div class="wz-row"><span class="ic">' + G.icon('pencil-simple') + '</span><div><b>Changing it later</b><span>Edit it from My worlds, then share the new link. The old one keeps working.</span></div></div>' +
         '</div></div>' +
-      '<div class="wz-q"><span class="n">' + G.icon('check') + '</span><h1>Your page is ready!</h1><p>' + (cfg.mode === 'g' ? 'This is your world. Followers walk into a room to reach each of your socials.' : 'This is what your followers see.') + '</p><div class="wz-prev" id="prev" style="display:block"></div></div>';
+      '<div class="wz-q"><span class="n">' + G.icon('check') + '</span><h1>Your world is ready!</h1><p>' + (cfg.mode === 'p' ? 'Followers land right here, with a coin rush ready to go. Each room is one of your socials.' : 'Followers land right here. Each room is one of your socials: try walking onto a pad.') + '</p><div class="wz-prev" id="prev" style="display:block"></div></div>';
     paintPreview();
     $('#copyBtn').addEventListener('click', async e => { try { await navigator.clipboard.writeText(S.url); e.currentTarget.innerHTML = G.icon('check') + 'Copied!'; } catch (err) { prompt('Copy your link:', S.url); } });
     $('#redo').addEventListener('click', () => go(0));

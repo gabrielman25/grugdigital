@@ -19,6 +19,7 @@
    - GK.free()                                                 true while the Free Shop Token runs (prices are 0)
    - GK.lockedCube(THREE, {size, text, color})                 a solid "LOCKED" / "COMING SOON" cube for a plot that isn't open yet
    - GK.prop(THREE, kind, seed)                                a small (≤ 1 block), low-key, no-collision prop for a sparse spot
+   - GK.npcs.install({THREE, scene, camera, canvas, units, seats, wander, …})   ambient Discord members (block figures) that sit or wander; tap one to join the Discord
    - GK.pet(THREE, seed)                                       a flashy little pet for a bot (returns {group, update(dt, pos)})
 */
 (function (root) {
@@ -459,11 +460,168 @@ body.menu-open #gk-emo,body.menu-open #gk-stam{display:none!important}
     return { group: g, update: g.userData.update, look: L };
   }
 
+  /* ---------- ambient Discord NPCs: real members of the Grug Discord, as plain block figures ----------
+     The site (grug.js, Grug.discord) keeps 'grug.dcw.v1' fresh: the server's online count, its invite, and for a few
+     online members a small picture (a data URL) with its two main colours. Games read only that, so a game never
+     loads anything from another site. Each NPC is a faceless, Roblox-style block figure: the picture is printed on
+     the front of the torso like a t-shirt, the torso takes the picture's main colour, the head and arms its second
+     colour, the legs a black or grey. They never play: they sit on the seats the game lists, or wander about.
+     Tap one: a card with their name, "is in our Discord server" and a Join button.
+
+     GK.npcs.install({
+       THREE, scene, camera, canvas,     // the game's own
+       units: 100,                       // world units per metre (100 = cm, 1 = m)
+       seats: [{x, z, y, face}],         // y = seat height, face = the way they look (radians, 0 = +z)
+       wander: () => [x, z],             // a random spot to walk to
+       path: (x0, z0, x1, z1) => [[x, z], …],   // optional: a walkable route (else a straight line)
+       collide: (x, z) => [x, z],        // optional: keep them out of walls
+       visible: (x, z) => true,          // optional: false hides them (dark rooms, another level)
+       active: () => true,               // optional: false hides them all (e.g. not in the lobby)
+       max: 4, onOpen, onClose })        // → { update(dt), list, dispose() } */
+  const DCW_KEY = 'grug.dcw.v1', DC_BLURPLE = '#5865F2', DC_INVITE = 'https://discord.gg/v5CgKm2YkR';
+  const dcw = () => { const v = readJSON(DCW_KEY, null); return v && typeof v === 'object' ? v : null; };
+  const DC_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.11 13.11 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>';   // the Discord mark (Simple Icons, CC0)
+  const npcCss = document.createElement('style');
+  npcCss.textContent = `
+#gk-npcs{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+#gk-npcs .nm{position:absolute;left:0;top:0;display:flex;align-items:center;gap:5px;padding:3px 9px 3px 5px;border-radius:999px;background:rgba(255,255,255,.92);color:#111827;font:700 13px/1.1 "Fredoka",system-ui,sans-serif;white-space:nowrap;will-change:transform;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+#gk-npcs .nm i{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;background:${DC_BLURPLE};color:#fff;flex:none}#gk-npcs .nm svg{width:11px;height:11px}
+#gk-npc{position:fixed;inset:0;z-index:70;display:none;place-items:center;background:rgba(10,12,20,.35);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#gk-npc.on{display:grid}
+#gk-npc.on .c{animation:gk-npc-in .25s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes gk-npc-in{from{transform:scale(.9);opacity:0}}
+@media (prefers-reduced-motion:reduce){#gk-npc.on .c{animation:none}}
+#gk-npc .c{width:min(380px,calc(100% - 32px));padding:24px 22px 20px;border-radius:28px;background:#fff;color:#111827;text-align:center;font:600 16px/1.35 "Fredoka",system-ui,sans-serif}
+#gk-npc .av{width:92px;height:92px;border-radius:50%;margin:0 auto 12px;display:block;background:#e5e7eb;object-fit:cover;border:4px solid ${DC_BLURPLE}}
+#gk-npc h2{margin:0;font-size:26px;line-height:1.1;word-break:break-word}
+#gk-npc p{margin:6px 0 0;color:#374151;font-size:17px}#gk-npc small{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;color:#6b7280;font-size:14px}
+#gk-npc small i{width:9px;height:9px;border-radius:50%;background:#23a55a;display:inline-block}
+#gk-npc .b{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:58px;margin-top:18px;border-radius:18px;background:${DC_BLURPLE};color:#fff;font:700 21px/1 "Fredoka",system-ui,sans-serif;text-decoration:none;border:0}
+#gk-npc .b svg{width:26px;height:26px}
+#gk-npc .q{display:block;width:100%;min-height:50px;margin-top:10px;border-radius:16px;border:0;background:#dde0e8;color:#111827;font:700 18px/1 "Fredoka",system-ui,sans-serif;cursor:pointer}`;
+  document.head.appendChild(npcCss);
+  function npcCard(m, data, done) {
+    let el = $('#gk-npc'); if (!el) { el = document.createElement('div'); el.id = 'gk-npc'; el.className = 'gk-nozoom'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); document.body.appendChild(el); }
+    const online = data && +data.online;
+    el.innerHTML = '<div class="c">' + (m.img ? '<img class="av" alt="" src="' + esc(m.img) + '">' : '') + '<h2>' + esc(m.n) + '</h2><p>is in our Discord server</p>' +
+      (online ? '<small><i></i>' + online.toLocaleString() + ' online now</small>' : '') +
+      '<a class="b" href="' + esc((data && data.invite) || DC_INVITE) + '" target="_blank" rel="noopener noreferrer">' + DC_SVG + 'Join our Discord</a><button type="button" class="q">Not now</button></div>';
+    const close = () => { el.classList.remove('on'); document.removeEventListener('keydown', key, true); done(); };
+    const key = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+    el.onclick = e => { if (e.target === el || e.target.closest('.q')) close(); else if (e.target.closest('.b')) setTimeout(close, 80); };
+    document.addEventListener('keydown', key, true);
+    el.classList.add('on'); buzz(10);
+  }
+  function npcsInstall(o) {
+    const THREE = o.THREE, U = o.units || 1, S = 0.34 * U, list = [], seats = (o.seats || []).slice(), max = o.max == null ? 4 : o.max;
+    const layer = document.createElement('div'); layer.id = 'gk-npcs'; layer.className = 'gk-nozoom';
+    // right after the canvas, so the game's HUD and menus (later in the page) stay on top of the name tags
+    if (o.canvas && o.canvas.parentNode) o.canvas.parentNode.insertBefore(layer, o.canvas.nextSibling); else document.body.appendChild(layer);
+    const box = new THREE.BoxGeometry(1, 1, 1), head = new THREE.CylinderGeometry(0.62, 0.62, 1.15, 18);
+    const lin = hex => { const c = new THREE.Color(hex); return o.srgb ? c : c.convertSRGBToLinear(); };
+    const LEGS = ['#1f2124', '#2b2d31', '#33363b', '#3f4248', '#4b4f56', '#5c6068'];
+    const hashS = s => { let h = 2166136261; for (const ch of String(s)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; };
+    let open = false, raycaster = null, v = new THREE.Vector3(), pd = null, opened = false;
+    function shirt(m, c1) {   // the torso's front: the picture printed on the main colour
+      const cv = document.createElement('canvas'); cv.width = cv.height = 128; const x = cv.getContext('2d');
+      x.fillStyle = c1; x.fillRect(0, 0, 128, 128);
+      const tex = new THREE.CanvasTexture(cv); if ('colorSpace' in tex) tex.colorSpace = 'srgb'; else tex.encoding = 3001;
+      if (m.img) { const im = new Image(); im.onload = () => { x.save(); x.beginPath(); x.roundRect ? x.roundRect(22, 18, 84, 84, 14) : x.rect(22, 18, 84, 84); x.clip(); x.drawImage(im, 22, 18, 84, 84); x.restore(); tex.needsUpdate = true; }; im.src = m.img; }
+      return tex;
+    }
+    function figure(m) {
+      const c1 = (m.c && m.c[0]) || '#5865f2', c2 = (m.c && m.c[1]) || '#2b2d31', legC = LEGS[hashS(m.n) % LEGS.length];
+      const M = c => new THREE.MeshLambertMaterial({ color: lin(c) });
+      const side = M(c1), front = new THREE.MeshLambertMaterial({ map: shirt(m, c1) }), limbs = M(c2), legs = M(legC);
+      const root = new THREE.Group(), hips = new THREE.Group(); hips.position.y = 2 * S; root.add(hips);
+      const torso = new THREE.Mesh(box, [side, side, side, side, front, side]); torso.scale.set(2 * S, 2 * S, S); torso.position.y = S; hips.add(torso);
+      const hd = new THREE.Mesh(head, limbs); hd.scale.setScalar(S); hd.position.y = 2 * S + 0.58 * S; hips.add(hd);
+      const limb = (mat, x, y, len) => { const p = new THREE.Group(); p.position.set(x, y, 0); const mm = new THREE.Mesh(box, mat); mm.scale.set(S * 0.98, len, S * 0.98); mm.position.y = -len / 2; p.add(mm); hips.add(p); return p; };
+      const armL = limb(limbs, 1.5 * S, 1.9 * S, 2 * S), armR = limb(limbs, -1.5 * S, 1.9 * S, 2 * S), legL = limb(legs, 0.5 * S, 0, 2 * S), legR = limb(legs, -0.5 * S, 0, 2 * S);
+      root.traverse(q => { q.userData.npc = m; });
+      o.scene.add(root);
+      const tag = document.createElement('div'); tag.className = 'nm'; tag.innerHTML = '<i>' + DC_SVG + '</i>' + esc(m.n); layer.appendChild(tag);
+      return { m, root, armL, armR, legL, legR, tag, mats: [side, front, limbs, legs] };
+    }
+    function spawn(data) {
+      const pool = (data.members || []).map(x => Object.assign({ n: x.n }, (data.avs || {})[x.n] || {})).filter(x => x.img && x.c);
+      const r = rng(hashS(new Date().toDateString() + (o.seed || location.pathname)) ^ (Date.now() / 600000 | 0));
+      for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+      const freeSeats = seats.slice(); for (let i = freeSeats.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [freeSeats[i], freeSeats[j]] = [freeSeats[j], freeSeats[i]]; }
+      pool.slice(0, max).forEach((m, i) => {
+        const f = figure(m), sit = i % 2 === 0 && freeSeats.length ? freeSeats.pop() : null;
+        const n = Object.assign(f, { seat: sit, x: 0, z: 0, face: 0, path: null, wait: r() * 3, ph: r() * 6, moving: false });
+        if (sit) { n.x = sit.x; n.z = sit.z; n.face = sit.face || 0; }
+        else { const p = o.wander ? o.wander() : [0, 0]; n.x = p[0]; n.z = p[1]; n.face = r() * 6.28; }
+        list.push(n);
+      });
+      opened = true;
+    }
+    function tryStart() { if (opened) return true; const d = dcw(); if (d && d.avs && Object.keys(d.avs).length) { spawn(d); return true; } return false; }
+    tryStart();
+    const onStorage = e => { if (e.key === DCW_KEY) tryStart(); };
+    addEventListener('storage', onStorage);
+    let retry = 0;
+    function update(dt) {
+      if (!opened) { retry += dt; if (retry > 3) { retry = 0; tryStart(); } }
+      const act = !o.active || o.active(), w = innerWidth, h = innerHeight, sp = 1.15 * U, k = Math.min(1, dt * 8);
+      for (const n of list) {
+        if (act && !n.seat && dt > 0) {
+          if (!n.path || !n.path.length) {
+            n.moving = false; n.wait -= dt;
+            if (n.wait <= 0 && o.wander) { const t = o.wander(); n.path = (o.path && o.path(n.x, n.z, t[0], t[1])) || [t]; n.wait = 2 + Math.random() * 5; }
+          } else {
+            const [tx, tz] = n.path[0], dx = tx - n.x, dz = tz - n.z, d = Math.hypot(dx, dz);
+            if (d < 0.35 * U) n.path.shift();
+            else {
+              let nx = n.x + dx / d * sp * dt, nz = n.z + dz / d * sp * dt; if (o.collide) [nx, nz] = o.collide(nx, nz);
+              const moved = Math.hypot(nx - n.x, nz - n.z); n.stuck = moved < sp * dt * 0.2 ? (n.stuck || 0) + dt : 0; if (n.stuck > 0.8) { n.path = null; n.stuck = 0; }
+              n.x = nx; n.z = nz; n.moving = true;
+              let df = (Math.atan2(dx, dz) - n.face) % (Math.PI * 2); if (df > Math.PI) df -= Math.PI * 2; if (df < -Math.PI) df += Math.PI * 2; n.face += df * k;
+            }
+          }
+        }
+        n.ph += dt * (n.moving ? 7 : 1.2);
+        const sw = n.moving ? Math.sin(n.ph) * 0.7 : 0;
+        if (n.seat) { n.legL.rotation.x = n.legR.rotation.x = -Math.PI / 2; n.armL.rotation.x = n.armR.rotation.x = -0.35; n.root.position.set(n.x, (n.seat.y || 0) - 2 * S + 0.02 * U, n.z); }
+        else { n.legL.rotation.x = sw; n.legR.rotation.x = -sw; n.armL.rotation.x = -sw * 0.8; n.armR.rotation.x = sw * 0.8; n.root.position.set(n.x, 0, n.z); }
+        n.root.rotation.y = n.face;
+        const vis = act && (!o.visible || o.visible(n.x, n.z)); n.root.visible = vis;
+        let show = false;
+        if (vis) { v.set(n.x, n.root.position.y + 5.9 * S, n.z).project(o.camera); show = v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1; if (show) n.tag.style.transform = 'translate(' + ((v.x + 1) / 2 * w).toFixed(1) + 'px,' + ((1 - v.y) / 2 * h).toFixed(1) + 'px) translate(-50%,-100%)'; }
+        if (show !== n.shown) { n.tag.style.display = show ? '' : 'none'; n.shown = show; }
+      }
+    }
+    // a tap (not a drag) on one of them opens their card
+    const isView = e => !!o.canvas && e.target === o.canvas;
+    const down = e => { pd = isView(e) ? { x: e.clientX, y: e.clientY, t: performance.now() } : null; };
+    const up = e => {
+      if (!pd || open || !list.length || Math.hypot(e.clientX - pd.x, e.clientY - pd.y) > 10 || performance.now() - pd.t > 450) return;
+      if (o.active && !o.active()) return;
+      const r = o.canvas.getBoundingClientRect(); raycaster = raycaster || new THREE.Raycaster();
+      raycaster.setFromCamera({ x: (e.clientX - r.left) / r.width * 2 - 1, y: -(e.clientY - r.top) / r.height * 2 + 1 }, o.camera);
+      const hits = raycaster.intersectObjects(list.filter(n => n.root.visible).map(n => n.root), true); let m = hits.length && hits[0].object.userData.npc;
+      if (!m) { // forgiving on phones: the nearest name tag within 40 px of the tap
+        let best = 40; for (const n of list) { if (!n.shown) continue; const b = n.tag.getBoundingClientRect(); const d = Math.hypot(e.clientX - (b.left + b.width / 2), e.clientY - (b.top + b.height / 2)); if (d < best) { best = d; m = n.m; } }
+      }
+      if (!m) return;
+      open = true; if (o.onOpen) o.onOpen(m);
+      npcCard(m, dcw(), () => { open = false; if (o.onClose) o.onClose(m); });
+    };
+    addEventListener('pointerdown', down, true); addEventListener('pointerup', up, true);
+    function dispose() {
+      removeEventListener('pointerdown', down, true); removeEventListener('pointerup', up, true); removeEventListener('storage', onStorage);
+      list.forEach(n => { o.scene.remove(n.root); n.mats.forEach(mt => { if (mt.map) mt.map.dispose(); mt.dispose(); }); }); list.length = 0; layer.remove();
+    }
+    return { update, list, dispose, get open() { return open; } };
+  }
+  const npcs = { install: npcsInstall, card: npcCard, data: dcw };
+
   /* ---------- boot ---------- */
   function ready(fn) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
   ready(() => { autoWatch(); watchLobbies(); freeTick(); });
 
-  root.GK = { GAME, profile, prefs, hint, center, watch, pop, compact, stamina, tutorial, skillSeen, markSkill, crate, free, freeLeft, emotes, lockedCube, prop, pet, PROP_KINDS, buzz, reduce, rng,
+  root.GK = { GAME, profile, prefs, hint, center, watch, pop, compact, stamina, tutorial, skillSeen, markSkill, crate, free, freeLeft, emotes, lockedCube, prop, pet, PROP_KINDS, buzz, reduce, rng, npcs,
     // the kit's bridge state (set by games that want GK to know the app's state)
     state: null };
 })(window);
