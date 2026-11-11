@@ -76,7 +76,13 @@
       wallet: { key: 'rr-crafthouse-gameday-v1', field: 'coins', label: 'Craft Coins', to: '#store' },   // the app's own coins, shown in the top bar
       // the app's own tab bar: the only navigation on every page in partner mode (grug.js). [id, label, icon, link]: '' or '#…' is
       // in the partner's app, anything else is a site path. Play is the site's game list (the partner's game plus Grug originals).
-      bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'meat', '#menu'], ['play', 'Play', 'controller', 'games/'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } }
+      bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'meat', '#menu'], ['play', 'Play', 'controller', 'games/'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } },
+    // Demo made to pitch Coco Crepes, Waffles & Coffee (Katy): its rewards app (play/coco/, built from tools/partner-app/partners/coco/)
+    // has no game of its own yet (no `game`), so partner mode lists the Grug originals only. fontDisplay: a second face for headings.
+    coco: { n: 'Coco Crepes, Waffles & Coffee', short: 'Coco', color: '#E5BD2F', i: 'coffee', f: 'f', logo: 'play/coco/logo.png', barLogo: 'play/coco/logo-bar.png', app: 'play/coco/', demo: true,
+      coin: 'play/coco/coin.png', font: 'play/coco/montserrat.woff2', fontDisplay: 'play/coco/frank-ruhl-libre.woff2', colors: { accent: '#E5BD2F', deep: '#533020', cream: '#fbf3e4', page: '#FBF7EF' },
+      wallet: { key: 'coco-crepes-crepeclub-v1', field: 'coins', label: 'Coco Coins', to: '#store' },
+      bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'cup', '#menu'], ['play', 'Play', 'controller', 'games/'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } }
   };
   const partnerBrand = id => PARTNERS[id] ? Object.assign({ p: id, at: Date.now() }, PARTNERS[id]) : null;
   const ss = { get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }, del(k) { try { sessionStorage.removeItem(k); } catch (e) {} } };
@@ -177,7 +183,8 @@
     try { const P = PARTNERS[brand.p], C = P.colors || {}, st = document.documentElement.style;
       [['accent', '--p-accent'], ['deep', '--p-deep'], ['cream', '--p-cream'], ['page', '--p-page']].forEach(([k, v]) => { if (C[k]) st.setProperty(v, C[k]); });
       if (P.coin) st.setProperty('--p-coin', 'url("' + rootPath + P.coin + '")');
-      if (P.font) { const f = document.createElement('style'); f.textContent = '@font-face{font-family:"Partner Font";src:url("' + rootPath + P.font + '") format("woff2");font-weight:200 800;font-display:swap}'; document.head.appendChild(f); } } catch (e) {}
+      if (P.font) { const f = document.createElement('style'); f.textContent = '@font-face{font-family:"Partner Font";src:url("' + rootPath + P.font + '") format("woff2");font-weight:200 800;font-display:swap}' +
+        (P.fontDisplay ? '@font-face{font-family:"Partner Display";src:url("' + rootPath + P.fontDisplay + '") format("woff2");font-weight:200 800;font-display:swap}' : ''); document.head.appendChild(f); } } catch (e) {}
     if (sitePage) queueMicrotask(() => partnerChrome(brand, rootPath));   // once this script has finished (the icons below are defined)
   }
   // Games: the blue fog in dark mode, a plain page in light mode (partner mode is always light); the cubes in both
@@ -197,6 +204,7 @@
     expand: '<path fill="currentColor" d="M5.293 9.293a1 1 0 1 1 1.414 1.414L4.414 13H5a1 1 0 1 1 0 2H2a1 1 0 0 1-1-1v-3a1 1 0 1 1 2 0v.586zM9.293 9.293a1 1 0 0 1 1.414 0L13 11.586V11a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1h-3a1 1 0 1 1 0-2h.586l-2.293-2.293a1 1 0 0 1 0-1.414M5 1a1 1 0 0 1 0 2h-.586l2.293 2.293a1 1 0 1 1-1.414 1.414L3 4.414V5a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1zM14 1a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-.586l-2.293 2.293a1 1 0 1 1-1.414-1.414L11.586 3H11a1 1 0 1 1 0-2z"/>',
     plus: '<path fill="currentColor" d="M8 1a1 1 0 0 1 1 1v5h5a1 1 0 1 1 0 2H9v5a1 1 0 1 1-2 0V9H2a1 1 0 0 1 0-2h5V2a1 1 0 0 1 1-1"/>',
     house: '<path fill="currentColor" d="M7.316 1.14a1 1 0 0 1 1.368 0l6.394 5.995a.5.5 0 0 1-.342.865H13v7h-3v-3a2 2 0 0 0-4 0v3H3V8H1.264a.5.5 0 0 1-.341-.865z"/>',
+    cup: '<path fill="currentColor" d="M14.333 12c.368 0 .667.299.667.667 0 .736-.597 1.333-1.333 1.333H2a1 1 0 1 1 0-2zM11 2a1 1 0 0 1 1 1v1h1a2 2 0 0 1 .204 3.99L13 8h-1.126A4.002 4.002 0 0 1 4 7V3a1 1 0 0 1 1-1zm1 5h1a1 1 0 1 0 0-2h-1z"/>',
     meat: '<path fill="currentColor" d="M5.043 9.457a3.75 3.75 0 0 0 1.5 1.5L5 12.5V14a1 1 0 0 1-2 0v-1H2a1 1 0 0 1 0-2h1.5zM8.608.867C9.613.715 11.688.687 13.5 2.5c1.812 1.811 1.786 3.886 1.634 4.891-.061.402-.309.74-.634.984l-.884.663a7.32 7.32 0 0 1-5.823 1.32 2.74 2.74 0 0 1-2.151-2.151 7.32 7.32 0 0 1 1.32-5.824l.663-.883c.244-.326.581-.572.983-.633m4.22 2.547c-.78-.78-1.73-1.098-2.121-.707-.39.39-.074 1.34.707 2.12.78.782 1.73 1.099 2.121.709.39-.39.074-1.341-.707-2.122"/>',
     controller: '<path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12.26 3a3 3 0 0 1 2.988 2.729l.57 6.264a1.84 1.84 0 0 1-3.364 1.188L11 11H5l-1.454 2.18a1.84 1.84 0 0 1-3.364-1.187l.57-6.264A3 3 0 0 1 3.74 3zM12 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2M4 5a2 2 0 1 0 0 4 2 2 0 0 0 0-4m6 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m4 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2m-2-2a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>',
     trophy: '<path fill="currentColor" d="M12.91 2H15a1 1 0 0 1 1 1v2a3 3 0 0 1-3 3h-.636l-.002.017A4.38 4.38 0 0 1 9 11.884V13h2l1 1v1H4v-1l1-1h2v-1.116a4.38 4.38 0 0 1-3.362-3.867L3.636 8H3l-.154-.004A3 3 0 0 1 0 5V3a1 1 0 0 1 .897-.995L1 2h2.09L3 1h10zM2 5a1 1 0 0 0 1 1h.454l-.182-2H2zm10.546 1H13a1 1 0 0 0 1-1V4h-1.273z"/>',

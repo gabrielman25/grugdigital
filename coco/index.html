@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Coco Crepes · Crêpe Club on Grug (demo)</title>
+<link rel="icon" href="../play/coco/logo.png">
+<!-- Partner mode for Coco Crepes: this short address starts it (assets/theme.js PARTNERS.coco) and opens the Games page.
+     The whole site then wears Coco's logo, colours and type, with the Crêpe Club app's tab bar, until the tab is closed. -->
+<script>
+(function () {
+  var to = '../games/?partner=coco' + (location.hash || '');
+  try { location.replace(to); } catch (e) { location.href = to; }
+})();
+</script>
+<noscript><meta http-equiv="refresh" content="0;url=../games/?partner=coco"></noscript>
+</head>
+<body style="background:#3a2016;color:#fff;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0">
+<a href="../games/?partner=coco" style="color:#E5BD2F">Open the Crêpe Club at Coco Crepes</a>
+</body>
+</html>

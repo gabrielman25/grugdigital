@@ -1,0 +1,300 @@
+{
+ "first": "hunger",
+ "questions": {
+  "hunger": {
+   "q": "First down. How hungry are we?",
+   "s": "Pick the size of the play.",
+   "o": [
+    [
+     "snack",
+     "Just a bite",
+     "Starters, soups and shareables",
+     {
+      "c": [
+       "app",
+       "soup"
+      ]
+     }
+    ],
+    [
+     "meal",
+     "A proper meal",
+     "Burgers, tacos, sandwiches and more",
+     {
+      "c": "main",
+      "price": [
+       0,
+       25
+      ]
+     }
+    ],
+    [
+     "feast",
+     "Go all out",
+     "Steaks and seafood plates",
+     {
+      "c": "main",
+      "price": [
+       25,
+       100000
+      ]
+     }
+    ],
+    [
+     "sweet",
+     "Sweet tooth",
+     "Straight to dessert",
+     {
+      "c": "dessert"
+     }
+    ],
+    [
+     "kids",
+     "Feeding a little one",
+     "Kid-sized plates",
+     {
+      "c": "kids"
+     }
+    ]
+   ]
+  },
+  "protein": {
+   "q": "Pick your star player.",
+   "s": "What's leading the plate?",
+   "w": 0.25,
+   "o": [
+    [
+     "beef",
+     "Beef",
+     "",
+     {
+      "pr": "beef"
+     }
+    ],
+    [
+     "chicken",
+     "Chicken",
+     "",
+     {
+      "pr": "chicken"
+     }
+    ],
+    [
+     "pork",
+     "Pork & sausage",
+     "",
+     {
+      "pr": "pork"
+     }
+    ],
+    [
+     "seafood",
+     "Seafood",
+     "",
+     {
+      "pr": "seafood"
+     }
+    ],
+    [
+     "veg",
+     "No meat",
+     "",
+     {
+      "pr": "veg"
+     }
+    ]
+   ]
+  },
+  "heat": {
+   "q": "How much heat can you handle?",
+   "s": "Jalapeños are standing by.",
+   "o": [
+    [
+     "0",
+     "Keep it mild",
+     "No heat, all flavor",
+     {
+      "h": 0
+     }
+    ],
+    [
+     "1",
+     "A little kick",
+     "Just enough to notice",
+     {
+      "h": 1
+     }
+    ],
+    [
+     "2",
+     "Bring the fire",
+     "Buffalo and jalapeño territory",
+     {
+      "h": 2
+     }
+    ]
+   ]
+  },
+  "form": {
+   "q": "Hands or silverware?",
+   "s": "How do you want to eat it?",
+   "o": [
+    [
+     "hand",
+     "Handheld",
+     "Pick it up and go",
+     {
+      "f": "hand"
+     }
+    ],
+    [
+     "fork",
+     "Knife & fork",
+     "A proper plate",
+     {
+      "f": "fork"
+     }
+    ],
+    [
+     "bowl",
+     "Bowl & spoon",
+     "Warm and slow",
+     {
+      "f": "bowl"
+     }
+    ],
+    [
+     "share",
+     "Pass it around",
+     "Made for the table",
+     {
+      "f": "share"
+     }
+    ]
+   ]
+  },
+  "style": {
+   "q": "Where's your flavor from tonight?",
+   "s": "The kitchen covers a lot of ground.",
+   "o": [
+    [
+     "cajun",
+     "Louisiana Cajun",
+     "Boudin, gumbo, po'boys",
+     {
+      "s": "cajun"
+     }
+    ],
+    [
+     "southwest",
+     "Southwest",
+     "Poblano, chipotle, avocado",
+     {
+      "s": "southwest"
+     }
+    ],
+    [
+     "classic",
+     "Classic American",
+     "The all-time greats",
+     {
+      "s": "classic"
+     }
+    ]
+   ]
+  },
+  "budget": {
+   "q": "What's the game plan on price?",
+   "s": "No wrong answers.",
+   "w": -0.15,
+   "o": [
+    [
+     "lo",
+     "Under $16",
+     "",
+     {
+      "price": [
+       0,
+       16
+      ]
+     }
+    ],
+    [
+     "mid",
+     "$16 to $22",
+     "",
+     {
+      "price": [
+       16,
+       22.005
+      ]
+     }
+    ],
+    [
+     "hi",
+     "Sky's the limit",
+     "",
+     {
+      "price": [
+       22.005,
+       100000
+      ]
+     }
+    ]
+   ]
+  },
+  "crowd": {
+   "q": "Crowd favorite or deep cut?",
+   "s": "Follow the regulars, or find your own.",
+   "w": -0.3,
+   "o": [
+    [
+     "top",
+     "Crowd favorite",
+     "What the regulars order",
+     {
+      "top": true
+     }
+    ],
+    [
+     "deep",
+     "Deep cut",
+     "Something off the beaten path",
+     {
+      "top": false
+     }
+    ]
+   ]
+  },
+  "sweet": {
+   "q": "What kind of sweet?",
+   "s": "Last question.",
+   "o": [
+    [
+     "choc",
+     "Chocolate",
+     "",
+     {
+      "sw": "choc"
+     }
+    ],
+    [
+     "fruit",
+     "Warm fruit",
+     "",
+     {
+      "sw": "fruit"
+     }
+    ],
+    [
+     "cream",
+     "Cold and creamy",
+     "",
+     {
+      "sw": "cream"
+     }
+    ]
+   ]
+  }
+ }
+}

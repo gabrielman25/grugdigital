@@ -21,13 +21,87 @@
     "cream": "#fbf4ea"
   },
   "pass": [
-    { "v": 1, "name": "First Down", "reward": "250 {coin}", "coins": 250 },
-    { "v": 3, "name": "Regular", "reward": "400 {coin} + gold game balls", "coins": 400, "skin": "gold" },
-    { "v": 8, "name": "Starting Lineup", "reward": "3 free power-ups for any game", "tokens": 3 },
-    { "v": 15, "name": "All-Pro", "reward": "1,500 {coin} + your name on the stadium jumbotron", "coins": 1500, "jumbo": true },
-    { "v": 25, "name": "CraftHouse Legend", "reward": "The black-and-gold Legend app theme + 5 free power-ups", "theme": "legend", "tokens": 5 }
+    {
+      "v": 1,
+      "name": "First Down",
+      "reward": "250 {coin}",
+      "coins": 250
+    },
+    {
+      "v": 3,
+      "name": "Regular",
+      "reward": "400 {coin}",
+      "coins": 400
+    },
+    {
+      "v": 8,
+      "name": "Starting Lineup",
+      "reward": "800 {coin}",
+      "coins": 800
+    },
+    {
+      "v": 15,
+      "name": "All-Pro",
+      "reward": "1,500 {coin}",
+      "coins": 1500
+    },
+    {
+      "v": 25,
+      "name": "CraftHouse Legend",
+      "reward": "The black-and-gold Legend app theme",
+      "theme": "legend"
+    }
   ],
-  "led": [["R&R CRAFTHOUSE GRILL", "#ffffff"], ["GAME DAY AT THE CRAFTHOUSE", "#cfac52"], ["ORDER AHEAD IN THE R&R APP", "#ffffff"], ["TRY THE NEWTON BURGER", "#f3e2ad"], ["BOUDIN BALLS · GUMBO · PO’BOYS", "#ffffff"]],
-  "quizPicks": ["Newton", "Chipotle Blackened Salmon", "Monterey Tacos"],
-  "menuPicks": ["Freddy", "Chocolate Molten Lava"]
+  "quizPicks": [
+    "Newton",
+    "Chipotle Blackened Salmon",
+    "Monterey Tacos"
+  ],
+  "menuPicks": [
+    "Freddy",
+    "Chocolate Molten Lava"
+  ],
+  "menuIcon": "meat",
+  "copy": {
+    "welcomeTitle": "Your table just got a scoreboard.",
+    "welcomeSub": "Play free games, find your perfect plate, and stack Craft Coins while the kitchen works.",
+    "passLabel": "Season Pass · Game Day",
+    "passDone": "Legend status. Every tier unlocked.",
+    "favTitle": "Crowd favorites",
+    "favLabel": "Guest favorite",
+    "quizCta": "Answer a few questions and we'll call the play",
+    "menuCredit": "Menu and prices from crafthousegrill.com. Ask your server about today's specials.",
+    "orderTitle": "Get the R&R app",
+    "orderSub": "Order ahead from your phone",
+    "mintLine": "Spend them on new looks for your app in the Coins tab.",
+    "staff": "your server",
+    "bill": "check"
+  },
+  "themes": [
+    {
+      "id": "classic",
+      "name": "Game Day",
+      "deep": "#24383f",
+      "deepDark": "#172529"
+    },
+    {
+      "id": "legend",
+      "name": "Legend",
+      "deep": "#161616",
+      "deepDark": "#0b0b0b",
+      "line": "Black and gold, for CraftHouse Legends only."
+    }
+  ],
+  "coinUses": [
+    [
+      "palette",
+      "App themes",
+      "New looks for your app."
+    ],
+    [
+      "controller",
+      "Game power-ups",
+      "Extras in the CraftHouse game."
+    ]
+  ]
 }

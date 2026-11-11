@@ -1,0 +1,62 @@
+{
+  "first": "crave",
+  "questions": {
+    "crave": { "q": "What are we craving?", "s": "Start anywhere on the menu.", "o": [
+      ["sweet", "Something sweet", "Dessert crêpes and waffles", { "k": "sweet" }],
+      ["savory", "Something savory", "Crêpes, paninis and salads", { "k": "savory" }],
+      ["coffee", "A coffee", "Espresso bar and specialties", { "k": "coffee" }],
+      ["smoothie", "A smoothie", "Fresh fruit and house gelato", { "k": "smoothie" }],
+      ["gelato", "Gelato", "A scoop or two, in a cone", { "k": "gelato" }],
+      ["sip", "Tea, lemonade or cocoa", "Something to sip", { "k": "sip" }]
+    ]},
+    "form": { "q": "Crêpe, waffle or something else?", "s": "How do you want it served?", "w": 0.2, "o": [
+      ["crepe", "A crêpe", "Folded thin, original or whole wheat", { "f": "crepe" }],
+      ["waffle", "A waffle", "Golden and crisp", { "f": "waffle" }],
+      ["panini", "A panini", "Pressed and toasty", { "f": "panini" }],
+      ["salad", "A salad", "Fresh and light", { "f": "salad" }]
+    ]},
+    "filling": { "q": "Pick your filling.", "s": "What's leading the plate?", "w": 0.25, "o": [
+      ["chicken", "Chicken", "", { "pr": "chicken" }],
+      ["sausage", "Merguez sausage", "", { "pr": "sausage" }],
+      ["ham", "Ham", "", { "pr": "ham" }],
+      ["turkey", "Turkey", "", { "pr": "turkey" }],
+      ["salmon", "Smoked salmon", "", { "pr": "salmon" }],
+      ["beef", "Braised beef", "", { "pr": "beef" }],
+      ["egg", "Eggs", "", { "pr": "egg" }],
+      ["veg", "No meat", "", { "pr": "veg" }]
+    ]},
+    "flavor": { "q": "What kind of sweet?", "s": "Every sweet crêpe comes with whipped cream.", "w": 0.25, "o": [
+      ["choc", "Chocolate", "Nutella, s'mores, mocha", { "fl": "choc" }],
+      ["fruit", "Fresh fruit", "Strawberries, bananas, raspberries", { "fl": "fruit" }],
+      ["caramel", "Caramel", "Dulce de leche and friends", { "fl": "caramel" }],
+      ["creamy", "Rich and creamy", "Cheesecake, tiramisu, tres leches", { "fl": "creamy" }],
+      ["cinnamon", "Cinnamon", "Warm and cozy", { "fl": "cinnamon" }]
+    ]},
+    "heat": { "q": "A little heat?", "s": "Harissa and jalapeño are standing by.", "o": [
+      ["0", "Keep it mild", "All flavor, no heat", { "h": 0 }],
+      ["1", "Bring the kick", "Harissa or jalapeño", { "h": 1 }]
+    ]},
+    "time": { "q": "Breakfast or lunch?", "s": "Coco does both all day.", "w": -0.1, "o": [
+      ["b", "Breakfast", "Eggs, French toast, waffles", { "b": 1 }],
+      ["l", "Lunch or later", "", { "b": 0 }]
+    ]},
+    "temp": { "q": "Hot or iced?", "s": "Pick your temperature.", "w": 0.15, "o": [
+      ["hot", "Hot", "", { "tp": "hot" }],
+      ["iced", "Iced", "", { "tp": "iced" }]
+    ]},
+    "style": { "q": "How do you take your coffee?", "s": "No wrong answers.", "w": 0.2, "o": [
+      ["bold", "Bold", "Espresso-forward", { "cs": "bold" }],
+      ["milky", "Smooth and milky", "Lattes, cortados, flat whites", { "cs": "milky" }],
+      ["sweet", "A sweet treat", "Mocha, caramel and gelato blends", { "cs": "sweet" }]
+    ]},
+    "blend": { "q": "What kind of smoothie?", "s": "All made with fresh fruit.", "o": [
+      ["fruity", "Fruity", "Berries, mango, pineapple", { "sm": "fruity" }],
+      ["protein", "Protein boost", "Peanut butter, protein powder", { "sm": "protein" }],
+      ["green", "Something green", "Spinach and fruit", { "sm": "green" }]
+    ]},
+    "sig": { "q": "House signature or something new?", "s": "Go with what Coco is known for, or find your own.", "w": -0.3, "o": [
+      ["top", "House signature", "The Coco originals", { "top": true }],
+      ["deep", "Something new", "Off the beaten path", { "top": false }]
+    ]}
+  }
+}

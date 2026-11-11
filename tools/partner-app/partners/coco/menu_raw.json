@@ -1,0 +1,514 @@
+[
+ {
+  "cat": "Sweet Crêpes",
+  "items": [
+   {
+    "n": "Nutella",
+    "d": "contains nuts",
+    "p": "",
+    "img": "img/00.bin"
+   },
+   {
+    "n": "Cinnamon Roll Crêpe",
+    "d": "cinnamon butter cream, cinnamon sugar",
+    "p": "",
+    "img": "img/01.bin"
+   },
+   {
+    "n": "Coco's Crêpe",
+    "d": "strawberries, caramel, chocolate sauce, topped with whipped cream",
+    "p": "",
+    "img": "img/02.bin"
+   },
+   {
+    "n": "S'mores",
+    "d": "marshmallows, graham cracker crumbs, chocolate chips, chocolate sauce",
+    "p": "",
+    "img": "img/03.bin"
+   },
+   {
+    "n": "White Chocolate Raspberry",
+    "d": "raspberry compote, bananas, white chocolate mousse",
+    "p": "",
+    "img": "img/04.bin"
+   },
+   {
+    "n": "Dulce de Leche",
+    "d": "",
+    "p": "",
+    "img": "img/05.bin"
+   },
+   {
+    "n": "Bananas Foster",
+    "d": "caramel, bananas, vanilla gelato,  topped with whipped cream",
+    "p": "",
+    "img": "img/06.bin"
+   },
+   {
+    "n": "Crème Brûlée",
+    "d": "strawberries, chocolate sauce, caramelized sugar",
+    "p": "",
+    "img": "img/07.bin"
+   },
+   {
+    "n": "Cheesecake",
+    "d": "choice of Oreo cookies, raspberries, or strawberries, with whipped cream",
+    "p": "",
+    "img": "img/08.bin"
+   },
+   {
+    "n": "Tres Leches",
+    "d": "tres leches cake filling, strawberries, vanilla custard, chocolate sauce, whipped cream",
+    "p": "",
+    "img": "img/09.bin"
+   },
+   {
+    "n": "French Toast",
+    "d": "topped with whipped cream, powdered sugar, and a sprig of mint",
+    "p": "",
+    "img": "img/10.bin"
+   },
+   {
+    "n": "Pistachio Butter Crêpe",
+    "d": "golden raisins, vanilla custard, caramel",
+    "p": "",
+    "img": "img/11.bin"
+   },
+   {
+    "n": "Tiramisu Crêpe",
+    "d": "tiramisu filling, espresso cream sauce, vanilla custard, & cocoa powder",
+    "p": "",
+    "img": "img/12.bin"
+   }
+  ]
+ },
+ {
+  "cat": "Savory Crêpes",
+  "items": [
+   {
+    "n": "Chicken + Spinach",
+    "d": "sautéed mushrooms, mozzarella cheese, wild mushroom pesto sauce · contains nuts",
+    "p": "",
+    "img": "img/13.bin"
+   },
+   {
+    "n": "Merguez Moroccan Sausage",
+    "d": "caramelized onions, mozzarella cheese, sautéed mushrooms, sun-dried tomato pesto sauce · contains nuts",
+    "p": "",
+    "img": "img/14.bin"
+   },
+   {
+    "n": "Smoked Salmon",
+    "d": "cream cheese, baby greens, red onion capers · contains nuts",
+    "p": "",
+    "img": "img/15.bin"
+   },
+   {
+    "n": "Beef Bourguignon",
+    "d": "tender beef braised stew, mushrooms, mozzarella, mushroom pesto sauce · contains nuts",
+    "p": "",
+    "img": "img/16.bin"
+   },
+   {
+    "n": "Breakfast Crêpe",
+    "d": "scrambled eggs, cheddar cheese | choice of turkey, ham, roasted pesto chicken or Merguez Moroccan sausage · contains nuts",
+    "p": "",
+    "img": "img/17.bin"
+   },
+   {
+    "n": "Chicken + Avocado",
+    "d": "baby greens, mozzarella cheese, fresh jalapenos, chipotle glaze · spicy, contains nuts",
+    "p": "",
+    "img": "img/18.bin"
+   },
+   {
+    "n": "La Galette",
+    "d": "whole wheat crêpe filled with roasted vegetables, oven-roasted tomatoes, sautéed mushrooms, spinach, cheddar cheese, roasted red pepper pesto sauce · contains nuts",
+    "p": "",
+    "img": "img/19.bin"
+   },
+   {
+    "n": "La Jardiniere",
+    "d": "avocado, veggies, caramelized onions, goat cheese, sun-dried tomato sauce · vegetarian, contains nuts",
+    "p": "",
+    "img": "img/20.bin"
+   },
+   {
+    "n": "Ham + Mozzarella",
+    "d": "caramelized onions, harissa aioli · contains nuts",
+    "p": "",
+    "img": "img/21.bin"
+   },
+   {
+    "n": "Mediterranean",
+    "d": "roasted pesto chicken, oven-roasted tomatoes, feta cheese, kalamata olives, baby greens, harissa aioli · spicy, contains nuts",
+    "p": "",
+    "img": "img/22.bin"
+   },
+   {
+    "n": "Turkey + Cheddar",
+    "d": "basil pesto aioli & cheddar cheese · contains nuts",
+    "p": "",
+    "img": "img/23.bin"
+   },
+   {
+    "n": "Roasted Eggplant Crêpe",
+    "d": "roasted eggplant, oven-dried tomatoes, goat cheese, & harissa aioli",
+    "p": "",
+    "img": "img/24.bin"
+   },
+   {
+    "n": "Wild Mushroom Crêpe",
+    "d": "wild mushrooms, marscapone cheese, truffle oil, sun-dried tomato sauce, & parmesan cheese",
+    "p": "",
+    "img": "img/25.bin"
+   }
+  ]
+ },
+ {
+  "cat": "Waffles",
+  "items": [
+   {
+    "n": "Sugar Waffle",
+    "d": "powdered sugar, maple syrup, butter | add mixed berries",
+    "p": "",
+    "img": "img/26.bin"
+   },
+   {
+    "n": "Waffle Gelato Sandwich",
+    "d": "choice of gelato, topped with chocolate and caramel sauce",
+    "p": "",
+    "img": "img/27.bin"
+   },
+   {
+    "n": "Tuscan Waffle",
+    "d": "oven-roasted tomatoes, scrambled eggs, fresh mozzarella cheese, parmesan cheese, baby greens, harissa aioli",
+    "p": "",
+    "img": "img/28.bin"
+   },
+   {
+    "n": "Avocado Toast Waffle",
+    "d": "sliced avocado, oven-roasted tomatoes, goat cheese, red onion capers, chipotle glaze | add scrambled eggs",
+    "p": "",
+    "img": "img/29.bin"
+   }
+  ]
+ },
+ {
+  "cat": "Build Your Own",
+  "items": [
+   {
+    "n": "Build a Savory Crêpe",
+    "d": "Pick two: olives, eggs, spinach, greens, mushrooms, red onion capers, roasted veggies, tomatoes, almonds, onions, red peppers, five cheeses, pesto chicken, Merguez sausage, turkey, ham or smoked salmon. Then one sauce. Original, whole wheat or gluten-free.",
+    "p": "",
+    "img": "img/30.bin"
+   },
+   {
+    "n": "Build a Sweet Crêpe",
+    "d": "Pick two: Nutella, strawberries, Oreo, dulce de leche, cinnamon butter cream, peanut butter, chocolate chips, bananas, cinnamon apples, almonds, marshmallows, cheesecake, white chocolate mousse, crème brûlée, tres leches or lemon curd. Then one sauce. Original, whole wheat or gluten-free.",
+    "p": "",
+    "img": "img/31.bin"
+   },
+   {
+    "n": "Build a Sweet Waffle",
+    "d": "Pick two: Nutella, strawberries, Oreo, dulce de leche, cinnamon butter cream, peanut butter, chocolate chips, bananas, cinnamon apples, almonds, marshmallows, cheesecake, white chocolate mousse, crème brûlée, tres leches or lemon curd. Then one sauce. Original, whole wheat or gluten-free.",
+    "p": "",
+    "img": "img/32.bin"
+   }
+  ]
+ },
+ {
+  "cat": "Paninis",
+  "items": [
+   {
+    "n": "Roasted Pesto Chicken Panini",
+    "d": "oven-roasted tomatoes, mozzarella cheese, spinach, basil pesto aioli · contains nuts",
+    "p": "",
+    "img": "img/33.bin"
+   },
+   {
+    "n": "Merguez Moroccan Sausage Panini",
+    "d": "caramelized onions, oven-roasted tomatoes, mozzarella cheese, mushroom pesto aioli · contains nuts",
+    "p": "",
+    "img": "img/34.bin"
+   },
+   {
+    "n": "Caprese Panini",
+    "d": "oven-roasted tomatoes, fresh mozzarella cheese, basil pesto aioli · contains nuts",
+    "p": "",
+    "img": "img/35.bin"
+   },
+   {
+    "n": "Mediterranean Panini",
+    "d": "roasted pesto chicken, roasted red peppers, spinach, goat cheese, kalamata olives, harissa aioli",
+    "p": "",
+    "img": "img/36.bin"
+   },
+   {
+    "n": "Smoked Salmon Panini",
+    "d": "cream cheese, red onion capers, mayo, spinach",
+    "p": "",
+    "img": "img/37.bin"
+   },
+   {
+    "n": "Breakfast Sandwich",
+    "d": "choice of croissant or brioche bread | cheddar cheese, caramelized onions, scrambled eggs, basil pesto aioli | choice of turkey, ham, roasted pesto chicken, or Merguez Moroccan sausage · contains nuts",
+    "p": "",
+    "img": "img/38.bin"
+   },
+   {
+    "n": "Croque Monsieur",
+    "d": "swiss cheese, harissa aioli, Dijon mustard | choice of turkey, ham, roasted pesto chicken, or Merguez Moroccan sausage | add an egg to make it a madame · contains nuts",
+    "p": "",
+    "img": "img/39.bin"
+   },
+   {
+    "n": "Panini Combo",
+    "d": "1/2 panini with choice of fruit, soup, or salad | add salmon",
+    "p": "",
+    "img": "img/40.bin"
+   }
+  ]
+ },
+ {
+  "cat": "Soups & Salads",
+  "items": [
+   {
+    "n": "Soup",
+    "d": "ask a team member for details",
+    "p": "",
+    "img": "img/41.bin"
+   },
+   {
+    "n": "Coco's House Salad",
+    "d": "baby greens, toasted almonds, strawberries, goat cheese crumbles, peppery raspberry vinaigrette",
+    "p": "",
+    "img": "img/42.bin"
+   },
+   {
+    "n": "Caesar Salad",
+    "d": "romaine, parmesan cheese, toasted basil croutons with caesar dressing",
+    "p": "",
+    "img": "img/43.bin"
+   },
+   {
+    "n": "Soup + Salad",
+    "d": "choice of soup + salad",
+    "p": "",
+    "img": "img/44.bin"
+   },
+   {
+    "n": "Side Salad",
+    "d": "choice of house or caesar",
+    "p": "",
+    "img": "img/45.bin"
+   }
+  ]
+ },
+ {
+  "cat": "Coffee & Espresso",
+  "items": [
+   {
+    "n": "Double Shot",
+    "d": "",
+    "p": "",
+    "img": "img/46.bin"
+   },
+   {
+    "n": "Espresso Macchiato",
+    "d": "espresso, foamed milk",
+    "p": "",
+    "img": "img/47.bin"
+   },
+   {
+    "n": "Espresso Con Panna",
+    "d": "espresso, whipped cream",
+    "p": "",
+    "img": "img/48.bin"
+   },
+   {
+    "n": "Espresso Affogato",
+    "d": "espresso, your choice of gelato",
+    "p": "",
+    "img": "img/49.bin"
+   },
+   {
+    "n": "Moroccan Cortado",
+    "d": "espresso, vanilla, steamed milk, foamed milk",
+    "p": "",
+    "img": "img/50.bin"
+   },
+   {
+    "n": "Flat White",
+    "d": "double espresso, frothed milk",
+    "p": "",
+    "img": "img/51.bin"
+   },
+   {
+    "n": "Coco Addiction",
+    "d": "espresso, white mocha, heavy cream served over ice",
+    "p": "",
+    "img": "img/52.bin"
+   },
+   {
+    "n": "Americano",
+    "d": "",
+    "p": "",
+    "img": "img/53.bin"
+   },
+   {
+    "n": "Cappuccino",
+    "d": "",
+    "p": "",
+    "img": "img/54.bin"
+   },
+   {
+    "n": "Cafe Latte",
+    "d": "add flavoring (vanilla, turmeric, amaretto, hazelnut)",
+    "p": "",
+    "img": "img/55.bin"
+   },
+   {
+    "n": "Caramel Crisp",
+    "d": "",
+    "p": "",
+    "img": "img/56.bin"
+   },
+   {
+    "n": "Mocha",
+    "d": "white or dark",
+    "p": "",
+    "img": "img/57.bin"
+   },
+   {
+    "n": "House Coffee",
+    "d": "",
+    "p": "",
+    "img": "img/58.bin"
+   },
+   {
+    "n": "Cold Brew Coffee",
+    "d": "",
+    "p": "",
+    "img": "img/59.bin"
+   },
+   {
+    "n": "Organic Chai Tea Latte",
+    "d": "",
+    "p": "",
+    "img": "img/60.bin"
+   },
+   {
+    "n": "Cococcino",
+    "d": "choice of dark mocha, white mocha, vanilla, or caramel",
+    "p": "",
+    "img": "img/61.bin"
+   }
+  ]
+ },
+ {
+  "cat": "Smoothies",
+  "items": [
+   {
+    "n": "Coco Loco",
+    "d": "pineapple, banana, soy milk, orange juice, coconut gelato · contains nuts",
+    "p": "",
+    "img": "img/62.bin"
+   },
+   {
+    "n": "Apple Crisp",
+    "d": "cinnamon apples, almond milk, banana, apple juice, vanilla gelato · contains nuts",
+    "p": "",
+    "img": "img/63.bin"
+   },
+   {
+    "n": "Power Up",
+    "d": "banana, peanut butter, almond milk, vanilla protein powder · contains nuts, protein enhanced",
+    "p": "",
+    "img": "img/64.bin"
+   },
+   {
+    "n": "Skinny Mini",
+    "d": "strawberries, banana, almond milk, vanilla gelato, vanilla protein powder · contains nuts, protein enhanced",
+    "p": "",
+    "img": "img/65.bin"
+   },
+   {
+    "n": "The Daily Fix",
+    "d": "banana, hazelnut syrup, double espresso shot, almond milk,  chocolate gelato, vanilla protein powder · contains nuts, protein enhanced",
+    "p": "",
+    "img": "img/66.bin"
+   },
+   {
+    "n": "Berry Berry",
+    "d": "mixed berries, banana, soy milk, vanilla gelato · contains nuts",
+    "p": "",
+    "img": "img/67.bin"
+   },
+   {
+    "n": "Tropical Kiss",
+    "d": "mango, pineapple, strawberries, almond milk, orange juice, coconut gelato · contains nuts",
+    "p": "",
+    "img": "img/68.bin"
+   },
+   {
+    "n": "Coco Green",
+    "d": "spinach, banana, strawberries, almond milk, splash of orange juice · contains nuts",
+    "p": "",
+    "img": "img/69.bin"
+   }
+  ]
+ },
+ {
+  "cat": "Gelato & Sorbet",
+  "items": [
+   {
+    "n": "Single Scoop",
+    "d": "",
+    "p": "",
+    "img": "img/70.bin"
+   },
+   {
+    "n": "Double Scoop",
+    "d": "",
+    "p": "",
+    "img": "img/71.bin"
+   }
+  ]
+ },
+ {
+  "cat": "Tea, Lemonade & Cocoa",
+  "items": [
+   {
+    "n": "Lemonade",
+    "d": "add flavoring (strawberry, peach, raspberry)",
+    "p": "",
+    "img": "img/72.bin"
+   },
+   {
+    "n": "Hot Dark Chocolate",
+    "d": "",
+    "p": "",
+    "img": "img/73.bin"
+   },
+   {
+    "n": "Sweet Moroccan Mint Tea",
+    "d": "",
+    "p": "",
+    "img": "img/74.bin"
+   },
+   {
+    "n": "Loose-Leaf Tea",
+    "d": "",
+    "p": "",
+    "img": "img/75.bin"
+   },
+   {
+    "n": "Fresh Brewed Iced Tea",
+    "d": "",
+    "p": "",
+    "img": "img/76.bin"
+   }
+  ]
+ }
+]

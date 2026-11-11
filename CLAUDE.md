@@ -68,7 +68,8 @@ must never lead to the standard Grug site or another partner's rewards app:
 - The Grug dock is hidden; the partner app's own tab bar (`bar` in its PARTNERS entry, `.g-pbar`) is the only navigation,
   on every page (a rail on the right in short landscape; `--sab` grows by its height so layouts make room). Its Play tab is
   the site's game list; the app's own Play tab goes there too.
-- Only the partner's own game and the Grug originals (`standalone: true`) are listed (`Grug.partnerAllows`). Allowed pages:
+- Only the partner's own game and the Grug originals (`standalone: true`) are listed (`Grug.partnerAllows`); a partner
+  with no game yet (no `game` in its entry, like Coco) lists the Grug originals only. Allowed pages:
   `games/` (and those games' pages), `avatar/`, `pearls`, `rewards/card/`; every other address goes to the game list
   (theme.js), and so do other partners' game pages (grug.js). A game host's back button (`#rrBack`) returns to the list.
 - The account menu is just Buy Pearls, Edit avatar and Settings; Settings has no Leave and no dark mode.
@@ -84,17 +85,20 @@ must never lead to the standard Grug site or another partner's rewards app:
 
 Partners live in `PARTNERS` in `assets/theme.js` (`GrugTheme.partner()`); `html[data-partner]` is set while it's on.
 A partner's look on the site comes from its entry: `colors` become `--p-accent` / `--p-deep` / `--p-cream` / `--p-page`,
-`coin` is the top bar's coin, `font` becomes "Partner Font" (never hard-code one partner's look in grug.css).
+`coin` is the top bar's coin, `font` becomes "Partner Font" and the optional `fontDisplay` "Partner Display" (headings)
+(never hard-code one partner's look in grug.css). Partners so far: `crafthouse/` and `coco/`.
 
 ## Making a partner rewards app (use the CraftHouse template)
 
-Every partner rewards app (a coffee shop, a bar…) is built the same way as R&R CraftHouse Grill's, from
-**`tools/partner-app/`**: the shared app (`src/`), one folder per partner (`partners/<id>/config.json` + menu data), and
-`python3 tools/partner-app/build.py <id>` → `play/<id>/index.html` (never edit that file by hand). Then the site side:
-a `PARTNERS` entry, the `<id>/` short address, the venue's game with its FOSSIL32 box. Follow the step-by-step and the
-browser checklist in `tools/partner-app/README.md`. **Every reward in a partner app is digital** (coins, game ball skins,
-free power-ups, the guest's name on the jumbotron, app themes): never free food, drinks or discounts. The checklist
-includes "open the app directly, play from its shelf, press Back: you must land back in the app".
+Every partner rewards app (a coffee shop, a bar…) is built the same way as R&R CraftHouse Grill's and Coco Crepes', from
+**`tools/partner-app/`**: the shared app (`src/`), one folder per partner (`partners/<id>/config.json`, `quiz.json` + menu
+data), and `python3 tools/partner-app/build.py <id>` → `play/<id>/index.html` (never edit that file by hand). Then the site
+side: a `PARTNERS` entry, the `<id>/` short address, and (once it has one) the venue's game with its FOSSIL32 box. Follow
+the step-by-step and the browser checklist in `tools/partner-app/README.md`. **The template has no game room and no
+sports games**: its games are the site's standard library (the Grug originals, plus the partner's own game when it has
+one). **Every reward in a partner app is digital** (coins, app themes, power-ups in the partner's own game): never free
+food, drinks or discounts. The checklist includes "open the app directly, play from its shelf, press Back: you must land
+back in the app".
 
 ## Games are FOSSIL32 cartridges
 

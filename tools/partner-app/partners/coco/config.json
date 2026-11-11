@@ -1,0 +1,59 @@
+{
+  "id": "coco",
+  "name": "Coco Crepes, Waffles & Coffee",
+  "brand": "Coco",
+  "short": "Coco",
+  "label": "Coco Crepes",
+  "place": "Katy, TX",
+  "address": "24818 Morton Ranch Rd, Suite 800 · Katy",
+  "website": "cococrepes.com",
+  "appStore": "https://order.toasttab.com/online/coco-crepes-waffles-and-coffee-katy-vqgfl",
+  "appTitle": "Crêpe Club",
+  "welcomeEyebrow": "Welcome to the Crêpe Club",
+  "coin": "Coco Coins",
+  "storageKey": "coco-crepes-crepeclub-v1",
+  "menuIcon": "cup",
+  "color": {
+    "accent": "#e5bd2f",
+    "accentDark": "#8f5337",
+    "accentLight": "#f6e3a1",
+    "deep": "#533020",
+    "deepDark": "#3a2016",
+    "cream": "#fbf3e4"
+  },
+  "copy": {
+    "welcomeTitle": "Your table just got sweeter.",
+    "welcomeSub": "Find your perfect crêpe, play free games while it's made, and stack Coco Coins every visit.",
+    "passLabel": "Season Pass · Crêpe Club",
+    "passDone": "Coco Legend. Every tier unlocked.",
+    "favTitle": "House signatures",
+    "favLabel": "House signature",
+    "quizCta": "Answer a few questions and we'll find your crêpe",
+    "menuCredit": "Menu from cococrepes.com. Ask the team about today's specials.",
+    "orderTitle": "Order ahead online",
+    "orderSub": "Pick up at Coco Katy",
+    "mintLine": "Spend them on new looks for your app in the Coins tab.",
+    "staff": "the team",
+    "bill": "order"
+  },
+  "themes": [
+    { "id": "classic", "name": "Coco", "deep": "#533020", "deepDark": "#3a2016" },
+    { "id": "strawberry", "name": "Strawberry", "price": 600, "deep": "#9e2f45", "deepDark": "#6b1d2e", "accent": "#f7c6cf", "line": "Strawberry-red panels with a pink shine." },
+    { "id": "pistachio", "name": "Pistachio", "price": 900, "deep": "#4e6b3b", "deepDark": "#33472a", "accent": "#dce7a0", "line": "Pistachio-green panels with a soft lime shine." },
+    { "id": "blueberry", "name": "Blueberry", "price": 1200, "deep": "#34407a", "deepDark": "#222a52", "accent": "#bfd0ff", "line": "Deep blueberry panels with an icy blue shine." },
+    { "id": "espresso", "name": "Espresso Gold", "deep": "#1e1a17", "deepDark": "#0e0c0a", "line": "Black-and-gold, for Coco Legends only." }
+  ],
+  "pass": [
+    { "v": 1, "name": "First Bite", "reward": "250 {coin}", "coins": 250 },
+    { "v": 3, "name": "Regular", "reward": "400 {coin}", "coins": 400 },
+    { "v": 6, "name": "Crêpe Club", "reward": "The Strawberry app theme + 200 {coin}", "theme": "strawberry", "coins": 200 },
+    { "v": 10, "name": "House Favorite", "reward": "1,000 {coin}", "coins": 1000 },
+    { "v": 20, "name": "Coco Legend", "reward": "The black-and-gold Espresso Gold theme + 1,500 {coin}", "theme": "espresso", "coins": 1500 }
+  ],
+  "coinUses": [
+    ["palette", "App themes", "Strawberry, Pistachio and Blueberry looks for your app."],
+    ["controller", "Coco's own game", "Power-ups for a Coco Crepes game, coming soon."]
+  ],
+  "quizPicks": ["Coco's Crêpe", "Chicken + Avocado", "Cococcino"],
+  "menuPicks": ["Nutella", "Moroccan Cortado"]
+}
