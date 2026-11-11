@@ -93,6 +93,27 @@ window.GRUG_GAMES = [
            art: 'assets/boxart/rodeo.jpg', shots: ['assets/boxart/shots/rodeo-1.jpg', 'assets/boxart/shots/rodeo-2.jpg'] }
   },
   {
+    // Demo made to pitch R&R CraftHouse Grill: not a live partner yet. The app is marked "Demo" in its header and footers.
+    // Its Craft Coins are the app's own demo currency, not partner points, so there's no storageKey here.
+    // crafthouse/ opens CraftHouse mode (assets/theme.js PARTNERS): the whole site in R&R's logo and colour, Games and Me only.
+    id: 'crafthouse', app: 'crafthouse',
+    title: 'Gridiron Grill 98', appTitle: 'Game Day', subtitle: 'CraftHouse Sports Triple Pack', kind: '3D sports', status: 'preview',
+    partner: 'R&R CraftHouse Grill', place: 'Malcomson Rd, Katy',
+    blurb: 'Three one-minute swipe games for the wait at the table: kick field goals, bend penalty kicks and sink buzzer beaters.',
+    long: 'A demo made for R&R CraftHouse Grill, the Katy sports grill. Three quick games in a blocky voxel stadium and backyard court: Field Goal Frenzy (swipe to kick through the uprights as the ball moves back and the wind picks up), Penalty Kings (curve your swipe to bend it past a sliding wall) and Buzzer Beater (stop the power meter in the green, with a gold money ball every fifth shot). Streaks multiply the score and the crowd goes wild. Craft Coins from the app buy one-run power-ups like Wide Uprights, Aim Guide and Golden Boot. The app around it has the full R&R menu with photos, a "What should I order?" quiz and a visit-based Season Pass.',
+    play: 'play/crafthouse/', game: 'play/crafthouse/#game', old: '',
+    thumb: 'assets/boxart/crafthouse.jpg', color: '#CFAC52', ink: '#1E1B16',
+    avatar: 'Your avatar is your player card', earn: 'Craft Coins in the app (demo): strike your first coin, play runs and check in at the table',
+    features: [
+      "Kick field goals, bend penalty kicks and sink buzzer beaters",
+      "One-minute runs: streaks multiply your score",
+      "Wind, a sliding wall and a gold money ball keep it tricky",
+      "Craft Coins buy power-ups like Wide Uprights and Aim Guide"
+    ],
+    box: { code: 'GD-0041', shell: '#3D5A63', players: '1P', region: 'KATY, TX', font: 'Bowlby One', fill: ["#FFF1C2", "#CFAC52"],
+           art: 'assets/boxart/crafthouse.jpg', shots: ['assets/boxart/shots/crafthouse-1.jpg', 'assets/boxart/shots/crafthouse-2.jpg', 'assets/boxart/shots/crafthouse-3.jpg'] }
+  },
+  {
     // A Grug original: no restaurant behind it (standalone: true). play/runway/ hosts it in place of a rewards app;
     // power-ups cost Pearls only. Its save ('grug-runway-v1') holds power-ups and best score, not partner points,
     // so it has no storageKey here (that field means "partner points live there").

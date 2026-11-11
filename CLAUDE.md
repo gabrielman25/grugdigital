@@ -52,6 +52,15 @@ shop mode with `data-hide-brand`; `data-only-brand` shows something only then. T
 builder (`FONTS` in `assets/rewards.js`, files in `assets/fonts/shop/`, `assets/shop-fonts.css`) and rides in the link as
 an optional 9th field; in shop mode it sets `--display` (headings). Keep any new font easy to read on a phone.
 
+## Partner mode (CraftHouse mode)
+
+A full partner can have its own branded version of the site. Its address (`crafthouse/`, which forwards to
+`games/?partner=crafthouse`) starts **partner mode**: the partner's real logo sits in the top bar on a white plate (with a
+Demo tag while `demo: true`) and links back to their app, the dock is just **Games** and **Me**, and Home, Make, Links,
+Rewards (not `rewards/card/`) and Partners send the guest to Games. The Games page opens on the partner's own game.
+Unlike shop mode it survives a refresh; it ends when the tab closes, the site is opened normally, or Settings → Leave.
+Partners live in `PARTNERS` in `assets/theme.js` (`GrugTheme.partner()`); `html[data-partner]` is set while it's on.
+
 ## Games are FOSSIL32 cartridges
 
 Everywhere a game is showcased (the home page games carousel, the Games page, each `games/<id>/` page) it is

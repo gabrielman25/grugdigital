@@ -154,6 +154,8 @@ html.gc-html body.g-chrome{padding:0}
   let start = 0;
   try { const id = sessionStorage.getItem('grug.games.sel'); const i = games.findIndex(g => g.id === id); if (i >= 0) start = i; } catch (e) {}
   const m = /^#g\/([\w-]+)/.exec(location.hash); if (m) { const i = games.findIndex(g => g.id === m[1]); if (i >= 0) start = i; }
+  // partner mode (theme.js): open on the partner's own game the first time in, unless a game was picked
+  try { const pm = window.GrugTheme && GrugTheme.partner(); if (pm && pm.game && !m && !sessionStorage.getItem('grug.games.sel')) { const i = games.findIndex(g => g.id === pm.game); if (i >= 0) start = i; } } catch (e) {}
   const state = { ids: games.map(g => g.id), pos: start, target: start };
   let sel = -1;
 

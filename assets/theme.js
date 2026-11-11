@@ -9,6 +9,11 @@
    NFC sticker) sees the whole site wear that shop's name, emoji and colour while they browse and play. It lives in
    sessionStorage 'grug.brand.v1' and ends on a refresh, when the site is opened normally (typed, bookmarked or from
    another site, not from a page of ours), or from Settings → Leave. Pages read it with GrugTheme.brand().
+   PARTNER MODE (CraftHouse mode). A full partner's own link (crafthouse/ for R&R CraftHouse Grill, or ?partner=<id> on any
+   page) does the same with the partner's real logo pinned in the top bar, and trims the site to playing and dressing up:
+   the dock is just Games and Me, and Home and Make send the guest to Games. Unlike shop mode it survives a refresh (a guest
+   at the table stays in it); it ends when the tab closes, when the site is opened normally, or from Settings → Leave.
+   Partners are listed in PARTNERS below.
    Load it in <head> (no defer) right after grug.css so the look is set before the first paint.
    Choices live in the profile (grug.profile.v1 → prefs), so they travel with Profile → Export like everything else.
 */
@@ -63,6 +68,11 @@
     '🍣': 'fish', '🍜': 'bowl-steam', '🥗': 'leaf', '🍩': 'cookie', '🥐': 'bread', '🧁': 'cake', '🍦': 'ice-cream', '⭐': 'star' };
   const SHOP_ICON = v => { v = String(v || '').replace(/\uFE0F/g, ''); return /^[a-z-]{2,20}$/.test(v) ? v : OLD_ICON[v] || 'storefront'; };
   const SHOP_FONTS = { f: null, l: 'Shop Lora', h: 'Shop Patrick Hand', o: 'Shop Oswald', p: 'Shop Playfair', b: 'Shop Lilita', r: 'Shop Righteous', m: 'Shop Outfit' };
+  // full partners with their own branded version of the site (partner mode): logo and app paths are from the site root
+  const PARTNERS = {
+    crafthouse: { n: 'R&R CraftHouse Grill', short: 'CraftHouse', color: '#CFAC52', i: 'hamburger', f: 'f', logo: 'play/crafthouse/logo.png', app: 'play/crafthouse/', game: 'crafthouse', demo: true }
+  };
+  const partnerBrand = id => PARTNERS[id] ? Object.assign({ p: id, at: Date.now() }, PARTNERS[id]) : null;
   const ss = { get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }, del(k) { try { sessionStorage.removeItem(k); } catch (e) {} } };
   // a shop's setup from its card link (the same text assets/rewards.js writes): name, colour and emoji are all we need here
   function brandFrom(c) {
@@ -79,8 +89,16 @@
     try { const e = performance.getEntriesByType('navigation')[0]; if (e && e.type) nav = e.type; } catch (e) {}
     try { fromSite = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (e) {}
     const keep = ss.get(BRAND_KEEP); ss.del(BRAND_KEEP);
-    // a refresh, or opening the site normally, ends shop mode
-    if (!keep && (nav === 'reload' || (nav === 'navigate' && !fromSite))) ss.del(BRAND_KEY);
+    let was = null; try { was = JSON.parse(ss.get(BRAND_KEY) || 'null'); } catch (e) {}
+    const wasPartner = !!(was && was.p && PARTNERS[was.p]);
+    // a refresh ends shop mode (not partner mode); opening the site normally ends both
+    if (!keep && ((nav === 'reload' && !wasPartner) || (nav === 'navigate' && !fromSite))) ss.del(BRAND_KEY);
+    // a partner's link starts partner mode: ?partner=<id> (crafthouse/ forwards here with it); the address is tidied after
+    try {
+      const q = new URLSearchParams(location.search), pid = q.get('partner');
+      if (pid && PARTNERS[pid]) { ss.set(BRAND_KEY, JSON.stringify(partnerBrand(pid))); q.delete('partner');
+        const s = q.toString(); history.replaceState(history.state, '', location.pathname + (s ? '?' + s : '') + location.hash); }
+    } catch (e) {}
     // arriving on a shop's card link starts it (not on a refresh of that page)
     try {
       if (/\/rewards\/card\/?$/.test(location.pathname) && (nav !== 'reload' || keep)) {
@@ -88,7 +106,9 @@
         if (b) ss.set(BRAND_KEY, JSON.stringify(b));
       }
     } catch (e) {}
-    try { const b = JSON.parse(ss.get(BRAND_KEY) || 'null'); if (b && b.c && /^#[0-9A-F]{6}$/i.test(b.color)) { b.i = SHOP_ICON(b.i); brand = b; } } catch (e) {}
+    try { const b = JSON.parse(ss.get(BRAND_KEY) || 'null');
+      if (b && b.p) brand = partnerBrand(b.p);   // partner mode: always the partner's current setup
+      else if (b && b.c && /^#[0-9A-F]{6}$/i.test(b.color)) { b.i = SHOP_ICON(b.i); brand = b; } } catch (e) {}
   })();
 
   // the tab's name says the shop's name, not ours (pages that set their own title later are caught too)
@@ -132,6 +152,12 @@
   try { sitePage = !/[?&]mode=viewer/.test(location.search) && !/\/(play|work|tools|showcase)\//.test(location.pathname); } catch (e) {}
   const me = (document.currentScript && document.currentScript.src) || '';
   if (sitePage) document.documentElement.classList.add('g-site');
+  // partner mode: no Home and no Make (the pitch pages and tools for shops and creators); those addresses go to Games
+  if (brand && brand.p && sitePage) {
+    try { const rootPath = new URL(me ? me.replace(/assets\/theme\.js(\?.*)?$/, '') : '/', location.href).pathname, rel = location.pathname.slice(rootPath.length);
+      if (/^(index\.html)?$|^(make|create|links|partners)(\/|$)|^rewards(\/|\/index\.html|\/create(\/.*)?)?$/.test(rel)) location.replace(rootPath + 'games/'); } catch (e) {}
+    document.documentElement.setAttribute('data-partner', brand.p);
+  }
   if (sitePage && SECTIONS[section].fog) {
     document.documentElement.classList.add('g-fogged');
     try { if (me) { const s = document.createElement('script'); s.src = me.replace(/theme\.js(\?.*)?$/, 'fogbg.js'); s.defer = true; document.head.appendChild(s); } } catch (e) {}
@@ -210,5 +236,5 @@
   function setBrand(c, reloadNext) { const b = brandFrom(c); if (!b) return null; ss.set(BRAND_KEY, JSON.stringify(b)); if (reloadNext) ss.set(BRAND_KEEP, '1'); brand = b; apply(); return b; }
   function leaveBrand() { ss.del(BRAND_KEY); ss.del(BRAND_KEEP); brand = null; }
   root.GrugTheme = { SECTIONS, ORBS, section: () => section, sectionOf, prefs, set, apply, accent, readable, inkOn,
-    brand: () => brand, setBrand, leaveBrand, isDark: () => document.documentElement.getAttribute('data-theme') !== 'light', kick: () => {} };
+    brand: () => brand, partner: () => (brand && brand.p ? brand : null), PARTNERS, setBrand, leaveBrand, isDark: () => document.documentElement.getAttribute('data-theme') !== 'light', kick: () => {} };
 })(window);

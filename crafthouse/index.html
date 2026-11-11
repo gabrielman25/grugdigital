@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>R&amp;R CraftHouse Grill · Game Day on Grug (demo)</title>
+<link rel="icon" href="../play/crafthouse/logo.png">
+<!-- CraftHouse mode: this short address starts partner mode (assets/theme.js PARTNERS.crafthouse) and opens the Games page.
+     The whole site then wears R&R's logo and colour, with only Games and Me in the dock, until the tab is closed. -->
+<script>
+(function () {
+  var to = '../games/?partner=crafthouse' + (location.hash || '');
+  try { location.replace(to); } catch (e) { location.href = to; }
+})();
+</script>
+<noscript><meta http-equiv="refresh" content="0;url=../games/?partner=crafthouse"></noscript>
+</head>
+<body style="background:#17171A;color:#fff;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0">
+<a href="../games/?partner=crafthouse" style="color:#CFAC52">Open Game Day at R&amp;R CraftHouse Grill</a>
+</body>
+</html>

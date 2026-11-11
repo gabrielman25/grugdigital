@@ -404,6 +404,11 @@
   ];
   // the dock's stops, left to right: what a swipe (or Q / E, LB / RB) steps through
   const STOPS = ['home', 'games', 'me', 'make'];
+  // partner mode (theme.js, e.g. crafthouse/): the site is just for playing and dressing up, so the dock is Games and Me
+  const partnerOn = () => !!(root.GrugTheme && root.GrugTheme.partner && root.GrugTheme.partner());
+  const PARTNER_TABS = ['games', 'me'];
+  const dockGroups = () => partnerOn() ? DOCK_GROUPS.filter(g => PARTNER_TABS.includes(g.id)) : DOCK_GROUPS;
+  const stops = () => partnerOn() ? PARTNER_TABS : STOPS;
   const SUB_TEXT = { avatar: 'Dress up your 3D avatar', shop: 'Clothes and how to earn them', profile: 'Stats, inventory and settings',
     links: 'A link page or 3D world for your socials', rewards: 'A free stamp card for your shop', create: 'Model Kit and free 3D presets' };
   const groupOf = k => DOCK_GROUPS.find(g => g.id === k || (g.items && g.items.includes(k))) || DOCK_GROUPS[0];
@@ -429,7 +434,9 @@
     const pageTitle = opts.title || (/^games made/i.test(titleBit) ? 'Home' : titleBit);
     const top = document.createElement('header'); top.className = 'g-top';
     const brand = root.GrugTheme && root.GrugTheme.brand();
-    top.innerHTML = (brand ? '<a class="g-logo k-glass is-brand" href="' + url('') + '" aria-label="' + esc(brand.n) + ' home"><span class="g-brand-mark" aria-hidden="true">' + shopIcon(brand.i) + '</span><span class="g-brand-name">' + esc(brand.n) + '</span></a>'
+    const partner = partnerOn() ? brand : null;
+    top.innerHTML = (partner ? '<a class="g-logo k-glass is-brand is-partner" href="' + url(partner.app) + '" aria-label="' + esc(partner.n) + ': open their app"><img class="g-partner-logo" alt="' + esc(partner.n) + '" src="' + url(partner.logo) + '">' + (partner.demo ? '<span class="g-partner-demo">Demo</span>' : '') + '</a>'
+      : brand ? '<a class="g-logo k-glass is-brand" href="' + url('') + '" aria-label="' + esc(brand.n) + ' home"><span class="g-brand-mark" aria-hidden="true">' + shopIcon(brand.i) + '</span><span class="g-brand-name">' + esc(brand.n) + '</span></a>'
         : '<a class="g-logo k-glass" href="' + url('') + '" aria-label="Grug home">' + LOGO + '<span>Grug</span></a>') +
       '<div class="g-title k-glass" aria-hidden="true"><small>' + esc(((DOCK_GROUPS.find(g => g.id === (opts.dockAs || groupOf(active).id)) || {}).label) || (pageTitle === navLabel ? (brand ? brand.n : 'Grug') : navLabel)) + '</small><b>' + esc(pageTitle) + '</b></div>' +
       '<div class="g-status k-glass"><a class="g-pts" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('pearl') + '<span class="num">' + fmt(pearlBalance()) + '</span><span class="g-plus" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M6 2.5v7M2.5 6h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></a></div>' +
@@ -442,7 +449,7 @@
     const tabStyle = (k, on) => { const c = on || brand ? (root.GrugTheme && root.GrugTheme.accent ? root.GrugTheme.accent() : null) : null;
       return 'style="--tab:' + (c ? c.a : DOCK_SIMPLE[k][1]) + ';--tab-lo:' + (c ? c.lo : DOCK_LO[k]) + '"'; };
     const paintTabs = () => { tabs.innerHTML = '<span class="k-sb l" aria-hidden="true">LB</span><span class="k-sb r" aria-hidden="true">RB</span>' +
-      DOCK_GROUPS.map(g => { const on = g.id === here;
+      dockGroups().map(g => { const on = g.id === here;
         if (!g.items) { const n = navOf(g.id); return '<a href="' + url(n[3]) + '" ' + tabStyle(g.id, on) + (on ? ' aria-current="page"' : '') + '>' + DOCK[g.id] + '<span>' + n[1] + '</span></a>'; }
         const cur = on ? navOf(active) : null;
         return '<button type="button" class="g-grp" data-grp="' + g.id + '" aria-haspopup="menu" aria-expanded="false" ' + tabStyle(g.id, on) + (on ? ' aria-current="page"' : '') + '>' + DOCK[on ? active : g.id] +
@@ -505,7 +512,7 @@
     });
     // LB / RB: Q and E (or a controller's shoulder buttons) step through the dock
     // step to the next or previous dock tab (Me and Make open their list pages); wrap = Q / E and the shoulder buttons go round
-    const go = (d, wrap) => { let i = STOPS.indexOf(here) + d; if (wrap) i = (i + STOPS.length) % STOPS.length; if (i < 0 || i >= STOPS.length) return false;
+    const go = (d, wrap) => { const STOPS = stops(); let i = STOPS.indexOf(here) + d; if (wrap) i = (i + STOPS.length) % STOPS.length; if (i < 0 || i >= STOPS.length) return false;
       try { sessionStorage.setItem('grug.swipe', d > 0 ? 'next' : 'prev'); } catch (e) {}
       closeTray(); location.href = url(navOf(STOPS[i])[3]); return true; };
     // swipe sideways anywhere on the page to change tabs (not on sliders, 3D views, maps or rows that scroll sideways)
@@ -621,7 +628,7 @@
   /* shop mode (theme.js): the row in Settings that says whose site this looks like, and a way out */
   function brandHtml() {
     const b = root.GrugTheme && root.GrugTheme.brand(); if (!b) return '';
-    return '<div class="g-pref g-brand-pref"><span class="g-brand-ic" aria-hidden="true">' + shopIcon(b.i) + '</span><span><b>Visiting ' + esc(b.n) + '</b><small>The site wears their colours while you browse. Refreshing the page also ends it</small></span>' +
+    return '<div class="g-pref g-brand-pref">' + (b.p && b.logo ? '<span class="g-brand-ic is-logo" aria-hidden="true"><img alt="" src="' + url(b.logo) + '"></span>' : '<span class="g-brand-ic" aria-hidden="true">' + shopIcon(b.i) + '</span>') + '<span><b>Visiting ' + esc(b.n) + (b.p && b.demo ? ' (demo)' : '') + '</b><small>' + (b.p ? 'Games and your avatar, in ' + esc(b.short || b.n) + ' colours. Leave to see all of Grug' : 'The site wears their colours while you browse. Refreshing the page also ends it') + '</small></span>' +
       '<button type="button" class="g-btn sm" data-brand-leave>Leave</button></div>';
   }
   function wireBrand(box) { const b = $('[data-brand-leave]', box); if (b) b.addEventListener('click', () => { root.GrugTheme.leaveBrand(); location.reload(); }); }

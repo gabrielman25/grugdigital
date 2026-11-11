@@ -576,6 +576,12 @@ html[data-role="player"] [data-hide-for~="player"],html[data-role="owner"] [data
 /* shop mode: the shop's emoji and name stand in for ours in the top bar */
 .g-logo .g-brand-mark{display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:var(--brand);color:var(--brand-ink);line-height:1;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
 .g-logo.is-brand span.g-brand-name{max-width:42vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* partner mode (theme.js PARTNERS, e.g. crafthouse/): the partner's real logo on a white plate, so it reads in light and dark */
+.g-logo.is-partner{padding:0 10px 0 5px;gap:8px}
+.g-partner-logo{display:block;height:38px;width:auto;max-width:34vw;object-fit:contain;background:#fff;border-radius:999px;padding:3px 12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.g-partner-demo{font:700 10.5px/1 var(--body,inherit);letter-spacing:.12em;text-transform:uppercase;color:var(--mode-text);border:1.5px solid currentColor;border-radius:7px;padding:3px 5px}
+@media (max-width:420px){.g-partner-logo{height:40px;padding:2px 10px}.g-logo.is-partner{padding:0 7px 0 3px;gap:6px}.g-partner-demo{font-size:9px;padding:2px 4px}}
+.g-brand-ic.is-logo{background:#fff;width:64px}.g-brand-ic.is-logo img{width:56px;height:auto;display:block}
 html[data-brand] [data-hide-brand]{display:none!important}
 html:not([data-brand]) [data-only-brand]{display:none!important}
 html[data-brand] .g-tabs .k-ic-s,html[data-brand] .g-tray .k-ic-s{color:var(--brand)!important}

@@ -893,5 +893,118 @@
     0.05
    ]
   ]
+ },
+ "kick": {
+  "w": 1000,
+  "h": 1300,
+  "target": [
+   0,
+   95,
+   0
+  ],
+  "dist": 680,
+  "lift": 10,
+  "rim": "#CFAC52",
+  "fov": 24,
+  "cfg": {
+   "expression": "laugh",
+   "top": {
+    "part": "gen_tshirt",
+    "texture": "gen_tshirt",
+    "colour": "#cfac52"
+   },
+   "outfit": {
+    "shirt": "#cfac52",
+    "shorts": "#24383f",
+    "belt": "#141414"
+   },
+   "hair": {
+    "style": 1,
+    "colour": "#7a3f1d"
+   },
+   "skin": "#b47a55",
+   "body": "female",
+   "feet": {
+    "type": "boots",
+    "part": "Female_Peasant_Feet",
+    "texture": "peasant",
+    "colour": "#ffffff",
+    "height": 1,
+    "auto": true
+   }
+  },
+  "pose": [
+   [
+    "spine_M_01_jnt",
+    "x",
+    -0.22
+   ],
+   [
+    "leg_R_upr_jnt",
+    "x",
+    -1.65
+   ],
+   [
+    "leg_R_knee_jnt",
+    "x",
+    0.2
+   ],
+   [
+    "leg_R_foot_jnt",
+    "x",
+    0.35
+   ],
+   [
+    "leg_L_upr_jnt",
+    "x",
+    0.2
+   ],
+   [
+    "leg_L_knee_jnt",
+    "x",
+    0.25
+   ],
+   [
+    "arm_L_shldr_jnt",
+    "z",
+    1.15
+   ],
+   [
+    "arm_L_shldr_jnt",
+    "x",
+    -0.35
+   ],
+   [
+    "arm_L_elbow_jnt",
+    "x",
+    -0.35
+   ],
+   [
+    "arm_R_shldr_jnt",
+    "z",
+    -1.05
+   ],
+   [
+    "arm_R_shldr_jnt",
+    "x",
+    0.55
+   ],
+   [
+    "arm_R_elbow_jnt",
+    "x",
+    -0.4
+   ],
+   [
+    "head_M_head_jnt",
+    "x",
+    0.12
+   ],
+   [
+    "head_M_head_jnt",
+    "y",
+    0.25
+   ]
+  ],
+  "yaw": -0.5
  }
 }

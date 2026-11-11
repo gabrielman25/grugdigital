@@ -76,6 +76,7 @@ jobs={
  'petmountainrescue':dict(bg=C+'pm_0.png',pose=C+'pose_climb.png',accent='#f97316',fy=.35,zoom=1.05,h_av=860,xc=1150),
  'alchemy':dict(bg=C+'al_2.png',pose=C+'pose_cast.png',accent='#c084fc',fx=.6,zoom=1.05,h_av=860,xc=1180,sparkle=(0.02,0.12)),
  'mysteryblasters':dict(bg=C+'mb3_1.png',pose=C+'pose_aim.png',accent='#22D3EE',fx=.5,fy=.5,zoom=1.05,h_av=770,xc=1150,bottom=55),
+ 'crafthouse':dict(bg=C+'ch_bg.jpg',pose=C+'pose_kick.png',accent='#CFAC52',fx=.5,fy=.5,zoom=1.0,h_av=820,xc=1180,bottom=40),
  'takeatea':dict(bg=TH+'teahouse.jpg',pose=C+'pose_serve.png',accent='#F6C445',blur=2.2,h_av=860,xc=1140),
 }
 only=sys.argv[1:]
