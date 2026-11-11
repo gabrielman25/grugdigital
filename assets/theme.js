@@ -164,7 +164,12 @@
     try { rootPath = new URL(me ? me.replace(/assets\/theme\.js(\?.*)?$/, '') : '/', location.href).pathname; } catch (e) {}
     if (sitePage) { try { const rel = location.pathname.slice(rootPath.length);
       if (!/^games(\/|$)|^avatar(\/|$)|^pearls(\.html)?$|^rewards\/card(\/|$)/.test(rel)) location.replace(rootPath + 'games/'); } catch (e) {} }
-    else if (/\/play\//.test(location.pathname)) document.addEventListener('DOMContentLoaded', () => { const a = document.getElementById('rrBack'); if (a) { a.href = rootPath + 'games/'; a.setAttribute('aria-label', 'Back to the games'); } });
+    // a game's host page: Back returns to wherever the game was started (the partner's app, or the game list). The app
+    // and the site's pages note that place (grug.partner.back) as a game launches; the game list if nothing was noted.
+    else if (/\/play\//.test(location.pathname)) document.addEventListener('DOMContentLoaded', () => { const a = document.getElementById('rrBack'); if (!a) return;
+      const back = ss.get('grug.partner.back'), ok = !!back && back.indexOf(rootPath) === 0;
+      a.href = ok ? back : rootPath + 'games/'; a.setAttribute('aria-label', ok && back.indexOf(rootPath + (PARTNERS[brand.p].app || '')) === 0 ? 'Back to the ' + (PARTNERS[brand.p].short || '') + ' app' : 'Back to the games'); });
+    if (sitePage) addEventListener('fossil32:play', () => ss.set('grug.partner.back', location.pathname + location.search));
     document.documentElement.setAttribute('data-partner', brand.p);
     if (sitePage) queueMicrotask(() => partnerChrome(brand, rootPath));   // once this script has finished (the icons below are defined)
   }

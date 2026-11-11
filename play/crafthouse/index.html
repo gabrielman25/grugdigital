@@ -524,6 +524,11 @@ const LINKS={play:"https://play.google.com/store/apps/details?id=com.owner.rrcra
 const GRUG_TARGET=IN_SITE?"":' target="_blank" rel="noopener"';
 /* on the site, the Play tab is the full game list in CraftHouse mode (R&R's game plus the Grug originals, in R&R's colours) */
 const GAMES_URL="../../games/?partner=crafthouse",AVATAR_URL="../../avatar/?partner=crafthouse";
+/* on the site, opening this app (however it was reached: a bookmark, a shared link, the site's own bar) puts the whole
+   site in CraftHouse mode for this tab, and a game started from here comes back here when the guest leaves it
+   (theme.js points the game's Back button at grug.partner.back) */
+if(IN_SITE){try{const b=JSON.parse(sessionStorage.getItem("grug.brand.v1")||"null");if(!b||b.p!=="crafthouse")sessionStorage.setItem("grug.brand.v1",JSON.stringify({p:"crafthouse",at:Date.now()}));}catch(e){}
+  addEventListener("fossil32:play",()=>{try{sessionStorage.setItem("grug.partner.back",location.pathname+"#home");}catch(e){}});}
 const COIN="Craft Coins";
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), lerp=(a,b,t)=>a+(b-a)*t, rnd=(a,b)=>a+Math.random()*(b-a);

@@ -2,7 +2,8 @@
    in Grug colours that tumble as they wander around, and a few dim boxes drifting in the haze. No glow, no tails.
    Drawn at half resolution (3D is half-res everywhere on the site so phones stay smooth).
    theme.js loads this on every site page (not inside the games under play/ or work/).
-   The fog is always blue, with cubes in Grug colours (ORBS in theme.js). It is only drawn in the Games section.
+   The fog is always blue, with cubes in Grug colours (ORBS in theme.js). It is only drawn in the Games section, and only
+   in dark mode: in light mode (and partner mode, always light) the Games pages are a plain page with nothing drawn.
    Still frame when Animations are off or the system asks for reduced motion. Paused while the tab is hidden or a
    FOSSIL32 cartridge is open over the page (html.f32-lock).
 */
@@ -172,7 +173,7 @@
     if (!orbs.length) makeOrbs(); else orbs.forEach(o => { o.x = Math.min(o.x, W - 10); o.y = Math.min(o.y, H - 10); });
     makeBoxes();
   }
-  const isLight = () => html.getAttribute('data-theme') === 'light';   // light mode: just the cubes on a plain page
+  const isLight = () => html.getAttribute('data-theme') === 'light';   // light mode: a plain page, nothing drawn
   function drawFog(t) {
     if (!gl || isLight()) return;
     gl.viewport(0, 0, fogW, fogH); gl.uniform2f(uRes, fogW, fogH); gl.uniform1f(uT, t + 40); gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -180,7 +181,8 @@
   function drawFx(dt, advance) {
     fx.setTransform(DPR, 0, 0, DPR, 0, 0); fx.clearRect(0, 0, W, H);
     fx.globalCompositeOperation = 'source-over';
-    if (!isLight()) boxes.forEach(b => drawBox(b, advance ? dt : 0));
+    if (isLight()) return;   // the cubes don't sit well on a white page: dark mode only
+    boxes.forEach(b => drawBox(b, advance ? dt : 0));
     orbs.sort((a, b) => a.z - b.z).forEach(o => { if (advance) stepOrb(o, dt); drawOrb(o, advance ? dt : 0); });
   }
 
@@ -195,6 +197,7 @@
   function tick(now) {
     raf = 0;
     if (held()) return;
+    if (isLight()) { drawFx(0, false); return; }   // light mode: cleared once, then the loop rests until dark mode
     if (calm()) { still = true; paintStill(); return; }
     still = false;
     const dt = Math.min(.05, (now - last) / 1000 || 0); last = now;

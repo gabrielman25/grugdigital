@@ -315,6 +315,10 @@ function faceSet(scale, withLabel, labelScale){
 // every 3D view here (tiles, the Games rack, the unbox stage) renders at half the screen's resolution so phones stay smooth
 const RES = 0.5;
 const DPR = () => Math.min(devicePixelRatio || 1, 2) * RES;
+// the one exception: the Games page's rack of boxes (Fossil32.rack) renders at full resolution while the boxes sit in it.
+// The boxes are cheap on geometry next to the site's other 3D; the unbox, cartridge and console overlay stay at half.
+const RACK_RES = 1;
+const RACK_DPR = () => Math.min(devicePixelRatio || 1, 2) * RACK_RES;
 let renderer = null, ANISO = 1;
 try {
   const cv = document.createElement("canvas");
@@ -533,7 +537,7 @@ function poseRack(t, dt){
 }
 function renderRack(t, dt){
   if (!rack.el || !rack.ready || !rack.el.isConnected || rack.w < 4 || rack.h < 4) return false;
-  const dpr = DPR(), pw = Math.round(rack.w * dpr), ph = Math.round(rack.h * dpr);
+  const dpr = RACK_DPR(), pw = Math.round(rack.w * dpr), ph = Math.round(rack.h * dpr);
   if (pw > shelf.bufW || ph > shelf.bufH){ shelf.bufW = Math.max(pw, shelf.bufW); shelf.bufH = Math.max(ph, shelf.bufH); renderer.setSize(shelf.bufW, shelf.bufH, false); }
   poseRack(t, dt); rackCam();
   renderer.shadowMap.enabled = false; renderer.setScissorTest(true);

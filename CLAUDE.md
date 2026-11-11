@@ -20,12 +20,14 @@ in `grug.css` (`--page`, `--card-solid`, `--card`, `--ink`, `--line` …): never
   The **Rewards** and **Links** sections are the exception: solid `#17171A`, no pattern (`solid: true` in `SECTIONS`), and its pages use
   solid colours only (no gradients, blur or decoration).
 - **The blue smoky fog (`assets/fogbg.js`) is only for the Games section** (`games/` and `games/<id>/`) **in dark mode**,
-  where the FOSSIL32 boxes float in it. In light mode the Games pages are a plain white page with black text. The small
-  solid 3D cubes in Grug colours tumble on the Games pages in both modes (no glowing orbs).
+  where the FOSSIL32 boxes float in it, with small solid 3D cubes in Grug colours tumbling in the fog (no glowing orbs).
+  In light mode (and partner mode) the Games pages are a plain white page with black text and nothing floating: the
+  cubes don't read on white.
 - **All 3D renders at half resolution** (device pixel ratio × 0.5, capped at 2): FOSSIL32 (`RES` in its source), the
   avatar editor, the asset library previews, Model Kit's 3D views, the rewards/links builders and the fog cubes.
-  Keep it that way for anything new. The one exception is the avatar editor's stage: it's a still picture (redrawn only
-  when the look changes), so it renders at full resolution.
+  Keep it that way for anything new. Two exceptions render at full resolution: the avatar editor's stage (a still picture,
+  redrawn only when the look changes) and the Games page's rack of FOSSIL32 boxes while they sit in it (`RACK_RES`; the
+  boxes are cheap on geometry). The unbox, cartridge and console overlay stay at half.
 
 ## Keep friction low
 
@@ -73,6 +75,10 @@ must never lead to the standard Grug site or another partner's rewards app:
 - The whole site stays in the partner's light look (no dark fog on Games), with its typeface and a faint gingham;
   the game panel and game page are centred.
 - It survives a refresh and ends only when the tab closes or the site is opened normally.
+- Opening the partner's app on the site (`play/<id>/`, however it was reached) starts partner mode by itself. Whatever
+  page launches a game (the app, the game list, a game page) notes itself in sessionStorage `grug.partner.back` on
+  `fossil32:play`, and the game's Back button (`#rrBack`, set by theme.js) returns there, so a guest who played from the
+  app lands back in the app.
 - The partner app's Home (on the site) opens with the site's game shelf: the partner's game and the Grug originals as
   floating FOSSIL32 cartridges in one looping row (`Shelf` in the app), the same ones as the Grug home page.
 
