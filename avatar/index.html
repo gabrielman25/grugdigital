@@ -515,7 +515,7 @@ renderer.setPixelRatio(Math.min(2,devicePixelRatio||1)*(document.body.classList.
 const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(30,1,5,5000);
 /* Grug: in the editor (not in ?mode=viewer embeds) the stage is a still picture. It is drawn again only when something
    changes: a slider is let go, a piece goes on or comes off, an emote or a view is picked, the page is resized. No live loop. */
-const STILL=!document.body.classList.contains('viewer');let still=0,stillT=[];
+const STILL=!document.body.classList.contains('viewer');let still=0,stillT=[],LIVE=false;   // LIVE: the full-screen animation page (nav.js) plays her live for a while
 function bump(){if(!STILL)return;still=Math.max(still,2);stillT.forEach(clearTimeout);stillT=[180,450,900,1700,2600].map(ms=>setTimeout(()=>{still=Math.max(still,1)},ms))}   // again as clothes and textures finish loading
 scene.add(new THREE.HemisphereLight(0xfff4e0,0x3a3456,0.75));
 const key=new THREE.DirectionalLight(0xfff0dc,1.1);key.position.set(160,320,240);key.castShadow=true;key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-120,right:120,top:220,bottom:-20,near:50,far:900});key.shadow.bias=-0.0004;scene.add(key);
@@ -554,18 +554,23 @@ $('freecam').addEventListener('click',()=>setFree(!FC.on));
 for(const b of document.querySelectorAll('#views [data-view]'))b.addEventListener('click',()=>setView(b.dataset.view));
 $('spin').addEventListener('click',()=>{O.spin=!O.spin;$('spin').setAttribute('aria-pressed',String(O.spin))});
 $('anims').innerHTML=(C.animations||['idle']).map(a=>`<button type="button" class="px" data-anim="${a}" aria-pressed="${a==='idle'}">${a[0].toUpperCase()+a.slice(1)}</button>`).join('');
-$('anims').addEventListener('click',e=>{const b=e.target.closest('[data-anim]');if(!b||!sandy)return;if(STILL)window.SANDY_STILL.pose(b.dataset.anim);else sandy.play(b.dataset.anim);for(const x of $('anims').children)x.setAttribute('aria-pressed',String(x===b))});
+$('anims').addEventListener('click',e=>{const b=e.target.closest('[data-anim]');if(!b||!sandy)return;if(STILL&&!LIVE)window.SANDY_STILL.pose(b.dataset.anim);else sandy.play(b.dataset.anim);for(const x of $('anims').children)x.setAttribute('aria-pressed',String(x===b))});
 let sandy=null,last=performance.now();
 (function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,(now-last)/1000);last=now;
-  if(STILL){if(!still)return;still--;if(O.want){O.t.copy(O.want.t);O.d=O.want.d;O.pitch=O.want.p;O.want=null}}
+  if(STILL&&!LIVE){if(!still)return;still--;if(O.want){O.t.copy(O.want.t);O.d=O.want.d;O.pitch=O.want.p;O.want=null}}
   if(O.want){const k=1-Math.exp(-dt*7);O.t.lerp(O.want.t,k);O.d+=(O.want.d-O.d)*k;O.pitch+=(O.want.p-O.pitch)*k}if(O.spin)O.yaw+=dt*0.5;
   if(FC.on){const f=new THREE.Vector3(Math.sin(FC.yaw)*Math.cos(FC.pitch),Math.sin(FC.pitch),Math.cos(FC.yaw)*Math.cos(FC.pitch)),r=new THREE.Vector3(-f.z,0,f.x).normalize(),sp=(FC.keys.has('shift')?320:110)*dt;
     if(FC.keys.has('w'))FC.pos.addScaledVector(f,sp);if(FC.keys.has('s'))FC.pos.addScaledVector(f,-sp);if(FC.keys.has('d'))FC.pos.addScaledVector(r,sp);if(FC.keys.has('a'))FC.pos.addScaledVector(r,-sp);
     if(FC.keys.has('e'))FC.pos.y+=sp;if(FC.keys.has('q'))FC.pos.y-=sp;cam.position.copy(FC.pos);cam.lookAt(FC.pos.clone().add(f))}
   else{cam.position.set(O.t.x+Math.sin(O.yaw)*Math.cos(O.pitch)*O.d,O.t.y+Math.sin(O.pitch)*O.d,O.t.z+Math.cos(O.yaw)*Math.cos(O.pitch)*O.d);cam.lookAt(O.t)}
-  if(sandy)sandy.update(STILL?0:dt);renderer.render(scene,cam)})(last);
+  if(sandy)sandy.update(STILL&&!LIVE?0:dt);renderer.render(scene,cam)})(last);
 // the still stage's controls, used by nav.js (View section, emotes): a view, a turn, or a pose taken from an animation
 window.SANDY_STILL={on:STILL,bump,view(v){if(VIEWS[v]){setView(v);bump()}},turn(y){O.yaw=y;bump()},
+  rotate(d){O.yaw=0.35+Math.round((O.yaw-0.35)/(Math.PI/4)+d)*(Math.PI/4);bump()},   // eight turns of 45 degrees
+  live(on){LIVE=!!on;renderer.setPixelRatio(Math.min(2,devicePixelRatio||1)*(LIVE?0.5:1));
+    if(LIVE){this._o={t:O.t.clone(),d:O.d,p:O.pitch};O.want=null;O.t.set(0,104,0);O.d=600;O.pitch=0.05}else if(this._o){O.t.copy(this._o.t);O.d=this._o.d;O.pitch=this._o.p;this._o=null}   // room to dance, then back to her still view
+   if(!LIVE&&sandy){sandy.play('idle');for(let i=0;i<6;i++)sandy.update(1/60)}size();bump()},
+  play(anim){if(sandy)sandy.play(anim)},
   pose(anim){if(!sandy)return;sandy.play(anim);for(let i=0;i<42;i++)sandy.update(1/60);bump()}};
 // ---------- the controls ----------
 let cfg=null;const get=(o,p)=>p.split('.').reduce((a,k)=>a==null?a:a[k],o);

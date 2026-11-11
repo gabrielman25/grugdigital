@@ -115,19 +115,43 @@
     const box = el('div', 'grp ed-viewgrp');
     box.innerHTML = '<h2 class="px">Focus</h2><div class="seg" id="edFocus" role="group" aria-label="Focus">' +
       [['body', 'Full'], ['face', 'Face'], ['feet', 'Feet']].map(([v, l], i) => '<button type="button" class="px" data-v="' + v + '" aria-pressed="' + (i === 0) + '">' + l + '</button>').join('') + '</div>' +
-      '<h2 class="px">Turn</h2><div class="seg" id="edTurn" role="group" aria-label="Turn">' +
-      [[0.35, 'Front'], [1.45, 'Side'], [Math.PI, 'Back']].map(([y, l], i) => '<button type="button" class="px" data-y="' + y + '" aria-pressed="' + (i === 0) + '">' + l + '</button>').join('') + '</div>';
+      '';
     box.addEventListener('click', e => { const b = e.target.closest('button'); if (!b || !window.SANDY_STILL) return; G.ui.buzz();
       if (b.dataset.v) window.SANDY_STILL.view(b.dataset.v); else window.SANDY_STILL.turn(+b.dataset.y);
       [...b.parentNode.children].forEach(x => x.setAttribute('aria-pressed', String(x === b))); });
-    return screen([page(box)]);
+    return screen([page(box, open('Watch her animate', 'play', enterAnim))]);
   });
   // Save: two pages, so nothing crowds or overlaps on a phone
   section('save', 'Save', 'floppy-disk', () => screen([page(g.save), page(g.share, open('Edit as JSON', 'clipboard-text', () => push('JSON', lend(() => screen([page(lent(g.json))]))())))], { cls: 'ed-save' }));
 
   // emotes (in Wardrobe): the ones she brings into games, and the poses to preview her in
-  const poses = el('div', 'grp ed-poses'); poses.innerHTML = '<h2 class="px">Preview a pose</h2>'; const anims = $('anims'); if (anims) poses.appendChild(anims);
-  function emoteScreen() { return screen([page(lent(g.emotes)), page(lent(poses))], { cls: 'ed-emotes' }); }
+  function emoteScreen() { return screen([page(lent(g.emotes), open('Watch her animate', 'play', enterAnim))], { cls: 'ed-emotes' }); }
+
+  /* ---------- the stage: turn her with the arrows (eight still pictures, 45 degrees apart) ---------- */
+  const stageEl = $('stage');
+  [['l', -1, 'caret-left', 'Turn her left'], ['r', 1, 'caret-right', 'Turn her right']].forEach(([s, d, ic, lab]) => {
+    const b = el('button', 'ed-rot ' + s, G.icon(ic)); b.type = 'button'; b.setAttribute('aria-label', lab);
+    b.addEventListener('click', () => { G.ui.buzz(); if (window.SANDY_STILL) window.SANDY_STILL.rotate(d); }); stageEl.appendChild(b);
+  });
+  /* ---------- the animation page: just her, full screen and live, with a hotbar of animations; back = the still picture ---------- */
+  const animBack = el('button', 'ed-anim-back', G.icon('arrow-left') + '<span>Back</span>'); animBack.type = 'button'; animBack.setAttribute('aria-label', 'Back to the editor');
+  const hotbar = el('div', 'ed-hotbar'); hotbar.setAttribute('role', 'group'); hotbar.setAttribute('aria-label', 'Animations');
+  const animsEl = $('anims'); if (animsEl) hotbar.appendChild(animsEl);
+  stageEl.appendChild(animBack); stageEl.appendChild(hotbar);
+  function enterAnim() {
+    if (document.body.classList.contains('ed-anim') || !window.SANDY_STILL) return;
+    G.ui.buzz(); document.body.classList.add('ed-anim'); try { history.pushState({ edAnim: 1 }, '', '#animate'); } catch (e) {}
+    window.SANDY_STILL.live(true);
+    const on = animsEl && animsEl.querySelector('[aria-pressed=true]'); if (on) window.SANDY_STILL.play(on.dataset.anim);
+  }
+  function exitAnim() {
+    if (!document.body.classList.contains('ed-anim')) return;
+    document.body.classList.remove('ed-anim'); window.SANDY_STILL.live(false);
+    if (animsEl) for (const x of animsEl.children) x.setAttribute('aria-pressed', String(x.dataset.anim === 'idle'));
+  }
+  animBack.addEventListener('click', () => { G.ui.buzz(); if (history.state && history.state.edAnim) history.back(); else exitAnim(); });
+  addEventListener('popstate', () => { if (!(history.state && history.state.edAnim)) exitAnim(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('ed-anim')) animBack.click(); });
   // a kit slot (tops, legs …): its pieces run sideways; fabric and tint show once a piece is on
   function itemScreen(kit) { const s = screen([page(lent(kit))], { cls: 'ed-kit1' }); return s; }
   // hats and earrings: the styles, then colour and fit once one is on

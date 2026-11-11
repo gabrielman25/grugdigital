@@ -126,8 +126,10 @@ When a new game is added to `assets/games.js` and listed, also make its box. Don
 
 The stage is a **still picture**, not a live 3D view: the editor redraws it only when a slider is let go, a piece goes
 on or comes off, an emote or view is picked, or the page resizes (`STILL`, `bump()`, `window.SANDY_STILL`), and nothing
-sits on top of it. Where the camera looks is the **View** section (Focus: Full / Face / Feet; Turn: Front / Side / Back),
-and emotes (plus pose previews) are a **Wardrobe → Emotes** category. `?mode=viewer` embeds stay live and animated.
+sits on top of it. The only things on it are two arrows that turn her 45 degrees at a time (eight still pictures). Where the camera looks is
+the **View** section (Full / Face / Feet), emotes are a **Wardrobe → Emotes** category, and "Watch her animate" (in both)
+opens the **animation page**: just her, full screen and live (at half resolution), with a hotbar of animations along the
+bottom; Back (or the phone's back button, `#animate`) returns to the still picture. `?mode=viewer` embeds stay live and animated.
 
 No scrolling: `avatar/nav.js` + `nav.css` move the editor's own controls (the SANDY EDITOR script, wired by id) into
 screens. A row of section icons (Body, Face, Hair, Wardrobe, Shoes, View, Save) sits over a strip you swipe through;

@@ -127,8 +127,6 @@ body.ed-nav .ed-page .row>.sws{flex:1;min-width:0}
 
 /* the still stage: nothing on top of her (no title, camera buttons, poses or hints); View and Wardrobe → Emotes have them */
 body.ed-nav :is(#stageTitle,#views,#stageHint){display:none!important}
-body.ed-nav .ed-poses #anims{position:static;display:flex;flex-wrap:wrap;gap:8px;inset:auto}
-body.ed-nav .ed-poses #anims button{min-height:42px;padding:0 16px;font-size:14px}
 body.ed-nav .ed-viewgrp .seg{margin-bottom:14px}
 body.ed-nav .ed-viewgrp .seg button{min-height:46px}
 /* Save: buttons wrap onto their own lines instead of squeezing, with room between groups */
@@ -139,3 +137,25 @@ body.ed-nav .ed-save .row{flex-wrap:wrap;gap:8px}
 /* room between groups on every screen, so headings never touch the buttons above them */
 body.ed-nav .ed-page > .grp + .grp{margin-top:12px}
 body.ed-nav .ed-page > .grp > h2{margin-top:2px}
+
+/* the stage's turn arrows: eight still pictures, 45 degrees apart */
+.ed-rot{position:absolute;top:50%;z-index:3;width:44px;height:44px;margin-top:-22px;border-radius:50%;display:grid;place-items:center;padding:0;cursor:pointer;
+  background:var(--glass);border:1px solid var(--line);color:var(--ink);box-shadow:var(--shadow);transition:transform .15s}
+.ed-rot.l{left:10px}.ed-rot.r{right:10px}
+.ed-rot .gi{width:22px;height:22px}
+.ed-rot:active{transform:scale(.92)}
+/* the animation page: the stage alone, full screen and live, a hotbar of animations along the bottom, Back at the top */
+.ed-anim-back,.ed-hotbar{display:none}
+body.ed-anim{overflow:hidden}
+body.ed-anim :is(.g-top,.g-tabs,.g-tray,.g-pbar,#panel,.k-sbar){display:none!important}
+body.ed-anim #stageWrap{position:fixed;inset:0;z-index:90;border:0;border-radius:0;box-shadow:none}
+body.ed-anim #stage{height:100vh;height:100dvh}
+body.ed-anim .ed-rot{top:46%}
+body.ed-anim .ed-anim-back{display:flex;align-items:center;gap:6px;position:absolute;z-index:4;top:calc(env(safe-area-inset-top,0px) + 12px);left:12px;height:46px;padding:0 16px 0 12px;
+  border-radius:999px;background:var(--glass);border:1px solid var(--line);color:var(--ink);font:700 15px/1 var(--font);box-shadow:var(--shadow);cursor:pointer}
+body.ed-anim .ed-anim-back .gi{width:20px;height:20px}
+body.ed-anim .ed-hotbar{display:block;position:absolute;z-index:4;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);padding:0 12px}
+body.ed-anim .ed-hotbar #anims{position:static;display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;scrollbar-width:none;padding:8px;border-radius:24px;
+  background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow);max-width:720px;margin:0 auto}
+body.ed-anim .ed-hotbar #anims::-webkit-scrollbar{display:none}
+body.ed-anim .ed-hotbar #anims button{flex:none;min-height:48px;padding:0 18px;font-size:15px}
