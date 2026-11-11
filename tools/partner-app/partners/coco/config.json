@@ -12,6 +12,7 @@
   "welcomeEyebrow": "Welcome to the Crêpe Club",
   "coin": "Coco Coins",
   "storageKey": "coco-crepes-crepeclub-v1",
+  "oldLinks": [],
   "menuIcon": "cup",
   "color": {
     "accent": "#e5bd2f",
@@ -34,7 +35,16 @@
     "orderSub": "Pick up at Coco Katy",
     "mintLine": "Spend them on new looks for your app in the Coins tab.",
     "staff": "the team",
-    "bill": "order"
+    "bill": "order",
+    "spot": "table",
+    "Spot": "Table",
+    "who": "Who's at the table?",
+    "mintGo": "Take me to my table",
+    "quizTitle": "What should I order?",
+    "menuSub": "Every plate, pictured",
+    "plate": "plate",
+    "dish": "dish",
+    "dishes": "dishes"
   },
   "themes": [
     { "id": "classic", "name": "Coco", "deep": "#533020", "deepDark": "#3a2016" },

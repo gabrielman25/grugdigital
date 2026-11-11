@@ -1,0 +1,152 @@
+{
+  "first": "crave",
+  "questions": {
+    "crave": {
+      "q": "Sweet or savory?",
+      "s": "Start anywhere in the lab.",
+      "o": [
+        [
+          "sweet",
+          "Something sweet",
+          "Mini desserts and signatures",
+          {
+            "k": "sweet"
+          }
+        ],
+        [
+          "savory",
+          "Something savory",
+          "Croissants, muffins and lunches",
+          {
+            "k": "savory"
+          }
+        ]
+      ]
+    },
+    "form": {
+      "q": "Pick a shape.",
+      "s": "How should it come out of the oven?",
+      "w": 0.2,
+      "o": [
+        [
+          "tart",
+          "A mini tart",
+          "",
+          {
+            "f": "tart"
+          }
+        ],
+        [
+          "cookie",
+          "A cookie",
+          "",
+          {
+            "f": "cookie"
+          }
+        ],
+        [
+          "pastry",
+          "A pastry",
+          "Croissants, puffs, donuts",
+          {
+            "f": "pastry"
+          }
+        ],
+        [
+          "cake",
+          "Cake",
+          "Pops, cones, muffins",
+          {
+            "f": "cake"
+          }
+        ],
+        [
+          "cup",
+          "In a cup",
+          "Shooters, puddings, brûlées",
+          {
+            "f": "cup"
+          }
+        ],
+        [
+          "bar",
+          "A bar",
+          "Brownies and krispy treats",
+          {
+            "f": "bar"
+          }
+        ]
+      ]
+    },
+    "flavor": {
+      "q": "Pick a flavor.",
+      "s": "What's the main event?",
+      "w": 0.2,
+      "o": [
+        [
+          "choc",
+          "Chocolate",
+          "",
+          {
+            "fl": "choc"
+          }
+        ],
+        [
+          "caramel",
+          "Caramel and toffee",
+          "",
+          {
+            "fl": "caramel"
+          }
+        ],
+        [
+          "fruit",
+          "Fruity",
+          "",
+          {
+            "fl": "fruit"
+          }
+        ],
+        [
+          "spice",
+          "Warm spice",
+          "Apple, pumpkin, cinnamon",
+          {
+            "fl": "spice"
+          }
+        ],
+        [
+          "creamy",
+          "Creamy and sweet",
+          "Buttercream, cream cheese, custard",
+          {
+            "fl": "creamy"
+          }
+        ]
+      ]
+    },
+    "sig": {
+      "q": "A lab signature?",
+      "s": "The made-to-order showstoppers, or this month's minis.",
+      "w": -0.3,
+      "o": [
+        [
+          "top",
+          "A signature",
+          "Made to order",
+          {
+            "top": true
+          }
+        ],
+        [
+          "deep",
+          "This month's minis",
+          "From the November menu",
+          {
+            "top": false
+          }
+        ]
+      ]
+    }
+  }
+}

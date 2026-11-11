@@ -121,7 +121,7 @@
     $('#name').textContent = p.name; $('#since').textContent = 'Playing since ' + new Date(p.created).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     $('#sPlays').textContent = G.fmt(t.plays); $('#sVisits').textContent = G.fmt(t.checkins); $('#sPartners').textContent = G.fmt(t.partners); $('#sItems').textContent = G.fmt(C.freeIds().length + p.inventory.length);
     const pts = G.points();
-    $('#points').innerHTML = pts.map(x => '<a class="g-points" href="' + G.url(x.game.play) + (G.appState(x.game) && G.appState(x.game).store ? '#' + G.esc(G.appState(x.game).store) + '/rewards' : '') + '"><span class="logo" style="background:' + x.game.color + ';color:' + x.game.ink + '">' + G.esc(C.APPS[x.game.app].short.slice(0, 3).toUpperCase()) + '</span><span><b>' + G.fmt(x.points) + '</b><small>' + G.esc(x.game.partner) + (x.visits ? ' · ' + x.visits + ' check-in' + (x.visits === 1 ? '' : 's') : '') + '</small></span><span class="sp"></span><span>' + G.icon('caret-right') + '</span></a>').join('');
+    $('#points').innerHTML = pts.map(x => '<a class="g-points" href="' + G.rewardsUrl(x.game) + '"><span class="logo" style="background:' + x.game.color + ';color:' + x.game.ink + '">' + G.esc(C.APPS[x.game.app].short.slice(0, 3).toUpperCase()) + '</span><span><b>' + G.fmt(x.points) + '</b><small>' + G.esc(x.game.partner) + (x.visits ? ' · ' + x.visits + ' check-in' + (x.visits === 1 ? '' : 's') : '') + '</small></span><span class="sp"></span><span>' + G.icon('caret-right') + '</span></a>').join('');
     const earned = p.inventory.map(id => C.get(id)).filter(Boolean);
     $('#earnedSec').hidden = !earned.length;
     $('#earned').innerHTML = earned.map(it => G.ui.itemTile(it)).join('');

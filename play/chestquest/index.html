@@ -4,123 +4,42 @@
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Chest Quest · Grug</title>
-<meta name="description" content="Delve a blocky dungeon, open every chest and hide from monsters you can't beat. A Grug original.">
+<meta name="description" content="Delve a blocky dungeon, open every chest and hide from monsters you can&#x27;t beat. A Grug original.">
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" href="../../favicon.png">
 <link rel="stylesheet" href="../../assets/grug.css">
 <script src="../../assets/theme.js"></script>
 <!--
-  STANDALONE GAME HOST · play/chestquest/ (copied from play/runway/)
-  A Grug original has no restaurant behind it, so this page stands in for a partner's rewards app: it opens game.html
-  full screen and answers the same messages (docs: the game kit's PROTOCOL.md), with no partner points (points: 0).
-  Power-ups are paid with Pearls only, from the site-wide wallet ('grug.pearls.v1'), and owned power-ups, best score
-  and runs are kept in 'grug-chestquest-v1'. Scores go to the Grug profile (GrugApp.onScore) so milestones count.
-  To host another original: copy this folder, change GAME below, and add an entry with standalone: true to assets/games.js.
+  STANDALONE GAME · play/chestquest/
+  A Grug original: no venue behind it, so its Store is paid in Pearls only.
+  assets/gamehost.js does everything else: the bar (Back, name, Pearls), the game frame (game.html) and the game kit's
+  messages. Change the game's Store, save key or venue below; the protocol is documented at the top of gamehost.js.
 -->
-<style>
-html,body{margin:0;height:100%;overflow:hidden;background:#0b0e14}
-.rr-bar{position:fixed;left:0;right:0;top:0;height:calc(52px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 10px 0;display:flex;align-items:center;gap:10px;background:#fff;z-index:2}
-.rr-bar a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#111827;font:700 16px/1 var(--g-font, system-ui, sans-serif)}
-.rr-back{width:42px;height:42px;border-radius:50%;justify-content:center;background:#ebedf2}
-.rr-back svg,.rr-pl svg{width:20px;height:20px}
-.rr-t{flex:1;min-width:0;font:700 18px/1.1 var(--g-font, system-ui, sans-serif);color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rr-pl{height:42px;padding:0 14px 0 10px;border-radius:999px;background:#ebedf2}
-.rr-pl b{font-weight:700}.rr-pl i{font-style:normal;color:#6b7280;font-weight:700}
-#rrFrame{position:fixed;left:0;right:0;bottom:0;top:calc(52px + env(safe-area-inset-top));width:100%;height:calc(100% - 52px - env(safe-area-inset-top));border:0;display:block;background:#0b0e14}
-</style>
 </head>
 <body>
-<div class="rr-bar">
-  <a class="rr-back" id="rrBack" href="../../games/chestquest/" aria-label="Back to the game page"></a>
-  <div class="rr-t">Chest Quest</div>
-  <a class="rr-pl" id="rrPearls" href="../../pearls.html" aria-label="Your Pearls: get more"></a>
-</div>
-<iframe id="rrFrame" title="Chest Quest" allow="autoplay *; fullscreen *; gamepad *"></iframe>
 <script src="../../assets/catalog.js"></script>
 <script src="../../assets/icons.js"></script>
 <script src="../../assets/games.js"></script>
 <script src="../../assets/grug.js"></script>
 <script src="../../assets/grug-app.js"></script>
+<script src="../../assets/gamehost.js"></script>
 <script>
 'use strict';
-(function () {
-  const GAME = {
-    app: 'chestquest', title: 'Chest Quest', src: 'game.html', collectible: 'gold', runSeconds: 600, storageKey: 'grug-chestquest-v1',
-    // Pearls only. effect / amount are what game.html does with each one (heart, stamina, unlock, kit, speed, double, radar, revive).
-    // Second Wind is also offered once per run when you run out of hearts (bought and used right there).
-    shop: [
-      {id: "heart", name: "Extra Heart", desc: "Start with 4 hearts instead of 3", cost: 5, effect: "heart", amount: 1, icon: "heart"},
-      {id: "lungs", name: "Deep Breath", desc: "40% more stamina all run", cost: 4, effect: "stamina", amount: 1.4, icon: "person_run"},
-      {id: "fingers", name: "Quick Fingers", desc: "Pick locks 30% faster", cost: 5, effect: "unlock", amount: 1.3, icon: "key"},
-      {id: "satchel", name: "Explorer's Satchel", desc: "Start holding a Stamina Elixir and a Bandage", cost: 6, effect: "kit", amount: "elixir,bandage", icon: "shopping_bag"},
-      {id: "feet", name: "Light Feet", desc: "Walk and run 12% faster", cost: 6, effect: "speed", amount: 1.12, icon: "boots"},
-      {id: "lucky", name: "Lucky Coin", desc: "Every gold coin counts twice", cost: 6, effect: "double", amount: 2, icon: "coins"},
-      {id: "radar", name: "Monster Radar", desc: "See every monster on your map all run", cost: 5, effect: "radar", amount: 1, icon: "eye"},
-      {id: "wind", name: "Second Wind", desc: "Out of hearts? Get back up once with 2", cost: 10, effect: "revive", amount: 2, icon: "stars"}
-    ]
-  };
-  const G = Grug, INV_MAX = 99, WKEY = 'grug.pearls.v1', $ = id => document.getElementById(id);
-  $('rrBack').innerHTML = G.icon('arrow-left');
-
-  /* ---------- this game's own save: owned power-ups, best, runs ---------- */
-  function load() { let s = null; try { s = JSON.parse(localStorage.getItem(GAME.storageKey) || 'null'); } catch (e) {} s = s && typeof s === 'object' ? s : {};
-    return { v: 1, inv: s.inv && typeof s.inv === 'object' ? s.inv : {}, game: Object.assign({ best: 0, runs: 0 }, s.game || {}) }; }
-  let st = load();
-  const save = () => { try { localStorage.setItem(GAME.storageKey, JSON.stringify(st)); } catch (e) {} };
-
-  /* ---------- Pearls: the site-wide wallet ---------- */
-  function wRaw() { try { const w = JSON.parse(localStorage.getItem(WKEY) || 'null'); return w && typeof w === 'object' ? w : { v: 1 }; } catch (e) { return { v: 1 }; } }
-  const pearls = () => Math.max(0, Math.floor(+wRaw().balance || 0));
-  function pearlsChange(d) { const w = wRaw(); w.v = 1; w.balance = Math.max(0, Math.floor(+w.balance || 0) + d); try { localStorage.setItem(WKEY, JSON.stringify(w)); } catch (e) {} paintPearls(); }
-  const pearlsLink = () => G.pearlsUrl(GAME.title);
-  function paintPearls() { const a = $('rrPearls'); a.innerHTML = G.icon('pearl') + '<b>' + G.fmt(pearls()) + '</b><i>+</i>'; a.href = pearlsLink(); }
-  paintPearls();
-
-  /* ---------- the game ---------- */
-  const f = $('rrFrame');
-  const shop = GAME.shop.filter(it => it && it.id && +it.cost > 0), item = id => shop.find(it => it.id === id);
-  function state() {
-    return Object.assign({ points: 0, pearls: pearls(), pearlName: 'Pearls', standalone: true, inv: st.inv, best: st.game.best, runs: st.game.runs, shop, title: GAME.title,
-      collectible: GAME.collectible, runSeconds: GAME.runSeconds, brand: { name: 'Grug', colors: ['#fbbf24', '#2a2438'] }, store: 'A Grug original' }, GrugApp.gameExtras());
-  }
-  const toGame = m => { try { f.contentWindow.postMessage(Object.assign({ rw: 1 }, m), '*'); } catch (e) {} };
-  const sendState = () => toGame(Object.assign({ t: 'state' }, state()));
-  function buy(id) {
-    const it = item(id); if (!it) return { ok: false, reason: 'That power-up isn’t in the shop.' };
-    if ((st.inv[id] || 0) >= INV_MAX) return { ok: false, reason: 'You already have ' + INV_MAX + ' of those.' };
-    if (window.Grug && Grug.freeShop()) { st.inv[id] = (st.inv[id] || 0) + 1; save(); return { ok: true, free: true }; }   // Free Shop Token: everything is free
-    if (pearls() < it.cost) return { ok: false, reason: 'You need ' + (it.cost - pearls()) + ' more Pearls for ' + it.name + '.', short: it.cost - pearls(), item: it.name };
-    pearlsChange(-it.cost); st.inv[id] = (st.inv[id] || 0) + 1; save(); return { ok: true };
-  }
-  function use(ids) {
-    ids = Array.isArray(ids) ? [...new Set(ids.map(String))] : [];
-    const miss = ids.find(id => !item(id) || !(st.inv[id] > 0));
-    if (miss) return { ok: false, reason: 'You’re out of ' + ((item(miss) || {}).name || 'that power-up') + '.' };
-    ids.forEach(id => { st.inv[id]--; if (!st.inv[id]) delete st.inv[id]; }); save(); return { ok: true };
-  }
-  // a power-up the player can't afford: pause, and offer the Pearls page (which brings them straight back here)
-  async function offerPearls(short, name) {
-    toGame({ t: 'pause' });
-    const go = await G.ui.dialog({ title: short + ' Pearls short for ' + name, html: '<p>Get Pearls on the Grug Pearls page. They work in every Grug game, and you’ll come straight back here.</p>',
-      actions: [{ label: 'Not now', kind: 'quiet', value: null }, { label: 'Get Pearls', kind: 'primary', value: 'go' }] });
-    if (go === 'go') location.href = pearlsLink();
-  }
-  addEventListener('message', e => {
-    const d = e.data; if (!d || d.rw !== 1 || typeof d.t !== 'string' || e.source !== f.contentWindow) return;
-    const reply = r => toGame(Object.assign({ t: 'reply', req: String(d.req || ''), state: state() }, r));
-    if (d.t === 'hello') { sendState(); GrugApp.onPlay(); GrugApp.onLogon(); }
-    else if (d.t === 'buy') { const r = buy(String(d.id)); reply(r); if (r.short) offerPearls(r.short, r.item); }
-    else if (d.t === 'needPearls') { const it = item(String(d.id)); if (it && pearls() < it.cost) offerPearls(it.cost - pearls(), it.name); }
-    else if (d.t === 'use') reply(use(d.ids));
-    else if (d.t === 'score') { const s = Math.max(0, Math.floor(+d.score || 0)); st.game.runs++; if (s > st.game.best) st.game.best = s; save(); GrugApp.onScore(d, { play: false }); }
-  });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) toGame({ t: 'pause' }); });
-  addEventListener('storage', e => { if (e.key === WKEY) { paintPearls(); sendState(); } if (e.key === GAME.storageKey) { st = load(); sendState(); } });
-  addEventListener('pageshow', e => { paintPearls(); if (e.persisted) sendState(); });
-
-  GrugApp.init({ app: GAME.app, get: () => st, save, sendGameState: sendState, buzz: () => {} });
-  f.src = GAME.src;
-})();
+GrugGameHost({
+  id: 'chestquest', app: 'chestquest', bg: '#0b0e14', title: 'Chest Quest', src: 'game.html', collectible: 'gold', runSeconds: 600, storageKey: 'grug-chestquest-v1',
+  // Pearls only. effect / amount are what game.html does with each one (heart, stamina, unlock, kit, speed, double, radar, revive).
+  // Second Wind is also offered once per run when you run out of hearts (bought and used right there).
+  shop: [
+    {id: "heart", name: "Extra Heart", desc: "Start with 4 hearts instead of 3", cost: 5, effect: "heart", amount: 1, icon: "heart"},
+    {id: "lungs", name: "Deep Breath", desc: "40% more stamina all run", cost: 4, effect: "stamina", amount: 1.4, icon: "person_run"},
+    {id: "fingers", name: "Quick Fingers", desc: "Pick locks 30% faster", cost: 5, effect: "unlock", amount: 1.3, icon: "key"},
+    {id: "satchel", name: "Explorer's Satchel", desc: "Start holding a Stamina Elixir and a Bandage", cost: 6, effect: "kit", amount: "elixir,bandage", icon: "shopping_bag"},
+    {id: "feet", name: "Light Feet", desc: "Walk and run 12% faster", cost: 6, effect: "speed", amount: 1.12, icon: "boots"},
+    {id: "lucky", name: "Lucky Coin", desc: "Every gold coin counts twice", cost: 6, effect: "double", amount: 2, icon: "coins"},
+    {id: "radar", name: "Monster Radar", desc: "See every monster on your map all run", cost: 5, effect: "radar", amount: 1, icon: "eye"},
+    {id: "wind", name: "Second Wind", desc: "Out of hearts? Get back up once with 2", cost: 10, effect: "revive", amount: 2, icon: "stars"}
+  ]
+});
 </script>
 </body>
 </html>

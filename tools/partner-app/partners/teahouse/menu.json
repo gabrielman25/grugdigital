@@ -1,0 +1,169 @@
+{
+  "sections": [
+    {
+      "cat": "Milk & cream teas",
+      "icon": "cup",
+      "items": [
+        {
+          "n": "Classic milk tea",
+          "d": "Black tea and creamy milk. Add tapioca pearls, jelly or pudding.",
+          "t": "k=milk fl=classic ca=1"
+        },
+        {
+          "n": "Teahouse cream tea",
+          "d": "The house favorite",
+          "t": "k=milk fl=creamy ca=1",
+          "top": 1
+        },
+        {
+          "n": "Honeydew cream tea",
+          "d": "Sweet honeydew melon",
+          "t": "k=milk fl=fruit,creamy ca=1"
+        },
+        {
+          "n": "Taro cream tea",
+          "d": "Nutty, creamy, purple",
+          "t": "k=milk fl=creamy ca=1"
+        },
+        {
+          "n": "Thai tea",
+          "d": "Spiced orange tea with cream",
+          "t": "k=milk fl=spiced ca=1"
+        },
+        {
+          "n": "Brown sugar milk tea",
+          "d": "Brown sugar syrup and fresh pearls",
+          "t": "k=milk fl=sweet ca=1",
+          "top": 1
+        }
+      ]
+    },
+    {
+      "cat": "Green & black teas",
+      "icon": "leaf",
+      "items": [
+        {
+          "n": "Green teapress",
+          "d": "Fresh-pressed green tea",
+          "t": "k=tea fl=classic ca=1"
+        },
+        {
+          "n": "Black teapress",
+          "d": "Fresh-pressed black tea",
+          "t": "k=tea fl=classic ca=1"
+        },
+        {
+          "n": "Oolong teapress",
+          "d": "Toasty, smooth oolong",
+          "t": "k=tea fl=classic ca=1"
+        },
+        {
+          "n": "Jasmine green tea",
+          "d": "Light and floral",
+          "t": "k=tea fl=floral ca=1"
+        },
+        {
+          "n": "Passion fruit green tea",
+          "t": "k=tea fl=fruit ca=1"
+        },
+        {
+          "n": "Lychee green tea",
+          "t": "k=tea fl=fruit,floral ca=1"
+        },
+        {
+          "n": "Peach oolong",
+          "t": "k=tea fl=fruit ca=1"
+        }
+      ]
+    },
+    {
+      "cat": "Ice blends (slurpy)",
+      "icon": "snowflake",
+      "items": [
+        {
+          "n": "Mango ice blend",
+          "t": "k=icy fl=fruit ca=0",
+          "top": 1
+        },
+        {
+          "n": "Watermelon ice blend",
+          "t": "k=icy fl=fruit ca=0"
+        },
+        {
+          "n": "Strawberry ice blend",
+          "t": "k=icy fl=fruit ca=0"
+        },
+        {
+          "n": "Lychee ice blend",
+          "t": "k=icy fl=fruit,floral ca=0"
+        }
+      ]
+    },
+    {
+      "cat": "Cream blends (smoothies)",
+      "icon": "glass",
+      "items": [
+        {
+          "n": "Taro cream blend",
+          "t": "k=icy fl=creamy ca=0"
+        },
+        {
+          "n": "Coconut cream blend",
+          "t": "k=icy fl=creamy ca=0"
+        },
+        {
+          "n": "Avocado smoothie",
+          "t": "k=icy fl=creamy ca=0"
+        },
+        {
+          "n": "Strawberry cream blend",
+          "t": "k=icy fl=fruit,creamy ca=0"
+        },
+        {
+          "n": "Matcha cream blend",
+          "t": "k=icy fl=creamy ca=1"
+        }
+      ]
+    },
+    {
+      "cat": "100% fresh juice",
+      "icon": "apple",
+      "items": [
+        {
+          "n": "Fresh orange juice",
+          "d": "Squeezed to order",
+          "t": "k=juice fl=fruit ca=0"
+        },
+        {
+          "n": "Fresh watermelon juice",
+          "d": "Squeezed to order",
+          "t": "k=juice fl=fruit ca=0"
+        }
+      ]
+    },
+    {
+      "cat": "Coffee & chocolate",
+      "icon": "cup",
+      "items": [
+        {
+          "n": "Vietnamese iced coffee",
+          "d": "Strong coffee, sweet condensed milk",
+          "t": "k=coffee fl=sweet ca=1",
+          "top": 1
+        },
+        {
+          "n": "Iced coffee",
+          "t": "k=coffee fl=classic ca=1"
+        },
+        {
+          "n": "Mocha",
+          "t": "k=coffee fl=sweet ca=1"
+        },
+        {
+          "n": "Hot chocolate",
+          "t": "k=coffee fl=sweet ca=0"
+        }
+      ]
+    }
+  ]
+}

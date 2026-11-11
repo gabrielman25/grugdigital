@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Take a Tea · Grug</title>
+<meta name="description" content="The original Teahouse Express game: run a boba shop in a blocky 3D mall. A Grug game.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="../../favicon.png">
+<link rel="stylesheet" href="../../assets/grug.css">
+<script src="../../assets/theme.js"></script>
+<!--
+  STANDALONE GAME · play/takeatea/
+  Made with Teahouse Express: Pearls pay everywhere; while the site is wrapped in Teahouse Express (partner mode), its coins pay too.
+  assets/gamehost.js does everything else: the bar (Back, name, Pearls), the game frame (game.html) and the game kit's
+  messages. Change the game's Store, save key or venue below; the protocol is documented at the top of gamehost.js.
+-->
+</head>
+<body>
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/grug.js"></script>
+<script src="../../assets/grug-app.js"></script>
+<script src="../../assets/gamehost.js"></script>
+<script>
+'use strict';
+GrugGameHost({
+  id: 'takeatea', app: 'teahouse', title: 'Take a Tea', src: 'game.html', collectible: 'cash a second', runSeconds: 300, storageKey: 'grug-takeatea-v1',
+  // made with a venue: its coins pay here too while the site is wrapped in it (theme.js PARTNERS.teahouse)
+  brand: 'teahouse', store: 'Teahouse Express · Katy Mills', colors: ['#1E6B35', '#F6C445'],
+  // the old rewards app kept this game's items, best and runs: they move here the first time
+  migrate: { key: 'teahouse-express-rewards-v1', game: 'legacyGame' },
+  // prices are in Pearls (or points: teahouse's coins ÷ 25)
+  shop: [
+      { id: 'rush', name: 'Brown Sugar Rush', desc: 'Move 35% faster', cost: 5, effect: 'speed', amount: 1.35, icon: 'bolt' },
+      { id: 'luck', name: 'Lucky Leaf', desc: 'Rarer drinks on the Tea Bar', cost: 8, effect: 'luck', amount: 3, icon: 'leaf' },
+      { id: 'longlock', name: 'Long Lock', desc: 'Your shop lock lasts 60 s longer', cost: 8, effect: 'time', amount: 60, icon: 'lock-simple-fill' },
+      { id: 'tipjar', name: 'Tip Jar', desc: 'Cash from every pedestal comes to you', cost: 10, effect: 'magnet', amount: 1, icon: 'magnet' },
+      { id: 'double', name: 'Double Shot', desc: 'Every drink makes twice the cash', cost: 12, effect: 'double', amount: 2, icon: 'star-four-fill' }
+  ]
+});
+</script>
+</body>
+</html>

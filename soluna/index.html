@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Soluna Coffee · Sun Club on Grug (demo)</title>
+<link rel="icon" href="../play/soluna/logo.png">
+<!-- Partner mode for Soluna Coffee: this short address starts it (assets/theme.js PARTNERS.soluna) and opens the Games page.
+     The whole site then wears Soluna Coffee's logo, colours and type, with the Sun Club app's tab bar, until the tab is closed. -->
+<script>
+(function () {
+  var to = '../games/?partner=soluna' + (location.hash || '');
+  try { location.replace(to); } catch (e) { location.href = to; }
+})();
+</script>
+<noscript><meta http-equiv="refresh" content="0;url=../games/?partner=soluna"></noscript>
+</head>
+<body style="background:#4a482a;color:#fff;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0">
+<a href="../games/?partner=soluna" style="color:#C8924F">Open the Sun Club at Soluna Coffee</a>
+</body>
+</html>

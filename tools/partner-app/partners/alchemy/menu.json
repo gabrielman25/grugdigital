@@ -1,0 +1,173 @@
+{
+  "sections": [
+    {
+      "cat": "Lab signatures",
+      "icon": "alembic",
+      "items": [
+        {
+          "n": "Custom cakes",
+          "d": "Whimsical cakes made to order, from drip cakes to storybook sets. Ask the lab.",
+          "t": "k=sweet f=cake fl=creamy",
+          "top": 1,
+          "photo": "tools/partner-app/partners/alchemy/photos/cake.jpg"
+        },
+        {
+          "n": "Glitter cake pops",
+          "d": "Dipped, rolled in gold glitter, made to order",
+          "t": "k=sweet f=cake fl=choc",
+          "top": 1,
+          "photo": "tools/partner-app/partners/alchemy/photos/cakepops.jpg"
+        },
+        {
+          "n": "Macarons",
+          "d": "Towers and boxes in any color",
+          "t": "k=sweet f=cookie fl=creamy,fruit",
+          "top": 1,
+          "photo": "tools/partner-app/partners/alchemy/photos/macarons.jpg"
+        },
+        {
+          "n": "Cupcake cones",
+          "d": "Mini cupcakes baked in a cone",
+          "t": "k=sweet f=cake fl=creamy",
+          "top": 1,
+          "photo": "tools/partner-app/partners/alchemy/photos/cupcakecones.jpg"
+        },
+        {
+          "n": "Glitter sugar cookies",
+          "d": "Iced, glittered and made to order",
+          "t": "k=sweet f=cookie fl=creamy",
+          "top": 1,
+          "photo": "tools/partner-app/partners/alchemy/photos/cookies.jpg"
+        }
+      ]
+    },
+    {
+      "cat": "November mini desserts",
+      "icon": "oven",
+      "items": [
+        {
+          "n": "TX Pecan Caramel Turtle Tarts",
+          "p": "$35/dz",
+          "t": "k=sweet f=tart fl=caramel,choc"
+        },
+        {
+          "n": "Cranberry Orange White Chocolate Scones",
+          "p": "$30/dz",
+          "t": "k=sweet f=pastry fl=fruit"
+        },
+        {
+          "n": "Raspberry Walnut Swirl Croissants",
+          "p": "$48/dz",
+          "t": "k=sweet f=pastry fl=fruit"
+        },
+        {
+          "n": "Chocolate Dipped Cream Puffs",
+          "p": "$30/dz",
+          "t": "k=sweet f=pastry fl=choc,creamy"
+        },
+        {
+          "n": "Apple Crisp Shooters",
+          "p": "$45/dz",
+          "t": "k=sweet f=cup fl=spice,fruit"
+        },
+        {
+          "n": "Pumpkin Cream Mini Tarts",
+          "p": "$35/dz",
+          "t": "k=sweet f=tart fl=spice,creamy"
+        },
+        {
+          "n": "Buttercream Brownies",
+          "p": "$30/dz",
+          "t": "k=sweet f=bar fl=choc"
+        },
+        {
+          "n": "Banoffee (Banana + Toffee) Tarts",
+          "p": "$35/dz",
+          "t": "k=sweet f=tart fl=caramel,fruit"
+        },
+        {
+          "n": "Fleur de Sel Chocolate Chip Cookies",
+          "p": "$20/dz",
+          "t": "k=sweet f=cookie fl=choc"
+        },
+        {
+          "n": "Mini Thanksgiving Sugar Cookies",
+          "p": "$35/dz",
+          "t": "k=sweet f=cookie fl=creamy"
+        },
+        {
+          "n": "Brown Butter Rice Krispy Treats",
+          "p": "$20/dz",
+          "t": "k=sweet f=bar fl=caramel"
+        },
+        {
+          "n": "Mini Assorted Fruit Danish",
+          "p": "$35/dz",
+          "t": "k=sweet f=pastry fl=fruit"
+        },
+        {
+          "n": "Tiny Oreos",
+          "d": "The lab's famously over-the-top mini Oreos",
+          "p": "$20/dz",
+          "t": "k=sweet f=cookie fl=choc"
+        },
+        {
+          "n": "Mini Apple Cider Donuts",
+          "p": "$20/dz",
+          "t": "k=sweet f=pastry fl=spice"
+        },
+        {
+          "n": "Mini Sticky Toffee Puddings",
+          "p": "$50/dz",
+          "t": "k=sweet f=cup fl=caramel"
+        },
+        {
+          "n": "Cream Cheese Coffee Cake Mini Muffins",
+          "p": "$20/dz",
+          "t": "k=sweet f=cake fl=spice,creamy"
+        },
+        {
+          "n": "Individual Crème Brûlées",
+          "p": "$50/dz",
+          "t": "k=sweet f=cup fl=creamy,caramel"
+        },
+        {
+          "n": "Croissant Cinnamon Rolls",
+          "p": "$35/dz",
+          "t": "k=sweet f=pastry fl=spice"
+        },
+        {
+          "n": "Oatmeal Cream Pies",
+          "p": "$30/dz",
+          "t": "k=sweet f=cookie fl=creamy,spice"
+        }
+      ]
+    },
+    {
+      "cat": "Mini savory munchies",
+      "icon": "meat",
+      "items": [
+        {
+          "n": "Mini Sausage & Stuffing Muffins",
+          "p": "$20/dz",
+          "t": "k=savory f=cake"
+        },
+        {
+          "n": "Jalapeño Popper & Candied Bacon Croissants",
+          "p": "$60/dz",
+          "t": "k=savory f=pastry"
+        },
+        {
+          "n": "Thanksgiving Croissants",
+          "p": "$60/dz",
+          "t": "k=savory f=pastry"
+        },
+        {
+          "n": "Boxed Lunches",
+          "p": "$13 each",
+          "t": "k=savory f=box"
+        }
+      ]
+    }
+  ]
+}

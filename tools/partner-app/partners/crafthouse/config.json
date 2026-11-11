@@ -61,6 +61,7 @@
     "Freddy",
     "Chocolate Molten Lava"
   ],
+  "oldLinks": [],
   "menuIcon": "meat",
   "copy": {
     "welcomeTitle": "Your table just got a scoreboard.",
@@ -75,7 +76,16 @@
     "orderSub": "Order ahead from your phone",
     "mintLine": "Spend them on new looks for your app in the Coins tab.",
     "staff": "your server",
-    "bill": "check"
+    "bill": "check",
+    "spot": "table",
+    "Spot": "Table",
+    "who": "Who's at the table?",
+    "mintGo": "Take me to my table",
+    "quizTitle": "What should I order?",
+    "menuSub": "Every plate, pictured",
+    "plate": "plate",
+    "dish": "dish",
+    "dishes": "dishes"
   },
   "themes": [
     {

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Sugar Alchemist · Grug</title>
+<meta name="description" content="Mix, bake, frost and sparkle treats at the Alchemy Bake Lab counter to match every ticket. A Grug game.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="../../favicon.png">
+<link rel="stylesheet" href="../../assets/grug.css">
+<script src="../../assets/theme.js"></script>
+<!--
+  STANDALONE GAME · play/sugaralchemist/
+  Made with Alchemy Bake Lab: Pearls pay everywhere; while the site is wrapped in Alchemy Bake Lab (partner mode), its coins pay too.
+  assets/gamehost.js does everything else: the bar (Back, name, Pearls), the game frame (game.html) and the game kit's
+  messages. Change the game's Store, save key or venue below; the protocol is documented at the top of gamehost.js.
+-->
+</head>
+<body>
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/grug.js"></script>
+<script src="../../assets/grug-app.js"></script>
+<script src="../../assets/gamehost.js"></script>
+<script>
+'use strict';
+GrugGameHost({
+  id: 'alchemy', app: 'alchemy', title: 'Sugar Alchemist', src: 'game.html', collectible: 'tips', runSeconds: 150, storageKey: 'grug-sugaralchemist-v1',
+  // made with a venue: its coins pay here too while the site is wrapped in it (theme.js PARTNERS.alchemy)
+  brand: 'alchemy', store: 'Alchemy Bake Lab · Peek Road', colors: ['#0B0B0C', '#C2A26B'],
+  // the old rewards app kept this game's items, best and runs: they move here the first time
+  migrate: { key: 'alchemy-bake-lab-rewards-v1', game: 'game' },
+  // prices are in Pearls (or points: alchemy's coins ÷ 25)
+  shop: [
+    { id: 'time',     name: 'Extra Time',     desc: '+30 seconds of open doors',              cost: 4,  effect: 'time',     amount: 30,  icon: 'timer' },
+    { id: 'goldoven', name: 'Golden Oven',    desc: 'Everything bakes twice as fast',         cost: 5,  effect: 'goldoven', amount: 2,   icon: 'thermometer-simple-fill' },
+    { id: 'steady',   name: 'Steady Hands',   desc: 'Green zones twice as wide',              cost: 5,  effect: 'steady',   amount: 2,   icon: 'sliders-horizontal' },
+    { id: 'rush',     name: 'Rush Hour',      desc: 'Customers come twice as often',          cost: 6,  effect: 'rush',     amount: 2,   icon: 'sneaker-move-fill' },
+    { id: 'double',   name: 'Double Tips',    desc: 'Every tip counts twice this shift',      cost: 8,  effect: 'double',   amount: 2,   icon: 'star-four-fill' },
+    { id: 'pass_tips',   name: 'x2 Tips',     desc: 'Every tip is doubled, forever',          cost: 50, effect: 'passtips',   amount: 2, icon: 'crown-simple-fill' },
+    { id: 'pass_rack',   name: 'Big Oven',    desc: 'One more oven rack, forever',            cost: 35, effect: 'passrack',   amount: 1, icon: 'arrow-fat-up' },
+    { id: 'pass_helper', name: 'Lab Helper',  desc: 'A helper takes orders at the counter, forever', cost: 40, effect: 'passhelper', amount: 1, icon: 'heart-fill' },
+    { id: 'pass_vip',    name: 'VIP Lab',     desc: 'Holo sign, plus a VIP guest every shift who tips x3', cost: 60, effect: 'passvip', amount: 3, icon: 'sparkle-fill' },
+    { id: 'tips1', name: 'Tip Jar',   desc: '+300 tips for the Lab Shop',   cost: 5,  effect: 'tips', amount: 300,  icon: 'cookie-fill' },
+    { id: 'tips2', name: 'Tip Stack', desc: '+1,200 tips for the Lab Shop', cost: 10, effect: 'tips', amount: 1200, icon: 'cookie-fill' },
+    { id: 'tips3', name: 'Tip Pile',  desc: '+3,500 tips for the Lab Shop', cost: 20, effect: 'tips', amount: 3500, icon: 'gift-fill' },
+    { id: 'tips4', name: 'Tip Vault', desc: '+9,000 tips for the Lab Shop', cost: 40, effect: 'tips', amount: 9000, icon: 'gift-fill' },
+    { id: 'rankup', name: 'Rank Up',  desc: 'Reach the next rank now (new treats sooner)', cost: 15, effect: 'rankup', amount: 1, icon: 'arrow-fat-up' }
+  ]
+});
+</script>
+</body>
+</html>

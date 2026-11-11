@@ -616,7 +616,7 @@ function panelHtml(c){
     const best = G && G.profile ? Math.max(+(G.profile.stats.best[g.app] || 0), p ? p.best : 0) : 0;
     const bits = []; if (p && p.points) bits.push(`<b>${G.fmt(p.points)}</b> points`); if (best) bits.push(`best <b>${G.fmt(best)}</b>`);
     if (bits.length) stats = `<div class="f32-stats">${bits.join(" · ")}</div>`; } catch (e) {}
-  const chips = [g.kind, g.standalone ? "Grug Original" : g.partner, g.place].filter(Boolean).map(t => `<span>${esc(t)}</span>`).join("");
+  const chips = [g.kind, g.original ? "Grug Original" : g.partner, g.place].filter(Boolean).map(t => `<span>${esc(t)}</span>`).join("");
   const feats = (g.features || []).map(f => `<li>${esc(f)}</li>`).join("");
   const live = g.status === "live" || g.status === "legacy";
   return `<div class="f32-eyebrow">FOSSIL32 · ${esc(c.code)} · ${esc(c.players)}${c.region ? " · " + esc(c.region) : ""}${g.status === "legacy" ? " · CLASSIC" : g.status !== "live" ? " · DEMO" : ""}</div>

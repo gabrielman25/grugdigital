@@ -41,6 +41,23 @@
 .st-sugg b{display:block;font-weight:600;font-size:15px;line-height:1.2}
 .st-sugg small{color:var(--mut);font-weight:600;font-size:12.5px}
 .st-sugg .all{justify-content:center;font-weight:700;color:var(--mode-text,var(--mode));border-top:1px solid var(--line);border-radius:0 0 9px 9px;margin-top:4px;padding:10px}
+/* the Rewards apps button and its picker */
+.st-nav>.st-apps{gap:7px;background:var(--mode);color:var(--on-sel);box-shadow:0 3px 0 var(--mode-lo);margin-left:4px}
+.st-nav>.st-apps:hover{background:var(--mode);color:var(--on-sel);filter:brightness(1.05)}
+.st-apps .gi{width:17px;height:17px}
+.st-applist{display:flex;flex-direction:column;gap:8px;margin:2px 0 4px}
+.st-app{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;background:var(--card2);border:1px solid var(--line);color:var(--ink)}
+.st-app:hover{border-color:var(--mode)}
+.st-app .lg{flex:none;width:112px;height:48px;border-radius:12px;background:#fff;display:grid;place-items:center;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.st-app .lg img{max-width:100%;max-height:40px;object-fit:contain}
+.st-app .lg b{font:700 15px/1 var(--display);color:#1E1B16;padding:0 8px;text-align:center}
+.st-app .tx{flex:1;min-width:0}
+.st-app .tx b{display:block;font-weight:600;font-size:16px;line-height:1.2}
+.st-app .tx small{display:block;color:var(--mut);font-weight:600;font-size:13px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-app .go{flex:none;color:var(--mut)}
+.st-app .go .gi{width:18px;height:18px}
+.st-apps-note{color:var(--mut);font-size:13.5px;margin:0 2px 10px}
+@media (max-width:760px){.st-nav>.st-apps{order:-1;flex:0 0 auto;margin:0 0 4px 6px;padding:0 14px}.st-nav>.st-apps:not([hidden])~.st-search{flex-basis:calc(100% - 132px)}}
 @media (max-width:760px){.st-nav{flex-wrap:wrap}.st-search{order:-1;flex:1 1 100%;max-width:none;margin:0 0 4px}.st-nav>a,.st-nav>button{flex:1;justify-content:center;padding:0 8px;font-size:14.5px}.st-nav .lbl-long{display:none}}
 
 /* ---------- shared bits ---------- */
@@ -269,6 +286,8 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     <a href="#search" data-nav="search">Browse<span class="lbl-long">&nbsp;all</span></a>
     <button type="button" data-queue><span class="lbl-long">Discovery&nbsp;</span>Queue</button>
     <a href="favorites/" data-nav="favs">Favorites <b id="favN">0</b></a>
+    <!-- every venue's rewards app, one tap away (hidden in partner mode: a wrapped site never leads to another venue's app) -->
+    <button type="button" class="st-apps" id="appsBtn" data-apps hidden><span id="appsIc"></span>Rewards<span class="lbl-long">&nbsp;apps</span></button>
     <div class="st-search" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-owns="sugg">
       <span id="qIc"></span>
       <input id="q" type="search" placeholder="Search games, tags or restaurants" autocomplete="off" spellcheck="false" aria-label="Search the games" aria-controls="sugg">
@@ -295,7 +314,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
 
   /* ---------- the games and what this player has done with them (only real numbers) ---------- */
   const pm = (window.GrugTheme && GrugTheme.partner && GrugTheme.partner()) || null;
-  const ALL = G.GAMES.filter(g => g.listed !== false && G.partnerAllows(g));   // partner mode: their game and the Grug originals only
+  const ALL = G.GAMES.filter(g => g.listed !== false && G.partnerAllows(g));   // partner mode: every standalone game, the partner's own first
   const byId = id => ALL.find(g => g.id === id);
   const st = G.profile.stats, pts = {};
   try { G.points().forEach(p => { pts[p.game.id] = p; }); } catch (e) {}
@@ -307,7 +326,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
   const best = g => Math.max(+(st.best[g.app] || 0), pts[g.id] ? pts[g.id].best : 0);
   const lastId = (ALL.find(g => g.app === st.lastGame && g.status !== 'legacy') || {}).id || '';
   const status = g => g.status === 'legacy' ? ['legacy', 'Classic'] : g.status === 'live' ? ['live', 'Live'] : ['demo', 'Demo'];
-  const madeFor = g => '<span class="st-made">' + G.icon(g.standalone ? 'sparkle' : 'storefront') + esc(g.standalone ? 'Grug original' : g.partner) + '</span>';
+  const madeFor = g => '<span class="st-made">' + G.icon(g.original ? 'sparkle' : 'storefront') + esc(g.original ? 'Grug original' : g.partner) + '</span>';
   const badge = g => { const s = status(g); return '<span class="st-badge ' + s[0] + '">' + s[1] + '</span>'; };
   const you = g => { const p = plays(g), b = best(g);
     return p || b ? '<div class="st-you">' + (p ? '<span>' + G.icon('game-controller') + G.fmt(p) + (p === 1 ? ' run' : ' runs') + '</span>' : '') + (b ? '<span>' + G.icon('trophy') + 'best ' + G.fmt(b) + '</span>' : '') + '</div>'
@@ -336,7 +355,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     const near = likes.map(x => [x, shared(x, g)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1])[0];
     if (near) return 'Because you like <b>' + esc(near[0].title) + '</b>';
     if (plays(g)) return 'You’ve played it ' + G.fmt(plays(g)) + (plays(g) === 1 ? ' time' : ' times');
-    return g.standalone ? '<b>A Grug original</b> · plays anywhere' : 'Made with <b>' + esc(g.partner) + '</b> in ' + esc(g.place);
+    return g.original ? '<b>A Grug original</b> · plays anywhere' : 'Made with <b>' + esc(g.partner) + '</b> in ' + esc(g.place);
   }
 
   /* ---------- Play: the cartridge goes into the FOSSIL32 console, then the game opens (plain link without 3D) ---------- */
@@ -352,6 +371,27 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     counts();
   }
   function counts(){ $('#favN').textContent = G.favs.list().filter(byId).length; }
+
+  /* ---------- Rewards apps: every venue's own app (menu, Season Pass, coins), from the top of the store ---------- */
+  // the venues with an app on the site (PARTNERS in theme.js), then the older apps that still carry their own game
+  function appList(){
+    const P = (window.GrugTheme && GrugTheme.PARTNERS) || {}, out = [];
+    Object.keys(P).forEach(id => { const v = P[id], g = G.GAMES.find(x => x.venue === id && x.status !== 'legacy') || {}, w = v.wallet;
+      let coins = 0; try { const s = w && JSON.parse(localStorage.getItem(w.key) || 'null'); coins = Math.max(0, Math.floor(+(s && s[w.field]) || 0)); } catch (e) {}
+      out.push({ href: G.url(v.app), logo: G.url(v.barLogo || v.logo), name: v.n, sub: (g.place ? g.place + ' · ' : '') + (coins ? G.fmt(coins) + ' ' + w.label : w ? w.label : 'Rewards app') }); });
+    G.GAMES.filter(g => !g.venue && g.storageKey && g.play && !g.original).forEach(g => {
+      const pts = (G.points().find(x => x.game.id === g.id) || {}).points || 0;
+      out.push({ href: G.url(g.play), name: g.partner, sub: g.place + ' · ' + (pts ? G.fmt(pts) + ' points' : 'Rewards app') }); });
+    return out;
+  }
+  function rewardApps(){
+    const list = appList();
+    G.ui.dialog({ title: 'Rewards apps', html: '<p class="st-apps-note">Menus, Season Passes and coins from the places behind the games. Every app opens the whole site in its own colours.</p>' +
+      '<div class="st-applist">' + list.map(a => '<a class="st-app" href="' + a.href + '"><span class="lg">' + (a.logo ? '<img src="' + a.logo + '" alt="">' : '<b>' + esc(a.name) + '</b>') + '</span>' +
+        '<span class="tx"><b>' + esc(a.name) + '</b><small>' + esc(a.sub) + '</small></span><span class="go">' + G.icon('caret-right') + '</span></a>').join('') + '</div>',
+      actions: [{ label: 'Close', kind: 'quiet', value: null }] });
+  }
+  if (!pm && appList().length) { $('#appsBtn').hidden = false; $('#appsIc').outerHTML = G.icon('storefront'); }
 
   /* ---------- the store's address: '' = the store, #search?… = Browse all, #queue = open the Discovery Queue ---------- */
   function searchHref(o){
@@ -410,8 +450,8 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
 
   const TABS = [
     ['all', 'All games', () => visible().filter(g => g.status !== 'legacy')],
-    ['originals', 'Grug originals', () => visible().filter(g => g.standalone)],
-    ['restaurants', 'Restaurant games', () => visible().filter(g => !g.standalone && g.status !== 'legacy')],
+    ['originals', 'Grug originals', () => visible().filter(g => g.original)],
+    ['restaurants', 'Restaurant games', () => visible().filter(g => !g.original && g.status !== 'legacy')],
     ['yours', 'Your games', () => visible().filter(g => plays(g) || G.favs.has(g.id))],
     ['classics', 'Classics', () => visible().filter(g => g.status === 'legacy')]
   ];
@@ -436,9 +476,10 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
   function home(){
     const vis = visible(), w = tagWeights();
     feat = vis.filter(g => g.status !== 'legacy').map((g, k) => [g, (pm && g.id === pm.game ? 1e6 : 0) + (g.id === lastId ? 1e5 : 0) + affinity(g, w) * 10 - k]).sort((a, b) => b[1] - a[1]).map(x => x[0]);
-    const originals = vis.filter(g => g.standalone).sort(sorter('relevance'));
-    const venues = vis.filter(g => !g.standalone && g.status !== 'legacy').sort(sorter('relevance'));
+    const originals = vis.filter(g => g.original).sort(sorter('relevance'));
+    const venues = vis.filter(g => !g.original && g.status !== 'legacy').sort(sorter('relevance'));
     const played = vis.filter(g => plays(g)).sort(sorter('recent'));
+    const mine = pm ? vis.filter(g => g.venue === pm.p) : [];   // partner mode: the venue's own games lead the store
     // categories: every tag, the busiest first, each pictured by its best match for this player
     const tc = {}; vis.forEach(g => tagsOf(g).forEach(t => { (tc[t] = tc[t] || []).push(g); }));
     const used = {};   // each tile pictured by a game (and shot) the tiles before it haven't used, where there is one
@@ -453,6 +494,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
         '<button type="button" class="st-arrow l" id="fPrev" aria-label="Previous game">' + G.icon('caret-left') + '</button><div id="featHost"></div>' +
         '<button type="button" class="st-arrow r" id="fNext" aria-label="Next game">' + G.icon('caret-right') + '</button></div>' +
         '<div class="st-dots" id="featDots">' + feat.map((g, k) => '<button type="button" data-k="' + k + '" aria-label="' + esc(g.title) + '"></button>').join('') + '</div></section>' : '') +
+      row('From ' + (pm ? pm.short || pm.n : ''), mine.map(g => capsule(g))) +
       row('Keep playing', played.map(g => capsule(g, g.id === lastId ? 'Last played' : ''))) +
       row('Grug originals', originals.map(g => capsule(g)), searchHref({ made: ['original'] })) +
       row('Made with Katy restaurants', venues.map(g => capsule(g)), searchHref({ made: ['restaurant'] })) +
@@ -482,7 +524,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
   const SORTS = { relevance: 'Relevance', name: 'Name', recent: 'Recently played', plays: 'Most played by you', originals: 'Grug originals first' };
   const GROUPS = [
     { k: 'mine', label: 'Your library', opts: [['played', 'Played'], ['new', 'New to you']], get: g => [plays(g) ? 'played' : 'new'] },
-    { k: 'made', label: 'Made for', opts: [['original', 'Grug originals'], ['restaurant', 'Katy restaurants']], get: g => [g.standalone ? 'original' : 'restaurant'] },
+    { k: 'made', label: 'Made for', opts: [['original', 'Grug originals'], ['restaurant', 'Katy restaurants']], get: g => [g.original ? 'original' : 'restaurant'] },
     { k: 'status', label: 'Status', opts: [['live', 'Live'], ['demo', 'Demo'], ['legacy', 'Classic']], get: g => [status(g)[0]] }
   ];
   let S = null, tagQ = '', tagsAll = false;
@@ -515,7 +557,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
       name: (a, b) => a.title.localeCompare(b.title),
       recent: (a, b) => (b.id === lastId) - (a.id === lastId) || plays(b) - plays(a) || base(a, b),
       plays: (a, b) => plays(b) - plays(a) || best(b) - best(a) || base(a, b),
-      originals: (a, b) => !!b.standalone - !!a.standalone || base(a, b)
+      originals: (a, b) => !!b.original - !!a.original || base(a, b)
     }[k] || base;
   }
   // every filter but the tags (the tag list counts what the tags would leave)
@@ -680,7 +722,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     const v = q.value.trim(); sel = -1;
     if (!v) { sugg.classList.remove('on'); sugg.parentElement.setAttribute('aria-expanded', 'false'); return; }
     const hits = ALL.map(g => [g, score(g, v)]).filter(x => x[1] >= 4).sort((a, b) => b[1] - a[1]).slice(0, 5).map(x => x[0]);
-    sugg.innerHTML = hits.map(g => '<a role="option" href="' + gameHref(g) + '"><img src="' + pic(g) + '" alt=""><span><b>' + esc(g.title) + '</b><small>' + esc(g.standalone ? 'Grug original' : g.partner) + ' · ' + esc(tagsOf(g).slice(0, 2).join(', ')) + '</small></span></a>').join('') +
+    sugg.innerHTML = hits.map(g => '<a role="option" href="' + gameHref(g) + '"><img src="' + pic(g) + '" alt=""><span><b>' + esc(g.title) + '</b><small>' + esc(g.original ? 'Grug original' : g.partner) + ' · ' + esc(tagsOf(g).slice(0, 2).join(', ')) + '</small></span></a>').join('') +
       '<a role="option" class="all" href="' + searchHref({ q: v }) + '">' + (hits.length ? 'See every result for “' + esc(v) + '”' : 'No games match “' + esc(v) + '” · browse all') + '</a>';
     sugg.classList.add('on'); sugg.parentElement.setAttribute('aria-expanded', 'true');
   }
@@ -700,6 +742,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     const f = e.target.closest('[data-fav]'); if (f) { e.preventDefault(); e.stopPropagation(); setFav(f.dataset.fav); if (S && /^#search/.test(location.hash)) results(); return; }
     const p = e.target.closest('[data-play]'); if (p) { e.preventDefault(); const g = byId(p.dataset.play); if (g) play(g); return; }
     if (e.target.closest('[data-queue]')) { e.preventDefault(); startQueue(); return; }
+    if (e.target.closest('[data-apps]')) { e.preventDefault(); rewardApps(); return; }
     const s = e.target.closest('[data-scroll]'); if (s) { const strip = s.parentElement.querySelector('.st-strip'); strip.scrollBy({ left: +s.dataset.scroll * strip.clientWidth * .85 }); return; }
     if (e.target.closest('a,button,input,select,.st-opt')) return;
     const r = e.target.closest('[data-go]'); if (r) location.href = gameHref(byId(r.dataset.go));

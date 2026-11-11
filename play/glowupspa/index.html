@@ -10,136 +10,55 @@
 <link rel="stylesheet" href="../../assets/grug.css">
 <script src="../../assets/theme.js"></script>
 <!--
-  STANDALONE GAME HOST · play/glowupspa/ (copied from play/chestquest/)
-  A Grug original has no restaurant behind it, so this page stands in for a partner's rewards app: it opens game.html
-  full screen and answers the same messages (docs: the game kit's PROTOCOL.md), with no partner points (points: 0).
-  Power-ups are paid with Pearls only, from the site-wide wallet ('grug.pearls.v1'), and owned power-ups, best score
-  and runs are kept in 'grug-glowupspa-v1'. Scores go to the Grug profile (GrugApp.onScore) so milestones count.
-  To host another original: copy this folder, change GAME below, and add an entry with standalone: true to assets/games.js.
+  STANDALONE GAME · play/glowupspa/
+  A Grug original: no venue behind it, so its Store is paid in Pearls only.
+  assets/gamehost.js does everything else: the bar (Back, name, Pearls), the game frame (game.html) and the game kit's
+  messages. Change the game's Store, save key or venue below; the protocol is documented at the top of gamehost.js.
 -->
-<style>
-html,body{margin:0;height:100%;overflow:hidden;background:#0b0e14}
-.rr-bar{position:fixed;left:0;right:0;top:0;height:calc(52px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 10px 0;display:flex;align-items:center;gap:10px;background:#fff;z-index:2}
-.rr-bar a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#111827;font:700 16px/1 var(--g-font, system-ui, sans-serif)}
-.rr-back{width:42px;height:42px;border-radius:50%;justify-content:center;background:#ebedf2}
-.rr-back svg,.rr-pl svg{width:20px;height:20px}
-.rr-t{flex:1;min-width:0;font:700 18px/1.1 var(--g-font, system-ui, sans-serif);color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rr-pl{height:42px;padding:0 14px 0 10px;border-radius:999px;background:#ebedf2}
-.rr-pl b{font-weight:700}.rr-pl i{font-style:normal;color:#6b7280;font-weight:700}
-#rrFrame{position:fixed;left:0;right:0;bottom:0;top:calc(52px + env(safe-area-inset-top));width:100%;height:calc(100% - 52px - env(safe-area-inset-top));border:0;display:block;background:#0b0e14}
-</style>
 </head>
 <body>
-<div class="rr-bar">
-  <a class="rr-back" id="rrBack" href="../../games/glowupspa/" aria-label="Back to the game page"></a>
-  <div class="rr-t">Glow Up Spa</div>
-  <a class="rr-pl" id="rrPearls" href="../../pearls.html" aria-label="Your Pearls: get more"></a>
-</div>
-<iframe id="rrFrame" title="Glow Up Spa" allow="autoplay *; fullscreen *; gamepad *"></iframe>
 <script src="../../assets/catalog.js"></script>
 <script src="../../assets/icons.js"></script>
 <script src="../../assets/games.js"></script>
 <script src="../../assets/grug.js"></script>
 <script src="../../assets/grug-app.js"></script>
+<script src="../../assets/gamehost.js"></script>
 <script>
 'use strict';
-(function () {
-  const GAME = {
-    app: 'glowupspa', title: 'Glow Up Spa', src: 'game.html', collectible: 'cash a second', runSeconds: 300, storageKey: 'grug-glowupspa-v1',
-    // Pearls only (the same items and prices as Steal a Sip's Store). effect / amount are what game.html does with each one:
-    // speedx / tune / tool = Speed and treadmill, pass* = forever passes, pet = a Secret pet, the rest are 5-minute boosts
-    // (speed, luck, hatch, magnet, double), and cash = that many minutes of your cash per second.
-    // The tycoon itself (rooms, staff, pets, cash) saves inside game.html ('glow-up-spa.v1'); this key only holds
-    // owned items, best cash a second and plays.
-    shop: [
-      { id: 'speed2', name: 'Double Your Speed', desc: 'x2 Speed, forever', cost: 1, effect: 'speedx', amount: 2, icon: 'sneaker-move-fill' },
-      { id: 'treadup', name: 'Upgrade Treadmill', desc: 'The next treadmill, right now', cost: 12, effect: 'tool', amount: 1, icon: 'arrow-fat-up' },
-      { id: 'spd1', name: '+1K Speed', desc: '+1,000 Speed', cost: 5, effect: 'tune', amount: 1000, icon: 'sneaker-move-fill' },
-      { id: 'spd2', name: '+10K Speed', desc: '+10,000 Speed', cost: 10, effect: 'tune', amount: 10000, icon: 'sneaker-move-fill' },
-      { id: 'spd3', name: '+100K Speed', desc: '+100,000 Speed', cost: 20, effect: 'tune', amount: 100000, icon: 'sneaker-move-fill' },
-      { id: 'spd4', name: '+1M Speed', desc: '+1,000,000 Speed', cost: 40, effect: 'tune', amount: 1000000, icon: 'sneaker-move-fill' },
-      { id: 'spd5', name: '+10M Speed', desc: '+10,000,000 Speed', cost: 75, effect: 'tune', amount: 10000000, icon: 'sneaker-move-fill' },
-      { id: 'spd6', name: '+100M Speed', desc: '+100,000,000 Speed', cost: 120, effect: 'tune', amount: 100000000, icon: 'sneaker-move-fill' },
-      { id: 'pass_cash', name: 'x2 Cash', desc: 'Every guest and every pet pays double, forever', cost: 50, effect: 'passcash', amount: 2, icon: 'coins' },
-      { id: 'pass_staff', name: 'Speedy Staff', desc: 'Your staff work twice as fast, forever', cost: 45, effect: 'passstaff', amount: 2, icon: 'timer' },
-      { id: 'pass_hatch', name: 'x2 Hatch Speed', desc: 'Eggs hatch twice as fast, forever', cost: 35, effect: 'passhatch', amount: 2, icon: 'egg' },
-      { id: 'pass_train', name: 'x2 Training', desc: 'The treadmill works twice as fast, forever', cost: 40, effect: 'passtune', amount: 2, icon: 'arrow-fat-up' },
-      { id: 'pass_tips', name: 'Cash Magnet', desc: 'Desk cash and floor tips come to you, forever', cost: 30, effect: 'passtips', amount: 1, icon: 'magnet' },
-      { id: 'feat_lion', name: 'Rainbow Lion', desc: 'A Secret pet, straight into your pet field', cost: 60, effect: 'pet', amount: 'lion:rainbow', icon: 'crown-simple-fill' },
-      { id: 'rush', name: 'Glitter Rush', desc: 'Move 35% faster', cost: 5, effect: 'speed', amount: 1.35, icon: 'bolt' },
-      { id: 'luck', name: 'Lucky Bow', desc: 'Rarer eggs and pets', cost: 8, effect: 'luck', amount: 3, icon: 'clover' },
-      { id: 'quickhatch', name: 'Quick Hatch', desc: 'Eggs hatch 3x faster', cost: 6, effect: 'hatch', amount: 3, icon: 'timer' },
-      { id: 'magnet', name: 'Tip Grabber', desc: 'Desk cash and floor tips come to you', cost: 10, effect: 'magnet', amount: 1, icon: 'magnet' },
-      { id: 'double', name: 'Double Cash', desc: 'Everything pays twice the cash', cost: 12, effect: 'double', amount: 2, icon: 'star-four-fill' },
-      { id: 'cash1', name: 'Tip Stack', desc: '5 minutes of your cash', cost: 5, effect: 'cash', amount: 5, icon: 'coins' },
-      { id: 'cash2', name: 'Cash Bundle', desc: '15 minutes of your cash', cost: 10, effect: 'cash', amount: 15, icon: 'coins' },
-      { id: 'cash3', name: 'Cash Pile', desc: '45 minutes of your cash', cost: 20, effect: 'cash', amount: 45, icon: 'coins' },
-      { id: 'cash4', name: 'Money Bag', desc: '2 hours of your cash', cost: 40, effect: 'cash', amount: 120, icon: 'coins' },
-      { id: 'cash5', name: 'Cash Safe', desc: '5 hours of your cash', cost: 75, effect: 'cash', amount: 300, icon: 'coins' }
-    ]
-  };
-  const G = Grug, INV_MAX = 99, WKEY = 'grug.pearls.v1', $ = id => document.getElementById(id);
-  $('rrBack').innerHTML = G.icon('arrow-left');
-
-  /* ---------- this game's own save: owned power-ups, best, runs ---------- */
-  function load() { let s = null; try { s = JSON.parse(localStorage.getItem(GAME.storageKey) || 'null'); } catch (e) {} s = s && typeof s === 'object' ? s : {};
-    return { v: 1, inv: s.inv && typeof s.inv === 'object' ? s.inv : {}, game: Object.assign({ best: 0, runs: 0 }, s.game || {}) }; }
-  let st = load();
-  const save = () => { try { localStorage.setItem(GAME.storageKey, JSON.stringify(st)); } catch (e) {} };
-
-  /* ---------- Pearls: the site-wide wallet ---------- */
-  function wRaw() { try { const w = JSON.parse(localStorage.getItem(WKEY) || 'null'); return w && typeof w === 'object' ? w : { v: 1 }; } catch (e) { return { v: 1 }; } }
-  const pearls = () => Math.max(0, Math.floor(+wRaw().balance || 0));
-  function pearlsChange(d) { const w = wRaw(); w.v = 1; w.balance = Math.max(0, Math.floor(+w.balance || 0) + d); try { localStorage.setItem(WKEY, JSON.stringify(w)); } catch (e) {} paintPearls(); }
-  const pearlsLink = () => G.pearlsUrl(GAME.title);
-  function paintPearls() { const a = $('rrPearls'); a.innerHTML = G.icon('pearl') + '<b>' + G.fmt(pearls()) + '</b><i>+</i>'; a.href = pearlsLink(); }
-  paintPearls();
-
-  /* ---------- the game ---------- */
-  const f = $('rrFrame');
-  const shop = GAME.shop.filter(it => it && it.id && +it.cost > 0), item = id => shop.find(it => it.id === id);
-  function state() {
-    return Object.assign({ points: 0, pearls: pearls(), pearlName: 'Pearls', standalone: true, inv: st.inv, best: st.game.best, runs: st.game.runs, shop, title: GAME.title,
-      collectible: GAME.collectible, runSeconds: GAME.runSeconds, brand: { name: 'Grug', colors: ['#ec4899', '#ffffff'] }, store: 'A Grug original' }, GrugApp.gameExtras());
-  }
-  const toGame = m => { try { f.contentWindow.postMessage(Object.assign({ rw: 1 }, m), '*'); } catch (e) {} };
-  const sendState = () => toGame(Object.assign({ t: 'state' }, state()));
-  function buy(id) {
-    const it = item(id); if (!it) return { ok: false, reason: 'That power-up isn’t in the shop.' };
-    if ((st.inv[id] || 0) >= INV_MAX) return { ok: false, reason: 'You already have ' + INV_MAX + ' of those.' };
-    if (window.Grug && Grug.freeShop()) { st.inv[id] = (st.inv[id] || 0) + 1; save(); return { ok: true, free: true }; }   // Free Shop Token: everything is free
-    if (pearls() < it.cost) return { ok: false, reason: 'You need ' + (it.cost - pearls()) + ' more Pearls for ' + it.name + '.', short: it.cost - pearls(), item: it.name };
-    pearlsChange(-it.cost); st.inv[id] = (st.inv[id] || 0) + 1; save(); return { ok: true };
-  }
-  function use(ids) {
-    ids = Array.isArray(ids) ? [...new Set(ids.map(String))] : [];
-    const miss = ids.find(id => !item(id) || !(st.inv[id] > 0));
-    if (miss) return { ok: false, reason: 'You’re out of ' + ((item(miss) || {}).name || 'that power-up') + '.' };
-    ids.forEach(id => { st.inv[id]--; if (!st.inv[id]) delete st.inv[id]; }); save(); return { ok: true };
-  }
-  // a power-up the player can't afford: pause, and offer the Pearls page (which brings them straight back here)
-  async function offerPearls(short, name) {
-    toGame({ t: 'pause' });
-    const go = await G.ui.dialog({ title: short + ' Pearls short for ' + name, html: '<p>Get Pearls on the Grug Pearls page. They work in every Grug game, and you’ll come straight back here.</p>',
-      actions: [{ label: 'Not now', kind: 'quiet', value: null }, { label: 'Get Pearls', kind: 'primary', value: 'go' }] });
-    if (go === 'go') location.href = pearlsLink();
-  }
-  addEventListener('message', e => {
-    const d = e.data; if (!d || d.rw !== 1 || typeof d.t !== 'string' || e.source !== f.contentWindow) return;
-    const reply = r => toGame(Object.assign({ t: 'reply', req: String(d.req || ''), state: state() }, r));
-    if (d.t === 'hello') { sendState(); GrugApp.onPlay(); GrugApp.onLogon(); }
-    else if (d.t === 'buy') { const r = buy(String(d.id)); reply(r); if (r.short) offerPearls(r.short, r.item); }
-    else if (d.t === 'needPearls') { const it = item(String(d.id)); if (it && pearls() < it.cost) offerPearls(it.cost - pearls(), it.name); }
-    else if (d.t === 'use') reply(use(d.ids));
-    else if (d.t === 'score') { const s = Math.max(0, Math.floor(+d.score || 0)); st.game.runs++; if (s > st.game.best) st.game.best = s; save(); GrugApp.onScore(d, { play: false }); }
-  });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) toGame({ t: 'pause' }); });
-  addEventListener('storage', e => { if (e.key === WKEY) { paintPearls(); sendState(); } if (e.key === GAME.storageKey) { st = load(); sendState(); } });
-  addEventListener('pageshow', e => { paintPearls(); if (e.persisted) sendState(); });
-
-  GrugApp.init({ app: GAME.app, get: () => st, save, sendGameState: sendState, buzz: () => {} });
-  f.src = GAME.src;
-})();
+GrugGameHost({
+  id: 'glowupspa', app: 'glowupspa', bg: '#0b0e14', title: 'Glow Up Spa', src: 'game.html', collectible: 'cash a second', runSeconds: 300, storageKey: 'grug-glowupspa-v1',
+  // Pearls only (the same items and prices as Steal a Sip's Store). effect / amount are what game.html does with each one:
+  // speedx / tune / tool = Speed and treadmill, pass* = forever passes, pet = a Secret pet, the rest are 5-minute boosts
+  // (speed, luck, hatch, magnet, double), and cash = that many minutes of your cash per second.
+  // The tycoon itself (rooms, staff, pets, cash) saves inside game.html ('glow-up-spa.v1'); this key only holds
+  // owned items, best cash a second and plays.
+  shop: [
+    { id: 'speed2', name: 'Double Your Speed', desc: 'x2 Speed, forever', cost: 1, effect: 'speedx', amount: 2, icon: 'sneaker-move-fill' },
+    { id: 'treadup', name: 'Upgrade Treadmill', desc: 'The next treadmill, right now', cost: 12, effect: 'tool', amount: 1, icon: 'arrow-fat-up' },
+    { id: 'spd1', name: '+1K Speed', desc: '+1,000 Speed', cost: 5, effect: 'tune', amount: 1000, icon: 'sneaker-move-fill' },
+    { id: 'spd2', name: '+10K Speed', desc: '+10,000 Speed', cost: 10, effect: 'tune', amount: 10000, icon: 'sneaker-move-fill' },
+    { id: 'spd3', name: '+100K Speed', desc: '+100,000 Speed', cost: 20, effect: 'tune', amount: 100000, icon: 'sneaker-move-fill' },
+    { id: 'spd4', name: '+1M Speed', desc: '+1,000,000 Speed', cost: 40, effect: 'tune', amount: 1000000, icon: 'sneaker-move-fill' },
+    { id: 'spd5', name: '+10M Speed', desc: '+10,000,000 Speed', cost: 75, effect: 'tune', amount: 10000000, icon: 'sneaker-move-fill' },
+    { id: 'spd6', name: '+100M Speed', desc: '+100,000,000 Speed', cost: 120, effect: 'tune', amount: 100000000, icon: 'sneaker-move-fill' },
+    { id: 'pass_cash', name: 'x2 Cash', desc: 'Every guest and every pet pays double, forever', cost: 50, effect: 'passcash', amount: 2, icon: 'coins' },
+    { id: 'pass_staff', name: 'Speedy Staff', desc: 'Your staff work twice as fast, forever', cost: 45, effect: 'passstaff', amount: 2, icon: 'timer' },
+    { id: 'pass_hatch', name: 'x2 Hatch Speed', desc: 'Eggs hatch twice as fast, forever', cost: 35, effect: 'passhatch', amount: 2, icon: 'egg' },
+    { id: 'pass_train', name: 'x2 Training', desc: 'The treadmill works twice as fast, forever', cost: 40, effect: 'passtune', amount: 2, icon: 'arrow-fat-up' },
+    { id: 'pass_tips', name: 'Cash Magnet', desc: 'Desk cash and floor tips come to you, forever', cost: 30, effect: 'passtips', amount: 1, icon: 'magnet' },
+    { id: 'feat_lion', name: 'Rainbow Lion', desc: 'A Secret pet, straight into your pet field', cost: 60, effect: 'pet', amount: 'lion:rainbow', icon: 'crown-simple-fill' },
+    { id: 'rush', name: 'Glitter Rush', desc: 'Move 35% faster', cost: 5, effect: 'speed', amount: 1.35, icon: 'bolt' },
+    { id: 'luck', name: 'Lucky Bow', desc: 'Rarer eggs and pets', cost: 8, effect: 'luck', amount: 3, icon: 'clover' },
+    { id: 'quickhatch', name: 'Quick Hatch', desc: 'Eggs hatch 3x faster', cost: 6, effect: 'hatch', amount: 3, icon: 'timer' },
+    { id: 'magnet', name: 'Tip Grabber', desc: 'Desk cash and floor tips come to you', cost: 10, effect: 'magnet', amount: 1, icon: 'magnet' },
+    { id: 'double', name: 'Double Cash', desc: 'Everything pays twice the cash', cost: 12, effect: 'double', amount: 2, icon: 'star-four-fill' },
+    { id: 'cash1', name: 'Tip Stack', desc: '5 minutes of your cash', cost: 5, effect: 'cash', amount: 5, icon: 'coins' },
+    { id: 'cash2', name: 'Cash Bundle', desc: '15 minutes of your cash', cost: 10, effect: 'cash', amount: 15, icon: 'coins' },
+    { id: 'cash3', name: 'Cash Pile', desc: '45 minutes of your cash', cost: 20, effect: 'cash', amount: 45, icon: 'coins' },
+    { id: 'cash4', name: 'Money Bag', desc: '2 hours of your cash', cost: 40, effect: 'cash', amount: 120, icon: 'coins' },
+    { id: 'cash5', name: 'Cash Safe', desc: '5 hours of your cash', cost: 75, effect: 'cash', amount: 300, icon: 'coins' }
+  ]
+});
 </script>
 </body>
 </html>

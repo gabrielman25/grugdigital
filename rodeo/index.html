@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Rodeo Express · Round-Up on Grug (demo)</title>
+<link rel="icon" href="../play/rodeo/logo.png">
+<!-- Partner mode for Rodeo Express: this short address starts it (assets/theme.js PARTNERS.rodeo) and opens the Games page.
+     The whole site then wears Rodeo Express's logo, colours and type, with the Round-Up app's tab bar, until the tab is closed. -->
+<script>
+(function () {
+  var to = '../games/?partner=rodeo' + (location.hash || '');
+  try { location.replace(to); } catch (e) { location.href = to; }
+})();
+</script>
+<noscript><meta http-equiv="refresh" content="0;url=../games/?partner=rodeo"></noscript>
+</head>
+<body style="background:#33271d;color:#fff;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0">
+<a href="../games/?partner=rodeo" style="color:#E39B32">Open the Round-Up at Rodeo Express</a>
+</body>
+</html>

@@ -1,0 +1,157 @@
+{
+  "id": "teahouse",
+  "name": "Teahouse Express",
+  "brand": "Teahouse",
+  "short": "Teahouse",
+  "label": "Teahouse Express",
+  "place": "Katy Mills, Katy TX",
+  "address": "5000 Katy Mills Cir · inside Katy Mills",
+  "website": "doordash.com",
+  "appStore": "https://www.doordash.com/store/teahouse-express-katy-24674551/32058348/",
+  "appTitle": "Boba Club",
+  "welcomeEyebrow": "Welcome to the Boba Club",
+  "coin": "Teahouse Coins",
+  "storageKey": "teahouse-express-teaclub-v1",
+  "oldLinks": [
+    [
+      "query",
+      "game=takeatea",
+      "../takeatea/"
+    ],
+    [
+      "hash",
+      "game",
+      "../stealasip/"
+    ]
+  ],
+  "menuIcon": "cup",
+  "color": {
+    "accent": "#f6c445",
+    "accentDark": "#8a5a00",
+    "accentLight": "#fbe6a8",
+    "deep": "#1e6b35",
+    "deepDark": "#134a25",
+    "cream": "#fbf7ec"
+  },
+  "copy": {
+    "welcomeTitle": "Your boba just got a bonus round.",
+    "welcomeSub": "Find your perfect drink, play free games while it's made, and stack Teahouse Coins every visit.",
+    "passLabel": "Season Pass · Boba Club",
+    "passDone": "Boba Boss. Every tier unlocked.",
+    "favTitle": "House favorites",
+    "favLabel": "House favorite",
+    "quizCta": "Answer a few questions and we'll find your drink",
+    "menuCredit": "Menu from Teahouse Express at Katy Mills. Ask at the counter what's fresh today.",
+    "orderTitle": "Order on DoorDash",
+    "orderSub": "Teahouse Express · Katy Mills",
+    "mintLine": "Spend them on new looks for your app, or on power-ups in Steal a Sip.",
+    "staff": "the counter",
+    "bill": "total",
+    "spot": "ticket",
+    "Spot": "Ticket",
+    "who": "Who's ordering?",
+    "mintGo": "Take me to the club",
+    "quizTitle": "What should I order?",
+    "menuSub": "Every drink, every flavor",
+    "plate": "drink",
+    "dish": "drink",
+    "dishes": "drinks"
+  },
+  "themes": [
+    {
+      "id": "classic",
+      "name": "Teahouse",
+      "deep": "#1e6b35",
+      "deepDark": "#134a25"
+    },
+    {
+      "id": "taro",
+      "name": "Taro",
+      "price": 600,
+      "deep": "#5b3f86",
+      "deepDark": "#3d2a5c",
+      "accent": "#e3d0ff",
+      "line": "Taro-purple panels with a lilac shine."
+    },
+    {
+      "id": "thai",
+      "name": "Thai Tea",
+      "price": 900,
+      "deep": "#b4541a",
+      "deepDark": "#7d3910",
+      "accent": "#ffd9a8",
+      "line": "Thai-tea orange panels with a cream shine."
+    },
+    {
+      "id": "matcha",
+      "name": "Matcha",
+      "price": 1200,
+      "deep": "#4f6b2e",
+      "deepDark": "#344820",
+      "accent": "#dbeaa8",
+      "line": "Matcha-green panels with a soft lime shine."
+    },
+    {
+      "id": "brownsugar",
+      "name": "Brown Sugar",
+      "deep": "#3a2416",
+      "deepDark": "#22140b",
+      "line": "Brown-sugar tiger stripes, for Boba Bosses only."
+    }
+  ],
+  "pass": [
+    {
+      "v": 1,
+      "name": "First Sip",
+      "reward": "250 {coin}",
+      "coins": 250
+    },
+    {
+      "v": 3,
+      "name": "Regular",
+      "reward": "400 {coin}",
+      "coins": 400
+    },
+    {
+      "v": 6,
+      "name": "Pearl Collector",
+      "reward": "The Taro app theme + 200 {coin}",
+      "theme": "taro",
+      "coins": 200
+    },
+    {
+      "v": 10,
+      "name": "Tea Trail Runner",
+      "reward": "1,000 {coin}",
+      "coins": 1000
+    },
+    {
+      "v": 20,
+      "name": "Boba Boss",
+      "reward": "The Brown Sugar theme + 1,500 {coin}",
+      "theme": "brownsugar",
+      "coins": 1500
+    }
+  ],
+  "coinUses": [
+    [
+      "palette",
+      "App themes",
+      "Taro, Thai Tea and Matcha looks for your app."
+    ],
+    [
+      "controller",
+      "Steal a Sip power-ups",
+      "Speed, passes and cash packs in the Teahouse game: 25 coins to a point."
+    ]
+  ],
+  "quizPicks": [
+    "Teahouse cream tea",
+    "Brown sugar milk tea",
+    "Mango ice blend"
+  ],
+  "menuPicks": [
+    "Taro cream tea",
+    "Vietnamese iced coffee"
+  ]
+}

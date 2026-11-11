@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Rodeo Wash Simulator · Grug</title>
+<meta name="description" content="Hand-wash muddy cars, run the Express Tunnel, hire a crew and rebirth for bigger Bucks. A Grug game.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="../../favicon.png">
+<link rel="stylesheet" href="../../assets/grug.css">
+<script src="../../assets/theme.js"></script>
+<!--
+  STANDALONE GAME · play/rodeowash/
+  Made with Rodeo Express: Pearls pay everywhere; while the site is wrapped in Rodeo Express (partner mode), its coins pay too.
+  assets/gamehost.js does everything else: the bar (Back, name, Pearls), the game frame (game.html) and the game kit's
+  messages. Change the game's Store, save key or venue below; the protocol is documented at the top of gamehost.js.
+-->
+</head>
+<body>
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/grug.js"></script>
+<script src="../../assets/grug-app.js"></script>
+<script src="../../assets/gamehost.js"></script>
+<script>
+'use strict';
+GrugGameHost({
+  id: 'rodeo', app: 'rodeo', title: 'Rodeo Wash Simulator', src: 'game.html', collectible: 'cars washed', runSeconds: 300, storageKey: 'grug-rodeowash-v1',
+  // made with a venue: its coins pay here too while the site is wrapped in it (theme.js PARTNERS.rodeo)
+  brand: 'rodeo', store: 'Rodeo Express · Peek Road', colors: ['#4B3A2C', '#E39B32'], passes: true,
+  // the old rewards app kept this game's items, best and runs: they move here the first time
+  migrate: { key: 'rodeo-express-rewards-v1', game: 'game' },
+  // your car wash rank grows with visits to Rodeo Express (checked in in its rewards app): a bonus on every car
+  extra: () => { let v = 0; try { v = +(JSON.parse(localStorage.getItem('rodeo-express-wash-club-v1') || '{}').visits) || 0; } catch (e) {}
+    const r = [[1, 'Greenhorn', 0], [3, 'Ranch Hand', .1], [6, 'Wrangler', .25], [12, 'Trail Boss', .5], [24, 'Rodeo Legend', 1]].filter(x => v >= x[0]).pop();
+    return { onsite: 0, rank: r ? { name: r[1], bonus: r[2] } : null }; },
+  // prices are in Pearls (or points: rodeo's coins ÷ 25)
+  shop: [
+      { id: 'pass_cash',  name: 'x2 Bucks',        desc: 'Every car pays double, forever',                 cost: 60, effect: 'pass',  amount: 'cash',  icon: 'coins' },
+      { id: 'pass_auto',  name: 'Auto Spray',      desc: 'Sprays on its own when you’re by a car, forever', cost: 40, effect: 'pass',  amount: 'auto',  icon: 'lightning' },
+      { id: 'pass_soap',  name: 'Bottomless Soap', desc: 'Your soap tank never runs dry, forever',         cost: 30, effect: 'pass',  amount: 'soap',  icon: 'drop' },
+      { id: 'pass_vip',   name: 'VIP Bay',         desc: 'A gold bay for show cars that pay x3, forever',  cost: 50, effect: 'pass',  amount: 'vip',   icon: 'crown-simple-fill' },
+      { id: 'pass_boots', name: 'Rodeo Boots',     desc: 'Walk 50% faster, forever',                       cost: 20, effect: 'pass',  amount: 'boots', icon: 'sneaker-move-fill' },
+      { id: 'pass_crew',  name: 'Crew Pro Gear',   desc: 'Your crew washes twice as fast, forever',        cost: 35, effect: 'pass',  amount: 'crew',  icon: 'users-three' },
+      { id: 'b_cash',     name: 'Double Bucks',    desc: 'x2 Bucks for 5 minutes',                         cost: 8,  effect: 'boost', amount: 'cash2', icon: 'coins' },
+      { id: 'b_rush',     name: 'Rush Hour',       desc: 'Cars pull in 3x faster for 5 minutes',           cost: 5,  effect: 'boost', amount: 'rush',  icon: 'car' },
+      { id: 'b_turbo',    name: 'Turbo Nozzle',    desc: 'Spray 3x stronger for 5 minutes',                cost: 6,  effect: 'boost', amount: 'turbo', icon: 'rocket' },
+      { id: 'b_tips',     name: 'Big Tippers',     desc: 'Customers tip 50% more for 5 minutes',           cost: 5,  effect: 'boost', amount: 'tips',  icon: 'star-four-fill' },
+      { id: 'c_jar',      name: 'Tip Jar',         desc: '10 minutes of your Bucks',                       cost: 5,  effect: 'bucks', amount: 10,      icon: 'coins' },
+      { id: 'c_bucket',   name: 'Bucket of Bucks', desc: '30 minutes of your Bucks',                       cost: 10, effect: 'bucks', amount: 30,      icon: 'coins' },
+      { id: 'c_bag',      name: 'Saddlebag',       desc: '2 hours of your Bucks',                          cost: 25, effect: 'bucks', amount: 120,     icon: 'shopping-bag' },
+      { id: 'skip_lane',  name: 'Open the Next Lane', desc: 'Unlock the next wash package right now',      cost: 15, effect: 'skip',  amount: 1,       icon: 'arrow-right' }
+  ]
+});
+</script>
+</body>
+</html>

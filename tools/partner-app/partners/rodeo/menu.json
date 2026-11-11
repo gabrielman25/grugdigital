@@ -1,0 +1,80 @@
+{
+  "sections": [
+    {
+      "cat": "Wash packages",
+      "icon": "car",
+      "items": [
+        {
+          "n": "Ultimate Ride",
+          "d": "Rodeo Ceramic, Turbo Shine Foam Bath, Rodeo Bubble Shine, tire dressing, Dry N Shine and everything below. Unlimited Club: $40 a month.",
+          "p": "$25",
+          "t": "lvl=4 dirt=muddy shine=1 prot=1",
+          "top": 1
+        },
+        {
+          "n": "Deluxe Ride",
+          "d": "Turbo Shine Foam Bath, Rodeo Bubble Shine, tire dressing, Dry N Shine, triple foam conditioner, underbody rinse, wheel brightening, soft wash, rinse and power dry. Unlimited Club: $35 a month.",
+          "p": "$20",
+          "t": "lvl=3 dirt=muddy,dusty shine=1 prot=0",
+          "top": 1
+        },
+        {
+          "n": "Express Wash",
+          "d": "Triple foam conditioner, underbody rinse, wheel brightening, soft wash, rinse and power dry. Unlimited Club: $30 a month.",
+          "p": "$15",
+          "t": "lvl=2 dirt=dusty shine=0 prot=0"
+        },
+        {
+          "n": "Basic Wash",
+          "d": "Soft wash, rinse and power dry. Unlimited Club: $20 a month.",
+          "p": "$10",
+          "t": "lvl=1 dirt=light shine=0 prot=0"
+        }
+      ]
+    },
+    {
+      "cat": "Unlimited Club",
+      "icon": "medal",
+      "items": [
+        {
+          "n": "Unlimited Ultimate",
+          "d": "Ultimate Ride as often as you like",
+          "p": "$40/mo"
+        },
+        {
+          "n": "Unlimited Deluxe",
+          "d": "Deluxe Ride as often as you like",
+          "p": "$35/mo"
+        },
+        {
+          "n": "Unlimited Express",
+          "d": "Express Wash as often as you like",
+          "p": "$30/mo"
+        },
+        {
+          "n": "Unlimited Basic",
+          "d": "Basic Wash as often as you like",
+          "p": "$20/mo"
+        }
+      ]
+    },
+    {
+      "cat": "Free with every wash",
+      "icon": "sponge",
+      "items": [
+        {
+          "n": "Free vacuums",
+          "d": "Pull into any spot after your wash"
+        },
+        {
+          "n": "Mat cleaners",
+          "d": "Floor mats back to fresh"
+        },
+        {
+          "n": "Microfiber towels",
+          "d": "For the final wipe-down"
+        }
+      ]
+    }
+  ]
+}

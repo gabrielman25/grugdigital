@@ -1,21 +1,23 @@
 # Partner rewards apps: the template
 
-Every **partner rewards app** (a grill, a coffee shop, a crêperie…) is built from this folder. R&R CraftHouse Grill was
-the first and Coco Crepes, Waffles & Coffee (`partners/coco/`) is the reference for a venue built on the current
-template. A partner gets two things that work as one app:
+Every **partner rewards app** (a grill, a coffee shop, a crêperie, a car wash…) is built from this folder. R&R CraftHouse
+Grill was the first; Coco Crepes, Waffles & Coffee (`partners/coco/`) is the reference for a venue whose menu comes from
+its website, and Teahouse Express, Soluna Coffee, Rodeo Express and Alchemy Bake Lab (`partners/teahouse/` …) for a
+venue with a hand-written `menu.json`. A partner gets two things that work as one app:
 
 1. **Its own rewards app** at `play/<id>/`. This is a single HTML file built from this folder. It has the full menu with
    photos, a "What should I order?" quiz, the coin welcome (strike a coin with the venue's logo), a visit-based Season
    Pass, a coin store ("added to your check", for show only) with app themes to spend coins on, and on Home the site's
    FOSSIL32 cartridge shelf.
 2. **Partner mode on the Grug site** (`assets/theme.js` `PARTNERS`). The site wears the partner's look and the app's top
-   bar and tab bar, lists only the partner's own game and the Grug originals, and never leads to the standard Grug site
+   bar and tab bar, lists every standalone game with the partner's own first, and never leads to the standard Grug site
    or to another partner's app. The rules for it are in `CLAUDE.md` under "Partner mode".
 
-**The template has no game room of its own and no sports games.** The games are the Grug site's standard library: the
-Grug originals (`standalone: true` in `assets/games.js`), plus the partner's own game once it has one (a normal entry in
-`games.js` with its FOSSIL32 box, named by `game` in its `PARTNERS` entry). Home shows them as cartridges; the Play tab is
-the site's game list. A partner without a game of its own (Coco, for now) simply lists the Grug originals.
+**The template has no game room of its own and no sports games.** The games are the Grug site's standalone games
+(`play/<dir>/`, hosted by `assets/gamehost.js`): the partner's own games first (`venue: '<id>'` in `assets/games.js`, and
+`game` in its `PARTNERS` entry), then every other one. Home shows them as cartridges; the Play tab is the site's game
+list. A partner without a game of its own (Coco, for now) lists the others. Inside the partner's wrap its coins pay in its
+own games too (`wallet.rate` coins to a point, 25 by default).
 
 Never edit `play/<id>/index.html` by hand: change `src/` or `partners/<id>/` and run the build.
 
@@ -26,7 +28,10 @@ tools/partner-app/
   shared/icons.json           the icon pack (MIT, Voxybuns: ICONS-LICENSE.txt), only the icons used get inlined
   partners/<id>/config.json   names, address, links, coin name, colours, copy, themes, Season Pass tiers, featured dishes
   partners/<id>/quiz.json     the "What should I order?" questions
-  partners/<id>/data.json     menu + menu photos + square logo (for the coin) + font(s), made by make_data.py
+  partners/<id>/data.json     menu + menu photos + square logo (for the coin) + font(s), made by make_data.py or make_menu.py
+  partners/<id>/menu.json     (make_menu.py venues) the menu by hand: sections, dishes, quiz tags, optional photos
+  make_menu.py                python3 tools/partner-app/make_menu.py <id>: data.json from menu.json; a dish with no photo
+                              gets a menu card in the partner's colours (needs playwright and Chrome)
   partners/<id>/logow.json    the wide logo for the top bar: {"logo_wide": "data:image/png;base64,..."}
 ```
 
@@ -71,14 +76,16 @@ date. The old game room is in git history before the Coco commit.)
    | `coin` | the coins' name | `Coco Coins` |
    | `storageKey` | the app's save key; must be new for every partner | `coco-crepes-crepeclub-v1` |
    | `menuIcon` | the Menu tab's icon (from `shared/icons.json`; add the same one to `PBAR_ICONS` in theme.js) | `cup` |
+   | `oldLinks` | addresses from the venue's earlier app to forward: `[kind, value, path]`, kind `hash` (`#game`, `#<store>/game`) or `query` (`game=takeatea`) | `[]` |
    | `color` | `accent` (buttons, coin gold), `accentDark` (eyebrows), `accentLight`, `deep` (dark panels), `deepDark`, `cream` | gold and chocolate |
-   | `copy` | the venue's wording: `welcomeTitle`, `welcomeSub`, `passLabel`, `passDone`, `favTitle`, `favLabel`, `quizCta`, `menuCredit`, `orderTitle`, `orderSub`, `mintLine`, `staff` ("your server", "the team"), `bill` ("check", "order") | |
+   | `copy` | the venue's wording: `welcomeTitle`, `welcomeSub`, `passLabel`, `passDone`, `favTitle`, `favLabel`, `quizCta`, `menuCredit`, `orderTitle`, `orderSub`, `mintLine`, `staff` ("your server", "the team"), `bill` ("check", "order"), `spot` / `Spot` ("table", "bay", "ticket"), `who` (the name step's question), `mintGo` (the last onboarding button), `quizTitle`, `menuSub`, `plate` / `dish` / `dishes` ("treat", "wash") | |
    | `themes` | app themes: `id`, `name`, `deep`, `deepDark`, optional `accent`, `line`, and `price` in coins (no price = Season Pass only). The first is the starting look. | 5 themes |
    | `pass` | Season Pass tiers: `v` visits, `name`, `reward` text (`{coin}` = the coin name) and what it gives: `coins`, `theme` (an id from `themes`) | 5 tiers |
    | `coinUses` | the "What coins do" cards: `[icon, title, text]` | 2 cards |
    | `quizPicks`, `menuPicks` | dish names whose photos decorate the quiz and menu tiles on Home | |
 
-2. **Menu data.** `make_data.py` needs `menu_raw.json`, `img_data.json` (photos), `logo-square.png` (the logo, dark on
+2. **Menu data.** Either write `partners/<id>/menu.json` by hand (the format is at the top of `make_menu.py`; photos are
+   optional) and run `python3 tools/partner-app/make_menu.py <id>`, or scrape the venue's website like Coco: `make_data.py` needs `menu_raw.json`, `img_data.json` (photos), `logo-square.png` (the logo, dark on
    white, for the coin), `font.woff2` and optionally `font-display.woff2` (a heading face). Coco's `fetch_menu.py` makes
    the first two from the venue's website (its menu page carries every dish and photo as JSON-LD); write one like it for
    the next venue. Tag the dishes in `TAGS` in `make_data.py` (free-form `key=value` tags), write the questions in
@@ -89,7 +96,7 @@ date. The old game room is in git history before the Coco commit.)
    missing.
 4. **Site.**
    - Add `PARTNERS.beanbar` in `assets/theme.js`. Copy the Coco entry. It holds the name, logos, `app: 'play/beanbar/'`,
-     `game` (only once the venue has its own game), `demo`, `wallet` (the same `storageKey`), `coin`, `font`, optional
+     `game` (only once the venue has its own game), `demo`, `wallet` (the same `storageKey`; `rate` = coins to a point in its games), `coin`, `font`, optional
      `fontDisplay`, `colors` (`accent`, `deep`, `cream`, `page`), and the tab bar `bar`.
    - Put the venue's files in `play/beanbar/`: `logo.png`, `logo-bar.png` (top bar, 96 px tall, about 220–260 px wide so
      the bar fits a 375 px phone), `coin.png` (132 px, the struck coin on a clear background: read it from the app's
@@ -98,11 +105,14 @@ date. The old game room is in git history before the Coco commit.)
      share: it forwards to `games/?partner=beanbar`.
    - When the venue gets its own game: add it to `assets/games.js` with its FOSSIL32 box (follow "Adding a game" in
      `CLAUDE.md` every time: retro title, box settings, box art, `games/beanbar/index.html`) and set `game` in its
-     `PARTNERS` entry. It then leads the shelf with an "Only at …" ribbon.
+     `PARTNERS` entry. It then leads the shelf with a "From …" ribbon, and the venue's coins pay in it inside the wrap. Make it a standalone
+     game: `play/<dir>/` with a host page calling `GrugGameHost` with `brand: 'beanbar'`, and `venue: 'beanbar'` in games.js.
+   - The Games page's Rewards apps list picks the new app up from `PARTNERS` by itself.
 5. **Check it in a browser**, on a phone-sized window:
    - `beanbar/` opens the game list in the venue's look, with the venue's top bar and tab bar. Home opens the app.
    - Open `play/beanbar/` directly in a fresh tab, start a Grug original from the cartridge shelf, and press Back. It
      must land back in the app. Start one from the game list: Back returns to the list.
-   - Following a link to the site's Home, Make or another venue's game bounces to the game list. A refresh stays in
-     partner mode.
+   - Following a link to the site's Home or Make, or to a game that lives inside another venue's app, bounces to the
+     game list. A refresh stays in partner mode.
+   - Open the venue's own game from the shelf: its bar shows the venue's coins next to the Pearls, and Back lands in the app.
    - The top bar's coin count matches the app's.
