@@ -24,14 +24,15 @@ in `grug.css` (`--page`, `--card-solid`, `--card`, `--ink`, `--line` …): never
   dark stage in light mode, but the top bar, dock and menus stay white there (`html.g-chrome-light`).
 - **All 3D renders at half resolution** (device pixel ratio × 0.5, capped at 2): FOSSIL32 (`RES` in its source), the
   avatar editor, the asset library previews, Model Kit's 3D views, the rewards/links builders and the fog cubes.
-  Keep it that way for anything new.
+  Keep it that way for anything new. The one exception is the avatar editor's stage: it's a still picture (redrawn only
+  when the look changes), so it renders at full resolution.
 
 ## Keep friction low
 
 Simplicity is a goal in itself: no dead ends (carousels loop, nothing hits a hard stop), no scrolling inside panels that
 should be static, and nothing on screen that doesn't help the person do the next thing. **Icons are one flat style
 everywhere** (`Grug.icon`: the @icons simple set, then Phosphor bold); there are no colourful icon pictures and no emoji in
-the interface. The top bar shows only the logo, the page name, the Pearls count and the person's name and avatar; Settings
+the interface. The top bar shows only the logo, the page name, the Pearls count, a full screen button and the person's avatar (no name); Settings
 and the dark-mode switch live in the account menu under the avatar.
 
 ## The dock: Home, Games, Me, Make
@@ -123,8 +124,13 @@ When a new game is added to `assets/games.js` and listed, also make its box. Don
 
 ## Avatar editor (`avatar/`)
 
+The stage is a **still picture**, not a live 3D view: the editor redraws it only when a slider is let go, a piece goes
+on or comes off, an emote or view is picked, or the page resizes (`STILL`, `bump()`, `window.SANDY_STILL`), and nothing
+sits on top of it. Where the camera looks is the **View** section (Focus: Full / Face / Feet; Turn: Front / Side / Back),
+and emotes (plus pose previews) are a **Wardrobe → Emotes** category. `?mode=viewer` embeds stay live and animated.
+
 No scrolling: `avatar/nav.js` + `nav.css` move the editor's own controls (the SANDY EDITOR script, wired by id) into
-screens. A row of section icons (Body, Face, Hair, Wardrobe, Shoes, Emotes, Save) sits over a strip you swipe through;
+screens. A row of section icons (Body, Face, Hair, Wardrobe, Shoes, View, Save) sits over a strip you swipe through;
 buttons open screens on top (Wardrobe's categories, the sliders), screens with more than fits become pages with dots, and
 lists of pieces run sideways in as many rows as fit. A piece's colours, fabric and fit show only once a piece is picked.
 Only a person's own swipe changes the section (the browser re-snapping after a resize doesn't). Add new controls to the

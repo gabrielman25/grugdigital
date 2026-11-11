@@ -1,7 +1,9 @@
 /* Grug · avatar/nav.js — the avatar editor without scrolling.
    The editor's own controls (built by the SANDY EDITOR script above, wired by id and data attributes) are moved into
    screens; nothing about how they work changes. The panel is:
-     - a row of section icons (Body, Face, Hair, Wardrobe, Shoes, Emotes, Save) over a strip of sections you swipe through
+     - a row of section icons (Body, Face, Hair, Wardrobe, Shoes, View, Save) over a strip of sections you swipe through
+     - the stage is a still picture with nothing on it (the editor redraws it on each change); where the camera looks is the
+       View section, and emotes are a Wardrobe category
      - buttons in a section open a screen of their own on top (with a back arrow): Wardrobe's categories, the sliders
      - a screen that holds more than fits is split into pages you swipe through, with dots
      - lists of pieces (tops, legs, boots, prints, emotes) run sideways in as many rows as fit
@@ -99,7 +101,8 @@
       ['Tops', 't-shirt', () => itemScreen(g.top)], ['Legs', 'pants', () => itemScreen(g.legs)],
       ['Hats', 'baseball-cap', () => chipScreen(g.hat)], ['Earrings', 'sparkle', () => chipScreen(g.rings)],
       ['Prints', 'image', printScreen], ['Shoulders', 'crown-simple', () => screen([page(lent(g.shL)), page(lent(g.shR))], { cls: 'ed-kits' })],
-      ['Custom', 'paint-brush', () => screen([page(lent(g.ccShirt)), page(lent(g.ccPants))], { cls: 'ed-cc' })], ['Basics', 'palette', () => screen([page(lent(g.basics))])]
+      ['Custom', 'paint-brush', () => screen([page(lent(g.ccShirt)), page(lent(g.ccPants))], { cls: 'ed-cc' })], ['Basics', 'palette', () => screen([page(lent(g.basics))])],
+      ['Emotes', 'hand-waving', emoteScreen]
     ];
     const grid = el('div', 'ed-cats');
     cats.forEach(([name, icon, build]) => { const b = el('button', 'ed-cat', '<span class="ic">' + G.icon(icon) + '</span><span>' + name + '</span>'); b.type = 'button';
@@ -107,9 +110,24 @@
     return screen([page(grid)]);
   });
   section('shoes', 'Shoes', 'sneaker', () => screen([page(g.feet, g.ff, open('Choose boots', 'sneaker', () => push('Boots', lend(() => screen([page(lent(g.boots)), page(lent(g.bootH))], { cls: 'ed-kits' }))())))], { cls: 'ed-shoes' }));
-  section('emotes', 'Emotes', 'hand-waving', () => screen([page(g.emotes)], { cls: 'ed-emotes' }));
-  section('save', 'Save', 'floppy-disk', () => screen([page(g.save, g.share, open('Edit as JSON', 'clipboard-text', () => push('JSON', lend(() => screen([page(lent(g.json))]))())))]));
+  // View: where the camera looks (the stage itself has no buttons on it)
+  section('view', 'View', 'eye', () => {
+    const box = el('div', 'grp ed-viewgrp');
+    box.innerHTML = '<h2 class="px">Focus</h2><div class="seg" id="edFocus" role="group" aria-label="Focus">' +
+      [['body', 'Full'], ['face', 'Face'], ['feet', 'Feet']].map(([v, l], i) => '<button type="button" class="px" data-v="' + v + '" aria-pressed="' + (i === 0) + '">' + l + '</button>').join('') + '</div>' +
+      '<h2 class="px">Turn</h2><div class="seg" id="edTurn" role="group" aria-label="Turn">' +
+      [[0.35, 'Front'], [1.45, 'Side'], [Math.PI, 'Back']].map(([y, l], i) => '<button type="button" class="px" data-y="' + y + '" aria-pressed="' + (i === 0) + '">' + l + '</button>').join('') + '</div>';
+    box.addEventListener('click', e => { const b = e.target.closest('button'); if (!b || !window.SANDY_STILL) return; G.ui.buzz();
+      if (b.dataset.v) window.SANDY_STILL.view(b.dataset.v); else window.SANDY_STILL.turn(+b.dataset.y);
+      [...b.parentNode.children].forEach(x => x.setAttribute('aria-pressed', String(x === b))); });
+    return screen([page(box)]);
+  });
+  // Save: two pages, so nothing crowds or overlaps on a phone
+  section('save', 'Save', 'floppy-disk', () => screen([page(g.save), page(g.share, open('Edit as JSON', 'clipboard-text', () => push('JSON', lend(() => screen([page(lent(g.json))]))())))], { cls: 'ed-save' }));
 
+  // emotes (in Wardrobe): the ones she brings into games, and the poses to preview her in
+  const poses = el('div', 'grp ed-poses'); poses.innerHTML = '<h2 class="px">Preview a pose</h2>'; const anims = $('anims'); if (anims) poses.appendChild(anims);
+  function emoteScreen() { return screen([page(lent(g.emotes)), page(lent(poses))], { cls: 'ed-emotes' }); }
   // a kit slot (tops, legs …): its pieces run sideways; fabric and tint show once a piece is on
   function itemScreen(kit) { const s = screen([page(lent(kit))], { cls: 'ed-kit1' }); return s; }
   // hats and earrings: the styles, then colour and fit once one is on
@@ -207,7 +225,7 @@
   function flatEmotes() { for (const b of panel.querySelectorAll('[data-emote] i,#emoLoad span i')) { if (b.dataset.flat) continue; const id = (b.closest('[data-emote]') || {}).dataset; const k = id && id.emote; b.dataset.flat = '1'; b.innerHTML = G.icon(EMO[k] || 'sparkle'); } }
   new MutationObserver(flatEmotes).observe($('emoGrid'), { childList: true }); new MutationObserver(flatEmotes).observe($('emoLoad'), { childList: true }); flatEmotes();
 
-  // #emotes in the address opens that section
-  const start = /emotes/i.test(location.hash) ? SECTIONS.findIndex(s => s.id === 'emotes') : 0;
-  requestAnimationFrame(() => { go(start, true); fit(); });
+  // #emotes in the address opens Wardrobe → Emotes
+  const toEmotes = /emotes/i.test(location.hash);
+  requestAnimationFrame(() => { go(toEmotes ? SECTIONS.findIndex(s => s.id === 'wardrobe') : 0, true); fit(); if (toEmotes) push('Emotes', lend(emoteScreen)()); });
 })();

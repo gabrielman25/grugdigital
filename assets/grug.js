@@ -432,6 +432,8 @@
   const DOCK = {};
   ['home', 'games', 'rewards', 'links', 'create', 'avatar', 'shop', 'profile', 'me', 'make'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
   const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
+  const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+  const fsOk = () => !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
   /* ---------- Pearls (the site-wide currency, sold on pearls.html; wallet in 'grug.pearls.v1') ---------- */
   const PEARL_KEY = 'grug.pearls.v1';
   const pearlBalance = () => { const w = readJSON(PEARL_KEY, null); return Math.max(0, Math.floor(+(w && w.balance) || 0)); };
@@ -451,7 +453,8 @@
         : '<a class="g-logo k-glass" href="' + url('') + '" aria-label="Grug home">' + LOGO + '<span>Grug</span></a>') +
       '<div class="g-title k-glass" aria-hidden="true"><small>' + esc(((DOCK_GROUPS.find(g => g.id === (opts.dockAs || groupOf(active).id)) || {}).label) || (pageTitle === navLabel ? (brand ? brand.n : 'Grug') : navLabel)) + '</small><b>' + esc(pageTitle) + '</b></div>' +
       '<div class="g-status k-glass"><a class="g-pts" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('pearl') + '<span class="num">' + fmt(pearlBalance()) + '</span><span class="g-plus" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M6 2.5v7M2.5 6h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></a></div>' +
-      '<button type="button" class="g-me" aria-label="Your account menu" aria-haspopup="menu" aria-expanded="false"><span class="g-me-name">' + esc(profile.name) + '</span>' + faceImg + '</button>';
+      (fsOk() ? '<button type="button" class="g-fs k-glass" aria-label="Full screen" aria-pressed="false">' + icon('arrows-out') + '</button>' : '') +
+      '<button type="button" class="g-me" aria-label="Your account menu" aria-haspopup="menu" aria-expanded="false">' + faceImg + '</button>';
     const tabs = document.createElement('nav'); tabs.className = 'g-tabs k-glass'; tabs.setAttribute('aria-label', 'Sections');
     const navNow = () => NAV;
     const navOf = k => NAV.find(n => n[0] === k);
@@ -518,6 +521,14 @@
         '<button type="button" role="menuitem" data-m="settings">' + icon('gear-six') + '<span>Settings</span></button>'; };
     document.body.appendChild(menu);
     const meBtn = $('.g-me', top);
+    // full screen (left of the avatar): more room for games and the editor; hidden where the browser can't (iPhone Safari)
+    const fsBtn = $('.g-fs', top);
+    if (fsBtn) {
+      const paintFs = () => { const on = !!fsEl(); fsBtn.innerHTML = icon(on ? 'arrows-in' : 'arrows-out'); fsBtn.setAttribute('aria-pressed', String(on)); fsBtn.setAttribute('aria-label', on ? 'Leave full screen' : 'Full screen'); };
+      fsBtn.addEventListener('click', () => { buzz(); const d = document.documentElement;
+        try { if (fsEl()) (document.exitFullscreen || document.webkitExitFullscreen).call(document); else { const r = (d.requestFullscreen || d.webkitRequestFullscreen).call(d, { navigationUI: 'hide' }); if (r && r.catch) r.catch(() => {}); } } catch (e) {} });
+      document.addEventListener('fullscreenchange', paintFs); document.addEventListener('webkitfullscreenchange', paintFs); paintFs();
+    }
     const setMenu = on => { if (on) paintMenu(); menu.hidden = !on; meBtn.setAttribute('aria-expanded', String(on)); if (on) { const f = $('[role=menuitem]', menu); if (f) f.focus({ preventScroll: true }); } };
     meBtn.addEventListener('click', e => { e.stopPropagation(); buzz(); setMenu(menu.hidden); });
     menu.addEventListener('click', e => {
@@ -532,7 +543,7 @@
     if (!$('#g-toast')) { const t = document.createElement('div'); t.id = 'g-toast'; t.className = 'g-toast'; t.setAttribute('role', 'status'); t.setAttribute('aria-live', 'polite'); document.body.appendChild(t); }
     root.addEventListener('grug:change', () => {
       const s = snaps(); const el = $('.g-me', top); if (!el) return;
-      el.innerHTML = '<span class="g-me-name">' + esc(profile.name) + '</span>' + (s ? '<img class="g-face" alt="" src="' + s.bust + '">' : '<span class="g-face g-face-empty">' + icon('smiley') + '</span>');
+      el.innerHTML = (s ? '<img class="g-face" alt="" src="' + s.bust + '">' : '<span class="g-face g-face-empty">' + icon('smiley') + '</span>');
       paintPearls();
     });
     // LB / RB: Q and E (or a controller's shoulder buttons) step through the dock

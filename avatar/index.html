@@ -511,8 +511,12 @@ const $=id=>document.getElementById(id),Q=new URLSearchParams(location.search),K
 if(Q.get('mode')==='viewer')document.body.classList.add('viewer');if(Q.get('bg')==='transparent')document.body.classList.add('clear');
 // ---------- the stage ----------
 const stage=$('stage'),renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});renderer.outputEncoding=THREE.sRGBEncoding;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.setPixelRatio(Math.min(2,devicePixelRatio||1)*0.5)/* 3D at half resolution */;stage.prepend(renderer.domElement);
+renderer.setPixelRatio(Math.min(2,devicePixelRatio||1)*(document.body.classList.contains('viewer')?0.5:1))/* embeds at half resolution; the editor's still picture at full */;stage.prepend(renderer.domElement);
 const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(30,1,5,5000);
+/* Grug: in the editor (not in ?mode=viewer embeds) the stage is a still picture. It is drawn again only when something
+   changes: a slider is let go, a piece goes on or comes off, an emote or a view is picked, the page is resized. No live loop. */
+const STILL=!document.body.classList.contains('viewer');let still=0,stillT=[];
+function bump(){if(!STILL)return;still=Math.max(still,2);stillT.forEach(clearTimeout);stillT=[180,450,900,1700,2600].map(ms=>setTimeout(()=>{still=Math.max(still,1)},ms))}   // again as clothes and textures finish loading
 scene.add(new THREE.HemisphereLight(0xfff4e0,0x3a3456,0.75));
 const key=new THREE.DirectionalLight(0xfff0dc,1.1);key.position.set(160,320,240);key.castShadow=true;key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-120,right:120,top:220,bottom:-20,near:50,far:900});key.shadow.bias=-0.0004;scene.add(key);
 const rim=new THREE.DirectionalLight(0x9fc4ff,0.55);rim.position.set(-200,180,-260);scene.add(rim);
@@ -522,7 +526,7 @@ const disc=new THREE.Mesh(new THREE.RingGeometry(70,74,64),new THREE.MeshBasicMa
 const VIEWS={body:{t:[0,102,0],d:440,p:0.06},face:{t:[0,180,0],d:150,p:0.04},feet:{t:[0,8,8],d:120,p:0.42}};
 const O={yaw:0.35,pitch:0.06,d:440,t:new THREE.Vector3(0,102,0),want:null,spin:false};
 function setView(v){const V=VIEWS[v];O.want={t:new THREE.Vector3(...V.t),d:V.d,p:V.p};for(const b of document.querySelectorAll('#views [data-view]'))b.setAttribute('aria-pressed',String(b.dataset.view===v))}
-function size(){const r=stage.getBoundingClientRect();renderer.setSize(r.width,r.height,false);cam.aspect=r.width/Math.max(1,r.height);cam.updateProjectionMatrix()}
+function size(){const r=stage.getBoundingClientRect();renderer.setSize(r.width,r.height,false);cam.aspect=r.width/Math.max(1,r.height);cam.updateProjectionMatrix();bump()}
 addEventListener('resize',size);new ResizeObserver(size).observe(stage);
 // drag to turn, right-drag / shift-drag / two fingers to pan, wheel / pinch to zoom, double-click to reset; free cam: WASD QE + drag to look
 const FC={on:false,pos:new THREE.Vector3(),yaw:0,pitch:0,keys:new Set()};
@@ -534,7 +538,7 @@ function setFree(on){FC.on=on;$('freecam').setAttribute('aria-pressed',String(on
 addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test((e.target&&e.target.tagName)||''))return;const k=e.key.toLowerCase();
   if(FC.on&&'wasdqe'.includes(k)&&k.length===1){FC.keys.add(k);e.preventDefault()}if(k==='shift')FC.keys.add('shift')});
 addEventListener('keyup',e=>{FC.keys.delete(e.key.toLowerCase())});addEventListener('blur',()=>FC.keys.clear());
-{const cv=renderer.domElement,P=new Map();let pinch=null;cv.addEventListener('contextmenu',e=>e.preventDefault());
+if(!STILL){const cv=renderer.domElement,P=new Map();let pinch=null;cv.addEventListener('contextmenu',e=>e.preventDefault());
   cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);P.set(e.pointerId,{x:e.clientX,y:e.clientY,pan:e.button===2||e.button===1||e.shiftKey});O.want=null;
     if(P.size===2){const [a,b]=[...P.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),d0:O.d,cx:(a.x+b.x)/2,cy:(a.y+b.y)/2}}});
   cv.addEventListener('pointermove',e=>{const p=P.get(e.pointerId);if(!p)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
@@ -550,19 +554,23 @@ $('freecam').addEventListener('click',()=>setFree(!FC.on));
 for(const b of document.querySelectorAll('#views [data-view]'))b.addEventListener('click',()=>setView(b.dataset.view));
 $('spin').addEventListener('click',()=>{O.spin=!O.spin;$('spin').setAttribute('aria-pressed',String(O.spin))});
 $('anims').innerHTML=(C.animations||['idle']).map(a=>`<button type="button" class="px" data-anim="${a}" aria-pressed="${a==='idle'}">${a[0].toUpperCase()+a.slice(1)}</button>`).join('');
-$('anims').addEventListener('click',e=>{const b=e.target.closest('[data-anim]');if(!b||!sandy)return;sandy.play(b.dataset.anim);for(const x of $('anims').children)x.setAttribute('aria-pressed',String(x===b))});
+$('anims').addEventListener('click',e=>{const b=e.target.closest('[data-anim]');if(!b||!sandy)return;if(STILL)window.SANDY_STILL.pose(b.dataset.anim);else sandy.play(b.dataset.anim);for(const x of $('anims').children)x.setAttribute('aria-pressed',String(x===b))});
 let sandy=null,last=performance.now();
 (function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(STILL){if(!still)return;still--;if(O.want){O.t.copy(O.want.t);O.d=O.want.d;O.pitch=O.want.p;O.want=null}}
   if(O.want){const k=1-Math.exp(-dt*7);O.t.lerp(O.want.t,k);O.d+=(O.want.d-O.d)*k;O.pitch+=(O.want.p-O.pitch)*k}if(O.spin)O.yaw+=dt*0.5;
   if(FC.on){const f=new THREE.Vector3(Math.sin(FC.yaw)*Math.cos(FC.pitch),Math.sin(FC.pitch),Math.cos(FC.yaw)*Math.cos(FC.pitch)),r=new THREE.Vector3(-f.z,0,f.x).normalize(),sp=(FC.keys.has('shift')?320:110)*dt;
     if(FC.keys.has('w'))FC.pos.addScaledVector(f,sp);if(FC.keys.has('s'))FC.pos.addScaledVector(f,-sp);if(FC.keys.has('d'))FC.pos.addScaledVector(r,sp);if(FC.keys.has('a'))FC.pos.addScaledVector(r,-sp);
     if(FC.keys.has('e'))FC.pos.y+=sp;if(FC.keys.has('q'))FC.pos.y-=sp;cam.position.copy(FC.pos);cam.lookAt(FC.pos.clone().add(f))}
   else{cam.position.set(O.t.x+Math.sin(O.yaw)*Math.cos(O.pitch)*O.d,O.t.y+Math.sin(O.pitch)*O.d,O.t.z+Math.cos(O.yaw)*Math.cos(O.pitch)*O.d);cam.lookAt(O.t)}
-  if(sandy)sandy.update(dt);renderer.render(scene,cam)})(last);
+  if(sandy)sandy.update(STILL?0:dt);renderer.render(scene,cam)})(last);
+// the still stage's controls, used by nav.js (View section, emotes): a view, a turn, or a pose taken from an animation
+window.SANDY_STILL={on:STILL,bump,view(v){if(VIEWS[v]){setView(v);bump()}},turn(y){O.yaw=y;bump()},
+  pose(anim){if(!sandy)return;sandy.play(anim);for(let i=0;i<42;i++)sandy.update(1/60);bump()}};
 // ---------- the controls ----------
 let cfg=null;const get=(o,p)=>p.split('.').reduce((a,k)=>a==null?a:a[k],o);
 function patchFor(path,v){const ks=path.split('.'),out={};let o=out;ks.forEach((k,i)=>{if(i===ks.length-1)o[k]=v;else o=o[k]={}});return out}
-function apply(patch){if(!sandy)return;sandy.apply(patch);cfg=sandy.getConfig();sync();post({sandy:'change',config:cfg})}
+function apply(patch){if(!sandy)return;sandy.apply(patch);cfg=sandy.getConfig();sync();post({sandy:'change',config:cfg});if(!sliding)bump()}
 const PAL={'earrings.colour':['#f3ede0','#d4af37','#c0c0c0','#b87333','#141414','#e3101c','#3fc1ff','#ff5c8a','#9b7bff','#2ee59d'],skin:C.skinTones,'hair.colour':['#141414','#2a1a12','#4a2a14','#6a3a1a','#9a3f1e','#d6ae58','#e8d7b0','#c8c8c8','#ff5c8a','#3fc1ff','#9b7bff','#e3101c'],
   nails:['#ffffff','#e3101c','#121212','#ff5c8a','#9b7bff','#3fc1ff','#4ad4b0','#ffcf4a'],
   cloth:['#ffffff','#f2efe6','#141414','#2a2a2a','#2b3350','#1e3a5f','#6b6864','#3b2a1e','#e3101c','#ff5c8a','#ffcf4a','#4ad4b0','#3fc1ff','#9b7bff','#2ee59d','#ff8a5c'],
@@ -680,8 +688,9 @@ $('exprs').addEventListener('click',e=>{const b=e.target.closest('[data-e]');if(
 // sliders: a drag fires many input events; apply only the newest values, at most once per screen frame
 const slidePend=new Map();let slideRaf=0;
 function slideFlush(){slideRaf=0;if(!slidePend.size)return;let patch={};for(const [k,v] of slidePend)patch=K.merge(patch,patchFor(k,v));slidePend.clear();apply(patch)}
-for(const r of document.querySelectorAll('[data-num]')){r.addEventListener('input',()=>{slidePend.set(r.dataset.num,+r.value);if(!slideRaf)slideRaf=requestAnimationFrame(slideFlush)});
-  r.addEventListener('change',()=>{if(slideRaf){cancelAnimationFrame(slideRaf);slideFlush()}})}
+let sliding=false;   // a slider being dragged: the still stage waits until it's let go
+for(const r of document.querySelectorAll('[data-num]')){r.addEventListener('input',()=>{sliding=true;slidePend.set(r.dataset.num,+r.value);if(!slideRaf)slideRaf=requestAnimationFrame(slideFlush)});
+  r.addEventListener('change',()=>{if(slideRaf){cancelAnimationFrame(slideRaf);slideFlush()}sliding=false;bump()})}
 // while a finger or mouse is on a control, the avatar pictures wait (see post())
 let editing=false;addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('input,button,select,.sw'))editing=true},true);
 for(const ev of ['pointerup','pointercancel','blur'])addEventListener(ev,()=>{editing=false},true);
@@ -714,8 +723,8 @@ for(const t of document.querySelectorAll('.tab'))t.addEventListener('click',()=>
 let toastT=0;function toast(s){const el=$('toast');el.textContent=s;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('on'),1800)}
 const copy=(s,msg)=>{(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>toast(msg),()=>{$('json').value=s;toast('Copy blocked here: the text is in the box on the Save tab')})};
 const download=(name,href)=>{const a=document.createElement('a');a.href=href;a.download=name;document.body.appendChild(a);a.click();a.remove()};
-$('bRandom').addEventListener('click',()=>{sandy.apply(K.randomConfig(null,{body:cfg&&cfg.body}),true);cfg=sandy.getConfig();sync();post({sandy:'change',config:cfg})});
-$('bReset').addEventListener('click',()=>{sandy.apply(K.DEFAULT,true);cfg=sandy.getConfig();sync();post({sandy:'change',config:cfg})});
+$('bRandom').addEventListener('click',()=>{sandy.apply(K.randomConfig(null,{body:cfg&&cfg.body}),true);cfg=sandy.getConfig();sync();post({sandy:'change',config:cfg});bump()});
+$('bReset').addEventListener('click',()=>{sandy.apply(K.DEFAULT,true);cfg=sandy.getConfig();sync();post({sandy:'change',config:cfg});bump()});
 $('bApply').addEventListener('click',()=>{try{const c=JSON.parse($('json').value);sandy.apply(K.merge(K.DEFAULT,c),true);cfg=sandy.getConfig();sync();toast('Applied')}catch(e){toast('That JSON has an error: '+e.message.slice(0,60))}});
 $('bCopy').addEventListener('click',()=>copy(JSON.stringify(cfg,null,2),'JSON copied'));
 
@@ -774,7 +783,7 @@ let start=K.DEFAULT;try{const sv=localStorage.getItem('grug.sandy.v1');if(sv)sta
 if(Q.get('character'))fetch(Q.get('character')).then(r=>r.text()).then(t=>{const go=()=>sandy?openCharacterText(t,Q.get('character').split('/').pop()):setTimeout(go,200);go()}).catch(()=>{});else if(Q.get('seed'))start=K.randomConfig(Q.get('seed'))}catch(e){console.warn('bad config in the link',e)}
 if(Q.get('view')&&VIEWS[Q.get('view')])setView(Q.get('view'));else setView('body');if(Q.get('spin')==='1'){O.spin=true;$('spin').setAttribute('aria-pressed','true')}
 size();
-K.create(start).then(s=>{sandy=s;scene.add(s.object3d);cfg=s.getConfig();sync();$('loading').classList.add('hide');post({sandy:'ready',config:cfg});window.SANDY=s}).catch(e=>{console.error(e);$('loading').textContent='Sandy could not load: '+e.message});
+K.create(start).then(s=>{sandy=s;scene.add(s.object3d);cfg=s.getConfig();sync();if(STILL){for(let i=0;i<6;i++)s.update(1/60);bump()}$('loading').classList.add('hide');post({sandy:'ready',config:cfg});window.SANDY=s}).catch(e=>{console.error(e);$('loading').textContent='Sandy could not load: '+e.message});
 })();
 
 </script>
@@ -796,7 +805,7 @@ K.create(start).then(s=>{sandy=s;scene.add(s.object3d);cfg=s.getConfig();sync();
   }
   $('emoGrid').addEventListener('click', e => {
     const b = e.target.closest('[data-emote]'); if (!b) return; const id = b.dataset.emote, em = G.emoteOf(id), k = loadout.indexOf(id);
-    if (window.SANDY && em) { try { window.SANDY.play(em.anim); } catch (x) {} for (const x of document.querySelectorAll('#anims button')) x.setAttribute('aria-pressed', String(x.dataset.anim === em.anim)); }   // preview on the stage
+    if (window.SANDY && em) { try { if (window.SANDY_STILL && window.SANDY_STILL.on) window.SANDY_STILL.pose(em.anim); else window.SANDY.play(em.anim); } catch (x) {} for (const x of document.querySelectorAll('#anims button')) x.setAttribute('aria-pressed', String(x.dataset.anim === em.anim)); }   // preview on the stage
     if (k >= 0) { if (loadout.length === 1) { G.ui.toast('Keep at least one emote', { icon: 'info' }); } else loadout.splice(k, 1); }
     else if (loadout.length >= G.EMOTE_MAX) { G.ui.toast('That\u2019s ' + G.EMOTE_MAX + ' already. Tap one to drop it first.', { icon: 'warning-circle' }); }
     else loadout.push(id);

@@ -124,3 +124,18 @@ body.ed-nav .ed-page .sws>*{flex:none}
 body.ed-nav .ed-page .row:has(>.sws){flex-wrap:nowrap}
 body.ed-nav .ed-page .row:has(>.sws) .lab{min-width:56px}
 body.ed-nav .ed-page .row>.sws{flex:1;min-width:0}
+
+/* the still stage: nothing on top of her (no title, camera buttons, poses or hints); View and Wardrobe → Emotes have them */
+body.ed-nav :is(#stageTitle,#views,#stageHint){display:none!important}
+body.ed-nav .ed-poses #anims{position:static;display:flex;flex-wrap:wrap;gap:8px;inset:auto}
+body.ed-nav .ed-poses #anims button{min-height:42px;padding:0 16px;font-size:14px}
+body.ed-nav .ed-viewgrp .seg{margin-bottom:14px}
+body.ed-nav .ed-viewgrp .seg button{min-height:46px}
+/* Save: buttons wrap onto their own lines instead of squeezing, with room between groups */
+body.ed-nav .ed-save .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+body.ed-nav .ed-save .btns .btn{flex:1 1 150px;min-height:46px}
+body.ed-nav .ed-save .grp + .grp,body.ed-nav .ed-save .grp + .ed-open{margin-top:14px}
+body.ed-nav .ed-save .row{flex-wrap:wrap;gap:8px}
+/* room between groups on every screen, so headings never touch the buttons above them */
+body.ed-nav .ed-page > .grp + .grp{margin-top:12px}
+body.ed-nav .ed-page > .grp > h2{margin-top:2px}
