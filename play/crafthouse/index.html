@@ -105,6 +105,32 @@ h2{font-size:20px;font-weight:700;letter-spacing:-.01em;margin:26px 0 12px}
 .daily .t{flex:1}
 .daily b{display:block;font-size:16px}
 .hs{display:flex;gap:12px;overflow-x:auto;margin:0 -16px;padding:0 16px;scrollbar-width:none;scroll-snap-type:x proximity}
+/* on the Grug site: the games as floating FOSSIL32 cartridges (the same ones as the Grug home page), one looping row,
+   the middle one big; tapping it opens the cartridge and its Play button (assets/fossil32/) */
+.hc{position:relative;margin:0 calc(50% - 50vw);min-height:calc(min(290px,60vw) * .75 + 58px)}
+.hc-row{--tw:min(290px,60vw);display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;
+  padding:0 calc(50vw - var(--tw) / 2) 6px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.hc-row::-webkit-scrollbar{display:none}
+.hc-row.drag{scroll-snap-type:none;cursor:grabbing}
+.hc-t{flex:none;width:var(--tw);scroll-snap-align:center;display:block;color:var(--ink);text-decoration:none;transform:scale(calc(1 - var(--d,1) * .2));opacity:calc(1 - var(--d,1) * .5);will-change:transform}
+.hc-t:focus-visible{outline:none}
+.hc-t:focus-visible .f32-stage{outline:3px solid var(--gold);outline-offset:-6px;border-radius:24px}
+.hc-t .f32-stage{overflow:visible;background:none}
+.hc-t .f32-flat{left:22%;width:56%;top:20%;height:50%}
+.hc-t .f32-ribbon{right:auto;left:50%;top:auto;bottom:2px;transform:translateX(-50%);white-space:nowrap;font-family:"Bricolage",system-ui,sans-serif;font-weight:800;background:var(--gold);color:#1d1705;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.hc-b{text-align:center;padding:0 6px;margin-top:-2px;transition:opacity .2s}
+.hc-b b{display:block;font-size:19px;font-weight:800;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hc-b span{font-size:13px;color:var(--mut)}
+.hc-t:not(.on) .hc-b{opacity:.55}
+.hc-cap{text-align:center;font-size:13px;color:var(--mut);margin:2px 0 4px}
+/* the cartridge's game panel: the page behind goes soft, and the panel is centred and in the CraftHouse lettering */
+#app{transition:filter .8s ease}
+html.f32-lock #app{filter:blur(9px) brightness(.6) saturate(1.1)}
+.f32-ov{--display:"Bricolage",system-ui,sans-serif;--f32-accent:#CFAC52}
+.f32-ov .f32-desc,.f32-ov .f32-chips span,.f32-ov .f32-feats li,.f32-ov .f32-stats,.f32-ov .f32-more{font-family:"Bricolage",system-ui,sans-serif}
+.f32-ov .f32-panel{text-align:center}
+.f32-ov .f32-chips,.f32-ov .f32-actions{justify-content:center}
+.f32-ov .f32-feats{display:inline-grid;text-align:left}
 .fav{flex:none;width:150px;text-align:left;scroll-snap-align:start}
 .fav img{width:150px;height:150px;border-radius:18px;object-fit:cover;display:block;background:var(--card)}
 .fav b{display:block;font-size:15px;margin-top:8px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -869,6 +895,69 @@ let curTab="home",walletShown=0,walletAnim=0,boardSport=null;
 const bestOf=id=>S.bests[id]||0;
 const grugCard=(pop)=>`<a class="cta grug ${pop?"pop":""}" href="${LINKS.grug}"${GRUG_TARGET}><div class="gem">${ic("gem")}</div><div class="t"><b>More games on Grug Digital</b><span>Free games from Katy spots. Keep your avatar and Pearls across all of them.</span></div>${ic("arrow_right")}${S.grugSeen?"":'<i class="new">NEW</i>'}</a>`;
 
+/* On the Grug site, the top of Home is the site's game shelf: the CraftHouse game and the Grug originals as floating
+   FOSSIL32 cartridges (assets/fossil32/, the same as the Grug home page), in one looping row. Built once and moved back
+   into Home each time it's drawn, so the 3D cartridges don't reload. Standalone (off the site): the old mini cards. */
+const Shelf=(()=>{
+  const ROOT="../../";let el=null,row=null,N=0,loading=null,rq=0,settleT=0,drag=null,dragged=false;
+  const kick=()=>{if(window.Fossil32&&Fossil32.kick)Fossil32.kick();};
+  const add=(tag,attrs)=>new Promise((ok,no)=>{const n=document.createElement(tag);Object.assign(n,attrs);n.onload=ok;n.onerror=no;document.head.appendChild(n);});
+  function load(){
+    if(loading)return loading;
+    loading=Promise.all([add("link",{rel:"stylesheet",href:ROOT+"assets/fossil32/fossil32.css"}).catch(()=>{}),add("script",{src:ROOT+"assets/games.js"})])
+      .then(()=>{build();if(curTab==="home")UI.home();add("script",{type:"module",src:ROOT+"assets/fossil32/fossil32.js"}).catch(()=>{});});
+    return loading;
+  }
+  // the CraftHouse game first, then the Grug originals (the only games CraftHouse mode lists)
+  const list=()=>{const G=window.GRUG_GAMES||[],own=G.find(g=>g.id==="crafthouse");
+    return [own,...G.filter(g=>g.standalone&&g.status!=="legacy"&&g.listed!==false)].filter(Boolean);};
+  const tile=g=>{const b=g.box||{},own=g.id==="crafthouse";
+    return `<a class="hc-t f32-tile f32-cart" data-f32="${g.id}" data-f32-kind="cart" href="${ROOT}games/${g.id}/" aria-label="${esc(g.title)}" style="--hc-c:${b.shell||g.color||"#CFAC52"}">
+      <div class="f32-stage">${own?'<span class="f32-ribbon">Only at CraftHouse</span>':""}<img class="f32-flat" src="${ROOT}${b.art||g.thumb}" alt="" decoding="async"></div>
+      <div class="hc-b"><b>${esc(g.title)}</b><span>${own?"R&amp;R CraftHouse":"Grug Original"} · ${esc(g.kind)}</span></div></a>`;};
+  function build(){
+    const L=list();N=L.length;if(!N)return;
+    el=document.createElement("div");el.className="hc";
+    row=document.createElement("div");row.className="hc-row";row.setAttribute("data-noswipe","");el.appendChild(row);
+    // an endless loop: the list three times over; once the row settles in the first or last copy it jumps (unseen)
+    // to the same cartridge in the middle copy, so there's never an end to hit
+    row.innerHTML=[0,1,2].map(()=>L.map(tile).join("")).join("");
+    [...row.children].forEach((t,i)=>{if(i<N||i>=2*N){t.setAttribute("aria-hidden","true");t.tabIndex=-1;}});
+    row.addEventListener("scroll",()=>{queue();kick();clearTimeout(settleT);settleT=setTimeout(recentre,140);},{passive:true});
+    if("onscrollend" in row)row.addEventListener("scrollend",recentre);
+    // a cartridge off to the side slides to the middle first; the middle one opens (FOSSIL32 handles that click)
+    row.addEventListener("click",e=>{const t=e.target.closest(".hc-t");if(!t)return;
+      if(dragged||!t.classList.contains("on")){e.preventDefault();e.stopPropagation();if(!dragged){centre(t);SFX.tap();}}},true);
+    row.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"||e.button)return;drag={x:e.clientX,left:row.scrollLeft};dragged=false;});
+    addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-drag.x;if(Math.abs(dx)>6){dragged=true;row.classList.add("drag");}if(dragged)row.scrollLeft=drag.left-dx;});
+    addEventListener("pointerup",()=>{if(!drag)return;drag=null;if(row.classList.contains("drag")){row.classList.remove("drag");const on=row.querySelector(".on");if(on)centre(on);}setTimeout(()=>{dragged=false;},0);});
+    addEventListener("resize",()=>{if(el.isConnected)settle();});
+  }
+  const step=()=>{const t=row.children[0];return t?t.offsetWidth+12:1;};
+  const centreLeft=t=>t.offsetLeft+t.offsetWidth/2-row.clientWidth/2;
+  function centre(t,instant){row.scrollTo({left:centreLeft(t),behavior:instant?"instant":"smooth"});}
+  function paint(){
+    rq=0;if(!row||!row.isConnected)return;
+    const r=row.getBoundingClientRect(),mid=r.left+r.width/2,s=step();let best=null,bd=1e9;
+    [...row.children].forEach(t=>{const b=t.getBoundingClientRect(),dx=Math.abs(b.left+b.width/2-mid);t.style.setProperty("--d",Math.min(1,dx/s).toFixed(3));if(dx<bd){bd=dx;best=t;}});
+    [...row.children].forEach(t=>t.classList.toggle("on",t===best));
+  }
+  const queue=()=>{if(!rq)rq=requestAnimationFrame(paint);};
+  function recentre(){
+    if(drag)return;const tiles=[...row.children],i=tiles.findIndex(t=>t.classList.contains("on"));if(i<0)return;
+    if(i<N||i>=2*N){const j=N+(i%N),off=row.scrollLeft-centreLeft(tiles[i]);row.style.scrollSnapType="none";row.scrollLeft=centreLeft(tiles[j])+off;requestAnimationFrame(()=>{row.style.scrollSnapType="";paint();});}
+  }
+  let at=0;   // which cartridge was in the middle, kept while Home is redrawn
+  function settle(){const tiles=[...row.children];centre(tiles[N+(at%N)],true);paint();}
+  return{
+    // the markup Home puts where the shelf goes
+    html(){if(!IN_SITE)return null;if(!el){load();return `<div class="hc" aria-busy="true"></div>`;}
+      const i=[...row.children].findIndex(t=>t.classList.contains("on"));if(i>=0)at=i%N;return `<div class="hc" id="shelfSlot"></div>`;},
+    // after Home is drawn: swap the placeholder for the shelf (the same cartridges, still mounted)
+    place(){const s=$("#shelfSlot");if(!s||!el)return;s.replaceWith(el);requestAnimationFrame(()=>{settle();kick();});}
+  };
+})();
+
 const UI={
   wallet(animate){
     const el=$("#walletN");cancelAnimationFrame(walletAnim);
@@ -895,9 +984,11 @@ const UI={
     const qth=["Newton","Chipotle Blackened Salmon","Monterey Tacos"].map(byName).filter(Boolean);
     const order=[S.sport,...GAME_IDS.filter(g=>g!==S.sport)];
     const showGrug=S.grug, popGrug=S.grug&&!S.grugSeen;
+    const shelf=Shelf.html();
     $("#v-home").innerHTML=`
       <p class="sub" style="margin-top:6px">12910 Malcomson Rd</p>
       <h1>${S.name?`Good to see you, ${esc(S.name)}.`:"Welcome to the table."}</h1>
+      ${shelf?shelf+`<p class="hc-cap">Swipe the cartridges, tap one to play</p>`:""}
       <button class="passhero" data-tab="pass" style="display:block;width:100%;text-align:left">
         <div class="gingham"></div>
         <div class="in">
@@ -912,8 +1003,8 @@ const UI={
         <div class="t"><b>${daily?"Table bonus is ready":"Table bonus collected"}</b><span class="sub">${daily?"25 coins, once per visit":"Come back next visit for another"}</span></div>
         <button class="btn sm ${daily?"gold":""}" id="dailyBtn" ${daily?"":"disabled"}>${daily?"Collect":"Done"}</button>
       </div>
-      <h2>While you wait</h2>
-      <div class="hs">${order.map(id=>this.gameMini(id)).join("")}</div>
+      ${shelf?"":`<h2>While you wait</h2>
+      <div class="hs">${order.map(id=>this.gameMini(id)).join("")}</div>`}
       <div class="tiles">
         <button class="tile" data-act="quiz">
           <div class="thumbs">${qth.map(i=>`<img src="${img(i)}" alt="">`).join("")}</div>
@@ -931,6 +1022,7 @@ const UI={
       ${showGrug?grugCard(popGrug):""}
       <p class="foot">Concept demo for R&amp;R CraftHouse Grill.<br>Purchases, check-ins and rewards here are simulated.</p>`;
     if(popGrug){S.grugSeen=true;save();}
+    Shelf.place();
   },
   menu(){
     const v=$("#v-menu");
@@ -2205,7 +2297,8 @@ const Onb=(()=>{
     if(dl)Game.open(GAME_IDS.includes(dl[1])?dl[1]:(S.sport||"football"));
     else{const tb=/^#(home|menu|play|pass|store)$/.exec(location.hash);if(tb)UI.go(tb[1]);if(!S.onboarded)Onb.start();}
     /* #menu, #play, #pass, #store: the tab bar Grug shows under its dock in CraftHouse mode links straight to a tab */
-    addEventListener("hashchange",()=>{const tb=/^#(home|menu|play|pass|store)$/.exec(location.hash);if(tb)UI.go(tb[1]);});
+    addEventListener("hashchange",()=>{const tb=/^#(home|menu|play|pass|store)$/.exec(location.hash);if(tb)UI.go(tb[1]);
+      const g=/^#game(?:\/(\w+))?/.exec(location.hash);if(g){if(window.Fossil32&&Fossil32.close)Fossil32.close();Game.open(GAME_IDS.includes(g[1])?g[1]:(S.sport||"football"));}});
     const idle=window.requestIdleCallback||(f=>setTimeout(f,1200));
     idle(()=>{Thumbs.make();},{timeout:2500});
     setTimeout(()=>Avatar.shoot(),S.onboarded?1500:4000);

@@ -73,6 +73,8 @@ must never lead to the standard Grug site or another partner's rewards app:
 - The whole site stays in the partner's light look (no dark fog on Games), with its typeface and a faint gingham;
   the game panel and game page are centred.
 - It survives a refresh and ends only when the tab closes or the site is opened normally.
+- The partner app's Home (on the site) opens with the site's game shelf: the partner's game and the Grug originals as
+  floating FOSSIL32 cartridges in one looping row (`Shelf` in the app), the same ones as the Grug home page.
 
 Partners live in `PARTNERS` in `assets/theme.js` (`GrugTheme.partner()`); `html[data-partner]` is set while it's on.
 
