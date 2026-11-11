@@ -404,6 +404,14 @@
   ];
   // the dock's stops, left to right: what a swipe (or Q / E, LB / RB) steps through
   const STOPS = ['home', 'games', 'me', 'make'];
+  // the partner app tab bar's icons (@icons, MIT): the same ones the partner app draws, so the bar looks identical
+  const PBAR_ICONS = {
+    house: '<path fill="currentColor" d="M7.316 1.14a1 1 0 0 1 1.368 0l6.394 5.995a.5.5 0 0 1-.342.865H13v7h-3v-3a2 2 0 0 0-4 0v3H3V8H1.264a.5.5 0 0 1-.341-.865z"/>',
+    meat: '<path fill="currentColor" d="M5.043 9.457a3.75 3.75 0 0 0 1.5 1.5L5 12.5V14a1 1 0 0 1-2 0v-1H2a1 1 0 0 1 0-2h1.5zM8.608.867C9.613.715 11.688.687 13.5 2.5c1.812 1.811 1.786 3.886 1.634 4.891-.061.402-.309.74-.634.984l-.884.663a7.32 7.32 0 0 1-5.823 1.32 2.74 2.74 0 0 1-2.151-2.151 7.32 7.32 0 0 1 1.32-5.824l.663-.883c.244-.326.581-.572.983-.633m4.22 2.547c-.78-.78-1.73-1.098-2.121-.707-.39.39-.074 1.34.707 2.12.78.782 1.73 1.099 2.121.709.39-.39.074-1.341-.707-2.122"/>',
+    controller: '<path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12.26 3a3 3 0 0 1 2.988 2.729l.57 6.264a1.84 1.84 0 0 1-3.364 1.188L11 11H5l-1.454 2.18a1.84 1.84 0 0 1-3.364-1.187l.57-6.264A3 3 0 0 1 3.74 3zM12 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2M4 5a2 2 0 1 0 0 4 2 2 0 0 0 0-4m6 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m4 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2m-2-2a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>',
+    trophy: '<path fill="currentColor" d="M12.91 2H15a1 1 0 0 1 1 1v2a3 3 0 0 1-3 3h-.636l-.002.017A4.38 4.38 0 0 1 9 11.884V13h2l1 1v1H4v-1l1-1h2v-1.116a4.38 4.38 0 0 1-3.362-3.867L3.636 8H3l-.154-.004A3 3 0 0 1 0 5V3a1 1 0 0 1 .897-.995L1 2h2.09L3 1h10zM2 5a1 1 0 0 0 1 1h.454l-.182-2H2zm10.546 1H13a1 1 0 0 0 1-1V4h-1.273z"/>',
+    coins: '<path fill="currentColor" d="M14 13c0 1.105-2.239 2-5 2s-5-.895-5-2v-.363q.445.117.923.197a12.8 12.8 0 0 0 3.076.127q.49.037 1.001.039c1.475 0 2.857-.237 3.907-.657.395-.158.77-.354 1.093-.594zM2 8.749c.322.24.698.436 1.093.594C4.143 9.763 5.525 10 7 10q.51-.001 1-.04.496.04 1 .04c.708 0 1.413-.056 2.077-.166q.478-.08.923-.197V10c0 1.105-2.239 2-5 2s-5-.895-5-2zM14 7c0 1.105-2.239 2-5 2s-5-.895-5-2V5.749c.32.238.695.435 1.093.594a9 9 0 0 0 1.83.491C7.587 6.944 8.293 7 9 7c.708 0 1.413-.056 2.077-.166a9 9 0 0 0 1.83-.491c.398-.16.773-.356 1.093-.594z"/><path fill="currentColor" d="M9 2c2.761 0 5 .895 5 2 0 .262-.129.522-.38.766-.252.242-.62.462-1.085.648a8 8 0 0 1-1.622.434C10.306 5.948 9.656 6 9 6s-1.307-.052-1.913-.152a8 8 0 0 1-1.622-.434C5 5.228 4.632 5.008 4.38 4.766 4.129 4.522 4 4.262 4 4c0-1.105 2.239-2 5-2M8 5h2V3H8z"/>'
+  };
   // partner mode (theme.js, e.g. crafthouse/): the site is just for playing and dressing up, so the dock is Games and Me
   const partnerOn = () => !!(root.GrugTheme && root.GrugTheme.partner && root.GrugTheme.partner());
   const PARTNER_TABS = ['games', 'me'];
@@ -480,6 +488,14 @@
     root.addEventListener('resize', closeTray); root.addEventListener('scroll', closeTray, { passive: true });
     document.body.appendChild(tray);
     document.body.prepend(top); document.body.appendChild(tabs);
+    // partner mode: the partner app's own tab bar stays on screen under the dock, so Games and Me feel like part of their app
+    if (partner && partner.bar) {
+      const pb = document.createElement('nav'); pb.className = 'g-pbar'; pb.setAttribute('aria-label', (partner.short || partner.n) + ' app');
+      const lit = (partner.barOn || {})[groupOf(active).id] || (partner.barOn || {})[active];
+      pb.innerHTML = partner.bar.map(([id, label, ic, hash]) => '<a href="' + url(partner.app) + hash + '"' + (id === lit ? ' aria-current="page"' : '') + '>' +
+        '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">' + (PBAR_ICONS[ic] || '') + '</svg><span>' + esc(label) + '</span></a>').join('');
+      document.body.appendChild(pb);
+    }
     document.body.classList.add('g-chrome');
     // the account menu under the avatar
     const menu = document.createElement('div'); menu.className = 'g-menu'; menu.setAttribute('role', 'menu'); menu.hidden = true;

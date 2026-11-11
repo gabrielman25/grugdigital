@@ -70,7 +70,9 @@
   const SHOP_FONTS = { f: null, l: 'Shop Lora', h: 'Shop Patrick Hand', o: 'Shop Oswald', p: 'Shop Playfair', b: 'Shop Lilita', r: 'Shop Righteous', m: 'Shop Outfit' };
   // full partners with their own branded version of the site (partner mode): logo and app paths are from the site root
   const PARTNERS = {
-    crafthouse: { n: 'R&R CraftHouse Grill', short: 'CraftHouse', color: '#CFAC52', i: 'hamburger', f: 'f', logo: 'play/crafthouse/logo.png', app: 'play/crafthouse/', game: 'crafthouse', demo: true }
+    crafthouse: { n: 'R&R CraftHouse Grill', short: 'CraftHouse', color: '#CFAC52', i: 'hamburger', f: 'f', logo: 'play/crafthouse/logo.png', app: 'play/crafthouse/', game: 'crafthouse', demo: true,
+      // the app's own tab bar, shown under the dock on every page (grug.js): [id, label, icon, link from the app]; 'play' lights up on Games
+      bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'meat', '#menu'], ['play', 'Play', 'controller', '#play'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } }
   };
   const partnerBrand = id => PARTNERS[id] ? Object.assign({ p: id, at: Date.now() }, PARTNERS[id]) : null;
   const ss = { get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }, del(k) { try { sessionStorage.removeItem(k); } catch (e) {} } };
@@ -158,7 +160,9 @@
       if (/^(index\.html)?$|^(make|create|links|partners)(\/|$)|^rewards(\/|\/index\.html|\/create(\/.*)?)?$/.test(rel)) location.replace(rootPath + 'games/'); } catch (e) {}
     document.documentElement.setAttribute('data-partner', brand.p);
   }
-  if (sitePage && SECTIONS[section].fog) {
+  // partner mode keeps the partner app's light look everywhere, Games included (no dark fog stage)
+  const fogOn = !!SECTIONS[section].fog && !(brand && brand.p);
+  if (sitePage && fogOn) {
     document.documentElement.classList.add('g-fogged');
     try { if (me) { const s = document.createElement('script'); s.src = me.replace(/theme\.js(\?.*)?$/, 'fogbg.js'); s.defer = true; document.head.appendChild(s); } } catch (e) {}
   } else if (sitePage && !SECTIONS[section].solid && !brand) {
@@ -168,10 +172,11 @@
   function apply() {
     const s = prefs(), t = SECTIONS[section], el = document.documentElement;
     // the Games section is a dark stage (the fog) in both modes
-    const mode = t.fog ? 'dark' : s.mode, bg = mode === 'light' ? '#F3F3F5' : '#17171A';
+    const fog = t.fog && !(brand && brand.p);
+    const mode = brand && brand.p ? 'light' : fog ? 'dark' : s.mode, bg = mode === 'light' ? (brand && brand.p ? '#F8F5EE' : '#F3F3F5') : '#17171A';
     const ac = accent();
     el.setAttribute('data-theme', mode); el.setAttribute('data-mode-pref', s.mode); el.setAttribute('data-section', section);
-    el.classList.toggle('g-chrome-light', s.mode === 'light' && mode === 'dark');   // Games in light mode: dark stage, light top bar and dock
+    el.classList.toggle('g-chrome-light', fog && s.mode === 'light' && mode === 'dark');   // Games in light mode: dark stage, light top bar and dock
     el.setAttribute('data-role', s.role);   // who's visiting (Settings → I'm a…): pages show or hide parts with [data-only-for] / [data-hide-for]
     if (brand) el.setAttribute('data-brand', ''); else el.removeAttribute('data-brand');
     el.style.setProperty('--h', HUE);
@@ -185,7 +190,7 @@
     el.classList.toggle('calm', isCalm(s));
     let m = document.querySelector('meta[name="theme-color"]');
     if (!m) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); }
-    m.content = t.fog ? '#03050f' : bg;
+    m.content = fog ? '#03050f' : bg;
     // the tab's name says the shop's name, not ours
     brandTitle();
     try { document.dispatchEvent(new CustomEvent('grug:theme', { detail: { section, mode, brand } })); } catch (e) {}

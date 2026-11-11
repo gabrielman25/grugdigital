@@ -579,8 +579,35 @@ html[data-role="player"] [data-hide-for~="player"],html[data-role="owner"] [data
 /* partner mode (theme.js PARTNERS, e.g. crafthouse/): the partner's real logo on a white plate, so it reads in light and dark */
 .g-logo.is-partner{padding:0 10px 0 5px;gap:8px}
 .g-partner-logo{display:block;height:38px;width:auto;max-width:34vw;object-fit:contain;background:#fff;border-radius:999px;padding:3px 12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
-.g-partner-demo{font:700 10.5px/1 var(--body,inherit);letter-spacing:.12em;text-transform:uppercase;color:var(--mode-text);border:1.5px solid currentColor;border-radius:7px;padding:3px 5px}
+.g-partner-demo{font:700 10.5px/1 var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--mode-text);border:1.5px solid currentColor;border-radius:7px;padding:3px 5px}
 @media (max-width:420px){.g-partner-logo{height:40px;padding:2px 10px}.g-logo.is-partner{padding:0 7px 0 3px;gap:6px}.g-partner-demo{font-size:9px;padding:2px 4px}}
+/* partner mode: the partner app's own tab bar under the dock (same look as the app). --sab grows by its height, so the dock,
+   page padding and every layout that already respects the bottom safe area move up to make room. */
+@font-face{font-family:"RR Bricolage";src:url(../play/crafthouse/bricolage.woff2) format("woff2");font-weight:200 800;font-display:swap}
+html[data-partner]{--sab:calc(env(safe-area-inset-bottom,0px) + 72px);--tabs:64px}
+/* the partner's look on every page, Games included (theme.js turns the dark fog off and keeps light mode): its warm page
+   colour, its typeface and a very faint gingham like the app's checkered liner */
+html[data-partner][data-theme]{--page:#F8F5EE;--font:"RR Bricolage","Fredoka",system-ui,sans-serif;--display:"RR Bricolage","Fredoka",system-ui,sans-serif}
+html[data-partner].g-site,html[data-partner].g-site body{background-color:var(--page)}
+html[data-partner].g-site body{background-image:linear-gradient(90deg,rgba(36,56,63,.035) 50%,transparent 50%),linear-gradient(rgba(36,56,63,.035) 50%,transparent 50%);background-size:28px 28px;background-attachment:fixed}
+html[data-partner] :is(.gc-biz,.gc-sub){color:var(--mode-text)}
+@media (orientation:portrait),(min-height:541px){html[data-partner] .g-tabs :is(a,.g-grp){height:48px;flex-direction:row;gap:8px;font-size:13px}html[data-partner] .g-tabs :is(a,.g-grp) .k-ic{width:26px;height:26px}}
+.g-pbar{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);transform:translateX(-50%);z-index:41;width:min(calc(100% - 24px),456px);
+  display:flex;gap:2px;padding:5px;border-radius:30px;background:#efeeea;box-shadow:0 6px 22px rgba(0,0,0,.22);font-family:"RR Bricolage","Fredoka",system-ui,sans-serif;view-transition-name:g-pbar}
+.g-pbar a{flex:1;height:50px;border-radius:25px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11.5px;font-weight:600;color:#55585e;text-decoration:none;transition:background .2s,transform .12s}
+.g-pbar a svg{width:19px;height:19px;display:block}
+.g-pbar a[aria-current]{background:#fff;color:#0d0d0d;box-shadow:0 1px 5px rgba(0,0,0,.09)}
+.g-pbar a:active{transform:scale(.95)}
+html.f32-lock .g-pbar{filter:blur(9px) brightness(.6)}
+/* short landscape screens: the Grug dock is a rail on the left, so the partner bar becomes a rail on the right (icons only) */
+@media (orientation:landscape) and (max-height:540px){
+  html[data-partner]{--sab:env(safe-area-inset-bottom,0px);--sar:calc(env(safe-area-inset-right,0px) + 70px)}
+  html[data-partner] body.g-chrome{padding-right:calc(var(--sar) + 10px)}
+  html[data-partner] .gc{right:70px}
+  .g-pbar{left:auto;right:calc(env(safe-area-inset-right,0px) + 10px);top:50%;bottom:auto;transform:translateY(-50%);width:auto;flex-direction:column;padding:5px;max-height:calc(100% - 90px)}
+  .g-pbar a{flex:none;width:52px;height:46px}
+  .g-pbar a span{display:none}
+}
 .g-brand-ic.is-logo{background:#fff;width:64px}.g-brand-ic.is-logo img{width:56px;height:auto;display:block}
 html[data-brand] [data-hide-brand]{display:none!important}
 html:not([data-brand]) [data-only-brand]{display:none!important}

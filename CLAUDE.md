@@ -59,6 +59,10 @@ A full partner can have its own branded version of the site. Its address (`craft
 Demo tag while `demo: true`) and links back to their app, the dock is just **Games** and **Me**, and Home, Make, Links,
 Rewards (not `rewards/card/`) and Partners send the guest to Games. The Games page opens on the partner's own game.
 Unlike shop mode it survives a refresh; it ends when the tab closes, the site is opened normally, or Settings → Leave.
+It should feel like one app: the partner app's own tab bar (`bar` in its PARTNERS entry, `.g-pbar`) stays on screen under
+the dock on every page (a rail on the right in short landscape; `--sab` grows by its height so layouts make room), its
+tabs link into the app (`#menu`, `#play` …), and the whole site stays in the partner's light look with its typeface and a
+faint gingham, Games included (no dark fog in partner mode).
 Partners live in `PARTNERS` in `assets/theme.js` (`GrugTheme.partner()`); `html[data-partner]` is set while it's on.
 
 ## Games are FOSSIL32 cartridges
