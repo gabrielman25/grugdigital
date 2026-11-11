@@ -102,13 +102,24 @@ back in the app".
 
 ## Games are FOSSIL32 cartridges
 
-Everywhere a game is showcased (the home page games carousel, the Games page, each `games/<id>/` page) it is
-shown as a floating 3D **FOSSIL32** cartridge box (Grug Digital's fantasy console). Tapping a box darkens the page and
+Wherever a game is showcased on its own (the home page games carousel, Favorites, each `games/<id>/` page) it is
+shown as a floating 3D **FOSSIL32** cartridge box (Grug Digital's fantasy console). The store (`games/`) is the one
+place that browses them as flat box art, like a big PC game store. Tapping a box darkens the page and
 blurs it out of focus, pulls the cartridge out and shows the game panel; **Play** drops the cartridge into the FOSSIL32
 console, zooms into its screen and opens the game. A pool of the game's colour follows the cartridge the whole way.
 
-The **Games page** is a looping vertical carousel of boxes on the left half (`Fossil32.rack`, the page drives
-`state.pos`), with the selected game's details on the right (below it on phones). Scroll, swipe, arrow keys or a
+The **Games page** (`games/`) is the **store**, laid out like a big PC game store in the site's own look: a featured
+carousel (hover a screenshot to see it big), rows of capsules (Keep playing, Grug originals, Made with Katy restaurants),
+categories (the games' `tags`), the **Discovery Queue** (step through games picked from what you play and favorite: heart
+or ignore each one) and a tabbed list with a preview beside it. **Browse all** (`games/#search?…`) is its search page:
+sort, tag include / exclude with live counts, Your library / Made for / Status filters and removable chips, all kept in the
+address. Every heart (store, queue, game page) adds the game to Favorites (`Grug.favs` in `grug.js`: favourites and the
+ignore list, saved on this device). Only real numbers appear (your runs and best scores): never made-up ratings, reviews
+or player counts. The old `games/#g/<id>` address goes to that game's page.
+
+**Favorites** (`games/favorites/`) is a looping vertical carousel of the hearted boxes, in the order they were added,
+on the left half (`Fossil32.rack`, the page drives `state.pos`), with the selected game's details on the right (below it
+on phones). With nothing hearted it shows a card pointing to the store and the Discovery Queue (no dead end). Scroll, swipe, arrow keys or a
 controller browse; Play / Enter / tapping the front box calls `Fossil32.launch(id)` (box opens → cartridge → console → game).
 The panel shows only the game's name, the business it was made for, its short `blurb` (the full `long` write-up is
 on its game page; keep blurbs to a sentence or two), its `features` and Play. No catalog codes, tags or Live/Demo
@@ -147,7 +158,10 @@ When a new game is added to `assets/games.js` and listed, also make its box. Don
    `assets/boxart/<id>.jpg`, 1580 × 950, no text). Rules: female avatar, long hair or buns only, no hats.
    Also save 1–3 back-of-box screenshots to `assets/boxart/shots/`.
 4. Point `thumb` at the box art too, and add a `games/<id>/index.html` like the others (it calls `GrugGamePage('<id>')`).
-5. Check it in a browser: the box on the Games page, the unbox, the panel, and Play (cartridge → console → game).
+5. **Store tags:** 3-5 genre words in `tags` (reuse the words other games already have where they fit). They drive the
+   store's categories, tag filters and recommendations.
+6. Check it in a browser: the game in the store (capsules, search, the queue), heart it, then its box on Favorites, the
+   unbox, the panel, and Play (cartridge → console → game).
 
 ## Avatar editor (`avatar/`)
 

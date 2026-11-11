@@ -13,6 +13,8 @@
                  art: assets/boxart/<id>.jpg (1580x950 cover art, the avatar in an action pose, NO title text: the box adds it),
                  shots: up to 3 back-of-box screenshots, 800x450 }
    thumb     = a flat picture for anything that isn't a box (point it at the box art).
+   tags      = 3-5 genre words for the store (games/): its categories, tag filters, "more like this" and recommendations.
+               Reuse words other games already have where they fit, so the filters stay short.
 */
 window.GRUG_GAMES = [
   {
@@ -29,6 +31,7 @@ window.GRUG_GAMES = [
   {
     id: 'teahouse', app: 'teahouse',
     title: 'Boba Bandit', appTitle: 'Steal a Sip', subtitle: 'Tea Trail Heist', kind: '3D tycoon', status: 'live',
+    tags: ['Tycoon', 'Heist', 'Food & Drink', 'Collecting'],
     partner: 'Teahouse Express', place: 'Katy Mills',
     blurb: 'Grab drinks on the Tea Trail, outrun the Keepers, and run the richest patio shack.',
     long: 'Ride down a winding Tea Trail through six zones, grab sealed Teahouse Express drinks and bring them home to your patio shack, where they brew and customers buy them. Copies stack and earn more, faster rides get you past the Keepers to the rare drinks, and you play as your own avatar. Points from Teahouse Express (or Pearls) buy speed boosts, passes and cash packs in the Store.',
@@ -58,6 +61,7 @@ window.GRUG_GAMES = [
   {
     id: 'soluna', app: 'soluna',
     title: 'Barista Blitz', appTitle: 'Sunrise to Sunset', subtitle: 'Sunrise to Sunset', kind: 'Barista sim', status: 'live',
+    tags: ['Simulator', 'Cooking', 'Food & Drink', 'Time Pressure'],
     partner: 'Soluna Coffee', place: 'Elyson Falls, Katy',
     blurb: 'Open the shop at sunrise, pour the orders and close at sunset. Buy boosts and passes with Pearls or Soluna points.',
     long: 'Soluna’s coffee-shop game, on the Game tab of the Soluna app. You work the bar as your own Grug avatar, and every customer is a Sandy. The Store sells shift boosts, packs and forever passes for Pearls (spent first) or Soluna points.',
@@ -77,6 +81,7 @@ window.GRUG_GAMES = [
     // Demo made to pitch Rodeo Express Car Wash: not a live partner yet. The app shows a "Demo" bar on every screen.
     id: 'rodeo', app: 'rodeo',
     title: 'Turbo Suds 2000', appTitle: 'Rodeo Wash Simulator', subtitle: 'Rodeo Express Edition', kind: '3D simulator', status: 'preview',
+    tags: ['Simulator', 'Tycoon', 'Cars', 'Rebirth'],
     partner: 'Rodeo Express Car Wash', place: 'Peek Rd, Katy',
     blurb: 'Hand-wash muddy cars, run the Express Tunnel from the pay station, hire a crew and rebirth for bigger Bucks.',
     long: 'A demo made for Rodeo Express Car Wash, in a blocky voxel world. Hand-wash muddy cars in your bays with a pressure wand (Soft Wash, Triple Foam, Tire Shine and Rodeo Ceramic, the steps of their real menu), and run the Express Tunnel: stand at the pay station to check drivers in, and the conveyor pulls them through the machines. Bucks buy upgrades, bays, packages, attendants and a crew; rebirth for a bigger multiplier. You wear the Rodeo crew tee, or your own shirt from the locker. Tapping the poster at your bay earns Rodeo points and doubles your Bucks for 15 minutes.',
@@ -98,6 +103,7 @@ window.GRUG_GAMES = [
     // crafthouse/ opens CraftHouse mode (assets/theme.js PARTNERS): the whole site in R&R's logo and colour, Games and Me only.
     id: 'crafthouse', app: 'crafthouse',
     title: 'Gridiron Grill 98', appTitle: 'Game Day', subtitle: 'CraftHouse Sports Triple Pack', kind: '3D sports', status: 'preview',
+    tags: ['Sports', 'Arcade', 'Quick Runs'],
     partner: 'R&R CraftHouse Grill', place: 'Malcomson Rd, Katy',
     blurb: 'Three one-minute swipe games for the wait at the table: kick field goals, bend penalty kicks and sink buzzer beaters.',
     long: 'A demo made for R&R CraftHouse Grill, the Katy sports grill. Three quick games in a blocky voxel stadium and backyard court: Field Goal Frenzy (swipe to kick through the uprights as the ball moves back and the wind picks up), Penalty Kings (curve your swipe to bend it past a sliding wall) and Buzzer Beater (stop the power meter in the green, with a gold money ball every fifth shot). Streaks multiply the score and the crowd goes wild. Craft Coins from the app buy one-run power-ups like Wide Uprights, Aim Guide and Golden Boot. The app around it has the full R&R menu with photos, a "What should I order?" quiz and a visit-based Season Pass.',
@@ -119,6 +125,7 @@ window.GRUG_GAMES = [
     // so it has no storageKey here (that field means "partner points live there").
     id: 'runway', app: 'runway', standalone: true,
     title: 'Catwalk Craze', appTitle: 'Runway Ready', subtitle: 'Fashion House Showdown', kind: '3D dress-up', status: 'live',
+    tags: ['Dress-Up', 'Fashion', 'Time Pressure', 'Competitive'],
     partner: 'Grug Original', place: 'Plays anywhere',
     blurb: 'Dress to the theme in a voxel fashion house, then walk the runway against four rivals.',
     long: 'A theme appears (Ocean Blue, Cowgirl, Red Carpet and more). Run through six wardrobe rooms full of pieces from the Grug avatar closet, pick their colours and beat the clock, then strut the runway. Matching the theme earns up to 70 points and the judges add up to 30. Pearls buy Extra Time, Style Hints, Fast Feet and Spotlight, and you play as your own avatar.',
@@ -139,6 +146,7 @@ window.GRUG_GAMES = [
     // Its save ('grug-chestquest-v1') holds power-ups and best score, not partner points, so no storageKey here.
     id: 'chestquest', app: 'chestquest', standalone: true,
     title: 'Crypt Crawler', appTitle: 'Chest Quest', subtitle: 'The Endless Chest Quest', kind: '3D dungeon roguelike', status: 'live',
+    tags: ['Roguelike', 'Dungeon', 'Stealth', 'Exploration'],
     partner: 'Grug Original', place: 'Plays anywhere',
     blurb: "Delve floor after floor of a blocky dungeon, crypt and caves: open every chest, then race back to the stairs while monsters you can't beat hunt you.",
     long: "A Dandy's World-style roguelike. Every floor is a new place (a dungeon, a crypt, caves, catacombs, a library, crystal caves and the ember depths): pick the lock on every chest, grab the gold, then get back to the stairs. Monsters can't be beaten: duck behind a column or a stack of crates, break their line of sight and they give up. Sprint, carry three items, shop with the merchant, and see how deep you can get as your own avatar. Pearls buy power-ups like Extra Heart, Quick Fingers and Second Wind.",
@@ -159,6 +167,7 @@ window.GRUG_GAMES = [
     // Its host save ('grug-glowupspa-v1') holds owned items and best cash a second, not partner points, so no storageKey here.
     id: 'glowupspa', app: 'glowupspa', standalone: true,
     title: 'Glamour Spa Deluxe', appTitle: 'Glow Up Spa', subtitle: 'Salon & Pet Tycoon', kind: '3D tycoon', status: 'live',
+    tags: ['Tycoon', 'Pets', 'Collecting', 'Rebirth'],
     partner: 'Grug Original', place: 'Plays anywhere',
     blurb: 'Run a salon and spa, sneak eggs out of the Beauty Store, and hatch pets that earn cash.',
     long: 'Build your own salon and spa: your staff give haircuts, pedicures, hair color and face masks while you grab the cash, add chairs, hire staff and open new rooms. Train your Speed on the treadmill, sneak eggs out of the six-zone Beauty Store mall past the clerks, and hatch pets that roam your field and earn cash on their own. Fuse matching pets to grow them, collect gold, rainbow and colour variants, and rebirth for a bigger multiplier. You play as your own avatar, and Pearls buy speed, passes, boosts and cash packs in the Store.',
@@ -179,6 +188,7 @@ window.GRUG_GAMES = [
     // Its host save ('grug-petmountainrescue-v1') holds owned items and best height, not partner points, so no storageKey here.
     id: 'petmountainrescue', app: 'petmountainrescue', standalone: true,
     title: 'Peak Pals', appTitle: 'Pet Mountain Rescue', subtitle: 'Mountain Rescue Adventure', kind: '3D climber + pet tycoon', status: 'live',
+    tags: ['Climbing', 'Pets', 'Exploration', 'Collecting'],
     partner: 'Grug Original', place: 'Plays anywhere',
     blurb: 'Climb an endless block mountain with a climbing partner, rescue stranded pets, and watch them earn gems at your Pet Haven.',
     long: 'You can’t jump, but your partner can boost you: set her down by a ledge, hop up on her head, then pull her up after you. Pets are stranded all the way up the mountain, rarer the higher you go: lead them to a camp’s Rescue Hut and they move into your Pet Haven, where they settle in and earn gems, even while you’re away. Pick one of three climbing partners (Booster, Pet Whisperer or Scout) who levels up as you climb together, spend gems on climbing and walking upgrades, Haven pads and her wardrobe, and climb as your own avatar. Pearls buy forever passes like x2 Gems and x2 Settle Speed, boosts, gem packs and a camp skip.',
@@ -199,6 +209,7 @@ window.GRUG_GAMES = [
     // Its host save ('grug-mysteryblasters-v1') holds owned items and best round, not partner points, so no storageKey here.
     id: 'mysteryblasters', app: 'mysteryblasters', standalone: true,
     title: 'Foam Frenzy', appTitle: 'Mystery Blasters', subtitle: 'A Whodunit Party',
+    tags: ['Party', 'Mystery', 'Stealth', 'Collecting', 'Pets'],
     kind: '3D party game', status: 'live',
     partner: 'Grug Original', place: 'Plays anywhere',
     blurb: 'One player is the Murderer, one is the Sheriff: find the Murderer before everyone is tagged, then unbox wild blaster skins and hatch pets.',
@@ -218,6 +229,7 @@ window.GRUG_GAMES = [
   {
     id: 'alchemy', app: 'alchemy',
     title: 'Sugar Sorcery', appTitle: 'Sugar Alchemist', subtitle: 'Alchemy Bake Lab', kind: '3D bakery sim', status: 'live',
+    tags: ['Cooking', 'Simulator', 'Food & Drink', 'Time Pressure'],
     partner: 'Alchemy Bake Lab', place: 'Peek Rd, Katy',
     blurb: 'Run the counter at Alchemy Bake Lab: mix, bake, frost and sparkle treats to match every ticket.',
     long: 'A 3D bakery game in the spirit of Papa’s Pizzeria. Take the order, stir the batter in the flask, pull the tray when it’s golden, frost it, add the sparkle and box it up; the closer it matches the ticket, the bigger the tip. Tips buy oven upgrades and decor for your lab, ranks unlock layer cakes, cake pops, macarons and custom cakes, and you play as your own avatar. Alchemy points (or Pearls) buy boosts, passes and tip packs in the Store. Points are for the game only.',
@@ -239,6 +251,7 @@ window.GRUG_GAMES = [
     // already listed under Steal a Sip.
     id: 'takeatea', app: 'teahouse',
     title: 'Tea Time Tycoon', appTitle: 'Take a Tea', subtitle: 'The Original Mall Shop', kind: '3D tycoon', status: 'legacy',
+    tags: ['Tycoon', 'Food & Drink', 'Classic'],
     partner: 'Teahouse Express', place: 'Katy Mills',
     blurb: 'The original Teahouse game: run a boba shop in a blocky 3D world, serve customers and race the clock.',
     long: 'The first Teahouse Express game, kept playable as a classic. A third-person tycoon on Grug’s own voxel engine: walk the mall, lock a shop, pour drinks and watch the cash tick up. Teahouse points still buy its five-minute boosts: speed, luck, longer locks, a tip jar and double cash. Your avatar is the character you play as.',

@@ -256,6 +256,24 @@
   // progress toward a milestone item: {have, need, pct}
   function progress(it) { const g = it.get; if (g.type !== 'milestone') return null; const have = statValue(g.app, g.stat); return { have, need: g.value, pct: Math.min(100, Math.round(have / g.value * 100)) }; }
 
+  /* ---------- favourite and ignored games (this device) ----------
+     The store's heart and the Discovery Queue's Ignore. Favourites keep the order they were added in: games/favorites/
+     shows them, in that order, as the FOSSIL32 rack. Ignoring a game drops it from favourites, and favouriting it again
+     takes it off the ignore list. */
+  const FAV_KEY = 'grug.games.favs.v1', IGN_KEY = 'grug.games.ignored.v1';
+  const idList = k => { const v = readJSON(k, []); return Array.isArray(v) ? v.filter(x => typeof x === 'string' && GAMES.some(g => g.id === x)) : []; };
+  const setIn = (k, id, on) => { const l = idList(k).filter(x => x !== id); if (on) l.push(id); writeJSON(k, l); };
+  const favs = {
+    list: () => idList(FAV_KEY),
+    has: id => idList(FAV_KEY).includes(id),
+    set(id, on) { setIn(FAV_KEY, id, !!on); if (on) setIn(IGN_KEY, id, false); return !!on; },
+    toggle(id) { return favs.set(id, !favs.has(id)); },
+    ignored: () => idList(IGN_KEY),
+    isIgnored: id => idList(IGN_KEY).includes(id),
+    ignore(id, on) { setIn(IGN_KEY, id, !!on); if (on) setIn(FAV_KEY, id, false); return !!on; },
+    clearIgnored() { writeJSON(IGN_KEY, []); }
+  };
+
   /* ---------- partner points (read from each app's own storage) ---------- */
   function appState(game) { return game && game.storageKey ? readJSON(game.storageKey, null) : null; }
   function points() {
@@ -862,6 +880,7 @@
     get profile() { return profile; }, get isNew() { return isNew; }, storageWorks,
     on(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },
     save, setName, setAvatar, equip, unequip, wearing, refreshPictures, owns, grant, track, totals, statValue, progress, checkMilestones, celebrate,
+    favs,   // favourite and ignored games (the store, games/favorites/, the game pages)
     points, appState, exportData, exportText, exportFilename, download, share, parseImport, applyImport, reset,
     snaps, ensureSnaps, randomName, cleanName, makeName, parseName, NAME_WORDS: { adj: ADJ.slice(), noun: NOUN.slice(), maxNum: NAME_MAX_NUM }, pearlBalance, pearlsUrl,
     announce,

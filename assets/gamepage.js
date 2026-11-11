@@ -13,15 +13,18 @@ window.GrugGamePage = function (id) {
   const live = g.status === 'live' || g.status === 'legacy', legacy = g.status === 'legacy';
   const main = document.createElement('main'); main.className = 'wrap gp';
   main.innerHTML =
-    '<a class="gp-back" href="' + G.url('games/') + '">' + G.icon('arrow-left') + 'All games</a>' +
+    '<a class="gp-back" href="' + G.url('games/') + '">' + G.icon('arrow-left') + 'Store</a>' +
     '<section class="gp-hero">' +
       // the cover is the game's FOSSIL32 box (assets/fossil32/): tap it to pull out the cartridge
       '<div class="gp-cover f32-tile" data-f32="' + g.id + '" role="button" tabindex="0" aria-label="Open the ' + G.esc(g.title) + ' cartridge"><div class="f32-stage"><span class="badge ' + (legacy ? 'legacy' : live ? 'live' : 'soon') + '"' + (legacy ? ' style="background:#6b7280;color:#fff"' : '') + '>' + (legacy ? 'Classic' : live ? 'Live' : 'Demo') + '</span><img class="f32-flat" src="' + G.url((g.box && g.box.art) || g.thumb) + '" alt=""></div></div>' +
       '<div class="gp-head">' +
         '<h1>' + G.esc(g.title) + '</h1>' + (g.subtitle ? '<p class="gp-sub">' + G.esc(g.subtitle) + '</p>' : '') +
         '<div class="row mut"><span class="g-chip">' + G.icon(g.standalone ? 'sparkle' : 'storefront') + G.esc(g.partner) + '</span><span class="g-chip">' + G.icon('game-controller') + G.esc(g.kind) + '</span><span class="g-chip">' + G.icon('map-pin') + G.esc(g.place) + '</span></div>' +
+        (g.tags && g.tags.length ? '<div class="gp-tags">' + g.tags.map(t => '<a href="' + G.url('games/') + '#search?tags=' + encodeURIComponent(t) + '">' + G.esc(t) + '</a>').join('') + '</div>' : '') +
         '<p class="lead">' + G.esc(g.blurb) + '</p>' +
         '<div class="row"><a class="g-btn primary big" id="playBtn" href="' + G.url(g.game || g.play) + '">' + G.icon('play') + (live ? 'Play' : 'Try the demo') + '</a>' +
+        // the heart: Favorites (games/favorites/) shows hearted games as the FOSSIL32 rack
+        '<button type="button" class="g-btn gp-fav" id="favBtn" aria-pressed="false"></button>' +
         (g.storageKey ? '<a class="g-btn" href="' + G.url(g.play) + '#' + (G.appState(g) && G.appState(g).store ? G.esc(G.appState(g).store) + '/rewards' : '') + '">' + G.icon('coins') + 'Rewards</a>' : '') + '</div>' +
         '<div class="gp-stats">' +
           (p ? '<div><b>' + G.fmt(p.points) + '</b><span>' + G.esc(C.APPS[g.app].short) + ' points</span></div>' : '') +
@@ -40,6 +43,9 @@ window.GrugGamePage = function (id) {
   // Play: the cartridge goes into the FOSSIL32 console, then the game opens (plain link if 3D isn't available)
   $('#playBtn').addEventListener('click', e => { if (window.Fossil32 && window.Fossil32.ok && !e.metaKey && !e.ctrlKey) { e.preventDefault(); window.Fossil32.boot(g.id); } });
   main.querySelector('.gp-cover').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && window.Fossil32 && window.Fossil32.ok) { e.preventDefault(); window.Fossil32.open(g.id, e.currentTarget); } });
+  const favBtn = $('#favBtn'), drawFav = () => { const on = G.favs.has(g.id); favBtn.setAttribute('aria-pressed', String(on)); favBtn.innerHTML = G.icon('heart') + (on ? 'In Favorites' : 'Favorite'); };
+  drawFav();
+  favBtn.addEventListener('click', () => { const on = G.favs.toggle(g.id); drawFav(); G.ui.buzz(); G.ui.toast(on ? 'Added to Favorites' : 'Removed from Favorites', { icon: 'heart' }); });
   G.ui.fillThumbs($('#gpItems'));
   main.addEventListener('click', e => {
     const b = e.target.closest('[data-item]'); if (!b) return;

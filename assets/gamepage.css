@@ -19,3 +19,7 @@
 .gp-facts b{display:block}
 .gp-facts span{color:var(--ink2);font-size:14.5px}
 @media (min-width:760px){.gp-hero{grid-template-columns:minmax(300px,460px) 1fr;gap:28px;align-items:start}.gp-facts{grid-template-columns:1fr 1fr}}
+.gp-fav[aria-pressed=true] .gi{color:#FF8FC2}
+.gp-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:-2px}
+.gp-tags a{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:8px;background:var(--card2);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink2)}
+.gp-tags a:hover{background:var(--mode);border-color:transparent;color:var(--on-sel)}

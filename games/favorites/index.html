@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en" class="gc-html">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Favorites · Grug</title>
+<meta name="description" content="Your favourite Grug games, as FOSSIL32 cartridge boxes.">
+<meta name="theme-color" content="#03050f">
+<link rel="icon" href="../../favicon.png">
+<link rel="stylesheet" href="../../assets/grug.css">
+<script src="../../assets/theme.js"></script>
+<link rel="stylesheet" href="../../assets/fossil32/fossil32.css">
+<style>
+/* Favorites: the games the player hearted in the store (games/), in the order they were added (Grug.favs), as a
+   console-style library: a vertical carousel of FOSSIL32 boxes on the left half (fossil32.js draws it, see Fossil32.rack),
+   the selected game's details on the right. Scroll, swipe, arrow keys or a controller's d-pad move through it, and it
+   loops (the last game sits above the first). Play (or tapping the front box, or Enter) launches the game through the
+   cartridge and console. With no favourites yet, the page points back to the store and the Discovery Queue. */
+html.gc-html,html.gc-html body{height:100%;overflow:hidden;overscroll-behavior:none}
+html.gc-html body.g-chrome{padding:0}
+.gc{position:fixed;inset:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);--gc-accent:var(--sel-a)}
+.gc-rack{position:relative;grid-column:1;grid-row:1;min-height:0;touch-action:none;cursor:grab;outline:none;
+  -webkit-mask-image:linear-gradient(transparent 0,#000 15%,#000 82%,transparent 100%);mask-image:linear-gradient(transparent 0,#000 15%,#000 82%,transparent 100%)}
+.gc-rack.drag{cursor:grabbing}
+/* a soft glow of the selected game's colour behind its box */
+.gc-glow{position:absolute;left:50%;top:50%;width:min(78%,640px);aspect-ratio:1.5;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--gc-accent) 34%,transparent),color-mix(in srgb,var(--gc-accent) 10%,transparent) 55%,transparent);transition:background .5s;filter:blur(8px)}
+/* without WebGL: flat covers stand in for the boxes */
+.gc-flat{position:absolute;inset:0;pointer-events:none}
+.gc-flat img{position:absolute;left:50%;top:50%;width:min(64%,520px);aspect-ratio:1920/1200;object-fit:cover;border-radius:4px;box-shadow:0 0 0 6px #0b0d09,0 20px 40px rgba(0,0,0,.5);transition:opacity .2s}
+.f32-rack-on .gc-flat{display:none}
+
+/* the rail between the halves: up, a dot per game, down */
+.gc-rail{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;display:flex;flex-direction:column;align-items:center;gap:8px}
+.gc-rail button{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--glass);border:1px solid var(--line);color:var(--ink);transition:transform .15s var(--spring),background .15s}
+.gc-rail button:hover{background:var(--glass-strong);transform:scale(1.06)}
+.gc-rail button:disabled{opacity:.3;transform:none}
+.gc-rail button .gi{width:20px;height:20px}
+.gc-dots{display:flex;flex-direction:column;align-items:center;gap:7px;padding:6px 0}
+.gc-dots i{display:block;width:6px;height:6px;border-radius:3px;background:var(--line2);transition:height .25s var(--spring),background .25s;cursor:pointer}
+.gc-dots i.on{height:22px;background:var(--gc-accent)}
+.gc-count{font:700 11px/1 ui-monospace,"JetBrains Mono",Menlo,monospace;letter-spacing:.12em;color:var(--mut)}
+
+/* the selected game's details */
+.gc-info{grid-column:2;grid-row:1;align-self:center;min-height:0;overflow:hidden;touch-action:none;
+  margin:calc(var(--top) + var(--sat) + 16px) 0 calc(var(--tabs) + var(--sab) + 30px);max-height:calc(100% - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 46px);
+  padding:12px max(40px,6vw) 18px 72px;
+}
+/* the panel never scrolls (only the boxes do): it's a column, and the description and list give way first if space runs out */
+.gc-info::-webkit-scrollbar{display:none}
+.gc-in{display:flex;flex-direction:column;max-height:100%}
+.gc-body{min-height:0;overflow:hidden;flex:0 1 auto;-webkit-mask-image:linear-gradient(#000 calc(100% - 22px),transparent);mask-image:linear-gradient(#000 calc(100% - 22px),transparent)}
+.gc-biz{display:flex;align-items:center;gap:8px;font:600 19px/1.25 var(--display);color:color-mix(in srgb,var(--gc-accent) 60%,#fff);margin:0 0 14px}
+.gc-biz .gi{width:20px;height:20px}
+.gc-in{max-width:540px}
+.gc-in.up{animation:gc-up .32s cubic-bezier(.2,.8,.2,1)}
+.gc-in.down{animation:gc-down .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes gc-up{from{opacity:0;transform:translateY(16px)}}
+@keyframes gc-down{from{opacity:0;transform:translateY(-16px)}}
+.gc-eyebrow{font:700 12px/1.3 ui-monospace,"JetBrains Mono",Menlo,monospace;letter-spacing:.18em;color:var(--mut);text-transform:uppercase}
+.gc-title{margin:0 0 6px;font-size:clamp(34px,min(4.4vw,7vh),62px);line-height:1.02}
+.gc-sub{font:600 19px/1.25 var(--display);color:color-mix(in srgb,var(--gc-accent) 60%,#fff);margin:0 0 14px}
+.gc-chips{display:flex;gap:7px;flex-wrap:wrap;margin:2px 0 16px}
+.gc-chips span{display:inline-flex;align-items:center;gap:6px;font:600 13px/1 var(--font);color:var(--ink);border:1px solid var(--line2);border-radius:999px;padding:7px 11px;background:var(--card2)}
+.gc-chips span.st{background:var(--gc-accent);color:#0b0d09;border-color:transparent;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:11.5px}
+.gc-chips span.st.legacy{background:#6b7280;color:#fff}
+.gc-chips .gi{width:15px;height:15px}
+.gc-desc{color:var(--ink2);font-size:16.5px;line-height:1.55;margin:0 0 16px}
+.gc-feats{margin:0 0 18px;padding-left:20px;display:grid;gap:6px;color:var(--ink2);font-size:15px}
+.gc-feats li::marker{color:var(--gc-accent)}
+.gc-stats{display:flex;gap:16px;flex-wrap:wrap;color:var(--ink2);font-weight:600;font-size:14px;margin:0 0 16px}
+.gc-stats .gi{color:var(--gold)}
+.gc-actions{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.gc-play{display:inline-flex;align-items:center;gap:12px;font:600 22px/1 var(--display);letter-spacing:.04em;color:#0b0d09;background:var(--gc-accent);
+  border:0;border-radius:14px;padding:17px 32px;cursor:pointer;box-shadow:0 7px 0 #000,0 12px 34px color-mix(in srgb,var(--gc-accent) 40%,transparent);transition:transform .1s,box-shadow .1s,background .4s}
+.gc-play:hover{filter:brightness(1.06)}
+.gc-play:active{transform:translateY(4px);box-shadow:0 3px 0 #000,0 8px 24px color-mix(in srgb,var(--gc-accent) 40%,transparent)}
+.gc-play svg{width:18px;height:18px}
+.gc-more{font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.gc-hint{margin-top:22px;font-size:13px;color:var(--mut);display:flex;gap:14px;flex-wrap:wrap}
+@media (max-height:760px){.gc-hint{display:none}.gc-feats{margin-bottom:14px}.gc-desc{margin-bottom:12px}}
+.gc-hint kbd{font:700 11px/1 ui-monospace,Menlo,monospace;border:1px solid var(--line2);border-bottom-width:2px;border-radius:5px;padding:3px 6px;margin-right:4px;color:var(--ink2)}
+/* the heart: tapping it takes the game off Favorites (it stays in the rack until the page is opened again, so it can be put back) */
+.gc-heart{display:inline-flex;align-items:center;gap:7px;font-weight:700;color:var(--ink);border:1px solid var(--line2);background:var(--card2);border-radius:12px;padding:11px 14px}
+.gc-heart .gi{width:18px;height:18px}
+.gc-heart[aria-pressed=true] .gi{color:#FF8FC2}
+.gc.one .gc-rail{display:none}
+/* no favourites yet */
+.gc-empty{position:fixed;inset:0;display:grid;place-items:center;padding:calc(var(--top) + var(--sat) + 20px) 20px calc(var(--tabs) + var(--sab) + 30px)}
+.gc-empty-in{max-width:460px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;padding:30px 26px;border-radius:var(--r);background:var(--card-solid);border:1px solid var(--line);box-shadow:var(--shadow)}
+.gc-empty-in>.gi{width:44px;height:44px;color:#FF8FC2}
+.gc-empty-in h2{font-size:28px}
+.gc-empty-in p{margin:0;color:var(--ink2)}
+.gc-empty-in .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+
+/* phones and tall screens: carousel on top, details below, Play stays in reach */
+@media (max-width:820px),(max-aspect-ratio:1/1){
+  .gc{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,52%) minmax(0,1fr);bottom:calc(var(--tabs) + var(--sab) + 18px)}
+  .gc-rack{grid-row:1;-webkit-mask-image:linear-gradient(transparent 0,#000 24%,#000 88%,transparent 100%);mask-image:linear-gradient(transparent 0,#000 24%,#000 88%,transparent 100%)}
+  .gc-info{grid-column:1;grid-row:2;align-self:stretch;padding:0 18px 0;margin:0;max-height:none}
+  .gc-in{height:100%;max-height:none;padding-bottom:4px}
+  .gc-body{flex:1 1 auto}
+  .gc-biz{font-size:16px;margin-bottom:8px}
+  .gc-rail{left:auto;right:max(8px,var(--sar));top:calc(var(--top) + var(--sat) + 2px + (52% - var(--top)) / 2);transform:translateY(-50%);gap:6px}
+  .gc-rail button{width:36px;height:36px}
+  .gc-dots{gap:5px}
+  .gc-title{font-size:clamp(30px,8.6vw,44px);margin-top:6px}
+  .gc-sub{font-size:17px;margin-bottom:10px}
+  .gc-desc{font-size:15px}
+  .gc-actions{padding:10px 0 8px;margin-top:auto}
+  .gc-play{font-size:19px;padding:15px 26px}
+  .gc-hint{display:none}
+}
+/* landscape phones: the dock is a rail on the left */
+@media (orientation:landscape) and (max-height:540px){
+  .gc{left:calc(86px + var(--sal));bottom:0;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+  .gc-rack{grid-row:1}
+  .gc-info{grid-column:2;grid-row:1;margin:calc(var(--top) + var(--sat) + 6px) 0 12px;max-height:calc(100% - var(--top) - var(--sat) - 18px);padding:0 20px 14px 52px}
+  .gc-rail{left:50%;right:auto;top:55%;transform:translate(-50%,-50%)}
+}
+</style>
+</head>
+<body>
+<div class="gc-empty" id="empty" hidden></div>
+<main class="gc" id="gc">
+  <h1 class="vh">Favorites</h1>
+  <div class="gc-rack" id="rack" tabindex="0" role="listbox" aria-label="Games. Use the up and down arrows to browse, Enter to play.">
+    <div class="gc-glow" aria-hidden="true"></div>
+    <div class="gc-flat" id="flat" aria-hidden="true"></div>
+  </div>
+  <div class="gc-rail">
+    <button type="button" id="prev" aria-label="Previous game"></button>
+    <div class="gc-dots" id="dots"></div>
+    <span class="gc-count" id="count" aria-hidden="true"></span>
+    <button type="button" id="next" aria-label="Next game"></button>
+  </div>
+  <section class="gc-info" id="info" aria-live="polite"></section>
+</main>
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/grug.js"></script>
+<script>
+(function(){
+  const G = Grug, $ = s => document.getElementById(s);
+  G.ui.chrome('games');
+  const pts = {}; G.points().forEach(p => { pts[p.game.id] = p; });
+  // the player's favourites, in the order they were added (partner mode: their game and the Grug originals only)
+  const games = G.favs.list().map(id => G.GAMES.find(g => g.id === id)).filter(g => g && g.listed !== false && G.partnerAllows(g));
+  const N = games.length;
+  const gc = $('gc'), rackEl = $('rack'), info = $('info'), dotsEl = $('dots');
+  // nothing hearted yet: no rack, just the way back to the store (no dead ends)
+  if (!N) {
+    gc.hidden = true;
+    const em = $('empty'); em.hidden = false;
+    em.innerHTML = '<div class="gc-empty-in">' + G.icon('heart') + '<h2>No favorites yet</h2>' +
+      '<p>Tap the heart on any game in the store and it lands here, on its own FOSSIL32 shelf.</p>' +
+      '<div class="row"><a class="g-btn primary" href="' + G.url('games/') + '">' + G.icon('storefront') + 'Browse the store</a>' +
+      '<a class="g-btn" href="' + G.url('games/') + '#queue">' + G.icon('shuffle') + 'Discovery Queue</a></div></div>';
+    return;
+  }
+  if (N < 2) gc.classList.add('one');
+
+  // the box's accent (same rule as fossil32.js: a dark cartridge colour is lifted so it reads on the dark page)
+  function accent(g){
+    const hex = (g.box && g.box.shell) || g.color || '#9BE338';
+    let [r, gg, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255);
+    const mx = Math.max(r, gg, b), mn = Math.min(r, gg, b), l = (mx + mn) / 2, d = mx - mn;
+    if (l >= .42) return hex;
+    let h = 0, s = d ? d / (1 - Math.abs(2 * l - 1)) : 0;
+    if (d) h = mx === r ? ((gg - b) / d) % 6 : mx === gg ? (b - r) / d + 2 : (r - gg) / d + 4;
+    return 'hsl(' + Math.round(h * 60 + 360) % 360 + ' ' + Math.round(Math.min(s, .6) * 100) + '% 55%)';
+  }
+
+  /* ---------- state: pos is a float index that eases toward target; Fossil32.rack draws from it every frame.
+     Both run past the ends freely: the list loops, so index i lives at every i + k·N. ---------- */
+  const wrap = i => ((i % N) + N) % N;
+  const near = i => Math.round(state.target) + (((wrap(i - Math.round(state.target)) + N / 2) % N) - N / 2);   // i, the short way round
+  let start = 0;
+  try { const id = sessionStorage.getItem('grug.favs.sel'); const i = games.findIndex(g => g.id === id); if (i >= 0) start = i; } catch (e) {}
+  const m = /^#g\/([\w-]+)/.exec(location.hash); if (m) { const i = games.findIndex(g => g.id === m[1]); if (i >= 0) start = i; }
+  const state = { ids: games.map(g => g.id), pos: start, target: start };
+  let sel = -1;
+
+  /* ---------- the details panel ---------- */
+  const esc = G.esc;
+  function panel(g){
+    const b = g.box || {}, p = pts[g.id], live = g.status === 'live' || g.status === 'legacy';
+    const best = Math.max(+(G.profile.stats.best[g.app] || 0), p ? p.best : 0);
+    const stats = [];
+    if (p && p.points) stats.push('<span>' + G.icon('coins') + G.fmt(p.points) + ' points</span>');
+    if (best) stats.push('<span>' + G.icon('trophy') + 'best ' + G.fmt(best) + '</span>');
+    // just the name, who it was made for, what it is and Play: no codes, tags or badges
+    return '<h2 class="gc-title">' + esc(g.title) + '</h2>' +
+      '<p class="gc-biz">' + G.icon(g.standalone ? 'sparkle' : 'storefront') + esc(g.standalone ? 'A Grug original' : g.partner) + '</p>' +
+      '<div class="gc-body"><p class="gc-desc">' + esc(g.blurb || g.long || '') + '</p>' +   // the short blurb here; the full write-up is on the game page
+      (g.features && g.features.length ? '<ul class="gc-feats">' + g.features.map(f => '<li>' + esc(f) + '</li>').join('') + '</ul>' : '') + '</div>' +
+      (stats.length ? '<div class="gc-stats">' + stats.join('') + '</div>' : '') +
+      '<div class="gc-actions"><button type="button" class="gc-play" data-play><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 2l14 8-14 8z" fill="currentColor"/></svg>' + (live ? 'PLAY' : 'PLAY DEMO') + '</button>' +
+      heartBtn(g) +
+      '<a class="gc-more" href="' + G.url('games/' + g.id + '/') + '">Game page</a><a class="gc-more" href="' + G.url('games/') + '">Store</a></div>';
+  }
+  const heartBtn = g => { const on = G.favs.has(g.id);
+    return '<button type="button" class="gc-heart" data-heart aria-pressed="' + on + '">' + G.icon('heart') + (on ? 'Favorited' : 'Add back') + '</button>'; };
+  function select(i){
+    if (i === sel) return;
+    const dir = i > sel ? 'up' : 'down', g = games[i]; sel = i;
+    info.innerHTML = '<div class="gc-in ' + (sel >= 0 ? dir : '') + '">' + panel(g) + '</div>';
+    info.scrollTop = 0;
+    gc.style.setProperty('--gc-accent', accent(g));
+    rackEl.setAttribute('aria-activedescendant', ''); rackEl.setAttribute('aria-label', g.title + ', ' + (i + 1) + ' of ' + N + '. Use the up and down arrows to browse, Enter to play.');
+    [...dotsEl.children].forEach((d, k) => d.classList.toggle('on', k === i));
+    $('count').textContent = String(i + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
+    try { sessionStorage.setItem('grug.favs.sel', g.id); history.replaceState(history.state, '', '#g/' + g.id); } catch (e) {}
+  }
+  info.addEventListener('click', e => {
+    if (e.target.closest('[data-play]')) { play(); return; }
+    const h = e.target.closest('[data-heart]'); if (!h) return;
+    const g = games[sel], on = G.favs.toggle(g.id);
+    h.outerHTML = heartBtn(g); G.ui.buzz();
+    G.ui.toast(on ? g.title + ' is back in Favorites' : 'Removed ' + g.title + ' from Favorites', { icon: 'heart' });
+  });
+
+  /* ---------- moving ---------- */
+  function go(i){ state.target = i; spin(); }
+  function step(d){ go(Math.round(state.target) + d); G.ui.buzz(6); }
+  let raf = 0, last = 0, drag = null;
+  function spin(){ if (!raf){ last = performance.now(); raf = requestAnimationFrame(frame); } }
+  function frame(now){
+    raf = 0;
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    if (!drag){ const k = 1 - Math.exp(-dt * 10); state.pos += (state.target - state.pos) * k; if (Math.abs(state.target - state.pos) < .0005) state.pos = state.target; }
+    const i = wrap(Math.round(state.pos)); if (i !== sel) select(i);
+    flat();
+    if (window.Fossil32 && Fossil32.kick) Fossil32.kick();
+    if (drag || state.pos !== state.target) raf = requestAnimationFrame(frame);
+  }
+
+  // wheel / trackpad: one game per notch; a long trackpad flick moves a few
+  let acc = 0, lockT = 0;
+  addEventListener('wheel', e => {
+    if (document.documentElement.classList.contains('f32-lock') || document.querySelector('dialog[open]')) return;
+    const dy = e.deltaMode === 1 ? e.deltaY * 40 : e.deltaY;
+    // the panel never scrolls: the wheel always browses the boxes
+    e.preventDefault();
+    const now = performance.now();
+    if (now < lockT) return;
+    acc += dy;
+    if (Math.abs(acc) >= 40){ step(Math.sign(acc)); acc = 0; lockT = now + 170; }
+  }, { passive: false });
+
+  // drag / swipe on the carousel; a tap picks a box (the front one plays)
+  const itemPx = () => rackEl.clientHeight * .3;
+  rackEl.addEventListener('pointerdown', e => {
+    if (e.button > 0) return;
+    drag = { y: e.clientY, x: e.clientX, pos: state.pos, t: performance.now(), moved: false, vy: 0, ly: e.clientY, lt: performance.now() };
+    rackEl.setPointerCapture(e.pointerId); rackEl.classList.add('drag'); spin();
+  });
+  rackEl.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const dy = e.clientY - drag.y; if (Math.abs(dy) > 6 || Math.abs(e.clientX - drag.x) > 6) drag.moved = true;
+    const now = performance.now(), dtm = Math.max(1, now - drag.lt); drag.vy = drag.vy * .6 + ((e.clientY - drag.ly) / dtm) * .4; drag.ly = e.clientY; drag.lt = now;
+    state.pos = drag.pos - dy / itemPx();
+  });
+  const end = e => {
+    if (!drag) return;
+    const d = drag; drag = null; rackEl.classList.remove('drag');
+    if (!d.moved && performance.now() - d.t < 400){
+      const i = window.Fossil32 && Fossil32.ok ? Fossil32.pick(e.clientX, e.clientY) : -1;
+      if (i >= 0 && i === wrap(Math.round(state.target))) { play(); return; }
+      if (i >= 0) { go(near(i)); return; }
+      state.pos = d.pos; spin(); return;
+    }
+    const fling = -d.vy * 1000 / itemPx() * .16;   // px/ms → items
+    go(Math.round(state.pos + Math.max(-4, Math.min(4, fling))));
+  };
+  rackEl.addEventListener('pointerup', end); rackEl.addEventListener('pointercancel', end);
+
+  $('prev').innerHTML = G.icon('caret-left'); $('next').innerHTML = G.icon('caret-right');
+  $('prev').querySelector('.gi').style.transform = 'rotate(90deg)'; $('next').querySelector('.gi').style.transform = 'rotate(90deg)';
+  $('prev').onclick = () => step(-1); $('next').onclick = () => step(1);
+  dotsEl.innerHTML = games.map((g, i) => '<i title="' + esc(g.title) + '" data-i="' + i + '"></i>').join('');
+  dotsEl.addEventListener('click', e => { const d = e.target.closest('[data-i]'); if (d) go(near(+d.dataset.i)); });
+
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey || document.querySelector('dialog[open]') || document.documentElement.classList.contains('f32-lock')) return;
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    const k = e.key;
+    if (k === 'ArrowDown' || k === 'ArrowRight' || k === 'PageDown' || k === 's') { e.preventDefault(); step(1); }
+    else if (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'PageUp' || k === 'w') { e.preventDefault(); step(-1); }
+    else if (k === 'Home') { e.preventDefault(); go(near(0)); }
+    else if (k === 'End') { e.preventDefault(); go(near(N - 1)); }
+    else if (k === 'Enter' && !e.target.closest('a,button')) { e.preventDefault(); play(); }
+  });
+  // a controller: d-pad / left stick to browse, A (or Cross) to play
+  addEventListener('gamepadconnected', () => {
+    let prev = {}, held = 0;
+    (function poll(now){
+      const p = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).find(Boolean);
+      if (p && !document.documentElement.classList.contains('f32-lock')){
+        const ax = p.axes[1] || 0, up = (p.buttons[12] && p.buttons[12].pressed) || ax < -.6, dn = (p.buttons[13] && p.buttons[13].pressed) || ax > .6, a = p.buttons[0] && p.buttons[0].pressed;
+        const dir = up ? -1 : dn ? 1 : 0;
+        if (dir && (prev.dir !== dir || now - held > 220)) { step(dir); held = now; }
+        if (a && !prev.a) play();
+        prev = { dir, a };
+      }
+      requestAnimationFrame(poll);
+    })(0);
+  }, { once: true });
+
+  /* ---------- Play: the box opens, the cartridge comes out and goes into the console, then the game ---------- */
+  function play(){
+    const g = games[wrap(Math.round(state.target))]; if (!g) return;
+    G.ui.buzz([8, 30, 12]);
+    if (window.Fossil32 && Fossil32.ok) Fossil32.launch(g.id);
+    else location.href = G.url(g.game || g.play);
+  }
+
+  /* ---------- without WebGL: flat covers in the same column ---------- */
+  const flatEl = $('flat');
+  flatEl.innerHTML = games.map(g => '<img alt="" loading="lazy" decoding="async" src="' + G.url((g.box && g.box.art) || g.thumb) + '">').join('');
+  function flat(){
+    if (rackEl.classList.contains('f32-rack-on')) return;
+    const H = rackEl.clientHeight;
+    [...flatEl.children].forEach((im, i) => {
+      const o = ((wrap(i - state.pos) + N / 2) % N) - N / 2, a = Math.abs(o), s = 1 - .27 * Math.min(a, 1) - .07 * Math.min(Math.max(0, a - 1), 2);
+      im.style.transform = 'translate(-50%,-50%) translate(' + (-Math.pow(Math.min(a, 2.6), 1.35) * 14) + '%,' + (o * H * .3) + 'px) scale(' + s + ') perspective(800px) rotateY(-16deg)';
+      im.style.opacity = a < 1.7 ? 1 : Math.max(0, 1 - (a - 1.7) / 1.3);
+      im.style.zIndex = 100 - Math.round(a * 10);
+    });
+  }
+
+  select(start); flat();
+  const hook = () => { if (window.Fossil32 && Fossil32.ok) Fossil32.rack(rackEl, state); };
+  if (window.Fossil32) hook(); else document.addEventListener('fossil32:ready', hook, { once: true });
+  addEventListener('resize', flat);
+})();
+</script>
+<script type="module" src="../../assets/fossil32/fossil32.js"></script>
+</body>
+</html>
