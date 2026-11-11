@@ -143,6 +143,13 @@ lists of pieces run sideways in as many rows as fit. A piece's colours, fabric a
 Only a person's own swipe changes the section (the browser re-snapping after a resize doesn't). Add new controls to the
 editor's markup as before, then place them in a section in `nav.js`.
 
+## Rewards card builder (`rewards/create/`)
+
+It should feel like talking to a top-of-the-line AI (there is no AI): the assistant (the Grug stegosaurus, `Grug.LOGO`)
+"thinks", then streams each question with a live 3D preview in its newest answer; answers are tiles in a tray docked at the
+bottom, picked like choosing a photo (typing is matched to a tile), and the shop's name goes in an AI-style prompt bar.
+Each question is a `STEPS` entry (`say`, `tiles`, `pick`, `att`/`answer`); styles in `assets/cardchat.css`.
+
 ## Rewards cards: icons and fonts
 
 A shop's icon is an id from `ICONS` in `assets/rewards.js`, drawn from the flat `sh-<id>` Phosphor icons in

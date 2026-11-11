@@ -871,6 +871,7 @@
     EMOTES, EMOTE_MAX, emoteOf, get emotes() { return profile.emotes.slice(); },
     setEmotes(ids) { ids = Array.isArray(ids) ? Array.from(new Set(ids.filter(id => emoteOf(id)))).slice(0, EMOTE_MAX) : []; if (!ids.length) return false; profile.emotes = ids; save('emotes'); return true; },
     UI_SCALES, applyUiScale,
+    LOGO,   // the Grug stegosaurus mark (an inline SVG)
     ROLES, get role() { return roleOf(); }, setRole, showsTab, partnerAllows,
     ui: { chrome, hub, shopIcon, askRole, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile, uiSizeHtml, wireUiSize, modeHtml, wireMode, setMode, brandHtml, wireBrand, inventoryHtml, wireInventory, freeBar }
   };

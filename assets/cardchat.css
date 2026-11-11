@@ -1,0 +1,144 @@
+/* Grug · the rewards card builder as a conversation (rewards/create/). It should feel like talking to a top AI assistant
+   (no AI behind it): the assistant "thinks", then streams each question; the answers are picked from a tray of tiles
+   docked at the bottom like choosing a photo, and the shop's name goes in a prompt bar. Solid colours only. */
+body.cc-page{min-height:0}
+.cc{display:flex;flex-direction:column;max-width:760px;padding-top:2px;
+  height:calc(100vh - var(--top) - var(--sat) - 8px - var(--tabs) - var(--sab) - 26px);
+  height:calc(100dvh - var(--top) - var(--sat) - 8px - var(--tabs) - var(--sab) - 26px);min-height:380px}
+
+/* header: back, progress, start over */
+.cc-top{flex:none;display:flex;align-items:center;gap:14px;padding:4px 0 10px}
+.cc-top a,.cc-top button{display:inline-flex;align-items:center;gap:6px;color:var(--ink2);font:700 15px var(--font);background:none;border:0;padding:6px 0;cursor:pointer;flex:none}
+.cc-top .gi{width:18px;height:18px}
+.cc-prog{flex:1;display:flex;gap:5px;max-width:260px;margin:0 auto}
+.cc-prog i{flex:1;height:6px;border-radius:99px;background:var(--line2);transition:background .35s}
+.cc-prog i.on{background:var(--mode)}
+.cc-top button[hidden]{display:inline-flex;visibility:hidden}
+
+/* the conversation */
+.cc-log{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:18px;padding:8px 2px 18px;scrollbar-width:thin}
+.cc-log>:first-child{margin-top:auto}
+.cc-a{display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;align-items:start;animation:cc-fade .3s ease both}
+/* the assistant's picture: the Grug stegosaurus (Grug.LOGO), which bobs and nods while it "thinks" */
+.cc-mk{width:38px;height:38px;border-radius:12px;display:block;overflow:hidden;box-shadow:0 3px 0 #6FB021;margin-top:-2px}
+.cc-mk svg.g-mark{display:block;width:100%;height:100%;transform:scale(1.16);margin:0}
+.cc-mk.think{animation:cc-bob 1.1s ease-in-out infinite}
+.cc-mk.think svg path{transform-box:fill-box;transform-origin:50% 80%;animation:cc-nod 1.1s ease-in-out infinite}
+@keyframes cc-bob{50%{transform:translateY(-3px)}}
+@keyframes cc-nod{25%{transform:rotate(-6deg)}75%{transform:rotate(5deg)}}
+.cc-body{min-width:0;padding-top:5px}
+.cc-tx{font:500 17px/1.5 var(--font);color:var(--ink)}
+.cc-tx p{margin:0}
+.cc-tx p+p{margin-top:8px}
+.cc-tx b{font-weight:700}
+.cc-w{opacity:0}
+.cc-w.on{opacity:1;animation:cc-fade .3s ease}
+.cc-think{display:flex;align-items:center;gap:9px;color:var(--mut);font:600 15px var(--font);height:24px}
+.cc-think span{animation:cc-pulse 1.4s ease-in-out infinite}
+.cc-dots{display:flex;gap:4px}
+.cc-dots i{width:6px;height:6px;border-radius:50%;background:var(--mut);animation:cc-dot 1s ease-in-out infinite}
+.cc-dots i:nth-child(2){animation-delay:.15s}.cc-dots i:nth-child(3){animation-delay:.3s}
+@keyframes cc-dot{40%{transform:translateY(-4px);opacity:1}0%,80%,to{opacity:.35;transform:none}}
+@keyframes cc-pulse{50%{opacity:.5}}
+@keyframes cc-fade{from{opacity:0}}
+.cc-link{border:0;background:none;padding:0;font:inherit;font-weight:700;color:var(--mode-text,var(--mode));text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.cc-a.mini .cc-tx{color:var(--ink2);font-size:15.5px}
+
+/* the "image" the assistant makes: the live 3D storefront / phone, rebuilt in each new answer */
+.cc-pv{position:relative;margin-top:12px;max-width:440px;aspect-ratio:16/10;border-radius:20px;overflow:hidden;background:#2A2420;box-shadow:0 0 0 1px var(--line);animation:cc-pv .5s var(--spring) both}
+.cc-pv .wz-stage{width:100%;height:100%;aspect-ratio:auto;border-radius:0}
+.cc-pv::after{content:"";position:absolute;inset:0;background:var(--card-solid);pointer-events:none;animation:cc-dev .9s ease .1s both}
+.cc-pv .cc-cap{position:absolute;left:10px;bottom:10px;z-index:2;display:inline-flex;align-items:center;gap:5px;padding:5px 10px 5px 8px;border-radius:99px;background:var(--page);color:var(--ink);font:700 12px var(--font)}
+.cc-pv .cc-cap .gi{width:13px;height:13px;color:var(--mode-text,var(--mode))}
+.cc-pv:not(.has-stage){aspect-ratio:auto;background:none;box-shadow:none;max-width:330px}
+.cc-pv:not(.has-stage)::after{display:none}
+@keyframes cc-pv{from{opacity:0;transform:translateY(10px) scale(.97)}}
+@keyframes cc-dev{from{opacity:1}to{opacity:0}}
+
+/* the person's answers: a bubble on the right, with what they picked attached like a picture */
+.cc-u{align-self:flex-end;max-width:82%;display:flex;align-items:center;gap:10px;padding:7px 14px 7px 7px;border-radius:22px 22px 6px 22px;background:var(--card-solid);border:1.5px solid var(--line2);
+  color:var(--ink);font:600 17px var(--display);cursor:pointer;animation:cc-pop .38s var(--spring) both;text-align:left}
+.cc-u.txt{padding:10px 16px}
+.cc-u .ed{width:16px;height:16px;color:var(--mut);opacity:0;transition:opacity .15s;flex:none}
+.cc-u:hover .ed,.cc-u:focus-visible .ed{opacity:1}
+.cc-u.pre .att{visibility:hidden}
+@keyframes cc-pop{from{opacity:0;transform:translateY(8px) scale(.94)}}
+.att{width:42px;height:42px;border-radius:13px;flex:none;display:grid;place-items:center;background:var(--card3);color:var(--ink);font:700 18px var(--display);overflow:hidden}
+.att .gi,.att .rw-svg{width:24px;height:24px}
+.att.sw{box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
+
+/* the bottom: a tray of tiles to pick from, and the prompt bar */
+.cc-dock{flex:none;padding-top:6px}
+.cc-dock.out .cc-tray,.cc-dock.out .cc-comp,.cc-dock.out .cc-acts{opacity:0;transform:translateY(14px);transition:opacity .2s,transform .25s}
+.cc-tray{animation:cc-up .45s var(--spring) both}
+@keyframes cc-up{from{opacity:0;transform:translateY(26px)}}
+.cc-trh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 2px 6px;color:var(--mut);font:700 12.5px var(--font);letter-spacing:.06em;text-transform:uppercase}
+.cc-trh .gi{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
+.cc-grid{--tw:104px;--th:100px;display:grid;grid-auto-flow:column;grid-template-rows:repeat(var(--rows,1),auto);grid-auto-columns:var(--tw);gap:10px;overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x proximity;scrollbar-width:none;padding:10px 2px 12px;margin:-6px -2px 0;overscroll-behavior-x:contain}
+.cc-grid::-webkit-scrollbar{display:none}
+@media (min-width:760px){.cc-grid{grid-auto-flow:row;grid-template-rows:none;grid-template-columns:repeat(auto-fill,minmax(var(--tw),1fr));overflow:visible}}
+.cc-t{position:relative;min-height:var(--th);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:10px 8px;border-radius:18px;background:var(--card-solid);
+  border:2px solid var(--line2);box-shadow:0 3px 0 var(--line2);color:var(--ink);font:600 14px/1.15 var(--display);text-align:center;cursor:pointer;scroll-snap-align:start;
+  transition:transform .18s var(--spring),border-color .15s,background .15s;animation:cc-tin .42s var(--spring) both;animation-delay:calc(var(--i,0) * 22ms)}
+@keyframes cc-tin{from{opacity:0;transform:translateY(16px) scale(.92)}}
+.cc-t:hover{transform:translateY(-2px)}
+.cc-t:active{transform:scale(.94)}
+.cc-t .ic{width:46px;height:46px;border-radius:14px;background:var(--card3);display:grid;place-items:center}
+.cc-t .ic .gi,.cc-t .ic .rw-svg{width:26px;height:26px}
+.cc-t small{display:block;font:500 12px var(--font);color:var(--mut);margin-top:-3px}
+.cc-t .tag{position:absolute;top:-8px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:2px 8px;border-radius:99px;background:var(--ink);color:var(--page);font:700 10.5px/1.5 var(--font);letter-spacing:.03em}
+.cc-t .ck{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:var(--mode);color:var(--on-sel);display:none;place-items:center}
+.cc-t .ck .gi{width:13px;height:13px}
+.cc-t[aria-checked=true]{border-color:var(--mode);background:color-mix(in srgb,var(--mode) 14%,var(--card-solid));box-shadow:0 3px 0 var(--mode-lo)}
+.cc-t[aria-checked=true] .ck{display:grid}
+.cc-t.sw .dot{width:50px;height:50px;border-radius:50%;box-shadow:inset 0 -5px 0 rgba(0,0,0,.2)}
+.cc-t.sw label{position:absolute;inset:0;cursor:pointer}
+.cc-t.sw input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+.cc-t.fn .nm{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink);line-height:1.15}
+.cc-t.ico{gap:0}
+.cc-t.ico .rw-svg{width:30px;height:30px}
+.cc-t.num b{font:700 30px/1 var(--display)}
+.cc-t.ghost{border-style:dashed;box-shadow:none;background:none;color:var(--ink2)}
+
+/* the prompt bar */
+.cc-comp{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 18px;border-radius:28px;background:var(--card-solid);border:2px solid var(--line2);box-shadow:0 3px 0 var(--line2);
+  transition:border-color .15s;animation:cc-up .45s var(--spring) both}
+.cc-comp:focus-within{border-color:var(--mode-text,var(--mode))}
+.cc-comp input{flex:1;min-width:0;border:0;background:none;outline:0;color:var(--ink);font:500 17px var(--font);min-height:44px;padding:0}
+.cc-comp input::placeholder{color:var(--mut)}
+.cc-comp.big{padding-left:20px}
+.cc-comp.big input{font:600 20px var(--display);min-height:52px}
+.cc-send{width:44px;height:44px;border-radius:50%;border:0;flex:none;display:grid;place-items:center;background:var(--mode);color:var(--on-sel);box-shadow:0 3px 0 var(--mode-lo);cursor:pointer;transition:transform .15s var(--spring),background .15s}
+.cc-comp.big .cc-send{width:50px;height:50px}
+.cc-send .gi{width:20px;height:20px;transform:rotate(-90deg)}
+.cc-send:disabled{background:var(--card3);color:var(--mut);box-shadow:none;cursor:default}
+.cc-send:not(:disabled):active{transform:scale(.9)}
+.cc-comp.shake{animation:cc-shake .4s}
+@keyframes cc-shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.cc-fine{text-align:center;color:var(--mut);font:500 12px var(--font);padding:7px 0 0}
+.cc-tray+.cc-comp{margin-top:2px}
+
+/* the finished card */
+.cc-file{display:flex;align-items:center;gap:12px;margin-top:12px;max-width:440px;padding:10px 10px 10px 10px;border-radius:18px;background:var(--card-solid);border:1.5px solid var(--line2);animation:cc-pv .5s var(--spring) both}
+.cc-file .pdf{width:44px;height:52px;border-radius:9px;background:#E5484D;color:#fff;display:grid;place-items:end center;padding-bottom:7px;font:700 11px var(--font);letter-spacing:.05em;flex:none;box-shadow:0 3px 0 #B7343A}
+.cc-file .t{flex:1;min-width:0}
+.cc-file b{display:block;font:600 15.5px var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-file span{display:block;color:var(--mut);font-size:13px}
+.cc-file .g-btn{flex:none}
+.cc-body .wz-3d{max-width:440px;margin-top:12px}
+.cc-body .wz-saved{margin-top:10px;font-size:14px}
+.cc-body .wz-share{max-width:440px;margin-top:12px}
+.cc-body .wz-up{max-width:440px;margin-top:12px}
+.cc-body .wz-row .ic{background:var(--card3)}
+.cc-acts{display:grid;grid-template-columns:auto auto auto;gap:8px;padding:2px 2px 6px;animation:cc-up .45s var(--spring) both}
+.cc-acts .g-btn{min-width:0;white-space:nowrap;padding-inline:12px;font-size:15.5px}
+.cc-body .wz-3d .cap{display:none}
+.cc-file .cc-send{width:46px;height:46px}
+.cc-file .cc-send .gi{transform:none}
+
+/* a cartridge-like lift for the tile on its way into the chat */
+.cc-fly{transform-origin:0 0;border-radius:18px}
+
+@media (orientation:landscape) and (max-height:540px){.cc-grid{--rows:1!important}.cc-pv{max-width:300px}}
+@media (prefers-reduced-motion:reduce){.cc-a,.cc-u,.cc-t,.cc-tray,.cc-comp,.cc-pv,.cc-acts,.cc-file,.cc-w{animation:none!important;opacity:1}.cc-pv::after{display:none}}

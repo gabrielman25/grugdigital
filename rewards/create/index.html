@@ -2,21 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <title>Make a rewards card · Grug</title>
-<meta name="description" content="Make a free rewards card for your café, bar or restaurant in seven quick questions. Download it as a PDF and put it by your register.">
+<meta name="description" content="Make a free rewards card for your café, bar or restaurant in eight quick questions. Download it as a PDF and put it by your register.">
 <meta name="theme-color" content="#17171A">
 <link rel="icon" href="../../favicon.png">
 <link rel="stylesheet" href="../../assets/grug.css">
 <script src="../../assets/theme.js"></script>
 <link rel="stylesheet" href="../../assets/rewards.css">
 <link rel="stylesheet" href="../../assets/wizard.css">
+<link rel="stylesheet" href="../../assets/cardchat.css">
 </head>
-<body>
-<main class="wrap wz">
-  <div class="wz-top"><a href="../" id="exit"></a><div class="wz-bar"><i id="bar"></i></div><span class="wz-count" id="count"></span></div>
-  <section class="wz-slide" id="slide"></section>
-  <div class="wz-nav" id="nav"><button type="button" class="g-btn" id="backBtn">Back</button><button type="button" class="g-btn primary" id="nextBtn">Next</button></div>
+<body class="cc-page">
+<!-- The card builder as a conversation (assets/cardchat.css): the assistant asks, the answers come from the tray of
+     tiles at the bottom (or the prompt bar for the shop's name). It only feels like an AI: every line is written here. -->
+<main class="wrap cc">
+  <div class="cc-top"><a href="../" id="exit"></a><div class="cc-prog" id="prog" aria-hidden="true"></div><button type="button" id="restart" hidden></button></div>
+  <div class="cc-log" id="log" aria-live="polite"></div>
+  <div class="cc-dock" id="dock"></div>
 </main>
 <script src="../../assets/catalog.js"></script>
 <script src="../../assets/icons.js"></script>
@@ -28,81 +31,106 @@
 (function(){
   const G = Grug, RW = GrugRewards, esc = G.esc, $ = s => document.querySelector(s);
   G.ui.chrome('rewards', { title: 'Make a card', noRole: true });   // someone making a card doesn't need the "who are you?" question first
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches, FINE = matchMedia('(pointer: fine)').matches;
+  const log = $('#log'), dock = $('#dock');
   $('#exit').innerHTML = G.icon('arrow-left') + 'Rewards';
+  $('#restart').innerHTML = G.icon('arrow-counter-clockwise') + 'Start over';
 
-  /* the answers so far (?c= = editing a saved card: start on the last slide) */
+  /* the answers so far (?c= = editing a saved card: open on the finished card) */
   const editing = new URLSearchParams(location.search).get('c');
   let cfg = (editing && RW.decode(editing)) || RW.normalize({ n: '', t: 'c', j: 1 });
   let named = !!(editing && RW.decode(editing)), saved = named ? editing : null;
   const touched = new Set(named ? ['i', 's', 'r', 'color', 'f'] : []);
-  let pctOpen = /^p\d+$/.test(cfg.r);
+  function set(patch) { Object.keys(patch).forEach(k => touched.add(k)); cfg = RW.normalize(Object.assign({}, cfg, patch)); paintPreview(); }
 
-  const opt = (key, val, icon, label, sub, extra) => '<button type="button" class="wz-opt" role="radio" data-' + key + '="' + val + '" aria-checked="false">' +
-    (icon ? '<span class="ic">' + icon + '</span>' : '') + '<span class="t">' + esc(label) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span>' + (extra || '') + '<span class="ck">' + G.icon('check') + '</span></button>';
+  /* words the assistant uses */
+  const COLOR_NAMES = { '#C8924F': 'caramel', '#2FAE5A': 'green', '#F2B544': 'gold', '#F26A1B': 'orange', '#E5484D': 'red', '#FF8FC2': 'pink', '#C59BFF': 'lavender', '#4FD8C4': 'mint', '#3B82F6': 'blue', '#2B2B33': 'charcoal' };
+  const COLOR_WORDS = { brown: '#C8924F', tan: '#C8924F', caramel: '#C8924F', coffee: '#C8924F', green: '#2FAE5A', yellow: '#F2B544', gold: '#F2B544', orange: '#F26A1B', red: '#E5484D', pink: '#FF8FC2',
+    purple: '#C59BFF', lavender: '#C59BFF', violet: '#C59BFF', mint: '#4FD8C4', teal: '#4FD8C4', aqua: '#4FD8C4', blue: '#3B82F6', navy: '#3B82F6', black: '#2B2B33', charcoal: '#2B2B33', gray: '#2B2B33', grey: '#2B2B33', dark: '#2B2B33' };
+  const colorName = c => COLOR_NAMES[String(c).toUpperCase()] || 'custom color';
+  const KIND_SAY = { c: 'A café', t: 'Boba and tea', b: 'A bar', f: 'A restaurant', k: 'A bakery', o: 'Something all its own' };
+  const kindWord = () => ({ c: 'café', t: 'boba and tea shop', b: 'bar', f: 'restaurant', k: 'bakery', o: 'place like yours' })[cfg.t];
+  const iconName = i => String(i).replace(/-/g, ' ');
+  const shopName = () => esc(named && cfg.n.trim() ? cfg.n : 'your shop');
+  const rewardWords = () => cfg.r === 'n' ? 'Pearls on every scan' : /^p\d+$/.test(cfg.r) ? cfg.r.slice(1) + '% off an item' : RW.REWARDS[cfg.r];
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const KICON = { d: 'pint-glass', f: 'fork-knife', s: 'cake', b: 'gift' };
+  const ck = '<span class="ck">' + G.icon('check') + '</span>';
+  const tag = t => t ? '<span class="tag">' + esc(t) + '</span>' : '';
 
-  /* the questions */
+  /* the conversation, one step per question. say = what the assistant writes; tiles = what the tray offers;
+     att + answer = what goes in the person's bubble once they've picked */
   const STEPS = [
-    { id: 'name', q: 'What’s your shop called?', hint: 'It goes at the top of your card.',
-      ok: () => named && cfg.n.trim().length > 0,
-      html: () => '<input class="g-input wz-name" id="aName" maxlength="28" autocomplete="organization" placeholder="e.g. Pebble Coffee Bar" value="' + (named ? esc(cfg.n) : '') + '">',
-      wire: () => { const i = $('#aName'); i.focus(); i.addEventListener('input', () => { named = i.value.trim().length > 0; set({ n: i.value }); paintNav(); }); } },
-    { id: 'kind', q: 'What kind of place is it?', hint: 'We’ll suggest the rest from here.', auto: true,
-      html: () => Object.keys(RW.KINDS).map(k => opt('k', k, RW.iconSvg(RW.KINDS[k].i), RW.KINDS[k].label)).join(''),
-      pick: el => el.dataset.k, sel: () => cfg.t,
-      apply: k => { const d = RW.KINDS[k], p = { t: k }; ['i', 's', 'r', 'color'].forEach(f => { if (!touched.has(f)) p[f] = d[f === 'color' ? 'color' : f]; }); if (!touched.has('f')) p.f = d.font; cfg = RW.normalize(Object.assign({}, cfg, p)); pctOpen = /^p\d+$/.test(cfg.r); } },
-    { id: 'color', q: 'Choose a brand color', hint: 'Your card and its QR frame use it.',
-      html: () => '<div class="wz-sw">' + RW.COLORS.map(c => '<button type="button" role="radio" data-c="' + c + '" style="background:' + c + '" aria-label="Color ' + c + '" aria-checked="false"></button>').join('') +
-        '<label title="Any color" id="aCustom" role="radio" aria-checked="false">+<input type="color" aria-label="Pick any color"></label></div>',
-      pick: el => el.dataset.c, sel: () => cfg.color, apply: c => set({ color: c }),
-      wire: () => { const l = $('#aCustom'), inp = l.querySelector('input'); inp.value = cfg.color.toLowerCase(); inp.addEventListener('input', () => { set({ color: inp.value }); mark(); }); } },
-    { id: 'font', q: 'Pick a font', hint: 'Your shop’s name is written in it, on your card and while guests play.', auto: true,
-      html: () => '<div class="wz-fonts">' + Object.keys(RW.FONTS).map(k => { const F = RW.FONTS[k];
-        return '<button type="button" class="wz-opt wz-font" role="radio" data-f="' + k + '" aria-checked="false">' +
-          '<span class="t"><span class="wz-font-n" style="font-family:\'' + F.css + '\',Fredoka,sans-serif;font-weight:' + F.w + ';font-size:' + (22 * F.size).toFixed(1) + 'px">' + esc(named ? cfg.n : 'Your shop') + '</span>' +
-          '<small><b>' + esc(F.label) + '</b> · ' + esc(F.sub) + '</small></span><span class="ck">' + G.icon('check') + '</span></button>'; }).join('') + '</div>',
-      pick: el => el.dataset.f, sel: () => cfg.f, apply: f => { set({ f }); RW.fontReady(cfg).then(paintPreview); },
-      wire: () => { RW.loadFonts(); Object.keys(RW.FONTS).forEach(k => RW.fontReady({ f: k, n: cfg.n })); RW.fontReady(cfg).then(paintPreview); } },
-    { id: 'icon', q: 'Choose an icon', hint: 'Guests collect one of these every visit.',
-      html: () => '<div class="wz-emo">' + RW.ICONS.map(i => '<button type="button" role="radio" data-i="' + i + '" aria-label="' + i.replace(/-/g, ' ') + '" title="' + i.replace(/-/g, ' ') + '" aria-checked="false">' + RW.iconSvg(i) + '</button>').join('') + '</div>',
-      pick: el => el.dataset.i, sel: () => cfg.i, apply: i => set({ i }) },
-    { id: 'stamps', q: 'How many stamps for a reward?', hint: 'Fewer stamps bring people back sooner.', auto: true,
-      html: () => [[5, 'Quick to earn'], [6, 'Good for bars'], [8, 'Most popular', true], [10, 'For weekly regulars'], [12, 'For daily regulars']].map(([n, sub, pop]) =>
-        opt('s', n, '<b style="font:700 20px var(--display)">' + n + '</b>', n + ' stamps', sub, pop ? '<span class="tag">Popular</span>' : '')).join(''),
-      pick: el => +el.dataset.s, sel: () => cfg.s, apply: s => set({ s }) },
-    { id: 'reward', q: 'What\u2019s the reward?', hint: 'Pearls come with every card. Add a reward of your own if you like.',
-      ok: () => !pctOpen || /^p\d+$/.test(cfg.r),
-      html: () => '<div class="wz-opt pearls"><span class="ic">' + G.icon('pearl') + '</span><span class="t">10 Pearls every visit<span class="vh"> (always included)</span><small>This one\u2019s on the house</small></span>' +
-          '<button type="button" class="wz-help" id="pearlHelp" aria-label="What are Pearls?">?</button><span class="ck" aria-hidden="true">' + G.icon('check') + '</span></div>' +
-        '<p class="wz-sub">Add your own reward (optional)</p>' +
-        Object.keys(RW.REWARDS).map(k => opt('r', k, RW.iconSvg(({ d: 'pint-glass', f: 'fork-knife', s: 'cake', b: 'gift' })[k]), RW.REWARDS[k])).join('') +
-        opt('r', 'p', G.icon('ticket'), 'A percent off an item') +
-        '<div id="pctBox"' + (pctOpen ? '' : ' hidden') + '><p class="wz-pct-l">How much off?</p><div class="wz-pct">' + RW.PCTS.map(p => '<button type="button" role="radio" data-p="' + p + '" aria-checked="false">' + p + '%</button>').join('') + '</div></div>' +
-        '<button type="button" class="wz-opt ghost" id="aCustomReward"><span class="ic">' + G.icon('chat-circle') + '</span><span class="t">Something else?<small>Talk to us about a custom reward</small></span></button>',
-      pick: el => el.dataset.r, sel: () => pctOpen ? 'p' : cfg.r,
-      // tapping the reward that's already picked takes it off again (Pearls only)
-      apply: r => {
-        if (r === (pctOpen ? 'p' : cfg.r)) { pctOpen = false; set({ r: 'n' }); return 'off'; }
-        if (r === 'p') { pctOpen = true; if (!/^p\d+$/.test(cfg.r)) set({ r: 'p10' }); return 'stay'; }
-        pctOpen = false; set({ r });
+    { id: 'name', name: true,
+      say: () => '<p>Hi! I’m Grug’s card studio. I’ll design a rewards card for your shop: eight quick questions, about a minute.</p><p>First, what’s your shop called?</p>',
+      answer: () => esc(cfg.n) },
+    { id: 'kind', label: 'Kind of place', rows: 2, tw: 104,
+      say: () => '<p><b>' + shopName() + '</b>. Great name. What kind of place is it? I’ll tailor the rest to it.</p>',
+      tiles: () => Object.keys(RW.KINDS).map(k => ({ v: k, words: RW.KINDS[k].label + ({ c: ' coffee cafe', t: ' boba bubble tea', b: ' pub brewery', f: ' food grill diner', k: ' bake pastry donut', o: ' something else' })[k],
+        html: '<span class="ic">' + RW.iconSvg(RW.KINDS[k].i) + '</span>' + esc(RW.KINDS[k].label) })),
+      sel: () => cfg.t,
+      pick: k => { const d = RW.KINDS[k], p = { t: k }; ['i', 's', 'r', 'color'].forEach(f => { if (!touched.has(f)) p[f] = d[f]; }); if (!touched.has('f')) p.f = d.font; cfg = RW.normalize(Object.assign({}, cfg, p)); paintPreview(); },
+      att: () => '<span class="att">' + RW.iconSvg(RW.KINDS[cfg.t].i) + '</span>', answer: () => esc(RW.KINDS[cfg.t].label) },
+    { id: 'color', label: 'Brand color', rows: 2, tw: 92, th: 96,
+      say: () => '<p>' + KIND_SAY[cfg.t] + '. I’ve sketched a look for <b>' + shopName() + '</b> to start from.</p>' +
+        (RW.KINDS[cfg.t].note ? '<p>' + esc(RW.KINDS[cfg.t].note) + '</p>' : '') + '<p>Which brand color? Your card and its QR frame will use it.</p>',
+      tiles: () => RW.COLORS.map(c => ({ v: c, cls: 'sw', words: colorName(c), tag: c === RW.KINDS[cfg.t].color ? 'Suggested' : '',
+        html: '<span class="dot" style="background:' + c + '"></span>' + esc(cap(colorName(c))) }))
+        .concat([{ v: 'custom', cls: 'sw', html: '<span class="dot" id="cDot" style="background:var(--card3)"></span>Any color<label aria-label="Pick any color"><input type="color" id="cIn"></label>' }]),
+      sel: () => RW.COLORS.includes(cfg.color) ? cfg.color : 'custom',
+      pick: c => set({ color: c }),
+      att: () => '<span class="att sw" style="background:' + cfg.color + '"></span>', answer: () => esc(cap(colorName(cfg.color))) },
+    { id: 'font', label: 'Lettering', rows: 2, tw: 176, th: 84,
+      say: () => '<p>' + (colorName(cfg.color) === 'custom color' ? 'That color' : cap(colorName(cfg.color))) + ' it is. It suits a ' + esc(kindWord()) + '.</p><p>Now the lettering. It writes <b>' + shopName() + '</b> on your card, and across Grug while your guests play.</p>',
+      tiles: () => Object.keys(RW.FONTS).map(k => { const F = RW.FONTS[k]; return { v: k, cls: 'fn', words: F.label + ' ' + F.sub, tag: k === RW.KINDS[cfg.t].font ? 'Suggested' : '',
+        html: '<span class="nm" style="font-family:\'' + F.css + '\',Fredoka,sans-serif;font-weight:' + F.w + ';font-size:' + (19 * F.size).toFixed(1) + 'px">' + shopName() + '</span><small>' + esc(F.label) + '</small>' }; }),
+      sel: () => cfg.f,
+      pick: f => { set({ f }); RW.fontReady(cfg).then(paintPreview); },
+      prep: () => { RW.loadFonts(); Object.keys(RW.FONTS).forEach(k => RW.fontReady({ f: k, n: cfg.n })); },
+      att: () => { const F = RW.FONTS[cfg.f]; return '<span class="att" style="font-family:\'' + F.css + '\',Fredoka,sans-serif;font-weight:' + F.w + '">Aa</span>'; }, answer: () => esc(RW.FONTS[cfg.f].label) },
+    { id: 'icon', label: 'Stamp icon', rows: 3, tw: 62, th: 62,
+      say: () => '<p>Looking sharp. Which icon should guests collect on each visit? For a ' + esc(kindWord()) + ' I’d go with the ' + esc(iconName(RW.KINDS[cfg.t].i)) + '.</p>',
+      tiles: () => RW.ICONS.map(i => ({ v: i, cls: 'ico', words: iconName(i), label: iconName(i), html: RW.iconSvg(i) })),
+      sel: () => cfg.i, pick: i => set({ i }),
+      att: () => '<span class="att">' + RW.iconSvg(cfg.i) + '</span>', answer: () => esc(cap(iconName(cfg.i))) },
+    { id: 'stamps', label: 'Stamps for a reward', rows: 1, tw: 104, th: 104,
+      say: () => '<p>The ' + esc(iconName(cfg.i)) + ' it is. How many stamps until a reward? Most shops pick 8. Fewer brings people back sooner.</p>',
+      tiles: () => [[5, 'Quick to earn'], [6, 'Good for bars'], [8, 'Most popular', 'Popular'], [10, 'Weekly regulars'], [12, 'Daily regulars']].map(([n, sub, t]) => ({ v: n, cls: 'num', words: String(n), tag: t,
+        html: '<b>' + n + '</b>stamps<small>' + esc(sub) + '</small>' })),
+      sel: () => cfg.s, pick: s => set({ s: +s }),
+      att: () => '<span class="att">' + cfg.s + '</span>', answer: () => cfg.s + ' stamps' },
+    { id: 'reward', label: 'Reward for a full card', rows: 2, tw: 116, th: 100,
+      say: () => '<p>' + cfg.s + ' stamps. Every scan already gives guests <b>10 Pearls</b>, on the house. <button type="button" class="cc-link" data-act="pearls">What are Pearls?</button></p><p>Want to add a reward of your own for a full card?</p>',
+      tiles: () => pctMode
+        ? [{ v: 'back', cls: 'ghost', html: '<span class="ic">' + G.icon('caret-left') + '</span>Rewards' }].concat(RW.PCTS.map(p => ({ v: 'p' + p, cls: 'num', words: p + ' percent', html: '<b>' + p + '%</b>off' })))
+        : [{ v: 'n', words: 'just pearls only none no nothing', tag: 'Free', html: '<span class="ic">' + G.icon('pearl') + '</span>Just Pearls' }]
+          .concat(Object.keys(RW.REWARDS).map(k => ({ v: k, words: RW.REWARDS[k] + (k === 'b' ? ' bogo' : ''), html: '<span class="ic">' + RW.iconSvg(KICON[k]) + '</span>' + esc(RW.REWARDS[k]) })))
+          .concat([{ v: 'p', words: 'percent off discount', html: '<span class="ic">' + G.icon('ticket') + '</span>A percent off' },
+            { v: 'x', cls: 'ghost', html: '<span class="ic">' + G.icon('chat-circle') + '</span>Something else?' }]),
+      sel: () => pctMode ? cfg.r : (/^p\d+$/.test(cfg.r) ? 'p' : cfg.r),
+      pick: r => {
+        if (r === 'x') { customReward(); return 'stay'; }
+        if (r === 'back') { pctMode = false; return 'stay'; }
+        if (r === 'p') { pctMode = true; return 'stay'; }
+        set({ r }); pctMode = false;
       },
-      wire: () => {
-        document.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => { set({ r: 'p' + b.dataset.p }); mark(); G.ui.buzz(); setTimeout(() => go(cur + 1), 320); }));
-        $('#aCustomReward').addEventListener('click', customReward);
-        $('#pearlHelp').addEventListener('click', pearlHelp);
-      } },
-    { id: 'welcome', q: 'Give new guests a free welcome stamp?', hint: 'A head start makes people more likely to come back.', auto: true,
-      html: () => opt('j', '1', G.icon('hand-waving'), 'Yes, start them with a stamp', 'Their first scan counts twice', '<span class="tag">Recommended</span>') + opt('j', '0', G.icon('smiley'), 'No, start at zero'),
-      pick: el => el.dataset.j, sel: () => String(cfg.j), apply: j => set({ j: j === '1' }) },
+      att: () => '<span class="att">' + (cfg.r === 'n' ? G.icon('pearl') : /^p/.test(cfg.r) ? G.icon('ticket') : RW.iconSvg(KICON[cfg.r])) + '</span>', answer: () => esc(cap(rewardWords())) },
+    { id: 'welcome', label: 'Welcome stamp', rows: 1, tw: 150, th: 104,
+      say: () => '<p>' + (cfg.r === 'n' ? 'Pearls it is, simple and free.' : esc(cap(rewardWords())) + ' for a full card. Guests will love that.') + '</p><p>Last one: should new guests get a free welcome stamp? A head start makes people more likely to come back.</p>',
+      tiles: () => [{ v: '1', words: 'yes yeah yep sure ok please', tag: 'Recommended', html: '<span class="ic">' + G.icon('hand-waving') + '</span>Yes, start them<small>First scan counts twice</small>' },
+        { v: '0', words: 'no nope nah zero', html: '<span class="ic">' + G.icon('smiley') + '</span>No, start at zero' }],
+      sel: () => String(cfg.j), pick: j => set({ j: j === '1' }),
+      att: () => '<span class="att">' + G.icon(cfg.j ? 'hand-waving' : 'smiley') + '</span>', answer: () => cfg.j ? 'Yes, a welcome stamp' : 'No welcome stamp' },
     { id: 'done', done: true }
   ];
   const QUESTIONS = STEPS.length - 1;
+  let pctMode = false;
 
-  function set(patch) { Object.keys(patch).forEach(k => touched.add(k)); cfg = RW.normalize(Object.assign({}, cfg, patch)); paintPreview(); }
   // what Pearls are, for a shop owner
   function pearlHelp() {
     G.ui.dialog({ title: 'What are Pearls?',
-      html: '<p>Pearls are Grug\u2019s premium currency. Players buy them in our store (100 for $1.99) and spend them on boosts, passes and power-ups in every game on Grug.</p>' +
-        '<p style="margin-top:10px"><b>Every time a guest scans your card, we give them 10 Pearls.</b> It\u2019s on the house, so it costs you nothing.</p>' +
+      html: '<p>Pearls are Grug’s premium currency. Players buy them in our store (100 for $1.99) and spend them on boosts, passes and power-ups in every game on Grug.</p>' +
+        '<p style="margin-top:10px"><b>Every time a guest scans your card, we give them 10 Pearls.</b> It’s on the house, so it costs you nothing.</p>' +
         '<p style="margin-top:10px"><b>Why it helps your shop</b></p><ul style="margin:6px 0 0 18px;color:var(--ink2);display:grid;gap:4px">' +
         '<li>Guests get something worth having on every visit, not just when the card is full.</li><li>That gives them a reason to scan each time, and to pick you over the shop next door.</li><li>Your card lives on their phone in Rewards, right next to their games: a reminder to come back.</li></ul>',
       actions: [{ label: 'Got it', kind: 'primary', value: true }] });
@@ -114,41 +142,90 @@
     if (go === 'go') location.href = 'sms:+19544596301?&body=' + encodeURIComponent('Hi! I’m making a rewards card for ' + (named ? cfg.n : 'my shop') + ' and I’d like a custom reward: ');
   }
 
-  /* slides */
-  let cur = 0, prevIdx = -1;
-  const slide = $('#slide');
+  /* ---------- the conversation ---------- */
+  let cur = -1, shownTo = -1, busy = false, timers = [], skip = null;
+  const later = (f, ms) => { const t = setTimeout(f, ms); timers.push(t); return t; };
+  const stopAll = () => { timers.forEach(clearTimeout); timers = []; skip = null; };
+  const nearEnd = () => log.scrollHeight - log.scrollTop - log.clientHeight < 160;
+  const toEnd = smooth => log.scrollTo({ top: log.scrollHeight, behavior: smooth && !RM ? 'smooth' : 'instant' });
+  const mark = () => '<span class="cc-mk" aria-hidden="true">' + G.LOGO + '</span>';   // the assistant's picture: the Grug stegosaurus
+
+  function paintTop() {
+    $('#prog').innerHTML = Array.from({ length: QUESTIONS }, (_, k) => '<i class="' + (k < cur ? 'on' : '') + '"></i>').join('');
+    $('#restart').hidden = cur === 0;
+  }
+  // the person's bubble for step k (tap it to change that answer)
+  function bubble(k) {
+    const st = STEPS[k], b = document.createElement('button');
+    b.type = 'button'; b.className = 'cc-u' + (st.att ? '' : ' txt'); b.dataset.ans = k; b.title = 'Change this answer';
+    b.innerHTML = (st.att ? st.att() : '') + '<span>' + st.answer() + '</span>' + G.icon('pencil-simple', 'ed');
+    b.addEventListener('click', () => { if (!busy) go(k); });
+    return b;
+  }
+  function assistant(html, cls) {
+    const m = document.createElement('div'); m.className = 'cc-a' + (cls ? ' ' + cls : '');
+    m.innerHTML = mark() + '<div class="cc-body"><div class="cc-tx">' + html + '</div></div>';
+    log.appendChild(m); return m;
+  }
+  // the whole conversation up to step i, drawn at once (opening the page, going back, changing an answer)
+  function rebuild(i) {
+    log.innerHTML = '';
+    for (let k = 0; k < i; k++) { assistant(STEPS[k].say()); log.appendChild(bubble(k)); }
+  }
+  // "Thinking…", then the words stream in a couple at a time (tapping the chat skips ahead)
+  function stream(m, then) {
+    const tx = m.querySelector('.cc-tx'), mk = m.querySelector('.cc-mk'), words = [];
+    (function wrap(node) {
+      [...node.childNodes].forEach(n => {
+        if (n.nodeType === 3) { const f = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach(w => { if (!w) return; if (/^\s+$/.test(w)) { f.appendChild(document.createTextNode(w)); return; }
+            const s = document.createElement('span'); s.className = 'cc-w'; s.textContent = w; words.push(s); f.appendChild(s); });
+          n.replaceWith(f); }
+        else if (n.nodeType === 1) wrap(n);
+      });
+    })(tx);
+    tx.hidden = true; mk.classList.add('think');
+    const th = document.createElement('div'); th.className = 'cc-think'; th.innerHTML = '<span>Thinking</span><span class="cc-dots"><i></i><i></i><i></i></span>';
+    m.querySelector('.cc-body').prepend(th);
+    let done = false;
+    const finish = () => { if (done) return; done = true; skip = null; th.remove(); tx.hidden = false; mk.classList.remove('think'); words.forEach(w => w.classList.add('on')); then(); };
+    skip = finish;
+    later(() => {
+      th.remove(); tx.hidden = false; let n = 0;
+      const tick = () => {
+        if (done) return;
+        const stick = nearEnd();
+        for (let k = 0; k < 2 && n < words.length; k++, n++) words[n].classList.add('on');
+        if (stick) toEnd(false);
+        if (n >= words.length) { later(finish, 180); return; }
+        later(tick, 32);
+      };
+      tick();
+    }, 480 + Math.min(560, words.length * 12));
+  }
+  log.addEventListener('pointerdown', () => { if (skip) skip(); });
+
   function show(i) {
     i = Math.max(0, Math.min(STEPS.length - 1, i));
     if (i > 0 && !named) i = 0;   // the name comes first
-    const st = STEPS[i], back = i < prevIdx; prevIdx = cur = i;
-    $('#bar').style.width = (Math.min(i, QUESTIONS) / QUESTIONS * 100) + '%';
-    $('#count').textContent = st.done ? 'Done!' : 'Step ' + (i + 1) + ' of ' + QUESTIONS;
-    slide.className = 'wz-slide' + (st.done ? ' wz-done' : '') + (back ? ' back' : '');
-    void slide.offsetWidth; slide.classList.add('in');
-    if (st.done) return showDone();
-    slide.innerHTML = '<div class="wz-a" role="radiogroup" aria-labelledby="qh">' + st.html() + '</div>' +
-      '<div class="wz-q"><span class="n">' + (i + 1) + '</span><h1 id="qh">' + esc(st.q) + '</h1><p>' + esc(st.hint) + '</p><div class="wz-prev has-stage" id="prev"></div></div>';
-    if (st.pick) slide.querySelectorAll('[role=radio]:not([data-p]):not(#aCustom)').forEach(b => b.addEventListener('click', () => {
-      const r = st.apply(st.pick(b)); mark(); G.ui.buzz();
-      if (r === 'stay') { $('#pctBox').hidden = false; paintNav(); return; }
-      if (r === 'off') { $('#pctBox').hidden = true; paintNav(); return; }
-      if (st.id === 'reward') $('#pctBox').hidden = true;
-      if (st.auto || st.id === 'reward') setTimeout(() => { if (cur === i) go(i + 1); }, 320);
-      paintNav();
-    }));
-    if (st.wire) st.wire();
-    mark(); paintPreview(); paintNav();
-    $('#nav').hidden = false;
+    stopAll(); busy = false; pctMode = false;
+    const last = log.lastElementChild;
+    const fresh = i === shownTo + 1 && last && last.dataset.ans === String(i - 1);
+    const animate = !RM && (fresh || (i === 0 && !log.children.length && !named));
+    if (!fresh) rebuild(i);
+    cur = shownTo = i;
+    paintTop(); dock.innerHTML = ''; dock.classList.remove('out');
+    const st = STEPS[i];
+    if (st.done) return showDone(animate);
+    if (st.prep) st.prep();
+    const m = assistant(st.say());
+    const after = () => { addPreview(m); wireInline(m); showDock(i); toEnd(true); };
+    if (animate) { toEnd(true); stream(m, after); } else { after(); toEnd(false); }
   }
-  function mark() {
-    const st = STEPS[cur]; if (!st.sel) return;
-    const v = String(st.sel());
-    slide.querySelectorAll('[role=radio]:not([data-p]):not(#aCustom)').forEach(b => { const k = Object.keys(b.dataset)[0]; b.setAttribute('aria-checked', String(String(b.dataset[k]).toUpperCase() === v.toUpperCase())); });
-    slide.querySelectorAll('[data-p]').forEach(b => b.setAttribute('aria-checked', String('p' + b.dataset.p === cfg.r)));
-    const cl = $('#aCustom'); if (cl) { const preset = RW.COLORS.some(c => c.toUpperCase() === cfg.color); cl.setAttribute('aria-checked', String(!preset)); cl.style.background = preset ? '' : cfg.color; cl.style.color = preset ? '' : RW.inkOn(cfg.color); }
-  }
-  /* the 3D picture beside each question (assets/wizard3d.js): one stage moved from slide to slide.
-     The storefront for the first five questions, the phone and the reward for the rest. A flat card if there's no 3D. */
+  function wireInline(m) { m.querySelectorAll('[data-act=pearls]').forEach(b => b.addEventListener('click', pearlHelp)); }
+
+  /* the picture in the newest answer: one 3D stage (assets/wizard3d.js), moved into each new answer as if it were
+     drawn again. The storefront for the first questions, the phone and the reward for the rest; a flat card if there's no 3D. */
   const SCENE = { name: 'shop', kind: 'shop', color: 'shop', font: 'shop', icon: 'shop', stamps: 'phone', reward: 'phone', welcome: 'phone' };
   const stage = document.createElement('div'); stage.className = 'wz-stage';
   let w3d = null, w3dFailed = false;
@@ -157,62 +234,163 @@
     catch (e) { w3dFailed = true; }
     paintPreview();
   })();
+  function addPreview(m) {
+    log.querySelectorAll('.cc-pv').forEach(p => p.remove());
+    const p = document.createElement('div'); p.className = 'cc-pv has-stage';
+    p.innerHTML = '<span class="cc-cap">' + G.icon('sparkle') + 'Live preview</span>';
+    m.querySelector('.cc-body').appendChild(p); paintPreview();
+  }
   function paintPreview() {
-    const p = $('#prev'), st = STEPS[cur]; if (!p || st.done) return;
+    const p = log.querySelector('.cc-pv'), st = STEPS[cur]; if (!p || !st || st.done) return;
     if (w3dFailed) { p.classList.remove('has-stage'); p.innerHTML = RW.passHtml(Object.assign({}, cfg, { n: named ? cfg.n : 'Your shop' }), Math.min(3, cfg.s - 1)); return; }
-    if (stage.parentNode !== p) { p.innerHTML = ''; p.appendChild(stage); }
+    if (stage.parentNode !== p) p.insertBefore(stage, p.firstChild);
     if (w3d) { w3d.show(SCENE[st.id], Object.assign({}, cfg, { named }), st.id); w3d.kick(); }
   }
-  function paintNav() {
-    const st = STEPS[cur];
-    $('#backBtn').style.visibility = cur === 0 ? 'hidden' : '';
-    $('#nextBtn').disabled = st.ok ? !st.ok() : false;
-    $('#nextBtn').textContent = cur === QUESTIONS - 1 ? 'Finish' : 'Next';
+
+  /* the bottom of the screen: the prompt bar for the name, the tray of tiles (and a smaller prompt bar) for the rest */
+  function showDock(i) {
+    const st = STEPS[i];
+    if (st.name) {
+      dock.innerHTML = '<form class="cc-comp big" id="comp" autocomplete="off"><input id="aName" maxlength="28" autocomplete="organization" enterkeyhint="send" placeholder="Your shop’s name…" aria-label="Your shop’s name" value="' + (named ? esc(cfg.n) : '') + '">' +
+        '<button class="cc-send" id="send" aria-label="Send">' + G.icon('arrow-right') + '</button></form><p class="cc-fine">Free forever · no account needed · saved on this phone</p>';
+      const inp = $('#aName'), send = $('#send');
+      const ok = () => { send.disabled = !inp.value.trim(); };
+      inp.addEventListener('input', () => { named = inp.value.trim().length > 0; set({ n: inp.value }); ok(); });
+      $('#comp').addEventListener('submit', e => { e.preventDefault(); if (busy) return;
+        if (!inp.value.trim()) { const c = $('#comp'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); return; }
+        named = true; set({ n: inp.value.trim() }); inp.blur(); answer(0, null); });
+      ok(); if (FINE) inp.focus({ preventScroll: true });
+      return;
+    }
+    dock.innerHTML = '<div class="cc-tray" id="tray"></div><form class="cc-comp" id="comp" autocomplete="off"><input id="say" enterkeyhint="send" placeholder="Pick one above, or type it…" aria-label="Or type your answer">' +
+      '<button class="cc-send" id="send" aria-label="Send" disabled>' + G.icon('arrow-right') + '</button></form>';
+    paintTray(i);
+    const inp = $('#say'), send = $('#send');
+    inp.addEventListener('input', () => { send.disabled = !inp.value.trim(); });
+    $('#comp').addEventListener('submit', e => { e.preventDefault(); const t = inp.value.trim(); if (!t || busy) return; inp.value = ''; send.disabled = true; inp.blur(); typed(i, t); });
   }
-  // each slide gets its own history entry, so the phone's back button goes back a question
+  function paintTray(i) {
+    const st = STEPS[i], tiles = st.tiles(), v = String(st.sel()).toUpperCase();
+    const rows = pctMode ? 1 : innerHeight < 700 ? Math.min(st.rows, 2) : st.rows;
+    $('#tray').innerHTML = '<div class="cc-trh"><span>' + esc(pctMode ? 'How much off?' : st.label) + '</span><span>' + G.icon('sparkle') + (tiles.some(t => t.tag === 'Suggested') ? 'Suggested for you' : 'Tap to pick') + '</span></div>' +
+      '<div class="cc-grid" data-noswipe role="radiogroup" aria-label="' + esc(st.label) + '" style="--rows:' + rows + ';--tw:' + st.tw + 'px;--th:' + (st.th || 100) + 'px">' +
+      tiles.map((t, k) => '<button type="button" class="cc-t' + (t.cls ? ' ' + t.cls : '') + '" role="radio" style="--i:' + k + '" data-v="' + esc(t.v) + '" aria-checked="' + (String(t.v).toUpperCase() === v) + '"' +
+        (t.label ? ' aria-label="' + esc(t.label) + '" title="' + esc(t.label) + '"' : '') + '>' + tag(t.tag) + t.html + ck + '</button>').join('') + '</div>';
+    const grid = $('#tray .cc-grid');
+    grid.querySelectorAll('.cc-t').forEach(b => b.addEventListener('click', () => { if (b.querySelector('#cIn')) return; choose(i, b.dataset.v, b); }));
+    // the picked one in view
+    const on = grid.querySelector('[aria-checked=true]'); if (on && grid.scrollWidth > grid.clientWidth) grid.scrollLeft = Math.max(0, on.offsetLeft - grid.clientWidth / 2 + on.offsetWidth / 2);
+    const cIn = $('#cIn');
+    if (cIn) { cIn.value = cfg.color.toLowerCase(); if (!RW.COLORS.includes(cfg.color)) $('#cDot').style.background = cfg.color;
+      cIn.addEventListener('input', () => { set({ color: cIn.value }); $('#cDot').style.background = cfg.color; grid.querySelectorAll('.cc-t').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === 'custom'))); });
+      cIn.addEventListener('change', () => choose(i, cfg.color, cIn.closest('.cc-t'))); }
+  }
+  function choose(i, v, el) {
+    if (busy || cur !== i) return;
+    G.ui.buzz();
+    if (STEPS[i].pick(v) === 'stay') { paintTray(i); return; }
+    answer(i, el);
+  }
+  // the answer goes into the chat (the tile flies up into the person's bubble), then on to the next question
+  function answer(i, el) {
+    busy = true; log.querySelectorAll('.cc-a.mini').forEach(n => n.remove());
+    const b = bubble(i); if (el) b.classList.add('pre'); log.appendChild(b); toEnd(true);
+    dock.classList.add('out');
+    fly(el, b.querySelector('.att')).then(() => b.classList.remove('pre'));
+    later(() => { busy = false; go(i + 1); }, RM ? 0 : 460);
+  }
+  function fly(from, to) {
+    if (RM || !from || !to) return Promise.resolve();
+    const a = from.getBoundingClientRect(), b = to.getBoundingClientRect(); if (!a.width || !b.width) return Promise.resolve();
+    const c = from.cloneNode(true); c.classList.add('cc-fly'); c.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+    Object.assign(c.style, { position: 'fixed', left: a.left + 'px', top: a.top + 'px', width: a.width + 'px', height: a.height + 'px', margin: 0, zIndex: 60, pointerEvents: 'none', animation: 'none' });
+    document.body.appendChild(c);
+    const s = Math.min(b.width / a.width, b.height / a.height), dx = b.left + b.width / 2 - a.left - a.width * s / 2, dy = b.top + b.height / 2 - a.top - a.height * s / 2;
+    const an = c.animate([{ transform: 'none', opacity: 1 }, { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + s + ')', opacity: .5 }], { duration: 440, easing: 'cubic-bezier(.3,.8,.25,1)' });
+    return an.finished.then(() => c.remove(), () => c.remove());
+  }
+  // typing instead of tapping: the words are matched to a tile ("blue", "10", "yes", "pizza", "20% off")
+  function typed(i, text) {
+    const st = STEPS[i], t = text.toLowerCase().replace(/[^\w#%\s-]/g, ' ').trim();
+    let v = null;
+    if (st.id === 'color') { const hx = /#?([0-9a-f]{6})\b/i.exec(text); if (hx) v = '#' + hx[1].toUpperCase(); else { const w = t.split(/\s+/).find(w => COLOR_WORDS[w]); if (w) v = COLOR_WORDS[w]; } }
+    else if (st.id === 'stamps') { const n = parseInt(t.replace(/\D+/g, ' '), 10); if (n >= 4 && n <= 12) v = n; }
+    else if (st.id === 'reward') { const n = /(\d+)\s*(%|percent|off)/.exec(t) || (pctMode && /(\d+)/.exec(t)); if (n) v = 'p' + n[1]; }
+    if (v == null) {
+      const ws = t.split(/\s+/).filter(w => w.length > 1), list = st.tiles().filter(x => x.words), low = x => x.words.toLowerCase();
+      const hit = list.find(x => ws.length && ws.every(w => low(x).includes(w))) || list.find(x => ws.some(w => w.length > 2 && low(x).split(/\s+/).includes(w)));
+      if (hit && hit.v === 'p') { pctMode = true; paintTray(i); return; }
+      if (hit) v = hit.v;
+    }
+    if (v == null) {
+      log.querySelectorAll('.cc-a.mini').forEach(n => n.remove());
+      const m = assistant('<p>Hmm, I didn’t catch that one. Tap one of the options below, or try another word.</p>', 'mini');
+      if (RM) toEnd(true); else stream(m, () => toEnd(true));
+      return;
+    }
+    if (st.pick(v) === 'stay') { paintTray(i); return; }
+    paintTray(i);
+    answer(i, $('#tray .cc-t[aria-checked=true]'));
+  }
+
+  // each question gets its own history entry, so the phone's back button goes back a question
   function go(i) { const h = '#' + STEPS[Math.max(0, Math.min(STEPS.length - 1, i))].id; if (location.hash !== h) location.hash = h; else show(i); }
   const fromHash = () => { const k = location.hash.slice(1); if (k === 'print') return STEPS.length - 1; const i = STEPS.findIndex(s => s.id === k); return i < 0 ? 0 : i; };
   addEventListener('hashchange', () => show(fromHash()));
-  $('#backBtn').addEventListener('click', () => go(cur - 1));
-  $('#nextBtn').addEventListener('click', () => { if (!$('#nextBtn').disabled) go(cur + 1); });
-  addEventListener('keydown', e => { if (e.key === 'Enter' && !document.querySelector('dialog[open]') && !STEPS[cur].done && !$('#nextBtn').disabled) { e.preventDefault(); go(cur + 1); } });
+  $('#restart').addEventListener('click', () => go(0));
 
-  /* the last slide: the card, the PDF, and what the links are for */
-  function showDone() {
-    $('#nav').hidden = true;
+  /* the end: the card as a file to download, the card on a café table, and what the links are for */
+  function showDone(animate) {
     const c = RW.encode(cfg); if (saved !== c) { RW.saveMine(c, saved); saved = c; try { history.replaceState(null, '', '?c=' + c + '#done'); } catch (e) {} }
-    const L = RW.links(cfg);
-    slide.innerHTML =
-      '<div class="wz-a">' +
-        '<button type="button" class="g-btn primary wz-big" id="pdfBtn">' + G.icon('download-simple') + 'Download your card (PDF)</button>' +
-        '<div class="wz-acts"><a class="g-btn" href="' + esc(L.open) + '" target="_blank" rel="noopener">See it as a guest</a><button type="button" class="g-btn" id="redo">' + G.icon('pencil-simple') + 'Change answers</button></div>' +
-        '<p class="wz-saved">' + G.icon('check-circle') + '<span>Saved to <a href="../#mine">Rewards → My creations</a> on this device.</span></p>' +
-        '<div class="wz-share"><h3>Sharing it online?</h3>' +
-          '<div class="wz-row"><span class="ic">' + G.icon('qr-code') + '</span><div><b>The QR on your card</b><span>Keep it in your shop. Guests scan it at the counter to collect a stamp, once a day.</span></div></div>' +
-          '<div class="wz-row"><span class="ic">' + G.icon('share-network') + '</span><div><b>Invite link</b><span>Post it on Instagram or your website. People can save your card, but stamps only come from the QR in your shop.</span></div><button type="button" class="g-btn sm" data-copy="join">Copy</button></div>' +
-          '<div class="wz-row"><span class="ic">' + G.icon('device-mobile') + '</span><div><b>NFC sticker</b><span>Optional. Copy the QR’s link onto an NFC sticker so guests can tap instead of scan.</span></div><button type="button" class="g-btn sm" data-copy="stamp">Copy</button></div>' +
-        '</div>' +
-        '<div class="wz-up"><div><b>Want your own game?</b><span>We build one starring your menu. First partners get 90 days free.</span></div><a class="g-btn sm" href="sms:+19544596301">Text us</a></div>' +
-      '</div>' +
-      '<div class="wz-q"><span class="n">' + G.icon('check') + '</span><h1>Your card is ready!</h1><p>Print it and stand it on your tables or by the register. Guests scan it with their phone camera.</p>' +
-        '<div class="wz-3d" id="cafe" role="img" aria-label="Your printed card standing in a holder on a café table"><div class="cap"><span>Print it</span><span>Put it on the table</span><span>Guests scan</span></div></div></div>';
-    RW.cardCanvas(cfg, L.stamp).then(cv => showCafe(cv));
-    $('#pdfBtn').addEventListener('click', async e => {
+    const L = RW.links(cfg), slug = (cfg.n || 'shop').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'shop';
+    $('#prog').querySelectorAll('i').forEach(i => i.classList.add('on'));
+    log.querySelectorAll('.cc-pv').forEach(p => p.remove());
+    async function pdf(e) {
       const b = e.currentTarget; b.disabled = true;
       try { await RW.downloadPdf(cfg, L.stamp); G.ui.toast('Your card is downloading', { icon: 'download-simple' }); } catch (err) { G.ui.toast('Couldn’t make the PDF. Try again.', { icon: 'warning-circle' }); }
       b.disabled = false;
-    });
-    $('#redo').addEventListener('click', () => go(0));
-    slide.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => {
-      const t = b.dataset.copy === 'join' ? L.join : L.stamp;
-      try { await navigator.clipboard.writeText(t); b.textContent = 'Copied'; } catch (err) { prompt('Copy this link:', t); }
-      setTimeout(() => { b.textContent = 'Copy'; }, 1500);
-    }));
+    }
+    // a second note: sharing it online, and the upgrade
+    function share() {
+      const s = assistant('<p>Sharing it online too? Here’s what each link does.</p>');
+      const rows = () => {
+        s.querySelector('.cc-body').insertAdjacentHTML('beforeend', '<div class="wz-share">' +
+          '<div class="wz-row"><span class="ic">' + G.icon('qr-code') + '</span><div><b>The QR on your card</b><span>Keep it in your shop. Guests scan it at the counter to collect a stamp, once a day.</span></div></div>' +
+          '<div class="wz-row"><span class="ic">' + G.icon('share-network') + '</span><div><b>Invite link</b><span>Post it on Instagram or your website. People can save your card, but stamps only come from the QR in your shop.</span></div><button type="button" class="g-btn sm" data-copy="join">Copy</button></div>' +
+          '<div class="wz-row"><span class="ic">' + G.icon('device-mobile') + '</span><div><b>NFC sticker</b><span>Optional. Copy the QR’s link onto an NFC sticker so guests can tap instead of scan.</span></div><button type="button" class="g-btn sm" data-copy="stamp">Copy</button></div>' +
+          '</div><div class="wz-up"><div><b>Want your own game?</b><span>We build one starring your menu. First partners get 90 days free.</span></div><a class="g-btn sm" href="sms:+19544596301">Text us</a></div>');
+        s.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', async () => {
+          const t = b.dataset.copy === 'join' ? L.join : L.stamp;
+          try { await navigator.clipboard.writeText(t); b.textContent = 'Copied'; } catch (err) { prompt('Copy this link:', t); }
+          setTimeout(() => { b.textContent = 'Copy'; }, 1500);
+        }));
+      };
+      if (animate) stream(s, () => { rows(); toEnd(true); }); else rows();
+    }
+    const m = assistant('<p>Done. Here’s <b>' + shopName() + '</b>’s card, ready to print.</p><p>Stand it by the register or on your tables. Guests scan it with their phone camera to collect a stamp, once a day.</p>');
+    const extra = () => {
+      m.querySelector('.cc-body').insertAdjacentHTML('beforeend',
+        '<div class="cc-file"><span class="pdf">PDF</span><div class="t"><b>' + esc(slug) + '-rewards-card.pdf</b><span>Print-ready · QR included</span></div><button type="button" class="cc-send" data-pdf aria-label="Download the PDF">' + G.icon('download-simple') + '</button></div>' +
+        '<div class="wz-3d" id="cafe" role="img" aria-label="Your printed card standing in a holder on a café table"><div class="cap"><span>Print it</span><span>Put it on the table</span><span>Guests scan</span></div></div>' +
+        '<p class="wz-saved">' + G.icon('check-circle') + '<span>Saved to <a href="../#mine">Rewards → My creations</a> on this phone.</span></p>');
+      RW.cardCanvas(cfg, L.stamp).then(cv => showCafe(cv));
+      dock.innerHTML = '<div class="cc-acts" data-noswipe><button type="button" class="g-btn primary" data-pdf>' + G.icon('download-simple') + 'Download</button>' +
+        '<a class="g-btn" href="' + esc(L.open) + '" target="_blank" rel="noopener" title="See it as a guest">' + G.icon('eye') + 'Guest view</a>' +
+        '<button type="button" class="g-btn" id="redo" title="Change answers">' + G.icon('pencil-simple') + 'Edit</button></div>' +
+        '<p class="cc-fine">Tap any answer above to change just that one.</p>';
+      document.querySelectorAll('[data-pdf]').forEach(b => b.addEventListener('click', pdf));
+      $('#redo').addEventListener('click', () => go(0));
+      toEnd(true);
+      if (animate) later(share, 1200); else share();
+    };
+    if (animate) { toEnd(true); stream(m, extra); } else { extra(); toEnd(false); }
   }
 
-  /* the café table on the last slide: the printed card in a stand (assets/cafe3d.js + three.min.js, loaded on demand) */
+  /* the café table: the printed card in a stand (assets/cafe3d.js + three.min.js, loaded on demand) */
   let cafe = null;
-  function loadScript(src) { return new Promise((ok, no) => { if (document.querySelector('script[src="' + src + '"]')) return ok(); const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
+  function loadScript(src) { return new Promise((ok, no) => { const have = document.querySelector('script[src="' + src + '"]');
+    if (have) { if (have.dataset.ok) return ok(); have.addEventListener('load', ok); have.addEventListener('error', no); return; }
+    const s = document.createElement('script'); s.src = src; s.onload = () => { s.dataset.ok = 1; ok(); }; s.onerror = no; document.head.appendChild(s); }); }
   async function showCafe(cv) {
     const box = $('#cafe'); if (!box) return;
     const flat = () => { box.style.aspectRatio = 'auto'; box.style.background = 'none'; const im = new Image(); im.src = cv.toDataURL('image/png'); im.alt = 'Your printable rewards card'; box.innerHTML = ''; box.appendChild(im); };
