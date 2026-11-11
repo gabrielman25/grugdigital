@@ -31,7 +31,7 @@ def main():
     atlas = json.load(open(os.path.join(HERE, 'shared', 'atlas.json')))
     icon_pack = json.load(open(os.path.join(HERE, 'shared', 'icons.json')))
     src = lambda n: open(os.path.join(HERE, 'src', n), encoding='utf-8').read()
-    t, sports = src('app.html'), src('sports.js')
+    t, sports, arena = src('app.html'), src('sports.js'), src('arena.js')
 
     # {{key}} = HTML-escaped text, {{key|js}} = inside a "double-quoted" JS string, {{key|json}} = a JS value.
     # Dotted keys reach into objects ({{color.accent}}).
@@ -51,7 +51,8 @@ def main():
         if kind == 'js':
             return json.dumps(str(v), ensure_ascii=False)[1:-1]
         return html.escape(str(v), quote=True)
-    t = re.sub(r'\{\{([A-Za-z][A-Za-z0-9.]*(?:\|(?:js|json))?)\}\}', fill, t)
+    TOK = r'\{\{([A-Za-z][A-Za-z0-9.]*(?:\|(?:js|json))?)\}\}'
+    t, sports, arena = (re.sub(TOK, fill, x) for x in (t, sports, arena))   # the game code takes {{tokens}} too (colours, the LED ribbon)
 
     # only the icons the app uses
     used = set(re.findall(r'ic\("([a-z_0-9]+)"', t) + re.findall(r'data-ic="([a-z_0-9]+)"', t) +
@@ -62,7 +63,7 @@ def main():
         print('missing icons (not in shared/icons.json):', ', '.join(missing))
     icons = {n: icon_pack[n] for n in sorted(used) if n in icon_pack}
 
-    t = t.replace('__ARENA__', src('arena.js')).replace('__SPORTS__', sports)
+    t = t.replace('__ARENA__', arena).replace('__SPORTS__', sports)
     t = t.replace('__LOGOW__', logow).replace('__FONT__', data['font']).replace('__LOGO__', data['logo'])
     t = t.replace('__MENU__', json.dumps(data['menu'], ensure_ascii=False, separators=(',', ':')))
     t = t.replace('__IMGS__', json.dumps(data['imgs'], separators=(',', ':')))

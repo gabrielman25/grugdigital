@@ -139,13 +139,13 @@ const Arena = (() => {
     const c = document.createElement('canvas'); c.width = 2048; c.height = 64; const x = c.getContext('2d');
     x.fillStyle = '#0b0f10'; x.fillRect(0, 0, 2048, 64);
     let px = 20; x.textBaseline = 'middle';
-    for (let k = 0; k < 2; k++) for (const [m, col] of msgs) { x.font = '800 34px Bricolage, sans-serif'; x.fillStyle = col; x.fillText(m, px, 34); px += x.measureText(m).width + 60; x.fillStyle = '#cfac52'; x.fillRect(px - 38, 28, 12, 12); }
+    for (let k = 0; k < 2; k++) for (const [m, col] of msgs) { x.font = '800 34px Bricolage, sans-serif'; x.fillStyle = col; x.fillText(m, px, 34); px += x.measureText(m).width + 60; x.fillStyle = '{{color.accent}}'; x.fillRect(px - 38, 28, 12, 12); }
     // LED dot mask
     x.globalCompositeOperation = 'destination-in'; const d = document.createElement('canvas'); d.width = 4; d.height = 4; const dx = d.getContext('2d'); dx.fillStyle = '#fff'; dx.fillRect(0, 0, 3, 3);
     x.fillStyle = x.createPattern(d, 'repeat'); x.fillRect(0, 0, 2048, 64); x.globalCompositeOperation = 'destination-over'; x.fillStyle = '#050707'; x.fillRect(0, 0, 2048, 64);
     const t = canvasTex(c); t.wrapS = T.RepeatWrapping; t.repeat.set(.5, 1); return t;
   }
-  const LED_MSGS = [['R&R CRAFTHOUSE GRILL', '#ffffff'], ['GAME DAY AT THE CRAFTHOUSE', '#cfac52'], ['ORDER AHEAD IN THE R&R APP', '#ffffff'], ['TRY THE NEWTON BURGER', '#f3e2ad'], ['BOUDIN BALLS · GUMBO · PO’BOYS', '#ffffff']];
+  const LED_MSGS = {{led|json}};   // the stadium's scrolling LED ribbon: [text, colour] from partners/<id>/config.json
   function adBoard(w, x0, x1, z, face, y) {
     const len = Math.abs(x1 - x0), g = new T.BoxGeometry(len, 1, .25);
     const t = ledTex(LED_MSGS); t.repeat.set(len / 40, 1);
@@ -162,11 +162,11 @@ const Arena = (() => {
       const x = c.getContext('2d'); x.fillStyle = '#081012'; x.fillRect(0, 0, 768, 384);
       x.fillStyle = '#0f1d21'; x.fillRect(10, 10, 748, 364);
       if (J.flash) {
-        x.fillStyle = J.flashCol || '#cfac52'; x.fillRect(10, 10, 748, 364);
+        x.fillStyle = J.flashCol || '{{color.accent}}'; x.fillRect(10, 10, 748, 364);
         pixelText(x, J.flash, 384, 120, 120, '#14110a', 'center');
       } else {
         x.drawImage(logoMask('#ffffff'), 18, 30, 320, 320);
-        pixelText(x, J.title.toUpperCase(), 556, 52, 44, '#cfac52', 'center');
+        pixelText(x, J.title.toUpperCase(), 556, 52, 44, '{{color.accent}}', 'center');
         pixelText(x, String(J.score).replace(/\B(?=(\d{3})+(?!\d))/g, ','), 556, 140, 132, '#ffffff', 'center');
         pixelText(x, J.sub || 'GAME DAY', 556, 300, 40, '#8fa3a9', 'center');
       }
@@ -212,7 +212,7 @@ const Arena = (() => {
     g.setAttribute('position', new T.Float32BufferAttribute(P, 3)); g.setAttribute('color', new T.Float32BufferAttribute(C, 3));
     g.setAttribute('aHead', new T.Float32BufferAttribute(H, 1)); g.setAttribute('aArm', new T.Float32BufferAttribute(A, 1));
     const n = spots.length, body = new Float32Array(n * 3), skin = new Float32Array(n * 3), ph = new Float32Array(n);
-    const BODY = ['#cfac52', '#24383f', '#f1efe9', '#1d1d1d', '#b8402f', '#cfac52', '#3a6ea5', '#e07b39', '#24383f', '#ffffff'], SKIN = ['#f1c9a5', '#e0b08a', '#c68c63', '#9c6845', '#6e4630'];
+    const BODY = ['{{color.accent}}', '{{color.deep}}', '#f1efe9', '#1d1d1d', '#b8402f', '{{color.accent}}', '#3a6ea5', '#e07b39', '{{color.deep}}', '#ffffff'], SKIN = ['#f1c9a5', '#e0b08a', '#c68c63', '#9c6845', '#6e4630'];
     const col = new T.Color();
     spots.forEach((s, i) => { col.set(BODY[(i * 7 + (i >> 3)) % BODY.length]).convertSRGBToLinear(); body.set([col.r, col.g, col.b], i * 3); col.set(SKIN[(i * 13) % SKIN.length]).convertSRGBToLinear(); skin.set([col.r, col.g, col.b], i * 3); ph[i] = (Math.sin(i * 91.7) * .5 + .5); });
     g.setAttribute('aBody', new T.InstancedBufferAttribute(body, 3)); g.setAttribute('aSkin', new T.InstancedBufferAttribute(skin, 3)); g.setAttribute('aPh', new T.InstancedBufferAttribute(ph, 1));
@@ -283,7 +283,7 @@ const Arena = (() => {
   function particles(w) {
     const N = 320, g = new T.BoxGeometry(.16, .16, .16), m = new T.MeshBasicMaterial({ vertexColors: false });
     const im = new T.InstancedMesh(g, m, N); im.instanceMatrix.setUsage(T.DynamicDrawUsage); im.frustumCulled = false;
-    const cols = ['#cfac52', '#f3e2ad', '#ffffff', '#24383f', '#b8402f', '#2f5e49', '#ffd65a'].map(h => new T.Color(h));
+    const cols = ['{{color.accent}}', '{{color.accentLight}}', '#ffffff', '{{color.deep}}', '#b8402f', '#2f5e49', '#ffd65a'].map(h => new T.Color(h));
     const ps = []; const M4 = new T.Matrix4(), Q = new T.Quaternion(), E = new T.Euler(), S0 = new T.Vector3(0, 0, 0);
     for (let i = 0; i < N; i++) { im.setColorAt(i, cols[i % cols.length]); M4.compose(new T.Vector3(), Q, S0); im.setMatrixAt(i, M4); ps.push({ life: 0 }); }
     w.scene.add(im); let head = 0;
@@ -395,8 +395,8 @@ const Arena = (() => {
         // end zone paint (goal line at z = 9.144)
         const [ex0, ez0] = P(-24.4, 0), [ex1, ez1] = P(24.4, 9.144);
         cx.fillStyle = 'rgba(36,56,63,.82)'; cx.fillRect(ex0, ez0, ex1 - ex0, ez1 - ez0);
-        cx.globalAlpha = .95; cx.drawImage(logoMask('#cfac52'), (ex0 + ex1) / 2 - 72, ez0 + 2, 144, 144); cx.globalAlpha = 1;
-        pixelText(cx, 'R&R', ex0 + 140, ez0 + 46, 56, 'rgba(255,255,255,.85)', 'center'); pixelText(cx, 'R&R', ex1 - 140, ez0 + 46, 56, 'rgba(255,255,255,.85)', 'center');
+        cx.globalAlpha = .95; cx.drawImage(logoMask('{{color.accent}}'), (ex0 + ex1) / 2 - 72, ez0 + 2, 144, 144); cx.globalAlpha = 1;
+        pixelText(cx, {{brand|json}}, ex0 + 140, ez0 + 46, 56, 'rgba(255,255,255,.85)', 'center'); pixelText(cx, {{brand|json}}, ex1 - 140, ez0 + 46, 56, 'rgba(255,255,255,.85)', 'center');
         cx.fillStyle = 'rgba(255,255,255,.92)';
         const line = (x0, z0, x1, z1, wd) => { const [a, b] = P(x0, z0), [c, d] = P(x1, z1); cx.fillRect(Math.min(a, c), Math.min(b, d), Math.max(wd, Math.abs(c - a)), Math.max(wd, Math.abs(d - b))); };
         line(-24.4, 0, 24.4, 0, 3); line(-24.4, 9.144, 24.4, 9.144, 4); line(-24.4, 0, -24.4, 96, 3); line(24.4, 0, 24.4, 96, 3);
@@ -439,7 +439,7 @@ const Arena = (() => {
         cx.strokeStyle = 'rgba(255,255,255,.92)'; cx.lineWidth = 3; cx.beginPath(); cx.arc(sx, sz, 9.15 * 16, Math.asin(5.5 / 9.15) + .02, Math.PI - Math.asin(5.5 / 9.15) - .02); cx.stroke();
         line(-30, 52.5, 30, 52.5, 3); const [cxp, czp] = P(0, 52.5); cx.beginPath(); cx.arc(cxp, czp, 9.15 * 16, 0, 7); cx.stroke();
         cx.globalAlpha = .85; cx.drawImage(logoMask('#ffffff'), cxp - 120, czp - 120, 240, 240); cx.globalAlpha = 1;
-        pixelText(cx, 'R&R CRAFTHOUSE', P(0, 0)[0], P(0, 23)[1], 64, 'rgba(255,255,255,.55)', 'center');
+        pixelText(cx, {{label|json}}.toUpperCase(), P(0, 0)[0], P(0, 23)[1], 64, 'rgba(255,255,255,.55)', 'center');
       });
       plane(w, tex, -32, -9, 64, 96, 0);
       adBoard(w, -22, 22, -5.5, null, 0);
@@ -459,7 +459,7 @@ const Arena = (() => {
         } };
       w.goal.buildNet();
       // the sliding training wall (padded board)
-      const c = document.createElement('canvas'); c.width = 256; c.height = 220; const x = c.getContext('2d'); x.fillStyle = '#24383f'; x.fillRect(0, 0, 256, 220); x.fillStyle = '#2f4a52'; for (let i = 0; i < 4; i++) x.fillRect(8, 8 + i * 52, 240, 44); x.globalAlpha = .9; x.drawImage(logoMask('#cfac52'), 48, 30, 160, 160);
+      const c = document.createElement('canvas'); c.width = 256; c.height = 220; const x = c.getContext('2d'); x.fillStyle = '{{color.deep}}'; x.fillRect(0, 0, 256, 220); x.fillStyle = '#2f4a52'; for (let i = 0; i < 4; i++) x.fillRect(8, 8 + i * 52, 240, 44); x.globalAlpha = .9; x.drawImage(logoMask('{{color.accent}}'), 48, 30, 160, 160);
       const wallT = canvasTex(c); const wm = new T.MeshLambertMaterial({ map: wallT }), wdark = new T.MeshLambertMaterial({ color: 0x1b2a2f });
       w.blocker = new T.Mesh(new T.BoxGeometry(1.7, 1.9, .3), [wdark, wdark, wdark, wdark, wm, wdark]); w.scene.add(w.blocker);
       w.coin = coinMesh(.5); w.scene.add(w.coin); w.coinGlow = glowSprite(w, 0, 0, 0, 2, 0xffe08a, .5);
@@ -495,7 +495,7 @@ const Arena = (() => {
       { const [a, b] = P(0, 0), r = 6.75 * ppm, ang = Math.asin(6.6 / 6.75); cx.beginPath(); cx.arc(a, b, r, Math.PI / 2 - ang, Math.PI / 2 + ang); cx.stroke(); const z1 = 6.75 * Math.cos(ang); for (const s of [-1, 1]) { const [p, q] = P(s * 6.6, -1.575), [p2, q2] = P(s * 6.6, z1); cx.beginPath(); cx.moveTo(p, q); cx.lineTo(p2, q2); cx.stroke(); } }
       { const [a, b] = P(-8.5, -1.575), [d] = P(8.5, 0); cx.beginPath(); cx.moveTo(a, b); cx.lineTo(d, b); cx.stroke(); }
       for (const s of [-1, 1]) { const [a, b] = P(s * 8.5, -1.575), [, e] = P(0, 16); cx.beginPath(); cx.moveTo(a, b); cx.lineTo(a, e); cx.stroke(); }
-      { const [a, b] = P(0, 10); cx.globalAlpha = .85; cx.drawImage(logoMask('#cfac52'), a - 64, b - 64, 128, 128); cx.globalAlpha = 1; }
+      { const [a, b] = P(0, 10); cx.globalAlpha = .85; cx.drawImage(logoMask('{{color.accent}}'), a - 64, b - 64, 128, 128); cx.globalAlpha = 1; }
       plane(w, c, -9, -4, 18, 20, 0);
       jumbotron(w, 0, 7.15, -4.97, 6, 3, 'Buzzer Beater');
       for (let i = 0; i <= 34; i++) { const x = -17 + i, y = 9.6 - Math.sin((i % 6) / 6 * Math.PI) * .45; glowSprite(w, x, y, -4.7, .55, i % 3 ? 0xffe2a0 : 0xffffff, .95); }
@@ -504,7 +504,7 @@ const Arena = (() => {
       const gray = 0x3b4448;
       litBox(w, .28, 3.4, .28, 0, 1.7, -2.2, gray); litBox(w, .5, 1.6, .5, 0, .8, -2.2, 0xcfac52);
       litBox(w, .18, .18, 1.75, 0, 3.32, -1.35, gray);
-      const bc = document.createElement('canvas'); bc.width = 366; bc.height = 214; const bxc = bc.getContext('2d'); bxc.fillStyle = '#f4f4f0'; bxc.fillRect(0, 0, 366, 214); bxc.strokeStyle = '#b8402f'; bxc.lineWidth = 8; bxc.strokeRect(4, 4, 358, 206); bxc.strokeRect(124, 108, 118, 90); bxc.globalAlpha = .9; bxc.drawImage(logoMask('#24383f'), 138, 6, 90, 90);
+      const bc = document.createElement('canvas'); bc.width = 366; bc.height = 214; const bxc = bc.getContext('2d'); bxc.fillStyle = '#f4f4f0'; bxc.fillRect(0, 0, 366, 214); bxc.strokeStyle = '#b8402f'; bxc.lineWidth = 8; bxc.strokeRect(4, 4, 358, 206); bxc.strokeRect(124, 108, 118, 90); bxc.globalAlpha = .9; bxc.drawImage(logoMask('{{color.deep}}'), 138, 6, 90, 90);
       const bt = canvasTex(bc), bm = new T.MeshLambertMaterial({ map: bt, emissive: 0x222222 }), bs = new T.MeshLambertMaterial({ color: 0xdedede });
       const board = new T.Mesh(new T.BoxGeometry(1.83, 1.07, .05), [bs, bs, bs, bs, bm, bs]); board.position.set(0, 2.9 + .535, -.40); w.scene.add(board);
       const rim = new T.Mesh(new T.TorusGeometry(.2286, .018, 8, 32), new T.MeshLambertMaterial({ color: 0xf06a1a, emissive: 0x401400 })); rim.rotation.x = Math.PI / 2; rim.position.set(0, 3.05, 0); w.scene.add(rim);

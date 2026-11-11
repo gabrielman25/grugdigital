@@ -28,6 +28,10 @@ tools/partner-app/
 
 ## How the pieces connect (keep these working for every partner)
 
+- **Rewards are digital only.** Never offer free food, drinks, discounts or anything that costs the venue money. Season
+  Pass tiers give coins, game ball skins, free power-ups, the guest's name on the jumbotron or an app theme. Coins are
+  spent in the game room. Coins a guest buys are added to their check, which brings the venue money.
+
 - **One app, everywhere.** The top bar (`.ptb`: logo with a Demo tag, the app's coin balance, full screen, avatar) and
   the tab bar are the same in the app and on every site page. On the site, `theme.js` builds them from `PARTNERS[id]`
   before the first paint. The coin balance is read from the app's own save (`wallet.key` / `wallet.field`), so the
@@ -61,8 +65,9 @@ tools/partner-app/
    | `coin` | the coins' name | `Craft Coins` |
    | `storageKey` | the app's save key; must be new for every partner | `rr-crafthouse-gameday-v1` |
    | `color` | `accent` (buttons, coin gold), `accentDark`, `accentLight`, `deep` (dark panels), `deepDark`, `cream` | gold and slate |
-   | `pass` | Season Pass tiers: `v` visits, `name`, `reward` (`{coin}` = the coin name), `coins`, `perk`, `skin` | 5 tiers |
-   | `quizPicks`, `menuPicks` | dish names whose photos decorate the quiz and menu tiles on Home | |
+   | `pass` | Season Pass tiers: `v` visits, `name`, `reward` text (`{coin}` = the coin name) and what it gives: `coins`, `skin: "gold"` (game balls), `tokens` (free power-ups), `jumbo: true` (name on the jumbotron), `theme: "legend"` (app theme) | 5 tiers |
+   | `led` | the stadium's scrolling LED ribbon in the game room: `[text, colour]` pairs (the venue's name, its app, dishes to try; never a free offer) | 5 messages |
+| `quizPicks`, `menuPicks` | dish names whose photos decorate the quiz and menu tiles on Home | |
 
 2. **Menu data.** Put `menu_raw.json`, `img_data.json` (photos), `logo-square.png` and `font.woff2` in the folder. Edit
    `TAGS` in `make_data.py` for the quiz, then run `python3 partners/beanbar/make_data.py` to get `data.json`. Then make

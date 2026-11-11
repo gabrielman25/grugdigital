@@ -255,8 +255,8 @@ html.f32-lock #app{filter:blur(9px) brightness(.6) saturate(1.1)}
 .field{width:100%;height:54px;border-radius:16px;border:0;background:var(--card);padding:0 16px;font-size:18px;outline:none;margin-top:12px;user-select:text;-webkit-user-select:text}
 .field:focus{box-shadow:inset 0 0 0 2px var(--ink)}
 .rowbtns{display:flex;gap:10px}
-.voucher{border:2px dashed var(--gold);border-radius:18px;padding:16px;text-align:center;background:var(--cream);margin-top:14px}
-.voucher b{font-size:20px;display:block}
+/* the Legend app theme (a Season Pass reward): the dark panels go black, the accent stays */
+html.th-legend{--slate:#161616;--slate-d:#0b0b0b}
 .prof{display:flex;align-items:center;gap:14px}
 .prof .av{width:72px;height:72px;box-shadow:0 0 0 3px var(--gold)}
 
@@ -537,7 +537,7 @@ function fillIcons(root){$$("[data-ic]",root||document).forEach(e=>{if(!e.firstC
 
 /* ================= STATE ================= */
 const KEY="{{storageKey|js}}";
-const DEF={onboarded:false,name:"",sport:"football",coins:0,visits:0,claimed:{},lastDaily:"",bests:{football:0,soccer:0,basketball:0},runs:0,runsBy:{},longest:0,tab:[],skin:"classic",skins:["classic"],quizDay:"",sound:true,table:12,lastPick:"",gfx:"medium",grug:false,grugSeen:false};
+const DEF={onboarded:false,name:"",sport:"football",coins:0,visits:0,claimed:{},lastDaily:"",bests:{football:0,soccer:0,basketball:0},runs:0,runsBy:{},longest:0,tab:[],skin:"classic",skins:["classic"],tokens:0,theme:"classic",themes:["classic"],jumbo:false,quizDay:"",sound:true,table:12,lastPick:"",gfx:"medium",grug:false,grugSeen:false};
 let S=Object.assign({},DEF);
 try{const j=JSON.parse(localStorage.getItem(KEY)||"null"); if(j) S=Object.assign({},DEF,j);}catch(e){}
 if(typeof S.best==="number"){S.bests=Object.assign({},DEF.bests,S.bests||{});S.bests.football=Math.max(S.bests.football||0,S.best);delete S.best;}
@@ -1012,7 +1012,7 @@ const UI={
       <h2>Crowd favorites</h2>
       <div class="hs">${favs.map(i=>`<button class="fav" data-item="${esc(i.n)}"><img loading="lazy" src="${img(i)}" alt=""><b>${esc(i.n)}</b><span>${i.p}</span></button>`).join("")}</div>
       <h2>Keep it going</h2>
-      <a class="cta dark" href="${LINKS.play}" target="_blank" rel="noopener"><div class="t"><b>Get the {{brand}} app</b><span>Order ahead and earn points toward free food</span></div>${ic("arrow_right")}</a>
+      <a class="cta dark" href="${LINKS.play}" target="_blank" rel="noopener"><div class="t"><b>Get the {{brand}} app</b><span>Order ahead from your phone</span></div>${ic("arrow_right")}</a>
       ${showGrug?grugCard(popGrug):""}
       <p class="foot">Concept demo for {{name}}.<br>Purchases, check-ins and rewards here are simulated.</p>`;
     if(popGrug){S.grugSeen=true;save();}
@@ -1062,8 +1062,7 @@ const UI={
       <div class="track"><div class="fill" id="trackFill" style="height:0"></div>
       ${PASS.map(t=>{const open=S.visits>=t.v,cl=S.claimed[t.v];return `<div class="tier ${open?"open":""}" data-tier="${t.v}"><div class="node">${open?(cl?ic("checkmark"):t.v):t.v}</div>
         <div class="vn">${t.v===1?"First visit":t.v+" visits"}</div><b>${esc(t.name)}</b><div class="rw">${esc(t.reward)}</div>
-        ${t.perk?'<span class="demo-tag" style="margin-top:8px">Sample perk · {{brand}} sets these</span>':""}
-        ${open?(cl?`<div class="done">${ic("checkmark")}Claimed${t.perk?` · <u data-voucher="${t.v}">show voucher</u>`:""}</div>`:`<button class="btn" data-claim="${t.v}">${ic("gift")}Claim reward</button>`):`<div class="lock">${ic("lock")}${t.v-S.visits} visit${t.v-S.visits>1?"s":""} to go</div>`}
+        ${open?(cl?`<div class="done">${ic("checkmark")}Claimed</div>`:`<button class="btn" data-claim="${t.v}">${ic("gift")}Claim reward</button>`):`<div class="lock">${ic("lock")}${t.v-S.visits} visit${t.v-S.visits>1?"s":""} to go</div>`}
       </div>`;}).join("")}</div>
       <p class="foot">Check-ins are confirmed with a code from your server, so every stamp is a real visit.</p>`;
     requestAnimationFrame(()=>{const tr=$(".track"),ts=$$(".tier",tr);if(!ts.length)return;const last=ts[Math.min(idx,ts.length)-1];$("#trackFill").style.height=(idx?last.offsetTop+20:0)+"px";});
@@ -1139,17 +1138,18 @@ function doVisit(){
 }
 function claim(v,btn){
   const t=PASS.find(x=>x.v==v);if(!t||S.claimed[v]||S.visits<t.v)return;S.claimed[v]=1;
-  if(t.skin&&!S.skins.includes(t.skin)){S.skins.push(t.skin);S.skin=t.skin;}
+  // Season Pass rewards are all digital: coins, game ball skins, free power-ups, your name on the jumbotron, app themes
+  const got=[];
+  if(t.skin&&!S.skins.includes(t.skin)){S.skins.push(t.skin);S.skin=t.skin;got.push("Gold game balls equipped");}
+  if(t.tokens){S.tokens=(S.tokens||0)+t.tokens;got.push(t.tokens+" free power-ups added");}
+  if(t.jumbo){S.jumbo=true;got.push("Your name is on the jumbotron");}
+  if(t.theme&&!S.themes.includes(t.theme)){S.themes.push(t.theme);S.theme=t.theme;applyTheme();got.push("Legend theme on");}
   save();SFX.win();FX.confetti(btn,60);
   if(t.coins)Wallet.add(t.coins,btn);
-  setTimeout(()=>{UI.pass();if(t.perk)voucher(v);else if(t.skin)toast("Gold game balls equipped");},t.coins?700:200);
+  setTimeout(()=>{UI.pass();if(got.length)toast(got.join(" · "));},t.coins?700:200);
 }
-function voucher(v){
-  const t=PASS.find(x=>x.v==v);
-  Sheet.open(`<div class="eyebrow">Season Pass reward</div><h3>${esc(t.name)}</h3><p>Show this screen to your server on your next visit.</p>
-    <div class="voucher"><div class="eyebrow">On the house</div><b>${esc(t.perk)}</b><span class="sub">Table ${S.table} · ${esc(S.name||"Guest")}</span></div>
-    <p class="gnote">Sample perk for the demo. {{brand}} chooses the real rewards.</p><button class="btn" data-close>Got it</button>`);
-}
+function applyTheme(){document.documentElement.classList.toggle("th-legend",S.theme==="legend");}
+applyTheme();
 function profileSheet(){
   SFX.tap();
   Sheet.open(`<div class="prof"><div class="av" data-avatar></div><div><div class="eyebrow">Player card</div><h3>${esc(S.name||"Guest")}</h3><span class="sub">Table ${S.table} · ${S.visits} visit${S.visits===1?"":"s"}</span></div></div>
@@ -1157,12 +1157,14 @@ function profileSheet(){
     ${IN_SITE?`<a class="btn" href="${AVATAR_URL}" style="margin-top:14px;text-decoration:none">${ic("controller")}Edit my avatar</a>`:""}
     <button class="btn ghost" id="pSound" style="margin-top:10px">${ic(S.sound?"speaker":"speaker_mute")}<span>Sound: ${S.sound?"On":"Off"}</span></button>
     ${S.skins.length>1?`<button class="btn ghost" id="pSkin" style="margin-top:10px">Game balls: ${S.skin==="gold"?"Gold":"Classic"}</button>`:""}
+    ${S.themes.length>1?`<button class="btn ghost" id="pTheme" style="margin-top:10px">App theme: ${S.theme==="legend"?"Legend":"Classic"}</button>`:""}
     <h2 style="margin-top:22px">Demo controls</h2>
     <p style="margin:-6px 0 4px;font-size:14px">For showing the owner how the loop works.</p>
     <div class="rowbtns"><button class="btn ghost" id="pVisit">+1 visit</button><button class="btn ghost" id="pCoins">+500 coins</button></div>
     <div class="rowbtns"><button class="btn ghost" id="pOnb">Replay intro</button><button class="btn ghost" id="pReset" style="color:var(--red)">Reset demo</button></div>`);
   $("#pSound").onclick=()=>{S.sound=!S.sound;save();$("#pSound").innerHTML=`${ic(S.sound?"speaker":"speaker_mute")}<span>Sound: ${S.sound?"On":"Off"}</span>`;SFX.tap();};
   if($("#pSkin"))$("#pSkin").onclick=()=>{S.skin=S.skin==="gold"?"classic":"gold";save();$("#pSkin").textContent="Game balls: "+(S.skin==="gold"?"Gold":"Classic");};
+  if($("#pTheme"))$("#pTheme").onclick=()=>{S.theme=S.theme==="legend"?"classic":"legend";save();applyTheme();$("#pTheme").textContent="App theme: "+(S.theme==="legend"?"Legend":"Classic");};
   $("#pVisit").onclick=doVisit;
   $("#pCoins").onclick=e=>{Wallet.add(500,e.target);};
   $("#pOnb").onclick=()=>{Sheet.close();Onb.start(true);};
@@ -1182,7 +1184,6 @@ document.addEventListener("click",e=>{
   if((b=t.closest("[data-item]"))){itemSheet(b.dataset.item);return;}
   if((b=t.closest("[data-pack]"))){buySheet(b.dataset.pack);return;}
   if((b=t.closest("[data-claim]"))){claim(b.dataset.claim,b);return;}
-  if((b=t.closest("[data-voucher]"))){voucher(b.dataset.voucher);return;}
   if(t.closest("#checkinBtn")){checkinSheet();return;}
   if(t.closest("#wallet")){SFX.tap();UI.go("store");return;}
   if(t.closest("#profileBtn")){profileSheet();return;}
@@ -1318,14 +1319,14 @@ const Game=(()=>{
   /* ---------- lobby / run / end ---------- */
   function lobby(){
     st="lobby";hud(false);const g=GAMES[id];
-    const cost=g.shop.filter(s=>pick[s.id]).reduce((a,s)=>a+s.cost,0);
+    const {cost,free,freeIds}=puCost(pick);
     $("#gLobby").innerHTML=`<button class="iconbtn x" id="gClose">${ic("cross")}</button>
       <div class="eyebrow">Game room</div><h3>${g.name}</h3><p class="sub">${esc(g.line)} 60 seconds. Streaks score more.</p>
       <div class="stats"><div><b>${fmt(bestOf(id))}</b><small>Best</small></div><div><b>${(S.runsBy||{})[id]||0}</b><small>Runs</small></div><div><b class="balN">${fmt(S.coins)}</b><small>Coins</small></div></div>
-      <div class="eyebrow" style="margin-top:14px">Power-ups for this run</div>
-      ${g.shop.map(s=>`<button class="pu ${pick[s.id]?"on":""}" data-pu="${s.id}"><div class="ic">${ic(s.icon)}</div><div class="t"><b>${s.name}</b><span>${s.desc}</span></div><div class="cost"><i class="c"></i>${s.cost}</div></button>`).join("")}
-      <button class="btn gold" id="gStart" style="margin-top:14px;height:62px;font-size:18px">${cost?`Kick off · <i class="c"></i> ${cost}`:"Kick off"}</button>
-      ${cost>S.coins?`<p class="gnote" style="color:var(--red)">You need ${cost-S.coins} more coins. <u id="gGet">Get coins</u></p>`:`<p class="gnote">Power-ups last one run.${S.grug?" Grug Pearls will work here soon.":""}</p>`}
+      <div class="eyebrow" style="margin-top:14px">Power-ups for this run${S.tokens?` · ${S.tokens} free`:""}</div>
+      ${g.shop.map(s=>`<button class="pu ${pick[s.id]?"on":""}" data-pu="${s.id}"><div class="ic">${ic(s.icon)}</div><div class="t"><b>${s.name}</b><span>${s.desc}</span></div><div class="cost">${freeIds.includes(s.id)?"Free":`<i class="c"></i>${s.cost}`}</div></button>`).join("")}
+      <button class="btn gold" id="gStart" style="margin-top:14px;height:62px;font-size:18px">${cost?`Kick off · <i class="c"></i> ${cost}`:free?`Kick off · ${free} free`:"Kick off"}</button>
+      ${cost>S.coins?`<p class="gnote" style="color:var(--red)">You need ${cost-S.coins} more coins. <u id="gGet">Get coins</u></p>`:`<p class="gnote">${free?`${free} free power-up${free>1?"s":""} from your Season Pass. `:""}Power-ups last one run.${S.grug?" Grug Pearls will work here soon.":""}</p>`}
       <div class="gswitch">${GAME_IDS.filter(x=>x!==id).map(x=>`<button data-switch="${x}">${ic(GAMES[x].icon)}${GAMES[x].short}</button>`).join("")}</div>`;
     show("gLobby");
   }
@@ -1335,16 +1336,20 @@ const Game=(()=>{
     if(e.target.closest("#gClose")){close();return;}
     if(e.target.closest("#gGet")){close();UI.go("store");return;}
     if(e.target.closest("#gStart")){
-      const cost=GAMES[id].shop.filter(s=>pick[s.id]).reduce((a,s)=>a+s.cost,0);
+      const {cost,free}=puCost(pick);
       if(cost>S.coins){toast("Not enough coins for those power-ups");return;}
+      if(free){S.tokens-=free;save();}
       if(cost)Wallet.spend(cost);const pu=Object.assign({},pick);pick={};start(pu);
     }
   };
+  // the power-ups picked for a run: free ones (Season Pass tokens) pay for the priciest first, coins pay for the rest
+  function puCost(p){const c=GAMES[id].shop.filter(s=>p[s.id]).sort((a,b)=>b.cost-a.cost),free=Math.min(S.tokens||0,c.length);
+    return {cost:c.slice(free).reduce((a,x)=>a+x.cost,0),free,freeIds:c.slice(0,free).map(x=>x.id)};}
   function start(pu){
     G=newRun(pu);st="ready";show(null);hud(true);SFX.whistle();place();
     $("#hScore").textContent="0";$("#hTime").textContent=Math.ceil(G.tLeft);$("#hTimeBox").classList.remove("low");
     $("#ghintT").textContent=id==="football"?"Swipe up to kick":id==="soccer"?"Swipe to shoot · curve it to bend":"Swipe up · stop the meter in the green";
-    $("#ghint").classList.add("on");w.jumbo&&(w.jumbo.score=0,w.jumbo.flash="",w.jumbo.sub="GAME DAY",w.jumbo.draw());
+    $("#ghint").classList.add("on");w.jumbo&&(w.jumbo.score=0,w.jumbo.flash="",w.jumbo.sub=S.jumbo&&S.name?S.name.toUpperCase().slice(0,14):"GAME DAY",w.jumbo.draw());
   }
   function call(t,sub,cls){const e=$("#call");e.className="";e.innerHTML=t+(sub?`<small>${sub}</small>`:"");void e.offsetWidth;e.className="go "+cls;}
   const ev={
@@ -1515,7 +1520,7 @@ const Onb=(()=>{
   }
   function mint(){
     minted=true;hero.idle=2.4;hero.vel=18;$("#mintWrap").classList.add("done");$("#tapHint").style.visibility="hidden";
-    $("#mintH").textContent="Fresh from the mint.";$("#mintP").textContent="500 "+COIN+", on the house. Spend them on power-ups in the game room.";
+    $("#mintH").textContent="Fresh from the mint.";$("#mintP").textContent="500 "+COIN+" to start. Spend them on power-ups in the game room.";
     SFX.win();FX.burst($("#mintWrap"),RM?8:44);FX.confetti($("#mintWrap"),70);
     setTimeout(()=>$("#mintDone").classList.add("on"),700);
   }

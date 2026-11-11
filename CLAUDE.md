@@ -92,8 +92,9 @@ Every partner rewards app (a coffee shop, a bar…) is built the same way as R&R
 **`tools/partner-app/`**: the shared app (`src/`), one folder per partner (`partners/<id>/config.json` + menu data), and
 `python3 tools/partner-app/build.py <id>` → `play/<id>/index.html` (never edit that file by hand). Then the site side:
 a `PARTNERS` entry, the `<id>/` short address, the venue's game with its FOSSIL32 box. Follow the step-by-step and the
-browser checklist in `tools/partner-app/README.md`, including "open the app directly, play from its shelf, press Back:
-you must land back in the app".
+browser checklist in `tools/partner-app/README.md`. **Every reward in a partner app is digital** (coins, game ball skins,
+free power-ups, the guest's name on the jumbotron, app themes): never free food, drinks or discounts. The checklist
+includes "open the app directly, play from its shelf, press Back: you must land back in the app".
 
 ## Games are FOSSIL32 cartridges
 
