@@ -142,3 +142,8 @@ body.cc-page{min-height:0}
 
 @media (orientation:landscape) and (max-height:540px){.cc-grid{--rows:1!important}.cc-pv{max-width:300px}}
 @media (prefers-reduced-motion:reduce){.cc-a,.cc-u,.cc-t,.cc-tray,.cc-comp,.cc-pv,.cc-acts,.cc-file,.cc-w{animation:none!important;opacity:1}.cc-pv::after{display:none}}
+/* the end: the card also made the shop's website and restaurant account (assets/business.js) */
+.cc-body .cc-biz{margin-top:14px;padding:14px;border-radius:16px;background:var(--card2)}
+.cc-body .cc-biz p{margin:0}
+.cc-biz-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.cc-body .cc-biz .cc-fine{text-align:left;padding-top:10px}

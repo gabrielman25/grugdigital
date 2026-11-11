@@ -52,6 +52,7 @@
 <script src="../assets/games.js"></script>
 <script src="../assets/grug.js"></script>
 <script src="../assets/rewards.js"></script>
+<script src="../assets/business.js"></script>
 <script>
 (function(){
   const G = Grug, RW = GrugRewards, esc = G.esc, $ = s => document.querySelector(s);
@@ -104,10 +105,14 @@
       return '<div class="rw-tile" ' + tileVars(m.cfg.color) + '>' + band(m.cfg.color, RW.iconSvg(m.cfg.i), m.cfg.n, 'Your card · made ' + when(m.at)) +
         '<div class="body"><div class="line"><span>' + m.cfg.s + ' stamps</span><span><b>' + esc(RW.rewardText(m.cfg.r)) + '</b></span></div>' +
         '<div class="acts"><a class="g-btn sm primary" href="create/?c=' + m.c + '">' + G.icon('pencil-simple') + 'Edit</a><a class="g-btn sm" href="create/?c=' + m.c + '#print">' + G.icon('qr-code') + 'Print QR</a>' +
+        '<button type="button" class="g-btn sm" data-site="' + m.c + '">' + G.icon('browser') + 'Website</button>' +
         '<a class="g-btn sm" href="' + esc(L.open) + '">Open card</a><button type="button" class="g-btn sm quiet del" data-del="' + m.c + '" aria-label="Remove ' + esc(m.cfg.n) + '">' + G.icon('trash') + 'Remove</button></div></div></div>'; }).join('');
     if (mine.length) $('#heroGo').textContent = 'Make another card';
   }
   $('#mineList').addEventListener('click', async e => {
+    // a card's website: cards made before websites existed get their shop (and restaurant account) now
+    const w = e.target.closest('[data-site]');
+    if (w) { const B = GrugBusiness, x = B.shops().find(s => s.c === w.dataset.site); if (x) B.setActive(x.id); else B.fromCard(w.dataset.site); location.href = G.url('business/site/'); return; }
     const b = e.target.closest('[data-del]'); if (!b) return;
     const cfg = RW.decode(b.dataset.del);
     const ok = await G.ui.dialog({ title: 'Remove ' + (cfg ? cfg.n : 'this card') + '?', html: '<p>It comes off your list here. Printed QR codes keep working, and guests keep their stamps.</p>',
@@ -126,7 +131,7 @@
 
   /* players see their own cards right under the hero; everyone else sees the owner pitch first */
   function order() {
-    const ids = G.role === 'player' ? ['hero', 'cards', 'features', 'mine'] : ['hero', 'mine', 'cards', 'features'];
+    const ids = G.business.on() ? ['mine', 'hero', 'features', 'cards'] : G.role === 'player' ? ['hero', 'cards', 'features', 'mine'] : ['hero', 'mine', 'cards', 'features'];
     ids.forEach(id => $('#main').appendChild(document.getElementById(id)));
   }
   order(); G.on((p, what) => { if (what === 'role' || what === 'external') order(); });

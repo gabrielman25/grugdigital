@@ -36,6 +36,7 @@
     // solid: plain #17171A behind the page, no pattern tile
     rewards: { name: 'Rewards', a: '#FF9F5A', lo: '#E0782F', solid: true },
     links: { name: 'Links', a: '#5AB0FF', lo: '#2F86D6', solid: true },
+    website: { name: 'Website', a: '#5AB0FF', lo: '#2F86D6', solid: true },   // the restaurant account's website editor (business/site/)
     pearls: { name: 'Pearls', a: '#C59BFF', lo: '#9A6FE0' }
   };
   // the lights that drift through the Games fog
@@ -52,6 +53,7 @@
   }
   const isCalm = s => !s.motion || !!(calmMQ && calmMQ.matches);
   function sectionOf(path) {
+    if (/\/business\/site(\/|$)/.test(path)) return 'website';
     if (/\/rewards(\/|$)/.test(path)) return 'rewards';
     if (/\/links(\/|$)/.test(path)) return 'links';   // creators' link pages (links/create/ is not the Create tab either)   // before the others: rewards/create/ is not the Create tab
     const m = /\/(games|create|avatar|shop|profile|me|make)(\/|$)/.exec(path); if (m) return m[1];
@@ -255,7 +257,9 @@
     const ac = accent();
     el.setAttribute('data-theme', mode); el.setAttribute('data-mode-pref', s.mode); el.setAttribute('data-section', section);
     el.classList.remove('g-chrome-light');   // (the Games page no longer forces a dark stage in light mode)   // Games in light mode: dark stage, light top bar and dock
-    el.setAttribute('data-role', s.role);   // who's visiting (Settings → I'm a…): pages show or hide parts with [data-only-for] / [data-hide-for]
+    el.setAttribute('data-role', s.role);
+    // which account is in use (assets/business.js): pages show or hide parts with [data-only-account="business"]
+    try { const b = JSON.parse(localStorage.getItem('grug.business.v1') || 'null'); el.setAttribute('data-account', b && b.mode === 'business' && b.active && !brand ? 'business' : 'player'); } catch (e) { el.setAttribute('data-account', 'player'); }   // who's visiting (Settings → I'm a…): pages show or hide parts with [data-only-for] / [data-hide-for]
     if (brand) el.setAttribute('data-brand', ''); else el.removeAttribute('data-brand');
     el.style.setProperty('--h', HUE);
     el.style.setProperty('--sel-a', ac.a); el.style.setProperty('--sel-b', ac.a); el.style.setProperty('--on-sel', inkOn(ac.a));

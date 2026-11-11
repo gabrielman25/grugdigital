@@ -203,6 +203,28 @@ lists of pieces run sideways in as many rows as fit. A piece's colours, fabric a
 Only a person's own swipe changes the section (the browser re-snapping after a resize doesn't). Add new controls to the
 editor's markup as before, then place them in a section in `nav.js`.
 
+## The restaurant account (`assets/business.js`)
+
+Next to the Grug player profile, each device can hold a **restaurant account** (`localStorage 'grug.business.v1'`: which
+account is in use, the active shop, and each shop's card text and website fields). Finishing a rewards card makes one
+(`GrugBusiness.fromCard` in the card builder's last step). There is no server and no login, the same as everywhere else.
+
+- **Switching:** the account menu under the avatar has "Switch to <shop>" (player) / "Switch to <player>" (restaurant);
+  the home page's owners' door becomes "Switch to your restaurant". `Grug.business.setAccount(mode)` saves it and opens
+  that account's home. Shop mode and partner mode always show the player account.
+- **In the restaurant account** the dock is Dashboard · Website · Rewards card · Games (`BIZ_TABS` in grug.js), the top
+  bar's picture is the shop's icon on its colour, and `html[data-account="business"]` is set (theme.js);
+  `[data-only-account="business"|"player"]` shows a part to one account only.
+- **Dashboard** (`business/`): the Daypart app, standalone with its own look and its own `daypart:*` storage. It reads the
+  restaurant account (the shop's name, which only changes on the card), lists **Mural** (website) and **Totem** (rewards
+  card) as apps that open the Grug pages, and its menu switches back to the player account. Opening it switches to the
+  restaurant account. It is not built from a tool: edit the file directly.
+- **Website** (`business/site/`, the Website section, accent `#5AB0FF`): the editor, with a live preview. The site itself
+  is drawn by `GrugBusiness.siteParts` from the card (name, colour, icon, lettering, reward) plus the owner's fields;
+  empty fields are left off the page. Its public address is `site/#s=<payload>` (the whole site rides in the link,
+  deflated), and **Download** gives one self-contained `index.html` (Google Fonts) for any web host.
+- Profile export carries `grug.business.v1` and the dashboard's `daypart:*` keys.
+
 ## Rewards card builder (`rewards/create/`)
 
 It should feel like talking to a top-of-the-line AI (there is no AI): the assistant (the Grug stegosaurus, `Grug.LOGO`)

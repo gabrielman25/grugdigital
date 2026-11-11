@@ -27,6 +27,7 @@
 <script src="../../assets/grug.js"></script>
 <script src="../../assets/qrcode.js"></script>
 <script src="../../assets/rewards.js"></script>
+<script src="../../assets/business.js"></script>
 <script>
 (function(){
   const G = Grug, RW = GrugRewards, esc = G.esc, $ = s => document.querySelector(s);
@@ -341,7 +342,10 @@
 
   /* the end: the card as a file to download, the card on a café table, and what the links are for */
   function showDone(animate) {
-    const c = RW.encode(cfg); if (saved !== c) { RW.saveMine(c, saved); saved = c; try { history.replaceState(null, '', '?c=' + c + '#done'); } catch (e) {} }
+    const c = RW.encode(cfg);
+    // the card also makes (or updates) the shop's restaurant account: its website and its dashboard (assets/business.js)
+    if (saved !== c || !GrugBusiness.shops().some(x => x.c === c)) GrugBusiness.fromCard(c, saved !== c ? saved : null);
+    if (saved !== c) { RW.saveMine(c, saved); saved = c; try { history.replaceState(null, '', '?c=' + c + '#done'); } catch (e) {} }
     const L = RW.links(cfg), slug = (cfg.n || 'shop').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'shop';
     $('#prog').querySelectorAll('i').forEach(i => i.classList.add('on'));
     log.querySelectorAll('.cc-pv').forEach(p => p.remove());
@@ -372,7 +376,11 @@
       m.querySelector('.cc-body').insertAdjacentHTML('beforeend',
         '<div class="cc-file"><span class="pdf">PDF</span><div class="t"><b>' + esc(slug) + '-rewards-card.pdf</b><span>Print-ready · QR included</span></div><button type="button" class="cc-send" data-pdf aria-label="Download the PDF">' + G.icon('download-simple') + '</button></div>' +
         '<div class="wz-3d" id="cafe" role="img" aria-label="Your printed card standing in a holder on a café table"><div class="cap"><span>Print it</span><span>Put it on the table</span><span>Guests scan</span></div></div>' +
-        '<p class="wz-saved">' + G.icon('check-circle') + '<span>Saved to <a href="../#mine">Rewards → My creations</a> on this phone.</span></p>');
+        '<p class="wz-saved">' + G.icon('check-circle') + '<span>Saved to <a href="../#mine">Rewards → My creations</a> on this phone.</span></p>' +
+        '<div class="cc-biz"><p>I also built <b>' + shopName() + '</b> its own website from your card, and set up a restaurant account with a dashboard for your schedule, recipe costs, checklists and more.</p>' +
+        '<div class="cc-biz-acts"><a class="g-btn sm primary" href="../../business/site/">' + G.icon('browser') + 'See your website</a><button type="button" class="g-btn sm" data-biz>' + G.icon('dashboard') + 'Open the dashboard</button></div>' +
+        '<p class="cc-fine">Switch between your restaurant and your Grug player account from the menu under your picture.</p></div>');
+      m.querySelectorAll('[data-biz]').forEach(b => b.addEventListener('click', () => G.business.setAccount('business')));
       RW.cardCanvas(cfg, L.stamp).then(cv => showCafe(cv));
       dock.innerHTML = '<div class="cc-acts" data-noswipe><button type="button" class="g-btn primary" data-pdf>' + G.icon('download-simple') + 'Download</button>' +
         '<a class="g-btn" href="' + esc(L.open) + '" target="_blank" rel="noopener" title="See it as a guest">' + G.icon('eye') + 'Guest view</a>' +

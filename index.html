@@ -97,7 +97,7 @@ footer a{color:var(--ink2);font-weight:700}
   <div data-only-brand><section class="role-hero brand-hero" id="brandHero"></section></div>
   <!-- two front doors, side by side (stacked on phones): shop owners and online creators. Not in shop mode. -->
   <div class="duo" data-hide-brand>
-    <a class="door" href="rewards/" style="--c:#FF9F5A;--c-lo:#E0782F">
+    <a class="door" id="doorOwner" href="rewards/" style="--c:#FF9F5A;--c-lo:#E0782F">
       <span class="door-ic" id="icOwner"></span>
       <span class="door-tx"><small>For restaurant owners</small><b>Bring your guests back.</b><span>A free rewards card in two minutes. Every visit earns your guests a stamp.</span></span>
       <span class="g-btn primary door-go">Make a card</span>
@@ -165,6 +165,10 @@ footer a{color:var(--ink2);font-weight:700}
   G.ui.chrome('home');
   G.ensureSnaps();
   $('#icOwner').innerHTML = G.icon('storefront'); $('#icCreator').innerHTML = G.icon('share-network');
+  // someone who already made a card has a restaurant account: the owners' door opens it instead
+  const shop = G.business.shop();
+  if (shop) { const d = $('#doorOwner'); d.href = '#'; d.querySelector('b').textContent = shop.n + '.'; d.querySelector('.door-tx > span').textContent = 'Your dashboard, website and rewards card.';
+    d.querySelector('.door-go').textContent = 'Switch to your restaurant'; d.addEventListener('click', e => { e.preventDefault(); G.ui.buzz(); G.business.setAccount('business'); }); }
   $('#icEat').innerHTML = G.icon('storefront'); $('#icPts').innerHTML = G.icon('coins'); $('#icSpend').innerHTML = G.icon('t-shirt');
 
   /* hero avatar */
