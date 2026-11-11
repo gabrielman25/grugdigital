@@ -193,7 +193,10 @@ html.g-patterned{background:var(--page,#17171A) var(--pattern,none) repeat fixed
 html.g-patterned body{background:transparent}
 
 /* ---------- the fog (Games only): fixed behind the page (fogbg.js fills the two canvases; this gradient shows until it does) ---------- */
-html.g-fogged{background:#03050f radial-gradient(ellipse 70% 60% at 50% 46%,#16288a 0%,#0a1347 34%,#040824 64%,#03050f 100%) fixed}
+/* Games: the blue fog in dark mode only; in light mode a plain page, with the cubes still tumbling (fogbg.js) */
+html.g-fogged[data-theme=light]{background:var(--page)}
+html[data-theme=light] #g-fog .g-fog-smoke{display:none}
+html.g-fogged[data-theme=dark]{background:#03050f radial-gradient(ellipse 70% 60% at 50% 46%,#16288a 0%,#0a1347 34%,#040824 64%,#03050f 100%) fixed}
 html.g-fogged body{background:transparent}
 #g-fog{position:fixed;inset:0;z-index:-1;pointer-events:none;transition:filter .9s ease}
 #g-fog canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -590,6 +593,27 @@ html[data-role="player"] [data-hide-for~="player"],html[data-role="owner"] [data
 /* partner mode: the partner's tab bar replaces the dock entirely */
 html[data-partner]{--sab:calc(env(safe-area-inset-bottom,0px) + 72px);--tabs:0px}
 html[data-partner] :is(.g-tabs,.g-tray){display:none!important}
+/* the partner's top bar (theme.js puts it in before the first paint): the SAME .ptb block as the partner's app (play/crafthouse/),
+   scoped here so the site's own top bar styles can't touch it. Keep the two copies identical. */
+html[data-partner] header.g-top.ptb{display:flex;align-items:center;gap:8px;height:calc(env(safe-area-inset-top,0px) + 64px);padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;background:#fff;box-shadow:0 1px 0 rgba(13,13,13,.07);font-family:"RR Bricolage","Bricolage",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#0d0d0d;-webkit-font-smoothing:antialiased;box-sizing:border-box;border-radius:0;border:0}
+html[data-partner] header.g-top.ptb .ptb-logo{position:relative;display:block;flex:none;height:44px;margin:0 0 0 -2px;padding:0;background:none;border:0;text-decoration:none;box-shadow:none}
+html[data-partner] header.g-top.ptb .ptb-logo img{display:block;height:44px;width:auto;max-width:none;background:none;padding:0;border-radius:0;box-shadow:none}
+html[data-partner] header.g-top.ptb .ptb-demo{position:absolute;right:-12px;bottom:-3px;font-size:9.5px;font-weight:750;letter-spacing:.1em;line-height:1;text-transform:uppercase;background:#24383f;color:#cfac52;border:0;border-radius:6px;padding:3px 5px}
+html[data-partner] header.g-top.ptb .ptb-sp{flex:1;min-width:0}
+html[data-partner] header.g-top.ptb .ptb-wallet{display:flex;align-items:center;gap:6px;height:42px;padding:0 9px 0 7px;border:0;border-radius:21px;background:#0d0d0d;color:#fff;font-family:inherit;font-size:16px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;text-decoration:none;cursor:pointer;flex:none;box-shadow:none}
+html[data-partner] header.g-top.ptb .ptb-coin{display:block;width:26px;height:26px;background:center/contain no-repeat;flex:none}
+html[data-partner] header.g-top.ptb .ptb-plus{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#cfac52;color:#201a08}
+html[data-partner] header.g-top.ptb .ptb-plus svg{width:11px;height:11px;display:block}
+html[data-partner] header.g-top.ptb .ptb-fs{display:grid;place-items:center;width:42px;height:42px;margin:0;padding:0;border:0;border-radius:50%;background:#f4f4f2;color:#0d0d0d;cursor:pointer;flex:none;box-shadow:none}
+html[data-partner] header.g-top.ptb .ptb-fs svg{width:18px;height:18px;display:block}
+html[data-partner] header.g-top.ptb .ptb-fs[aria-pressed=true]{background:#0d0d0d;color:#fff}
+html[data-partner] header.g-top.ptb .ptb-av{display:block;width:42px;height:42px;min-height:0;margin:0;padding:0;border:0;border-radius:50%;background:#fbf4ea center/cover no-repeat;box-shadow:inset 0 0 0 2px #cfac52;cursor:pointer;flex:none}
+html[data-partner] header.g-top.ptb a:active,html[data-partner] header.g-top.ptb button:active{transform:scale(.95)}
+html[data-partner] header.g-top.ptb{position:fixed;top:0;left:0;right:0;z-index:40;pointer-events:auto}
+html[data-partner] header.g-top.ptb .ptb-coin{background-image:url(../play/crafthouse/coin.png)}
+@media (orientation:landscape) and (max-height:540px){html[data-partner] header.g-top.ptb{padding-left:16px}}
+/* no pill skeletons in partner mode: the real bars are there from the first paint */
+html[data-partner].g-pre body:not(.g-chrome)::before,html[data-partner].g-pre body:not(.g-chrome)::after,html[data-partner].g-pre:has(body:not(.g-chrome))::after{display:none!important}
 /* the game panel and game page, centred */
 html[data-partner] .gc-info{text-align:center}
 html[data-partner] :is(.gc-biz,.gc-actions,.gc-stats){justify-content:center}
@@ -599,9 +623,10 @@ html[data-partner] .gp-head :is(div,p,ul,nav){justify-content:center}
 /* the partner's look on every page, Games included (theme.js turns the dark fog off and keeps light mode): its warm page
    colour, its typeface and a very faint gingham like the app's checkered liner */
 html[data-partner][data-theme]{--page:#F8F5EE;--font:"RR Bricolage","Fredoka",system-ui,sans-serif;--display:"RR Bricolage","Fredoka",system-ui,sans-serif}
-html[data-partner].g-site,html[data-partner].g-site body{background-color:var(--page)}
-html[data-partner].g-site body{background-image:linear-gradient(90deg,rgba(36,56,63,.035) 50%,transparent 50%),linear-gradient(rgba(36,56,63,.035) 50%,transparent 50%);background-size:28px 28px;background-attachment:fixed}
-html[data-partner] :is(.gc-biz,.gc-sub){color:var(--mode-text)}
+html[data-partner].g-site{background-color:var(--page)}
+html[data-partner].g-site body{background:transparent}
+html[data-partner].g-site{background-image:linear-gradient(90deg,rgba(36,56,63,.035) 50%,transparent 50%),linear-gradient(rgba(36,56,63,.035) 50%,transparent 50%);background-size:28px 28px;background-attachment:fixed}
+html[data-theme=light] :is(.gc-biz,.gc-sub){color:var(--mode-text)}   /* Games in light mode: accent text that reads on white */
 .g-pbar{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);transform:translateX(-50%);z-index:41;width:min(calc(100% - 24px),456px);
   display:flex;gap:2px;padding:5px;border-radius:30px;background:#efeeea;box-shadow:0 6px 22px rgba(0,0,0,.22);font-family:"RR Bricolage","Fredoka",system-ui,sans-serif;view-transition-name:g-pbar}
 .g-pbar a{flex:1;height:50px;border-radius:25px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11.5px;font-weight:600;color:#55585e;text-decoration:none;transition:background .2s,transform .12s}

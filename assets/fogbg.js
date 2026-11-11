@@ -172,14 +172,15 @@
     if (!orbs.length) makeOrbs(); else orbs.forEach(o => { o.x = Math.min(o.x, W - 10); o.y = Math.min(o.y, H - 10); });
     makeBoxes();
   }
+  const isLight = () => html.getAttribute('data-theme') === 'light';   // light mode: just the cubes on a plain page
   function drawFog(t) {
-    if (!gl) return;
+    if (!gl || isLight()) return;
     gl.viewport(0, 0, fogW, fogH); gl.uniform2f(uRes, fogW, fogH); gl.uniform1f(uT, t + 40); gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
   function drawFx(dt, advance) {
     fx.setTransform(DPR, 0, 0, DPR, 0, 0); fx.clearRect(0, 0, W, H);
     fx.globalCompositeOperation = 'source-over';
-    boxes.forEach(b => drawBox(b, advance ? dt : 0));
+    if (!isLight()) boxes.forEach(b => drawBox(b, advance ? dt : 0));
     orbs.sort((a, b) => a.z - b.z).forEach(o => { if (advance) stepOrb(o, dt); drawOrb(o, advance ? dt : 0); });
   }
 

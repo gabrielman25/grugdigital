@@ -70,7 +70,8 @@
   const SHOP_FONTS = { f: null, l: 'Shop Lora', h: 'Shop Patrick Hand', o: 'Shop Oswald', p: 'Shop Playfair', b: 'Shop Lilita', r: 'Shop Righteous', m: 'Shop Outfit' };
   // full partners with their own branded version of the site (partner mode): logo and app paths are from the site root
   const PARTNERS = {
-    crafthouse: { n: 'R&R CraftHouse Grill', short: 'CraftHouse', color: '#CFAC52', i: 'hamburger', f: 'f', logo: 'play/crafthouse/logo.png', app: 'play/crafthouse/', game: 'crafthouse', demo: true,
+    crafthouse: { n: 'R&R CraftHouse Grill', short: 'CraftHouse', color: '#CFAC52', i: 'hamburger', f: 'f', logo: 'play/crafthouse/logo.png', barLogo: 'play/crafthouse/logo-bar.png', app: 'play/crafthouse/', game: 'crafthouse', demo: true,
+      wallet: { key: 'rr-crafthouse-gameday-v1', field: 'coins', label: 'Craft Coins', to: '#store' },   // the app's own coins, shown in the top bar
       // the app's own tab bar: the only navigation on every page in partner mode (grug.js). [id, label, icon, link]: '' or '#…' is
       // in the partner's app, anything else is a site path. Play is the site's game list (the partner's game plus Grug originals).
       bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'meat', '#menu'], ['play', 'Play', 'controller', 'games/'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } }
@@ -165,9 +166,10 @@
       if (!/^games(\/|$)|^avatar(\/|$)|^pearls(\.html)?$|^rewards\/card(\/|$)/.test(rel)) location.replace(rootPath + 'games/'); } catch (e) {} }
     else if (/\/play\//.test(location.pathname)) document.addEventListener('DOMContentLoaded', () => { const a = document.getElementById('rrBack'); if (a) { a.href = rootPath + 'games/'; a.setAttribute('aria-label', 'Back to the games'); } });
     document.documentElement.setAttribute('data-partner', brand.p);
+    if (sitePage) queueMicrotask(() => partnerChrome(brand, rootPath));   // once this script has finished (the icons below are defined)
   }
-  // partner mode keeps the partner app's light look everywhere, Games included (no dark fog stage)
-  const fogOn = !!SECTIONS[section].fog && !(brand && brand.p);
+  // Games: the blue fog in dark mode, a plain page in light mode (partner mode is always light); the cubes in both
+  const fogOn = !!SECTIONS[section].fog;
   if (sitePage && fogOn) {
     document.documentElement.classList.add('g-fogged');
     try { if (me) { const s = document.createElement('script'); s.src = me.replace(/theme\.js(\?.*)?$/, 'fogbg.js'); s.defer = true; document.head.appendChild(s); } } catch (e) {}
@@ -175,14 +177,42 @@
     document.documentElement.classList.add('g-patterned');
     try { if (me) document.documentElement.style.setProperty('--pattern', 'url("' + me.replace(/theme\.js(\?.*)?$/, 'patterns/' + (SECTIONS[section].pat || section) + '.png?v=2') + '")'); } catch (e) {}
   }
+  /* partner mode's top bar and tab bar, put into the page the moment <body> exists (before anything is drawn), so every
+     page shows exactly the same bars as the partner's app: same markup and styles (.ptb, .g-pbar), same avatar picture
+     (the site's saved one), the app's own coin balance. grug.js wires them up (account menu, full screen). */
+  // the partner app tab bar's icons (@icons, MIT): the same ones the partner app draws, so the bar looks identical
+  const PBAR_ICONS = {
+    expand: '<path fill="currentColor" d="M5.293 9.293a1 1 0 1 1 1.414 1.414L4.414 13H5a1 1 0 1 1 0 2H2a1 1 0 0 1-1-1v-3a1 1 0 1 1 2 0v.586zM9.293 9.293a1 1 0 0 1 1.414 0L13 11.586V11a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1h-3a1 1 0 1 1 0-2h.586l-2.293-2.293a1 1 0 0 1 0-1.414M5 1a1 1 0 0 1 0 2h-.586l2.293 2.293a1 1 0 1 1-1.414 1.414L3 4.414V5a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1zM14 1a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-.586l-2.293 2.293a1 1 0 1 1-1.414-1.414L11.586 3H11a1 1 0 1 1 0-2z"/>',
+    plus: '<path fill="currentColor" d="M8 1a1 1 0 0 1 1 1v5h5a1 1 0 1 1 0 2H9v5a1 1 0 1 1-2 0V9H2a1 1 0 0 1 0-2h5V2a1 1 0 0 1 1-1"/>',
+    house: '<path fill="currentColor" d="M7.316 1.14a1 1 0 0 1 1.368 0l6.394 5.995a.5.5 0 0 1-.342.865H13v7h-3v-3a2 2 0 0 0-4 0v3H3V8H1.264a.5.5 0 0 1-.341-.865z"/>',
+    meat: '<path fill="currentColor" d="M5.043 9.457a3.75 3.75 0 0 0 1.5 1.5L5 12.5V14a1 1 0 0 1-2 0v-1H2a1 1 0 0 1 0-2h1.5zM8.608.867C9.613.715 11.688.687 13.5 2.5c1.812 1.811 1.786 3.886 1.634 4.891-.061.402-.309.74-.634.984l-.884.663a7.32 7.32 0 0 1-5.823 1.32 2.74 2.74 0 0 1-2.151-2.151 7.32 7.32 0 0 1 1.32-5.824l.663-.883c.244-.326.581-.572.983-.633m4.22 2.547c-.78-.78-1.73-1.098-2.121-.707-.39.39-.074 1.34.707 2.12.78.782 1.73 1.099 2.121.709.39-.39.074-1.341-.707-2.122"/>',
+    controller: '<path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12.26 3a3 3 0 0 1 2.988 2.729l.57 6.264a1.84 1.84 0 0 1-3.364 1.188L11 11H5l-1.454 2.18a1.84 1.84 0 0 1-3.364-1.187l.57-6.264A3 3 0 0 1 3.74 3zM12 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2M4 5a2 2 0 1 0 0 4 2 2 0 0 0 0-4m6 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m4 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2m-2-2a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>',
+    trophy: '<path fill="currentColor" d="M12.91 2H15a1 1 0 0 1 1 1v2a3 3 0 0 1-3 3h-.636l-.002.017A4.38 4.38 0 0 1 9 11.884V13h2l1 1v1H4v-1l1-1h2v-1.116a4.38 4.38 0 0 1-3.362-3.867L3.636 8H3l-.154-.004A3 3 0 0 1 0 5V3a1 1 0 0 1 .897-.995L1 2h2.09L3 1h10zM2 5a1 1 0 0 0 1 1h.454l-.182-2H2zm10.546 1H13a1 1 0 0 0 1-1V4h-1.273z"/>',
+    coins: '<path fill="currentColor" d="M14 13c0 1.105-2.239 2-5 2s-5-.895-5-2v-.363q.445.117.923.197a12.8 12.8 0 0 0 3.076.127q.49.037 1.001.039c1.475 0 2.857-.237 3.907-.657.395-.158.77-.354 1.093-.594zM2 8.749c.322.24.698.436 1.093.594C4.143 9.763 5.525 10 7 10q.51-.001 1-.04.496.04 1 .04c.708 0 1.413-.056 2.077-.166q.478-.08.923-.197V10c0 1.105-2.239 2-5 2s-5-.895-5-2zM14 7c0 1.105-2.239 2-5 2s-5-.895-5-2V5.749c.32.238.695.435 1.093.594a9 9 0 0 0 1.83.491C7.587 6.944 8.293 7 9 7c.708 0 1.413-.056 2.077-.166a9 9 0 0 0 1.83-.491c.398-.16.773-.356 1.093-.594z"/><path fill="currentColor" d="M9 2c2.761 0 5 .895 5 2 0 .262-.129.522-.38.766-.252.242-.62.462-1.085.648a8 8 0 0 1-1.622.434C10.306 5.948 9.656 6 9 6s-1.307-.052-1.913-.152a8 8 0 0 1-1.622-.434C5 5.228 4.632 5.008 4.38 4.766 4.129 4.522 4 4.262 4 4c0-1.105 2.239-2 5-2M8 5h2V3H8z"/>'
+  };
+  function partnerChrome(p, rootPath) {
+    const R = (me ? me.replace(/assets\/theme\.js(\?.*)?$/, '') : rootPath), esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    let face = R + 'assets/sandy/bust.png'; try { const s = JSON.parse(localStorage.getItem('grug.sandy.snaps.v1') || 'null'); if (s && s.bust) face = s.bust; } catch (e) {}
+    let coins = 0; try { const w = p.wallet && JSON.parse(localStorage.getItem(p.wallet.key) || 'null'); coins = Math.max(0, Math.floor(+(w && w[p.wallet.field]) || 0)); } catch (e) {}
+    const fsOk = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled), svg = n => '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">' + (PBAR_ICONS[n] || '') + '</svg>';
+    const top = document.createElement('header'); top.className = 'g-top ptb';
+    top.innerHTML = '<a class="ptb-logo" href="' + R + p.app + '" aria-label="' + esc(p.n) + ' home"><img src="' + R + (p.barLogo || p.logo) + '" alt="' + esc(p.n) + '">' + (p.demo ? '<span class="ptb-demo" title="A concept demo">Demo</span>' : '') + '</a><span class="ptb-sp"></span>' +
+      (p.wallet ? '<a class="ptb-wallet" href="' + R + p.app + p.wallet.to + '" aria-label="' + esc(p.wallet.label) + '"><i class="ptb-coin"></i><span>' + coins.toLocaleString('en-US') + '</span><span class="ptb-plus">' + svg('plus') + '</span></a>' : '') +
+      (fsOk ? '<button type="button" class="g-fs ptb-fs" aria-label="Full screen" aria-pressed="false">' + svg('expand') + '</button>' : '') +
+      '<button type="button" class="g-me ptb-av" aria-label="Your account menu" aria-haspopup="menu" aria-expanded="false" style="background-image:url(&quot;' + esc(face) + '&quot;)"></button>';
+    const bar = document.createElement('nav'); bar.className = 'g-pbar'; bar.setAttribute('aria-label', (p.short || p.n) + ' app');
+    const lit = (p.barOn || {})[section];
+    bar.innerHTML = (p.bar || []).map(([id, label, ic, to]) => '<a href="' + (/^#|^$/.test(to) ? R + p.app + to : R + to) + '"' + (id === lit ? ' aria-current="page"' : '') + '>' + svg(ic) + '<span>' + esc(label) + '</span></a>').join('');
+    const put = () => { if (!document.body) return false; if (!document.querySelector('header.ptb')) document.body.prepend(top); if (!document.querySelector('.g-pbar')) document.body.appendChild(bar); return true; };
+    if (!put()) new MutationObserver((m, o) => { if (put()) o.disconnect(); }).observe(document.documentElement, { childList: true });
+  }
   function apply() {
     const s = prefs(), t = SECTIONS[section], el = document.documentElement;
     // the Games section is a dark stage (the fog) in both modes
-    const fog = t.fog && !(brand && brand.p);
-    const mode = brand && brand.p ? 'light' : fog ? 'dark' : s.mode, bg = mode === 'light' ? (brand && brand.p ? '#F8F5EE' : '#F3F3F5') : '#17171A';
+    const mode = brand && brand.p ? 'light' : s.mode, fog = t.fog && mode === 'dark', bg = mode === 'light' ? (brand && brand.p ? '#F8F5EE' : '#F3F3F5') : '#17171A';
     const ac = accent();
     el.setAttribute('data-theme', mode); el.setAttribute('data-mode-pref', s.mode); el.setAttribute('data-section', section);
-    el.classList.toggle('g-chrome-light', fog && s.mode === 'light' && mode === 'dark');   // Games in light mode: dark stage, light top bar and dock
+    el.classList.remove('g-chrome-light');   // (the Games page no longer forces a dark stage in light mode)   // Games in light mode: dark stage, light top bar and dock
     el.setAttribute('data-role', s.role);   // who's visiting (Settings → I'm a…): pages show or hide parts with [data-only-for] / [data-hide-for]
     if (brand) el.setAttribute('data-brand', ''); else el.removeAttribute('data-brand');
     el.style.setProperty('--h', HUE);
@@ -196,7 +226,7 @@
     el.classList.toggle('calm', isCalm(s));
     let m = document.querySelector('meta[name="theme-color"]');
     if (!m) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); }
-    m.content = fog ? '#03050f' : bg;
+    m.content = fog ? '#03050f' : bg;   // (fog = Games in dark mode)
     // the tab's name says the shop's name, not ours
     brandTitle();
     try { document.dispatchEvent(new CustomEvent('grug:theme', { detail: { section, mode, brand } })); } catch (e) {}

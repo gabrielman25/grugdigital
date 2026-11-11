@@ -19,9 +19,9 @@ in `grug.css` (`--page`, `--card-solid`, `--card`, `--ink`, `--line` …): never
   section's accent at alpha 7/255, `assets/patterns/<section>.png`, 96px). Keep it faint so text always reads clearly.
   The **Rewards** and **Links** sections are the exception: solid `#17171A`, no pattern (`solid: true` in `SECTIONS`), and its pages use
   solid colours only (no gradients, blur or decoration).
-- **The blue smoky fog (`assets/fogbg.js`) is only for the Games section** (`games/` and `games/<id>/`), where the
-  FOSSIL32 boxes float in it, with small solid 3D cubes in Grug colours tumbling through it (no glowing orbs). It stays a
-  dark stage in light mode, but the top bar, dock and menus stay white there (`html.g-chrome-light`).
+- **The blue smoky fog (`assets/fogbg.js`) is only for the Games section** (`games/` and `games/<id>/`) **in dark mode**,
+  where the FOSSIL32 boxes float in it. In light mode the Games pages are a plain white page with black text. The small
+  solid 3D cubes in Grug colours tumble on the Games pages in both modes (no glowing orbs).
 - **All 3D renders at half resolution** (device pixel ratio × 0.5, capped at 2): FOSSIL32 (`RES` in its source), the
   avatar editor, the asset library previews, Model Kit's 3D views, the rewards/links builders and the fog cubes.
   Keep it that way for anything new. The one exception is the avatar editor's stage: it's a still picture (redrawn only
@@ -59,7 +59,10 @@ A full partner can have its own branded, closed version of the site. Its address
 `games/?partner=crafthouse`; any page takes `?partner=<id>`) starts **partner mode**, which must feel like one app and
 must never lead to the standard Grug site or another partner's rewards app:
 
-- The partner's real logo sits in the top bar (white plate, Demo tag while `demo: true`) and links to their app.
+- The top bar is the partner app's own bar, identical on every page and in the app (`.ptb`: logo with Demo tag, the app's
+  coin balance, full screen, avatar). theme.js puts it and the tab bar into the page the moment `<body>` exists, so there is
+  no skeleton swap; grug.js only wires them up. The avatar picture everywhere (site and app) is the site's saved one
+  (`grug.sandy.snaps.v1`, else `assets/sandy/bust.png`). The `.ptb` CSS block is duplicated in the app: keep both identical.
 - The Grug dock is hidden; the partner app's own tab bar (`bar` in its PARTNERS entry, `.g-pbar`) is the only navigation,
   on every page (a rail on the right in short landscape; `--sab` grows by its height so layouts make room). Its Play tab is
   the site's game list; the app's own Play tab goes there too.
