@@ -19,6 +19,7 @@ Games built with Katy restaurants, one local profile (no accounts), a 3D avatar 
 - `partners/` — the "for restaurants" pitch, our work and contact (the old front page).
 - `play/<name>/` — the partner rewards apps, moved here from their own repos: `yoshi`, `cielito`, `teahouse`, `soluna`. Each old URL redirects here and keeps `?tap=` NFC links and `#store/tab` hashes.
 - `play/crafthouse/` — a demo rewards app made to pitch R&R CraftHouse Grill (one self-contained file: menu with photos, an order quiz, a visit-based Season Pass, a coin store that adds to the check, and three 3D swipe games: football, soccer, basketball). Its Grug links open CraftHouse mode.
+- `tools/partner-app/` — the template every partner rewards app is built from (CraftHouse is the first): the shared app, one folder per partner (`config.json` + menu data) and `build.py <id>` → `play/<id>/index.html`. Its README is the step-by-step for a new venue, with the browser checklist.
 - `play/runway/` — Runway Ready, a Grug original with no restaurant: a slim host page stands in for a rewards app (Pearls only, no partner points). Games like this have `standalone: true` in `assets/games.js`; copy the folder to host another one.
 - `work/` — concept sites, screenshots and pitch packs. `community/` — neighborhood photos and the map.
 

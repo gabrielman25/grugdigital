@@ -71,6 +71,8 @@
   // full partners with their own branded version of the site (partner mode): logo and app paths are from the site root
   const PARTNERS = {
     crafthouse: { n: 'R&R CraftHouse Grill', short: 'CraftHouse', color: '#CFAC52', i: 'hamburger', f: 'f', logo: 'play/crafthouse/logo.png', barLogo: 'play/crafthouse/logo-bar.png', app: 'play/crafthouse/', game: 'crafthouse', demo: true,
+      // the look on the site: the coin in the top bar, the typeface ("Partner Font") and the colours (--p-* in grug.css)
+      coin: 'play/crafthouse/coin.png', font: 'play/crafthouse/bricolage.woff2', colors: { accent: '#CFAC52', deep: '#24383f', cream: '#fbf4ea', page: '#F8F5EE' },
       wallet: { key: 'rr-crafthouse-gameday-v1', field: 'coins', label: 'Craft Coins', to: '#store' },   // the app's own coins, shown in the top bar
       // the app's own tab bar: the only navigation on every page in partner mode (grug.js). [id, label, icon, link]: '' or '#…' is
       // in the partner's app, anything else is a site path. Play is the site's game list (the partner's game plus Grug originals).
@@ -171,6 +173,11 @@
       a.href = ok ? back : rootPath + 'games/'; a.setAttribute('aria-label', ok && back.indexOf(rootPath + (PARTNERS[brand.p].app || '')) === 0 ? 'Back to the ' + (PARTNERS[brand.p].short || '') + ' app' : 'Back to the games'); });
     if (sitePage) addEventListener('fossil32:play', () => ss.set('grug.partner.back', location.pathname + location.search));
     document.documentElement.setAttribute('data-partner', brand.p);
+    // its look: colours as --p-* (grug.css), the top bar's coin, and its typeface as "Partner Font"
+    try { const P = PARTNERS[brand.p], C = P.colors || {}, st = document.documentElement.style;
+      [['accent', '--p-accent'], ['deep', '--p-deep'], ['cream', '--p-cream'], ['page', '--p-page']].forEach(([k, v]) => { if (C[k]) st.setProperty(v, C[k]); });
+      if (P.coin) st.setProperty('--p-coin', 'url("' + rootPath + P.coin + '")');
+      if (P.font) { const f = document.createElement('style'); f.textContent = '@font-face{font-family:"Partner Font";src:url("' + rootPath + P.font + '") format("woff2");font-weight:200 800;font-display:swap}'; document.head.appendChild(f); } } catch (e) {}
     if (sitePage) queueMicrotask(() => partnerChrome(brand, rootPath));   // once this script has finished (the icons below are defined)
   }
   // Games: the blue fog in dark mode, a plain page in light mode (partner mode is always light); the cubes in both
@@ -214,7 +221,7 @@
   function apply() {
     const s = prefs(), t = SECTIONS[section], el = document.documentElement;
     // the Games section is a dark stage (the fog) in both modes
-    const mode = brand && brand.p ? 'light' : s.mode, fog = t.fog && mode === 'dark', bg = mode === 'light' ? (brand && brand.p ? '#F8F5EE' : '#F3F3F5') : '#17171A';
+    const mode = brand && brand.p ? 'light' : s.mode, fog = t.fog && mode === 'dark', bg = mode === 'light' ? (brand && brand.p ? ((PARTNERS[brand.p] || {}).colors || {}).page || '#F8F5EE' : '#F3F3F5') : '#17171A';
     const ac = accent();
     el.setAttribute('data-theme', mode); el.setAttribute('data-mode-pref', s.mode); el.setAttribute('data-section', section);
     el.classList.remove('g-chrome-light');   // (the Games page no longer forces a dark stage in light mode)   // Games in light mode: dark stage, light top bar and dock

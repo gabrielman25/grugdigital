@@ -83,6 +83,17 @@ must never lead to the standard Grug site or another partner's rewards app:
   floating FOSSIL32 cartridges in one looping row (`Shelf` in the app), the same ones as the Grug home page.
 
 Partners live in `PARTNERS` in `assets/theme.js` (`GrugTheme.partner()`); `html[data-partner]` is set while it's on.
+A partner's look on the site comes from its entry: `colors` become `--p-accent` / `--p-deep` / `--p-cream` / `--p-page`,
+`coin` is the top bar's coin, `font` becomes "Partner Font" (never hard-code one partner's look in grug.css).
+
+## Making a partner rewards app (use the CraftHouse template)
+
+Every partner rewards app (a coffee shop, a bar…) is built the same way as R&R CraftHouse Grill's, from
+**`tools/partner-app/`**: the shared app (`src/`), one folder per partner (`partners/<id>/config.json` + menu data), and
+`python3 tools/partner-app/build.py <id>` → `play/<id>/index.html` (never edit that file by hand). Then the site side:
+a `PARTNERS` entry, the `<id>/` short address, the venue's game with its FOSSIL32 box. Follow the step-by-step and the
+browser checklist in `tools/partner-app/README.md`, including "open the app directly, play from its shelf, press Back:
+you must land back in the app".
 
 ## Games are FOSSIL32 cartridges
 
