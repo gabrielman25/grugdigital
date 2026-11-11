@@ -47,7 +47,7 @@
       html: () => '<input class="g-input wz-name" id="aName" maxlength="28" autocomplete="organization" placeholder="e.g. Pebble Coffee Bar" value="' + (named ? esc(cfg.n) : '') + '">',
       wire: () => { const i = $('#aName'); i.focus(); i.addEventListener('input', () => { named = i.value.trim().length > 0; set({ n: i.value }); paintNav(); }); } },
     { id: 'kind', q: 'What kind of place is it?', hint: 'We’ll suggest the rest from here.', auto: true,
-      html: () => Object.keys(RW.KINDS).map(k => opt('k', k, RW.KINDS[k].i, RW.KINDS[k].label)).join(''),
+      html: () => Object.keys(RW.KINDS).map(k => opt('k', k, RW.iconSvg(RW.KINDS[k].i), RW.KINDS[k].label)).join(''),
       pick: el => el.dataset.k, sel: () => cfg.t,
       apply: k => { const d = RW.KINDS[k], p = { t: k }; ['i', 's', 'r', 'color'].forEach(f => { if (!touched.has(f)) p[f] = d[f === 'color' ? 'color' : f]; }); if (!touched.has('f')) p.f = d.font; cfg = RW.normalize(Object.assign({}, cfg, p)); pctOpen = /^p\d+$/.test(cfg.r); } },
     { id: 'color', q: 'Choose a brand color', hint: 'Your card and its QR frame use it.',
@@ -62,8 +62,8 @@
           '<small><b>' + esc(F.label) + '</b> · ' + esc(F.sub) + '</small></span><span class="ck">' + G.icon('check') + '</span></button>'; }).join('') + '</div>',
       pick: el => el.dataset.f, sel: () => cfg.f, apply: f => { set({ f }); RW.fontReady(cfg).then(paintPreview); },
       wire: () => { RW.loadFonts(); Object.keys(RW.FONTS).forEach(k => RW.fontReady({ f: k, n: cfg.n })); RW.fontReady(cfg).then(paintPreview); } },
-    { id: 'icon', q: 'Choose a stamp icon', hint: 'Guests collect one of these every visit.',
-      html: () => '<div class="wz-emo">' + RW.ICONS.map(i => '<button type="button" role="radio" data-i="' + i + '" aria-label="' + i + '" aria-checked="false">' + i + '</button>').join('') + '</div>',
+    { id: 'icon', q: 'Choose an icon', hint: 'Guests collect one of these every visit.',
+      html: () => '<div class="wz-emo">' + RW.ICONS.map(i => '<button type="button" role="radio" data-i="' + i + '" aria-label="' + i.replace(/-/g, ' ') + '" title="' + i.replace(/-/g, ' ') + '" aria-checked="false">' + RW.iconSvg(i) + '</button>').join('') + '</div>',
       pick: el => el.dataset.i, sel: () => cfg.i, apply: i => set({ i }) },
     { id: 'stamps', q: 'How many stamps for a reward?', hint: 'Fewer stamps bring people back sooner.', auto: true,
       html: () => [[5, 'Quick to earn'], [6, 'Good for bars'], [8, 'Most popular', true], [10, 'For weekly regulars'], [12, 'For daily regulars']].map(([n, sub, pop]) =>
@@ -74,8 +74,8 @@
       html: () => '<div class="wz-opt pearls"><span class="ic">' + G.icon('pearl') + '</span><span class="t">10 Pearls every visit<span class="vh"> (always included)</span><small>This one\u2019s on the house</small></span>' +
           '<button type="button" class="wz-help" id="pearlHelp" aria-label="What are Pearls?">?</button><span class="ck" aria-hidden="true">' + G.icon('check') + '</span></div>' +
         '<p class="wz-sub">Add your own reward (optional)</p>' +
-        Object.keys(RW.REWARDS).map(k => opt('r', k, ({ d: '🥤', f: '🍽️', s: '🍰', b: '🎁' })[k], RW.REWARDS[k])).join('') +
-        opt('r', 'p', '🏷️', 'A percent off an item') +
+        Object.keys(RW.REWARDS).map(k => opt('r', k, RW.iconSvg(({ d: 'pint-glass', f: 'fork-knife', s: 'cake', b: 'gift' })[k]), RW.REWARDS[k])).join('') +
+        opt('r', 'p', G.icon('ticket'), 'A percent off an item') +
         '<div id="pctBox"' + (pctOpen ? '' : ' hidden') + '><p class="wz-pct-l">How much off?</p><div class="wz-pct">' + RW.PCTS.map(p => '<button type="button" role="radio" data-p="' + p + '" aria-checked="false">' + p + '%</button>').join('') + '</div></div>' +
         '<button type="button" class="wz-opt ghost" id="aCustomReward"><span class="ic">' + G.icon('chat-circle') + '</span><span class="t">Something else?<small>Talk to us about a custom reward</small></span></button>',
       pick: el => el.dataset.r, sel: () => pctOpen ? 'p' : cfg.r,
@@ -91,7 +91,7 @@
         $('#pearlHelp').addEventListener('click', pearlHelp);
       } },
     { id: 'welcome', q: 'Give new guests a free welcome stamp?', hint: 'A head start makes people more likely to come back.', auto: true,
-      html: () => opt('j', '1', '👋', 'Yes, start them with a stamp', 'Their first scan counts twice', '<span class="tag">Recommended</span>') + opt('j', '0', '🙂', 'No, start at zero'),
+      html: () => opt('j', '1', G.icon('hand-waving'), 'Yes, start them with a stamp', 'Their first scan counts twice', '<span class="tag">Recommended</span>') + opt('j', '0', G.icon('smiley'), 'No, start at zero'),
       pick: el => el.dataset.j, sel: () => String(cfg.j), apply: j => set({ j: j === '1' }) },
     { id: 'done', done: true }
   ];

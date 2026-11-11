@@ -217,12 +217,8 @@ p{margin:0}
 :focus-visible{outline:3px solid var(--ring-a);outline-offset:3px;border-radius:var(--r-xs)}
 [hidden]{display:none!important}
 .gi{width:1.25em;height:1.25em;fill:currentColor;display:inline-block;vertical-align:-.3em;flex:none}
-/* full-colour pack icons (img). They keep their own colours, so colour rules for .gi don't apply */
-.gi-img{object-fit:contain;-webkit-user-drag:none;user-select:none;image-rendering:auto;filter:none}
-.g-toast .gi-img{background:var(--icon-bg)!important}
 svg.k-ic-s{filter:none}
 .gi-s{fill:currentColor}
-img.k-ic{display:block;object-fit:contain;-webkit-user-drag:none;user-select:none}
 .wrap{width:100%;max-width:1160px;margin:0 auto;padding:0 max(16px,var(--sal)) 0 max(16px,var(--sar))}
 .mut{color:var(--mut)}
 .small{font-size:14px}
@@ -256,10 +252,10 @@ img.k-ic{display:block;object-fit:contain;-webkit-user-drag:none;user-select:non
 .g-gear:hover,.g-pts:hover{background:var(--card2)}
 .g-gear:hover .gi{transform:rotate(60deg)}
 .g-me{display:flex;align-items:center;gap:10px;padding:0;border-radius:999px;min-height:46px}
-.g-me-name{display:none;font-weight:700;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-me-name{display:none;font-weight:700;max-width:min(140px,30vw);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .g-face{width:46px;height:46px;border-radius:50%;object-fit:cover;border:3px solid var(--bezel);background:linear-gradient(140deg,var(--sel-a),var(--sel-b));box-shadow:var(--shadow);flex:none}
 .g-face-empty{display:grid;place-items:center;color:var(--on-sel)}
-@media (min-width:560px){.g-me{padding:0 0 0 14px;background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow)}.g-me-name{display:block}.g-me .g-face{width:40px;height:40px;box-shadow:none;margin:2px}}
+@media (min-width:360px){.g-me{padding:0 0 0 14px;background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow)}.g-me-name{display:block}.g-me .g-face{width:40px;height:40px;box-shadow:none;margin:2px}}
 @media (min-width:980px){.g-title{display:flex}}
 
 /* ---------- the dock (bottom on phones and desktops, side rail on landscape phones) ---------- */
@@ -466,9 +462,10 @@ textarea.g-input{min-height:120px;font-size:14px;font-family:ui-monospace,SFMono
 :root.calm *,:root.calm *::before,:root.calm *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 
 /* ---------- Pearls in the top bar + the account menu ---------- */
-.g-pts .g-plus{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--sel-a),var(--sel-b));color:var(--on-sel);font:800 15px/1 var(--font)}
+.g-pts .g-plus{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--mode);color:var(--on-sel)}
+.g-pts .g-plus svg{width:12px;height:12px;display:block}   /* drawn, so the + sits dead centre (a text + rides low in most fonts) */
 button.g-me{appearance:none;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
-@media (min-width:560px){button.g-me{background:var(--glass);border:1px solid var(--line)}}
+@media (min-width:360px){button.g-me{background:var(--glass);border:1px solid var(--line)}}
 .g-menu{position:fixed;z-index:60;top:calc(var(--top) + var(--sat) + 2px);right:max(12px,var(--sar));width:min(300px,calc(100% - 24px));padding:8px;border-radius:var(--r);
   background:var(--icon-bg);border:1px solid var(--line);box-shadow:var(--shadow);transform-origin:top right;animation:g-menu-in .16s cubic-bezier(.2,.8,.2,1)}
 .g-menu[hidden]{display:none}
@@ -476,9 +473,9 @@ button.g-me{appearance:none;border:0;background:none;color:inherit;font:inherit;
 .g-menu-h{display:flex;gap:12px;align-items:center;padding:8px 8px 12px;border-bottom:1px solid var(--line);margin-bottom:6px}
 .g-menu-h img{width:44px;height:44px;border-radius:50%;object-fit:cover;background:linear-gradient(140deg,var(--sel-a),var(--sel-b))}
 .g-menu-h b{display:block;font-size:16px}.g-menu-h small{color:var(--mut);font-size:12.5px}
-.g-menu [role=menuitem]{display:flex;align-items:center;gap:12px;width:100%;min-height:46px;padding:0 12px;border-radius:14px;border:0;background:none;color:var(--ink);font:700 15px/1 var(--font);text-align:left;cursor:pointer;text-decoration:none}
-.g-menu [role=menuitem] span{flex:1}
-.g-menu [role=menuitem]:hover,.g-menu [role=menuitem]:focus-visible{background:var(--card2);outline:none}
+.g-menu :is([role=menuitem],[role=menuitemcheckbox]){display:flex;align-items:center;gap:12px;width:100%;min-height:46px;padding:0 12px;border-radius:14px;border:0;background:none;color:var(--ink);font:700 15px/1 var(--font);text-align:left;cursor:pointer;text-decoration:none}
+.g-menu :is([role=menuitem],[role=menuitemcheckbox]) span{flex:1}
+.g-menu :is([role=menuitem],[role=menuitemcheckbox]):hover,.g-menu :is([role=menuitem],[role=menuitemcheckbox]):focus-visible{background:var(--card2);outline:none}
 .g-menu [role=menuitem].hot{background:linear-gradient(135deg,var(--sel-a),var(--sel-b));color:var(--on-sel);margin-bottom:4px}
 .g-menu [role=menuitem].hot .gi{color:inherit}
 
@@ -572,16 +569,17 @@ html[data-role="player"] [data-hide-for~="player"],html[data-role="owner"] [data
 
 /* ---------- light / dark toggle and shop mode ---------- */
 .g-seg button .gi{width:16px;height:16px;vertical-align:-.2em}
-.g-brand-ic{flex:none!important;display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:var(--brand,var(--mode));font-size:24px;line-height:1}
+.g-brand-ic{flex:none!important;display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:var(--brand,var(--mode));color:var(--brand-ink,#1E1B16);line-height:1}
+.g-brand-ic .gi{width:24px;height:24px;color:inherit}
+.g-logo .g-brand-mark .gi{width:20px;height:20px}
 .g-brand-pref .g-btn{flex:none}
 /* shop mode: the shop's emoji and name stand in for ours in the top bar */
-.g-logo .g-brand-mark{display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:var(--brand);font-size:19px;line-height:1;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.g-logo .g-brand-mark{display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:var(--brand);color:var(--brand-ink);line-height:1;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
 .g-logo.is-brand span.g-brand-name{max-width:42vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 html[data-brand] [data-hide-brand]{display:none!important}
 html:not([data-brand]) [data-only-brand]{display:none!important}
 html[data-brand] .g-tabs .k-ic-s,html[data-brand] .g-tray .k-ic-s{color:var(--brand)!important}
 html[data-brand] .g-tabs :is(a,.g-grp)[aria-current=page] .k-ic-s{color:var(--on-sel)!important}
-@media (max-width:420px){.g-modebtn{display:none}}
 /* shop fonts that only come in one regular weight: don't let the browser fake a bold */
 html:is([data-brand-font="h"],[data-brand-font="b"],[data-brand-font="r"]) :is(h1,h2,h3,h4,.g-logo,.g-title b){font-weight:400;font-synthesis:none}
 html.g-chrome-light :is(.g-top,.g-tabs,.g-tray,.g-menu,.g-dialog,.g-toast){color:var(--ink)}
@@ -629,3 +627,10 @@ html.g-fade.g-swipe-prev main{animation:g-sw-in-l .32s cubic-bezier(.2,.8,.2,1) 
 .g-hub-list a.go .g-hub-ico{background:rgba(255,255,255,.35)}
 .g-hub-list a.go .k-ic-s{color:#1E1B16!important}
 html.g-chrome-light :is(.g-top .k-glass,button.g-me,.g-tabs){background:#FFFFFF!important}
+
+/* the account menu's dark-mode row: a small switch on the right */
+.g-menu [role=menuitemcheckbox] .g-switch.sm{flex:none;width:40px;height:24px}
+.g-menu [role=menuitemcheckbox][aria-checked=true] .g-switch.sm{background:var(--mode)}
+.g-menu [role=menuitemcheckbox] .g-switch.sm::after{width:18px;height:18px;top:3px;left:3px}
+.g-menu [role=menuitemcheckbox][aria-checked=true] .g-switch.sm::after{transform:translateX(16px)}
+.g-status{padding:0 8px 0 10px}

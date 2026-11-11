@@ -101,7 +101,7 @@
           signMat.map = canvasTex(740, 164, (x, w, h) => {
             x.fillStyle = col; x.fillRect(0, 0, w, h); x.fillStyle = dark; x.fillRect(0, h - 12, w, 12);
             rr(x, 18, 18, 116, 116, 26); x.fillStyle = dark; x.fill();
-            x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = '74px ' + EMO; x.fillText(cfg.i, 76, 80);
+            x.textBaseline = 'middle'; RW.drawIcon(x, cfg.i, 76, 76, 70, RW.inkOn(dark));
             x.textAlign = 'left'; x.fillStyle = RW.inkOn(col); fitName(x, cfg, 70, w - 180); x.fillText(nameOf(cfg), 158, 80);
           });
           signMat.needsUpdate = true;
@@ -160,7 +160,7 @@
           rr(x, 20, 100, w - 40, 470, 26); x.fillStyle = '#FFFFFF'; x.fill();
           x.save(); rr(x, 20, 100, w - 40, 470, 26); x.clip(); x.fillStyle = cfg.color; x.fillRect(20, 100, w - 40, 104); x.fillStyle = RW.lo(cfg.color); x.fillRect(20, 196, w - 40, 8); x.restore();
           rr(x, 38, 118, 68, 68, 16); x.fillStyle = RW.lo(cfg.color); x.fill();
-          x.textAlign = 'center'; x.font = '42px ' + EMO; x.fillText(cfg.i, 72, 154);
+          RW.drawIcon(x, cfg.i, 72, 152, 40, RW.inkOn(RW.lo(cfg.color)));
           x.textAlign = 'left'; x.fillStyle = RW.inkOn(cfg.color); fitName(x, cfg, 30, 250); x.fillText(nameOf(cfg), 120, 144);
           x.font = '600 18px Fredoka, sans-serif'; x.globalAlpha = .85; x.fillText('Rewards card', 120, 174); x.globalAlpha = 1;
           const n = cfg.s, cols = (n === 6 || n === 9) ? 3 : (n === 5 || n === 10) ? 5 : 4, rows = Math.ceil(n / cols);
@@ -168,8 +168,10 @@
           for (let i = 0; i < n; i++) {
             const cx = gx + (i % cols + .5) * cell, cy = 225 + (Math.floor(i / cols) + .5) * cell;
             x.beginPath(); x.arc(cx, cy, r, 0, 7);
-            if (i < have) { x.fillStyle = cfg.color; x.fill(); x.textAlign = 'center'; x.font = Math.round(r * 1.05) + 'px ' + EMO; x.fillText(cfg.i, cx, cy + 2); }
-            else { x.fillStyle = '#F6F2EC'; x.fill(); x.lineWidth = 3; x.strokeStyle = '#E6DED2'; x.stroke(); x.fillStyle = '#B0A898'; x.textAlign = 'center'; x.font = (i === n - 1 ? Math.round(r) + 'px ' + EMO : '700 ' + Math.round(r * .6) + 'px Fredoka, sans-serif'); x.fillText(i === n - 1 ? '🎁' : String(i + 1), cx, cy + 2); }
+            if (i < have) { x.fillStyle = cfg.color; x.fill(); RW.drawIcon(x, cfg.i, cx, cy, r * 1.1, RW.inkOn(cfg.color)); }
+            else { x.fillStyle = '#F6F2EC'; x.fill(); x.lineWidth = 3; x.strokeStyle = '#E6DED2'; x.stroke();
+              if (i === n - 1) RW.drawIcon(x, 'gift', cx, cy, r, '#B0A898');
+              else { x.fillStyle = '#B0A898'; x.textAlign = 'center'; x.font = '700 ' + Math.round(r * .6) + 'px Fredoka, sans-serif'; x.fillText(String(i + 1), cx, cy + 2); } }
           }
           x.textAlign = 'center'; x.fillStyle = '#1E1B16'; fit(x, RW.pearlsOnly(cfg.r) ? 'Every visit: +10 Pearls' : 'Collect ' + n + ' → ' + RW.rewardText(cfg.r), '700', 24, w - 70);
           x.fillText(RW.pearlsOnly(cfg.r) ? 'Every visit: +10 Pearls' : 'Collect ' + n + ' → ' + RW.rewardText(cfg.r), w / 2, 540);

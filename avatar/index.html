@@ -497,6 +497,7 @@ body.viewer.clear,body.viewer.clear #stage{background:transparent}
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="help" hidden role="dialog" aria-modal="true" aria-labelledby="helpT"><div class="card"><header><h2 class="px" id="helpT">Read me</h2><button type="button" class="btn px" id="bCopyReadme">Copy</button><button type="button" class="btn px" id="bHelpClose">Close</button></header><pre id="helpText"></pre></div></div>
 
+<link rel="stylesheet" href="nav.css">
 <!-- ===== SANDY EDITOR: END (markup and styles) ===== -->
 <!-- ===== SANDY RUNTIME: BEGIN ===== -->
 <script src="../assets/sandy-runtime.js"></script>
@@ -806,4 +807,5 @@ K.create(start).then(s=>{sandy=s;scene.add(s.object3d);cfg=s.getConfig();sync();
   G.on((p, what) => { if (what === 'external' || what === 'import' || what === 'reset') { loadout = G.emotes.slice(); paint(); } });
 })();
 </script>
+<script src="nav.js"></script>
 </body></html>

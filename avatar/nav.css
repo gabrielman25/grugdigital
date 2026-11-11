@@ -1,0 +1,126 @@
+/* Grug · avatar/nav.css — the avatar editor without scrolling (with avatar/nav.js). Nothing in the panel scrolls up and
+   down: sections and pages slide sideways, and lists of pieces run sideways in as many rows as fit. */
+html:has(body.ed-nav),body.ed-nav{overflow:hidden;height:100%}
+body.ed-nav #app{height:calc(100vh - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 30px);height:calc(100dvh - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 30px);min-height:0}
+@media (max-width:860px){
+  body.ed-nav #app{grid-template-columns:1fr;grid-template-rows:minmax(0,40%) minmax(0,1fr);gap:10px;padding-top:2px}
+  body.ed-nav #panel{min-height:0}
+  body.ed-nav #stageHint{display:none}
+  body.ed-nav #anims{bottom:10px}
+}
+body.ed-nav #panel{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+
+/* the title row: back, the screen's name, randomize and reset */
+body.ed-nav #panelTop{padding:10px 10px 6px 14px;gap:6px}
+body.ed-nav #panelTop h1{font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.ed-nav #panelTop .btn{width:38px;min-height:38px;padding:0}
+body.ed-nav #panelTop .btn .gi{width:19px;height:19px}
+body.ed-nav #panelTop .ed-back{margin-left:-4px}
+
+/* the section icons */
+.ed-bar{display:flex;gap:2px;padding:0 8px 8px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);transition:opacity .2s}
+.ed-bar::-webkit-scrollbar{display:none}
+.ed-bar.dim{opacity:.45}
+.ed-tab{flex:1 0 auto;min-width:48px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px 6px;border-radius:12px;color:var(--mut);font:700 10.5px/1 var(--font)}
+.ed-tab .gi{width:22px;height:22px}
+.ed-tab[aria-selected=true]{background:var(--mode);color:var(--on-sel)}
+.ed-tab:not([aria-selected=true]):hover{background:var(--card2)}
+
+/* the sections, side by side; screens opened on top slide in from the right */
+.ed-view{position:relative;flex:1;min-height:0;overflow:hidden}
+.ed-strip,.ed-pager{display:flex;height:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.ed-strip::-webkit-scrollbar,.ed-pager::-webkit-scrollbar{display:none}
+.ed-strip>.ed-screen,.ed-pager>.ed-page{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always}
+.ed-screen{height:100%;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.ed-page{height:100%;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px 14px 8px;overflow:hidden}
+.ed-push{position:absolute;inset:0;background:var(--solid);transform:translateX(100%);transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+.ed-push.in{transform:none}
+.ed-push.out{transform:translateX(100%)}
+@media (prefers-reduced-motion:reduce){.ed-push{transition:none}}
+.ed-dots{display:flex;justify-content:center;gap:6px;padding:4px 0 8px}
+.ed-dots i{width:6px;height:6px;border-radius:3px;background:var(--line2);transition:width .2s}
+.ed-dots i.on{width:18px;background:var(--mode)}
+
+/* groups inside a screen: no rules or headings of their own beyond a small label */
+body.ed-nav .ed-page .grp{padding:0;border:0;display:flex;flex-direction:column;gap:6px;min-height:0}
+body.ed-nav .ed-page .grp h2{font-size:13px;margin:0;color:var(--mut);letter-spacing:.04em;text-transform:uppercase}
+body.ed-nav .ed-page .grp .note{display:none}
+body.ed-nav .ed-page .row{margin:4px 0}
+body.ed-nav .ed-page .sws{gap:6px}
+body.ed-nav .ed-page .sw,body.ed-nav .ed-page .pick{width:28px;height:28px}
+.ed-sec>.ed-page{gap:12px}
+body.ed-nav .ed-hideslide>.row:has(input[type=range]),body.ed-nav .ed-hideslide>.sub{display:none}
+.ed-page>.row:has(input[type=range]){padding:6px 0}
+
+/* a button that opens a screen */
+.ed-open{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:0 12px;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--ink);font:600 15px/1 var(--display);text-align:left;flex:none}
+.ed-open span{flex:1}
+.ed-open .gi{width:18px;height:18px;color:var(--mut)}
+.ed-open:hover{background:var(--card2)}
+
+/* Wardrobe's categories */
+.ed-cats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-content:start}
+.ed-cat{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px 10px;border-radius:16px;background:var(--card);border:1px solid var(--line);color:var(--ink);font:600 13px/1.1 var(--display)}
+.ed-cat .ic{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:color-mix(in srgb,var(--mode) 18%,transparent);color:var(--mode-text,var(--mode))}
+.ed-cat .ic .gi{width:24px;height:24px}
+.ed-cat:hover{background:var(--card2)}
+.ed-cat:active{transform:scale(.97)}
+
+/* lists of pieces: sideways, as many rows as fit (nav.js sets --rows) */
+body.ed-nav .ed-page :is(.kitgrid,.ccg,#pkGrid,.emogrid){flex:1 1 auto;min-height:0;max-height:none;display:grid;grid-auto-flow:column;grid-template-rows:repeat(var(--rows,1),var(--rh,max-content));
+  grid-auto-columns:var(--cw,96px);align-content:start;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scrollbar-width:none;margin:0;padding:2px}
+body.ed-nav .ed-page :is(.kitgrid,.ccg,#pkGrid,.emogrid)::-webkit-scrollbar{display:none}
+body.ed-nav .ed-page :is(.kitgrid,.ccg,#pkGrid,.emogrid)>*{scroll-snap-align:start}
+body.ed-nav .ed-page .ccg{--cw:84px}
+body.ed-nav .ed-page #pkGrid{--cw:54px}
+body.ed-nav .ed-page .emogrid{--cw:96px}
+body.ed-nav .ed-page .kit,body.ed-nav .ed-page [data-cc]{flex:1;min-height:0}
+
+/* a piece's colours, fabric and fit show once a piece is picked */
+body.ed-nav .kit:not(.has)>.row,body.ed-nav [data-cc]:not(.has)>.row:has(.sws){display:none}
+body.ed-nav .ed-chip1 .grp:not(.has)>:is(.sws,.ed-after){display:none}
+body.ed-nav .ed-print .grp:not(.has)>.row:has(input[type=range]){display:none}
+
+/* prints: quick picks, the pack sideways, its categories on one line */
+body.ed-nav .ed-print .grp{flex:1}
+body.ed-nav .ed-print .row:has(#pkOpen){display:none}
+body.ed-nav .ed-print #pk{display:flex!important;flex-direction:column;gap:6px;flex:1;min-height:0;margin:0}
+body.ed-nav .ed-print #pkCats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+body.ed-nav .ed-print #pkCats button{flex:none}
+body.ed-nav .ed-print #decals{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+body.ed-nav .ed-print #decals>*{flex:none}
+
+/* shoes: "Choose boots" only when boots are on */
+.ed-shoes:not(:has(#feetType [data-type=boots][aria-pressed=true])) .ed-open{display:none}
+
+/* emotes: the six picked as a line, all of them sideways below */
+body.ed-nav .ed-emotes .grp{flex:1}
+body.ed-nav .ed-emotes .emoload{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0}
+body.ed-nav .ed-emotes .emoload span{flex:none}
+body.ed-nav .emoload span i{display:none}
+body.ed-nav .emogrid button i .gi{width:24px;height:24px;color:#fff}
+
+/* save: the buttons, and the JSON on its own screen */
+body.ed-nav .ed-sec[data-sec=save] .btns .btn{flex:1 1 auto}
+body.ed-nav #json{min-height:0;flex:1}
+@media (max-width:860px){body.ed-nav #anims{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;right:14px}body.ed-nav #anims::-webkit-scrollbar{display:none}body.ed-nav #anims button{flex:none}}
+
+/* a piece's picture shrinks with its row, so a row never gets cut off */
+body.ed-nav .ed-page :is(.kitgrid,.ccg)>button{height:100%;overflow:hidden}
+body.ed-nav .ed-page :is(.kitgrid,.ccg)>button i{flex:none;width:100%}
+body.ed-nav .ed-page .kitgrid button small{display:none}
+/* prints: the pack loads more by itself; categories only when there's room */
+body.ed-nav .ed-print #pkMore{display:none!important}
+@media (max-height:900px){body.ed-nav .ed-print #pkCats{display:none}}
+body.ed-nav .ed-print .row:has(#decFile){margin:0}
+
+/* choices that would wrap onto many lines run sideways instead: expressions and hats in rows, colours in one line */
+body.ed-nav .ed-page :is(#exprs,#hats,#rings){display:grid;grid-auto-flow:column;grid-template-rows:repeat(3,auto);grid-auto-columns:max-content;gap:6px;overflow-x:auto;scrollbar-width:none;flex:none}
+body.ed-nav .ed-page :is(#hats,#rings){grid-template-rows:repeat(2,auto)}
+body.ed-nav .ed-page :is(#exprs,#hats,#rings)::-webkit-scrollbar{display:none}
+body.ed-nav .ed-page .sws{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:3px 2px;flex:none;max-width:100%}
+body.ed-nav .ed-page .sws::-webkit-scrollbar{display:none}
+body.ed-nav .ed-page .sws>*{flex:none}
+body.ed-nav .ed-page .row:has(>.sws){flex-wrap:nowrap}
+body.ed-nav .ed-page .row:has(>.sws) .lab{min-width:56px}
+body.ed-nav .ed-page .row>.sws{flex:1;min-width:0}

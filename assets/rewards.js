@@ -27,12 +27,12 @@
   const RESET_HOUR = 4, TAP_PEARLS = 10, DAY_CAP = 30, VOUCHER_MIN = 10;
 
   const KINDS = {
-    c: { label: 'Café', i: '☕', s: 8, r: 'n', color: '#C8924F', font: 'l' },
-    t: { label: 'Boba & tea', i: '🧋', s: 8, r: 'n', color: '#2FAE5A', font: 'b' },
-    b: { label: 'Bar', i: '🍺', s: 6, r: 'n', color: '#F2B544', font: 'o', note: 'For bars: one stamp per visit, not per drink. Each guest in a group scans with their own phone.' },
-    f: { label: 'Restaurant', i: '🌮', s: 8, r: 'n', color: '#F26A1B', font: 'b' },
-    k: { label: 'Bakery', i: '🍩', s: 10, r: 'n', color: '#FF8FC2', font: 'h' },
-    o: { label: 'Other', i: '⭐', s: 8, r: 'n', color: '#4FD8C4', font: 'f' }
+    c: { label: 'Café', i: 'coffee', s: 8, r: 'n', color: '#C8924F', font: 'l' },
+    t: { label: 'Boba & tea', i: 'pint-glass', s: 8, r: 'n', color: '#2FAE5A', font: 'b' },
+    b: { label: 'Bar', i: 'beer-stein', s: 6, r: 'n', color: '#F2B544', font: 'o', note: 'For bars: one stamp per visit, not per drink. Each guest in a group scans with their own phone.' },
+    f: { label: 'Restaurant', i: 'fork-knife', s: 8, r: 'n', color: '#F26A1B', font: 'b' },
+    k: { label: 'Bakery', i: 'bread', s: 10, r: 'n', color: '#FF8FC2', font: 'h' },
+    o: { label: 'Other', i: 'star', s: 8, r: 'n', color: '#4FD8C4', font: 'f' }
   };
   /* lettering a shop can pick for its card (and, in shop mode, the site's headings). Easy to read first, then a style each:
      css = the family in assets/shop-fonts.css, w = its one weight, size = how big it sets next to Fredoka */
@@ -49,13 +49,31 @@
   const fontOf = cfg => FONTS[cfg && cfg.f] || FONTS.f;
   const fontStack = cfg => { const F = fontOf(cfg); return '"' + F.css + '", Fredoka, system-ui, sans-serif'; };
   // the stylesheet with the shop fonts, added to the page the first time a card needs it
+  let fontsCss = null;
   function loadFonts() {
-    if (document.getElementById('g-shop-fonts')) return;
-    const me = Array.from(document.scripts).find(x => /rewards\.js(\?|$)/.test(x.src)); if (!me) return;
-    const l = document.createElement('link'); l.id = 'g-shop-fonts'; l.rel = 'stylesheet'; l.href = me.src.replace(/rewards\.js.*$/, 'shop-fonts.css'); document.head.appendChild(l);
+    if (fontsCss) return fontsCss;
+    const have = document.getElementById('g-shop-fonts');
+    if (have) return (fontsCss = have.sheet ? Promise.resolve() : new Promise(ok => { have.addEventListener('load', ok); have.addEventListener('error', ok); setTimeout(ok, 3000); }));
+    const me = Array.from(document.scripts).find(x => /rewards\.js(\?|$)/.test(x.src)); if (!me) return (fontsCss = Promise.resolve());
+    const l = document.createElement('link'); l.id = 'g-shop-fonts'; l.rel = 'stylesheet'; l.href = me.src.replace(/rewards\.js.*$/, 'shop-fonts.css');
+    fontsCss = new Promise(ok => { l.onload = l.onerror = ok; setTimeout(ok, 3000); }); document.head.appendChild(l); return fontsCss;
   }
-  async function fontReady(cfg) { loadFonts(); const F = fontOf(cfg); try { await document.fonts.load(F.w + ' 40px "' + F.css + '"', cfg.n || 'Aa'); } catch (e) {} }
-  const ICONS = ['☕', '🧋', '🍵', '🍺', '🍷', '🍸', '🌮', '🍕', '🍔', '🍣', '🍜', '🥗', '🍩', '🥐', '🧁', '🍦'];
+  // the stylesheet first (so the browser knows the font), then the font file itself
+  async function fontReady(cfg) { await loadFonts(); const F = fontOf(cfg); try { await document.fonts.load(F.w + ' 40px "' + F.css + '"', cfg.n || 'Aa'); } catch (e) {} }
+  /* a shop's icon: one of the site's flat icons (Phosphor bold, 'sh-<id>' in assets/icons.js). Links made before these
+     carried an emoji; OLD maps each one to the closest icon, so those cards keep working. */
+  const ICONS = ['coffee', 'tea-bag', 'pint-glass', 'beer-stein', 'wine', 'martini', 'pizza', 'hamburger', 'bowl-steam', 'fish', 'pepper', 'fork-knife',
+    'cake', 'cookie', 'bread', 'ice-cream', 'orange-slice', 'leaf', 'storefront', 'scissors', 'paw-print', 'barbell', 'flower-tulip', 'star'];
+  const OLD = { '☕': 'coffee', '🧋': 'pint-glass', '🍵': 'tea-bag', '🍺': 'beer-stein', '🍷': 'wine', '🍸': 'martini', '🌮': 'pepper', '🍕': 'pizza', '🍔': 'hamburger',
+    '🍣': 'fish', '🍜': 'bowl-steam', '🥗': 'leaf', '🍩': 'cookie', '🥐': 'bread', '🧁': 'cake', '🍦': 'ice-cream', '⭐': 'star' };
+  const iconId = v => { v = String(v || ''); return ICONS.includes(v) ? v : OLD[v] || OLD[v.replace(/\uFE0F/g, '')] || ''; };
+  // the icon as an inline SVG (on the card, in lists), or drawn onto a canvas (the printed card, the 3D builder)
+  const iconSvg = (id, cls) => { const d = root.GRUG_ICONS && root.GRUG_ICONS['sh-' + iconId(id)] || (root.GRUG_ICONS && root.GRUG_ICONS[id]) || '';
+    return '<svg class="gi rw-svg' + (cls ? ' ' + cls : '') + '" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path fill="currentColor" d="' + d + '"/></svg>'; };
+  function drawIcon(x, id, cx, cy, size, color) {
+    const d = root.GRUG_ICONS && (root.GRUG_ICONS['sh-' + iconId(id)] || root.GRUG_ICONS[id]); if (!d) return;
+    x.save(); x.translate(cx - size / 2, cy - size / 2); x.scale(size / 256, size / 256); x.fillStyle = color; x.fill(new Path2D(d)); x.restore();
+  }
   const COLORS = ['#C8924F', '#2FAE5A', '#F2B544', '#F26A1B', '#E5484D', '#FF8FC2', '#C59BFF', '#4FD8C4', '#3B82F6', '#2B2B33'];
   const REWARDS = { d: 'A free drink', f: 'A free food item', s: 'A free dessert', b: 'Buy one, get one free' };
   const PCTS = [5, 10, 15, 20, 25, 30, 40, 50];
@@ -85,7 +103,7 @@
     else if (!REWARDS[r] && r !== 'n') r = d.r;
     const col = String(o.color || '').replace('#', '');
     return { n: clip(o.n, 28, 'Your shop'), t, color: /^[0-9a-f]{6}$/i.test(col) ? '#' + col.toUpperCase() : d.color,
-      i: clip(o.i, 8, d.i), s: Math.max(4, Math.min(12, parseInt(o.s, 10) || d.s)), r, j: o.j ? 1 : 0, f: FONTS[o.f] ? o.f : 'f' };
+      i: iconId(o.i) || d.i, s: Math.max(4, Math.min(12, parseInt(o.s, 10) || d.s)), r, j: o.j ? 1 : 0, f: FONTS[o.f] ? o.f : 'f' };
   }
   function encode(cfg) { cfg = normalize(cfg); return b64e(['2', cfg.n, cfg.t, cfg.color.slice(1), cfg.i, cfg.s, cfg.r, cfg.j].concat(cfg.f !== 'f' ? [cfg.f] : []).join('~')); }
   function decode(c) {
@@ -171,10 +189,10 @@
   function passHtml(cfg, have) {
     cfg = normalize(cfg); loadFonts(); const esc = Grug.esc, n = cfg.s; have = Math.max(0, Math.min(n, have || 0));
     let g = '';
-    for (let i = 0; i < n; i++) { const on = i < have, last = i === n - 1; g += '<div class="rw-slot' + (on ? ' on' : '') + (last ? ' gift' : '') + '">' + (on ? esc(cfg.i) : last ? '🎁' : (i + 1)) + '</div>'; }
-    return '<div class="rw-pass" style="' + passVars(cfg.color) + '"><div class="rw-band"><span class="rw-ic">' + esc(cfg.i) + '</span><div class="rw-who"><b>' + esc(cfg.n) + '</b><small>Rewards card</small></div><b class="rw-count">' + have + '/' + n + '</b></div>' +
+    for (let i = 0; i < n; i++) { const on = i < have, last = i === n - 1; g += '<div class="rw-slot' + (on ? ' on' : '') + (last ? ' gift' : '') + '">' + (on ? iconSvg(cfg.i) : last ? iconSvg('gift') : (i + 1)) + '</div>'; }
+    return '<div class="rw-pass" style="' + passVars(cfg.color) + '"><div class="rw-band"><span class="rw-ic">' + iconSvg(cfg.i) + '</span><div class="rw-who"><b>' + esc(cfg.n) + '</b><small>Rewards card</small></div><b class="rw-count">' + have + '/' + n + '</b></div>' +
       '<div class="rw-pass-body"><div class="rw-grid" style="grid-template-columns:repeat(' + ((n === 6 || n === 9) ? 3 : (n === 5 || n === 10) ? 5 : 4) + ',1fr)">' + g + '</div>' +
-      '<p class="rw-goal">' + (pearlsOnly(cfg.r) ? 'Every visit: <b>+' + TAP_PEARLS + ' Pearls</b> for any game on Grug' : 'Collect ' + n + ' <span class="rw-emo">' + esc(cfg.i) + '</span> → <b>' + esc(rewardText(cfg.r)) + '</b>') + '</p></div></div>';
+      '<p class="rw-goal">' + (pearlsOnly(cfg.r) ? 'Every visit: <b>+' + TAP_PEARLS + ' Pearls</b> for any game on Grug' : 'Collect ' + n + ' <span class="rw-emo">' + iconSvg(cfg.i) + '</span> → <b>' + esc(rewardText(cfg.r)) + '</b>') + '</p></div></div>';
   }
 
   /* ---------- the printable counter card as a PDF ----------
@@ -194,7 +212,7 @@
     // the shop's band
     x.fillStyle = cfg.color; x.fillRect(0, 0, W, 250); x.fillStyle = dark; x.fillRect(0, 236, W, 14);
     rr(60, 52, 132, 132, 32); x.fillStyle = dark; x.fill();
-    x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = '84px ' + EMO + ', sans-serif'; x.fillText(cfg.i, 126, 124);
+    drawIcon(x, cfg.i, 126, 118, 80, inkOn(dark));
     const SF = fontOf(cfg), nameFit = (px) => { do { x.font = SF.w + ' ' + Math.round(px * SF.size) + 'px "' + SF.css + '", Fredoka, ' + EMO + ', sans-serif'; px -= 2; } while (x.measureText(cfg.n).width > 720 && px > 20); };
     x.textAlign = 'left'; x.fillStyle = ink; nameFit(66); x.fillText(cfg.n, 224, 100);   // the shop's name in its own lettering
     x.globalAlpha = .85; x.font = font('600', 34); x.fillText('Rewards card', 224, 160); x.globalAlpha = 1;
@@ -207,7 +225,7 @@
     x.fillStyle = '#1E1B16';
     for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) x.fillRect(Math.floor(qx + c * cell), Math.floor(qy + r * cell), Math.ceil(cell) + 1, Math.ceil(cell) + 1);
     // the reward + how it works
-    const goal = pearlsOnly(cfg.r) ? 'Every visit: +' + TAP_PEARLS + ' Pearls for your games' : 'Collect ' + cfg.s + ' ' + cfg.i + '  →  ' + rewardText(cfg.r);
+    const goal = pearlsOnly(cfg.r) ? 'Every visit: +' + TAP_PEARLS + ' Pearls for your games' : 'Collect ' + cfg.s + ' stamps  →  ' + rewardText(cfg.r);
     x.fillStyle = '#1E1B16'; fit(goal, '600', 46, 880); x.fillText(goal, W / 2, 1040);
     const lines = ['Point your phone camera at the code', 'One stamp per visit, once a day', pearlsOnly(cfg.r) ? 'Spend Pearls in any game on Grug' : '+' + TAP_PEARLS + ' Pearls for any game on Grug'].concat(cfg.j ? ['First scan? Your welcome stamp is on us'] : []);
     x.fillStyle = '#55514A'; x.font = font('500', 33); lines.forEach((t, i) => x.fillText(t, W / 2, 1110 + i * 48));
@@ -276,7 +294,7 @@
 
     function render(fresh) {
       themeVars(app, cfg.color);
-      R.icon.textContent = cfg.i; R.name.textContent = cfg.n; loadFonts();
+      R.icon.innerHTML = iconSvg(cfg.i); R.name.textContent = cfg.n; loadFonts();
       R.name.style.fontFamily = fontStack(cfg); R.name.style.fontWeight = fontOf(cfg).w; R.name.style.fontSize = fontOf(cfg).size + 'em';
       const n = cfg.s, have = Math.min(st.stamps, n), full = have >= n;
       R.count.textContent = have + '/' + n;
@@ -284,36 +302,36 @@
       let g = '';
       for (let i = 0; i < n; i++) {
         const on = i < have, last = i === n - 1, isNew = fresh && i >= fresh[0] && i < fresh[1];
-        g += '<div class="rw-slot' + (on ? ' on' : '') + (last ? ' gift' : '') + (isNew ? ' new' : '') + '"' + (isNew ? ' style="animation-delay:' + ((i - fresh[0]) * .12) + 's"' : '') + '>' + (on ? esc(cfg.i) : last ? '🎁' : (i + 1)) + '</div>';
+        g += '<div class="rw-slot' + (on ? ' on' : '') + (last ? ' gift' : '') + (isNew ? ' new' : '') + '"' + (isNew ? ' style="animation-delay:' + ((i - fresh[0]) * .12) + 's"' : '') + '>' + (on ? iconSvg(cfg.i) : last ? iconSvg('gift') : (i + 1)) + '</div>';
       }
       R.grid.innerHTML = g;
       const rw = rewardText(cfg.r);
       if (pearlsOnly(cfg.r)) R.goal.innerHTML = full ? 'Card full! You\u2019re a regular here. Your next visit starts a new card.' : 'Every visit: <b>+' + TAP_PEARLS + ' Pearls</b> for any game on Grug';
-      else R.goal.innerHTML = full ? 'Card full! <b>' + esc(rw) + '</b> is yours.' : 'Collect ' + n + ' <span class="rw-emo">' + esc(cfg.i) + '</span> → <b>' + esc(rw) + '</b>';
+      else R.goal.innerHTML = full ? 'Card full! <b>' + esc(rw) + '</b> is yours.' : 'Collect ' + n + ' <span class="rw-emo">' + iconSvg(cfg.i) + '</span> → <b>' + esc(rw) + '</b>';
       R.redeem.hidden = !full || pearlsOnly(cfg.r); R.redeem.textContent = 'Redeem: ' + rw;
       const today = dayKey(now());
-      if (!st.joined) R.msg.innerHTML = '<span class="i">👋</span><span><b>Welcome to ' + esc(cfg.n) + '</b>Scan the QR or tap the tag at the counter to get your ' + (cfg.j ? 'first stamps (one is on us).' : 'first stamp.') + '</span>';
-      else if (st.lastDay === today) R.msg.innerHTML = '<span class="i">✅</span><span><b>Stamped today</b>Your next stamp unlocks after ' + RESET_HOUR + ' AM tomorrow.</span>';
-      else R.msg.innerHTML = '<span class="i">📍</span><span><b>Here today?</b>Scan the QR or tap the tag at the counter for your stamp.</span>';
+      if (!st.joined) R.msg.innerHTML = '<span class="i">' + Grug.icon('hand-waving') + '</span><span><b>Welcome to ' + esc(cfg.n) + '</b>Scan the QR or tap the tag at the counter to get your ' + (cfg.j ? 'first stamps (one is on us).' : 'first stamp.') + '</span>';
+      else if (st.lastDay === today) R.msg.innerHTML = '<span class="i">' + Grug.icon('check-circle') + '</span><span><b>Stamped today</b>Your next stamp unlocks after ' + RESET_HOUR + ' AM tomorrow.</span>';
+      else R.msg.innerHTML = '<span class="i">' + Grug.icon('map-pin') + '</span><span><b>Here today?</b>Scan the QR or tap the tag at the counter for your stamp.</span>';
       R.bal.innerHTML = G.fmt(o.pearls.balance()) + '<small>yours</small>';
     }
     function toast(icon, title, sub, kind) {
-      R.tI.textContent = icon; R.tB.textContent = title; R.tS.textContent = sub || '';
+      R.tI.innerHTML = Grug.icon(icon); R.tB.textContent = title; R.tS.textContent = sub || '';
       R.toast.className = 'rw-toast show ' + (kind || ''); clearTimeout(toastT); toastT = setTimeout(() => { R.toast.className = 'rw-toast'; }, 3600);
     }
     function scan(k) {
-      if (k !== check(c)) { toast('⚠️', 'This QR isn’t for ' + cfg.n, 'Ask the staff for the current card.', 'err'); return { ok: false, why: 'bad' }; }
+      if (k !== check(c)) { toast('warning-circle', 'This QR isn’t for ' + cfg.n, 'Ask the staff for the current card.', 'err'); return { ok: false, why: 'bad' }; }
       const today = dayKey(now());
-      if (st.lastDay === today) { toast('🕓', 'Already stamped today', 'Come back after ' + RESET_HOUR + ' AM for the next one.', 'warn'); return { ok: false, why: 'today' }; }
+      if (st.lastDay === today) { toast('hourglass', 'Already stamped today', 'Come back after ' + RESET_HOUR + ' AM for the next one.', 'warn'); return { ok: false, why: 'today' }; }
       const first = !st.joined, before = Math.min(st.stamps, cfg.s);
       st.joined = true; st.lastDay = today; st.visits++; st.seen = Date.now(); if (!st.first) st.first = st.seen;
       const pl = o.pearls.grant(); st.pearls = (st.pearls || 0) + pl;
       const plText = pl ? ' +' + pl + ' Pearls.' : '';
       if (before >= cfg.s && pearlsOnly(cfg.r)) { st.stamps = 1; st.rewards++; save(); render([0, 1]); toast(cfg.i, 'New card started!', 'You filled your last one.' + plText); return { ok: true, pearls: pl }; }
-      if (before >= cfg.s) { save(); render(); toast('🎁', 'Your card is full!', 'Redeem your reward at the counter.' + plText); return { ok: true, pearls: pl }; }
+      if (before >= cfg.s) { save(); render(); toast('gift', 'Your card is full!', 'Redeem your reward at the counter.' + plText); return { ok: true, pearls: pl }; }
       const add = 1 + (first && cfg.j ? 1 : 0);
       st.stamps = Math.min(cfg.s, before + add); save(); render([before, st.stamps]);
-      if (st.stamps >= cfg.s) toast('🎉', 'Card complete!', (pearlsOnly(cfg.r) ? 'You\u2019re a regular here.' : rewardText(cfg.r) + ' is ready.') + plText);
+      if (st.stamps >= cfg.s) toast('confetti', 'Card complete!', (pearlsOnly(cfg.r) ? 'You\u2019re a regular here.' : rewardText(cfg.r) + ' is ready.') + plText);
       else toast(cfg.i, (first ? 'Welcome! +' : '+') + add + ' stamp' + (add > 1 ? 's' : ''), (pearlsOnly(cfg.r) ? '' : (cfg.s - st.stamps) + ' more for ' + rewardText(cfg.r).toLowerCase() + '.') + plText);
       return { ok: true, pearls: pl, first };
     }
@@ -324,7 +342,7 @@
       st.stamps = Math.max(0, st.stamps - cfg.s); st.rewards++; st.voucher = { r: rewardText(cfg.r), until: Date.now() + VOUCHER_MIN * 60e3 };
       save(); render(); openVoucher();
     });
-    function openVoucher() { if (!st.voucher) return; R.vIcon.textContent = cfg.i; R.vReward.textContent = st.voucher.r; R.vShop.textContent = 'at ' + cfg.n; R.voucher.hidden = false; tick(); clearInterval(vT); vT = setInterval(tick, 250); }
+    function openVoucher() { if (!st.voucher) return; R.vIcon.innerHTML = iconSvg(cfg.i); R.vReward.textContent = st.voucher.r; R.vShop.textContent = 'at ' + cfg.n; R.voucher.hidden = false; tick(); clearInterval(vT); vT = setInterval(tick, 250); }
     function tick() {
       if (!st.voucher) return closeVoucher();
       const t = Date.now(), left = Math.max(0, st.voucher.until - t);
@@ -347,7 +365,7 @@
     };
   }
 
-  root.GrugRewards = { FONTS, fontOf, fontStack, fontReady, loadFonts,
+  root.GrugRewards = { iconId, iconSvg, drawIcon, FONTS, fontOf, fontStack, fontReady, loadFonts,
     KEY, TAP_PEARLS, DAY_CAP, RESET_HOUR, VOUCHER_MIN, KINDS, ICONS, COLORS, REWARDS, PCTS,
     rewardText, pearlsOnly, normalize, encode, decode, check, shopId, links, cardBase, code, b64e, b64d,
     load, cards, cardStore, removeCard, mine, saveMine, removeMine,

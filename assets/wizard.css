@@ -106,3 +106,10 @@
 .wz-font .wz-font-n{display:block;line-height:1.15;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wz-font small b{font-weight:700;color:var(--ink2)}
 @media (min-width:720px){.wz-fonts{grid-template-columns:1fr 1fr}}
+
+/* the icon step and option icons: the site's flat icons */
+.wz-emo button .rw-svg{width:46%;height:46%;color:var(--ink)}
+.wz-emo button[aria-checked=true] .rw-svg{color:var(--mode-text,var(--mode))}
+.wz-opt .ic .rw-svg{width:24px;height:24px;color:var(--ink)}
+.wz-emo{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;max-width:480px}
+@media (max-width:520px){.wz-emo{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}.wz-emo button{border-radius:14px}}

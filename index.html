@@ -60,12 +60,27 @@
 .hc-nav.next{right:calc(50vw - var(--tw,330px) / 2 - 64px)}
 .hc{--tw:min(330px,72vw)}
 @media (max-width:640px){.hc-nav{display:none}}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+@media (min-width:760px){.duo{gap:16px;margin-top:18px}}
+/* phones: the same two halves, trimmed to a label, a line and a button */
+@media (max-width:759px){.door{padding:14px;gap:8px}.door-ic{width:38px;height:38px;border-radius:12px}.door-ic .gi{width:22px;height:22px}
+  .door-tx small{font-size:11px}.door-tx b{font-size:17px}.door-tx span{display:none}.door .door-go{min-height:38px;padding:0 12px;font-size:14px;align-self:stretch;justify-content:center}}
+.door{display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:var(--r);background:var(--card);border:1px solid var(--line);transition:transform .18s var(--spring)}
+.door:hover{transform:translateY(-2px)}
+.door-ic{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:color-mix(in srgb,var(--c) 20%,transparent);color:var(--c)}
+.door-ic .gi{width:26px;height:26px}
+.door-tx{display:flex;flex-direction:column;gap:4px}
+.door-tx small{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mut)}
+.door-tx b{font:600 clamp(22px,3vw,28px)/1.1 var(--display)}
+.door-tx span{color:var(--ink2);font-size:15.5px}
+.door .door-go{align-self:flex-start;margin-top:auto;background:var(--c);box-shadow:0 4px 0 var(--c-lo);color:#1E1B16}
 .role-hero{margin-top:18px;padding:26px;border-radius:var(--r);background:var(--card-solid);border:1px solid var(--line2);display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;justify-content:space-between}
 .role-hero h1{font-size:clamp(28px,5vw,42px)}
 .role-hero p{color:var(--ink2);font-size:17px;margin-top:8px;max-width:52ch}
 .role-hero .row{flex:none}
 .brand-hero{border:0;background:var(--brand);color:var(--brand-ink)}
-.brand-hero .em{font-size:54px;line-height:1;width:84px;height:84px;display:grid;place-items:center;border-radius:24px;background:rgba(255,255,255,.22);flex:none}
+.brand-hero .em .gi{width:48px;height:48px}
+.brand-hero .em{line-height:1;width:84px;height:84px;display:grid;place-items:center;border-radius:24px;background:rgba(255,255,255,.22);flex:none}
 .brand-hero .who{display:flex;gap:18px;align-items:center}
 .brand-hero p{color:inherit!important;opacity:.85}
 .brand-hero .g-btn.primary{background:var(--brand-ink);color:var(--brand);box-shadow:none}
@@ -80,22 +95,21 @@ footer a{color:var(--ink2);font-weight:700}
 <main class="wrap">
   <!-- shop mode (a guest who came from a shop's rewards card): the front door is the shop's -->
   <div data-only-brand><section class="role-hero brand-hero" id="brandHero"></section></div>
-  <!-- who's visiting (Settings → I'm a…): owners and developers get their own front door -->
-  <div data-only-for="owner" data-hide-brand><section class="role-hero">
-    <div><p class="g-fine" style="margin:0 0 6px;color:#FF9F5A;font-weight:700">For restaurant owners</p><h1>Bring your guests back.</h1><p>Make a free rewards card in two minutes. Every visit gives your guests a stamp and Pearls for polished games.</p></div>
-    <div class="row"><a class="g-btn primary big" href="rewards/" style="background:#FF9F5A;box-shadow:0 4px 0 #E0782F">Make my rewards card</a><a class="g-btn big" href="partners/">Get a custom game</a></div>
-  </section></div>
-  <div data-only-for="dev" data-hide-brand><section class="role-hero">
-    <div><p class="g-fine" style="margin:0 0 6px;color:#4FD8C4;font-weight:700">For game developers</p><h1>Free 3D models, ready to use.</h1><p>Grab presets from the asset library, or make your own with Model Kit, our pixel-to-3D editor.</p></div>
-    <div class="row"><a class="g-btn primary big" href="create/" style="background:#4FD8C4;box-shadow:0 4px 0 #25A893">Open the library</a><a class="g-btn big" href="create/modelkit/">Open Model Kit</a></div>
-  </section></div>
+  <!-- two front doors, side by side (stacked on phones): shop owners and online creators. Not in shop mode. -->
+  <div class="duo" data-hide-brand>
+    <a class="door" href="rewards/" style="--c:#FF9F5A;--c-lo:#E0782F">
+      <span class="door-ic" id="icOwner"></span>
+      <span class="door-tx"><small>For restaurant owners</small><b>Bring your guests back.</b><span>A free rewards card in two minutes. Every visit earns your guests a stamp.</span></span>
+      <span class="g-btn primary door-go">Make a card</span>
+    </a>
+    <a class="door" href="links/" style="--c:#5AB0FF;--c-lo:#2F86D6">
+      <span class="door-ic" id="icCreator"></span>
+      <span class="door-tx"><small>For online creators</small><b>Turn followers into players.</b><span>One link for all your socials, or a little 3D world to walk through.</span></span>
+      <span class="g-btn primary door-go">Make a page</span>
+    </a>
+  </div>
 
-  <div data-only-for="creator" data-hide-brand><section class="role-hero">
-    <div><p class="g-fine" style="margin:0 0 6px;color:#5AB0FF;font-weight:700">For online creators</p><h1>Turn your followers into players.</h1><p>Make a link page for all your socials, or a little 3D world your followers walk through. Every visit gives them 10 Pearls.</p></div>
-    <div class="row"><a class="g-btn primary big" href="links/" style="background:#5AB0FF;box-shadow:0 4px 0 #2F86D6">Make my link page</a></div>
-  </section></div>
-
-  <section class="hero" data-hide-for="owner">
+  <section class="hero">
     <div class="g-view" id="heroView"><span class="hint">Tap to wave · <a href="avatar/">edit your look</a></span></div>
     <div class="copy">
       <h1 id="heroTitle">Games made with Katy restaurants.</h1>
@@ -117,7 +131,7 @@ footer a{color:var(--ink2);font-weight:700}
     </div>
   </section>
 
-  <section class="g-section" data-hide-for="owner">
+  <section class="g-section" hidden>
     <div class="g-section-h"><h2>Closet picks</h2><a href="shop/">Shop</a></div>
     <p class="g-fine" style="margin:-6px 0 12px">Custom clothing you can earn next: Roblox-style shirt and pants designs from playing or eating local.</p>
     <div class="g-items" id="closetPicks"></div>
@@ -150,6 +164,7 @@ footer a{color:var(--ink2);font-weight:700}
   const G = Grug, C = GrugCatalog, $ = s => document.querySelector(s);
   G.ui.chrome('home');
   G.ensureSnaps();
+  $('#icOwner').innerHTML = G.icon('storefront'); $('#icCreator').innerHTML = G.icon('share-network');
   $('#icEat').innerHTML = G.icon('storefront'); $('#icPts').innerHTML = G.icon('coins'); $('#icSpend').innerHTML = G.icon('t-shirt');
 
   /* hero avatar */
@@ -160,7 +175,7 @@ footer a{color:var(--ink2);font-weight:700}
   /* shop mode: the shop's welcome, with a way back to its card */
   const B = window.GrugTheme && GrugTheme.brand();
   if (B) document.title = B.n + ' · Games';
-  if (B) $('#brandHero').innerHTML = '<div class="who"><span class="em" aria-hidden="true">' + G.esc(B.i) + '</span><div><p class="g-fine" style="margin:0 0 6px;font-weight:700">Welcome to</p><h1>' + G.esc(B.n) + '</h1><p>Play a game while you wait. Every visit stamps your card and adds Pearls you can spend in any game.</p></div></div>' +
+  if (B) $('#brandHero').innerHTML = '<div class="who"><span class="em" aria-hidden="true">' + G.ui.shopIcon(B.i) + '</span><div><p class="g-fine" style="margin:0 0 6px;font-weight:700">Welcome to</p><h1>' + G.esc(B.n) + '</h1><p>Play a game while you wait. Every visit stamps your card and adds Pearls you can spend in any game.</p></div></div>' +
     '<div class="row"><a class="g-btn primary big" href="rewards/card/#c=' + encodeURIComponent(B.c) + '">' + G.icon('ticket') + 'My stamp card</a><a class="g-btn big" href="games/">' + G.icon('game-controller') + 'Play</a></div>';
 
   /* greeting */
@@ -185,25 +200,40 @@ footer a{color:var(--ink2);font-weight:700}
   }
   const lastG = G.GAMES.find(g => g.id === G.profile.stats.lastGame && g.listed !== false);
   const list = (lastG ? [lastG] : []).concat(G.GAMES.filter(g => g.status !== 'legacy' && g.listed !== false && g !== lastG));
-  const row = $('#gameRow');
-  row.innerHTML = list.map(g => tile(g, Object.assign({ kind: 'cart' }, g === lastG ? { ribbon: 'Last played' } : {}))).join('');   // bare cartridges here, boxes elsewhere
-  [...row.children].forEach((el, i) => { const g = list[i]; el.style.setProperty('--hc-c', (g.box && g.box.shell) || g.color || 'var(--sel-a)'); if (g === lastG) el.classList.add('lp'); });
+  const row = $('#gameRow'), N = list.length;
+  // an endless loop: the list three times over; when the row settles in the first or last copy it jumps (unseen) to the
+  // same box in the middle copy, so there's never an end to hit
+  const copies = N > 1 ? 3 : 1;
+  row.innerHTML = Array.from({ length: copies }, () => list.map(g => tile(g, Object.assign({ kind: 'cart' }, g === lastG ? { ribbon: 'Last played' } : {}))).join('')).join('');   // bare cartridges here, boxes elsewhere
+  [...row.children].forEach((el, i) => { const g = list[i % N]; el.style.setProperty('--hc-c', (g.box && g.box.shell) || g.color || 'var(--sel-a)'); if (g === lastG) el.classList.add('lp'); if (copies > 1 && (i < N || i >= 2 * N)) { el.setAttribute('aria-hidden', 'true'); el.tabIndex = -1; } });
 
   // how far each box is from the middle → its size, fade and the lit one
   let rq = 0;
+  const stepW = () => { const t = row.children[0]; return t ? t.offsetWidth + 16 : 1; };
   function paint() {
     rq = 0;
     const r = row.getBoundingClientRect(), mid = r.left + r.width / 2, tiles = [...row.children];
     if (!tiles.length) return;
-    const step = tiles[0].offsetWidth + 16; let best = null, bd = 1e9;
+    const step = stepW(); let best = null, bd = 1e9;
     tiles.forEach(el => { const b = el.getBoundingClientRect(), dx = Math.abs(b.left + b.width / 2 - mid);
       el.style.setProperty('--d', Math.min(1, dx / step).toFixed(3)); if (dx < bd) { bd = dx; best = el; } });
     tiles.forEach(el => el.classList.toggle('on', el === best));
-    $('#hcPrev').disabled = row.scrollLeft < 4; $('#hcNext').disabled = row.scrollLeft > row.scrollWidth - row.clientWidth - 4;
   }
   const queue = () => { if (!rq) rq = requestAnimationFrame(paint); };
-  row.addEventListener('scroll', queue, { passive: true }); addEventListener('resize', queue); paint();
-  const centre = el => row.scrollTo({ left: el.offsetLeft + el.offsetWidth / 2 - row.clientWidth / 2, behavior: 'smooth' });
+  const centreLeft = el => el.offsetLeft + el.offsetWidth / 2 - row.clientWidth / 2;
+  const centre = (el, instant) => row.scrollTo({ left: centreLeft(el), behavior: instant ? 'instant' : 'smooth' });
+  // back into the middle copy once the row has come to rest
+  let settleT = 0;
+  function recentre() {
+    if (copies < 2 || drag) return;
+    const tiles = [...row.children], i = tiles.findIndex(t => t.classList.contains('on')); if (i < 0) return;
+    if (i < N || i >= 2 * N) { const j = N + (i % N), off = row.scrollLeft - centreLeft(tiles[i]); row.style.scrollSnapType = 'none'; row.scrollLeft = centreLeft(tiles[j]) + off; requestAnimationFrame(() => { row.style.scrollSnapType = ''; paint(); }); }
+  }
+  row.addEventListener('scroll', () => { queue(); clearTimeout(settleT); settleT = setTimeout(recentre, 140); }, { passive: true });
+  if ('onscrollend' in row) row.addEventListener('scrollend', recentre);
+  addEventListener('resize', () => { if (row.children[N]) centre(row.children[N + Math.max(0, [...row.children].findIndex(t => t.classList.contains('on')) % N)], true); queue(); });
+  if (row.children[copies > 1 ? N : 0]) centre(row.children[copies > 1 ? N : 0], true);   // start on the last-played game, middle copy
+  paint();
   const nudge = d => { const tiles = [...row.children], i = tiles.findIndex(t => t.classList.contains('on')); const t = tiles[Math.max(0, Math.min(tiles.length - 1, i + d))]; if (t) centre(t); G.ui.buzz(6); };
   $('#hcPrev').innerHTML = G.icon('caret-left'); $('#hcNext').innerHTML = G.icon('caret-right');
   $('#hcPrev').onclick = () => nudge(-1); $('#hcNext').onclick = () => nudge(1);
@@ -219,13 +249,7 @@ footer a{color:var(--ink2);font-weight:700}
   addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x; if (Math.abs(dx) > 6) { dragged = true; row.classList.add('drag'); } if (dragged) row.scrollLeft = drag.left - dx; });
   addEventListener('pointerup', () => { if (!drag) return; drag = null; if (row.classList.contains('drag')) { row.classList.remove('drag'); const on = row.querySelector('.on'); if (on) centre(on); } setTimeout(() => { dragged = false; }, 0); });
 
-  /* closet picks: closest milestones first, then cheapest buys */
-  const picks = C.ITEMS.filter(it => !G.owns(it.id)).map(it => { const pr = G.progress(it); return { it, score: pr ? (100 - pr.pct) : 60 + (it.get.cost || 0) / 10 }; })
-    .sort((a, b) => a.score - b.score).slice(0, 6).map(x => x.it);
-  $('#closetPicks').innerHTML = picks.map(it => G.ui.itemTile(it)).join('') || '<div class="g-empty">You’ve earned everything. Legend.</div>';
-  G.ui.fillThumbs($('#closetPicks'));
-  $('#closetPicks').addEventListener('click', e => { const b = e.target.closest('[data-item]'); if (b) location.href = 'shop/#' + b.dataset.item; });
-
+  /* closet picks: hidden for now (players dress up when they choose to, from Me → Avatar) */
 })();
 </script>
 <script type="module" src="assets/fossil32/fossil32.js"></script>

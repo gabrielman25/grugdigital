@@ -22,7 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-Colorful icons and chest prints (assets/icons/, assets/prints/): from the
-vector-flat-casual "vector icon pack", used under the licence it was bought with.
+Chest prints (assets/prints/): from the vector-flat-casual "vector icon pack",
+used under the licence it was bought with.
 
-Older single-colour icons (assets/icons.js, GRUG_ICONS): Phosphor Icons 2.1.1, MIT.
+Single-colour icons (assets/icons.js, GRUG_ICONS, including the 'sh-' shop icons): Phosphor Icons 2.1.1, MIT.

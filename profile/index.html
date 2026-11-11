@@ -77,7 +77,6 @@
     <div id="uiSize"></div>
     <div class="g-pref"><span id="icMotion"></span><span><b>Animations</b><small>Celebrations, poses and count-ups</small></span><button class="g-switch" role="switch" data-pref="motion" aria-label="Animations"></button></div>
     <div class="g-pref"><span id="icBuzz"></span><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button class="g-switch" role="switch" data-pref="haptics" aria-label="Vibrate on tap"></button></div>
-    <div class="g-pref"><span id="icColor"></span><span><b>Colorful icons</b><small>Full-colour pictures instead of simple one-colour icons</small></span><button class="g-switch" role="switch" data-pref="colorIcons" aria-label="Colorful icons"></button></div>
     <p class="g-fine" id="storageNote" style="margin-top:10px"></p>
   </section>
 
@@ -112,7 +111,7 @@
   const redraw = () => { const c = (() => { try { return JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); } catch (e) { return null; } })(); if (!c) return;
     const s = document.createElement('script'); s.src = G.url('assets/sandy-view.js'); s.onload = () => window.SandyView.makeSnaps(c).catch(() => {}); document.head.appendChild(s); };
   G.on((p, what) => { if (what === 'import' && G.snaps().def) redraw(); });
-  $('#rename').innerHTML = G.icon('pencil-simple'); $('#icMotion').innerHTML = G.icon('sparkle'); $('#icBuzz').innerHTML = G.icon('device-mobile'); $('#icColor').innerHTML = G.icon('palette');
+  $('#rename').innerHTML = G.icon('pencil-simple'); $('#icMotion').innerHTML = G.icon('sparkle'); $('#icBuzz').innerHTML = G.icon('device-mobile');
   $('#export').innerHTML = G.icon('download-simple') + 'Export profile'; $('#copy').innerHTML = G.icon('copy') + 'Copy as text'; $('#shareBtn').innerHTML = G.icon('share-network') + 'Share file';
   $('#importFile').innerHTML = G.icon('upload-simple') + 'Load a profile file'; $('#importPaste').innerHTML = G.icon('clipboard-text') + 'Paste profile text'; $('#resetBtn').innerHTML = G.icon('trash') + 'Start over';
   if (navigator.canShare) $('#shareBtn').hidden = false;
@@ -131,7 +130,7 @@
     $('#pid').textContent = 'Profile id ' + p.id + ' · saved in this browser as ' + G.KEY;
     $('#storageNote').textContent = G.storageWorks() ? 'Everything is saved in this browser on this device.' : 'This browser isn’t saving (private mode or blocked storage). Changes will be lost when you close it.';
   }
-  document.querySelectorAll('[data-pref]').forEach(b => b.addEventListener('click', () => { G.profile.prefs[b.dataset.pref] = !G.profile.prefs[b.dataset.pref]; G.save('prefs'); render(); G.ui.buzz(); if (b.dataset.pref === 'colorIcons') setTimeout(() => location.reload(), 250); }));
+  document.querySelectorAll('[data-pref]').forEach(b => b.addEventListener('click', () => { G.profile.prefs[b.dataset.pref] = !G.profile.prefs[b.dataset.pref]; G.save('prefs'); render(); G.ui.buzz(); }));
 
   $('#rename').addEventListener('click', async () => {
     // names are built from two word lists plus an optional number: no free text

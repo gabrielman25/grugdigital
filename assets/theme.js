@@ -58,6 +58,10 @@
 
   /* ---------- shop mode ---------- */
   // the shop's lettering (the same list as GrugRewards.FONTS; families in assets/shop-fonts.css): it sets the headings
+  // the shop's icon id (a flat icon, 'sh-<id>' in icons.js); older links carried an emoji (the same map as rewards.js)
+  const OLD_ICON = { '☕': 'coffee', '🧋': 'pint-glass', '🍵': 'tea-bag', '🍺': 'beer-stein', '🍷': 'wine', '🍸': 'martini', '🌮': 'pepper', '🍕': 'pizza', '🍔': 'hamburger',
+    '🍣': 'fish', '🍜': 'bowl-steam', '🥗': 'leaf', '🍩': 'cookie', '🥐': 'bread', '🧁': 'cake', '🍦': 'ice-cream', '⭐': 'star' };
+  const SHOP_ICON = v => { v = String(v || '').replace(/\uFE0F/g, ''); return /^[a-z-]{2,20}$/.test(v) ? v : OLD_ICON[v] || 'storefront'; };
   const SHOP_FONTS = { f: null, l: 'Shop Lora', h: 'Shop Patrick Hand', o: 'Shop Oswald', p: 'Shop Playfair', b: 'Shop Lilita', r: 'Shop Righteous', m: 'Shop Outfit' };
   const ss = { get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }, del(k) { try { sessionStorage.removeItem(k); } catch (e) {} } };
   // a shop's setup from its card link (the same text assets/rewards.js writes): name, colour and emoji are all we need here
@@ -66,7 +70,7 @@
       const t = decodeURIComponent(escape(atob(String(c).replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((String(c).length + 3) % 4)))).split('~');
       if (t[0] !== '2' || t.length < 8) return null;
       const color = /^[0-9a-f]{6}$/i.test(t[3]) ? '#' + t[3].toUpperCase() : '#4FD8C4';
-      return { c: String(c), n: String(t[1] || 'Your shop').slice(0, 28), color, i: String(t[4] || '\u2B50').slice(0, 8), f: SHOP_FONTS[t[8]] ? t[8] : 'f', at: Date.now() };
+      return { c: String(c), n: String(t[1] || 'Your shop').slice(0, 28), color, i: SHOP_ICON(t[4]), f: SHOP_FONTS[t[8]] ? t[8] : 'f', at: Date.now() };
     } catch (e) { return null; }
   }
   let brand = null;
@@ -84,7 +88,7 @@
         if (b) ss.set(BRAND_KEY, JSON.stringify(b));
       }
     } catch (e) {}
-    try { const b = JSON.parse(ss.get(BRAND_KEY) || 'null'); if (b && b.c && /^#[0-9A-F]{6}$/i.test(b.color)) brand = b; } catch (e) {}
+    try { const b = JSON.parse(ss.get(BRAND_KEY) || 'null'); if (b && b.c && /^#[0-9A-F]{6}$/i.test(b.color)) { b.i = SHOP_ICON(b.i); brand = b; } } catch (e) {}
   })();
 
   // the tab's name says the shop's name, not ours (pages that set their own title later are caught too)

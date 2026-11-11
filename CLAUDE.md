@@ -26,6 +26,14 @@ in `grug.css` (`--page`, `--card-solid`, `--card`, `--ink`, `--line` …): never
   avatar editor, the asset library previews, Model Kit's 3D views, the rewards/links builders and the fog cubes.
   Keep it that way for anything new.
 
+## Keep friction low
+
+Simplicity is a goal in itself: no dead ends (carousels loop, nothing hits a hard stop), no scrolling inside panels that
+should be static, and nothing on screen that doesn't help the person do the next thing. **Icons are one flat style
+everywhere** (`Grug.icon`: the @icons simple set, then Phosphor bold); there are no colourful icon pictures and no emoji in
+the interface. The top bar shows only the logo, the page name, the Pearls count and the person's name and avatar; Settings
+and the dark-mode switch live in the account menu under the avatar.
+
 ## The dock: Home, Games, Me, Make
 
 Four tabs for everyone (the role in Settings → I'm a… only changes what the home page shows first). **Me** and **Make**
@@ -54,11 +62,15 @@ console, zooms into its screen and opens the game. A pool of the game's colour f
 The **Games page** is a looping vertical carousel of boxes on the left half (`Fossil32.rack`, the page drives
 `state.pos`), with the selected game's details on the right (below it on phones). Scroll, swipe, arrow keys or a
 controller browse; Play / Enter / tapping the front box calls `Fossil32.launch(id)` (box opens → cartridge → console → game).
-The panel shows each game's short `blurb` (the full `long` write-up is on its game page); keep blurbs to a sentence or two.
+The panel shows only the game's name, the business it was made for, its short `blurb` (the full `long` write-up is
+on its game page; keep blurbs to a sentence or two), its `features` and Play. No catalog codes, tags or Live/Demo
+badges, and the panel never scrolls: only the boxes do.
 
-The **home page** is the one place games show as bare cartridges (no box, no card and no glow behind them), in one
-horizontal carousel right under the welcome message: `boxTile(g, { kind: 'cart', ribbon })` (`data-f32-kind="cart"`). The
-last-played game comes first, centred, with a "Last played" ribbon; the rest follow.
+The **home page** opens with two half-width doors side by side (restaurant owners → `rewards/`, online creators →
+`links/`; hidden in shop mode), then the avatar hello, then the games: the one place they show as bare cartridges (no
+box, no card and no glow behind them), in one horizontal carousel: `boxTile(g, { kind: 'cart', ribbon })`
+(`data-f32-kind="cart"`). It loops endlessly (the list three times over, quietly re-centred on the middle copy). The
+last-played game comes first, with a "Last played" ribbon. Closet picks are hidden: players dress up when they choose to.
 Tapping a cartridge glides it straight to the game panel.
 
 - Code: `tools/fossil32/src/fossil32.js` → bundled to `assets/fossil32/fossil32.js` (`cd tools/fossil32 && npm install && npm run build`).
@@ -88,6 +100,21 @@ When a new game is added to `assets/games.js` and listed, also make its box. Don
    Also save 1–3 back-of-box screenshots to `assets/boxart/shots/`.
 4. Point `thumb` at the box art too, and add a `games/<id>/index.html` like the others (it calls `GrugGamePage('<id>')`).
 5. Check it in a browser: the box on the Games page, the unbox, the panel, and Play (cartridge → console → game).
+
+## Avatar editor (`avatar/`)
+
+No scrolling: `avatar/nav.js` + `nav.css` move the editor's own controls (the SANDY EDITOR script, wired by id) into
+screens. A row of section icons (Body, Face, Hair, Wardrobe, Shoes, Emotes, Save) sits over a strip you swipe through;
+buttons open screens on top (Wardrobe's categories, the sliders), screens with more than fits become pages with dots, and
+lists of pieces run sideways in as many rows as fit. A piece's colours, fabric and fit show only once a piece is picked.
+Only a person's own swipe changes the section (the browser re-snapping after a resize doesn't). Add new controls to the
+editor's markup as before, then place them in a section in `nav.js`.
+
+## Rewards cards: icons and fonts
+
+A shop's icon is an id from `ICONS` in `assets/rewards.js`, drawn from the flat `sh-<id>` Phosphor icons in
+`assets/icons.js` (`RW.iconSvg` in the page, `RW.drawIcon` on canvases: the print, the 3D builder). Links from before
+carried an emoji; `OLD` maps those to the closest icon so old cards keep working. Never put emoji back on a card.
 
 ## Create tab and Model Kit
 

@@ -70,7 +70,7 @@
       inventory: [],            // earned (non-free) item ids
       earned: {},               // item id → {at, how}
       stats: { plays: {}, checkins: {}, best: {}, course: {}, days: {}, lastGame: '', lastPlayed: 0 },
-      prefs: { motion: true, haptics: true, colorIcons: false, uiScale: 1, role: '', mode: 'light' },
+      prefs: { motion: true, haptics: true, uiScale: 1, role: '', mode: 'light' },
       items: {},                // site-wide items (inventory on the settings page): item id → {n, at}; see ITEMS below
       emotes: EMOTE_DEFAULT.slice(),   // the emotes brought into games (ids from EMOTES, in wheel order)
       seen: {}                  // one-time hints
@@ -112,6 +112,7 @@
     o.prefs.uiScale = UI_SCALES.includes(+o.prefs.uiScale) ? +o.prefs.uiScale : 1;
     o.prefs.role = ROLES[o.prefs.role] || o.prefs.role === 'all' ? o.prefs.role : '';
     o.prefs.mode = o.prefs.mode === 'dark' ? 'dark' : 'light';   // light unless they picked dark
+    delete o.prefs.colorIcons;   // the colourful icon pictures are gone: one flat icon style everywhere
     Object.keys(o.items).forEach(k => { const v = o.items[k]; if (!ITEMS[k] || !v || typeof v !== 'object' || !(+v.n > 0)) delete o.items[k]; else v.n = Math.min(ITEMS[k].max, Math.floor(+v.n)); });
     return o;
   }
@@ -372,18 +373,12 @@
   }
 
   /* ---------- icons ---------- */
-  const ICON_IMG_LIST = ["arrow-counter-clockwise", "arrow-left", "arrow-right", "arrow-square-out", "arrows-clockwise", "arrows-in", "arrows-out", "backpack", "baseball-cap", "bell", "bowl-food", "calendar-check", "camera", "caret-left", "caret-right", "chat-circle", "check", "check-circle", "clipboard-text", "coffee", "coins", "confetti", "cookie", "copy", "crown-simple", "cube", "device-mobile", "dots-three", "download-simple", "export", "eye", "fire", "flag", "floppy-disk", "game-controller", "gear-six", "gift", "hamburger", "hand", "hand-waving", "heart", "hourglass", "house", "ice-cream", "image", "info", "lightning", "list", "lock-simple", "magic-wand", "map-pin", "map-trifold", "medal", "minus", "moon", "paint-brush", "palette", "pants", "pearl", "pencil-simple", "person", "phone", "play", "plus", "qr-code", "question", "rocket", "scissors", "seal-check", "share-network", "shopping-bag", "shuffle", "smiley", "sneaker", "sparkle", "star", "storefront", "sun", "t-shirt", "ticket", "timer", "trash", "trophy", "upload-simple", "user", "user-circle", "users-three", "warning-circle", "wrench", "x"];
-  /* Two icon styles, picked in Settings (profile.prefs.colorIcons):
-     simple (default)  the @icons set in icons.js (GRUG_ICONS_SIMPLE): small one-colour SVGs that follow the text colour
-     colorful          full-colour pictures from the vector icon pack, assets/icons/<name>.webp (names in ICON_IMG)
-     Any name missing from the chosen style falls back to the older Phosphor paths (GRUG_ICONS). */
+  /* One icon style everywhere: flat, one colour, following the text colour.
+     the @icons set in icons.js (GRUG_ICONS_SIMPLE): small SVGs on a 16px grid, used first
+     Phosphor Icons 2.1.1 bold (GRUG_ICONS, 256px paths): any name the simple set doesn't have, and the shop icons ('sh-…') */
   const SIMPLE = root.GRUG_ICONS_SIMPLE || {};
-  const ICON_IMG = new Set(ICON_IMG_LIST);
-  const iconSrc = name => url('assets/icons/' + name + '.webp?v=1');
-  const colorful = () => !!(profile && profile.prefs && profile.prefs.colorIcons);
   function icon(name, cls) {
     const c = cls ? ' ' + cls : '';
-    if (colorful() && ICON_IMG.has(name)) return '<img class="gi gi-img' + c + '" src="' + iconSrc(name) + '" alt="" aria-hidden="true" draggable="false" decoding="async">';
     if (SIMPLE[name]) return '<svg class="gi gi-s' + c + '" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">' + SIMPLE[name] + '</svg>';
     const d = ICONS[name]; return '<svg class="gi' + c + '" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path d="' + (d || ICONS.question || '') + '"/></svg>';
   }
@@ -412,14 +407,12 @@
   const SUB_TEXT = { avatar: 'Dress up your 3D avatar', shop: 'Clothes and how to earn them', profile: 'Stats, inventory and settings',
     links: 'A link page or 3D world for your socials', rewards: 'A free stamp card for your shop', create: 'Model Kit and free 3D presets' };
   const groupOf = k => DOCK_GROUPS.find(g => g.id === k || (g.items && g.items.includes(k))) || DOCK_GROUPS[0];
-  // dock icons: colourful pictures, or the simple set in one colour per tab
+  // dock icons: the simple set, one colour per tab
   // one colour per section, the same accents theme.js gives each section (Model Kit style)
   const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], rewards: ['gift', '#FF9F5A'], links: ['share-network', '#5AB0FF'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'],
     me: ['person', '#FF8FC2'], make: ['magic-wand', '#4FD8C4'] };
   const DOCK_LO = { home: '#6FB31C', games: '#4FB357', rewards: '#E0782F', links: '#2F86D6', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E', me: '#E0669E', make: '#25A893' };
-  const DOCK_PIC = { me: 'profile', make: 'create' };   // the colourful pictures the groups borrow
-  const dockIcon = k => colorful() ? '<img class="k-ic" src="' + iconSrc('dock-' + (DOCK_PIC[k] || k)) + '" alt="" aria-hidden="true" draggable="false">'
-    : '<svg class="k-ic k-ic-s" viewBox="0 0 16 16" fill="currentColor" style="color:' + DOCK_SIMPLE[k][1] + '" aria-hidden="true" focusable="false">' + (SIMPLE['dock-' + DOCK_SIMPLE[k][0]] || SIMPLE[DOCK_SIMPLE[k][0]] || '') + '</svg>';
+  const dockIcon = k => '<svg class="k-ic k-ic-s" viewBox="0 0 16 16" fill="currentColor" style="color:' + DOCK_SIMPLE[k][1] + '" aria-hidden="true" focusable="false">' + (SIMPLE['dock-' + DOCK_SIMPLE[k][0]] || SIMPLE[DOCK_SIMPLE[k][0]] || '') + '</svg>';
   const DOCK = {};
   ['home', 'games', 'rewards', 'links', 'create', 'avatar', 'shop', 'profile', 'me', 'make'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
   const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
@@ -436,12 +429,10 @@
     const pageTitle = opts.title || (/^games made/i.test(titleBit) ? 'Home' : titleBit);
     const top = document.createElement('header'); top.className = 'g-top';
     const brand = root.GrugTheme && root.GrugTheme.brand();
-    top.innerHTML = (brand ? '<a class="g-logo k-glass is-brand" href="' + url('') + '" aria-label="' + esc(brand.n) + ' home"><span class="g-brand-mark" aria-hidden="true">' + esc(brand.i) + '</span><span class="g-brand-name">' + esc(brand.n) + '</span></a>'
+    top.innerHTML = (brand ? '<a class="g-logo k-glass is-brand" href="' + url('') + '" aria-label="' + esc(brand.n) + ' home"><span class="g-brand-mark" aria-hidden="true">' + shopIcon(brand.i) + '</span><span class="g-brand-name">' + esc(brand.n) + '</span></a>'
         : '<a class="g-logo k-glass" href="' + url('') + '" aria-label="Grug home">' + LOGO + '<span>Grug</span></a>') +
       '<div class="g-title k-glass" aria-hidden="true"><small>' + esc(((DOCK_GROUPS.find(g => g.id === (opts.dockAs || groupOf(active).id)) || {}).label) || (pageTitle === navLabel ? (brand ? brand.n : 'Grug') : navLabel)) + '</small><b>' + esc(pageTitle) + '</b></div>' +
-      '<div class="g-status k-glass"><a class="g-pts" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('pearl') + '<span class="num">' + fmt(pearlBalance()) + '</span><span class="g-plus" aria-hidden="true">+</span></a><span class="g-sep"></span>' +
-      '<button type="button" class="g-gear g-modebtn" aria-label="Switch light or dark mode" title="Light or dark">' + icon(isLight() ? 'moon' : 'sun') + '</button>' +
-      '<button type="button" class="g-gear" aria-label="Settings" title="Settings">' + icon('gear-six') + '</button></div>' +
+      '<div class="g-status k-glass"><a class="g-pts" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('pearl') + '<span class="num">' + fmt(pearlBalance()) + '</span><span class="g-plus" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M6 2.5v7M2.5 6h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></a></div>' +
       '<button type="button" class="g-me" aria-label="Your account menu" aria-haspopup="menu" aria-expanded="false"><span class="g-me-name">' + esc(profile.name) + '</span>' + faceImg + '</button>';
     const tabs = document.createElement('nav'); tabs.className = 'g-tabs k-glass'; tabs.setAttribute('aria-label', 'Sections');
     const navNow = () => NAV;
@@ -483,8 +474,6 @@
     document.body.appendChild(tray);
     document.body.prepend(top); document.body.appendChild(tabs);
     document.body.classList.add('g-chrome');
-    $('.g-gear:not(.g-modebtn)', top).addEventListener('click', () => settings());
-    $('.g-modebtn', top).addEventListener('click', () => { setMode(isLight() ? 'dark' : 'light'); buzz(); });
     // the account menu under the avatar
     const menu = document.createElement('div'); menu.className = 'g-menu'; menu.setAttribute('role', 'menu'); menu.hidden = true;
     const paintMenu = () => { const f = snaps();
@@ -493,12 +482,16 @@
         '<a role="menuitem" href="' + url('profile/') + '">' + icon('user') + '<span>Profile</span></a>' +
         '<a role="menuitem" href="' + url('avatar/') + '">' + icon('t-shirt') + '<span>Edit avatar</span></a>' +
         '<a role="menuitem" href="' + url('shop/?mine') + '">' + icon('shopping-bag') + '<span>My closet</span></a>' +
+        '<button type="button" role="menuitemcheckbox" data-m="mode" aria-checked="' + !isLight() + '">' + icon('moon') + '<span>Dark mode</span><span class="g-switch sm" aria-hidden="true"></span></button>' +
         '<button type="button" role="menuitem" data-m="settings">' + icon('gear-six') + '<span>Settings</span></button>'; };
     document.body.appendChild(menu);
     const meBtn = $('.g-me', top);
     const setMenu = on => { if (on) paintMenu(); menu.hidden = !on; meBtn.setAttribute('aria-expanded', String(on)); if (on) { const f = $('[role=menuitem]', menu); if (f) f.focus({ preventScroll: true }); } };
     meBtn.addEventListener('click', e => { e.stopPropagation(); buzz(); setMenu(menu.hidden); });
-    menu.addEventListener('click', e => { const b = e.target.closest('[data-m=settings]'); if (b) { setMenu(false); settings(); } });
+    menu.addEventListener('click', e => {
+      if (e.target.closest('[data-m=settings]')) { setMenu(false); settings(); return; }
+      const m = e.target.closest('[data-m=mode]'); if (m) { setMode(isLight() ? 'dark' : 'light'); m.setAttribute('aria-checked', String(!isLight())); buzz(); }
+    });
     document.addEventListener('click', e => { if (!menu.hidden && !menu.contains(e.target)) setMenu(false); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { setMenu(false); meBtn.focus(); } });
     const paintPearls = () => { const pt = $('.g-pts .num', top); if (pt) pt.textContent = fmt(pearlBalance()); const a = $('.g-pts', top); if (a) a.href = pearlsUrl(); };
@@ -570,6 +563,9 @@
     }, true);
   }
   const navOf = k => NAV.find(n => n[0] === k);
+  // a shop's icon in shop mode (flat Phosphor icon 'sh-<id>' from icons.js)
+  function shopIcon(id) { const d = (root.GRUG_ICONS && (root.GRUG_ICONS['sh-' + id] || root.GRUG_ICONS.storefront)) || '';
+    return '<svg class="gi" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path fill="currentColor" d="' + d + '"/></svg>'; }
 
   /* ---------- fast pages: the next page starts loading as soon as a finger or mouse heads for its link ---------- */
   let sped = false;
@@ -614,7 +610,6 @@
   function setMode(m) {
     profile.prefs.mode = m === 'light' ? 'light' : 'dark'; save('prefs');
     if (root.GrugTheme) root.GrugTheme.apply();
-    $$('.g-modebtn').forEach(b => { b.innerHTML = icon(isLight() ? 'moon' : 'sun'); });
     $$('[data-mode-set]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.modeSet === profile.prefs.mode)));
   }
   function modeHtml() {
@@ -626,7 +621,7 @@
   /* shop mode (theme.js): the row in Settings that says whose site this looks like, and a way out */
   function brandHtml() {
     const b = root.GrugTheme && root.GrugTheme.brand(); if (!b) return '';
-    return '<div class="g-pref g-brand-pref"><span class="g-brand-ic" aria-hidden="true">' + esc(b.i) + '</span><span><b>Visiting ' + esc(b.n) + '</b><small>The site wears their colours while you browse. Refreshing the page also ends it</small></span>' +
+    return '<div class="g-pref g-brand-pref"><span class="g-brand-ic" aria-hidden="true">' + shopIcon(b.i) + '</span><span><b>Visiting ' + esc(b.n) + '</b><small>The site wears their colours while you browse. Refreshing the page also ends it</small></span>' +
       '<button type="button" class="g-btn sm" data-brand-leave>Leave</button></div>';
   }
   function wireBrand(box) { const b = $('[data-brand-leave]', box); if (b) b.addEventListener('click', () => { root.GrugTheme.leaveBrand(); location.reload(); }); }
@@ -674,7 +669,6 @@
       title: 'Settings', html: brandHtml() + modeHtml() + (root.GrugTheme && root.GrugTheme.brand() ? '' : roleHtml()) + uiSizeHtml() +
         '<div class="g-pref"><span><b>Animations</b><small>Celebrations and poses</small></span><button type="button" class="g-switch" role="switch" data-pref="motion" aria-checked="' + !!profile.prefs.motion + '" aria-label="Animations"></button></div>' +
         '<div class="g-pref"><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button type="button" class="g-switch" role="switch" data-pref="haptics" aria-checked="' + !!profile.prefs.haptics + '" aria-label="Vibrate on tap"></button></div>' +
-        '<div class="g-pref"><span><b>Colorful icons</b><small>Full-colour pictures instead of simple one-colour icons</small></span><button type="button" class="g-switch" role="switch" data-pref="colorIcons" aria-checked="' + !!profile.prefs.colorIcons + '" aria-label="Colorful icons"></button></div>' +
         '<div id="kInv"></div>' +
         '<p class="g-fine" style="margin-top:6px">Saved in your profile, so it comes along when you export it. Emotes are picked in the <a href="' + url('avatar/#emotes') + '" style="color:var(--ember);font-weight:800">avatar editor</a>. More in <a href="' + url('profile/') + '" style="color:var(--ember);font-weight:800">Profile</a>.</p>',
       actions: [{ label: 'Done', kind: 'primary', value: true }],
@@ -685,7 +679,6 @@
         $$('[data-pref]', d).forEach(b => b.addEventListener('click', () => {
           profile.prefs[b.dataset.pref] = !profile.prefs[b.dataset.pref]; save('prefs'); b.setAttribute('aria-checked', !!profile.prefs[b.dataset.pref]);
           if (root.GrugTheme) root.GrugTheme.apply(); buzz();
-          if (b.dataset.pref === 'colorIcons') setTimeout(() => location.reload(), 250);   // every icon on the page is redrawn
         }));
       }
     });
@@ -848,6 +841,6 @@
     setEmotes(ids) { ids = Array.isArray(ids) ? Array.from(new Set(ids.filter(id => emoteOf(id)))).slice(0, EMOTE_MAX) : []; if (!ids.length) return false; profile.emotes = ids; save('emotes'); return true; },
     UI_SCALES, applyUiScale,
     ROLES, get role() { return roleOf(); }, setRole, showsTab,
-    ui: { chrome, hub, askRole, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile, uiSizeHtml, wireUiSize, modeHtml, wireMode, setMode, brandHtml, wireBrand, inventoryHtml, wireInventory, freeBar }
+    ui: { chrome, hub, shopIcon, askRole, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile, uiSizeHtml, wireUiSize, modeHtml, wireMode, setMode, brandHtml, wireBrand, inventoryHtml, wireInventory, freeBar }
   };
 })(window);
