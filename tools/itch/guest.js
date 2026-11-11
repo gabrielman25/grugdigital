@@ -1,5 +1,5 @@
-/* Grug · guest.js — guest mode for a Grug game played off the site (the itch.io builds). Needs bridge.js first.
-   It only ever acts when GrugBridge.mode is 'guest' (no trusted Grug host answered). In platform mode nothing appears.
+/* Grug · guest.js — guest mode for the standalone itch.io copies of the Grug originals. Load guestmode.js first.
+   Every player on itch is a guest; the site never sees this game.
 
    - Guest profile: localStorage 'grug.guest.v1' on this device only, never sent anywhere:
        { v:1, name:'Guest' + 4 digits, avatar:null (null = the avatar runtime's default look), created, welcomed }
@@ -103,7 +103,7 @@
     mount(o) {
       opts = Object.assign({}, root.GRUG_GAME || {}, o || {});
       const B = root.GrugBridge; if (!B) { start(); return; }
-      B.onMode(m => { if (m === 'guest') start(); else hide(); });   // a late trusted host takes it back to platform mode
+      B.onMode(m => { if (m === 'guest') start(); else hide(); });
       if (B.mode === 'guest') start();
     },
     gate() { return open() ? new Promise(ok => gates.push(ok)) : Promise.resolve(); },

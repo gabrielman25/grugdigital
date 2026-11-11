@@ -4,15 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Peak Pals · Grug</title>
-<!-- Grug itch.io build (tools/itch/build.py). The game is game.html, framed below the guest banner.
-     bridge.js talks to the Grug site when it hosts this page (platform mode); with no trusted host it's guest mode. -->
+<!-- Grug itch.io build (tools/itch/build.py): a standalone copy, separate from the Grug site. The game is game.html,
+     framed below the guest banner; it never talks to any other page. -->
 <style>
 html,body{margin:0;height:100%;overflow:hidden;background:#8fd0ff}
 #wrap{position:fixed;inset:0;display:flex;flex-direction:column}
 #game{flex:1;min-height:0;width:100%;border:0;display:block;background:#8fd0ff}
 </style>
 <script>window.GRUG_GAME = { id: 'petmountainrescue', title: 'Peak Pals' };</script>
-<script src="bridge.js"></script>
+<script src="guestmode.js"></script>
 <script src="guest.js"></script>
 </head>
 <body>
@@ -22,10 +22,9 @@ html,body{margin:0;height:100%;overflow:hidden;background:#8fd0ff}
   'use strict';
   var f = document.getElementById('game');
   var focusGame = function () { try { f.focus(); f.contentWindow.focus(); } catch (e) {} };
-  GrugBridge.relay(f);
   GrugGuest.mount({
     into: document.getElementById('wrap'),
-    // the pop-up opened after the run started: pause it (the bridge's own 'pause' message)
+    // the pop-up opened after the run started: pause it (the game's own 'pause' message, same origin)
     pause: function () { try { if (f.contentWindow.GRUG_STARTED) f.contentWindow.postMessage({ rw: 1, t: 'pause' }, location.origin); } catch (e) {} },
     focus: focusGame
   });

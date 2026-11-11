@@ -256,7 +256,7 @@ const SETTINGS = {
      app → game  {t:'pause'} when the player leaves the Game tab; a fresh {t:'state'} whenever points change.
    On its own (no app answers within 1.5 s) the game runs in demo mode with pretend points saved on this device.
    ===================================================================================== */
-/* itch build: the wrapper page's bridge (assets/bridge.js), or null when this file runs on its own */
+/* itch build: the wrapper page's guest mode (guestmode.js), or null when this file runs on its own */
 const GRUGB = (() => { try { return window.parent !== window && window.parent.GrugBridge || null; } catch (e) { return null; } })();
 const Bridge = (() => {
   let embedded = window.parent && window.parent !== window;
@@ -275,7 +275,7 @@ const Bridge = (() => {
   });
   function ask(m) { const req = String(++reqN); return new Promise((ok, no) => { waiting.set(req, ok); post(Object.assign({ req }, m)); setTimeout(() => { if (waiting.delete(req)) no(new Error('no answer')); }, 6000); }); }
   function start() {
-    if (GRUGB) embedded = GRUGB.mode === 'platform';   // guest mode: no host, demo at once
+    if (GRUGB) embedded = false;   // standalone guest copy: no host to ask, demo at once
     window.GRUG_STARTED = true;
     if (embedded) post({ t: 'hello' });
     setTimeout(() => { if (mode === 'pending') { mode = 'demo'; setState(Object.assign({ demo: true }, demoLoad())); } }, embedded ? 1500 : 0);
@@ -2364,7 +2364,7 @@ const UI = (() => {
   if (!window.THREE) { load.textContent = 'This game needs the Grug avatar runtime (sandy-runtime.js).'; return; }
   const atlas = new Image(); atlas.src = 'data:image/png;base64,' + ATLAS_B64; await atlas.decode();
   makeWorld(atlas);
-  if (GRUGB) await GRUGB.ready();   // platform or guest decides the player's look
+  if (GRUGB) await GRUGB.ready();
   await Game.setup();
   if (GRUGB) { await GRUGB.ready(); if (window.parent.GrugGuest) await window.parent.GrugGuest.gate(); }
   load.classList.add('done'); Bridge.start();

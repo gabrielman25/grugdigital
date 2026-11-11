@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 """Grug · itch.io build: python3 tools/itch/build.py <id>  →  itch-builds/<id>/ and itch-builds/<id>.zip
 
+The itch.io copies are standalone: separate from the site (which keeps hosting its own games in play/<id>/), never
+talking to it, there for visibility and to send players to the site. Every player on itch is a guest.
+
 The zip is what gets uploaded to itch.io (Kind = HTML). Inside it:
-  index.html     the wrapper: guest banner + pop-up (guest.js), the bridge to the Grug site (bridge.js), and a frame
-                 for the game below the banner, so the banner never covers the game's UI
+  index.html     the wrapper: the guest banner + one-time welcome pop-up (guest.js, both link to the site in a new tab),
+                 and a frame for the game below the banner, so the banner never covers the game's UI
   game.html      a copy of play/<id>/game.html with a few small patches (below); play/<id>/game.html is never changed
-  bridge.js, guest.js, gamekit.js, fredoka.woff2, CREDITS.txt
+  guestmode.js   always 'guest': the local GuestNNNN player in the default look (tools/itch/guestmode.js)
+  guest.js, gamekit.js (the site's, unchanged), fredoka.woff2, CREDITS.txt
 The avatar runtime (sandy-runtime.js, 15 MB) is not bundled: it loads from https://grugdigital.pages.dev/assets/.
 
 Patches to the game copy (every Grug original shares the same template Bridge, so most are the same for all):
   - scripts load from the zip's root; the runtime from the site only
-  - Bridge: posts to its own origin (the wrapper) instead of "*", accepts only the wrapper, and in guest mode starts
-    its demo straight away (GRUGB = the wrapper's GrugBridge)
-  - the player's look comes from GRUGB.sandy() (the host's, a guest's default, else this origin's storage)
-  - boot waits for the mode (≤ 1.5 s) before building the player, and for the welcome pop-up before the run starts
-  - the player's name from GRUGB.name()
+  - Bridge: never posts to "*" (only its own origin) and starts its demo at once (GRUGB = the wrapper's guest mode)
+  - the player wears the default look and, where the game shows a name, is called GuestNNNN
+  - boot waits for the welcome pop-up to close before the run starts
 Per-game patches (name spots, boot lines) are in GAMES below.
 """
 import os, re, shutil, sys, zipfile
@@ -23,9 +25,9 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 SITE = 'https://grugdigital.pages.dev'
 RUNTIME = SITE + '/assets/sandy-runtime.js'
 
-GRUGB = ("/* itch build: the wrapper page's bridge (assets/bridge.js), or null when this file runs on its own */\n"
+GRUGB = ("/* itch build: the wrapper page's guest mode (guestmode.js), or null when this file runs on its own */\n"
          "const GRUGB = (() => { try { return window.parent !== window && window.parent.GrugBridge || null; } catch (e) { return null; } })();\n")
-READY = "  if (GRUGB) await GRUGB.ready();   // platform or guest decides the player's look\n"
+READY = "  if (GRUGB) await GRUGB.ready();\n"
 GATE = "if (GRUGB) { await GRUGB.ready(); if (window.parent.GrugGuest) await window.parent.GrugGuest.gate(); }"
 
 COMMON = [
@@ -39,7 +41,7 @@ COMMON = [
     ("if (!d || d.rw !== 1 || e.source !== window.parent) return;",
      "if (!d || d.rw !== 1 || e.source !== window.parent || e.origin !== location.origin) return;"),
     ("  function start() {\n    if (embedded) post({ t: 'hello' });",
-     "  function start() {\n    if (GRUGB) embedded = GRUGB.mode === 'platform';   // guest mode: no host, demo at once\n    window.GRUG_STARTED = true;\n    if (embedded) post({ t: 'hello' });"),
+     "  function start() {\n    if (GRUGB) embedded = false;   // standalone guest copy: no host to ask, demo at once\n    window.GRUG_STARTED = true;\n    if (embedded) post({ t: 'hello' });"),
     ("function playerConfig() { let c = null; try { c = JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); } catch (e) {} return",
      "function playerConfig() { const own = () => { try { return JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); } catch (e) { return null; } }; const c = GRUGB ? GRUGB.sandy(own) : own(); return"),
 ]
@@ -49,7 +51,7 @@ GAMES = {
         'title': 'Runway Ready', 'bg': '#efe9e2',
         'patches': [
             ("  await Game.setup();\n  load.classList.add('done'); Bridge.start();",
-             "  if (GRUGB) await GRUGB.ready();   // platform or guest decides the player's look\n  await Game.setup();\n  " + GATE + "\n  load.classList.add('done'); Bridge.start();"),
+             READY + "  await Game.setup();\n  " + GATE + "\n  load.classList.add('done'); Bridge.start();"),
             ("html: esc(c.isPlayer ? (Bridge.state && Bridge.state.player) || 'You' : c.name)",
              "html: esc(c.isPlayer ? (GRUGB ? GRUGB.name((Bridge.state && Bridge.state.player) || 'You') : (Bridge.state && Bridge.state.player) || 'You') : c.name)"),
         ],
@@ -91,15 +93,15 @@ WRAPPER = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>{title} · Grug</title>
-<!-- Grug itch.io build (tools/itch/build.py). The game is game.html, framed below the guest banner.
-     bridge.js talks to the Grug site when it hosts this page (platform mode); with no trusted host it's guest mode. -->
+<!-- Grug itch.io build (tools/itch/build.py): a standalone copy, separate from the Grug site. The game is game.html,
+     framed below the guest banner; it never talks to any other page. -->
 <style>
 html,body{{margin:0;height:100%;overflow:hidden;background:{bg}}}
 #wrap{{position:fixed;inset:0;display:flex;flex-direction:column}}
 #game{{flex:1;min-height:0;width:100%;border:0;display:block;background:{bg}}}
 </style>
 <script>window.GRUG_GAME = {{ id: '{id}', title: '{title}' }};</script>
-<script src="bridge.js"></script>
+<script src="guestmode.js"></script>
 <script src="guest.js"></script>
 </head>
 <body>
@@ -109,10 +111,9 @@ html,body{{margin:0;height:100%;overflow:hidden;background:{bg}}}
   'use strict';
   var f = document.getElementById('game');
   var focusGame = function () {{ try {{ f.focus(); f.contentWindow.focus(); }} catch (e) {{}} }};
-  GrugBridge.relay(f);
   GrugGuest.mount({{
     into: document.getElementById('wrap'),
-    // the pop-up opened after the run started: pause it (the bridge's own 'pause' message)
+    // the pop-up opened after the run started: pause it (the game's own 'pause' message, same origin)
     pause: function () {{ try {{ if (f.contentWindow.GRUG_STARTED) f.contentWindow.postMessage({{ rw: 1, t: 'pause' }}, location.origin); }} catch (e) {{}} }},
     focus: focusGame
   }});
@@ -154,8 +155,9 @@ def build(gid):
     if re.search(r"postMessage\([^;]*['\"]\*['\"]\)", src):
         sys.exit(gid + ': a "*" postMessage target is left')
     open(os.path.join(out, 'game.html'), 'w', encoding='utf-8').write(src)
-    for f in ('bridge.js', 'guest.js', 'gamekit.js'):
-        shutil.copy(os.path.join(ROOT, 'assets', f), os.path.join(out, f))
+    shutil.copy(os.path.join(ROOT, 'assets', 'gamekit.js'), os.path.join(out, 'gamekit.js'))
+    for f in ('guestmode.js', 'guest.js'):
+        shutil.copy(os.path.join(ROOT, 'tools', 'itch', f), os.path.join(out, f))
     shutil.copy(os.path.join(ROOT, 'assets', 'fonts', 'fredoka.woff2'), os.path.join(out, 'fredoka.woff2'))
     for extra in g.get('copy', []):
         shutil.copy(os.path.join(ROOT, 'play', gid, extra), os.path.join(out, extra))

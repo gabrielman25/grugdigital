@@ -13,9 +13,6 @@
                  art: assets/boxart/<id>.jpg (1580x950 cover art, the avatar in an action pose, NO title text: the box adds it),
                  shots: up to 3 back-of-box screenshots, 800x450 }
    thumb     = a flat picture for anything that isn't a box (point it at the box art).
-   itch      = { embedUrl, origin } for a Grug original whose game build is hosted on itch.io (itch-builds/<id>/).
-                 embedUrl: the iframe URL itch gives for the upload; origin: the exact origin the game itself runs on there.
-                 When embedUrl is set, play/<id>/ frames it (assets/hostbridge.js); clear it to go back to the local game.html.
 */
 window.GRUG_GAMES = [
   {
@@ -126,7 +123,6 @@ window.GRUG_GAMES = [
     blurb: 'Dress to the theme in a voxel fashion house, then walk the runway against four rivals.',
     long: 'A theme appears (Ocean Blue, Cowgirl, Red Carpet and more). Run through six wardrobe rooms full of pieces from the Grug avatar closet, pick their colours and beat the clock, then strut the runway. Matching the theme earns up to 70 points and the judges add up to 30. Pearls buy Extra Time, Style Hints, Fast Feet and Spotlight, and you play as your own avatar.',
     play: 'play/runway/', game: 'play/runway/', storageKey: '', old: '',
-    itch: { embedUrl: '', origin: '' },
     thumb: 'assets/boxart/runway.jpg', color: '#F43F5E', ink: '#FFFFFF',
     avatar: 'You play as your avatar', earn: 'Power-ups use Pearls, the Grug currency',
     features: [
@@ -147,7 +143,6 @@ window.GRUG_GAMES = [
     blurb: "Delve floor after floor of a blocky dungeon, crypt and caves: open every chest, then race back to the stairs while monsters you can't beat hunt you.",
     long: "A Dandy's World-style roguelike. Every floor is a new place (a dungeon, a crypt, caves, catacombs, a library, crystal caves and the ember depths): pick the lock on every chest, grab the gold, then get back to the stairs. Monsters can't be beaten: duck behind a column or a stack of crates, break their line of sight and they give up. Sprint, carry three items, shop with the merchant, and see how deep you can get as your own avatar. Pearls buy power-ups like Extra Heart, Quick Fingers and Second Wind.",
     play: 'play/chestquest/', game: 'play/chestquest/', storageKey: '', old: '',
-    itch: { embedUrl: '', origin: '' },
     thumb: 'assets/boxart/chestquest.jpg', color: '#2A2438', ink: '#FBBF24',
     avatar: 'You play as your avatar', earn: 'Power-ups use Pearls, the Grug currency',
     features: [
@@ -168,7 +163,6 @@ window.GRUG_GAMES = [
     blurb: 'Run a salon and spa, sneak eggs out of the Beauty Store, and hatch pets that earn cash.',
     long: 'Build your own salon and spa: your staff give haircuts, pedicures, hair color and face masks while you grab the cash, add chairs, hire staff and open new rooms. Train your Speed on the treadmill, sneak eggs out of the six-zone Beauty Store mall past the clerks, and hatch pets that roam your field and earn cash on their own. Fuse matching pets to grow them, collect gold, rainbow and colour variants, and rebirth for a bigger multiplier. You play as your own avatar, and Pearls buy speed, passes, boosts and cash packs in the Store.',
     play: 'play/glowupspa/', game: 'play/glowupspa/', storageKey: '', old: '',
-    itch: { embedUrl: '', origin: '' },
     thumb: 'assets/boxart/glowupspa.jpg', color: '#EC4899', ink: '#FFFFFF',
     avatar: 'You play as your avatar', earn: 'Store items use Pearls, the Grug currency',
     features: [
@@ -189,7 +183,6 @@ window.GRUG_GAMES = [
     blurb: 'Climb an endless block mountain with a climbing partner, rescue stranded pets, and watch them earn gems at your Pet Haven.',
     long: 'You can’t jump, but your partner can boost you: set her down by a ledge, hop up on her head, then pull her up after you. Pets are stranded all the way up the mountain, rarer the higher you go: lead them to a camp’s Rescue Hut and they move into your Pet Haven, where they settle in and earn gems, even while you’re away. Pick one of three climbing partners (Booster, Pet Whisperer or Scout) who levels up as you climb together, spend gems on climbing and walking upgrades, Haven pads and her wardrobe, and climb as your own avatar. Pearls buy forever passes like x2 Gems and x2 Settle Speed, boosts, gem packs and a camp skip.',
     play: 'play/petmountainrescue/', game: 'play/petmountainrescue/', storageKey: '', old: '',
-    itch: { embedUrl: '', origin: '' },
     thumb: 'assets/boxart/petmountainrescue.jpg', color: '#f97316', ink: '#FFFFFF',
     avatar: 'You play as your avatar', earn: 'Store items use Pearls, the Grug currency',
     features: [
@@ -211,7 +204,6 @@ window.GRUG_GAMES = [
     blurb: 'One player is the Murderer, one is the Sheriff: find the Murderer before everyone is tagged, then unbox wild blaster skins and hatch pets.',
     long: 'A Murder Mystery-style party game against eight bots on three blocky maps (Whispering Forest, Moonlit Mansion and Blockrock Prison) with fog of war: you only see the room you’re in, and next door through an open doorway. Be the Murderer, the Sheriff or an Innocent. The Murderer’s foam blaster knocks players down, then she has to walk up and finish them off, or drag the body into a closet. Innocents fix five fuse boxes to open an escape hatch, hide in lockers and boxes (watch your air!), and crawl through vents once they’re down. Every coin you grab goes to blaster crates (millions of skins with colours, patterns, glows, trails and rare mutations) and pet eggs with powers like Dash and Vanish. You play as your own avatar, and Pearls buy role chances, double coins, a VIP pass and more.',
     play: 'play/mysteryblasters/', game: 'play/mysteryblasters/', storageKey: '', old: '',
-    itch: { embedUrl: '', origin: '' },
     thumb: 'assets/boxart/mysteryblasters.jpg', color: '#F43F5E', ink: '#FFFFFF',
     avatar: 'You play as your avatar', earn: 'Store items use Pearls, the Grug currency',
     features: [
