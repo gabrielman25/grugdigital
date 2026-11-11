@@ -1,0 +1,5 @@
+Grug · Runway Ready
+A Grug original by Grug Digital. Play it with your own avatar on https://grugdigital.pages.dev/games/runway/
+
+Fredoka (fredoka.woff2): SIL Open Font License 1.1, https://openfontlicense.org
+three.js (in the avatar runtime, loaded from https://grugdigital.pages.dev): MIT License
