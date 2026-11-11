@@ -54,15 +54,22 @@ an optional 9th field; in shop mode it sets `--display` (headings). Keep any new
 
 ## Partner mode (CraftHouse mode)
 
-A full partner can have its own branded version of the site. Its address (`crafthouse/`, which forwards to
-`games/?partner=crafthouse`) starts **partner mode**: the partner's real logo sits in the top bar on a white plate (with a
-Demo tag while `demo: true`) and links back to their app, the dock is just **Games** and **Me**, and Home, Make, Links,
-Rewards (not `rewards/card/`) and Partners send the guest to Games. The Games page opens on the partner's own game.
-Unlike shop mode it survives a refresh; it ends when the tab closes, the site is opened normally, or Settings → Leave.
-It should feel like one app: the partner app's own tab bar (`bar` in its PARTNERS entry, `.g-pbar`) stays on screen under
-the dock on every page (a rail on the right in short landscape; `--sab` grows by its height so layouts make room), its
-tabs link into the app (`#menu`, `#play` …), and the whole site stays in the partner's light look with its typeface and a
-faint gingham, Games included (no dark fog in partner mode).
+A full partner can have its own branded, closed version of the site. Its address (`crafthouse/`, which forwards to
+`games/?partner=crafthouse`; any page takes `?partner=<id>`) starts **partner mode**, which must feel like one app and
+must never lead to the standard Grug site or another partner's rewards app:
+
+- The partner's real logo sits in the top bar (white plate, Demo tag while `demo: true`) and links to their app.
+- The Grug dock is hidden; the partner app's own tab bar (`bar` in its PARTNERS entry, `.g-pbar`) is the only navigation,
+  on every page (a rail on the right in short landscape; `--sab` grows by its height so layouts make room). Its Play tab is
+  the site's game list; the app's own Play tab goes there too.
+- Only the partner's own game and the Grug originals (`standalone: true`) are listed (`Grug.partnerAllows`). Allowed pages:
+  `games/` (and those games' pages), `avatar/`, `pearls`, `rewards/card/`; every other address goes to the game list
+  (theme.js), and so do other partners' game pages (grug.js). A game host's back button (`#rrBack`) returns to the list.
+- The account menu is just Buy Pearls, Edit avatar and Settings; Settings has no Leave and no dark mode.
+- The whole site stays in the partner's light look (no dark fog on Games), with its typeface and a faint gingham;
+  the game panel and game page are centred.
+- It survives a refresh and ends only when the tab closes or the site is opened normally.
+
 Partners live in `PARTNERS` in `assets/theme.js` (`GrugTheme.partner()`); `html[data-partner]` is set while it's on.
 
 ## Games are FOSSIL32 cartridges

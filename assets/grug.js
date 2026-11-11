@@ -412,6 +412,9 @@
     trophy: '<path fill="currentColor" d="M12.91 2H15a1 1 0 0 1 1 1v2a3 3 0 0 1-3 3h-.636l-.002.017A4.38 4.38 0 0 1 9 11.884V13h2l1 1v1H4v-1l1-1h2v-1.116a4.38 4.38 0 0 1-3.362-3.867L3.636 8H3l-.154-.004A3 3 0 0 1 0 5V3a1 1 0 0 1 .897-.995L1 2h2.09L3 1h10zM2 5a1 1 0 0 0 1 1h.454l-.182-2H2zm10.546 1H13a1 1 0 0 0 1-1V4h-1.273z"/>',
     coins: '<path fill="currentColor" d="M14 13c0 1.105-2.239 2-5 2s-5-.895-5-2v-.363q.445.117.923.197a12.8 12.8 0 0 0 3.076.127q.49.037 1.001.039c1.475 0 2.857-.237 3.907-.657.395-.158.77-.354 1.093-.594zM2 8.749c.322.24.698.436 1.093.594C4.143 9.763 5.525 10 7 10q.51-.001 1-.04.496.04 1 .04c.708 0 1.413-.056 2.077-.166q.478-.08.923-.197V10c0 1.105-2.239 2-5 2s-5-.895-5-2zM14 7c0 1.105-2.239 2-5 2s-5-.895-5-2V5.749c.32.238.695.435 1.093.594a9 9 0 0 0 1.83.491C7.587 6.944 8.293 7 9 7c.708 0 1.413-.056 2.077-.166a9 9 0 0 0 1.83-.491c.398-.16.773-.356 1.093-.594z"/><path fill="currentColor" d="M9 2c2.761 0 5 .895 5 2 0 .262-.129.522-.38.766-.252.242-.62.462-1.085.648a8 8 0 0 1-1.622.434C10.306 5.948 9.656 6 9 6s-1.307-.052-1.913-.152a8 8 0 0 1-1.622-.434C5 5.228 4.632 5.008 4.38 4.766 4.129 4.522 4 4.262 4 4c0-1.105 2.239-2 5-2M8 5h2V3H8z"/>'
   };
+  // partner mode: the partner's own game and the Grug originals (no other partner's game or rewards app)
+  const partnerAllows = g => { const p = root.GrugTheme && root.GrugTheme.partner && root.GrugTheme.partner(); return !p || !g || g.id === p.game || !!g.standalone; };
+  try { const m = /\/games\/([\w-]+)\/?$/.exec(location.pathname), g = m && GAMES.find(x => x.id === m[1]); if (g && !partnerAllows(g)) location.replace(url('games/')); } catch (e) {}
   // partner mode (theme.js, e.g. crafthouse/): the site is just for playing and dressing up, so the dock is Games and Me
   const partnerOn = () => !!(root.GrugTheme && root.GrugTheme.partner && root.GrugTheme.partner());
   const PARTNER_TABS = ['games', 'me'];
@@ -488,11 +491,11 @@
     root.addEventListener('resize', closeTray); root.addEventListener('scroll', closeTray, { passive: true });
     document.body.appendChild(tray);
     document.body.prepend(top); document.body.appendChild(tabs);
-    // partner mode: the partner app's own tab bar stays on screen under the dock, so Games and Me feel like part of their app
+    // partner mode: the partner app's own tab bar is the only navigation (the dock is hidden in grug.css), so it all feels like their app
     if (partner && partner.bar) {
       const pb = document.createElement('nav'); pb.className = 'g-pbar'; pb.setAttribute('aria-label', (partner.short || partner.n) + ' app');
       const lit = (partner.barOn || {})[groupOf(active).id] || (partner.barOn || {})[active];
-      pb.innerHTML = partner.bar.map(([id, label, ic, hash]) => '<a href="' + url(partner.app) + hash + '"' + (id === lit ? ' aria-current="page"' : '') + '>' +
+      pb.innerHTML = partner.bar.map(([id, label, ic, to]) => '<a href="' + (/^#|^$/.test(to) ? url(partner.app) + to : url(to)) + '"' + (id === lit ? ' aria-current="page"' : '') + '>' +
         '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">' + (PBAR_ICONS[ic] || '') + '</svg><span>' + esc(label) + '</span></a>').join('');
       document.body.appendChild(pb);
     }
@@ -500,6 +503,12 @@
     // the account menu under the avatar
     const menu = document.createElement('div'); menu.className = 'g-menu'; menu.setAttribute('role', 'menu'); menu.hidden = true;
     const paintMenu = () => { const f = snaps();
+      if (partnerOn()) {   // partner mode: only what stays inside it (the avatar and Pearls), and Settings without a way out
+        menu.innerHTML = '<div class="g-menu-h"><img alt="" src="' + f.bust + '"><div><b>' + esc(profile.name) + '</b><small>' + fmt(pearlBalance()) + ' Pearls</small></div></div>' +
+          '<a role="menuitem" class="hot" href="' + pearlsUrl() + '">' + icon('pearl') + '<span>Buy Pearls</span>' + icon('caret-right') + '</a>' +
+          '<a role="menuitem" href="' + url('avatar/') + '">' + icon('t-shirt') + '<span>Edit avatar</span></a>' +
+          '<button type="button" role="menuitem" data-m="settings">' + icon('gear-six') + '<span>Settings</span></button>';
+        return; }
       menu.innerHTML = '<div class="g-menu-h"><img alt="" src="' + f.bust + '"><div><b>' + esc(profile.name) + '</b><small>' + fmt(pearlBalance()) + ' Pearls · ' + fmt(totalPoints()) + ' partner points</small></div></div>' +
         '<a role="menuitem" class="hot" href="' + pearlsUrl() + '">' + icon('pearl') + '<span>Buy Pearls</span>' + icon('caret-right') + '</a>' +
         '<a role="menuitem" href="' + url('profile/') + '">' + icon('user') + '<span>Profile</span></a>' +
@@ -528,7 +537,7 @@
     });
     // LB / RB: Q and E (or a controller's shoulder buttons) step through the dock
     // step to the next or previous dock tab (Me and Make open their list pages); wrap = Q / E and the shoulder buttons go round
-    const go = (d, wrap) => { const STOPS = stops(); let i = STOPS.indexOf(here) + d; if (wrap) i = (i + STOPS.length) % STOPS.length; if (i < 0 || i >= STOPS.length) return false;
+    const go = (d, wrap) => { if (partnerOn()) return false; const STOPS = stops(); let i = STOPS.indexOf(here) + d; if (wrap) i = (i + STOPS.length) % STOPS.length; if (i < 0 || i >= STOPS.length) return false;
       try { sessionStorage.setItem('grug.swipe', d > 0 ? 'next' : 'prev'); } catch (e) {}
       closeTray(); location.href = url(navOf(STOPS[i])[3]); return true; };
     // swipe sideways anywhere on the page to change tabs (not on sliders, 3D views, maps or rows that scroll sideways)
@@ -644,8 +653,8 @@
   /* shop mode (theme.js): the row in Settings that says whose site this looks like, and a way out */
   function brandHtml() {
     const b = root.GrugTheme && root.GrugTheme.brand(); if (!b) return '';
-    return '<div class="g-pref g-brand-pref">' + (b.p && b.logo ? '<span class="g-brand-ic is-logo" aria-hidden="true"><img alt="" src="' + url(b.logo) + '"></span>' : '<span class="g-brand-ic" aria-hidden="true">' + shopIcon(b.i) + '</span>') + '<span><b>Visiting ' + esc(b.n) + (b.p && b.demo ? ' (demo)' : '') + '</b><small>' + (b.p ? 'Games and your avatar, in ' + esc(b.short || b.n) + ' colours. Leave to see all of Grug' : 'The site wears their colours while you browse. Refreshing the page also ends it') + '</small></span>' +
-      '<button type="button" class="g-btn sm" data-brand-leave>Leave</button></div>';
+    return '<div class="g-pref g-brand-pref">' + (b.p && b.logo ? '<span class="g-brand-ic is-logo" aria-hidden="true"><img alt="" src="' + url(b.logo) + '"></span>' : '<span class="g-brand-ic" aria-hidden="true">' + shopIcon(b.i) + '</span>') + '<span><b>Visiting ' + esc(b.n) + (b.p && b.demo ? ' (demo)' : '') + '</b><small>' + (b.p ? 'Games and your avatar, in ' + esc(b.short || b.n) + ' colours' : 'The site wears their colours while you browse. Refreshing the page also ends it') + '</small></span>' +
+      (b.p ? '' : '<button type="button" class="g-btn sm" data-brand-leave>Leave</button>') + '</div>';
   }
   function wireBrand(box) { const b = $('[data-brand-leave]', box); if (b) b.addEventListener('click', () => { root.GrugTheme.leaveBrand(); location.reload(); }); }
 
@@ -689,7 +698,7 @@
   }
   function settings() {
     return dialog({
-      title: 'Settings', html: brandHtml() + modeHtml() + (root.GrugTheme && root.GrugTheme.brand() ? '' : roleHtml()) + uiSizeHtml() +
+      title: 'Settings', html: brandHtml() + (partnerOn() ? '' : modeHtml()) + (root.GrugTheme && root.GrugTheme.brand() ? '' : roleHtml()) + uiSizeHtml() +
         '<div class="g-pref"><span><b>Animations</b><small>Celebrations and poses</small></span><button type="button" class="g-switch" role="switch" data-pref="motion" aria-checked="' + !!profile.prefs.motion + '" aria-label="Animations"></button></div>' +
         '<div class="g-pref"><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button type="button" class="g-switch" role="switch" data-pref="haptics" aria-checked="' + !!profile.prefs.haptics + '" aria-label="Vibrate on tap"></button></div>' +
         '<div id="kInv"></div>' +
@@ -863,7 +872,7 @@
     EMOTES, EMOTE_MAX, emoteOf, get emotes() { return profile.emotes.slice(); },
     setEmotes(ids) { ids = Array.isArray(ids) ? Array.from(new Set(ids.filter(id => emoteOf(id)))).slice(0, EMOTE_MAX) : []; if (!ids.length) return false; profile.emotes = ids; save('emotes'); return true; },
     UI_SCALES, applyUiScale,
-    ROLES, get role() { return roleOf(); }, setRole, showsTab,
+    ROLES, get role() { return roleOf(); }, setRole, showsTab, partnerAllows,
     ui: { chrome, hub, shopIcon, askRole, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile, uiSizeHtml, wireUiSize, modeHtml, wireMode, setMode, brandHtml, wireBrand, inventoryHtml, wireInventory, freeBar }
   };
 })(window);

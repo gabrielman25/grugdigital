@@ -131,7 +131,7 @@ html.gc-html body.g-chrome{padding:0}
   const G = Grug, $ = s => document.getElementById(s);
   G.ui.chrome('games');
   const pts = {}; G.points().forEach(p => { pts[p.game.id] = p; });
-  const shown = G.GAMES.filter(g => g.listed !== false);
+  const shown = G.GAMES.filter(g => g.listed !== false && G.partnerAllows(g));   // partner mode: their game and the Grug originals only
   const games = shown.filter(g => g.status !== 'legacy').concat(shown.filter(g => g.status === 'legacy'));
   const N = games.length;
   const gc = $('gc'), rackEl = $('rack'), info = $('info'), dotsEl = $('dots');

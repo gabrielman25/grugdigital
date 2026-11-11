@@ -71,8 +71,9 @@
   // full partners with their own branded version of the site (partner mode): logo and app paths are from the site root
   const PARTNERS = {
     crafthouse: { n: 'R&R CraftHouse Grill', short: 'CraftHouse', color: '#CFAC52', i: 'hamburger', f: 'f', logo: 'play/crafthouse/logo.png', app: 'play/crafthouse/', game: 'crafthouse', demo: true,
-      // the app's own tab bar, shown under the dock on every page (grug.js): [id, label, icon, link from the app]; 'play' lights up on Games
-      bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'meat', '#menu'], ['play', 'Play', 'controller', '#play'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } }
+      // the app's own tab bar: the only navigation on every page in partner mode (grug.js). [id, label, icon, link]: '' or '#…' is
+      // in the partner's app, anything else is a site path. Play is the site's game list (the partner's game plus Grug originals).
+      bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'meat', '#menu'], ['play', 'Play', 'controller', 'games/'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } }
   };
   const partnerBrand = id => PARTNERS[id] ? Object.assign({ p: id, at: Date.now() }, PARTNERS[id]) : null;
   const ss = { get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }, del(k) { try { sessionStorage.removeItem(k); } catch (e) {} } };
@@ -154,10 +155,15 @@
   try { sitePage = !/[?&]mode=viewer/.test(location.search) && !/\/(play|work|tools|showcase)\//.test(location.pathname); } catch (e) {}
   const me = (document.currentScript && document.currentScript.src) || '';
   if (sitePage) document.documentElement.classList.add('g-site');
-  // partner mode: no Home and no Make (the pitch pages and tools for shops and creators); those addresses go to Games
-  if (brand && brand.p && sitePage) {
-    try { const rootPath = new URL(me ? me.replace(/assets\/theme\.js(\?.*)?$/, '') : '/', location.href).pathname, rel = location.pathname.slice(rootPath.length);
-      if (/^(index\.html)?$|^(make|create|links|partners)(\/|$)|^rewards(\/|\/index\.html|\/create(\/.*)?)?$/.test(rel)) location.replace(rootPath + 'games/'); } catch (e) {}
+  // partner mode is a closed space: only the game list, game pages, the avatar editor and the Pearls page. Every other address
+  // (Home, Make, Me, Shop, Profile, other partners' pages…) goes to the game list; grug.js also turns away game pages for
+  // other partners' games. On a game's host page (play/…) the back button returns to the game list.
+  if (brand && brand.p) {
+    let rootPath = '/';
+    try { rootPath = new URL(me ? me.replace(/assets\/theme\.js(\?.*)?$/, '') : '/', location.href).pathname; } catch (e) {}
+    if (sitePage) { try { const rel = location.pathname.slice(rootPath.length);
+      if (!/^games(\/|$)|^avatar(\/|$)|^pearls(\.html)?$|^rewards\/card(\/|$)/.test(rel)) location.replace(rootPath + 'games/'); } catch (e) {} }
+    else if (/\/play\//.test(location.pathname)) document.addEventListener('DOMContentLoaded', () => { const a = document.getElementById('rrBack'); if (a) { a.href = rootPath + 'games/'; a.setAttribute('aria-label', 'Back to the games'); } });
     document.documentElement.setAttribute('data-partner', brand.p);
   }
   // partner mode keeps the partner app's light look everywhere, Games included (no dark fog stage)
