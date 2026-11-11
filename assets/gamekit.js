@@ -10,6 +10,11 @@
    - Lobby text: "how to play" blocks fold into a toggle and long leads clamp, so the first screen is short.
    - The Free Shop Token timer at the top when one is running (GK.free() says whether prices are 0 right now).
 
+   Off the site (the itch.io builds, see bridge.js): when GrugBridge says 'platform' and the host is on another origin, the
+   profile bits (UI size, tutorials seen, emotes, site items, the Free Shop Token timer) come from the host's state and
+   changes go up as bridge messages ({t:'seen'}, {t:'crate'}) that the host checks and saves. In guest mode, or with no
+   bridge at all, it uses this origin's localStorage as before. GK.mode = 'platform' | 'guest' | 'pending'.
+
    What a game calls
    - GK.hint(text, {ms, anim:'shake'|'flash', sub})          a centred, animated message (the default anim is shake)
    - GK.stamina.show(on) / GK.stamina.set(frac, state)        a stamina bar for games where you walk around
@@ -29,9 +34,14 @@
   const readJSON = (k, f) => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? f : v; } catch (e) { return f; } };
   const writeJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
   // the Grug profile (grug.js makes it on every site page; a game opened on its own before any site page gets a bare one, which grug.js fills in later)
-  const profile = () => { const p = readJSON(KEY, null); return p && typeof p === 'object' && p.v ? p : { v: 1, created: Date.now(), seen: {}, items: {}, prefs: {} }; };
+  // the bridge (bridge.js), in this window or the itch wrapper around it (same origin); none on the site's own game.html
+  const GB = () => { if (root.GrugBridge) return root.GrugBridge; try { return root.parent !== root && root.parent.GrugBridge || null; } catch (e) { return null; } };
+  const kit = () => { const b = GB(); return b && b.remote && b.state && b.state.kit && typeof b.state.kit === 'object' ? b.state.kit : null; };
+  const profile = () => {
+    const k = kit(); if (k) return { v: 1, remote: true, seen: k.seen || (k.seen = {}), items: k.items || {}, prefs: k.prefs || {}, emotes: k.emotes };
+    const p = readJSON(KEY, null); return p && typeof p === 'object' && p.v ? p : { v: 1, created: Date.now(), seen: {}, items: {}, prefs: {} }; };
   const prefs = () => Object.assign({ motion: true, haptics: true, uiScale: 1 }, profile().prefs || {});
-  const GAME = (location.pathname.match(/\/play\/([a-z0-9]+)\//) || [])[1] || 'game';
+  const GAME = (root.GRUG_GAME && root.GRUG_GAME.id) || (location.pathname.match(/\/play\/([a-z0-9]+)\//) || [])[1] || 'game';
   const reduce = () => !prefs().motion || (matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   let gestured = false; ['pointerdown', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, () => { gestured = true; }, { once: true, capture: true, passive: true }));
   const buzz = p => { if (gestured && prefs().haptics && navigator.vibrate) try { navigator.vibrate(p || 8); } catch (e) {} };   // browsers refuse a vibration before the first tap
@@ -218,7 +228,7 @@ body.menu-open #gk-emo,body.menu-open #gk-stam{display:none!important}
 
   /* ---------- the Free Shop Token timer ---------- */
   let freeT = 0;
-  function freeLeft() { const b = readJSON(BOOST_KEY, null) || {}; return Math.max(0, Math.floor((+b.freeShopUntil || 0) - Date.now())); }
+  function freeLeft() { const k = kit(), b = k ? { freeShopUntil: GB().state.freeShopUntil } : readJSON(BOOST_KEY, null) || {}; return Math.max(0, Math.floor((+b.freeShopUntil || 0) - Date.now())); }
   const free = () => freeLeft() > 0;
   function freeTick() {
     let el = $('#gk-free'); const left = freeLeft();
@@ -244,6 +254,7 @@ body.menu-open #gk-emo,body.menu-open #gk-stam{display:none!important}
   }
   // a crate, egg or loot box opened: roll for a site item (one at a time: a token that's held means no roll). Returns the item or null.
   function crate(how) {
+    if (kit()) { GB().ask({ t: 'crate', how: String(how || GAME) }).then(r => { const it = r && r.ok && r.item; if (it && SPEC[it.id]) showDrop(SPEC[it.id]); }); return null; }   // the host rolls
     for (const id in SPEC) { if (itemCount(id) >= SPEC[id].max) continue; if (Math.random() < DROP) { if (grant(id, how)) { showDrop(SPEC[id]); return Object.assign({ id }, SPEC[id]); } } }
     return null;
   }
@@ -260,12 +271,12 @@ body.menu-open #gk-emo,body.menu-open #gk-stam{display:none!important}
     tut.el = el; return el;
   }
   function seen(key) { return !!((profile().seen || {})['tut:' + key]); }
-  function markSeen(key) { const p = profile(); if (!p.v) return; p.seen = p.seen || {}; p.seen['tut:' + key] = Date.now(); writeJSON(KEY, p); }
+  function markSeen(key) { const p = profile(); if (!p.v) return; p.seen = p.seen || {}; p.seen['tut:' + key] = Date.now(); if (p.remote) GB().post({ t: 'seen', key: 'tut:' + key }); else writeJSON(KEY, p); }
   /* Shared lessons: a step tagged skill: 'move' | 'sprint' | 'camera' | 'jump' | 'emotes' (any name) is the same lesson in every
      game, so once a player has done it anywhere it is skipped everywhere else. Done = advanced past it (Next, or its `until`),
      or the whole tutorial skipped. Tracked in the profile as seen['skill:<name>'], site-wide. */
   const skillSeen = name => !!((profile().seen || {})['skill:' + name]);
-  function markSkill(name) { if (!name || skillSeen(name)) return; const p = profile(); if (!p.v) return; p.seen = p.seen || {}; p.seen['skill:' + name] = Date.now(); writeJSON(KEY, p); }
+  function markSkill(name) { if (!name || skillSeen(name)) return; const p = profile(); if (!p.v) return; p.seen = p.seen || {}; p.seen['skill:' + name] = Date.now(); if (p.remote) GB().post({ t: 'seen', key: 'skill:' + name }); else writeJSON(KEY, p); }
   function tutorial(key, steps, opts) {
     opts = opts || {}; steps = (steps || []).filter(Boolean);
     if (!opts.force) steps = steps.filter(st => !(st.skill && skillSeen(st.skill)));   // basic lessons already learnt in another game
@@ -462,8 +473,12 @@ body.menu-open #gk-emo,body.menu-open #gk-stam{display:none!important}
   /* ---------- boot ---------- */
   function ready(fn) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
   ready(() => { autoWatch(); watchLobbies(); freeTick(); });
+  // off the site: a fresh state from the host may change the UI size, emotes or the Free Shop Token
+  (function () { const b = GB(); if (b && b.onState) b.onState(() => { if (!kit()) return; applyScale(); emotes.reload(); freeTick(); }); })();
 
   root.GK = { GAME, profile, prefs, hint, center, watch, pop, compact, stamina, tutorial, skillSeen, markSkill, crate, free, freeLeft, emotes, lockedCube, prop, pet, PROP_KINDS, buzz, reduce, rng,
     // the kit's bridge state (set by games that want GK to know the app's state)
-    state: null };
+    state: null,
+    // 'platform' (on the Grug site) | 'guest' (played elsewhere, see bridge.js) | 'pending'; the site's own game.html has no bridge: platform
+    get mode() { const b = GB(); return b ? b.mode : 'platform'; } };
 })(window);

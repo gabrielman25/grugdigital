@@ -114,7 +114,16 @@
     const won = G.checkMilestones(); G.save('backfill');
     if (won.length) setTimeout(() => G.celebrate(won), 1200);
   }
-  function gameExtras() { return { avatar: G.profile.avatar, player: G.profile.name, look: look(), grug: ROOT, freeShopUntil: G.freeShopLeft() ? Date.now() + G.freeShopLeft() : 0, uiScale: G.profile.prefs.uiScale || 1, emotes: G.emotes }; }
+  function gameExtras() { return { avatar: G.profile.avatar, player: G.profile.name, look: look(), grug: ROOT, freeShopUntil: G.freeShopLeft() ? Date.now() + G.freeShopLeft() : 0, uiScale: G.profile.prefs.uiScale || 1, emotes: G.emotes, sandy: sandy(), kit: kit() }; }
+  // for a game on another origin (itch.io builds, assets/bridge.js), which can't read the site's localStorage:
+  // sandy = the avatar editor's look ('grug.sandy.v1'); kit = the profile bits gamekit.js uses (tutorials seen, site items, UI prefs, emotes)
+  function sandy() { try { const c = JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); return c && typeof c === 'object' ? c : null; } catch (e) { return null; } }
+  function kit() {
+    const p = G.profile, seen = {}, items = {};
+    Object.keys(p.seen || {}).forEach(k => { if (/^(tut|skill):/.test(k)) seen[k] = p.seen[k]; });
+    Object.keys(p.items || {}).forEach(k => { items[k] = { n: +p.items[k].n || 0 }; });
+    return { seen, items, prefs: { uiScale: p.prefs.uiScale || 1, motion: p.prefs.motion !== false, haptics: p.prefs.haptics !== false }, emotes: (p.emotes || []).slice() };
+  }
   // A flat, catalog-free version of the look for games that draw their own character (Take a Tea's voxel rig)
   const hexRgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
   // (only used until the 3D avatar loads: the blocky stand-in wears the main colours of what's on)
