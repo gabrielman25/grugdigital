@@ -1,0 +1,5 @@
+Grug · Glamour Spa Deluxe
+A Grug original by Grug Digital. Play it with your own avatar on https://grugdigital.pages.dev/games/glowupspa/
+
+Fredoka (fredoka.woff2): SIL Open Font License 1.1, https://openfontlicense.org
+three.js (in the avatar runtime, loaded from https://grugdigital.pages.dev): MIT License

@@ -25,6 +25,7 @@ RUNTIME = SITE + '/assets/sandy-runtime.js'
 
 GRUGB = ("/* itch build: the wrapper page's bridge (assets/bridge.js), or null when this file runs on its own */\n"
          "const GRUGB = (() => { try { return window.parent !== window && window.parent.GrugBridge || null; } catch (e) { return null; } })();\n")
+READY = "  if (GRUGB) await GRUGB.ready();   // platform or guest decides the player's look\n"
 GATE = "if (GRUGB) { await GRUGB.ready(); if (window.parent.GrugGuest) await window.parent.GrugGuest.gate(); }"
 
 COMMON = [
@@ -51,6 +52,35 @@ GAMES = {
              "  if (GRUGB) await GRUGB.ready();   // platform or guest decides the player's look\n  await Game.setup();\n  " + GATE + "\n  load.classList.add('done'); Bridge.start();"),
             ("html: esc(c.isPlayer ? (Bridge.state && Bridge.state.player) || 'You' : c.name)",
              "html: esc(c.isPlayer ? (GRUGB ? GRUGB.name((Bridge.state && Bridge.state.player) || 'You') : (Bridge.state && Bridge.state.player) || 'You') : c.name)"),
+        ],
+    },
+    # The other originals call the player "You" (as they do on the site) and never show a profile name, so only boot changes.
+    'chestquest': {
+        'title': 'Crypt Crawler', 'bg': '#0b0e14',
+        'patches': [
+            ("  makeWorld(atlas); await Game.setup();\n  load.classList.add('done'); Bridge.start();",
+             "  makeWorld(atlas);\n" + READY + "  await Game.setup();\n  " + GATE + "\n  load.classList.add('done'); Bridge.start();"),
+        ],
+    },
+    'petmountainrescue': {
+        'title': 'Peak Pals', 'bg': '#8fd0ff',
+        'patches': [
+            ("  makeWorld(atlas); await Game.setup();\n  load.classList.add('done'); Bridge.start();",
+             "  makeWorld(atlas);\n" + READY + "  await Game.setup();\n  " + GATE + "\n  load.classList.add('done'); Bridge.start();"),
+        ],
+    },
+    'glowupspa': {
+        'title': 'Glamour Spa Deluxe', 'bg': '#5cc8ff',
+        'patches': [
+            ("  await Game.setup();\n  Bridge.start();\n  load.classList.add('done');",
+             READY + "  await Game.setup();\n  " + GATE + "\n  Bridge.start();\n  load.classList.add('done');"),
+        ],
+    },
+    'mysteryblasters': {
+        'title': 'Foam Frenzy', 'bg': '#0b0e14',
+        'patches': [
+            ("  await Game.setup(txt);\n  Bridge.start();",
+             READY + "  await Game.setup(txt);\n  " + GATE + "\n  Bridge.start();"),
         ],
     },
 }

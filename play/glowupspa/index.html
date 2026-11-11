@@ -41,6 +41,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#0b0e14}
 <script src="../../assets/games.js"></script>
 <script src="../../assets/grug.js"></script>
 <script src="../../assets/grug-app.js"></script>
+<script src="../../assets/hostbridge.js"></script>
 <script>
 'use strict';
 (function () {
@@ -102,7 +103,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#0b0e14}
     return Object.assign({ points: 0, pearls: pearls(), pearlName: 'Pearls', standalone: true, inv: st.inv, best: st.game.best, runs: st.game.runs, shop, title: GAME.title,
       collectible: GAME.collectible, runSeconds: GAME.runSeconds, brand: { name: 'Grug', colors: ['#ec4899', '#ffffff'] }, store: 'A Grug original' }, GrugApp.gameExtras());
   }
-  const toGame = m => { try { f.contentWindow.postMessage(Object.assign({ rw: 1 }, m), '*'); } catch (e) {} };
+  let link = null;   // GrugHost.connect below: picks the itch build or the local game.html, and checks origins
+  const toGame = m => { if (link) link.toGame(m); };
   const sendState = () => toGame(Object.assign({ t: 'state' }, state()));
   function buy(id) {
     const it = item(id); if (!it) return { ok: false, reason: 'That power-up isn’t in the shop.' };
@@ -124,21 +126,19 @@ html,body{margin:0;height:100%;overflow:hidden;background:#0b0e14}
       actions: [{ label: 'Not now', kind: 'quiet', value: null }, { label: 'Get Pearls', kind: 'primary', value: 'go' }] });
     if (go === 'go') location.href = pearlsLink();
   }
-  addEventListener('message', e => {
-    const d = e.data; if (!d || d.rw !== 1 || typeof d.t !== 'string' || e.source !== f.contentWindow) return;
-    const reply = r => toGame(Object.assign({ t: 'reply', req: String(d.req || ''), state: state() }, r));
+  function onGame(d, reply) {
     if (d.t === 'hello') { sendState(); GrugApp.onPlay(); GrugApp.onLogon(); }
     else if (d.t === 'buy') { const r = buy(String(d.id)); reply(r); if (r.short) offerPearls(r.short, r.item); }
     else if (d.t === 'needPearls') { const it = item(String(d.id)); if (it && pearls() < it.cost) offerPearls(it.cost - pearls(), it.name); }
     else if (d.t === 'use') reply(use(d.ids));
     else if (d.t === 'score') { const s = Math.max(0, Math.floor(+d.score || 0)); st.game.runs++; if (s > st.game.best) st.game.best = s; save(); GrugApp.onScore(d, { play: false }); }
-  });
+  }
   document.addEventListener('visibilitychange', () => { if (document.hidden) toGame({ t: 'pause' }); });
   addEventListener('storage', e => { if (e.key === WKEY) { paintPearls(); sendState(); } if (e.key === GAME.storageKey) { st = load(); sendState(); } });
   addEventListener('pageshow', e => { paintPearls(); if (e.persisted) sendState(); });
 
   GrugApp.init({ app: GAME.app, get: () => st, save, sendGameState: sendState, buzz: () => {} });
-  f.src = GAME.src;
+  link = GrugHost.connect({ frame: f, id: GAME.app, local: GAME.src, state, onMessage: onGame });
 })();
 </script>
 </body>
