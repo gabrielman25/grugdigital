@@ -49,7 +49,7 @@ def img(path, max_px=None, fmt='WEBP', q=80):
     else: im.save(b, 'WEBP', quality=q, method=6); mime = 'image/webp'
     assets[path] = 'data:%s;base64,%s' % (mime, base64.b64encode(b.getvalue()).decode())
 
-for d, mx, fmt, q in [('assets/thumbs', 720, 'JPEG', 78), ('assets/clothing/thumbs', 240, 'WEBP', 82), ('assets/sandy', None, 'WEBP', 88),
+for d, mx, fmt, q in [('assets/thumbs', 720, 'JPEG', 78), ('assets/boxart', 720, 'JPEG', 78), ('assets/clothing/thumbs', 240, 'WEBP', 82), ('assets/sandy', None, 'WEBP', 88),
                       ('community', 900, 'JPEG', 72), ('play/soluna/assets/photos', 900, 'JPEG', 74), ('work/alchemy', 900, 'JPEG', 74)]:
     for f in sorted(os.listdir(os.path.join(REPO, d))):
         if re.search(r'\.(jpe?g|png|webp)$', f, re.I): img(d + '/' + f, mx, fmt, q)
@@ -58,8 +58,7 @@ if MODE == 'site':   # full clothing templates: the avatar editor dresses the 3D
     for f in sorted(os.listdir(os.path.join(REPO, 'assets/clothing'))):
         if f.endswith('.png'): img('assets/clothing/' + f, None, 'WEBP', 92)
 img('favicon.png', 128, 'WEBP', 90)
-for f in os.listdir(os.path.join(REPO, 'assets/prints')):
-    if f.endswith('.png'): img('assets/prints/' + f, 192, 'WEBP', 88)
+# (the picture prints in assets/prints/ were removed: the avatar has only its drawn shapes)
 
 # ---------- shared scripts and styles (kept once, put back into each page in the browser) ----------
 def font_data(css, base):
@@ -69,7 +68,7 @@ def font_data(css, base):
     return re.sub(r"url\(['\"]?([^'\")]+\.woff2)['\"]?\)", sub, css)
 
 libs = {}
-for f in ['catalog.js', 'icons.js', 'games.js', 'grug.js', 'grug-app.js', 'theme.js', 'chef.js', 'gamepage.js']:
+for f in ['catalog.js', 'icons.js', 'games.js', 'grug.js', 'grug-app.js', 'theme.js', 'chef.js', 'gamepage.js', 'demo.js', 'cursors.js']:
     libs[f] = rd('assets/' + f)
 for f in ['grug.css', 'grug-app.css', 'gamepage.css']:
     libs[f] = font_data(rd('assets/' + f), 'assets')
@@ -85,11 +84,10 @@ g = patch(g, "const url = p => ROOT + String(p || '').replace(/^\\/+/, '');",
           "const url = p => { const k = String(p || '').replace(/^\\/+/, ''); return (root.GRUG_ASSETS && root.GRUG_ASSETS[k.split(/[?#]/)[0]]) || ROOT + k; };")
 g = patch(g, "const d = url('assets/sandy/');\n    return { def: true, bust: d + 'bust.png', full: d + 'full.png', happy: d + 'happy.png', sad: d + 'sad.png', cheer: d + 'cheer.png' };",
           "const d = n => url('assets/sandy/' + n + '.png');   // showcase: each picture by its own path, so the packed copies are found\n    return { def: true, bust: d('bust'), full: d('full'), happy: d('happy'), sad: d('sad'), cheer: d('cheer') };")
-g = patch(g, "const colorful = () => !!(profile && profile.prefs && profile.prefs.colorIcons);", "const colorful = () => false;   // showcase: colourful icon pictures aren't packed")
+# (the colourful icon pictures are gone from grug.js, so there is nothing to switch off here any more)
 g = g.replace("'<div class=\"g-pref\"><span><b>Colorful icons</b>", "'<div class=\"g-pref\" hidden><span><b>Colorful icons</b>")
 libs['grug.js'] = g
-libs['theme.js'] = patch(libs['theme.js'], "img.src = me ? me.src.replace(/theme\\.js.*$/, 'backdrop.jpg') : 'assets/backdrop.jpg';",
-                         "img.src = (window.GRUG_ASSETS && window.GRUG_ASSETS['assets/backdrop.jpg']) || 'assets/backdrop.jpg';")
+# (theme.js no longer loads an image backdrop: the faint pixel patterns replaced it, so there is nothing to patch there)
 for k in libs:
     if '</script' in libs[k].lower(): raise SystemExit(k + ' contains </script')
 
@@ -190,9 +188,8 @@ for p in presets:   # pictures as webp (much smaller than the rendered png)
         im = Image.open(io.BytesIO(base64.b64decode(v.split(',', 1)[1]))); b = io.BytesIO(); im.save(b, 'WEBP', quality=90, method=6)
         p['snaps'][k] = 'data:image/webp;base64,' + base64.b64encode(b.getvalue()).decode()
 
-# a few full-pack prints for the 3D editor (the 10 quick prints are packed above)
-PACK_PRINTS = ['bubble-purple', 'star-gold', 'heart', 'lightning-bolt-yellow', 'sparkle', 'ghost-pink', 'snowman', 'dice', 'burger', 'candy',
-               'party-popper', 'trophy', 'planet-saturn', 'cactus', 'gift-box', 'clownfish', 'teddy-bear', 'music', 'ufo', 'moon']
+# (the icon pack of prints was removed, so the 3D editor gets none)
+PACK_PRINTS = []
 for pid in PACK_PRINTS:
     if os.path.exists(os.path.join(REPO, 'assets/prints/pack/%s.webp' % pid)): img('assets/prints/pack/%s.webp' % pid, 192, 'WEBP', 90)
 pack_prints = [p for p in PACK_PRINTS if 'assets/prints/pack/%s.webp' % p in assets]

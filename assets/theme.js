@@ -81,7 +81,7 @@
       bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'meat', '#menu'], ['play', 'Play', 'controller', 'games/'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } },
     // Demo made to pitch Coco Crepes, Waffles & Coffee (Katy): its rewards app (play/coco/, built from tools/partner-app/partners/coco/)
     // has no game of its own yet (no `game`), so partner mode lists the Grug originals only. fontDisplay: a second face for headings.
-    coco: { n: 'Coco Crepes, Waffles & Coffee', short: 'Coco', color: '#E5BD2F', i: 'coffee', f: 'f', logo: 'play/coco/logo.png', barLogo: 'play/coco/logo-bar.png', app: 'play/coco/', demo: true,
+    coco: { n: 'Coco Crepes, Waffles & Coffee', short: 'Coco', color: '#E5BD2F', i: 'coffee', f: 'f', logo: 'play/coco/logo.png', barLogo: 'play/coco/logo-bar.png', app: 'play/coco/', demo: true, source: 'Coco’s name, logo, menu and photos are taken from cococrepes.com, the official website of Coco Crepes, Waffles & Coffee, and belong to Coco.',
       coin: 'play/coco/coin.png', font: 'play/coco/montserrat.woff2', fontDisplay: 'play/coco/frank-ruhl-libre.woff2', colors: { accent: '#E5BD2F', deep: '#533020', cream: '#fbf3e4', page: '#FBF7EF' },
       wallet: { key: 'coco-crepes-crepeclub-v1', field: 'coins', label: 'Coco Coins', to: '#store', rate: 25 },
       bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'cup', '#menu'], ['play', 'Play', 'controller', 'games/'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } },
@@ -251,7 +251,7 @@
     // wrapped page, and the coin balance is left off the bar because nothing is earned or spent
     const FROZEN = !(window.GRUG_DEMO && window.GRUG_DEMO.isLive(p.p));
     if (FROZEN) { document.documentElement.style.setProperty('--gd-lift', '84px');
-      const note = () => window.GRUG_DEMO && window.GRUG_DEMO.install(p.n, p.p);
+      const note = () => window.GRUG_DEMO && window.GRUG_DEMO.install(p.n, p.p, p.source);
       if (window.GRUG_DEMO) note(); else { const sc = document.createElement('script'); sc.src = R + 'assets/demo.js'; sc.onload = note; document.head.appendChild(sc); } }
     const top = document.createElement('header'); top.className = 'g-top ptb';
     top.innerHTML = '<a class="ptb-logo" href="' + R + p.app + '" aria-label="' + esc(p.n) + ' home"><img src="' + R + (p.barLogo || p.logo) + '" alt="' + esc(p.n) + '">' + (p.demo || FROZEN ? '<span class="ptb-demo" title="A demonstration only. Not affiliated with or endorsed by this business.">Demo</span>' : '') + '</a><span class="ptb-sp"></span>' +

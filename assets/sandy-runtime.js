@@ -5861,7 +5861,8 @@ function decalCanvas(name){const c=document.createElement('canvas');c.width=c.he
     g.lineWidth=14;g.beginPath();g.arc(0,8,58,0.15*Math.PI,0.85*Math.PI);g.stroke()}
   else if(name==='peace'){g.lineWidth=18;g.strokeStyle=ink;g.beginPath();g.arc(0,0,100,0,Math.PI*2);g.moveTo(0,-100);g.lineTo(0,100);g.moveTo(0,0);g.lineTo(-71,71);g.moveTo(0,0);g.lineTo(71,71);g.stroke()}
   return c}
-// 'print:<name>' = a ready-made print shipped with the site (assets/prints/<name>.png); anything else not a shape is an image URL
+// 'print:<name>' = a ready-made print that used to ship in assets/prints/ (removed: it now fails to load and is skipped);
+// anything else not a shape is an image URL
 const SR_BASE=((document.currentScript&&document.currentScript.src)||'').replace(/sandy-runtime\.js[^/]*$/,'');
 const DECAL_PENDING=new Set();
 // 'pack:<id>' = a print from the icon pack that used to be in assets/prints/pack/. The pack has been removed, so a look

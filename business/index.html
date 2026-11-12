@@ -573,6 +573,22 @@ table.plain{border-collapse:collapse;width:100%;min-width:36rem;font-size:.9rem}
 .stone{display:grid;place-items:center;width:4.4rem;height:4.4rem;flex:none;border-radius:.7rem;background:var(--mode);color:var(--ink);box-shadow:0 .2rem 0 var(--lo)}
 .stone .mk{width:2.4rem;height:2.4rem}
 .stone.dim{background:var(--field-hi);box-shadow:none;opacity:1}
+/* legal notices: a banner at the top of every app that keeps records, and a one-time "Before you start" screen */
+.legal{display:flex;gap:.7rem;align-items:flex-start;border-radius:.63rem;padding:.8rem 1rem;margin:0 0 1rem;background:var(--warn-bg);box-shadow:inset 0 0 0 1.5px #E8B739;color:var(--ink);font-size:.9rem;line-height:1.45}
+.legal .li{flex:none;width:1.6rem;height:1.6rem;border-radius:50%;background:#E8B739;color:#1E1B16;display:grid;place-items:center;font-weight:800;font-size:1rem;line-height:1}
+.legal b{display:block;font-weight:700;margin-bottom:.1rem}
+.legal-foot{margin:1.4rem 0 .4rem;font-size:.82rem;color:var(--text-2);text-align:center;line-height:1.45}
+#legalGate{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:1rem;background:rgba(30,27,22,.6)}
+#legalGate .lg{width:min(30rem,100%);max-height:calc(100vh - 2rem);overflow:auto;background:var(--panel,#fff);color:var(--ink);border-radius:.9rem;padding:1.2rem 1.25rem 1.1rem;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+#legalGate h2{margin:0 0 .35rem;font-size:1.35rem}
+#legalGate p{margin:0 0 .7rem;color:var(--text-2)}
+#legalGate ul{margin:0 0 .9rem;padding-left:1.15rem}
+#legalGate li{margin:0 0 .45rem}
+#legalGate .ck{display:flex;gap:.55rem;align-items:flex-start;margin:.2rem 0 .9rem;font-weight:600;cursor:pointer}
+#legalGate .ck input{width:1.15rem;height:1.15rem;margin-top:.15rem;flex:none}
+#legalGate button{width:100%}
+#legalGate button[disabled]{opacity:.45;cursor:not-allowed}
+@media print{.legal,.legal-foot{display:none!important}}
 </style>
 </head>
 <body>
@@ -1301,14 +1317,26 @@ A.ckToggle=el=>{const on=!el.classList.contains('on');el.classList.toggle('on',o
 
 /* ---------- Render ---------- */
 const locked=()=>!!(meta&&meta.locked);
+/* What each record-keeping app is not. Shown as a banner at the top of the app's main view (never on the staff kiosk). */
+const LEGAL={
+  schedule:['Overtime warnings and pay estimates are a guide, not legal or payroll advice.','Overtime rules depend on your state, your city and each worker’s job, and can differ from the settings here. Check them with your payroll provider, an accountant or an employment lawyer.'],
+  clock:['These hours are a record-keeping aid, not payroll.','Check every hour before you pay anyone. You’re responsible for paying wages and overtime correctly and for keeping time records for as long as the law requires. These records live only on this device, so save a backup in Fossil often.'],
+  team:['Staff details are kept only on this device.','Names, phone numbers and pay rates stay on this device, and Grug Digital can’t see, back up or recover them. Only enter what you need, keep the device locked, and tell your staff what you keep about them.'],
+  temps:['The safe ranges are general guidance, not your health code.','They follow the FDA Food Code, but your local health department’s rules come first and may be stricter. This log doesn’t replace any record your health department requires.'],
+  checklists:['Checklists are reminders, not a food-safety plan.','They don’t replace your health department’s requirements, your inspections or your own food-safety training.'],
+  expirations:['Reminders only help if the dates are right and someone opens the app.','You’re responsible for renewing every permit, license and certificate on time. Check the real dates on the documents themselves.'],
+  recipes:['Costs are estimates from the prices you enter.','Check them against your invoices before you change menu prices.']
+};
+const legalBox=id=>LEGAL[id]?`<div class="legal noprint" role="note"><span class="li" aria-hidden="true">!</span><div><b>${esc(LEGAL[id][0])}</b>${esc(LEGAL[id][1])}</div></div>`:'';
 function frame(body,S,cls){
   const m=body.match(/^([\s\S]*?<p class="lead[^"]*">[\s\S]*?<\/p>)/);
   const boxed=h=>{const k=h.indexOf('<!--box-->');return k<0?(h.trim()?`<div class="panelbox">${h}</div>`:''):`${h.slice(0,k)}<div class="panelbox">${h.slice(k+10)}</div>`};
-  if(S.id==='home')return`<main class="${cls||''} homey"><div class="mi">${boxed(body)}</div></main>`;
+  if(S.id==='home')return`<main class="${cls||''} homey"><div class="mi">${boxed(body)}<p class="legal-foot noprint">Daypart is a free record-keeping aid. It isn’t legal, payroll, tax or food-safety advice, and using it doesn’t make you compliant with any law. Everything you enter stays on this device. <a href="../terms.html" target="_blank" rel="noopener">Terms</a></p></div></main>`;
   if(!m)return`<main class="${cls||''}"><div class="mi">${boxed(body)}</div></main>`;
   let head=m[1];
   if(!ui.sub&&S.tag)head=head.replace(/<h1>/,`<p class="kicker">by ${esc(S.co)}</p><h1>`).replace('</h1>',`</h1><p class="tagline">${esc(S.tag)}</p>`);
-  return`<header class="hero noprint"><div class="in ${cls||''}">${appIcon(S,'blob')}<div class="ht">${head}</div></div></header><main class="${cls||''}"><div class="mi">${boxed(body.slice(m[1].length))}</div></main>`;
+  const note=!ui.sub&&!locked()?legalBox(S.id):'';
+  return`<header class="hero noprint"><div class="in ${cls||''}">${appIcon(S,'blob')}<div class="ht">${head}</div></div></header><main class="${cls||''}"><div class="mi">${note}${boxed(body.slice(m[1].length))}</div></main>`;
 }
 function topBar(S,home){
   const n=locked()?0:attentionAll().length;
@@ -1328,6 +1356,7 @@ function render(){
   app.innerHTML=`<div class="page b-${S.brand} ${home?'':'inapp'} ${enter?'enter':''}">${topBar(S,home)}${frame(body,S,isWide?'wide':'')}</div>`;
   document.documentElement.classList.toggle('gd-locked',locked());
   applyBrand(S);tipify(app);
+  if(needLegal())legalGate();
 }
 /* Kit backgrounds: a static pixel pattern in the app's accent behind everything, and the same tile in ink on the header. */
 let curBrand=null;const PAT={};
@@ -1449,7 +1478,7 @@ let TOUR=null;
 function tourEnd(){if(!TOUR)return;TOUR.els.forEach(e=>e.remove());removeEventListener('resize',TOUR.place);removeEventListener('scroll',TOUR.place,true);document.removeEventListener('keydown',TOUR.key,true);TOUR=null;
   try{localStorage.setItem('grug.biz.tour','done')}catch(e){}}
 function tour(i){
-  if(locked())return;closePop();if(ui.page!=='home'||ui.sub){go('home')}
+  if(locked())return;if(needLegal()){LEGAL_NEXT=()=>tour(i);legalGate();return}closePop();if(ui.page!=='home'||ui.sub){go('home')}
   if(!TOUR){const catchEl=document.createElement('div'),hole=document.createElement('div'),tip=document.createElement('div');
     catchEl.className='tour-catch';hole.className='tour-hole';tip.className='tour-tip';tip.setAttribute('role','dialog');tip.setAttribute('aria-modal','true');tip.setAttribute('aria-labelledby','tourT');
     document.body.append(catchEl,hole,tip);
@@ -1475,6 +1504,30 @@ function tour(i){
 A.tour=()=>{closePop();tour(0)};
 /* the onboarding link (restaurant/) lands here with ?start=1: a fresh dashboard gets example data in every app (the owner's
    own name, if the link had one), then the tour starts. ?tour=1 just starts the tour. */
+/* "Before you start": shown once per device, the first time the dashboard opens after setup (never on the staff
+   kiosk). It stays until the owner ticks the box and taps Continue; meta.legalAckAt records it. The tour waits for it. */
+let LEGAL_NEXT=null;
+const needLegal=()=>!!D&&!!meta&&!!D.settings.setupDone&&!meta.legalAckAt&&!locked();
+function legalGate(){
+  if(!needLegal()||document.getElementById('legalGate'))return;
+  const g=document.createElement('div');g.id='legalGate';g.setAttribute('role','dialog');g.setAttribute('aria-modal','true');g.setAttribute('aria-labelledby','lgT');
+  g.innerHTML=`<div class="lg"><h2 id="lgT">Before you start</h2>
+    <p>Daypart helps you keep track of your restaurant. Please read this once:</p>
+    <ul>
+      <li><b>It isn’t advice.</b> Its overtime warnings, pay estimates, temperature ranges and reminders are general helpers. They aren’t legal, payroll, tax, employment or food-safety advice and may not match the rules where you are.</li>
+      <li><b>You stay responsible.</b> Paying wages and overtime correctly, keeping the records the law requires, meeting your health code and renewing permits are up to you. Check anything important with a professional.</li>
+      <li><b>Your records stay on this device only.</b> Grug Digital can’t see, back up or recover them. Save a backup in Fossil often, and keep this device locked.</li>
+      <li><b>Staff details are yours to protect.</b> Only enter what you need about your staff, and let them know what you keep.</li>
+    </ul>
+    <label class="ck"><input type="checkbox" id="lgOk"> I understand that Daypart is a record-keeping aid and that I’m responsible for my own compliance.</label>
+    <button type="button" class="btn pri" id="lgGo" disabled>Continue</button>
+    <p style="margin:.7rem 0 0;font-size:.82rem;text-align:center">Read the full <a href="../terms.html" target="_blank" rel="noopener">terms</a> and <a href="../privacy.html" target="_blank" rel="noopener">privacy policy</a>.</p></div>`;
+  document.body.appendChild(g);
+  const ok=g.querySelector('#lgOk'),go_=g.querySelector('#lgGo');
+  ok.addEventListener('change',()=>{go_.disabled=!ok.checked});
+  go_.addEventListener('click',()=>{if(!ok.checked)return;meta.legalAckAt=nowISO();saveMeta();g.remove();const n=LEGAL_NEXT;LEGAL_NEXT=null;if(n)n()});
+  setTimeout(()=>{try{ok.focus()}catch(e){}},50);
+}
 function onboard(){let q;try{q=new URLSearchParams(location.search)}catch(e){return}if(!q.has('start')&&!q.has('tour'))return;
   try{history.replaceState(history.state,'',location.pathname)}catch(e){}
   let o={};try{o=JSON.parse(sessionStorage.getItem('grug.onboard')||'{}')||{};sessionStorage.removeItem('grug.onboard')}catch(e){}
@@ -1573,7 +1626,7 @@ A.copyWeek=()=>{
     D.shifts.push(touch({...s,id:C.uid(),date,createdAt:null}));n++}},null);
   toast(n?`Copied ${n} shifts from last week.`:'Those shifts are already here.',!!n);
 };
-A.exportHours=()=>{const ds=C.weekDates(ui.week);download('hours-week-of-'+ds[0]+'.csv',C.csv(C.payrollRows(D,ds)),'text/csv');toast('Saved. These are scheduled hours, so check them against hours actually worked.')};
+A.exportHours=()=>{const ds=C.weekDates(ui.week);download('hours-week-of-'+ds[0]+'.csv',C.csv(C.payrollRows(D,ds)),'text/csv');toast('Saved. These are scheduled hours, not hours worked, and the pay is an estimate. Check every line before you run payroll.')};
 
 SUB.shift=s=>{
   const ex=s.id?D.shifts.find(x=>x.id===s.id):null;
@@ -2066,7 +2119,7 @@ SUB.hours=()=>{
   :'<p class="mute">Nobody clocked in this week.</p>'}
   <div class="quiets">${Object.keys(W).length?'<button class="quiet" data-act="exportWorked">Save hours worked for payroll</button>':''}<button class="quiet" ${goAttr('clock',{type:'punchEdit'})}>Add a missed clock-in</button></div>`;
 };
-A.exportWorked=()=>{const ds=C.weekDates(ui.week);download('hours-worked-week-of-'+ds[0]+'.csv',C.csv(C.workedRows(D,ds)),'text/csv');toast('Saved.')};
+A.exportWorked=()=>{const ds=C.weekDates(ui.week);download('hours-worked-week-of-'+ds[0]+'.csv',C.csv(C.workedRows(D,ds)),'text/csv');toast('Saved. The pay is an estimate. Check every line before you run payroll.')};
 SUB.punchEdit=s=>{
   const ex=s.id?D.punches.find(p=>p.id===s.id):null,p=ex||{empId:'',in:TODAY()+'T09:00',out:TODAY()+'T17:00',edits:[]};
   ui.form={save:d=>{if(!ex&&!d.empId)return'Choose a person.';if(!d.inD||!d.inT)return'Choose when they clocked in.';

@@ -294,7 +294,7 @@ const R = {
     const pts = live.map(g => visitPts(g.id)).filter(Boolean);
     return '<p class="eyebrow">' + ic('sparkle') + 'Katy, Texas</p>' +
       '<h1 class="h1">Games made for <em>Katy restaurants.</em></h1>' +
-      '<p class="lead"><b>This walk-through is a demonstration.</b> The businesses shown have not approved or endorsed it, nothing in it is saved, and no rewards are offered or redeemable. The idea: every restaurant gets its own rewards app and a game built from its menu. Guests tap a tag at the counter, earn points, and spend them on power-ups and rewards. One avatar and one wallet work across every game.</p>' +
+      '<p class="lead"><b>This walk-through is a demonstration.</b> The businesses shown have not approved or endorsed it, nothing in it is saved, and no rewards are offered or redeemable. The idea: every restaurant gets its own rewards app and a game built from its menu. Guests tap a tag at the counter, earn points, and spend them on power-ups in the restaurant’s game. One avatar and one wallet work across every game.</p>' +
       '<div class="grid stats4 mt2">' +
         stat(GAMES.length, 'demo games') + stat(Math.min.apply(null, pts) + '–' + Math.max.apply(null, pts), 'points per visit') + stat('1 tap', 'to check in, no account') + stat('1', 'avatar in every game') +
       '</div>' +
@@ -353,8 +353,8 @@ const R = {
         sec('Top', opt('top', '', 'tank top', !top) + opt('top', 'gen_tshirt', 'T-shirt', top === 'gen_tshirt') + opt('top', 'gen_longsleeve', 'long sleeve', top === 'gen_longsleeve')) +
         sec('Top colour', CLOTH.map(c => sw('topcol', c, (top ? cfg.top.colour : cfg.outfit.shirt) === c)).join('')) +
         sec('Shorts', CLOTH.map(c => sw('outfit.shorts', c, cfg.outfit.shorts === c)).join('')) +
-        sec('Shirt print', '<button class="prt" data-ed="print" data-v="" aria-pressed="' + !prt + '">none</button>' +
-          PRINTS.map(v => '<button class="prt" data-ed="print" data-v="' + v + '" aria-pressed="' + (prt === v) + '" title="' + v.replace(/^\w+:/, '') + '"><img src="' + printSrc(v) + '" alt=""></button>').join('')) +
+        (!PRINTS.length ? '' : sec('Shirt print', '<button class="prt" data-ed="print" data-v="" aria-pressed="' + !prt + '">none</button>' +
+          PRINTS.map(v => '<button class="prt" data-ed="print" data-v="' + v + '" aria-pressed="' + (prt === v) + '" title="' + v.replace(/^\w+:/, '') + '"><img src="' + printSrc(v) + '" alt=""></button>').join(''))) +
         '</div>';
     }
     return '<p class="eyebrow">' + ic('t-shirt') + 'One look, every game</p><h1 class="h1">The avatar</h1>' +
@@ -509,7 +509,7 @@ function randomLook(){
   const top = pick(['', 'gen_tshirt', 'gen_longsleeve']), shirt = pick(CLOTH);
   return {body: pick(C.bodies), skin: pick(C.skinTones), hair: {style: Math.floor(Math.random() * C.hairStyles.length), colour: pick(HAIR)}, expression: pick(FACES),
     hat: Math.random() < 0.5 ? {type: 'none'} : {type: pick(C.hats).id, colour: pick(CLOTH)}, outfit: {shirt, shorts: pick(CLOTH), belt: '#141414'},
-    top: top ? {part: top, texture: top, colour: shirt} : null, decal: {image: Math.random() < 0.8 ? pick(PRINTS) : null, size: 1, up: 0, side: 0}};
+    top: top ? {part: top, texture: top, colour: shirt} : null, decal: {image: PRINTS.length && Math.random() < 0.8 ? pick(PRINTS) : null, size: 1, up: 0, side: 0}};
 }
 async function edWear(){
   if(!ED.sandy || !window.SandyView) return;

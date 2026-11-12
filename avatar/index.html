@@ -139,7 +139,7 @@ Every field is optional; anything left out comes from `SandyKit.DEFAULT`.
 - `body`: `"female"` or `"male"` (`SandyKit.CATALOG.bodies`). Both bodies are Quaternius Universal Base Characters
   (Superhero, CC0) wearing her own head, sphere hands and feet; every outfit piece fits both. Changing `body` rebuilds
   her rig in place; `await sandy.ready` if you need to know when it's done.
-- `decal`: a chest print on her top: `image` (`"star"`, `"heart"`, `"bolt"`, `"smile"`, `"peace"`, `"print:<name>"` for a ready-made print in assets/prints/ (fire, crown, rocket, gamepad, pearl, gem, rainbow, flower, paw, duck), an image data URL, or null; the old `"pack:<id>"` prints were removed with the icon pack and now show nothing), `size`, `up` and `side` (cm).
+- `decal`: a chest print on her top: `image` (`"star"`, `"heart"`, `"bolt"`, `"smile"`, `"peace"`, an image data URL, or null; the old `"print:<name>"` and `"pack:<id>"` picture prints were removed and now show nothing), `size`, `up` and `side` (cm).
 - `hat`: `type` (`"none"` or one of `SandyKit.CATALOG.hats`: beanie, beret, bucketHat, cap, cowboyHat, sunHat, topHat, witchHat),
   `colour`, `size`, `up` and `forward` (cm), `tilt` (radians). Her hair is never changed by a hat. Hats: Chibi Hats by PaperPluto
   (itch.io; free for commercial use, not to be redistributed on their own).
@@ -655,8 +655,9 @@ document.querySelectorAll('[data-ccu]').forEach(inp=>inp.addEventListener('chang
   ccWear(slot,{template:url});inp.value=''};im.src=rd.result};rd.readAsDataURL(f)}));
 if(/custom/i.test(location.hash))setTimeout(()=>{const t=$('tabCustom');if(t)t.click()},0);
 addEventListener('load',()=>renderCustom());
-// chest prints: the drawn shapes, then ready-made prints from the icon pack (assets/prints/<name>.png, saved as 'print:<name>')
-const PRINTS=['fire','crown','rocket','gamepad','pearl','gem','rainbow','flower','paw','duck'];
+// chest prints: the drawn shapes only. The ready-made picture prints (assets/prints/) were removed with the icon pack;
+// a look saved with one ('print:<name>' or 'pack:<id>') simply shows no print.
+const PRINTS=[];
 $('decals').innerHTML=['none','star','heart','bolt','smile','peace'].map(t=>`<button type="button" data-d="${t}" aria-pressed="false">${t}</button>`).join('')+
   PRINTS.map(t=>`<button type="button" class="print" data-d="print:${t}" aria-pressed="false" title="${t}" aria-label="${t} print"><img src="../assets/prints/${t}.png" alt="" width="28" height="28" loading="lazy"></button>`).join('');
 $('decals').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b)apply({decal:{image:b.dataset.d==='none'?null:b.dataset.d}})});

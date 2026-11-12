@@ -47,7 +47,7 @@
     const OFF = 'Purchases and rewards are switched off. This is a demonstration only.';
     if (FROZEN) {
       const who = (P && P.n) || (partner && partner.n) || 'this business';
-      const note = () => root.GRUG_DEMO && root.GRUG_DEMO.install(who, DEMO_ID);
+      const note = () => root.GRUG_DEMO && root.GRUG_DEMO.install(who, DEMO_ID, (P && P.source) || (partner && partner.source));
       if (root.GRUG_DEMO) note(); else { const sc = document.createElement('script'); sc.src = G.url('assets/demo.js'); sc.onload = note; document.head.appendChild(sc); }
     }
     // the venue's coins pay here only while the site is wrapped in that venue (never while frozen)

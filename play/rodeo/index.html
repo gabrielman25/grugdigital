@@ -460,7 +460,7 @@ const FROZEN=!(window.GRUG_DEMO&&GRUG_DEMO.isLive("rodeo"));
 const OFF="Rewards are switched off. This is a demonstration only.";
 if(FROZEN){Object.assign(S,{coins:0,visits:0,claimed:{},tab:[],theme:"classic",themes:["classic"],onboarded:true});
   document.documentElement.style.setProperty("--gd-lift","84px");
-  if(window.GRUG_DEMO)GRUG_DEMO.install("Rodeo Express Car Wash","rodeo");}
+  if(window.GRUG_DEMO)GRUG_DEMO.install("Rodeo Express Car Wash","rodeo","Wash packages and prices from rodeoexpresscarwash.com. Club prices are per month.");}
 
 /* Wallet: the one place coins move through. When this app is wired to Grug Digital, Pearls plug in here
    (spend Pearls first, then coins) using the kit's rewards-app protocol. */
@@ -900,7 +900,7 @@ const UI={
       <h2>Keep it going</h2>
       <a class="cta dark" href="${LINKS.play}" target="_blank" rel="noopener"><div class="t"><b>Join the Unlimited Club</b><span>Wash as often as you like, one monthly price</span></div>${ic("arrow_right")}</a>
       ${showGrug?grugCard(popGrug):""}
-      <p class="foot">Concept demo for Rodeo Express Car Wash.<br>Purchases, check-ins and rewards here are simulated.</p>`;
+      <p class="foot">A demonstration for Rodeo Express Car Wash, which has not approved or endorsed it.<br>Wash packages and prices from rodeoexpresscarwash.com. Club prices are per month.</p>`;
     if(popGrug){S.grugSeen=true;save();}
     Shelf.place();
   },

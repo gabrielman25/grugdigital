@@ -460,7 +460,7 @@ const FROZEN=!(window.GRUG_DEMO&&GRUG_DEMO.isLive("alchemy"));
 const OFF="Rewards are switched off. This is a demonstration only.";
 if(FROZEN){Object.assign(S,{coins:0,visits:0,claimed:{},tab:[],theme:"classic",themes:["classic"],onboarded:true});
   document.documentElement.style.setProperty("--gd-lift","84px");
-  if(window.GRUG_DEMO)GRUG_DEMO.install("Alchemy Bake Lab","alchemy");}
+  if(window.GRUG_DEMO)GRUG_DEMO.install("Alchemy Bake Lab","alchemy","The November catering menu (one-dozen minimum) from alchemybakelab.com. Custom cakes and treats by order.");}
 
 /* Wallet: the one place coins move through. When this app is wired to Grug Digital, Pearls plug in here
    (spend Pearls first, then coins) using the kit's rewards-app protocol. */
@@ -900,7 +900,7 @@ const UI={
       <h2>Keep it going</h2>
       <a class="cta dark" href="${LINKS.play}" target="_blank" rel="noopener"><div class="t"><b>Order on alchemybakelab.com</b><span>Monthly menus, custom cakes and events</span></div>${ic("arrow_right")}</a>
       ${showGrug?grugCard(popGrug):""}
-      <p class="foot">Concept demo for Alchemy Bake Lab.<br>Purchases, check-ins and rewards here are simulated.</p>`;
+      <p class="foot">A demonstration for Alchemy Bake Lab, which has not approved or endorsed it.<br>The November catering menu (one-dozen minimum) from alchemybakelab.com. Custom cakes and treats by order.</p>`;
     if(popGrug){S.grugSeen=true;save();}
     Shelf.place();
   },

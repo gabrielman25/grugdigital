@@ -24,6 +24,9 @@ way until the owner says a business has agreed in writing.
 - **Never promise a membership, a Pass or a price** for something that isn't on sale (Grug Club is hidden on
   `pearls.html`; the Pass was removed from `partners/`).
 - **No PeerJS and no connection between browsers.** The live menu board link and Sunrise to Sunset's "Together" are off.
+- **Say where a business's material came from.** `GRUG_DEMO.install(name, id, source)` adds a "Where this came from"
+  line to the notice: the partner apps pass `copy.menuCredit`, a wrap and a venue's game pass `source` from its `PARTNERS`
+  entry (Coco's names cococrepes.com). Give any new business the same.
 
 ## Money rules for the Grug originals
 
@@ -35,7 +38,22 @@ way until the owner says a business has agreed in writing.
 - The Discord feed (`Grug.announce`) says "A player", never the display name. The privacy policy promises that.
 - When a page starts loading anything from another host, storing something new, or the host changes, update
   `privacy.html` in the same change. Third-party work is credited on `credits.html`.
-- The icon pack of prints (`assets/prints/pack/`) was removed. Don't bring it back without a licence on file.
+- The picture prints (`assets/prints/`: the 10 quick prints and the icon pack) were removed; the avatar's chest prints are
+  the drawn shapes only. Don't bring picture prints back without a licence on file.
+
+## The restaurant dashboard's notices (`business/index.html`)
+
+- `LEGAL` holds one plain warning per record-keeping app (schedule, clock, team, temps, checklists, expirations,
+  recipes), shown as a yellow banner at the top of that app's main view, never on the locked staff kiosk. A new app
+  that keeps records, pay or safety information gets an entry.
+- `legalGate()` is a one-time "Before you start" screen: it shows after setup until the owner ticks the box and taps
+  Continue (`meta.legalAckAt`). The tour waits for it. Home ends with a one-line "record-keeping aid" footer.
+
+## The showcase (`showcase/index.html`)
+
+Built by `python3 tools/showcase/build.py showcase showcase/index.html`; never edit the output. The build lags the site:
+it doesn't pack FOSSIL32 (`assets/fossil32/`) or load the cursors, so the 3D cartridges don't appear inside it. Rebuild it
+after any change to the pages it packs.
 
 ## The look: Model Kit's theme, one accent per section
 

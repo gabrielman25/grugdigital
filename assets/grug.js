@@ -17,7 +17,7 @@
      shows its own tab. theme.js puts the role on <html data-role> so pages can show or hide parts with
      [data-only-for="owner dev"] / [data-hide-for="owner"] (rules in grug.css). */
   const ROLES = {
-    player: { label: 'Player', icon: 'game-controller', color: '#7EE081', text: 'Play games, earn rewards at shops and dress up your avatar', tabs: ['home', 'games', 'rewards', 'avatar', 'shop', 'profile'] },
+    player: { label: 'Player', icon: 'game-controller', color: '#7EE081', text: 'Play free games and dress up your avatar', tabs: ['home', 'games', 'rewards', 'avatar', 'shop', 'profile'] },
     owner: { label: 'Restaurant owner', icon: 'storefront', color: '#FF9F5A', text: 'Make a free rewards card that brings guests back', tabs: ['home', 'games', 'rewards', 'profile'] },
     dev: { label: 'Game developer', icon: 'cube', color: '#4FD8C4', text: 'Free 3D models, Model Kit and the game library', tabs: ['home', 'games', 'create', 'avatar', 'shop', 'profile'] },
     creator: { label: 'Online creator', icon: 'camera', color: '#5AB0FF', text: 'Make a link page or a 3D world for your socials', tabs: ['home', 'games', 'links', 'avatar', 'shop', 'profile'] }

@@ -460,7 +460,7 @@ const FROZEN=!(window.GRUG_DEMO&&GRUG_DEMO.isLive("coco"));
 const OFF="Rewards are switched off. This is a demonstration only.";
 if(FROZEN){Object.assign(S,{coins:0,visits:0,claimed:{},tab:[],theme:"classic",themes:["classic"],onboarded:true});
   document.documentElement.style.setProperty("--gd-lift","84px");
-  if(window.GRUG_DEMO)GRUG_DEMO.install("Coco Crepes, Waffles & Coffee","coco");}
+  if(window.GRUG_DEMO)GRUG_DEMO.install("Coco Crepes, Waffles & Coffee","coco","The menu, prices and dish photos in this demonstration are taken from cococrepes.com, the official website of Coco Crepes, Waffles & Coffee. They belong to Coco and may be out of date.");}
 
 /* Wallet: the one place coins move through. When this app is wired to Grug Digital, Pearls plug in here
    (spend Pearls first, then coins) using the kit's rewards-app protocol. */
@@ -900,7 +900,7 @@ const UI={
       <h2>Keep it going</h2>
       <a class="cta dark" href="${LINKS.play}" target="_blank" rel="noopener"><div class="t"><b>Order ahead online</b><span>Pick up at Coco Katy</span></div>${ic("arrow_right")}</a>
       ${showGrug?grugCard(popGrug):""}
-      <p class="foot">Concept demo for Coco Crepes, Waffles &amp; Coffee.<br>Purchases, check-ins and rewards here are simulated.</p>`;
+      <p class="foot">A demonstration for Coco Crepes, Waffles &amp; Coffee, which has not approved or endorsed it.<br>The menu, prices and dish photos in this demonstration are taken from cococrepes.com, the official website of Coco Crepes, Waffles &amp; Coffee. They belong to Coco and may be out of date.</p>`;
     if(popGrug){S.grugSeen=true;save();}
     Shelf.place();
   },
@@ -913,7 +913,7 @@ const UI={
       if(c.cat==="Side Sauces"){h+=`<div class="sauces">${c.items.map(it=>`<div>${esc(it.n)}<span>${it.p}</span></div>`).join("")}</div>`;return;}
       h+=c.items.map(it=>`<button class="mi ${it.i==null?"plain":""}" data-item="${esc(it.n)}"><div class="t">${it.top?`<span class="top">${ic("star")}House signature</span>`:""}<b>${esc(it.n)}</b><div class="pr">${it.p}</div>${it.d?`<div class="ds">${esc(it.d)}</div>`:""}</div>${it.i!=null?`<img loading="lazy" src="${img(it)}" alt="">`:""}</button>`).join("");
     });
-    v.innerHTML=h+`<p class="foot">Menu from cococrepes.com. Ask the team about today&#x27;s specials.</p>`;
+    v.innerHTML=h+`<p class="foot">The menu, prices and dish photos in this demonstration are taken from cococrepes.com, the official website of Coco Crepes, Waffles &amp; Coffee. They belong to Coco and may be out of date.</p>`;
     let lock=0;
     v.onscroll=()=>{if(Date.now()<lock)return;let cur=0;const top=v.getBoundingClientRect().top+70;$$("h2[data-seci]",v).forEach(h2=>{if(h2.getBoundingClientRect().top<=top)cur=+h2.dataset.seci;});setChip(cur);};
     function setChip(i){const ch=$$(".chip",v);if(ch[i].classList.contains("on"))return;ch.forEach((c,k)=>c.classList.toggle("on",k===i));const cs=$("#chips");cs.scrollTo({left:ch[i].offsetLeft-cs.clientWidth/2+ch[i].clientWidth/2,behavior:"smooth"});}

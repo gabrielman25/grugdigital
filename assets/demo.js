@@ -24,14 +24,15 @@
 
   function style() { if (doc.getElementById('gd-css')) return; var s = doc.createElement('style'); s.id = 'gd-css'; s.textContent = CSS; (doc.head || doc.documentElement).appendChild(s); }
 
-  function show(name) {
+  function show(name, source) {
     if (!doc.body || doc.querySelector('.gd-wrap')) return;
     style();
     var n = esc(name || 'this business');
     var w = doc.createElement('div'); w.className = 'gd-wrap'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-labelledby', 'gdTitle');
     w.innerHTML = '<div class="gd-card"><h2 id="gdTitle">Demonstration only</h2>' +
-      '<p>Grug Digital made this page to show the owners of ' + n + ' what we could build for them. It is not ' + n + '’s official app or website, ' + n + ' has not approved or endorsed it, and it is not part of the main Grug site.</p>' +
+      '<p>Grug Digital made this page to show the owners of ' + n + ' what we could build for them. It isn’t an official app or website of ' + n + ', they didn’t approve or endorse it, and it isn’t part of the main Grug site.</p>' +
       '<p>No rewards are offered here. Nothing can be earned, bought, spent or redeemed, and nothing shown on this page is valid at the business. Menus, prices and photos may be out of date.</p>' +
+      (source ? '<p><b>Where this came from:</b> ' + esc(source) + '</p>' : '') +
       '<button type="button">Got it</button></div>';
     var close = function () { if (w.parentNode) w.parentNode.removeChild(w); };
     w.querySelector('button').onclick = close;
@@ -40,16 +41,17 @@
     try { w.querySelector('button').focus(); } catch (e) {}
   }
 
-  /* install(name[, id]): the chip on this page, and the notice once per tab for this business */
-  function install(name, id) {
+  /* install(name[, id[, source]]): the chip on this page, and the notice once per tab for this business.
+     source (optional) says where the business's material on the page came from, e.g. its own website. */
+  function install(name, id, source) {
     if (id && LIVE.indexOf(id) >= 0) return;
     var go = function () {
       if (shown) return; shown = true; style();
       var c = doc.createElement('button'); c.type = 'button'; c.className = 'gd-chip'; c.textContent = 'Demo only · not affiliated with ' + (name || 'this business');
-      c.onclick = function () { show(name); };
+      c.onclick = function () { show(name, source); };
       doc.body.appendChild(c);
       var k = 'grug.demo.seen.' + String(id || name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      if (!seen(k)) { mark(k); show(name); }
+      if (!seen(k)) { mark(k); show(name, source); }
     };
     if (doc.body) go(); else doc.addEventListener('DOMContentLoaded', go);
   }
