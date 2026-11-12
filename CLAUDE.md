@@ -217,8 +217,9 @@ account is in use, the active shop, and each shop's card text and website fields
 - **Switching:** the account menu under the avatar has "Switch to <shop>" (player) / "Switch to <player>" (restaurant);
   the home page's owners' door becomes "Switch to your restaurant". `Grug.business.setAccount(mode)` saves it and opens
   that account's home. Shop mode and partner mode always show the player account.
-- **In the restaurant account** the dock is Dashboard · Website · Rewards card (`BIZ_TABS` in grug.js; no Games), the top
-  bar's picture is the shop's icon on its colour, and `html[data-account="business"]` is set (theme.js);
+- **In the restaurant account** the dock is Dashboard · Rewards card · Website (`BIZ_TABS` in grug.js; no Games), the top
+  bar's picture is the shop's icon on its colour, and `html[data-account="business"]` is set (theme.js). It has no home
+  page: the site's home (and the Grug logo) opens the dashboard instead (theme.js);
   `[data-only-account="business"|"player"]` shows a part to one account only.
 - **Dashboard** (`business/`): the Daypart app, standalone with its own look and its own `daypart:*` storage. It reads the
   restaurant account (the shop's name, which only changes on the card), lists **Mural** (website) and **Totem** (rewards
@@ -226,8 +227,9 @@ account is in use, the active shop, and each shop's card text and website fields
   restaurant account. It is not built from a tool: edit the file directly.
   - It draws the restaurant dock itself (`GDOCK` / `gdock()`, same look and order as the site's), pinned on every
     dashboard page so nothing is out of reach; Q / E step to the other tabs. A locked time clock (staff kiosk) hides it.
-  - Home groups its apps (`APP_GROUPS`): Your team (Henge, Stomp, Clan), Kitchen (Notch, Mammoth, Hearth), Your guests
-    (Mural, Totem), Paperwork (Conch, Fossil). A new app goes in a group there, or it shows under "More".
+  - Home groups its apps (`APP_GROUPS`) in drop-downs, all closed at first, each with an icon from the site's simple set
+    (`GROUP_IC`) and the count of things that need you inside: Your team (Henge, Stomp, Clan), Kitchen (Notch, Mammoth,
+    Hearth), Your guests (Mural, Totem), Paperwork (Conch, Fossil). A new app goes in a group there, or it shows under "More".
 - **Website** (`business/site/`, the Website section, accent `#5AB0FF`): the editor, with a live preview. The site itself
   is drawn by `GrugBusiness.siteParts` from the card (name, colour, icon, lettering, reward) plus the owner's fields;
   empty fields are left off the page. Its public address is `site/#s=<payload>` (the whole site rides in the link,

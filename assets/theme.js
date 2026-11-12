@@ -188,6 +188,12 @@
   // the custom cursor on every page (assets/cursors.js; theme.js, grug.js or gamekit.js loads it, once)
   try { if (!root.GrugCursors && !document.getElementById('grug-cursors-js') && me) { const s = document.createElement('script'); s.id = 'grug-cursors-js'; s.src = new URL('cursors.js', me).href; (document.head || document.documentElement).appendChild(s); } } catch (e) {}
   if (sitePage) document.documentElement.classList.add('g-site');
+  // the restaurant account has no home page: opening the site's home while it's the account in use opens the dashboard
+  // (shop mode and partner mode always use the player account, so they never come here)
+  if (!brand) { try { const b = JSON.parse(localStorage.getItem('grug.business.v1') || 'null');
+    if (b && b.mode === 'business' && b.active && b.shops && b.shops[b.active]) {
+      const home = new URL(me ? me.replace(/assets\/theme\.js(\?.*)?$/, '') : '/', location.href).pathname;
+      if (location.pathname === home || location.pathname === home + 'index.html') location.replace(home + 'business/' + location.search); } } catch (e) {} }
   // partner mode is a closed space: only the game list, game pages, the avatar editor and the Pearls page. Every other address
   // (Home, Make, Me, Shop, Profile, other partners' pages…) goes to the game list; grug.js also turns away game pages for
   // other partners' games. On a game's host page (play/…) the back button returns to the game list.

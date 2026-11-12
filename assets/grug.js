@@ -456,9 +456,9 @@
   const PARTNER_TABS = ['games', 'me'];
   /* ---------- the restaurant account (assets/business.js keeps it; grug.js only reads it) ----------
      Making a rewards card makes a restaurant account. While it's the account in use, the dock is the restaurant's:
-     Dashboard (business/, the Daypart app, which draws the same dock itself), Website (business/site/) and Rewards card;
-     the account menu switches back. */
-  const BIZ_TABS = ['dashboard', 'website', 'rewards'];
+     Dashboard (business/, the Daypart app, which draws the same dock itself), Rewards card and Website (business/site/);
+     the account menu switches back. The restaurant account has no home page: the site's home opens the dashboard (theme.js). */
+  const BIZ_TABS = ['dashboard', 'rewards', 'website'];
   function bizState() { const s = readJSON(BIZ_KEY, null); return s && typeof s === 'object' && s.shops && typeof s.shops === 'object' ? s : null; }
   // the shop the restaurant account is about: its card's name, colour and icon, read straight from the card text
   function bizShop() {
@@ -514,7 +514,7 @@
     const partner = partnerOn() ? brand : null;
     if (!ptb) top.innerHTML = (partner ? '<a class="g-logo k-glass is-brand is-partner" href="' + url(partner.app) + '" aria-label="' + esc(partner.n) + ': open their app"><img class="g-partner-logo" alt="' + esc(partner.n) + '" src="' + url(partner.logo) + '">' + (partner.demo ? '<span class="g-partner-demo">Demo</span>' : '') + '</a>'
       : brand ? '<a class="g-logo k-glass is-brand" href="' + url('') + '" aria-label="' + esc(brand.n) + ' home"><span class="g-brand-mark" aria-hidden="true">' + shopIcon(brand.i) + '</span><span class="g-brand-name">' + esc(brand.n) + '</span></a>'
-        : '<a class="g-logo k-glass" href="' + url('') + '" aria-label="Grug home">' + LOGO + '<span>Grug</span></a>') +
+        : '<a class="g-logo k-glass" href="' + url(biz ? 'business/' : '') + '" aria-label="' + (biz ? 'Your dashboard' : 'Grug home') + '">' + LOGO + '<span>Grug</span></a>') +
       '<div class="g-title k-glass" aria-hidden="true"><small>' + esc(((DOCK_GROUPS.find(g => g.id === (opts.dockAs || groupOf(active).id)) || {}).label) || (pageTitle === navLabel ? (brand ? brand.n : 'Grug') : navLabel)) + '</small><b>' + esc(pageTitle) + '</b></div>' +
       '<div class="g-status k-glass"><a class="g-pts" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('pearl') + '<span class="num">' + fmt(pearlBalance()) + '</span><span class="g-plus" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M6 2.5v7M2.5 6h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></a></div>' +
       (fsOk() ? '<button type="button" class="g-fs k-glass" aria-label="Full screen" aria-pressed="false">' + icon('arrows-out') + '</button>' : '') +

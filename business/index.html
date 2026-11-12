@@ -314,8 +314,24 @@ main.homey>.mi>h1{font-size:2.4rem}
 .allgood{display:flex;align-items:center;gap:.45rem;font-weight:600;margin:0 0 1.3rem}
 .allgood .i{color:#fff;background:var(--ok);border-radius:50%;padding:.15rem;width:1.4rem;height:1.4rem}
 .apps{list-style:none;margin:0;padding:0;display:grid;gap:.6rem}
-.agrp+.agrp{margin-top:1.6rem}
-.agrp h2{font-size:1.05rem;font-weight:700;color:var(--text-2);margin:0 0 .6rem .2rem;letter-spacing:0}
+.agrp+.agrp{margin-top:.6rem}
+.agrp>summary{list-style:none;display:flex;align-items:center;gap:1rem;min-height:0;font-size:1rem;letter-spacing:0;text-transform:none;padding:.8rem 1.1rem .8rem 1rem;border-radius:.77rem;background:var(--panel);box-shadow:var(--sh-float);cursor:pointer;user-select:none;transition:transform .15s}
+.agrp>summary::-webkit-details-marker{display:none}
+.agrp>summary:hover{transform:translateY(-1px)}.agrp>summary:active{transform:translateY(1px)}
+.agrp>summary:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.agrp .gic{display:grid;place-items:center;width:3rem;height:3rem;border-radius:.66rem;background:var(--ink);color:#fff;flex:none}
+.agrp .gic svg{width:1.6rem;height:1.6rem}
+.agrp summary b{display:block;font-size:1.25rem;font-weight:700;line-height:1.15}
+.agrp summary small{display:block;font-size:.9rem;color:var(--muted);margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agrp .minis{display:flex}.agrp .minis .appic{width:1.9rem;height:1.9rem;margin:0 0 0 -.45rem;box-shadow:0 0 0 .16rem var(--panel)}
+.agrp .grow{flex:1;min-width:0}
+.agrp>summary::after{flex:none;margin:0 .2rem 0 .3rem;color:var(--faint)}
+details.agrp[open]>summary{margin-bottom:0}
+.agrp[open] .minis{display:none}
+.agrp>.apps{padding:.6rem 0 .4rem 1.1rem;border-left:.2rem solid var(--line);margin:.5rem 0 0 1.6rem}
+.agrp[open]>.apps{animation:grpin .18s ease-out both}
+@keyframes grpin{from{opacity:0;transform:translateY(-.3rem)}to{opacity:1;transform:none}}
+@media(max-width:600px){.agrp>summary{padding:.75rem .8rem;gap:.8rem}.agrp .gic{width:2.6rem;height:2.6rem}.agrp .minis{display:none}.agrp>.apps{margin-left:.4rem;padding-left:.6rem}}
 .arow{display:flex;align-items:center;gap:1rem;width:100%;padding:.8rem 1rem;border:0;border-radius:0.77rem;background:var(--panel);text-align:left;cursor:pointer;color:inherit;box-shadow:var(--sh-float);transition:transform .18s var(--ease),box-shadow .18s}
 .arow:hover{transform:translateY(-.12rem);box-shadow:var(--sh-lift),inset 0 0 0 .14rem var(--c)}
 .arow:active{transform:scale(.98)}
@@ -324,7 +340,7 @@ main.homey>.mi>h1{font-size:2.4rem}
 .arow b{display:block;font-size:1.2rem;font-weight:700;line-height:1.15}
 .arow em{display:block;font-style:normal;font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:.15rem 0 .1rem}
 .arow small{display:block;font-size:.9rem;line-height:1.4;color:var(--text-2)}
-.arow .count{display:grid;place-items:center;min-width:1.6rem;height:1.6rem;padding:0 .4rem;border-radius:0.7rem;background:#E5242B;color:#fff;font-weight:700;font-size:.78rem}
+.arow .count,.agrp .count{display:grid;place-items:center;min-width:1.6rem;height:1.6rem;padding:0 .4rem;border-radius:0.7rem;background:#E5242B;color:#fff;font-weight:700;font-size:.78rem}
 .arow .chev{color:var(--faint);font-size:1.4rem;font-weight:300}
 @media(max-width:600px){.arow{padding:.75rem .8rem;gap:.8rem}.arow .appic{width:2.9rem;height:2.9rem;border-radius:0.56rem}.arow small{font-size:.86rem}.needs .go{display:none}main.homey>.mi>h1{font-size:1.9rem}}
 
@@ -1396,8 +1412,8 @@ const GRUG={
 // what the dashboard adds about the shop's Grug pages to "things that need you"
 function bizAttention(){const sh=GRUG.shop();if(!sh)return[];const s=sh.site||{},h=Array.isArray(s.hours)&&s.hours.some(Boolean);
   return !h||!s.address?[{level:'info',text:!h&&!s.address?'Add your hours and address to your website.':!h?'Add your hours to your website.':'Add your address to your website.',page:'website'}]:[]}
-// the dock: Dashboard · Website · Rewards card, the same as on the site's other restaurant pages (Q / E step through them)
-const GDOCK=[['dashboard','Dashboard','./','#9BE338','#6FB31C',"<rect x=\"1\" y=\"1\" width=\"6\" height=\"8\" rx=\"1.5\"></rect><rect x=\"9\" y=\"1\" width=\"6\" height=\"5\" rx=\"1.5\"></rect><rect x=\"1\" y=\"11\" width=\"6\" height=\"4\" rx=\"1.5\"></rect><rect x=\"9\" y=\"8\" width=\"6\" height=\"7\" rx=\"1.5\"></rect>"],['website','Website','site/','#5AB0FF','#2F86D6',"<path fill-rule=\"evenodd\" d=\"M13 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zM3 6v7h10V6z\" clip-rule=\"evenodd\"></path>"],['rewards','Rewards card','../rewards/','#FF9F5A','#E0782F',"<path d=\"M7 15H3a1 1 0 0 1-1-1V9h5zM14 14a1 1 0 0 1-1 1H9V9h5zM7 8H1V6a1 1 0 0 1 1-1h5zM14 5a1 1 0 0 1 1 1v2H9V5zM4.282 1.312a1.784 1.784 0 0 1 2.242.212L8 3l1.238-1.352c.605-.66 1.6-.781 2.345-.285l.06.04A1.75 1.75 0 0 1 12 4H4c-.776-.776-.63-2.08.282-2.688\"></path>"]];
+// the dock: Dashboard · Rewards card · Website, the same as on the site's other restaurant pages (Q / E step through them)
+const GDOCK=[['dashboard','Dashboard','./','#9BE338','#6FB31C',"<rect x=\"1\" y=\"1\" width=\"6\" height=\"8\" rx=\"1.5\"></rect><rect x=\"9\" y=\"1\" width=\"6\" height=\"5\" rx=\"1.5\"></rect><rect x=\"1\" y=\"11\" width=\"6\" height=\"4\" rx=\"1.5\"></rect><rect x=\"9\" y=\"8\" width=\"6\" height=\"7\" rx=\"1.5\"></rect>"],['rewards','Rewards card','../rewards/','#FF9F5A','#E0782F',"<path d=\"M7 15H3a1 1 0 0 1-1-1V9h5zM14 14a1 1 0 0 1-1 1H9V9h5zM7 8H1V6a1 1 0 0 1 1-1h5zM14 5a1 1 0 0 1 1 1v2H9V5zM4.282 1.312a1.784 1.784 0 0 1 2.242.212L8 3l1.238-1.352c.605-.66 1.6-.781 2.345-.285l.06.04A1.75 1.75 0 0 1 12 4H4c-.776-.776-.63-2.08.282-2.688\"></path>"],['website','Website','site/','#5AB0FF','#2F86D6',"<path fill-rule=\"evenodd\" d=\"M13 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zM3 6v7h10V6z\" clip-rule=\"evenodd\"></path>"]];
 function gdock(){if(document.querySelector('.gdock')||!GRUG.shop())return;
   const n=document.createElement('nav');n.className='gdock';n.setAttribute('aria-label','Sections');
   n.innerHTML=GDOCK.map(([id,name,href,c,lo,svg],i)=>`<a href="${href}" style="--tab:${c};--tab-lo:${lo}"${i?'':' aria-current="page" data-act="dockHome"'}><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">${svg}</svg><span>${name}</span></a>`).join('');
@@ -1406,11 +1422,16 @@ function gdock(){if(document.querySelector('.gdock')||!GRUG.shop())return;
     const k=e.key.toLowerCase();if(k!=='q'&&k!=='e')return;e.preventDefault();location.href=GDOCK[k==='e'?1:2][2]})}
 A.dockHome=(el,e)=>{e.preventDefault();if(ui.page!=='home'||ui.sub)A.logo()};
 const attentionAll=()=>C.attention(D,TODAY(),{backupAge:backupAge(),backupDays:meta.backupDays}).concat(bizAttention());
-/* the apps on Home, in groups by what they look after (an app not listed here lands in "More") */
-const APP_GROUPS=[['Your team',['schedule','clock','team']],['Kitchen',['checklists','temps','recipes']],['Your guests',['website','card']],['Paperwork',['expirations','backup']]];
-function appGroups(){const all=SECTIONS.filter(s=>s.id!=='home'&&s.id!=='settings').map(s=>s.id),put=new Set(APP_GROUPS.flatMap(g=>g[1]));
-  const g=APP_GROUPS.map(([n,ids])=>[n,ids.filter(id=>all.includes(id))]).filter(x=>x[1].length),rest=all.filter(id=>!put.has(id));
-  return rest.length?g.concat([['More',rest]]):g}
+/* the apps on Home, in groups by what they look after (an app not listed here lands in "More").
+   Each group is a drop-down, closed until it's opened; it stays open while the dashboard is open (OPEN_GROUPS). Closed, it
+   still shows which apps are inside and how many things in them need you. Its icon is from the site's simple set. */
+const APP_GROUPS=[['team','Your team',['schedule','clock','team']],['kitchen','Kitchen',['checklists','temps','recipes']],['guests','Your guests',['website','card']],['paper','Paperwork',['expirations','backup']]];
+const GROUP_IC={"team": "<path d=\"M8 11a3 3 0 0 1 3 3v1H1v-1a3 3 0 0 1 3-3zM12 8a3 3 0 0 1 3 3v1h-3.537a4 4 0 0 0-2.611-1.908A3.5 3.5 0 0 0 9.962 8zM6.5 4A2.5 2.5 0 0 1 9 6.5v1A2.5 2.5 0 0 1 6.5 10h-1A2.5 2.5 0 0 1 3 7.5v-1A2.5 2.5 0 0 1 5.5 4z\"></path> <path d=\"M10.5 1A2.5 2.5 0 0 1 13 3.5v1A2.5 2.5 0 0 1 10.5 7H10v-.5a3.5 3.5 0 0 0-2.957-3.459A2.5 2.5 0 0 1 9.5 1z\"></path>", "kitchen": "<path d=\"M14.333 12c.368 0 .667.299.667.667 0 .736-.597 1.333-1.333 1.333H2a1 1 0 1 1 0-2zM11 2a1 1 0 0 1 1 1v1h1a2 2 0 0 1 .204 3.99L13 8h-1.126A4.002 4.002 0 0 1 4 7V3a1 1 0 0 1 1-1zm1 5h1a1 1 0 1 0 0-2h-1z\"></path>", "guests": "<path fill-rule=\"evenodd\" d=\"M12 8.23c.252.226.538.411.852.541l.277.1Q13.554 9 14 9v6H7v-3a2 2 0 1 0-4 0v3H2V9c.394 0 .785-.078 1.148-.229l.267-.125q.317-.173.585-.416c.252.226.538.411.852.541l.277.1a3 3 0 0 0 2.02-.1l.266-.125q.317-.173.585-.416c.252.226.538.411.852.541l.277.1a3 3 0 0 0 2.02-.1l.266-.125q.317-.173.585-.416M9 14h4v-3H9z\" clip-rule=\"evenodd\"></path> <path d=\"M13.382 1a1 1 0 0 1 .894.553l1.513 3.025c.139.278.21.583.211.894V6a2.002 2.002 0 0 1-2.766 1.848 2 2 0 0 1-1.224-1.652L12 6a2.002 2.002 0 0 1-2.766 1.848A2 2 0 0 1 8.01 6.196L8 6a2.001 2.001 0 0 1-3.414 1.414 2 2 0 0 1-.576-1.218L4 6A2.001 2.001 0 0 1 .586 7.414 2 2 0 0 1 .01 6.196L0 6v-.528a2 2 0 0 1 .21-.894l1.514-3.025A1 1 0 0 1 2.618 1z\"></path>", "paper": "<path d=\"M12 3.27c.597.345 1 .99 1 1.73v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5c0-.74.403-1.385 1-1.73V5a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2z\"></path> <path d=\"M8 1a2 2 0 0 1 2 2h1v2a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3h1a2 2 0 0 1 2-2m0 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2\"></path>", "more": "<path d=\"M2 6a2 2 0 1 1 0 4 2 2 0 0 1 0-4M8 6a2 2 0 1 1 0 4 2 2 0 0 1 0-4M14 6a2 2 0 1 1 0 4 2 2 0 0 1 0-4\"></path>"};
+const OPEN_GROUPS=new Set();
+function appGroups(){const all=SECTIONS.filter(s=>s.id!=='home'&&s.id!=='settings').map(s=>s.id),put=new Set(APP_GROUPS.flatMap(g=>g[2]));
+  const g=APP_GROUPS.map(([id,n,ids])=>[id,n,ids.filter(x=>all.includes(x))]).filter(x=>x[2].length),rest=all.filter(id=>!put.has(id));
+  return rest.length?g.concat([['more','More',rest]]):g}
+document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.matches&&d.matches('details.agrp'))d.open?OPEN_GROUPS.add(d.dataset.g):OPEN_GROUPS.delete(d.dataset.g)},true);
 V.home=()=>{
   const t=TODAY(),d=new Date(),h=d.getHours(),all=attentionAll(),count={};
   all.forEach(i=>{if(i.level!=='info')count[i.page]=(count[i.page]||0)+1});
@@ -1418,7 +1439,9 @@ V.home=()=>{
   const now=D.shifts.filter(s=>s.date===t&&s.empId).map(s=>firstName((emp(s.empId)||{}).name||'')).filter((n,i,a)=>n&&a.indexOf(n)===i);
   return`<h1>Good ${h<12?'morning':h<17?'afternoon':'evening'}${first?', '+esc(first):''}</h1><p class="lead">${C.DNL[d.getDay()]}, ${C.MON[d.getMonth()]} ${d.getDate()}.${now.length?` Working today: ${esc(now.slice(0,5).join(', '))}${now.length>5?' and '+(now.length-5)+' more':''}.`:''}</p>
   ${all.length?`<button class="needs" data-act="needs"><span class="dot">${all.length}</span><span>${all.length===1?'1 thing needs you':all.length+' things need you'}</span><span class="go">See them in your profile ›</span></button>`:`<p class="allgood">${icon('checkmark')} Nothing needs you right now.</p>`}
-  <!--box-->${appGroups().map(([g,ids])=>`<section class="agrp"><h2>${g}</h2><ul class="apps">${ids.map(sec).map(s=>`<li><button class="arow" style="--c:${s.mode};--clo:${s.lo}" ${s.ext?`data-act="ext" data-href="${s.ext}"`:`data-act="nav" data-page="${s.id}"`}>${appIcon(s)}<span class="grow"><b>${s.name}</b><em>${s.sub}</em><small>${BLURB[s.id]}</small></span>${count[s.id]?`<span class="count" aria-label="${count[s.id]} to check">${count[s.id]}</span>`:''}<span class="chev" aria-hidden="true">›</span></button></li>`).join('')}</ul></section>`).join('')}
+  <!--box-->${appGroups().map(([gid,g,ids])=>{const n=ids.reduce((a,id)=>a+(count[id]||0),0);return`<details class="agrp" data-g="${gid}"${OPEN_GROUPS.has(gid)?' open':''}><summary>`+
+    `<span class="gic" aria-hidden="true"><svg viewBox="0 0 16 16" fill="currentColor">${GROUP_IC[gid]||''}</svg></span><span class="grow"><b>${g}</b><small>${ids.map(id=>sec(id).name).join(', ')}</small></span>`+
+    `${n?`<span class="count" aria-label="${n} to check">${n}</span>`:''}<span class="minis" aria-hidden="true">${ids.map(id=>appIcon(sec(id),'xs')).join('')}</span></summary><ul class="apps">${ids.map(sec).map(s=>`<li><button class="arow" style="--c:${s.mode};--clo:${s.lo}" ${s.ext?`data-act="ext" data-href="${s.ext}"`:`data-act="nav" data-page="${s.id}"`}>${appIcon(s)}<span class="grow"><b>${s.name}</b><em>${s.sub}</em><small>${BLURB[s.id]}</small></span>${count[s.id]?`<span class="count" aria-label="${count[s.id]} to check">${count[s.id]}</span>`:''}<span class="chev" aria-hidden="true">›</span></button></li>`).join('')}</ul></details>`}).join('')}
   `;
 };
 SUB.profile=()=>{
