@@ -83,12 +83,12 @@
         '<div class="line"><span>' + (full ? '<b>Reward ready</b>' : '<b>' + have + ' of ' + x.cfg.s + '</b> stamps') + '</span><span>' + esc(RW.rewardText(x.cfg.r)) + '</span></div>' +
         '<div class="line"><span>Last visit ' + esc(when(x.st.seen)) + '</span><span>' + G.fmt(x.st.pearls || 0) + ' Pearls earned</span></div></div></a>' };
     });
-    const pts = G.points().filter(p => !p.game.standalone && p.game.status !== 'legacy');
+    const pts = G.points().filter(p => !p.game.original && p.game.status !== 'legacy');
     const visited = pts.filter(p => p.has && (p.points > 0 || p.visits > 0 || p.runs > 0));
     const partner = visited.map(p => {
       const g = p.game, s = G.appState(g) || {}, last = Array.isArray(s.history) && s.history[0] ? +s.history[0].at || 0 : 0;
-      return { at: last, html: '<a class="rw-tile" href="' + G.url(g.play) + '">' + band(g.color, G.icon('storefront'), g.partner, 'Grug partner · ' + g.place) +
-        '<div class="body"><div class="line"><span><b>' + G.fmt(p.points) + '</b> points</span><span>' + G.fmt(p.visits) + ' visit' + (p.visits === 1 ? '' : 's') + '</span></div>' +
+      return { at: last, html: '<a class="rw-tile" href="' + G.rewardsUrl(g) + '">' + band(g.color, G.icon('storefront'), g.partner, 'Grug partner · ' + g.place) +
+        '<div class="body"><div class="line"><span><b>' + G.fmt(p.points) + '</b> ' + esc(p.coin) + '</span><span>' + G.fmt(p.visits) + ' visit' + (p.visits === 1 ? '' : 's') + '</span></div>' +
         '<div class="line"><span>' + esc(g.earn || 'Earn points every visit') + '</span></div>' +
         '<div class="line"><span>' + (last ? 'Last visit ' + esc(when(last)) : 'Open the app') + '</span><span>' + esc(g.title) + '</span></div></div></a>' };
     });

@@ -1,0 +1,152 @@
+{
+  "first": "crave",
+  "questions": {
+    "crave": {
+      "q": "What are we sipping?",
+      "s": "Start anywhere on the menu.",
+      "o": [
+        [
+          "milk",
+          "A milk tea",
+          "Creamy, with pearls if you like",
+          {
+            "k": "milk"
+          }
+        ],
+        [
+          "tea",
+          "A fresh tea",
+          "Green, black or oolong",
+          {
+            "k": "tea"
+          }
+        ],
+        [
+          "icy",
+          "Something icy",
+          "Slurpies and cream blends",
+          {
+            "k": "icy"
+          }
+        ],
+        [
+          "juice",
+          "Fresh juice",
+          "Squeezed to order",
+          {
+            "k": "juice"
+          }
+        ],
+        [
+          "coffee",
+          "Coffee or chocolate",
+          "Iced, hot or Vietnamese",
+          {
+            "k": "coffee"
+          }
+        ]
+      ]
+    },
+    "flavor": {
+      "q": "Pick a flavor.",
+      "s": "What should it taste like?",
+      "w": 0.2,
+      "o": [
+        [
+          "fruit",
+          "Fruity",
+          "Mango, lychee, peach, honeydew",
+          {
+            "fl": "fruit"
+          }
+        ],
+        [
+          "creamy",
+          "Rich and creamy",
+          "Taro, coconut, cream",
+          {
+            "fl": "creamy"
+          }
+        ],
+        [
+          "classic",
+          "Classic",
+          "Just the tea or coffee",
+          {
+            "fl": "classic"
+          }
+        ],
+        [
+          "sweet",
+          "Sweet",
+          "Brown sugar, mocha, condensed milk",
+          {
+            "fl": "sweet"
+          }
+        ],
+        [
+          "floral",
+          "Light and floral",
+          "Jasmine and lychee",
+          {
+            "fl": "floral"
+          }
+        ],
+        [
+          "spiced",
+          "Spiced",
+          "Thai tea",
+          {
+            "fl": "spiced"
+          }
+        ]
+      ]
+    },
+    "caff": {
+      "q": "A little caffeine?",
+      "s": "Some drinks are tea or coffee, some are all fruit.",
+      "w": -0.1,
+      "o": [
+        [
+          "1",
+          "Yes please",
+          "Tea or coffee in it",
+          {
+            "ca": 1
+          }
+        ],
+        [
+          "0",
+          "No caffeine",
+          "Fruit, cream and juice",
+          {
+            "ca": 0
+          }
+        ]
+      ]
+    },
+    "sig": {
+      "q": "House favorite or something new?",
+      "s": "Go with what Teahouse is known for, or find your own.",
+      "w": -0.3,
+      "o": [
+        [
+          "top",
+          "House favorite",
+          "The Teahouse classics",
+          {
+            "top": true
+          }
+        ],
+        [
+          "deep",
+          "Something new",
+          "Off the beaten path",
+          {
+            "top": false
+          }
+        ]
+      ]
+    }
+  }
+}

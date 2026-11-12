@@ -1,0 +1,105 @@
+{
+  "first": "crave",
+  "questions": {
+    "crave": {
+      "q": "What are we pouring?",
+      "s": "Start anywhere on the board.",
+      "o": [
+        [
+          "coffee",
+          "Coffee",
+          "Espresso, drip and cold brew",
+          {
+            "k": "coffee"
+          }
+        ],
+        [
+          "matcha",
+          "Matcha",
+          "Lattes and signature matcha",
+          {
+            "k": "matcha"
+          }
+        ],
+        [
+          "other",
+          "Something else",
+          "Chai, cocoa, limeade or tea",
+          {
+            "k": "other"
+          }
+        ]
+      ]
+    },
+    "style": {
+      "q": "How do you like it?",
+      "s": "Pick the one that sounds best right now.",
+      "w": 0.2,
+      "o": [
+        [
+          "bold",
+          "Bold",
+          "Espresso-forward",
+          {
+            "st": "bold"
+          }
+        ],
+        [
+          "milky",
+          "Smooth and milky",
+          "Lattes, cortados, flat whites",
+          {
+            "st": "milky"
+          }
+        ],
+        [
+          "sweet",
+          "A sweet treat",
+          "Housemade syrups and foams",
+          {
+            "st": "sweet"
+          }
+        ],
+        [
+          "fruity",
+          "Bright and fruity",
+          "Citrus, berries, tonic",
+          {
+            "st": "fruity"
+          }
+        ],
+        [
+          "light",
+          "Light",
+          "Loose-leaf tea",
+          {
+            "st": "light"
+          }
+        ]
+      ]
+    },
+    "sig": {
+      "q": "Signature or classic?",
+      "s": "Soluna's own creations, or a coffee-bar staple.",
+      "w": -0.2,
+      "o": [
+        [
+          "top",
+          "A signature",
+          "Only at Soluna",
+          {
+            "top": true
+          }
+        ],
+        [
+          "deep",
+          "A classic",
+          "Done really well",
+          {
+            "top": false
+          }
+        ]
+      ]
+    }
+  }
+}

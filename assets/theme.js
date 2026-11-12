@@ -73,7 +73,7 @@
     crafthouse: { n: 'R&R CraftHouse Grill', short: 'CraftHouse', color: '#CFAC52', i: 'hamburger', f: 'f', logo: 'play/crafthouse/logo.png', barLogo: 'play/crafthouse/logo-bar.png', app: 'play/crafthouse/', game: 'crafthouse', demo: true,
       // the look on the site: the coin in the top bar, the typeface ("Partner Font") and the colours (--p-* in grug.css)
       coin: 'play/crafthouse/coin.png', font: 'play/crafthouse/bricolage.woff2', colors: { accent: '#CFAC52', deep: '#24383f', cream: '#fbf4ea', page: '#F8F5EE' },
-      wallet: { key: 'rr-crafthouse-gameday-v1', field: 'coins', label: 'Craft Coins', to: '#store' },   // the app's own coins, shown in the top bar
+      wallet: { key: 'rr-crafthouse-gameday-v1', field: 'coins', label: 'Craft Coins', to: '#store', rate: 25 },   // the app's own coins, shown in the top bar
       // the app's own tab bar: the only navigation on every page in partner mode (grug.js). [id, label, icon, link]: '' or '#…' is
       // in the partner's app, anything else is a site path. Play is the site's game list (the partner's game plus Grug originals).
       bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'meat', '#menu'], ['play', 'Play', 'controller', 'games/'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } },
@@ -81,8 +81,28 @@
     // has no game of its own yet (no `game`), so partner mode lists the Grug originals only. fontDisplay: a second face for headings.
     coco: { n: 'Coco Crepes, Waffles & Coffee', short: 'Coco', color: '#E5BD2F', i: 'coffee', f: 'f', logo: 'play/coco/logo.png', barLogo: 'play/coco/logo-bar.png', app: 'play/coco/', demo: true,
       coin: 'play/coco/coin.png', font: 'play/coco/montserrat.woff2', fontDisplay: 'play/coco/frank-ruhl-libre.woff2', colors: { accent: '#E5BD2F', deep: '#533020', cream: '#fbf3e4', page: '#FBF7EF' },
-      wallet: { key: 'coco-crepes-crepeclub-v1', field: 'coins', label: 'Coco Coins', to: '#store' },
-      bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'cup', '#menu'], ['play', 'Play', 'controller', 'games/'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } }
+      wallet: { key: 'coco-crepes-crepeclub-v1', field: 'coins', label: 'Coco Coins', to: '#store', rate: 25 },
+      bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'cup', '#menu'], ['play', 'Play', 'controller', 'games/'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } },
+    // Teahouse Express (Katy Mills): its rewards app (play/teahouse/, partners/teahouse/) and its standalone games Steal a Sip and Take a Tea.
+    teahouse: { n: 'Teahouse Express', short: 'Teahouse', color: '#F6C445', i: 'pint-glass', f: 'f', logo: 'play/teahouse/logo.png', barLogo: 'play/teahouse/logo-bar.png', app: 'play/teahouse/', game: 'teahouse', demo: true,
+      coin: 'play/teahouse/coin.png', font: 'play/teahouse/nunito.woff2', fontDisplay: 'play/teahouse/fredoka.woff2', colors: { accent: '#F6C445', deep: '#1E6B35', cream: '#FBF7EC', page: '#FBF7EC' },
+      wallet: { key: 'teahouse-express-teaclub-v1', field: 'coins', label: 'Teahouse Coins', to: '#store', rate: 25 },
+      bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'cup', '#menu'], ['play', 'Play', 'controller', 'games/'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } },
+    // Soluna Coffee (Elyson): its rewards app (play/soluna/, partners/soluna/) and its standalone game Sunrise to Sunset (play/sunrise/).
+    soluna: { n: 'Soluna Coffee', short: 'Soluna', color: '#C8924F', i: 'coffee', f: 'f', logo: 'play/soluna/logo.png', barLogo: 'play/soluna/logo-bar.png', app: 'play/soluna/', game: 'soluna', demo: true,
+      coin: 'play/soluna/coin.png', font: 'play/soluna/jost.woff2', fontDisplay: 'play/soluna/fraunces.woff2', colors: { accent: '#C8924F', deep: '#5F5C37', cream: '#F6F1E7', page: '#F8F4EC' },
+      wallet: { key: 'soluna-coffee-club-v1', field: 'coins', label: 'Soluna Coins', to: '#store', rate: 25 },
+      bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'cup', '#menu'], ['play', 'Play', 'controller', 'games/'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } },
+    // Rodeo Express Car Wash (Peek Rd): its rewards app (play/rodeo/, partners/rodeo/) and its standalone game Rodeo Wash Simulator (play/rodeowash/).
+    rodeo: { n: 'Rodeo Express Car Wash', short: 'Rodeo', color: '#E39B32', i: 'storefront', f: 'f', logo: 'play/rodeo/logo.png', barLogo: 'play/rodeo/logo-bar.png', app: 'play/rodeo/', game: 'rodeo', demo: true,
+      coin: 'play/rodeo/coin.png', font: 'play/rodeo/archivo.woff2', fontDisplay: 'play/rodeo/rye.woff2', colors: { accent: '#E39B32', deep: '#4B3A2C', cream: '#FBF3E6', page: '#FAF5EC' },
+      wallet: { key: 'rodeo-express-wash-club-v1', field: 'coins', label: 'Rodeo Coins', to: '#store', rate: 25 },
+      bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'car', '#menu'], ['play', 'Play', 'controller', 'games/'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } },
+    // Alchemy Bake Lab (Peek Rd): its rewards app (play/alchemy/, partners/alchemy/) and its standalone game Sugar Alchemist (play/sugaralchemist/). A typewriter wordmark stands in for the real logo until the owner says yes.
+    alchemy: { n: 'Alchemy Bake Lab', short: 'Alchemy', color: '#C2A26B', i: 'cake', f: 'f', logo: 'play/alchemy/logo.png', barLogo: 'play/alchemy/logo-bar.png', app: 'play/alchemy/', game: 'alchemy', demo: true,
+      coin: 'play/alchemy/coin.png', font: 'play/alchemy/karla.woff2', fontDisplay: 'play/alchemy/special-elite.woff2', colors: { accent: '#C2A26B', deep: '#1E1F21', cream: '#F3F1EA', page: '#F6F5F0' },
+      wallet: { key: 'alchemy-bake-lab-labclub-v1', field: 'coins', label: 'Alchemy Coins', to: '#store', rate: 25 },
+      bar: [['home', 'Home', 'house', ''], ['menu', 'Menu', 'alembic', '#menu'], ['play', 'Play', 'controller', 'games/'], ['pass', 'Pass', 'trophy', '#pass'], ['store', 'Coins', 'coins', '#store']], barOn: { games: 'play' } }
   };
   const partnerBrand = id => PARTNERS[id] ? Object.assign({ p: id, at: Date.now() }, PARTNERS[id]) : null;
   const ss = { get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} }, del(k) { try { sessionStorage.removeItem(k); } catch (e) {} } };
@@ -206,6 +226,8 @@
     house: '<path fill="currentColor" d="M7.316 1.14a1 1 0 0 1 1.368 0l6.394 5.995a.5.5 0 0 1-.342.865H13v7h-3v-3a2 2 0 0 0-4 0v3H3V8H1.264a.5.5 0 0 1-.341-.865z"/>',
     cup: '<path fill="currentColor" d="M14.333 12c.368 0 .667.299.667.667 0 .736-.597 1.333-1.333 1.333H2a1 1 0 1 1 0-2zM11 2a1 1 0 0 1 1 1v1h1a2 2 0 0 1 .204 3.99L13 8h-1.126A4.002 4.002 0 0 1 4 7V3a1 1 0 0 1 1-1zm1 5h1a1 1 0 1 0 0-2h-1z"/>',
     meat: '<path fill="currentColor" d="M5.043 9.457a3.75 3.75 0 0 0 1.5 1.5L5 12.5V14a1 1 0 0 1-2 0v-1H2a1 1 0 0 1 0-2h1.5zM8.608.867C9.613.715 11.688.687 13.5 2.5c1.812 1.811 1.786 3.886 1.634 4.891-.061.402-.309.74-.634.984l-.884.663a7.32 7.32 0 0 1-5.823 1.32 2.74 2.74 0 0 1-2.151-2.151 7.32 7.32 0 0 1 1.32-5.824l.663-.883c.244-.326.581-.572.983-.633m4.22 2.547c-.78-.78-1.73-1.098-2.121-.707-.39.39-.074 1.34.707 2.12.78.782 1.73 1.099 2.121.709.39-.39.074-1.341-.707-2.122"/>',
+    car: '<path fill="currentColor" d="M4.5 11a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3M11.5 11a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3"></path> <path fill="currentColor" d="M9.323 3a1 1 0 0 1 .928.629L12 8l2.316.772a1 1 0 0 1 .684.949V12h-1.05a2.501 2.501 0 0 0-4.9 0h-2.1a2.501 2.501 0 0 0-4.9 0H1V8.192a1 1 0 0 1 .071-.37L2.75 3.628A1 1 0 0 1 3.677 3zM2 8h4V4H3.5zm5 0h4L9.5 4H7z"></path>',
+    alembic: '<path fill="currentColor" d="M10 10a1 1 0 0 1 .114 1.993l.78 1.56a1 1 0 0 1-1.789.894L7.882 12H4.118l-1.224 2.447a1 1 0 0 1-1.789-.894l.78-1.56A1 1 0 0 1 2 10zM6.31 1.01C10.69 1.23 14.972 5.97 15 6l-1 2-3.024-1.513A5 5 0 0 1 9.999 9h-8a5 5 0 0 1 4.31-7.99"></path>',
     controller: '<path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12.26 3a3 3 0 0 1 2.988 2.729l.57 6.264a1.84 1.84 0 0 1-3.364 1.188L11 11H5l-1.454 2.18a1.84 1.84 0 0 1-3.364-1.187l.57-6.264A3 3 0 0 1 3.74 3zM12 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2M4 5a2 2 0 1 0 0 4 2 2 0 0 0 0-4m6 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m4 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2m-2-2a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>',
     trophy: '<path fill="currentColor" d="M12.91 2H15a1 1 0 0 1 1 1v2a3 3 0 0 1-3 3h-.636l-.002.017A4.38 4.38 0 0 1 9 11.884V13h2l1 1v1H4v-1l1-1h2v-1.116a4.38 4.38 0 0 1-3.362-3.867L3.636 8H3l-.154-.004A3 3 0 0 1 0 5V3a1 1 0 0 1 .897-.995L1 2h2.09L3 1h10zM2 5a1 1 0 0 0 1 1h.454l-.182-2H2zm10.546 1H13a1 1 0 0 0 1-1V4h-1.273z"/>',
     coins: '<path fill="currentColor" d="M14 13c0 1.105-2.239 2-5 2s-5-.895-5-2v-.363q.445.117.923.197a12.8 12.8 0 0 0 3.076.127q.49.037 1.001.039c1.475 0 2.857-.237 3.907-.657.395-.158.77-.354 1.093-.594zM2 8.749c.322.24.698.436 1.093.594C4.143 9.763 5.525 10 7 10q.51-.001 1-.04.496.04 1 .04c.708 0 1.413-.056 2.077-.166q.478-.08.923-.197V10c0 1.105-2.239 2-5 2s-5-.895-5-2zM14 7c0 1.105-2.239 2-5 2s-5-.895-5-2V5.749c.32.238.695.435 1.093.594a9 9 0 0 0 1.83.491C7.587 6.944 8.293 7 9 7c.708 0 1.413-.056 2.077-.166a9 9 0 0 0 1.83-.491c.398-.16.773-.356 1.093-.594z"/><path fill="currentColor" d="M9 2c2.761 0 5 .895 5 2 0 .262-.129.522-.38.766-.252.242-.62.462-1.085.648a8 8 0 0 1-1.622.434C10.306 5.948 9.656 6 9 6s-1.307-.052-1.913-.152a8 8 0 0 1-1.622-.434C5 5.228 4.632 5.008 4.38 4.766 4.129 4.522 4 4.262 4 4c0-1.105 2.239-2 5-2M8 5h2V3H8z"/>'

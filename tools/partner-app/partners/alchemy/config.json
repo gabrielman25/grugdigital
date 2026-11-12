@@ -1,0 +1,153 @@
+{
+  "id": "alchemy",
+  "name": "Alchemy Bake Lab",
+  "brand": "Alchemy",
+  "short": "Alchemy",
+  "label": "Alchemy Bake Lab",
+  "place": "Peek Rd, Katy TX",
+  "address": "6845 Peek Rd, Suite 230 · Katy",
+  "website": "alchemybakelab.com",
+  "appStore": "https://www.alchemybakelab.com/menu",
+  "appTitle": "Dessert Club",
+  "welcomeEyebrow": "Welcome to the Dessert Club",
+  "coin": "Alchemy Coins",
+  "storageKey": "alchemy-bake-lab-labclub-v1",
+  "oldLinks": [
+    [
+      "hash",
+      "game",
+      "../sugaralchemist/"
+    ]
+  ],
+  "menuIcon": "alembic",
+  "color": {
+    "accent": "#c2a26b",
+    "accentDark": "#8c6f3a",
+    "accentLight": "#ebddbf",
+    "deep": "#1e1f21",
+    "deepDark": "#0b0b0c",
+    "cream": "#f3f1ea"
+  },
+  "copy": {
+    "welcomeTitle": "Whimsical. Edible. Art. Now with coins.",
+    "welcomeSub": "Find your next mini treat, play free games while it's boxed, and stack Alchemy Coins every visit.",
+    "passLabel": "Season Pass · Dessert Club",
+    "passDone": "Mini Treat Master. Every tier unlocked.",
+    "favTitle": "Lab signatures",
+    "favLabel": "Lab signature",
+    "quizCta": "Answer a few questions and we'll find your treat",
+    "menuCredit": "The November catering menu (one-dozen minimum) from alchemybakelab.com. Custom cakes and treats by order.",
+    "orderTitle": "Order on alchemybakelab.com",
+    "orderSub": "Monthly menus, custom cakes and events",
+    "mintLine": "Spend them on new looks for your app, or on boosts in Sugar Alchemist.",
+    "staff": "the lab",
+    "bill": "total",
+    "spot": "ticket",
+    "Spot": "Ticket",
+    "who": "Who's ordering?",
+    "mintGo": "Into the lab",
+    "quizTitle": "What should I order?",
+    "menuSub": "This month and the signatures",
+    "plate": "treat",
+    "dish": "treat",
+    "dishes": "treats"
+  },
+  "themes": [
+    {
+      "id": "classic",
+      "name": "Lab Black",
+      "deep": "#1e1f21",
+      "deepDark": "#0b0b0c"
+    },
+    {
+      "id": "potion",
+      "name": "Potion Green",
+      "price": 600,
+      "deep": "#1d6b35",
+      "deepDark": "#124a24",
+      "accent": "#a8f0bd",
+      "line": "Bubbling-potion green with a mint shine."
+    },
+    {
+      "id": "velvet",
+      "name": "Red Velvet",
+      "price": 900,
+      "deep": "#7a1f2b",
+      "deepDark": "#52141c",
+      "accent": "#ffc4cc",
+      "line": "Red-velvet panels with a frosting shine."
+    },
+    {
+      "id": "macaron",
+      "name": "Macaron",
+      "price": 1200,
+      "deep": "#8a3f74",
+      "deepDark": "#5e2a4f",
+      "accent": "#ffd0ef",
+      "line": "Pink-macaron panels with a sugar shine."
+    },
+    {
+      "id": "holo",
+      "name": "Holographic",
+      "deep": "#2b2350",
+      "deepDark": "#18132f",
+      "accent": "#c8f7ff",
+      "line": "Holographic foil, for Mini Treat Masters only."
+    }
+  ],
+  "pass": [
+    {
+      "v": 1,
+      "name": "First Bite",
+      "reward": "250 {coin}",
+      "coins": 250
+    },
+    {
+      "v": 3,
+      "name": "Regular",
+      "reward": "400 {coin}",
+      "coins": 400
+    },
+    {
+      "v": 6,
+      "name": "Apprentice Alchemist",
+      "reward": "The Potion Green theme + 200 {coin}",
+      "theme": "potion",
+      "coins": 200
+    },
+    {
+      "v": 10,
+      "name": "Head Baker",
+      "reward": "1,000 {coin}",
+      "coins": 1000
+    },
+    {
+      "v": 20,
+      "name": "Mini Treat Master",
+      "reward": "The Holographic theme + 1,500 {coin}",
+      "theme": "holo",
+      "coins": 1500
+    }
+  ],
+  "coinUses": [
+    [
+      "palette",
+      "App themes",
+      "Potion Green, Red Velvet and Macaron looks for your app."
+    ],
+    [
+      "controller",
+      "Sugar Alchemist boosts",
+      "Boosts, passes and tip packs in the bakery game: 25 coins to a point."
+    ]
+  ],
+  "quizPicks": [
+    "Glitter cake pops",
+    "Macarons",
+    "Custom cakes"
+  ],
+  "menuPicks": [
+    "Cupcake cones",
+    "Glitter sugar cookies"
+  ]
+}

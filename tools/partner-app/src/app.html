@@ -382,7 +382,7 @@ html.f32-lock #app{filter:blur(9px) brightness(.6) saturate(1.1)}
   </div>
   <div class="step" data-s="1">
     <div class="dots"><i class="on"></i><i></i></div>
-    <h1>Who's at the table?</h1>
+    <h1>{{copy.who}}</h1>
     <p class="sub">So we know what to call you.</p>
     <div class="me"><div class="av" data-avatar></div><div><b>Your player card</b><span>Your look from Grug carries over here</span></div></div>
     <input class="field" id="obName" maxlength="14" placeholder="First name or nickname" autocomplete="off">
@@ -399,7 +399,7 @@ html.f32-lock #app{filter:blur(9px) brightness(.6) saturate(1.1)}
       <div id="tapHint"><span data-ic="click"></span><span id="tapHintT">Tap the coin</span></div>
       <div id="strikes"><i></i><i></i><i></i></div>
     </div>
-    <button class="btn gold" id="mintDone">Take me to my table</button>
+    <button class="btn gold" id="mintDone">{{copy.mintGo}}</button>
   </div>
 </div>
 
@@ -418,7 +418,7 @@ let LOGO_IMG=null;
 const IN_SITE=/\/play\/{{id}}(\/|$)/.test(location.pathname);
 const LINKS={play:"{{appStore|js}}",grug:IN_SITE?"../../{{id}}/":"https://grugdigital.pages.dev/{{id}}/"};
 const GRUG_TARGET=IN_SITE?"":' target="_blank" rel="noopener"';
-/* on the site, the Play tab is the full game list in partner mode (the partner's game plus the Grug originals, in its colours) */
+/* on the site, the Play tab is the full game list in partner mode (every standalone game, the partner's own first, in its colours) */
 const GAMES_URL="../../games/?partner={{id}}",AVATAR_URL="../../avatar/?partner={{id}}";
 /* on the site, opening this app (however it was reached: a bookmark, a shared link, the site's own bar) puts the whole
    site in partner mode for this tab, and a game started from here comes back here when the guest leaves it
@@ -427,6 +427,12 @@ if(IN_SITE){try{const b=JSON.parse(sessionStorage.getItem("grug.brand.v1")||"nul
   /* a game started from the shelf: note the way back, and the Grug Digital card can show on Home from now on */
   addEventListener("fossil32:play",()=>{try{sessionStorage.setItem("grug.partner.back",location.pathname+"#home");}catch(e){}if(!S.grug){S.grug=true;save();}});}
 const COIN="{{coin|js}}";
+/* addresses from the venue's earlier app (QR codes, bookmarks, links from before): its game is a standalone game now,
+   so "…/game" style links go there. partners/<id>/config.json "oldLinks": [kind, value, path from play/<id>/]:
+   ["hash","game",…] matches #game and #<store>/game, ["query","game=takeatea",…] matches that query. */
+function oldLink(){try{const q=location.search.slice(1).split("&"),h=location.hash;
+  for(const [k,v,to] of {{oldLinks|json}})if((k==="hash"&&(h==="#"+v||h.slice(-v.length-1)==="/"+v))||(k==="query"&&q.includes(v))){location.replace(to);return true;}}catch(e){}return false;}
+oldLink();addEventListener("hashchange",oldLink);
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), lerp=(a,b,t)=>a+(b-a)*t, rnd=(a,b)=>a+Math.random()*(b-a);
 const fmt=n=>Math.round(n).toLocaleString("en-US");
@@ -439,7 +445,7 @@ function fillIcons(root){$$("[data-ic]",root||document).forEach(e=>{if(!e.firstC
 
 /* ================= STATE ================= */
 const KEY="{{storageKey|js}}";
-const DEF={onboarded:false,name:"",coins:0,visits:0,claimed:{},lastDaily:"",tab:[],theme:"classic",themes:["classic"],quizDay:"",sound:true,table:12,lastPick:"",grug:false,grugSeen:false};
+const DEF={onboarded:false,name:"",coins:0,visits:0,claimed:{},lastDaily:"",lastTap:"",tab:[],theme:"classic",themes:["classic"],quizDay:"",sound:true,table:12,lastPick:"",grug:false,grugSeen:false};
 let S=Object.assign({},DEF);
 try{const j=JSON.parse(localStorage.getItem(KEY)||"null"); if(j) S=Object.assign({},DEF,j);}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
@@ -759,7 +765,7 @@ const grugCard=(pop)=>`<a class="cta grug ${pop?"pop":""}" href="${LINKS.grug}"$
 /* off the Grug site (the app opened as a single file): the games live on the site, so Home and Play point there */
 const playCard=()=>`<a class="cta dark" href="${LINKS.grug}"${GRUG_TARGET}><div class="t"><b>Free games while you wait</b><span>Play the Grug Digital library in {{short}} colours</span></div>${ic("play")}</a>`;
 
-/* On the Grug site, the top of Home is the site's game shelf: the partner's game and the Grug originals as floating
+/* On the Grug site, the top of Home is the site's game shelf: the partner's own games, then every other standalone game, as floating
    FOSSIL32 cartridges (assets/fossil32/, the same as the Grug home page), in one looping row. Built once and moved back
    into Home each time it's drawn, so the 3D cartridges don't reload. Standalone (off the site): a card that opens the site. */
 const Shelf=(()=>{
@@ -772,13 +778,14 @@ const Shelf=(()=>{
       .then(()=>{build();if(curTab==="home")UI.home();add("script",{type:"module",src:ROOT+"assets/fossil32/fossil32.js"}).catch(()=>{});});
     return loading;
   }
-  // the partner's game first, then the Grug originals (the only games partner mode lists)
-  const list=()=>{const G=window.GRUG_GAMES||[],own=G.find(g=>g.id==="{{id}}");
-    return [own,...G.filter(g=>g.standalone&&g.status!=="legacy"&&g.listed!==false)].filter(Boolean);};
-  const tile=g=>{const b=g.box||{},own=g.id==="{{id}}";
+  // the partner's own game first, then every other standalone game (never one that lives inside another venue's app)
+  const mine=g=>g.venue==="{{id}}"||g.id==="{{id}}";
+  const list=()=>{const G=(window.GRUG_GAMES||[]).filter(g=>g.listed!==false&&g.status!=="legacy");
+    return G.filter(mine).concat(G.filter(g=>!mine(g)&&!g.inApp));};
+  const tile=g=>{const b=g.box||{},own=mine(g);
     return `<a class="hc-t f32-tile f32-cart" data-f32="${g.id}" data-f32-kind="cart" href="${ROOT}games/${g.id}/" aria-label="${esc(g.title)}" style="--hc-c:${b.shell||g.color||"{{color.accent}}"}">
-      <div class="f32-stage">${own?'<span class="f32-ribbon">Only at {{short}}</span>':""}<img class="f32-flat" src="${ROOT}${b.art||g.thumb}" alt="" decoding="async"></div>
-      <div class="hc-b"><b>${esc(g.title)}</b><span>${own?"{{label}}":"Grug Original"} · ${esc(g.kind)}</span></div></a>`;};
+      <div class="f32-stage">${own?'<span class="f32-ribbon">From {{short}}</span>':""}<img class="f32-flat" src="${ROOT}${b.art||g.thumb}" alt="" decoding="async"></div>
+      <div class="hc-b"><b>${esc(g.title)}</b><span>${own?"{{label}}":g.original?"Grug Original":esc(g.partner)} · ${esc(g.kind)}</span></div></a>`;};
   function build(){
     const L=list();N=L.length;if(!N)return;
     el=document.createElement("div");el.className="hc";
@@ -862,18 +869,18 @@ const UI={
       </button>
       <div class="card daily">
         <i class="c" style="width:44px;height:44px"></i>
-        <div class="t"><b>${daily?"Table bonus is ready":"Table bonus collected"}</b><span class="sub">${daily?"25 coins, once per visit":"Come back next visit for another"}</span></div>
+        <div class="t"><b>${daily?"{{copy.Spot|js}} bonus is ready":"{{copy.Spot|js}} bonus collected"}</b><span class="sub">${daily?"25 coins, once per visit":"Come back next visit for another"}</span></div>
         <button class="btn sm ${daily?"gold":""}" id="dailyBtn" ${daily?"":"disabled"}>${daily?"Collect":"Done"}</button>
       </div>
       ${shelf?"":playCard()}
       <div class="tiles">
         <button class="tile" data-act="quiz">
           <div class="thumbs">${qth.map(i=>`<img src="${img(i)}" alt="">`).join("")}</div>
-          <b>What should I order?</b><span>A quiz that narrows it down</span>
+          <b>{{copy.quizTitle}}</b><span>A quiz that narrows it down</span>
         </button>
         <button class="tile" data-tab="menu">
           <div class="thumbs">${{{menuPicks|json}}.map(byName).filter(Boolean).map(i=>`<img src="${img(i)}" alt="">`).join("")}</div>
-          <b>Browse the menu</b><span>Every plate, pictured</span>
+          <b>Browse the menu</b><span>{{copy.menuSub}}</span>
         </button>
       </div>
       ${favs.length?`<h2>{{copy.favTitle}}</h2>
@@ -932,12 +939,12 @@ const UI={
     const total=S.tab.reduce((a,b)=>a+b.price,0);
     $("#v-store").innerHTML=`
       <div class="storehero"><canvas id="storeCoin"></canvas><div class="bal balN">${fmt(S.coins)}</div><div class="sub">${COIN} · drag the coin to spin it</div></div>
-      <div class="check-note"><span class="itile gold">${ic("notepad")}</span><div><b>No card needed.</b> Coins you buy are added to your table's {{copy.bill}} and confirmed by {{copy.staff}}.</div></div>
+      <div class="check-note"><span class="itile gold">${ic("notepad")}</span><div><b>No card needed.</b> Coins you buy are added to your {{copy.spot}}'s {{copy.bill}} and confirmed by {{copy.staff}}.</div></div>
       <h2>Top up</h2>
       ${PACKS.map((p,i)=>`<button class="pack" data-pack="${p.id}">${p.flag?`<i class="flag">${p.flag}</i>`:""}
         <div class="stack">${Array.from({length:i*2+2},(_,k)=>`<i style="left:${[12,2,22,8,18,12][k]}px;top:${[22,14,12,4,2,-6][k]}px"></i>`).join("")}</div>
         <div class="t"><b>${fmt(p.coins+p.bonus)}</b><span>${esc(p.name)}${p.bonus?` · includes ${p.bonus} bonus`:""}</span></div><span class="price">$${p.price.toFixed(2)}</span></button>`).join("")}
-      ${S.tab.length?`<h2>On your {{copy.bill}} today <span class="demo-tag" style="vertical-align:3px;margin-left:6px">Demo</span></h2><div class="card">${S.tab.map(t=>`<div class="tabline"><span>${fmt(t.coins)} ${COIN}</span><span>$${t.price.toFixed(2)}</span></div>`).join("")}<div class="tabline" style="border:0;font-weight:750"><span>Added to Table ${S.table}</span><span>$${total.toFixed(2)}</span></div></div>`:""}
+      ${S.tab.length?`<h2>On your {{copy.bill}} today <span class="demo-tag" style="vertical-align:3px;margin-left:6px">Demo</span></h2><div class="card">${S.tab.map(t=>`<div class="tabline"><span>${fmt(t.coins)} ${COIN}</span><span>$${t.price.toFixed(2)}</span></div>`).join("")}<div class="tabline" style="border:0;font-weight:750"><span>Added to {{copy.Spot|js}} ${S.table}</span><span>$${total.toFixed(2)}</span></div></div>`:""}
       ${THEMES.length>1?`<h2>App themes</h2><div class="themes">${THEMES.map(t=>this.themeCard(t)).join("")}</div>`:""}
       <h2>What coins do</h2>
       <div class="uses">${{{coinUses|json}}.map(([i,b,t])=>`<div class="card"><span class="itile">${ic(i)}</span><b>${esc(b)}</b>${esc(t)}</div>`).join("")}</div>
@@ -966,8 +973,8 @@ function itemSheet(n){
 function buySheet(id){
   const p=PACKS.find(x=>x.id===id);if(!p)return;SFX.tap();
   Sheet.open(`<div class="eyebrow">Add to {{copy.bill}}</div><h3>${fmt(p.coins+p.bonus)} ${COIN}</h3>
-    <p>We'll add <b>$${p.price.toFixed(2)}</b> to your table's {{copy.bill}}, and {{copy.staff}} confirms it when they swing by. No card, no sign-up.</p>
-    <div class="stepper"><span>Your table</span><div class="n"><button data-tbl="-1">${ic("minus_in_circle")}</button><span id="tblN">${S.table}</span><button data-tbl="1">${ic("plus")}</button></div></div>
+    <p>We'll add <b>$${p.price.toFixed(2)}</b> to your {{copy.spot}}'s {{copy.bill}}, and {{copy.staff}} confirms it when they swing by. No card, no sign-up.</p>
+    <div class="stepper"><span>Your {{copy.spot}}</span><div class="n"><button data-tbl="-1">${ic("minus_in_circle")}</button><span id="tblN">${S.table}</span><button data-tbl="1">${ic("plus")}</button></div></div>
     <button class="btn gold" id="buyGo">${ic("notepad")}Add $${p.price.toFixed(2)} to my {{copy.bill}}</button>
     <button class="btn ghost" data-close style="margin-top:10px">Not now</button>
     <p class="gnote">Concept demo. Nothing is charged.</p>`);
@@ -978,7 +985,7 @@ function buySheet(id){
       $("#sheet").innerHTML=`<div class="grab"></div><div class="sending"><div class="ring"></div><h3>Sending to {{copy.staff}}</h3><p>Table ${S.table}</p></div>`;
       setTimeout(()=>{
         S.tab.push({coins:p.coins+p.bonus,price:p.price});save();
-        $("#sheet").innerHTML=`<div class="grab"></div><div class="sending"><div class="okmark">${ic("checkmark")}</div><h3>It's on your {{copy.bill}}</h3><p>${fmt(p.coins+p.bonus)} ${COIN} added for Table ${S.table}.</p></div><button class="btn" data-close>Nice</button>`;
+        $("#sheet").innerHTML=`<div class="grab"></div><div class="sending"><div class="okmark">${ic("checkmark")}</div><h3>It's on your {{copy.bill}}</h3><p>${fmt(p.coins+p.bonus)} ${COIN} added for {{copy.Spot|js}} ${S.table}.</p></div><button class="btn" data-close>Nice</button>`;
         Sheet.lock=false;SFX.win();FX.burst($(".okmark"),26,{power:700});Wallet.add(p.coins+p.bonus,$(".okmark"));
         if(curTab==="store")setTimeout(()=>UI.store(),900);
       },1300);
@@ -1001,7 +1008,7 @@ function themeSheet(id){
 }
 function checkinSheet(){
   SFX.tap();
-  Sheet.open(`<div class="eyebrow">Check in</div><h3>Stamp this visit</h3><p>Ask {{copy.staff}} for today's 4-digit table code. One stamp per visit.</p>
+  Sheet.open(`<div class="eyebrow">Check in</div><h3>Stamp this visit</h3><p>Ask {{copy.staff}} for today's 4-digit {{copy.spot}} code. One stamp per visit.</p>
     <input class="field" id="ciCode" inputmode="numeric" maxlength="4" placeholder="• • • •" style="text-align:center;letter-spacing:.4em;font-size:26px;font-weight:700">
     <button class="btn gold" id="ciGo">${ic("stamp")}Check in</button><p class="gnote">Demo: any four digits work, and you can check in as often as you like.</p>`);
   $("#ciGo").onclick=()=>{const v=$("#ciCode").value.replace(/\D/g,"");if(v.length<4){toast("Enter the 4-digit code");return;}doVisit();};
@@ -1028,7 +1035,7 @@ applyTheme();
 function profileSheet(){
   SFX.tap();
   const nth=THEMES.filter(t=>S.themes.includes(t.id));
-  Sheet.open(`<div class="prof"><div class="av" data-avatar></div><div><div class="eyebrow">Player card</div><h3>${esc(S.name||"Guest")}</h3><span class="sub">Table ${S.table} · ${S.visits} visit${S.visits===1?"":"s"}</span></div></div>
+  Sheet.open(`<div class="prof"><div class="av" data-avatar></div><div><div class="eyebrow">Player card</div><h3>${esc(S.name||"Guest")}</h3><span class="sub">{{copy.Spot|js}} ${S.table} · ${S.visits} visit${S.visits===1?"":"s"}</span></div></div>
     <div class="stats"><div><b>${fmt(S.visits)}</b><small>Visits</small></div><div><b>${fmt(S.coins)}</b><small>Coins</small></div><div><b>${fmt(Object.keys(S.claimed).length)}</b><small>Rewards</small></div></div>
     ${IN_SITE?`<a class="btn" href="${AVATAR_URL}" style="margin-top:14px;text-decoration:none">${ic("controller")}Edit my avatar</a>`:""}
     <button class="btn ghost" id="pSound" style="margin-top:10px">${ic(S.sound?"speaker":"speaker_mute")}<span>Sound: ${S.sound?"On":"Off"}</span></button>
@@ -1108,7 +1115,7 @@ const Quiz=(()=>{
     const opts=q.o.map(o=>({o,n:pool.filter(o[3]).length})).filter(x=>x.n>0);
     body.classList.remove("sw");void body.offsetWidth;body.classList.add("sw");
     body.innerHTML=`<div class="eyebrow">Question ${asked.length+1}</div><h1>${q.q}</h1><p class="sub">${q.s}</p>
-      <div class="opts">${opts.map((x,i)=>`<button class="opt" data-o="${i}" style="animation:rise .45s ${.05*i+.1}s both"><b>${x.o[1]}</b><span>${x.o[2]||x.n+(x.n===1?" dish":" dishes")}</span></button>`).join("")}
+      <div class="opts">${opts.map((x,i)=>`<button class="opt" data-o="${i}" style="animation:rise .45s ${.05*i+.1}s both"><b>${x.o[1]}</b><span>${x.o[2]||x.n+(x.n===1?" {{copy.dish|js}}":" {{copy.dishes|js}}")}</span></button>`).join("")}
       ${asked.length?`<button class="opt skip" data-o="-1"><b style="font-size:15px">No preference</b></button>`:""}</div>`;
     body.onclick=e=>{const b=e.target.closest(".opt");if(!b)return;body.onclick=null;SFX.tap();b.classList.add("sel");const i=+b.dataset.o;asked.push(k);
       if(i>=0){pool=pool.filter(opts[i].o[3]);why.push(opts[i].o[1]);}
@@ -1122,7 +1129,7 @@ const Quiz=(()=>{
     body.innerHTML=`<div class="eyebrow">Our pick for you</div><h1>${S.name?esc(S.name)+", your":"Your"} pick: ${esc(w.n)}</h1>
       <div class="win"><img src="${img(w)}" alt=""><div class="in"><b>${esc(w.n)}${w.p?` <span style="font-weight:500;font-size:18px">${w.p}</span>`:""}</b><p>${esc(w.d||"")}</p><div class="why">${why.map(x=>`<i>${esc(x)}</i>`).join("")}${w.top&&!why.includes("{{copy.favLabel|js}}")?"<i>{{copy.favLabel}}</i>":""}</div></div></div>
       ${r.length>1?`<h2 style="margin-top:20px">Also worth a look</h2>`+r.slice(1,3).map(i=>`<button class="runner" data-item="${esc(i.n)}"><img src="${img(i)}" alt=""><div><b>${esc(i.n)}</b><span>${i.p?i.p+" · ":""}${esc(i.cat)}</span></div></button>`).join(""):""}
-      ${first?`<div class="earn" id="qEarn"><i class="c lg"></i>+25 for finding your plate</div>`:""}
+      ${first?`<div class="earn" id="qEarn"><i class="c lg"></i>+25 for finding your {{copy.plate}}</div>`:""}
       <button class="btn" data-pick="${esc(w.n)}" style="margin-top:14px" id="qPick">${ic("checkmark")}That's my pick</button>
       <button class="btn ghost" id="qAgain" style="margin-top:10px">${ic("arrows_clockwise")}Start over</button>`;
     body.scrollTop=0;SFX.win();setTimeout(()=>FX.confetti([innerWidth/2,innerHeight*.35],80),250);
@@ -1177,7 +1184,12 @@ const Onb=(()=>{
 })();
 
 /* ================= BOOT ================= */
+/* an NFC tag or QR at the venue (play/<id>/?tap=…, the same links the earlier app printed) stamps today's visit, once a day */
+const TAPPED=(()=>{try{const q=new URLSearchParams(location.search);if(!q.has("tap"))return false;q.delete("tap");
+  const r=q.toString();history.replaceState(history.state,"",location.pathname+(r?"?"+r:"")+location.hash);
+  if(S.lastTap===today())return "again";S.lastTap=today();S.visits++;save();return true;}catch(e){return false;}})();
 (function boot(){
+  if(TAPPED)setTimeout(()=>toast(TAPPED===true?"Visit stamped. Thanks for stopping by!":"Already stamped today. See you next visit."),S.onboarded?900:5200);
   fillIcons();UI.tabs();UI.menu();Avatar.paint();
   const im=new Image();
   im.onload=()=>{LOGO_IMG=im;Coin.init(im);UI.wallet(false);UI.go("home");

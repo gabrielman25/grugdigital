@@ -1,0 +1,221 @@
+{
+  "sections": [
+    {
+      "cat": "Signature drinks",
+      "icon": "star",
+      "items": [
+        {
+          "n": "Tres Leches Latte",
+          "d": "Vanilla, coconut, condensed milk and a touch of cinnamon.",
+          "p": "$7.75",
+          "t": "k=coffee st=sweet,milky",
+          "top": 1
+        },
+        {
+          "n": "Black Amber",
+          "d": "Pineapple coconut cold brew topped with orange cream foam and fresh orange zest.",
+          "p": "$7.75",
+          "t": "k=coffee st=bold,fruity",
+          "top": 1
+        },
+        {
+          "n": "Espresso Tonic",
+          "d": "Bright, refreshing and effortlessly smooth.",
+          "p": "$6.75",
+          "t": "k=coffee st=bold,fruity",
+          "top": 1
+        },
+        {
+          "n": "Smoked Sea Salt Maple Latte",
+          "d": "Homemade bourbon maple, vanilla cream foam and smoked sea salt.",
+          "p": "$7.75",
+          "t": "k=coffee st=sweet,milky",
+          "top": 1,
+          "photo": "play/soluna/assets/photos/fall.jpg"
+        },
+        {
+          "n": "Espresso Old-Fashioned",
+          "d": "Homemade bourbon maple, orange old-fashioned blend and orange cream foam.",
+          "p": "$7.75",
+          "t": "k=coffee st=bold,sweet",
+          "top": 1
+        },
+        {
+          "n": "Desert Dust",
+          "d": "Espresso, raw honey, brown sugar cream foam and graham cracker crumb.",
+          "p": "$7.75",
+          "t": "k=coffee st=sweet",
+          "top": 1
+        },
+        {
+          "n": "Spanish Latte",
+          "d": "Four shots espresso, sweetened condensed milk and a touch of cinnamon.",
+          "p": "$7.75",
+          "t": "k=coffee st=sweet,milky",
+          "top": 1
+        },
+        {
+          "n": "Strawberry Pie Matcha",
+          "d": "Strawberry purée, strawberry vanilla cream foam and graham cracker crumb.",
+          "p": "$7.75",
+          "t": "k=matcha st=sweet,fruity",
+          "top": 1
+        },
+        {
+          "n": "Banana Cream Matcha Latte",
+          "d": "Homemade caramelized banana syrup and banana cream foam.",
+          "p": "$7.75",
+          "t": "k=matcha st=sweet,milky",
+          "top": 1
+        }
+      ]
+    },
+    {
+      "cat": "Classic coffee",
+      "icon": "cup",
+      "items": [
+        {
+          "n": "Doppio",
+          "p": "$3.75",
+          "t": "k=coffee st=bold"
+        },
+        {
+          "n": "Americano",
+          "p": "$3.90 / $4.75",
+          "t": "k=coffee st=bold"
+        },
+        {
+          "n": "Macchiato",
+          "p": "$4.75",
+          "t": "k=coffee st=bold"
+        },
+        {
+          "n": "Cortado",
+          "p": "$5.25",
+          "t": "k=coffee st=milky"
+        },
+        {
+          "n": "Flat White",
+          "p": "$5.75",
+          "t": "k=coffee st=milky"
+        },
+        {
+          "n": "Cappuccino",
+          "p": "$5.50",
+          "t": "k=coffee st=milky",
+          "photo": "play/soluna/assets/photos/latte-art.jpg"
+        },
+        {
+          "n": "Latte",
+          "d": "Made with local, grass-fed Texas milk",
+          "p": "$6.25",
+          "t": "k=coffee st=milky",
+          "photo": "play/soluna/assets/photos/pour.jpg"
+        },
+        {
+          "n": "Shaken Espresso",
+          "p": "$6.25",
+          "t": "k=coffee st=bold,sweet"
+        },
+        {
+          "n": "Drip Coffee",
+          "p": "$3.75 / $4.25",
+          "t": "k=coffee st=bold"
+        },
+        {
+          "n": "Cold Brew",
+          "p": "$5.75 / $6.50",
+          "t": "k=coffee st=bold"
+        }
+      ]
+    },
+    {
+      "cat": "Non-coffee",
+      "icon": "leaf",
+      "items": [
+        {
+          "n": "Chai Latte",
+          "p": "$5.75 / $6.25",
+          "t": "k=other st=milky,sweet"
+        },
+        {
+          "n": "Matcha Latte",
+          "p": "$5.75 / $6.25",
+          "t": "k=matcha st=milky",
+          "photo": "play/soluna/assets/photos/lineup.jpg"
+        },
+        {
+          "n": "Hot Chocolate",
+          "p": "$3.75 / $4.25",
+          "t": "k=other st=sweet"
+        },
+        {
+          "n": "Cucumber Limeade",
+          "p": "$6.95",
+          "t": "k=other st=fruity"
+        },
+        {
+          "n": "Loose Leaf Tea Selection",
+          "d": "Ask about today's selection",
+          "t": "k=other st=light"
+        }
+      ]
+    },
+    {
+      "cat": "Add-ons",
+      "icon": "plus",
+      "items": [
+        {
+          "n": "Syrups",
+          "d": "Vanilla, caramel, white mocha, hazelnut, banana, bourbon maple, brown sugar",
+          "p": "$1.25"
+        },
+        {
+          "n": "Milk (Coconut, Almond, Oat Milk)",
+          "p": "+ $1.00"
+        },
+        {
+          "n": "Extra Espresso Shot",
+          "p": "+ $1.25"
+        }
+      ]
+    },
+    {
+      "cat": "Housemade syrups",
+      "icon": "droplet",
+      "items": [
+        {
+          "n": "Vanilla"
+        },
+        {
+          "n": "Simple Syrup"
+        },
+        {
+          "n": "Brown Sugar"
+        },
+        {
+          "n": "Bourbon Maple"
+        },
+        {
+          "n": "Old Fashioned"
+        },
+        {
+          "n": "Caramelized Banana"
+        },
+        {
+          "n": "Pumpkin Spice"
+        },
+        {
+          "n": "SF Vanilla",
+          "d": "Sugar-free"
+        },
+        {
+          "n": "Mocha, Caramel or White Mocha Sauce"
+        },
+        {
+          "n": "Hazelnut or Raw Honey"
+        }
+      ]
+    }
+  ]
+}

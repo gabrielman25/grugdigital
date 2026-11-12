@@ -12,8 +12,9 @@ Inputs (see README.md):
   partners/<id>/data.json                       menu + menu photos (base64) + logo (for the coin) + font(s) (base64)
   partners/<id>/logow.json                      the wide logo for the top bar, {"logo_wide": "data:image/png;base64,..."}
 
-The app has no game room of its own: its games are the Grug site's (the partner's own game, once it has one, and the
-Grug originals), shown on Home as FOSSIL32 cartridges and on the site's game list.
+The app has no game room of its own: its games are the Grug site's standalone games (the partner's own first, then the
+rest), shown on Home as FOSSIL32 cartridges and on the site's game list. A partner whose menu isn't scraped from a website
+makes its data.json with make_menu.py (partners/<id>/menu.json) instead of a make_data.py of its own.
 """
 import html, json, os, re, sys
 

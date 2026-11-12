@@ -20,7 +20,7 @@
     grug:     { name: 'Grug',                     short: 'Grug' },
     yoshi:    { name: 'Yoshi Sushi Asian Fusion', short: 'Yoshi',    game: 'Sushi Swap' },
     cielito:  { name: 'Cielito Lindo Taqueria',   short: 'Cielito',  game: 'Taco Match' },
-    teahouse: { name: 'Teahouse Express',         short: 'Teahouse', game: 'Take a Tea' },
+    teahouse: { name: 'Teahouse Express',         short: 'Teahouse', game: 'Steal a Sip' },
     soluna:   { name: 'Soluna Coffee',            short: 'Soluna',   game: 'Sunrise to Sunset' },
     alchemy:  { name: 'Alchemy Bake Lab',         short: 'Alchemy',  game: 'Sugar Alchemist' },
     rodeo:    { name: 'Rodeo Express Car Wash',   short: 'Rodeo',    game: 'Rodeo Wash Simulator' },
@@ -55,10 +55,10 @@
     shirt('omakase',     'Omakase chef coat',  ['#F6F3EC', '#C0392B'], ms('yoshi', 'best', 6000, 'Score 6,000 in one Sushi Swap run')),
     shirt('taco-tee',    'Taco tee',           ['#C8382A', '#F2B544'], pts('cielito', 40)),
     shirt('serape',      'Serape stripes',     ['#C8382A', '#2E8B57'], ms('cielito', 'best', 6000, 'Score 6,000 in one Taco Match run')),
-    shirt('boba-tee',    'Boba tee',           ['#1E6B35', '#F6C445'], pts('teahouse', 30)),
+    shirt('boba-tee',    'Boba tee',           ['#1E6B35', '#F6C445'], ms('teahouse', 'plays', 3, 'Play 3 runs of Steal a Sip')),   // (was 30 Teahouse points: its rewards app now pays in coins for app themes)
     pants('matcha',      'Matcha joggers',     ['#7FA650', '#F6F1E7'], ms('teahouse', 'best', 10, 'Run a tea shop that makes $10 a second')),
-    shirt('barista',     'Barista apron',      ['#F3EEE4', '#4A3324'], pts('soluna', 30)),
-    shirt('sunrise',     'Sunrise hoodie',     ['#FF8A5C', '#8E5CF0'], pts('soluna', 35)),
+    shirt('barista',     'Barista apron',      ['#F3EEE4', '#4A3324'], ms('soluna', 'plays', 3, 'Work 3 shifts in Sunrise to Sunset')),
+    shirt('sunrise',     'Sunrise hoodie',     ['#FF8A5C', '#8E5CF0'], ms('soluna', 'plays', 10, 'Work 10 shifts in Sunrise to Sunset')),
     shirt('sprinkles',   'Sprinkle tee',       ['#FF9CC2', '#6B3E26'], ms('alchemy', 'days', 1, 'Finish a day in Sugar Alchemist'))
   ];
   ITEMS.forEach(it => { it.template = 'shop:' + it.id; it.png = 'assets/clothing/' + it.id + '.png'; it.thumb = 'assets/clothing/thumbs/' + it.id + '.png'; });

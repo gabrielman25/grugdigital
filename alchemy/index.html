@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Alchemy Bake Lab · Dessert Club on Grug (demo)</title>
+<link rel="icon" href="../play/alchemy/logo.png">
+<!-- Partner mode for Alchemy Bake Lab: this short address starts it (assets/theme.js PARTNERS.alchemy) and opens the Games page.
+     The whole site then wears Alchemy Bake Lab's logo, colours and type, with the Dessert Club app's tab bar, until the tab is closed. -->
+<script>
+(function () {
+  var to = '../games/?partner=alchemy' + (location.hash || '');
+  try { location.replace(to); } catch (e) { location.href = to; }
+})();
+</script>
+<noscript><meta http-equiv="refresh" content="0;url=../games/?partner=alchemy"></noscript>
+</head>
+<body style="background:#0b0b0c;color:#fff;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0">
+<a href="../games/?partner=alchemy" style="color:#C2A26B">Open the Dessert Club at Alchemy Bake Lab</a>
+</body>
+</html>

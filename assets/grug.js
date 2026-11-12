@@ -277,16 +277,33 @@
   /* ---------- partner points (read from each app's own storage) ---------- */
   function appState(game) { return game && game.storageKey ? readJSON(game.storageKey, null) : null; }
   function points() {
+    // a venue's rewards app keeps its coins and visits ('coins' / 'visits', or 'points' / a history in the older apps);
+    // a standalone game keeps its best and runs in its own save (games.js `save`)
     return GAMES.filter(g => g.storageKey).map(g => {
-      const s = appState(g) || {};
-      return { game: g, points: Math.max(0, +s.points || 0), best: +(s.game && s.game.best) || 0, runs: +(s.game && s.game.runs) || 0, visits: Array.isArray(s.history) ? s.history.filter(h => h && h.pts > 0).length : 0, has: !!localStorage.getItem(g.storageKey) };
+      const s = appState(g) || {}, h = (g.save && readJSON(g.save, null)) || s;
+      return { game: g, points: Math.max(0, +s.points || +s.coins || 0), best: +(h.game && h.game.best) || 0, runs: +(h.game && h.game.runs) || 0,
+        visits: +s.visits || (Array.isArray(s.history) ? s.history.filter(x => x && x.pts > 0).length : 0), has: !!localStorage.getItem(g.storageKey) || !!(g.save && localStorage.getItem(g.save)),
+        coin: venueOf(g) && venueOf(g).wallet ? venueOf(g).wallet.label : 'points' };
     });
+  }
+  // the venue a game was made with (its PARTNERS entry in theme.js), and the link to that venue's rewards app
+  const venueOf = g => { const P = root.GrugTheme && root.GrugTheme.PARTNERS; return g && g.venue && P && P[g.venue] ? P[g.venue] : null; };
+  function rewardsUrl(g) {
+    const v = venueOf(g); if (v) return url(v.app + (v.wallet && v.wallet.to || ''));
+    const s = appState(g); return url(g.play) + (s && s.store ? '#' + esc(s.store) + '/rewards' : '');
   }
 
   /* ---------- export / import ---------- */
+  // every save that belongs to the profile: the venues' rewards apps (storageKey, plus each PARTNERS wallet) and the games' own saves
+  function appKeys() {
+    const P = (root.GrugTheme && root.GrugTheme.PARTNERS) || {}, ks = [];
+    GAMES.forEach(g => { if (g.storageKey) ks.push(g.storageKey); if (g.save) ks.push(g.save); });
+    Object.values(P).forEach(p => { if (p.wallet && p.wallet.key) ks.push(p.wallet.key); });
+    return [...new Set(ks)];
+  }
   function exportData() {
     const apps = {};
-    GAMES.forEach(g => { if (g.storageKey) { const v = localStorage.getItem(g.storageKey); if (v) { try { apps[g.storageKey] = JSON.parse(v); } catch (e) {} } } });
+    appKeys().forEach(k => { const v = localStorage.getItem(k); if (v) { try { apps[k] = JSON.parse(v); } catch (e) {} } });   // venue apps and game saves
     { const v = localStorage.getItem(REWARDS_KEY); if (v) { try { apps[REWARDS_KEY] = JSON.parse(v); } catch (e) {} } }   // saved Rewards cards + My creations
     const sandy = readJSON('grug.sandy.v1', null);   // the 3D avatar's look
     return { format: EXPORT_FORMAT, version: 1, exportedAt: new Date().toISOString(), site: ROOT, profile, apps, sandy };
@@ -314,21 +331,21 @@
     if (!d || typeof d !== 'object' || d.format !== EXPORT_FORMAT || !d.profile) return { ok: false, error: 'That file isn’t a Grug profile export (missing "format": "grug-profile").' };
     const p = normalize(d.profile);
     const apps = d.apps && typeof d.apps === 'object' ? d.apps : {};
-    const pts = GAMES.filter(g => g.storageKey && apps[g.storageKey]).map(g => ({ game: g, points: Math.max(0, +apps[g.storageKey].points || 0) }));
+    const pts = GAMES.filter(g => g.storageKey && apps[g.storageKey]).map(g => ({ game: g, points: Math.max(0, +apps[g.storageKey].points || +apps[g.storageKey].coins || 0) }));
     const sandy = d.sandy && typeof d.sandy === 'object' && !Array.isArray(d.sandy) ? d.sandy : null;
     return { ok: true, data: { profile: p, apps, sandy }, summary: { name: p.name, items: p.inventory.length, exportedAt: d.exportedAt || '', points: pts } };
   }
   // Replace everything on this device with the file's contents.
   function applyImport(data) {
     const p = normalize(data.profile); p.updated = Date.now();
-    GAMES.forEach(g => { if (g.storageKey && data.apps[g.storageKey] && typeof data.apps[g.storageKey] === 'object') writeJSON(g.storageKey, data.apps[g.storageKey]); });
+    appKeys().forEach(k => { if (data.apps[k] && typeof data.apps[k] === 'object') writeJSON(k, data.apps[k]); });
     if (data.apps[REWARDS_KEY] && typeof data.apps[REWARDS_KEY] === 'object') writeJSON(REWARDS_KEY, data.apps[REWARDS_KEY]);
     profile = p; writeJSON(KEY, profile); try { localStorage.removeItem(SNAP_KEY); } catch (e) {}
     if (data.sandy) { writeJSON('grug.sandy.v1', data.sandy); try { localStorage.removeItem('grug.sandy.snaps.v1'); } catch (e) {} }
     emit('import'); return true;
   }
   function reset(alsoPoints) {
-    if (alsoPoints) GAMES.forEach(g => { if (g.storageKey) try { localStorage.removeItem(g.storageKey); } catch (e) {} });
+    if (alsoPoints) appKeys().forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
     if (alsoPoints) try { localStorage.removeItem(REWARDS_KEY); } catch (e) {}
     try { localStorage.removeItem(KEY); localStorage.removeItem(SNAP_KEY); localStorage.removeItem('grug.sandy.v1'); localStorage.removeItem('grug.sandy.snaps.v1'); } catch (e) {}
     profile = fresh(); writeJSON(KEY, profile); emit('reset');
@@ -422,8 +439,9 @@
   ];
   // the dock's stops, left to right: what a swipe (or Q / E, LB / RB) steps through
   const STOPS = ['home', 'games', 'me', 'make'];
-  // partner mode: the partner's own game and the Grug originals (no other partner's game or rewards app)
-  const partnerAllows = g => { const p = root.GrugTheme && root.GrugTheme.partner && root.GrugTheme.partner(); return !p || !g || g.id === p.game || !!g.standalone; };
+  // partner mode: every standalone game (the partner's own first, see games/), but never another partner's rewards app,
+  // so a game that still lives inside its venue's app (inApp) shows only in that venue's own wrap
+  const partnerAllows = g => { const p = root.GrugTheme && root.GrugTheme.partner && root.GrugTheme.partner(); return !p || !g || g.id === p.game || !g.inApp; };
   try { const m = /\/games\/([\w-]+)\/?$/.exec(location.pathname), g = m && GAMES.find(x => x.id === m[1]); if (g && !partnerAllows(g)) location.replace(url('games/')); } catch (e) {}
   // partner mode (theme.js, e.g. crafthouse/): the site is just for playing and dressing up, so the dock is Games and Me
   const partnerOn = () => !!(root.GrugTheme && root.GrugTheme.partner && root.GrugTheme.partner());
@@ -809,7 +827,7 @@
     const st = g.status === 'live' ? ['live', 'Live'] : g.status === 'legacy' ? ['legacy', 'Classic'] : ['soon', 'Demo'];
     const badge = '<span class="badge ' + st[0] + '"' + (st[0] === 'legacy' ? ' style="background:#6b7280;color:#fff"' : '') + '>' + st[1] + '</span>';
     const art = g.box && g.box.art ? g.box.art : g.thumb;
-    const meta = icon(g.standalone ? 'sparkle' : 'storefront') + esc(g.standalone ? 'Grug Original' : g.partner) + '<span>·</span>' + esc(g.kind);
+    const meta = icon(g.original ? 'sparkle' : 'storefront') + esc(g.original ? 'Grug Original' : g.partner) + '<span>·</span>' + esc(g.kind);
     const cart = opts.kind === 'cart';
     return '<a class="g-tile f32-tile' + (cart ? ' f32-cart' : '') + '" data-f32="' + esc(g.id) + '"' + (cart ? ' data-f32-kind="cart"' : '') + ' href="' + url('games/' + g.id + '/') + '" aria-label="' + esc(g.title) + ' (' + esc(g.kind) + ')">' +
       '<div class="f32-stage">' + badge + (opts.ribbon ? '<span class="f32-ribbon">' + icon('arrow-counter-clockwise') + esc(opts.ribbon) + '</span>' : '') + '<img class="f32-flat" src="' + url(art) + '" alt="" loading="lazy" decoding="async"></div>' +
@@ -881,7 +899,7 @@
     on(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },
     save, setName, setAvatar, equip, unequip, wearing, refreshPictures, owns, grant, track, totals, statValue, progress, checkMilestones, celebrate,
     favs,   // favourite and ignored games (the store, games/favorites/, the game pages)
-    points, appState, exportData, exportText, exportFilename, download, share, parseImport, applyImport, reset,
+    points, appState, venueOf, rewardsUrl, exportData, exportText, exportFilename, download, share, parseImport, applyImport, reset,
     snaps, ensureSnaps, randomName, cleanName, makeName, parseName, NAME_WORDS: { adj: ADJ.slice(), noun: NOUN.slice(), maxNum: NAME_MAX_NUM }, pearlBalance, pearlsUrl,
     announce,
     // site-wide items and live effects (see ITEMS above)

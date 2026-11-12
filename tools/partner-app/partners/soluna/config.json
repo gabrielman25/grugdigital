@@ -1,0 +1,152 @@
+{
+  "id": "soluna",
+  "name": "Soluna Coffee",
+  "brand": "Soluna",
+  "short": "Soluna",
+  "label": "Soluna Coffee",
+  "place": "Elyson, Katy TX",
+  "address": "22225 Elyson Falls Dr · Katy",
+  "website": "instagram.com/solunacoffeeshop",
+  "appStore": "https://www.instagram.com/solunacoffeeshop/",
+  "appTitle": "Sun Club",
+  "welcomeEyebrow": "Welcome to the Sun Club",
+  "coin": "Soluna Coins",
+  "storageKey": "soluna-coffee-club-v1",
+  "oldLinks": [
+    [
+      "hash",
+      "game",
+      "../sunrise/"
+    ]
+  ],
+  "menuIcon": "cup",
+  "color": {
+    "accent": "#c8924f",
+    "accentDark": "#7a5a30",
+    "accentLight": "#ecd9b8",
+    "deep": "#5f5c37",
+    "deepDark": "#4a482a",
+    "cream": "#f6f1e7"
+  },
+  "copy": {
+    "welcomeTitle": "Good morning. Your cup has a bonus.",
+    "welcomeSub": "Find your next favorite drink, play free games while it's poured, and stack Soluna Coins every visit.",
+    "passLabel": "Season Pass · Sun Club",
+    "passDone": "Golden Hour. Every tier unlocked.",
+    "favTitle": "Signature drinks",
+    "favLabel": "Signature",
+    "quizCta": "Answer a few questions and we'll pour your drink",
+    "menuCredit": "Menu and prices from the board at Soluna Elyson. Ask about the seasonal specials.",
+    "orderTitle": "Follow @solunacoffeeshop",
+    "orderSub": "Seasonal drinks, pop-ups and events",
+    "mintLine": "Spend them on new looks for your app, or on boosts in Sunrise to Sunset.",
+    "staff": "your barista",
+    "bill": "total",
+    "spot": "ticket",
+    "Spot": "Ticket",
+    "who": "Who's ordering?",
+    "mintGo": "Take me to the club",
+    "quizTitle": "What should I order?",
+    "menuSub": "Everything on the board",
+    "plate": "drink",
+    "dish": "drink",
+    "dishes": "drinks"
+  },
+  "themes": [
+    {
+      "id": "classic",
+      "name": "Olive",
+      "deep": "#5f5c37",
+      "deepDark": "#4a482a"
+    },
+    {
+      "id": "sunrise",
+      "name": "Sunrise",
+      "price": 600,
+      "deep": "#b5562f",
+      "deepDark": "#7f3a1e",
+      "accent": "#ffd7a6",
+      "line": "Sunrise-orange panels with a peach shine."
+    },
+    {
+      "id": "dusk",
+      "name": "Dusk",
+      "price": 900,
+      "deep": "#3e3a66",
+      "deepDark": "#29264a",
+      "accent": "#d6cfff",
+      "line": "Dusky violet panels with a lavender shine."
+    },
+    {
+      "id": "matcha",
+      "name": "Matcha",
+      "price": 1200,
+      "deep": "#4c6b3a",
+      "deepDark": "#334a27",
+      "accent": "#d9e8a8",
+      "line": "Matcha-green panels with a lime shine."
+    },
+    {
+      "id": "espresso",
+      "name": "Espresso",
+      "deep": "#221e1a",
+      "deepDark": "#110f0d",
+      "line": "Espresso-black, for Golden Hour regulars only."
+    }
+  ],
+  "pass": [
+    {
+      "v": 1,
+      "name": "First Pour",
+      "reward": "250 {coin}",
+      "coins": 250
+    },
+    {
+      "v": 3,
+      "name": "Regular",
+      "reward": "400 {coin}",
+      "coins": 400
+    },
+    {
+      "v": 6,
+      "name": "Morning Ritual",
+      "reward": "The Sunrise app theme + 200 {coin}",
+      "theme": "sunrise",
+      "coins": 200
+    },
+    {
+      "v": 10,
+      "name": "Latte Artist",
+      "reward": "1,000 {coin}",
+      "coins": 1000
+    },
+    {
+      "v": 20,
+      "name": "Golden Hour",
+      "reward": "The Espresso theme + 1,500 {coin}",
+      "theme": "espresso",
+      "coins": 1500
+    }
+  ],
+  "coinUses": [
+    [
+      "palette",
+      "App themes",
+      "Sunrise, Dusk and Matcha looks for your app."
+    ],
+    [
+      "controller",
+      "Sunrise to Sunset boosts",
+      "Shift boosts and passes in the Soluna game: 25 coins to a point."
+    ]
+  ],
+  "quizPicks": [
+    "Cappuccino",
+    "Latte",
+    "Matcha Latte"
+  ],
+  "menuPicks": [
+    "Smoked Sea Salt Maple Latte",
+    "Cappuccino"
+  ]
+}

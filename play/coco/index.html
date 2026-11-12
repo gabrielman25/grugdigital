@@ -382,7 +382,7 @@ html.f32-lock #app{filter:blur(9px) brightness(.6) saturate(1.1)}
   </div>
   <div class="step" data-s="1">
     <div class="dots"><i class="on"></i><i></i></div>
-    <h1>Who's at the table?</h1>
+    <h1>Who&#x27;s at the table?</h1>
     <p class="sub">So we know what to call you.</p>
     <div class="me"><div class="av" data-avatar></div><div><b>Your player card</b><span>Your look from Grug carries over here</span></div></div>
     <input class="field" id="obName" maxlength="14" placeholder="First name or nickname" autocomplete="off">
@@ -418,7 +418,7 @@ let LOGO_IMG=null;
 const IN_SITE=/\/play\/coco(\/|$)/.test(location.pathname);
 const LINKS={play:"https://order.toasttab.com/online/coco-crepes-waffles-and-coffee-katy-vqgfl",grug:IN_SITE?"../../coco/":"https://grugdigital.pages.dev/coco/"};
 const GRUG_TARGET=IN_SITE?"":' target="_blank" rel="noopener"';
-/* on the site, the Play tab is the full game list in partner mode (the partner's game plus the Grug originals, in its colours) */
+/* on the site, the Play tab is the full game list in partner mode (every standalone game, the partner's own first, in its colours) */
 const GAMES_URL="../../games/?partner=coco",AVATAR_URL="../../avatar/?partner=coco";
 /* on the site, opening this app (however it was reached: a bookmark, a shared link, the site's own bar) puts the whole
    site in partner mode for this tab, and a game started from here comes back here when the guest leaves it
@@ -427,6 +427,12 @@ if(IN_SITE){try{const b=JSON.parse(sessionStorage.getItem("grug.brand.v1")||"nul
   /* a game started from the shelf: note the way back, and the Grug Digital card can show on Home from now on */
   addEventListener("fossil32:play",()=>{try{sessionStorage.setItem("grug.partner.back",location.pathname+"#home");}catch(e){}if(!S.grug){S.grug=true;save();}});}
 const COIN="Coco Coins";
+/* addresses from the venue's earlier app (QR codes, bookmarks, links from before): its game is a standalone game now,
+   so "…/game" style links go there. partners/<id>/config.json "oldLinks": [kind, value, path from play/<id>/]:
+   ["hash","game",…] matches #game and #<store>/game, ["query","game=takeatea",…] matches that query. */
+function oldLink(){try{const q=location.search.slice(1).split("&"),h=location.hash;
+  for(const [k,v,to] of [])if((k==="hash"&&(h==="#"+v||h.slice(-v.length-1)==="/"+v))||(k==="query"&&q.includes(v))){location.replace(to);return true;}}catch(e){}return false;}
+oldLink();addEventListener("hashchange",oldLink);
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), lerp=(a,b,t)=>a+(b-a)*t, rnd=(a,b)=>a+Math.random()*(b-a);
 const fmt=n=>Math.round(n).toLocaleString("en-US");
@@ -439,7 +445,7 @@ function fillIcons(root){$$("[data-ic]",root||document).forEach(e=>{if(!e.firstC
 
 /* ================= STATE ================= */
 const KEY="coco-crepes-crepeclub-v1";
-const DEF={onboarded:false,name:"",coins:0,visits:0,claimed:{},lastDaily:"",tab:[],theme:"classic",themes:["classic"],quizDay:"",sound:true,table:12,lastPick:"",grug:false,grugSeen:false};
+const DEF={onboarded:false,name:"",coins:0,visits:0,claimed:{},lastDaily:"",lastTap:"",tab:[],theme:"classic",themes:["classic"],quizDay:"",sound:true,table:12,lastPick:"",grug:false,grugSeen:false};
 let S=Object.assign({},DEF);
 try{const j=JSON.parse(localStorage.getItem(KEY)||"null"); if(j) S=Object.assign({},DEF,j);}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
@@ -759,7 +765,7 @@ const grugCard=(pop)=>`<a class="cta grug ${pop?"pop":""}" href="${LINKS.grug}"$
 /* off the Grug site (the app opened as a single file): the games live on the site, so Home and Play point there */
 const playCard=()=>`<a class="cta dark" href="${LINKS.grug}"${GRUG_TARGET}><div class="t"><b>Free games while you wait</b><span>Play the Grug Digital library in Coco colours</span></div>${ic("play")}</a>`;
 
-/* On the Grug site, the top of Home is the site's game shelf: the partner's game and the Grug originals as floating
+/* On the Grug site, the top of Home is the site's game shelf: the partner's own games, then every other standalone game, as floating
    FOSSIL32 cartridges (assets/fossil32/, the same as the Grug home page), in one looping row. Built once and moved back
    into Home each time it's drawn, so the 3D cartridges don't reload. Standalone (off the site): a card that opens the site. */
 const Shelf=(()=>{
@@ -772,13 +778,14 @@ const Shelf=(()=>{
       .then(()=>{build();if(curTab==="home")UI.home();add("script",{type:"module",src:ROOT+"assets/fossil32/fossil32.js"}).catch(()=>{});});
     return loading;
   }
-  // the partner's game first, then the Grug originals (the only games partner mode lists)
-  const list=()=>{const G=window.GRUG_GAMES||[],own=G.find(g=>g.id==="coco");
-    return [own,...G.filter(g=>g.standalone&&g.status!=="legacy"&&g.listed!==false)].filter(Boolean);};
-  const tile=g=>{const b=g.box||{},own=g.id==="coco";
+  // the partner's own game first, then every other standalone game (never one that lives inside another venue's app)
+  const mine=g=>g.venue==="coco"||g.id==="coco";
+  const list=()=>{const G=(window.GRUG_GAMES||[]).filter(g=>g.listed!==false&&g.status!=="legacy");
+    return G.filter(mine).concat(G.filter(g=>!mine(g)&&!g.inApp));};
+  const tile=g=>{const b=g.box||{},own=mine(g);
     return `<a class="hc-t f32-tile f32-cart" data-f32="${g.id}" data-f32-kind="cart" href="${ROOT}games/${g.id}/" aria-label="${esc(g.title)}" style="--hc-c:${b.shell||g.color||"#e5bd2f"}">
-      <div class="f32-stage">${own?'<span class="f32-ribbon">Only at Coco</span>':""}<img class="f32-flat" src="${ROOT}${b.art||g.thumb}" alt="" decoding="async"></div>
-      <div class="hc-b"><b>${esc(g.title)}</b><span>${own?"Coco Crepes":"Grug Original"} · ${esc(g.kind)}</span></div></a>`;};
+      <div class="f32-stage">${own?'<span class="f32-ribbon">From Coco</span>':""}<img class="f32-flat" src="${ROOT}${b.art||g.thumb}" alt="" decoding="async"></div>
+      <div class="hc-b"><b>${esc(g.title)}</b><span>${own?"Coco Crepes":g.original?"Grug Original":esc(g.partner)} · ${esc(g.kind)}</span></div></a>`;};
   function build(){
     const L=list();N=L.length;if(!N)return;
     el=document.createElement("div");el.className="hc";
@@ -1177,7 +1184,12 @@ const Onb=(()=>{
 })();
 
 /* ================= BOOT ================= */
+/* an NFC tag or QR at the venue (play/<id>/?tap=…, the same links the earlier app printed) stamps today's visit, once a day */
+const TAPPED=(()=>{try{const q=new URLSearchParams(location.search);if(!q.has("tap"))return false;q.delete("tap");
+  const r=q.toString();history.replaceState(history.state,"",location.pathname+(r?"?"+r:"")+location.hash);
+  if(S.lastTap===today())return "again";S.lastTap=today();S.visits++;save();return true;}catch(e){return false;}})();
 (function boot(){
+  if(TAPPED)setTimeout(()=>toast(TAPPED===true?"Visit stamped. Thanks for stopping by!":"Already stamped today. See you next visit."),S.onboarded?900:5200);
   fillIcons();UI.tabs();UI.menu();Avatar.paint();
   const im=new Image();
   im.onload=()=>{LOGO_IMG=im;Coin.init(im);UI.wallet(false);UI.go("home");

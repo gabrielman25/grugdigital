@@ -68,10 +68,14 @@ must never lead to the standard Grug site or another partner's rewards app:
 - The Grug dock is hidden; the partner app's own tab bar (`bar` in its PARTNERS entry, `.g-pbar`) is the only navigation,
   on every page (a rail on the right in short landscape; `--sab` grows by its height so layouts make room). Its Play tab is
   the site's game list; the app's own Play tab goes there too.
-- Only the partner's own game and the Grug originals (`standalone: true`) are listed (`Grug.partnerAllows`); a partner
-  with no game yet (no `game` in its entry, like Coco) lists the Grug originals only. Allowed pages:
-  `games/` (and those games' pages), `avatar/`, `pearls`, `rewards/card/`; every other address goes to the game list
-  (theme.js), and so do other partners' game pages (grug.js). A game host's back button (`#rrBack`) returns to the list.
+- Every standalone game is listed (`Grug.partnerAllows`), with the partner's own games first (a "From <venue>" row and
+  the front of the featured carousel on `games/`, the front of the app's shelf). The one exception is a game that still
+  lives inside its venue's app (`inApp: true`, CraftHouse's sports games): only that venue's wrap lists it, since a wrap
+  never leads into another partner's rewards app. Allowed pages: `games/` (and those games' pages), `avatar/`, `pearls`,
+  `rewards/card/`; every other address goes to the game list (theme.js), and so do `inApp` games of other partners
+  (grug.js). A game host's back button (`#rrBack`) returns to the list.
+- Money in a wrap: Pearls pay in every game, and the venue's own coins also pay in its own games (25 coins to a point,
+  `wallet.rate`; `assets/gamehost.js`). The game's bar shows the venue's coin balance next to the Pearls.
 - The account menu is just Buy Pearls, Edit avatar and Settings; Settings has no Leave and no dark mode.
 - The whole site stays in the partner's light look (no dark fog on Games), with its typeface and a faint gingham;
   the game panel and game page are centred.
@@ -80,23 +84,41 @@ must never lead to the standard Grug site or another partner's rewards app:
   page launches a game (the app, the game list, a game page) notes itself in sessionStorage `grug.partner.back` on
   `fossil32:play`, and the game's Back button (`#rrBack`, set by theme.js) returns there, so a guest who played from the
   app lands back in the app.
-- The partner app's Home (on the site) opens with the site's game shelf: the partner's game and the Grug originals as
-  floating FOSSIL32 cartridges in one looping row (`Shelf` in the app), the same ones as the Grug home page.
+- The partner app's Home (on the site) opens with the site's game shelf: the partner's own games, then every other
+  standalone game, as floating FOSSIL32 cartridges in one looping row (`Shelf` in the app).
 
 Partners live in `PARTNERS` in `assets/theme.js` (`GrugTheme.partner()`); `html[data-partner]` is set while it's on.
 A partner's look on the site comes from its entry: `colors` become `--p-accent` / `--p-deep` / `--p-cream` / `--p-page`,
 `coin` is the top bar's coin, `font` becomes "Partner Font" and the optional `fontDisplay` "Partner Display" (headings)
-(never hard-code one partner's look in grug.css). Partners so far: `crafthouse/` and `coco/`.
+(never hard-code one partner's look in grug.css). Partners so far: `crafthouse/`, `coco/`, `teahouse/`, `soluna/`,
+`rodeo/` and `alchemy/`.
+
+## Every game is a standalone game
+
+Games are their own thing, not a tab inside a venue's rewards app. Each lives at `play/<dir>/`: `game.html` (built with the
+game kit) under a thin `index.html` that calls `GrugGameHost({...})` from **`assets/gamehost.js`** (the bar with Back, the
+game's name and the Pearls / coins, the game frame, and the game kit's messages; the protocol is at the top of that file).
+The game's Store, save key (`grug-<dir>-v1`) and venue are in that call. A game made with a venue names it (`venue` in
+`assets/games.js`, `brand` in the host call): the venue's coins pay there while the site is wrapped in it. Grug originals
+(`original: true`, no venue) are paid in Pearls only. The venue games and their folders: Steal a Sip `play/stealasip/`,
+Take a Tea `play/takeatea/` (Teahouse Express), Sunrise to Sunset `play/sunrise/` (Soluna), Rodeo Wash Simulator
+`play/rodeowash/` (Rodeo Express), Sugar Alchemist `play/sugaralchemist/` (Alchemy Bake Lab). The first time a guest opens
+one, the host brings over what the venue's older app kept for it (`migrate`: owned items, best, runs).
+Each venue's rewards app stays at `play/<venue>/` (the address its QR codes and NFC tags use): an NFC link (`?tap=`)
+stamps today's visit, and the old app's game links (`#…/game`, `?game=takeatea`) forward to the standalone game
+(`oldLinks` in the venue's config.json). The Games page's **Rewards apps** button (top of the store, beside Favorites)
+opens a list of every venue's app; it's hidden in partner mode.
 
 ## Making a partner rewards app (use the CraftHouse template)
 
-Every partner rewards app (a coffee shop, a bar…) is built the same way as R&R CraftHouse Grill's and Coco Crepes', from
-**`tools/partner-app/`**: the shared app (`src/`), one folder per partner (`partners/<id>/config.json`, `quiz.json` + menu
-data), and `python3 tools/partner-app/build.py <id>` → `play/<id>/index.html` (never edit that file by hand). Then the site
-side: a `PARTNERS` entry, the `<id>/` short address, and (once it has one) the venue's game with its FOSSIL32 box. Follow
-the step-by-step and the browser checklist in `tools/partner-app/README.md`. **The template has no game room and no
-sports games**: its games are the site's standard library (the Grug originals, plus the partner's own game when it has
-one). **Every reward in a partner app is digital** (coins, app themes, power-ups in the partner's own game): never free
+Every partner rewards app (a coffee shop, a bar, a car wash…) is built the same way as Coco Crepes', Teahouse Express',
+Soluna's, Rodeo Express' and Alchemy Bake Lab's, from **`tools/partner-app/`**: the shared app (`src/`), one folder per
+partner (`partners/<id>/config.json`, `quiz.json` + menu data: a website scraper and `make_data.py` like Coco's, or a
+hand-written `menu.json` and `python3 tools/partner-app/make_menu.py <id>`), and `python3 tools/partner-app/build.py <id>`
+→ `play/<id>/index.html` (never edit that file by hand). Then the site side: a `PARTNERS` entry, the `<id>/` short
+address, and (once it has one) the venue's game as a standalone game with its FOSSIL32 box. Follow the step-by-step and
+the browser checklist in `tools/partner-app/README.md`. **The template has no game room and no sports games**: its games
+are the site's standalone games, the partner's own first. **Every reward in a partner app is digital** (coins, app themes, power-ups in the partner's own game): never free
 food, drinks or discounts. The checklist includes "open the app directly, play from its shelf, press Back: you must land
 back in the app".
 
@@ -133,7 +155,7 @@ last-played game comes first, with a "Last played" ribbon. Closet picks are hidd
 Tapping a cartridge glides it straight to the game panel.
 
 - Code: `tools/fossil32/src/fossil32.js` → bundled to `assets/fossil32/fossil32.js` (`cd tools/fossil32 && npm install && npm run build`).
-  Never edit the bundle by hand. Styles: `assets/fossil32/fossil32.css`. Tiles come from `Grug.ui.boxTile(game)` in `assets/grug.js`.
+  Never edit the bundle by hand (`npm install` needs only the npm registry). Styles: `assets/fossil32/fossil32.css`. Tiles come from `Grug.ui.boxTile(game)` in `assets/grug.js`.
 - Cartridge/console models and textures are in `assets/fossil32/` (cartridge model: Pavel Kutejnikov, CC BY 4.0, keep the credit).
 - The overlay's text (title, description, features) uses the site's header font in plain white on the dark stage.
   The retro lettering and colours belong on the box art only.
@@ -158,6 +180,8 @@ When a new game is added to `assets/games.js` and listed, also make its box. Don
    `assets/boxart/<id>.jpg`, 1580 × 950, no text). Rules: female avatar, long hair or buns only, no hats.
    Also save 1–3 back-of-box screenshots to `assets/boxart/shots/`.
 4. Point `thumb` at the box art too, and add a `games/<id>/index.html` like the others (it calls `GrugGamePage('<id>')`).
+   The game itself goes in `play/<dir>/game.html` with a thin host `index.html` copied from another game (it calls
+   `GrugGameHost`); set `play`, `game` and `save` in its `games.js` entry, and `venue` (or `original: true`).
 5. **Store tags:** 3-5 genre words in `tags` (reuse the words other games already have where they fit). They drive the
    store's categories, tag filters and recommendations.
 6. Check it in a browser: the game in the store (capsules, search, the queue), heart it, then its box on Favorites, the

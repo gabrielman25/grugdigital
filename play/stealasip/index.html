@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Steal a Sip · Grug</title>
+<meta name="description" content="Ride the Tea Trail, grab sealed drinks, outrun the Keepers and run the richest patio shack. A Grug game.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="../../favicon.png">
+<link rel="stylesheet" href="../../assets/grug.css">
+<script src="../../assets/theme.js"></script>
+<!--
+  STANDALONE GAME · play/stealasip/
+  Made with Teahouse Express: Pearls pay everywhere; while the site is wrapped in Teahouse Express (partner mode), its coins pay too.
+  assets/gamehost.js does everything else: the bar (Back, name, Pearls), the game frame (game.html) and the game kit's
+  messages. Change the game's Store, save key or venue below; the protocol is documented at the top of gamehost.js.
+-->
+</head>
+<body>
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/grug.js"></script>
+<script src="../../assets/grug-app.js"></script>
+<script src="../../assets/gamehost.js"></script>
+<script>
+'use strict';
+GrugGameHost({
+  id: 'teahouse', app: 'teahouse', title: 'Steal a Sip', src: 'game.html', collectible: 'cash a second', runSeconds: 300, storageKey: 'grug-stealasip-v1',
+  // made with a venue: its coins pay here too while the site is wrapped in it (theme.js PARTNERS.teahouse)
+  brand: 'teahouse', store: 'Teahouse Express · Katy Mills', colors: ['#1E6B35', '#F6C445'],
+  // the old rewards app kept this game's items, best and runs: they move here the first time
+  migrate: { key: 'teahouse-express-rewards-v1', game: 'game' },
+  // prices are in Pearls (or points: teahouse's coins ÷ 25)
+  shop: [
+    { id: 'speed2', name: 'Double Your Speed', desc: 'x2 Speed, forever', cost: 1, effect: 'speedx', amount: 2, icon: 'sneaker-move-fill' },
+    { id: 'padup', name: 'Upgrade Tune-up Pad', desc: 'The next tool, right now', cost: 12, effect: 'tool', amount: 1, icon: 'arrow-fat-up' },
+    { id: 'spd1', name: '+1K Speed', desc: '+1,000 Speed', cost: 5, effect: 'tune', amount: 1000, icon: 'sneaker-move-fill' },
+    { id: 'spd2', name: '+10K Speed', desc: '+10,000 Speed', cost: 10, effect: 'tune', amount: 10000, icon: 'sneaker-move-fill' },
+    { id: 'spd3', name: '+100K Speed', desc: '+100,000 Speed', cost: 20, effect: 'tune', amount: 100000, icon: 'sneaker-move-fill' },
+    { id: 'spd4', name: '+1M Speed', desc: '+1,000,000 Speed', cost: 40, effect: 'tune', amount: 1e6, icon: 'sneaker-move-fill' },
+    { id: 'spd5', name: '+10M Speed', desc: '+10,000,000 Speed', cost: 75, effect: 'tune', amount: 1e7, icon: 'sneaker-move-fill' },
+    { id: 'spd6', name: '+100M Speed', desc: '+100,000,000 Speed', cost: 120, effect: 'tune', amount: 1e8, icon: 'sneaker-move-fill' },
+    { id: 'pass_cash', name: 'x2 Cash', desc: 'Every drink makes double cash, forever', cost: 50, effect: 'passcash', amount: 2, icon: 'coffee-bean-fill' },
+    { id: 'pass_brew', name: 'x2 Brew Speed', desc: 'Drinks brew twice as fast, forever', cost: 35, effect: 'passbrew', amount: 2, icon: 'timer' },
+    { id: 'pass_tune', name: 'x2 Tuning', desc: 'The tune-up pad works twice as fast, forever', cost: 40, effect: 'passtune', amount: 2, icon: 'arrow-fat-up' },
+    { id: 'pass_tips', name: 'Auto Tip Jar', desc: 'Tip jars empty into your cash on their own, forever', cost: 30, effect: 'passtips', amount: 1, icon: 'magnet' },
+    { id: 'feat_golden', name: 'Golden Teahouse Special', desc: 'A Tea-cret drink, straight onto your menu', cost: 60, effect: 'drink', amount: 'golden', icon: 'crown-simple-fill' },
+    { id: 'rush', name: 'Brown Sugar Rush', desc: 'Move 35% faster', cost: 5, effect: 'speed', amount: 1.35, icon: 'bolt' },
+    { id: 'luck', name: 'Lucky Leaf', desc: 'Rarer drinks on the Tea Trail', cost: 8, effect: 'luck', amount: 3, icon: 'leaf' },
+    { id: 'quickbrew', name: 'Quick Brew', desc: 'Drinks brew 3x faster', cost: 6, effect: 'brew', amount: 3, icon: 'timer' },
+    { id: 'tipjar', name: 'Tip Jar', desc: 'Tip jars empty into your cash from anywhere', cost: 10, effect: 'magnet', amount: 1, icon: 'magnet' },
+    { id: 'double', name: 'Double Shot', desc: 'Every drink makes twice the cash', cost: 12, effect: 'double', amount: 2, icon: 'star-four-fill' },
+    { id: 'cash1', name: 'Tip Stack', desc: '5 minutes of your cash', cost: 5, effect: 'cash', amount: 5, icon: 'coffee-fill' },
+    { id: 'cash2', name: 'Cash Bundle', desc: '15 minutes of your cash', cost: 10, effect: 'cash', amount: 15, icon: 'coffee-fill' },
+    { id: 'cash3', name: 'Cash Pile', desc: '45 minutes of your cash', cost: 20, effect: 'cash', amount: 45, icon: 'coffee-fill' },
+    { id: 'cash4', name: 'Money Bag', desc: '2 hours of your cash', cost: 40, effect: 'cash', amount: 120, icon: 'coffee-fill' },
+    { id: 'cash5', name: 'Cash Safe', desc: '5 hours of your cash', cost: 75, effect: 'cash', amount: 300, icon: 'coffee-fill' }
+  ]
+});
+</script>
+</body>
+</html>

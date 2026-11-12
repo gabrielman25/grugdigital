@@ -1,0 +1,145 @@
+{
+  "id": "rodeo",
+  "name": "Rodeo Express Car Wash",
+  "brand": "Rodeo",
+  "short": "Rodeo",
+  "label": "Rodeo Express",
+  "place": "Peek Rd, Katy TX",
+  "address": "6802 Peek Rd · Katy",
+  "website": "rodeoexpresscarwash.com",
+  "appStore": "https://rodeoexpresscarwash.com/katy-tx",
+  "appTitle": "Round-Up",
+  "welcomeEyebrow": "Welcome to the Round-Up",
+  "coin": "Rodeo Coins",
+  "storageKey": "rodeo-express-wash-club-v1",
+  "oldLinks": [
+    [
+      "hash",
+      "game",
+      "../rodeowash/"
+    ]
+  ],
+  "menuIcon": "car",
+  "color": {
+    "accent": "#e39b32",
+    "accentDark": "#9a5f14",
+    "accentLight": "#f6d7a6",
+    "deep": "#4b3a2c",
+    "deepDark": "#33271d",
+    "cream": "#fbf3e6"
+  },
+  "copy": {
+    "welcomeTitle": "Your wash just got a scoreboard.",
+    "welcomeSub": "Find the right wash, play free games while you wait, and stack Rodeo Coins every visit.",
+    "passLabel": "Season Pass · Round-Up",
+    "passDone": "Rodeo Legend. Every tier unlocked.",
+    "favTitle": "Top washes",
+    "favLabel": "Crowd favorite",
+    "quizCta": "Answer a few questions and we'll pick your wash",
+    "menuCredit": "Wash packages and prices from rodeoexpresscarwash.com. Club prices are per month.",
+    "orderTitle": "Join the Unlimited Club",
+    "orderSub": "Wash as often as you like, one monthly price",
+    "mintLine": "Spend them on new looks for your app, or on passes in Rodeo Wash Simulator.",
+    "staff": "the crew",
+    "bill": "ticket",
+    "spot": "bay",
+    "Spot": "Bay",
+    "who": "Who's behind the wheel?",
+    "mintGo": "Pull into the bay",
+    "quizTitle": "Which wash is mine?",
+    "menuSub": "Every package and the Club",
+    "plate": "wash",
+    "dish": "wash",
+    "dishes": "washes"
+  },
+  "themes": [
+    {
+      "id": "classic",
+      "name": "Saddle",
+      "deep": "#4b3a2c",
+      "deepDark": "#33271d"
+    },
+    {
+      "id": "sunset",
+      "name": "Desert Sunset",
+      "price": 600,
+      "deep": "#a8461f",
+      "deepDark": "#742f14",
+      "accent": "#ffd29a",
+      "line": "Desert-sunset panels with a gold shine."
+    },
+    {
+      "id": "denim",
+      "name": "Denim",
+      "price": 900,
+      "deep": "#2f4a6b",
+      "deepDark": "#1f3249",
+      "accent": "#bcd6f5",
+      "line": "Faded-denim panels with a sky shine."
+    },
+    {
+      "id": "sage",
+      "name": "Sagebrush",
+      "price": 1200,
+      "deep": "#566b4a",
+      "deepDark": "#3a4a31",
+      "accent": "#dfe8c4",
+      "line": "Sagebrush-green panels with a soft shine."
+    },
+    {
+      "id": "legend",
+      "name": "Black Hat",
+      "deep": "#171310",
+      "deepDark": "#0b0907",
+      "line": "Black and gold, for Rodeo Legends only."
+    }
+  ],
+  "pass": [
+    {
+      "v": 1,
+      "name": "Greenhorn",
+      "reward": "250 {coin}",
+      "coins": 250
+    },
+    {
+      "v": 3,
+      "name": "Ranch Hand",
+      "reward": "400 {coin}",
+      "coins": 400
+    },
+    {
+      "v": 6,
+      "name": "Wrangler",
+      "reward": "The Desert Sunset theme + 200 {coin}",
+      "theme": "sunset",
+      "coins": 200
+    },
+    {
+      "v": 12,
+      "name": "Trail Boss",
+      "reward": "1,000 {coin}",
+      "coins": 1000
+    },
+    {
+      "v": 24,
+      "name": "Rodeo Legend",
+      "reward": "The Black Hat theme + 1,500 {coin}",
+      "theme": "legend",
+      "coins": 1500
+    }
+  ],
+  "coinUses": [
+    [
+      "palette",
+      "App themes",
+      "Desert Sunset, Denim and Sagebrush looks for your app."
+    ],
+    [
+      "controller",
+      "Rodeo Wash Simulator",
+      "Passes and boosts in the Rodeo game: 25 coins to a point. Your visits raise your rank there too."
+    ]
+  ],
+  "quizPicks": [],
+  "menuPicks": []
+}

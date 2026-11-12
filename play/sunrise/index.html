@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Sunrise to Sunset · Grug</title>
+<meta name="description" content="Open the coffee shop at sunrise, pour every order and close at sunset. A Grug game.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="../../favicon.png">
+<link rel="stylesheet" href="../../assets/grug.css">
+<script src="../../assets/theme.js"></script>
+<!--
+  STANDALONE GAME · play/sunrise/
+  Made with Soluna Coffee: Pearls pay everywhere; while the site is wrapped in Soluna Coffee (partner mode), its coins pay too.
+  assets/gamehost.js does everything else: the bar (Back, name, Pearls), the game frame (game.html) and the game kit's
+  messages. Change the game's Store, save key or venue below; the protocol is documented at the top of gamehost.js.
+-->
+</head>
+<body>
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/grug.js"></script>
+<script src="../../assets/grug-app.js"></script>
+<script src="../../assets/gamehost.js"></script>
+<script>
+'use strict';
+GrugGameHost({
+  id: 'soluna', app: 'soluna', title: 'Sunrise to Sunset', src: 'game.html', collectible: 'customers served', runSeconds: 300, storageKey: 'grug-sunrise-v1',
+  // made with a venue: its coins pay here too while the site is wrapped in it (theme.js PARTNERS.soluna)
+  brand: 'soluna', store: 'Soluna Elyson', colors: ['#5F5C37', '#B08A57'], passes: true,
+  // the old rewards app kept this game's items, best and runs: they move here the first time
+  migrate: { key: 'soluna-site-v2', game: 'game' },
+  extra: () => ({ storeId: 'elyson' }),
+  // prices are in Pearls (or points: soluna's coins ÷ 25)
+  shop: [
+      {"id": "quickfeet", "name": "Quick Feet", "desc": "Walk 15% faster in every shift, forever", "cost": 1, "effect": "pass", "amount": "feet", "icon": "boots", "appIcon": "sneaker-move-fill"},
+      {"id": "b_brew", "name": "Cold Brew", "desc": "Walk 30% faster all shift", "cost": 3, "effect": "boost", "amount": "brew", "icon": "cup", "appIcon": "snowflake-fill"},
+      {"id": "b_shot", "name": "Extra Shot", "desc": "Espresso sweet spot twice as wide", "cost": 5, "effect": "boost", "amount": "shot", "icon": "cup", "appIcon": "coffee-bean-fill"},
+      {"id": "b_pitcher", "name": "Steady Pitcher", "desc": "Wider, slower steam and pour gauges", "cost": 5, "effect": "boost", "amount": "pitcher", "icon": "cup", "appIcon": "thermometer-simple-fill"},
+      {"id": "b_scoop", "name": "Big Scoop", "desc": "Ice and cinnamon need half the taps", "cost": 5, "effect": "boost", "amount": "scoop", "icon": "snowflake", "appIcon": "snowflake-fill"},
+      {"id": "b_spoon", "name": "Shuffle Spoon", "desc": "Match boards show hints, plus 2 free shuffles", "cost": 6, "effect": "boost", "amount": "spoon", "icon": "arrows_clockwise", "appIcon": "shuffle-fill"},
+      {"id": "b_pastry", "name": "Patience Pastry", "desc": "Customers wait 30% longer", "cost": 8, "effect": "boost", "amount": "pastry", "icon": "hourglass", "appIcon": "cookie-fill"},
+      {"id": "b_bean", "name": "Golden Bean", "desc": "Match boards need one match fewer", "cost": 8, "effect": "boost", "amount": "bean", "icon": "star", "appIcon": "star-four-fill"},
+      {"id": "pk_morning", "name": "Morning Rush Pack", "desc": "Extra Shot, Steady Pitcher and Cold Brew", "cost": 12, "effect": "pack", "amount": "shot,pitcher,brew", "n": 1, "icon": "sun", "appIcon": "sun-horizon-fill"},
+      {"id": "pk_full", "name": "Full Bar Pack", "desc": "One of every boost: 7 in all", "cost": 25, "effect": "pack", "amount": "shot,pitcher,spoon,bean,pastry,brew,scoop", "n": 1, "icon": "gift", "appIcon": "gift-fill"},
+      {"id": "pk_week", "name": "Week of Shifts", "desc": "Three of every boost: 21 in all", "cost": 60, "effect": "pack", "amount": "shot,pitcher,spoon,bean,pastry,brew,scoop", "n": 3, "icon": "calendar", "appIcon": "gift-fill"},
+      {"id": "pass_slot", "name": "Extra Boost Slot", "desc": "Bring one more boost into every shift, forever", "cost": 40, "effect": "pass", "amount": "slot", "icon": "plus", "appIcon": "plus"},
+      {"id": "pass_patience", "name": "Regulars’ Patience", "desc": "Customers wait 20% longer, every shift, forever", "cost": 35, "effect": "pass", "amount": "patience", "icon": "hourglass", "appIcon": "timer"},
+      {"id": "pass_train", "name": "Barista Training", "desc": "Every gauge has a wider sweet spot, forever", "cost": 30, "effect": "pass", "amount": "train", "icon": "medal", "appIcon": "sparkle-fill"}
+  ]
+});
+</script>
+</body>
+</html>

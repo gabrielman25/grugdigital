@@ -1,0 +1,79 @@
+{
+  "first": "dirt",
+  "questions": {
+    "dirt": {
+      "q": "How's your ride looking?",
+      "s": "Be honest, we've seen worse.",
+      "o": [
+        [
+          "light",
+          "Pretty clean",
+          "Just a quick refresh",
+          {
+            "dirt": "light"
+          }
+        ],
+        [
+          "dusty",
+          "Dusty",
+          "A week of Katy roads",
+          {
+            "dirt": "dusty"
+          }
+        ],
+        [
+          "muddy",
+          "Muddy",
+          "Back roads, rain or a ranch",
+          {
+            "dirt": "muddy"
+          }
+        ]
+      ]
+    },
+    "shine": {
+      "q": "Want it to shine?",
+      "s": "Bubble Shine and Dry N Shine leave a gloss.",
+      "o": [
+        [
+          "1",
+          "Make it shine",
+          "Foam bath, shine and tire dressing",
+          {
+            "shine": 1
+          }
+        ],
+        [
+          "0",
+          "Clean is enough",
+          "Wash, rinse, dry",
+          {
+            "shine": 0
+          }
+        ]
+      ]
+    },
+    "prot": {
+      "q": "Protect the paint?",
+      "s": "Rodeo Ceramic adds a layer that keeps it cleaner, longer.",
+      "o": [
+        [
+          "1",
+          "Ceramic, please",
+          "The top of the line",
+          {
+            "prot": 1
+          }
+        ],
+        [
+          "0",
+          "Not today",
+          "",
+          {
+            "prot": 0
+          }
+        ]
+      ]
+    }
+  }
+}
