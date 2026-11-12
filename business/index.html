@@ -12,6 +12,31 @@
 <style id="app-css">
 /* pages on the Grug site cross-fade into each other; the dashboard joins in so the switch from the site is smooth */
 @view-transition{navigation:auto}
+/* The Grug dock (the restaurant account's Dashboard · Website · Rewards card, assets/grug.js BIZ_TABS), drawn here so it
+   stays on screen on every dashboard page. It matches the site's dock: same sizes, colours and order. */
+.gdock{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);transform:translateX(-50%);z-index:50;display:flex;gap:4px;
+  padding:9px 14px 12px;border-radius:26px;background:#fff;border:1px solid rgba(30,27,22,.1);box-shadow:0 14px 36px rgba(30,27,22,.16);view-transition-name:g-tabs}
+.gdock a{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:84px;height:62px;border-radius:16px;
+  font:700 11px/1 'Fredoka',system-ui,sans-serif;color:#6B655B;text-decoration:none;transition:transform .2s cubic-bezier(.3,1.5,.5,1),background .2s}
+.gdock a svg{width:38px;height:38px;color:var(--tab);transition:transform .25s cubic-bezier(.3,1.5,.5,1)}
+.gdock a[aria-current=page]{color:#1E1B16;background:var(--tab);transform:translateY(-3px);box-shadow:0 3px 0 var(--tab-lo)}
+.gdock a[aria-current=page] svg{color:#1E1B16;transform:scale(1.04)}
+.gdock a:not([aria-current]):hover{background:var(--field)}
+.gdock a:active svg{transform:scale(.9)}
+.gdock a:focus-visible{outline:3px solid #1E1B16;outline-offset:2px}
+html.gd-docked .page{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+html.gd-docked #toast{bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+html.gd-docked .setupwrap .skip{bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+@media(max-width:719px){.gdock{width:min(calc(100% - 24px),380px);gap:2px;padding:8px 10px 10px}.gdock a{flex:1;width:auto;height:58px}.gdock a svg{width:34px;height:34px}}
+/* short landscape phones: a rail on the left, like the site */
+@media(orientation:landscape) and (max-height:540px){
+  .gdock{left:calc(10px + env(safe-area-inset-left,0px));top:50%;bottom:auto;transform:translateY(-50%);flex-direction:column;width:auto;padding:14px 7px}
+  .gdock a{flex:none;width:62px;height:52px}.gdock a span{display:none}.gdock a[aria-current=page]{transform:translateX(3px)}
+  html.gd-docked .page{padding-bottom:0;padding-left:calc(90px + env(safe-area-inset-left,0px))}
+  html.gd-docked #toast,html.gd-docked .setupwrap .skip{bottom:1.4rem}}
+/* a locked time clock is a staff kiosk: no way out to the website or the card */
+html.gd-locked .gdock{display:none}html.gd-locked.gd-docked .page{padding-bottom:0;padding-left:0}
+@media print{.gdock{display:none}}
 [hidden]{display:none!important}
 /* ==========================================================================
    Daypart on the Grug Digital kit, light edition.
@@ -289,6 +314,8 @@ main.homey>.mi>h1{font-size:2.4rem}
 .allgood{display:flex;align-items:center;gap:.45rem;font-weight:600;margin:0 0 1.3rem}
 .allgood .i{color:#fff;background:var(--ok);border-radius:50%;padding:.15rem;width:1.4rem;height:1.4rem}
 .apps{list-style:none;margin:0;padding:0;display:grid;gap:.6rem}
+.agrp+.agrp{margin-top:1.6rem}
+.agrp h2{font-size:1.05rem;font-weight:700;color:var(--text-2);margin:0 0 .6rem .2rem;letter-spacing:0}
 .arow{display:flex;align-items:center;gap:1rem;width:100%;padding:.8rem 1rem;border:0;border-radius:0.77rem;background:var(--panel);text-align:left;cursor:pointer;color:inherit;box-shadow:var(--sh-float);transition:transform .18s var(--ease),box-shadow .18s}
 .arow:hover{transform:translateY(-.12rem);box-shadow:var(--sh-lift),inset 0 0 0 .14rem var(--c)}
 .arow:active{transform:scale(.98)}
@@ -1272,6 +1299,7 @@ function render(){
   const isWide=ui.page==='schedule'&&!ui.sub&&wide();
   const body=ui.sub&&SUB[ui.sub.type]?SUB[ui.sub.type](ui.sub):V[ui.page]();
   app.innerHTML=`<div class="page b-${S.brand} ${home?'':'inapp'} ${enter?'enter':''}">${topBar(S,home)}${frame(body,S,isWide?'wide':'')}</div>`;
+  document.documentElement.classList.toggle('gd-locked',locked());
   applyBrand(S);tipify(app);
 }
 /* Kit backgrounds: a static pixel pattern in the app's accent behind everything, and the same tile in ink on the header. */
@@ -1368,7 +1396,21 @@ const GRUG={
 // what the dashboard adds about the shop's Grug pages to "things that need you"
 function bizAttention(){const sh=GRUG.shop();if(!sh)return[];const s=sh.site||{},h=Array.isArray(s.hours)&&s.hours.some(Boolean);
   return !h||!s.address?[{level:'info',text:!h&&!s.address?'Add your hours and address to your website.':!h?'Add your hours to your website.':'Add your address to your website.',page:'website'}]:[]}
+// the dock: Dashboard · Website · Rewards card, the same as on the site's other restaurant pages (Q / E step through them)
+const GDOCK=[['dashboard','Dashboard','./','#9BE338','#6FB31C',"<rect x=\"1\" y=\"1\" width=\"6\" height=\"8\" rx=\"1.5\"></rect><rect x=\"9\" y=\"1\" width=\"6\" height=\"5\" rx=\"1.5\"></rect><rect x=\"1\" y=\"11\" width=\"6\" height=\"4\" rx=\"1.5\"></rect><rect x=\"9\" y=\"8\" width=\"6\" height=\"7\" rx=\"1.5\"></rect>"],['website','Website','site/','#5AB0FF','#2F86D6',"<path fill-rule=\"evenodd\" d=\"M13 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zM3 6v7h10V6z\" clip-rule=\"evenodd\"></path>"],['rewards','Rewards card','../rewards/','#FF9F5A','#E0782F',"<path d=\"M7 15H3a1 1 0 0 1-1-1V9h5zM14 14a1 1 0 0 1-1 1H9V9h5zM7 8H1V6a1 1 0 0 1 1-1h5zM14 5a1 1 0 0 1 1 1v2H9V5zM4.282 1.312a1.784 1.784 0 0 1 2.242.212L8 3l1.238-1.352c.605-.66 1.6-.781 2.345-.285l.06.04A1.75 1.75 0 0 1 12 4H4c-.776-.776-.63-2.08.282-2.688\"></path>"]];
+function gdock(){if(document.querySelector('.gdock')||!GRUG.shop())return;
+  const n=document.createElement('nav');n.className='gdock';n.setAttribute('aria-label','Sections');
+  n.innerHTML=GDOCK.map(([id,name,href,c,lo,svg],i)=>`<a href="${href}" style="--tab:${c};--tab-lo:${lo}"${i?'':' aria-current="page" data-act="dockHome"'}><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">${svg}</svg><span>${name}</span></a>`).join('');
+  document.body.appendChild(n);document.documentElement.classList.add('gd-docked');
+  document.addEventListener('keydown',e=>{if(POP||e.ctrlKey||e.metaKey||e.altKey||locked()||e.target.closest('input,textarea,select,[contenteditable]'))return;
+    const k=e.key.toLowerCase();if(k!=='q'&&k!=='e')return;e.preventDefault();location.href=GDOCK[k==='e'?1:2][2]})}
+A.dockHome=(el,e)=>{e.preventDefault();if(ui.page!=='home'||ui.sub)A.logo()};
 const attentionAll=()=>C.attention(D,TODAY(),{backupAge:backupAge(),backupDays:meta.backupDays}).concat(bizAttention());
+/* the apps on Home, in groups by what they look after (an app not listed here lands in "More") */
+const APP_GROUPS=[['Your team',['schedule','clock','team']],['Kitchen',['checklists','temps','recipes']],['Your guests',['website','card']],['Paperwork',['expirations','backup']]];
+function appGroups(){const all=SECTIONS.filter(s=>s.id!=='home'&&s.id!=='settings').map(s=>s.id),put=new Set(APP_GROUPS.flatMap(g=>g[1]));
+  const g=APP_GROUPS.map(([n,ids])=>[n,ids.filter(id=>all.includes(id))]).filter(x=>x[1].length),rest=all.filter(id=>!put.has(id));
+  return rest.length?g.concat([['More',rest]]):g}
 V.home=()=>{
   const t=TODAY(),d=new Date(),h=d.getHours(),all=attentionAll(),count={};
   all.forEach(i=>{if(i.level!=='info')count[i.page]=(count[i.page]||0)+1});
@@ -1376,7 +1418,7 @@ V.home=()=>{
   const now=D.shifts.filter(s=>s.date===t&&s.empId).map(s=>firstName((emp(s.empId)||{}).name||'')).filter((n,i,a)=>n&&a.indexOf(n)===i);
   return`<h1>Good ${h<12?'morning':h<17?'afternoon':'evening'}${first?', '+esc(first):''}</h1><p class="lead">${C.DNL[d.getDay()]}, ${C.MON[d.getMonth()]} ${d.getDate()}.${now.length?` Working today: ${esc(now.slice(0,5).join(', '))}${now.length>5?' and '+(now.length-5)+' more':''}.`:''}</p>
   ${all.length?`<button class="needs" data-act="needs"><span class="dot">${all.length}</span><span>${all.length===1?'1 thing needs you':all.length+' things need you'}</span><span class="go">See them in your profile ›</span></button>`:`<p class="allgood">${icon('checkmark')} Nothing needs you right now.</p>`}
-  <!--box--><ul class="apps">${SECTIONS.filter(s=>s.id!=='home'&&s.id!=='settings').map(s=>`<li><button class="arow" style="--c:${s.mode};--clo:${s.lo}" ${s.ext?`data-act="ext" data-href="${s.ext}"`:`data-act="nav" data-page="${s.id}"`}>${appIcon(s)}<span class="grow"><b>${s.name}</b><em>${s.sub}</em><small>${BLURB[s.id]}</small></span>${count[s.id]?`<span class="count" aria-label="${count[s.id]} to check">${count[s.id]}</span>`:''}<span class="chev" aria-hidden="true">›</span></button></li>`).join('')}</ul>
+  <!--box-->${appGroups().map(([g,ids])=>`<section class="agrp"><h2>${g}</h2><ul class="apps">${ids.map(sec).map(s=>`<li><button class="arow" style="--c:${s.mode};--clo:${s.lo}" ${s.ext?`data-act="ext" data-href="${s.ext}"`:`data-act="nav" data-page="${s.id}"`}>${appIcon(s)}<span class="grow"><b>${s.name}</b><em>${s.sub}</em><small>${BLURB[s.id]}</small></span>${count[s.id]?`<span class="count" aria-label="${count[s.id]} to check">${count[s.id]}</span>`:''}<span class="chev" aria-hidden="true">›</span></button></li>`).join('')}</ul></section>`).join('')}
   `;
 };
 SUB.profile=()=>{
@@ -2028,7 +2070,7 @@ if(window.matchMedia){const mq=matchMedia('(min-width:900px)');const h=()=>{if(D
   if(got.settings){try{D=C.migrate({schemaVersion:got.schemaVersion,settings:got.settings,...Object.fromEntries(C.COLLS.map(c=>[c,got[c]||[]]))})}catch(e){D=null;window.__loadError=e.message}}
   if(!D){D=C.stampAll(C.blank(),meta.deviceId,nowISO())}
   D.settings.tools={recipes:true,checklists:true,temps:true,expirations:true,clock:true};
-  GRUG.claim();{const sh=GRUG.shop();if(sh&&sh.n&&D.settings.name!==sh.n){D.settings.name=sh.n;touch(D.settings);save()}}
+  GRUG.claim();gdock();{const sh=GRUG.shop();if(sh&&sh.n&&D.settings.name!==sh.n){D.settings.name=sh.n;touch(D.settings);save()}}
   if(got.settings&&(+got.schemaVersion||0)<C.SCHEMA)save();
   if(!got.meta)saveMeta();
   ui.week=C.weekStart(TODAY(),D.settings.weekStart);

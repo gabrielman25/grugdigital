@@ -185,6 +185,8 @@
   let sitePage = false;
   try { sitePage = !/[?&]mode=viewer/.test(location.search) && !/\/(play|work|tools|showcase)\//.test(location.pathname); } catch (e) {}
   const me = (document.currentScript && document.currentScript.src) || '';
+  // the custom cursor on every page (assets/cursors.js; theme.js, grug.js or gamekit.js loads it, once)
+  try { if (!root.GrugCursors && !document.getElementById('grug-cursors-js') && me) { const s = document.createElement('script'); s.id = 'grug-cursors-js'; s.src = new URL('cursors.js', me).href; (document.head || document.documentElement).appendChild(s); } } catch (e) {}
   if (sitePage) document.documentElement.classList.add('g-site');
   // partner mode is a closed space: only the game list, game pages, the avatar editor and the Pearls page. Every other address
   // (Home, Make, Me, Shop, Profile, other partners' pages…) goes to the game list; grug.js also turns away game pages for

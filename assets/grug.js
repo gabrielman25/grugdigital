@@ -30,6 +30,8 @@
   const script = document.currentScript || Array.from(document.scripts).find(s => /grug\.js(\?|$)/.test(s.src));
   const ROOT = script ? script.src.replace(/assets\/grug\.js.*$/, '') : (location.origin + '/');
   const url = p => ROOT + String(p || '').replace(/^\/+/, '');
+  // the custom cursor on every page (assets/cursors.js; theme.js, grug.js or gamekit.js loads it, once)
+  try { if (!root.GrugCursors && !document.getElementById('grug-cursors-js') && script) { const s = document.createElement('script'); s.id = 'grug-cursors-js'; s.src = new URL('assets/cursors.js', ROOT).href; (document.head || document.documentElement).appendChild(s); } } catch (e) {}
 
   /* ---------- small helpers ---------- */
   const $ = (s, el) => (el || document).querySelector(s);
@@ -454,8 +456,9 @@
   const PARTNER_TABS = ['games', 'me'];
   /* ---------- the restaurant account (assets/business.js keeps it; grug.js only reads it) ----------
      Making a rewards card makes a restaurant account. While it's the account in use, the dock is the restaurant's:
-     Dashboard (business/, the Daypart app), Website (business/site/), Rewards and Games; the account menu switches back. */
-  const BIZ_TABS = ['dashboard', 'website', 'rewards', 'games'];
+     Dashboard (business/, the Daypart app, which draws the same dock itself), Website (business/site/) and Rewards card;
+     the account menu switches back. */
+  const BIZ_TABS = ['dashboard', 'website', 'rewards'];
   function bizState() { const s = readJSON(BIZ_KEY, null); return s && typeof s === 'object' && s.shops && typeof s.shops === 'object' ? s : null; }
   // the shop the restaurant account is about: its card's name, colour and icon, read straight from the card text
   function bizShop() {
