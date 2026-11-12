@@ -4,7 +4,7 @@
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Shop · Grug</title>
-<meta name="description" content="Custom clothing for your Grug avatar: Roblox-style shirt and pants templates you earn by playing and eating at Katy partners.">
+<meta name="description" content="Custom clothing for your Grug avatar: Roblox-style shirt and pants templates you earn by playing.">
 <meta name="theme-color" content="#eaf6ee">
 <link rel="icon" href="../favicon.png">
 <link rel="stylesheet" href="../assets/grug.css">
@@ -53,7 +53,7 @@
     <p>One balance that works in all Grug games. Spend them on boosts and power-ups.</p>
     <span class="row"><span class="cta">Get Pearls</span><span class="bal" id="pearlsBal"></span></span>
   </a>
-  <div class="sh-head"><h1>Shop</h1><p>Custom clothing for your avatar. Every design is a Roblox-style shirt or pants template, earned by playing or bought with the points you get for eating at a partner. Nothing here costs money.</p></div>
+  <div class="sh-head"><h1>Shop</h1><p>Custom clothing for your avatar. Every design is a Roblox-style shirt or pants template, earned by playing. Nothing here costs money.</p></div>
   <div class="sh-own"><p><b>Have your own Roblox template?</b> Upload any classic shirt or pants template in the avatar editor, under Custom.</p><a class="g-btn sm" href="../avatar/#custom">Upload</a></div>
   <div class="sh-filters" id="filters"></div>
   <div id="groups"></div>
@@ -77,6 +77,7 @@
   function render() {
     const html = GROUPS.map(gr => {
       let items = C.ITEMS.filter(it => (it.get.type === 'free' ? 'grug' : it.get.app) === gr[0]);
+      items = items.filter(it => !it.frozen || G.owns(it.id));   // designs tied to a business demonstration can't be earned: shown only to someone who already has one
       if (filter === 'mine') items = items.filter(it => G.owns(it.id)); else if (filter !== 'all') items = items.filter(it => it.slot === filter);
       if (!items.length) return '';
       const owned = items.filter(it => G.owns(it.id)).length;

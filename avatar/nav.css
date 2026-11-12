@@ -84,7 +84,6 @@ body.ed-nav .ed-print .grp:not(.has)>.row:has(input[type=range]){display:none}
 /* prints: quick picks, the pack sideways, its categories on one line */
 body.ed-nav .ed-print .grp{flex:1}
 body.ed-nav .ed-print .row:has(#pkOpen){display:none}
-body.ed-nav .ed-print #pk{display:flex!important;flex-direction:column;gap:6px;flex:1;min-height:0;margin:0}
 body.ed-nav .ed-print #pkCats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
 body.ed-nav .ed-print #pkCats button{flex:none}
 body.ed-nav .ed-print #decals{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}

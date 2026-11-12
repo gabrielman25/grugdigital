@@ -380,5 +380,8 @@ document.getElementById('send').addEventListener('click',()=>{if(!cart.length){s
  document.getElementById('cartForm').style.display='none';document.getElementById('done').classList.add('on')});
 document.getElementById('again').addEventListener('click',()=>{cart.length=0;drawCart();document.getElementById('cartForm').style.display='';document.getElementById('done').classList.remove('on')});
 </script>
-<script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;var id=a.getAttribute('href').slice(1);e.preventDefault();var t=id?document.getElementById(id):null;if(t)t.scrollIntoView({behavior:'smooth'});else window.scrollTo({top:0,behavior:'smooth'})},true);</script></body>
+<script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;var id=a.getAttribute('href').slice(1);e.preventDefault();var t=id?document.getElementById(id):null;if(t)t.scrollIntoView({behavior:'smooth'});else window.scrollTo({top:0,behavior:'smooth'})},true);</script><!-- the notice on every demonstration page (assets/demo.js) -->
+<script src="../../assets/demo.js"></script>
+<script>if(window.GRUG_DEMO)GRUG_DEMO.install('Karma Kolache','karma');</script>
+</body>
 </html>

@@ -401,7 +401,8 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
         '<span class="tx"><b>' + esc(a.name) + '</b><small>' + esc(a.sub) + '</small></span><span class="go">' + G.icon('caret-right') + '</span></a>').join('') + '</div>',
       actions: [{ label: 'Close', kind: 'quiet', value: null }] });
   }
-  if (!pm && appList().length) { $('#appsBtn').hidden = false; $('#appsIc').outerHTML = G.icon('storefront'); }
+  // The Rewards apps button stays hidden: every venue app is a frozen demonstration (assets/demo.js), reached from
+  // the For restaurants page (partners/), not from the store.
 
   /* ---------- the store's address: '' = the store, #search?… = Browse all, #queue = open the Discovery Queue ---------- */
   function searchHref(o){
@@ -508,7 +509,6 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
       row('Keep playing', played.map(g => capsule(g, g.id === lastId ? 'Last played' : ''))) +
       row('Grug originals', originals.map(g => capsule(g)), searchHref({ made: ['original'] })) +
       row('Carts · quick one-tap games', CARTS.filter(g => !G.favs.isIgnored(g.id)).map(g => capsule(g)), searchHref({ type: ['cart'] })) +
-      row('Made with Katy restaurants', venues.map(g => capsule(g)), searchHref({ made: ['restaurant'] })) +
       row('Browse by category', cats, searchHref({})) +
       '<section class="st-qb"><div><h2>Your Discovery Queue</h2><p>Step through games picked from what you play and favorite. Heart the ones you like, ignore the rest, and your store gets sharper.</p>' +
         '<button type="button" class="st-play" data-queue>' + G.icon('shuffle') + 'Start your queue</button></div>' +
@@ -536,7 +536,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
   const GROUPS = [
     { k: 'type', label: 'Type', opts: [['game', 'Games'], ['cart', 'Carts']], get: g => [g.cart ? 'cart' : 'game'] },
     { k: 'mine', label: 'Your library', opts: [['played', 'Played'], ['new', 'New to you']], get: g => [plays(g) ? 'played' : 'new'] },
-    { k: 'made', label: 'Made for', opts: [['original', 'Grug originals'], ['restaurant', 'Katy restaurants']], get: g => [g.original ? 'original' : 'restaurant'] },
+    { k: 'made', label: 'Made for', opts: [['original', 'Grug originals'], ['restaurant', 'Business demos']], get: g => [g.original ? 'original' : 'restaurant'] },
     { k: 'status', label: 'Status', opts: [['live', 'Live'], ['demo', 'Demo'], ['legacy', 'Classic']], get: g => [status(g)[0]] }
   ];
   let S = null, tagQ = '', tagsAll = false;

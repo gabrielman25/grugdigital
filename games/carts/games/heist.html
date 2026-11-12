@@ -1213,7 +1213,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--mk-bg,#17171A);t
     const price = (base, grow, lv) => Math.round(base * Math.pow(grow, lv));
     let h = `<h2>Your pen</h2><div class="sub">${P.pets.length} pets · earning ${petIncome()} coins every 10 s${P.cash >= 1 ? ' · ' + Math.floor(P.cash) + ' waiting' : ''}</div>`;
     if (P.awayCash > 0) h += `<div class="card"><div class="ic" style="background:#facc15"><svg viewBox="0 0 16 16" width="26" height="26" style="color:#fff"><path fill="currentColor" d="M8 3a5 5 0 1 1 0 10A5 5 0 0 1 8 3M7 5v6h2V5z"></path> <path fill="currentColor" d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m0 1a6 6 0 1 0 0 12A6 6 0 0 0 8 2"></path></svg></div><div class="tx"><b>While you were away</b><span>Your pets earned ${P.awayCash} coins</span></div>` +
-      (confirm === 'dbl' ? `<button class="b-ok" data-a="double">Tap to confirm</button>` : `<button class="b-pearl" data-a="double">Double it · 10 Pearls</button>`) + `</div>`;
+      `` + `</div>`;
     if (P.cash >= 1) h += `<button class="b-coin" data-a="collect">Collect ${Math.floor(P.cash)} coins</button>`;
     h += `<div class="sec">Eggs · ${P.incs.length} of ${slots()} spots</div>`;
     if (!P.incs.length) h += `<div class="empty">Steal eggs and bring them home to hatch them here.</div>`;
@@ -1288,12 +1288,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--mk-bg,#17171A);t
       collect(n) { P = load(); P.cash += n; P.awayCash = n; save(); }, note: 'your pets earned · run home to collect'
     },
     shop: [
-      { id: 'cash2', name: '2x Cash', desc: 'Your pets earn double coins, for good', kind: 'pass', pearls: 200 },
       { id: 'hatch2', name: '2x Hatch Speed', desc: 'Eggs hatch twice as fast, for good', kind: 'pass', pearls: 200 },
       { id: 'tread2', name: 'Golden Treadmill', desc: 'Double speed from your treadmill, for good', kind: 'pass', pearls: 150 },
       { id: 'instant', name: 'Instant Hatch', desc: 'Hatch one egg right now (use it in your pen)', kind: 'skip', pearls: 8 },
       { id: 'growall', name: 'Grow All', desc: 'Hatch every egg in your pen at once', kind: 'skip', pearls: 60 },
-      { id: 'double_away', name: 'Double Away Coins', desc: 'Double what your pets earned while you were away (use it in your pen)', kind: 'skip', pearls: 10 },
       { id: 'tread', name: 'Treadmill', desc: '+50% speed from every second on it, and while you\u2019re away', kind: 'upgrade', coins: 50, grow: 1.75, max: 8 },
       { id: 'vault', name: 'Piggy Bank', desc: 'Pets earn 4 more hours while you\u2019re away', kind: 'upgrade', coins: 60, grow: 1.8, max: 4 },
       { id: 'strong', name: 'Strong Arms', desc: 'Heavy eggs slow you down less', kind: 'upgrade', coins: 60, grow: 1.8, max: 5 },

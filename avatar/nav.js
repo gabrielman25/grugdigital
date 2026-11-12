@@ -162,9 +162,9 @@
     s._home = () => adj.remove();
     return s;
   }
-  // prints: the whole pack sideways, a search, upload; size and place once one is on
+  // prints: the quick picks, upload; size and place once one is on
   function printScreen() {
-    const pk = $('pk'); if (pk && pk.hidden) $('pkOpen').click();   // loads the print pack
+    // (the icon pack of prints has been removed: this screen is the quick prints, upload, and size and place)
     // more of the pack loads as the row nears its end (no "Show more" button)
     const grid = $('pkGrid'); if (grid && !grid.dataset.more) { grid.dataset.more = '1'; grid.addEventListener('scroll', () => { const m = $('pkMore'); if (m && !m.hidden && grid.scrollLeft + grid.clientWidth > grid.scrollWidth - 200) m.click(); }, { passive: true }); }
     return screen([page(lent(g.print))], { cls: 'ed-print' });

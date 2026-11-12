@@ -4,7 +4,7 @@
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Grug · Showcase</title>
-<meta name="description" content="A walk-through of Grug: rewards apps, games and avatars made with Katy restaurants.">
+<meta name="description" content="A demonstration walk-through of Grug: rewards apps, games and avatars made for Katy restaurants. Not endorsed by the businesses shown.">
 <style>
 /*@FONTS@*/
 :root{
@@ -293,13 +293,13 @@ const R = {
   overview(){
     const pts = live.map(g => visitPts(g.id)).filter(Boolean);
     return '<p class="eyebrow">' + ic('sparkle') + 'Katy, Texas</p>' +
-      '<h1 class="h1">Games made with <em>Katy restaurants.</em></h1>' +
-      '<p class="lead">Every partner gets its own rewards app and a game built from its menu. Guests tap a tag at the counter, earn points, and spend them on power-ups and rewards. One avatar and one wallet work across every game.</p>' +
+      '<h1 class="h1">Games made for <em>Katy restaurants.</em></h1>' +
+      '<p class="lead"><b>This walk-through is a demonstration.</b> The businesses shown have not approved or endorsed it, nothing in it is saved, and no rewards are offered or redeemable. The idea: every restaurant gets its own rewards app and a game built from its menu. Guests tap a tag at the counter, earn points, and spend them on power-ups and rewards. One avatar and one wallet work across every game.</p>' +
       '<div class="grid stats4 mt2">' +
-        stat(GAMES.length, 'partner games') + stat(Math.min.apply(null, pts) + '–' + Math.max.apply(null, pts), 'points per visit') + stat('1 tap', 'to check in, no account') + stat('1', 'avatar in every game') +
+        stat(GAMES.length, 'demo games') + stat(Math.min.apply(null, pts) + '–' + Math.max.apply(null, pts), 'points per visit') + stat('1 tap', 'to check in, no account') + stat('1', 'avatar in every game') +
       '</div>' +
       '<div class="row mt2"><button class="btn primary" data-go="how">' + ic('play') + 'See how it works</button><button class="btn" data-go="places">' + ic('storefront') + 'Open a restaurant’s app</button></div>' +
-      '<h2 class="h2">The partners</h2><div class="grid g2">' + GAMES.filter(g => g.status !== 'legacy').map(g =>
+      '<h2 class="h2">The demonstrations</h2><div class="grid g2">' + GAMES.filter(g => g.status !== 'legacy').map(g =>
         '<button class="card place-mini btn" style="border-radius:18px;justify-content:flex-start;padding:10px;gap:12px;text-align:left" data-place="' + g.id + '"><img src="' + META.thumbs[g.id] + '" alt="" style="width:56px;height:56px;border-radius:12px;object-fit:cover">' +
         '<span><b style="display:block;font-size:15.5px">' + esc(g.partner) + '</b><span class="note">' + esc(g.title) + ' · ' + esc(g.kind) + '</span></span></button>').join('') + '</div>' +
       '<p class="note mt">The phone shows the real Grug site. Tap around: every link works inside the showcase.</p>';
@@ -315,7 +315,7 @@ const R = {
         '<button class="btn lime sm" data-tap="teahouse">' + ic('device-mobile') + 'Tap the Teahouse tag</button>') +
       step(3, 'coins', 'Points add up', 'Each restaurant keeps its own points: 5 or 10 a visit, set by the owner. Points stay with that restaurant.',
         '<button class="btn sm" data-app="teahouse" data-tab="rewards">' + ic('coins') + 'See the points</button>') +
-      step(4, 'gift', 'Spend them', 'On rewards the owner picks (Cielito Lindo gives a free breakfast taco at 35 points) and on power-ups for the restaurant’s game.',
+      step(4, 'gift', 'Spend them', 'On whatever the owner decides to offer, and on power-ups for the restaurant’s game. (In these demonstrations nothing is offered or redeemable.)',
         '<button class="btn sm" data-app="cielito" data-tab="rewards">' + ic('gift') + 'Cielito’s rewards</button>') +
       step(5, 'game-controller', 'Play the game', 'Every partner has a game made from its menu. Power-ups bought with points make the next run better.',
         '<button class="btn sm" data-app="yoshi" data-tab="game">' + ic('game-controller') + 'Play Sushi Swap</button>') +
@@ -603,5 +603,8 @@ function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on
   fit(); $('#boot').hidden = true;
 })();
 </script>
+<!-- the notice on every demonstration page (assets/demo.js) -->
+<script src="../assets/demo.js"></script>
+<script>if(window.GRUG_DEMO)GRUG_DEMO.install("the businesses shown here","showcase");</script>
 </body>
 </html>

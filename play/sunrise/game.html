@@ -6283,10 +6283,10 @@ function showBoostPick() {
 }
 
 /* ---------------- Soluna Club (membership) ----------------
-   Free to join while the game is in preview. At launch it will be $4 a month; set CLUB.launched = true
-   once checkout and licence checks exist, and joinClub() should hand off to checkout instead. */
+   Switched off: no membership is offered, promised or priced, and nobody can join (CLUB_OFF below). */
+const CLUB_OFF = true;
 const CLUB = {
-  name: 'Soluna Club', price: '$4 a month', launched: false,
+  name: 'Soluna Club', price: 'Not offered', launched: false,   // no membership is offered or promised (this game is a frozen demonstration)
   perks: [
     ['bean', 'A free boost every day', 'Pick any boost when you open the shop, once a day (new one at 4 AM)'],
     ['spoon', 'A 4th boost slot', 'Bring up to 4 boosts from your bag into a shift'],
@@ -6296,22 +6296,23 @@ const CLUB = {
 const MKEY = 'soluna.club';
 const MEM = (() => { try { return JSON.parse(lsGet(MKEY) || 'null') || {}; } catch (e) { return {}; } })();
 function saveMem() { lsSet(MKEY, JSON.stringify(MEM)); }
-function isMember() { return !!MEM.active; }
+function isMember() { return !CLUB_OFF && !!MEM.active; }
 function clubSync() { if (APP.linked) appPost({ t: 'club', active: !!MEM.active, since: MEM.since || 0, rev: MEM.rev || Date.now() }); }
 function clubDay() { const d = new Date(Date.now() - 4 * 3600e3); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
 function clubFreeReady() { return isMember() && MEM.freeDay !== clubDay(); }
 function joinClub() {
+  if (CLUB_OFF) { toast('The club is switched off. This is a demonstration only.'); return false; }
   if (CLUB.launched) { toast('Checkout opens at launch'); return false; }
   MEM.active = true; MEM.plan = 'preview'; MEM.since = MEM.since || Date.now(); MEM.rev = Date.now(); saveMem(); clubSync(); return true;
 }
 function showClub(back) {
   const m = isMember();
   menu(`<div class="sol-arch wide"><div class="mk">${MARK}</div><h2 class="sol-display">Soluna Club</h2>
-    <p class="club-price"><b>${CLUB.price}</b> at launch<br><span>Free to join while the game is in preview</span></p>
+    <p class="club-price"><b>Not offered</b><br><span>The club is switched off. This is a demonstration only.</span></p>
     <div class="binv">${CLUB.perks.map(([ic, t, s]) => `<div class="bi"><span class="bic">${svg(ic, 22)}</span><div><b>${t}</b><small>${s}</small></div></div>`).join('')}</div>
     ${m ? `<p class="best">★ Member since ${new Date(MEM.since).toLocaleDateString()}${clubFreeReady() ? ' · today’s free boost is waiting' : ''}</p><button class="btn2 pri" data-nav id="clBack">Back</button><button class="btn2" data-nav id="clLeave">Leave the club</button>`
         : `<button class="btn2 pri" data-nav id="clJoin">Join free during preview</button><button class="btn2" data-nav id="clBack">Not now</button>`}
-    <p class="fine">Preview membership is free and saved on this device. When the club launches at ${CLUB.price}, you will be asked first: nothing is ever charged automatically.</p></div>`, 'how');
+    <p class="fine">No membership is offered. Nothing is charged, earned or redeemed here.</p></div>`, 'how');
   const b = () => back ? back() : showTitle2();
   $('clBack').onclick = b;
   if ($('clJoin')) $('clJoin').onclick = () => { if (joinClub()) { sfx('serve'); toast('Welcome to the Soluna Club', 'good'); showClub(back); } };
@@ -6578,7 +6579,7 @@ const segName = (a, b) => (SEG_A[a] && SEG_B[b]) ? SEG_A[a] + ' ' + SEG_B[b] : '
 const TOG = (() => {
   let s = {}; try { s = JSON.parse(lsGet('soluna.together') || '{}'); } catch (e) { }
   const ok = segName(s.a, s.b);
-  return { on: s.on === true, a: ok ? s.a : rnd(SEG_A.length), b: ok ? s.b : rnd(SEG_B.length), col: TOG_COLS.includes(s.col) ? s.col : TOG_COLS[rnd(TOG_COLS.length)] };
+  return { on: false, a: ok ? s.a : rnd(SEG_A.length), b: ok ? s.b : rnd(SEG_B.length), col: TOG_COLS.includes(s.col) ? s.col : TOG_COLS[rnd(TOG_COLS.length)] };
 })();
 const myName = () => segName(TOG.a, TOG.b);
 function saveTog() { lsSet('soluna.together', JSON.stringify(TOG)); }
@@ -6589,15 +6590,8 @@ const STORE_NAMES = { elyson: 'Elyson' };
 const mpStore = () => { const q = new URLSearchParams(location.search).get('cafe'); return (q && /^[a-z0-9-]{2,24}$/.test(q)) ? q : (APP.storeId && /^[a-z0-9-]{2,24}$/.test(APP.storeId) ? APP.storeId : 'elyson'); };
 const mpStoreName = () => { const r = MP.room || mpStore(); return STORE_NAMES[r] || r.charAt(0).toUpperCase() + r.slice(1); };
 const ROOM_ID = k => 'soluna-cafe-v1-' + MP.room + '-' + k;
-let peerLib = null;
-function loadPeerJS() {
-  if (window.Peer) return Promise.resolve();
-  if (peerLib) return peerLib;
-  const one = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.async = true; s.onload = () => window.Peer ? ok() : no(); s.onerror = no; document.head.appendChild(s); });
-  peerLib = one('https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js').catch(() => one('https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js'));
-  peerLib.catch(() => { peerLib = null; });
-  return peerLib;
-}
+// Together is switched off: the PeerJS connection service is no longer loaded, so the game connects to nobody.
+function loadPeerJS() { return Promise.reject(new Error('removed')); }
 const PEER_OPT = { debug: 0 };
 function mpLeave() {
   MP.gen++;
@@ -6607,7 +6601,8 @@ function mpLeave() {
   MP.hub = false; MP.status = TOG.on ? 'connecting' : 'off'; mpChip();
 }
 async function mpJoin() {
-  mpLeave(); if (!TOG.on) return;
+  mpLeave(); return;   // (Together is switched off: see loadPeerJS)
+  if (!TOG.on) return;
   const gen = MP.gen; MP.room = mpStore();
   try { await loadPeerJS(); } catch (e) { if (gen === MP.gen) { MP.status = 'offline'; mpChip(); setTimeout(() => gen === MP.gen && mpJoin(), 30000); } return; }
   for (let k = 0; k < 3; k++) {
@@ -6828,8 +6823,8 @@ function showTogether(back) {
   };
   const live = TOG.on && MP.status === 'on';
   menu(`<div class="sol-arch wide"><h2 class="sol-display">Together</h2>
-    <button class="tog-sw${TOG.on ? ' on' : ''}" data-nav id="togOn" role="switch" aria-checked="${TOG.on}"><span><b>Multiplayer</b><small>${TOG.on ? mpLabel().replace('Together · ', '') : 'Off · playing solo'}</small></span><i></i></button>
-    <p class="fine tog-why">When it's on, everyone playing at Soluna ${mpStoreName()} walks the same café: you'll see each other's baristas and the drinks in their hands. Each of you still serves your own customers.</p>
+    <button class="tog-sw${TOG.on ? ' on' : ''}" data-nav id="togOn" role="switch" aria-checked="${TOG.on}"><span><b>Multiplayer</b><small>Not available right now · playing solo</small></span><i></i></button>
+    <p class="fine tog-why">Multiplayer is switched off for now, so everyone plays solo. Your barista name and apron colour are still yours to pick.</p>
     <div class="pick-h">Your barista name</div>
     <div class="tog-name"><button class="iconbtn" data-nav id="tnA0" aria-label="Previous first word">‹</button><b>${SEG_A[TOG.a]}</b><button class="iconbtn" data-nav id="tnA1" aria-label="Next first word">›</button>
       <button class="iconbtn" data-nav id="tnB0" aria-label="Previous second word">‹</button><b>${SEG_B[TOG.b]}</b><button class="iconbtn" data-nav id="tnB1" aria-label="Next second word">›</button></div>
@@ -6845,7 +6840,7 @@ function showTogether(back) {
   $('tnRnd').onclick = () => { TOG.a = rnd(SEG_A.length); TOG.b = rnd(SEG_B.length); sfx('cup'); re('tnRnd'); };
   document.querySelectorAll('.fchip.sw').forEach(b => b.onclick = () => { TOG.col = b.dataset.col; saveTog(); showTogether(back); });
   $('togDone').onclick = () => { saveTog(); back ? back() : showTitle2(); };
-  $('togOn').onclick = () => { TOG.on = !TOG.on; saveTog(); if (TOG.on) mpJoin(); else mpLeave(); re('togOn'); };
+  $('togOn').onclick = () => {};   // Together is switched off
   clearTimeout(MP.menuT);
   if (TOG.on && MP.status !== 'on') MP.menuT = setTimeout(() => $('togDone') && showTogether(back), 2500);
 }
@@ -7476,11 +7471,11 @@ function showBoostPick() {
 function showClub(back) {
   const m = isMember();
   const perks = [['gift', COL.amber, 'A free boost every day', 'Pick any boost when you open the shop, once a day (a new one at 4 AM)'], ['plus', COL.violet, 'A 4th boost slot', 'Bring one more boost from your bag into a shift'], ['hourglass', COL.rose, 'Regulars notice the craft', 'Perfect steps buy customers 6 seconds instead of 4']];
-  menu(`<div class="wsheet mid">${wTop('chess_king', COL.violet, 'Soluna Club', m ? '★ Member since ' + new Date(MEM.since).toLocaleDateString() : CLUB.price + ' at launch · free while the game is in preview', true, true)}<div class="wbody">
+  menu(`<div class="wsheet mid">${wTop('chess_king', COL.violet, 'Soluna Club', m ? '★ Member since ' + new Date(MEM.since).toLocaleDateString() : 'Not offered · demonstration only', true, true)}<div class="wbody">
     <div class="wgrid" style="margin-top:18px">${perks.map(p => `<div class="wi"><span class="wic" style="background:${p[1]}">${vi(p[0])}</span><div class="wtx"><b>${p[2]}</b><small>${p[3]}</small></div></div>`).join('')}</div>
     ${m && clubFreeReady() ? '<p class="wlead">Today’s free boost is waiting on the “Bring boosts?” screen.</p>' : ''}
     <div class="wcta">${m ? `<button class="wb big" data-nav id="clBack">${vi('checkmark')}Back</button><button class="wb big ghost" data-nav id="clLeave">Leave the club</button>` : `<button class="wb big" style="background:${COL.violet}" data-nav id="clJoin">${vi('chess_king')}Join free during preview</button><button class="wb big ghost" data-nav id="clBack">Not now</button>`}</div>
-    <p class="wnote">Preview membership is free and saved on this device. When the club launches at ${CLUB.price}, you will be asked first: nothing is ever charged automatically.</p></div></div>`, 'how');
+    <p class="wnote">No membership is offered. Nothing is charged, earned or redeemed here.</p></div></div>`, 'how');
   const b = () => back ? back() : showTitle2();
   $('clBack').onclick = b; $('wClose').onclick = b;
   if ($('clJoin')) $('clJoin').onclick = () => { if (joinClub()) { sfx('serve'); toast('Welcome to the Soluna Club', 'good'); showClub(back); } };

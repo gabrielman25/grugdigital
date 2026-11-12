@@ -93,7 +93,7 @@ footer a{color:var(--ink2);font-weight:700}
 <main class="wrap">
   <article class="pl">
     <h1>Pearls</h1>
-    <p class="lede">One balance for every Grug game. Buy Pearls once and spend them on in-game items in Take a Tea and other partner games.</p>
+    <p class="lede">One balance for every Grug game. Buy Pearls once and spend them on in-game items in any Grug game. Nothing random is ever sold: what you buy is exactly what it says.</p>
 
     <div class="box thanks" id="thanks" hidden></div>
 
@@ -114,6 +114,9 @@ footer a{color:var(--ink2);font-weight:700}
     <p class="note saves" id="savesNote"><b>Pearls are saved on this device only.</b> They stay in this browser on this phone and don’t move to other phones, browsers or accounts.</p>
     <p class="note" id="payNote">You’ll pay on Stripe’s secure checkout page, then come straight back here.</p>
 
+    <!-- Grug Club (a monthly membership) is not offered, so nothing about it is shown or promised. The markup stays, hidden,
+         because the script below still looks these elements up; CLUB.productId is empty, so nothing ever contacts Gumroad. -->
+    <div id="clubOff" hidden>
     <h2 id="clubH">Grug Club</h2>
     <p>A monthly membership for every Grug game: Pearls every month, bonus Pearls on every pack and a member badge. Cancel any time.</p>
     <div class="box club" id="club" hidden></div>
@@ -125,8 +128,10 @@ footer a{color:var(--ink2);font-weight:700}
       <p class="msg" id="actMsg" role="status" aria-live="polite"></p>
     </div>
 
+    </div>
+
     <h2>Good to know</h2>
-    <p>Pearls buy in-game items only. They can’t be exchanged for food, drinks, merchandise, points or money. They’re saved in this browser on this phone, so buy on the phone and browser you play on. Points you earn at each restaurant stay separate. Grug Club memberships are sold and billed by Gumroad, and each membership works on up to two phones.</p>
+    <p>Pearls buy in-game items only. They can’t be exchanged for food, drinks, merchandise or money, and they never buy crates, eggs, better odds or the coins those cost. They’re saved in this browser on this phone, so buy on the phone and browser you play on.</p>
     <p class="fine" style="margin-top:10px">Need help with a purchase? Visit <a href="support.html">customer support</a> and include your purchase code: <span class="code" id="code"></span>. Purchases follow our <a href="terms.html">terms of service</a> and <a href="privacy.html">privacy policy</a>.</p>
 
     <div id="histWrap" hidden>

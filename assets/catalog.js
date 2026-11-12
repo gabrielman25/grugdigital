@@ -61,6 +61,11 @@
     shirt('sunrise',     'Sunrise hoodie',     ['#FF8A5C', '#8E5CF0'], ms('soluna', 'plays', 10, 'Work 10 shifts in Sunrise to Sunset')),
     shirt('sprinkles',   'Sprinkle tee',       ['#FF9CC2', '#6B3E26'], ms('alchemy', 'days', 1, 'Finish a day in Sugar Alchemist'))
   ];
+  /* FROZEN designs: anything earned through a named business (its points, its game, or a check-in there) is switched
+     off while those pages are demonstrations (assets/demo.js). They can't be earned or bought; someone who already
+     owns one keeps it. Thaw a business by taking its id out of DEMO_APPS once it has agreed in writing. */
+  const DEMO_APPS = ['yoshi', 'cielito', 'teahouse', 'soluna', 'alchemy', 'rodeo'];
+  ITEMS.forEach(it => { const g = it.get; it.frozen = g.type !== 'free' && (DEMO_APPS.includes(g.app) || g.stat === 'checkins' || g.stat === 'partners'); });
   ITEMS.forEach(it => { it.template = 'shop:' + it.id; it.png = 'assets/clothing/' + it.id + '.png'; it.thumb = 'assets/clothing/thumbs/' + it.id + '.png'; });
 
   const SLOTS = [
@@ -94,6 +99,7 @@
       if (!it) return '';
       const g = it.get, app = APPS[g.app] || APPS.grug;
       if (g.type === 'free') return 'Free';
+      if (it.frozen) return 'Not available right now';
       if (g.type === 'points') return g.cost + ' ' + app.short + ' points';
       return g.text || 'Milestone';
     },

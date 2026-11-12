@@ -29,7 +29,7 @@ GrugGameHost({
   id: 'glowupspa', app: 'glowupspa', bg: '#0b0e14', title: 'Glow Up Spa', src: 'game.html', collectible: 'cash a second', runSeconds: 300, storageKey: 'grug-glowupspa-v1',
   // Pearls only (the same items and prices as Steal a Sip's Store). effect / amount are what game.html does with each one:
   // speedx / tune / tool = Speed and treadmill, pass* = forever passes, pet = a Secret pet, the rest are 5-minute boosts
-  // (speed, luck, hatch, magnet, double), and cash = that many minutes of your cash per second.
+  // (speed, hatch, magnet, double; no luck boost: nothing random is ever paid for), and cash = that many minutes of your cash per second.
   // The tycoon itself (rooms, staff, pets, cash) saves inside game.html ('glow-up-spa.v1'); this key only holds
   // owned items, best cash a second and plays.
   shop: [
@@ -48,7 +48,6 @@ GrugGameHost({
     { id: 'pass_tips', name: 'Cash Magnet', desc: 'Desk cash and floor tips come to you, forever', cost: 30, effect: 'passtips', amount: 1, icon: 'magnet' },
     { id: 'feat_lion', name: 'Rainbow Lion', desc: 'A Secret pet, straight into your pet field', cost: 60, effect: 'pet', amount: 'lion:rainbow', icon: 'crown-simple-fill' },
     { id: 'rush', name: 'Glitter Rush', desc: 'Move 35% faster', cost: 5, effect: 'speed', amount: 1.35, icon: 'bolt' },
-    { id: 'luck', name: 'Lucky Bow', desc: 'Rarer eggs and pets', cost: 8, effect: 'luck', amount: 3, icon: 'clover' },
     { id: 'quickhatch', name: 'Quick Hatch', desc: 'Eggs hatch 3x faster', cost: 6, effect: 'hatch', amount: 3, icon: 'timer' },
     { id: 'magnet', name: 'Tip Grabber', desc: 'Desk cash and floor tips come to you', cost: 10, effect: 'magnet', amount: 1, icon: 'magnet' },
     { id: 'double', name: 'Double Cash', desc: 'Everything pays twice the cash', cost: 12, effect: 'double', amount: 2, icon: 'star-four-fill' },

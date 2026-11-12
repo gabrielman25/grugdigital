@@ -194,14 +194,14 @@
     if (b && b.mode === 'business' && b.active && b.shops && b.shops[b.active]) {
       const home = new URL(me ? me.replace(/assets\/theme\.js(\?.*)?$/, '') : '/', location.href).pathname;
       if (location.pathname === home || location.pathname === home + 'index.html') location.replace(home + 'business/' + location.search); } } catch (e) {} }
-  // partner mode is a closed space: only the game list, game pages, the avatar editor and the Pearls page. Every other address
+  // partner mode is a closed space: only the game list, game pages and the avatar editor. Every other address
   // (Home, Make, Me, Shop, Profile, other partners' pages…) goes to the game list; grug.js also turns away game pages for
   // other partners' games. On a game's host page (play/…) the back button returns to the game list.
   if (brand && brand.p) {
     let rootPath = '/';
     try { rootPath = new URL(me ? me.replace(/assets\/theme\.js(\?.*)?$/, '') : '/', location.href).pathname; } catch (e) {}
     if (sitePage) { try { const rel = location.pathname.slice(rootPath.length);
-      if (!/^games(\/|$)|^avatar(\/|$)|^pearls(\.html)?$|^rewards\/card(\/|$)/.test(rel)) location.replace(rootPath + 'games/'); } catch (e) {} }
+      if (!/^games(\/|$)|^avatar(\/|$)|^rewards\/card(\/|$)/.test(rel)) location.replace(rootPath + 'games/'); } catch (e) {} }
     // a game's host page: Back returns to wherever the game was started (the partner's app, or the game list). The app
     // and the site's pages note that place (grug.partner.back) as a game launches; the game list if nothing was noted.
     else if (/\/play\//.test(location.pathname)) document.addEventListener('DOMContentLoaded', () => { const a = document.getElementById('rrBack'); if (!a) return;
@@ -247,9 +247,15 @@
     let face = R + 'assets/sandy/bust.png'; try { const s = JSON.parse(localStorage.getItem('grug.sandy.snaps.v1') || 'null'); if (s && s.bust) face = s.bust; } catch (e) {}
     let coins = 0; try { const w = p.wallet && JSON.parse(localStorage.getItem(p.wallet.key) || 'null'); coins = Math.max(0, Math.floor(+(w && w[p.wallet.field]) || 0)); } catch (e) {}
     const fsOk = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled), svg = n => '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">' + (PBAR_ICONS[n] || '') + '</svg>';
+    // every wrap is a demonstration until the business signs off (assets/demo.js): its notice and chip go on every
+    // wrapped page, and the coin balance is left off the bar because nothing is earned or spent
+    const FROZEN = !(window.GRUG_DEMO && window.GRUG_DEMO.isLive(p.p));
+    if (FROZEN) { document.documentElement.style.setProperty('--gd-lift', '84px');
+      const note = () => window.GRUG_DEMO && window.GRUG_DEMO.install(p.n, p.p);
+      if (window.GRUG_DEMO) note(); else { const sc = document.createElement('script'); sc.src = R + 'assets/demo.js'; sc.onload = note; document.head.appendChild(sc); } }
     const top = document.createElement('header'); top.className = 'g-top ptb';
-    top.innerHTML = '<a class="ptb-logo" href="' + R + p.app + '" aria-label="' + esc(p.n) + ' home"><img src="' + R + (p.barLogo || p.logo) + '" alt="' + esc(p.n) + '">' + (p.demo ? '<span class="ptb-demo" title="A concept demo">Demo</span>' : '') + '</a><span class="ptb-sp"></span>' +
-      (p.wallet ? '<a class="ptb-wallet" href="' + R + p.app + p.wallet.to + '" aria-label="' + esc(p.wallet.label) + '"><i class="ptb-coin"></i><span>' + coins.toLocaleString('en-US') + '</span><span class="ptb-plus">' + svg('plus') + '</span></a>' : '') +
+    top.innerHTML = '<a class="ptb-logo" href="' + R + p.app + '" aria-label="' + esc(p.n) + ' home"><img src="' + R + (p.barLogo || p.logo) + '" alt="' + esc(p.n) + '">' + (p.demo || FROZEN ? '<span class="ptb-demo" title="A demonstration only. Not affiliated with or endorsed by this business.">Demo</span>' : '') + '</a><span class="ptb-sp"></span>' +
+      (p.wallet && !FROZEN ? '<a class="ptb-wallet" href="' + R + p.app + p.wallet.to + '" aria-label="' + esc(p.wallet.label) + '"><i class="ptb-coin"></i><span>' + coins.toLocaleString('en-US') + '</span><span class="ptb-plus">' + svg('plus') + '</span></a>' : '') +
       (fsOk ? '<button type="button" class="g-fs ptb-fs" aria-label="Full screen" aria-pressed="false">' + svg('expand') + '</button>' : '') +
       '<button type="button" class="g-me ptb-av" aria-label="Your account menu" aria-haspopup="menu" aria-expanded="false" style="background-image:url(&quot;' + esc(face) + '&quot;)"></button>';
     const bar = document.createElement('nav'); bar.className = 'g-pbar'; bar.setAttribute('aria-label', (p.short || p.n) + ' app');

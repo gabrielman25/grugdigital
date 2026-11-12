@@ -2064,10 +2064,10 @@ const CONFIG = {
   "enabled": false,
   "name": "Yan Tea Club",
   "headline": "The regulars’ pass",
-  "price": "$4",
-  "per": "a month at launch",
-  "tag": "Free in preview",
-  "fine": "Nothing is charged during the preview.",
+  "price": "Not offered",
+  "per": "",
+  "tag": "Demonstration",
+  "fine": "No membership is offered. Nothing is charged, earned or redeemed here.",
   "perks": [
    [
     "star-four-fill",
@@ -2275,7 +2275,7 @@ function srcLegend(){
   return '<div class="src-key"><h3>What’s real in this preview</h3><ul>' + L.map(([what, s, d]) => '<li>' + srcBadge(s) + '<span><b>' + e(what) + '</b><span class="d">' + e(d) + '</span></span></li>').join('') +
     '</ul><p>Red “Placeholder” and “Price TBD” tags mark sample items and missing prices. Yellow “Seen in reviews” items were named by customers, not taken from a menu. Everything gets confirmed with the owner before launch.</p></div>';
 }
-/* BOARD PROTOCOL (PeerJS, data connection to store.board):
+/* BOARD PROTOCOL (no longer used: the PeerJS link is removed, see ask() below):
      → {t:'menu', id}             ← {t:'menu', id, menu:{sections:[same shape as CONFIG.menu], soldOut:['Item name', …]}}
      → {t:'redeem', id, code}     ← {t:'redeem', id, ok:true, win:'<code window id>', points:5}
                                   ← {t:'redeem', id, ok:false, reason:'expired' | 'wrong' | 'busy'}
@@ -2359,6 +2359,27 @@ function loadState(){
   };
 }
 let st = loadState();
+/* FROZEN: this page is a demonstration for the business's owners (assets/demo.js). Until they sign off, nothing is earned,
+   bought, spent or redeemed here. Balances start at zero every time, the Rewards / Membership / Store / Live tabs are shown
+   but can't be used, and every way of getting or using a reward answers with OFF. Set FROZEN to false only once the
+   business has agreed in writing. */
+const FROZEN = true, OFF = 'Rewards are switched off. This is a demonstration only.';
+if(FROZEN){
+  Object.assign(st, {points: 0, vouchers: [], inv: {}, club: {active: false, since: 0, rev: 0}});
+  ['tickets', 'packs', 'pv'].forEach(k => { if(k in st) st[k] = 0; });
+  if('cards' in st) st.cards = []; if('activeRun' in st) st.activeRun = null; if('starter' in st) st.starter = true;
+  const DEMO_NAME = 'Yan Tea Cafe';
+  const css = document.createElement('style');
+  css.textContent = '.gd-frozen{pointer-events:none;user-select:none}.gd-frozen>*:not(.gd-note){opacity:.45;filter:grayscale(.5)}' +
+    '.gd-note{margin:12px 0;padding:12px 14px;border-radius:12px;background:#1b1b1f;color:#fff;font:500 14px/1.45 system-ui,sans-serif}.gd-note b{display:block;font-weight:700;margin-bottom:2px}';
+  document.head.appendChild(css);
+  ['pRewards', 'pClub', 'pStore', 'pLive'].forEach(id => { const el = document.getElementById(id); if(!el) return;
+    el.inert = true; el.classList.add('gd-frozen');
+    el.insertAdjacentHTML('afterbegin', '<div class="gd-note"><b>Rewards are switched off.</b>This is a demonstration only. We are not providing rewards of any kind at this time: nothing here can be earned, bought or redeemed at ' + DEMO_NAME.replace(/&/g, '&amp;') + '.</div>'); });
+  document.documentElement.style.setProperty('--gd-lift', '84px');
+  const demoNote = () => window.GRUG_DEMO && GRUG_DEMO.install(DEMO_NAME, 'yan-tea-cafe');
+  if(window.GRUG_DEMO) demoNote(); else { const sc = document.createElement('script'); sc.src = '../../assets/demo.js'; sc.onload = demoNote; document.head.appendChild(sc); }
+}
 function storageWorks(){ try{ const k = '__rw_check'; localStorage.setItem(k, '1'); const ok = localStorage.getItem(k) === '1'; localStorage.removeItem(k); return ok; }catch(e){ return false; } }
 let storageOK = storageWorks();
 function save(){ let ok = true; try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){ ok = false; } if(ok !== storageOK){ storageOK = ok; renderStorage(); } }
@@ -2406,42 +2427,11 @@ function parseTap(raw){
   return s && m[2].toUpperCase() === tapCheck(s.id) ? s : null;
 }
 
-/* ---------- PeerJS (only when a store has a live board) ---------- */
+/* ---------- live boards (the PeerJS link is removed) ---------- */
 const HAS_BOARD = STORES.some(s => s.board);
-let peerP = null, peer = null, idleT = 0;
-function loadPeerLib(){
-  if(window.Peer) return Promise.resolve();
-  const one = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = () => window.Peer ? ok() : no(); s.onerror = no; document.head.appendChild(s); });
-  return one('https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js').catch(() => one('https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js'));
-}
-function getPeer(){
-  clearTimeout(idleT);
-  if(peer && !peer.destroyed && peer.open) return Promise.resolve(peer);
-  if(peerP) return peerP;
-  peerP = loadPeerLib().then(() => new Promise((ok, no) => {
-    const p = new Peer({debug: 0}), to = setTimeout(() => { no(Object.assign(new Error('network'), {code: 'network'})); try{ p.destroy(); }catch(e){} }, 12000);
-    p.on('open', () => { clearTimeout(to); peer = p; ok(p); });
-    p.on('error', e => { if(!p.open){ clearTimeout(to); no(Object.assign(new Error('network'), {code: 'network'})); } });
-  })).finally(() => { peerP = null; });
-  return peerP;
-}
-function releaseSoon(){ clearTimeout(idleT); idleT = setTimeout(() => { try{ peer && peer.destroy(); }catch(e){} peer = null; }, 20000); }
-async function ask(s, msg){
-  msg.id = Math.random().toString(36).slice(2, 10);
-  const p = await getPeer();
-  return new Promise((res, rej) => {
-    let done = false, conn = null;
-    const fail = c => Object.assign(new Error(c), {code: c});
-    const finish = (err, val) => { if(done) return; done = true; clearTimeout(to); p.off('error', onErr); try{ conn && conn.close(); }catch(e){} releaseSoon(); err ? rej(err) : res(val); };
-    const onErr = e => { const t = e && e.type; if(t === 'peer-unavailable') finish(fail('offline')); else if(/network|disconnected|server-error|socket/.test(t || '')) finish(fail('network')); };
-    const to = setTimeout(() => finish(fail('timeout')), 12000);
-    p.on('error', onErr);
-    try{ conn = p.connect(s.board, {reliable: true}); }catch(e){ return finish(fail('network')); }
-    conn.on('open', () => { try{ conn.send(msg); }catch(e){ finish(fail('network')); } });
-    conn.on('data', d => { if(d && d.id === msg.id) finish(null, d); });
-    conn.on('error', () => finish(fail('offline')));
-  });
-}
+/* The live board link (PeerJS) has been removed: this page connects to no board and no outside connection service.
+   Anything that used to ask a board (today's menu, a check-in code) now gets "offline" and falls back to what is built in. */
+async function ask(s, msg){ throw Object.assign(new Error('offline'), {code: 'offline'}); }
 
 /* ---------- routing ---------- */
 let store = null, tab = 'Menu';
@@ -2615,7 +2605,7 @@ function celebrate(){
   }
 }
 const checkinLine = () => { const t = CONFIG.points.tickets || 1, pk = CONFIG.live && CONFIG.live.enabled ? CONFIG.live.packsPerCheckin || 0 : 0; return t + ' prize run' + (t > 1 ? 's' : '') + ' + ' + checkinPts() + ' tokens' + (pk ? ' + ' + (pk > 1 ? pk + ' player packs' : 'a player pack') : ''); };
-function addCheckin(label){
+function addCheckin(label){ if(FROZEN){ toast(OFF); return; } 
   const n = checkinPts(), before = st.tickets, rk = rankAt(st.visits);
   st.points += n; st.tickets = Math.min(CONFIG.points.maxTickets, st.tickets + (CONFIG.points.tickets || 1));
   st.visits++; if(LV.enabled) st.packs = Math.min(20, st.packs + (LV.packsPerCheckin || 0));
@@ -2657,7 +2647,7 @@ const codeVal = () => boxes.map(b => b.value).join('');
 function redeemMsg(t, k){ const m = $('#redeemMsg'); m.textContent = t; m.className = 'msg' + (k ? ' ' + k : ''); }
 function shake(el){ el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
 let redeeming = false;
-async function redeemBoard(){
+async function redeemBoard(){ if(FROZEN){ redeemMsg(OFF, 'err'); return; } 
   if(redeeming || !store || !store.board) return;
   if(claimedToday()) return renderCollect();
   const code = codeVal();
@@ -2682,7 +2672,7 @@ function codeFail(t){ $('#boxes').classList.add('bad'); shake($('#boxes')); rede
 $('#redeemBtn').addEventListener('click', () => { buzz(); redeemBoard(); });
 
 /* NFC: tags hold ?tap=<store>-<check>; any NFC phone opens the link, Chrome on Android can also read in-page */
-function tapClaim(s){
+function tapClaim(s){ if(FROZEN){ toast(OFF); return; } 
   st.lastTap = Date.now(); save();
   if(claimedToday()){ renderCollect(); renderLiveAll(); toast('Today’s prize run is already in. You’re tapped in: the Store is open.'); buzz(8); return; }
   st.lastClaimDay = rewardsDay(); toast('+' + checkinLine() + '. Good luck!');
@@ -2746,7 +2736,7 @@ function giveText(g){
   if(g.skin){ const k = skinById(g.skin); out.push((k ? k.name : g.skin) + ' board'); }
   return out.join(' · ');
 }
-function applyPrize(p){
+function applyPrize(p){ if(FROZEN) return; 
   const g = p.give || {}, notes = [];
   if(g.tokens){ st.points += g.tokens; }
   if(g.item){ st.inv[g.item] = Math.min(99, (st.inv[g.item] || 0) + (g.n || 1)); }
@@ -2810,7 +2800,7 @@ function renderClub(){
   $('#clubJoin').disabled = m; $('#clubLeave').hidden = !m;
   $('#perks').innerHTML = CL.perks.map(([i, t, s]) => '<li class="card"><span class="rw-ic" style="background:var(--brand);color:var(--on-brand)">' + ic(i) + '</span><span><b>' + esc(t) + '</b>' + esc(s) + '</span></li>').join('');
 }
-function setClub(active){ st.club = {active, since: active ? (st.club.since || Date.now()) : 0, rev: Date.now()}; save(); renderClub(); renderCollect(); sendGameState(); }
+function setClub(active){ if(FROZEN){ toast(OFF); return; }  st.club = {active, since: active ? (st.club.since || Date.now()) : 0, rev: Date.now()}; save(); renderClub(); renderCollect(); sendGameState(); }
 $('#clubJoin').addEventListener('click', () => { if(st.club.active) return; buzz([10, 30, 10]); setClub(true); toast('Welcome to the ' + CL.name); });
 $('#clubLeave').addEventListener('click', () => { buzz(); setClub(false); toast('You left the ' + CL.name); });
 
@@ -2838,14 +2828,14 @@ function gameState(){
 function toGame(m){ if(!gameFrame || !gameFrame.contentWindow) return; try{ gameFrame.contentWindow.postMessage(Object.assign({rw: 1}, m), '*'); }catch(e){} }
 function sendGameState(){ toGame(Object.assign({t: 'state'}, gameState())); }
 function pauseGame(){ toGame({t: 'pause'}); }
-function buyItem(id){
+function buyItem(id){ if(FROZEN) return {ok: false, reason: OFF}; 
   const it = gameItem(id); if(!it) return {ok: false, reason: 'That power-up isn’t in the shop.'};
   if((st.inv[id] || 0) >= INV_MAX) return {ok: false, reason: 'You already have ' + INV_MAX + ' of those.'};
   if(st.points < it.cost) return {ok: false, reason: 'You need ' + (it.cost - st.points) + ' more tokens for ' + it.name + '. Check in at the counter for more.'};
   st.points -= it.cost; st.inv[id] = (st.inv[id] || 0) + 1; hist(it.name, -it.cost, '−' + it.cost + ' tokens'); save();
   return {ok: true};
 }
-function startPrizeRun(ids){
+function startPrizeRun(ids){ if(FROZEN) return {ok: false, reason: OFF}; 
   ids = Array.isArray(ids) ? [...new Set(ids.map(String))] : [];
   if(st.activeRun) settleRun(st.activeRun.score);
   if(st.tickets < 1) return {ok: false, reason: 'No prize runs left. Check in at the counter to earn one, or play a free practice run.'};
@@ -3141,7 +3131,7 @@ function jbVote(i){
   toast(w > 1 ? 'Voted for ' + JB.opts[i].t + ' · your vote counts twice' : 'Voted for ' + JB.opts[i].t);
   jbPaint();
 }
-function jbBoost(){
+function jbBoost(){ if(FROZEN){ toast(OFF); return; } 
   const c = SH.boost || 5;
   if(JB.mine < 0 || JB.boosted || !jbCanVote()) return;
   if(st.points < c) return toast('You need ' + (c - st.points) + ' more tokens. Get more in the Store.');
@@ -3187,7 +3177,7 @@ function cardHTML(c, champ){
 const cardMini = c => '<span class="mini-c ' + c.tier + '">' + ovr(c) + '</span>';
 const packDef = id => (SH.packs || []).find(p => p.id === id) || {id: 'pack', name: 'Player pack', odds: {bronze: .6, silver: .28, gold: .1, legend: .02}};
 function rollTier(odds){ let r = Math.random(), acc = 0; for(const k of ['legend', 'gold', 'silver', 'bronze']){ acc += odds[k] || 0; if(r < acc) return k; } return 'bronze'; }
-function openPack(id, source){
+function openPack(id, source){ if(FROZEN){ toast(OFF); return; } 
   const p = packDef(id), tiers = [0, 1, 2].map(() => rollTier(p.odds));
   if(p.guarantee && !tiers.some(t => t === 'gold' || t === 'legend')) tiers[2] = Math.random() < .9 ? 'gold' : 'legend';
   const res = tiers.map(t => addCard(makeCard(t))), melted = res.reduce((t, r) => t + (r.melt || 0), 0);
@@ -3438,7 +3428,7 @@ function renderStoreTab(){
     '<p class="fine">Tokens are digital and only work in ' + esc(B.short) + '’s rewards games. They have no cash value and can’t be cashed out, refunded as cash or passed to someone else. Nothing is charged in this app: your server adds what you pick to your bill. If something wasn’t right tonight, staff can add tokens to make up for it.</p>';
   el.innerHTML = h;
 }
-function bundleSheet(id){
+function bundleSheet(id){ if(FROZEN){ toast(OFF); return; } 
   const b = (SH.bundles || []).find(x => x.id === id); if(!b) return;
   if(!inRoom()) return toast('Tap in at the counter to use the store');
   openSheet('<div class="grab"></div><span class="eyebrow">Add to my bill</span><h3>' + b.tokens + ' tokens</h3><p>Your server rings it up on your bill and the tokens land in this app. Nothing is charged here.</p>' +
@@ -3464,7 +3454,7 @@ function settleReq(id, ok){
   if(ok && document.body.classList.contains('console-mode') === false) toast('+' + r.tokens + ' tokens · added to ' + tName(r.table) + '’s bill');
   if($('#csReq')) repaint('#csReq', csReqHTML);
 }
-function buyPack(id){
+function buyPack(id){ if(FROZEN){ toast(OFF); return; } 
   const p = packDef(id);
   if(!inRoom()) return toast('Tap in at the counter to use the store');
   if(st.points < p.cost) return toast('You need ' + (p.cost - st.points) + ' more tokens');

@@ -4,7 +4,7 @@
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Profile · Grug</title>
-<meta name="description" content="Your Grug profile: name, avatar, points at every partner, settings, and export/import to move to another phone.">
+<meta name="description" content="Your Grug profile: name, avatar, settings, and export/import to move to another phone.">
 <meta name="theme-color" content="#eaf6ee">
 <link rel="icon" href="../favicon.png">
 <link rel="stylesheet" href="../assets/grug.css">
@@ -53,7 +53,8 @@
     </div>
   </section>
 
-  <section class="g-card">
+  <!-- hidden: the business apps are frozen demonstrations (assets/demo.js), so there are no points to show -->
+  <section class="g-card" hidden>
     <h2>Points at each partner</h2>
     <p class="g-fine" style="margin-bottom:10px">Each restaurant keeps its own balance. Tap one to open its rewards app.</p>
     <div class="pf-points" id="points"></div>
@@ -83,7 +84,7 @@
   <section class="g-card full">
     <h2>Move to another phone</h2>
     <div class="pf-move">
-      <p class="g-fine">Your profile lives on this device. Export it to a file to keep a copy or load it on another phone. The file holds your name, avatar, closet and your points at every partner.</p>
+      <p class="g-fine">Your profile lives on this device. Export it to a file to keep a copy or load it on another phone. The file holds your name, avatar, closet and game saves.</p>
       <div class="row"><button class="g-btn primary" id="export"></button><button class="g-btn" id="shareBtn" hidden></button><button class="g-btn" id="copy"></button></div>
       <div class="row"><button class="g-btn" id="importFile"></button><button class="g-btn" id="importPaste"></button></div>
       <input type="file" id="file" accept="application/json,.json" hidden>
@@ -93,7 +94,7 @@
 
   <section class="g-card pf-danger full">
     <h2>Start over</h2>
-    <p class="g-fine" style="margin-bottom:10px">Clears your name, avatar and closet on this device. You can also clear the points at every partner.</p>
+    <p class="g-fine" style="margin-bottom:10px">Clears your name, avatar and closet on this device.</p>
     <div class="row"><button class="g-btn danger" id="resetBtn"></button></div>
     <p class="pf-code" id="pid" style="margin-top:12px"></p>
   </section>

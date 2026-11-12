@@ -149,7 +149,7 @@
           '<div class="wz-row"><span class="ic">' + G.icon('share-network') + '</span><div><b>Put it in your bio</b><span>Paste the link into your Instagram, TikTok or X bio, or anywhere you share links.</span></div></div>' +
           '<div class="wz-row"><span class="ic">' + G.icon('pearl') + '</span><div><b>Followers get 10 Pearls</b><span>Each follower gets 10 Pearls a day for stopping by, to spend in any game on Grug. Free for you.</span></div></div>' +
           '<div class="wz-row"><span class="ic">' + G.icon('pencil-simple') + '</span><div><b>Changing it later</b><span>Edit it from My link pages, then share the new link. The old one keeps working.</span></div></div>' +
-        '</div></div>' +
+        '</div><p class="g-fine" style="margin:10px 2px 0">You’re responsible for what’s on this page and for sharing it. Only link accounts that are yours, and only use names, logos and photos you have the right to use. It lives in its own link: Grug Digital doesn’t review, host or stand behind it. <a href=\'../../terms.html\' target=\'_blank\' rel=\'noopener\'>Terms</a></p></div>' +
       '<div class="wz-q"><span class="n">' + G.icon('check') + '</span><h1>Your page is ready!</h1><p>' + (cfg.mode === 'g' ? 'This is your world. Followers walk into a room to reach each of your socials.' : 'This is what your followers see.') + '</p><div class="wz-prev" id="prev" style="display:block"></div></div>';
     paintPreview();
     $('#copyBtn').addEventListener('click', async e => { try { await navigator.clipboard.writeText(S.url); e.currentTarget.innerHTML = G.icon('check') + 'Copied!'; } catch (err) { prompt('Copy your link:', S.url); } });

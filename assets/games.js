@@ -277,3 +277,20 @@ window.GRUG_GAMES = [
            art: 'assets/boxart/takeatea.jpg', shots: ['assets/boxart/shots/takeatea-1.jpg'] }
   }
 ];
+
+/* FROZEN DEMONSTRATIONS (see assets/demo.js)
+   Every game made for a named business (anything that isn't a Grug original) is a demonstration for that business's
+   owners. Until a business signs off, its game is kept off the main site (Grug.partnerAllows), nothing can be bought or
+   earned in it (assets/gamehost.js), and its write-up here says so: the lines about Pearls, coins and points are
+   dropped and a plain notice is put first. To thaw one, remove this block's effect for it (and review its pages). */
+window.GRUG_GAMES.forEach(function (g) {
+  if (g.original) return;
+  g.demo = true;
+  var money = /pearl|coins?\b|points?\b/i;
+  var clean = function (t) { return (String(t || '').match(/[^.!?]+[.!?]*\s*/g) || []).filter(function (x) { return !money.test(x); }).join('').trim(); };
+  var note = 'A demonstration made for ' + g.partner + ', which has not approved or endorsed it. Nothing can be earned, bought or redeemed.';
+  g.blurb = clean(g.blurb) || note;
+  g.long = note + ' ' + clean(g.long);
+  g.earn = 'Demonstration only: nothing is earned, bought or spent';
+  if (g.features) g.features = g.features.filter(function (f) { return !money.test(f); }).concat('Demonstration only: no rewards, nothing to buy');
+});

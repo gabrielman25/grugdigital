@@ -139,7 +139,7 @@ Every field is optional; anything left out comes from `SandyKit.DEFAULT`.
 - `body`: `"female"` or `"male"` (`SandyKit.CATALOG.bodies`). Both bodies are Quaternius Universal Base Characters
   (Superhero, CC0) wearing her own head, sphere hands and feet; every outfit piece fits both. Changing `body` rebuilds
   her rig in place; `await sandy.ready` if you need to know when it's done.
-- `decal`: a chest print on her top: `image` (`"star"`, `"heart"`, `"bolt"`, `"smile"`, `"peace"`, `"print:<name>"` for a ready-made print in assets/prints/ (fire, crown, rocket, gamepad, pearl, gem, rainbow, flower, paw, duck), `"pack:<id>"` for any of the 1,176 icon-pack prints in assets/prints/pack/ (ids in its index.json), an image data URL, or null), `size`, `up` and `side` (cm).
+- `decal`: a chest print on her top: `image` (`"star"`, `"heart"`, `"bolt"`, `"smile"`, `"peace"`, `"print:<name>"` for a ready-made print in assets/prints/ (fire, crown, rocket, gamepad, pearl, gem, rainbow, flower, paw, duck), an image data URL, or null; the old `"pack:<id>"` prints were removed with the icon pack and now show nothing), `size`, `up` and `side` (cm).
 - `hat`: `type` (`"none"` or one of `SandyKit.CATALOG.hats`: beanie, beret, bucketHat, cap, cowboyHat, sunHat, topHat, witchHat),
   `colour`, `size`, `up` and `forward` (cm), `tilt` (radians). Her hair is never changed by a hat. Hats: Chibi Hats by PaperPluto
   (itch.io; free for commercial use, not to be redistributed on their own).
@@ -432,7 +432,7 @@ body.viewer.clear,body.viewer.clear #stage{background:transparent}
           <div class="row"><span class="lab">Belt</span><div class="sws" data-colour="outfit.belt"></div></div></div>
         <div class="grp kit" data-slot="top"><h2 class="px">Top</h2></div>
         <div class="grp"><h2 class="px">Chest print</h2><p class="note">One picture on the front of her top (or her shirt).</p><div class="chips" id="decals"></div>
-          <div class="row"><button type="button" class="btn px" id="pkOpen" aria-expanded="false" aria-controls="pk">All prints…</button></div>
+          <div class="row" hidden><button type="button" class="btn px" id="pkOpen" aria-expanded="false" aria-controls="pk">All prints…</button></div>
           <div id="pk" hidden>
             <input type="search" id="pkQ" placeholder="Search prints (star, cat, pizza…)" autocomplete="off" aria-label="Search prints">
             <div class="chips" id="pkCats" role="group" aria-label="Print categories"></div>
@@ -660,17 +660,14 @@ const PRINTS=['fire','crown','rocket','gamepad','pearl','gem','rainbow','flower'
 $('decals').innerHTML=['none','star','heart','bolt','smile','peace'].map(t=>`<button type="button" data-d="${t}" aria-pressed="false">${t}</button>`).join('')+
   PRINTS.map(t=>`<button type="button" class="print" data-d="print:${t}" aria-pressed="false" title="${t}" aria-label="${t} print"><img src="../assets/prints/${t}.png" alt="" width="28" height="28" loading="lazy"></button>`).join('');
 $('decals').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b)apply({decal:{image:b.dataset.d==='none'?null:b.dataset.d}})});
-// every print in the icon pack (1,176): loaded the first time the browser is opened, shown a page at a time
+// the print browser (its icon pack has been removed, so PK.list stays empty)
 const PK={list:null,cats:[],cat:-1,q:'',shown:0,PAGE:72};
 const pkMatches=()=>PK.list.filter(x=>(PK.cat<0||x[2]===PK.cat)&&(!PK.q||x[1].toLowerCase().includes(PK.q)||x[0].includes(PK.q)));
 function pkRender(reset){if(!PK.list)return;const all=pkMatches();if(reset){PK.shown=0;$('pkGrid').innerHTML='';$('pkGrid').scrollTop=0}
   const cur=cfg&&cfg.decal&&cfg.decal.image,next=all.slice(PK.shown,PK.shown+PK.PAGE);PK.shown+=next.length;
   $('pkGrid').insertAdjacentHTML('beforeend',next.map(x=>`<button type="button" data-d="pack:${x[0]}" aria-pressed="${cur==='pack:'+x[0]}" title="${x[1]}" aria-label="${x[1]} print"><img src="../assets/prints/pack/${x[0]}.webp" alt="" loading="lazy" decoding="async"></button>`).join(''));
   $('pkNone').hidden=all.length>0;$('pkMore').hidden=PK.shown>=all.length;$('pkMore').textContent='Show more ('+(all.length-PK.shown)+' left)'}
-$('pkOpen').addEventListener('click',async()=>{const p=$('pk'),open=p.hidden;p.hidden=!open;$('pkOpen').setAttribute('aria-expanded',String(open));if(!open||PK.list)return;
-  try{const r=await fetch('../assets/prints/pack/index.json');const j=await r.json();PK.list=j.items;PK.cats=j.cats;
-    $('pkCats').innerHTML=['All'].concat(PK.cats).map((c,i)=>`<button type="button" data-c="${i-1}" aria-pressed="${i===0}">${c}</button>`).join('');pkRender(true)}
-  catch(e){$('pkNone').hidden=false;$('pkNone').textContent='Couldn’t load the prints. Check your connection and try again.';PK.list=null;p.hidden=true;$('pkOpen').setAttribute('aria-expanded','false')}});
+// (the 1,176-print icon pack has been removed from the site: the browser below stays closed and empty. Quick prints and Upload image still work.)
 $('pkCats').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;PK.cat=+b.dataset.c;for(const x of $('pkCats').children)x.setAttribute('aria-pressed',String(x===b));pkRender(true)});
 $('pkQ').addEventListener('input',()=>{PK.q=$('pkQ').value.trim().toLowerCase();pkRender(true)});
 $('pkMore').addEventListener('click',()=>pkRender(false));

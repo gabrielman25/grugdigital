@@ -11,6 +11,8 @@
 <title>Soluna Coffee · Sun Club (concept demo)</title>
 <!-- the site's custom cursor (a cursor the app sets itself still wins) -->
 <script src="../../assets/cursors.js"></script>
+<!-- the freeze on every branded page: a demonstration only, nothing is earned, bought or redeemed (assets/demo.js) -->
+<script src="../../assets/demo.js"></script>
 <style>
 /* the partner's typefaces ("Bricolage" is the body face's name inside the app for every partner; "Display" is for headings and
    falls back to the body face when the partner has no second one) */
@@ -451,13 +453,21 @@ const DEF={onboarded:false,name:"",coins:0,visits:0,claimed:{},lastDaily:"",last
 let S=Object.assign({},DEF);
 try{const j=JSON.parse(localStorage.getItem(KEY)||"null"); if(j) S=Object.assign({},DEF,j);}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+/* FROZEN: this app is a demonstration for the business's owners (assets/demo.js). Until they sign off, nothing is earned,
+   bought, spent or redeemed here: the balance and the visit count stay at zero, the welcome coins are skipped, and every
+   way of getting or using coins answers with OFF. */
+const FROZEN=!(window.GRUG_DEMO&&GRUG_DEMO.isLive("soluna"));
+const OFF="Rewards are switched off. This is a demonstration only.";
+if(FROZEN){Object.assign(S,{coins:0,visits:0,claimed:{},tab:[],theme:"classic",themes:["classic"],onboarded:true});
+  document.documentElement.style.setProperty("--gd-lift","84px");
+  if(window.GRUG_DEMO)GRUG_DEMO.install("Soluna Coffee","soluna");}
 
 /* Wallet: the one place coins move through. When this app is wired to Grug Digital, Pearls plug in here
    (spend Pearls first, then coins) using the kit's rewards-app protocol. */
 const Wallet={
   pearls:0, pearlName:"",
-  add(n,from){S.coins+=n;save();UI.wallet(true);if(from)FX.fly(from,$("#wallet"),clamp(Math.round(n/25),4,16));SFX.coins(clamp(Math.round(n/40),2,8));},
-  spend(n){if(S.coins<n)return false;S.coins-=n;save();UI.wallet(true);return true;}
+  add(n,from){if(FROZEN){toast(OFF);return;}S.coins+=n;save();UI.wallet(true);if(from)FX.fly(from,$("#wallet"),clamp(Math.round(n/25),4,16));SFX.coins(clamp(Math.round(n/40),2,8));},
+  spend(n){if(FROZEN){toast(OFF);return false;}if(S.coins<n)return false;S.coins-=n;save();UI.wallet(true);return true;}
 };
 
 /* ================= SOUND ================= */
@@ -763,7 +773,7 @@ const THEMES=[{"id":"classic","name":"Olive","deep":"#5f5c37","deepDark":"#4a482
 const themeOf=id=>THEMES.find(t=>t.id===id)||THEMES[0];
 const TABS=[["home","Home","house"],["menu","Menu","cup"],["play","Play","controller"],["pass","Pass","trophy"],["store","Coins","coins"]];
 let curTab="home",walletShown=0,walletAnim=0;
-const grugCard=(pop)=>`<a class="cta grug ${pop?"pop":""}" href="${LINKS.grug}"${GRUG_TARGET}><div class="gem">${ic("gem")}</div><div class="t"><b>More games on Grug Digital</b><span>Free games from Katy spots. Keep your avatar and Pearls across all of them.</span></div>${ic("arrow_right")}${S.grugSeen?"":'<i class="new">NEW</i>'}</a>`;
+const grugCard=(pop)=>`<a class="cta grug ${pop?"pop":""}" href="${LINKS.grug}"${GRUG_TARGET}><div class="gem">${ic("gem")}</div><div class="t"><b>More games on Grug Digital</b><span>Free games from Katy spots. Keep your avatar across all of them.</span></div>${ic("arrow_right")}${S.grugSeen?"":'<i class="new">NEW</i>'}</a>`;
 /* off the Grug site (the app opened as a single file): the games live on the site, so Home and Play point there */
 const playCard=()=>`<a class="cta dark" href="${LINKS.grug}"${GRUG_TARGET}><div class="t"><b>Free games while you wait</b><span>Play the Grug Digital library in Soluna colours</span></div>${ic("play")}</a>`;
 
@@ -871,7 +881,7 @@ const UI={
       </button>
       <div class="card daily">
         <i class="c" style="width:44px;height:44px"></i>
-        <div class="t"><b>${daily?"Ticket bonus is ready":"Ticket bonus collected"}</b><span class="sub">${daily?"25 coins, once per visit":"Come back next visit for another"}</span></div>
+        <div class="t"><b>${daily?"Ticket bonus is ready":"Ticket bonus collected"}</b><span class="sub">${FROZEN?"Switched off in this demonstration":daily?"25 coins, once per visit":"Come back next visit for another"}</span></div>
         <button class="btn sm ${daily?"gold":""}" id="dailyBtn" ${daily?"":"disabled"}>${daily?"Collect":"Done"}</button>
       </div>
       ${shelf?"":playCard()}
@@ -931,7 +941,7 @@ const UI={
         <div class="vn">${t.v===1?"First visit":t.v+" visits"}</div><b>${esc(t.name)}</b><div class="rw">${esc(t.reward)}</div>
         ${open?(cl?`<div class="done">${ic("checkmark")}Claimed</div>`:`<button class="btn" data-claim="${t.v}">${ic("gift")}Claim reward</button>`):`<div class="lock">${ic("lock")}${t.v-S.visits} visit${t.v-S.visits>1?"s":""} to go</div>`}
       </div>`;}).join("")}</div>
-      <p class="foot">Check-ins are confirmed with a code from your barista, so every stamp is a real visit.</p>`;
+      <p class="foot">Check-ins and rewards are switched off. This is a demonstration only: nothing here is earned or redeemed at Soluna Coffee.</p>`;
     requestAnimationFrame(()=>{const tr=$(".track"),ts=$$(".tier",tr);if(!ts.length)return;const last=ts[Math.min(idx,ts.length)-1];$("#trackFill").style.height=(idx?last.offsetTop+20:0)+"px";});
   },
   themeCard(t){const own=S.themes.includes(t.id),on=S.theme===t.id,pass=PASS.find(x=>x.theme===t.id);
@@ -941,17 +951,11 @@ const UI={
     const total=S.tab.reduce((a,b)=>a+b.price,0);
     $("#v-store").innerHTML=`
       <div class="storehero"><canvas id="storeCoin"></canvas><div class="bal balN">${fmt(S.coins)}</div><div class="sub">${COIN} · drag the coin to spin it</div></div>
-      <div class="check-note"><span class="itile gold">${ic("notepad")}</span><div><b>No card needed.</b> Coins you buy are added to your ticket's total and confirmed by your barista.</div></div>
-      <h2>Top up</h2>
-      ${PACKS.map((p,i)=>`<button class="pack" data-pack="${p.id}">${p.flag?`<i class="flag">${p.flag}</i>`:""}
-        <div class="stack">${Array.from({length:i*2+2},(_,k)=>`<i style="left:${[12,2,22,8,18,12][k]}px;top:${[22,14,12,4,2,-6][k]}px"></i>`).join("")}</div>
-        <div class="t"><b>${fmt(p.coins+p.bonus)}</b><span>${esc(p.name)}${p.bonus?` · includes ${p.bonus} bonus`:""}</span></div><span class="price">$${p.price.toFixed(2)}</span></button>`).join("")}
-      ${S.tab.length?`<h2>On your total today <span class="demo-tag" style="vertical-align:3px;margin-left:6px">Demo</span></h2><div class="card">${S.tab.map(t=>`<div class="tabline"><span>${fmt(t.coins)} ${COIN}</span><span>$${t.price.toFixed(2)}</span></div>`).join("")}<div class="tabline" style="border:0;font-weight:750"><span>Added to Ticket ${S.table}</span><span>$${total.toFixed(2)}</span></div></div>`:""}
+      <div class="check-note"><span class="itile gold">${ic("notepad")}</span><div><b>Rewards are switched off.</b> This is a demonstration only. We are not providing rewards of any kind at this time: coins can't be earned, bought or spent, and nothing here can be redeemed at Soluna Coffee.</div></div>
       ${THEMES.length>1?`<h2>App themes</h2><div class="themes">${THEMES.map(t=>this.themeCard(t)).join("")}</div>`:""}
       <h2>What coins do</h2>
       <div class="uses">${[["palette","App themes","Sunrise, Dusk and Matcha looks for your app."],["controller","Sunrise to Sunset boosts","Shift boosts and passes in the Soluna game: 25 coins to a point."]].map(([i,b,t])=>`<div class="card"><span class="itile">${ic(i)}</span><b>${esc(b)}</b>${esc(t)}</div>`).join("")}</div>
-      ${S.grug&&IN_SITE?`<div class="cta" style="margin-top:12px"><div class="t"><b>Grug Pearls</b><span>Coming soon: connect your Grug Digital account to spend Pearls here too.</span></div><span class="demo-tag">Soon</span></div>`:""}
-      <p class="foot">Coins are for in-app extras only and have no cash value.<br>This is a concept demo. Nothing is charged.</p>`;
+      <p class="foot">Coins have no cash value.<br>This is a demonstration only. Nothing is charged, earned or redeemed.</p>`;
     Coin.attach($("#storeCoin"),{scale:.9,idle:.9});
   }
 };
@@ -973,6 +977,7 @@ function itemSheet(n){
     <a class="btn ghost" href="${LINKS.play}" target="_blank" rel="noopener" style="text-decoration:none;margin-top:10px">Follow @solunacoffeeshop</a>`,{noGrab:it.i!=null});
 }
 function buySheet(id){
+  if(FROZEN){toast(OFF);return;}
   const p=PACKS.find(x=>x.id===id);if(!p)return;SFX.tap();
   Sheet.open(`<div class="eyebrow">Add to total</div><h3>${fmt(p.coins+p.bonus)} ${COIN}</h3>
     <p>We'll add <b>$${p.price.toFixed(2)}</b> to your ticket's total, and your barista confirms it when they swing by. No card, no sign-up.</p>
@@ -1009,6 +1014,7 @@ function themeSheet(id){
   $("#thGo").onclick=()=>{if(!Wallet.spend(t.price))return;S.themes.push(id);S.theme=id;save();applyTheme();Sheet.close();SFX.win();FX.confetti([innerWidth/2,innerHeight*.4],60);toast(t.name+" theme on");setTimeout(redraw,300);};
 }
 function checkinSheet(){
+  if(FROZEN){toast(OFF);return;}
   SFX.tap();
   Sheet.open(`<div class="eyebrow">Check in</div><h3>Stamp this visit</h3><p>Ask your barista for today's 4-digit ticket code. One stamp per visit.</p>
     <input class="field" id="ciCode" inputmode="numeric" maxlength="4" placeholder="• • • •" style="text-align:center;letter-spacing:.4em;font-size:26px;font-weight:700">
@@ -1016,12 +1022,14 @@ function checkinSheet(){
   $("#ciGo").onclick=()=>{const v=$("#ciCode").value.replace(/\D/g,"");if(v.length<4){toast("Enter the 4-digit code");return;}doVisit();};
 }
 function doVisit(){
+  if(FROZEN){Sheet.close();toast(OFF);return;}
   const before=PASS.filter(t=>S.visits>=t.v).length;S.visits++;save();const after=PASS.filter(t=>S.visits>=t.v);
   Sheet.close();SFX.stamp(2);UI.go("pass");
   if(after.length>before){const t=after[after.length-1];setTimeout(()=>{SFX.win();FX.confetti([innerWidth/2,innerHeight*.45],90);toast("Unlocked: "+t.name);const el=$(`[data-tier="${t.v}"]`);el&&el.scrollIntoView({behavior:"smooth",block:"center"});},500);}
   else toast("Visit stamped. See you next time.");
 }
 function claim(v,btn){
+  if(FROZEN){toast(OFF);return;}
   const t=PASS.find(x=>x.v==v);if(!t||S.claimed[v]||S.visits<t.v)return;S.claimed[v]=1;
   // Season Pass rewards are all digital: coins and app themes (never free food, drinks or discounts)
   const got=[];
@@ -1172,7 +1180,7 @@ const Onb=(()=>{
     setTimeout(()=>$("#mintDone").classList.add("on"),700);
   }
   function finish(){
-    if(!S.onboarded){S.onboarded=true;S.coins+=500;if(S.visits<1)S.visits=1;}
+    if(!S.onboarded){S.onboarded=true;if(!FROZEN){S.coins+=500;if(S.visits<1)S.visits=1;}}
     save();el.classList.remove("on");UI.wallet(false);UI.go("home");
     setTimeout(()=>toast("First visit stamped. Your Season Pass has a reward waiting."),600);
   }
@@ -1189,9 +1197,9 @@ const Onb=(()=>{
 /* an NFC tag or QR at the venue (play/<id>/?tap=…, the same links the earlier app printed) stamps today's visit, once a day */
 const TAPPED=(()=>{try{const q=new URLSearchParams(location.search);if(!q.has("tap"))return false;q.delete("tap");
   const r=q.toString();history.replaceState(history.state,"",location.pathname+(r?"?"+r:"")+location.hash);
-  if(S.lastTap===today())return "again";S.lastTap=today();S.visits++;save();return true;}catch(e){return false;}})();
+  if(FROZEN)return "off";if(S.lastTap===today())return "again";S.lastTap=today();S.visits++;save();return true;}catch(e){return false;}})();
 (function boot(){
-  if(TAPPED)setTimeout(()=>toast(TAPPED===true?"Visit stamped. Thanks for stopping by!":"Already stamped today. See you next visit."),S.onboarded?900:5200);
+  if(TAPPED)setTimeout(()=>toast(TAPPED==="off"?OFF:TAPPED===true?"Visit stamped. Thanks for stopping by!":"Already stamped today. See you next visit."),S.onboarded?900:5200);
   fillIcons();UI.tabs();UI.menu();Avatar.paint();
   const im=new Image();
   im.onload=()=>{LOGO_IMG=im;Coin.init(im);UI.wallet(false);UI.go("home");

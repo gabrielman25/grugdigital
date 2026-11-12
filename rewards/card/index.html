@@ -26,6 +26,8 @@
   <div class="cd" id="cd" hidden>
     <a class="cd-back" href="../" id="back"></a>
     <div id="card"></div>
+    <!-- every card is made by a shop owner, not by us: say so, and give a way to report one -->
+    <p class="g-fine" style="max-width:60ch;margin:14px auto 0;text-align:center">This card was made by the shop with Grug’s free tools. Any reward it offers is given and honored by the shop, not by Grug Digital, which didn’t write or review this card. <a href="../../support.html">Report this card</a></p>
   </div>
   <section class="g-section" id="games" hidden>
     <div class="g-section-h"><h2>Spend your Pearls</h2><a href="../../games/">All games</a></div>
@@ -62,7 +64,7 @@
   addEventListener('hashchange', () => { const nc = new URLSearchParams(location.hash.slice(1)).get('c'); if (nc && window.GrugTheme) GrugTheme.setBrand(nc, true); location.reload(); });
 
   // where to spend the Pearls: the game library as FOSSIL32 boxes
-  const list = G.GAMES.filter(g => g.status !== 'legacy' && g.listed !== false).slice(0, 6);
+  const list = G.GAMES.filter(g => g.status !== 'legacy' && g.listed !== false && G.partnerAllows(g)).slice(0, 6);
   $('#gameList').innerHTML = list.map(g => G.ui.boxTile(g)).join('');
 })();
 </script>

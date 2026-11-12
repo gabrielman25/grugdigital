@@ -2,6 +2,41 @@
 
 The Grug game site (static HTML, Cloudflare Pages, deploys on push to `main`). See `README.md` for the map of the site.
 
+## Frozen: everything made for a named business is a demonstration (read this first)
+
+No business has signed off on its pages yet, so **every page that carries a business's name, logo, menu or photos is a
+demonstration only**, kept apart from the main site. This overrides anything further down that says otherwise (venue
+coins paying in games, Pearls in a wrap, check-ins stamping visits, "partners", the Rewards apps button…). Keep it this
+way until the owner says a business has agreed in writing.
+
+- **`assets/demo.js`** is the freeze: `GRUG_DEMO.install(name, id)` shows a "Demonstration only" notice once per tab and a
+  chip that stays on the page. `LIVE` in that file is the (empty) list of businesses that have signed off.
+- **Nothing is earned, bought, spent or redeemed on a branded page.** No Pearls, no coins, no points, no food, drinks or
+  discounts, no memberships. Where it is enforced: `FROZEN` in `tools/partner-app/src/app.html` (rebuild the apps after
+  editing it), in `play/crafthouse/`, in the older apps (`play/yoshi|cielito|pera/`, `work/another-round|citrino|fuji-tea|
+  yan-tea-cafe/`: their Rewards / Membership / Store / Live tabs are shown but inert), and in `assets/gamehost.js` (a game
+  with `brand`, or any game opened inside a wrap, refuses every purchase and shows no Pearls or coins).
+- **The main site never shows a business's game or app.** `Grug.partnerAllows` lists only Grug originals outside a wrap;
+  a wrap lists its own games plus the originals. The Rewards apps button stays hidden, the Pearls page is not reachable
+  from a wrap, and closet designs tied to a business (`frozen` in `assets/catalog.js`) can't be earned.
+- **Wording:** never call a business a "partner" or say a game was "made with" it on the main site. The demonstrations
+  are reached from `partners/` (the "For restaurants" page), which carries the disclaimer.
+- **Never promise a membership, a Pass or a price** for something that isn't on sale (Grug Club is hidden on
+  `pearls.html`; the Pass was removed from `partners/`).
+- **No PeerJS and no connection between browsers.** The live menu board link and Sunrise to Sunset's "Together" are off.
+
+## Money rules for the Grug originals
+
+- **Nothing random is ever paid for.** Pearls never buy a crate, an egg, a loot box, better odds, or the in-game
+  currency that crates and eggs cost (no coin packs, coin doublers or coin passes for Pearls in a game whose coins buy
+  crates). A role or item bought with Pearls is a sure thing, never a chance. The Carts follow the same rule: the copies in
+  `games/carts/` were patched by hand for it, so **make the same change in `grug-game-kit/micro` before the next build**
+  (Egg Heist: no `cash2`, no `double_away`; Smash: no `coins2`; Pizza: the parrot costs coins, not Pearls).
+- The Discord feed (`Grug.announce`) says "A player", never the display name. The privacy policy promises that.
+- When a page starts loading anything from another host, storing something new, or the host changes, update
+  `privacy.html` in the same change. Third-party work is credited on `credits.html`.
+- The icon pack of prints (`assets/prints/pack/`) was removed. Don't bring it back without a licence on file.
+
 ## The look: Model Kit's theme, one accent per section
 
 The site uses the same look as **Model Kit** (Grug Digital's editor, `create/modelkit/`): flat neutral greys, **Fredoka**

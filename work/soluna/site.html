@@ -391,5 +391,8 @@ footer .concept{width:100%;border-top:1px solid #34312C;padding-top:18px;margin-
   els.forEach((e,i)=>{e.style.transitionDelay=(i%3)*0.12+"s";io.observe(e);});
 })();
 </script>
-<script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;var id=a.getAttribute('href').slice(1);e.preventDefault();var t=id?document.getElementById(id):null;if(t)t.scrollIntoView({behavior:'smooth'});else window.scrollTo({top:0,behavior:'smooth'})},true);</script></body>
+<script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;var id=a.getAttribute('href').slice(1);e.preventDefault();var t=id?document.getElementById(id):null;if(t)t.scrollIntoView({behavior:'smooth'});else window.scrollTo({top:0,behavior:'smooth'})},true);</script><!-- the notice on every demonstration page (assets/demo.js) -->
+<script src="../../assets/demo.js"></script>
+<script>if(window.GRUG_DEMO)GRUG_DEMO.install('Soluna Coffee','soluna');</script>
+</body>
 </html>

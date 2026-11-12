@@ -5864,7 +5864,8 @@ function decalCanvas(name){const c=document.createElement('canvas');c.width=c.he
 // 'print:<name>' = a ready-made print shipped with the site (assets/prints/<name>.png); anything else not a shape is an image URL
 const SR_BASE=((document.currentScript&&document.currentScript.src)||'').replace(/sandy-runtime\.js[^/]*$/,'');
 const DECAL_PENDING=new Set();
-// 'pack:<id>' = one of the full icon-pack prints (assets/prints/pack/<id>.webp, listed in assets/prints/pack/index.json)
+// 'pack:<id>' = a print from the icon pack that used to be in assets/prints/pack/. The pack has been removed, so a look
+// that still names one simply shows no print (the image fails to load and is skipped)
 function decalUrl(img){let m=/^print:([a-z0-9-]{1,32})$/.exec(img);if(m)return SR_BASE+'prints/'+m[1]+'.png';m=/^pack:([a-z0-9-]{1,48})$/.exec(img);return m?SR_BASE+'prints/pack/'+m[1]+'.webp':img}
 function decalTexture(img){if(!img)return null;if(DECAL_TEX[img])return DECAL_TEX[img];let t;
   if(DECAL_SHAPES.includes(img))t=new THREE.CanvasTexture(decalCanvas(img));

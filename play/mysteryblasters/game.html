@@ -225,28 +225,24 @@ const SETTINGS = {
   bots: 8,                             // other players in a round (all female avatars)
   // the chance that YOU get each role in a round (the rest is Innocent). Role boosts raise these for one round.
   odds: { murderer: 0.30, sheriff: 0.50 },
-  boostOdds: { murderer: 0.65, sheriff: 0.85 },
+  boostOdds: { murderer: 1, sheriff: 1 },   // a role bought in the Store is a sure thing, never a paid chance
   // The Store. Embedded, the app's CONFIG.game.shop is used instead (copy this list there; the app sets the prices,
   // spends Pearls first, then points). Effects this game understands:
-  //   next round only (consumed when the round starts): murderer, sheriff (role chance up) · double (x2 coins) · xp (x2 XP)
-  //   timed (last runSeconds): luck (luckier crates and eggs x amount)
+  //   next round only (consumed when the round starts): murderer, sheriff (you play that role) · xp (x2 XP)
+  //   NOT sold any more, because nothing random is ever paid for and coins (which buy crates and eggs) are never
+  //   bought: luck, double (x2 coins), passvip (x2 coins), passbag (bigger coin bag), passseason (its track held crates
+  //   and eggs) and the +40% coins pet. The game still understands them for anyone who already owns one.
   //   right away, saved on this phone: passvip (x amount coins, gold name, forever) · passbag (bigger coin bag) ·
   //     passpet (a 2nd pet slot) · passseason (the premium season track) · gun (a featured blaster, 'seed:rarity:mutation') ·
   //     pet (a featured pet, 'id:variant')
   //   crate (opens one crate of kind amount: common / rare / godly) is understood too but is NOT in the default list:
   //     the kit's rules say no paid random rewards, so crates and eggs cost coins you earn by playing.
   demoShop: [
-    { id: 'mboost', name: 'Murderer Chance', desc: 'Next round: 65% chance to be the Murderer', cost: 4, effect: 'murderer', amount: 0.65, icon: 'skull' },
-    { id: 'sboost', name: 'Sheriff Chance', desc: 'Next round: 85% chance to be the Sheriff', cost: 3, effect: 'sheriff', amount: 0.85, icon: 'star' },
-    { id: 'dcoins', name: 'Double Coins', desc: 'Next round: every coin counts twice', cost: 3, effect: 'double', amount: 2, icon: 'coins' },
+    { id: 'mboost', name: 'Murderer Pick', desc: 'Next round: you play the Murderer', cost: 4, effect: 'murderer', amount: 1, icon: 'skull' },
+    { id: 'sboost', name: 'Sheriff Pick', desc: 'Next round: you play the Sheriff', cost: 3, effect: 'sheriff', amount: 1, icon: 'star' },
     { id: 'dxp', name: 'Double XP', desc: 'Next round: twice the XP', cost: 3, effect: 'xp', amount: 2, icon: 'stars' },
-    { id: 'luck', name: 'Lucky Charm', desc: 'Rarer blasters and pets for 5 minutes', cost: 8, effect: 'luck', amount: 2, icon: 'leaf' },
-    { id: 'vip', name: 'VIP Pass', desc: 'x2 coins every round and a gold name, forever', cost: 60, effect: 'passvip', amount: 2, icon: 'medal' },
-    { id: 'bag', name: 'Bigger Coin Bag', desc: 'Carry 60 coins a round instead of 40, forever', cost: 30, effect: 'passbag', amount: 60, icon: 'shopping_bag' },
     { id: 'petslot', name: 'Second Pet Slot', desc: 'Bring 2 pets: both perks and both powers, forever', cost: 35, effect: 'passpet', amount: 2, icon: 'plus' },
-    { id: 'season', name: 'Season Pass', desc: 'Unlock the premium rewards on every Season tier', cost: 40, effect: 'passseason', amount: 1, icon: 'trophy' },
     { id: 'featgun', name: 'Nebula Longshot', desc: 'A Godly blaster with the Celestial mutation', cost: 50, effect: 'gun', amount: '777001:5:celestial', icon: 'fire' },
-    { id: 'featpet', name: 'Rainbow Tiger', desc: 'Pet: turns you invisible, +40% coins', cost: 45, effect: 'pet', amount: 'tiger:rainbow', icon: 'gift' }
   ],
   demoPoints: 40,
   // where the avatar runtime lives (first one that loads wins): on the site, then in the dev kit
@@ -2529,9 +2525,9 @@ const Game = (() => {
     G.useNext = {};
     // roles: you first (30% Murderer, 50% Sheriff, the rest Innocent, unless a boost says otherwise)
     let pm = SETTINGS.odds.murderer, ps = SETTINGS.odds.sheriff;
-    if (G.active.murderer) pm = Math.min(0.95, G.active.murderer > 1 ? SETTINGS.boostOdds.murderer : G.active.murderer);
-    if (G.active.sheriff) ps = Math.min(0.95, G.active.sheriff > 1 ? SETTINGS.boostOdds.sheriff : G.active.sheriff);
-    if (G.active.murderer && !G.active.sheriff) ps = Math.min(ps, 1 - pm); else if (G.active.sheriff && !G.active.murderer) pm = Math.min(pm, 1 - ps); else if (pm + ps > 1) { const k = pm + ps; pm /= k; ps /= k; }
+    if (G.active.murderer) pm = Math.min(1, G.active.murderer > 1 ? SETTINGS.boostOdds.murderer : G.active.murderer);
+    if (G.active.sheriff) ps = Math.min(1, G.active.sheriff > 1 ? SETTINGS.boostOdds.sheriff : G.active.sheriff);
+    if (G.active.murderer && !G.active.sheriff) ps = Math.min(ps, 1 - pm); else if (G.active.sheriff && !G.active.murderer) pm = Math.min(pm, 1 - ps); else if (pm + ps > 1) ps = Math.max(0, 1 - pm);   // both picked: the Murderer pick wins (no coin flip on something paid for)
     const r = Math.random(), mine = r < pm ? 'murderer' : r < pm + ps ? 'sheriff' : 'innocent';
     const order = bots.slice().sort(() => Math.random() - 0.5); bots.forEach(b => b.role = 'innocent');
     if (mine !== 'murderer') order.shift().role = 'murderer';
@@ -3280,7 +3276,7 @@ const Game = (() => {
   }
   function claimTier(i, prem) {
     const tier = Math.floor(S.sxp / SEASON.xp); if (i >= tier) return; const key = prem ? 'p' : 'f';
-    if (prem && !S.passes.season) return UI.open('store');
+    if (prem && !S.passes.season) return;
     if (S.claimed[key].includes(i)) return; S.claimed[key].push(i); grant(SEASON_REWARDS[i][prem ? 1 : 0]);
   }
   const today = () => new Date().toDateString();
@@ -3505,8 +3501,8 @@ const UI = (() => {
       const rw = (r, i, p) => { const got = S.claimed[p ? 'p' : 'f'].includes(i), can = i < tier && !got && (!p || prem);
         return '<div class="rw ' + (p ? 'prem' : '') + '"><span>' + rewardTxt(r) + '</span>' + (got ? vi('checkmark', 18) : can ? '<button style="background:' + (p ? C.amber : C.green) + '" data-tier="' + i + ':' + (p ? 1 : 0) + '">Claim</button>' : p && !prem ? vi('lock', 16) : '') + '</div>'; };
       h = top(SEASON.n, 'Tier ' + tier + ' of ' + SEASON.tiers + ' · every round earns XP', 'trophy', C.violet) + '<div class="body">' + (tier < SEASON.tiers ? '<div class="prog"><i style="width:' + (into / SEASON.xp * 100) + '%"></i></div><p class="note" style="margin-top:0">' + into + ' / ' + SEASON.xp + ' XP to tier ' + (tier + 1) + '</p>' : '') +
-        (prem ? '' : '<div class="item" style="margin:14px 0">' + tile('trophy', C.amber) + '<div class="txt"><b>Premium track</b><small>Unlock it with the Season Pass in the Store</small></div><div class="btns"><button style="background:' + C.orange + '" data-open="store">Store</button></div></div>') +
-        '<div class="tiers"><div class="tierrow"><span></span><small style="text-align:center;color:var(--mut)">Free</small><small style="text-align:center;color:var(--mut)">Premium</small></div>' + SEASON_REWARDS.map((r, i) => '<div class="tierrow"><span class="lv ' + (i < tier ? 'on' : '') + '">' + (i + 1) + '</span>' + rw(r[0], i, 0) + rw(r[1], i, 1) + '</div>').join('') + '</div></div>';
+        // (the premium track is no longer sold: it held crates and eggs, and nothing random is ever paid for. Someone who already has it keeps it.)
+        '<div class="tiers"><div class="tierrow"><span></span><small style="text-align:center;color:var(--mut)">Free</small>' + (prem ? '<small style="text-align:center;color:var(--mut)">Premium</small>' : '') + '</div>' + SEASON_REWARDS.map((r, i) => '<div class="tierrow"><span class="lv ' + (i < tier ? 'on' : '') + '">' + (i + 1) + '</span>' + rw(r[0], i, 0) + (prem ? rw(r[1], i, 1) : '') + '</div>').join('') + '</div></div>';
     } else if (sheet === 'daily') {
       const can = S.daily.day !== Game.today(), next = can ? (S.daily.day === new Date(Date.now() - 864e5).toDateString() ? S.daily.streak + 1 : 1) : S.daily.streak;
       h = top('Daily Gift', 'Come back every day: the gift grows', 'gift', C.green) + '<div class="body"><div class="stats">' + DAILY.map((r, i) => '<div class="stat" style="' + (i + 1 === ((next - 1) % 7) + 1 ? 'outline:3px solid ' + C.green : '') + '"><b style="font-size:18px">' + rewardTxt(typeof r === 'number' ? { c: r } : r) + '</b><small>Day ' + (i + 1) + '</small></div>').join('') + '</div>' +

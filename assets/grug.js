@@ -195,7 +195,7 @@
   /* ---------- closet ---------- */
   const owns = id => { const it = C.get(id); return !!it && (it.get.type === 'free' || profile.inventory.includes(id)); };
   function grant(id, how) {
-    const it = C.get(id); if (!it || owns(id)) return false;
+    const it = C.get(id); if (!it || owns(id) || it.frozen) return false;   // (frozen: tied to a business demonstration, see catalog.js)
     profile.inventory.push(id); profile.earned[id] = { at: Date.now(), how: how || it.get.type };
     save('grant'); return true;
   }
@@ -249,7 +249,7 @@
   function checkMilestones() {
     const won = [];
     C.ITEMS.forEach(it => {
-      const g = it.get; if (g.type !== 'milestone' || owns(it.id)) return;
+      const g = it.get; if (g.type !== 'milestone' || owns(it.id) || it.frozen) return;
       if (statValue(g.app, g.stat) >= g.value) { profile.inventory.push(it.id); profile.earned[it.id] = { at: Date.now(), how: 'milestone' }; won.push(it); }
     });
     return won;
@@ -451,7 +451,11 @@
   const STOPS = ['home', 'games', 'me', 'make'];
   // partner mode: every standalone game (the partner's own first, see games/), but never another partner's rewards app,
   // so a game that still lives inside its venue's app (inApp) shows only in that venue's own wrap
-  const partnerAllows = g => { const p = root.GrugTheme && root.GrugTheme.partner && root.GrugTheme.partner(); return !p || !g || g.id === p.game || !g.inApp; };
+  /* Which games a page may show. A game made for a named business (anything that isn't a Grug original) is a
+     demonstration for that business's owners (assets/demo.js): it is never shown on the main site, only inside that
+     business's own wrap, and a wrap shows its own games plus the Grug originals (never another business's). */
+  const partnerAllows = g => { const p = root.GrugTheme && root.GrugTheme.partner && root.GrugTheme.partner(); if (!g) return true;
+    if (!p) return !!g.original; return !!g.original || g.venue === p.p || g.id === p.game; };
   try { const m = /\/games\/([\w-]+)\/?$/.exec(location.pathname), g = m && GAMES.find(x => x.id === m[1]); if (g && !partnerAllows(g)) location.replace(url('games/')); } catch (e) {}
   // partner mode (theme.js, e.g. crafthouse/): the site is just for playing and dressing up, so the dock is Games and Me
   const partnerOn = () => !!(root.GrugTheme && root.GrugTheme.partner && root.GrugTheme.partner());
@@ -566,9 +570,8 @@
     // the account menu under the avatar
     const menu = document.createElement('div'); menu.className = 'g-menu'; menu.setAttribute('role', 'menu'); menu.hidden = true;
     const paintMenu = () => { const f = snaps();
-      if (partnerOn()) {   // partner mode: only what stays inside it (the avatar and Pearls), and Settings without a way out
-        menu.innerHTML = '<div class="g-menu-h"><img alt="" src="' + f.bust + '"><div><b>' + esc(profile.name) + '</b><small>' + fmt(pearlBalance()) + ' Pearls</small></div></div>' +
-          '<a role="menuitem" class="hot" href="' + pearlsUrl() + '">' + icon('pearl') + '<span>Buy Pearls</span>' + icon('caret-right') + '</a>' +
+      if (partnerOn()) {   // partner mode: only what stays inside it (the avatar), and Settings without a way out. No Pearls: a wrap is a demonstration
+        menu.innerHTML = '<div class="g-menu-h"><img alt="" src="' + f.bust + '"><div><b>' + esc(profile.name) + '</b><small>Demonstration only</small></div></div>' +
           '<a role="menuitem" href="' + url('avatar/') + '">' + icon('t-shirt') + '<span>Edit avatar</span></a>' +
           '<button type="button" role="menuitem" data-m="settings">' + icon('gear-six') + '<span>Settings</span></button>';
         return; }
@@ -582,7 +585,7 @@
           '<button type="button" role="menuitemcheckbox" data-m="mode" aria-checked="' + !isLight() + '">' + icon('moon') + '<span>Dark mode</span><span class="g-switch sm" aria-hidden="true"></span></button>' +
           '<button type="button" role="menuitem" data-m="settings">' + icon('gear-six') + '<span>Settings</span></button>';
         return; }
-      menu.innerHTML = '<div class="g-menu-h"><img alt="" src="' + f.bust + '"><div><b>' + esc(profile.name) + '</b><small>' + fmt(pearlBalance()) + ' Pearls · ' + fmt(totalPoints()) + ' partner points</small></div></div>' +
+      menu.innerHTML = '<div class="g-menu-h"><img alt="" src="' + f.bust + '"><div><b>' + esc(profile.name) + '</b><small>' + fmt(pearlBalance()) + ' Pearls</small></div></div>' +
         (shop && !(root.GrugTheme && root.GrugTheme.brand && root.GrugTheme.brand()) ? '<button type="button" role="menuitem" class="g-menu-sw" data-m="business">' + shopMark(shop) + '<span>Switch to ' + esc(shop.n) + '<small>Your restaurant account</small></span>' + icon('swap') + '</button>' : '') +
         '<a role="menuitem" class="hot" href="' + pearlsUrl() + '">' + icon('pearl') + '<span>Buy Pearls</span>' + icon('caret-right') + '</a>' +
         '<a role="menuitem" href="' + url('profile/') + '">' + icon('user') + '<span>Profile</span></a>' +
@@ -902,6 +905,7 @@
 
   /* ---------- Discord feed ----------
      One webhook for the whole site. announce(kind, detail) posts:
+     Every note says "A player": no display name and nothing else about the person is sent.
        'logon'    {app}                     someone opened a game (once per game per phone every LOGON_GAP_MIN)
        'reward'   {app, points, pearls}     someone collected a check-in / tap reward
        'purchase' {pearls, price}           someone bought a Pearl pack
@@ -927,7 +931,7 @@
     } catch (e) { return false; }
   }
   function announce(kind, d) {
-    d = d || {}; const who = '**' + plain(profile.name) + '**';
+    d = d || {}; const who = 'A player';   // never the display name: the privacy policy promises these notes carry no name or contact details
     if (kind === 'logon') {
       const log = readJSON(DKEY, {}) || {}; log.logon = log.logon && typeof log.logon === 'object' ? log.logon : {};
       const k = String(d.app || 'site'); if (Date.now() - (+log.logon[k] || 0) < LOGON_GAP_MIN * 60000) return false;

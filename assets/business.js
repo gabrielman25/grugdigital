@@ -176,7 +176,9 @@
         (site.email ? '<p>' + I('chat-circle') + '<a href="mailto:' + esc(site.email) + '">' + esc(site.email) + '</a></p>' : '') + '</div></div></section>' : '') +
       '</main>' +
       '<footer>' + (socials ? '<div class="soc">' + socials + '</div>' : '') +
-        '<p>© ' + new Date().getFullYear() + ' ' + esc(cfg.n) + '. <a href="https://grugdigital.pages.dev/rewards/"' + tgt + '>Free website and rewards card by Grug</a></p></footer>';
+        '<p>© ' + new Date().getFullYear() + ' ' + esc(cfg.n) + '. <a href="https://grugdigital.pages.dev/rewards/"' + tgt + '>Free website and rewards card by Grug</a></p>' +
+        // every website is made by its owner, not by us: say so on the page itself
+        '<p style="margin-top:8px;font-size:13px">This website was made by its owner with Grug’s free tools. Grug Digital didn’t write or review it and isn’t responsible for what’s on it. <a href="https://grugdigital.pages.dev/support.html"' + tgt + '>Report this page</a></p></footer>';
     const css =
       ':root{--c:' + col + ';--lo:' + lo + ';--on:' + ink + ';--paper:' + paper + ';--wash:' + wash + ';--text:' + text + ';--ink:#1E1B16;--mut:#5E5850;' +
         '--disp:"' + fam + '",Fredoka,system-ui,sans-serif;--dw:' + F.w + ';--ds:' + F.size + '}' +

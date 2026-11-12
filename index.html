@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Grug · games made with Katy restaurants</title>
-<meta name="description" content="Free games starring real Katy restaurants. Eat at a partner, earn points, spend them on power-ups and clothes for your avatar. No account needed.">
+<title>Grug · free games made in Katy, Texas</title>
+<meta name="description" content="Free 3D games from Grug Digital in Katy, Texas. Play as your own avatar and dress it up. No account needed.">
 <meta name="theme-color" content="#03050f">
 <meta name='impact-site-verification' value='c5aa1990-f972-4278-9ccf-b03ba19f790b'>
 <link rel="icon" href="favicon.png">
@@ -112,8 +112,8 @@ footer a{color:var(--ink2);font-weight:700}
   <section class="hero">
     <div class="g-view" id="heroView"><span class="hint">Tap to wave · <a href="avatar/">edit your look</a></span></div>
     <div class="copy">
-      <h1 id="heroTitle">Games made with Katy restaurants.</h1>
-      <p id="heroText">Play free. Eat at a partner, tap the tag, and your points buy power-ups and clothes for your avatar. No account, nothing to sign up for.</p>
+      <h1 id="heroTitle">Free games, made in Katy.</h1>
+      <p id="heroText">Play free as your own avatar and dress it up as you go. No account, nothing to sign up for.</p>
       <div class="cta">
         <a class="g-btn primary big" id="heroPlay" href="games/">Play</a>
         <a class="g-btn big" href="avatar/">Edit avatar</a>
@@ -133,22 +133,17 @@ footer a{color:var(--ink2);font-weight:700}
 
   <section class="g-section" hidden>
     <div class="g-section-h"><h2>Closet picks</h2><a href="shop/">Shop</a></div>
-    <p class="g-fine" style="margin:-6px 0 12px">Custom clothing you can earn next: Roblox-style shirt and pants designs from playing or eating local.</p>
+    <p class="g-fine" style="margin:-6px 0 12px">Custom clothing you can earn next by playing.</p>
     <div class="g-items" id="closetPicks"></div>
-  </section>
-
-  <section class="g-section" data-hide-for="owner dev" data-hide-brand>
-    <div class="g-section-h"><h2>How points work</h2></div>
-    <div class="steps">
-      <div class="step"><span class="n" id="icEat"></span><div><b>Eat at a partner</b><span>Scan the QR on the table or tap the tag with your phone. Play while you wait.</span></div></div>
-      <div class="step"><span class="n" id="icPts"></span><div><b>Earn points</b><span>One check-in a day per restaurant. Each partner keeps its own balance.</span></div></div>
-      <div class="step"><span class="n" id="icSpend"></span><div><b>Spend them on play</b><span>Power-ups, board skins and closet clothes. Or trade points for food at the counter.</span></div></div>
-    </div>
   </section>
 
   <footer>
     <span>© 2026 Grug Digital · Katy, Texas</span>
-    <a href="partners/" data-hide-brand>Put your restaurant in a game</a>
+    <a href="partners/" data-hide-brand>For restaurants</a>
+    <a href="support.html">Support</a>
+    <a href="terms.html">Terms</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="credits.html">Credits</a>
     <a href="profile/">Profile &amp; settings</a>
     <span class="sp"></span>
     <span>Made with Grug, our own engine.</span>
@@ -169,7 +164,7 @@ footer a{color:var(--ink2);font-weight:700}
   const shop = G.business.shop();
   if (shop) { const d = $('#doorOwner'); d.href = '#'; d.querySelector('b').textContent = shop.n + '.'; d.querySelector('.door-tx > span').textContent = 'Your dashboard, website and rewards card.';
     d.querySelector('.door-go').textContent = 'Switch to your restaurant'; d.addEventListener('click', e => { e.preventDefault(); G.ui.buzz(); G.business.setAccount('business'); }); }
-  $('#icEat').innerHTML = G.icon('storefront'); $('#icPts').innerHTML = G.icon('coins'); $('#icSpend').innerHTML = G.icon('t-shirt');
+
 
   /* hero avatar */
   const view = G.ui.avatarPic($('#heroView'), { bottom: 30, onTap: () => { view.play(['wave','cheer','dance','happy'][Math.floor(Math.random()*4)], { ms: 2200 }); G.ui.buzz(); } });
@@ -186,12 +181,13 @@ footer a{color:var(--ink2);font-weight:700}
   const t = G.totals();
   if (!G.isNew && (t.plays > 0 || t.checkins > 0)) {
     $('#heroTitle').innerHTML = 'Welcome back, <span class="name">' + G.esc(G.profile.name) + '</span>.';
-    $('#heroText').textContent = 'Your avatar, points and closet are saved on this phone. Pick up where you left off.';
+    $('#heroText').textContent = 'Your avatar and closet are saved on this phone. Pick up where you left off.';
   } else {
-    $('#heroTitle').innerHTML = 'Hi, <span class="name">' + G.esc(G.profile.name) + '</span>. Games made with Katy restaurants.';
+    $('#heroTitle').innerHTML = 'Hi, <span class="name">' + G.esc(G.profile.name) + '</span>. Free games, made in Katy.';
   }
   if (B) { $('#heroTitle').innerHTML = 'Hi, <span class="name">' + G.esc(G.profile.name) + '</span>.'; $('#heroText').textContent = 'Pick a game below, or dress up your avatar. Your stamps and Pearls stay on this phone.'; }
-  const last = G.GAMES.find(g => g.id === G.profile.stats.lastGame) || G.GAMES.find(g => g.listed !== false) || G.GAMES[0];
+  // (games made for a named business are demonstrations: they are not shown on the main site, see G.partnerAllows)
+  const last = G.GAMES.find(g => g.id === G.profile.stats.lastGame && G.partnerAllows(g)) || G.GAMES.find(g => g.listed !== false && G.partnerAllows(g)) || G.GAMES[0];
   $('#heroPlay').href = last.game || last.play; $('#heroPlay').innerHTML = G.icon('play') + 'Play ' + G.esc(last.title);
   if (!G.storageWorks()) $('#heroFine').textContent = 'This browser isn’t saving (private mode or blocked storage). Your avatar and points will be lost when you close it.';
 
@@ -202,8 +198,8 @@ footer a{color:var(--ink2);font-weight:700}
     const best = p && p.best ? '<div class="meta">' + G.icon('trophy') + 'Your best ' + G.fmt(p.best) + '</div>' : (p && p.points ? '<div class="meta">' + G.icon('coins') + G.fmt(p.points) + ' points</div>' : '');
     return G.ui.boxTile(g, Object.assign({ extra: best }, opts));   // a FOSSIL32 box (assets/fossil32/)
   }
-  const lastG = G.GAMES.find(g => g.id === G.profile.stats.lastGame && g.listed !== false);
-  const list = (lastG ? [lastG] : []).concat(G.GAMES.filter(g => g.status !== 'legacy' && g.listed !== false && g !== lastG));
+  const lastG = G.GAMES.find(g => g.id === G.profile.stats.lastGame && g.listed !== false && G.partnerAllows(g));
+  const list = (lastG ? [lastG] : []).concat(G.GAMES.filter(g => g.status !== 'legacy' && g.listed !== false && g !== lastG && G.partnerAllows(g)));
   const row = $('#gameRow'), N = list.length;
   // an endless loop: the list three times over; when the row settles in the first or last copy it jumps (unseen) to the
   // same box in the middle copy, so there's never an end to hit

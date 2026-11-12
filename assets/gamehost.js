@@ -9,6 +9,8 @@
                   {t:'score', score, …}       keeps the best score and counts the run (and the Grug milestones)
                   {t:'needPearls', id}        offers the Pearls page, then comes straight back here
                   {t:'club', active, since, rev}   (Barista Blitz) joined or left the club in the game
+     Frozen (a venue's game, or any game inside a venue's wrap): a demonstration only, so 'buy' is always refused,
+     the Pearls and coins are not shown and state.frozen is true. See assets/demo.js.
      host → game  {t:'pause'} when the tab is hidden; a fresh {t:'state'} whenever Pearls or coins change.
 
    Money: Pearls (the site-wide wallet 'grug.pearls.v1') buy everything, in every game, everywhere.
@@ -38,8 +40,18 @@
     const G = root.Grug, $ = id => document.getElementById(id);
     const T = root.GrugTheme, partner = T && T.partner && T.partner();
     const P = GAME.brand && T && T.PARTNERS ? T.PARTNERS[GAME.brand] : null;
-    // the venue's coins pay here only while the site is wrapped in that venue
-    const W = P && P.wallet && partner && partner.p === GAME.brand ? Object.assign({ rate: 25, field: 'coins' }, P.wallet) : null;
+    /* FROZEN: a game made for a named business, or any game opened inside a business's wrap, is a demonstration only
+       (assets/demo.js). Nothing is bought, spent or earned there: no Pearls, no coins, and the Store answers "off". */
+    const DEMO_ID = GAME.brand || (partner && partner.p) || '';
+    const FROZEN = !!DEMO_ID && !(root.GRUG_DEMO && root.GRUG_DEMO.isLive(DEMO_ID));
+    const OFF = 'Purchases and rewards are switched off. This is a demonstration only.';
+    if (FROZEN) {
+      const who = (P && P.n) || (partner && partner.n) || 'this business';
+      const note = () => root.GRUG_DEMO && root.GRUG_DEMO.install(who, DEMO_ID);
+      if (root.GRUG_DEMO) note(); else { const sc = document.createElement('script'); sc.src = G.url('assets/demo.js'); sc.onload = note; document.head.appendChild(sc); }
+    }
+    // the venue's coins pay here only while the site is wrapped in that venue (never while frozen)
+    const W = !FROZEN && P && P.wallet && partner && partner.p === GAME.brand ? Object.assign({ rate: 25, field: 'coins' }, P.wallet) : null;
 
     /* ---------- this game's own save: owned items, best, runs ---------- */
     function load() {
@@ -90,7 +102,7 @@
     bar.innerHTML = '<a class="rr-back" id="rrBack" href="' + G.url('games/' + GAME.id + '/') + '" aria-label="Back to the game page">' + G.icon('arrow-left') + '</a>' +
       '<div class="rr-t">' + G.esc(GAME.title) + '</div>' +
       (W ? '<a class="rr-pl rr-coins" id="rrCoins" href="' + G.url(P.app + (W.to || '')) + '" aria-label="' + G.esc(W.label) + '"></a>' : '') +
-      '<a class="rr-pl" id="rrPearls" href="' + pearlsLink() + '" aria-label="Your Pearls: get more"></a>';
+      (FROZEN ? '' : '<a class="rr-pl" id="rrPearls" href="' + pearlsLink() + '" aria-label="Your Pearls: get more"></a>');
     const f = document.createElement('iframe'); f.id = 'rrFrame'; f.title = GAME.title; f.allow = 'autoplay *; fullscreen *; gamepad *; accelerometer; gyroscope'; f.setAttribute('allowfullscreen', '');
     document.body.prepend(bar); document.body.appendChild(f);
     if (W && P.coin) document.documentElement.style.setProperty('--rr-coin', 'url("' + G.url(P.coin) + '")');
@@ -100,7 +112,7 @@
     const shop = (GAME.shop || []).filter(it => it && it.id && +it.cost > 0), item = id => shop.find(it => it.id === id);
     const isPass = it => GAME.passes && it.effect === 'pass';
     function state() {
-      return Object.assign({ points: points(), pearls: pearls(), pearlName: 'Pearls', standalone: !W, inv: st.inv, best: st.game.best, runs: st.game.runs, shop, title: GAME.title,
+      return Object.assign({ points: points(), pearls: FROZEN ? 0 : pearls(), pearlName: 'Pearls', standalone: !W, frozen: FROZEN, inv: st.inv, best: st.game.best, runs: st.game.runs, shop, title: GAME.title,
         collectible: GAME.collectible, runSeconds: GAME.runSeconds, club: st.club,
         brand: { name: P ? P.n : 'Grug', colors: GAME.colors || ['#f43f5e', '#111827'] }, store: GAME.store || 'A Grug original', storeId: '' },
         GAME.extra ? GAME.extra() : {}, root.GrugApp ? GrugApp.gameExtras() : {});
@@ -110,6 +122,7 @@
     const wallet = () => pearls() + points();
     const moneyName = () => W ? 'Pearls or ' + W.label : 'Pearls';
     function buy(id) {
+      if (FROZEN) return { ok: false, reason: OFF };
       const it = item(id); if (!it) return { ok: false, reason: 'That isn’t in the Store.' };
       if (isPass(it) && st.inv[id] > 0) return { ok: false, reason: 'You already have ' + it.name + '.' };
       if ((st.inv[id] || 0) >= INV_MAX) return { ok: false, reason: 'You already have ' + INV_MAX + ' of those.' };
@@ -138,7 +151,7 @@
       const reply = r => toGame(Object.assign({ t: 'reply', req: String(d.req || ''), state: state() }, r));
       if (d.t === 'hello') { sendState(); if (root.GrugApp) { GrugApp.onPlay(); GrugApp.onLogon(); } }
       else if (d.t === 'buy') { const r = buy(String(d.id)); reply(r); if (r.short) offerPearls(r.short, r.item); }
-      else if (d.t === 'needPearls') { const it = item(String(d.id)); if (it && wallet() < it.cost) offerPearls(it.cost - wallet(), it.name); }
+      else if (d.t === 'needPearls') { if (FROZEN) return; const it = item(String(d.id)); if (it && wallet() < it.cost) offerPearls(it.cost - wallet(), it.name); }
       else if (d.t === 'use') reply(use(d.ids));
       else if (d.t === 'score') { const s = Math.max(0, Math.floor(+d.score || 0)); st.game.runs++; if (s > st.game.best) st.game.best = s; save(); if (root.GrugApp) GrugApp.onScore(d, { play: false }); }
       else if (d.t === 'club') { const rev = +d.rev || 0; if (rev > (+st.club.rev || 0)) { st.club = { active: !!d.active, since: d.active ? (+d.since || Date.now()) : 0, rev }; save(); } }

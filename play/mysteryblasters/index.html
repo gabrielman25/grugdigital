@@ -27,24 +27,20 @@
 'use strict';
 GrugGameHost({
   id: 'mysteryblasters', app: 'mysteryblasters', bg: '#0b0e14', title: 'Mystery Blasters', src: 'game.html', collectible: 'coins', runSeconds: 300, storageKey: 'grug-mysteryblasters-v1',
-  // Pearls only. effect / amount are what game.html does with each one: murderer / sheriff = role chance for the next
-  // round, double / xp = next round only, luck = 5 minutes of rarer crates and eggs, pass* = forever passes (VIP, bigger
-  // coin bag, second pet slot, Season Pass), gun 'seed:rarity:mutation' / pet 'id:variant' = that exact blaster or pet.
-  // No paid random rewards: crates and eggs cost coins earned by playing, never Pearls.
+  // Pearls only. effect / amount are what game.html does with each one: murderer / sheriff = you play that role next
+  // round (a sure thing, not a chance), xp = next round only, passpet = a second pet slot forever,
+  // gun 'seed:rarity:mutation' = that exact blaster.
+  // Nothing random is ever paid for, and coins are never bought: crates and eggs cost coins earned by playing. So the
+  // Store sells no luck boost, no coin doublers or coin passes, no Season Pass (its track held crates and eggs) and
+  // no pet with a coin perk.
   // The game itself (coins, blasters, pets, level, season) saves inside game.html ('mystery-blasters.v1');
   // this key only holds owned items, best round and plays.
   shop: [
-    { id: 'mboost', name: 'Murderer Chance', desc: 'Next round: 65% chance to be the Murderer', cost: 4, effect: 'murderer', amount: 0.65, icon: 'skull' },
-    { id: 'sboost', name: 'Sheriff Chance', desc: 'Next round: 85% chance to be the Sheriff', cost: 3, effect: 'sheriff', amount: 0.85, icon: 'star' },
-    { id: 'dcoins', name: 'Double Coins', desc: 'Next round: every coin counts twice', cost: 3, effect: 'double', amount: 2, icon: 'coins' },
+    { id: 'mboost', name: 'Murderer Pick', desc: 'Next round: you play the Murderer', cost: 4, effect: 'murderer', amount: 1, icon: 'skull' },
+    { id: 'sboost', name: 'Sheriff Pick', desc: 'Next round: you play the Sheriff', cost: 3, effect: 'sheriff', amount: 1, icon: 'star' },
     { id: 'dxp', name: 'Double XP', desc: 'Next round: twice the XP', cost: 3, effect: 'xp', amount: 2, icon: 'stars' },
-    { id: 'luck', name: 'Lucky Charm', desc: 'Rarer blasters and pets for 5 minutes', cost: 8, effect: 'luck', amount: 2, icon: 'leaf' },
-    { id: 'vip', name: 'VIP Pass', desc: 'x2 coins every round and a gold name, forever', cost: 60, effect: 'passvip', amount: 2, icon: 'medal' },
-    { id: 'bag', name: 'Bigger Coin Bag', desc: 'Carry 60 coins a round instead of 40, forever', cost: 30, effect: 'passbag', amount: 60, icon: 'shopping_bag' },
     { id: 'petslot', name: 'Second Pet Slot', desc: 'Bring 2 pets: both perks and both powers, forever', cost: 35, effect: 'passpet', amount: 2, icon: 'plus' },
-    { id: 'season', name: 'Season Pass', desc: 'Unlock the premium rewards on every Season tier', cost: 40, effect: 'passseason', amount: 1, icon: 'trophy' },
     { id: 'featgun', name: 'Nebula Longshot', desc: 'A Godly blaster with the Celestial mutation', cost: 50, effect: 'gun', amount: '777001:5:celestial', icon: 'fire' },
-    { id: 'featpet', name: 'Rainbow Tiger', desc: 'Pet: turns you invisible, +40% coins', cost: 45, effect: 'pet', amount: 'tiger:rainbow', icon: 'gift' }
   ]
 });
 </script>

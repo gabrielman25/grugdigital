@@ -2,7 +2,15 @@
 
 The Grug game site: https://grugdigital.pages.dev/
 
-Games built with Katy restaurants (each one a standalone game, each venue with its own rewards app that can wrap the whole site), one local profile (no accounts), a 3D avatar that shows up in every game, and a closet of clothes earned by playing or by eating at a partner. Hosted on Cloudflare Pages (deploys automatically on every push to `main`); everything is static HTML. The old GitHub Pages address forwards here.
+Free 3D games by Grug Digital, free tools for restaurants and creators, and demonstrations built to show Katy restaurants what we could make for them (each a standalone game or a rewards app that can wrap the site), one local profile (no accounts), a 3D avatar that shows up in every game, and a closet of clothes earned by playing or by eating at a partner. Hosted on Cloudflare Pages (deploys automatically on every push to `main`); everything is static HTML. The old GitHub Pages address forwards here.
+
+## Frozen demonstrations
+
+Everything made for a named business (the venue apps and games in `play/`, the brand wraps, `work/`, `showcase/`) is a
+**demonstration only**: no business has approved it yet. Those pages show a notice (`assets/demo.js`), are kept off the
+main site, and nothing can be earned, bought, spent or redeemed on them. The descriptions below explain how those pages
+are built; `CLAUDE.md` → "Frozen" says what is switched off and where. Policies: `terms.html`, `privacy.html`,
+`support.html`, `credits.html`.
 
 ## Map
 
