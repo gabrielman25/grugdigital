@@ -369,6 +369,6 @@
     KEY, TAP_PEARLS, DAY_CAP, RESET_HOUR, VOUCHER_MIN, KINDS, ICONS, COLORS, REWARDS, PCTS,
     rewardText, pearlsOnly, normalize, encode, decode, check, shopId, links, cardBase, code, b64e, b64d,
     load, cards, cardStore, removeCard, mine, saveMine, removeMine,
-    dayKey, balance, grantPearls, inkOn, lo, mix, themeVars, bandStyle, qrSvg, mountCard, passHtml, cardCanvas, cardPdf, downloadPdf
+    dayKey, balance, grantPearls, inkOn, lo, mix, lum, themeVars, bandStyle, qrSvg, mountCard, passHtml, cardCanvas, cardPdf, downloadPdf
   };
 })(window);

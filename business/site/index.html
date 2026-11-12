@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Website · Grug</title>
+<meta name="description" content="Your shop's free website, made from its rewards card. Add your hours, menu and address, then share the link.">
+<meta name="theme-color" content="#F3F3F5">
+<link rel="icon" href="../../favicon.png">
+<link rel="stylesheet" href="../../assets/grug.css">
+<script src="../../assets/theme.js"></script>
+<style>
+/* the website editor: the form on the left, the live site on the right (above the form on phones) */
+.ws{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:24px;align-items:start}
+@media (max-width:900px){.ws{grid-template-columns:1fr}.ws-pv{order:-1}}
+.ws-h h1{font-size:clamp(28px,5vw,40px);line-height:1.05;margin:0}
+.ws-h p{color:var(--mut);margin:6px 0 0}
+.ws-acts{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 22px}
+.ws-shops{margin:0 0 16px}
+.ws .g-card{margin-bottom:16px}
+.ws .g-card h2{font-size:21px;margin:0 0 4px}
+.ws .g-card>p{color:var(--mut);margin:0 0 14px;font-size:15px}
+.ws-f{display:block;margin:0 0 14px}
+.ws-f>span{display:block;font-weight:700;font-size:14px;margin:0 0 6px;color:var(--ink2)}
+.ws-f>small{display:block;color:var(--mut);font-size:13px;margin-top:5px}
+.ws textarea.g-input{font:500 16px/1.5 var(--font);min-height:110px;resize:vertical}
+.ws-hours{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center}
+.ws-hours label{font-weight:700;font-size:15px}
+.ws-hours .g-input{min-height:42px}
+.ws-row{display:grid;grid-template-columns:minmax(0,1fr) 92px 44px;gap:8px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
+.ws-row:first-child{border-top:0;padding-top:0}
+.ws-row .g-input{min-height:42px;font-size:16px}
+.ws-row .d{grid-column:1 / 3}
+.ws-row .x{width:44px;height:42px;border-radius:12px;border:0;background:var(--card2);color:var(--mut);display:grid;place-items:center;cursor:pointer}
+.ws-row .x:hover{color:var(--ink)}
+.ws-row .x .gi{width:18px;height:18px}
+.ws-from{display:flex;gap:14px;align-items:center}
+.ws-from .mk{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;flex:none}
+.ws-from .mk .gi{width:30px;height:30px}
+.ws-from div{flex:1}.ws-from b{display:block;font-size:17px}.ws-from small{color:var(--mut)}
+.ws-pv{position:sticky;top:calc(var(--top,70px) + 16px)}
+.ws-phone{border-radius:28px;background:#1E1B16;padding:10px;box-shadow:var(--shadow)}
+.ws-phone iframe{display:block;width:100%;height:min(70vh,680px);border:0;border-radius:20px;background:#fff}
+@media (max-width:900px){.ws-pv{position:static}.ws-phone iframe{height:440px}}
+.ws-pv p{color:var(--mut);font-size:13px;text-align:center;margin:10px 0 0}
+.ws-empty{max-width:34rem;margin:8vh auto;text-align:center}
+.ws-empty h1{font-size:32px;margin:0 0 8px}.ws-empty p{color:var(--mut);margin:0 0 20px}
+</style>
+</head>
+<body>
+<!-- The restaurant account's Website tab: edits the shop's one-page site (assets/business.js). Everything saves on this
+     device as it's typed; the public link (site/#s=…) carries the whole site, so it changes when the site changes. -->
+<main class="wrap" id="main"></main>
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/grug.js"></script>
+<script src="../../assets/rewards.js"></script>
+<script src="../../assets/business.js"></script>
+<script>
+(function(){
+  const G = Grug, RW = GrugRewards, B = GrugBusiness, esc = G.esc, $ = s => document.querySelector(s), main = $('#main');
+  const want = new URLSearchParams(location.search).get('shop');
+  if (want) B.setActive(want);
+  // opening the restaurant's own pages means using the restaurant account
+  if (B.has() && !B.on()) { B.setMode('business'); if (window.GrugTheme) GrugTheme.apply(); }
+  G.ui.chrome('website', { title: 'Website', noRole: true });
+
+  const abs = p => new URL(G.url(p), location.href).href;
+  const joinLink = c => RW.cardBase() + '#c=' + c;
+  let shop = B.active();
+
+  if (!shop || !shop.cfg) {
+    main.innerHTML = '<div class="ws-empty"><h1>Your website starts with your rewards card</h1><p>Make a free rewards card for your shop and we’ll build its website from it: your name, colours, lettering and reward, ready to share.</p>' +
+      '<a class="g-btn primary big" href="' + G.url('rewards/create/') + '">' + G.icon('gift') + 'Make my rewards card</a></div>';
+    return;
+  }
+
+  const shops = B.shops();
+  const field = (k, label, opts) => { opts = opts || {}; const v = shop.site[k] || '';
+    return '<label class="ws-f"><span>' + label + '</span>' + (opts.area ? '<textarea class="g-input" data-k="' + k + '" maxlength="' + (opts.max || 600) + '" placeholder="' + esc(opts.ph || '') + '">' + esc(v) + '</textarea>'
+      : '<input class="g-input" data-k="' + k + '" type="' + (opts.type || 'text') + '" maxlength="' + (opts.max || 120) + '" autocomplete="off" placeholder="' + esc(opts.ph || '') + '" value="' + esc(v) + '"' + (opts.mode ? ' inputmode="' + opts.mode + '"' : '') + '>') +
+      (opts.hint ? '<small>' + opts.hint + '</small>' : '') + '</label>'; };
+  const menuRow = (m, i) => '<div class="ws-row" data-i="' + i + '"><input class="g-input" data-m="n" maxlength="60" placeholder="Dish or drink" value="' + esc(m.n) + '">' +
+    '<input class="g-input" data-m="p" maxlength="12" placeholder="Price" inputmode="decimal" value="' + esc(m.p) + '">' +
+    '<button type="button" class="x" data-del-item="' + i + '" aria-label="Remove ' + esc(m.n || 'this item') + '">' + G.icon('trash') + '</button>' +
+    '<input class="g-input d" data-m="d" maxlength="140" placeholder="A few words about it (optional)" value="' + esc(m.d) + '"></div>';
+
+  function paint() {
+    const cfg = shop.cfg, s = shop.site;
+    main.innerHTML = '<div class="ws-h"><h1>' + esc(cfg.n) + '’s website</h1><p>Changes save as you type, and your link always shows the latest version.</p></div>' +
+      (shops.length > 1 ? '<div class="g-seg ws-shops" role="radiogroup" aria-label="Which shop">' + shops.map(x => '<button type="button" role="radio" data-shop="' + x.id + '" aria-checked="' + (x.id === shop.id) + '">' + esc(x.cfg ? x.cfg.n : 'Shop') + '</button>').join('') + '</div>' : '') +
+      '<div class="ws-acts"><a class="g-btn primary" id="open" href="#" target="_blank" rel="noopener">' + G.icon('arrow-square-out') + 'Open my website</a>' +
+      '<button type="button" class="g-btn" id="copy">' + G.icon('copy') + 'Copy link</button>' +
+      '<button type="button" class="g-btn" id="dl">' + G.icon('download-simple') + 'Download</button></div>' +
+      '<div class="ws"><div class="ws-form">' +
+        '<section class="g-card"><h2>Say hello</h2><p>The first thing people read.</p>' +
+          field('tagline', 'One line about your shop', { max: 90, ph: 'Fresh boba, made to order' }) +
+          field('about', 'About you', { area: true, ph: 'Who you are, what you make, what makes it yours.' }) + '</section>' +
+        '<section class="g-card"><h2>Visit us</h2><p>Leave anything blank and it stays off your website.</p>' +
+          field('address', 'Address', { ph: '123 Main St, Katy, TX', hint: 'Adds a Directions button that opens maps.' }) +
+          field('phone', 'Phone', { type: 'tel', max: 24, ph: '(281) 555-0123', hint: 'Adds a Call us button.' }) +
+          field('email', 'Email', { type: 'email', max: 80, ph: 'hello@yourshop.com' }) +
+          '<div class="ws-f"><span>Hours</span><div class="ws-hours">' + B.DAYS.map((d, i) => '<label for="h' + i + '">' + d + '</label><input class="g-input" id="h' + i + '" data-h="' + i + '" maxlength="40" placeholder="Closed" value="' + esc(s.hours[i]) + '">').join('') + '</div>' +
+          '<small>Write them how you say them, like 7am – 9pm. Blank days show as Closed. <button type="button" class="g-btn sm quiet" id="sameHours">Use Monday’s hours every day</button></small></div></section>' +
+        '<section class="g-card"><h2>Menu</h2><p>Your favourites are enough. Add as many as you like.</p><div id="menu">' + s.menu.map(menuRow).join('') + '</div>' +
+          '<button type="button" class="g-btn sm" id="addItem">' + G.icon('plus') + 'Add an item</button></section>' +
+        '<section class="g-card"><h2>Links</h2><p>Where else people can find you.</p>' +
+          field('order', 'Online ordering', { type: 'url', max: 300, ph: 'https://order.yourshop.com', hint: 'Adds an Order online button at the top.' }) +
+          field('ig', 'Instagram', { ph: '@yourshop', max: 60 }) + field('tt', 'TikTok', { ph: '@yourshop', max: 60 }) + field('fb', 'Facebook', { ph: 'yourshop', max: 60 }) + '</section>' +
+        '<section class="g-card"><h2>Rewards card</h2><div class="g-pref"><span><b>Show your rewards card</b><small>Lets visitors save your card before they come in</small></span><button type="button" class="g-switch" role="switch" id="rw" aria-checked="' + !!s.rewards + '" aria-label="Show your rewards card"></button></div></section>' +
+        '<section class="g-card"><div class="ws-from"><span class="mk" style="' + RW.bandStyle(cfg.color) + '">' + RW.iconSvg(cfg.i) + '</span><div><b>Name, colour, icon and lettering</b><small>These come from your rewards card, so the card and the website always match.</small></div>' +
+          '<a class="g-btn sm" href="' + G.url('rewards/create/') + '?c=' + shop.c + '">' + G.icon('pencil-simple') + 'Edit card</a></div></section>' +
+        '<section class="g-card"><h2>Your own web address</h2><p>Your link works right now, nothing to set up. To use an address like yourshop.com, download your website and upload the file to your web host as your home page. It’s one file with everything in it.</p></section>' +
+      '</div><aside class="ws-pv"><div class="ws-phone"><iframe id="pv" title="Your website" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe></div><p>What visitors see</p></aside></div>';
+    preview(); link();
+  }
+
+  /* the live preview and the public link */
+  const previewHtml = () => B.siteHtml(shop.c, shop.site, { stampLink: joinLink(shop.c), fontsHref: abs('assets/shop-fonts.css'), fredokaUrl: abs('assets/fonts/fredoka.woff2') });
+  // the preview is sandboxed (no scripts run in it); it starts at the top each time it's redrawn
+  function preview() { const f = $('#pv'); if (f) f.srcdoc = previewHtml(); }
+  let url = '';
+  async function link() { url = await B.siteUrl(shop); const a = $('#open'); if (a) a.href = url; }
+
+  /* saving as they type */
+  let tmr = 0;
+  function read() {
+    const s = Object.assign({}, shop.site);
+    main.querySelectorAll('[data-k]').forEach(el => { s[el.dataset.k] = el.value; });
+    s.hours = B.DAYS.map((d, i) => { const el = main.querySelector('[data-h="' + i + '"]'); return el ? el.value : ''; });
+    s.menu = Array.from(main.querySelectorAll('.ws-row')).map(r => ({ n: r.querySelector('[data-m=n]').value, p: r.querySelector('[data-m=p]').value, d: r.querySelector('[data-m=d]').value }));
+    s.rewards = $('#rw').getAttribute('aria-checked') === 'true';
+    return s;
+  }
+  function commit(now) {
+    clearTimeout(tmr);
+    const go = () => { const s = read(); B.saveSite(shop.id, s); shop = B.active(); preview(); link(); };
+    if (now) go(); else tmr = setTimeout(go, 350);
+  }
+  main.addEventListener('input', () => commit());
+  main.addEventListener('change', () => commit(true));
+  main.addEventListener('click', async e => {
+    const t = e.target.closest('button, a'); if (!t) return;
+    if (t.dataset.shop) { B.setActive(t.dataset.shop); shop = B.active(); paint(); G.ui.buzz(); return; }
+    if (t.id === 'rw') { t.setAttribute('aria-checked', String(t.getAttribute('aria-checked') !== 'true')); G.ui.buzz(); commit(true); return; }
+    if (t.id === 'addItem') { const m = $('#menu'); m.insertAdjacentHTML('beforeend', menuRow({ n: '', p: '', d: '' }, m.children.length)); m.lastElementChild.querySelector('input').focus(); return; }
+    if (t.dataset.delItem != null) { t.closest('.ws-row').remove(); commit(true); return; }
+    if (t.id === 'sameHours') { const v = $('[data-h="0"]').value; main.querySelectorAll('[data-h]').forEach(el => { el.value = v; }); commit(true); G.ui.toast('Every day now says ' + (v || 'Closed'), { icon: 'check' }); return; }
+    if (t.id === 'copy') { commit(true); await link();
+      try { await navigator.clipboard.writeText(url); G.ui.toast('Link copied', { icon: 'copy' }); } catch (err) { prompt('Copy your website’s link:', url); } return; }
+    if (t.id === 'dl') { commit(true);
+      const html = B.siteHtml(shop.c, shop.site, { stampLink: joinLink(shop.c), fonts: 'google' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' })); a.download = 'index.html'; document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000); G.ui.toast('Your website is downloading as index.html', { icon: 'download-simple' }); return; }
+    if (t.id === 'open' && !url) { e.preventDefault(); await link(); window.open(url, '_blank', 'noopener'); }
+  });
+  paint();
+})();
+</script>
+</body>
+</html>

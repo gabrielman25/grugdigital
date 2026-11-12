@@ -5734,7 +5734,7 @@ function texturesFor(set){return CATALOG.textures.filter(t=>MH[set]?t===set:!MH[
 const DEFAULT={body:'female',hair:{style:0,colour:'#2a1a12',size:1,up:0,forward:0},skin:'#d9a67e',nails:'#d9a67e',expression:'smug',faceScale:0.7,faceY:0,hat:{type:'none',colour:'#ffffff',size:1,up:0,forward:0,tilt:0},faceShape:{jaw:1,cheeks:1,chin:1,depth:1},decal:{image:null,size:1,up:0,side:0},ears:{size:1,thickness:1,up:0,forward:0,out:0,twist:0,flare:0},earrings:{type:'none',size:1,colour:null,drop:0,forward:0,angle:0},
   outfit:{shirt:'#2b3350',shorts:'#2a2a2a',belt:'#141414'},
   top:null,legs:null,shoulderL:null,shoulderR:null,
-  feet:{type:'flipflops',sole:'#f2efe6',strap:'#e3101c'},
+  feet:{type:'boots',part:'Female_Peasant_Feet',texture:'peasant',colour:'#ffffff',height:1,auto:true},
   weapon:null,build:{height:1,footLength:1,toeLength:1,cranium:1,headSize:1,headWidth:1,handSize:1,upperTorso:1,lowerTorso:1,neck:1,shoulders:1,hips:1,upperArm:1,forearm:1,thigh:1,shin:1}};
 // proportion sliders: which joints' rest offsets each one scales (a joint's offset is the bone leading to it)
 const PROP_BONES={upperTorso:/^spine_M_0[45]_jnt$/,lowerTorso:/^spine_M_0[1-3]_jnt$/,neck:/^head_M_(neck_0[1-3]|head)_jnt$/,shoulders:/^arm_[LR]_shldr_jnt$/,hips:/^leg_[LR]_upr_jnt$/,

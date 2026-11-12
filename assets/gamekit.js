@@ -23,6 +23,8 @@
 */
 (function (root) {
   'use strict';
+  // the custom cursor inside every game too (assets/cursors.js; a game that sets its own cursor keeps it)
+  try { if (!root.GrugCursors && !document.getElementById('grug-cursors-js') && document.currentScript) { const s = document.createElement('script'); s.id = 'grug-cursors-js'; s.src = new URL('cursors.js', document.currentScript.src).href; (document.head || document.documentElement).appendChild(s); } } catch (e) {}
   const KEY = 'grug.profile.v1', BOOST_KEY = 'grug.boost.v1';
   const $ = (s, el) => (el || document).querySelector(s), $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

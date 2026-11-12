@@ -36,6 +36,7 @@
     // solid: plain #17171A behind the page, no pattern tile
     rewards: { name: 'Rewards', a: '#FF9F5A', lo: '#E0782F', solid: true },
     links: { name: 'Links', a: '#5AB0FF', lo: '#2F86D6', solid: true },
+    website: { name: 'Website', a: '#5AB0FF', lo: '#2F86D6', solid: true },   // the restaurant account's website editor (business/site/)
     pearls: { name: 'Pearls', a: '#C59BFF', lo: '#9A6FE0' }
   };
   // the lights that drift through the Games fog
@@ -52,6 +53,7 @@
   }
   const isCalm = s => !s.motion || !!(calmMQ && calmMQ.matches);
   function sectionOf(path) {
+    if (/\/business\/site(\/|$)/.test(path)) return 'website';
     if (/\/rewards(\/|$)/.test(path)) return 'rewards';
     if (/\/links(\/|$)/.test(path)) return 'links';   // creators' link pages (links/create/ is not the Create tab either)   // before the others: rewards/create/ is not the Create tab
     const m = /\/(games|create|avatar|shop|profile|me|make)(\/|$)/.exec(path); if (m) return m[1];
@@ -183,7 +185,15 @@
   let sitePage = false;
   try { sitePage = !/[?&]mode=viewer/.test(location.search) && !/\/(play|work|tools|showcase)\//.test(location.pathname); } catch (e) {}
   const me = (document.currentScript && document.currentScript.src) || '';
+  // the custom cursor on every page (assets/cursors.js; theme.js, grug.js or gamekit.js loads it, once)
+  try { if (!root.GrugCursors && !document.getElementById('grug-cursors-js') && me) { const s = document.createElement('script'); s.id = 'grug-cursors-js'; s.src = new URL('cursors.js', me).href; (document.head || document.documentElement).appendChild(s); } } catch (e) {}
   if (sitePage) document.documentElement.classList.add('g-site');
+  // the restaurant account has no home page: opening the site's home while it's the account in use opens the dashboard
+  // (shop mode and partner mode always use the player account, so they never come here)
+  if (!brand) { try { const b = JSON.parse(localStorage.getItem('grug.business.v1') || 'null');
+    if (b && b.mode === 'business' && b.active && b.shops && b.shops[b.active]) {
+      const home = new URL(me ? me.replace(/assets\/theme\.js(\?.*)?$/, '') : '/', location.href).pathname;
+      if (location.pathname === home || location.pathname === home + 'index.html') location.replace(home + 'business/' + location.search); } } catch (e) {} }
   // partner mode is a closed space: only the game list, game pages, the avatar editor and the Pearls page. Every other address
   // (Home, Make, Me, Shop, Profile, other partners' pages…) goes to the game list; grug.js also turns away game pages for
   // other partners' games. On a game's host page (play/…) the back button returns to the game list.
@@ -255,7 +265,9 @@
     const ac = accent();
     el.setAttribute('data-theme', mode); el.setAttribute('data-mode-pref', s.mode); el.setAttribute('data-section', section);
     el.classList.remove('g-chrome-light');   // (the Games page no longer forces a dark stage in light mode)   // Games in light mode: dark stage, light top bar and dock
-    el.setAttribute('data-role', s.role);   // who's visiting (Settings → I'm a…): pages show or hide parts with [data-only-for] / [data-hide-for]
+    el.setAttribute('data-role', s.role);
+    // which account is in use (assets/business.js): pages show or hide parts with [data-only-account="business"]
+    try { const b = JSON.parse(localStorage.getItem('grug.business.v1') || 'null'); el.setAttribute('data-account', b && b.mode === 'business' && b.active && !brand ? 'business' : 'player'); } catch (e) { el.setAttribute('data-account', 'player'); }   // who's visiting (Settings → I'm a…): pages show or hide parts with [data-only-for] / [data-hide-for]
     if (brand) el.setAttribute('data-brand', ''); else el.removeAttribute('data-brand');
     el.style.setProperty('--h', HUE);
     el.style.setProperty('--sel-a', ac.a); el.style.setProperty('--sel-b', ac.a); el.style.setProperty('--on-sel', inkOn(ac.a));

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Restaurant website</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../favicon.png">
+<style id="base">
+@font-face{font-family:Fredoka;font-weight:300 700;font-display:swap;src:url(../assets/fonts/fredoka.woff2) format("woff2")}
+body{margin:0;background:#F3F3F5;color:#1E1B16;font:400 17px/1.55 Fredoka,system-ui,sans-serif}
+.msg{max-width:30rem;margin:18vh auto;padding:0 22px}.msg h1{font-size:30px;line-height:1.1;margin:0 0 10px}.msg a{color:#1E1B16;font-weight:600}
+</style>
+</head>
+<body>
+<!-- A shop's website, made on Grug (assets/business.js). The whole site rides in the link: site/#s=<payload>.
+     Nothing is fetched from a server; the owner edits it in business/site/ and shares the new link. -->
+<div id="page"><p class="msg">Loading…</p></div>
+<script src="../assets/icons.js"></script>
+<script src="../assets/rewards.js"></script>
+<script src="../assets/business.js"></script>
+<script>
+(async function () {
+  const B = GrugBusiness, page = document.getElementById('page');
+  const fail = (h, p) => { page.innerHTML = '<div class="msg"><h1>' + h + '</h1><p>' + p + '</p></div>'; };
+  async function show() {
+    const m = /[#&]s=([\w-]+)/.exec(location.hash);
+    if (!m) return fail('No website here yet', 'This link is missing its website. Ask the shop for their full link, or <a href="../rewards/">make a free website and rewards card</a> for your own shop.');
+    const d = await B.decodeSite(m[1]);
+    if (d && d.error === 'old') return fail('Update your browser to see this page', 'This website needs a newer browser. Try opening the link in Chrome, Safari or Firefox.');
+    if (!d) return fail('This link is cut short', 'Part of the website link is missing. Copy the whole link again and open it here.');
+    const join = new URL('../rewards/card/', location.href).href + '#c=' + d.c;
+    const p = B.siteParts(d.c, d.site, { stampLink: join, fontsHref: '../assets/shop-fonts.css' });
+    document.title = p.title;
+    const meta = (n, v) => { let el = document.querySelector('meta[name="' + n + '"]'); if (!el) { el = document.createElement('meta'); el.name = n; document.head.appendChild(el); } el.content = v; };
+    meta('description', p.desc.slice(0, 160)); meta('theme-color', p.color);
+    document.getElementById('base').remove();
+    let st = document.getElementById('site-css'); if (!st) { st = document.createElement('style'); st.id = 'site-css'; document.head.appendChild(st); }
+    st.textContent = '@font-face{font-family:Fredoka;font-weight:300 700;font-display:swap;src:url(../assets/fonts/fredoka.woff2) format("woff2")}' + p.css;
+    if (!document.getElementById('g-shop-fonts')) document.head.insertAdjacentHTML('beforeend', '<link id="g-shop-fonts" rel="stylesheet" href="../assets/shop-fonts.css">');
+    page.innerHTML = p.body;
+  }
+  await show();
+  addEventListener('hashchange', show);
+})();
+</script>
+</body>
+</html>

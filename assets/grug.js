@@ -11,6 +11,7 @@
   const C = root.GrugCatalog, GAMES = root.GRUG_GAMES || [], ICONS = root.GRUG_ICONS || {};
   const KEY = 'grug.profile.v1', SNAP_KEY = 'grug.snaps.v1';
   const REWARDS_KEY = 'grug.rewards.v1';   // stamp cards from shops (rewards/), see assets/rewards.js
+  const BIZ_KEY = 'grug.business.v1';      // the restaurant account (assets/business.js): its shops, websites, and which account is in use
   /* ---------- who's visiting: picked once (askRole), kept in profile.prefs.role, changed in Settings ----------
      Each role sees only the dock tabs it needs ('' = not asked yet, 'all' = everything). A page reached by link still
      shows its own tab. theme.js puts the role on <html data-role> so pages can show or hide parts with
@@ -29,6 +30,8 @@
   const script = document.currentScript || Array.from(document.scripts).find(s => /grug\.js(\?|$)/.test(s.src));
   const ROOT = script ? script.src.replace(/assets\/grug\.js.*$/, '') : (location.origin + '/');
   const url = p => ROOT + String(p || '').replace(/^\/+/, '');
+  // the custom cursor on every page (assets/cursors.js; theme.js, grug.js or gamekit.js loads it, once)
+  try { if (!root.GrugCursors && !document.getElementById('grug-cursors-js') && script) { const s = document.createElement('script'); s.id = 'grug-cursors-js'; s.src = new URL('assets/cursors.js', ROOT).href; (document.head || document.documentElement).appendChild(s); } } catch (e) {}
 
   /* ---------- small helpers ---------- */
   const $ = (s, el) => (el || document).querySelector(s);
@@ -305,6 +308,8 @@
     const apps = {};
     appKeys().forEach(k => { const v = localStorage.getItem(k); if (v) { try { apps[k] = JSON.parse(v); } catch (e) {} } });   // venue apps and game saves
     { const v = localStorage.getItem(REWARDS_KEY); if (v) { try { apps[REWARDS_KEY] = JSON.parse(v); } catch (e) {} } }   // saved Rewards cards + My creations
+    { const v = localStorage.getItem(BIZ_KEY); if (v) { try { apps[BIZ_KEY] = JSON.parse(v); } catch (e) {} } }   // the restaurant account and its websites
+    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^daypart:/.test(k)) apps[k] = JSON.parse(localStorage.getItem(k)); } } catch (e) {}   // the restaurant dashboard (business/)
     const sandy = readJSON('grug.sandy.v1', null);   // the 3D avatar's look
     return { format: EXPORT_FORMAT, version: 1, exportedAt: new Date().toISOString(), site: ROOT, profile, apps, sandy };
   }
@@ -340,6 +345,8 @@
     const p = normalize(data.profile); p.updated = Date.now();
     appKeys().forEach(k => { if (data.apps[k] && typeof data.apps[k] === 'object') writeJSON(k, data.apps[k]); });
     if (data.apps[REWARDS_KEY] && typeof data.apps[REWARDS_KEY] === 'object') writeJSON(REWARDS_KEY, data.apps[REWARDS_KEY]);
+    if (data.apps[BIZ_KEY] && typeof data.apps[BIZ_KEY] === 'object') writeJSON(BIZ_KEY, data.apps[BIZ_KEY]);
+    Object.keys(data.apps).forEach(k => { if (/^daypart:/.test(k)) writeJSON(k, data.apps[k]); });
     profile = p; writeJSON(KEY, profile); try { localStorage.removeItem(SNAP_KEY); } catch (e) {}
     if (data.sandy) { writeJSON('grug.sandy.v1', data.sandy); try { localStorage.removeItem('grug.sandy.snaps.v1'); } catch (e) {} }
     emit('import'); return true;
@@ -429,7 +436,8 @@
   const NAV = [
     ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'], ['shop', 'Shop', 'storefront', 'shop/'], ['profile', 'Profile', 'user', 'profile/'],
     ['links', 'Link page', 'share-network', 'links/'], ['rewards', 'Rewards card', 'gift', 'rewards/'], ['create', '3D models', 'cube', 'create/'],
-    ['me', 'Me', 'user', 'me/'], ['make', 'Make', 'magic-wand', 'make/']   // the groups' own pages: a simple list of where to go
+    ['me', 'Me', 'user', 'me/'], ['make', 'Make', 'magic-wand', 'make/'],   // the groups' own pages: a simple list of where to go
+    ['dashboard', 'Dashboard', 'dashboard', 'business/'], ['website', 'Website', 'browser', 'business/site/']   // the restaurant account's own pages
   ];
   // what's in the dock, left to right; a group opens its tray of pages
   const DOCK_GROUPS = [
@@ -446,19 +454,44 @@
   // partner mode (theme.js, e.g. crafthouse/): the site is just for playing and dressing up, so the dock is Games and Me
   const partnerOn = () => !!(root.GrugTheme && root.GrugTheme.partner && root.GrugTheme.partner());
   const PARTNER_TABS = ['games', 'me'];
-  const dockGroups = () => partnerOn() ? DOCK_GROUPS.filter(g => PARTNER_TABS.includes(g.id)) : DOCK_GROUPS;
-  const stops = () => partnerOn() ? PARTNER_TABS : STOPS;
+  /* ---------- the restaurant account (assets/business.js keeps it; grug.js only reads it) ----------
+     Making a rewards card makes a restaurant account. While it's the account in use, the dock is the restaurant's:
+     Dashboard (business/, the Daypart app, which draws the same dock itself), Rewards card and Website (business/site/);
+     the account menu switches back. The restaurant account has no home page: the site's home opens the dashboard (theme.js). */
+  const BIZ_TABS = ['dashboard', 'rewards', 'website'];
+  function bizState() { const s = readJSON(BIZ_KEY, null); return s && typeof s === 'object' && s.shops && typeof s.shops === 'object' ? s : null; }
+  // the shop the restaurant account is about: its card's name, colour and icon, read straight from the card text
+  function bizShop() {
+    const s = bizState(); if (!s) return null;
+    const ids = Object.keys(s.shops).filter(id => s.shops[id] && typeof s.shops[id].c === 'string'); if (!ids.length) return null;
+    const id = ids.includes(s.active) ? s.active : ids.sort((a, b) => (+s.shops[b].updated || 0) - (+s.shops[a].updated || 0))[0], c = s.shops[id].c;
+    try { const p = decodeURIComponent(escape(atob(c.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((c.length + 3) % 4)))).split('~');
+      return { id, c, n: p[1] || 'Your shop', color: /^[0-9a-f]{6}$/i.test(p[3]) ? '#' + p[3] : '#FF9F5A', i: p[4] || 'storefront' }; } catch (e) { return null; }
+  }
+  const bizOn = () => { if (partnerOn() || (root.GrugTheme && root.GrugTheme.brand && root.GrugTheme.brand())) return false; const s = bizState(); return !!(s && s.mode === 'business' && bizShop()); };
+  // switch accounts, then open that account's home (the dashboard, or the Grug home page)
+  function setAccount(mode) {
+    const s = bizState() || { v: 1, shops: {} }; if (mode === 'business' && !bizShop()) return false;
+    s.mode = mode === 'business' ? 'business' : 'player'; writeJSON(BIZ_KEY, s); emit('account');
+    location.href = url(s.mode === 'business' ? 'business/' : ''); return true;
+  }
+  const inkOn = h => { const n = parseInt(String(h).slice(1), 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2] > .2 ? '#1E1B16' : '#FFFFFF'; };
+  // the shop's mark: its icon on its colour (the restaurant account's "avatar")
+  const shopMark = (b, cls) => '<span class="g-face g-face-shop' + (cls ? ' ' + cls : '') + '" style="background:' + b.color + ';color:' + inkOn(b.color) + '">' + shopIcon(b.i) + '</span>';
+  const dockGroups = () => partnerOn() ? DOCK_GROUPS.filter(g => PARTNER_TABS.includes(g.id)) : bizOn() ? BIZ_TABS.map(id => ({ id })) : DOCK_GROUPS;
+  const stops = () => partnerOn() ? PARTNER_TABS : bizOn() ? BIZ_TABS : STOPS;
   const SUB_TEXT = { avatar: 'Dress up your 3D avatar', shop: 'Clothes and how to earn them', profile: 'Stats, inventory and settings',
-    links: 'A link page or 3D world for your socials', rewards: 'A free stamp card for your shop', create: 'Model Kit and free 3D presets' };
-  const groupOf = k => DOCK_GROUPS.find(g => g.id === k || (g.items && g.items.includes(k))) || DOCK_GROUPS[0];
+    links: 'A link page or 3D world for your socials', rewards: 'A free stamp card for your shop', create: 'Model Kit and free 3D presets',
+    dashboard: 'Schedule, recipes, checklists and more', website: 'Your shop\u2019s own website' };
+  const groupOf = k => { const find = list => list.find(g => g.id === k || (g.items && g.items.includes(k))); return find(dockGroups()) || find(DOCK_GROUPS) || dockGroups()[0]; };
   // dock icons: the simple set, one colour per tab
   // one colour per section, the same accents theme.js gives each section (Model Kit style)
   const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], rewards: ['gift', '#FF9F5A'], links: ['share-network', '#5AB0FF'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'],
-    me: ['person', '#FF8FC2'], make: ['magic-wand', '#4FD8C4'] };
-  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', rewards: '#E0782F', links: '#2F86D6', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E', me: '#E0669E', make: '#25A893' };
+    me: ['person', '#FF8FC2'], make: ['magic-wand', '#4FD8C4'], dashboard: ['dashboard', '#9BE338'], website: ['browser', '#5AB0FF'] };
+  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', rewards: '#E0782F', links: '#2F86D6', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E', me: '#E0669E', make: '#25A893', dashboard: '#6FB31C', website: '#2F86D6' };
   const dockIcon = k => '<svg class="k-ic k-ic-s" viewBox="0 0 16 16" fill="currentColor" style="color:' + DOCK_SIMPLE[k][1] + '" aria-hidden="true" focusable="false">' + (SIMPLE['dock-' + DOCK_SIMPLE[k][0]] || SIMPLE[DOCK_SIMPLE[k][0]] || '') + '</svg>';
   const DOCK = {};
-  ['home', 'games', 'rewards', 'links', 'create', 'avatar', 'shop', 'profile', 'me', 'make'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
+  ['home', 'games', 'rewards', 'links', 'create', 'avatar', 'shop', 'profile', 'me', 'make', 'dashboard', 'website'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
   const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
   const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
   const fsOk = () => !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
@@ -469,7 +502,8 @@
   const pearlsUrl = app => /\/pearls(\.html)?$/.test(location.pathname) ? location.pathname + location.search : url('pearls.html') + '?from=' + encodeURIComponent(location.pathname + location.search + location.hash) + '&app=' + encodeURIComponent(app || 'Grug');
   function chrome(active, opts) {
     opts = opts || {};
-    const face = snaps(); const faceImg = face ? '<img class="g-face" alt="" src="' + face.bust + '">' : '<span class="g-face g-face-empty">' + icon('smiley') + '</span>';
+    const face = snaps(), biz = bizOn() ? bizShop() : null;
+    const faceImg = biz ? shopMark(biz) : face ? '<img class="g-face" alt="" src="' + face.bust + '">' : '<span class="g-face g-face-empty">' + icon('smiley') + '</span>';
     const navLabel = (NAV.find(n => n[0] === active) || NAV[0])[1];
     const titleBit = (document.title.split(' · ').find(x => x && x !== 'Grug') || navLabel);
     const pageTitle = opts.title || (/^games made/i.test(titleBit) ? 'Home' : titleBit);
@@ -480,11 +514,11 @@
     const partner = partnerOn() ? brand : null;
     if (!ptb) top.innerHTML = (partner ? '<a class="g-logo k-glass is-brand is-partner" href="' + url(partner.app) + '" aria-label="' + esc(partner.n) + ': open their app"><img class="g-partner-logo" alt="' + esc(partner.n) + '" src="' + url(partner.logo) + '">' + (partner.demo ? '<span class="g-partner-demo">Demo</span>' : '') + '</a>'
       : brand ? '<a class="g-logo k-glass is-brand" href="' + url('') + '" aria-label="' + esc(brand.n) + ' home"><span class="g-brand-mark" aria-hidden="true">' + shopIcon(brand.i) + '</span><span class="g-brand-name">' + esc(brand.n) + '</span></a>'
-        : '<a class="g-logo k-glass" href="' + url('') + '" aria-label="Grug home">' + LOGO + '<span>Grug</span></a>') +
+        : '<a class="g-logo k-glass" href="' + url(biz ? 'business/' : '') + '" aria-label="' + (biz ? 'Your dashboard' : 'Grug home') + '">' + LOGO + '<span>Grug</span></a>') +
       '<div class="g-title k-glass" aria-hidden="true"><small>' + esc(((DOCK_GROUPS.find(g => g.id === (opts.dockAs || groupOf(active).id)) || {}).label) || (pageTitle === navLabel ? (brand ? brand.n : 'Grug') : navLabel)) + '</small><b>' + esc(pageTitle) + '</b></div>' +
       '<div class="g-status k-glass"><a class="g-pts" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('pearl') + '<span class="num">' + fmt(pearlBalance()) + '</span><span class="g-plus" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M6 2.5v7M2.5 6h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></a></div>' +
       (fsOk() ? '<button type="button" class="g-fs k-glass" aria-label="Full screen" aria-pressed="false">' + icon('arrows-out') + '</button>' : '') +
-      '<button type="button" class="g-me" aria-label="Your account menu" aria-haspopup="menu" aria-expanded="false">' + faceImg + '</button>';
+      '<button type="button" class="g-me" aria-label="' + (biz ? esc(biz.n) + ': restaurant account menu' : 'Your account menu') + '" aria-haspopup="menu" aria-expanded="false">' + faceImg + '</button>';
     const tabs = document.createElement('nav'); tabs.className = 'g-tabs k-glass'; tabs.setAttribute('aria-label', 'Sections');
     const navNow = () => NAV;
     const navOf = k => NAV.find(n => n[0] === k);
@@ -535,7 +569,18 @@
           '<a role="menuitem" href="' + url('avatar/') + '">' + icon('t-shirt') + '<span>Edit avatar</span></a>' +
           '<button type="button" role="menuitem" data-m="settings">' + icon('gear-six') + '<span>Settings</span></button>';
         return; }
+      const shop = bizShop();
+      if (bizOn()) {   // the restaurant account: its own pages, and the way back to the player account
+        menu.innerHTML = '<div class="g-menu-h">' + shopMark(shop) + '<div><b>' + esc(shop.n) + '</b><small>Restaurant account</small></div></div>' +
+          '<a role="menuitem" class="hot" href="' + url('business/') + '">' + icon('dashboard') + '<span>Dashboard</span>' + icon('caret-right') + '</a>' +
+          '<a role="menuitem" href="' + url('business/site/') + '">' + icon('browser') + '<span>Website</span></a>' +
+          '<a role="menuitem" href="' + url('rewards/') + '">' + icon('gift') + '<span>Rewards card</span></a>' +
+          '<button type="button" role="menuitem" class="g-menu-sw" data-m="player"><img alt="" src="' + f.bust + '"><span>Switch to ' + esc(profile.name) + '<small>Your Grug player account</small></span>' + icon('swap') + '</button>' +
+          '<button type="button" role="menuitemcheckbox" data-m="mode" aria-checked="' + !isLight() + '">' + icon('moon') + '<span>Dark mode</span><span class="g-switch sm" aria-hidden="true"></span></button>' +
+          '<button type="button" role="menuitem" data-m="settings">' + icon('gear-six') + '<span>Settings</span></button>';
+        return; }
       menu.innerHTML = '<div class="g-menu-h"><img alt="" src="' + f.bust + '"><div><b>' + esc(profile.name) + '</b><small>' + fmt(pearlBalance()) + ' Pearls · ' + fmt(totalPoints()) + ' partner points</small></div></div>' +
+        (shop && !(root.GrugTheme && root.GrugTheme.brand && root.GrugTheme.brand()) ? '<button type="button" role="menuitem" class="g-menu-sw" data-m="business">' + shopMark(shop) + '<span>Switch to ' + esc(shop.n) + '<small>Your restaurant account</small></span>' + icon('swap') + '</button>' : '') +
         '<a role="menuitem" class="hot" href="' + pearlsUrl() + '">' + icon('pearl') + '<span>Buy Pearls</span>' + icon('caret-right') + '</a>' +
         '<a role="menuitem" href="' + url('profile/') + '">' + icon('user') + '<span>Profile</span></a>' +
         '<a role="menuitem" href="' + url('avatar/') + '">' + icon('t-shirt') + '<span>Edit avatar</span></a>' +
@@ -556,6 +601,7 @@
     meBtn.addEventListener('click', e => { e.stopPropagation(); buzz(); setMenu(menu.hidden); });
     menu.addEventListener('click', e => {
       if (e.target.closest('[data-m=settings]')) { setMenu(false); settings(); return; }
+      const sw = e.target.closest('[data-m=business],[data-m=player]'); if (sw) { buzz(); setMenu(false); setAccount(sw.dataset.m); return; }
       const m = e.target.closest('[data-m=mode]'); if (m) { setMode(isLight() ? 'dark' : 'light'); m.setAttribute('aria-checked', String(!isLight())); buzz(); }
     });
     document.addEventListener('click', e => { if (!menu.hidden && !menu.contains(e.target)) setMenu(false); });
@@ -567,7 +613,8 @@
     root.addEventListener('grug:change', () => {
       const s = snaps(); const el = $('.g-me', top); if (!el) return;
       if (ptb) { el.style.backgroundImage = 'url("' + s.bust + '")'; paintPearls(); return; }
-      el.innerHTML = (s ? '<img class="g-face" alt="" src="' + s.bust + '">' : '<span class="g-face g-face-empty">' + icon('smiley') + '</span>');
+      const b = bizOn() ? bizShop() : null;
+      el.innerHTML = b ? shopMark(b) : (s ? '<img class="g-face" alt="" src="' + s.bust + '">' : '<span class="g-face g-face-empty">' + icon('smiley') + '</span>');
       paintPearls();
     });
     // LB / RB: Q and E (or a controller's shoulder buttons) step through the dock
@@ -910,6 +957,7 @@
     UI_SCALES, applyUiScale,
     LOGO,   // the Grug stegosaurus mark (an inline SVG)
     ROLES, get role() { return roleOf(); }, setRole, showsTab, partnerAllows,
+    business: { on: bizOn, shop: bizShop, setAccount, TABS: BIZ_TABS },
     ui: { chrome, hub, shopIcon, askRole, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile, uiSizeHtml, wireUiSize, modeHtml, wireMode, setMode, brandHtml, wireBrand, inventoryHtml, wireInventory, freeBar }
   };
 })(window);

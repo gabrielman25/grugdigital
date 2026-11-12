@@ -261,6 +261,14 @@ svg.k-ic-s{filter:none}
 .g-fs:active{transform:scale(.94)}
 .g-face{width:46px;height:46px;border-radius:50%;object-fit:cover;border:3px solid var(--bezel);background:linear-gradient(140deg,var(--sel-a),var(--sel-b));box-shadow:var(--shadow);flex:none}
 .g-face-empty{display:grid;place-items:center;color:var(--on-sel)}
+/* the restaurant account's "avatar": its shop icon on its own colour (assets/business.js) */
+.g-face-shop{display:grid;place-items:center;border-radius:14px;background-image:none}
+.g-face-shop .gi{width:58%;height:58%}
+.g-menu-h .g-face-shop{width:44px;height:44px;border:0;box-shadow:none}
+.g-menu .g-menu-sw{min-height:60px;margin:2px 0 6px;background:var(--card2)}
+.g-menu .g-menu-sw img,.g-menu .g-menu-sw .g-face-shop{width:34px;height:34px;border-radius:10px;object-fit:cover;border:0;box-shadow:none;flex:none}
+.g-menu .g-menu-sw img{border-radius:50%;background:var(--mode)}
+.g-menu .g-menu-sw span small{display:block;font-weight:600;font-size:12px;color:var(--mut);margin-top:3px}
 @media (min-width:360px){.g-me{padding:0;margin-left:6px;background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow)}.g-me .g-face{width:40px;height:40px;box-shadow:none;margin:2px}}
 @media (min-width:980px){.g-title{display:flex}}
 
@@ -561,6 +569,8 @@ html.g-scaled .g-dialog{zoom:var(--g-ui)}
 [data-only-for]{display:none!important}
 html[data-role="player"] [data-only-for~="player"],html[data-role="owner"] [data-only-for~="owner"],html[data-role="dev"] [data-only-for~="dev"],html[data-role="creator"] [data-only-for~="creator"]{display:revert!important}
 html[data-role="player"] [data-hide-for~="player"],html[data-role="owner"] [data-hide-for~="owner"],html[data-role="dev"] [data-hide-for~="dev"],html[data-role="creator"] [data-hide-for~="creator"]{display:none!important}
+/* the account in use (assets/business.js, set by theme.js): [data-only-account="business"] / [data-only-account="player"] */
+html:not([data-account="business"]) [data-only-account="business"],html[data-account="business"] [data-only-account="player"]{display:none!important}
 .g-role-dialog .g-dialog-actions{display:none}
 .g-roles{display:flex;flex-direction:column;gap:10px}
 .g-roles button{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px;border-radius:18px;background:var(--card);border:2px solid var(--line2);color:var(--ink);transition:border-color .15s,transform .15s var(--spring)}

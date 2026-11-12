@@ -19,6 +19,11 @@ in `grug.css` (`--page`, `--card-solid`, `--card`, `--ink`, `--line` …): never
   section's accent at alpha 7/255, `assets/patterns/<section>.png`, 96px). Keep it faint so text always reads clearly.
   The **Rewards** and **Links** sections are the exception: solid `#17171A`, no pattern (`solid: true` in `SECTIONS`), and its pages use
   solid colours only (no gradients, blur or decoration).
+- **The cursor** is the restaurant dashboard's drawn outline set (Kenney Cursor Pack) on every page and game:
+  `assets/cursors.js`, loaded once by theme.js, grug.js or gamekit.js (and by the partner app template). It swaps only the
+  plain cursors (default, pointer, not-allowed, grab, grabbing, wait) in stylesheets and in code (`el.style.cursor = …`), so
+  a page or game that picks its own cursor (an image, `none`, crosshair…) keeps it. Write `cursor:pointer` as usual.
+  Left out on purpose: shops' own websites (`site/`, `work/`), which aren't Grug pages.
 - **The blue smoky fog (`assets/fogbg.js`) is only for the Games section** (`games/` and `games/<id>/`) **in dark mode**,
   where the FOSSIL32 boxes float in it, with small solid 3D cubes in Grug colours tumbling in the fog (no glowing orbs).
   In light mode (and partner mode) the Games pages are a plain white page with black text and nothing floating: the
@@ -202,6 +207,34 @@ buttons open screens on top (Wardrobe's categories, the sliders), screens with m
 lists of pieces run sideways in as many rows as fit. A piece's colours, fabric and fit show only once a piece is picked.
 Only a person's own swipe changes the section (the browser re-snapping after a resize doesn't). Add new controls to the
 editor's markup as before, then place them in a section in `nav.js`.
+
+## The restaurant account (`assets/business.js`)
+
+Next to the Grug player profile, each device can hold a **restaurant account** (`localStorage 'grug.business.v1'`: which
+account is in use, the active shop, and each shop's card text and website fields). Finishing a rewards card makes one
+(`GrugBusiness.fromCard` in the card builder's last step). There is no server and no login, the same as everywhere else.
+
+- **Switching:** the account menu under the avatar has "Switch to <shop>" (player) / "Switch to <player>" (restaurant);
+  the home page's owners' door becomes "Switch to your restaurant". `Grug.business.setAccount(mode)` saves it and opens
+  that account's home. Shop mode and partner mode always show the player account.
+- **In the restaurant account** the dock is Dashboard · Rewards card · Website (`BIZ_TABS` in grug.js; no Games), the top
+  bar's picture is the shop's icon on its colour, and `html[data-account="business"]` is set (theme.js). It has no home
+  page: the site's home (and the Grug logo) opens the dashboard instead (theme.js);
+  `[data-only-account="business"|"player"]` shows a part to one account only.
+- **Dashboard** (`business/`): the Daypart app, standalone with its own look and its own `daypart:*` storage. It reads the
+  restaurant account (the shop's name, which only changes on the card), lists **Mural** (website) and **Totem** (rewards
+  card) as apps that open the Grug pages, and its menu switches back to the player account. Opening it switches to the
+  restaurant account. It is not built from a tool: edit the file directly.
+  - It draws the restaurant dock itself (`GDOCK` / `gdock()`, same look and order as the site's), pinned on every
+    dashboard page so nothing is out of reach; Q / E step to the other tabs. A locked time clock (staff kiosk) hides it.
+  - Home groups its apps (`APP_GROUPS`) in drop-downs, all closed at first, each with an icon from the site's simple set
+    (`GROUP_IC`) and the count of things that need you inside: Your team (Henge, Stomp, Clan), Kitchen (Notch, Mammoth,
+    Hearth), Your guests (Mural, Totem), Paperwork (Conch, Fossil). A new app goes in a group there, or it shows under "More".
+- **Website** (`business/site/`, the Website section, accent `#5AB0FF`): the editor, with a live preview. The site itself
+  is drawn by `GrugBusiness.siteParts` from the card (name, colour, icon, lettering, reward) plus the owner's fields;
+  empty fields are left off the page. Its public address is `site/#s=<payload>` (the whole site rides in the link,
+  deflated), and **Download** gives one self-contained `index.html` (Google Fonts) for any web host.
+- Profile export carries `grug.business.v1` and the dashboard's `daypart:*` keys.
 
 ## Rewards card builder (`rewards/create/`)
 
