@@ -39,12 +39,27 @@ and the dark-mode switch live in the account menu under the avatar.
 
 ## The dock: Home, Games, Me, Make
 
-Four tabs for everyone (the role in Settings → I'm a… only changes what the home page shows first). **Me** and **Make**
-are groups: tapping one opens a tray of its pages, and each has its own page (`me/`, `make/`), a plain Linktree-style
-list (`Grug.ui.hub`) whose picked row fills with its colour and slides on. Me = Avatar, Shop, Profile. Make = Link page
-(`links/`), Rewards card (`rewards/`), 3D models (`create/`). `DOCK_GROUPS` / `NAV` in `assets/grug.js`.
+Four tabs for everyone (the role in Settings → I'm a… only changes what the home page shows first). **Games**, **Me** and
+**Make** are groups: tapping one opens a tray of its pages. Games = Games (the store, `games/`) and Carts (`games/carts/`,
+see below). Me and Make also have their own page (`me/`, `make/`), a plain Linktree-style list (`Grug.ui.hub`) whose
+picked row fills with its colour and slides on. Me = Avatar, Shop, Profile. Make = Link page (`links/`), Rewards card
+(`rewards/`), 3D models (`create/`). `DOCK_GROUPS` / `NAV` in `assets/grug.js`.
 Swiping sideways anywhere (not on sliders, canvases or sideways-scrolling rows; mark others `data-noswipe`) or Q / E /
 LB / RB steps Home ↔ Games ↔ Me ↔ Make, and the next page slides in from that side (`grug.swipe` → `html.g-swipe-*`).
+
+## Carts (`games/carts/`)
+
+**Carts** are quick 1–3 minute 3D games played with one input (tap, or hold), shown one per screen in a vertical swipe
+feed like Reels: swipe up for the next. They are built with the **Grug Micro** kit (`grug-game-kit/micro`, its own
+README): `python3 build.py` there writes `dist/index.html` (the feed) and `dist/games/<id>.html` (each cart); copy them to
+`games/carts/index.html` and `games/carts/games/`. Never edit those copies by hand. The feed has its own top bar
+(Games | Carts: Games goes back to the store), right rail (favourite, best, restart, share) and Shop button; each cart's
+shop has an **Inventory** tab where owned skins and pets are equipped. Coins are earned by playing; Pearls are the site's
+wallet (`grug.pearls.v1`); crates are coins only (no paid random rewards). Saves: `grug.micro.v1`.
+`assets/carts.js` (`GRUG_CARTS`) lists them for the store: they show in Browse all (a Type filter: Games / Carts), the
+search box and a "Carts" row, each with its cover (`assets/carts/<id>.jpg`, 1580 × 950: a HUD-free shot of the cart
+with its title and a GRUG CART tag). They are not FOSSIL32 boxes and are not in Favorites or the Discovery Queue;
+tapping one opens `games/carts/#<id>`. A new cart needs its entry in `carts.js` and a cover.
 
 ## Shop mode (Ziosk-style)
 
