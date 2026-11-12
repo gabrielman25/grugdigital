@@ -286,6 +286,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     <a href="#search" data-nav="search">Browse<span class="lbl-long">&nbsp;all</span></a>
     <button type="button" data-queue><span class="lbl-long">Discovery&nbsp;</span>Queue</button>
     <a href="favorites/" data-nav="favs">Favorites <b id="favN">0</b></a>
+    <a href="carts/" data-nav="carts">Carts</a>
     <!-- every venue's rewards app, one tap away (hidden in partner mode: a wrapped site never leads to another venue's app) -->
     <button type="button" class="st-apps" id="appsBtn" data-apps hidden><span id="appsIc"></span>Rewards<span class="lbl-long">&nbsp;apps</span></button>
     <div class="st-search" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-owns="sugg">
@@ -300,6 +301,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
 <script src="../assets/catalog.js"></script>
 <script src="../assets/icons.js"></script>
 <script src="../assets/games.js"></script>
+<script src="../assets/carts.js"></script>
 <script src="../assets/grug.js"></script>
 <script src="../create/market-icons.js"></script>
 <script>
@@ -315,27 +317,34 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
   /* ---------- the games and what this player has done with them (only real numbers) ---------- */
   const pm = (window.GrugTheme && GrugTheme.partner && GrugTheme.partner()) || null;
   const ALL = G.GAMES.filter(g => g.listed !== false && G.partnerAllows(g));   // partner mode: every standalone game, the partner's own first
-  const byId = id => ALL.find(g => g.id === id);
+  // the Carts (assets/carts.js): quick one-tap games in the swipe feed (carts/). They show up in search, the search box
+  // and their own row on the store; tapping one opens the feed on it. Ids get a 'cart-' prefix so they never meet a game's.
+  const CARTS = (window.GRUG_CARTS || []).map(c => Object.assign({}, c, { id: 'cart-' + c.id, cid: c.id, cart: true, original: true, status: 'live', kind: 'Cart',
+    partner: 'Grug', place: '', app: 'cart-' + c.id, thumb: 'assets/carts/' + c.id + '.jpg' }));
+  const EVERY = ALL.concat(CARTS);   // what search looks through
+  const microBest = (() => { try { return (JSON.parse(localStorage.getItem('grug.micro.v1') || '{}').best) || {}; } catch (e) { return {}; } })();
+  const byId = id => EVERY.find(g => g.id === id);
   const st = G.profile.stats, pts = {};
   try { G.points().forEach(p => { pts[p.game.id] = p; }); } catch (e) {}
   const artOf = g => (g.box && g.box.art) || g.thumb;
   const pic = g => G.url(artOf(g));
   const shots = g => [artOf(g)].concat((g.box && g.box.shots) || []).map(s => G.url(s));
   const tagsOf = g => g.tags || [];
-  const plays = g => +(st.plays[g.app] || 0) || (pts[g.id] ? pts[g.id].runs : 0);
-  const best = g => Math.max(+(st.best[g.app] || 0), pts[g.id] ? pts[g.id].best : 0);
+  const plays = g => g.cart ? 0 : +(st.plays[g.app] || 0) || (pts[g.id] ? pts[g.id].runs : 0);
+  const best = g => g.cart ? +(microBest[g.cid] || 0) : Math.max(+(st.best[g.app] || 0), pts[g.id] ? pts[g.id].best : 0);
   const lastId = (ALL.find(g => g.app === st.lastGame && g.status !== 'legacy') || {}).id || '';
-  const status = g => g.status === 'legacy' ? ['legacy', 'Classic'] : g.status === 'live' ? ['live', 'Live'] : ['demo', 'Demo'];
-  const madeFor = g => '<span class="st-made">' + G.icon(g.original ? 'sparkle' : 'storefront') + esc(g.original ? 'Grug original' : g.partner) + '</span>';
+  const status = g => g.cart ? ['live', 'Cart'] : g.status === 'legacy' ? ['legacy', 'Classic'] : g.status === 'live' ? ['live', 'Live'] : ['demo', 'Demo'];
+  const madeFor = g => g.cart ? '<span class="st-made">' + G.icon('device-mobile') + 'Cart · ' + (g.controls === 'hold' ? 'Hold' : 'Tap') + ' · ' + esc(g.len) + '</span>'
+    : '<span class="st-made">' + G.icon(g.original ? 'sparkle' : 'storefront') + esc(g.original ? 'Grug original' : g.partner) + '</span>';
   const badge = g => { const s = status(g); return '<span class="st-badge ' + s[0] + '">' + s[1] + '</span>'; };
   const you = g => { const p = plays(g), b = best(g);
     return p || b ? '<div class="st-you">' + (p ? '<span>' + G.icon('game-controller') + G.fmt(p) + (p === 1 ? ' run' : ' runs') + '</span>' : '') + (b ? '<span>' + G.icon('trophy') + 'best ' + G.fmt(b) + '</span>' : '') + '</div>'
       : '<div class="st-you st-new">New to you</div>'; };
   const tagLinks = (g, n) => '<div class="st-tags">' + tagsOf(g).slice(0, n || 9).map(t => '<a class="st-tag" href="' + searchHref({ inc: [t] }) + '">' + esc(t) + '</a>').join('') + '</div>';
-  const heart = (g, sm) => { const on = G.favs.has(g.id);
+  const heart = (g, sm) => { if (g.cart) return ''; const on = G.favs.has(g.id);   // carts are hearted in their own feed
     return '<button type="button" class="st-heart' + (sm ? ' sm' : '') + '" data-fav="' + g.id + '" aria-pressed="' + on + '" aria-label="' + (on ? 'Remove ' : 'Add ') + esc(g.title) + (on ? ' from' : ' to') + ' Favorites" title="' + (on ? 'In your Favorites' : 'Add to Favorites') + '">' + G.icon('heart') + '</button>'; };
   const playBtn = g => '<button type="button" class="st-play" data-play="' + g.id + '">' + G.icon('play') + (g.status === 'preview' ? 'Try the demo' : 'Play') + '</button>';
-  const gameHref = g => G.url('games/' + g.id + '/');
+  const gameHref = g => G.url(g.cart ? 'games/carts/#' + g.cid : 'games/' + g.id + '/');
   const visible = () => ALL.filter(g => !G.favs.isIgnored(g.id));
 
   // what the player likes: the tags of their favourites and the games they've played
@@ -361,6 +370,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
   /* ---------- Play: the cartridge goes into the FOSSIL32 console, then the game opens (plain link without 3D) ---------- */
   function play(g){
     G.ui.buzz([8, 30, 12]);
+    if (g.cart) { location.href = gameHref(g); return; }
     if (window.Fossil32 && Fossil32.ok) Fossil32.boot(g.id); else location.href = G.url(g.game || g.play);
   }
   function setFav(id, on){
@@ -398,7 +408,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     const u = new URLSearchParams();
     if (o.q) u.set('q', o.q);
     const tags = (o.inc || []).concat((o.exc || []).map(t => '-' + t)); if (tags.length) u.set('tags', tags.join(','));
-    ['made', 'status', 'mine'].forEach(k => { if (o[k] && o[k].length) u.set(k, o[k].join(',')); });
+    ['made', 'status', 'mine', 'type'].forEach(k => { if (o[k] && o[k].length) u.set(k, o[k].join(',')); });
     if (o.sort && o.sort !== 'relevance') u.set('sort', o.sort);
     if (o.hidefav) u.set('hidefav', '1'); if (o.showign) u.set('showign', '1');
     const s = u.toString(); return '#search' + (s ? '?' + s : '');
@@ -439,7 +449,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
 
   function capsule(g, ribbon){
     return '<div class="st-cap" data-go="' + g.id + '" data-hc="' + g.id + '"><a href="' + gameHref(g) + '" tabindex="-1" aria-hidden="true"><img class="st-pic" src="' + pic(g) + '" alt="" loading="lazy" decoding="async"></a>' +
-      (ribbon ? '<span class="ribbon">' + G.icon('arrow-counter-clockwise') + esc(ribbon) + '</span>' : g.status !== 'live' ? badge(g) : '') + heart(g, true) +
+      (ribbon ? '<span class="ribbon">' + G.icon('arrow-counter-clockwise') + esc(ribbon) + '</span>' : g.status !== 'live' || g.cart ? badge(g) : '') + heart(g, true) +
       '<div class="st-cap-b"><b><a href="' + gameHref(g) + '">' + esc(g.title) + '</a></b>' + madeFor(g) + you(g) + '</div></div>';
   }
   const row = (title, list, more, cls) => !list.length ? '' :
@@ -497,6 +507,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
       row('From ' + (pm ? pm.short || pm.n : ''), mine.map(g => capsule(g))) +
       row('Keep playing', played.map(g => capsule(g, g.id === lastId ? 'Last played' : ''))) +
       row('Grug originals', originals.map(g => capsule(g)), searchHref({ made: ['original'] })) +
+      row('Carts · quick one-tap games', CARTS.filter(g => !G.favs.isIgnored(g.id)).map(g => capsule(g)), searchHref({ type: ['cart'] })) +
       row('Made with Katy restaurants', venues.map(g => capsule(g)), searchHref({ made: ['restaurant'] })) +
       row('Browse by category', cats, searchHref({})) +
       '<section class="st-qb"><div><h2>Your Discovery Queue</h2><p>Step through games picked from what you play and favorite. Heart the ones you like, ignore the rest, and your store gets sharper.</p>' +
@@ -523,6 +534,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
   /* ================= Browse all (search) ================= */
   const SORTS = { relevance: 'Relevance', name: 'Name', recent: 'Recently played', plays: 'Most played by you', originals: 'Grug originals first' };
   const GROUPS = [
+    { k: 'type', label: 'Type', opts: [['game', 'Games'], ['cart', 'Carts']], get: g => [g.cart ? 'cart' : 'game'] },
     { k: 'mine', label: 'Your library', opts: [['played', 'Played'], ['new', 'New to you']], get: g => [plays(g) ? 'played' : 'new'] },
     { k: 'made', label: 'Made for', opts: [['original', 'Grug originals'], ['restaurant', 'Katy restaurants']], get: g => [g.original ? 'original' : 'restaurant'] },
     { k: 'status', label: 'Status', opts: [['live', 'Live'], ['demo', 'Demo'], ['legacy', 'Classic']], get: g => [status(g)[0]] }
@@ -533,9 +545,9 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     const tags = (u.get('tags') || '').split(',').filter(Boolean), set = k => new Set((u.get(k) || '').split(',').filter(Boolean));
     return { q: u.get('q') || '', sort: SORTS[u.get('sort')] ? u.get('sort') : 'relevance',
       inc: new Set(tags.filter(t => t[0] !== '-')), exc: new Set(tags.filter(t => t[0] === '-').map(t => t.slice(1))),
-      mine: set('mine'), made: set('made'), status: set('status'), hidefav: u.get('hidefav') === '1', showign: u.get('showign') === '1' };
+      mine: set('mine'), made: set('made'), status: set('status'), type: set('type'), hidefav: u.get('hidefav') === '1', showign: u.get('showign') === '1' };
   }
-  const hrefOf = s => searchHref({ q: s.q, sort: s.sort, inc: [...s.inc], exc: [...s.exc], mine: [...s.mine], made: [...s.made], status: [...s.status], hidefav: s.hidefav, showign: s.showign });
+  const hrefOf = s => searchHref({ q: s.q, sort: s.sort, inc: [...s.inc], exc: [...s.exc], mine: [...s.mine], made: [...s.made], status: [...s.status], type: [...s.type], hidefav: s.hidefav, showign: s.showign });
   function score(g, q){
     if (!q) return 1;
     q = q.toLowerCase().trim(); let s = 0; const t = g.title.toLowerCase();
@@ -544,12 +556,13 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
       if (t.split(/\s+/).some(x => x.startsWith(w))) s += 8;
       if (((g.appTitle || '') + ' ' + (g.subtitle || '')).toLowerCase().includes(w)) s += 5;
       if (tagsOf(g).some(x => x.toLowerCase().startsWith(w))) s += 5;
+      if (g.cart && 'carts'.startsWith(w) && w.length > 2) s += 6;
       if ((g.partner + ' ' + g.place).toLowerCase().includes(w)) s += 4;
       if ((g.kind + ' ' + (g.blurb || '')).toLowerCase().includes(w)) s += 2;
     });
     return s;
   }
-  const ORDER = ALL.map(g => g.id);
+  const ORDER = EVERY.map(g => g.id);
   function sorter(k, q){
     const w = tagWeights(), base = (a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id);
     return {
@@ -580,13 +593,13 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     (canEx ? '<button type="button" class="ex" data-ex="' + esc(val) + '" tabindex="-1">' + (state === 'exc' ? 'Undo' : 'Exclude') + '</button>' : '') + '</div>';
   const fbox = (id, title, body) => '<div class="st-fbox' + (shut.has(id) ? ' shut' : '') + '" data-box="' + id + '"><button type="button" aria-expanded="' + !shut.has(id) + '">' + esc(title) + G.icon('caret-right') + '</button><div class="fb">' + body + '</div></div>';
   function filters(){
-    const pool = ALL.filter(g => passes(g, true) && (S.showign || !G.favs.isIgnored(g.id)));
+    const pool = EVERY.filter(g => passes(g, true) && (S.showign || !G.favs.isIgnored(g.id)));
     const tc = {}; pool.forEach(g => tagsOf(g).forEach(t => { tc[t] = (tc[t] || 0) + 1; }));
-    const every = [...new Set(ALL.flatMap(tagsOf))];
+    const every = [...new Set(EVERY.flatMap(tagsOf))];
     let list = every.filter(t => tc[t] || S.inc.has(t) || S.exc.has(t)).sort((a, b) => (S.inc.has(b) || S.exc.has(b)) - (S.inc.has(a) || S.exc.has(a)) || (tc[b] || 0) - (tc[a] || 0) || a.localeCompare(b));
     if (tagQ) list = every.filter(t => t.toLowerCase().includes(tagQ.toLowerCase()));
     const cut = tagQ || tagsAll ? list.length : 10;
-    const counted = Gp => { const c = {}; ALL.filter(g => passes(g) && (S.showign || !G.favs.isIgnored(g.id))).forEach(g => Gp.get(g).forEach(v => { c[v] = (c[v] || 0) + 1; })); return c; };
+    const counted = Gp => { const c = {}; EVERY.filter(g => passes(g) && (S.showign || !G.favs.isIgnored(g.id))).forEach(g => Gp.get(g).forEach(v => { c[v] = (c[v] || 0) + 1; })); return c; };
     $('#filters').innerHTML =
       fbox('prefs', 'Your preferences', opt('hidefav', '1', 'Hide my favorites', S.hidefav ? 'inc' : '') + opt('showign', '1', 'Show ignored games', S.showign ? 'inc' : '') +
         (G.favs.ignored().length ? '<div class="st-fnote">' + G.favs.ignored().length + ' ignored · <button type="button" class="st-more" data-unignore style="padding:0">Clear the list</button></div>' : '')) +
@@ -611,7 +624,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     return c.join('');
   }
   function results(){
-    let res = ALL.filter(g => passes(g));
+    let res = EVERY.filter(g => passes(g));
     const hidden = S.showign ? 0 : res.filter(g => G.favs.isIgnored(g.id)).length;
     if (!S.showign) res = res.filter(g => !G.favs.isIgnored(g.id));
     res.sort(sorter(S.sort, S.q));
@@ -721,8 +734,8 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
   function suggest(){
     const v = q.value.trim(); sel = -1;
     if (!v) { sugg.classList.remove('on'); sugg.parentElement.setAttribute('aria-expanded', 'false'); return; }
-    const hits = ALL.map(g => [g, score(g, v)]).filter(x => x[1] >= 4).sort((a, b) => b[1] - a[1]).slice(0, 5).map(x => x[0]);
-    sugg.innerHTML = hits.map(g => '<a role="option" href="' + gameHref(g) + '"><img src="' + pic(g) + '" alt=""><span><b>' + esc(g.title) + '</b><small>' + esc(g.original ? 'Grug original' : g.partner) + ' · ' + esc(tagsOf(g).slice(0, 2).join(', ')) + '</small></span></a>').join('') +
+    const hits = EVERY.map(g => [g, score(g, v)]).filter(x => x[1] >= 4).sort((a, b) => b[1] - a[1]).slice(0, 5).map(x => x[0]);
+    sugg.innerHTML = hits.map(g => '<a role="option" href="' + gameHref(g) + '"><img src="' + pic(g) + '" alt=""><span><b>' + esc(g.title) + '</b><small>' + esc(g.cart ? 'Cart' : g.original ? 'Grug original' : g.partner) + ' · ' + esc(tagsOf(g).slice(0, 2).join(', ')) + '</small></span></a>').join('') +
       '<a role="option" class="all" href="' + searchHref({ q: v }) + '">' + (hits.length ? 'See every result for “' + esc(v) + '”' : 'No games match “' + esc(v) + '” · browse all') + '</a>';
     sugg.classList.add('on'); sugg.parentElement.setAttribute('aria-expanded', 'true');
   }

@@ -429,19 +429,21 @@
   const showsTab = () => true;   // the dock shows everything to everyone now (Me and Make keep it short)
 
   /* ---------- UI chrome: floating top bar + dock ----------
-     The dock has four tabs: Home, Games, and two groups that open a small tray of pages:
+     The dock has four tabs: Home, and three groups that open a small tray of pages:
+       Games → Games (the store), Carts (quick one-tap games in a swipe feed, games/carts/)
        Me   → Avatar, Shop, Profile
        Make → Link page (creators), Rewards card (shop owners), 3D models (Model Kit + the asset library)
      Everyone sees every tab (the role picked in Settings only changes what the home page shows first). */
   const NAV = [
     ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'], ['shop', 'Shop', 'storefront', 'shop/'], ['profile', 'Profile', 'user', 'profile/'],
     ['links', 'Link page', 'share-network', 'links/'], ['rewards', 'Rewards card', 'gift', 'rewards/'], ['create', '3D models', 'cube', 'create/'],
+    ['carts', 'Carts', 'device-mobile', 'games/carts/'],
     ['me', 'Me', 'user', 'me/'], ['make', 'Make', 'magic-wand', 'make/'],   // the groups' own pages: a simple list of where to go
     ['dashboard', 'Dashboard', 'dashboard', 'business/'], ['website', 'Website', 'browser', 'business/site/']   // the restaurant account's own pages
   ];
   // what's in the dock, left to right; a group opens its tray of pages
   const DOCK_GROUPS = [
-    { id: 'home' }, { id: 'games' },
+    { id: 'home' }, { id: 'games', label: 'Games', items: ['games', 'carts'] },
     { id: 'me', label: 'Me', items: ['avatar', 'shop', 'profile'] },
     { id: 'make', label: 'Make', items: ['links', 'rewards', 'create'] }
   ];
@@ -480,18 +482,19 @@
   const shopMark = (b, cls) => '<span class="g-face g-face-shop' + (cls ? ' ' + cls : '') + '" style="background:' + b.color + ';color:' + inkOn(b.color) + '">' + shopIcon(b.i) + '</span>';
   const dockGroups = () => partnerOn() ? DOCK_GROUPS.filter(g => PARTNER_TABS.includes(g.id)) : bizOn() ? BIZ_TABS.map(id => ({ id })) : DOCK_GROUPS;
   const stops = () => partnerOn() ? PARTNER_TABS : bizOn() ? BIZ_TABS : STOPS;
-  const SUB_TEXT = { avatar: 'Dress up your 3D avatar', shop: 'Clothes and how to earn them', profile: 'Stats, inventory and settings',
+  const SUB_TEXT = { games: 'The game store: every game, search and favorites', carts: 'Quick one-tap games: swipe up for the next',
+    avatar: 'Dress up your 3D avatar', shop: 'Clothes and how to earn them', profile: 'Stats, inventory and settings',
     links: 'A link page or 3D world for your socials', rewards: 'A free stamp card for your shop', create: 'Model Kit and free 3D presets',
     dashboard: 'Schedule, recipes, checklists and more', website: 'Your shop\u2019s own website' };
   const groupOf = k => { const find = list => list.find(g => g.id === k || (g.items && g.items.includes(k))); return find(dockGroups()) || find(DOCK_GROUPS) || dockGroups()[0]; };
   // dock icons: the simple set, one colour per tab
   // one colour per section, the same accents theme.js gives each section (Model Kit style)
-  const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], rewards: ['gift', '#FF9F5A'], links: ['share-network', '#5AB0FF'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'],
+  const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], carts: ['device-mobile', '#7EE081'], rewards: ['gift', '#FF9F5A'], links: ['share-network', '#5AB0FF'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'],
     me: ['person', '#FF8FC2'], make: ['magic-wand', '#4FD8C4'], dashboard: ['dashboard', '#9BE338'], website: ['browser', '#5AB0FF'] };
-  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', rewards: '#E0782F', links: '#2F86D6', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E', me: '#E0669E', make: '#25A893', dashboard: '#6FB31C', website: '#2F86D6' };
+  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', carts: '#4FB357', rewards: '#E0782F', links: '#2F86D6', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E', me: '#E0669E', make: '#25A893', dashboard: '#6FB31C', website: '#2F86D6' };
   const dockIcon = k => '<svg class="k-ic k-ic-s" viewBox="0 0 16 16" fill="currentColor" style="color:' + DOCK_SIMPLE[k][1] + '" aria-hidden="true" focusable="false">' + (SIMPLE['dock-' + DOCK_SIMPLE[k][0]] || SIMPLE[DOCK_SIMPLE[k][0]] || '') + '</svg>';
   const DOCK = {};
-  ['home', 'games', 'rewards', 'links', 'create', 'avatar', 'shop', 'profile', 'me', 'make', 'dashboard', 'website'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
+  ['home', 'games', 'carts', 'rewards', 'links', 'create', 'avatar', 'shop', 'profile', 'me', 'make', 'dashboard', 'website'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
   const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
   const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
   const fsOk = () => !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
@@ -515,7 +518,7 @@
     if (!ptb) top.innerHTML = (partner ? '<a class="g-logo k-glass is-brand is-partner" href="' + url(partner.app) + '" aria-label="' + esc(partner.n) + ': open their app"><img class="g-partner-logo" alt="' + esc(partner.n) + '" src="' + url(partner.logo) + '">' + (partner.demo ? '<span class="g-partner-demo">Demo</span>' : '') + '</a>'
       : brand ? '<a class="g-logo k-glass is-brand" href="' + url('') + '" aria-label="' + esc(brand.n) + ' home"><span class="g-brand-mark" aria-hidden="true">' + shopIcon(brand.i) + '</span><span class="g-brand-name">' + esc(brand.n) + '</span></a>'
         : '<a class="g-logo k-glass" href="' + url(biz ? 'business/' : '') + '" aria-label="' + (biz ? 'Your dashboard' : 'Grug home') + '">' + LOGO + '<span>Grug</span></a>') +
-      '<div class="g-title k-glass" aria-hidden="true"><small>' + esc(((DOCK_GROUPS.find(g => g.id === (opts.dockAs || groupOf(active).id)) || {}).label) || (pageTitle === navLabel ? (brand ? brand.n : 'Grug') : navLabel)) + '</small><b>' + esc(pageTitle) + '</b></div>' +
+      '<div class="g-title k-glass" aria-hidden="true"><small>' + esc((active !== 'games' && (DOCK_GROUPS.find(g => g.id === (opts.dockAs || groupOf(active).id)) || {}).label) || (pageTitle === navLabel ? (brand ? brand.n : 'Grug') : navLabel)) + '</small><b>' + esc(pageTitle) + '</b></div>' +
       '<div class="g-status k-glass"><a class="g-pts" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('pearl') + '<span class="num">' + fmt(pearlBalance()) + '</span><span class="g-plus" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M6 2.5v7M2.5 6h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></a></div>' +
       (fsOk() ? '<button type="button" class="g-fs k-glass" aria-label="Full screen" aria-pressed="false">' + icon('arrows-out') + '</button>' : '') +
       '<button type="button" class="g-me" aria-label="' + (biz ? esc(biz.n) + ': restaurant account menu' : 'Your account menu') + '" aria-haspopup="menu" aria-expanded="false">' + faceImg + '</button>';
@@ -529,7 +532,7 @@
     const paintTabs = () => { tabs.innerHTML = '<span class="k-sb l" aria-hidden="true">LB</span><span class="k-sb r" aria-hidden="true">RB</span>' +
       dockGroups().map(g => { const on = g.id === here;
         if (!g.items) { const n = navOf(g.id); return '<a href="' + url(n[3]) + '" ' + tabStyle(g.id, on) + (on ? ' aria-current="page"' : '') + '>' + DOCK[g.id] + '<span>' + n[1] + '</span></a>'; }
-        const cur = on ? navOf(active) : null;
+        const cur = on && active !== g.id ? navOf(active) : null;
         return '<button type="button" class="g-grp" data-grp="' + g.id + '" aria-haspopup="menu" aria-expanded="false" ' + tabStyle(g.id, on) + (on ? ' aria-current="page"' : '') + '>' + DOCK[on ? active : g.id] +
           '<span>' + esc(g.label) + (cur ? '<i> · ' + esc(cur[1]) + '</i>' : '') + '</span><svg class="g-grp-up" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 5l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'; }).join(''); };
     paintTabs(); chromeTabs = paintTabs;
