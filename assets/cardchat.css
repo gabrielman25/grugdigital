@@ -16,7 +16,7 @@ body.cc-page{min-height:0}
 .cc-top button[hidden]{display:inline-flex;visibility:hidden}
 
 /* the conversation */
-.cc-log{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:18px;padding:8px 2px 18px;scrollbar-width:thin}
+.cc-log{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:18px;padding:8px 2px 18px}
 .cc-log>:first-child{margin-top:auto}
 .cc-a{display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;align-items:start;animation:cc-fade .3s ease both}
 /* the assistant's picture: the Grug stegosaurus (Grug.LOGO), which bobs and nods while it "thinks" */

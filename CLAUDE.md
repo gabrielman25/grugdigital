@@ -24,6 +24,9 @@ in `grug.css` (`--page`, `--card-solid`, `--card`, `--ink`, `--line` …): never
   plain cursors (default, pointer, not-allowed, grab, grabbing, wait) in stylesheets and in code (`el.style.cursor = …`), so
   a page or game that picks its own cursor (an image, `none`, crosshair…) keeps it. Write `cursor:pointer` as usual.
   Left out on purpose: shops' own websites (`site/`, `work/`), which aren't Grug pages.
+- **Scrollbars** are a thin rounded pill everywhere (grug.css; cursors.js for games and partner apps; a shop's website uses its
+  own colour). Don't set `scrollbar-width` / `scrollbar-color` except inside `@supports not selector(::-webkit-scrollbar)`:
+  Chrome drops the custom bar when they're set.
 - **The blue smoky fog (`assets/fogbg.js`) is only for the Games section** (`games/` and `games/<id>/`) **in dark mode**,
   where the FOSSIL32 boxes float in it, with small solid 3D cubes in Grug colours tumbling in the fog (no glowing orbs).
   In light mode (and partner mode) the Games pages are a plain white page with black text and nothing floating: the
@@ -250,6 +253,13 @@ account is in use, the active shop, and each shop's card text and website fields
   empty fields are left off the page. Its public address is `site/#s=<payload>` (the whole site rides in the link,
   deflated), and **Download** gives one self-contained `index.html` (Google Fonts) for any web host.
 - Profile export carries `grug.business.v1` and the dashboard's `daypart:*` keys.
+- **The owners' link** (`restaurant/`, the one to hand restaurant owners): one screen asks the restaurant's name and what it
+  serves while their rewards card and website draw live beside it, and one tap makes the card, the website and the restaurant
+  account, then opens the dashboard with example data in every app and a **tour** (`tourSteps()` in `business/index.html`:
+  one stop per part, ending on the menu; "Take the tour" in the menu replays it, `?tour=1` starts it). Optional
+  `?name=…&type=c|t|b|f|k|o&owner=<first name>` fills it in and builds straight away (`?c=<card code>` uses a whole card).
+  An owner who already has a restaurant account on the device goes straight to the dashboard. When a dashboard part is
+  added or renamed, update the tour.
 
 ## Rewards card builder (`rewards/create/`)
 

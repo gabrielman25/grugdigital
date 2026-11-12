@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<script>/* a returning owner (a restaurant account on this phone, and a plain link) goes straight to the dashboard */
+(function(){try{var q=location.search,b=JSON.parse(localStorage.getItem('grug.business.v1')||'null');
+  if(!/[?&](name|type|c)=/.test(q)&&b&&b.active&&b.shops&&b.shops[b.active]){b.mode='business';localStorage.setItem('grug.business.v1',JSON.stringify(b));location.replace('../business/')}}catch(e){}})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Grug for restaurants</title>
+<meta name="description" content="A rewards card that brings guests back, a website made from it, and a dashboard for your team and kitchen. Free, and ready in one tap.">
+<meta name="theme-color" content="#F3F3F5">
+<link rel="icon" href="../favicon.png">
+<link rel="stylesheet" href="../assets/grug.css">
+<link rel="stylesheet" href="../assets/rewards.css">
+<style>
+/* Grug for restaurants: the link we hand restaurant owners (restaurant/, optionally ?name=…&type=c|t|b|f|k|o&owner=…).
+   One screen: their restaurant's name and what it serves, with their rewards card and website drawing live beside the form.
+   One tap makes all three (card, website, dashboard), then the dashboard opens with example data and a tour. */
+:root{--mode:#FF9F5A;--mode-lo:#E0782F;--page:#F3F3F5}
+html,body{background:var(--page)}
+body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.rs{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto 1fr;column-gap:clamp(24px,5vw,72px);row-gap:clamp(18px,3vw,28px);align-items:center;width:min(1180px,100%);margin:0 auto;padding:clamp(20px,4vw,48px) 20px 40px}
+@media(max-width:900px){.rs{grid-template-columns:1fr;grid-template-rows:none;align-items:start;padding-top:16px;row-gap:14px}}
+.rs-mark{display:inline-flex;align-items:center;gap:10px;font:600 18px/1 var(--font);color:var(--ink);text-decoration:none;grid-column:1/-1;justify-self:start}
+.rs-mark .lg{width:38px;height:38px;border-radius:12px;background:#9BE338;display:grid;place-items:center;box-shadow:0 3px 0 #6FB31C}
+.rs-mark .lg svg{width:26px;height:26px}
+.rs-mark small{font-weight:500;color:var(--ink2)}
+.rs h1{font:600 clamp(32px,4.6vw,54px)/1.04 var(--font);letter-spacing:-.02em;margin:0;max-width:13ch}
+.rs .lede{font-size:clamp(17px,1.6vw,19px);line-height:1.5;color:var(--ink2);margin:14px 0 22px;max-width:34em}
+.rs-form{background:var(--card-solid);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:24px;padding:22px}
+.rs-form label{display:block;font-weight:600;font-size:15px;margin:0 0 8px}
+.rs-name{width:100%;min-height:58px;border-radius:16px;border:2px solid var(--line2);background:#fff;padding:0 16px;font:600 22px/1 var(--font);color:var(--ink)}
+.rs-name:focus{outline:none;border-color:var(--ink)}
+.rs-kinds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:18px 0 20px}
+.rs-kind{display:flex;align-items:center;gap:10px;min-height:52px;padding:0 12px;border-radius:14px;border:2px solid var(--line);background:#fff;font:600 15px/1.1 var(--font);color:var(--ink);text-align:left}
+.rs-kind .k{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;background:var(--k);color:var(--k-ink)}
+.rs-kind .k svg{width:19px;height:19px}
+.rs-kind[aria-checked=true]{border-color:var(--ink);box-shadow:0 3px 0 var(--ink)}
+.rs-kind:focus-visible,.rs-go:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+@media(max-width:420px){.rs-kinds{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.rs-go{width:100%;min-height:60px;border:0;border-radius:16px;background:var(--mode);color:#1E1B16;font:600 20px/1 var(--font);box-shadow:0 4px 0 var(--mode-lo);display:flex;align-items:center;justify-content:center;gap:10px}
+.rs-go svg{width:24px;height:24px;flex:none}
+.rs-go:active{transform:translateY(3px);box-shadow:0 1px 0 var(--mode-lo)}
+.rs-go[disabled]{opacity:.45;box-shadow:none}
+.rs-fine{font-size:14px;color:var(--ink2);margin:12px 2px 0}
+/* the stage: their card and their website, drawn as they type */
+.rs-stage{position:relative;min-height:560px;grid-column:2;grid-row:2}
+.rs-copy{grid-column:1;grid-row:2}
+@media(max-width:900px){.rs-stage,.rs-copy{grid-column:auto;grid-row:auto}}
+.rs-phone{position:absolute;right:0;top:0;width:300px;height:560px;border-radius:38px;background:#1E1B16;padding:10px;box-shadow:0 30px 60px -30px rgba(20,20,40,.45)}
+.rs-phone .scr{width:100%;height:100%;border-radius:29px;overflow:hidden;background:#fff;position:relative}
+.rs-phone iframe{position:absolute;left:0;top:0;width:400px;height:720px;border:0;transform:scale(.7);transform-origin:0 0;pointer-events:none}
+.rs-card{position:absolute;left:0;bottom:30px;width:min(330px,62%);transform:rotate(-4deg);filter:drop-shadow(0 18px 26px rgba(20,20,40,.22))}
+.rs-card .rw-pass{width:100%}
+.rs-tag{position:absolute;z-index:2;display:inline-flex;align-items:center;gap:7px;font:600 14px/1 var(--font);color:var(--ink);background:#fff;border-radius:99px;padding:8px 12px 8px 9px;box-shadow:var(--shadow)}
+.rs-tag i{width:20px;height:20px;border-radius:7px;display:grid;place-items:center;background:var(--t)}.rs-tag i svg{width:13px;height:13px}
+.rs-tag.c{left:8px;bottom:6px}.rs-tag.w{right:18px;top:-14px}
+@media(max-width:900px){.rs-stage{min-height:0}.rs-phone,.rs-tag.w{display:none}.rs-card{position:relative;left:auto;bottom:auto;width:min(290px,80%);margin:0 auto 6px;transform:rotate(-2deg)}.rs-tag.c{display:none}}
+/* the build: three rows tick over, then the dashboard opens */
+.rs-build{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.rs-build li{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:18px;background:var(--card-solid);border:1px solid var(--line);box-shadow:var(--shadow);opacity:.45;transition:opacity .3s}
+.rs-build li.on,.rs-build li.ok{opacity:1}
+.rs-build .ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--t);box-shadow:0 3px 0 var(--tl);color:#1E1B16;flex:none}
+.rs-build .ic svg{width:26px;height:26px}
+.rs-build b{display:block;font-size:18px}.rs-build small{display:block;color:var(--ink2);font-size:14.5px;margin-top:2px}
+.rs-build .st{margin-left:auto;width:28px;height:28px;flex:none;display:grid;place-items:center}
+.rs-build li.on .st::before{content:"";width:20px;height:20px;border-radius:50%;border:3px solid var(--line2);border-top-color:var(--ink);animation:rs-spin .7s linear infinite}
+.rs-build li.ok .st{background:#1E1B16;color:#fff;border-radius:50%}.rs-build li.ok .st svg{width:16px;height:16px}
+@keyframes rs-spin{to{transform:rotate(360deg)}}
+.rs-open{margin-top:18px}
+@media(prefers-reduced-motion:reduce){.rs-build li.on .st::before{animation:none}}
+</style>
+</head>
+<body>
+<main class="rs" id="rs">
+  <a class="rs-mark" id="mark" href="../"><span class="lg" id="lg"></span>Grug <small>for restaurants</small></a>
+  <aside class="rs-stage" aria-hidden="true">
+    <span class="rs-tag w"><i style="--t:#5AB0FF" id="tagW"></i>Your website</span>
+    <div class="rs-phone"><div class="scr"><iframe id="pv" title="" tabindex="-1" sandbox="allow-same-origin"></iframe></div></div>
+    <div class="rs-card" id="card"></div>
+    <span class="rs-tag c"><i style="--t:#FF9F5A" id="tagC"></i>Your rewards card</span>
+  </aside>
+  <section class="rs-copy" id="copy" aria-live="polite"></section>
+</main>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="../assets/games.js"></script>
+<script src="../assets/grug.js"></script>
+<script src="../assets/rewards.js"></script>
+<script src="../assets/business.js"></script>
+<script>
+(function () {
+  const G = Grug, RW = GrugRewards, B = GrugBusiness, esc = G.esc, $ = s => document.querySelector(s);
+  const q = new URLSearchParams(location.search);
+  const KIND_ORDER = ['f', 'c', 't', 'b', 'k', 'o'];
+  const state = { n: (q.get('name') || '').trim().slice(0, 28), t: RW.KINDS[q.get('type')] ? q.get('type') : '', owner: (q.get('owner') || '').trim().slice(0, 40) };
+  // a full card in the link (?c=…) sets everything, as the card builder made it
+  const fromLink = q.get('c') && RW.decode(q.get('c'));
+  if (fromLink) { state.n = fromLink.n; state.t = fromLink.t; }
+  const cfg = () => fromLink || RW.normalize({ n: state.n || 'Your restaurant', t: state.t || 'f', j: 1 });
+  const svg = (k, d) => '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">' + (window.GRUG_ICONS_SIMPLE[k] || '') + '</svg>';
+  $('#lg').innerHTML = G.LOGO;
+  $('#tagW').innerHTML = svg('browser'); $('#tagC').innerHTML = svg('gift');
+
+  /* ---------- the live stage ---------- */
+  const abs = p => new URL(G.url(p), location.href).href;
+  let pvT = 0;
+  function stage() {
+    const c = cfg(), code = RW.encode(c);
+    $('#card').innerHTML = RW.passHtml(c, 2);
+    clearTimeout(pvT); pvT = setTimeout(() => { $('#pv').srcdoc = B.siteHtml(code, B.starterSite(c), { fontsHref: abs('assets/shop-fonts.css'), fredokaUrl: abs('assets/fonts/fredoka.woff2') }); }, 220);
+  }
+
+  /* ---------- the form ---------- */
+  function form() {
+    const n = state.n;
+    $('#copy').innerHTML =
+      '<h1>' + (n ? esc(n) + ', ready in one tap.' : 'Your restaurant, ready in one tap.') + '</h1>' +
+      '<p class="lede">A rewards card that brings guests back, a website made from it, and a dashboard for your team and kitchen. Free, with nothing to install.</p>' +
+      '<form class="rs-form" id="f" novalidate>' +
+        '<label for="nm">Your restaurant’s name</label><input class="rs-name" id="nm" maxlength="28" autocomplete="organization" placeholder="Pebble Boba Bar" value="' + esc(n) + '">' +
+        '<div class="rs-kinds" role="radiogroup" aria-label="What do you serve?">' + KIND_ORDER.map(k => { const K = RW.KINDS[k];
+          return '<button type="button" class="rs-kind" role="radio" data-k="' + k + '" aria-checked="' + (state.t === k) + '" style="--k:' + K.color + ';--k-ink:' + RW.inkOn(K.color) + '"><span class="k">' + RW.iconSvg(K.i) + '</span>' + esc(K.label) + '</button>'; }).join('') + '</div>' +
+        '<button class="rs-go" id="go">' + svg('magic-wand') + '<span id="goTx"></span></button>' +
+        '<p class="rs-fine">Saved on this phone. No sign-up, no app to download.</p></form>';
+    const nm = $('#nm'), go = $('#go');
+    const sync = () => { $('#goTx').textContent = state.n ? 'Set up ' + state.n : 'Set up my restaurant'; go.disabled = !state.n.trim() || !state.t; };
+    nm.addEventListener('input', () => { state.n = nm.value.replace(/\s+/g, ' ').slice(0, 28); sync(); stage(); });
+    $('#f').addEventListener('click', e => { const b = e.target.closest('.rs-kind'); if (!b) return; state.t = b.dataset.k; G.ui.buzz && G.ui.buzz();
+      document.querySelectorAll('.rs-kind').forEach(x => x.setAttribute('aria-checked', String(x === b))); sync(); stage(); });
+    $('#f').addEventListener('submit', e => { e.preventDefault(); if (!state.n.trim()) { nm.focus(); return; } if (!state.t) { document.querySelector('.rs-kind').focus(); return; } build(); });
+    sync(); stage();
+    if (!n) nm.focus({ preventScroll: true }); else if (!state.t) document.querySelector('.rs-kind').focus({ preventScroll: true });
+  }
+
+  /* ---------- the build: card → website → dashboard, then the dashboard opens (with example data and the tour) ---------- */
+  const wait = ms => new Promise(ok => setTimeout(ok, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : ms));
+  async function build() {
+    const c = cfg(), code = RW.encode(c), name = c.n;
+    const ROWS = [
+      ['gift', '#FF9F5A', '#E0782F', 'Rewards card', 'Making your rewards card', 'Ready to print and put by the register'],
+      ['browser', '#5AB0FF', '#2F86D6', 'Website', 'Building your website from it', 'Live, with a link you can share'],
+      ['dashboard', '#9BE338', '#6FB31C', 'Dashboard', 'Setting up your dashboard', 'Team, kitchen and paperwork in one place']];
+    $('#copy').innerHTML = '<h1>Setting up ' + esc(name) + '</h1><p class="lede">This takes a few seconds.</p><ol class="rs-build">' +
+      ROWS.map(r => '<li style="--t:' + r[1] + ';--tl:' + r[2] + '"><span class="ic">' + svg(r[0]) + '</span><span><b>' + r[3] + '</b><small>' + r[4] + '</small></span><span class="st"></span></li>').join('') + '</ol>';
+    const li = Array.from(document.querySelectorAll('.rs-build li'));
+    const tick = (i, done) => { const r = ROWS[i], el = li[i]; el.classList.toggle('on', !done); el.classList.toggle('ok', !!done); el.querySelector('small').textContent = done ? r[5] : r[4]; if (done) el.querySelector('.st').innerHTML = svg('check'); };
+    // the actual work: who's visiting, the card (in My creations), the restaurant account and its website, then which account is in use
+    try { G.setRole && G.setRole('owner'); } catch (e) {}
+    tick(0); await wait(700); RW.saveMine(code); tick(0, true);
+    tick(1); await wait(700); B.fromCard(code); tick(1, true);
+    tick(2); await wait(700); B.setMode('business');
+    try { sessionStorage.setItem('grug.onboard', JSON.stringify({ owner: state.owner })); } catch (e) {}
+    tick(2, true);
+    $('#copy').insertAdjacentHTML('beforeend', '<button class="rs-go rs-open" id="open">' + svg('dashboard') + 'Open my dashboard</button>');
+    $('#open').addEventListener('click', openDash); $('#open').focus({ preventScroll: true });
+    await wait(900); openDash();
+  }
+  let leaving = false;
+  function openDash() { if (leaving) return; leaving = true; location.href = G.url('business/') + '?start=1'; }
+
+  // a link with the name and what they serve sets up straight away; otherwise the form
+  if (fromLink || (state.n && state.t)) { stage(); build(); } else form();
+})();
+</script>
+</body>
+</html>

@@ -138,3 +138,9 @@ a.rw-tile:hover{transform:translateY(-2px)}
 .rw-toast .i .gi{width:20px;height:20px}
 .rw-ring .c .rw-svg{width:46%;height:46%;color:var(--a,#1E1B16)}
 .rw-toast .i{color:var(--a-ink,#1E1B16)}.rw-toast.err .i{color:#fff}.rw-toast.warn .i{color:#1E1B16}
+/* Cards: the same card and drop shadow as the website editor (.g-card in grug.css) and the dashboard's panels, so the
+   three restaurant pages read as one system and the cards stand off the plain page in light mode. Tiles you can tap
+   lift a little more on hover, like the dashboard's app rows. */
+.rw-hero,.rw-feat,.rw-tile,.rw-pearls,.rw-msg{box-shadow:var(--shadow)}
+.rw-tile{transition:transform .2s var(--spring),box-shadow .2s}
+.rw-tile:hover{box-shadow:var(--shadow),0 .6rem 1.6rem rgba(20,20,40,.10)}

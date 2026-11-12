@@ -1,4 +1,4 @@
-/* Grug · the custom cursor, everywhere (cursors.js)
+/* Grug · the custom cursor (and the scrollbar pill), everywhere (cursors.js)
 
    The same outline cursors as the restaurant dashboard (business/, Kenney Cursor Pack, CC0) on every page and game.
    Loaded by theme.js, grug.js and gamekit.js (whichever comes first; it runs once), and by the partner app template.
@@ -63,7 +63,12 @@
     ':where(a[href],area[href],button,summary,select,label,[role=button],[role=link],[role=tab],[role=menuitem],[role=menuitemcheckbox],[role=menuitemradio],[role=option],[role=switch],[role=checkbox],[role=radio],[onclick],' +
       'input:is([type=button],[type=submit],[type=reset],[type=checkbox],[type=radio],[type=color],[type=file],[type=range],[type=image])){cursor:' + VAL.pointer + '}' +
     ':where(input:not([type]),input:is([type=text],[type=email],[type=search],[type=tel],[type=url],[type=password],[type=number],[type=date],[type=time],[type=datetime-local],[type=month],[type=week]),textarea,[contenteditable]:not([contenteditable=false])){cursor:text}' +
-    ':where(:disabled,[aria-disabled=true]){cursor:' + VAL['not-allowed'] + '}';
+    ':where(:disabled,[aria-disabled=true]){cursor:' + VAL['not-allowed'] + '}' +
+    // scrollbars: the site's pill (grug.css has the themed one for site pages; this is for games and partner apps)
+    ':where(*)::-webkit-scrollbar{width:12px;height:12px}:where(*)::-webkit-scrollbar-track,:where(*)::-webkit-scrollbar-corner{background:transparent}' +
+    ':where(*)::-webkit-scrollbar-thumb{background:rgba(128,128,136,.55);border-radius:99px;border:3px solid transparent;background-clip:padding-box;min-height:36px}' +
+    ':where(*)::-webkit-scrollbar-thumb:hover{background-color:rgba(128,128,136,.85);border-width:2px}' +
+    '@supports not selector(::-webkit-scrollbar){:where(*){scrollbar-width:thin;scrollbar-color:rgba(128,128,136,.6) transparent}}';
   function addBase() { const h = doc.head || doc.documentElement; if (!base.isConnected && h) h.insertBefore(base, h.firstChild); }
   addBase(); seen.add(base.sheet);
 

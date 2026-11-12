@@ -213,6 +213,9 @@
       '.where p{display:flex;gap:10px;margin:0 0 14px;align-items:flex-start}.where .ic{margin-top:.25em;color:var(--text)}.where a{color:var(--text);font-weight:600}' +
       'footer{padding-top:56px;padding-bottom:40px;color:var(--mut);font-size:15px}footer p{margin:0}footer a{color:var(--mut)}' +
       '.soc{display:flex;flex-wrap:wrap;gap:18px;margin-bottom:22px}.soc a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:600;color:var(--ink)}.soc .ic{width:22px;height:22px}' +
+      '::-webkit-scrollbar{width:12px;height:12px}::-webkit-scrollbar-track{background:var(--paper)}::-webkit-scrollbar-corner{background:transparent}' +
+      '::-webkit-scrollbar-thumb{background:var(--c);border-radius:99px;border:3px solid var(--paper);min-height:40px}::-webkit-scrollbar-thumb:hover{background:var(--lo)}' +
+      '@supports not selector(::-webkit-scrollbar){html{scrollbar-width:thin;scrollbar-color:var(--c) var(--paper)}}' +
       '@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}';
     const fontLink = opts.fonts === 'google'
       ? '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=' + GOOGLE.f + (cfg.f !== 'f' && GOOGLE[cfg.f] ? '&family=' + GOOGLE[cfg.f] : '') + '&display=swap">'

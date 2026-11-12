@@ -530,12 +530,14 @@ html::-webkit-scrollbar{width:0;height:0;display:none}
 .k-sbar i{position:absolute;right:2px;width:6px;border-radius:99px;background:color-mix(in srgb,var(--ink) 34%,transparent);transition:width .15s ease,background .15s ease,right .15s ease;cursor:grab}
 .k-sbar:hover i,.k-sbar.hold i{width:9px;right:1px;background:linear-gradient(var(--sel-a),var(--sel-b))}
 .k-sbar.hold i{cursor:grabbing}
-/* scrolling boxes inside pages: thin, themed */
-*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--ink) 30%,transparent) transparent}
-*::-webkit-scrollbar{width:8px;height:8px}
-*::-webkit-scrollbar-track{background:transparent}
-*::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--ink) 30%,transparent);border-radius:99px;border:2px solid transparent;background-clip:padding-box}
-*::-webkit-scrollbar-thumb:hover{background:linear-gradient(var(--sel-a),var(--sel-b));background-clip:padding-box}
+/* scrolling boxes inside pages: the same pill as the page's own bar (.k-sbar), filling with the section's accent when
+   it's held or hovered. Chrome and Safari draw it from the ::-webkit-scrollbar rules, which they ignore on any element that
+   also has scrollbar-width / scrollbar-color, so those two are only set where the pill can't be drawn (Firefox). */
+*::-webkit-scrollbar{width:12px;height:12px}
+*::-webkit-scrollbar-track,*::-webkit-scrollbar-corner{background:transparent}
+*::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--ink) 34%,transparent);border-radius:99px;border:3px solid transparent;background-clip:padding-box;min-height:36px}
+*::-webkit-scrollbar-thumb:hover,*::-webkit-scrollbar-thumb:active{background-color:var(--mode);border-width:2px}
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--ink) 34%,transparent) transparent}}
 
 /* ---------- UI size (Settings): a zoom on the page's UI; the fog and the 3D box stage stay as they are ---------- */
 :root{--g-ui:1}
