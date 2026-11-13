@@ -107,3 +107,5 @@ html.f32-lock #g-fog,html.f32-lock body>main,html.f32-lock .g-top,html.f32-lock 
   .f32-credit{display:none}
 }
 @media (prefers-reduced-motion:reduce){.f32-white,.f32-panel,.f32-focus{transition:none}}
+/* a mature game's 18+ tag in the game panel (Grug.age; the box draws its own plain 18+ label) */
+.f32-chips .g-rated{background:#F1F5F9;color:#1E1B16;border:0;border-radius:7px;font:700 13px/1 "Outfit",system-ui,sans-serif;padding:7px 9px;margin:0;height:auto}

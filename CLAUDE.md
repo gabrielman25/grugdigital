@@ -41,6 +41,40 @@ way until the owner says a business has agreed in writing.
 - The picture prints (`assets/prints/`: the 10 quick prints and the icon pack) were removed; the avatar's chest prints are
   the drawn shapes only. Don't bring picture prints back without a licence on file.
 
+## Mature games and the games onboarding
+
+- **What's allowed:** a game may be rated mature for violence, horror, strong language or suggestive themes only.
+  Sexually explicit games are never accepted on this site (Stripe, GitHub and age-verification laws). The age check is
+  a neutral age screen on the device, not ID verification. There is still no server and no account.
+- **Rating fields** (`assets/games.js`, documented at its top; `assets/carts.js` takes the same): `rating: 'mature'` and
+  `contains: ['Violence', ...]`. Everything goes through **`Grug.age`** in `assets/grug.js` (`birthday()`, `isAdult()`,
+  `canSee(g)`, `tag(g)`, `setBirthday(s)`); never do age maths anywhere else. `Grug.partnerAllows(g)` includes `canSee`,
+  so every list that already uses it (store rows, featured, Discovery Queue, Browse all and search, Favorites, the home
+  carousel, recommendations, the stamp card page) hides mature games where they can't be shown.
+- **Adults** see a mature game everywhere like any other, with an **18+ tag** (`Grug.age.tag`, `.g-rated`: a plain label,
+  never imagery) on its card, box (the 3D box draws its own plain "18+" label, `tools/fossil32/src/fossil32.js`) and game
+  page, which also lists `contains`. **Under 18**, or with no birthday, it is hidden everywhere, and its `games/<id>/` and
+  `play/<id>/` pages show "This game isn't available" with a way back to the store (`Grug.ui.unavailable`); the game frame
+  never loads. **Shop mode and partner mode never show one**, whatever the age (the partner apps' shelf filters them too:
+  `tools/partner-app/src/app.html`). The Discord feed (`Grug.announce`) and the link previews (`tools/og/build.js`) never
+  feature one.
+- **The birthday** lives in `profile.prefs.birthday` ('YYYY-MM-DD') on the device only. Settings (and Profile) show it and
+  change it (`Grug.ui.birthdayHtml`). **The change rule:** a birthday under 18 can be raised to 18+ once per device (for
+  typos); after that it can only go down until the site's data is cleared. Lowering is always allowed. The per-device record
+  is `grug.age.v1` (`{bd, raised}`), which Start over and a profile import don't reset (Start over keeps the birthday; an
+  import that would raise it a second time is put back). Change the rule in `setBirthday` / `syncAge` in grug.js.
+- **The games onboarding** (`games/welcome/?next=…`): the first time a device opens anything games-related (`games/` and
+  everything under it, a game's `play/<dir>/`, a shared direct link, the home page's Play buttons, the dock's Games tab), it
+  goes through five screens first: the character's body (the avatar editor's bodies only), the player's own birthday (no
+  default year, nothing said about what it unlocks), a top, a bottom (from the closet they own, on either garment), then on
+  to where they were going (the store by default). Steps 1, 3 and 4 change the saved avatar straight away. Finished =
+  `profile.seen.onboarded` plus a birthday; it never shows again. Settings → Your character → **Set up again** replays it
+  (`&redo=1`). `Grug.onboard` (grug.js) has the gate; `fossil32.js` asks it before a Play boots the console. Pages inside a
+  frame (the showcase) skip it. `games/carts/` has no grug.js, so it loads `assets/onboard-gate.js` (the same check): that
+  line was patched into the built feed by hand, **add it to `grug-game-kit/micro` before the next build**.
+- **The placeholder** `placeholder18` (games.js, `games/placeholder18/`, `play/placeholder18/`, `assets/boxart/placeholder18.jpg`)
+  is a blank 18+ game for previewing all of this. Remove those four before launch.
+
 ## The restaurant dashboard's notices (`business/index.html`)
 
 - `LEGAL` holds one plain warning per record-keeping app (schedule, clock, team, temps, checklists, expirations,

@@ -19,6 +19,14 @@
    thumb     = a flat picture for anything that isn't a box (point it at the box art).
    tags      = 3-5 genre words for the store (games/): its categories, tag filters, "more like this" and recommendations.
                Reuse words other games already have where they fit, so the filters stay short.
+
+   Ratings (Grug.age in grug.js; CLAUDE.md "Mature games and the games onboarding"):
+   rating    = 'mature' for a game that is for players 18 and over (violence, horror, strong language or suggestive
+               themes only: sexually explicit games are never accepted on this site). Leave it out for everyone else.
+   contains  = what's in a mature game, shown on its game page: ['Violence', 'Horror themes', 'Strong language', ...]
+   A mature game shows only to a player whose birthday (asked in the games onboarding, saved on the device) makes them
+   18+, never in shop mode or partner mode, and carries an "18+" tag on its card, box and page. Everyone else never sees
+   it, and its pages say "This game isn't available". It gets no link preview (tools/og/build.js) and no Discord note.
 */
 window.GRUG_GAMES = [
   {
@@ -275,6 +283,28 @@ window.GRUG_GAMES = [
     ],
     box: { code: 'GD-0011', shell: '#F6C445', players: '1P', region: 'KATY, TX', font: 'Righteous', fill: ["#FFF6C2", "#F6C445"],
            art: 'assets/boxart/takeatea.jpg', shots: ['assets/boxart/shots/takeatea-1.jpg'] }
+  },
+  {
+    // PLACEHOLDER, REMOVE BEFORE LAUNCH: a blank 18+ game so the age-aware catalog and the games onboarding can be
+    // previewed end to end. It has no game (play/placeholder18/game.html is a plain screen) and plain flat cover art.
+    // To remove it: delete this entry, games/placeholder18/, play/placeholder18/ and assets/boxart/placeholder18.jpg.
+    id: 'placeholder18', app: 'placeholder18', original: true, placeholder: true,
+    rating: 'mature', contains: ['Violence', 'Horror themes', 'Strong language'],
+    title: 'Placeholder 18+ Game', appTitle: 'Placeholder 18+ game', subtitle: 'Not a real game', kind: 'Placeholder', status: 'preview',
+    tags: ['Placeholder'],
+    partner: 'Grug Original', place: 'Plays anywhere',
+    blurb: 'A blank stand-in for an 18+ game, here only to preview how mature games show up. There is no game yet.',
+    long: 'A placeholder, not a real game. It is here so the store, the game pages and the 18+ tag can be checked before a real mature game is added, and it will be removed before launch. Opening it shows a plain screen.',
+    play: 'play/placeholder18/', game: 'play/placeholder18/', save: 'grug-placeholder18-v1', storageKey: '', old: '',
+    thumb: 'assets/boxart/placeholder18.jpg', color: '#475569', ink: '#FFFFFF',
+    avatar: 'No game yet, so no avatar', earn: 'Nothing to buy: this is a placeholder',
+    features: [
+      "A blank screen: there is no game here yet",
+      "Shows how an 18+ game appears in the store",
+      "Will be removed before launch"
+    ],
+    box: { code: 'GD-0035', shell: '#64748B', players: '1P', region: 'WORLDWIDE', font: 'Bowlby One', fill: ["#F1F5F9", "#94A3B8"],
+           art: 'assets/boxart/placeholder18.jpg', shots: [] }
   }
 ];
 

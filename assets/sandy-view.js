@@ -57,6 +57,8 @@
     if (!r.sandy) { r.sandy = await r.K.create(c); r.scene.add(r.sandy.object3d); } else { r.sandy.apply(c, true); if (r.sandy.ready) await r.sandy.ready; }
     if (r.K.customReady) await r.K.customReady();   // custom clothing templates still loading
     if (r.K.decalReady) await r.K.decalReady();     // chest print images still loading
+    // the male body's face is a picture that loads by itself: wait for it (up to 2 s), or the first shot of him has no face
+    if (c.body === 'male' && typeof root.faceTexture === 'function') { const t = root.faceTexture('male'); for (let k = 0; k < 80 && t && !t.image; k++) await new Promise(ok => setTimeout(ok, 25)); }
     r.sandy.play((o && o.anim) || 'idle');
     for (let i = 0; i < 40; i++) r.sandy.update(((o && o.animT) || 0.6) / 40);   // settle the pose
     r.renderer.setSize(F.w, F.h, false); r.cam.aspect = F.w / F.h; r.cam.updateProjectionMatrix();

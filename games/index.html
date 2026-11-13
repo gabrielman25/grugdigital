@@ -71,6 +71,7 @@
 a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-sel)}
 .st-made{display:flex;align-items:center;gap:6px;color:var(--mut);font-weight:600;font-size:14px}
 .st-made .gi{width:16px;height:16px;flex:none}
+.st-made .g-rated{margin-left:4px;height:20px;min-width:30px;font-size:11.5px}
 .st-badge{display:inline-flex;align-items:center;min-height:24px;padding:0 9px;border-radius:7px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--mode);color:var(--on-sel)}
 .st-badge.demo{background:var(--gold);color:#1E1B16}
 .st-badge.legacy{background:#6b7280;color:#fff}
@@ -308,6 +309,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
 <script>
 (function(){
   const G = Grug, esc = G.esc, $ = s => document.querySelector(s), $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
+  if (G.onboard.away) return;   // first visit: off to the games onboarding (games/welcome/), which comes back here
   G.ui.chrome('games');
   // the @icons set: the site's (Grug.icon) plus search / sliders / tag, which only the Create library's set has
   const MK = window.MK_ICONS || {};
@@ -320,7 +322,8 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
   const ALL = G.GAMES.filter(g => g.listed !== false && G.partnerAllows(g));   // partner mode: every standalone game, the partner's own first
   // the Carts (assets/carts.js): quick one-tap games in the swipe feed (carts/). They show up in search, the search box
   // and their own row on the store; tapping one opens the feed on it. Ids get a 'cart-' prefix so they never meet a game's.
-  const CARTS = (window.GRUG_CARTS || []).map(c => Object.assign({}, c, { id: 'cart-' + c.id, cid: c.id, cart: true, original: true, status: 'live', kind: 'Cart',
+  // (a cart can carry rating: 'mature' too: Grug.age decides, the same as for games)
+  const CARTS = (window.GRUG_CARTS || []).filter(c => G.age.canSee(c)).map(c => Object.assign({}, c, { id: 'cart-' + c.id, cid: c.id, cart: true, original: true, status: 'live', kind: 'Cart',
     partner: 'Grug', place: '', app: 'cart-' + c.id, thumb: 'assets/carts/' + c.id + '.jpg' }));
   const EVERY = ALL.concat(CARTS);   // what search looks through
   const microBest = (() => { try { return (JSON.parse(localStorage.getItem('grug.micro.v1') || '{}').best) || {}; } catch (e) { return {}; } })();
@@ -336,7 +339,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
   const lastId = (ALL.find(g => g.app === st.lastGame && g.status !== 'legacy') || {}).id || '';
   const status = g => g.cart ? ['live', 'Cart'] : g.status === 'legacy' ? ['legacy', 'Classic'] : g.status === 'live' ? ['live', 'Live'] : ['demo', 'Demo'];
   const madeFor = g => g.cart ? '<span class="st-made">' + G.icon('device-mobile') + 'Cart · ' + (g.controls === 'hold' ? 'Hold' : 'Tap') + ' · ' + esc(g.len) + '</span>'
-    : '<span class="st-made">' + G.icon(g.original ? 'sparkle' : 'storefront') + esc(g.original ? 'Grug original' : g.partner) + '</span>';
+    : '<span class="st-made">' + G.icon(g.original ? 'sparkle' : 'storefront') + esc(g.original ? 'Grug original' : g.partner) + G.age.tag(g, 'st-rated') + '</span>';   // a mature game's 18+ tag rides on this line everywhere
   const badge = g => { const s = status(g); return '<span class="st-badge ' + s[0] + '">' + s[1] + '</span>'; };
   const you = g => { const p = plays(g), b = best(g);
     return p || b ? '<div class="st-you">' + (p ? '<span>' + G.icon('game-controller') + G.fmt(p) + (p === 1 ? ' run' : ' runs') + '</span>' : '') + (b ? '<span>' + G.icon('trophy') + 'best ' + G.fmt(b) + '</span>' : '') + '</div>'
@@ -736,7 +739,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     const v = q.value.trim(); sel = -1;
     if (!v) { sugg.classList.remove('on'); sugg.parentElement.setAttribute('aria-expanded', 'false'); return; }
     const hits = EVERY.map(g => [g, score(g, v)]).filter(x => x[1] >= 4).sort((a, b) => b[1] - a[1]).slice(0, 5).map(x => x[0]);
-    sugg.innerHTML = hits.map(g => '<a role="option" href="' + gameHref(g) + '"><img src="' + pic(g) + '" alt=""><span><b>' + esc(g.title) + '</b><small>' + esc(g.cart ? 'Cart' : g.original ? 'Grug original' : g.partner) + ' · ' + esc(tagsOf(g).slice(0, 2).join(', ')) + '</small></span></a>').join('') +
+    sugg.innerHTML = hits.map(g => '<a role="option" href="' + gameHref(g) + '"><img src="' + pic(g) + '" alt=""><span><b>' + esc(g.title) + G.age.tag(g) + '</b><small>' + esc(g.cart ? 'Cart' : g.original ? 'Grug original' : g.partner) + ' · ' + esc(tagsOf(g).slice(0, 2).join(', ')) + '</small></span></a>').join('') +
       '<a role="option" class="all" href="' + searchHref({ q: v }) + '">' + (hits.length ? 'See every result for “' + esc(v) + '”' : 'No games match “' + esc(v) + '” · browse all') + '</a>';
     sugg.classList.add('on'); sugg.parentElement.setAttribute('aria-expanded', 'true');
   }

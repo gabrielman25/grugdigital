@@ -3,9 +3,16 @@ window.GrugGamePage = function (id) {
   const G = Grug, C = GrugCatalog, $ = s => document.querySelector(s);
   const g = G.GAMES.find(x => x.id === id);
   if (!g) { document.body.innerHTML = '<p style="padding:40px;font:600 18px sans-serif">That game isn’t on the list. <a href="' + G.url('games/') + '">All games</a></p>'; return; }
+  if (G.onboard.away) return;   // first visit: off to the games onboarding (games/welcome/), which comes back here
+  // a mature game where it can't be shown (under 18, shop mode, partner mode): a polite screen, no game (Grug.age)
+  if (!G.age.canSee(g)) {
+    document.title = 'Not available · Grug'; G.ui.chrome('games');
+    const na = document.createElement('main'); na.className = 'wrap'; document.body.insertBefore(na, document.querySelector('.g-tabs')); G.ui.unavailable(na); return;
+  }
   document.title = g.title + ' · Grug';
   G.ui.chrome('games');
   G.ensureSnaps();
+  const contains = G.age.contains(g);
   const p = G.points().find(x => x.game.id === g.id);
   const st = G.profile.stats;
   const plays = +(st.plays[g.app] || 0), best = Math.max(+(st.best[g.app] || 0), p ? p.best : 0);
@@ -16,9 +23,9 @@ window.GrugGamePage = function (id) {
     '<a class="gp-back" href="' + G.url('games/') + '">' + G.icon('arrow-left') + 'Store</a>' +
     '<section class="gp-hero">' +
       // the cover is the game's FOSSIL32 box (assets/fossil32/): tap it to pull out the cartridge
-      '<div class="gp-cover f32-tile" data-f32="' + g.id + '" role="button" tabindex="0" aria-label="Open the ' + G.esc(g.title) + ' cartridge"><div class="f32-stage"><span class="badge ' + (legacy ? 'legacy' : live ? 'live' : 'soon') + '"' + (legacy ? ' style="background:#6b7280;color:#fff"' : '') + '>' + (legacy ? 'Classic' : live ? 'Live' : 'Demo') + '</span><img class="f32-flat" src="' + G.url((g.box && g.box.art) || g.thumb) + '" alt=""></div></div>' +
+      '<div class="gp-cover f32-tile" data-f32="' + g.id + '" role="button" tabindex="0" aria-label="Open the ' + G.esc(g.title) + ' cartridge"><div class="f32-stage"><span class="badge ' + (legacy ? 'legacy' : live ? 'live' : 'soon') + '"' + (legacy ? ' style="background:#6b7280;color:#fff"' : '') + '>' + (legacy ? 'Classic' : live ? 'Live' : 'Demo') + '</span>' + G.age.tag(g, 'f32-rated') + '<img class="f32-flat" src="' + G.url((g.box && g.box.art) || g.thumb) + '" alt=""></div></div>' +
       '<div class="gp-head">' +
-        '<h1>' + G.esc(g.title) + '</h1>' + (g.subtitle ? '<p class="gp-sub">' + G.esc(g.subtitle) + '</p>' : '') +
+        '<h1>' + G.esc(g.title) + G.age.tag(g) + '</h1>' + (g.subtitle ? '<p class="gp-sub">' + G.esc(g.subtitle) + '</p>' : '') +
         '<div class="row mut"><span class="g-chip">' + G.icon(g.original ? 'sparkle' : 'storefront') + G.esc(g.partner) + '</span><span class="g-chip">' + G.icon('game-controller') + G.esc(g.kind) + '</span><span class="g-chip">' + G.icon('map-pin') + G.esc(g.place) + '</span></div>' +
         (g.tags && g.tags.length ? '<div class="gp-tags">' + g.tags.map(t => '<a href="' + G.url('games/') + '#search?tags=' + encodeURIComponent(t) + '">' + G.esc(t) + '</a>').join('') + '</div>' : '') +
         '<p class="lead">' + G.esc(g.blurb) + '</p>' +
@@ -35,6 +42,8 @@ window.GrugGamePage = function (id) {
     '</section>' +
     '<section class="g-section"><div class="g-section-h"><h2>About</h2></div><p class="gp-long">' + G.esc(g.long) + '</p>' +
       (g.features && g.features.length ? '<ul class="gp-feats">' + g.features.map(f => '<li>' + G.esc(f) + '</li>').join('') + '</ul>' : '') +
+      // a mature game says what's in it (games.js contains)
+      (G.age.isMature(g) ? '<div class="gp-rating">' + G.age.tag(g) + '<span><b>For players 18 and over</b>' + (contains.length ? 'Contains: ' + contains.map(G.esc).join(', ') : '') + '</span></div>' : '') +
       '<div class="gp-facts"><div>' + G.icon('smiley') + '<span><b>Your avatar</b>' + G.esc(g.avatar) + '</span></div><div>' + G.icon(g.original ? 'pearl' : 'coins') + '<span><b>' + (g.original ? 'Power-ups' : 'Earning points') + '</b>' + G.esc(g.earn) + '</span></div></div></section>' +
     (items.length ? '<section class="g-section"><div class="g-section-h"><h2>Custom clothing from ' + G.esc(C.APPS[g.app].short) + '</h2><a href="' + G.url('shop/') + '">Shop</a></div><div class="g-items" id="gpItems">' + items.map(it => G.ui.itemTile(it)).join('') + '</div></section>' : '');
   document.body.insertBefore(main, document.querySelector('.g-tabs'));

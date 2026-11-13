@@ -718,3 +718,24 @@ html.g-chrome-light :is(.g-top .k-glass,button.g-me,.g-tabs){background:#FFFFFF!
 .g-menu [role=menuitemcheckbox] .g-switch.sm::after{width:18px;height:18px;top:3px;left:3px}
 .g-menu [role=menuitemcheckbox][aria-checked=true] .g-switch.sm::after{transform:translateX(16px)}
 .g-status{padding:0 8px 0 10px}
+
+/* ---------- mature games and the birthday (Grug.age; see CLAUDE.md "Mature games and the games onboarding") ---------- */
+/* the 18+ tag: a plain flat label, the same on every card, box and page (ink on the page colour, so it reads in both modes) */
+.g-rated{display:inline-flex;align-items:center;justify-content:center;flex:none;height:22px;min-width:34px;padding:0 7px;margin-left:8px;border-radius:7px;vertical-align:middle;
+  font:700 12px/1 var(--font);letter-spacing:.04em;background:var(--ink);color:var(--page,#fff);text-transform:none}
+.f32-stage .g-rated.f32-rated{position:absolute;left:10px;bottom:10px;z-index:3;margin:0;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+:root[data-theme=dark] .g-rated{background:#ECECEF;color:#1E1B16}
+/* a page that is about to go to the onboarding stays hidden (Grug.onboard.guard) */
+html.g-away body{visibility:hidden}
+/* the birthday picker (the onboarding and Settings): month tiles, then day and year */
+.g-bd{display:grid;gap:14px}
+.g-bd-months{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.g-bd-months button{min-height:52px;border-radius:14px;background:var(--card);border:1px solid var(--line2);color:var(--ink);font:600 17px/1 var(--display);transition:transform .15s var(--spring),background .15s}
+.g-bd-months button:hover{background:var(--card3)}
+.g-bd-months button[aria-checked=true]{background:var(--mode);color:var(--on-sel);border-color:transparent;box-shadow:0 3px 0 var(--mode-lo)}
+.g-bd-row{display:grid;grid-template-columns:1fr 1.4fr;gap:10px}
+.g-bd-row label{display:grid;gap:6px;font:700 12px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.g-bd-row input{width:100%;box-sizing:border-box;min-height:56px;padding:0 16px;border-radius:14px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font:600 24px/1 var(--display);letter-spacing:.06em}
+.g-bd-row input:focus{outline:3px solid var(--ring-a);outline-offset:1px}
+.g-bd-err{min-height:1.4em;margin:10px 0 0;color:var(--danger);font-weight:600;font-size:14.5px}
+@media (max-width:380px){.g-bd-months{grid-template-columns:repeat(3,minmax(0,1fr))}}

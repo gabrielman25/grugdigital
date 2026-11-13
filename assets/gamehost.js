@@ -38,6 +38,11 @@
 
   root.GrugGameHost = function (GAME) {
     const G = root.Grug, $ = id => document.getElementById(id);
+    // first visit on this device (a shared link straight to the game, say): the games onboarding comes first, then back here
+    if (G.onboard && (G.onboard.away || G.onboard.guard())) return null;
+    // a mature game where it can't be shown (under 18, shop mode, partner mode): a polite screen, and the game never loads
+    const entry = (G.GAMES || []).find(g => g.id === GAME.id);
+    if (G.age && entry && !G.age.canSee(entry)) { document.title = 'Not available · Grug'; G.ui.unavailable(); return null; }
     const T = root.GrugTheme, partner = T && T.partner && T.partner();
     const P = GAME.brand && T && T.PARTNERS ? T.PARTNERS[GAME.brand] : null;
     /* FROZEN: a game made for a named business, or any game opened inside a business's wrap, is a demonstration only

@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Welcome · Grug</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="../../favicon.png">
+<link rel="stylesheet" href="../../assets/grug.css">
+<script src="../../assets/theme.js"></script>
+<!--
+  THE GAMES ONBOARDING · games/welcome/?next=<where they were going>[&redo=1]
+  Shown the first time someone opens anything games-related on this device (Grug.onboard in assets/grug.js sends them
+  here; games/carts/ uses assets/onboard-gate.js). One screen per step, each with Back:
+    1. their character's body (the avatar editor's bodies: SandyKit.CATALOG.bodies, Grug.BODIES)
+    2. their own birthday (a neutral age screen: nothing suggested, nothing said about what it unlocks; Grug.age)
+    3. a top and 4. a bottom from the closet they own (assets/catalog.js), each on either of its garments
+    5. on to where they were going (the store unless they came from a game's link)
+  Steps 1, 3 and 4 change the saved avatar straight away, the way the avatar editor does (grug.sandy.v1, then new
+  pictures). Finishing sets profile.seen.onboarded; Settings → Set up character again comes back with &redo=1.
+-->
+<style>
+html.g-pre body{padding:0!important}
+html.g-pre body::before,html.g-pre body::after,html.g-pre::after{display:none!important}
+body{min-height:100vh;min-height:100dvh}
+.ob{max-width:680px;margin:0 auto;padding:calc(var(--sat,0px) + 14px) 16px calc(var(--sab,0px) + 18px);min-height:100vh;min-height:100dvh;box-sizing:border-box;display:flex;flex-direction:column;gap:14px}
+html[data-partner] .ob{padding-top:calc(var(--sat,0px) + 78px)}
+.ob-top{display:flex;align-items:center;gap:12px}
+.ob-logo{display:flex;align-items:center;gap:8px;height:46px;padding:0 14px 0 7px;border-radius:999px;background:var(--glass);border:1px solid var(--line);font:600 22px/1 var(--display);color:var(--ink);text-decoration:none;flex:none}
+.ob-logo .g-mark{width:32px;height:32px}
+html[data-partner] .ob-logo{display:none}
+.ob-prog{flex:1;display:flex;gap:6px}
+.ob-prog i{flex:1;height:8px;border-radius:99px;background:var(--card3,rgba(20,20,30,.09))}
+.ob-prog i.on{background:var(--mode)}
+.ob-n{font:700 12px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);flex:none}
+.ob-card{background:var(--card-solid);color:var(--ink);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:22px 20px 20px;display:flex;flex-direction:column;gap:16px}
+.ob-card h1{font-size:clamp(26px,5.6vw,34px)}
+.ob-card h1:focus{outline:none}
+.ob-card .ob-sub{margin:-8px 0 0;color:var(--ink2);font-size:16.5px;line-height:1.45;max-width:46ch}
+.ob-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ob-tiles.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:520px){.ob-tiles.three{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ob-tile{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:10px 10px 12px;border-radius:18px;background:var(--card);border:2px solid var(--line2);color:var(--ink);text-align:left;font:inherit;cursor:pointer;transition:transform .15s var(--spring),background .15s,border-color .15s}
+.ob-tile:hover{transform:translateY(-2px)}
+.ob-tile:active{transform:scale(.98)}
+.ob-tile[aria-checked=true]{background:var(--mode);border-color:var(--mode);color:var(--on-sel);box-shadow:0 4px 0 var(--mode-lo)}
+.ob-pic{position:relative;aspect-ratio:1;border-radius:12px;background:var(--tile-bg,#ECECEF);overflow:hidden;display:grid;place-items:center}
+.ob-tiles.tall .ob-pic{aspect-ratio:3/4}
+.ob-pic img{width:100%;height:100%;object-fit:contain;transition:opacity .25s}
+.ob-pic img.thumb{object-fit:cover;opacity:.75}
+.ob-pic .gi{width:36px;height:36px;color:var(--mut);opacity:.6}
+.ob-pic.wait::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);background-size:220% 100%;animation:ob-sh 1.3s linear infinite}
+@keyframes ob-sh{from{background-position:120% 0}to{background-position:-120% 0}}
+@media (prefers-reduced-motion:reduce){.ob-pic.wait::after{animation:none}}
+.ob-tile b{font:600 18px/1.15 var(--display)}
+.ob-tile small{display:block;font-size:13.5px;font-weight:600;opacity:.75;margin-top:2px}
+.ob-tile .ob-ck{position:absolute;right:16px;top:16px;width:30px;height:30px;border-radius:50%;background:var(--on-sel);color:var(--mode);display:none;place-items:center}
+.ob-tile .ob-ck .gi{width:18px;height:18px}
+.ob-tile[aria-checked=true] .ob-ck{display:grid}
+.ob-done{display:grid;grid-template-columns:minmax(0,200px) 1fr;gap:18px;align-items:center}
+.ob-done .ob-pic{aspect-ratio:3/4;background:transparent}
+.ob-done ul{margin:0;padding:0;list-style:none;display:grid;gap:8px;color:var(--ink2);font-weight:600}
+.ob-done li{display:flex;gap:10px;align-items:center}
+.ob-done li .gi{width:20px;height:20px;color:var(--mode-text,var(--mode));flex:none}
+@media (max-width:460px){.ob-done{grid-template-columns:1fr}.ob-done .ob-pic{max-width:180px;margin:0 auto;width:100%}}
+.ob-nav{display:flex;gap:10px;justify-content:space-between;align-items:center;position:sticky;bottom:calc(var(--sab,0px) + 10px);margin-top:auto}
+.ob-nav .g-btn.primary{flex:1;max-width:340px;margin-left:auto}
+.ob-nav .g-btn:not(.primary){background:var(--glass-strong)}
+.g-bd-err:empty{display:none}
+/* desktop: the steps sit together in the middle of the screen (the buttons right under the card) */
+@media (min-width:720px) and (min-height:560px){.ob{justify-content:center}.ob-nav{margin-top:0;position:static}}
+</style>
+</head>
+<body>
+<main class="ob" id="ob">
+  <header class="ob-top">
+    <a class="ob-logo" id="obLogo" href="../../" aria-label="Grug home"></a>
+    <div class="ob-prog" id="obProg" role="progressbar" aria-valuemin="1" aria-valuemax="5" aria-label="Setup progress"></div>
+    <span class="ob-n" id="obN"></span>
+  </header>
+  <section class="ob-card" id="obCard" aria-live="polite"></section>
+  <nav class="ob-nav" aria-label="Setup steps">
+    <button type="button" class="g-btn" id="obBack"></button>
+    <button type="button" class="g-btn primary big" id="obNext"></button>
+  </nav>
+</main>
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/grug.js"></script>
+<script src="../../assets/sandy-view.js"></script>
+<script>
+(function(){
+  'use strict';
+  const G = Grug, C = GrugCatalog, V = window.SandyView, esc = G.esc, $ = id => document.getElementById(id);
+  document.documentElement.classList.remove('g-pre');   // no top bar or dock here: just the steps
+  const Q = new URLSearchParams(location.search), REDO = Q.get('redo') === '1';
+  const NEXT = G.onboard.clean(Q.get('next') || 'games/');
+  // already set up (a second tab, or the Back button after finishing): straight on
+  if (!REDO && G.onboard.done()) { location.replace(G.url(NEXT)); return; }
+
+  /* ---------- the avatar's look (grug.sandy.v1, the editor's own save) ---------- */
+  const LOOK = 'grug.sandy.v1';
+  const look = () => { try { const c = JSON.parse(localStorage.getItem(LOOK) || 'null'); return c && typeof c === 'object' ? c : {}; } catch (e) { return {}; } };
+  const hadLook = (() => { try { return !!localStorage.getItem(LOOK); } catch (e) { return false; } })();   // set up before: preselect it
+  const start = look();   // what she wore when the page opened ("Keep this one")
+  const garmentFor = (slot, part) => C.GARMENTS[slot].find(x => x.part === part);
+  // a closet design on a garment, the way Grug.equip dresses her
+  const dressed = (base, it, part) => { const c = JSON.parse(JSON.stringify(base)), g = garmentFor(it.slot, part);
+    c[C.CFG_KEY[it.slot]] = { part: g.part, texture: g.texture, colour: '#ffffff', template: it.template }; return c; };
+  // the choices for a slot: every design they own, on each of its garments; plus "Keep this one" when what she wears now isn't one of them
+  function choices(slot) {
+    const out = [];
+    C.inSlot(slot).filter(it => G.owns(it.id)).forEach(it => C.GARMENTS[slot].forEach(g => out.push({ key: it.id + '|' + g.part, it, part: g.part, name: it.name, sub: g.name })));
+    const cur = start[C.CFG_KEY[slot]], worn = C.wornIn(start, slot), curKey = worn && cur ? worn + '|' + cur.part : null;
+    if (hadLook && !out.some(o => o.key === curKey)) out.unshift({ key: 'keep', keep: true, name: 'Keep this one', sub: 'What your character wears now' });
+    return { list: out, cur: hadLook ? (out.some(o => o.key === curKey) ? curKey : 'keep') : null };
+  }
+
+  /* ---------- pictures: rendered one at a time with the avatar's own 3D runtime (assets/sandy-view.js) ---------- */
+  let chain = Promise.resolve();
+  const render = (cfg, frame) => (chain = chain.catch(() => {}).then(() => V.picture(cfg, frame)));
+  const cache = {};
+  function picInto(el, key, cfg, frame) {
+    const show = src => { if (!el.isConnected) return; el.classList.remove('wait'); el.innerHTML = '<img alt="" src="' + src + '">'; };
+    if (cache[key]) return show(cache[key]);
+    if (!cache['p:' + key]) cache['p:' + key] = render(cfg, frame).then(src => (cache[key] = src)).catch(() => null);
+    el.classList.add('wait');
+    cache['p:' + key].then(src => { if (src) show(src); else el.classList.remove('wait'); });
+  }
+
+  /* ---------- the steps ---------- */
+  const STEPS = ['body', 'birthday', 'top', 'bottom', 'done'];
+  let i = 0, picker = null, bdError = '';
+  const sel = { body: (start.body === 'male' ? 'male' : hadLook ? 'female' : null) };
+  const tops = choices('shirt'), bottoms = choices('pants');
+  sel.top = tops.cur; sel.bottom = bottoms.cur;
+  const card = $('obCard'), next = $('obNext'), back = $('obBack');
+  $('obLogo').innerHTML = G.LOGO + '<span>Grug</span>';
+  $('obProg').innerHTML = STEPS.map(() => '<i></i>').join('');
+
+  // where finishing goes, in words (a mature game's title is only named where it can be shown)
+  function goLabel() {
+    const m = /^(play\/[\w-]+\/)/.exec(NEXT), gp = /^games\/([\w-]+)\/?(?:[?#]|$)/.exec(NEXT);
+    const g = m ? G.GAMES.find(x => x.play === m[1] || x.game === m[1]) : gp ? G.GAMES.find(x => x.id === gp[1]) : null;
+    if (g && G.age.canSee(g)) return (m ? 'Play ' : 'See ') + g.title;
+    if (/^games\/carts\//.test(NEXT)) return 'Open Carts';
+    if (/^games\/favorites\//.test(NEXT)) return 'Open Favorites';
+    if (/^games\/?([?#]|$)/.test(NEXT)) return 'Into the store';
+    return REDO ? 'Done' : 'Continue';
+  }
+  const tile = (key, on, pic, name, sub) => '<button type="button" class="ob-tile" role="radio" data-k="' + esc(key) + '" aria-checked="' + !!on + '">' +
+    '<span class="ob-pic">' + pic + '</span><span><b>' + esc(name) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span><span class="ob-ck">' + G.icon('check') + '</span></button>';
+
+  function paint() {
+    const step = STEPS[i];
+    $$('#obProg i').forEach((el, k) => el.classList.toggle('on', k <= i));
+    $('obProg').setAttribute('aria-valuenow', String(i + 1));
+    $('obN').textContent = 'Step ' + (i + 1) + ' of ' + STEPS.length;
+    back.innerHTML = G.icon('arrow-left') + 'Back';
+    next.innerHTML = step === 'done' ? goLabel() + G.icon('arrow-right') : 'Continue' + G.icon('arrow-right');
+    if (step === 'body') {
+      card.innerHTML = '<h1>Pick your character</h1><p class="ob-sub">This doesn’t have to be you. It’s the character you play as, and you can change it any time in the avatar editor.</p>' +
+        '<div class="ob-tiles tall" role="radiogroup" aria-label="Character">' + G.BODIES.map(b => tile(b, sel.body === b, G.icon('person'), b[0].toUpperCase() + b.slice(1))).join('') + '</div>';
+      card.querySelectorAll('.ob-tile').forEach(t => picInto(t.querySelector('.ob-pic'), 'body:' + t.dataset.k + ':' + JSON.stringify(look()), Object.assign(look(), { body: t.dataset.k }), 'full'));
+    } else if (step === 'birthday') {
+      card.innerHTML = '<h1>When’s your birthday?</h1><p class="ob-sub">Your own birthday, not your character’s. It’s saved on this device only and never sent anywhere.</p><div id="obBd"></div><p class="g-bd-err" id="obErr" role="alert">' + esc(bdError) + '</p>';
+      picker = G.ui.bdPicker($('obBd'), G.age.birthday(), () => { bdError = ''; $('obErr').textContent = ''; ready(); });
+    } else if (step === 'top' || step === 'bottom') {
+      const slot = step === 'top' ? 'shirt' : 'pants', ch = step === 'top' ? tops : bottoms;
+      card.innerHTML = '<h1>' + (step === 'top' ? 'Pick a top' : 'Pick a bottom') + '</h1><p class="ob-sub">From your closet. Play games to earn more designs, and change it any time in the avatar editor.</p>' +
+        '<div class="ob-tiles' + (ch.list.length > 4 ? ' three' : '') + '" role="radiogroup" aria-label="' + (step === 'top' ? 'Top' : 'Bottom') + '">' +
+        ch.list.map(o => tile(o.key, sel[step] === o.key, o.it ? '<img class="thumb" alt="" src="' + G.url(o.it.thumb) + '">' : G.icon(step === 'top' ? 't-shirt' : 'pants'), o.name, o.sub)).join('') + '</div>';
+      card.querySelectorAll('.ob-tile').forEach(t => { const o = ch.list.find(x => x.key === t.dataset.k), base = look();
+        const cfg = o.keep ? Object.assign(base, { [C.CFG_KEY[slot]]: start[C.CFG_KEY[slot]] || null }) : dressed(base, o.it, o.part);
+        picInto(t.querySelector('.ob-pic'), step + ':' + o.key + ':' + (base.body || 'female'), cfg, slot); });
+    } else {
+      card.innerHTML = '<h1>' + (REDO ? 'All saved' : 'You’re all set') + '</h1><div class="ob-done"><span class="ob-pic" id="obMe">' + G.icon('person') + '</span>' +
+        '<ul><li>' + G.icon('check') + 'Your character is saved on this device</li><li>' + G.icon('check') + 'Dress up more any time in Me → Avatar</li><li>' + G.icon('check') + 'Your birthday can be changed in Settings</li></ul></div>';
+      const me = $('obMe'); me.classList.add('wait');
+      snapsSoon().then(sn => { if (!me.isConnected) return; me.classList.remove('wait'); if (sn && sn.full) me.innerHTML = '<img alt="" src="' + sn.full + '">'; });
+    }
+    ready();
+    const h = card.querySelector('h1'); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); }
+    scrollTo(0, 0);
+  }
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  // Continue is only on once the step has an answer (the birthday is required)
+  function ready() {
+    const step = STEPS[i];
+    const ok = step === 'body' ? !!sel.body : step === 'birthday' ? !!(picker && picker.value()) : step === 'top' ? !!sel.top : step === 'bottom' ? !!sel.bottom : true;
+    next.disabled = !ok;
+  }
+
+  // a tile: the avatar changes right away (saved like the editor does); a beat later the next step slides in
+  card.addEventListener('click', e => {
+    const t = e.target.closest('.ob-tile'); if (!t) return;
+    const step = STEPS[i], k = t.dataset.k; G.ui.buzz();
+    card.querySelectorAll('.ob-tile').forEach(x => x.setAttribute('aria-checked', String(x === t)));
+    if (step === 'body') { sel.body = k; G.setBody(k, false); }
+    else { const slot = step === 'top' ? 'shirt' : 'pants', ch = step === 'top' ? tops : bottoms, o = ch.list.find(x => x.key === k); sel[step] = k;
+      if (o.keep) { const c = look(), key = C.CFG_KEY[slot]; c[key] = start[key] || null; try { localStorage.setItem(LOOK, JSON.stringify(c)); } catch (x) {}
+        G.setAvatar({ [slot]: C.wornIn(start, slot) }); }
+      else G.equip(o.it.id, o.part, false); }
+    ready();
+    clearTimeout(card.t); card.t = setTimeout(() => { if (STEPS[i] === step) go(1); }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 320);
+  });
+
+  /* new pictures of the finished look for the rest of the site (header, home, profile), started on the last step. They're
+     taken in a fresh copy of the 3D runtime (a hidden frame): once the runtime has built the male body, later pictures of
+     the female body lose her boots' texture, so pictures taken on this page could differ from the avatar editor's. */
+  let snapping = null, snapFor = '';
+  function snapsSoon() {
+    const c = look(), key = JSON.stringify(c);
+    if (snapping && snapFor === key) return snapping;
+    snapFor = key;
+    return (snapping = new Promise(ok => {
+      const f = document.createElement('iframe'); f.hidden = true; f.setAttribute('aria-hidden', 'true'); f.tabIndex = -1;
+      f.srcdoc = '<!doctype html><script src="' + G.url('assets/sandy-view.js') + '"><\/script>';
+      f.onload = () => { const V2 = f.contentWindow && f.contentWindow.SandyView; if (!V2) return ok(null);
+        V2.makeSnaps(c, { step: true }).then(sn => { try { window.dispatchEvent(new CustomEvent('grug-sandy-snaps', { detail: sn })); } catch (e) {} ok(sn); }, () => ok(null)); };
+      document.body.appendChild(f);
+    }));
+  }
+
+  function go(d) {
+    const step = STEPS[i];
+    if (d > 0 && step === 'birthday') {
+      const v = picker && picker.value();
+      if (!v) { bdError = picker && picker.filled() ? 'That date doesn’t look right. Check the month, day and year.' : 'Pick the month, then fill in the day and year.'; $('obErr').textContent = bdError; return; }
+      if (v !== G.age.birthday()) { const r = G.age.setBirthday(v); if (!r.ok) { bdError = r.reason === 'locked' ? 'This birthday can’t be changed to that date on this device any more. Clearing this site’s data in your browser starts everything fresh.' : r.reason; $('obErr').textContent = bdError; return; } }
+    }
+    if (d > 0 && step === 'done') return finish();
+    if (d < 0 && i === 0) return leave();
+    i = Math.max(0, Math.min(STEPS.length - 1, i + d)); paint();
+  }
+  async function finish() {
+    next.disabled = true;
+    G.onboard.finish();
+    // give the pictures a moment to finish (they're redrawn later anyway if not)
+    if (snapping) { next.textContent = 'Saving your character\u2026'; await Promise.race([snapping, new Promise(ok => setTimeout(ok, 4000))]); }
+    location.replace(G.url(NEXT));
+  }
+  // Back on the first screen: where they came from on the site, or home (the partner's app in partner mode)
+  function leave() {
+    let ref = null; try { ref = document.referrer && new URL(document.referrer).origin === location.origin ? G.onboard.relOf(document.referrer) : null; } catch (e) {}
+    if (ref != null && !G.onboard.gated(ref) && !/^games\/welcome/.test(ref)) { history.back(); return; }
+    const p = window.GrugTheme && GrugTheme.partner && GrugTheme.partner();
+    location.href = G.url(p && GrugTheme.PARTNERS[p.p] ? GrugTheme.PARTNERS[p.p].app : '');
+  }
+  next.addEventListener('click', () => go(1));
+  back.addEventListener('click', () => { clearTimeout(card.t); go(-1); });
+  document.addEventListener('keydown', e => { if (e.key === 'Enter' && !next.disabled && !e.target.closest('button,a')) { e.preventDefault(); go(1); } });
+  paint();
+  // warm the 3D runtime and the clothes' pictures while the first screens are read
+  setTimeout(() => { [['top', tops, 'shirt'], ['bottom', bottoms, 'pants']].forEach(([st, ch, slot]) => ch.list.forEach(o => { if (o.keep) return; const base = look(), k = st + ':' + o.key + ':' + (base.body || 'female');
+    if (!cache['p:' + k]) cache['p:' + k] = render(dressed(base, o.it, o.part), slot).then(src => (cache[k] = src)).catch(() => null); })); }, 1200);
+})();
+</script>
+</body>
+</html>

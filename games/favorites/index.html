@@ -143,6 +143,7 @@ html.gc-html body.g-chrome{padding:0}
 <script>
 (function(){
   const G = Grug, $ = s => document.getElementById(s);
+  if (G.onboard.away) return;   // first visit: off to the games onboarding (games/welcome/), which comes back here
   G.ui.chrome('games');
   const pts = {}; G.points().forEach(p => { pts[p.game.id] = p; });
   // the player's favourites, in the order they were added (partner mode: their game and the Grug originals only)
@@ -192,7 +193,7 @@ html.gc-html body.g-chrome{padding:0}
     if (best) stats.push('<span>' + G.icon('trophy') + 'best ' + G.fmt(best) + '</span>');
     // just the name, who it was made for, what it is and Play: no codes, tags or badges
     return '<h2 class="gc-title">' + esc(g.title) + '</h2>' +
-      '<p class="gc-biz">' + G.icon(g.original ? 'sparkle' : 'storefront') + esc(g.original ? 'A Grug original' : g.partner) + '</p>' +
+      '<p class="gc-biz">' + G.icon(g.original ? 'sparkle' : 'storefront') + esc(g.original ? 'A Grug original' : g.partner) + G.age.tag(g) + '</p>' +   // (a mature game's 18+ tag)
       '<div class="gc-body"><p class="gc-desc">' + esc(g.blurb || g.long || '') + '</p>' +   // the short blurb here; the full write-up is on the game page
       (g.features && g.features.length ? '<ul class="gc-feats">' + g.features.map(f => '<li>' + esc(f) + '</li>').join('') + '</ul>' : '') + '</div>' +
       (stats.length ? '<div class="gc-stats">' + stats.join('') + '</div>' : '') +

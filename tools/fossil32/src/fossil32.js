@@ -37,7 +37,10 @@ const BASE = new URL("./", import.meta.url).href;          // …/assets/fossil3
 const ROOT = new URL("../../", import.meta.url).href;      // site root
 const siteUrl = p => /^(https?:|data:|blob:)/.test(p || "") ? p : ROOT + String(p || "").replace(/^\/+/, "");
 const GAMES = () => window.GRUG_GAMES || [];
-const gameById = id => GAMES().find(g => g.id === id);
+// a mature game (games.js rating) only where Grug.age lets it show (an adult, not in shop or partner mode)
+const mature = g => !!g && g.rating === "mature";
+const canSee = g => !mature(g) || !!(window.Grug && window.Grug.age && window.Grug.age.canSee(g));
+const gameById = id => GAMES().find(g => g.id === id && canSee(g));
 const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ═════════════════ FONTS ═════════════════ */
@@ -76,7 +79,7 @@ function cfgOf(g){
   const b = g.box || {}, shell = b.shell || g.color || "#9BE338";
   return {
     id: g.id, game: g, title: g.title || "", subtitle: g.subtitle || "", description: g.long || g.blurb || "",
-    code: b.code || "GD-0000", players: b.players || "1P", region: b.region || "", shell, accent: boxAccent(shell),
+    code: b.code || "GD-0000", players: b.players || "1P", region: b.region || "", shell, accent: boxAccent(shell), rated: mature(g),
     font: b.font || "Bungee", fill: b.fill || ["#ffffff", lighten(shell, .2)], art: b.art || g.thumb, shots: (b.shots || []).slice(0, 3)
   };
 }
@@ -210,6 +213,10 @@ function drawFront(g, c, im){
   g.save(); g.translate(1905, 676); g.rotate(-Math.PI / 2); g.textAlign = "center"; g.textBaseline = "middle";
   g.font = font(800, 17, "mono"); spaced(g, .14, 17); g.fillStyle = INK; g.fillText(c.players, 0, 1); g.restore(); spaced(g, 0, 1);
   [1,1,1,1,1, 0,1,1,1,0, 0,0,1,0,0].forEach((v, i) => { if (v) g.fillRect(1632 + (i % 5) * 15, 706 + Math.floor(i / 5) * 15, 12, 12); });
+  if (c.rated){   // a mature game: a plain "18+" label on the box (no imagery)
+    g.fillStyle = CREAM; rr(g, 1602, 772, 112, 76, 10); g.fill();
+    g.fillStyle = INK; g.textAlign = "center"; g.font = font(800, 42, "mono"); g.fillText("18+", 1658, 826); g.textAlign = "left";
+  }
   g.fillStyle = CREAM; rr(g, 1602, 870, 250, 318, 10); g.fill();
   g.save(); rr(g, 1602, 870, 250, 318, 10); g.clip(); g.fillStyle = A; g.fillRect(1602, 870, 250, 8); g.restore();
   g.imageSmoothingEnabled = false; g.drawImage(barcodeCanvas(c.code, 226, 258), 1614, 892, 226, 258); g.imageSmoothingEnabled = true;
@@ -245,7 +252,7 @@ function drawBack(g, c, im){
   let y = 300;
   if (c.subtitle){ g.font = font(700, 28, "mono"); spaced(g, .14, 28); g.fillStyle = A; g.fillText(c.subtitle.toUpperCase(), L + 2, y + 56); y += 56; }
   y += 46; g.font = font(700, 20, "mono"); spaced(g, .1, 20); let cx = L;
-  [c.code, c.players, c.region, c.game.kind && c.game.kind.toUpperCase()].filter(Boolean).forEach(t => {
+  [c.code, c.players, c.region, c.game.kind && c.game.kind.toUpperCase(), c.rated && "18+"].filter(Boolean).forEach(t => {
     const w = g.measureText(t).width + 30; g.strokeStyle = "#3a4230"; g.lineWidth = 2; rr(g, cx, y, w, 40, 6); g.stroke();
     g.fillStyle = "#a3ab97"; g.fillText(t, cx + 15, y + 28); cx += w + 12; });
   spaced(g, 0, 1);
@@ -616,10 +623,10 @@ function panelHtml(c){
     const best = G && G.profile ? Math.max(+(G.profile.stats.best[g.app] || 0), p ? p.best : 0) : 0;
     const bits = []; if (p && p.points) bits.push(`<b>${G.fmt(p.points)}</b> points`); if (best) bits.push(`best <b>${G.fmt(best)}</b>`);
     if (bits.length) stats = `<div class="f32-stats">${bits.join(" · ")}</div>`; } catch (e) {}
-  const chips = [g.kind, g.original ? "Grug Original" : g.partner, g.place].filter(Boolean).map(t => `<span>${esc(t)}</span>`).join("");
+  const chips = (c.rated ? `<span class="g-rated" title="For players 18 and over">18+</span>` : "") + [g.kind, g.original ? "Grug Original" : g.partner, g.place].filter(Boolean).map(t => `<span>${esc(t)}</span>`).join("");
   const feats = (g.features || []).map(f => `<li>${esc(f)}</li>`).join("");
   const live = g.status === "live" || g.status === "legacy";
-  return `<div class="f32-eyebrow">FOSSIL32 · ${esc(c.code)} · ${esc(c.players)}${c.region ? " · " + esc(c.region) : ""}${g.status === "legacy" ? " · CLASSIC" : g.status !== "live" ? " · DEMO" : ""}</div>
+  return `<div class="f32-eyebrow">FOSSIL32 · ${esc(c.code)} · ${esc(c.players)}${c.region ? " · " + esc(c.region) : ""}${g.status === "legacy" ? " · CLASSIC" : g.status !== "live" ? " · DEMO" : ""}${c.rated ? " · 18+" : ""}</div>
     <h2 class="f32-title">${esc(c.title || "")}</h2>
     ${c.subtitle ? `<div class="f32-sub">${esc(c.subtitle)}</div>` : ""}
     <div class="f32-chips">${chips}</div>
@@ -1003,6 +1010,8 @@ async function open(id, it, opts){
 }
 function startBoot(direct){
   if (ov.phase === "boot") return;
+  { const G = window.Grug, g = ov.c && ov.c.game;
+    if (G && G.onboard && g && G.onboard.needed()){ G.onboard.start(siteUrl(g.game || g.play)); return; } }
   if (reduceMotion()){ go(ov.c); return; }
   O.cart.updateMatrixWorld(true);
   boot = { cp: O.cart.position.clone(), cr: O.cart.rotation.clone(), camPos: camNow.pos.clone(), camTarget: camNow.target.clone(), went: false };

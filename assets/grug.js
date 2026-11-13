@@ -73,7 +73,7 @@
       inventory: [],            // earned (non-free) item ids
       earned: {},               // item id → {at, how}
       stats: { plays: {}, checkins: {}, best: {}, course: {}, days: {}, lastGame: '', lastPlayed: 0 },
-      prefs: { motion: true, haptics: true, uiScale: 1, role: '', mode: 'light' },
+      prefs: { motion: true, haptics: true, uiScale: 1, role: '', mode: 'light', birthday: '' },
       items: {},                // site-wide items (inventory on the settings page): item id → {n, at}; see ITEMS below
       emotes: EMOTE_DEFAULT.slice(),   // the emotes brought into games (ids from EMOTES, in wheel order)
       seen: {}                  // one-time hints
@@ -115,6 +115,7 @@
     o.prefs.uiScale = UI_SCALES.includes(+o.prefs.uiScale) ? +o.prefs.uiScale : 1;
     o.prefs.role = ROLES[o.prefs.role] || o.prefs.role === 'all' ? o.prefs.role : '';
     o.prefs.mode = o.prefs.mode === 'dark' ? 'dark' : 'light';   // light unless they picked dark
+    o.prefs.birthday = parseBd(o.prefs.birthday) ? o.prefs.birthday : '';   // 'YYYY-MM-DD' or '' (see "age" below)
     delete o.prefs.colorIcons;   // the colourful icon pictures are gone: one flat icon style everywhere
     Object.keys(o.items).forEach(k => { const v = o.items[k]; if (!ITEMS[k] || !v || typeof v !== 'object' || !(+v.n > 0)) delete o.items[k]; else v.n = Math.min(ITEMS[k].max, Math.floor(+v.n)); });
     return o;
@@ -176,6 +177,13 @@
     document.documentElement.style.setProperty('--g-ui', String(z));
     document.documentElement.classList.toggle('g-scaled', z !== 1);
   }
+  // a birthday as saved ('YYYY-MM-DD'): a real date, not in the future, at most 120 years ago. {y, m, d} or null
+  function parseBd(s) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s == null ? '' : s)); if (!m) return null;
+    const y = +m[1], mo = +m[2], d = +m[3], dt = new Date(y, mo - 1, d), now = new Date();
+    if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d || dt > now || y < now.getFullYear() - 120) return null;
+    return { y, m: mo, d };
+  }
   // Only names built from the word lists survive; anything else (old free-text names, edited files) becomes ''.
   function cleanName(n) { const p = parseName(n); return p ? makeName(p.adj, p.noun, p.num) : ''; }
 
@@ -190,7 +198,7 @@
   function emit(what) { listeners.forEach(fn => { try { fn(profile, what); } catch (e) { console.error(e); } }); try { root.dispatchEvent(new CustomEvent('grug:change', { detail: { what, profile } })); } catch (e) {} }
   function save(what) { profile.updated = Date.now(); const ok = writeJSON(KEY, profile); emit(what || 'save'); return ok; }
   // another tab (or a game inside an app) changed the profile
-  root.addEventListener('storage', e => { if (e.key === KEY) { profile = normalize(readJSON(KEY, null)); emit('external'); } });
+  root.addEventListener('storage', e => { if (e.key === KEY) { profile = normalize(readJSON(KEY, null)); try { syncAge(); } catch (x) {} emit('external'); } });
 
   /* ---------- closet ---------- */
   const owns = id => { const it = C.get(id); return !!it && (it.get.type === 'free' || profile.inventory.includes(id)); };
@@ -204,13 +212,14 @@
   const LOOK_KEY = 'grug.sandy.v1';
   const look = () => { const c = readJSON(LOOK_KEY, null); return c && typeof c === 'object' ? c : {}; };
   const wearing = it => !!it && C.wornIn(look(), it.slot) === it.id;
-  function equip(id) {
+  // part (optional): which garment to put it on (a C.GARMENTS part: T-shirt or long sleeves, shorts or pants)
+  function equip(id, part, redraw) {
     const it = C.get(id); if (!it || !owns(id)) return false;
     const c = look(), key = C.CFG_KEY[it.slot], cur = c[key], G0 = C.GARMENTS[it.slot];
-    const g = (cur && G0.find(x => x.part === cur.part)) || G0[it.slot === 'shirt' ? 0 : 1];
+    const g = (part && G0.find(x => x.part === part)) || (cur && G0.find(x => x.part === cur.part)) || G0[it.slot === 'shirt' ? 0 : 1];
     c[key] = { part: g.part, texture: g.texture, colour: '#ffffff', template: it.template };
     writeJSON(LOOK_KEY, c); profile.avatar[it.slot] = id; profile.avatar = C.normalize(profile.avatar); save('avatar');
-    refreshPictures(c); return true;
+    if (redraw !== false) refreshPictures(c); return true;
   }
   function unequip(slot) {
     const c = look(), key = C.CFG_KEY[slot]; if (!key) return false;
@@ -226,6 +235,14 @@
     return picBusy;
   }
   function setAvatar(patch) { profile.avatar = C.normalize(Object.assign({}, profile.avatar, patch)); save('avatar'); }
+  // the avatar's body (the editor's Body choice, SandyKit.CATALOG.bodies). Saved in her look like the editor does;
+  // pass redraw: false to take the pictures later (refreshPictures) when several changes come together
+  const BODIES = ['female', 'male'];
+  function setBody(b, redraw) {
+    if (!BODIES.includes(b)) return false;
+    const c = look(); c.body = b; writeJSON(LOOK_KEY, c); save('avatar');
+    if (redraw !== false) refreshPictures(c); return true;
+  }
   function setName(name) { name = cleanName(name); if (!name) return false; profile.name = name; save('name'); return true; }
 
   /* ---------- stats & milestones ---------- */
@@ -276,6 +293,122 @@
     ignore(id, on) { setIn(IGN_KEY, id, !!on); if (on) setIn(FAV_KEY, id, false); return !!on; },
     clearIgnored() { writeJSON(IGN_KEY, []); }
   };
+
+  /* ---------- age: the player's birthday and mature games ----------
+     A neutral age screen, not ID verification. The birthday is asked once, in the games onboarding (games/welcome/), and
+     kept on this device only (profile.prefs.birthday, 'YYYY-MM-DD'); it is never sent anywhere. Settings shows and changes it.
+     A game with rating: 'mature' (games.js; contains: what's in it) is for 18+ only: under 18 it is hidden everywhere and
+     its pages say it isn't available. Shop mode and partner mode never show one, whatever the age.
+     The change rule: a birthday under 18 can be raised to 18+ once per device (for typos); after that only lowered,
+     until the site's data is cleared. AGE_KEY remembers that per device, so "Start over" and an imported profile don't
+     reset it (Start over keeps the birthday; an import that would raise it a second time is put back). */
+  const AGE_KEY = 'grug.age.v1', ADULT_AT = 18;
+  function yearsOld(s) {
+    const b = parseBd(s); if (!b) return null;
+    const now = new Date(), m = now.getMonth() + 1; let a = now.getFullYear() - b.y;
+    if (m < b.m || (m === b.m && now.getDate() < b.d)) a--;
+    return a;
+  }
+  const isAdultBd = s => (yearsOld(s) || 0) >= ADULT_AT;
+  const ageRec = () => { const r = readJSON(AGE_KEY, null); return r && typeof r === 'object' && !Array.isArray(r) ? r : {}; };
+  const brandOn = () => !!(root.GrugTheme && root.GrugTheme.brand && root.GrugTheme.brand());
+  const birthday = () => parseBd(profile.prefs.birthday) ? profile.prefs.birthday : '';
+  // a new birthday: {ok: true} or {ok: false, reason}
+  function setBirthday(s) {
+    if (!parseBd(s)) return { ok: false, reason: 'That date doesn’t look right. Check the month, day and year.' };
+    const cur = birthday(), rec = ageRec();
+    if (cur && !isAdultBd(cur) && isAdultBd(s)) {
+      if (rec.raised) return { ok: false, reason: 'locked' };
+      rec.raised = Date.now();
+    }
+    rec.bd = s; writeJSON(AGE_KEY, rec);
+    profile.prefs.birthday = s; save('birthday'); return { ok: true };
+  }
+  // the device's record and the profile agree (after loading, an import, Start over or another tab)
+  function syncAge() {
+    const rec = ageRec(), p = birthday(), r = parseBd(rec.bd) ? rec.bd : '';
+    if (!p && r) { profile.prefs.birthday = r; writeJSON(KEY, profile); return; }   // Start over: the device keeps the birthday
+    if (!p || p === r) return;
+    if (r && !isAdultBd(r) && isAdultBd(p)) {   // an import that raises it: allowed once, like Settings
+      if (rec.raised) { profile.prefs.birthday = r; writeJSON(KEY, profile); return; }
+      rec.raised = Date.now();
+    }
+    rec.bd = p; writeJSON(AGE_KEY, rec);
+  }
+  try { syncAge(); } catch (e) {}
+  const isMature = g => !!g && g.rating === 'mature';
+  const age = {
+    ADULT_AT, KEY: AGE_KEY,
+    birthday, setBirthday, years: () => yearsOld(birthday()), isAdult: () => isAdultBd(birthday()),
+    isMature, contains: g => isMature(g) && Array.isArray(g.contains) ? g.contains.slice() : [],
+    // may this game be shown here? (mature: an adult, and not in shop mode or partner mode)
+    canSee: g => !isMature(g) || (isAdultBd(birthday()) && !brandOn()),
+    // can the birthday still be raised to 18+ on this device?
+    canRaise: () => !ageRec().raised,
+    // the "18+" tag for a mature game's card, box and page ('' for every other game)
+    tag: (g, cls) => isMature(g) ? '<span class="g-rated' + (cls ? ' ' + cls : '') + '" title="For players 18 and over">18+</span>' : '',
+    parse: parseBd,
+    format(s) { const b = parseBd(s); return b ? new Date(b.y, b.m - 1, b.d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : ''; }
+  };
+
+  /* ---------- the games onboarding (games/welcome/) ----------
+     The first time someone opens anything games-related on this device (the store, a game page, a game, Carts,
+     Favorites, a Play button on the home page) they go through a few short screens first: their character's body,
+     their own birthday, a top, a bottom, then on to where they were going (onboard.start(next)). Once finished
+     (profile.seen.onboarded, with a birthday saved) it never shows again; Settings → Your character → Set up again replays it.
+     games/carts/ (built by the Grug Micro kit, no grug.js) checks the same thing with assets/onboard-gate.js. */
+  const WELCOME = 'games/welcome/';
+  const SITE_PATH = (() => { try { return new URL(ROOT).pathname; } catch (e) { return '/'; } })();
+  // a link's address relative to the site's root ('games/runway/', 'play/runway/?x#y'), or null if it isn't ours
+  function relOf(href) {
+    try { const u = new URL(href, location.href); if (u.origin !== location.origin || u.pathname.indexOf(SITE_PATH) !== 0) return null;
+      return u.pathname.slice(SITE_PATH.length) + u.search + u.hash; } catch (e) { return null; }
+  }
+  // the games surfaces: the store and everything under games/ (not the onboarding itself), and a game's own page in play/
+  const PLAY_DIRS = GAMES.filter(g => !g.inApp && g.play).map(g => g.play);
+  function gated(rel) {
+    if (rel == null) return false;
+    if (/^games\/welcome(\/|[?#]|$)/.test(rel)) return false;
+    if (/^games(\/|[?#]|$)/.test(rel)) return true;
+    const m = /^(play\/[\w-]+\/)/.exec(rel); return !!m && PLAY_DIRS.includes(m[1]);
+  }
+  // a page inside a frame (the showcase, an embed) never goes to the onboarding; mature games stay hidden there
+  const FRAMED = (() => { try { return root.top !== root.self; } catch (e) { return true; } })();
+  const onboard = {
+    done: () => !!profile.seen.onboarded && !!birthday(),
+    // nothing can be saved (private mode, blocked storage): don't send them round in a loop; mature games stay hidden
+    needed: () => !FRAMED && !onboard.done() && storageWorks(),
+    // a place to go after the onboarding, as an address relative to the site's root (a page of ours, never off the site)
+    clean(next) {
+      const t = String(next == null ? '' : next);
+      const n = /^[a-z][a-z0-9+.-]*:/i.test(t) ? relOf(t) : relOf(url(t));
+      return n == null || n === '' || /^games\/welcome(\/|[?#]|$)/.test(n) || /^[a-z][a-z0-9+.-]*:/i.test(n) ? 'games/' : n;
+    },
+    url(next, redo) { return url(WELCOME) + '?next=' + encodeURIComponent(onboard.clean(next)) + (redo ? '&redo=1' : ''); },
+    start(next, redo) { location.href = onboard.url(next, redo); },
+    finish() { profile.seen.onboarded = Date.now(); return save('onboard'); },
+    gated, relOf,
+    // send this page to the onboarding if it's needed (the page underneath stays hidden). True if it is going.
+    guard() {
+      if (/[?&]mode=viewer/.test(location.search) || !onboard.needed()) return false;
+      const to = onboard.url(location.href);
+      document.documentElement.classList.add('g-away');
+      const go = () => { if (onboard.needed()) location.replace(to); else location.reload(); };   // (a page made ahead of time: finished elsewhere meanwhile?)
+      if (document.prerendering) document.addEventListener('prerenderingchange', go, { once: true }); else go();
+      onboard.away = true; return true;
+    },
+    away: false
+  };
+  // the store, a game page, Favorites…: straight to the onboarding the first time
+  try { if (gated(relOf(location.href))) onboard.guard(); } catch (e) {}
+  // anywhere on the site: a link into the games (the dock's Games tab, a Play button) goes through the onboarding first.
+  // (A FOSSIL32 box only opens its panel; the panel's Play asks fossil32.js, which calls onboard.start.)
+  document.addEventListener('click', e => {
+    if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !onboard.needed()) return;
+    const a = e.target.closest && e.target.closest('a[href]'); if (!a || a.target === '_blank' || a.hasAttribute('download') || a.closest('[data-f32]')) return;
+    const rel = relOf(a.href); if (!gated(rel) || gated(relOf(location.href))) return;
+    e.preventDefault(); e.stopPropagation(); onboard.start(rel);
+  }, true);
 
   /* ---------- partner points (read from each app's own storage) ---------- */
   function appState(game) { return game && game.storageKey ? readJSON(game.storageKey, null) : null; }
@@ -348,6 +481,7 @@
     if (data.apps[BIZ_KEY] && typeof data.apps[BIZ_KEY] === 'object') writeJSON(BIZ_KEY, data.apps[BIZ_KEY]);
     Object.keys(data.apps).forEach(k => { if (/^daypart:/.test(k)) writeJSON(k, data.apps[k]); });
     profile = p; writeJSON(KEY, profile); try { localStorage.removeItem(SNAP_KEY); } catch (e) {}
+    try { syncAge(); } catch (e) {}   // the birthday rule holds across an import (see "age")
     if (data.sandy) { writeJSON('grug.sandy.v1', data.sandy); try { localStorage.removeItem('grug.sandy.snaps.v1'); } catch (e) {} }
     emit('import'); return true;
   }
@@ -355,7 +489,7 @@
     if (alsoPoints) appKeys().forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
     if (alsoPoints) try { localStorage.removeItem(REWARDS_KEY); } catch (e) {}
     try { localStorage.removeItem(KEY); localStorage.removeItem(SNAP_KEY); localStorage.removeItem('grug.sandy.v1'); localStorage.removeItem('grug.sandy.snaps.v1'); } catch (e) {}
-    profile = fresh(); writeJSON(KEY, profile); emit('reset');
+    profile = fresh(); writeJSON(KEY, profile); try { syncAge(); } catch (e) {} emit('reset');
   }
 
   /* ---------- avatar snapshots: pictures of the new 3D avatar (Sandy) ----------
@@ -455,9 +589,12 @@
   /* Which games a page may show. A game made for a named business (anything that isn't a Grug original) is a
      demonstration for that business's owners (assets/demo.js): it is never shown on the main site, only inside that
      business's own wrap, and a wrap shows its own games plus the Grug originals (never another business's). */
-  const partnerAllows = g => { const p = root.GrugTheme && root.GrugTheme.partner && root.GrugTheme.partner(); if (!g) return true;
+  const partnerOk = g => { const p = root.GrugTheme && root.GrugTheme.partner && root.GrugTheme.partner(); if (!g) return true;
     if (!p) return !!g.original; return !!g.original || g.venue === p.p || g.id === p.game; };
-  try { const m = /\/games\/([\w-]+)\/?$/.exec(location.pathname), g = m && GAMES.find(x => x.id === m[1]); if (g && !partnerAllows(g)) location.replace(url('games/')); } catch (e) {}
+  // ...and a mature game only for an adult outside shop and partner mode (age.canSee). Every list of games uses this.
+  const partnerAllows = g => !g || (partnerOk(g) && age.canSee(g));
+  // (a mature game's own page says it isn't available instead: assets/gamepage.js, assets/gamehost.js)
+  try { const m = /\/games\/([\w-]+)\/?$/.exec(location.pathname), g = m && GAMES.find(x => x.id === m[1]); if (g && !partnerOk(g)) location.replace(url('games/')); } catch (e) {}
   // partner mode (theme.js, e.g. crafthouse/): the site is just for playing and dressing up, so the dock is Games and Me
   const partnerOn = () => !!(root.GrugTheme && root.GrugTheme.partner && root.GrugTheme.partner());
   const PARTNER_TABS = ['games', 'me'];
@@ -786,16 +923,82 @@
       if (rerender) rerender();
     });
   }
+  /* ---------- the birthday picker (the onboarding's birthday screen and Settings): month tiles, then day and year.
+     Nothing is filled in to start with (no year is suggested). picker.value() → 'YYYY-MM-DD' or '' ---------- */
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  function bdPicker(host, value, onChange) {
+    const b = parseBd(value) || null;
+    host.innerHTML = '<div class="g-bd"><div class="g-bd-months" role="radiogroup" aria-label="Month">' +
+      MONTHS.map((m, i) => '<button type="button" role="radio" data-bdm="' + (i + 1) + '" aria-checked="' + (!!b && b.m === i + 1) + '" aria-label="' + m + '">' + m.slice(0, 3) + '</button>').join('') + '</div>' +
+      '<div class="g-bd-row"><label><span>Day</span><input type="text" inputmode="numeric" autocomplete="bday-day" maxlength="2" placeholder="DD" data-bdd value="' + (b ? b.d : '') + '"></label>' +
+      '<label><span>Year</span><input type="text" inputmode="numeric" autocomplete="bday-year" maxlength="4" placeholder="YYYY" data-bdy value="' + (b ? b.y : '') + '"></label></div></div>';
+    let m = b ? b.m : 0;
+    const dd = $('[data-bdd]', host), yy = $('[data-bdy]', host);
+    const value_ = () => { const d = +dd.value, y = +yy.value; if (!m || !d || !/^\d{4}$/.test(yy.value)) return '';
+      const s = y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0'); return parseBd(s) ? s : ''; };
+    const changed = () => { if (onChange) onChange(value_()); };
+    $$('[data-bdm]', host).forEach(btn => btn.addEventListener('click', () => { m = +btn.dataset.bdm; $$('[data-bdm]', host).forEach(x => x.setAttribute('aria-checked', String(x === btn))); buzz(); changed(); if (!dd.value) dd.focus({ preventScroll: true }); }));
+    [dd, yy].forEach(inp => inp.addEventListener('input', () => { inp.value = inp.value.replace(/\D+/g, '').slice(0, inp === dd ? 2 : 4); if (inp === dd && inp.value.length === 2) yy.focus({ preventScroll: true }); changed(); }));
+    // a date that's filled in but can't be a birthday (31 February, a year to come)
+    const filled = () => !!m && !!dd.value && yy.value.length === 4;
+    return { value: value_, filled, focus: () => (m ? dd : $('[data-bdm]', host)).focus({ preventScroll: true }) };
+  }
+  const BD_LOCKED = 'Your birthday can’t be changed to that date on this device any more. Clearing this site’s data in your browser starts everything fresh.';
+  // Settings rows: the saved birthday (Change) and Set up character again (the onboarding, then back here)
+  function birthdayHtml() {
+    const bd = birthday();
+    return '<div class="g-pref" data-bd-row>' + icon('calendar-check') + '<span><b>Your birthday</b><small data-bd-show>' + (bd ? esc(age.format(bd)) : 'Not set yet') + '. Saved on this device only</small></span>' +
+      '<button type="button" class="g-btn sm" data-bd-edit>Change</button></div>' +
+      '<div class="g-pref">' + icon('user') + '<span><b>Your character</b><small>Pick your character\u2019s body, top and bottom again</small></span>' +
+      '<a class="g-btn sm" href="' + esc(onboard.url(location.href, true)) + '" data-bd-redo>Set up again</a></div>';
+  }
+  function editBirthday() {
+    let pick = null;
+    return dialog({ title: 'Your birthday', html: '<p class="g-fine" style="margin:-4px 0 12px">Your own birthday. It’s kept on this device only and decides which games show here.</p><div data-bdp></div><p class="g-bd-err" data-bd-err role="alert"></p>',
+      actions: [{ label: 'Cancel', kind: 'quiet', value: null }, { label: 'Save', kind: 'primary', value: 'save' }],
+      onOpen: d => {
+        d.classList.add('wide');
+        pick = bdPicker($('[data-bdp]', d), birthday(), () => { $('[data-bd-err]', d).textContent = ''; });
+        // Save checks first: a date that can't be saved keeps the dialog open with the reason
+        const saveBtn = $$('.g-dialog-actions .g-btn', d)[1];
+        saveBtn.addEventListener('click', e => {
+          const v = pick.value();
+          if (!v) { e.preventDefault(); $('[data-bd-err]', d).textContent = pick.filled() ? 'That date doesn’t look right. Check the month, day and year.' : 'Pick the month, then fill in the day and year.'; return; }
+          if (v === birthday()) return;
+          const r = setBirthday(v);
+          if (!r.ok) { e.preventDefault(); $('[data-bd-err]', d).textContent = r.reason === 'locked' ? BD_LOCKED : r.reason; }
+        });
+      }
+    }).then(v => { if (v === 'save') toast('Birthday saved', { icon: 'calendar-check' }); return v; });
+  }
+  function wireBirthday(box) {
+    const b = $('[data-bd-edit]', box); if (!b) return;
+    b.addEventListener('click', async () => { buzz(); await editBirthday(); const s = $('[data-bd-show]', box); const bd = birthday(); if (s) s.textContent = (bd ? age.format(bd) : 'Not set yet') + '. Saved on this device only'; });
+  }
+  /* a mature game opened where it can't be shown (under 18, shop mode, partner mode): a polite screen with the way back.
+     host = where to draw it (the page's main), or the whole body on a game's host page */
+  function unavailable(host) {
+    if (!document.getElementById('g-na-css')) { const st = document.createElement('style'); st.id = 'g-na-css';
+      st.textContent = '.g-na{min-height:60vh;display:grid;place-items:center;padding:24px 16px}.g-na-in{max-width:420px;text-align:center;background:var(--card-solid,#fff);color:var(--ink);border:1px solid var(--line);border-radius:var(--r,18px);padding:28px 24px;box-shadow:var(--shadow)}' +
+        '.g-na-in>.gi{width:44px;height:44px;color:var(--mut)}.g-na-in h1{font-size:26px;margin:12px 0 8px}.g-na-in p{color:var(--ink2);margin:0 0 18px;line-height:1.5}' +
+        'body.g-na-page{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--page,#F3F3F5);font-family:var(--font,system-ui)}';
+      document.head.appendChild(st); }
+    const el = document.createElement('section'); el.className = 'g-na'; el.setAttribute('role', 'alert');
+    el.innerHTML = '<div class="g-na-in">' + icon('lock-simple') + '<h1>This game isn’t available</h1><p>It can’t be opened on this device. There are plenty of other games in the store.</p>' +
+      '<a class="g-btn primary" href="' + url('games/') + '">' + icon('storefront') + 'Back to the store</a></div>';
+    if (host) { host.innerHTML = ''; host.appendChild(el); } else { document.body.className = 'g-na-page'; document.body.innerHTML = ''; document.body.appendChild(el); }
+    return el;
+  }
   function settings() {
     return dialog({
-      title: 'Settings', html: brandHtml() + (partnerOn() ? '' : modeHtml()) + (root.GrugTheme && root.GrugTheme.brand() ? '' : roleHtml()) + uiSizeHtml() +
+      title: 'Settings', html: brandHtml() + (partnerOn() ? '' : modeHtml()) + (root.GrugTheme && root.GrugTheme.brand() ? '' : roleHtml()) + uiSizeHtml() + birthdayHtml() +
         '<div class="g-pref"><span><b>Animations</b><small>Celebrations and poses</small></span><button type="button" class="g-switch" role="switch" data-pref="motion" aria-checked="' + !!profile.prefs.motion + '" aria-label="Animations"></button></div>' +
         '<div class="g-pref"><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button type="button" class="g-switch" role="switch" data-pref="haptics" aria-checked="' + !!profile.prefs.haptics + '" aria-label="Vibrate on tap"></button></div>' +
         '<div id="kInv"></div>' +
         '<p class="g-fine" style="margin-top:6px">Saved in your profile, so it comes along when you export it. Emotes are picked in the <a href="' + url('avatar/#emotes') + '" style="color:var(--ember);font-weight:800">avatar editor</a>. More in <a href="' + url('profile/') + '" style="color:var(--ember);font-weight:800">Profile</a>.</p>',
       actions: [{ label: 'Done', kind: 'primary', value: true }],
       onOpen: d => {
-        d.classList.add('wide'); wireUiSize(d); wireMode(d); wireBrand(d);
+        d.classList.add('wide'); wireUiSize(d); wireMode(d); wireBrand(d); wireBirthday(d);
         $$('[data-role-set]', d).forEach(b => b.addEventListener('click', () => { setRole(b.dataset.roleSet); $$('[data-role-set]', d).forEach(x => x.setAttribute('aria-checked', String(x === b))); buzz(); }));
         const inv = $('#kInv', d), paintInv = () => { inv.innerHTML = inventoryHtml(); }; paintInv(); wireInventory(inv, paintInv);
         $$('[data-pref]', d).forEach(b => b.addEventListener('click', () => {
@@ -885,8 +1088,8 @@
     const meta = icon(g.original ? 'sparkle' : 'storefront') + esc(g.original ? 'Grug Original' : g.partner) + '<span>·</span>' + esc(g.kind);
     const cart = opts.kind === 'cart';
     return '<a class="g-tile f32-tile' + (cart ? ' f32-cart' : '') + '" data-f32="' + esc(g.id) + '"' + (cart ? ' data-f32-kind="cart"' : '') + ' href="' + url('games/' + g.id + '/') + '" aria-label="' + esc(g.title) + ' (' + esc(g.kind) + ')">' +
-      '<div class="f32-stage">' + badge + (opts.ribbon ? '<span class="f32-ribbon">' + icon('arrow-counter-clockwise') + esc(opts.ribbon) + '</span>' : '') + '<img class="f32-flat" src="' + url(art) + '" alt="" loading="lazy" decoding="async"></div>' +
-      '<div class="body"><div class="title">' + esc(g.title) + '</div><div class="meta">' + meta + '</div>' + (opts.extra || '') + '</div></a>';
+      '<div class="f32-stage">' + badge + age.tag(g, 'f32-rated') + (opts.ribbon ? '<span class="f32-ribbon">' + icon('arrow-counter-clockwise') + esc(opts.ribbon) + '</span>' : '') + '<img class="f32-flat" src="' + url(art) + '" alt="" loading="lazy" decoding="async"></div>' +
+      '<div class="body"><div class="title">' + esc(g.title) + age.tag(g) + '</div><div class="meta">' + meta + '</div>' + (opts.extra || '') + '</div></a>';
   }
   function itemTile(it, ctx) {
     ctx = ctx || {}; const st = itemState(it, ctx); const app = C.APPS[it.get.app] || C.APPS.grug;
@@ -934,6 +1137,7 @@
   }
   function announce(kind, d) {
     d = d || {}; const who = 'A player';   // never the display name: the privacy policy promises these notes carry no name or contact details
+    { const g = GAMES.find(x => x.app === d.app || x.id === d.app); if (isMature(g)) return false; }   // the feed never features a mature game
     if (kind === 'logon') {
       const log = readJSON(DKEY, {}) || {}; log.logon = log.logon && typeof log.logon === 'object' ? log.logon : {};
       const k = String(d.app || 'site'); if (Date.now() - (+log.logon[k] || 0) < LOGON_GAP_MIN * 60000) return false;
@@ -953,8 +1157,9 @@
     KEY, ROOT, url, esc, fmt, icon, GAMES, C,
     get profile() { return profile; }, get isNew() { return isNew; }, storageWorks,
     on(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },
-    save, setName, setAvatar, equip, unequip, wearing, refreshPictures, owns, grant, track, totals, statValue, progress, checkMilestones, celebrate,
+    save, setName, setAvatar, setBody, BODIES, equip, unequip, wearing, refreshPictures, owns, grant, track, totals, statValue, progress, checkMilestones, celebrate,
     favs,   // favourite and ignored games (the store, games/favorites/, the game pages)
+    age, onboard,   // the birthday and mature games; the games onboarding (games/welcome/)
     points, appState, venueOf, rewardsUrl, exportData, exportText, exportFilename, download, share, parseImport, applyImport, reset,
     snaps, ensureSnaps, randomName, cleanName, makeName, parseName, NAME_WORDS: { adj: ADJ.slice(), noun: NOUN.slice(), maxNum: NAME_MAX_NUM }, pearlBalance, pearlsUrl,
     announce,
@@ -967,6 +1172,7 @@
     LOGO,   // the Grug stegosaurus mark (an inline SVG)
     ROLES, get role() { return roleOf(); }, setRole, showsTab, partnerAllows,
     business: { on: bizOn, shop: bizShop, setAccount, TABS: BIZ_TABS },
-    ui: { chrome, hub, shopIcon, askRole, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile, uiSizeHtml, wireUiSize, modeHtml, wireMode, setMode, brandHtml, wireBrand, inventoryHtml, wireInventory, freeBar }
+    ui: { chrome, hub, shopIcon, askRole, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile, uiSizeHtml, wireUiSize, modeHtml, wireMode, setMode, brandHtml, wireBrand, inventoryHtml, wireInventory, freeBar,
+      birthdayHtml, wireBirthday, editBirthday, bdPicker, unavailable }
   };
 })(window);

@@ -23,3 +23,8 @@
 .gp-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:-2px}
 .gp-tags a{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:8px;background:var(--card2);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--ink2)}
 .gp-tags a:hover{background:var(--mode);border-color:transparent;color:var(--on-sel)}
+/* a mature game: the 18+ tag and what's in it (games.js rating / contains) */
+.gp-rating{display:flex;gap:12px;align-items:center;margin-top:14px;padding:12px 14px;background:var(--card);border-radius:var(--r-s);color:var(--ink2);max-width:70ch}
+.gp-rating .g-rated{margin:0;height:28px;min-width:42px;font-size:14px}
+.gp-rating b{display:block;color:var(--ink);font-weight:700}
+.gp-head h1 .g-rated{position:relative;top:-4px}

@@ -5,7 +5,10 @@
    (assets/carts/<id>.jpg, 1580 x 950, the title and a GRUG CART tag on a HUD-free shot of the game).
    Their saves live in the feed's own record (localStorage 'grug.micro.v1': bests, coins, owned items, favourites);
    Pearls are the site's (grug.pearls.v1). Tapping one opens the feed on it: games/carts/#<id>.
-   controls: 'tap' | 'hold' (the only input); len = how long a run takes. */
+   controls: 'tap' | 'hold' (the only input); len = how long a run takes.
+   rating: 'mature' (+ contains: [...]) works here the same as in games.js (Grug.age): the store hides such a cart under 18
+   and in shop / partner mode. The feed itself (games/carts/, built by the kit) has no such filter yet: give it one in
+   grug-game-kit/micro before a mature cart is added. */
 window.GRUG_CARTS = [
   { id: 'heist', title: 'Egg Heist', controls: 'hold', len: '2–3 min', color: '#f59e0b', tags: ['Heist', 'Pets', 'Collecting', 'Quick Runs'],
     blurb: 'Hold to head out, let go by an egg and tap the ring. Get home before its guardian wakes up and catches you.' },

@@ -76,6 +76,7 @@
     <h2>Settings</h2>
     <div id="modeRow"></div>
     <div id="uiSize"></div>
+    <div id="bdRow"></div>
     <div class="g-pref"><span id="icMotion"></span><span><b>Animations</b><small>Celebrations, poses and count-ups</small></span><button class="g-switch" role="switch" data-pref="motion" aria-label="Animations"></button></div>
     <div class="g-pref"><span id="icBuzz"></span><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button class="g-switch" role="switch" data-pref="haptics" aria-label="Vibrate on tap"></button></div>
     <p class="g-fine" id="storageNote" style="margin-top:10px"></p>
@@ -94,7 +95,7 @@
 
   <section class="g-card pf-danger full">
     <h2>Start over</h2>
-    <p class="g-fine" style="margin-bottom:10px">Clears your name, avatar and closet on this device.</p>
+    <p class="g-fine" style="margin-bottom:10px">Clears your name, avatar and closet on this device. Your birthday stays (change it in Settings).</p>
     <div class="row"><button class="g-btn danger" id="resetBtn"></button></div>
     <p class="pf-code" id="pid" style="margin-top:12px"></p>
   </section>
@@ -187,6 +188,9 @@
   render();
   $('#modeRow').innerHTML = G.ui.brandHtml() + G.ui.modeHtml(); G.ui.wireMode($('#modeRow')); G.ui.wireBrand($('#modeRow'));
   $('#uiSize').innerHTML = G.ui.uiSizeHtml(); G.ui.wireUiSize($('#uiSize'));
+  // the birthday (games onboarding; Grug.age) and Set up character again
+  const paintBd = () => { $('#bdRow').innerHTML = G.ui.birthdayHtml(); G.ui.wireBirthday($('#bdRow')); }; paintBd();
+  G.on((p, what) => { if (what === 'external' || what === 'import' || what === 'reset') paintBd(); });
   const paintInv = () => { $('#inventory').innerHTML = G.ui.inventoryHtml().replace('<span class="k-set-h">Inventory</span>', ''); };
   paintInv(); G.ui.wireInventory($('#inventory'), paintInv);
   G.on((p, what) => { if (what === 'items' || what === 'boost' || what === 'external' || what === 'import' || what === 'reset') paintInv(); });

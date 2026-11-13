@@ -7,7 +7,7 @@
        node tools/og/build.js
 
    Only Grug originals (original: true) get a rich preview: a business's game is a demonstration and must not be
-   advertised outside the site (CLAUDE.md, "Frozen").
+   advertised outside the site (CLAUDE.md, "Frozen"). A mature game (rating: 'mature') never gets one either.
 
    What Discord shows, top to bottom: the provider (oEmbed provider_name), the author (oEmbed author_name), the title
    (og:title, linked), the description (og:description, newlines kept), then the big picture (og:image with
@@ -28,7 +28,8 @@ const END = '<!-- /grug:og -->';
 const ctx = { window: {} };
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(ROOT, 'assets/games.js'), 'utf8'), ctx);
-const GAMES = ctx.window.GRUG_GAMES.filter(g => g.original && g.listed !== false);
+// (never a mature game: rating 'mature' is for players 18 and over and is not advertised outside the site)
+const GAMES = ctx.window.GRUG_GAMES.filter(g => g.original && g.listed !== false && g.rating !== 'mature');
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/\n/g, '&#10;');

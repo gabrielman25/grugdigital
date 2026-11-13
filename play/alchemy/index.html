@@ -792,7 +792,8 @@ const Shelf=(()=>{
   }
   // the partner's own game first, then every other standalone game (never one that lives inside another venue's app)
   const mine=g=>g.venue==="alchemy"||g.id==="alchemy";
-  const list=()=>{const G=(window.GRUG_GAMES||[]).filter(g=>g.listed!==false&&g.status!=="legacy");
+  // (never a mature game: partner mode doesn't show them, whatever the player's age; see Grug.age in assets/grug.js)
+  const list=()=>{const G=(window.GRUG_GAMES||[]).filter(g=>g.listed!==false&&g.status!=="legacy"&&g.rating!=="mature");
     return G.filter(mine).concat(G.filter(g=>!mine(g)&&!g.inApp));};
   const tile=g=>{const b=g.box||{},own=mine(g);
     return `<a class="hc-t f32-tile f32-cart" data-f32="${g.id}" data-f32-kind="cart" href="${ROOT}games/${g.id}/" aria-label="${esc(g.title)}" style="--hc-c:${b.shell||g.color||"#c2a26b"}">
