@@ -260,6 +260,10 @@ When a new game is added to `assets/games.js` and listed, also make its box. Don
    `GrugGameHost`); set `play`, `game` and `save` in its `games.js` entry, and `venue` (or `original: true`).
 5. **Store tags:** 3-5 genre words in `tags` (reuse the words other games already have where they fit). They drive the
    store's categories, tag filters and recommendations.
+6. **Link previews** (Grug originals only): run `node tools/og/build.js`. It writes the Discord / iMessage / Slack preview
+   tags (title, blurb, genre / players / tags lines, the box art as the big picture, the game's `color` as the stripe)
+   into `games/<id>/` and `play/<dir>/`, plus `assets/oembed/<id>.json`. Rerun it whenever a title, blurb, tags or box art
+   changes; never edit the `grug:og` block by hand. A business's game gets no preview while it is a demonstration.
 6. Check it in a browser: the game in the store (capsules, search, the queue), heart it, then its box on Favorites, the
    unbox, the panel, and Play (cartridge → console → game).
 
