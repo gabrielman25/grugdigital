@@ -17,12 +17,12 @@
 </script>
 <style>
 .hero{display:grid;grid-template-columns:1fr;gap:18px;padding:18px 0 6px}
-.hero .g-view{height:320px}
+.hero .g-view{height:230px}
 .hero .copy{display:flex;flex-direction:column;gap:14px;justify-content:center}
 .hero .copy p{color:var(--ink2);font-size:17px;max-width:46ch}
 .hero .cta{display:flex;gap:10px;flex-wrap:wrap}
 .hero .name{color:var(--moss)}
-@media (min-width:760px){.hero{grid-template-columns:minmax(300px,420px) 1fr;gap:28px;padding:28px 0 10px}.hero .g-view{height:420px}}
+@media (min-width:760px){.hero{grid-template-columns:minmax(300px,380px) 1fr;gap:28px;padding:24px 0 6px}.hero .g-view{height:340px}}
 @media (orientation:landscape) and (max-height:540px){.hero{grid-template-columns:minmax(220px,38%) 1fr;gap:22px;padding:8px 0 6px;align-items:center}.hero .g-view{height:calc(100vh - 110px);min-height:220px}.hero h1{font-size:30px}.hero .copy p{font-size:15px}.hero .g-btn.big{min-height:48px;font-size:18px;padding:0 20px}}
 .steps{display:grid;gap:10px;grid-template-columns:1fr}
 .step{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;background:var(--card);border-radius:var(--r);border:1px solid var(--line)}
@@ -60,11 +60,31 @@
 .hc-nav.next{right:calc(50vw - var(--tw,330px) / 2 - 64px)}
 .hc{--tw:min(330px,72vw)}
 @media (max-width:640px){.hc-nav{display:none}}
-.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-@media (min-width:760px){.duo{gap:16px;margin-top:18px}}
-/* phones: the same two halves, trimmed to a label, a line and a button */
-@media (max-width:759px){.door{padding:14px;gap:8px}.door-ic{width:38px;height:38px;border-radius:12px}.door-ic .gi{width:22px;height:22px}
-  .door-tx small{font-size:11px}.door-tx b{font-size:17px}.door-tx span{display:none}.door .door-go{min-height:38px;padding:0 12px;font-size:14px;align-self:stretch;justify-content:center}}
+/* a visitor who said they run a restaurant or make content (Settings → I'm a…) gets their door first, full width */
+.door.wide{margin-top:16px;flex-direction:row;flex-wrap:wrap;align-items:center;gap:14px 18px}
+.door.wide .door-tx{flex:1 1 260px}
+.door.wide .door-go{margin-top:0;align-self:center}
+/* quick games (the Carts): a sideways row of covers that opens the swipe feed on that cart */
+.qc{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 10px;margin-inline:-2px;scrollbar-width:none}
+.qc::-webkit-scrollbar{display:none}
+.qc a{flex:none;width:min(200px,44vw);scroll-snap-align:start;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;background:var(--card);border:1px solid var(--line);transition:transform .18s var(--spring)}
+.qc a:hover{transform:translateY(-2px)}
+.qc a:focus-visible{outline:3px solid var(--ring-a);outline-offset:2px}
+.qc img{width:100%;aspect-ratio:1580/950;object-fit:cover;display:block;background:var(--card2)}
+.qc span{display:flex;flex-direction:column;gap:2px;padding:8px 11px 10px}
+.qc b{font-size:15px;line-height:1.2}
+.qc small{font-size:12.5px;color:var(--mut)}
+/* the slim strip near the end: one door for restaurant owners, one for creators */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
+.strip-door{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--r);background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c);transition:transform .18s var(--spring)}
+.strip-door:hover{transform:translateY(-2px)}
+.strip-door .door-ic{width:40px;height:40px;border-radius:12px;flex:none}
+.strip-door .door-ic .gi{width:22px;height:22px}
+.strip-door span.tx{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.strip-door b{font:600 17px/1.2 var(--display)}
+.strip-door small{color:var(--ink2);font-size:14px}
+.strip-door>span[data-ic]{display:grid;color:var(--mut);flex:none}.strip-door>span[data-ic] .gi{width:20px;height:20px}
+@media (max-width:640px){.duo{grid-template-columns:1fr}}
 .door{display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:var(--r);background:var(--card);border:1px solid var(--line);transition:transform .18s var(--spring)}
 .door:hover{transform:translateY(-2px)}
 .door-ic{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:color-mix(in srgb,var(--c) 20%,transparent);color:var(--c)}
@@ -95,19 +115,18 @@ footer a{color:var(--ink2);font-weight:700}
 <main class="wrap">
   <!-- shop mode (a guest who came from a shop's rewards card): the front door is the shop's -->
   <div data-only-brand><section class="role-hero brand-hero" id="brandHero"></section></div>
-  <!-- two front doors, side by side (stacked on phones): shop owners and online creators. Not in shop mode. -->
-  <div class="duo" data-hide-brand>
-    <a class="door" id="doorOwner" href="rewards/" style="--c:#FF9F5A;--c-lo:#E0782F">
-      <span class="door-ic" id="icOwner"></span>
-      <span class="door-tx"><small>For restaurant owners</small><b>Bring your guests back.</b><span>A free rewards card in two minutes. Every visit earns your guests a stamp.</span></span>
-      <span class="g-btn primary door-go">Make a card</span>
-    </a>
-    <a class="door" href="links/" style="--c:#5AB0FF;--c-lo:#2F86D6">
-      <span class="door-ic" id="icCreator"></span>
-      <span class="door-tx"><small>For online creators</small><b>Turn followers into players.</b><span>One link for all your socials, or a little 3D world to walk through.</span></span>
-      <span class="g-btn primary door-go">Make a page</span>
-    </a>
-  </div>
+  <!-- someone who said in Settings → I'm a… that they run a restaurant or make content sees their own door first.
+       Everyone else starts on the games; the two doors also sit in the strip near the end. Not in shop mode. -->
+  <div data-only-for="owner" data-hide-brand><a class="door wide" data-owner-door href="restaurant/" style="--c:#FF9F5A;--c-lo:#E0782F">
+    <span class="door-ic" data-ic="storefront"></span>
+    <span class="door-tx"><small>For restaurant owners</small><b>Bring your guests back.</b><span>A free rewards card, a website and a dashboard for your team. Ready in about a minute.</span></span>
+    <span class="g-btn primary door-go">Set up my restaurant</span>
+  </a></div>
+  <div data-only-for="creator" data-hide-brand><a class="door wide" href="links/" style="--c:#5AB0FF;--c-lo:#2F86D6">
+    <span class="door-ic" data-ic="share-network"></span>
+    <span class="door-tx"><small>For online creators</small><b>Turn followers into players.</b><span>One link for all your socials, or a little 3D world to walk through.</span></span>
+    <span class="g-btn primary door-go">Make my link page</span>
+  </a></div>
 
   <section class="hero">
     <div class="g-view" id="heroView"><span class="hint">Tap to wave · <a href="avatar/">edit your look</a></span></div>
@@ -130,6 +149,26 @@ footer a{color:var(--ink2);font-weight:700}
       <button type="button" class="hc-nav next" id="hcNext" aria-label="Next game"></button>
     </div>
   </section>
+
+  <!-- quick games (the Carts, assets/carts.js): a minute each, one tap or one hold -->
+  <section class="g-section" id="quickSec" hidden>
+    <div class="g-section-h"><h2>Quick games · about a minute</h2><a href="games/carts/">See all</a></div>
+    <div class="qc" id="quickRow"></div>
+  </section>
+
+  <!-- the strip: restaurant owners and creators pick their own door here (not in shop mode) -->
+  <div class="duo" data-hide-brand>
+    <a class="strip-door" data-owner-door href="restaurant/" style="--c:#FF9F5A">
+      <span class="door-ic" data-ic="storefront" style="background:color-mix(in srgb,#FF9F5A 20%,transparent);color:#E0782F"></span>
+      <span class="tx"><b>Own a restaurant?</b><small>A free rewards card, website and dashboard.</small></span>
+      <span data-ic="caret-right"></span>
+    </a>
+    <a class="strip-door" href="links/" style="--c:#5AB0FF">
+      <span class="door-ic" data-ic="share-network" style="background:color-mix(in srgb,#5AB0FF 20%,transparent);color:#2F86D6"></span>
+      <span class="tx"><b>Make content?</b><small>A free link page for all your socials.</small></span>
+      <span data-ic="caret-right"></span>
+    </a>
+  </div>
 
   <section class="g-section" hidden>
     <div class="g-section-h"><h2>Closet picks</h2><a href="shop/">Shop</a></div>
@@ -154,17 +193,29 @@ footer a{color:var(--ink2);font-weight:700}
 <script src="assets/catalog.js"></script>
 <script src="assets/icons.js"></script>
 <script src="assets/games.js"></script>
+<script src="assets/carts.js"></script>
 <script src="assets/grug.js"></script>
 <script>
 (function(){
   const G = Grug, C = GrugCatalog, $ = s => document.querySelector(s);
-  G.ui.chrome('home');
+  G.ui.chrome('home', { noTitle: true });   // the page-name pill would only repeat the headline here
   G.ensureSnaps();
-  $('#icOwner').innerHTML = G.icon('storefront'); $('#icCreator').innerHTML = G.icon('share-network');
-  // someone who already made a card has a restaurant account: the owners' door opens it instead
+  document.querySelectorAll('[data-ic]').forEach(el => { el.innerHTML = G.icon(el.dataset.ic); });
+  // someone who already made a card has a restaurant account: the owners' doors open it instead
   const shop = G.business.shop();
-  if (shop) { const d = $('#doorOwner'); d.href = '#'; d.querySelector('b').textContent = shop.n + '.'; d.querySelector('.door-tx > span').textContent = 'Your dashboard, website and rewards card.';
-    d.querySelector('.door-go').textContent = 'Switch to your restaurant'; d.addEventListener('click', e => { e.preventDefault(); G.ui.buzz(); G.business.setAccount('business'); }); }
+  if (shop) document.querySelectorAll('[data-owner-door]').forEach(d => {
+    d.href = '#'; d.querySelector('b').textContent = shop.n + '.';
+    const line = d.querySelector('.door-tx > span, .tx small'); if (line) line.textContent = 'Your dashboard, website and rewards card.';
+    const go = d.querySelector('.door-go'); if (go) go.textContent = 'Switch to your restaurant';
+    d.addEventListener('click', e => { e.preventDefault(); G.ui.buzz(); G.business.setAccount('business'); });
+  });
+
+  /* quick games: every Cart, opening the swipe feed on it */
+  const carts = window.GRUG_CARTS || [];
+  if (carts.length) {
+    $('#quickRow').innerHTML = carts.map(c => '<a href="games/carts/#' + encodeURIComponent(c.id) + '"><img loading="lazy" alt="" src="assets/carts/' + encodeURIComponent(c.id) + '.jpg"><span><b>' + G.esc(c.title) + '</b><small>' + (c.controls === 'hold' ? 'Hold' : 'Tap') + ' · ' + G.esc(c.len) + '</small></span></a>').join('');
+    $('#quickSec').hidden = false;
+  }
 
 
   /* hero avatar */

@@ -438,13 +438,14 @@
     ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'], ['shop', 'Shop', 'storefront', 'shop/'], ['profile', 'Profile', 'user', 'profile/'],
     ['links', 'Link page', 'share-network', 'links/'], ['rewards', 'Rewards card', 'gift', 'rewards/'], ['create', '3D models', 'cube', 'create/'],
     ['carts', 'Carts', 'device-mobile', 'games/carts/'],
+    ['cards', 'Stamp cards', 'ticket', 'me/cards/'],   // the guest's side of rewards: stamp cards from shops and their Pearls (the owner's side is rewards/)
     ['me', 'Me', 'user', 'me/'], ['make', 'Make', 'magic-wand', 'make/'],   // the groups' own pages: a simple list of where to go
     ['dashboard', 'Dashboard', 'dashboard', 'business/'], ['website', 'Website', 'browser', 'business/site/']   // the restaurant account's own pages
   ];
   // what's in the dock, left to right; a group opens its tray of pages
   const DOCK_GROUPS = [
     { id: 'home' }, { id: 'games', label: 'Games', items: ['games', 'carts'] },
-    { id: 'me', label: 'Me', items: ['avatar', 'shop', 'profile'] },
+    { id: 'me', label: 'Me', items: ['avatar', 'shop', 'cards', 'profile'] },
     { id: 'make', label: 'Make', items: ['links', 'rewards', 'create'] }
   ];
   // the dock's stops, left to right: what a swipe (or Q / E, LB / RB) steps through
@@ -487,18 +488,18 @@
   const dockGroups = () => partnerOn() ? DOCK_GROUPS.filter(g => PARTNER_TABS.includes(g.id)) : bizOn() ? BIZ_TABS.map(id => ({ id })) : DOCK_GROUPS;
   const stops = () => partnerOn() ? PARTNER_TABS : bizOn() ? BIZ_TABS : STOPS;
   const SUB_TEXT = { games: 'The game store: every game, search and favorites', carts: 'Quick one-tap games: swipe up for the next',
-    avatar: 'Dress up your 3D avatar', shop: 'Clothes and how to earn them', profile: 'Stats, inventory and settings',
+    avatar: 'Dress up your 3D avatar', shop: 'Clothes and how to earn them', cards: 'Stamp cards from shops, and your Pearls', profile: 'Stats, inventory and settings',
     links: 'A link page or 3D world for your socials', rewards: 'A free stamp card for your shop', create: 'Model Kit and free 3D presets',
     dashboard: 'Schedule, recipes, checklists and more', website: 'Your shop\u2019s own website' };
   const groupOf = k => { const find = list => list.find(g => g.id === k || (g.items && g.items.includes(k))); return find(dockGroups()) || find(DOCK_GROUPS) || dockGroups()[0]; };
   // dock icons: the simple set, one colour per tab
   // one colour per section, the same accents theme.js gives each section (Model Kit style)
-  const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], carts: ['device-mobile', '#7EE081'], rewards: ['gift', '#FF9F5A'], links: ['share-network', '#5AB0FF'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'],
+  const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], carts: ['device-mobile', '#7EE081'], cards: ['ticket', '#FF9F5A'], rewards: ['gift', '#FF9F5A'], links: ['share-network', '#5AB0FF'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'],
     me: ['person', '#FF8FC2'], make: ['magic-wand', '#4FD8C4'], dashboard: ['dashboard', '#9BE338'], website: ['browser', '#5AB0FF'] };
-  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', carts: '#4FB357', rewards: '#E0782F', links: '#2F86D6', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E', me: '#E0669E', make: '#25A893', dashboard: '#6FB31C', website: '#2F86D6' };
+  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', carts: '#4FB357', cards: '#E0782F', rewards: '#E0782F', links: '#2F86D6', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E', me: '#E0669E', make: '#25A893', dashboard: '#6FB31C', website: '#2F86D6' };
   const dockIcon = k => '<svg class="k-ic k-ic-s" viewBox="0 0 16 16" fill="currentColor" style="color:' + DOCK_SIMPLE[k][1] + '" aria-hidden="true" focusable="false">' + (SIMPLE['dock-' + DOCK_SIMPLE[k][0]] || SIMPLE[DOCK_SIMPLE[k][0]] || '') + '</svg>';
   const DOCK = {};
-  ['home', 'games', 'carts', 'rewards', 'links', 'create', 'avatar', 'shop', 'profile', 'me', 'make', 'dashboard', 'website'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
+  ['home', 'games', 'carts', 'cards', 'rewards', 'links', 'create', 'avatar', 'shop', 'profile', 'me', 'make', 'dashboard', 'website'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
   const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
   const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
   const fsOk = () => !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
@@ -522,8 +523,8 @@
     if (!ptb) top.innerHTML = (partner ? '<a class="g-logo k-glass is-brand is-partner" href="' + url(partner.app) + '" aria-label="' + esc(partner.n) + ': open their app"><img class="g-partner-logo" alt="' + esc(partner.n) + '" src="' + url(partner.logo) + '">' + (partner.demo ? '<span class="g-partner-demo">Demo</span>' : '') + '</a>'
       : brand ? '<a class="g-logo k-glass is-brand" href="' + url('') + '" aria-label="' + esc(brand.n) + ' home"><span class="g-brand-mark" aria-hidden="true">' + shopIcon(brand.i) + '</span><span class="g-brand-name">' + esc(brand.n) + '</span></a>'
         : '<a class="g-logo k-glass" href="' + url(biz ? 'business/' : '') + '" aria-label="' + (biz ? 'Your dashboard' : 'Grug home') + '">' + LOGO + '<span>Grug</span></a>') +
-      '<div class="g-title k-glass" aria-hidden="true"><small>' + esc((active !== 'games' && (DOCK_GROUPS.find(g => g.id === (opts.dockAs || groupOf(active).id)) || {}).label) || (pageTitle === navLabel ? (brand ? brand.n : 'Grug') : navLabel)) + '</small><b>' + esc(pageTitle) + '</b></div>' +
-      '<div class="g-status k-glass"><a class="g-pts" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('pearl') + '<span class="num">' + fmt(pearlBalance()) + '</span><span class="g-plus" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M6 2.5v7M2.5 6h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></a></div>' +
+      (opts.noTitle ? '' : '<div class="g-title k-glass" aria-hidden="true"><small>' + esc((active !== 'games' && (DOCK_GROUPS.find(g => g.id === (opts.dockAs || groupOf(active).id)) || {}).label) || (pageTitle === navLabel ? (brand ? brand.n : 'Grug') : navLabel)) + '</small><b>' + esc(pageTitle) + '</b></div>') +
+      (opts.noPearls ? '<div class="g-status" aria-hidden="true" style="visibility:hidden"></div>' : '<div class="g-status k-glass"><a class="g-pts" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('pearl') + '<span class="num">' + fmt(pearlBalance()) + '</span><span class="g-plus" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M6 2.5v7M2.5 6h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span></a></div>') +
       (fsOk() ? '<button type="button" class="g-fs k-glass" aria-label="Full screen" aria-pressed="false">' + icon('arrows-out') + '</button>' : '') +
       '<button type="button" class="g-me" aria-label="' + (biz ? esc(biz.n) + ': restaurant account menu' : 'Your account menu') + '" aria-haspopup="menu" aria-expanded="false">' + faceImg + '</button>';
     const tabs = document.createElement('nav'); tabs.className = 'g-tabs k-glass'; tabs.setAttribute('aria-label', 'Sections');
@@ -649,6 +650,7 @@
       const k = e.key.toLowerCase(); if (k === 'q') go(-1, true); else if (k === 'e') go(1, true);
     });
     root.addEventListener('gamepadconnected', () => {
+      document.documentElement.classList.add('g-pad');   // the dock's LB / RB badges show only now
       let prev = {};
       (function poll() {
         const p = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).find(Boolean);
@@ -657,8 +659,8 @@
       })();
     }, { once: true });
     speed(); freeBar();
-    // first visit: who are you? (not on pages a guest reaches from a shop's QR, which pass noRole)
-    if (!roleOf() && !opts.noRole && !(root.GrugTheme && root.GrugTheme.brand()) && storageWorks()) setTimeout(() => { if (!roleOf() && !document.querySelector('dialog[open]')) askRole(); }, 700);
+    // no "who are you?" popup on arrival: the home page sorts people itself (games first, then a strip for owners and
+    // creators). The role is still picked in Settings → I'm a… and only changes what the home page shows first.
     root.addEventListener('grug:change', e => { if (e.detail && e.detail.what === 'boost') freeBar(); });
     return top;
   }
@@ -670,7 +672,7 @@
     const brand = root.GrugTheme && root.GrugTheme.brand();
     const face = snaps();
     const head = id === 'me'
-      ? '<div class="g-hub-h"><img class="g-hub-face" alt="" src="' + face.bust + '"><h1>' + esc(profile.name) + '</h1><p>Your look, your closet and your settings.</p></div>'
+      ? '<div class="g-hub-h"><img class="g-hub-face" alt="" src="' + face.bust + '"><h1>' + esc(profile.name) + '</h1><p>Your look, your closet, your stamp cards and your settings.</p></div>'
       : '<div class="g-hub-h"><span class="g-hub-ic">' + DOCK.make + '</span><h1>Make</h1><p>Free tools for creators, shops and game makers.</p></div>';
     host.innerHTML = head + '<nav class="g-hub-list" aria-label="' + esc(g.label) + '">' + g.items.map(k => { const n = navOf(k);
       return '<a href="' + url(n[3]) + '" style="--tab:' + (brand ? brand.color : DOCK_SIMPLE[k][1]) + ';--tab-lo:' + (brand ? brand.color : DOCK_LO[k]) + '"><span class="g-hub-ico">' + DOCK[k] + '</span><span class="g-hub-tx"><b>' + esc(n[1]) + '</b><small>' + esc(SUB_TEXT[k] || '') + '</small></span>' + icon('caret-right') + '</a>'; }).join('') + '</nav>';

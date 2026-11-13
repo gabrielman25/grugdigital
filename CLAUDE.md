@@ -95,15 +95,17 @@ in `grug.css` (`--page`, `--card-solid`, `--card`, `--ink`, `--line` …): never
 Simplicity is a goal in itself: no dead ends (carousels loop, nothing hits a hard stop), no scrolling inside panels that
 should be static, and nothing on screen that doesn't help the person do the next thing. **Icons are one flat style
 everywhere** (`Grug.icon`: the @icons simple set, then Phosphor bold); there are no colourful icon pictures and no emoji in
-the interface. The top bar shows only the logo, the page name, the Pearls count, a full screen button and the person's avatar (no name); Settings
+the interface. The top bar shows only the logo, the page name, the Pearls count, a full screen button and the person's avatar (no name;
+a page can drop the name with `noTitle` or the Pearls with `noPearls`, as Home and the restaurants pitch do); Settings
 and the dark-mode switch live in the account menu under the avatar.
 
 ## The dock: Home, Games, Me, Make
 
-Four tabs for everyone (the role in Settings → I'm a… only changes what the home page shows first). **Games**, **Me** and
+Four tabs for everyone (the role in Settings → I'm a… only changes what the home page shows first; nobody is asked it on arrival).
+The dock's LB / RB badges only show once a controller is plugged in (`html.g-pad`). **Games**, **Me** and
 **Make** are groups: tapping one opens a tray of its pages. Games = Games (the store, `games/`) and Carts (`games/carts/`,
 see below). Me and Make also have their own page (`me/`, `make/`), a plain Linktree-style list (`Grug.ui.hub`) whose
-picked row fills with its colour and slides on. Me = Avatar, Shop, Profile. Make = Link page (`links/`), Rewards card
+picked row fills with its colour and slides on. Me = Avatar, Shop, Stamp cards (`me/cards/`: the guest's stamp cards and Pearls), Profile. Make = Link page (`links/`), Rewards card
 (`rewards/`), 3D models (`create/`). `DOCK_GROUPS` / `NAV` in `assets/grug.js`.
 Swiping sideways anywhere (not on sliders, canvases or sideways-scrolling rows; mark others `data-noswipe`) or Q / E /
 LB / RB steps Home ↔ Games ↔ Me ↔ Make, and the next page slides in from that side (`grug.swipe` → `html.g-swipe-*`).
@@ -223,8 +225,10 @@ The panel shows only the game's name, the business it was made for, its short `b
 on its game page; keep blurbs to a sentence or two), its `features` and Play. No catalog codes, tags or Live/Demo
 badges, and the panel never scrolls: only the boxes do.
 
-The **home page** opens with two half-width doors side by side (restaurant owners → `rewards/`, online creators →
-`links/`; hidden in shop mode), then the avatar hello, then the games: the one place they show as bare cartridges (no
+The **home page** puts games first: the avatar hello with Play (the last game played), then the games, then a row of
+quick games (the Carts, `assets/carts.js`), then a slim strip with two doors (restaurant owners → `restaurant/`, online
+creators → `links/`; hidden in shop mode). Someone whose role is owner or creator sees that door first, full width. It
+has no page-name pill in the top bar (`chrome('home', { noTitle: true })`). The games are the one place they show as bare cartridges (no
 box, no card and no glow behind them), in one horizontal carousel: `boxTile(g, { kind: 'cart', ribbon })`
 (`data-f32-kind="cart"`). It loops endlessly (the list three times over, quietly re-centred on the middle copy). The
 last-played game comes first, with a "Last played" ribbon. Closet picks are hidden: players dress up when they choose to.

@@ -25,7 +25,7 @@ body{margin:0;background:#F3F3F5;color:#1E1B16;font:400 17px/1.55 Fredoka,system
   const fail = (h, p) => { page.innerHTML = '<div class="msg"><h1>' + h + '</h1><p>' + p + '</p></div>'; };
   async function show() {
     const m = /[#&]s=([\w-]+)/.exec(location.hash);
-    if (!m) return fail('No website here yet', 'This link is missing its website. Ask the shop for their full link, or <a href="../rewards/">make a free website and rewards card</a> for your own shop.');
+    if (!m) return fail('No website here yet', 'This link is missing its website. Ask the shop for their full link, or <a href="../restaurant/">make a free website and rewards card</a> for your own shop.');
     const d = await B.decodeSite(m[1]);
     if (d && d.error === 'old') return fail('Update your browser to see this page', 'This website needs a newer browser. Try opening the link in Chrome, Safari or Firefox.');
     if (!d) return fail('This link is cut short', 'Part of the website link is missing. Copy the whole link again and open it here.');

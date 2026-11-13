@@ -7,7 +7,7 @@
   if(!/[?&](name|type|c)=/.test(q)&&b&&b.active&&b.shops&&b.shops[b.active]){b.mode='business';localStorage.setItem('grug.business.v1',JSON.stringify(b));location.replace('../business/')}}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Grug for restaurants</title>
-<meta name="description" content="A rewards card that brings guests back, a website made from it, and a dashboard for your team and kitchen. Free, and ready in one tap.">
+<meta name="description" content="A rewards card that brings guests back, a website made from it, and a dashboard for your team and kitchen. Free, and ready in about a minute.">
 <meta name="theme-color" content="#F3F3F5">
 <link rel="icon" href="../favicon.png">
 <link rel="stylesheet" href="../assets/grug.css">
@@ -115,7 +115,7 @@ body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
   function form() {
     const n = state.n;
     $('#copy').innerHTML =
-      '<h1>' + (n ? esc(n) + ', ready in one tap.' : 'Your restaurant, ready in one tap.') + '</h1>' +
+      '<h1>' + (n ? esc(n) + ', ready in about a minute.' : 'Your restaurant, ready in about a minute.') + '</h1>' +
       '<p class="lede">A rewards card that brings guests back, a website made from it, and a dashboard for your team and kitchen. Free, with nothing to install.</p>' +
       '<form class="rs-form" id="f" novalidate>' +
         '<label for="nm">Your restaurant’s name</label><input class="rs-name" id="nm" maxlength="28" autocomplete="organization" placeholder="Pebble Boba Bar" value="' + esc(n) + '">' +

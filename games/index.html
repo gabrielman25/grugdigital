@@ -58,7 +58,8 @@
 .st-app .go .gi{width:18px;height:18px}
 .st-apps-note{color:var(--mut);font-size:13.5px;margin:0 2px 10px}
 @media (max-width:760px){.st-nav>.st-apps{order:-1;flex:0 0 auto;margin:0 0 4px 6px;padding:0 14px}.st-nav>.st-apps:not([hidden])~.st-search{flex-basis:calc(100% - 132px)}}
-@media (max-width:760px){.st-nav{flex-wrap:wrap}.st-search{order:-1;flex:1 1 100%;max-width:none;margin:0 0 4px}.st-nav>a,.st-nav>button{flex:1;justify-content:center;padding:0 8px;font-size:14.5px}.st-nav .lbl-long{display:none}}
+@media (max-width:760px){.st-nav{flex-wrap:wrap}.st-search{order:-1;flex:1 1 100%;max-width:none;margin:0 0 4px}.st-nav>a,.st-nav>button{flex:1;justify-content:center;padding:0 8px;font-size:14.5px}.st-nav .lbl-long{display:none}.st-nav .lbl-short{display:inline}.st-nav>a,.st-nav>button{padding:0 6px;font-size:14px}.st-nav>a b{margin-left:5px}}
+.lbl-short{display:none}
 
 /* ---------- shared bits ---------- */
 .st-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:30px 2px 12px}
@@ -282,7 +283,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
 <main class="wrap st">
   <h1 class="vh">Games</h1>
   <nav class="st-nav" aria-label="Store">
-    <a href="#" data-nav="home">Your store</a>
+    <a href="#" data-nav="home"><span class="lbl-long">Your&nbsp;store</span><span class="lbl-short">Store</span></a>
     <a href="#search" data-nav="search">Browse<span class="lbl-long">&nbsp;all</span></a>
     <button type="button" data-queue><span class="lbl-long">Discovery&nbsp;</span>Queue</button>
     <a href="favorites/" data-nav="favs">Favorites <b id="favN">0</b></a>
@@ -291,7 +292,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     <button type="button" class="st-apps" id="appsBtn" data-apps hidden><span id="appsIc"></span>Rewards<span class="lbl-long">&nbsp;apps</span></button>
     <div class="st-search" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-owns="sugg">
       <span id="qIc"></span>
-      <input id="q" type="search" placeholder="Search games, tags or restaurants" autocomplete="off" spellcheck="false" aria-label="Search the games" aria-controls="sugg">
+      <input id="q" type="search" placeholder="Search games or tags" autocomplete="off" spellcheck="false" aria-label="Search the games" aria-controls="sugg">
       <div class="st-sugg" id="sugg" role="listbox"></div>
     </div>
   </nav>
@@ -364,7 +365,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     const near = likes.map(x => [x, shared(x, g)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1])[0];
     if (near) return 'Because you like <b>' + esc(near[0].title) + '</b>';
     if (plays(g)) return 'You’ve played it ' + G.fmt(plays(g)) + (plays(g) === 1 ? ' time' : ' times');
-    return g.original ? '<b>A Grug original</b> · plays anywhere' : 'Made with <b>' + esc(g.partner) + '</b> in ' + esc(g.place);
+    return g.original ? '<b>Free</b> · plays in your browser, nothing to download' : 'Made with <b>' + esc(g.partner) + '</b> in ' + esc(g.place);
   }
 
   /* ---------- Play: the cartridge goes into the FOSSIL32 console, then the game opens (plain link without 3D) ---------- */

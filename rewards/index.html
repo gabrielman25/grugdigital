@@ -4,7 +4,7 @@
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Rewards · Grug</title>
-<meta name="description" content="Your rewards cards from every shop you've tapped in at, your Pearls, and the cards you've made for your own shop.">
+<meta name="description" content="Make a free stamp card for your café, bar or restaurant: print a QR, and guests collect a stamp every visit.">
 <meta name="theme-color" content="#17171A">
 <link rel="icon" href="../favicon.png">
 <link rel="stylesheet" href="../assets/grug.css">
@@ -21,7 +21,7 @@
     <div class="copy">
       <p class="kick">For cafés, bars and restaurants · Free</p>
       <h1>Turn first-time guests into regulars.</h1>
-      <p class="lead">Make a free rewards card for your shop in two minutes.</p>
+      <p class="lead">Make a free stamp card for your shop. Ready in about a minute.</p>
       <div class="row"><a class="g-btn primary big" href="create/" id="heroGo">Make my rewards card</a><a class="g-btn big" href="#features">How it works</a></div>
       <p class="g-fine">No app, no hardware, no sign-up.</p>
     </div>
@@ -31,7 +31,7 @@
   <section class="g-section" id="features">
     <div class="g-section-h"><h2>Why guests keep coming back</h2></div>
     <div class="rw-feats" id="featList"></div>
-    <p class="rw-more">Want a whole game starring your menu? <a href="../partners/">See Custom</a></p>
+    <p class="rw-more">Want a whole game starring your menu? <a href="../partners/">See what we build</a></p>
   </section>
 
   <section class="g-section" id="mine">
@@ -39,12 +39,8 @@
     <div class="rw-tiles" id="mineList"></div>
   </section>
 
-  <section class="g-section" id="cards">
-    <div class="g-section-h"><h2>Your cards</h2><span class="n" id="cardsN"></span></div>
-    <div class="rw-pearls" id="pearls" style="margin-bottom:14px"></div>
-    <div class="rw-tiles" id="cardList"></div>
-  </section>
-
+  <!-- a guest who has collected stamps: their cards now live under Me → Stamp cards (me/cards/) -->
+  <p class="rw-more" id="guestNote" hidden>Collecting stamps at a shop? <a href="../me/cards/">Your stamp cards are under Me</a>.</p>
 
 </main>
 <script src="../assets/catalog.js"></script>
@@ -68,36 +64,8 @@
   const tileVars = color => 'style="--a:' + color + ';--a-lo:' + RW.lo(color) + ';--a-ink:' + RW.inkOn(color) + '"';
   const band = (color, icon, name, sub) => '<div class="band" style="' + RW.bandStyle(color) + '"><span class="rw-ic">' + icon + '</span><div><b>' + esc(name) + '</b><small>' + esc(sub) + '</small></div></div>';
 
-  function paintPearls() {
-    $('#pearls').innerHTML = '<span class="pi">' + G.icon('pearl') + '</span><div><div class="num">' + G.fmt(RW.balance()) + '<small>Pearls</small></div></div>' +
-      '<p class="txt"><b>+' + RW.TAP_PEARLS + ' Pearls every time you tap in</b> at a shop (once a day each). Pearls are Grug’s premium currency: spend them in any game on Grug.</p>' +
-      '<div class="row"><a class="g-btn primary" href="' + G.url('games/') + '">' + G.icon('game-controller') + 'Play a game</a><a class="g-btn" href="' + G.pearlsUrl() + '">Get more</a></div>';
-  }
-
   function paint() {
-    paintPearls();
-    /* your cards: stamp cards saved on this phone + partner apps you've used */
-    const stamp = RW.cards().map(x => {
-      const have = Math.min(x.st.stamps, x.cfg.s), full = have >= x.cfg.s;
-      return { at: x.st.seen || 0, html: '<a class="rw-tile" ' + tileVars(x.cfg.color) + ' href="card/#c=' + x.st.c + '">' + band(x.cfg.color, RW.iconSvg(x.cfg.i), x.cfg.n, 'Stamp card') +
-        '<div class="body">' + dots(have, x.cfg.s) +
-        '<div class="line"><span>' + (full ? '<b>Reward ready</b>' : '<b>' + have + ' of ' + x.cfg.s + '</b> stamps') + '</span><span>' + esc(RW.rewardText(x.cfg.r)) + '</span></div>' +
-        '<div class="line"><span>Last visit ' + esc(when(x.st.seen)) + '</span><span>' + G.fmt(x.st.pearls || 0) + ' Pearls earned</span></div></div></a>' };
-    });
-    const pts = G.points().filter(p => !p.game.original && p.game.status !== 'legacy');
-    const visited = pts.filter(p => p.has && (p.points > 0 || p.visits > 0 || p.runs > 0));
-    const partner = visited.map(p => {
-      const g = p.game, s = G.appState(g) || {}, last = Array.isArray(s.history) && s.history[0] ? +s.history[0].at || 0 : 0;
-      return { at: last, html: '<a class="rw-tile" href="' + G.rewardsUrl(g) + '">' + band(g.color, G.icon('storefront'), g.partner, 'Grug partner · ' + g.place) +
-        '<div class="body"><div class="line"><span><b>' + G.fmt(p.points) + '</b> ' + esc(p.coin) + '</span><span>' + G.fmt(p.visits) + ' visit' + (p.visits === 1 ? '' : 's') + '</span></div>' +
-        '<div class="line"><span>' + esc(g.earn || 'Earn points every visit') + '</span></div>' +
-        '<div class="line"><span>' + (last ? 'Last visit ' + esc(when(last)) : 'Open the app') + '</span><span>' + esc(g.title) + '</span></div></div></a>' };
-    });
-    const all = stamp.concat(partner).sort((a, b) => b.at - a.at);
-    $('#cardsN').textContent = all.length ? all.length + ' card' + (all.length > 1 ? 's' : '') : '';
-    $('#cardList').innerHTML = all.length ? all.map(x => x.html).join('') :
-      '<div class="rw-empty"><b>No cards yet</b><span>Scan the QR or tap the tag at a shop and its card shows up here, with your stamps and Pearls.</span></div>';
-
+    $('#guestNote').hidden = !RW.cards().length;
     /* the cards this person made */
     const mine = RW.mine();
     $('#mine').hidden = !mine.length;
@@ -122,19 +90,19 @@
   /* the hero's picture: one sample card */
   $('#heroArt').innerHTML = RW.passHtml({ n: 'Pebble Coffee Bar', t: 'c', s: 8, f: 'l' }, 5);   // one sample card, upright
   const FEATS = [
-    ['pearl', '#C59BFF', 'A reward they actually want', 'Every visit gives guests 10 Pearls to spend on polished games on Grug. High value for them, no cost to you.'],
+    ['ticket', '#C59BFF', 'A reward they understand', 'Every visit earns a stamp, and a full card earns the reward you pick. Guests also get 10 Pearls for Grug\u2019s free games, at no cost to you.'],
     ['qr-code', '#FF9F5A', 'No app. No hardware.', 'Print your card and put it by the register. Guests scan it with their phone camera.'],
-    ['timer', '#7EE081', 'Ready in two minutes', 'Pick your colors, icon and reward, then download a print-ready PDF.'],
+    ['timer', '#7EE081', 'Ready in about a minute', 'Pick your colors, icon and reward, then download a print-ready PDF.'],
     ['seal-check', '#4FD8C4', 'Rewards your staff can trust', 'A full card opens a live 10-minute reward screen that a screenshot can\u2019t fake.']
   ];
   $('#featList').innerHTML = FEATS.map(f => '<div class="rw-feat"><span class="ic" style="background:' + f[1] + '">' + G.icon(f[0]) + '</span><b>' + esc(f[2]) + '</b><p>' + esc(f[3]) + '</p></div>').join('');
 
-  /* players see their own cards right under the hero; everyone else sees the owner pitch first */
+  /* a restaurant account sees its own cards first; everyone else sees the pitch first */
   function order() {
-    const ids = G.business.on() ? ['mine', 'hero', 'features', 'cards'] : G.role === 'player' ? ['hero', 'cards', 'features', 'mine'] : ['hero', 'mine', 'cards', 'features'];
+    const ids = G.business.on() ? ['mine', 'hero', 'features', 'guestNote'] : ['hero', 'mine', 'features', 'guestNote'];
     ids.forEach(id => $('#main').appendChild(document.getElementById(id)));
   }
-  order(); G.on((p, what) => { if (what === 'role' || what === 'external') order(); });
+  order(); G.on((p, what) => { if (what === 'external') order(); });
 
   paint();
   addEventListener('storage', e => { if (!e.key || e.key === RW.KEY || e.key === 'grug.pearls.v1') paint(); });

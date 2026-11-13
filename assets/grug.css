@@ -276,6 +276,8 @@ svg.k-ic-s{filter:none}
 .g-tabs{position:fixed;left:50%;bottom:calc(var(--sab) + 10px);transform:translateX(-50%);z-index:40;display:flex;justify-content:space-between;gap:2px;
   width:min(calc(100% - 24px),380px);padding:8px 10px 10px;border-radius:26px}
 .g-tabs .k-sb.l{left:14px}.g-tabs .k-sb.r{right:14px}
+/* the dock's LB / RB badges only mean something with a controller: hidden until one is plugged in (grug.js adds html.g-pad) */
+html:not(.g-pad) .g-tabs .k-sb{display:none}
 .g-tabs :is(a,.g-grp){position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:58px;border-radius:16px;font:700 11px/1 var(--font);color:var(--mut);transition:transform .2s var(--spring),background .2s}
 .g-tabs :is(a,.g-grp) .k-ic{width:34px;height:34px;filter:none;transition:transform .25s var(--spring)}
 .g-tabs :is(a,.g-grp)::after{content:"";position:absolute;left:50%;bottom:-6px;width:0;height:4px;border-radius:3px;background:var(--ink);opacity:.85;transform:translateX(-50%);transition:width .25s}
