@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Grug for restaurant managers · Six back-office jobs, one free dashboard</title>
+<meta name="description" content="Staff schedule, temperature log, daily checklists, recipe costs, time clock and permit reminders in one free dashboard.">
+<meta property="og:title" content="Six back-office jobs. One free dashboard.">
+<meta property="og:description" content="Staff schedule, temperature log, daily checklists, recipe costs, time clock and permit reminders. Free, no logins for staff.">
+<meta name="theme-color" content="#F3F3F5">
+<link rel="icon" href="/favicon.png">
+<style>
+@font-face{font-family:'Fredoka';font-weight:300 700;font-display:swap;src:url(/assets/fonts/fredoka.woff2) format('woff2')}
+:root{
+  --page:#F3F3F5;--card:#fff;--card2:#EAEAEE;--line:rgba(20,20,30,.09);--line2:rgba(20,20,30,.16);
+  --ink:#16161A;--ink2:#3C3C44;--mut:#62626C;
+  --mode:#9BE338;--lo:#6FB31C;--on:#1E1B16;--text:#3B740B;
+  --font:"Fredoka",ui-rounded,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--page);color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow:hidden;
+  background-image:radial-gradient(rgba(111,179,28,.10) 1.2px,transparent 1.3px);background-size:22px 22px}
+a{color:inherit}
+img{display:block;max-width:100%}
+h1,h2,h3{font-weight:700;line-height:1.06;margin:0;letter-spacing:-.015em}
+p{margin:0}
+.ico{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+.btn{--b:var(--mode);--bl:var(--lo);display:inline-flex;align-items:center;justify-content:center;gap:10px;font:600 19px/1.1 var(--font);color:var(--on);background:var(--b);border:0;border-radius:16px;padding:18px 26px;min-height:60px;text-decoration:none;cursor:pointer;box-shadow:0 5px 0 var(--bl);transition:transform .12s,box-shadow .12s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 7px 0 var(--bl)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--bl)}
+.btn.quiet{--b:#fff;--bl:#D3D3DA;outline:1.5px solid var(--line2);outline-offset:-1.5px}
+.btn.dark{--b:var(--on);--bl:#000;color:#fff}
+.btn .ico{width:22px;height:22px;stroke-width:2.6}
+:focus-visible{outline:3px solid var(--text);outline-offset:3px}
+
+/* ---------- the frame: top bar, the slide, the bottom button ---------- */
+.app{position:fixed;inset:0;display:grid;grid-template-rows:auto 1fr;height:100dvh}
+.topbar{display:flex;align-items:center;gap:14px;padding:14px max(20px,env(safe-area-inset-left));padding-top:max(14px,env(safe-area-inset-top));max-width:1180px;width:100%;margin:0 auto}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:21px;text-decoration:none;flex:none}
+.brand .g-mark{width:36px;height:36px}
+.back{width:44px;height:44px;border-radius:13px;border:0;background:#fff;color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none;box-shadow:0 3px 0 #DADAE0;outline:1.5px solid var(--line2);outline-offset:-1.5px}
+.back[hidden]{display:none}
+.prog{flex:1;display:grid;grid-auto-flow:column;gap:5px;max-width:520px;margin-left:auto}
+.prog i{height:8px;border-radius:99px;background:#DCDCE2;transition:background .3s}
+.prog i.done{background:var(--mode)}
+.prog i.now{background:var(--lo)}
+.count{font-weight:700;font-size:14px;color:var(--mut);min-width:44px;text-align:right}
+.app.intro .prog,.app.intro .count{visibility:hidden}
+.chat{display:inline-flex;align-items:center;gap:8px;flex:none;height:44px;padding:0 14px;border-radius:13px;background:#5865F2;color:#fff;font-weight:600;font-size:15px;text-decoration:none;box-shadow:0 3px 0 #3C45A5;transition:transform .12s,box-shadow .12s}
+.chat:hover{transform:translateY(-1px);box-shadow:0 4px 0 #3C45A5}
+.chat:active{transform:translateY(2px);box-shadow:0 1px 0 #3C45A5}
+.chat .ico{width:20px;height:20px;stroke-width:2.4}
+@media(max-width:620px){.chat{padding:0;width:44px;justify-content:center}.chat span{display:none}.topbar .brand span{display:none}}
+.ask-us{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:600;font-size:16px;color:var(--ink2);margin-top:4px}
+.ask-us a{display:inline-flex;align-items:center;gap:8px;color:#4752C4;text-decoration:none;border-bottom:2px solid currentColor;padding:2px 0}
+.ask-us .ico{width:18px;height:18px;stroke-width:2.4}
+
+.stage-wrap{position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;display:none;grid-template-rows:1fr auto;max-width:1180px;margin:0 auto;padding:0 max(20px,env(safe-area-inset-left))}
+.slide.on{display:grid;animation:in .45s cubic-bezier(.2,.8,.2,1)}
+.slide.on.back-in{animation-name:inb}
+@keyframes in{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes inb{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:none}}
+.body{min-height:0;overflow:auto;display:grid;align-content:center;padding:8px 0 16px}
+.foot{display:flex;gap:12px;justify-content:center;padding:14px 0 max(22px,env(safe-area-inset-bottom))}
+.foot .btn{min-width:min(360px,100%)}
+@media(max-width:620px){.foot .btn{width:100%;min-width:0}}
+
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
+.eyebrow::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--mode)}
+
+/* ---------- 1. intro ---------- */
+.intro-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+.intro-grid h1{font-size:clamp(38px,5.4vw,64px);margin-top:14px}
+.intro-grid .lead{font-size:clamp(18px,1.9vw,21px);color:var(--ink2);margin-top:18px;max-width:30em}
+.intro-grid .lead b{color:var(--ink);font-weight:600}
+.apps6{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:26px;max-width:460px}
+.app6{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;line-height:1.15;animation:pop6 .5s cubic-bezier(.34,1.56,.64,1) both}
+.app6 i{width:42px;height:42px;border-radius:13px;background:var(--c);box-shadow:0 4px 0 var(--cl);display:grid;place-items:center;color:#fff;flex:none}
+.app6 i .ico{width:21px;height:21px;stroke-width:2.4}
+@keyframes pop6{from{opacity:0;transform:translateY(10px) scale(.9)}to{opacity:1;transform:none}}
+.ph{position:relative;border-radius:30px;overflow:hidden;aspect-ratio:5/4.4;background:#ddd;box-shadow:0 30px 70px rgba(20,20,30,.16)}
+.ph img{width:100%;height:100%;object-fit:cover;object-position:46% 28%}
+.ph .float{position:absolute;display:grid;place-items:center;width:58px;height:58px;border-radius:17px;background:var(--c);box-shadow:0 5px 0 var(--cl),0 14px 26px rgba(0,0,0,.25);color:#fff;animation:bob 4s ease-in-out infinite}
+.ph .float .ico{width:28px;height:28px;stroke-width:2.4}
+@keyframes bob{50%{transform:translateY(-8px)}}
+@media(max-width:900px){
+  .intro-grid{grid-template-columns:1fr;gap:0}
+  .intro-grid .phwrap{display:none}
+  .apps6{grid-template-columns:repeat(2,1fr);gap:12px 14px}
+}
+@media(max-width:380px){.app6{font-size:14px}.app6 i{width:38px;height:38px}}
+
+/* ---------- 2. one app per slide ---------- */
+.appslide{display:grid;grid-template-columns:1.25fr .75fr;gap:44px;align-items:center}
+.appslide .demo{box-shadow:0 26px 60px rgba(20,20,30,.13);border-radius:22px;background:#F7F7FA;border:1px solid var(--line)}
+.appslide .tag{display:inline-flex;align-items:center;gap:12px}
+.appslide .tag i{width:56px;height:56px;border-radius:17px;background:var(--c);box-shadow:0 5px 0 var(--cl);display:grid;place-items:center;color:#fff}
+.appslide .tag i .ico{width:28px;height:28px;stroke-width:2.4}
+.appslide .tag span{font-weight:700;font-size:15px;color:var(--mut);letter-spacing:.04em;text-transform:uppercase}
+.appslide h2{font-size:clamp(32px,4.2vw,50px);margin-top:16px}
+.appslide p.one{font-size:clamp(18px,1.8vw,21px);color:var(--ink2);margin-top:12px;max-width:22em}
+.appslide .was{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-weight:600;font-size:16px;color:var(--mut);background:#fff;border-radius:999px;padding:7px 14px;border:1.5px solid var(--line2)}
+.appslide .was s{text-decoration-thickness:2px;text-decoration-color:#E05050;color:var(--ink2)}
+@media(max-width:900px){
+  .appslide{grid-template-columns:1fr;gap:18px}
+  .appslide .txt{order:-1;display:grid;grid-template-columns:auto 1fr;gap:2px 14px;align-items:center}
+  .appslide .tag{grid-row:span 2}
+  .appslide .tag span{display:none}
+  .appslide .tag i{width:50px;height:50px;border-radius:15px}
+  .appslide h2{font-size:28px;margin:0}
+  .appslide p.one{font-size:16.5px;margin:0;grid-column:2}
+  .appslide .was{grid-column:1/-1;justify-self:start;margin-top:10px;font-size:14px;padding:5px 12px}
+}
+
+/* ---------- 3. the basics ---------- */
+.basics h2,.ask h2,.done h2{font-size:clamp(32px,4.4vw,52px);text-align:center}
+.basics .sub,.ask .sub,.done .sub{text-align:center;color:var(--ink2);font-size:clamp(17px,1.8vw,20px);margin-top:12px}
+.bgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:30px auto 0;max-width:1000px}
+.b{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px 18px;display:grid;gap:10px;justify-items:center;text-align:center;animation:pop6 .5s cubic-bezier(.34,1.56,.64,1) both}
+.b i{width:58px;height:58px;border-radius:18px;background:var(--c);box-shadow:0 5px 0 var(--cl);display:grid;place-items:center;color:#fff}
+.b i .ico{width:28px;height:28px;stroke-width:2.4}
+.b b{font-size:20px;line-height:1.15}
+.b span{font-size:15px;color:var(--mut);line-height:1.35}
+.fine{max-width:640px;margin:22px auto 0;text-align:center;font-size:13.5px;color:var(--mut)}
+@media(max-width:900px){.bgrid{grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}.b{padding:16px 12px;gap:7px}.b i{width:48px;height:48px;border-radius:15px}.b b{font-size:17px}.b span{font-size:13.5px}}
+
+/* ---------- 4. one question ---------- */
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:720px;margin:30px auto 0;width:100%}
+.opt{font:inherit;text-align:left;cursor:pointer;background:#fff;border:2px solid var(--line2);border-radius:22px;padding:20px;display:grid;gap:10px;align-content:start;min-height:180px;box-shadow:0 6px 0 #E2E2E8;transition:transform .12s,box-shadow .12s,border-color .15s,background .15s;color:var(--ink)}
+.opt:hover{border-color:var(--c);transform:translateY(-2px);box-shadow:0 8px 0 #E2E2E8}
+.opt.pick,.opt:active{transform:translateY(4px);box-shadow:0 2px 0 #E2E2E8;border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,#fff)}
+.opt i{width:58px;height:58px;border-radius:18px;background:var(--c);box-shadow:0 5px 0 var(--cl);display:grid;place-items:center;color:#fff}
+.opt i .ico{width:28px;height:28px;stroke-width:2.4}
+.opt b{font-size:21px;line-height:1.15}
+.opt span{font-size:15px;color:var(--mut)}
+@media(max-width:620px){.opt{min-height:160px;padding:16px}.opt b{font-size:18px}.opt i{width:50px;height:50px}}
+
+/* ---------- 5. the end: open the dashboard ---------- */
+.done .row6{display:flex;justify-content:center;gap:10px;margin-top:22px}
+.done .row6 i{width:44px;height:44px;border-radius:13px;background:var(--c);box-shadow:0 4px 0 var(--cl);display:grid;place-items:center;color:#fff;animation:pop6 .5s cubic-bezier(.34,1.56,.64,1) both}
+.done .row6 i .ico{width:22px;height:22px;stroke-width:2.4}
+.endcard{max-width:560px;margin:26px auto 0;width:100%;background:#fff;border:1px solid var(--line2);border-radius:24px;padding:20px;box-shadow:0 20px 50px rgba(20,20,30,.08);display:grid;gap:12px}
+.endcard label{font-weight:600;font-size:15px}
+.endcard input{font:500 19px var(--font);color:var(--ink);border:2px solid var(--line2);border-radius:15px;padding:0 16px;min-height:58px;outline:none;background:var(--page);width:100%}
+.endcard input:focus{border-color:var(--lo);background:#fff}
+.endcard .btn{width:100%}
+.endcard small{text-align:center;color:var(--mut);font-size:14px}
+.legal{margin-top:18px;text-align:center;font-size:13px;color:var(--mut)}
+.legal a{margin:0 8px}
+@media(max-width:620px){.done .row6 i{width:38px;height:38px}.done .row6{gap:7px}.endcard{padding:16px}}
+@media(max-height:720px) and (max-width:620px){.done .row6,.b span{display:none}.fine{font-size:12px;margin-top:12px}.basics h2,.ask h2,.done h2{font-size:28px}.endcard{margin-top:16px}}
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);visibility:hidden;background:var(--on);color:#fff;border-radius:14px;padding:14px 20px;font-weight:600;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:50}
+.toast.on{transform:translate(-50%,0);visibility:visible}
+
+/* ---------- the six looping demos (each scene is drawn at 320x200 and scaled to fit) ---------- */
+.demo{position:relative;aspect-ratio:16/10;border-radius:16px;background:#F5F5F8;overflow:hidden;border:1px solid var(--line)}
+.stage{position:absolute;left:0;top:0;width:320px;height:200px;transform-origin:0 0;transform:scale(var(--k,1));font-family:var(--font);color:var(--ink);font-size:13px;line-height:1.2;user-select:none}
+.scene{position:absolute;inset:0;padding:14px;transition:opacity .28s}
+.stage.fade .scene{opacity:0}
+.cur{position:absolute;left:0;top:0;width:20px;height:24px;z-index:10;transform:translate(300px,215px);transition:transform .6s cubic-bezier(.45,0,.2,1);pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.cur svg{width:20px;height:24px;display:block;transform-origin:3px 3px;transition:transform .12s}
+.cur.press svg{transform:scale(.8)}
+.rip{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:rgba(30,27,22,.18);z-index:9;pointer-events:none;animation:rip .5s ease-out forwards}
+@keyframes rip{from{transform:scale(.2);opacity:1}to{transform:scale(1.4);opacity:0}}
+.typing::after{content:"";display:inline-block;width:1.5px;height:.95em;margin-left:1px;background:currentColor;vertical-align:-1px;animation:blink .7s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.hit{filter:brightness(.92)}
+.sk{display:block;height:8px;border-radius:5px;background:#E1E1E7}
+.av{width:24px;height:24px;border-radius:50%;background:var(--a);color:#fff;font-weight:700;font-size:10px;display:grid;place-items:center;font-style:normal;flex:none}
+.stage .ico{width:16px;height:16px;stroke-width:2.4}
+
+/* schedule */
+.s-sched .top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.s-sched .meter{flex:1;height:10px;border-radius:6px;background:#E6E6EB;position:relative;overflow:hidden}
+.s-sched .meter i{position:absolute;inset:0 auto 0 0;width:40%;background:var(--mode);border-radius:6px;transition:width .5s}
+.s-sched .meter u{position:absolute;top:-2px;bottom:-2px;left:60%;width:2px;background:var(--on);opacity:.5}
+.s-sched .pct{font-weight:700;font-size:13px;width:34px;text-align:right}
+.s-sched .grid{display:grid;grid-template-columns:28px repeat(5,1fr);gap:5px;align-items:center}
+.s-sched .grid>b{text-align:center;font-size:11px;color:#8A8A94}
+.s-sched .cell{height:36px;border-radius:8px;background:#fff;border:1.5px solid #E6E6EB;display:grid;place-items:center;transition:border-color .15s,background .15s}
+.s-sched .cell.sel{border-color:var(--on);background:#FAFAFB}
+.s-sched .sh{font-style:normal;font-weight:700;font-size:11px;padding:4px 6px;border-radius:6px;background:var(--a);color:#fff;white-space:nowrap}
+.s-sched .sh.new{background:transparent;color:var(--ink);padding:0}
+.s-sched .sh.set{background:var(--a);color:#fff;padding:4px 6px;animation:pop .3s}
+@keyframes pop{0%{transform:scale(.6)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+
+/* time clock */
+.s-clock .scene{display:grid;grid-template-columns:150px 1fr;gap:14px}
+.s-clock .pad{background:#1E1B16;border-radius:14px;padding:10px;display:grid;gap:7px;justify-items:center;position:relative;overflow:hidden}
+.s-clock .t{color:#fff;font-weight:700;font-size:24px;line-height:1}
+.s-clock .dots{display:flex;gap:7px}
+.s-clock .dots i{width:9px;height:9px;border-radius:50%;border:1.5px solid #77777F;transition:background .15s,border-color .15s}
+.s-clock .dots i.on{background:#FFBE1A;border-color:#FFBE1A}
+.s-clock .keys{display:grid;grid-template-columns:repeat(3,36px);gap:5px}
+.s-clock .keys b{height:22px;border-radius:7px;background:#34343B;color:#fff;font-size:11px;display:grid;place-items:center;box-shadow:0 2px 0 #0c0c0e;transition:background .12s}
+.s-clock .keys b.hit{background:#55555E}
+.s-clock .keys b.go{background:#FFBE1A;color:var(--on)}
+.s-clock .ok{position:absolute;inset:0;background:#7EE081;display:grid;place-items:center;opacity:0;transform:scale(.9);transition:opacity .2s,transform .25s}
+.s-clock .ok.on{opacity:1;transform:none}
+.s-clock .ok svg{width:46px;height:46px;stroke:#1E1B16;stroke-width:3.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.s-clock .list{display:grid;gap:7px;align-content:start}
+.s-clock .lh{display:flex;align-items:center;gap:6px;font-weight:700;font-size:15px;margin-bottom:2px}
+.s-clock .lh i{width:9px;height:9px;border-radius:50%;background:#45B04A;box-shadow:0 0 0 3px rgba(126,224,129,.35)}
+.s-clock .row{display:flex;align-items:center;gap:8px;background:#fff;border-radius:10px;padding:6px 8px;border:1.5px solid #E6E6EB}
+.s-clock .row .sk{flex:1}
+.s-clock .row em{font-style:normal;font-size:10px;font-weight:700;color:#3B740B}
+.s-clock .row.new{animation:slidein .4s cubic-bezier(.34,1.4,.64,1)}
+@keyframes slidein{from{opacity:0;transform:translateY(-10px) scale(.95)}to{opacity:1;transform:none}}
+
+/* temperature log */
+.s-temp .scene{display:grid;gap:9px;align-content:center}
+.s-temp .r{display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:8px 10px;border:1.5px solid #E6E6EB;transition:background .25s,border-color .25s}
+.s-temp .u{width:32px;height:32px;border-radius:10px;background:var(--u);display:grid;place-items:center;color:#fff;flex:none}
+.s-temp .r .sk{flex:1;max-width:90px}
+.s-temp .f{margin-left:auto;width:66px;height:30px;border-radius:9px;border:1.5px solid #DADAE0;display:flex;align-items:center;justify-content:flex-end;padding:0 8px;font-weight:700;font-size:15px;background:#FAFAFB;transition:border-color .15s}
+.s-temp .f.sel{border-color:var(--on)}
+.s-temp .f em{font-style:normal}
+.s-temp .f span{color:#9A9AA3;font-weight:600;margin-left:1px}
+.s-temp .st{width:26px;height:26px;border-radius:50%;background:#EDEDF1;display:grid;place-items:center;flex:none;transition:background .2s}
+.s-temp .st svg{width:15px;height:15px;stroke:#fff;stroke-width:3.2;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.s-temp .r.ok .st{background:#45B04A}.s-temp .r.ok .st svg{opacity:1}
+.s-temp .r.bad{background:#FFF0F0;border-color:#FF9B9B;animation:shake .4s}
+.s-temp .r.bad .st{background:#E5484D}.s-temp .r.bad .st svg{opacity:1}
+@keyframes shake{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+
+/* checklists */
+.s-check .scene{display:grid;grid-template-columns:86px 1fr;gap:16px;align-items:center}
+.s-check .ring{position:relative;width:80px;height:80px}
+.s-check .ring svg{width:80px;height:80px;transform:rotate(-90deg)}
+.s-check .ring circle{fill:none;stroke-width:4}
+.s-check .ring .bg{stroke:#E6E6EB}
+.s-check .ring .fg{stroke-opacity:0;stroke:#7EE081;stroke-linecap:round;stroke-dasharray:0 100;transition:stroke-dasharray .45s cubic-bezier(.2,.8,.2,1)}
+.s-check .ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:17px}
+.s-check .ring.full b{color:#3B740B}
+.s-check .l{display:grid;gap:8px}
+.s-check .r{display:flex;align-items:center;gap:9px;background:#fff;border-radius:10px;padding:7px 9px;border:1.5px solid #E6E6EB;transition:opacity .25s}
+.s-check .box{width:20px;height:20px;border-radius:6px;border:2px solid #C9C9D1;display:grid;place-items:center;flex:none;transition:background .15s,border-color .15s}
+.s-check .box svg{width:13px;height:13px;stroke:#fff;stroke-width:3.6;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.s-check .r.done .box{background:#45B04A;border-color:#45B04A}.s-check .r.done .box svg{opacity:1}
+.s-check .r.done .sk{background:#CFE9C7}
+.s-check .r .ri{color:#9A9AA3}
+.s-check .conf{position:absolute;width:7px;height:7px;border-radius:2px;left:57px;top:100px;animation:conf .9s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes conf{to{transform:translate(var(--x),var(--y)) rotate(260deg);opacity:0}}
+
+/* recipe costs */
+.s-cost .scene{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:center}
+.s-cost .plate{width:92px;height:92px;border-radius:50%;background:#fff;border:6px solid #EDEDF1;position:relative;box-shadow:0 6px 14px rgba(0,0,0,.08)}
+.s-cost .plate i{position:absolute;border-radius:40%;background:var(--b)}
+.s-cost .ings{display:grid;gap:6px}
+.s-cost .ing{display:flex;align-items:center;gap:7px;background:#fff;border-radius:9px;padding:5px 8px;border:1.5px solid #E6E6EB}
+.s-cost .ing i{width:10px;height:10px;border-radius:3px;background:var(--b);flex:none}
+.s-cost .ing .sk{flex:1}
+.s-cost .ing b,.s-cost .price b{font-size:12px;min-width:34px;text-align:right;border-radius:6px;padding:2px 4px;transition:background .15s}
+.s-cost .sel{background:#FFF6D6;outline:1.5px solid var(--on)}
+.s-cost .bot{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+.s-cost .price{display:flex;align-items:center;gap:6px;background:#1E1B16;color:#fff;border-radius:10px;padding:6px 8px;font-weight:700}
+.s-cost .price .ico{width:14px;height:14px}
+.s-cost .price b{font-size:14px;color:#fff}
+.s-cost .price b.sel{background:#3A3A40;outline-color:#fff}
+.s-cost .gauge{height:14px;border-radius:8px;background:#E6E6EB;position:relative}
+.s-cost .gauge i{position:absolute;inset:0 auto 0 0;border-radius:8px;width:86%;background:#E5484D;transition:width .5s,background .3s}
+.s-cost .gauge u{position:absolute;top:-4px;bottom:-4px;left:60%;width:2.5px;border-radius:2px;background:#1E1B16}
+.s-cost .gp{font-weight:700;font-size:15px;color:#C93338;min-width:38px;text-align:right;transition:color .3s}
+.s-cost.good .gauge i{background:#45B04A}.s-cost.good .gp{color:#3B740B}
+
+/* permits */
+.s-perm .scene{display:grid;gap:8px;align-content:start}
+.s-perm .p{display:flex;align-items:center;gap:9px;background:#fff;border-radius:11px;padding:7px 9px;border:1.5px solid #E6E6EB;position:relative}
+.s-perm .p .u{width:28px;height:28px;border-radius:8px;background:#C59BFF;display:grid;place-items:center;color:#fff;flex:none}
+.s-perm .p .sk{flex:1;max-width:84px}
+.s-perm .d{margin-left:auto;font-weight:700;font-size:12px;min-width:46px;text-align:center;border-radius:7px;padding:4px 6px;background:#F3F3F5;transition:background .15s}
+.s-perm .d.sel{outline:1.5px solid var(--on);background:#fff}
+.s-perm .s{font-style:normal;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:#E6F7D6;color:#3B740B;min-width:38px;text-align:center;transition:background .3s,color .3s}
+.s-perm .s.wait{background:#EDEDF1;color:#9A9AA3}
+.s-perm .s.soon{background:#FFF1CC;color:#8A6200}
+.s-perm .p.new{animation:slidein .4s cubic-bezier(.34,1.4,.64,1)}
+.s-perm .bell{position:absolute;right:-6px;top:-8px;width:24px;height:24px;border-radius:50%;background:#FFBE1A;display:grid;place-items:center;color:var(--on);opacity:0;transform:scale(.4);transition:opacity .2s,transform .3s cubic-bezier(.34,1.6,.64,1)}
+.s-perm .bell.on{opacity:1;transform:none;animation:ring .5s .3s 2}
+.s-perm .bell .ico{width:14px;height:14px;stroke-width:2.6}
+@keyframes ring{25%{transform:rotate(-18deg)}75%{transform:rotate(18deg)}}
+.s-perm .add{justify-self:start;width:34px;height:34px;border-radius:10px;background:#C59BFF;color:#fff;display:grid;place-items:center;box-shadow:0 3px 0 #9A6FE0;font-weight:700;font-size:20px}
+.s-perm .tl{position:absolute;left:62px;right:14px;bottom:20px;height:8px;border-radius:5px;background:#E6E6EB;overflow:hidden;opacity:0;transition:opacity .2s}
+.s-perm .tl.on{opacity:1}
+.s-perm .tl i{position:absolute;inset:0 auto 0 0;width:0;background:#FFBE1A;border-radius:5px;transition:width 1.6s linear}
+.s-perm .tl.on i{width:100%}
+.s-perm .cal{position:absolute;left:14px;bottom:12px;width:38px;height:24px;border-radius:7px;background:#1E1B16;color:#fff;font-weight:700;font-size:11px;display:grid;place-items:center;opacity:0;transition:opacity .2s}
+.s-perm .cal.on{opacity:1}
+.demo{position:relative;aspect-ratio:16/10;overflow:hidden}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.cur{display:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+  <symbol id="i-team" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.2c2.6.2 4.5 2.2 4.5 4.8"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M10 6.5h10M10 12h10M10 17.5h10M3.5 6.5l1.5 1.5 2.5-3M3.5 12l1.5 1.5 2.5-3M3.5 17.5l1.5 1.5 2.5-3"/></symbol>
+  <symbol id="i-temp" viewBox="0 0 24 24"><path d="M10 13.5V5a2 2 0 014 0v8.5a4 4 0 11-4 0z"/><path d="M12 9v7"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 11.5V4.5A1.5 1.5 0 014.5 3h7l9.5 9.5-8.5 8.5z"/><circle cx="8" cy="8" r="1.6"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h5"/><circle cx="15.5" cy="16.5" r="2"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v10.5h14V9M10 13.5h4"/></symbol>
+  <symbol id="i-web" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M6.5 6.5h.01M9.5 6.5h.01"/></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4.5" rx="1.2"/><path d="M5 12.5V20h14v-7.5M12 8v12M12 8C10.5 4 6.5 4.5 7.5 7c.4 1 2 1 4.5 1zM12 8c1.5-4 5.5-3.5 4.5-1-.4 1-2 1-4.5 1z"/></symbol>
+  <symbol id="i-tick" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"/></symbol>
+  <symbol id="i-food" viewBox="0 0 24 24"><path d="M7 3v8M4.5 3v5a2.5 2.5 0 005 0V3M7 11v10M17 21V3c-2.5 1.5-3.5 4-3.5 7v4H17"/></symbol>
+  <symbol id="i-cup" viewBox="0 0 24 24"><path d="M5 8h12v6a5 5 0 01-5 5h-2a5 5 0 01-5-5zM17 10h1.5a2.5 2.5 0 010 5H17M9 2.5v2.5M13 2.5v2.5"/></symbol>
+  <symbol id="i-paper" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h4"/></symbol>
+  <symbol id="i-app" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 7h8M8 11h8M8 15h3"/><circle cx="15.5" cy="16" r="1.4"/></symbol>
+  <symbol id="i-pos" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2.5"/><path d="M8 20h8M12 16v4M7 8h6"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 004 0"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.5-1-1.6-1.5-2.8-1.5-1.6 0-2.8.8-2.8 2.1 0 3 5.8 1.4 5.8 4.3 0 1.3-1.3 2.2-3 2.2-1.3 0-2.5-.6-3-1.6M12 6v1.7M12 16.3V18"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2.5L5 13.5h6l-1 8 8-11h-6z"/></symbol>
+  <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 21c0-4 3.1-7 7-7s7 3 7 7"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-fridge" viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="3"/><path d="M5 10h14M9 6v1.5M9 13v3"/></symbol>
+  <symbol id="i-snow" viewBox="0 0 24 24"><path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6M9.5 4.5L12 7l2.5-2.5M9.5 19.5L12 17l2.5 2.5"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 21.5c-4 0-6.5-2.7-6.5-6.3 0-4 3.2-5.8 3.9-9.7 2.6 1.6 3.4 4 3.4 5.6 1-.6 1.7-1.8 1.9-3.1 2 1.9 3.8 4.3 3.8 7.2 0 3.6-2.5 6.3-6.5 6.3z"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 016.5 3h11A2.5 2.5 0 0120 5.5v8a2.5 2.5 0 01-2.5 2.5H10l-5 4.5V16h1.5"/><path d="M8.5 9.5h.01M12 9.5h.01M15.5 9.5h.01"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></symbol>
+</svg>
+
+<div class="app intro" id="app">
+  <header class="topbar">
+    <button class="back" id="back" type="button" aria-label="Back" hidden><svg class="ico"><use href="#i-back"/></svg></button>
+    <a class="brand" href="/"><svg class="g-mark" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="16" fill="#9BE338"/><path d="M19.8 51C19.5 50.9 18.9 50.9 18.4 50.9C17.2 50.9 17.1 50.7 17 48.6C16.8 46.5 17 45.5 17.9 43.8C18.1 43.3 18.3 42.8 18.3 42.8C18.3 42.6 19 41.2 19.3 40.7C19.8 39.8 19.8 39.8 19.7 39.6C19.5 38.9 19.2 38.3 18.8 37.8C17.9 36.4 17.6 35.3 17.7 34C17.8 32.5 18.1 32 19.1 31.1C19.5 30.8 19.9 30.5 20 30.5C20.5 30 21.2 29.7 21.7 29.7C22.5 29.7 22.8 29.4 22.8 28.8C22.8 27.9 23.5 28.4 23.6 29.3C23.6 30 23.1 30.5 21.7 30.8C20.7 31 20.2 33 21 33.9C21.9 35 25.6 34.7 26.6 33.5C26.6 33.4 26.7 33.4 26.7 33.4C26.8 33.4 27 33.3 27.3 33.2C27.5 33.1 28 32.9 28.2 32.8C29.5 32.4 29.8 32.4 30 32.4C30 32.4 30.3 32.3 30.5 32.2C31 32.1 31.5 32 33 31.9C34.8 31.8 35.5 31.7 35.8 31.6C35.9 31.5 36.2 31.4 36.4 31.4C37.8 31 38.2 30.7 39 29.2C39.6 28.1 39.6 25.4 39 24.6C38.9 24.5 38.8 24.4 38.8 24.4C38.8 24.3 38.1 23 37.9 22.8C37.8 22.7 37.3 22.4 36.8 22.1C36.3 21.8 35.8 21.5 35.7 21.5C35.3 21.2 33.8 20.9 32.9 20.9C32.5 20.9 32 20.9 31.9 20.8C31.8 20.8 31.5 20.7 31.3 20.7C30.3 20.5 30 20.3 29.2 19.5C28 18.3 27.9 17.7 28.3 15.9C28.4 15.7 28.5 15.4 28.5 15.3C28.6 15.2 28.7 15 28.7 14.9C29.1 14.2 29.8 13.4 30.4 13.3C31.1 13.1 31.3 13.1 32.3 13C33.2 13 34.1 13.1 34.9 13.3C35.2 13.3 35.6 13.4 35.8 13.5C36.7 13.6 37.3 13.8 38.7 14.4C39.5 14.7 40.5 15.4 41.3 16.1C41.5 16.2 41.9 16.5 42.1 16.6C42.2 16.8 42.5 17 42.6 17.1C42.7 17.3 42.9 17.5 43 17.6C43.3 18 43.8 18.7 44 19.2C44.1 19.5 44.3 19.9 44.5 20.1C44.6 20.3 44.8 20.6 44.8 20.9C44.9 21.1 45.1 21.4 45.3 21.7C45.5 21.9 45.6 22.2 45.7 22.3C45.7 22.4 45.8 22.7 45.8 22.9C45.9 23.1 46 23.6 46.1 23.9C46.2 24.2 46.4 24.6 46.4 24.7C46.6 25.2 46.8 26.3 46.9 26.8C46.9 27 47 27.4 47 27.7C47.1 28.3 47.1 32.1 46.9 32.4C46.9 32.5 46.9 33.2 46.9 34C46.9 34.8 46.9 35.6 46.8 35.8C46.8 36 46.7 36.3 46.7 36.5C46.6 36.9 46.5 37.4 46.4 37.7C46.3 37.8 46.3 38.1 46.2 38.3C46.2 38.6 46.1 38.9 46.1 39C46 39.1 46 39.3 45.9 39.5C45.6 40.7 45.3 41.5 45 42.3C45 42.4 44.9 42.7 44.8 43C44.7 43.4 44.5 43.9 44.3 44.3C44.1 44.7 43.9 45.2 43.8 45.5C43.7 45.8 43.6 46.1 43.5 46.2C43.5 46.2 43.5 46.3 43.5 46.3C43.5 46.4 43.4 46.5 43.3 46.7C43.2 46.8 43.1 47.1 43 47.2C43 47.3 42.9 47.5 42.8 47.7C42.6 47.9 42.4 48.3 42.3 48.6C41.1 50.8 41.2 50.8 38.3 50.8C34.9 50.8 34.8 50.7 34.8 49.5C34.8 49 34.8 48.8 34.7 48.6C33.3 46.1 32.8 45.5 31.8 45.2C31.6 45.1 31.3 45 31.1 45C30.4 44.8 29.9 44.9 28.2 45.4C27.2 45.7 26 46.8 26 47.5C26 47.6 26 47.7 26 47.7C25.9 47.8 25.9 48 25.8 48.2C25.8 48.4 25.6 48.8 25.4 49.1C25.3 49.4 25.2 49.7 25.2 49.7C25.2 50.3 24.3 50.8 23.4 50.8C23 50.9 22.5 50.9 22.3 50.9C22 51 20.6 51 19.8 51Z" fill="#1F1A17"/></svg>Grug</a>
+    <div class="prog" id="prog" aria-hidden="true"></div>
+    <span class="count" id="count"></span>
+    <a class="chat" id="chat" href="#" target="_blank" rel="noopener" aria-label="Talk to us on Discord"><svg class="ico"><use href="#i-chat"/></svg><span>Discord</span></a>
+  </header>
+  <main class="stage-wrap" id="slides" aria-live="polite"></main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  const SITE = '/';
+  // Discord is how Grug talks with managers and owners: one server invite for each role
+  const MANAGER_DISCORD = 'https://discord.gg/cHGS3QGTQh';
+  const OWNER_DISCORD = 'https://discord.gg/28Dj4Ws8tu';
+  // "Send this to my owner" shares this walkthrough itself, plus the owners' Discord
+  const OWNER_PAGE = location.protocol.startsWith('http') ? location.origin + location.pathname : SITE + 'for/managers/';
+  const $ = id => document.getElementById(id);
+  $('chat').href = MANAGER_DISCORD;
+  const svg = n => `<svg class="ico"><use href="#i-${n}"/></svg>`;
+  const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  // the six apps, in the order the slideshow shows them
+  const APPS = [
+    { id: 'schedule', t: 'Staff schedule', i: 'cal', c: '#FF4D4D', cl: '#D42F3A', one: 'Tap a day, type the shift. Labor stays under your target as you go.', was: 'the paper on the wall' },
+    { id: 'temps', t: 'Temperature log', i: 'temp', c: '#4FD8C4', cl: '#25A893', one: 'Type the reading. Anything out of range turns red right away.', was: 'the temp log binder' },
+    { id: 'checklists', t: 'Daily checklists', i: 'check', c: '#7EE081', cl: '#45B04A', one: 'Opening and closing, ticked off the same way every shift.', was: 'the clipboard' },
+    { id: 'recipes', t: 'Recipe costs', i: 'tag', c: '#FF7A6B', cl: '#DE5545', one: 'Change a price and see the food cost of the plate move.', was: 'an old spreadsheet' },
+    { id: 'clock', t: 'Time clock', i: 'clock', c: '#FFBE1A', cl: '#D99A00', one: 'Staff punch in with a PIN on a shared tablet. Hours add up on their own.', was: 'punch cards' },
+    { id: 'permits', t: 'Permit reminders', i: 'doc', c: '#C59BFF', cl: '#9A6FE0', one: 'Add the expiry date once. You get a heads-up before it lapses.', was: 'remembering' },
+  ];
+  const tile = (a, cls = '', d = 0) => `<i class="${cls}" style="--c:${a.c};--cl:${a.cl};animation-delay:${d}ms">${svg(a.i)}</i>`;
+  let owner = null;
+
+  const SLIDES = [
+    { id: 'intro', html: () => `
+      <div class="intro-grid">
+        <div>
+          <span class="eyebrow">For restaurant managers</span>
+          <h1>Six back-office jobs. One free dashboard.</h1>
+          <p class="lead">Grug runs your <b>staff schedule</b>, <b>temperature log</b>, <b>daily checklists</b>, <b>recipe costs</b>, <b>time clock</b> and <b>permit reminders</b> from the tablet you already have.</p>
+          <div class="apps6">${APPS.map((a, k) => `<div class="app6" style="animation-delay:${120 + k * 70}ms">${tile(a)}${a.t}</div>`).join('')}</div>
+        </div>
+        <div class="phwrap"><div class="ph"><img src="mgr-tablet.jpg" alt="A restaurant manager in her dining room" width="1800" height="1012">
+          ${tile(APPS[0], 'float', 0).replace('<i class="float" style="', '<i class="float" style="left:22px;top:26px;')}
+          ${tile(APPS[1], 'float', 0).replace('<i class="float" style="', '<i class="float" style="right:24px;top:40%;animation-delay:-1.3s;')}
+          ${tile(APPS[4], 'float', 0).replace('<i class="float" style="', '<i class="float" style="left:30px;bottom:30px;animation-delay:-2.6s;')}
+        </div></div>
+      </div>`,
+      foot: () => `<button class="btn" type="button" data-next>What does Grug do? ${svg('arrow')}</button>` },
+
+    ...APPS.map((a, k) => ({ id: a.id, html: () => `
+      <div class="appslide" style="--c:${a.c};--cl:${a.cl}">
+        <div class="demo" data-demo="${a.id}" role="img" aria-label="${a.t}: a short looping demo"></div>
+        <div class="txt">
+          <div class="tag">${tile(a)}<span>${k + 1} of ${APPS.length}</span></div>
+          <h2>${a.t}</h2>
+          <p class="one">${a.one}</p>
+          <span class="was">Instead of <s>${a.was}</s></span>
+        </div>
+      </div>`,
+      foot: () => `<button class="btn" type="button" data-next>${k < APPS.length - 1 ? `Next: ${APPS[k + 1].t}` : 'Next'} ${svg('arrow')}</button>` })),
+
+    { id: 'basics', html: () => `<div class="basics">
+      <h2>The basics.</h2><p class="sub">Everything you'd want to know before you try it.</p>
+      <div class="bgrid">
+        <div class="b" style="--c:#9BE338;--cl:#6FB31C;animation-delay:60ms"><i>${svg('tag')}</i><b>Free</b><span>The dashboard costs nothing.</span></div>
+        <div class="b" style="--c:#FFBE1A;--cl:#D99A00;animation-delay:130ms"><i>${svg('person')}</i><b>No staff logins</b><span>The clock locks on a shared tablet.</span></div>
+        <div class="b" style="--c:#8AA8FF;--cl:#5E7FE0;animation-delay:200ms"><i>${svg('save')}</i><b>Stays on your device</b><span>No server, no account. Back it up anytime.</span></div>
+        <div class="b" style="--c:#5AB0FF;--cl:#2F86D6;animation-delay:270ms"><i>${svg('app')}</i><b>Nothing to install</b><span>Runs in the browser on any tablet or phone.</span></div>
+      </div>
+      <p class="fine">A free record-keeping aid. You stay responsible for the wage, payroll, health-code and licensing records the law requires.</p></div>`,
+      foot: () => `<button class="btn" type="button" data-next>Next ${svg('arrow')}</button>` },
+
+    { id: 'ask', html: () => `<div class="ask">
+      <h2>Can you set this up yourself?</h2><p class="sub">Tap one.</p>
+      <div class="opts">
+        <button class="opt${owner === false ? ' pick' : ''}" type="button" data-owner="0" style="--c:#9BE338;--cl:#6FB31C"><i>${svg('bolt')}</i><b>Yes, it's my call</b><span>I can start today</span></button>
+        <button class="opt${owner === true ? ' pick' : ''}" type="button" data-owner="1" style="--c:#8AA8FF;--cl:#5E7FE0"><i>${svg('person')}</i><b>I'd ask the owner</b><span>They sign off first</span></button>
+      </div></div>`,
+      foot: () => '' },
+
+    { id: 'done', html: () => `<div class="done">
+      <h2>${owner ? 'Show your owner, or try it first.' : 'Your dashboard is ready.'}</h2>
+      <p class="sub">It opens with example data in every app and a two-minute tour.</p>
+      <div class="row6">${APPS.map((a, k) => tile(a, '', 80 + k * 60)).join('')}</div>
+      <form class="endcard" id="end" autocomplete="off">
+        <label for="nm">Your restaurant's name</label>
+        <input id="nm" maxlength="28" placeholder="e.g. Rosa's Tacos" autocapitalize="words" enterkeyhint="go" required>
+        ${owner ? `<button class="btn" type="button" id="share">${svg('share')}Send this to my owner</button><button class="btn quiet" type="submit">Open the dashboard myself</button>`
+                : `<button class="btn" type="submit">Open my dashboard ${svg('arrow')}</button>`}
+        <small>Free. Nothing to sign up for.</small>
+      </form>
+      <p class="ask-us" style="margin-top:16px">Questions first? <a href="${MANAGER_DISCORD}" target="_blank" rel="noopener">${svg('chat')}Ask us on Discord</a></p>
+      <p class="legal"><a href="/terms.html">Terms</a>·<a href="/privacy.html">Privacy</a>·<a href="/support.html">Support</a></p></div>`,
+      foot: () => '' },
+  ];
+
+  // ---------- the slideshow ----------
+  const app = $('app'), host = $('slides'), prog = $('prog'), count = $('count'), backB = $('back');
+  const N = SLIDES.length;
+  let at = -1;
+  prog.innerHTML = SLIDES.slice(1).map(() => '<i></i>').join('');
+  function show(i, dir) {
+    i = Math.max(0, Math.min(N - 1, i));
+    if (i === at) return;
+    at = i;
+    const S = SLIDES[i];
+    host.querySelectorAll('[data-demo]').forEach(d => d._stop && d._stop());
+    host.innerHTML = `<section class="slide on${dir === 'back' ? ' back-in' : ''}" aria-label="${i + 1} of ${N}"><div class="body">${S.html()}</div><div class="foot">${S.foot()}</div></section>`;
+    app.classList.toggle('intro', i === 0);
+    backB.hidden = i === 0;
+    [...prog.children].forEach((el, k) => el.className = k < i - 1 ? 'done' : k === i - 1 ? 'now' : '');
+    count.textContent = i ? `${i} / ${N - 1}` : '';
+    host.querySelectorAll('[data-demo]').forEach(demo);
+    host.querySelectorAll('[data-next]').forEach(b => b.onclick = () => go(at + 1));
+    host.querySelectorAll('[data-owner]').forEach(b => b.onclick = () => { owner = b.dataset.owner === '1'; b.classList.add('pick'); setTimeout(() => go(at + 1), 260); });
+    if (S.id === 'done') wireEnd();
+    const f = host.querySelector('[data-next], .opt, #nm'); if (f && dir !== 'init') f.focus({ preventScroll: true });
+  }
+  // each step is its own address, so the phone's back button steps back through the slides
+  function go(i) { history.pushState({ i }, '', '#' + SLIDES[Math.max(0, Math.min(N - 1, i))].id); show(i, i < at ? 'back' : ''); }
+  backB.onclick = () => history.back();
+  addEventListener('popstate', e => { const i = e.state && Number.isInteger(e.state.i) ? e.state.i : idxFromHash(); show(i, i < at ? 'back' : ''); });
+  const idxFromHash = () => Math.max(0, SLIDES.findIndex(s => '#' + s.id === location.hash));
+  addEventListener('keydown', e => {
+    if (e.target.matches('input')) return;
+    if ((e.key === 'ArrowRight' || e.key === 'Enter') && host.querySelector('[data-next]') && !e.target.matches('button')) { e.preventDefault(); go(at + 1); }
+    if (e.key === 'ArrowLeft' && at > 0) { e.preventDefault(); history.back(); }
+  });
+  // swipe left / right on phones
+  let sx = null, sy = 0;
+  host.addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+  host.addEventListener('touchend', e => {
+    if (sx === null) return; const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy; sx = null;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if (dx < 0 && host.querySelector('[data-next]')) go(at + 1); else if (dx > 0 && at > 0) history.back();
+  }, { passive: true });
+
+  // ---------- the end: open the dashboard, or send it up the chain ----------
+  function wireEnd() {
+    $('end').onsubmit = e => { e.preventDefault(); const name = $('nm').value.trim(); if (!name) return $('nm').focus(); location.href = SITE + 'restaurant/?' + new URLSearchParams({ name, type: 'f' }); };
+    if ($('share')) $('share').onclick = () => share();
+  }
+  const toast = t => { const el = $('toast'); el.textContent = t; el.classList.add('on'); setTimeout(() => el.classList.remove('on'), 2600); };
+  async function share() {
+    const n = ($('nm').value || '').trim();
+    const text = `Found a free dashboard${n ? ' for ' + n : ''}: staff schedule, temperature log, daily checklists, recipe costs, time clock and permit reminders. No cost, no logins for staff, and it opens with example data so we can try it first. The team behind it answers owners' questions on Discord: ${OWNER_DISCORD}`;
+    if (navigator.share) { try { await navigator.share({ title: 'Grug for restaurants', text, url: OWNER_PAGE }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+    try { await navigator.clipboard.writeText(text + ' ' + OWNER_PAGE); toast('Copied. Paste it to your owner.'); }
+    catch { location.href = 'sms:?&body=' + encodeURIComponent(text + ' ' + OWNER_PAGE); }
+  }
+
+  /* ---------- six looping demos: a cursor clicks and types in a tiny copy of each app ---------- */
+  const TICK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  const ARROW = '<svg viewBox="0 0 20 24"><path d="M2 2l15.5 11.5-6.6.9 3.8 7.4-3.1 1.6-3.8-7.5L2 20z" fill="#1E1B16" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+  const I = n => `<svg class="ico"><use href="#i-${n}"/></svg>`;
+  const SCENES = {
+    schedule: {
+      html: () => {
+        const rows = [['AJ', '#FF8FC2', ['9–5', '', '9–5', '', '9–5']], ['MR', '#5AB0FF', ['', '11–7', '', '11–7', '']], ['SK', '#FF7A6B', ['4–10', '', '', '4–10', '']]];
+        return `<div class="top">${I('cal')}<div class="meter"><i style="width:40%"></i><u></u></div><b class="pct">20%</b></div>
+        <div class="grid"><span></span>${['M', 'T', 'W', 'T', 'F'].map(d => `<b>${d}</b>`).join('')}
+        ${rows.map(([n, a, cells], r) => `<i class="av" style="--a:${a}">${n}</i>` + cells.map((c, k) => `<span class="cell" data-c="${r}${k}" style="--a:${a}">${c ? `<em class="sh">${c}</em>` : ''}</span>`).join('')).join('')}</div>`;
+      },
+      async run(S, h) {
+        const meter = S.querySelector('.meter i'), pct = S.querySelector('.pct');
+        const add = async (id, txt, w, p) => {
+          const c = S.querySelector(`[data-c="${id}"]`);
+          await h.to(c); await h.tap(c); c.classList.add('sel');
+          const e = document.createElement('em'); e.className = 'sh new'; c.appendChild(e);
+          await h.type(e, txt, 110); c.classList.remove('sel'); e.className = 'sh set';
+          meter.style.width = w; pct.textContent = p; await h.sleep(350);
+        };
+        await add('01', '9–3', '48%', '24%');
+        await add('23', '4–10', '54%', '27%');
+        await add('14', '11–7', '60%', '30%');
+      } },
+    clock: {
+      html: () => `<div class="pad"><div class="t">4:58</div><div class="dots"><i></i><i></i><i></i><i></i></div>
+        <div class="keys">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<b data-k="${n}">${n}</b>`).join('')}<b></b><b data-k="0">0</b><b class="go" data-k="go">${I('clock')}</b></div>
+        <div class="ok">${TICK}</div></div>
+        <div class="list"><div class="lh"><i></i><b class="cnt">3</b></div>
+        ${[['AJ', '#FF8FC2', '9:02'], ['SK', '#FF7A6B', '3:55'], ['LP', '#4FD8C4', '4:30']].map(([n, a, t]) => `<div class="row"><i class="av" style="--a:${a}">${n}</i><span class="sk"></span><em>${t}</em></div>`).join('')}</div>`,
+      async run(S, h) {
+        const dots = S.querySelectorAll('.dots i');
+        for (const [i, k] of ['4', '8', '1', '9'].entries()) { const b = S.querySelector(`[data-k="${k}"]`); await h.to(b, .5, .5, 340); await h.tap(b); dots[i].classList.add('on'); }
+        const go = S.querySelector('[data-k="go"]'); await h.to(go); await h.tap(go);
+        S.querySelector('.ok').classList.add('on'); await h.sleep(300);
+        const row = document.createElement('div'); row.className = 'row new';
+        row.innerHTML = '<i class="av" style="--a:#5AB0FF">MR</i><span class="sk"></span><em>4:58</em>';
+        S.querySelector('.lh').after(row); S.querySelector('.cnt').textContent = '4';
+        await h.sleep(900); S.querySelector('.ok').classList.remove('on');
+      } },
+    temps: {
+      html: () => [['fridge', '#5AB0FF'], ['snow', '#8AA8FF'], ['flame', '#FF7A6B']].map(([ic, u], r) =>
+        `<div class="r" data-r="${r}"><i class="u" style="--u:${u}">${I(ic)}</i><span class="sk" style="max-width:${[80, 64, 72][r]}px"></span><span class="f"><em></em><span>°</span></span><i class="st">${r === 2 ? '<svg viewBox="0 0 24 24"><path d="M12 7v6M12 17h.01"/></svg>' : TICK}</i></div>`).join(''),
+      async run(S, h) {
+        for (const [r, v, bad] of [[0, '38', 0], [1, '-2', 0], [2, '47', 1]]) {
+          const row = S.querySelector(`[data-r="${r}"]`), f = row.querySelector('.f');
+          await h.to(f); await h.tap(f); f.classList.add('sel');
+          await h.type(f.querySelector('em'), v, 130); f.classList.remove('sel');
+          row.classList.add(bad ? 'bad' : 'ok'); await h.sleep(bad ? 700 : 250);
+        }
+      } },
+    checklists: {
+      html: () => `<div class="ring"><svg viewBox="0 0 36 36"><circle class="bg" cx="18" cy="18" r="15.9155"/><circle class="fg" cx="18" cy="18" r="15.9155"/></svg><b>0%</b></div>
+        <div class="l">${['bolt', 'temp', 'cup', 'check'].map((ic, i) => `<div class="r" data-i="${i}"><span class="box">${TICK}</span><span class="sk" style="flex:1;max-width:${[110, 84, 120, 96][i]}px"></span><span class="ri">${I(ic)}</span></div>`).join('')}</div>`,
+      async run(S, h) {
+        const fg = S.querySelector('.fg'), lab = S.querySelector('.ring b');
+        for (let i = 0; i < 4; i++) {
+          const r = S.querySelector(`[data-i="${i}"]`), box = r.querySelector('.box');
+          await h.to(box, .5, .5, 420); await h.tap(box); r.classList.add('done');
+          const p = (i + 1) * 25; fg.style.strokeOpacity = 1; fg.style.strokeDasharray = `${p} 100`; lab.textContent = p + '%';
+        }
+        S.querySelector('.ring').classList.add('full');
+        ['#9BE338', '#FFBE1A', '#FF8FC2', '#5AB0FF', '#7EE081', '#C59BFF', '#FF7A6B', '#4FD8C4'].forEach((c, i) => {
+          const d = document.createElement('i'); d.className = 'conf'; const a = i / 8 * Math.PI * 2;
+          d.style.cssText = `background:${c};--x:${Math.cos(a) * 60}px;--y:${Math.sin(a) * 60}px`; S.appendChild(d);
+        });
+        await h.sleep(900);
+      } },
+    recipes: {
+      html: () => `<div class="plate"><i style="--b:#F4C27A;left:14px;top:16px;width:34px;height:28px"></i><i style="--b:#7EE081;left:42px;top:30px;width:28px;height:26px"></i><i style="--b:#FF7A6B;left:22px;top:46px;width:30px;height:20px"></i></div>
+        <div class="ings">${[['#F4C27A', 70, '1.20'], ['#7EE081', 54, '0.80'], ['#FF7A6B', 62, '3.10']].map(([b, w, p], i) => `<div class="ing" data-i="${i}"><i style="--b:${b}"></i><span class="sk" style="max-width:${w}px"></span><b>$${p}</b></div>`).join('')}</div>
+        <div class="bot"><div class="price">${I('tag')}<b>$12</b></div><div class="gauge"><i></i><u></u></div><b class="gp">43%</b></div>`,
+      async run(S, h) {
+        const g = S.querySelector('.gauge i'), gp = S.querySelector('.gp');
+        const set = (w, t) => { g.style.width = w; gp.textContent = t; };
+        const ing = S.querySelector('[data-i="2"] b');
+        await h.to(ing); await h.tap(ing); ing.classList.add('sel'); await h.type(ing, '$2.40', 120); ing.classList.remove('sel');
+        set('72%', '36%'); await h.sleep(500);
+        const pr = S.querySelector('.price b');
+        await h.to(pr); await h.tap(pr); pr.classList.add('sel'); await h.type(pr, '$15', 140); pr.classList.remove('sel');
+        set('58%', '29%'); S.parentElement.classList.add('good'); await h.sleep(700);
+      } },
+    permits: {
+      html: () => `${[['08/02', '9mo'], ['11/30', '1yr']].map(([d, s]) => `<div class="p"><i class="u">${I('doc')}</i><span class="sk"></span><b class="d">${d}</b><em class="s">${s}</em></div>`).join('')}
+        <div class="slot"></div><span class="add" data-add>+</span><div class="cal"></div><div class="tl"><i></i></div>`,
+      async run(S, h) {
+        const add = S.querySelector('[data-add]'); await h.to(add); await h.tap(add);
+        const p = document.createElement('div'); p.className = 'p new';
+        p.innerHTML = `<i class="u">${I('doc')}</i><span class="sk" style="max-width:70px"></span><b class="d"></b><em class="s wait">–</em><span class="bell">${I('bell')}</span>`;
+        S.querySelector('.slot').replaceWith(p); add.style.visibility = 'hidden'; await h.sleep(300);
+        const d = p.querySelector('.d'); await h.to(d); await h.tap(d); d.classList.add('sel'); await h.type(d, '03/14', 120); d.classList.remove('sel');
+        const s = p.querySelector('.s'); s.className = 's'; s.textContent = '60d'; await h.home();
+        const cal = S.querySelector('.cal'), tl = S.querySelector('.tl'); cal.classList.add('on'); tl.classList.add('on');
+        for (const n of [52, 44, 36, 28, 21]) { await h.sleep(300); s.textContent = n + 'd'; cal.textContent = '+' + (60 - n) + 'd'; }
+        s.className = 's soon'; p.querySelector('.bell').classList.add('on'); await h.sleep(1200);
+      } },
+  };
+
+  function demo(el) {
+    const id = el.dataset.demo, D = SCENES[id];
+    const CLS = { schedule: 'sched', clock: 'clock', temps: 'temp', checklists: 'check', recipes: 'cost', permits: 'perm' };
+    el.innerHTML = `<div class="stage s-${CLS[id]}"><div class="scene"></div><div class="cur">${ARROW}</div></div>`;
+    const stage = el.firstChild, scene = stage.firstChild, cur = stage.lastChild;
+    new ResizeObserver(() => stage.style.setProperty('--k', el.clientWidth / 320)).observe(el);
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let token = 0, x = 300, y = 215;
+    const h = {
+      sleep: ms => { const t = token; return new Promise((ok, no) => setTimeout(() => t === token ? ok() : no('stop'), still ? 0 : ms)); },
+      async to(target, fx = .5, fy = .5, ms = 560) {
+        const s = stage.getBoundingClientRect(), r = target.getBoundingClientRect(), k = s.width / 320;
+        x = (r.left - s.left + r.width * fx) / k - 3; y = (r.top - s.top + r.height * fy) / k - 3;
+        cur.style.transitionDuration = ms + 'ms'; cur.style.transform = `translate(${x}px,${y}px)`; await h.sleep(ms + 60);
+      },
+      async tap(target) {
+        cur.classList.add('press'); target.classList.add('hit');
+        const r = document.createElement('i'); r.className = 'rip'; r.style.left = x + 3 + 'px'; r.style.top = y + 3 + 'px'; stage.appendChild(r); setTimeout(() => r.remove(), 520);
+        await h.sleep(150); cur.classList.remove('press'); target.classList.remove('hit'); await h.sleep(90);
+      },
+      async type(target, text, ms = 100) {
+        target.textContent = ''; target.classList.add('typing');
+        for (const ch of text) { target.textContent += ch; await h.sleep(ms); }
+        await h.sleep(160); target.classList.remove('typing');
+      },
+      async home() { x = 300; y = 215; cur.style.transitionDuration = '600ms'; cur.style.transform = `translate(${x}px,${y}px)`; },
+    };
+    const reset = () => { scene.innerHTML = D.html(); stage.className = stage.className.replace(' good', ''); stage.querySelectorAll('.conf').forEach(c => c.remove()); };
+    async function loop() {
+      const t = ++token;
+      try {
+        while (t === token) {
+          reset(); stage.classList.remove('fade'); await h.sleep(500);
+          await D.run(scene, h); h.home(); await h.sleep(1400);
+          stage.classList.add('fade'); await h.sleep(300);
+        }
+      } catch (e) { /* stopped: scrolled out of view */ }
+    }
+    el._stop = () => { token++; };
+    reset();
+    if (still) { D.run(scene, h).catch(() => {}); return; }
+    // play only while on screen, so a phone isn't animating six scenes at once
+    new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) loop(); else token++; }), { threshold: .4 }).observe(el);
+  }
+
+
+  // start where the address says (a refresh mid-way keeps your place); the end needs the question answered
+  let first = idxFromHash();
+  if (SLIDES[first].id === 'done' && owner === null) first = SLIDES.findIndex(s => s.id === 'ask');
+  history.replaceState({ i: first }, '', first ? '#' + SLIDES[first].id : location.pathname + location.search);
+  show(first, 'init');
+})();
+</script>
+</body>
+</html>
