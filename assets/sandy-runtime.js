@@ -6070,8 +6070,13 @@ window.SandyKit={version:'1.1.0',CATALOG,decalReady:()=>Promise.all(Array.from(D
      2. triangles that cross a cut are sliced along it, so the torso/limb divide is a straight seam, not a zig-zag;
      3. every piece is box-projected onto its part's template panels, like Roblox does on a blocky body. */
   const GEO = new WeakMap();
-  function wrapped(mesh, full, kind) {
-    const src0 = mesh.geometry; if (GEO.has(src0)) return GEO.get(src0);
+  // shirt: for pants, the T-shirt or long-sleeve tee worn over them (its geometry), or null. The waistband is pulled in
+  // only where that shirt covers it (above its hem); with no shirt (a crop top, the plain tank) nothing is pulled in,
+  // since a tucked-in waistband sinks into the body and skin shows through it.
+  function wrapped(mesh, full, kind, shirt) {
+    const src0 = mesh.geometry, got = GEO.get(src0);
+    const hem = kind === 'pants' && shirt ? hemOf(shirt) : null, ck = hem == null ? 'plain' : 'h' + Math.round(hem * 4);
+    if (got && got[ck]) return got[ck];
     const base = src0.index ? src0.toNonIndexed() : src0;
     const names = Object.keys(base.attributes), A0 = {}; for (const k of names) A0[k] = base.attributes[k];
     const bones = mesh.skeleton.bones, inv = mesh.skeleton.boneInverses;
@@ -6181,27 +6186,50 @@ window.SandyKit={version:'1.1.0',CATALOG,decalReady:()=>Promise.all(Array.from(D
       const moves = idx.map(i => { const y = P.getY(i); if (y >= yTop) return null; const f = Math.min(1, (yTop - y) / Math.max(1e-3, yTop - y0)), g = Math.max(0, (f - 0.78) / 0.22), e = f * f * (3 - 2 * f) * LOOSE + g * g * 1.0;   /* + a small flare at the hem */ const n2 = nrm.get(key(i)); return n2 ? [i, n2.x * e, n2.z * e] : null; });
       for (const m of moves) if (m) P.setXYZ(m[0], P.getX(m[0]) + m[1], P.getY(m[0]), P.getZ(m[0]) + m[2]);
     }
-    // the waist of pants tucks a hair under a shirt's hem
-    // (more at the top of the waistband, where a shirt's hem sits over it; hardly any lower down at the hips)
-    if (kind === 'pants') { let wy0 = 1e9, wy1 = -1e9; for (let t = 0; t < out.length; t++) if (out[t][0] === 't') for (let j = 0; j < 3; j++) { const y = P.getY(t * 3 + j); wy0 = Math.min(wy0, y); wy1 = Math.max(wy1, y); }
-      for (let t = 0; t < out.length; t++) if (out[t][0] === 't') for (let j = 0; j < 3; j++) { const i = t * 3 + j, f = Math.min(1, Math.max(0, (P.getY(i) - wy0) / Math.max(1e-3, wy1 - wy0))), d = 0.3 + 1.7 * f * f;
-        P.setXYZ(i, P.getX(i) - N.getX(i) * d, P.getY(i), P.getZ(i) - N.getZ(i) * d); } }
+    // pants ease out a touch all over, along each point's averaged normal (seams stay closed), so a bigger body (the male
+    // body's thighs) doesn't push through the cloth
+    if (kind === 'pants') {
+      const EASE = 0.6;   // cm
+      const key = i => Math.round(P.getX(i) * 20) + ',' + Math.round(P.getY(i) * 20) + ',' + Math.round(P.getZ(i) * 20), nrm = new Map();
+      for (let i = 0; i < n; i++) { const k2 = key(i); if (!nrm.has(k2)) nrm.set(k2, new T.Vector3()); nrm.get(k2).add(new T.Vector3(N.getX(i), N.getY(i), N.getZ(i))); }
+      for (const v of nrm.values()) if (v.lengthSq() > 1e-6) v.normalize();
+      const mv = []; for (let i = 0; i < n; i++) { const v = nrm.get(key(i)); if (v) mv.push([i, v.x * EASE, v.y * EASE, v.z * EASE]); }
+      for (const m of mv) P.setXYZ(m[0], P.getX(m[0]) + m[1], P.getY(m[0]) + m[2], P.getZ(m[0]) + m[3]);
+    }
+    // under a shirt, the waistband tucks in beneath its hem: nothing at the hem itself, up to 2.6 cm (the 0.6 ease plus 2)
+    // a few cm above it, where the shirt hides it; below the hem it stays eased out
+    if (kind === 'pants' && hem != null) {
+      for (let t = 0; t < out.length; t++) if (out[t][0] === 't') for (let j = 0; j < 3; j++) { const i = t * 3 + j, f = Math.min(1, Math.max(0, (P.getY(i) - hem - 1) / 2.6)), d = 2.6 * f * f * (3 - 2 * f);
+        if (d > 0) P.setXYZ(i, P.getX(i) - N.getX(i) * d, P.getY(i), P.getZ(i) - N.getZ(i) * d); } }
     geo.setAttribute('uv', new T.BufferAttribute(uv, 2));
     geo.computeBoundingSphere();
-    GEO.set(src0, geo); return geo;
+    GEO.set(src0, Object.assign(got || {}, { [ck]: geo })); return geo;
   }
 
+  // where a shirt's hem is, leaving out the sleeves (the middle third of its width). A hem isn't level, so this is the
+  // higher of its lowest points at the front and at the back: tucking starts above it, never in sight below the hem
+  const HEM = new WeakMap();
+  function hemOf(geo) {
+    if (HEM.has(geo)) return HEM.get(geo);
+    const P = geo.attributes.position; let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
+    for (let i = 0; i < P.count; i++) { x0 = Math.min(x0, P.getX(i)); x1 = Math.max(x1, P.getX(i)); z0 = Math.min(z0, P.getZ(i)); z1 = Math.max(z1, P.getZ(i)); }
+    const w = (x1 - x0) / 6, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2; let yf = 1e9, yb = 1e9;
+    for (let i = 0; i < P.count; i++) if (Math.abs(P.getX(i) - cx) < w) { if (P.getZ(i) > cz) yf = Math.min(yf, P.getY(i)); else yb = Math.min(yb, P.getY(i)); }
+    const y = Math.max(yf, yb), h = y < 1e8 ? y : null; HEM.set(geo, h); return h;
+  }
   function meshFor(s, slot) { const M = s.M; return slot === 'top' ? (M.armorMeshes.body || M.armorMeshes.top) : M.armorMeshes.legs; }
   // after every change: give custom garments their template (and put normal garments back)
   function sync(s) {
     for (const slot of ['top', 'legs']) {
       const v = s.config && s.config[slot], m = meshFor(s, slot); if (!m) continue;
       const g = v && GARMENTS[v.part];
+      const top = s.config && s.config.top, tm = slot === 'legs' && top && /^gen_(tshirt|longsleeve)$/.test(top.part || '') ? meshFor(s, 'top') : null;
+      const shirt = tm && tm.geometry, tuck = shirt ? hemOf(shirt) : null;   // a T-shirt or long-sleeve tee over these pants
       if (!g || !v.template) { if (m.userData.custom) { m.geometry = m.userData.custom.geo; m.material = m.userData.custom.mat; m.userData.custom = null; } continue; }
-      const key = v.part + '|' + v.template.length + ':' + v.template.slice(-64) + '|' + (v.colour || '');
+      const key = v.part + '|' + v.template.length + ':' + v.template.slice(-64) + '|' + (v.colour || '') + '|' + (tuck == null ? '' : Math.round(tuck * 4));
       if (m.userData.custom && m.userData.custom.key === key && m.material === m.userData.custom.mine) continue;
       const base = m.userData.custom && m.material === m.userData.custom.mine ? m.userData.custom : { geo: m.geometry, mat: m.material };
-      const geo = wrapped({ geometry: base.geo, skeleton: m.skeleton }, g.full, g.kind);
+      const geo = wrapped({ geometry: base.geo, skeleton: m.skeleton }, g.full, g.kind, shirt);
       const ud = base.mat.userData; base.mat.userData = {}; const mat = base.mat.clone(); base.mat.userData = ud;   // clone() can't copy circular userData mat.onBeforeCompile = base.mat.onBeforeCompile; mat.customProgramCacheKey = base.mat.customProgramCacheKey; mat.userData = Object.assign({}, ud);
       mat.map = texture(v.template, v.colour || '#ffffff'); mat.color.set(0xffffff); mat.roughness = 0.82; mat.metalness = 0; mat.needsUpdate = true;
       if (g.kind === 'shirt') { mat.polygonOffset = true; mat.polygonOffsetFactor = -2; mat.polygonOffsetUnits = -8; }   // a shirt always wins over the pants' waistband

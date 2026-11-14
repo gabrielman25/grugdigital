@@ -83,13 +83,20 @@ way until the owner says a business has agreed in writing.
   import that would raise it a second time is put back). Change the rule in `setBirthday` / `syncAge` in grug.js.
 - **The games onboarding** (`games/welcome/?next=…`): the first time a device opens anything games-related (`games/` and
   everything under it, a game's `play/<dir>/`, a shared direct link, the home page's Play buttons, the dock's Games tab), it
-  goes through five screens first: the character's body (the avatar editor's bodies only), the player's own birthday (no
-  default year, nothing said about what it unlocks), a top, a bottom (from the closet they own, on either garment), then on
-  to where they were going (the store by default). Steps 1, 3 and 4 change the saved avatar straight away. Finished =
+  goes through five screens first: the player's own birthday first (required; no default year, nothing said about what it
+  unlocks), then the character's body (the avatar editor's bodies only), a top, a bottom (from the closet they own, on
+  either garment), then on to where they were going (the store by default). Body, top and bottom each have **Skip**, and
+  **Skip all** goes straight on: only the birthday is required. A pick changes the saved avatar straight away. A bottom's
+  preview shows the whole character wearing the top they picked, never a close-up of the hips. Finished =
   `profile.seen.onboarded` plus a birthday; it never shows again. Settings → Your character → **Set up again** replays it
   (`&redo=1`). `Grug.onboard` (grug.js) has the gate; `fossil32.js` asks it before a Play boots the console. Pages inside a
   frame (the showcase) skip it. `games/carts/` has no grug.js, so it loads `assets/onboard-gate.js` (the same check): that
   line was patched into the built feed by hand, **add it to `grug-game-kit/micro` before the next build**.
+- **Clothing fit** (the custom-clothing block at the end of `assets/sandy-runtime.js`): pants made from a closet design
+  ease out 0.6 cm all over so no body shows through (the male body's thighs did), and their waistband tucks in only above
+  the hem of a T-shirt or long-sleeve tee worn over them (`hemOf`). With no shirt over the waist it is never tucked:
+  that sank it into the body and showed skin at the waist. Check any change to that block with renders of both bodies in
+  shorts and pants, with no top, the T-shirt and the long-sleeve tee.
 - **The placeholder** `placeholder18` (games.js, `games/placeholder18/`, `play/placeholder18/`, `assets/boxart/placeholder18.jpg`)
   is a blank 18+ game for previewing all of this. Remove those four before launch.
 

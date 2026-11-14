@@ -12,12 +12,13 @@
   THE GAMES ONBOARDING · games/welcome/?next=<where they were going>[&redo=1]
   Shown the first time someone opens anything games-related on this device (Grug.onboard in assets/grug.js sends them
   here; games/carts/ uses assets/onboard-gate.js). One screen per step, each with Back:
-    1. their character's body (the avatar editor's bodies: SandyKit.CATALOG.bodies, Grug.BODIES)
-    2. their own birthday (a neutral age screen: nothing suggested, nothing said about what it unlocks; Grug.age)
+    1. their own birthday, required (a neutral age screen: nothing suggested, nothing said about what it unlocks; Grug.age)
+    2. their character's body (the avatar editor's bodies: SandyKit.CATALOG.bodies, Grug.BODIES)
     3. a top and 4. a bottom from the closet they own (assets/catalog.js), each on either of its garments
     5. on to where they were going (the store unless they came from a game's link)
-  Steps 1, 3 and 4 change the saved avatar straight away, the way the avatar editor does (grug.sandy.v1, then new
-  pictures). Finishing sets profile.seen.onboarded; Settings → Set up character again comes back with &redo=1.
+  Steps 2-4 each have Skip, and Skip all (top right) goes straight on to where they were going: only the birthday is
+  required. A pick changes the saved avatar straight away, the way the avatar editor does (grug.sandy.v1, then new
+  pictures). Finishing sets profile.seen.onboarded; Settings → Your character → Set up again comes back with &redo=1.
 -->
 <style>
 html.g-pre body{padding:0!important}
@@ -64,8 +65,15 @@ html[data-partner] .ob-logo{display:none}
 .ob-done li .gi{width:20px;height:20px;color:var(--mode-text,var(--mode));flex:none}
 @media (max-width:460px){.ob-done{grid-template-columns:1fr}.ob-done .ob-pic{max-width:180px;margin:0 auto;width:100%}}
 .ob-nav{display:flex;gap:10px;justify-content:space-between;align-items:center;position:sticky;bottom:calc(var(--sab,0px) + 10px);margin-top:auto}
-.ob-nav .g-btn.primary{flex:1;max-width:340px;margin-left:auto}
+.ob-nav .g-btn{flex:none}
+.ob-nav .g-btn.primary{flex:1 1 0;min-width:0;max-width:340px;margin-left:auto}
+.ob-nav .g-btn.primary{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* phones: three buttons in a row, the main one keeps the room */
+@media (max-width:520px){.ob-nav{gap:8px}.ob-nav .g-btn:not(.primary){padding:0 14px}.ob-nav .g-btn.big{padding:0 16px;font-size:19px}}
 .ob-nav .g-btn:not(.primary){background:var(--glass-strong)}
+.ob-skipall{flex:none;border:0;background:none;padding:8px 4px;font:700 14px/1 var(--font);color:var(--ink2);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.ob-skipall:hover{color:var(--ink)}
+@media (max-width:440px){.ob-top.can-skip .ob-n{display:none}}
 .g-bd-err:empty{display:none}
 /* desktop: the steps sit together in the middle of the screen (the buttons right under the card) */
 @media (min-width:720px) and (min-height:560px){.ob{justify-content:center}.ob-nav{margin-top:0;position:static}}
@@ -73,14 +81,16 @@ html[data-partner] .ob-logo{display:none}
 </head>
 <body>
 <main class="ob" id="ob">
-  <header class="ob-top">
+  <header class="ob-top" id="obTop">
     <a class="ob-logo" id="obLogo" href="../../" aria-label="Grug home"></a>
     <div class="ob-prog" id="obProg" role="progressbar" aria-valuemin="1" aria-valuemax="5" aria-label="Setup progress"></div>
     <span class="ob-n" id="obN"></span>
+    <button type="button" class="ob-skipall" id="obSkipAll" hidden>Skip all</button>
   </header>
   <section class="ob-card" id="obCard" aria-live="polite"></section>
   <nav class="ob-nav" aria-label="Setup steps">
     <button type="button" class="g-btn" id="obBack"></button>
+    <button type="button" class="g-btn" id="obSkip" hidden>Skip</button>
     <button type="button" class="g-btn primary big" id="obNext"></button>
   </nav>
 </main>
@@ -120,22 +130,25 @@ html[data-partner] .ob-logo{display:none}
   /* ---------- pictures: rendered one at a time with the avatar's own 3D runtime (assets/sandy-view.js) ---------- */
   let chain = Promise.resolve();
   const render = (cfg, frame) => (chain = chain.catch(() => {}).then(() => V.picture(cfg, frame)));
-  const cache = {};
-  function picInto(el, key, cfg, frame) {
-    const show = src => { if (!el.isConnected) return; el.classList.remove('wait'); el.innerHTML = '<img alt="" src="' + src + '">'; };
+  // cached by the exact outfit and framing (so a bottom's picture always shows the top they picked)
+  const cache = {}, warm = (cfg, frame) => { const key = frame + '|' + JSON.stringify(cfg);
+    if (!cache['p:' + key]) cache['p:' + key] = render(cfg, frame).then(src => (cache[key] = src)).catch(() => null); return key; };
+  function picInto(el, cfg, frame) {
+    const key = warm(cfg, frame), show = src => { if (!el.isConnected) return; el.classList.remove('wait'); el.innerHTML = '<img alt="" src="' + src + '">'; };
     if (cache[key]) return show(cache[key]);
-    if (!cache['p:' + key]) cache['p:' + key] = render(cfg, frame).then(src => (cache[key] = src)).catch(() => null);
     el.classList.add('wait');
     cache['p:' + key].then(src => { if (src) show(src); else el.classList.remove('wait'); });
   }
 
   /* ---------- the steps ---------- */
-  const STEPS = ['body', 'birthday', 'top', 'bottom', 'done'];
+  const STEPS = ['birthday', 'body', 'top', 'bottom', 'done'];
+  const SKIPPABLE = ['body', 'top', 'bottom'];
+  const FRAME = { top: 'shirt', bottom: 'full' };   // a bottom is shown on the whole character, never a close-up
   let i = 0, picker = null, bdError = '';
   const sel = { body: (start.body === 'male' ? 'male' : hadLook ? 'female' : null) };
   const tops = choices('shirt'), bottoms = choices('pants');
   sel.top = tops.cur; sel.bottom = bottoms.cur;
-  const card = $('obCard'), next = $('obNext'), back = $('obBack');
+  const card = $('obCard'), next = $('obNext'), back = $('obBack'), skip = $('obSkip'), skipAll = $('obSkipAll');
   $('obLogo').innerHTML = G.LOGO + '<span>Grug</span>';
   $('obProg').innerHTML = STEPS.map(() => '<i></i>').join('');
 
@@ -159,21 +172,22 @@ html[data-partner] .ob-logo{display:none}
     $('obN').textContent = 'Step ' + (i + 1) + ' of ' + STEPS.length;
     back.innerHTML = G.icon('arrow-left') + 'Back';
     next.innerHTML = step === 'done' ? goLabel() + G.icon('arrow-right') : 'Continue' + G.icon('arrow-right');
+    const can = SKIPPABLE.includes(step); skip.hidden = skipAll.hidden = !can; $('obTop').classList.toggle('can-skip', can);
     if (step === 'body') {
       card.innerHTML = '<h1>Pick your character</h1><p class="ob-sub">This doesn’t have to be you. It’s the character you play as, and you can change it any time in the avatar editor.</p>' +
         '<div class="ob-tiles tall" role="radiogroup" aria-label="Character">' + G.BODIES.map(b => tile(b, sel.body === b, G.icon('person'), b[0].toUpperCase() + b.slice(1))).join('') + '</div>';
-      card.querySelectorAll('.ob-tile').forEach(t => picInto(t.querySelector('.ob-pic'), 'body:' + t.dataset.k + ':' + JSON.stringify(look()), Object.assign(look(), { body: t.dataset.k }), 'full'));
+      card.querySelectorAll('.ob-tile').forEach(t => picInto(t.querySelector('.ob-pic'), Object.assign(look(), { body: t.dataset.k }), 'full'));
     } else if (step === 'birthday') {
-      card.innerHTML = '<h1>When’s your birthday?</h1><p class="ob-sub">Your own birthday, not your character’s. It’s saved on this device only and never sent anywhere.</p><div id="obBd"></div><p class="g-bd-err" id="obErr" role="alert">' + esc(bdError) + '</p>';
+      card.innerHTML = '<h1>When’s your birthday?</h1><p class="ob-sub">Your own birthday. It’s saved on this device only and never sent anywhere.</p><div id="obBd"></div><p class="g-bd-err" id="obErr" role="alert">' + esc(bdError) + '</p>';
       picker = G.ui.bdPicker($('obBd'), G.age.birthday(), () => { bdError = ''; $('obErr').textContent = ''; ready(); });
     } else if (step === 'top' || step === 'bottom') {
       const slot = step === 'top' ? 'shirt' : 'pants', ch = step === 'top' ? tops : bottoms;
       card.innerHTML = '<h1>' + (step === 'top' ? 'Pick a top' : 'Pick a bottom') + '</h1><p class="ob-sub">From your closet. Play games to earn more designs, and change it any time in the avatar editor.</p>' +
-        '<div class="ob-tiles' + (ch.list.length > 4 ? ' three' : '') + '" role="radiogroup" aria-label="' + (step === 'top' ? 'Top' : 'Bottom') + '">' +
+        '<div class="ob-tiles' + (ch.list.length > 4 ? ' three' : '') + (step === 'bottom' ? ' tall' : '') + '" role="radiogroup" aria-label="' + (step === 'top' ? 'Top' : 'Bottom') + '">' +
         ch.list.map(o => tile(o.key, sel[step] === o.key, o.it ? '<img class="thumb" alt="" src="' + G.url(o.it.thumb) + '">' : G.icon(step === 'top' ? 't-shirt' : 'pants'), o.name, o.sub)).join('') + '</div>';
       card.querySelectorAll('.ob-tile').forEach(t => { const o = ch.list.find(x => x.key === t.dataset.k), base = look();
         const cfg = o.keep ? Object.assign(base, { [C.CFG_KEY[slot]]: start[C.CFG_KEY[slot]] || null }) : dressed(base, o.it, o.part);
-        picInto(t.querySelector('.ob-pic'), step + ':' + o.key + ':' + (base.body || 'female'), cfg, slot); });
+        picInto(t.querySelector('.ob-pic'), cfg, FRAME[step]); });
     } else {
       card.innerHTML = '<h1>' + (REDO ? 'All saved' : 'You’re all set') + '</h1><div class="ob-done"><span class="ob-pic" id="obMe">' + G.icon('person') + '</span>' +
         '<ul><li>' + G.icon('check') + 'Your character is saved on this device</li><li>' + G.icon('check') + 'Dress up more any time in Me → Avatar</li><li>' + G.icon('check') + 'Your birthday can be changed in Settings</li></ul></div>';
@@ -235,8 +249,9 @@ html[data-partner] .ob-logo{display:none}
     i = Math.max(0, Math.min(STEPS.length - 1, i + d)); paint();
   }
   async function finish() {
-    next.disabled = true;
+    next.disabled = skip.disabled = skipAll.disabled = true; clearTimeout(card.t);
     G.onboard.finish();
+    if (!snapping && JSON.stringify(look()) !== JSON.stringify(start)) snapsSoon();   // Skip all after a pick: new pictures too
     // give the pictures a moment to finish (they're redrawn later anyway if not)
     if (snapping) { next.textContent = 'Saving your character\u2026'; await Promise.race([snapping, new Promise(ok => setTimeout(ok, 4000))]); }
     location.replace(G.url(NEXT));
@@ -249,12 +264,16 @@ html[data-partner] .ob-logo{display:none}
     location.href = G.url(p && GrugTheme.PARTNERS[p.p] ? GrugTheme.PARTNERS[p.p].app : '');
   }
   next.addEventListener('click', () => go(1));
+  // Skip: this step stays as it is; Skip all: straight on to where they were going (the birthday is already saved)
+  skip.addEventListener('click', () => { clearTimeout(card.t); G.ui.buzz(); i = Math.min(STEPS.length - 1, i + 1); paint(); });
+  skipAll.addEventListener('click', () => { G.ui.buzz(); finish(); });
   back.addEventListener('click', () => { clearTimeout(card.t); go(-1); });
   document.addEventListener('keydown', e => { if (e.key === 'Enter' && !next.disabled && !e.target.closest('button,a')) { e.preventDefault(); go(1); } });
   paint();
   // warm the 3D runtime and the clothes' pictures while the first screens are read
-  setTimeout(() => { [['top', tops, 'shirt'], ['bottom', bottoms, 'pants']].forEach(([st, ch, slot]) => ch.list.forEach(o => { if (o.keep) return; const base = look(), k = st + ':' + o.key + ':' + (base.body || 'female');
-    if (!cache['p:' + k]) cache['p:' + k] = render(dressed(base, o.it, o.part), slot).then(src => (cache[k] = src)).catch(() => null); })); }, 1200);
+  // (the bodies, then the tops on the body they have now; the bottoms are drawn once the top is picked)
+  setTimeout(() => { G.BODIES.forEach(b => warm(Object.assign(look(), { body: b }), 'full'));
+    tops.list.forEach(o => { if (!o.keep) warm(dressed(look(), o.it, o.part), 'shirt'); }); }, 600);
 })();
 </script>
 </body>

@@ -353,8 +353,8 @@
 
   /* ---------- the games onboarding (games/welcome/) ----------
      The first time someone opens anything games-related on this device (the store, a game page, a game, Carts,
-     Favorites, a Play button on the home page) they go through a few short screens first: their character's body,
-     their own birthday, a top, a bottom, then on to where they were going (onboard.start(next)). Once finished
+     Favorites, a Play button on the home page) they go through a few short screens first: their own birthday
+     (required), then their character's body, a top and a bottom (each skippable), then on to where they were going (onboard.start(next)). Once finished
      (profile.seen.onboarded, with a birthday saved) it never shows again; Settings → Your character → Set up again replays it.
      games/carts/ (built by the Grug Micro kit, no grug.js) checks the same thing with assets/onboard-gate.js. */
   const WELCOME = 'games/welcome/';
