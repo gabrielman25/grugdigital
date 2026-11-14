@@ -2,6 +2,24 @@
 
 The Grug game site (static HTML, Cloudflare Pages, deploys on push to `main`). See `README.md` for the map of the site.
 
+## Always send the owner a preview link (not just screenshots)
+
+Whenever a session changes the website, the owner wants a **link to a live page they can open and click through**, not
+only screenshots. Screenshots are a nice extra, never the substitute.
+
+- Work on a branch and push it (not `main`, unless the owner says to). Cloudflare Pages builds every pushed branch:
+  - **Branch preview:** `https://<branch>.grugdigital.pages.dev/` (the branch name in lower case, anything that isn't a
+    letter or number turned into `-`, cut to 28 characters). It always shows the newest push to that branch.
+  - **Commit preview:** `https://<first 8 of the deploy id>.grugdigital.pages.dev/`, fixed to one build.
+- Get the exact addresses from the commit's **Cloudflare Pages** check once it finishes (a minute or two after the push):
+  `gh api repos/gabrielman25/grugdigital/commits/$(git rev-parse HEAD)/check-runs --jq '.check_runs[] | select(.name=="Cloudflare Pages") | {status, conclusion, summary: .output.summary}'`
+  (the summary holds "Preview URL" and "Branch Preview URL"). Wait for `conclusion: success`; if it fails, say so and
+  include the "View logs" link instead.
+- In the final summary, link **straight to the pages that changed** on the branch preview (for example
+  `https://my-branch.grugdigital.pages.dev/games/welcome/`), one link per thing to try, with a few words on what to look at.
+- A preview is its own web address, so its saved data starts empty: first-visit flows (the games onboarding, Start over,
+  a fresh closet) show as they would for a brand new player. Say so when it matters.
+
 ## Frozen: everything made for a named business is a demonstration (read this first)
 
 No business has signed off on its pages yet, so **every page that carries a business's name, logo, menu or photos is a
