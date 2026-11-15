@@ -164,6 +164,13 @@ way until the owner says a business has agreed in writing.
 - **The placeholder** `placeholder18` (games.js, `games/placeholder18/`, `play/placeholder18/`, `assets/boxart/placeholder18.jpg`)
   is a blank 18+ game for previewing all of this. Remove those four before launch.
 
+## Contact us (`assets/contact.js`)
+
+Grug Digital's own contact details (Discord, Instagram, text number, email) live in `GRUG_CONTACT` at the top of
+`assets/contact.js`, and only there. Every dashboard has a **Contact us** button in its top bar (Daypart, Bubble Tea, Café;
+not on a locked staff kiosk), and the restaurant account's menu has it on the site's pages. An empty field is left out.
+The site says texts only, no calls: keep the text row a text (`sms:`).
+
 ## The restaurant dashboard's notices (`business/index.html`)
 
 - `LEGAL` holds one plain warning per record-keeping app (schedule, clock, team, temps, checklists, expirations,
@@ -486,10 +493,15 @@ Read `tools/shop-dashboards/README.md` before changing them.
   `schemaVersion`; add a step to `MIGRATIONS` in `src/core.js` when the shape changes) and CSV exports. Profile export
   carries their keys too (grug.js).
 - **On the site** (`SHOP_PWA = 'site'`) each page loads `app/app.js`, which gives it its manifest, the Download card
-  (Settings, with status) and the site's service worker. Today offers "Put this app on the home screen" for the first two
-  weeks. Pearl and tea timers are stored timestamps, never counters, so they stay right after a reload or a sleeping tablet.
+  (Settings, with status) and the site's service worker. Download sits in the top bar on every page
+  (and a card at the end of Today) until it's installed. Pearl and tea timers are stored timestamps, never counters, so they stay right after a reload or a sleeping tablet.
 - Temperature, cleaning and timer settings are editable record-keeping templates and say so: never claim health-code
   compliance. Hold times, ranges and intervals are the owner's settings.
+- **One account with the rest of the restaurant side:** on the site each shop dashboard makes its shop a rewards card and
+  a restaurant account shop (`grug.business.v1`) marked `dash: 'tea' | 'cafe'`, and draws Daypart's bottom bar
+  (Dashboard · Rewards card · Website). Everything that opens "the dashboard" (the site dock, the logo, the account menu,
+  the home page, `restaurant/`) goes to the shop's own one through `dash` (`GrugBusiness.dashPath`, `dashPath()` in grug.js).
+  A shop with no `dash` is Daypart's, unchanged.
 - **Play while you wait:** `PLAY_URL` in `tools/shop-dashboards/src/config.js` (the footer link and the customer screen's QR).
 - Tests: `node tools/shop-dashboards/test/core.test.js`, and with the site served on :8766
   `python3 tools/shop-dashboards/test/e2e.py` (143 browser checks, including that the restaurant dashboard's data is untouched).

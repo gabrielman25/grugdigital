@@ -88,19 +88,21 @@ def page(t, pwa):
       <button class="chip warn" id="soundchip" data-act="soundOn" hidden></button>
       <span class="chip" id="offchip" hidden>No internet · still works</span>
       <button class="chip" id="installchip" data-act="install" hidden></button>
+      {'<button class="chip dl" title="Download the app" aria-label="Download the app" data-get-app="' + t + '" hidden><span data-app-ic></span><span class="lbl">Download</span></button>' if pwa == 'site' else ''}
       <span class="clock" id="clock"></span>
+      <span id="contactslot"></span>
       <button class="chip who" id="whochip" data-act="who" aria-label="Who's using this?"></button>
       <button class="ib helpbtn" id="helpbtn" data-act="help" title="Help"></button>
     </header>
     <main id="view"></main>
-    <footer class="foot noprint"><a id="playfoot" class="playlink" target="_blank" rel="noopener" hidden></a><span>Everything is saved on this device · <a href="#/settings">Save a backup</a></span></footer>
+    <footer class="foot noprint"><a id="playfoot" class="playlink" target="_blank" rel="noopener" hidden></a><span>Need help? <a href="#" data-grug-contact>Contact us</a> · Everything is saved on this device · <a href="#/settings">Save a backup</a></span></footer>
   </div>
   <nav class="tabbar" id="tabbar" aria-label="Quick links"></nav>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="imp" accept=".json,application/json" hidden>
 <script>window.SHOP_PWA = {"'site'" if pwa == 'site' else ('true' if pwa else 'false')};</script>
-''' + ('<script id="grug-app-js" src="../../app/app.js"></script>\n' if pwa == 'site' else '') + ''.join(f'<script>\n{s}\n</script>\n' for s in scripts) + '<script>App.start();</script>\n</body>\n</html>\n'
+''' + ('<script id="grug-app-js" src="../../app/app.js"></script>\n<script src="../../assets/rewards.js"></script>\n<script src="../../assets/business.js"></script>\n<script src="../../assets/contact.js"></script>\n' if pwa == 'site' else '<script>\n' + site_read('assets', 'contact.js') + '\n</script>\n') + ''.join(f'<script>\n{s}\n</script>\n' for s in scripts) + '<script>App.start();</script>\n</body>\n</html>\n'
     return body
 
 OFFLINE = '''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">

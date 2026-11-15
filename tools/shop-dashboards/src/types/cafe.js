@@ -6,6 +6,7 @@
 window.SHOP_TYPE = {
   id: 'cafe', name: 'Café', kind: 'coffee shop', version: '1.0.0',
   storagePrefix: 'grug-cafe:',
+  cardType: 'c',   // the rewards card's kind (assets/rewards.js KINDS) when the shop gets one on the site
   icon: 'coffee',
   tagline: 'Dial-in notes, bean freshness, milk dates, machine cleaning and the morning rush, plus the daily paperwork.',
   namePh: 'Morning Ritual Coffee',

@@ -29,6 +29,19 @@ with sync_playwright() as p:
     pg.on('pageerror', lambda e: errs.append(str(e)))
     ls = lambda: pg.evaluate('Object.fromEntries(Object.keys(localStorage).map(k=>[k,localStorage.getItem(k)]))')
     others = lambda: {k: v for k, v in ls().items() if not k.startswith(('grug-tea:', 'grug-cafe:'))}
+    # on the site a shop dashboard adds its shop to the restaurant account (grug.business.v1) and its card to
+    # "My creations" (grug.rewards.v1), on purpose. Everything else (daypart:* and the other grug.* keys) must not change,
+    # and those two may only gain things: what was there before is kept as it was.
+    SHARED = ('grug.business.v1', 'grug.rewards.v1')
+    def same_as(was):
+        now = others()
+        if {k: v for k, v in now.items() if k not in SHARED and not k.startswith('grug.app')} != {k: v for k, v in was.items() if k not in SHARED and not k.startswith('grug.app')}: return False
+        for k in SHARED:
+            if k not in was: continue
+            a, b2 = json.loads(was[k]), json.loads(now.get(k, 'null')) or {}
+            if k == SHARED[0] and any(b2.get('shops', {}).get(i) != v for i, v in a.get('shops', {}).items()): return False
+            if k == SHARED[1] and any(m not in b2.get('mine', []) for m in a.get('mine', [])): return False
+        return True
     top = lambda: pg.locator('.dlg').last
     esc = lambda: (pg.keyboard.press('Escape'), pg.wait_for_timeout(150))
 
@@ -194,10 +207,12 @@ with sync_playwright() as p:
     cafe_errs = list(errs); errs.clear()
 
     print('Restaurant dashboard untouched')
-    ok(others() == before, 'every non-dashboard key (daypart:*, grug.*) is byte-for-byte unchanged')
+    ok(same_as(before), 'every daypart:* and grug.* key is unchanged (the restaurant account only gained this shop)')
+    acct = json.loads(ls().get('grug.business.v1', 'null')) or {}
+    ok(sorted(x.get('dash') for x in acct.get('shops', {}).values()) == ['cafe', 'tea'], 'the restaurant account now holds the bubble tea and café shops, each marked with its dashboard')
     pg.goto(BASE + '/business/'); pg.wait_for_timeout(1500)
     ok(not errs, 'restaurant page still loads with no script errors')
-    ok(others() == before, 'and its data is still the same after loading it again')
+    ok(same_as(before), 'and its data is still the same after loading it again')
 
     print("Apps: each dashboard is its own app in the site's shared app system")
     for t in ('tea', 'cafe'):
@@ -211,9 +226,10 @@ with sync_playwright() as p:
     pg.goto(f'{BASE}/business/tea/#/settings'); pg.wait_for_timeout(800)
     ok('download the app' in pg.inner_text('[data-app-card="tea"]').lower() and 'bubble tea app' in pg.inner_text('[data-app-card="tea"]').lower(), 'Settings shows the Bubble Tea Download card')
     pg.goto(f'{BASE}/business/tea/#/home'); pg.wait_for_timeout(500)
-    if pg.locator('[data-k=allTodos]').count(): pg.click('[data-k=allTodos]'); pg.wait_for_timeout(300)
-    ok(pg.locator('.todo', has_text='home screen').count() == 1, 'Today offers "Put this app on the home screen" in the first weeks')
-    pg.locator('.todo', has_text='home screen').locator('.btn').click(); pg.wait_for_timeout(400)
+    ok(pg.locator('.top [data-get-app="tea"]').is_visible() and pg.locator('#view [data-app-card="tea"]').count() == 1, 'Download is in the top bar on every page, and its card is at the end of Today')
+    ok(pg.locator('.gdock a').count() == 3, 'the bottom bar (Dashboard · Rewards card · Website) is there')
+    ok(pg.locator('.top [data-grug-contact]').is_visible(), 'Contact us is in the top bar')
+    pg.locator('.top [data-get-app="tea"]').click(); pg.wait_for_timeout(400)
     ok('Bubble Tea' in pg.inner_text('.gapp-card') , 'tapping Download opens the install how-to for the Bubble Tea app'); pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
     off = json.loads(open(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'app', 'offline.json')).read())
     ok(off['apps']['tea'] == ['tea'] and off['apps']['cafe'] == ['cafe'] and '/business/tea/' in off['packs']['tea']['files'], 'app/offline.json has a pack for each dashboard')
@@ -233,7 +249,7 @@ with sync_playwright() as p:
                 if r != 'home': ok(q.locator('#homebtn').is_visible(), f'{t} {lab} {r}: Home button visible')
             small = q.evaluate("[...document.querySelectorAll('#view button:not([hidden]), .tabbar button')].filter(b=>{const r=b.getBoundingClientRect();return r.width>0&&r.height>0&&r.height<38&&!b.closest('.chips:not(.big),.seg,details.how,.cell,.wk')}).map(b=>b.textContent.trim()).slice(0,5)")
             ok(not small, f'{t} {lab}: buttons are big enough to tap (≥38px tall) {small}')
-            if w < 700: ok(q.locator('#tabbar').is_visible(), f'{t} phone: bottom tab bar')
+            if w < 700: ok(q.locator('.gdock').is_visible() and not q.locator('#tabbar').is_visible() and q.locator('.gdock').bounding_box()['y'] + q.locator('.gdock').bounding_box()['height'] <= q.viewport_size['height'], f'{t} phone: the restaurant bottom bar, on screen (it replaces the old tab bar on the site)')
             ok(not e2, f'{t} {lab}: no script errors')
             c2.close()
 

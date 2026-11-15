@@ -201,7 +201,8 @@
   if (!brand) { try { const b = JSON.parse(localStorage.getItem('grug.business.v1') || 'null');
     if (b && b.mode === 'business' && b.active && b.shops && b.shops[b.active]) {
       const home = new URL(me ? me.replace(/assets\/theme\.js(\?.*)?$/, '') : '/', location.href).pathname;
-      if (location.pathname === home || location.pathname === home + 'index.html') location.replace(home + 'business/' + location.search); } } catch (e) {} }
+      const dash = b.shops[b.active].dash === 'tea' || b.shops[b.active].dash === 'cafe' ? 'business/' + b.shops[b.active].dash + '/' : 'business/';   // the shop's own dashboard
+      if (location.pathname === home || location.pathname === home + 'index.html') location.replace(home + dash + location.search); } } catch (e) {} }
   // partner mode is a closed space: only the game list, game pages and the avatar editor. Every other address
   // (Home, Make, Me, Shop, Profile, other partners' pages…) goes to the game list; grug.js also turns away game pages for
   // other partners' games. On a game's host page (play/…) the back button returns to the game list.

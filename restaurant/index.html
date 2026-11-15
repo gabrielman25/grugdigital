@@ -4,7 +4,7 @@
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
 <script>/* a returning owner (a restaurant account on this phone, and a plain link) goes straight to the dashboard */
 (function(){try{var q=location.search,b=JSON.parse(localStorage.getItem('grug.business.v1')||'null');
-  if(!/[?&](name|type|c)=/.test(q)&&b&&b.active&&b.shops&&b.shops[b.active]){b.mode='business';localStorage.setItem('grug.business.v1',JSON.stringify(b));location.replace('../business/')}}catch(e){}})();</script>
+  if(!/[?&](name|type|c)=/.test(q)&&b&&b.active&&b.shops&&b.shops[b.active]){b.mode='business';localStorage.setItem('grug.business.v1',JSON.stringify(b));var d=b.shops[b.active].dash;location.replace('../business/'+(d==='tea'||d==='cafe'?d+'/':''))}}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Grug for restaurants</title>
 <meta name="description" content="A rewards card that brings guests back, a website made from it, and a dashboard for your team and kitchen. Free, and ready in about a minute.">

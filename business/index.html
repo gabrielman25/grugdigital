@@ -2,12 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
+<script>/* the shop in use runs the bubble tea or café dashboard (and this browser has no Daypart records): open that one */
+(function(){try{if(/[?&]pwa=daypart/.test(location.search)||localStorage.getItem('daypart:settings'))return;var b=JSON.parse(localStorage.getItem('grug.business.v1')||'null'),x=b&&b.shops&&b.shops[b.active],d=x&&x.dash;
+  if(d==='tea'||d==='cafe')location.replace(d+'/')}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#F6F4EF">
 <meta name="color-scheme" content="light">
 
 <title>Dashboard · Daypart</title>
 <link rel="icon" href="../favicon.png">
+<script src="../assets/contact.js"></script>
 <!-- the installable Daypart app (app/daypart.webmanifest; app/app.js: offline downloads, update checks, Add to home screen) -->
 <link rel="manifest" href="../app/daypart.webmanifest">
 <link rel="apple-touch-icon" href="../app/icons/daypart-180.png">
@@ -1357,7 +1361,7 @@ function topBar(S,home){
   const n=locked()?0:attentionAll().length;
   const right=locked()?`<button class="lockbtn" title="Unlock (manager PIN)" ${goAttr('clock',{type:'unlock'})}>${icon('lock')}<span>Locked</span></button>`
     :`<button class="me" data-act="menu" title="Your profile" aria-haspopup="menu" aria-expanded="false" aria-label="Your profile${n?', '+n+' things need you':''}">${avatar()}${n?`<span class="badge">${n>9?'9+':n}</span>`:''}</button>`;
-  return`<div class="top noprint"><button class="logo" data-act="logo" title="${locked()?'Locked to '+sec('clock').name:'Home'}" aria-label="${locked()?'Locked to '+sec('clock').name:'Home'}"><span class="brandmark"></span><span class="rn">${esc(D.settings.name||'Daypart')}</span></button>${home?'':`<span class="crumb">${mark(S.mark)}<span>${esc(S.name)}</span></span>`}<span class="sp"></span>${right}</div>`;
+  return`<div class="top noprint"><button class="logo" data-act="logo" title="${locked()?'Locked to '+sec('clock').name:'Home'}" aria-label="${locked()?'Locked to '+sec('clock').name:'Home'}"><span class="brandmark"></span><span class="rn">${esc(D.settings.name||'Daypart')}</span></button>${home?'':`<span class="crumb">${mark(S.mark)}<span>${esc(S.name)}</span></span>`}<span class="sp"></span>${!locked()&&window.GrugContact?GrugContact.button('gc-top'):''}${right}</div>`;
 }
 function render(){
   for(const k in PK)delete PK[k];closePop();ui.form=null;

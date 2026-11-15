@@ -426,6 +426,8 @@ input::placeholder,textarea::placeholder{color:var(--faint)}
   .top{padding:.35rem .7rem;min-height:3.6rem}
   .top .clock,.top h1{display:none}
   .chip.who>span:not(.av){display:none}.chip.who{padding:0 .3rem}
+  .top .chip{flex:none}.top .chip .lbl{display:none}.chip.dl{padding:0 .75rem}.chip.dl svg{width:1.2rem;height:1.2rem}
+  .top{overflow:hidden;gap:.4rem}.top .chip:not(#homebtn){padding:0;width:2.6rem;justify-content:center}.top .chip.who{width:auto;padding:0 .3rem}.top .gc-btn{width:2.6rem}
   main#view{padding:1rem .85rem calc(5.8rem + env(safe-area-inset-bottom))}
   .foot{padding-bottom:calc(5.8rem + env(safe-area-inset-bottom))}
   .ph h2{font-size:1.5rem}.hello h2{font-size:1.6rem}
@@ -447,6 +449,30 @@ input::placeholder,textarea::placeholder{color:var(--faint)}
   .homebtn span{display:inline}
 }
 @media print{.top,.tabbar,.foot,.noprint,#toast{display:none!important}main#view{max-width:none;padding:0}}
+
+/* ---------- the restaurant account's dock: Dashboard · Rewards card · Website (on the site only), the same as Daypart's ---------- */
+.gdock{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);transform:translateX(-50%);z-index:50;display:flex;gap:4px;
+  padding:9px 14px 12px;border-radius:26px;background:#fff;border:1px solid rgba(30,27,22,.1);box-shadow:0 14px 36px rgba(30,27,22,.16);view-transition-name:g-tabs}
+.gdock a{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:84px;height:62px;border-radius:16px;
+  font:700 11px/1 'Fredoka',system-ui,sans-serif;color:#6B655B;text-decoration:none;transition:transform .2s cubic-bezier(.3,1.5,.5,1),background .2s}
+.gdock a svg{width:38px;height:38px;color:var(--tab);transition:transform .25s cubic-bezier(.3,1.5,.5,1)}
+.gdock a[aria-current=page]{color:#1E1B16;background:var(--tab);transform:translateY(-3px);box-shadow:0 3px 0 var(--tab-lo)}
+.gdock a[aria-current=page] svg{color:#1E1B16;transform:scale(1.04)}
+.gdock a:not([aria-current]):hover{background:var(--field)}
+.gdock a:active svg{transform:scale(.9)}
+.gdock a:focus-visible{outline:3px solid #1E1B16;outline-offset:2px}
+html.gd-docked main#view,html.gd-docked .foot{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+html.gd-docked #toast{bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+@media(max-width:719px){.gdock{width:min(calc(100% - 24px),380px);gap:2px;padding:8px 10px 10px}.gdock a{flex:1;width:auto;height:58px}.gdock a svg{width:34px;height:34px}}
+/* short landscape phones: a rail on the left, like the site */
+@media(orientation:landscape) and (max-height:540px){
+  .gdock{left:calc(10px + env(safe-area-inset-left,0px));top:50%;bottom:auto;transform:translateY(-50%);flex-direction:column;width:auto;padding:14px 7px}
+  .gdock a{flex:none;width:62px;height:52px}.gdock a span{display:none}.gdock a[aria-current=page]{transform:translateX(3px)}
+  html.gd-docked main#view,html.gd-docked .foot{padding-bottom:1rem;padding-left:calc(90px + env(safe-area-inset-left,0px))}
+  html.gd-docked #toast{bottom:1.4rem}}html.gd-docked .tabbar{display:none!important}
+.chip.dl{font-weight:700}
+
+.chip .lbl-s{display:none}
 
 /* Tea & Boba: the pearl timer hero. The most important thing on the screen during a shift. */
 .pearlhero{background:var(--panel);border-radius:1.2rem;box-shadow:0 .35rem 0 var(--lo),var(--sh-lift);overflow:hidden;margin-bottom:.4rem}
@@ -497,12 +523,14 @@ input::placeholder,textarea::placeholder{color:var(--faint)}
       <button class="chip warn" id="soundchip" data-act="soundOn" hidden></button>
       <span class="chip" id="offchip" hidden>No internet · still works</span>
       <button class="chip" id="installchip" data-act="install" hidden></button>
+      <button class="chip dl" title="Download the app" aria-label="Download the app" data-get-app="tea" hidden><span data-app-ic></span><span class="lbl">Download</span></button>
       <span class="clock" id="clock"></span>
+      <span id="contactslot"></span>
       <button class="chip who" id="whochip" data-act="who" aria-label="Who's using this?"></button>
       <button class="ib helpbtn" id="helpbtn" data-act="help" title="Help"></button>
     </header>
     <main id="view"></main>
-    <footer class="foot noprint"><a id="playfoot" class="playlink" target="_blank" rel="noopener" hidden></a><span>Everything is saved on this device · <a href="#/settings">Save a backup</a></span></footer>
+    <footer class="foot noprint"><a id="playfoot" class="playlink" target="_blank" rel="noopener" hidden></a><span>Need help? <a href="#" data-grug-contact>Contact us</a> · Everything is saved on this device · <a href="#/settings">Save a backup</a></span></footer>
   </div>
   <nav class="tabbar" id="tabbar" aria-label="Quick links"></nav>
 </div>
@@ -510,6 +538,9 @@ input::placeholder,textarea::placeholder{color:var(--faint)}
 <input type="file" id="imp" accept=".json,application/json" hidden>
 <script>window.SHOP_PWA = 'site';</script>
 <script id="grug-app-js" src="../../app/app.js"></script>
+<script src="../../assets/rewards.js"></script>
+<script src="../../assets/business.js"></script>
+<script src="../../assets/contact.js"></script>
 <script>
 /* ==========================================================================
    Site-wide settings for the shop dashboards. Change PLAY_URL here (one place) to point the
@@ -757,6 +788,7 @@ if (typeof module !== 'undefined') module.exports = Core;
 window.SHOP_TYPE = {
   id: 'tea', name: 'Bubble Tea', kind: 'bubble tea shop', version: '1.0.0',
   storagePrefix: 'grug-tea:',
+  cardType: 't',   // the rewards card's kind (assets/rewards.js KINDS) when the shop gets one on the site
   icon: 'boba',
   tagline: 'Pearl timers, prep sheets, staffing for the after-school rush, and the daily paperwork, all in one place.',
   namePh: 'Pearl & Leaf Tea Bar',
@@ -1295,9 +1327,6 @@ const App = (() => {
   function todos() {
     const out = [];
     for (const id in MODS) { if (!isOn(id) || !MODS[id].todo) continue; try { out.push(...MODS[id].todo().map(t => ({ ...t, mod: id }))); } catch (e) { console.error(e); } }
-    const g = siteApp();
-    if (g && !g.standalone() && !g.installed().includes(T.id) && Date.now() - Date.parse(D.settings.createdAt || 0) < 14 * 864e5)
-      out.push({ key: 'getapp', pri: 4, level: 'go', icon: 'download', text: 'Put this app on the home screen', sub: 'It gets its own icon, opens full screen and keeps working when the Wi-Fi drops. Free, no app store.', btn: 'Download', act: 'install' });
     if (backupDue()) out.push({ key: 'backup', pri: 2, level: 'go', icon: 'shield', text: 'Save a backup of this app', sub: 'Takes 5 seconds. Protects everything if this tablet breaks or gets reset.', btn: 'Save backup', act: 'backup' });
     return out;
   }
@@ -1326,9 +1355,64 @@ const App = (() => {
           : `<div class="caught">${ic('party')}<div><b>You're all caught up!</b><small>Nothing needs doing right now. Check back later, or help a customer.</small></div></div>`}
         ${done.length ? `<p class="donecount">${ic('check')} Done today: ${done.map(t => esc(t.text)).join(' · ')}</p>` : ''}</section>
         ${hero}
-        <h3 class="sec" style="margin-top:2rem">All tools</h3>${groups.replace('<h3 class="sec">', '<h3 class="sec" style="margin-top:.6rem">')}`;
+        <h3 class="sec" style="margin-top:2rem">All tools</h3>${groups.replace('<h3 class="sec">', '<h3 class="sec" style="margin-top:.6rem">')}
+        ${SITE ? `<div class="noprint" data-app-card="${T.id}" hidden></div>` : ''}`;
     }
   });
+
+  /* ---------- the restaurant account (site only) ----------
+     On grugdigital.com the shop is also a "restaurant account" (assets/business.js, 'grug.business.v1'), marked
+     dash: 'tea' | 'cafe', so it gets a rewards card (rewards/) and a website (business/site/) like any restaurant, and
+     the site's dock and menus open this dashboard. The card's name is the shop's name. */
+  const BIZ = () => SITE && window.GrugBusiness && window.GrugRewards ? window.GrugBusiness : null;
+  function linkShop() {
+    const B = BIZ(); if (!B || !D || !D.settings.shopName) return null;
+    try {
+      let s = B.load(), id = meta.shopId && s.shops[meta.shopId] ? meta.shopId : '';
+      if (!id) id = Object.keys(s.shops).find(k => s.shops[k].dash === T.id) || '';
+      if (!id) {
+        const RW = window.GrugRewards; let cfg = RW.normalize({ n: D.settings.shopName, t: T.cardType, j: 1 });
+        // a shop's id comes from its name: never take over another shop on this device (a restaurant with the same name)
+        if (s.shops[RW.shopId(cfg)]) cfg = RW.normalize({ ...cfg, n: (D.settings.shopName + ' ' + T.name).slice(0, 28) });
+        if (s.shops[RW.shopId(cfg)]) return null;
+        const code = RW.encode(cfg);
+        try { RW.saveMine(code); } catch (e) { }
+        const r = B.fromCard(code); if (!r) return null;
+        id = r.shop.id; B.setDash(id, T.id);
+      }
+      if (meta.shopId !== id) { meta.shopId = id; saveMeta(); }
+      s = B.load();
+      if (s.active !== id) B.setActive(id);
+      if (s.mode !== 'business') B.setMode('business');   // using a dashboard means using the restaurant account, like Daypart
+      // renamed on the rewards card since we last looked? use that name here too
+      const cfg = window.GrugRewards.decode(B.load().shops[id].c);
+      if (cfg && cfg.n && cfg.n !== meta.cardName) { if (meta.cardName) { D.settings.shopName = cfg.n; save('settings'); } meta.cardName = cfg.n; saveMeta(); }
+      return id;
+    } catch (e) { console.error(e); return null; }
+  }
+  // the shop was renamed here: rename its rewards card and website too (they keep everything else)
+  function renameShop(name) {
+    const B = BIZ(), id = meta.shopId; if (!B || !id) return;
+    try {
+      const RW = window.GrugRewards, s = B.load(), x = s.shops[id]; if (!x) return;
+      const cfg = RW.decode(x.c); if (!cfg || cfg.n === name) return;
+      const code = RW.encode(Object.assign({}, cfg, { n: name })), r = B.fromCard(code, x.c);
+      try { RW.saveMine(code, x.c); } catch (e) { }
+      if (r) { B.setDash(r.shop.id, T.id); meta.shopId = r.shop.id; meta.cardName = name; saveMeta(); }
+    } catch (e) { console.error(e); }
+  }
+  const DOCK = [['dashboard', 'Dashboard', './', '#9BE338', '#6FB31C', '<rect x="1" y="1" width="6" height="8" rx="1.5"></rect><rect x="9" y="1" width="6" height="5" rx="1.5"></rect><rect x="1" y="11" width="6" height="4" rx="1.5"></rect><rect x="9" y="8" width="6" height="7" rx="1.5"></rect>'],
+    ['rewards', 'Rewards card', '../../rewards/', '#FF9F5A', '#E0782F', '<path d="M7 15H3a1 1 0 0 1-1-1V9h5zM14 14a1 1 0 0 1-1 1H9V9h5zM7 8H1V6a1 1 0 0 1 1-1h5zM14 5a1 1 0 0 1 1 1v2H9V5zM4.282 1.312a1.784 1.784 0 0 1 2.242.212L8 3l1.238-1.352c.605-.66 1.6-.781 2.345-.285l.06.04A1.75 1.75 0 0 1 12 4H4c-.776-.776-.63-2.08.282-2.688"></path>'],
+    ['website', 'Website', '../site/', '#5AB0FF', '#2F86D6', '<path fill-rule="evenodd" d="M13 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zM3 6v7h10V6z" clip-rule="evenodd"></path>']];
+  function gdock() {
+    if (document.querySelector('.gdock') || !meta.shopId) return;
+    const n = document.createElement('nav'); n.className = 'gdock noprint'; n.setAttribute('aria-label', 'Your shop');
+    n.innerHTML = DOCK.map(([id, name, href, c, lo, svg], i) => `<a href="${href}" style="--tab:${c};--tab-lo:${lo}"${i ? '' : ' aria-current="page" data-act="dockHome"'}><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">${svg}</svg><span>${name}</span></a>`).join('');
+    document.body.appendChild(n); document.documentElement.classList.add('gd-docked');
+  }
+  act('dockHome', () => { if (route !== 'home') go('home'); else window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  act('toPlayer', () => { const B = BIZ(); if (B) B.setMode('player'); location.href = '../../'; });
+  function siteLinks() { if (!SITE) return; if (linkShop()) gdock(); }
 
   /* ---------- shell ---------- */
   function tabsHtml() {
@@ -1363,14 +1447,14 @@ const App = (() => {
   function renderSetup() {
     $('#app').hidden = true;
     let s = $('#setup'); if (!s) { s = document.createElement('div'); s.id = 'setup'; document.body.appendChild(s); }
-    const st = ui.setup = ui.setup || { step: 0, name: (new URLSearchParams(location.search).get('name') || '').trim().slice(0, 40), open: T.hours[0], close: T.hours[1], team: [], off: T.offByDefault ? T.offByDefault.slice() : [], starter: true, demo: false };
+    const st = ui.setup = ui.setup || { step: 0, name: (new URLSearchParams(location.search).get('name') || '').trim().slice(0, 28), open: T.hours[0], close: T.hours[1], team: [], off: T.offByDefault ? T.offByDefault.slice() : [], starter: true, demo: false };
     const opt = T.groups.flatMap(g => g[1]).filter(id => MODS[id] && !MODS[id].core && (!MODS[id].visible || MODS[id].visible() !== false));
     const N = 4, dots = `<div class="dots">${Array.from({ length: N }, (_, j) => `<i class="${j <= st.step ? 'on' : ''}"></i>`).join('')}</div>`;
     const back = st.step ? `<button type="button" class="btn lg" data-back>${ic('left')} Back</button>` : '';
     let body = '';
     if (st.step === 0) body = `<div class="brand" style="padding:0 0 .6rem"><span class="logo">${ic(T.icon)}</span><span><small>Grug Digital</small><b>${esc(T.name)} dashboard</b></span></div>
       <h2 class="q">Hi! What's your shop called?</h2><p class="hint">${esc(T.tagline)}</p>
-      <label class="f"><span>Shop name</span><input type="text" name="name" value="${esc(st.name)}" placeholder="${esc(T.namePh)}" autofocus></label>
+      <label class="f"><span>Shop name</span><input type="text" name="name" maxlength="28" value="${esc(st.name)}" placeholder="${esc(T.namePh)}" autofocus></label>
       <div class="fgrid"><label class="f"><span>We open at</span><input type="time" name="open" value="${st.open}"></label><label class="f"><span>We close at</span><input type="time" name="close" value="${st.close}"></label></div>
       <p class="small mute">The app uses these to know when to remind you about opening and closing jobs.</p>`;
     if (st.step === 1) body = `<h2 class="q">Who works here?</h2><p class="hint">Type each person's name and tap Add. Just first names are fine. You can add more later.</p>
@@ -1403,7 +1487,7 @@ const App = (() => {
       if (st.demo) T.demo(D, C, today());
       st.team.forEach((n, i) => { if (!D.employees.some(e => e.name.toLowerCase() === n.toLowerCase())) D.employees.push({ id: C.uid(), name: n, color: COLORS[(i + 3) % COLORS.length] }); });
       for (const c of COLLS) for (const r of D[c]) { if (!r.id) r.id = C.uid(); if (!r.updatedAt) r.updatedAt = nowISO(); }
-      save(); ui.setup = null; go('home'); render();
+      save(); ui.setup = null; siteLinks(); go('home'); render();
       if (staff().length) setTimeout(() => whoPicker(), 300);
     };
   }
@@ -1430,7 +1514,7 @@ const App = (() => {
         if (mode === 'replace' && hasData && !(await confirmBox({ title: 'Swap everything for the backup?', body: 'What\'s on this device now for <b>' + esc(D.settings.shopName) + '</b> will be replaced. You can\'t undo this.', ok: 'Yes, replace', danger: true, typed: 'REPLACE' }))) return;
         const next = mode === 'replace' ? r.data : C.mergeData(D, r.data, COLLS);
         D = { schemaVersion: C.SCHEMA, settings: { ...blankSettings(), ...next.settings } }; for (const c of COLLS) D[c] = next[c] || [];
-        ui.setup = null; save(); applyLook(); render(); toast('Backup restored. Everything is back.', 4000);
+        ui.setup = null; save(); applyLook(); siteLinks(); render(); toast('Backup restored. Everything is back.', 4000);
       };
     };
     rd.readAsText(file);
@@ -1469,8 +1553,9 @@ const App = (() => {
     R.setProperty('--mode', T.theme.mode); R.setProperty('--lo', T.theme.lo); R.setProperty('--bg', T.theme.bg); R.setProperty('--accent-2', T.theme.accent2); R.setProperty('--accent-2-lo', T.theme.accent2lo);
     $('#brandlogo').innerHTML = ic(T.icon);
     $('#homebtn').innerHTML = ic('home') + '<span>Home</span>'; $('#helpbtn').innerHTML = ic('help') + '<span class="sr">Help</span>';
-    $('#soundchip').innerHTML = ic('vol') + ' Tap to turn on sound';
+    $('#soundchip').innerHTML = ic('vol') + ' <span class="lbl">Tap to turn on sound</span>'; $('#soundchip').title = 'Tap to turn on sound'; $('#soundchip').setAttribute('aria-label', 'Turn on sound');
     $('#installchip').innerHTML = ic('download') + ' Install app';
+    if (window.GrugContact) $('#contactslot').outerHTML = GrugContact.button();   // assets/contact.js: Discord, Instagram, text, email
     if (PLAY_URL) { const p = $('#playfoot'); p.href = PLAY_URL; p.innerHTML = `<span class="dot">${ic('game')}</span> Play while you wait`; }
     document.addEventListener('click', e => {
       const g = e.target.closest('[data-go]'); if (g && !g.closest('.dlg')) { go(g.dataset.go, g.dataset.p); return; }
@@ -1481,7 +1566,7 @@ const App = (() => {
     window.addEventListener('storage', e => { if (e.key && e.key.startsWith(PRE)) { loadAll(); if (!modalStack.length) render(); } }); /* another tab changed data */
     document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
     $('#imp').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importFile(f); });
-    ui.day = today(); render(); setupPwa(); setInterval(tick, 1000); tick();
+    siteLinks(); ui.day = today(); render(); setupPwa(); setInterval(tick, 1000); tick();
     if (Store.mode !== 'local') toast("This browser won't let the app save. Open it in a normal (not private) window.", 9000);
   }
 
@@ -1489,7 +1574,7 @@ const App = (() => {
     C, T, PLAY_URL, COLLS, PRE, Store, $, $$, esc, ic, IC, today, nowISO, nowMin, register, act, go, render, refreshChrome, toast, modal, closeModal, confirmBox, xBtn,
     openForm, formHtml, wireForm, readForm, fieldHtml, wizard, whoPicker, Sound, timerCard, ringSvg, timerText, download, csvDownload, inRange, backupDue, exportBackup,
     page, legal, empty, past, rangeSeg, staffOpts, staffNames, staff, empName, avatar, initials, COLORS, upsert, remove, removeUndo, find, save, setSettings,
-    by, rememberBy, ui, MODS, CSVS, installHint, isIOS, isStandalone, activeTimers, start, importFile, isOn,
+    by, rememberBy, ui, MODS, CSVS, installHint, SITE, renameShop, linkShop, isIOS, isStandalone, activeTimers, start, importFile, isOn,
     get D() { return D; }, get meta() { return meta; }, saveMeta, get installEvt() { return installEvt; }, get route() { return route; }
   };
 })();
@@ -2198,7 +2283,7 @@ const App = (() => {
     render() {
       const s = S(), m = A.meta, demoN = A.COLLS.reduce((n, c) => n + A.D[c].filter(r => r.demo).length, 0);
       const opt = T.groups.flatMap(g => g[1]).filter(id => A.MODS[id] && !A.MODS[id].core && (!A.MODS[id].visible || A.MODS[id].visible()));
-      const shopF = [{ k: 'shopName', label: 'Shop name', req: true, full: true }, { k: 'openAt', label: 'We open at', type: 'time' }, { k: 'closeAt', label: 'We close at', type: 'time' }, { k: 'tempUnit', label: 'Temperatures in', type: 'chips', opts: [['F', '°F'], ['C', '°C']] }, { k: 'bigText', label: 'Bigger text and buttons', type: 'check' }, { k: 'sound', label: 'Beep when something needs throwing out', type: 'check' }];
+      const shopF = [{ k: 'shopName', label: 'Shop name', req: true, full: true, max: 28 }, { k: 'openAt', label: 'We open at', type: 'time' }, { k: 'closeAt', label: 'We close at', type: 'time' }, { k: 'tempUnit', label: 'Temperatures in', type: 'chips', opts: [['F', '°F'], ['C', '°C']] }, { k: 'bigText', label: 'Bigger text and buttons', type: 'check' }, { k: 'sound', label: 'Beep when something needs throwing out', type: 'check' }];
       const advF = [{ k: 'weekStart', label: 'Week starts on', type: 'select', blank: false, opts: C.DNL.map((d, i) => [i, d]) }, { k: 'backupEveryDays', label: 'Remind me to back up every', type: 'number', min: 0, step: 1, hint: 'days (0 = never)' },
         { k: 'warnMin', label: 'Warn before throw-out time', type: 'number', min: 0, step: 1, hint: 'minutes' }].concat(A.PLAY_URL ? [{ k: 'showPlay', label: 'Show "Play while you wait" for customers', type: 'check' }] : []).concat(T.settingsFields || []);
       A.ui._sf = shopF.concat(advF);
@@ -2212,6 +2297,8 @@ const App = (() => {
           <h3 class="sec">Tools you use</h3><div class="card"><p class="small mute" style="margin-bottom:.6rem">Turn off what you don't need. It disappears from the app (nothing is deleted).</p><div class="pick">${opt.map(id => { const mm = A.MODS[id], on = !(s.off || []).includes(id); return `<label class="pk ${on ? 'on' : ''}"><input type="checkbox" data-mod="${id}" ${on ? 'checked' : ''}><span class="ti">${ic(mm.icon)}</span><span class="grow"><b>${esc(mm.title)}</b><small>${esc((mm.help && mm.help.what) || '')}</small></span></label>`; }).join('')}</div></div>
           ${A.past('More settings', `<div class="card">${A.formHtml(advF, s)}</div>`)}
           <div class="savebar"><button class="btn pri lg">${ic('check')} Save settings</button></div></form>
+          ${A.SITE && A.meta.shopId ? `<h3 class="sec">Your shop on Grug</h3><div class="card"><p class="small">This dashboard, your <a href="../../rewards/">rewards card</a> and your <a href="../site/">website</a> are your shop's account on Grug. The bar at the bottom moves between them.</p><div class="cardacts"><button class="btn" data-act="toPlayer">Switch to your player account</button></div></div>` : ''}
+          ${window.GrugContact && GrugContact.rows().length ? `<h3 class="sec">Help from the people who made this</h3><div class="card"><p class="small">Setting it up, a question, or something not working? We answer. The <b>Contact us</b> button at the top is always there too.</p><div class="cardacts">${GrugContact.rows().map(([k, title, sub, href]) => `<a class="btn" href="${esc(href)}"${/^https?:/.test(href) ? ' target="_blank" rel="noopener"' : ''}>${esc(title)}</a>`).join('')}</div></div>` : ''}
           <h3 class="sec">People</h3><div class="card"><p>${A.staff().map(e => esc(e.name)).join(', ') || 'Nobody added yet.'}</p><button class="btn" data-act="team">${ic('users')} Add or change people</button></div>
           <h3 class="sec">Put it on your home screen</h3>${window.SHOP_PWA === 'site' ? `<div data-app-card="${T.id}" data-app-status hidden></div>` : ''}<div class="card">${sa ? '<p>✓ It\'s already installed as an app.</p>' : `<p class="small">${window.SHOP_PWA ? 'Then it opens like an app and works without internet.' : 'This is the single-file preview. Once it\'s on your website you can install it as an app.'}</p>
             ${A.installEvt ? `<button class="btn pri" data-act="install" style="margin:.6rem 0">${ic('download')} Install app</button>` : ''}
@@ -2228,7 +2315,8 @@ const App = (() => {
         const old = S().tempUnit; x.weekStart = +x.weekStart; x.backupEveryDays = x.backupEveryDays === '' ? 7 : +x.backupEveryDays; x.warnMin = +x.warnMin || 0;
         x.off = [...v.querySelectorAll('[data-mod]')].filter(c => !c.checked).map(c => c.dataset.mod);
         if (x.tempUnit && x.tempUnit !== old) { const cv = t => t === '' || t == null ? t : C.r2(x.tempUnit === 'C' ? (t - 32) * 5 / 9 : t * 9 / 5 + 32); for (const u of A.D.tempUnits) { u.min = cv(u.min); u.max = cv(u.max); u.updatedAt = A.nowISO(); } A.save('tempUnits'); }
-        A.setSettings(x); ui.wk = ui.hw = null; A.render(); A.toast('Settings saved.');
+        const renamed = x.shopName !== S().shopName;
+        A.setSettings(x); if (renamed) A.renameShop(x.shopName); ui.wk = ui.hw = null; A.render(); A.toast(renamed && A.SITE ? 'Saved. Your rewards card and website use the new name too.' : 'Settings saved.');
       };
     },
     acts: {

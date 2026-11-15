@@ -6,6 +6,7 @@
 window.SHOP_TYPE = {
   id: 'tea', name: 'Bubble Tea', kind: 'bubble tea shop', version: '1.0.0',
   storagePrefix: 'grug-tea:',
+  cardType: 't',   // the rewards card's kind (assets/rewards.js KINDS) when the shop gets one on the site
   icon: 'boba',
   tagline: 'Pearl timers, prep sheets, staffing for the after-school rush, and the daily paperwork, all in one place.',
   namePh: 'Pearl & Leaf Tea Bar',

@@ -70,8 +70,26 @@ One `localStorage` key per collection, under a prefix per dashboard:
 | Bubble Tea | `grug-tea:` | `grug-tea:settings`, `grug-tea:pearlBatches`, `grug-tea:meta` |
 | Café | `grug-cafe:` | `grug-cafe:settings`, `grug-cafe:dialins`, `grug-cafe:meta` |
 
-`<prefix>meta` is device-only (device id, last backup time, "checking as" name, dismissed hints) and is not exported.
-"Erase everything" removes only that dashboard's prefix.
+`<prefix>meta` is device-only (device id, last backup time, "checking as" name, dismissed hints, and on the site the
+linked shop's id `shopId` and card name `cardName`) and is not exported. "Erase everything" removes only that dashboard's prefix.
+
+## On the site: the restaurant account, the bottom bar and Contact us
+
+On grugdigital.com a shop dashboard is also a **restaurant account**, like Daypart (`linkShop()` in `src/ui.js`). After
+setup it makes the shop a rewards card (kind `cardType` in the type file: `t` for bubble tea, `c` for café; saved in
+My creations, `grug.rewards.v1`) and a shop in `grug.business.v1` marked `dash: 'tea' | 'cafe'`, makes it the active
+shop and switches to the restaurant account. It never takes over another shop on the device (a name already in use gets
+" Bubble Tea" / " Café" added; if that's taken too it stays unlinked). It reads but never changes `daypart:*`.
+
+- **The bottom bar** (`gdock()`, styles at the end of `src/app.css`) is Daypart's: Dashboard · Rewards card · Website,
+  the same colours and sizes. Dashboard is this page; the other two are the site's `rewards/` and `business/site/`. On the
+  site it replaces the phone tab bar. The site's own dock, logo and account menu send this shop back here (`dash` in
+  `assets/business.js`, `dashPath()` in `assets/grug.js`, theme.js's home redirect, `restaurant/`, and Daypart's first
+  lines when that browser has no Daypart records).
+- **Renaming** the shop in Settings renames its rewards card and website (`renameShop()`); a rename on the card is picked up here.
+- **Download** is in the top bar on every page (`data-get-app`), with the card at the end of Today and in Settings.
+- **Contact us** (`assets/contact.js`: Discord, Instagram, text, email, in one place) is in the top bar, the footer and
+  Settings. The standalone copies inline the same file.
 
 ## Export format (schema version 1)
 
@@ -105,8 +123,8 @@ dial-in, equipment and pastry counts (café). Cells that start with `= + - @` ar
 system: it gives the page its manifest (`app/tea.webmanifest` / `app/cafe.webmanifest`: own `id`, `start_url`
 `/business/<id>/?pwa=<id>`, scope the dashboard's folder), registers the site's service worker (`sw.js`), and fills the
 Download card in Settings (`data-app-card="tea|cafe" data-app-status`). Installed, the app keeps its pack
-(`tea` / `cafe` in `app/offline.json`) on the device and updates itself whenever the site changes. Today offers "Put this
-app on the home screen" for the first two weeks. Icons: `node tools/pwa/icons.js tea cafe`.
+(`tea` / `cafe` in `app/offline.json`) on the device and updates itself whenever the site changes. The top bar's Download
+button and a card at the end of Today offer it until it's installed. Icons: `node tools/pwa/icons.js tea cafe`.
 
 **Anywhere else** (`--extras`, `dist/pwa/<folder>/`): its own `manifest.webmanifest`, `sw.js` (precaches the shell,
 network-first page with a cached copy and `offline.html` as fallbacks, `VERSION` = hash of `index.html`) and an

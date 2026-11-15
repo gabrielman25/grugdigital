@@ -413,6 +413,8 @@ input::placeholder,textarea::placeholder{color:var(--faint)}
   .top{padding:.35rem .7rem;min-height:3.6rem}
   .top .clock,.top h1{display:none}
   .chip.who>span:not(.av){display:none}.chip.who{padding:0 .3rem}
+  .top .chip{flex:none}.top .chip .lbl{display:none}.chip.dl{padding:0 .75rem}.chip.dl svg{width:1.2rem;height:1.2rem}
+  .top{overflow:hidden;gap:.4rem}.top .chip:not(#homebtn){padding:0;width:2.6rem;justify-content:center}.top .chip.who{width:auto;padding:0 .3rem}.top .gc-btn{width:2.6rem}
   main#view{padding:1rem .85rem calc(5.8rem + env(safe-area-inset-bottom))}
   .foot{padding-bottom:calc(5.8rem + env(safe-area-inset-bottom))}
   .ph h2{font-size:1.5rem}.hello h2{font-size:1.6rem}
@@ -434,3 +436,27 @@ input::placeholder,textarea::placeholder{color:var(--faint)}
   .homebtn span{display:inline}
 }
 @media print{.top,.tabbar,.foot,.noprint,#toast{display:none!important}main#view{max-width:none;padding:0}}
+
+/* ---------- the restaurant account's dock: Dashboard · Rewards card · Website (on the site only), the same as Daypart's ---------- */
+.gdock{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);transform:translateX(-50%);z-index:50;display:flex;gap:4px;
+  padding:9px 14px 12px;border-radius:26px;background:#fff;border:1px solid rgba(30,27,22,.1);box-shadow:0 14px 36px rgba(30,27,22,.16);view-transition-name:g-tabs}
+.gdock a{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:84px;height:62px;border-radius:16px;
+  font:700 11px/1 'Fredoka',system-ui,sans-serif;color:#6B655B;text-decoration:none;transition:transform .2s cubic-bezier(.3,1.5,.5,1),background .2s}
+.gdock a svg{width:38px;height:38px;color:var(--tab);transition:transform .25s cubic-bezier(.3,1.5,.5,1)}
+.gdock a[aria-current=page]{color:#1E1B16;background:var(--tab);transform:translateY(-3px);box-shadow:0 3px 0 var(--tab-lo)}
+.gdock a[aria-current=page] svg{color:#1E1B16;transform:scale(1.04)}
+.gdock a:not([aria-current]):hover{background:var(--field)}
+.gdock a:active svg{transform:scale(.9)}
+.gdock a:focus-visible{outline:3px solid #1E1B16;outline-offset:2px}
+html.gd-docked main#view,html.gd-docked .foot{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+html.gd-docked #toast{bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+@media(max-width:719px){.gdock{width:min(calc(100% - 24px),380px);gap:2px;padding:8px 10px 10px}.gdock a{flex:1;width:auto;height:58px}.gdock a svg{width:34px;height:34px}}
+/* short landscape phones: a rail on the left, like the site */
+@media(orientation:landscape) and (max-height:540px){
+  .gdock{left:calc(10px + env(safe-area-inset-left,0px));top:50%;bottom:auto;transform:translateY(-50%);flex-direction:column;width:auto;padding:14px 7px}
+  .gdock a{flex:none;width:62px;height:52px}.gdock a span{display:none}.gdock a[aria-current=page]{transform:translateX(3px)}
+  html.gd-docked main#view,html.gd-docked .foot{padding-bottom:1rem;padding-left:calc(90px + env(safe-area-inset-left,0px))}
+  html.gd-docked #toast{bottom:1.4rem}}html.gd-docked .tabbar{display:none!important}
+.chip.dl{font-weight:700}
+
+.chip .lbl-s{display:none}

@@ -700,7 +700,7 @@
     render() {
       const s = S(), m = A.meta, demoN = A.COLLS.reduce((n, c) => n + A.D[c].filter(r => r.demo).length, 0);
       const opt = T.groups.flatMap(g => g[1]).filter(id => A.MODS[id] && !A.MODS[id].core && (!A.MODS[id].visible || A.MODS[id].visible()));
-      const shopF = [{ k: 'shopName', label: 'Shop name', req: true, full: true }, { k: 'openAt', label: 'We open at', type: 'time' }, { k: 'closeAt', label: 'We close at', type: 'time' }, { k: 'tempUnit', label: 'Temperatures in', type: 'chips', opts: [['F', '°F'], ['C', '°C']] }, { k: 'bigText', label: 'Bigger text and buttons', type: 'check' }, { k: 'sound', label: 'Beep when something needs throwing out', type: 'check' }];
+      const shopF = [{ k: 'shopName', label: 'Shop name', req: true, full: true, max: 28 }, { k: 'openAt', label: 'We open at', type: 'time' }, { k: 'closeAt', label: 'We close at', type: 'time' }, { k: 'tempUnit', label: 'Temperatures in', type: 'chips', opts: [['F', '°F'], ['C', '°C']] }, { k: 'bigText', label: 'Bigger text and buttons', type: 'check' }, { k: 'sound', label: 'Beep when something needs throwing out', type: 'check' }];
       const advF = [{ k: 'weekStart', label: 'Week starts on', type: 'select', blank: false, opts: C.DNL.map((d, i) => [i, d]) }, { k: 'backupEveryDays', label: 'Remind me to back up every', type: 'number', min: 0, step: 1, hint: 'days (0 = never)' },
         { k: 'warnMin', label: 'Warn before throw-out time', type: 'number', min: 0, step: 1, hint: 'minutes' }].concat(A.PLAY_URL ? [{ k: 'showPlay', label: 'Show "Play while you wait" for customers', type: 'check' }] : []).concat(T.settingsFields || []);
       A.ui._sf = shopF.concat(advF);
@@ -714,6 +714,8 @@
           <h3 class="sec">Tools you use</h3><div class="card"><p class="small mute" style="margin-bottom:.6rem">Turn off what you don't need. It disappears from the app (nothing is deleted).</p><div class="pick">${opt.map(id => { const mm = A.MODS[id], on = !(s.off || []).includes(id); return `<label class="pk ${on ? 'on' : ''}"><input type="checkbox" data-mod="${id}" ${on ? 'checked' : ''}><span class="ti">${ic(mm.icon)}</span><span class="grow"><b>${esc(mm.title)}</b><small>${esc((mm.help && mm.help.what) || '')}</small></span></label>`; }).join('')}</div></div>
           ${A.past('More settings', `<div class="card">${A.formHtml(advF, s)}</div>`)}
           <div class="savebar"><button class="btn pri lg">${ic('check')} Save settings</button></div></form>
+          ${A.SITE && A.meta.shopId ? `<h3 class="sec">Your shop on Grug</h3><div class="card"><p class="small">This dashboard, your <a href="../../rewards/">rewards card</a> and your <a href="../site/">website</a> are your shop's account on Grug. The bar at the bottom moves between them.</p><div class="cardacts"><button class="btn" data-act="toPlayer">Switch to your player account</button></div></div>` : ''}
+          ${window.GrugContact && GrugContact.rows().length ? `<h3 class="sec">Help from the people who made this</h3><div class="card"><p class="small">Setting it up, a question, or something not working? We answer. The <b>Contact us</b> button at the top is always there too.</p><div class="cardacts">${GrugContact.rows().map(([k, title, sub, href]) => `<a class="btn" href="${esc(href)}"${/^https?:/.test(href) ? ' target="_blank" rel="noopener"' : ''}>${esc(title)}</a>`).join('')}</div></div>` : ''}
           <h3 class="sec">People</h3><div class="card"><p>${A.staff().map(e => esc(e.name)).join(', ') || 'Nobody added yet.'}</p><button class="btn" data-act="team">${ic('users')} Add or change people</button></div>
           <h3 class="sec">Put it on your home screen</h3>${window.SHOP_PWA === 'site' ? `<div data-app-card="${T.id}" data-app-status hidden></div>` : ''}<div class="card">${sa ? '<p>✓ It\'s already installed as an app.</p>' : `<p class="small">${window.SHOP_PWA ? 'Then it opens like an app and works without internet.' : 'This is the single-file preview. Once it\'s on your website you can install it as an app.'}</p>
             ${A.installEvt ? `<button class="btn pri" data-act="install" style="margin:.6rem 0">${ic('download')} Install app</button>` : ''}
@@ -730,7 +732,8 @@
         const old = S().tempUnit; x.weekStart = +x.weekStart; x.backupEveryDays = x.backupEveryDays === '' ? 7 : +x.backupEveryDays; x.warnMin = +x.warnMin || 0;
         x.off = [...v.querySelectorAll('[data-mod]')].filter(c => !c.checked).map(c => c.dataset.mod);
         if (x.tempUnit && x.tempUnit !== old) { const cv = t => t === '' || t == null ? t : C.r2(x.tempUnit === 'C' ? (t - 32) * 5 / 9 : t * 9 / 5 + 32); for (const u of A.D.tempUnits) { u.min = cv(u.min); u.max = cv(u.max); u.updatedAt = A.nowISO(); } A.save('tempUnits'); }
-        A.setSettings(x); ui.wk = ui.hw = null; A.render(); A.toast('Settings saved.');
+        const renamed = x.shopName !== S().shopName;
+        A.setSettings(x); if (renamed) A.renameShop(x.shopName); ui.wk = ui.hw = null; A.render(); A.toast(renamed && A.SITE ? 'Saved. Your rewards card and website use the new name too.' : 'Settings saved.');
       };
     },
     acts: {

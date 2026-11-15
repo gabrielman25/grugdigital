@@ -427,9 +427,6 @@ const App = (() => {
   function todos() {
     const out = [];
     for (const id in MODS) { if (!isOn(id) || !MODS[id].todo) continue; try { out.push(...MODS[id].todo().map(t => ({ ...t, mod: id }))); } catch (e) { console.error(e); } }
-    const g = siteApp();
-    if (g && !g.standalone() && !g.installed().includes(T.id) && Date.now() - Date.parse(D.settings.createdAt || 0) < 14 * 864e5)
-      out.push({ key: 'getapp', pri: 4, level: 'go', icon: 'download', text: 'Put this app on the home screen', sub: 'It gets its own icon, opens full screen and keeps working when the Wi-Fi drops. Free, no app store.', btn: 'Download', act: 'install' });
     if (backupDue()) out.push({ key: 'backup', pri: 2, level: 'go', icon: 'shield', text: 'Save a backup of this app', sub: 'Takes 5 seconds. Protects everything if this tablet breaks or gets reset.', btn: 'Save backup', act: 'backup' });
     return out;
   }
@@ -458,9 +455,64 @@ const App = (() => {
           : `<div class="caught">${ic('party')}<div><b>You're all caught up!</b><small>Nothing needs doing right now. Check back later, or help a customer.</small></div></div>`}
         ${done.length ? `<p class="donecount">${ic('check')} Done today: ${done.map(t => esc(t.text)).join(' · ')}</p>` : ''}</section>
         ${hero}
-        <h3 class="sec" style="margin-top:2rem">All tools</h3>${groups.replace('<h3 class="sec">', '<h3 class="sec" style="margin-top:.6rem">')}`;
+        <h3 class="sec" style="margin-top:2rem">All tools</h3>${groups.replace('<h3 class="sec">', '<h3 class="sec" style="margin-top:.6rem">')}
+        ${SITE ? `<div class="noprint" data-app-card="${T.id}" hidden></div>` : ''}`;
     }
   });
+
+  /* ---------- the restaurant account (site only) ----------
+     On grugdigital.com the shop is also a "restaurant account" (assets/business.js, 'grug.business.v1'), marked
+     dash: 'tea' | 'cafe', so it gets a rewards card (rewards/) and a website (business/site/) like any restaurant, and
+     the site's dock and menus open this dashboard. The card's name is the shop's name. */
+  const BIZ = () => SITE && window.GrugBusiness && window.GrugRewards ? window.GrugBusiness : null;
+  function linkShop() {
+    const B = BIZ(); if (!B || !D || !D.settings.shopName) return null;
+    try {
+      let s = B.load(), id = meta.shopId && s.shops[meta.shopId] ? meta.shopId : '';
+      if (!id) id = Object.keys(s.shops).find(k => s.shops[k].dash === T.id) || '';
+      if (!id) {
+        const RW = window.GrugRewards; let cfg = RW.normalize({ n: D.settings.shopName, t: T.cardType, j: 1 });
+        // a shop's id comes from its name: never take over another shop on this device (a restaurant with the same name)
+        if (s.shops[RW.shopId(cfg)]) cfg = RW.normalize({ ...cfg, n: (D.settings.shopName + ' ' + T.name).slice(0, 28) });
+        if (s.shops[RW.shopId(cfg)]) return null;
+        const code = RW.encode(cfg);
+        try { RW.saveMine(code); } catch (e) { }
+        const r = B.fromCard(code); if (!r) return null;
+        id = r.shop.id; B.setDash(id, T.id);
+      }
+      if (meta.shopId !== id) { meta.shopId = id; saveMeta(); }
+      s = B.load();
+      if (s.active !== id) B.setActive(id);
+      if (s.mode !== 'business') B.setMode('business');   // using a dashboard means using the restaurant account, like Daypart
+      // renamed on the rewards card since we last looked? use that name here too
+      const cfg = window.GrugRewards.decode(B.load().shops[id].c);
+      if (cfg && cfg.n && cfg.n !== meta.cardName) { if (meta.cardName) { D.settings.shopName = cfg.n; save('settings'); } meta.cardName = cfg.n; saveMeta(); }
+      return id;
+    } catch (e) { console.error(e); return null; }
+  }
+  // the shop was renamed here: rename its rewards card and website too (they keep everything else)
+  function renameShop(name) {
+    const B = BIZ(), id = meta.shopId; if (!B || !id) return;
+    try {
+      const RW = window.GrugRewards, s = B.load(), x = s.shops[id]; if (!x) return;
+      const cfg = RW.decode(x.c); if (!cfg || cfg.n === name) return;
+      const code = RW.encode(Object.assign({}, cfg, { n: name })), r = B.fromCard(code, x.c);
+      try { RW.saveMine(code, x.c); } catch (e) { }
+      if (r) { B.setDash(r.shop.id, T.id); meta.shopId = r.shop.id; meta.cardName = name; saveMeta(); }
+    } catch (e) { console.error(e); }
+  }
+  const DOCK = [['dashboard', 'Dashboard', './', '#9BE338', '#6FB31C', '<rect x="1" y="1" width="6" height="8" rx="1.5"></rect><rect x="9" y="1" width="6" height="5" rx="1.5"></rect><rect x="1" y="11" width="6" height="4" rx="1.5"></rect><rect x="9" y="8" width="6" height="7" rx="1.5"></rect>'],
+    ['rewards', 'Rewards card', '../../rewards/', '#FF9F5A', '#E0782F', '<path d="M7 15H3a1 1 0 0 1-1-1V9h5zM14 14a1 1 0 0 1-1 1H9V9h5zM7 8H1V6a1 1 0 0 1 1-1h5zM14 5a1 1 0 0 1 1 1v2H9V5zM4.282 1.312a1.784 1.784 0 0 1 2.242.212L8 3l1.238-1.352c.605-.66 1.6-.781 2.345-.285l.06.04A1.75 1.75 0 0 1 12 4H4c-.776-.776-.63-2.08.282-2.688"></path>'],
+    ['website', 'Website', '../site/', '#5AB0FF', '#2F86D6', '<path fill-rule="evenodd" d="M13 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zM3 6v7h10V6z" clip-rule="evenodd"></path>']];
+  function gdock() {
+    if (document.querySelector('.gdock') || !meta.shopId) return;
+    const n = document.createElement('nav'); n.className = 'gdock noprint'; n.setAttribute('aria-label', 'Your shop');
+    n.innerHTML = DOCK.map(([id, name, href, c, lo, svg], i) => `<a href="${href}" style="--tab:${c};--tab-lo:${lo}"${i ? '' : ' aria-current="page" data-act="dockHome"'}><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">${svg}</svg><span>${name}</span></a>`).join('');
+    document.body.appendChild(n); document.documentElement.classList.add('gd-docked');
+  }
+  act('dockHome', () => { if (route !== 'home') go('home'); else window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  act('toPlayer', () => { const B = BIZ(); if (B) B.setMode('player'); location.href = '../../'; });
+  function siteLinks() { if (!SITE) return; if (linkShop()) gdock(); }
 
   /* ---------- shell ---------- */
   function tabsHtml() {
@@ -495,14 +547,14 @@ const App = (() => {
   function renderSetup() {
     $('#app').hidden = true;
     let s = $('#setup'); if (!s) { s = document.createElement('div'); s.id = 'setup'; document.body.appendChild(s); }
-    const st = ui.setup = ui.setup || { step: 0, name: (new URLSearchParams(location.search).get('name') || '').trim().slice(0, 40), open: T.hours[0], close: T.hours[1], team: [], off: T.offByDefault ? T.offByDefault.slice() : [], starter: true, demo: false };
+    const st = ui.setup = ui.setup || { step: 0, name: (new URLSearchParams(location.search).get('name') || '').trim().slice(0, 28), open: T.hours[0], close: T.hours[1], team: [], off: T.offByDefault ? T.offByDefault.slice() : [], starter: true, demo: false };
     const opt = T.groups.flatMap(g => g[1]).filter(id => MODS[id] && !MODS[id].core && (!MODS[id].visible || MODS[id].visible() !== false));
     const N = 4, dots = `<div class="dots">${Array.from({ length: N }, (_, j) => `<i class="${j <= st.step ? 'on' : ''}"></i>`).join('')}</div>`;
     const back = st.step ? `<button type="button" class="btn lg" data-back>${ic('left')} Back</button>` : '';
     let body = '';
     if (st.step === 0) body = `<div class="brand" style="padding:0 0 .6rem"><span class="logo">${ic(T.icon)}</span><span><small>Grug Digital</small><b>${esc(T.name)} dashboard</b></span></div>
       <h2 class="q">Hi! What's your shop called?</h2><p class="hint">${esc(T.tagline)}</p>
-      <label class="f"><span>Shop name</span><input type="text" name="name" value="${esc(st.name)}" placeholder="${esc(T.namePh)}" autofocus></label>
+      <label class="f"><span>Shop name</span><input type="text" name="name" maxlength="28" value="${esc(st.name)}" placeholder="${esc(T.namePh)}" autofocus></label>
       <div class="fgrid"><label class="f"><span>We open at</span><input type="time" name="open" value="${st.open}"></label><label class="f"><span>We close at</span><input type="time" name="close" value="${st.close}"></label></div>
       <p class="small mute">The app uses these to know when to remind you about opening and closing jobs.</p>`;
     if (st.step === 1) body = `<h2 class="q">Who works here?</h2><p class="hint">Type each person's name and tap Add. Just first names are fine. You can add more later.</p>
@@ -535,7 +587,7 @@ const App = (() => {
       if (st.demo) T.demo(D, C, today());
       st.team.forEach((n, i) => { if (!D.employees.some(e => e.name.toLowerCase() === n.toLowerCase())) D.employees.push({ id: C.uid(), name: n, color: COLORS[(i + 3) % COLORS.length] }); });
       for (const c of COLLS) for (const r of D[c]) { if (!r.id) r.id = C.uid(); if (!r.updatedAt) r.updatedAt = nowISO(); }
-      save(); ui.setup = null; go('home'); render();
+      save(); ui.setup = null; siteLinks(); go('home'); render();
       if (staff().length) setTimeout(() => whoPicker(), 300);
     };
   }
@@ -562,7 +614,7 @@ const App = (() => {
         if (mode === 'replace' && hasData && !(await confirmBox({ title: 'Swap everything for the backup?', body: 'What\'s on this device now for <b>' + esc(D.settings.shopName) + '</b> will be replaced. You can\'t undo this.', ok: 'Yes, replace', danger: true, typed: 'REPLACE' }))) return;
         const next = mode === 'replace' ? r.data : C.mergeData(D, r.data, COLLS);
         D = { schemaVersion: C.SCHEMA, settings: { ...blankSettings(), ...next.settings } }; for (const c of COLLS) D[c] = next[c] || [];
-        ui.setup = null; save(); applyLook(); render(); toast('Backup restored. Everything is back.', 4000);
+        ui.setup = null; save(); applyLook(); siteLinks(); render(); toast('Backup restored. Everything is back.', 4000);
       };
     };
     rd.readAsText(file);
@@ -601,8 +653,9 @@ const App = (() => {
     R.setProperty('--mode', T.theme.mode); R.setProperty('--lo', T.theme.lo); R.setProperty('--bg', T.theme.bg); R.setProperty('--accent-2', T.theme.accent2); R.setProperty('--accent-2-lo', T.theme.accent2lo);
     $('#brandlogo').innerHTML = ic(T.icon);
     $('#homebtn').innerHTML = ic('home') + '<span>Home</span>'; $('#helpbtn').innerHTML = ic('help') + '<span class="sr">Help</span>';
-    $('#soundchip').innerHTML = ic('vol') + ' Tap to turn on sound';
+    $('#soundchip').innerHTML = ic('vol') + ' <span class="lbl">Tap to turn on sound</span>'; $('#soundchip').title = 'Tap to turn on sound'; $('#soundchip').setAttribute('aria-label', 'Turn on sound');
     $('#installchip').innerHTML = ic('download') + ' Install app';
+    if (window.GrugContact) $('#contactslot').outerHTML = GrugContact.button();   // assets/contact.js: Discord, Instagram, text, email
     if (PLAY_URL) { const p = $('#playfoot'); p.href = PLAY_URL; p.innerHTML = `<span class="dot">${ic('game')}</span> Play while you wait`; }
     document.addEventListener('click', e => {
       const g = e.target.closest('[data-go]'); if (g && !g.closest('.dlg')) { go(g.dataset.go, g.dataset.p); return; }
@@ -613,7 +666,7 @@ const App = (() => {
     window.addEventListener('storage', e => { if (e.key && e.key.startsWith(PRE)) { loadAll(); if (!modalStack.length) render(); } }); /* another tab changed data */
     document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
     $('#imp').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importFile(f); });
-    ui.day = today(); render(); setupPwa(); setInterval(tick, 1000); tick();
+    siteLinks(); ui.day = today(); render(); setupPwa(); setInterval(tick, 1000); tick();
     if (Store.mode !== 'local') toast("This browser won't let the app save. Open it in a normal (not private) window.", 9000);
   }
 
@@ -621,7 +674,7 @@ const App = (() => {
     C, T, PLAY_URL, COLLS, PRE, Store, $, $$, esc, ic, IC, today, nowISO, nowMin, register, act, go, render, refreshChrome, toast, modal, closeModal, confirmBox, xBtn,
     openForm, formHtml, wireForm, readForm, fieldHtml, wizard, whoPicker, Sound, timerCard, ringSvg, timerText, download, csvDownload, inRange, backupDue, exportBackup,
     page, legal, empty, past, rangeSeg, staffOpts, staffNames, staff, empName, avatar, initials, COLORS, upsert, remove, removeUndo, find, save, setSettings,
-    by, rememberBy, ui, MODS, CSVS, installHint, isIOS, isStandalone, activeTimers, start, importFile, isOn,
+    by, rememberBy, ui, MODS, CSVS, installHint, SITE, renameShop, linkShop, isIOS, isStandalone, activeTimers, start, importFile, isOn,
     get D() { return D; }, get meta() { return meta; }, saveMeta, get installEvt() { return installEvt; }, get route() { return route; }
   };
 })();

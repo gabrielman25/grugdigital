@@ -8,8 +8,10 @@
        v: 1,
        mode: 'player' | 'business',     // which account is in use right now
        active: <shopId> | '',           // the shop the dashboard, website and menus are about
-       shops: { <shopId>: { id, c, created, updated, site } }
+       shops: { <shopId>: { id, c, created, updated, site, dash? } }
      }
+     dash  = which dashboard the shop uses: missing = Daypart (business/), 'tea' = business/tea/, 'cafe' = business/cafe/
+             (set by the bubble tea and café dashboards when they make the shop; the dock's Dashboard tab follows it)
      c     = the shop's rewards card setup, the same text as its card link (GrugRewards.encode)
      site  = what the shop's website shows beyond the card (SITE_FIELDS below); empty fields are left off the page
 
@@ -26,13 +28,16 @@
   const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];   // hours[0] is Monday
   const SITE_FIELDS = ['tagline', 'about', 'address', 'phone', 'email', 'hours', 'menu', 'order', 'ig', 'tt', 'fb', 'rewards'];
   const RW = () => root.GrugRewards;
+  // the dashboards a shop can use (from the site root): Daypart for restaurants, and the bubble tea and café dashboards
+  const DASHES = { tea: 'business/tea/', cafe: 'business/cafe/' };
+  const dashPath = x => (x && DASHES[x.dash]) || 'business/';
 
   const rd = () => { try { const v = JSON.parse(localStorage.getItem(KEY) || 'null'); return v && typeof v === 'object' ? v : null; } catch (e) { return null; } };
   const wr = v => { try { localStorage.setItem(KEY, JSON.stringify(v)); return true; } catch (e) { return false; } };
   function load() {
     const s = rd() || {};
     const out = { v: 1, mode: s.mode === 'business' ? 'business' : 'player', active: typeof s.active === 'string' ? s.active : '', shops: {} };
-    if (s.shops && typeof s.shops === 'object') Object.keys(s.shops).forEach(id => { const x = s.shops[id]; if (x && typeof x.c === 'string') out.shops[id] = { id, c: x.c, created: +x.created || 0, updated: +x.updated || 0, site: cleanSite(x.site) }; });
+    if (s.shops && typeof s.shops === 'object') Object.keys(s.shops).forEach(id => { const x = s.shops[id]; if (x && typeof x.c === 'string') { out.shops[id] = { id, c: x.c, created: +x.created || 0, updated: +x.updated || 0, site: cleanSite(x.site) }; if (DASHES[x.dash]) out.shops[id].dash = x.dash; } });
     if (!out.shops[out.active]) out.active = Object.keys(out.shops).sort((a, b) => out.shops[b].updated - out.shops[a].updated)[0] || '';
     if (!out.active) out.mode = 'player';
     return out;
@@ -79,6 +84,7 @@
     return { shop: x, isNew };
   }
   function setMode(mode) { const s = load(); if (mode === 'business' && !s.active) return false; s.mode = mode === 'business' ? 'business' : 'player'; save(s, 'mode'); return true; }
+  function setDash(id, dash) { const s = load(), x = s.shops[id]; if (!x) return false; if (DASHES[dash]) x.dash = dash; else delete x.dash; return save(s, 'dash'); }
   function setActive(id) { const s = load(); if (!s.shops[id]) return false; s.active = id; save(s, 'active'); return true; }
   function saveSite(id, site) { const s = load(), x = s.shops[id]; if (!x) return false; x.site = cleanSite(site); x.updated = Date.now(); return save(s, 'site'); }
   function remove(id) { const s = load(); delete s.shops[id]; if (s.active === id) s.active = ''; save(s, 'remove'); }
@@ -235,6 +241,6 @@
       p.fontLink + '\n<style>' + p.css + '</style>\n</head>\n<body>\n' + p.body + '\n</body>\n</html>\n';
   }
 
-  root.GrugBusiness = { KEY, DAYS, SITE_FIELDS, load, has, on, shops, active, fromCard, setMode, setActive, saveSite, remove, cleanSite, starterSite,
+  root.GrugBusiness = { KEY, DAYS, SITE_FIELDS, DASHES, dashPath, setDash, load, has, on, shops, active, fromCard, setMode, setActive, saveSite, remove, cleanSite, starterSite,
     encodeSite, decodeSite, siteUrl, siteBase, siteParts, siteHtml, webUrl };
 })(typeof window !== 'undefined' ? window : globalThis);
