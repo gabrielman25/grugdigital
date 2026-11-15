@@ -1,5 +1,5 @@
 {
- "v": "32e8d496cf51",
+ "v": "c220c8b54e94",
  "apps": {
   "grug": [
    "grug",
@@ -20,7 +20,7 @@
    "title": "Grug",
    "files": {
     "/404.html": "64e366437c",
-    "/app/app.js": "1ee2055d58",
+    "/app/app.js": "0ecd7b22c1",
     "/app/daypart.webmanifest": "a54f8c1672",
     "/app/grug.webmanifest": "70b7c1ce06",
     "/app/icons/daypart-180.png": "64a5bf0833",
@@ -159,7 +159,7 @@
     "/assets/gamehost.js": "033b37689b",
     "/assets/games.js": "a87c15c415",
     "/assets/grug.css": "0dafe96312",
-    "/assets/grug.js": "9e0a202b3e",
+    "/assets/grug.js": "3eab62590c",
     "/assets/icons.js": "d421bed707",
     "/assets/links.css": "5be746f1ee",
     "/assets/links.js": "8ad0bef667",
@@ -219,15 +219,15 @@
     "/credits.html": "e2379774bb",
     "/favicon.png": "25d0921a67",
     "/games/favorites/": "b5fee8fe8a",
-    "/games/": "37f70510ae",
+    "/games/": "3a2c45fc0c",
     "/games/welcome/": "aae83e63c2",
-    "/": "7e5b6103e0",
+    "/": "7017de5879",
     "/links/create/": "d40a805a88",
     "/links/": "b9971e3ed4",
     "/links/page/": "984b54c854",
     "/make/": "a28011c194",
     "/me/cards/": "bc7189095b",
-    "/me/": "71c47f5a87",
+    "/me/": "4c538059d9",
     "/offline.html": "c1b6421a93",
     "/pearls.html": "7a54ab1121",
     "/privacy.html": "d9f2026432",
@@ -239,12 +239,12 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "3106453a5e"
    },
-   "bytes": 28547947
+   "bytes": 28557849
   },
   "daypart": {
    "title": "Daypart",
    "files": {
-    "/app/app.js": "1ee2055d58",
+    "/app/app.js": "0ecd7b22c1",
     "/app/daypart.webmanifest": "a54f8c1672",
     "/app/grug.webmanifest": "70b7c1ce06",
     "/app/icons/daypart-180.png": "64a5bf0833",
@@ -280,7 +280,7 @@
     "/assets/gamehost.js": "033b37689b",
     "/assets/games.js": "a87c15c415",
     "/assets/grug.css": "0dafe96312",
-    "/assets/grug.js": "9e0a202b3e",
+    "/assets/grug.js": "3eab62590c",
     "/assets/icons.js": "d421bed707",
     "/assets/qrcode.js": "1695445831",
     "/assets/rewards.css": "35ee1500c7",
@@ -296,7 +296,7 @@
     "/assets/three.min.js": "1dc7b29a4a",
     "/assets/wizard.css": "eb51fc0402",
     "/assets/wizard3d.js": "3870ba7150",
-    "/business/": "0468a8acb4",
+    "/business/": "d2a5cd0ea2",
     "/business/site/": "7beb01205d",
     "/credits.html": "e2379774bb",
     "/favicon.png": "25d0921a67",
@@ -309,7 +309,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "3106453a5e"
    },
-   "bytes": 2070610
+   "bytes": 2079937
   },
   "game:runway": {
    "title": "Runway Ready",

@@ -136,6 +136,8 @@ footer a{color:var(--ink2);font-weight:700}
       <div class="cta">
         <a class="g-btn primary big" id="heroPlay" href="games/">Play</a>
         <a class="g-btn big" href="avatar/">Edit avatar</a>
+        <!-- app/app.js shows it where the Grug app can be downloaded (not inside the app, not in shop mode) -->
+        <a class="g-btn big" href="#" data-get-app="grug" hidden><span data-app-ic></span>Download</a>
       </div>
       <p class="g-fine" id="heroFine"></p>
     </div>
@@ -149,6 +151,9 @@ footer a{color:var(--ink2);font-weight:700}
       <button type="button" class="hc-nav next" id="hcNext" aria-label="Next game"></button>
     </div>
   </section>
+
+  <!-- the Download card (app/app.js): every game, the store and the avatar editor on this device, offline -->
+  <div data-app-card="grug" hidden></div>
 
   <!-- quick games (the Carts, assets/carts.js): a minute each, one tap or one hold -->
   <section class="g-section" id="quickSec" hidden>

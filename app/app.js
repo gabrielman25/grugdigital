@@ -14,6 +14,14 @@
    - on iPhone and iPad, where an installed app keeps its own save, apart from Safari: "Save a copy" before installing and
      "Load a copy" the first time the app opens. Pearls never move (they stay in the browser they were bought in).
 
+   Download buttons and cards, for any page:
+     <button data-get-app="grug" hidden>…<span data-app-ic></span>Download</button>   shown only where the app can be
+        downloaded (not inside the installed app, not in shop or partner mode, not once it's installed in this browser);
+        a tap downloads it. [data-app-ic] gets the download icon.
+     <div data-app-card="grug" hidden></div>   filled with the Download card (what you get, its size, a Download button).
+        Add data-app-status and, inside the installed app, it shows instead what is saved, when it last checked for
+        updates, and a Check for updates button.
+
    Installed apps on this device are remembered in localStorage 'grug.apps.v1' ({grug: time, daypart: time}). */
 (function () {
   'use strict';
@@ -116,7 +124,25 @@
 .gapp-card button{border:0;border-radius:999px;padding:.65rem 1.1rem;font:600 1rem Fredoka,system-ui,sans-serif;cursor:pointer;background:#9BE338;color:#1E1B16;box-shadow:0 3px 0 #6FB31C}
 .gapp-card button.q{background:transparent;color:inherit;box-shadow:inset 0 0 0 2px var(--line,#E4E4E8)}
 .gapp-card .k{display:inline-block;padding:0 .35rem;border-radius:.4rem;background:rgba(127,127,127,.15);font-weight:600}
-.gapp-card .err{color:#C62F2F}`;
+.gapp-card .err{color:#C62F2F}
+.gapp-ic{width:1.15em;height:1.15em;flex:none;vertical-align:-.18em}
+[data-get-app] .gapp-ic{margin-right:.35em}
+.gapp-card-box{display:block;margin:18px 0}
+.gapp-card-in{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;padding:18px 20px;border-radius:var(--r,20px);background:var(--card-solid,#fff);
+  color:var(--ink,#1E1B16);border:1px solid var(--line,#E6E4DE);border-left:6px solid #9BE338;font-family:Fredoka,var(--font,system-ui),sans-serif}
+.gapp-card-in>img{width:64px;height:64px;border-radius:16px;flex:none}
+.gapp-tx{flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:3px}
+.gapp-tx small{font-size:12.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:.6}
+.gapp-tx b{font-size:clamp(20px,2.6vw,25px);font-weight:600;line-height:1.15;display:flex;align-items:center;gap:.35em}
+.gapp-tx b .gapp-ic{color:#4E9A0E}
+.gapp-tx span{font-size:15px;line-height:1.4;opacity:.85}
+.gapp-tx .gapp-meta{font-size:13.5px;font-weight:600;opacity:.6}
+.gapp-go{flex:none;display:inline-flex;align-items:center;gap:.4em;border:0;border-radius:999px;padding:.8rem 1.4rem;cursor:pointer;
+  font:600 1.05rem Fredoka,system-ui,sans-serif;background:#9BE338;color:#1E1B16;box-shadow:0 4px 0 #6FB31C}
+.gapp-go:hover{filter:brightness(1.04)}.gapp-go:active{transform:translateY(2px);box-shadow:0 2px 0 #6FB31C}
+.gapp-go.q{background:transparent;color:inherit;box-shadow:inset 0 0 0 2px var(--line,#E4E4E8)}
+.gapp-go[disabled]{opacity:.55;cursor:default}
+@media (max-width:520px){.gapp-go{width:100%;justify-content:center}.gapp-card-in{padding:16px}.gapp-card-in>img{width:48px;height:48px;border-radius:13px;align-self:flex-start}.gapp-tx{flex:1 1 calc(100% - 70px)}}`;
     document.head.appendChild(s);
   }
   function lift() {   // keep the note above the dock where there is one
@@ -143,9 +169,13 @@
   /* ---------- what the service worker says ---------- */
   let showing = false;
   function onMessage(d) {
+    if (d.type === 'status') { swState = d; paint(); }
+    if (d.type === 'progress') { checking = true; paint(); }
+    if (d.type === 'synced' || d.type === 'sync-failed') { checking = false; if (d.quiet) askStatus(); }
     const app = thisApp(); if (!app && d.type !== 'status') return;   // a browser tab stays quiet: downloads are the app's business
     const what = app === 'daypart' ? 'Daypart' : 'games';
     if (d.type === 'status') { if (loadedV == null) loadedV = d.v || ''; return; }
+    if (d.type === 'synced') askStatus();
     if (d.type === 'progress' && d.total) {
       if (!d.firstTime && d.total < 3) return;   // a file or two: not worth a note
       showing = true;
@@ -247,16 +277,16 @@
         '<p class="err" hidden></p><div class="row"><button type="button" data-a="load">Load a copy</button><button type="button" class="q" data-a="close">Start fresh</button></div>' +
         '<input type="file" accept=".json,application/json" hidden>';
     } else {
-      const why = app === 'daypart' ? 'Open your dashboard from the home screen, full screen, and keep working when the Wi-Fi drops.' : 'Play from your home screen, full screen, and keep playing with no connection.';
+      const why = app === 'daypart' ? 'Open your dashboard from the home screen, full screen, and keep working when the Wi-Fi drops. It updates itself.' : 'Every game, the store and your avatar editor on your home screen. Open it once online and it saves everything, then plays with no connection and updates itself.';
       let steps;
       if (IOS) steps = '<ol><li>Tap <span class="k">Share</span> (the square with an arrow' + (SAFARI ? ', at the bottom or top of Safari' : '') + ').</li><li>Scroll down and tap <span class="k">Add to Home Screen</span>.</li><li>Leave <span class="k">Open as Web App</span> on, then tap <span class="k">Add</span>.</li></ol>';
       else if (ANDROID) steps = '<ol><li>Open the browser menu (<span class="k">⋮</span>).</li><li>Tap <span class="k">Install app</span> or <span class="k">Add to Home screen</span>.</li></ol>';
       else if (MAC && SAFARI) steps = '<ol><li>In the menu bar, choose <span class="k">File</span> → <span class="k">Add to Dock</span>.</li></ol>';
-      else if (FIREFOX) steps = '<p>Firefox can’t add apps. Open this page in Chrome, Edge or Safari, then choose Get the app again.</p>';
+      else if (FIREFOX) steps = '<p>Firefox can’t add apps. Open this page in Chrome, Edge or Safari, then tap Download again.</p>';
       else steps = '<ol><li>Click the install button at the right end of the address bar, or open the browser menu.</li><li>Choose <span class="k">Install ' + name + '</span> (in Chrome: <span class="k">Cast, save and share</span> → <span class="k">Install page as app</span>).</li></ol>';
       const keep = IOS ? '<div class="box"><b>Bring your stuff with you</b>On iPhone and iPad the app keeps its own save, apart from Safari. Save a copy first, then open the app and tap Load a copy.' + pearlsLine +
         '<div class="row"><button type="button" data-a="save">Save a copy</button></div></div>' : '';
-      body = '<div class="hd"><img alt="" src="' + icon + '"><div><h2>Get the ' + name + ' app</h2><small>Free. No app store, no account.</small></div></div><p>' + why + '</p>' + steps + keep +
+      body = '<div class="hd"><img alt="" src="' + icon + '"><div><h2>Download ' + name + '</h2><small>Free. No app store, no account.</small></div></div><p>' + why + '</p>' + steps + keep +
         '<div class="row"><button type="button" class="q" data-a="close">Done</button></div>';
     }
     scrim.innerHTML = '<div class="gapp-card" role="dialog" aria-modal="true" aria-label="' + esc(name) + '">' + body + '</div>';
@@ -285,11 +315,89 @@
     if (standalone() && thisApp() === app) return note('You’re already in the ' + NAMES[app] + ' app.');
     if (deferred && app === pageApp) {
       const d = deferred; deferred = null;
-      try { d.prompt(); const r = await d.userChoice; if (r && r.outcome === 'accepted') { remember(app); return; } } catch (e) {}
+      try { d.prompt(); const r = await d.userChoice; if (r && r.outcome === 'accepted') { remember(app); paint(); return; } } catch (e) {}
       return;
     }
     sheet(app, 'install');
   }
+
+  /* ---------- Download buttons and cards ([data-get-app], [data-app-card]) ---------- */
+  let swState = null, checking = false, sizes = null;
+  async function askStatus() { const reg = ready && await ready; if (reg && reg.active) reg.active.postMessage({ type: 'status' }); }
+  const off = () => { const h = document.documentElement; return h.hasAttribute('data-brand') || h.hasAttribute('data-partner'); };
+  const canGet = app => !off() && !standalone() && !installed()[app];
+  const inApp = app => standalone() && thisApp() === app;
+  const DL = '<svg class="gapp-ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M228,144v64a12,12,0,0,1-12,12H40a12,12,0,0,1-12-12V144a12,12,0,0,1,24,0v52H204V144a12,12,0,0,1,24,0Zm-108.49,8.49a12,12,0,0,0,17,0l40-40a12,12,0,0,0-17-17L140,115V32a12,12,0,0,0-24,0v83L96.49,95.51a12,12,0,0,0-17,17Z"/></svg>';
+  const CHECK = '<svg class="gapp-ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z"/></svg>';
+  // how big each app's download is, from the offline list (fetched once, only when a card needs it)
+  function loadSizes() {
+    if (sizes || navigator.onLine === false) return; sizes = {};
+    fetch(at('app/offline.json'), { cache: 'no-cache' }).then(r => r.json()).then(ix => {
+      const grown = adult() === true;
+      for (const a of Object.keys(ix.apps || {})) {
+        const ids = ix.apps[a].filter(id => ix.packs[id] && (grown || ix.packs[id].rating !== 'mature'));
+        sizes[a] = { bytes: ids.reduce((n, id) => n + (ix.packs[id].bytes || 0), 0), games: ids.filter(id => id.startsWith('game:')).length, carts: ids.includes('carts') };
+      }
+      paint(true);
+    }).catch(() => { sizes = null; });
+  }
+  const mb = b => b >= 1e6 ? 'About ' + Math.max(1, Math.round(b / 1e6)) + ' MB' : 'Under 1 MB';
+  const COPY = {
+    grug: { label: 'The Grug app', title: 'Download Grug', text: 'Every game, the game store and your avatar editor, saved on this device. Plays with no Wi-Fi, and updates itself whenever the site does. Free, no app store.' },
+    daypart: { label: 'The Daypart app', title: 'Download Daypart', text: 'Your schedule, time clock, temperatures, checklists and paperwork as an app on this device. Keeps working when the Wi-Fi drops, and updates itself. Free, no app store.' },
+  };
+  function cardHtml(app, el) {
+    const c = COPY[app], icon = at('app/icons/' + app + '-192.png');
+    if (inApp(app)) {
+      if (!el.hasAttribute('data-app-status')) return '';
+      const st = swState || {}, w = st.wanted || [], n = w.filter(id => id.startsWith('game:')).length;
+      const what = app === 'grug' ? (n ? n + ' games' + (w.includes('carts') ? ', Carts' : '') + ', the store and your avatar editor' : 'The games, the store and your avatar editor') : 'Your dashboard, website editor and rewards card';
+      const when = st.at ? new Date(st.at).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }) : '';
+      const line = checking ? 'Checking for updates…' : st.at ? (st.complete ? 'Up to date. Last checked ' + when + '.' : 'Some files are still downloading. Last tried ' + when + '.') : 'Saving for offline…';
+      return '<div class="gapp-card-in"><img alt="" src="' + icon + '"><div class="gapp-tx"><small>' + c.label + '</small><b>' + CHECK + 'Saved on this device</b>' +
+        '<span>' + what + ' work with no connection' + (st.bytes ? ' (' + mb(st.bytes).replace('About ', 'about ') + ')' : '') + '.</span><span class="gapp-meta">' + line + '</span></div>' +
+        '<button type="button" class="gapp-go q" data-app-check' + (checking ? ' disabled' : '') + '>Check for updates</button></div>';
+    }
+    if (!canGet(app)) return '';
+    const sz = sizes && sizes[app];
+    return '<div class="gapp-card-in"><img alt="" src="' + icon + '"><div class="gapp-tx"><small>' + c.label + '</small><b>' + c.title + '</b><span>' + c.text + '</span>' +
+      (sz ? '<span class="gapp-meta">' + mb(sz.bytes) + (app === 'grug' ? ' · ' + sz.games + ' games and ' + (sz.carts ? 'every Cart' : 'more') : '') + '</span>' : '') + '</div>' +
+      '<button type="button" class="gapp-go" data-get-app="' + app + '">' + DL + 'Download</button></div>';
+  }
+  let painting = false;
+  function paint(force) {
+    if (painting || !document.body) return; painting = true;
+    try {
+      css();
+      document.querySelectorAll('[data-get-app]').forEach(b => {
+        if (b.closest('[data-app-card]')) return;
+        b.hidden = !canGet(b.dataset.getApp);
+        const ic = b.querySelector('[data-app-ic]'); if (ic && !ic.firstChild) ic.innerHTML = DL;
+      });
+      document.querySelectorAll('[data-app-card]').forEach(el => {
+        const app = el.dataset.appCard; if (!COPY[app]) return;
+        if (!sizes && !inApp(app)) loadSizes();   // the Download card says how big it is; the app's own card doesn't need to
+        const html = cardHtml(app, el);
+        if (force === true || el.__gapp !== html) { el.__gapp = html; el.innerHTML = html; }
+        el.hidden = !html; el.classList.add('gapp-card-box');
+      });
+    } finally { painting = false; }
+  }
+  // taps on any Download / Check for updates button, wherever it is
+  document.addEventListener('click', e => {
+    const g = e.target.closest('[data-get-app]'); if (g) { e.preventDefault(); install(g.dataset.getApp); return; }
+    const c = e.target.closest('[data-app-check]'); if (c) { e.preventDefault(); checking = true; paint(); sync({ force: true }); }
+  });
+  // pages that draw themselves (the dashboard, the Me list) add buttons and cards later: fill those in as they appear
+  let paintQueued = false;
+  new MutationObserver(muts => {
+    if (painting || paintQueued) return;
+    if (!muts.some(m => [...m.addedNodes].some(n => n.nodeType === 1 && (n.matches('[data-get-app],[data-app-card]') || n.querySelector('[data-get-app],[data-app-card]'))))) return;
+    paintQueued = true; requestAnimationFrame(() => { paintQueued = false; paint(); });
+  }).observe(document.documentElement, { childList: true, subtree: true });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => paint()); else paint();
+  addEventListener('load', () => paint());
+  addEventListener('appinstalled', () => setTimeout(paint, 50));
 
   window.GrugApp = {
     install,                                     // GrugApp.install('grug' | 'daypart')
@@ -298,6 +406,7 @@
     installed: () => Object.keys(installed()),   // the apps opened on this device
     canPrompt: () => !!deferred,
     check: () => sync({ force: true }),          // ask for the newest files now
+    paint,                                       // redraw the Download buttons and cards
     saveCopy, loadCopy: f => loadCopy(f),
   };
 

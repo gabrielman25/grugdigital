@@ -112,10 +112,21 @@ async function openOffline(ctx, base, url, label, check) {
     const canvas = await f.evaluate(() => !!document.querySelector('canvas')).catch(() => false);
     return canvas ? null : 'no game canvas';
   };
-  const pages = ['/', '/games/', '/games/favorites/', '/me/', '/me/cards/', '/avatar/', '/profile/', '/make/', '/links/', '/rewards/', '/create/', '/pearls.html', '/games/carts/'];
+  // the whole games side: home, the store, the avatar editor (and the classic one, its closet), the onboarding, Me, Make
+  const pages = ['/', '/games/', '/games/favorites/', '/games/welcome/', '/me/', '/me/cards/', '/avatar/', '/avatar/classic/', '/shop/', '/profile/',
+    '/make/', '/links/', '/links/create/', '/rewards/', '/rewards/create/', '/create/', '/create/modelkit/', '/pearls.html', '/games/carts/'];
   for (const u of pages) await openOffline(ctx, base, u, 'offline ' + u);
+  // Play from a game's page, the way a player does: cartridge → console → game, all with no connection
+  const launched = async p => {
+    await p.waitForFunction(() => window.Fossil32 && window.Fossil32.launch, null, { timeout: 15000 }).catch(() => {});
+    const id = new URL(p.url()).pathname.split('/').filter(Boolean)[1];
+    await p.evaluate(id => window.Fossil32.launch(id), id).catch(() => {});
+    for (let i = 0; i < 20 && !p.frames().some(f => /game\.html/.test(f.url())); i++) await p.waitForTimeout(1000);
+    await p.waitForTimeout(3000);
+    return gameStarted(p);
+  };
   for (const g of games) {
-    await openOffline(ctx, base, '/games/' + g + '/', 'offline game page ' + g);
+    await openOffline(ctx, base, '/games/' + g + '/', 'offline Play from the store ' + g, launched);
     await openOffline(ctx, base, '/play/' + g + '/', 'offline play ' + g, gameStarted);
   }
   for (const c of fs.readdirSync(path.join(ROOT, 'games/carts/games')).filter(f => f.endsWith('.html')))

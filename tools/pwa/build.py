@@ -183,6 +183,9 @@ def read_list(js_file, var):
 
 def build():
     games = read_list('assets/games.js', 'GRUG_GAMES')
+    # Every game the store (games/) shows on the main site: the same rule as partnerOk() in assets/grug.js (Grug
+    # originals; a business's game is a demonstration and never shows there). If that rule changes (a business signs
+    # off and its game joins the main site), change this line to match, so the app downloads exactly what the store lists.
     originals = [g for g in games if g.get('original') and g.get('listed') is not False]
 
     packs = {}

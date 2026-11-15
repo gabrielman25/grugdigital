@@ -27,40 +27,59 @@ own `max-age=0` and check for new files on every visit. Before that it kept scri
 why the shared scripts and the default avatar pictures carry `?v=av2`. The tags are harmless; leave them. If that
 setting is ever changed back, bump the tag across the site whenever a shared script or picture changes.
 
-## The two apps: Grug and Daypart (rebuild the offline list after every change)
+## The two apps: Grug and Daypart (they update themselves with the site: keep it that way)
 
-The site installs as two apps from one address, each with its own home-screen icon: **Grug** (the games side,
-`app/grug.webmanifest`, opens `/?pwa=grug`) and **Daypart** (the restaurant side, `app/daypart.webmanifest`, opens
-`/business/?pwa=daypart`). Both cover the whole site (scope `/`), so the dock's tabs stay inside the app.
+The site installs as two apps from one address, each with its own home-screen icon: **Grug** (the whole games side:
+home, the game store, every game the store lists, the Carts, the avatar editor with the classic editor and closet,
+the games onboarding, Me and Make; `app/grug.webmanifest`, opens `/?pwa=grug`) and **Daypart** (the restaurant side:
+dashboard, website editor, rewards card, owners' link; `app/daypart.webmanifest`, opens `/business/?pwa=daypart`).
+Both cover the whole site (scope `/`), so the dock's tabs stay inside the app. The owner wants the installed apps to
+**always get every update to the site, and every new game**, without anyone doing anything on the phone.
 
-- **`sw.js`** (site root): every page and file comes from the network first; when that fails (or takes over a few
-  seconds) the copy on the device is used, and a page never saved shows `offline.html`. It also saves anything opened
-  online, so it works offline next time.
-- **`app/offline.json`** lists what each app keeps on the device, as packs: `grug` (the games side's pages and shared
-  files), one `game:<id>` per Grug original, `carts`, and `daypart`. Every file has a fingerprint. An installed app asks
-  the worker to check this list when it opens, when the connection comes back and every half hour; only new or changed
-  files download, a new Grug original downloads by itself ("New game ready to play offline"), and an open page that is
-  now older offers **Refresh**. Mature games download only when the device's birthday is 18+. The demonstrations
-  (`work/`, the venue apps and their games) are never in a pack.
-- **After ANY change to the site, run `python3 tools/pwa/build.py` and commit `app/offline.json` with it.** Otherwise
-  installed apps don't get the change for offline use (they still get it online). `python3 tools/pwa/build.py --check`
-  says whether it's current. A new Grug original is picked up from `assets/games.js` by itself. If a game builds a file
-  name in code that the build can't see, add it to `EXTRA` (or the folder to `COMPANIONS`) in `tools/pwa/build.py`.
-- **Check it:** `node tools/pwa/check.js` (Playwright + Chrome) installs both apps in headless Chrome, turns the network
-  off, opens every page, game and cart, and tests the update check. Run it after changing `sw.js`, `app/app.js`, the
-  build, or how a game loads its files.
-- **`app/app.js`** (loaded by theme.js on every page; `business/index.html` loads it itself): registers the worker, sets
-  the page's manifest (Daypart on the restaurant side), and `GrugApp.install('grug' | 'daypart')`: the browser's own
-  prompt where there is one, a short how-to elsewhere. The account menu has **Get the app** (and **Get the Daypart app**
-  in the restaurant account); the dashboard's menu has **Add to home screen**. Hidden inside the installed app.
+**How an update reaches an installed app**
+1. You change the site and run `python3 tools/pwa/build.py`. It writes `app/offline.json`: every file each app keeps on
+   the device, grouped in packs (`grug`; one `game:<id>` per game the store lists; `carts`; `daypart`), each file with a
+   fingerprint of its contents. Commit `app/offline.json` **in the same commit** as the change.
+2. Safety net: the **Offline list** GitHub Action (`.github/workflows/offline-list.yml`) runs the same build on every
+   push and commits `app/offline.json` back if it was stale. If it did, your next push is rejected as behind: run
+   `git pull --rebase` and push again. Running the build yourself first avoids that.
+3. Cloudflare Pages deploys. The installed app's service worker (`sw.js`) fetches `app/offline.json` when the app opens,
+   when the connection comes back and every half hour, then downloads only the files whose fingerprint changed, adds new
+   packs (a new game: "New game ready to play offline") and drops files no pack lists. An open page that is now older
+   offers **Refresh**. Online, every page and file comes from the site first anyway, so nobody ever sees a stale version.
+
+**Rules**
+- **Never edit `app/offline.json` by hand.** `python3 tools/pwa/build.py --check` says whether it's current.
+- **A new game:** add it to `assets/games.js` as usual (original, listed) and it becomes its own pack by itself. The
+  build downloads exactly what the store lists on the main site, using the same rule as `partnerOk()` in grug.js (Grug
+  originals; a business's game is a demonstration and never in a pack). If that rule changes, change the build to match.
+- **A game that builds file names in code** (`'sounds/' + name + '.mp3'`): the build finds paths written in pages,
+  scripts, styles and data, and whole small folders when a path ends at the folder. If it still can't see a file, add it
+  to `EXTRA` (or the folder to `COMPANIONS`) in `tools/pwa/build.py`. Anything missed still works online and is saved the
+  first time it loads, but it won't be there offline before that.
+- **A new page on the games side:** add it to `GRUG_PAGES` in `tools/pwa/build.py` (restaurant side: `DAYPART_PAGES`).
+- **Check it** after changing `sw.js`, `app/app.js`, the build, a page's or a game's loading: `node tools/pwa/check.js`
+  (Playwright + Chrome) installs both apps in headless Chrome, turns the network off, opens every page, presses Play on
+  every game from its store page, opens every cart, and tests the update check. It must end "All good".
+- Never rename `app/offline.json`, `sw.js` or the cache names in `sw.js`, and never change a manifest's `id`: installed
+  apps on people's phones depend on them.
+
+**The Download buttons** (`app/app.js`): `<button data-get-app="grug|daypart" hidden><span data-app-ic></span>Download</button>`
+and `<div data-app-card="grug|daypart" hidden></div>` (the card: what you get, its size, Download). Both hide inside the
+installed app, in shop and partner mode, and once the app is installed in that browser. With `data-app-status`, the
+card shows inside the app what's saved, when it last checked, and **Check for updates**. They are on the home page (hero
+and under the games), the store's top row, Me (with status), the dashboard's Home and Settings (with status), and the
+account menus. Download opens the browser's own install prompt where there is one, and a short how-to elsewhere
+(iPhone and iPad: Share → Add to Home Screen).
+
 - **iPhone and iPad keep an installed app's save apart from Safari.** The how-to offers **Save a copy** (every
   `localStorage` key except Pearls, as a `grug-device` file) and the app's first launch offers **Load a copy**.
   **Pearls never move**, and `pearls.html` turns purchases off inside the iPhone/iPad app (Stripe's checkout opens
   outside it, so the Pearls could land in Safari): buy them in Safari. Keep both rules unless the owner decides otherwise.
-- Opening the Grug app always switches to the player account (theme.js reads `?pwa=grug`); Daypart opens the dashboard,
-  which switches to the restaurant account as it always has.
-- Icons: `app/icons/` (`node tools/pwa/icons.js` redraws them: the Grug dino on green; the dashboard's four tiles on ink).
-  Never change a manifest's `id`: it is how phones know it's the same app.
+- Mature games download only when the device's birthday is 18+. Opening the Grug app always switches to the player
+  account (theme.js reads `?pwa=grug`); Daypart opens the dashboard, which switches to the restaurant account.
+- `offline.html` is what a page that was never saved shows with no connection. Icons: `app/icons/`
+  (`node tools/pwa/icons.js` redraws them: the Grug dino on green; the dashboard's four tiles on ink).
 
 ## Frozen: everything made for a named business is a demonstration (read this first)
 

@@ -1392,7 +1392,7 @@ A.menu=el=>{const pk=el.closest('.me');if(POP&&POP.pk===pk)return closePop();
    <p class="grp">${all.length?all.length===1?'1 thing needs you':all.length+' things need you':'Nothing needs you right now'}</p>
    ${all.map(i=>{const A2=sec(i.page);return`<button type="button" class="opt mi-row" data-act="attn" data-page="${i.page}" data-week="${i.week||''}">${appIcon(A2,'xs')}<span>${esc(i.text)}<small>${lv[i.level][1]?`<span class="tag ${lv[i.level][0]}">${lv[i.level][1]}</span> `:''}${esc(A2.name)}</small></span></button>`}).join('')}
    <div class="mfoot"><button type="button" class="opt" data-act="ext" data-href="site/">${icon('browser')}<span>Your website</span></button><button type="button" class="opt" data-act="ext" data-href="../rewards/">${icon('gift')}<span>Rewards card</span></button>
-   ${window.GrugApp&&!GrugApp.standalone()?`<button type="button" class="opt" data-act="getApp">${icon('download')}<span>Add to home screen<small>Open Daypart like an app. Works offline.</small></span></button>`:''}
+   ${window.GrugApp&&!GrugApp.standalone()?`<button type="button" class="opt" data-act="getApp">${icon('download')}<span>Download Daypart<small>Your dashboard as an app. Works offline, updates itself.</small></span></button>`:''}
    <button type="button" class="opt" data-act="tour">${icon('info')}<span>Take the tour</span></button>
    <button type="button" class="opt" ${goAttr('settings')}>${icon('cog')}<span>Settings</span></button></div>`,'menu')};
 A.ext=el=>{location.href=el.dataset.href};
@@ -1570,6 +1570,7 @@ V.home=()=>{
   const now=D.shifts.filter(s=>s.date===t&&s.empId).map(s=>firstName((emp(s.empId)||{}).name||'')).filter((n,i,a)=>n&&a.indexOf(n)===i);
   return`<h1>Good ${h<12?'morning':h<17?'afternoon':'evening'}${first?', '+esc(first):''}</h1><p class="lead">${C.DNL[d.getDay()]}, ${C.MON[d.getMonth()]} ${d.getDate()}.${now.length?` Working today: ${esc(now.slice(0,5).join(', '))}${now.length>5?' and '+(now.length-5)+' more':''}.`:''}</p>
   ${all.length?`<button class="needs" data-act="needs"><span class="dot">${all.length}</span><span>${all.length===1?'1 thing needs you':all.length+' things need you'}</span><span class="go">See them in your profile ›</span></button>`:`<p class="allgood">${icon('checkmark')} Nothing needs you right now.</p>`}
+  <div class="noprint" data-app-card="daypart" hidden></div>
   <!--box-->${appGroups().map(([gid,g,ids])=>{const n=ids.reduce((a,id)=>a+(count[id]||0),0);return`<details class="agrp" data-g="${gid}"${OPEN_GROUPS.has(gid)?' open':''}><summary>`+
     `<span class="gic" aria-hidden="true"><svg viewBox="0 0 16 16" fill="currentColor">${GROUP_IC[gid]||''}</svg></span><span class="grow"><b>${g}</b><small>${ids.map(id=>sec(id).name).join(', ')}</small></span>`+
     `${n?`<span class="count" aria-label="${n} to check">${n}</span>`:''}<span class="minis" aria-hidden="true">${ids.map(id=>appIcon(sec(id),'xs')).join('')}</span></summary><ul class="apps">${ids.map(sec).map(s=>`<li><button class="arow" style="--c:${s.mode};--clo:${s.lo}" ${s.ext?`data-act="ext" data-href="${s.ext}"`:`data-act="nav" data-page="${s.id}"`}>${appIcon(s)}<span class="grow"><b>${s.name}</b><em>${s.sub}</em><small>${BLURB[s.id]}</small></span>${count[s.id]?`<span class="count" aria-label="${count[s.id]} to check">${count[s.id]}</span>`:''}<span class="chev" aria-hidden="true">›</span></button></li>`).join('')}</ul></details>`}).join('')}
@@ -1810,6 +1811,7 @@ V.settings=()=>{
   ui.form={save:d=>{const name=d.name.trim()||"Tea House Express";
     change(()=>{Object.assign(S,{name,weekStart:+d.weekStart,otWeekly:Math.max(0,+d.otWeekly||0),otDaily:Math.max(0,+d.otDaily||0),otMult:Math.max(1,+d.otMult||1.5),minRest:Math.max(0,+d.minRest||0),foodCostPct:Math.min(90,Math.max(5,+d.foodCostPct||30))});touch(S);ui.week=C.weekStart(TODAY(),S.weekStart)},'Settings saved.')}};
   return`<h1>Settings</h1><p class="lead">The basics about your restaurant. Most people never need to change these.</p>
+  <div class="noprint" data-app-card="daypart" data-app-status hidden></div>
   <form data-form>${GRUG.shop()?`<div class="f"><span class="fl">Restaurant name</span><p style="margin:0">${esc(S.name)} <button type="button" class="quiet sm" data-act="ext" data-href="../rewards/">Change it on your rewards card</button></p><input type="hidden" name="name" value="${esc(S.name)}"></div>`:`<label class="f">Restaurant name<input type="text" name="name" maxlength="60" placeholder="Tea House Express" value="${esc(S.name)}"></label>`}
   <div class="f"><span class="fl">The week starts on</span>${sel('weekStart',[1,0,6].map(i=>({v:i,l:C.DNL[i]})),S.weekStart,{title:'Week starts on'})}</div>
   <label class="f">Overtime starts after this many hours a week${N('otWeekly',S.otWeekly)}<small>40 in most of the US. This is a helper, not legal advice. Check your state's rules.</small></label>
