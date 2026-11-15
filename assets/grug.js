@@ -462,7 +462,7 @@
     appKeys().forEach(k => { const v = localStorage.getItem(k); if (v) { try { apps[k] = JSON.parse(v); } catch (e) {} } });   // venue apps and game saves
     { const v = localStorage.getItem(REWARDS_KEY); if (v) { try { apps[REWARDS_KEY] = JSON.parse(v); } catch (e) {} } }   // saved Rewards cards + My creations
     { const v = localStorage.getItem(BIZ_KEY); if (v) { try { apps[BIZ_KEY] = JSON.parse(v); } catch (e) {} } }   // the restaurant account and its websites
-    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^daypart:/.test(k)) apps[k] = JSON.parse(localStorage.getItem(k)); } } catch (e) {}   // the restaurant dashboard (business/)
+    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^(daypart|grug-tea|grug-cafe):/.test(k)) apps[k] = JSON.parse(localStorage.getItem(k)); } } catch (e) {}   // the dashboards (business/, business/tea/, business/cafe/)
     const sandy = readJSON('grug.sandy.v1', null), sandyClassic = readJSON('grug.sandy.classic.v1', null);   // the avatar's look, and the archived classic one
     return { format: EXPORT_FORMAT, version: 1, exportedAt: new Date().toISOString(), site: ROOT, profile, apps, sandy, sandyClassic };
   }
@@ -500,7 +500,7 @@
     appKeys().forEach(k => { if (data.apps[k] && typeof data.apps[k] === 'object') writeJSON(k, data.apps[k]); });
     if (data.apps[REWARDS_KEY] && typeof data.apps[REWARDS_KEY] === 'object') writeJSON(REWARDS_KEY, data.apps[REWARDS_KEY]);
     if (data.apps[BIZ_KEY] && typeof data.apps[BIZ_KEY] === 'object') writeJSON(BIZ_KEY, data.apps[BIZ_KEY]);
-    Object.keys(data.apps).forEach(k => { if (/^daypart:/.test(k)) writeJSON(k, data.apps[k]); });
+    Object.keys(data.apps).forEach(k => { if (/^(daypart|grug-tea|grug-cafe):/.test(k)) writeJSON(k, data.apps[k]); });
     profile = p; writeJSON(KEY, profile); try { localStorage.removeItem(SNAP_KEY); } catch (e) {}
     try { syncAge(); } catch (e) {}   // the birthday rule holds across an import (see "age")
     if (data.sandyClassic) writeJSON('grug.sandy.classic.v1', data.sandyClassic);

@@ -139,13 +139,18 @@ p{margin:0}
 @media(max-width:620px){.opt{min-height:160px;padding:16px}.opt b{font-size:18px}.opt i{width:50px;height:50px}}
 
 /* ---------- 5. the end: open the dashboard ---------- */
-.done .row6{display:flex;justify-content:center;gap:10px;margin-top:22px}
+.done .row6{display:flex;justify-content:center;gap:10px;margin-top:22px}.done .row6[hidden]{display:none}
 .done .row6 i{width:44px;height:44px;border-radius:13px;background:var(--c);box-shadow:0 4px 0 var(--cl);display:grid;place-items:center;color:#fff;animation:pop6 .5s cubic-bezier(.34,1.56,.64,1) both}
 .done .row6 i .ico{width:22px;height:22px;stroke-width:2.4}
 .endcard{max-width:560px;margin:26px auto 0;width:100%;background:#fff;border:1px solid var(--line2);border-radius:24px;padding:20px;box-shadow:0 20px 50px rgba(20,20,30,.08);display:grid;gap:12px}
 .endcard label{font-weight:600;font-size:15px}
 .endcard input{font:500 19px var(--font);color:var(--ink);border:2px solid var(--line2);border-radius:15px;padding:0 16px;min-height:58px;outline:none;background:var(--page);width:100%}
 .endcard input:focus{border-color:var(--lo);background:#fff}
+/* the kind of place: Restaurant (Daypart), Bubble tea or Café (their own dashboards and apps) */
+.endcard select{font:600 19px var(--font);color:var(--ink);border:2px solid var(--line2);border-radius:15px;padding:0 48px 0 16px;min-height:58px;outline:none;width:100%;cursor:pointer;
+  -webkit-appearance:none;appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231E1B16' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 16px center/20px}
+.endcard select:focus{border-color:var(--lo)}
+.endcard .kline{margin:-4px 0 4px;color:var(--mut);font-size:14.5px;line-height:1.4}
 .endcard .btn{width:100%}
 .endcard small{text-align:center;color:var(--mut);font-size:14px}
 .legal{margin-top:18px;text-align:center;font-size:13px;color:var(--mut)}
@@ -350,6 +355,22 @@ p{margin:0}
   const OWNER_DISCORD = 'https://discord.gg/28Dj4Ws8tu';
   // "Send this to my owner" shares this walkthrough itself, plus the owners' Discord
   const OWNER_PAGE = location.protocol.startsWith('http') ? location.origin + location.pathname : SITE + 'for/managers/';
+  // the three dashboards a manager can pick at the end (?kind=tea|cafe picks one ahead of time)
+  const KINDS = {
+    restaurant: { label: 'Restaurant', nameLabel: "Your restaurant's name", ph: "e.g. Rosa's Tacos", sub: 'It opens with example data in every app and a two-minute tour.',
+      line: 'Staff schedule, temperature log, daily checklists, recipe costs, time clock and permit reminders.',
+      shareWhat: 'dashboard', shareList: 'staff schedule, temperature log, daily checklists, recipe costs, time clock and permit reminders',
+      open: name => SITE + 'restaurant/?' + new URLSearchParams({ name, type: 'f' }) },
+    tea: { label: 'Bubble tea', nameLabel: "Your shop's name", ph: 'e.g. Pearl & Leaf Tea Bar', sub: 'Four quick setup steps, then a to-do list that tells your team what to do next.',
+      line: 'Pearl and tea timers, toppings to make, opening and closing lists, clock in, fridge temperatures, stock and cash-out.',
+      shareWhat: 'bubble tea shop dashboard', shareList: 'pearl and tea timers, toppings to make, opening and closing lists, clock in, fridge temperatures, stock counts and cash-out',
+      open: name => SITE + 'business/tea/?' + new URLSearchParams({ name }) },
+    cafe: { label: 'Café', nameLabel: "Your café's name", ph: 'e.g. Morning Ritual Coffee', sub: 'Four quick setup steps, then a to-do list that tells your team what to do next.',
+      line: 'Espresso check, milk dates, machine cleaning, pastry counts, opening and closing lists, clock in, stock and cash-out.',
+      shareWhat: 'café dashboard', shareList: 'espresso check, milk dates, machine cleaning, pastry counts, opening and closing lists, clock in, stock counts and cash-out',
+      open: name => SITE + 'business/cafe/?' + new URLSearchParams({ name }) },
+  };
+  let kind = KINDS[new URLSearchParams(location.search).get('kind')] ? new URLSearchParams(location.search).get('kind') : 'restaurant';
   // the owners' pitch (a rewards app, with a game as the bonus): the message to the owner mentions it once, after the free dashboard
   const GAME_PAGE = location.protocol.startsWith('http') ? location.origin + '/partners/' : SITE + 'partners/';
   // arriving from the business card (its QR and its printed address both go through /managers/, which adds ?from=card)
@@ -424,14 +445,17 @@ p{margin:0}
 
     { id: 'done', html: () => `<div class="done">
       <h2>${owner ? 'Show your owner, or try it first.' : 'Your dashboard is ready.'}</h2>
-      <p class="sub">It opens with example data in every app and a two-minute tour.</p>
-      <div class="row6">${APPS.map((a, k) => tile(a, '', 80 + k * 60)).join('')}</div>
+      <p class="sub" id="dsub">${esc(KINDS[kind].sub)}</p>
+      <div class="row6" ${kind === 'restaurant' ? '' : 'hidden'}>${APPS.map((a, k) => tile(a, '', 80 + k * 60)).join('')}</div>
       <form class="endcard" id="end" autocomplete="off">
-        <label for="nm">Your restaurant's name</label>
-        <input id="nm" maxlength="28" placeholder="e.g. Rosa's Tacos" autocapitalize="words" enterkeyhint="go" required>
+        <label for="kind">What kind of place is it?</label>
+        <select id="kind">${Object.entries(KINDS).map(([k, K]) => `<option value="${k}" ${k === kind ? 'selected' : ''}>${K.label}</option>`).join('')}</select>
+        <p class="kline" id="kline">${esc(KINDS[kind].line)}</p>
+        <label for="nm" id="nml">${esc(KINDS[kind].nameLabel)}</label>
+        <input id="nm" maxlength="28" placeholder="${esc(KINDS[kind].ph)}" autocapitalize="words" enterkeyhint="go" required>
         ${owner ? `<button class="btn" type="button" id="share">${svg('share')}Send this to my owner</button><button class="btn quiet" type="submit">Open the dashboard myself</button>`
                 : `<button class="btn" type="submit">Open my dashboard ${svg('arrow')}</button>`}
-        <small>Free. Nothing to sign up for.</small>
+        <small>Free. Nothing to sign up for. Each one is its own app: tap Download inside it to put it on your home screen.</small>
       </form>
       <p class="ask-us" style="margin-top:16px">Questions first? <a href="${MANAGER_DISCORD}" target="_blank" rel="noopener">${svg('chat')}Ask us on Discord</a></p>
       <p class="legal"><a href="/terms.html">Terms</a>·<a href="/privacy.html">Privacy</a>·<a href="/support.html">Support</a></p></div>`,
@@ -480,14 +504,23 @@ p{margin:0}
   }, { passive: true });
 
   // ---------- the end: open the dashboard, or send it up the chain ----------
+  // Restaurant = Daypart (made through the owners' link); Bubble tea and Café each have their own dashboard and app.
   function wireEnd() {
-    $('end').onsubmit = e => { e.preventDefault(); const name = $('nm').value.trim(); if (!name) return $('nm').focus(); location.href = SITE + 'restaurant/?' + new URLSearchParams({ name, type: 'f' }); };
+    const sel = $('kind');
+    sel.onchange = () => {
+      kind = sel.value; const K = KINDS[kind];
+      $('kline').textContent = K.line; $('nml').textContent = K.nameLabel; $('nm').placeholder = K.ph; $('dsub').textContent = K.sub;
+      host.querySelector('.row6').hidden = kind !== 'restaurant';
+      try { const q = new URLSearchParams(location.search); if (kind === 'restaurant') q.delete('kind'); else q.set('kind', kind);
+        history.replaceState(history.state, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash); } catch (e) {}
+    };
+    $('end').onsubmit = e => { e.preventDefault(); const name = $('nm').value.trim(); if (!name) return $('nm').focus(); location.href = KINDS[kind].open(name); };
     if ($('share')) $('share').onclick = () => share();
   }
   const toast = t => { const el = $('toast'); el.textContent = t; el.classList.add('on'); setTimeout(() => el.classList.remove('on'), 2600); };
   async function share() {
     const n = ($('nm').value || '').trim();
-    const text = `Found a free dashboard${n ? ' for ' + n : ''}: staff schedule, temperature log, daily checklists, recipe costs, time clock and permit reminders. No cost, no logins for staff, and it opens with example data so we can try it first. The team behind it answers owners' questions on Discord: ${OWNER_DISCORD}`;
+    const text = `Found a free ${KINDS[kind].shareWhat}${n ? ' for ' + n : ''}: ${KINDS[kind].shareList}. No cost, no logins for staff, and it can fill in example data so we can try it first. The team behind it answers owners' questions on Discord: ${OWNER_DISCORD}`;
     const game = `They also build rewards apps that bring guests back (with a game starring the restaurant's food as a bonus), if we ever want one: ${GAME_PAGE}`;
     if (navigator.share) { try { await navigator.share({ title: 'Grug for restaurants', text: text + '\n\n' + game, url: OWNER_PAGE }); return; } catch (e) { if (e.name === 'AbortError') return; } }
     const all = text + ' ' + OWNER_PAGE + '\n\n' + game;

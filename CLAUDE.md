@@ -27,18 +27,20 @@ own `max-age=0` and check for new files on every visit. Before that it kept scri
 why the shared scripts and the default avatar pictures carry `?v=av2`. The tags are harmless; leave them. If that
 setting is ever changed back, bump the tag across the site whenever a shared script or picture changes.
 
-## The two apps: Grug and Daypart (they update themselves with the site: keep it that way)
+## The apps: Grug, Daypart, Bubble Tea and Café (they update themselves with the site: keep it that way)
 
-The site installs as two apps from one address, each with its own home-screen icon: **Grug** (the whole games side:
+The site installs as four apps from one address, each with its own home-screen icon: **Grug** (the whole games side:
 home, the game store, every game the store lists, the Carts, the avatar editor with the classic editor and closet,
 the games onboarding, Me and Make; `app/grug.webmanifest`, opens `/?pwa=grug`) and **Daypart** (the restaurant side:
 dashboard, website editor, rewards card, owners' link; `app/daypart.webmanifest`, opens `/business/?pwa=daypart`).
-Both cover the whole site (scope `/`), so the dock's tabs stay inside the app. The owner wants the installed apps to
+Both cover the whole site (scope `/`), so the dock's tabs stay inside the app. **Bubble Tea** and **Café** are the shop
+dashboards (`business/tea/`, `business/cafe/`; `app/tea.webmanifest`, `app/cafe.webmanifest`, opening
+`/business/<id>/?pwa=<id>`, scope their own folder): see "The shop dashboards" below. The owner wants the installed apps to
 **always get every update to the site, and every new game**, without anyone doing anything on the phone.
 
 **How an update reaches an installed app**
 1. You change the site and run `python3 tools/pwa/build.py`. It writes `app/offline.json`: every file each app keeps on
-   the device, grouped in packs (`grug`; one `game:<id>` per game the store lists; `carts`; `daypart`), each file with a
+   the device, grouped in packs (`grug`; one `game:<id>` per game the store lists; `carts`; `daypart`; `tea`; `cafe`), each file with a
    fingerprint of its contents. Commit `app/offline.json` **in the same commit** as the change.
 2. Safety net: the **Offline list** GitHub Action (`.github/workflows/offline-list.yml`) runs the same build on every
    push and commits `app/offline.json` back if it was stale. If it did, your next push is rejected as behind: run
@@ -64,8 +66,8 @@ Both cover the whole site (scope `/`), so the dock's tabs stay inside the app. T
 - Never rename `app/offline.json`, `sw.js` or the cache names in `sw.js`, and never change a manifest's `id`: installed
   apps on people's phones depend on them.
 
-**The Download buttons** (`app/app.js`): `<button data-get-app="grug|daypart" hidden><span data-app-ic></span>Download</button>`
-and `<div data-app-card="grug|daypart" hidden></div>` (the card: what you get, its size, Download). Both hide inside the
+**The Download buttons** (`app/app.js`): `<button data-get-app="grug|daypart|tea|cafe" hidden><span data-app-ic></span>Download</button>`
+and `<div data-app-card="grug|daypart|tea|cafe" hidden></div>` (the card: what you get, its size, Download). Both hide inside the
 installed app, in shop and partner mode, and once the app is installed in that browser. With `data-app-status`, the
 card shows inside the app what's saved, when it last checked, and **Check for updates**. They are on the home page (hero
 and under the games), the store's top row, Me (with status), the dashboard's Home and Settings (with status), and the
@@ -79,7 +81,8 @@ account menus. Download opens the browser's own install prompt where there is on
 - Mature games download only when the device's birthday is 18+. Opening the Grug app always switches to the player
   account (theme.js reads `?pwa=grug`); Daypart opens the dashboard, which switches to the restaurant account.
 - `offline.html` is what a page that was never saved shows with no connection. Icons: `app/icons/`
-  (`node tools/pwa/icons.js` redraws them: the Grug dino on green; the dashboard's four tiles on ink).
+  (`node tools/pwa/icons.js [names]` redraws them: the Grug dino on green; the dashboard's four tiles on ink; a boba cup on
+  taro purple; a coffee cup on caramel. Name only the apps you changed so the others keep their exact bytes).
 
 ## Frozen: everything made for a named business is a demonstration (read this first)
 
@@ -459,9 +462,37 @@ account is in use, the active shop, and each shop's card text and website fields
   An owner who already has a restaurant account on the device goes straight to the dashboard. When a dashboard part is
   added or renamed, update the tour.
 - **The business card path** (managers first, owners second): the printed card's QR and address go to `managers/` →
-  `for/managers/?from=card` (the managers' walkthrough, "Thanks for scanning") → the owners' link → the dashboard. The
+  `for/managers/?from=card` (the managers' walkthrough, "Thanks for scanning") → the owners' link → the dashboard.
+  The walkthrough's last step asks **What kind of place is it?** (Restaurant / Bubble tea / Café, `KINDS` in its script;
+  `?kind=tea|cafe` picks one ahead of time): Restaurant goes through the owners' link to Daypart as before, Bubble tea
+  and Café open their own dashboards (`business/tea/?name=…`, `business/cafe/?name=…`), each its own app. The
   dashboard's Home ends with one door to the owners' pitch (`.gamedoor` → `partners/`, "A rewards app that brings guests back"; the game is the bonus, so lead with the rewards app),
   with its own tour stop. **`managers/` is printed on paper: never move or remove it.**
+
+## The shop dashboards: Bubble Tea and Café (`tools/shop-dashboards/`)
+
+Two lean dashboards made for a bubble tea shop and a café, each its own installable app (Bubble Tea, Café). Same look as
+Daypart, but a separate build: **`python3 tools/shop-dashboards/build.py`** writes `business/tea/index.html` and
+`business/cafe/index.html` (one file each, everything inline); never edit those by hand. Then run `python3 tools/pwa/build.py`.
+Read `tools/shop-dashboards/README.md` before changing them.
+
+- **The design rule is "a new hire on day one can use it without asking anyone".** Today is a numbered to-do list in plain
+  sentences, timed from the shop's open and close times (red "do it now" items first, "You're all caught up" when done);
+  every other tool is a big tile with a one-line status; every page shows a 3-step "How this works" the first time (the
+  **?** brings it back); one main button per page, the rest under More; "Who's using this?" signs every tick and log for
+  the day; fiddly jobs are one question per screen; deletes offer Undo; silly numbers are refused in plain words. Keep it.
+- **Storage:** `grug-tea:*` and `grug-cafe:*` (one key per collection, `<prefix>meta` is device-only). They don't use the
+  restaurant account (`grug.business.v1`) and never touch `daypart:*`. Each has its own backup file (JSON with
+  `schemaVersion`; add a step to `MIGRATIONS` in `src/core.js` when the shape changes) and CSV exports. Profile export
+  carries their keys too (grug.js).
+- **On the site** (`SHOP_PWA = 'site'`) each page loads `app/app.js`, which gives it its manifest, the Download card
+  (Settings, with status) and the site's service worker. Today offers "Put this app on the home screen" for the first two
+  weeks. Pearl and tea timers are stored timestamps, never counters, so they stay right after a reload or a sleeping tablet.
+- Temperature, cleaning and timer settings are editable record-keeping templates and say so: never claim health-code
+  compliance. Hold times, ranges and intervals are the owner's settings.
+- **Play while you wait:** `PLAY_URL` in `tools/shop-dashboards/src/config.js` (the footer link and the customer screen's QR).
+- Tests: `node tools/shop-dashboards/test/core.test.js`, and with the site served on :8766
+  `python3 tools/shop-dashboards/test/e2e.py` (143 browser checks, including that the restaurant dashboard's data is untouched).
 
 ## Rewards card builder (`rewards/create/`)
 

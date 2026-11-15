@@ -1,8 +1,8 @@
-/* Grug · the offline check for the two installable apps. Run from the repo root:
+/* Grug · the offline check for the installable apps (Grug, Daypart, Bubble Tea, Café). Run from the repo root:
 
      node tools/pwa/check.js            (needs Playwright and Chrome: npm i playwright; CHROME=path if not /usr/bin/google-chrome)
 
-   It serves the site on localhost, then for each app (Grug, Daypart):
+   It serves the site on localhost, then for each app (Grug, Daypart, Bubble Tea, Café):
      1. opens it the way the installed app does (?pwa=…, display-mode standalone) and waits for the downloads,
      2. checks every file in the app's packs is on the device,
      3. turns the network off and opens every page and game, failing on any file that couldn't load,
@@ -180,6 +180,28 @@ async function openOffline(ctx, base, url, label, check) {
   for (const u of ['/business/', '/business/site/', '/rewards/', '/rewards/create/'])
     await openOffline(ctx, base, u, 'offline ' + u, u === '/business/' ? async p => (await p.evaluate(() => !!window.__ready)) ? null : 'the dashboard did not start' : null);
   await ctx.close();
+
+  /* ---------- Bubble Tea and Café (the shop dashboards, business/tea/ and business/cafe/) ---------- */
+  for (const [app, label] of [['tea', 'Bubble Tea'], ['cafe', 'Café']]) {
+    console.log(label);
+    ctx = await browser.newContext();
+    await ctx.addInitScript(standalone);
+    // a shop set up the way the dashboard's first screen does it
+    await ctx.addInitScript(a => { try { if (!localStorage.getItem('grug-' + a + ':settings')) localStorage.setItem('grug-' + a + ':settings', JSON.stringify({ shopName: 'Test Shop', createdAt: new Date().toISOString() })); } catch (e) {} }, app);
+    page = await ctx.newPage();
+    await page.goto(base + '/business/' + app + '/?pwa=' + app);
+    const m = await page.evaluate(() => (document.querySelector('link[rel=manifest]') || {}).href || '');
+    if (!m.endsWith('/app/' + app + '.webmanifest')) fail(app + ' manifest', 'the page uses ' + m);
+    const s1 = await waitSynced(page);
+    console.log('  first download:', s1.downloaded, 'files,', s1.failed, 'failed');
+    const want = Object.keys(index.packs[app].files), have = new Set(await cachedFiles(page));
+    const miss = want.filter(u => !have.has(u));
+    if (miss.length) fail(app + ' pack', 'not on the device: ' + miss.join(', '));
+    await page.close();
+    await ctx.setOffline(true);
+    await openOffline(ctx, base, '/business/' + app + '/', 'offline /business/' + app + '/', async p => (await p.evaluate(() => (document.getElementById('shopname') || {}).textContent)) === 'Test Shop' ? null : 'the dashboard did not start');
+    await ctx.close();
+  }
 
   await browser.close(); server.close();
   console.log(fails.length ? '\n' + fails.length + ' problem(s)' : '\nAll good');

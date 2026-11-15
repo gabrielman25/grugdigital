@@ -1,13 +1,15 @@
 /* Grug · the installable apps (app/app.js)
 
-   Two apps come from this one site, each with its own icon on the home screen:
-     Grug     the games side      app/grug.webmanifest     opens /?pwa=grug
-     Daypart  the restaurant side app/daypart.webmanifest  opens /business/?pwa=daypart
-   theme.js loads this file on every site page (business/ loads it itself). It:
+   Four apps come from this one site, each with its own icon on the home screen:
+     Grug        the games side          app/grug.webmanifest     opens /?pwa=grug
+     Daypart     the restaurant side     app/daypart.webmanifest  opens /business/?pwa=daypart
+     Bubble Tea  the bubble tea dashboard app/tea.webmanifest     opens /business/tea/?pwa=tea   (scope business/tea/)
+     Café        the café dashboard       app/cafe.webmanifest    opens /business/cafe/?pwa=cafe (scope business/cafe/)
+   theme.js loads this file on every site page (business/, business/tea/ and business/cafe/ load it themselves). It:
 
    - registers the service worker (sw.js) and gives each page the right manifest (Daypart on the restaurant side),
    - offers the install: window.GrugApp.install('grug' | 'daypart') shows the browser's own prompt where there is one
-     (Android, desktop Chrome and Edge) and a short how-to everywhere else (iPhone and iPad: Share → Add to Home Screen),
+     (Android, desktop Chrome and Edge) for the app whose page this is and a short how-to everywhere else (iPhone and iPad: Share → Add to Home Screen),
    - inside an installed app, asks the service worker to keep that app's packs on the device (app/offline.json) and checks
      for updates when the app opens, when the connection comes back and every half hour while it stays open. New games and
      updates download by themselves; a note at the bottom says what happened (and offers Refresh when the open page is older),
@@ -22,7 +24,7 @@
         Add data-app-status and, inside the installed app, it shows instead what is saved, when it last checked for
         updates, and a Check for updates button.
 
-   Installed apps on this device are remembered in localStorage 'grug.apps.v1' ({grug: time, daypart: time}). */
+   Installed apps on this device are remembered in localStorage 'grug.apps.v1' ({grug: time, daypart: time, tea…}). */
 (function () {
   'use strict';
   if (window.GrugApp || window !== window.top) return;
@@ -30,7 +32,10 @@
   const ROOT = new URL('../', (me && me.src) || location.href).href;          // the site root, with a trailing '/'
   const at = p => new URL(p, ROOT).href;
   const APPS_KEY = 'grug.apps.v1', SAVE_FORMAT = 'grug-device';
-  const NAMES = { grug: 'Grug', daypart: 'Daypart' };
+  const NAMES = { grug: 'Grug', daypart: 'Daypart', tea: 'Bubble Tea', cafe: 'Café' };
+  // what each app saves for offline, in a sentence ("Saving … for offline")
+  const WHAT = { grug: 'the games', daypart: 'Daypart', tea: 'the Bubble Tea dashboard', cafe: 'the Café dashboard' };
+  const SHOP = a => a === 'tea' || a === 'cafe';
 
   /* ---------- where we are ---------- */
   const mm = q => { try { return matchMedia(q).matches; } catch (e) { return false; } };
@@ -39,10 +44,10 @@
   const IOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const ANDROID = /Android/.test(ua), MAC = /Macintosh/.test(ua) && !IOS, FIREFOX = /Firefox|FxiOS/.test(ua);
   const SAFARI = /Safari/.test(ua) && !/Chrome|Chromium|CriOS|Edg|FxiOS|OPR/.test(ua);
-  const restaurantPage = () => {
-    const p = location.pathname.slice(new URL(ROOT).pathname.length);
-    return /^(business|restaurant)\//.test(p) || document.documentElement.getAttribute('data-account') === 'business';
-  };
+  const sitePath = () => location.pathname.slice(new URL(ROOT).pathname.length);
+  const restaurantPage = () => /^(business|restaurant)\//.test(sitePath()) || document.documentElement.getAttribute('data-account') === 'business';
+  // the app this page belongs to when it isn't inside an installed app: the shop dashboards are their own apps
+  const pageAppOf = () => { const p = sitePath(); return /^business\/tea\//.test(p) ? 'tea' : /^business\/cafe\//.test(p) ? 'cafe' : restaurantPage() ? 'daypart' : 'grug'; };
   // which app this window is: the start address says (?pwa=), and the tab remembers it
   const ss = { get: k => { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) {} } };
   const q = new URLSearchParams(location.search);
@@ -51,7 +56,7 @@
     q.delete('pwa');
     try { history.replaceState(history.state, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash); } catch (e) {}
   }
-  const thisApp = () => standalone() ? (ss.get('grug.pwa') || (restaurantPage() ? 'daypart' : 'grug')) : null;
+  const thisApp = () => standalone() ? (ss.get('grug.pwa') || pageAppOf()) : null;
 
   const readJSON = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? d : v; } catch (e) { return d; } };
   const writeJSON = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
@@ -61,7 +66,7 @@
 
   /* ---------- the manifest for this page ---------- */
   function setManifest() {
-    const app = thisApp() || (restaurantPage() ? 'daypart' : 'grug');
+    const app = thisApp() || pageAppOf();
     let l = document.querySelector('link[rel="manifest"]');
     if (!l) { l = document.createElement('link'); l.rel = 'manifest'; document.head.appendChild(l); }
     l.href = at('app/' + app + '.webmanifest');
@@ -149,7 +154,7 @@ html [data-get-app]:not(.gapp-go):hover{filter:brightness(1.04)}
     document.head.appendChild(s);
   }
   function lift() {   // keep the note above the dock where there is one
-    const d = document.querySelector('.g-dock,.gdock,.g-pbar');
+    const d = document.querySelector('.g-dock,.gdock,.g-pbar,#tabbar');
     const h = d && d.offsetParent !== null ? d.getBoundingClientRect().height + 16 : 24;
     document.documentElement.style.setProperty('--gapp-lift', Math.round(h) + 'px');
   }
@@ -176,7 +181,7 @@ html [data-get-app]:not(.gapp-go):hover{filter:brightness(1.04)}
     if (d.type === 'progress') { checking = true; paint(); }
     if (d.type === 'synced' || d.type === 'sync-failed') { checking = false; if (d.quiet) askStatus(); }
     const app = thisApp(); if (!app && d.type !== 'status') return;   // a browser tab stays quiet: downloads are the app's business
-    const what = app === 'daypart' ? 'Daypart' : 'games';
+    const what = WHAT[app] || 'games';
     if (d.type === 'status') { if (loadedV == null) loadedV = d.v || ''; return; }
     if (d.type === 'synced') askStatus();
     if (d.type === 'progress' && d.total) {
@@ -196,7 +201,7 @@ html [data-get-app]:not(.gapp-go):hover{filter:brightness(1.04)}
       } else if (older) {
         note('An update is ready.', { action: 'Refresh', onAction: () => location.reload() });
       } else if (d.firstTime && d.complete) {
-        note(app === 'daypart' ? 'Daypart works offline now.' : 'Ready to play offline.');
+        note(app === 'grug' ? 'Ready to play offline.' : NAMES[app] + ' works offline now.');
       } else if (d.failed && (d.firstTime || showing)) {
         note('Some files didn’t download. They’ll try again next time you’re online.', { ms: 7000 });
       } else if (showing) hide();
@@ -212,7 +217,7 @@ html [data-get-app]:not(.gapp-go):hover{filter:brightness(1.04)}
     const saveData = navigator.connection && navigator.connection.saveData;
     const go = () => sync();
     if (saveData && !readJSON('grug.apps.ok', false)) {
-      note('Save ' + (app === 'daypart' ? 'Daypart' : 'the games') + ' for offline? It uses data now, then works without a connection.',
+      note('Save ' + WHAT[app] + ' for offline? It uses data now, then works without a connection.',
         { action: 'Download', onAction: () => { writeJSON('grug.apps.ok', true); sync({ force: true }); } });
     } else setTimeout(go, 1500);
     addEventListener('online', () => sync({ force: true }));
@@ -248,16 +253,18 @@ html [data-get-app]:not(.gapp-go):hover{filter:brightness(1.04)}
       if (!d || d.format !== SAVE_FORMAT || !d.keys || typeof d.keys !== 'object') throw new Error('That isn’t a Grug copy. Pick the .json file you saved before adding the app.');
       let n = 0;
       for (const [k, v] of Object.entries(d.keys)) { if (SKIP(k) || typeof v !== 'string') continue; try { localStorage.setItem(k, v); n++; } catch (e) {} }
-      // open on this app's own account: Grug on the player, Daypart on the restaurant
+      // open on this app's own account: Grug on the player, Daypart on the restaurant (the shop dashboards have their own)
       const b = readJSON('grug.business.v1', null), app = thisApp();
-      if (b && app) { b.mode = app === 'daypart' && b.active ? 'business' : 'player'; writeJSON('grug.business.v1', b); }
+      if (b && app && !SHOP(app)) { b.mode = app === 'daypart' && b.active ? 'business' : 'player'; writeJSON('grug.business.v1', b); }
       return n;
     });
   }
   // the first time the installed app opens on an iPhone or iPad with nothing saved in it yet
   function firstRun(app) {
     if (readJSON('grug.apps.welcomed', false)) return;
-    const has = app === 'daypart' ? !!localStorage.getItem('grug.business.v1') || !!localStorage.getItem('daypart:settings') : !!localStorage.getItem('grug.profile.v1') && !!localStorage.getItem('grug.age.v1');
+    const has = app === 'daypart' ? !!localStorage.getItem('grug.business.v1') || !!localStorage.getItem('daypart:settings')
+      : SHOP(app) ? !!localStorage.getItem('grug-' + app + ':settings')
+      : !!localStorage.getItem('grug.profile.v1') && !!localStorage.getItem('grug.age.v1');
     writeJSON('grug.apps.welcomed', true);
     if (has) return;
     const go = () => sheet(app, 'welcome');
@@ -276,11 +283,11 @@ html [data-get-app]:not(.gapp-go):hover{filter:brightness(1.04)}
     let body = '';
     if (mode === 'welcome') {
       body = '<div class="hd"><img alt="" src="' + icon + '"><div><h2>Welcome to ' + name + '</h2><small>On this ' + (/iPad/.test(ua) ? 'iPad' : 'iPhone') + ', the app keeps its own save.</small></div></div>' +
-        '<p>Used ' + name + ' in Safari before? Load the copy you saved to bring ' + (app === 'daypart' ? 'your restaurant’s records' : 'your avatar, saves and favorites') + ' over.' + (app === 'grug' ? ' Pearls don’t move: they stay in Safari.' : '') + '</p>' +
+        '<p>Used ' + name + ' in Safari before? Load the copy you saved to bring ' + (app === 'daypart' ? 'your restaurant’s records' : SHOP(app) ? 'your shop’s records' : 'your avatar, saves and favorites') + ' over.' + (app === 'grug' ? ' Pearls don’t move: they stay in Safari.' : '') + '</p>' +
         '<p class="err" hidden></p><div class="row"><button type="button" data-a="load">Load a copy</button><button type="button" class="q" data-a="close">Start fresh</button></div>' +
         '<input type="file" accept=".json,application/json" hidden>';
     } else {
-      const why = app === 'daypart' ? 'Open your dashboard from the home screen, full screen, and keep working when the Wi-Fi drops. It updates itself.' : 'Every game, the store and your avatar editor on your home screen. Open it once online and it saves everything, then plays with no connection and updates itself.';
+      const why = app === 'daypart' || SHOP(app) ? 'Open your dashboard from the home screen, full screen, and keep working when the Wi-Fi drops. It updates itself.' : 'Every game, the store and your avatar editor on your home screen. Open it once online and it saves everything, then plays with no connection and updates itself.';
       let steps;
       if (IOS) steps = '<ol><li>Tap <span class="k">Share</span> (the square with an arrow' + (SAFARI ? ', at the bottom or top of Safari' : '') + ').</li><li>Scroll down and tap <span class="k">Add to Home Screen</span>.</li><li>Leave <span class="k">Open as Web App</span> on, then tap <span class="k">Add</span>.</li></ol>';
       else if (ANDROID) steps = '<ol><li>Open the browser menu (<span class="k">⋮</span>).</li><li>Tap <span class="k">Install app</span> or <span class="k">Add to Home screen</span>.</li></ol>';
@@ -348,13 +355,15 @@ html [data-get-app]:not(.gapp-go):hover{filter:brightness(1.04)}
   const COPY = {
     grug: { label: 'The Grug app', title: 'Download Grug', text: 'Every game, the game store and your avatar editor, saved on this device. Plays with no Wi-Fi, and updates itself whenever the site does. Free, no app store.' },
     daypart: { label: 'The Daypart app', title: 'Download Daypart', text: 'Your schedule, time clock, temperatures, checklists and paperwork as an app on this device. Keeps working when the Wi-Fi drops, and updates itself. Free, no app store.' },
+    tea: { label: 'The Bubble Tea app', title: 'Download the app', text: 'Pearl timers, opening and closing lists, clock in and the daily paperwork as an app on this tablet. Keeps working when the Wi-Fi drops, and updates itself. Free, no app store.' },
+    cafe: { label: 'The Café app', title: 'Download the app', text: 'Espresso check, milk dates, machine cleaning, clock in and the daily paperwork as an app on this tablet. Keeps working when the Wi-Fi drops, and updates itself. Free, no app store.' },
   };
   function cardHtml(app, el) {
     const c = COPY[app], icon = at('app/icons/' + app + '-192.png');
     if (inApp(app)) {
       if (!el.hasAttribute('data-app-status')) return '';
       const st = swState || {}, w = st.wanted || [], n = w.filter(id => id.startsWith('game:')).length;
-      const what = app === 'grug' ? (n ? n + ' games' + (w.includes('carts') ? ', Carts' : '') + ', the store and your avatar editor' : 'The games, the store and your avatar editor') : 'Your dashboard, website editor and rewards card';
+      const what = SHOP(app) ? 'Your dashboard' : app === 'grug' ? (n ? n + ' games' + (w.includes('carts') ? ', Carts' : '') + ', the store and your avatar editor' : 'The games, the store and your avatar editor') : 'Your dashboard, website editor and rewards card';
       const when = st.at ? new Date(st.at).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }) : '';
       const line = checking ? 'Checking for updates…' : st.at ? (st.complete ? 'Up to date. Last checked ' + when + '.' : 'Some files are still downloading. Last tried ' + when + '.') : 'Saving for offline…';
       return '<div class="gapp-card-in"><img alt="" src="' + icon + '"><div class="gapp-tx"><small>' + c.label + '</small><b>' + CHECK + 'Saved on this device</b>' +
@@ -403,9 +412,9 @@ html [data-get-app]:not(.gapp-go):hover{filter:brightness(1.04)}
   addEventListener('appinstalled', () => setTimeout(paint, 50));
 
   window.GrugApp = {
-    install,                                     // GrugApp.install('grug' | 'daypart')
+    install,                                     // GrugApp.install('grug' | 'daypart' | 'tea' | 'cafe')
     standalone,                                  // true inside an installed app
-    app: thisApp,                                // 'grug' | 'daypart' inside an installed app, else null
+    app: thisApp,                                // 'grug' | 'daypart' | 'tea' | 'cafe' inside an installed app, else null
     installed: () => Object.keys(installed()),   // the apps opened on this device
     canPrompt: () => !!deferred,
     check: () => sync({ force: true }),          // ask for the newest files now

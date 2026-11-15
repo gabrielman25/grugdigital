@@ -1,0 +1,24 @@
+/* Café: the "bar check" hero on Today, and the pastry sparklines. */
+.barhero{background:var(--panel);border-radius:1.2rem;box-shadow:0 .35rem 0 var(--lo),var(--sh-lift);overflow:hidden;margin-bottom:.4rem}
+.bh{display:flex;align-items:center;flex-wrap:wrap;gap:.8rem;padding:1.1rem 1.3rem;background:var(--mode);color:var(--ink)}
+.bh small{font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;opacity:.75}
+.bh h3{font-size:1.7rem;line-height:1.1;margin:.1rem 0 0}
+.bh .sp{flex:1}
+.bh .btn.dark{box-shadow:0 .25rem 0 #000}
+.bgrid{display:grid;gap:1rem;padding:1.1rem 1.2rem 1.2rem;grid-template-columns:repeat(auto-fill,minmax(min(100%,16rem),1fr))}
+.shot{padding:1rem 1.1rem;border-radius:1rem;background:color-mix(in srgb,var(--mode) 12%,#fff);box-shadow:inset 0 0 0 2px var(--tint-2);display:flex;flex-direction:column;gap:.35rem;align-items:flex-start}
+.shot.stale{background:var(--warn-bg);box-shadow:inset 0 0 0 2px #F5D27A}
+.shot small{font-weight:700;font-size:.9rem;color:var(--text-2)}
+.shot .rec{font-size:2.5rem;font-weight:700;line-height:1;letter-spacing:-.02em}
+.shot .rec i{font-style:normal;font-size:1.2rem;color:var(--text-2);margin-left:.05rem}
+.shot .meta{display:flex;flex-wrap:wrap;gap:.3rem}
+.side2{display:flex;flex-direction:column;gap:.7rem}
+.mini{display:flex;gap:.8rem;align-items:flex-start;text-align:left;width:100%;border:0;border-radius:1rem;padding:.9rem 1rem;background:var(--ok-bg);color:var(--ink);box-shadow:inset 0 0 0 2px #A6E9C3;transition:transform .12s}
+.mini:hover{transform:translateY(-2px)}
+.mini .i{width:1.6rem;height:1.6rem;margin-top:.1rem}
+.mini b{display:block}.mini small{display:block;color:var(--text-2);line-height:1.4;margin-top:.15rem}
+.mini.warn{background:var(--warn-bg);box-shadow:inset 0 0 0 2px #F5D27A}
+.mini.bad{background:var(--bad-bg);box-shadow:inset 0 0 0 2px #F6B3AC}
+.spark{display:inline-flex;align-items:flex-end;gap:2px;height:26px}
+.spark i{display:block;width:6px;border-radius:2px;background:var(--lo)}
+@media(max-width:699px){.bh h3{font-size:1.4rem}.bgrid{padding:.8rem}.shot .rec{font-size:2.1rem}}

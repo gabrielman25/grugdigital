@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Grug · the offline list for the two installable apps (app/offline.json).
+"""Grug · the offline list for the installable apps (app/offline.json): Grug, Daypart, Bubble Tea and Café.
 
 Run from the repo root after ANY change to the site:   python3 tools/pwa/build.py
 (`--check` exits 1 if app/offline.json is out of date, without writing it.)
@@ -7,11 +7,12 @@ Run from the repo root after ANY change to the site:   python3 tools/pwa/build.p
 The service worker (sw.js) reads app/offline.json to know what to keep on the device:
 
   packs   one pack per thing that can be downloaded: `grug` (the games side's pages and shared files),
-          one `game:<id>` per Grug original, `carts` (the Carts feed and every cart) and `daypart`
-          (the restaurant side: dashboard, website editor, rewards card, owners' link).
+          one `game:<id>` per Grug original, `carts` (the Carts feed and every cart), `daypart`
+          (the restaurant side: dashboard, website editor, rewards card, owners' link), and `tea` / `cafe` (the
+          bubble tea and café dashboards, business/tea/ and business/cafe/, built by tools/shop-dashboards/).
           Each pack lists its files as { "/path": "<fingerprint>" } (first 10 hex of the file's SHA-1).
   apps    which packs each installed app keeps: Grug = grug + carts + every game the player may see,
-          Daypart = daypart.
+          Daypart = daypart, Bubble Tea = tea, Café = cafe.
   v       one fingerprint for the whole list: when it changes, something on the site changed.
 
 When the app opens (and every few hours while it stays open) the service worker fetches this file, compares each
@@ -39,7 +40,11 @@ DAYPART_PAGES = [
     'business/', 'business/site/', 'rewards/', 'rewards/create/', 'restaurant/', 'site/',
     'privacy.html', 'terms.html', 'support.html', 'credits.html',
 ]
-# Both apps: the app's own files (the offline page, its script, the manifests and icons).
+# The shop dashboards: each one page (everything inline), its own app with its own manifest and icons.
+SHOP_PAGES = {'tea': ['business/tea/'], 'cafe': ['business/cafe/']}
+def shop_files(a):
+    return ['offline.html', 'app/app.js', 'favicon.png', 'app/%s.webmanifest' % a, 'app/icons/%s-192.png' % a, 'app/icons/%s-180.png' % a]
+# Grug and Daypart: the app's own files (the offline page, its script, the manifests and icons).
 APP_FILES = ['offline.html', 'app/app.js', 'app/grug.webmanifest', 'app/daypart.webmanifest', 'favicon.png',
              'app/icons/grug-192.png', 'app/icons/daypart-192.png', 'app/icons/grug-180.png', 'app/icons/daypart-180.png']
 # Files a pack needs that no page names in a way the scan can see. { pack id: [paths] }
@@ -61,6 +66,7 @@ EXCLUDE = {
                 'assets/carts/', 'assets/clothing/', 'assets/avatar/', 'assets/oembed/', 'assets/sandy-classic.js',
                 'assets/sandy-runtime.js', 'assets/sandy-classic', 'assets/patterns/', 'community/'],
 }
+EXCLUDE['tea'] = EXCLUDE['cafe'] = EXCLUDE['daypart']
 
 # Never kept offline: tools, the demonstrations made for named businesses, the showcase build.
 SKIP_DIRS = ('.git/', 'tools/', 'work/', 'showcase/', 'node_modules/', 'grug-game-kit/')
@@ -197,6 +203,8 @@ def build():
 
     add('grug', 'Grug', GRUG_PAGES, APP_FILES)
     add('daypart', 'Daypart', DAYPART_PAGES, APP_FILES)
+    add('tea', 'Bubble Tea', SHOP_PAGES['tea'], shop_files('tea'))
+    add('cafe', 'Café', SHOP_PAGES['cafe'], shop_files('cafe'))
     for g in originals:
         play = g['play'].rstrip('/') + '/'
         pages = ['games/%s/' % g['id'], play]
@@ -219,7 +227,7 @@ def build():
     for p in packs.values():
         p['bytes'] = sum(os.path.getsize(os.path.join(ROOT, (u[1:] + 'index.html') if u.endswith('/') else u[1:]))
                          for u in p['files'])
-    apps = {'grug': ['grug', 'carts'] + ['game:' + g['id'] for g in originals], 'daypart': ['daypart']}
+    apps = {'grug': ['grug', 'carts'] + ['game:' + g['id'] for g in originals], 'daypart': ['daypart'], 'tea': ['tea'], 'cafe': ['cafe']}
     body = {'apps': apps, 'packs': packs}
     v = hashlib.sha1(json.dumps(body, sort_keys=True).encode()).hexdigest()[:12]
     return {'v': v, **body}

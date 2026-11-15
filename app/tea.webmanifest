@@ -1,0 +1,36 @@
+{
+  "id": "/tea",
+  "name": "Daypart Bubble Tea",
+  "short_name": "Bubble Tea",
+  "description": "Pearl timers, opening and closing lists, clock in, fridge temperatures, stock and the daily paperwork for a bubble tea shop. Works offline once installed.",
+  "start_url": "../business/tea/?pwa=tea",
+  "scope": "../business/tea/",
+  "display": "standalone",
+  "background_color": "#F7F4FA",
+  "theme_color": "#C59BFF",
+  "categories": [
+    "business",
+    "productivity",
+    "food"
+  ],
+  "icons": [
+    {
+      "src": "icons/tea-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/tea-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/tea-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
