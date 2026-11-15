@@ -185,6 +185,14 @@
   let sitePage = false;
   try { sitePage = !/[?&]mode=viewer/.test(location.search) && !/\/(play|work|tools|showcase)\//.test(location.pathname); } catch (e) {}
   const me = (document.currentScript && document.currentScript.src) || '';
+  // the installed Grug app (app/grug.webmanifest starts at ?pwa=grug) always opens on the player account, even when the
+  // restaurant account was in use on this device (Android shares one save between the browser and both apps)
+  try { if (/[?&]pwa=grug\b/.test(location.search)) { const b = JSON.parse(localStorage.getItem('grug.business.v1') || 'null');
+    if (b && b.mode === 'business') { b.mode = 'player'; localStorage.setItem('grug.business.v1', JSON.stringify(b)); } } } catch (e) {}
+  // the installable apps (app/app.js: the service worker, Get the app, offline downloads and update checks). Not in frames.
+  try { if (me && root === root.top && !/[?&]mode=viewer/.test(location.search) && !document.getElementById('grug-app-js')) {
+    const s = document.createElement('script'); s.id = 'grug-app-js'; s.defer = true; s.src = new URL('../app/app.js', me).href;
+    (document.head || document.documentElement).appendChild(s); } } catch (e) {}
   // the custom cursor on every page (assets/cursors.js; theme.js, grug.js or gamekit.js loads it, once)
   try { if (!root.GrugCursors && !document.getElementById('grug-cursors-js') && me) { const s = document.createElement('script'); s.id = 'grug-cursors-js'; s.src = new URL('cursors.js', me).href; (document.head || document.documentElement).appendChild(s); } } catch (e) {}
   if (sitePage) document.documentElement.classList.add('g-site');

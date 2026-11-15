@@ -110,6 +110,11 @@ footer a{color:var(--ink2);font-weight:700}
       <p>This browser isn’t letting the page save anything, so Pearls you bought would be lost straight away. This usually happens in private or incognito mode, when cookies and site data are blocked, or when your phone’s storage is full.</p>
       <p>Open this page in a normal browser window with site data allowed, then try again. You haven’t been charged.</p>
     </div>
+    <div class="box warnbox" id="iosApp" role="alert" hidden>
+      <b>Buy Pearls in Safari, not in the app</b>
+      <p>On iPhone and iPad, the Grug app keeps its own save, apart from Safari, and Stripe's checkout opens outside the app, so Pearls bought here could land in Safari instead of the app.</p>
+      <p>Open grugdigital.com in Safari to buy Pearls and spend them there. You haven't been charged.</p>
+    </div>
     <div class="packs" id="packs"></div>
     <p class="note saves" id="savesNote"><b>Pearls are saved on this device only.</b> They stay in this browser on this phone and don’t move to other phones, browsers or accounts.</p>
     <p class="note" id="payNote">You’ll pay on Stripe’s secure checkout page, then come straight back here.</p>
@@ -227,6 +232,14 @@ function storageOK(){
   }catch(e){ return false; }
 }
 try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); }catch(e){}   // ask the browser not to evict the wallet
+/* APP GUARD · the installed Grug app on iPhone and iPad (app/app.js) keeps its own save, apart from Safari, and Stripe's
+   checkout opens outside it, so the return trip could credit Safari's wallet instead of the app's. No purchases there. */
+function iosApp(){
+  try{
+    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    return ios && (navigator.standalone === true || matchMedia('(display-mode: standalone)').matches);
+  }catch(e){ return false; }
+}
 const okPath = p => typeof p === 'string' && p.indexOf(SITE) === 0 && p.indexOf('//') < 0 && !/[\s"'<>\\]/.test(p) && p.length < 300;
 
 /* where the guest came from (kept for two hours, long enough for a Stripe round trip) */
@@ -331,8 +344,9 @@ function render(){
   $('#payNote').innerHTML = test ? '<b>Test mode:</b> no real money moves. Pay with card 4242 4242 4242 4242, any future date and any 3 digits.' : 'You’ll pay on Stripe’s secure checkout page, then come straight back here.';
   $('#from').hidden = !r || !!arrived;
   if(r) $('#from').innerHTML = '<p>Buying Pearls for <b>' + esc(r.app) + '</b>.</p><a class="g-btn" href="' + esc(r.path) + '">Back to ' + esc(r.app) + '</a>';
-  const canSave = storageOK();
-  $('#noStore').hidden = canSave;
+  const inApp = iosApp(), canSave = storageOK() && !inApp;
+  $('#noStore').hidden = canSave || inApp;
+  $('#iosApp').hidden = !inApp;
   $('#payNote').hidden = !canSave;
   $('#packs').innerHTML = PACKS.map(p => '<button class="pack' + (p.tag ? ' hot' : '') + '" data-pack="' + p.id + '"' + (canSave ? '' : ' disabled aria-disabled="true"') + '>' + (p.tag ? '<span class="tag">' + esc(p.tag) + '</span>' : '') +
     PEARL + '<b>' + fmt(p.pearls) + '</b><small>Pearls</small><span class="price">' + esc(p.price) + '</span></button>').join('');
@@ -359,7 +373,7 @@ function openCf(p, from){
 }
 $('#packs').addEventListener('click', e => {
   const b = e.target.closest('[data-pack]'); if(!b || b.disabled) return; const p = PACKS.find(x => x.id === b.dataset.pack); if(!p) return;
-  if(!storageOK()){ render(); return; }
+  if(!storageOK() || iosApp()){ render(); return; }
   openCf(p, b);
 });
 $('#cfOk').addEventListener('change', () => { $('#cfGo').disabled = !$('#cfOk').checked; });
@@ -368,7 +382,7 @@ $('#cf').addEventListener('click', e => { if(e.target === $('#cf')) closeCf(); }
 addEventListener('keydown', e => { if(e.key === 'Escape' && !$('#cf').hidden) closeCf(); });
 $('#cfGo').addEventListener('click', () => {
   const p = pending; if(!p || !$('#cfOk').checked) return;
-  if(!storageOK()){ closeCf(); render(); return; }   // storage broke while the dialog was open
+  if(!storageOK() || iosApp()){ closeCf(); render(); return; }   // storage broke while the dialog was open
   $('#cfGo').disabled = true; $('#cfGo').textContent = 'Opening Stripe…';
   location.href = p.link + (p.link.indexOf('?') < 0 ? '?' : '&') + 'client_reference_id=' + encodeURIComponent(wallet().code);   // same tab, so the guest returns to this browser
 });

@@ -27,6 +27,41 @@ own `max-age=0` and check for new files on every visit. Before that it kept scri
 why the shared scripts and the default avatar pictures carry `?v=av2`. The tags are harmless; leave them. If that
 setting is ever changed back, bump the tag across the site whenever a shared script or picture changes.
 
+## The two apps: Grug and Daypart (rebuild the offline list after every change)
+
+The site installs as two apps from one address, each with its own home-screen icon: **Grug** (the games side,
+`app/grug.webmanifest`, opens `/?pwa=grug`) and **Daypart** (the restaurant side, `app/daypart.webmanifest`, opens
+`/business/?pwa=daypart`). Both cover the whole site (scope `/`), so the dock's tabs stay inside the app.
+
+- **`sw.js`** (site root): every page and file comes from the network first; when that fails (or takes over a few
+  seconds) the copy on the device is used, and a page never saved shows `offline.html`. It also saves anything opened
+  online, so it works offline next time.
+- **`app/offline.json`** lists what each app keeps on the device, as packs: `grug` (the games side's pages and shared
+  files), one `game:<id>` per Grug original, `carts`, and `daypart`. Every file has a fingerprint. An installed app asks
+  the worker to check this list when it opens, when the connection comes back and every half hour; only new or changed
+  files download, a new Grug original downloads by itself ("New game ready to play offline"), and an open page that is
+  now older offers **Refresh**. Mature games download only when the device's birthday is 18+. The demonstrations
+  (`work/`, the venue apps and their games) are never in a pack.
+- **After ANY change to the site, run `python3 tools/pwa/build.py` and commit `app/offline.json` with it.** Otherwise
+  installed apps don't get the change for offline use (they still get it online). `python3 tools/pwa/build.py --check`
+  says whether it's current. A new Grug original is picked up from `assets/games.js` by itself. If a game builds a file
+  name in code that the build can't see, add it to `EXTRA` (or the folder to `COMPANIONS`) in `tools/pwa/build.py`.
+- **Check it:** `node tools/pwa/check.js` (Playwright + Chrome) installs both apps in headless Chrome, turns the network
+  off, opens every page, game and cart, and tests the update check. Run it after changing `sw.js`, `app/app.js`, the
+  build, or how a game loads its files.
+- **`app/app.js`** (loaded by theme.js on every page; `business/index.html` loads it itself): registers the worker, sets
+  the page's manifest (Daypart on the restaurant side), and `GrugApp.install('grug' | 'daypart')`: the browser's own
+  prompt where there is one, a short how-to elsewhere. The account menu has **Get the app** (and **Get the Daypart app**
+  in the restaurant account); the dashboard's menu has **Add to home screen**. Hidden inside the installed app.
+- **iPhone and iPad keep an installed app's save apart from Safari.** The how-to offers **Save a copy** (every
+  `localStorage` key except Pearls, as a `grug-device` file) and the app's first launch offers **Load a copy**.
+  **Pearls never move**, and `pearls.html` turns purchases off inside the iPhone/iPad app (Stripe's checkout opens
+  outside it, so the Pearls could land in Safari): buy them in Safari. Keep both rules unless the owner decides otherwise.
+- Opening the Grug app always switches to the player account (theme.js reads `?pwa=grug`); Daypart opens the dashboard,
+  which switches to the restaurant account as it always has.
+- Icons: `app/icons/` (`node tools/pwa/icons.js` redraws them: the Grug dino on green; the dashboard's four tiles on ink).
+  Never change a manifest's `id`: it is how phones know it's the same app.
+
 ## Frozen: everything made for a named business is a demonstration (read this first)
 
 No business has signed off on its pages yet, so **every page that carries a business's name, logo, menu or photos is a

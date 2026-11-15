@@ -1,0 +1,17 @@
+{
+  "id": "/daypart",
+  "name": "Daypart",
+  "short_name": "Daypart",
+  "description": "Your restaurant's schedule, time clock, temperatures, checklists and paperwork. Works offline once installed.",
+  "start_url": "../business/?pwa=daypart",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#F6F4EF",
+  "theme_color": "#F6F4EF",
+  "categories": ["business", "productivity", "food"],
+  "icons": [
+    { "src": "icons/daypart-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/daypart-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/daypart-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

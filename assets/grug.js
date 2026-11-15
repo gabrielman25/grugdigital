@@ -730,6 +730,9 @@
     document.body.classList.add('g-chrome');
     // the account menu under the avatar
     const menu = document.createElement('div'); menu.className = 'g-menu'; menu.setAttribute('role', 'menu'); menu.hidden = true;
+    // Get the app (app/app.js): Grug for players, Daypart for the restaurant account. Hidden inside the installed app and in shop mode.
+    const appItem = (id, name) => (root.GrugApp && !root.GrugApp.standalone() && !(root.GrugTheme && root.GrugTheme.brand && root.GrugTheme.brand()))
+      ? '<button type="button" role="menuitem" data-m="app" data-app="' + id + '">' + icon('device-mobile') + '<span>' + name + '</span></button>' : '';
     const paintMenu = () => { const f = snaps();
       if (partnerOn()) {   // partner mode: only what stays inside it (the avatar), and Settings without a way out. No Pearls: a wrap is a demonstration
         menu.innerHTML = '<div class="g-menu-h"><img alt="" src="' + f.bust + '"><div><b>' + esc(profile.name) + '</b><small>Demonstration only</small></div></div>' +
@@ -743,6 +746,7 @@
           '<a role="menuitem" href="' + url('business/site/') + '">' + icon('browser') + '<span>Website</span></a>' +
           '<a role="menuitem" href="' + url('rewards/') + '">' + icon('gift') + '<span>Rewards card</span></a>' +
           '<button type="button" role="menuitem" class="g-menu-sw" data-m="player"><img alt="" src="' + f.bust + '"><span>Switch to ' + esc(profile.name) + '<small>Your Grug player account</small></span>' + icon('swap') + '</button>' +
+          appItem('daypart', 'Get the Daypart app') +
           '<button type="button" role="menuitemcheckbox" data-m="mode" aria-checked="' + !isLight() + '">' + icon('moon') + '<span>Dark mode</span><span class="g-switch sm" aria-hidden="true"></span></button>' +
           '<button type="button" role="menuitem" data-m="settings">' + icon('gear-six') + '<span>Settings</span></button>';
         return; }
@@ -752,6 +756,7 @@
         '<a role="menuitem" href="' + url('profile/') + '">' + icon('user') + '<span>Profile</span></a>' +
         '<a role="menuitem" href="' + url('avatar/') + '">' + icon('t-shirt') + '<span>Edit avatar</span></a>' +
         (look().classic ? '<a role="menuitem" href="' + url('shop/?mine') + '">' + icon('shopping-bag') + '<span>Classic closet</span></a>' : '') +
+        appItem('grug', 'Get the app') +
         '<button type="button" role="menuitemcheckbox" data-m="mode" aria-checked="' + !isLight() + '">' + icon('moon') + '<span>Dark mode</span><span class="g-switch sm" aria-hidden="true"></span></button>' +
         '<button type="button" role="menuitem" data-m="settings">' + icon('gear-six') + '<span>Settings</span></button>'; };
     document.body.appendChild(menu);
@@ -768,6 +773,7 @@
     meBtn.addEventListener('click', e => { e.stopPropagation(); buzz(); setMenu(menu.hidden); });
     menu.addEventListener('click', e => {
       if (e.target.closest('[data-m=settings]')) { setMenu(false); settings(); return; }
+      const ap = e.target.closest('[data-m=app]'); if (ap) { buzz(); setMenu(false); if (root.GrugApp) root.GrugApp.install(ap.dataset.app); return; }
       const sw = e.target.closest('[data-m=business],[data-m=player]'); if (sw) { buzz(); setMenu(false); setAccount(sw.dataset.m); return; }
       const m = e.target.closest('[data-m=mode]'); if (m) { setMode(isLight() ? 'dark' : 'light'); m.setAttribute('aria-checked', String(!isLight())); buzz(); }
     });
