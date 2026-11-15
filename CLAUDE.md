@@ -406,7 +406,7 @@ account is in use, the active shop, and each shop's card text and website fields
   added or renamed, update the tour.
 - **The business card path** (managers first, owners second): the printed card's QR and address go to `managers/` →
   `for/managers/?from=card` (the managers' walkthrough, "Thanks for scanning") → the owners' link → the dashboard. The
-  dashboard's Home ends with one door to the owners' pitch (`.gamedoor` → `partners/`, "A game starring your food"),
+  dashboard's Home ends with one door to the owners' pitch (`.gamedoor` → `partners/`, "A rewards app that brings guests back"; the game is the bonus, so lead with the rewards app),
   with its own tour stop. **`managers/` is printed on paper: never move or remove it.**
 
 ## Rewards card builder (`rewards/create/`)

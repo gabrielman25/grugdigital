@@ -350,7 +350,7 @@ p{margin:0}
   const OWNER_DISCORD = 'https://discord.gg/28Dj4Ws8tu';
   // "Send this to my owner" shares this walkthrough itself, plus the owners' Discord
   const OWNER_PAGE = location.protocol.startsWith('http') ? location.origin + location.pathname : SITE + 'for/managers/';
-  // the owners' pitch (a game starring their food): the message to the owner mentions it once, after the free dashboard
+  // the owners' pitch (a rewards app, with a game as the bonus): the message to the owner mentions it once, after the free dashboard
   const GAME_PAGE = location.protocol.startsWith('http') ? location.origin + '/partners/' : SITE + 'partners/';
   // arriving from the business card (its QR and its printed address both go through /managers/, which adds ?from=card)
   const FROM_CARD = (() => { try {
@@ -488,7 +488,7 @@ p{margin:0}
   async function share() {
     const n = ($('nm').value || '').trim();
     const text = `Found a free dashboard${n ? ' for ' + n : ''}: staff schedule, temperature log, daily checklists, recipe costs, time clock and permit reminders. No cost, no logins for staff, and it opens with example data so we can try it first. The team behind it answers owners' questions on Discord: ${OWNER_DISCORD}`;
-    const game = `They also build a game starring a restaurant's own food, if we ever want one: ${GAME_PAGE}`;
+    const game = `They also build rewards apps that bring guests back (with a game starring the restaurant's food as a bonus), if we ever want one: ${GAME_PAGE}`;
     if (navigator.share) { try { await navigator.share({ title: 'Grug for restaurants', text: text + '\n\n' + game, url: OWNER_PAGE }); return; } catch (e) { if (e.name === 'AbortError') return; } }
     const all = text + ' ' + OWNER_PAGE + '\n\n' + game;
     try { await navigator.clipboard.writeText(all); toast('Copied. Paste it to your owner.'); }
