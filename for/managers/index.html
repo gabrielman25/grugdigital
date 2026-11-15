@@ -487,10 +487,12 @@ p{margin:0}
   const toast = t => { const el = $('toast'); el.textContent = t; el.classList.add('on'); setTimeout(() => el.classList.remove('on'), 2600); };
   async function share() {
     const n = ($('nm').value || '').trim();
-    const text = `Found a free dashboard${n ? ' for ' + n : ''}: staff schedule, temperature log, daily checklists, recipe costs, time clock and permit reminders. No cost, no logins for staff, and it opens with example data so we can try it first. The team behind it answers owners' questions on Discord: ${OWNER_DISCORD}. They also build a game starring a restaurant's own food, if we ever want one: ${GAME_PAGE}`;
-    if (navigator.share) { try { await navigator.share({ title: 'Grug for restaurants', text, url: OWNER_PAGE }); return; } catch (e) { if (e.name === 'AbortError') return; } }
-    try { await navigator.clipboard.writeText(text + ' ' + OWNER_PAGE); toast('Copied. Paste it to your owner.'); }
-    catch { location.href = 'sms:?&body=' + encodeURIComponent(text + ' ' + OWNER_PAGE); }
+    const text = `Found a free dashboard${n ? ' for ' + n : ''}: staff schedule, temperature log, daily checklists, recipe costs, time clock and permit reminders. No cost, no logins for staff, and it opens with example data so we can try it first. The team behind it answers owners' questions on Discord: ${OWNER_DISCORD}`;
+    const game = `They also build a game starring a restaurant's own food, if we ever want one: ${GAME_PAGE}`;
+    if (navigator.share) { try { await navigator.share({ title: 'Grug for restaurants', text: text + '\n\n' + game, url: OWNER_PAGE }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+    const all = text + ' ' + OWNER_PAGE + '\n\n' + game;
+    try { await navigator.clipboard.writeText(all); toast('Copied. Paste it to your owner.'); }
+    catch { location.href = 'sms:?&body=' + encodeURIComponent(all); }
   }
 
   /* ---------- six looping demos: a cursor clicks and types in a tiny copy of each app ---------- */
