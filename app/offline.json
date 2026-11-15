@@ -1,5 +1,5 @@
 {
- "v": "be8d66489f5f",
+ "v": "eb8838c070ef",
  "apps": {
   "grug": [
    "grug",
@@ -20,7 +20,7 @@
    "title": "Grug",
    "files": {
     "/404.html": "64e366437c",
-    "/app/app.js": "0ecd7b22c1",
+    "/app/app.js": "f8791f2164",
     "/app/daypart.webmanifest": "a54f8c1672",
     "/app/grug.webmanifest": "70b7c1ce06",
     "/app/icons/daypart-180.png": "64a5bf0833",
@@ -239,12 +239,12 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "3106453a5e"
    },
-   "bytes": 28557890
+   "bytes": 28558265
   },
   "daypart": {
    "title": "Daypart",
    "files": {
-    "/app/app.js": "0ecd7b22c1",
+    "/app/app.js": "f8791f2164",
     "/app/daypart.webmanifest": "a54f8c1672",
     "/app/grug.webmanifest": "70b7c1ce06",
     "/app/icons/daypart-180.png": "64a5bf0833",
@@ -309,7 +309,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "3106453a5e"
    },
-   "bytes": 2079937
+   "bytes": 2080312
   },
   "game:runway": {
    "title": "Runway Ready",

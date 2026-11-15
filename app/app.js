@@ -110,7 +110,7 @@
 .gapp-pill.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .gapp-pill .t{flex:1;min-width:0}.gapp-pill .bar{display:block;height:.35rem;margin-top:.4rem;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden}
 .gapp-pill .bar i{display:block;height:100%;width:0;background:#9BE338;border-radius:99px;transition:width .25s}
-.gapp-pill button{flex:none;border:0;border-radius:999px;padding:.45rem .9rem;font:600 .9rem Fredoka,system-ui,sans-serif;cursor:pointer;background:#9BE338;color:#1E1B16;box-shadow:0 3px 0 #6FB31C}
+.gapp-pill button{flex:none;border:0;border-radius:999px;padding:.45rem .9rem;font:600 .9rem Fredoka,system-ui,sans-serif;cursor:pointer;background:#FFBE1A;color:#1E1B16;box-shadow:0 3px 0 #D99A00}
 .gapp-pill button.x{background:transparent;color:#fff;box-shadow:none;padding:.45rem .5rem;opacity:.7}
 .gapp-scrim{position:fixed;inset:0;z-index:2147483001;background:rgba(10,10,12,.5);display:flex;align-items:flex-end;justify-content:center;padding:1rem}
 @media (min-width:640px){.gapp-scrim{align-items:center}}
@@ -129,7 +129,7 @@
 [data-get-app] .gapp-ic{margin-right:.35em}
 .gapp-card-box{display:block;margin:18px 0}
 .gapp-card-in{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;padding:18px 20px;border-radius:var(--r,20px);background:var(--card-solid,#fff);
-  color:var(--ink,#1E1B16);border:1px solid var(--line,#E6E4DE);border-left:6px solid #9BE338;font-family:Fredoka,var(--font,system-ui),sans-serif}
+  color:var(--ink,#1E1B16);border:1px solid var(--line,#E6E4DE);border-left:6px solid #FFBE1A;font-family:Fredoka,var(--font,system-ui),sans-serif}
 .gapp-card-in>img{width:64px;height:64px;border-radius:16px;flex:none}
 .gapp-tx{flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:3px}
 .gapp-tx small{font-size:12.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:.6}
@@ -138,8 +138,11 @@
 .gapp-tx span{font-size:15px;line-height:1.4;opacity:.85}
 .gapp-tx .gapp-meta{font-size:13.5px;font-weight:600;opacity:.6}
 .gapp-go{flex:none;display:inline-flex;align-items:center;gap:.4em;border:0;border-radius:999px;padding:.8rem 1.4rem;cursor:pointer;
-  font:600 1.05rem Fredoka,system-ui,sans-serif;background:#9BE338;color:#1E1B16;box-shadow:0 4px 0 #6FB31C}
-.gapp-go:hover{filter:brightness(1.04)}.gapp-go:active{transform:translateY(2px);box-shadow:0 2px 0 #6FB31C}
+  font:600 1.05rem Fredoka,system-ui,sans-serif;background:#FFBE1A;color:#1E1B16;box-shadow:0 4px 0 #D99A00}
+.gapp-go:hover{filter:brightness(1.04)}.gapp-go:active{transform:translateY(2px);box-shadow:0 2px 0 #D99A00}
+/* every Download button is Grug yellow (the Shop accent) so it stands out on white and on the section colours */
+html [data-get-app]:not(.gapp-go),html .st-nav>[data-get-app].st-apps{background:#FFBE1A!important;color:#1E1B16!important;border-color:transparent!important;box-shadow:0 4px 0 #D99A00!important}
+html [data-get-app]:not(.gapp-go):hover{filter:brightness(1.04)}
 .gapp-go.q{background:transparent;color:inherit;box-shadow:inset 0 0 0 2px var(--line,#E4E4E8)}
 .gapp-go[disabled]{opacity:.55;cursor:default}
 @media (max-width:520px){.gapp-go{width:100%;justify-content:center}.gapp-card-in{padding:16px}.gapp-card-in>img{width:48px;height:48px;border-radius:13px;align-self:flex-start}.gapp-tx{flex:1 1 calc(100% - 70px)}}`;
