@@ -350,6 +350,13 @@ p{margin:0}
   const OWNER_DISCORD = 'https://discord.gg/28Dj4Ws8tu';
   // "Send this to my owner" shares this walkthrough itself, plus the owners' Discord
   const OWNER_PAGE = location.protocol.startsWith('http') ? location.origin + location.pathname : SITE + 'for/managers/';
+  // the owners' pitch (a game starring their food): the message to the owner mentions it once, after the free dashboard
+  const GAME_PAGE = location.protocol.startsWith('http') ? location.origin + '/partners/' : SITE + 'partners/';
+  // arriving from the business card (its QR and its printed address both go through /managers/, which adds ?from=card)
+  const FROM_CARD = (() => { try {
+    if (new URLSearchParams(location.search).get('from') === 'card') sessionStorage.setItem('grug.mgr.card', '1');
+    return sessionStorage.getItem('grug.mgr.card') === '1';
+  } catch (e) { return /[?&]from=card\b/.test(location.search); } })();
   const $ = id => document.getElementById(id);
   $('chat').href = MANAGER_DISCORD;
   const svg = n => `<svg class="ico"><use href="#i-${n}"/></svg>`;
@@ -371,7 +378,7 @@ p{margin:0}
     { id: 'intro', html: () => `
       <div class="intro-grid">
         <div>
-          <span class="eyebrow">For restaurant managers</span>
+          <span class="eyebrow">${FROM_CARD ? 'Thanks for scanning' : 'For restaurant managers'}</span>
           <h1>Six back-office jobs. One free dashboard.</h1>
           <p class="lead">Grug runs your <b>staff schedule</b>, <b>temperature log</b>, <b>daily checklists</b>, <b>recipe costs</b>, <b>time clock</b> and <b>permit reminders</b> from the tablet you already have.</p>
           <div class="apps6">${APPS.map((a, k) => `<div class="app6" style="animation-delay:${120 + k * 70}ms">${tile(a)}${a.t}</div>`).join('')}</div>
@@ -480,7 +487,7 @@ p{margin:0}
   const toast = t => { const el = $('toast'); el.textContent = t; el.classList.add('on'); setTimeout(() => el.classList.remove('on'), 2600); };
   async function share() {
     const n = ($('nm').value || '').trim();
-    const text = `Found a free dashboard${n ? ' for ' + n : ''}: staff schedule, temperature log, daily checklists, recipe costs, time clock and permit reminders. No cost, no logins for staff, and it opens with example data so we can try it first. The team behind it answers owners' questions on Discord: ${OWNER_DISCORD}`;
+    const text = `Found a free dashboard${n ? ' for ' + n : ''}: staff schedule, temperature log, daily checklists, recipe costs, time clock and permit reminders. No cost, no logins for staff, and it opens with example data so we can try it first. The team behind it answers owners' questions on Discord: ${OWNER_DISCORD}. They also build a game starring a restaurant's own food, if we ever want one: ${GAME_PAGE}`;
     if (navigator.share) { try { await navigator.share({ title: 'Grug for restaurants', text, url: OWNER_PAGE }); return; } catch (e) { if (e.name === 'AbortError') return; } }
     try { await navigator.clipboard.writeText(text + ' ' + OWNER_PAGE); toast('Copied. Paste it to your owner.'); }
     catch { location.href = 'sms:?&body=' + encodeURIComponent(text + ' ' + OWNER_PAGE); }

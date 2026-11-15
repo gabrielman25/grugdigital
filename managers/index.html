@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Grug for restaurant managers</title>
+<link rel="icon" href="/favicon.png">
+<!-- The business card's address (its QR code and the printed grugdigital.com/managers). It opens the managers'
+     walkthrough with ?from=card, which greets the visitor as someone who scanned the card. Keep this address working:
+     it is printed on cards. -->
+<script>
+(function () {
+  var to = '../for/managers/?from=card' + (location.hash || '');
+  try { location.replace(to); } catch (e) { location.href = to; }
+})();
+</script>
+<noscript><meta http-equiv="refresh" content="0;url=../for/managers/?from=card"></noscript>
+</head>
+<body style="background:#F3F3F5;color:#16161A;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0">
+<a href="../for/managers/?from=card" style="color:#3B740B">Open Grug for restaurant managers</a>
+</body>
+</html>

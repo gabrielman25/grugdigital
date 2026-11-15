@@ -404,6 +404,10 @@ account is in use, the active shop, and each shop's card text and website fields
   `?name=…&type=c|t|b|f|k|o&owner=<first name>` fills it in and builds straight away (`?c=<card code>` uses a whole card).
   An owner who already has a restaurant account on the device goes straight to the dashboard. When a dashboard part is
   added or renamed, update the tour.
+- **The business card path** (managers first, owners second): the printed card's QR and address go to `managers/` →
+  `for/managers/?from=card` (the managers' walkthrough, "Thanks for scanning") → the owners' link → the dashboard. The
+  dashboard's Home ends with one door to the owners' pitch (`.gamedoor` → `partners/`, "A game starring your food"),
+  with its own tour stop. **`managers/` is printed on paper: never move or remove it.**
 
 ## Rewards card builder (`rewards/create/`)
 
