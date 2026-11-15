@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <!-- the games onboarding (assets/onboard-gate.js). Patched in by hand: add this line to grug-game-kit/micro before the next build -->
-<script src="../../assets/onboard-gate.js"></script>
+<script src="../../assets/onboard-gate.js?v=av2"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#17171A">
 <title>Grug Carts</title>
@@ -350,7 +350,7 @@ for (const n of ['WebGL2RenderingContext', 'WebGLRenderingContext', 'HTMLImageEl
   const tag = '[object ' + n + ']', own = Function.prototype[Symbol.hasInstance];
   try { Object.defineProperty(C, Symbol.hasInstance, { value(o) { return own.call(C, o) || (o != null && typeof o === 'object' && Object.prototype.toString.call(o) === tag); } }); } catch (e) { }
 }
-const RUNTIME = ['../vendor/sandy-runtime.js', '../../vendor/sandy-runtime.js', '../assets/sandy-runtime.js', '../../assets/sandy-runtime.js', 'https://grugdigital.pages.dev/assets/sandy-runtime.js'];
+const RUNTIME = ['../vendor/sandy-runtime.js', '../../vendor/sandy-runtime.js', '../assets/sandy-runtime.js?v=av2', '../../assets/sandy-runtime.js?v=av2', 'https://grugdigital.pages.dev/assets/sandy-runtime.js?v=av2'];
 const THREE_ONLY = ['../assets/three.min.js', '../../assets/three.min.js', 'https://grugdigital.pages.dev/assets/three.min.js'];
 function addScript(src, text) {
   return new Promise((ok, no) => {

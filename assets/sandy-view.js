@@ -15,7 +15,7 @@
   const me = document.currentScript || Array.from(document.scripts).find(s => /sandy-view\.js(\?|$)/.test(s.src));
   const ASSETS = me ? me.src.replace(/sandy-view\.js.*$/, '') : '';
   const DEF = ASSETS + 'sandy/';
-  const DEFAULT_SNAPS = { def: true, bust: DEF + 'bust.png', full: DEF + 'full.png', happy: DEF + 'happy.png', sad: DEF + 'sad.png', cheer: DEF + 'cheer.png' };
+  const DEFAULT_SNAPS = { def: true, bust: DEF + 'bust.png?v=av2', full: DEF + 'full.png?v=av2', happy: DEF + 'happy.png?v=av2', sad: DEF + 'sad.png?v=av2', cheer: DEF + 'cheer.png?v=av2' };
   const read = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
   const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
   const CLASSIC_KEY = 'grug.sandy.classic.v1';
@@ -36,7 +36,7 @@
   function load() {
     if (root.SandyKit) return Promise.resolve(root.SandyKit);
     if (loading) return loading;
-    loading = new Promise((ok, no) => { const s = document.createElement('script'); s.src = ASSETS + 'sandy-runtime.js'; s.onload = () => root.SandyKit ? ok(root.SandyKit) : no(new Error('SandyKit missing')); s.onerror = no; document.head.appendChild(s); });
+    loading = new Promise((ok, no) => { const s = document.createElement('script'); s.src = ASSETS + 'sandy-runtime.js?v=av2'; s.onload = () => root.SandyKit ? ok(root.SandyKit) : no(new Error('SandyKit missing')); s.onerror = no; document.head.appendChild(s); });
     return loading;
   }
 

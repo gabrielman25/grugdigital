@@ -20,6 +20,16 @@ only screenshots. Screenshots are a nice extra, never the substitute.
 - A preview is its own web address, so its saved data starts empty: first-visit flows (the games onboarding, Start over,
   a fresh closet) show as they would for a brand new player. Say so when it matters.
 
+## grugdigital.com keeps scripts and pictures for 4 hours
+
+The custom domain's Cloudflare settings tell browsers to keep `.js`, `.css` and pictures for 4 hours (Browser Cache TTL),
+while pages are never kept. So after a change, a returning visitor gets the new page with yesterday's scripts, which can
+break it. **When you change a shared script or picture, give its address a new version** everywhere it is loaded:
+`assets/grug.js?v=av2` (the tag is on grug.js, grug-app.js, theme.js, chef.js, onboard-gate.js, sandy-runtime.js,
+sandy-view.js and the default pictures in `assets/sandy/`; bump it, e.g. `av3`, across the site in one go). New files need
+no tag. Setting Cloudflare → Caching → Browser Cache TTL to "Respect Existing Headers" would end this (Pages already
+sends `max-age=0`), at which point the tags can stay as they are.
+
 ## Frozen: everything made for a named business is a demonstration (read this first)
 
 No business has signed off on its pages yet, so **every page that carries a business's name, logo, menu or photos is a

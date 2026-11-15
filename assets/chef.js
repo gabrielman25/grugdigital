@@ -9,7 +9,7 @@
   'use strict';
   const me = document.currentScript || Array.from(document.scripts).find(s => /chef\.js(\?|$)/.test(s.src));
   const DEF = (me && me.src ? me.src.replace(/chef\.js.*$/, '') : '../../assets/') + 'sandy/';
-  const DEFAULTS = { bust: DEF + 'bust.png', full: DEF + 'full.png', happy: DEF + 'happy.png', sad: DEF + 'sad.png', cheer: DEF + 'cheer.png' };
+  const DEFAULTS = { bust: DEF + 'bust.png?v=av2', full: DEF + 'full.png?v=av2', happy: DEF + 'happy.png?v=av2', sad: DEF + 'sad.png?v=av2', cheer: DEF + 'cheer.png?v=av2' };
   const hash = (o) => { const s = JSON.stringify(o || null); let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
   const read = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
   function pics() { const s = read('grug.sandy.snaps.v1'), c = read('grug.sandy.v1'); return s && s.full && (!c || s.hash === hash(c)) ? s : DEFAULTS; }

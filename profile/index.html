@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#eaf6ee">
 <link rel="icon" href="../favicon.png">
 <link rel="stylesheet" href="../assets/grug.css">
-<script src="../assets/theme.js"></script>
+<script src="../assets/theme.js?v=av2"></script>
 <style>
 .pf{display:grid;gap:16px;grid-template-columns:1fr;padding-top:16px}
 .pf-card{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center;background:var(--card);border-radius:var(--r);border:1px solid var(--line);padding:14px}
@@ -103,7 +103,7 @@
 <script src="../assets/catalog.js"></script>
 <script src="../assets/icons.js"></script>
 <script src="../assets/games.js"></script>
-<script src="../assets/grug.js"></script>
+<script src="../assets/grug.js?v=av2"></script>
 <script>
 (function(){
   const G = Grug, C = GrugCatalog, $ = s => document.querySelector(s);
@@ -111,7 +111,7 @@
   const view = G.ui.avatarPic($('#view'), { onTap: () => { view.play('wave', { ms: 2000 }); } });
   // after loading a profile file with a look in it, redraw the pictures of that look
   const redraw = () => { const c = (() => { try { return JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); } catch (e) { return null; } })(); if (!c) return;
-    const s = document.createElement('script'); s.src = G.url('assets/sandy-view.js'); s.onload = () => window.SandyView.makeSnaps(c).catch(() => {}); document.head.appendChild(s); };
+    const s = document.createElement('script'); s.src = G.url('assets/sandy-view.js?v=av2'); s.onload = () => window.SandyView.makeSnaps(c).catch(() => {}); document.head.appendChild(s); };
   G.on((p, what) => { if (what === 'import' && G.snaps().def) redraw(); });
   $('#rename').innerHTML = G.icon('pencil-simple'); $('#icMotion').innerHTML = G.icon('sparkle'); $('#icBuzz').innerHTML = G.icon('device-mobile');
   $('#export').innerHTML = G.icon('download-simple') + 'Export profile'; $('#copy').innerHTML = G.icon('copy') + 'Copy as text'; $('#shareBtn').innerHTML = G.icon('share-network') + 'Share file';

@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#eaf6ee">
 <link rel="icon" href="../../favicon.png">
 <link rel="stylesheet" href="../../assets/grug.css">
-<script src="../../assets/theme.js"></script>
+<script src="../../assets/theme.js?v=av2"></script>
 <!-- READ ME FIRST: the full read-me (Markdown) is in <textarea id="sandy-readme"> right after <body>. It explains the config, the SandyKit API,
      the iframe postMessage API and how to lift the runtime (between the SANDY RUNTIME markers) into another project. -->
 </head><body>
@@ -513,9 +513,9 @@ body.viewer.clear,body.viewer.clear #stage{background:transparent}
 <style>/* room for the archive bar */body.ed-nav #app{height:calc(100vh - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 100px);height:calc(100dvh - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 100px)}@media (max-width:860px){#classicBar span{display:none}#classicBar{padding:8px 12px;gap:8px}body.ed-nav #app{height:calc(100dvh - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 80px)}}</style>
 <!-- ===== SANDY EDITOR: END (markup and styles) ===== -->
 <!-- ===== SANDY RUNTIME: BEGIN ===== -->
-<script src="../../assets/sandy-runtime.js"></script>
+<script src="../../assets/sandy-runtime.js?v=av2"></script>
 <script src="../../assets/sandy-classic.js"></script>
-<script src="../../assets/sandy-view.js"></script>
+<script src="../../assets/sandy-view.js?v=av2"></script>
 <!-- ===== SANDY RUNTIME: END ===== -->
 <!-- ===== SANDY EDITOR: BEGIN (script) ===== -->
 <script id="sandy-editor">
@@ -812,7 +812,7 @@ K.create(start).then(s=>{sandy=s;scene.add(s.object3d);cfg=s.getConfig();sync();
 <script src="../../assets/catalog.js"></script>
 <script src="../../assets/icons.js"></script>
 <script src="../../assets/games.js"></script>
-<script src="../../assets/grug.js"></script>
+<script src="../../assets/grug.js?v=av2"></script>
 <script>(function(){ if (/[?&]mode=viewer/.test(location.search)) return; try { Grug.ui.chrome('avatar'); } catch (e) {} })();</script>
 <script>
 /* ---------- Emotes: pick the ones she brings into games (saved in the Grug profile; the games read them through gamekit.js) ---------- */

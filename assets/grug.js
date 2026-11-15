@@ -253,7 +253,7 @@
   function refreshPictures(c) {
     const run = () => root.SandyView.makeSnaps(c || look(), { step: true }).then(() => emit('snaps')).catch(() => {});
     if (root.SandyView) { picBusy = (picBusy || Promise.resolve()).then(run); return picBusy; }
-    picBusy = new Promise(ok => { const s = document.createElement('script'); s.src = url('assets/sandy-view.js'); s.onload = ok; s.onerror = ok; document.head.appendChild(s); }).then(() => root.SandyView && run());
+    picBusy = new Promise(ok => { const s = document.createElement('script'); s.src = url('assets/sandy-view.js?v=av2'); s.onload = ok; s.onerror = ok; document.head.appendChild(s); }).then(() => root.SandyView && run());
     return picBusy;
   }
   function setAvatar(patch) { profile.avatar = C.normalize(Object.assign({}, profile.avatar, patch)); save('avatar'); }
@@ -525,7 +525,7 @@
     const s = readJSON(SANDY_SNAPS, null), c = readJSON(SANDY_KEY, null);
     if (s && s.bust) { if (c && s.hash !== sandyHash(c)) s.stale = true; return s; }
     const d = url('assets/sandy/');
-    return { def: true, bust: d + 'bust.png', full: d + 'full.png', happy: d + 'happy.png', sad: d + 'sad.png', cheer: d + 'cheer.png' };
+    return { def: true, bust: d + 'bust.png?v=av2', full: d + 'full.png?v=av2', happy: d + 'happy.png?v=av2', sad: d + 'sad.png?v=av2', cheer: d + 'cheer.png?v=av2' };
   }
   // pages that show the avatar call this: out-of-date pictures (the editor was closed before it finished) get redrawn
   // in the background, a picture at a time, once the page has settled

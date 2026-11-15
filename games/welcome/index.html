@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" href="../../favicon.png">
 <link rel="stylesheet" href="../../assets/grug.css">
-<script src="../../assets/theme.js"></script>
+<script src="../../assets/theme.js?v=av2"></script>
 <!--
   THE GAMES ONBOARDING · games/welcome/?next=<where they were going>[&redo=1]
   Shown the first time someone opens anything games-related on this device (Grug.onboard in assets/grug.js sends them
@@ -100,7 +100,7 @@ html[data-partner] .ob-logo{display:none}
 <script src="../../assets/catalog.js"></script>
 <script src="../../assets/icons.js"></script>
 <script src="../../assets/games.js"></script>
-<script src="../../assets/grug.js"></script>
+<script src="../../assets/grug.js?v=av2"></script>
 <script>
 (function(){
   'use strict';
@@ -197,7 +197,7 @@ html[data-partner] .ob-logo{display:none}
     snapFor = key;
     return (snapping = new Promise(ok => {
       const f = document.createElement('iframe'); f.hidden = true; f.setAttribute('aria-hidden', 'true'); f.tabIndex = -1;
-      f.srcdoc = '<!doctype html><script src="' + G.url('assets/sandy-view.js') + '"><\/script>';
+      f.srcdoc = '<!doctype html><script src="' + G.url('assets/sandy-view.js?v=av2') + '"><\/script>';
       f.onload = () => { const V2 = f.contentWindow && f.contentWindow.SandyView; if (!V2) return ok(null);
         V2.makeSnaps(c, { step: true }).then(sn => { try { window.dispatchEvent(new CustomEvent('grug-sandy-snaps', { detail: sn })); } catch (e) {} ok(sn); }, () => ok(null)); };
       document.body.appendChild(f);

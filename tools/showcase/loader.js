@@ -33,7 +33,7 @@ GL.unpackEngine = () => GL.engineP || (GL.engineP = (async () => {
   const code = await gunzipB64('engine');
   GL.engineURL = URL.createObjectURL(new Blob([code], {type: 'text/javascript'}));
   window.__grugEngineURL = GL.engineURL;
-  if(GL.pack) GL.pack.assets['assets/sandy-view.js'] = GL.engineURL;
+  if(GL.pack) GL.pack.assets['assets/sandy-view.js?v=av2'] = GL.engineURL;
   return GL.engineURL;
 })());
 

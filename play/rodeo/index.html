@@ -357,7 +357,7 @@ html.f32-lock #app{filter:blur(9px) brightness(.6) saturate(1.1)}
     <button class="ptb-fs" id="fsBtn" aria-label="Full screen" aria-pressed="false" hidden><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path fill="currentColor" d="M5.293 9.293a1 1 0 1 1 1.414 1.414L4.414 13H5a1 1 0 1 1 0 2H2a1 1 0 0 1-1-1v-3a1 1 0 1 1 2 0v.586zM9.293 9.293a1 1 0 0 1 1.414 0L13 11.586V11a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1h-3a1 1 0 1 1 0-2h.586l-2.293-2.293a1 1 0 0 1 0-1.414M5 1a1 1 0 0 1 0 2h-.586l2.293 2.293a1 1 0 1 1-1.414 1.414L3 4.414V5a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1zM14 1a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-.586l-2.293 2.293a1 1 0 1 1-1.414-1.414L11.586 3H11a1 1 0 1 1 0-2z"/></svg></button>
     <button class="ptb-av" id="profileBtn" aria-label="Your profile"></button>
   </header>
-  <script>/* the avatar picture right away (the Grug site's own saved picture; see Avatar below) */(function(){try{var s=JSON.parse(localStorage.getItem("grug.sandy.snaps.v1")||"null"),u=s&&s.bust?s.bust:(/\/play\/rodeo(\/|$)/.test(location.pathname)?"../../assets/sandy/bust.png":"");if(u)document.getElementById("profileBtn").style.backgroundImage='url("'+u+'")';var f=document.getElementById("fsBtn");if(document.fullscreenEnabled||document.webkitFullscreenEnabled)f.hidden=false;}catch(e){}})();</script>
+  <script>/* the avatar picture right away (the Grug site's own saved picture; see Avatar below) */(function(){try{var s=JSON.parse(localStorage.getItem("grug.sandy.snaps.v1")||"null"),u=s&&s.bust?s.bust:(/\/play\/rodeo(\/|$)/.test(location.pathname)?"../../assets/sandy/bust.png?v=av2":"");if(u)document.getElementById("profileBtn").style.backgroundImage='url("'+u+'")';var f=document.getElementById("fsBtn");if(document.fullscreenEnabled||document.webkitFullscreenEnabled)f.hidden=false;}catch(e){}})();</script>
   <main id="views">
     <section class="view" id="v-home"></section>
     <section class="view" id="v-menu"></section>
@@ -703,7 +703,7 @@ const FX=(()=>{
    a flat portrait from the same look. */
 const Avatar=(()=>{
   const LOOK="grug.sandy.v1",SHOT="rr-gameday-avatar-shot-v2";
-  const RUNTIME=["../../assets/sandy-runtime.js","../vendor/sandy-runtime.js","vendor/sandy-runtime.js"];
+  const RUNTIME=["../../assets/sandy-runtime.js?v=av2","../vendor/sandy-runtime.js","vendor/sandy-runtime.js"];
   let url="",listeners=[];
   const look=()=>{try{const j=JSON.parse(localStorage.getItem(LOOK)||"null");return j&&typeof j==="object"?j:null;}catch(e){return null;}};
   const lookKey=()=>JSON.stringify(look()||{});
@@ -727,7 +727,7 @@ ${hat?`<path d="M30 40c2-16 14-24 30-24s28 8 30 24z" fill="${hat}"/><rect x="26"
     return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(s);
   }
   /* on the Grug site: always the site's own saved picture (the same one its top bar shows), never a separate headshot */
-  function siteFace(){try{const s=JSON.parse(localStorage.getItem("grug.sandy.snaps.v1")||"null");if(s&&s.bust)return s.bust;}catch(e){}return "../../assets/sandy/bust.png";}
+  function siteFace(){try{const s=JSON.parse(localStorage.getItem("grug.sandy.snaps.v1")||"null");if(s&&s.bust)return s.bust;}catch(e){}return "../../assets/sandy/bust.png?v=av2";}
   function current(){return IN_SITE?siteFace():(url||flat());}
   function paint(){const u=current();$$("[data-avatar]").forEach(e=>e.style.backgroundImage=`url("${u}")`);const pb=$("#profileBtn");if(pb)pb.style.backgroundImage=`url("${u}")`;}
   function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement("script");s.src=src;s.async=true;s.onload=()=>res();s.onerror=()=>{s.remove();rej();};document.head.appendChild(s);});}

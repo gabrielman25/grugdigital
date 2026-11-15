@@ -244,7 +244,7 @@
   };
   function partnerChrome(p, rootPath) {
     const R = (me ? me.replace(/assets\/theme\.js(\?.*)?$/, '') : rootPath), esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-    let face = R + 'assets/sandy/bust.png'; try { const s = JSON.parse(localStorage.getItem('grug.sandy.snaps.v1') || 'null'); if (s && s.bust) face = s.bust; } catch (e) {}
+    let face = R + 'assets/sandy/bust.png?v=av2'; try { const s = JSON.parse(localStorage.getItem('grug.sandy.snaps.v1') || 'null'); if (s && s.bust) face = s.bust; } catch (e) {}
     let coins = 0; try { const w = p.wallet && JSON.parse(localStorage.getItem(p.wallet.key) || 'null'); coins = Math.max(0, Math.floor(+(w && w[p.wallet.field]) || 0)); } catch (e) {}
     const fsOk = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled), svg = n => '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true">' + (PBAR_ICONS[n] || '') + '</svg>';
     // every wrap is a demonstration until the business signs off (assets/demo.js): its notice and chip go on every

@@ -82,7 +82,7 @@ g = libs['grug.js']
 g = re.sub(r"const ROOT = [^\n]*;", "const ROOT = 'https://grug.local/';   // showcase: the shell catches links to this host", g, count=1)
 g = patch(g, "const url = p => ROOT + String(p || '').replace(/^\\/+/, '');",
           "const url = p => { const k = String(p || '').replace(/^\\/+/, ''); return (root.GRUG_ASSETS && root.GRUG_ASSETS[k.split(/[?#]/)[0]]) || ROOT + k; };")
-g = patch(g, "const d = url('assets/sandy/');\n    return { def: true, bust: d + 'bust.png', full: d + 'full.png', happy: d + 'happy.png', sad: d + 'sad.png', cheer: d + 'cheer.png' };",
+g = patch(g, "const d = url('assets/sandy/');\n    return { def: true, bust: d + 'bust.png?v=av2', full: d + 'full.png?v=av2', happy: d + 'happy.png?v=av2', sad: d + 'sad.png?v=av2', cheer: d + 'cheer.png?v=av2' };",
           "const d = n => url('assets/sandy/' + n + '.png');   // showcase: each picture by its own path, so the packed copies are found\n    return { def: true, bust: d('bust'), full: d('full'), happy: d('happy'), sad: d('sad'), cheer: d('cheer') };")
 # (the colourful icon pictures are gone from grug.js, so there is nothing to switch off here any more)
 g = g.replace("'<div class=\"g-pref\"><span><b>Colorful icons</b>", "'<div class=\"g-pref\" hidden><span><b>Colorful icons</b>")
