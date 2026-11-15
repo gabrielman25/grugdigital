@@ -1,0 +1,851 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Classic avatar · Grug</title>
+<meta name="description" content="The classic Grug avatar (archived): body, face, hair, hat, clothes and shoes. Saved on this phone.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#eaf6ee">
+<link rel="icon" href="../../favicon.png">
+<link rel="stylesheet" href="../../assets/grug.css">
+<script src="../../assets/theme.js"></script>
+<!-- READ ME FIRST: the full read-me (Markdown) is in <textarea id="sandy-readme"> right after <body>. It explains the config, the SandyKit API,
+     the iframe postMessage API and how to lift the runtime (between the SANDY RUNTIME markers) into another project. -->
+</head><body>
+<textarea id="sandy-readme" hidden readonly aria-hidden="true">
+# Sandy avatar editor and runtime (sandy-avatar.html)
+
+One self-contained HTML file. Open it in a browser and it is a wardrobe for Sandy: hair,
+skin, nails, face, build, base clothes, outfit pieces with a tint each, flip-flops or
+boots, and a weapon. The same file carries the runtime (`window.SandyKit`) that builds a
+dressed Sandy from a small JSON config, so other projects can use her as the player or
+as any number of NPCs. Nothing is loaded from the network.
+
+## Where things are in this file
+
+Search for these markers. Everything between them is plain text you can copy out. This read-me quotes the markers as well, so take the last match of each runtime marker.
+
+| Marker | What it is |
+| --- | --- |
+| `<textarea id="sandy-readme"` | This read-me (Markdown) |
+| `SANDY RUNTIME: BEGIN` / `SANDY RUNTIME: END` | Everything a project needs: three.js r149, GLTFLoader, the body model, hair, outfits, weapons, the rig (`makeN3`) and `SandyKit` |
+| `<script id="sandy-kit">` | The `SandyKit` API itself (the last script inside the runtime) |
+| `SANDY EDITOR: BEGIN` / `SANDY EDITOR: END` | The wardrobe page, in two parts: its styles and markup (before the runtime) and its script (after it). Drop both when you only need the runtime |
+
+To split the runtime into its own file (for example from a shell, or from a Claude session):
+
+```python
+s = open('sandy-avatar.html', encoding='utf-8').read()
+a = s.rindex('<!-- ===== SANDY RUNTIME: BEGIN ===== -->')   # rindex: this read-me quotes the markers too
+b = s.rindex('<!-- ===== SANDY RUNTIME: END ===== -->') + len('<!-- ===== SANDY RUNTIME: END ===== -->')
+open('sandy-runtime.html', 'w', encoding='utf-8').write(s[a:b])   # paste these script tags into your page
+readme = s[s.index('<textarea id="sandy-readme" hidden readonly'):]
+readme = readme[readme.index('>') + 1:readme.index('</' + 'textarea>')]
+```
+
+## Three ways to use her in a project
+
+### 1. As an iframe (any page, any framework, nothing to merge)
+
+Put the file next to your page and embed it in viewer mode (no wardrobe, just her):
+
+```html
+<iframe id="npc1" src="sandy-avatar.html?mode=viewer&bg=transparent&seed=guard-1"
+        width="320" height="480" style="border:0" title="Sandy"></iframe>
+```
+
+URL options:
+
+- `mode=viewer`: hide the wardrobe. Leave it out to show the full editor.
+- `bg=transparent`: no backdrop (viewer mode only).
+- `config=<code>`: a look, from the editor's "Copy link" / "Copy embed code" or `SandyKit.encode(config)`.
+- `seed=<any text>`: a random look that is the same every time for the same seed (good for NPC crowds).
+- `view=body|face|feet`, `spin=1`: camera framing and a slow turntable.
+
+Talk to it with `postMessage`. Every reply echoes the `id` you sent.
+
+```js
+const f = document.getElementById('npc1').contentWindow;
+f.postMessage({ sandy: 'apply', config: { skin: '#8a5a3c', top: { part: 'Female_Ranger_Body', colour: '#3fc1ff' } }, id: 1 }, '*');
+f.postMessage({ sandy: 'apply', config: fullConfig, replace: true }, '*'); // replace the whole look
+f.postMessage({ sandy: 'get', id: 2 }, '*');          // -> { sandy: 'config', config, id: 2 }
+f.postMessage({ sandy: 'random', seed: 'bob' }, '*'); // a random look
+f.postMessage({ sandy: 'snapshot', id: 3 }, '*');     // -> { sandy: 'png', dataURL, id: 3 }
+f.postMessage({ sandy: 'view', view: 'face', spin: true }, '*');
+f.postMessage({ sandy: 'catalog', id: 4 }, '*');      // -> everything a config can name
+addEventListener('message', e => { if (e.data && e.data.sandy === 'change') save(e.data.config); });
+// the frame also sends { sandy: 'ready', config } once she has loaded
+```
+
+A game can open the full editor in an iframe (no `mode=viewer`) as its character
+creator, listen for `change`, and store the config.
+
+### 2. Inside a three.js scene (the player or NPCs in your own 3D world)
+
+Copy the runtime block (see above) into your page before your own code. It defines
+`window.THREE` (r149) and `THREE.GLTFLoader`; build your scene with that same `THREE`.
+
+```js
+const sandy = await SandyKit.create({ hair: { style: 5, colour: '#d6ae58' }, feet: { type: 'flipflops', sole: '#ffffff', strap: '#ff5c8a' } });
+scene.add(sandy.object3d);             // a THREE.Group: stands on y = 0, faces +z, units are centimetres (about 205 to the top of her hair)
+sandy.object3d.position.set(0, 0, 0);
+sandy.object3d.scale.setScalar(0.01);  // if your world is in metres
+// every frame:
+sandy.update(dt);                      // dt in seconds (or leave it out and she times herself)
+// later:
+sandy.apply({ expression: 'surprised' });
+sandy.lookAt(camera.position);         // head and eyes follow a world point; lookAt(null) to stop
+const cfg = sandy.getConfig();         // save it, send it, put it in a level file
+sandy.dispose();
+```
+
+NPC crowds: `SandyKit.create(SandyKit.randomConfig('npc-' + i))` for each one. Each
+Sandy takes a moment to build (she is a full skinned model), so create them during a
+loading screen or one per frame.
+
+Lighting: she uses `MeshStandardMaterial`, so give your scene a light or two
+(a `HemisphereLight` plus a `DirectionalLight` with shadows looks right). Set
+`renderer.outputEncoding = THREE.sRGBEncoding`.
+
+If your project already uses a different three.js version, either load this r149 copy
+in its own page and use the iframe route, or keep the runtime's copy as the only
+`THREE` on the page. The rig and loader are written for r149.
+
+### 3. As the whole page
+
+Open `sandy-avatar.html` and use it as is: dress her, then "Save" gives you the JSON,
+a link that reopens this exact look, an embed code and a PNG picture.
+
+## The config
+
+Every field is optional; anything left out comes from `SandyKit.DEFAULT`.
+`apply()` takes a partial config and changes only what you pass.
+
+```json
+{
+  "hair": { "style": 12, "colour": "#2a1a12" },
+  "skin": "#d9a67e",
+  "nails": "#d9a67e",
+  "expression": "smug",
+  "outfit": { "shirt": "#2b3350", "shorts": "#2a2a2a", "belt": "#141414" },
+  "top":       { "part": "mh_toigo_keyhole_tank_top", "texture": "mh_toigo_keyhole_tank_top", "colour": "#ffffff" },
+  "legs":      { "part": "Female_Peasant_Legs", "texture": "peasant2", "colour": "#ffffff" },
+  "shoulderL": null,
+  "shoulderR": null,
+  "feet": { "type": "flipflops", "sole": "#f2efe6", "strap": "#e3101c" },
+  "weapon": { "name": "Sword", "variant": "Iron", "colour": "#ffffff" },
+  "build": { "height": 1, "footLength": 1, "toeLength": 1, "upperTorso": 1, "lowerTorso": 1, "neck": 1,
+             "shoulders": 1, "hips": 1, "upperArm": 1, "forearm": 1, "thigh": 1, "shin": 1 }
+}
+```
+
+- `body`: `"female"` or `"male"` (`SandyKit.CATALOG.bodies`). Both bodies are Quaternius Universal Base Characters
+  (Superhero, CC0) wearing her own head, sphere hands and feet; every outfit piece fits both. Changing `body` rebuilds
+  her rig in place; `await sandy.ready` if you need to know when it's done.
+- `decal`: a chest print on her top: `image` (`"star"`, `"heart"`, `"bolt"`, `"smile"`, `"peace"`, an image data URL, or null; the old `"print:<name>"` and `"pack:<id>"` picture prints were removed and now show nothing), `size`, `up` and `side` (cm).
+- `hat`: `type` (`"none"` or one of `SandyKit.CATALOG.hats`: beanie, beret, bucketHat, cap, cowboyHat, sunHat, topHat, witchHat),
+  `colour`, `size`, `up` and `forward` (cm), `tilt` (radians). Her hair is never changed by a hat. Hats: Chibi Hats by PaperPluto
+  (itch.io; free for commercial use, not to be redistributed on their own).
+- `earrings`: `type` `"none"`, `"pearls"` or `"hoops"`; `size`, `colour` (null = pearl white / gold), `drop` and `forward` (cm), `angle` (radians, hoops).
+- `ears`: `size` (0 hides them), `thickness`, `up`, `forward`, `out` (cm), `twist` and `flare` (radians); all 0 / 1 by default.
+- `faceShape`: `jaw` and `cheeks` (widths), `chin` (length below the mouth) and `depth` (how far the lower face comes forward), multipliers around 1.
+- `faceScale`: the size of the face drawing (eyes, brows, mouth), 0.7 by default (0.3 to 1 in the editor); `faceY` moves it up or down.
+- `build.headSize`, `build.headWidth`, `build.handSize` (the hand balls) and `hair.size`: multipliers around 1; `hair.up` and `hair.forward` nudge the hair (cm).
+- `build.cranium`: the size of her cranium above the brow (her hair grows with it), 1 by default; for cartoonish big-brained looks.
+- `build`: `height`, `footLength`, `toeLength`, and the proportions `upperTorso`, `lowerTorso`, `neck`, `shoulders`
+  (width), `hips` (width), `upperArm`, `forearm`, `thigh`, `shin`: each a length multiplier, 1 = as modelled.
+- `hair.style`: 0 to `SandyKit.CATALOG.hairStyles.length - 1` (5 styles from the Universal Base Characters pack:
+  long, buns, pixie, parted, buzzed; `hair.colour` tints any of them).
+- `skin`, `nails`, `hair.colour`, the `outfit` colours and every `colour`: any `#rrggbb`.
+  Skin is a tint over her painted skin (`#ffffff` = as painted).
+- `outfit`: her shirt, shorts and belt, shown where no `top` / `legs` piece is worn.
+- `top`, `legs`, `shoulderL`, `shoulderR`: `null` for nothing, or a `part` from
+  `SandyKit.CATALOG.parts[slot]`, a `texture` from `SandyKit.CATALOG.textures`
+  (`ranger`, `ranger3`, `peasant`, `peasant2`) and a `colour` tint (`#ffffff` keeps the
+  original colours).
+- Checked clothing only: every part in `SandyKit.CATALOG.parts` passed an automated check on both bodies. Each part is worn
+  alone and rendered from 20 angles in 5 poses (idle, two walk frames, wave, jump), counting two things: skin that was hidden
+  but can be seen (a see-through hole, such as a missing neck), and skin poking out through cloth. Parts over the limits
+  (idle ≤ 90 px, walk ≤ 120, wave / jump ≤ 400, no single view over 120, at 400×600) were left out, plus two shoes that
+  passed but looked wrong close up. The kit pieces left out are still in the data, so old configs naming them still load.
+- Clothes: the parts whose id starts with `mh_` are MakeHuman community garments (dresses, suits, tops, trousers,
+  skirts, shoes, boots and socks) fitted to both bodies, in plain colours (no textures; `#ffffff` keeps the garment's
+  own colour, any other `colour` replaces it). Each has one "texture" entry, its own id
+  (`SandyKit.texturesFor(p.set)` lists the textures a catalogue part `p` can take), and `colour` tints it. In the catalogue
+  they carry `clothes: true`, `licence` (`CC0`, or `check`: read that asset's MakeHuman page before you ship it)
+  and `full: true` for a dress, suit or robe: those go in `top` and cover her legs too, so wearing one clears
+  `legs` and picking a `legs` piece takes it off. Skin a garment covers is hidden rather than pushed out.
+- Boots take `height` (0 = cut just above the ankle, like a shoe; 1 = as made) and `auto` (default true: at ankle height whenever
+  trousers, a long skirt or a long dress reach below the knee).
+- T-shirt and Long-sleeve tee (`gen_tshirt`, `gen_longsleeve`) are grown from the body itself, so they fit both bodies exactly.
+- Every garment starts white (textured kit pieces in greyscale), so `colour` sets its colour directly.
+- `SandyKit.randomConfig(seed, {body})` keeps that body and only picks what that body wears (each catalogue part has
+  `wearer`: `"f"`, `"m"` or `"u"` for both). The editor's Randomize keeps the body you have selected.
+- `feet.type`: `"barefoot"`, `"flipflops"` (with `sole` and `strap` colours) or
+  `"boots"` (with `part`, `texture` and `colour`, like the other pieces).
+- `weapon`: always `null` (weapons were removed; her hands stay empty).
+- `build`: multipliers around 1 (height 0.85 to 1.15, foot length 0.8 to 1.25, toe
+  length 0.8 to 1.3).
+- The male body has his own face drawing, shown whatever `expression` says (the expressions are drawn for her face).
+- `expression`: one of `SandyKit.CATALOG.expressions` (neutral, smug, happy, laugh,
+  surprised, scared, annoyed, pout, curious, blush, relaxed, sleepy, wince, dizzy, dead,
+  pleading, gasp).
+
+Animations: `sandy.play(name)` with a name from `SandyKit.CATALOG.animations` (`idle`, `walk`, `wave`, `jump`,
+`dance`) loops it on top of her idle pose; `sandy.animation` says which is playing. Call `sandy.update(dt)` every frame.
+
+In the editor's stage: drag to turn her, right-drag or Shift-drag to pan, scroll to zoom; **Free cam** flies the camera
+with W A S D (Q / E down and up, Shift for speed) while dragging looks around. The buttons at the bottom left preview the
+animations.
+
+### Character files
+
+The Save tab's **Save character (.json)** writes the whole character (with its name) to one small file; **Open character…**,
+or dropping a .json on the page, loads one back. The file is a config plus `"name"` (and a `"sandyCharacter": 1` marker),
+so it also works anywhere a config does. In a game:
+
+```js
+const rosa = await SandyKit.loadCharacter('characters/rosa.json');   // or a parsed object
+scene.add(rosa.object3d);  // rosa.name === 'Shopkeeper Rosa'
+```
+
+Served over http, `sandy-avatar.html?character=characters/rosa.json` opens the editor on that file.
+
+Configs are small, so they fit in save files, URLs and level data.
+`SandyKit.encode(config)` turns one into a URL-safe string and `SandyKit.decode(text)`
+turns it back.
+
+## SandyKit API
+
+- `SandyKit.create(config) -> Promise<Sandy>`: build a new Sandy.
+- `SandyKit.randomConfig(seed?)`: a random look; the same seed always gives the same look.
+- `SandyKit.DEFAULT`: the look used for anything a config leaves out.
+- `SandyKit.CATALOG`: `hairStyles`, `skinTones`, `nailColours`, `expressions`,
+  `textures`, `parts` (by slot), `weapons`, `slots` (slot labels).
+- `SandyKit.merge(a, b)`, `SandyKit.encode(config)`, `SandyKit.decode(text)`.
+- `SandyKit.readme()`: this text.
+- A `Sandy` has `object3d` (add it to your scene), `apply(patch)`, `getConfig()`,
+  `setExpression(name)`, `lookAt(vector3 | null)`, `update(dt)` and `dispose()`.
+  `sandy.n3` is the underlying rig (`n3.bones` by name, `n3.pose` for the idle pose)
+  for anyone who wants to animate her further.
+
+## What is not included
+
+This is her look and an idle stance. Walking, fighting, ragdolls, voices and the
+dungeon live in Splash Dungeon and are not part of this file.
+
+## Credits and licences
+
+- Body rig: "Natalie" by Andrew Silke (create3dcharacters.com), licensed for
+  non-commercial, educational use only. Check that licence before shipping anything
+  commercial with her.
+- Outfits: Quaternius "Modular Character Outfits - Fantasy" (CC0), refitted to her rig.
+- Weapons: FantasyWeaponsPack models.
+- three.js r149 (MIT).
+</textarea>
+<!-- ===== SANDY EDITOR: BEGIN (markup and styles) ===== -->
+<style>
+/* Avatar editor, themed with the Grug site (assets/grug.css tokens: --ink, --card, --glass, --line, --ring-a …) */
+:root{--slate:var(--mut);--paper:var(--glass-strong)}
+body.g-chrome{padding-bottom:calc(var(--tabs) + var(--sab) + 10px)}
+.px{font-family:var(--display);font-weight:600;letter-spacing:.003em}
+#app{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:18px;height:calc(100vh - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 30px);height:calc(100dvh - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 30px);min-height:480px;padding:6px 0 0}
+#stageWrap{position:relative;border-radius:var(--r);padding:0;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);min-height:0;overflow:hidden}
+#stage{position:relative;width:100%;height:100%;overflow:hidden;background:radial-gradient(90% 70% at 50% 35%,var(--stage-a),transparent 70%),radial-gradient(80% 60% at 50% 100%,var(--stage-b),transparent 70%),var(--card2)}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}#stage canvas:active{cursor:grabbing}
+#stageTitle{position:absolute;left:16px;top:14px;color:var(--ink);font-size:20px;pointer-events:none}
+#stageHint{position:absolute;left:16px;bottom:12px;right:16px;color:var(--mut);font-size:12.5px;pointer-events:none}
+#views{position:absolute;right:12px;top:10px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:70%}
+#views button,.btn,#anims button{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:0 14px;border-radius:999px;background:var(--glass-strong);color:var(--ink);border:1px solid var(--line2);font:700 14px/1 var(--font);cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#views button[aria-pressed=true],#anims button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn:active,#views button:active,#anims button:active{transform:scale(.97)}
+.btn.red{background:linear-gradient(135deg,var(--ring-a),var(--ring-b));color:var(--on-sel);border-color:transparent}
+.btn:focus-visible,#views button:focus-visible,select:focus-visible,input:focus-visible,.sw:focus-visible,.seg button:focus-visible,.tab:focus-visible,.chips button:focus-visible{outline:3px solid var(--ring-a);outline-offset:2px}
+#loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink);font-size:20px;background:var(--scrim);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+#loading.hide{display:none}
+#panel{display:flex;flex-direction:column;min-height:0;background:var(--glass);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);overflow:hidden}
+#panelTop{display:flex;align-items:center;gap:8px;padding:14px 14px 10px}
+#panelTop h1{margin:0;flex:1;font-size:24px}
+#panelTop .btn{min-height:36px;padding:0 12px;font-size:13.5px}
+#tabs{display:flex;gap:6px;padding:0 14px 10px;overflow-x:auto;scrollbar-width:none}
+#tabs::-webkit-scrollbar{display:none}
+.tab{appearance:none;flex:none;min-height:38px;padding:0 14px;border-radius:999px;background:var(--card);color:var(--ink2);border:1px solid var(--line);font:700 14.5px/1 var(--font);cursor:pointer}
+.tab[aria-selected=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#pages{flex:1;min-height:0;overflow-y:auto;border-top:1px solid var(--line)}
+.page{padding:4px 16px 20px}.page[hidden]{display:none}
+.grp{padding:14px 0;border-bottom:1px solid var(--line)}.grp:last-child{border-bottom:0}
+.grp h2{margin:0 0 10px;font-size:18px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0}
+.row label,.lab{color:var(--ink2);font-size:14px;min-width:92px}
+select,input[type=text],textarea{font:600 14.5px/1.3 var(--font);color:var(--ink);background:var(--solid);border:1px solid var(--line2);border-radius:12px;padding:9px 12px}
+select{flex:1;min-width:0}
+textarea{width:100%;min-height:120px;font:12.5px/1.45 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
+.sws{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.sw{width:30px;height:30px;border-radius:50%;border:2px solid var(--line2);cursor:pointer;padding:0;position:relative}
+.sw[aria-pressed=true]{border-color:var(--bezel);box-shadow:0 0 0 2px var(--ink)}
+.pick{position:relative;display:block;flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--line2);background:conic-gradient(#e3101c,#ffcf4a,#2ee59d,#3fc1ff,#9b7bff,#ff5c8a,#e3101c);cursor:pointer;overflow:hidden}
+.pick[aria-pressed=true]{border-color:var(--bezel);box-shadow:0 0 0 2px var(--ink)}.pick i{position:absolute;inset:6px;border-radius:50%;background:var(--c,transparent)}
+.pick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}.row .pick,.sws .pick{min-width:0}.pick:focus-within{outline:3px solid var(--ring-a);outline-offset:2px}
+#stageHint .narrow{display:none}@media (max-width:860px){#stageHint .wide{display:none}#stageHint .narrow{display:inline}}
+.seg{display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--card2);border:1px solid var(--line)}
+.seg button{appearance:none;flex:1;border:0;background:none;padding:8px 12px;border-radius:999px;cursor:pointer;color:var(--ink2);font:700 14px/1 var(--font)}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{appearance:none;min-height:34px;padding:0 13px;border-radius:999px;background:var(--card);color:var(--ink2);border:1px solid var(--line);cursor:pointer;font:700 13.5px/1 var(--font);text-transform:capitalize}
+.chips button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+/* print pictures sit on a flat, opaque off-white tile (no shadows) so every colour reads clearly */
+#decals .print,#pkGrid button{background:#f6f4ee!important;border:1px solid #e2ddd0;box-shadow:none}
+#decals .print[aria-pressed=true],#pkGrid button[aria-pressed=true]{border:2px solid var(--ink);background:#f6f4ee!important}
+#decals .print img,#pkGrid img{filter:none}
+#pk{margin-top:8px;display:grid;gap:8px}
+#pkQ{width:100%;min-height:40px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:#f6f4ee;color:#1a2410;font:600 15px/1 var(--font)}
+#pkGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px;max-height:340px;overflow:auto;padding:2px}
+#pkGrid button{appearance:none;aspect-ratio:1;border-radius:12px;padding:6px;cursor:pointer;display:grid;place-items:center}
+#pkGrid img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+#decals .print{padding:4px 8px;line-height:0}#decals .print img{width:28px;height:28px;object-fit:contain;pointer-events:none}
+input[type=range]{flex:1;min-width:120px;accent-color:var(--ring-a)}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--ring-a)}
+.val{width:48px;text-align:right;font-variant-numeric:tabular-nums;color:var(--mut);font-size:13.5px}
+.note{color:var(--mut);font-size:13px;margin:6px 0 0}
+.cc .seg{margin-bottom:10px}
+.ccg{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;margin:2px 0 8px}
+.ccg button{appearance:none;position:relative;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:4px;border-radius:14px;background:var(--card);border:1px solid var(--line);cursor:pointer;font:700 11.5px/1.15 var(--font);color:var(--ink2);text-align:center;min-width:0}
+.ccg button i{display:block;aspect-ratio:1;border-radius:10px;background:var(--card2) center/cover no-repeat}
+.ccg button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px 2px}
+.ccg button[aria-pressed=true]{border:2px solid var(--ink);padding:3px;color:var(--ink)}
+.ccg button.locked i{filter:grayscale(1) opacity(.45)}
+.ccg button.locked::after{content:"🔒";position:absolute;top:8px;right:8px;font-size:13px}
+/* wardrobe grids: every piece is a tile with a picture of her wearing it (rendered on this phone the first time it scrolls into view) */
+.kitgrid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
+.kitgrid button i{aspect-ratio:1;background-color:var(--card2);position:relative;overflow:hidden}
+.kitgrid button i.busy::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);animation:kg-shimmer 1.1s linear infinite}
+@keyframes kg-shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.kitgrid button.none i{display:grid;place-items:center;font-size:26px;color:var(--mut)}
+.kitgrid button.none i::before{content:"∅"}
+.kitgrid button small{display:block;font-size:10.5px;color:var(--mut);font-weight:600;text-transform:none;padding:0 2px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kitgrid button[aria-pressed=true] i{box-shadow:inset 0 0 0 2px var(--ink)}
+.emogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;margin:6px 0}
+.emogrid button{appearance:none;position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px 10px;border-radius:16px;background:var(--card);border:1px solid var(--line);cursor:pointer;font:700 13px/1 var(--font);color:var(--ink);text-transform:none}
+.emogrid button i{width:46px;height:46px;border-radius:50%;background:var(--c,#3b82f6);display:grid;place-items:center;font-size:24px;font-style:normal;color:#fff}
+.emogrid button[aria-pressed=true]{border:2px solid var(--ink);padding:11px 5px 9px}
+.emogrid button .n{position:absolute;top:6px;left:8px;min-width:18px;height:18px;border-radius:9px;background:var(--ink);color:var(--bg);font-size:11px;display:grid;place-items:center;padding:0 5px}
+.emogrid button[aria-pressed=false] .n{display:none}
+.emoload{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0 10px;min-height:36px}
+.emoload span{display:inline-flex;align-items:center;gap:6px;padding:6px 10px 6px 6px;border-radius:999px;background:var(--card2);border:1px solid var(--line);font:700 13px/1 var(--font)}
+.emoload span i{width:22px;height:22px;border-radius:50%;background:var(--c);display:grid;place-items:center;font-size:12px;font-style:normal}
+.emoload .empty{color:var(--mut);font-weight:600;font-size:13px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.classic{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;margin:10px 0 2px;padding:12px 14px;border-radius:var(--r-s);background:var(--card2);border:1px solid var(--line)}
+.classic p{font-size:13.5px;color:var(--ink2);flex:1;min-width:180px}
+.classic a{font-weight:800;color:var(--ink);white-space:nowrap}
+#toast{position:fixed;left:50%;bottom:calc(var(--tabs) + var(--sab) + 18px);transform:translateX(-50%);background:var(--chip-bg);color:var(--chip-fg);padding:10px 16px;border-radius:999px;font-weight:700;opacity:0;transition:opacity .2s;pointer-events:none;z-index:60}
+#toast.on{opacity:1}
+#help{position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.45);z-index:70}#help[hidden]{display:none}
+#help .card{width:min(820px,92vw);height:min(80vh,900px);display:flex;flex-direction:column;background:var(--solid);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+#help .card header{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}#help header h2{margin:0;flex:1}
+#help pre{flex:1;margin:0;overflow:auto;padding:14px 16px;font:12.5px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;color:var(--ink)}
+body.viewer #panel{display:none}body.viewer #app{grid-template-columns:1fr;padding:0;height:100vh}body.viewer #stageWrap{border:0;border-radius:0;box-shadow:none;background:none}
+#anims{position:absolute;left:14px;bottom:40px;display:flex;gap:6px;flex-wrap:wrap;z-index:2}#anims button{min-height:32px;padding:0 11px;font-size:12.5px}
+#anims button,#freecam{cursor:pointer}
+body.viewer #views,body.viewer #stageTitle,body.viewer #stageHint,body.viewer #anims{display:none}
+body.viewer.clear,body.viewer.clear #stage{background:transparent}
+@media (max-width:860px){#app{grid-template-columns:1fr;grid-template-rows:56vh auto;height:auto;min-height:0;gap:14px}#panel{min-height:60vh}#pages{overflow:visible}#views{max-width:64%;gap:4px}#views button{min-height:30px;padding:0 10px;font-size:12.5px}#stageTitle{font-size:16px}#anims button{min-height:28px;padding:0 9px;font-size:12px}}
+@media (orientation:landscape) and (max-height:540px){#app{grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:none;height:calc(100vh - var(--top) - var(--sat) - 24px)}}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+.sub{font-size:13px;margin:14px 0 4px;color:var(--mut)}
+/* the archive bar (this whole editor is the archived classic avatar) */
+#classicBar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px auto 0;padding:10px 14px;border-radius:var(--r-s);background:var(--card-solid,var(--card));border:1px solid var(--line)}
+#classicBar>div{flex:1;min-width:200px;display:flex;flex-direction:column;gap:2px}#classicBar span{color:var(--mut);font-size:13px}
+#classicBar .btn{min-height:36px;font-size:13.5px}
+.cb-sw{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font:700 14px/1 var(--font);color:var(--ink)}
+.cb-sw input{position:absolute;opacity:0;width:1px;height:1px}.cb-sw i{width:42px;height:24px;border-radius:12px;background:var(--line2);position:relative;transition:background .15s}
+.cb-sw i::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .15s}
+.cb-sw input:checked+i{background:var(--mode,#C59BFF)}.cb-sw input:checked+i::after{transform:translateX(18px)}.cb-sw input:focus-visible+i{outline:3px solid var(--mode-text,var(--ink));outline-offset:2px}
+#app{height:calc(100vh - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 96px);height:calc(100dvh - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 96px)}
+</style>
+<div class="wrap" id="classicBar" data-noswipe><div><b class="px">Classic avatar</b><span>Archived. Turn it on to play as this look in games; everyone else still sees the new avatar.</span></div>
+  <label class="cb-sw"><input type="checkbox" id="classicOn"><i aria-hidden="true"></i><span>Use in games</span></label><a class="btn px" href="../">New avatar</a></div>
+<main class="wrap" id="app">
+  <div id="stageWrap"><div id="stage">
+    <div id="stageTitle" class="px">Your avatar</div>
+    <div id="views" role="group" aria-label="Camera"><button type="button" class="px" data-view="body" aria-pressed="true">Full</button><button type="button" class="px" data-view="face">Face</button><button type="button" class="px" data-view="feet">Feet</button><button type="button" class="px" id="spin" aria-pressed="false">Spin</button><button type="button" class="px" id="freecam" aria-pressed="false" title="Free camera: WASD to move, Q/E down/up, drag to look, Shift for speed">Free cam</button></div>
+    <div id="anims" role="group" aria-label="Animation"></div>
+    <div id="stageHint"><span class="wide">Drag to turn her, right-drag or Shift-drag to pan, scroll to zoom, double-click to reset. Free cam: WASD, Q/E, drag to look.</span><span class="narrow">Drag to turn her, two fingers to pan and zoom.</span></div>
+    <div id="loading" class="px">Getting dressed…</div>
+  </div></div>
+  <aside id="panel" aria-label="Avatar editor">
+    <div id="panelTop"><h1 class="px">Wardrobe</h1><button type="button" class="btn px" id="bRandom">Randomize</button><button type="button" class="btn px" id="bReset">Reset</button><button type="button" class="btn px" id="bHelp" aria-label="Read me" hidden>?</button></div>
+    <div id="tabs" role="tablist">
+      <button class="tab px" role="tab" aria-selected="true" data-page="pLook">Look</button><button class="tab px" role="tab" aria-selected="false" data-page="pClothes">Clothes</button><button class="tab px" role="tab" aria-selected="false" data-page="pCustom" id="tabCustom">Custom</button><button class="tab px" role="tab" aria-selected="false" data-page="pFeet">Feet</button><button class="tab px" role="tab" aria-selected="false" data-page="pEmotes" id="tabEmotes">Emotes</button><button class="tab px" role="tab" aria-selected="false" data-page="pSave">Save</button>
+    </div>
+    <div id="pages">
+      <section class="page" id="pLook" role="tabpanel">
+        <div class="grp"><h2 class="px">Body</h2><div class="chips" id="bodies"></div></div>
+        <div class="grp"><h2 class="px">Face</h2><div class="chips" id="exprs"></div>
+          <div class="row"><label for="fsz">Face size</label><input type="range" id="fsz" min="0.3" max="1" step="0.005" data-num="faceScale"><span class="val" data-show="faceScale"></span></div>
+          <div class="row"><label for="fsJ">Jaw width</label><input type="range" id="fsJ" min="0.7" max="1.3" step="0.005" data-num="faceShape.jaw"><span class="val" data-show="faceShape.jaw"></span></div>
+          <div class="row"><label for="fsC">Cheek width</label><input type="range" id="fsC" min="0.8" max="1.25" step="0.005" data-num="faceShape.cheeks"><span class="val" data-show="faceShape.cheeks"></span></div>
+          <div class="row"><label for="fsN">Chin length</label><input type="range" id="fsN" min="0.5" max="1.6" step="0.01" data-num="faceShape.chin"><span class="val" data-show="faceShape.chin"></span></div>
+          <div class="row"><label for="fsD">Face depth</label><input type="range" id="fsD" min="0.7" max="1.4" step="0.005" data-num="faceShape.depth"><span class="val" data-show="faceShape.depth"></span></div>
+          <div class="row"><label for="fy">Face height</label><input type="range" id="fy" min="-0.25" max="0.25" step="0.005" data-num="faceY"><span class="val" data-show="faceY"></span></div></div>
+        <div class="grp"><h2 class="px">Ears</h2>
+          <div class="row"><label for="eS">Size</label><input type="range" id="eS" min="0" max="2" step="0.01" data-num="ears.size"><span class="val" data-show="ears.size"></span></div>
+          <div class="row"><label for="eT">Thickness</label><input type="range" id="eT" min="0.3" max="3" step="0.01" data-num="ears.thickness"><span class="val" data-show="ears.thickness"></span></div>
+          <div class="row"><label for="eU">Up / down</label><input type="range" id="eU" min="-4" max="4" step="0.05" data-num="ears.up"><span class="val" data-show="ears.up"></span></div>
+          <div class="row"><label for="eF">Forward / back</label><input type="range" id="eF" min="-4" max="4" step="0.05" data-num="ears.forward"><span class="val" data-show="ears.forward"></span></div>
+          <div class="row"><label for="eO">Out / in</label><input type="range" id="eO" min="-2" max="3" step="0.05" data-num="ears.out"><span class="val" data-show="ears.out"></span></div>
+          <div class="row"><label for="eW">Twist</label><input type="range" id="eW" min="-1.2" max="1.2" step="0.01" data-num="ears.twist"><span class="val" data-show="ears.twist"></span></div>
+          <div class="row"><label for="eL">Flare</label><input type="range" id="eL" min="-0.8" max="0.8" step="0.01" data-num="ears.flare"><span class="val" data-show="ears.flare"></span></div>
+        </div>
+        <div class="grp"><h2 class="px">Hat</h2><div class="chips" id="hats"></div>
+          <div class="row"><label for="hS">Size</label><input type="range" id="hS" min="0.7" max="1.4" step="0.005" data-num="hat.size"><span class="val" data-show="hat.size"></span></div>
+          <div class="row"><label for="hU">Up / down</label><input type="range" id="hU" min="-3" max="4" step="0.05" data-num="hat.up"><span class="val" data-show="hat.up"></span></div>
+          <div class="row"><label for="hF">Forward / back</label><input type="range" id="hF" min="-3" max="3" step="0.05" data-num="hat.forward"><span class="val" data-show="hat.forward"></span></div>
+          <div class="row"><label for="hT">Tilt</label><input type="range" id="hT" min="-0.5" max="0.5" step="0.01" data-num="hat.tilt"><span class="val" data-show="hat.tilt"></span></div>
+          <div class="sws" data-colour="hat.colour"></div>
+        </div>
+        <div class="grp"><h2 class="px">Earrings</h2><div class="chips" id="rings"></div>
+          <div class="row"><label for="rS">Size</label><input type="range" id="rS" min="0.4" max="2.5" step="0.01" data-num="earrings.size"><span class="val" data-show="earrings.size"></span></div>
+          <div class="row"><label for="rD">Drop</label><input type="range" id="rD" min="-1" max="3" step="0.05" data-num="earrings.drop"><span class="val" data-show="earrings.drop"></span></div>
+          <div class="row"><label for="rF">Forward</label><input type="range" id="rF" min="-1" max="2" step="0.05" data-num="earrings.forward"><span class="val" data-show="earrings.forward"></span></div>
+          <div class="row"><label for="rA">Hoop angle</label><input type="range" id="rA" min="-1.6" max="1.6" step="0.01" data-num="earrings.angle"><span class="val" data-show="earrings.angle"></span></div>
+          <div class="sws" data-colour="earrings.colour"></div>
+        </div>
+        <div class="grp"><h2 class="px">Skin</h2><div class="sws" data-colour="skin"></div></div>
+        <div class="grp"><h2 class="px">Hair</h2>
+          <div class="row"><button type="button" class="btn px" id="hairPrev" aria-label="Previous hairstyle">&lt;</button><select id="hairStyle" aria-label="Hairstyle"></select><button type="button" class="btn px" id="hairNext" aria-label="Next hairstyle">&gt;</button></div>
+          <div class="row"><label for="hsz">Hair size</label><input type="range" id="hsz" min="0.85" max="1.3" step="0.005" data-num="hair.size"><span class="val" data-show="hair.size"></span></div>
+          <div class="row"><label for="hup">Hair up / down</label><input type="range" id="hup" min="-2" max="2" step="0.05" data-num="hair.up"><span class="val" data-show="hair.up"></span></div>
+          <div class="row"><label for="hfw">Hair forward / back</label><input type="range" id="hfw" min="-2" max="2" step="0.05" data-num="hair.forward"><span class="val" data-show="hair.forward"></span></div>
+          <div class="sws" data-colour="hair.colour"></div></div>
+        <div class="grp"><h2 class="px">Nails</h2><div class="sws" data-colour="nails"></div><p class="note">Painted on her toes too.</p></div>
+        <div class="grp"><h2 class="px">Build</h2>
+          <div class="row"><label for="bh">Height</label><input type="range" id="bh" min="0.85" max="1.15" step="0.005" data-num="build.height"><span class="val" data-show="build.height"></span></div>
+          <div class="row"><label for="bf">Foot length</label><input type="range" id="bf" min="0.8" max="1.25" step="0.005" data-num="build.footLength"><span class="val" data-show="build.footLength"></span></div>
+          <div class="row"><label for="bt">Toe length</label><input type="range" id="bt" min="0.8" max="1.3" step="0.005" data-num="build.toeLength"><span class="val" data-show="build.toeLength"></span></div>
+          <div class="row"><label for="bhs">Head size</label><input type="range" id="bhs" min="0.7" max="1.4" step="0.005" data-num="build.headSize"><span class="val" data-show="build.headSize"></span></div>
+          <div class="row"><label for="bhw">Head width</label><input type="range" id="bhw" min="0.8" max="1.25" step="0.005" data-num="build.headWidth"><span class="val" data-show="build.headWidth"></span></div>
+          <div class="row"><label for="bhn">Hand size</label><input type="range" id="bhn" min="0.5" max="1.6" step="0.005" data-num="build.handSize"><span class="val" data-show="build.handSize"></span></div>
+          <div class="row"><label for="bc">Cranium</label><input type="range" id="bc" min="0.85" max="1.45" step="0.005" data-num="build.cranium"><span class="val" data-show="build.cranium"></span></div>
+          <h3 class="sub px">Proportions</h3>
+          <div class="row"><label for="pUT">Upper torso</label><input type="range" id="pUT" min="0.8" max="1.25" step="0.005" data-num="build.upperTorso"><span class="val" data-show="build.upperTorso"></span></div>
+          <div class="row"><label for="pLT">Lower torso</label><input type="range" id="pLT" min="0.8" max="1.25" step="0.005" data-num="build.lowerTorso"><span class="val" data-show="build.lowerTorso"></span></div>
+          <div class="row"><label for="pNk">Neck</label><input type="range" id="pNk" min="0.7" max="1.4" step="0.005" data-num="build.neck"><span class="val" data-show="build.neck"></span></div>
+          <div class="row"><label for="pSh">Shoulder width</label><input type="range" id="pSh" min="0.8" max="1.25" step="0.005" data-num="build.shoulders"><span class="val" data-show="build.shoulders"></span></div>
+          <div class="row"><label for="pHp">Hip width</label><input type="range" id="pHp" min="0.8" max="1.25" step="0.005" data-num="build.hips"><span class="val" data-show="build.hips"></span></div>
+          <div class="row"><label for="pUA">Upper arm</label><input type="range" id="pUA" min="0.8" max="1.25" step="0.005" data-num="build.upperArm"><span class="val" data-show="build.upperArm"></span></div>
+          <div class="row"><label for="pFA">Forearm</label><input type="range" id="pFA" min="0.8" max="1.25" step="0.005" data-num="build.forearm"><span class="val" data-show="build.forearm"></span></div>
+          <div class="row"><label for="pTh">Thigh</label><input type="range" id="pTh" min="0.8" max="1.25" step="0.005" data-num="build.thigh"><span class="val" data-show="build.thigh"></span></div>
+          <div class="row"><label for="pSn">Shin</label><input type="range" id="pSn" min="0.8" max="1.25" step="0.005" data-num="build.shin"><span class="val" data-show="build.shin"></span></div>
+        </div>
+      </section>
+      <section class="page" id="pClothes" role="tabpanel" hidden>
+        <div class="grp"><h2 class="px">Shirt and shorts</h2><p class="note">What she wears when no top or legs are picked below.</p>
+          <div class="row"><span class="lab">Shirt</span><div class="sws" data-colour="outfit.shirt"></div></div>
+          <div class="row"><span class="lab">Shorts</span><div class="sws" data-colour="outfit.shorts"></div></div>
+          <div class="row"><span class="lab">Belt</span><div class="sws" data-colour="outfit.belt"></div></div></div>
+        <div class="grp kit" data-slot="top"><h2 class="px">Top</h2></div>
+        <div class="grp"><h2 class="px">Chest print</h2><p class="note">One picture on the front of her top (or her shirt).</p><div class="chips" id="decals"></div>
+          <div class="row" hidden><button type="button" class="btn px" id="pkOpen" aria-expanded="false" aria-controls="pk">All prints…</button></div>
+          <div id="pk" hidden>
+            <input type="search" id="pkQ" placeholder="Search prints (star, cat, pizza…)" autocomplete="off" aria-label="Search prints">
+            <div class="chips" id="pkCats" role="group" aria-label="Print categories"></div>
+            <div id="pkGrid" role="group" aria-label="Prints"></div>
+            <p class="note" id="pkNone" hidden>No prints match that.</p>
+            <div class="row"><button type="button" class="btn px" id="pkMore" hidden>Show more</button></div>
+          </div>
+          <div class="row"><label class="btn px" for="decFile" style="cursor:pointer">Upload image…</label><input type="file" id="decFile" accept="image/*" hidden></div>
+          <div class="row"><label for="dS">Size</label><input type="range" id="dS" min="0.3" max="2" step="0.01" data-num="decal.size"><span class="val" data-show="decal.size"></span></div>
+          <div class="row"><label for="dU">Up / down</label><input type="range" id="dU" min="-12" max="8" step="0.1" data-num="decal.up"><span class="val" data-show="decal.up"></span></div>
+          <div class="row"><label for="dX">Left / right</label><input type="range" id="dX" min="-8" max="8" step="0.1" data-num="decal.side"><span class="val" data-show="decal.side"></span></div>
+        </div>
+        <div class="grp kit" data-slot="legs"><h2 class="px">Legs</h2></div>
+        <div class="grp kit" data-slot="shoulderL"><h2 class="px">Left shoulder</h2></div>
+        <div class="grp kit" data-slot="shoulderR"><h2 class="px">Right shoulder</h2></div>
+      </section>
+      <section class="page" id="pCustom" role="tabpanel" hidden>
+        <p class="note" style="margin:10px 0 0">Custom clothing works like Roblox: any classic <b>shirt</b> or <b>pants</b> template (585 × 559 PNG) wraps onto her. Wear a design from your closet or upload your own.</p>
+        <div class="grp cc" data-cc="shirt"><h2 class="px">Shirt</h2>
+          <div class="seg" data-ccg="shirt" role="group" aria-label="Shirt type"><button type="button" class="px" data-g="">None</button><button type="button" class="px" data-g="gen_tshirt">T-shirt</button><button type="button" class="px" data-g="gen_longsleeve">Long sleeves</button></div>
+          <div class="ccg" data-ccd="shirt"></div>
+          <div class="row"><label class="btn px" for="ccFileShirt" style="cursor:pointer">Upload shirt template…</label><input type="file" id="ccFileShirt" accept="image/*" hidden data-ccu="shirt"><a class="btn px" href="../../assets/clothing/template-shirt.png" download="grug-shirt-template.png">Blank template</a></div>
+          <div class="row"><span class="lab">Base colour</span><div class="sws" data-colour="top.colour"></div></div><p class="note">Shows through see-through parts of the template.</p></div>
+        <div class="grp cc" data-cc="pants"><h2 class="px">Pants</h2>
+          <div class="seg" data-ccg="pants" role="group" aria-label="Pants type"><button type="button" class="px" data-g="">None</button><button type="button" class="px" data-g="mh_cortu_jeans_shorts">Shorts</button><button type="button" class="px" data-g="Female_Peasant_Legs">Pants</button></div>
+          <div class="ccg" data-ccd="pants"></div>
+          <div class="row"><label class="btn px" for="ccFilePants" style="cursor:pointer">Upload pants template…</label><input type="file" id="ccFilePants" accept="image/*" hidden data-ccu="pants"><a class="btn px" href="../../assets/clothing/template-pants.png" download="grug-pants-template.png">Blank template</a></div>
+          <div class="row"><span class="lab">Base colour</span><div class="sws" data-colour="legs.colour"></div></div></div>
+        <div class="grp"><p class="note">Earn more designs by playing and eating at partners. <a href="../../shop/" style="font-weight:800;color:var(--ink)">See them in the shop</a>.</p></div>
+      </section>
+      <section class="page" id="pFeet" role="tabpanel" hidden>
+        <div class="grp"><h2 class="px">On her feet</h2><div class="seg" id="feetType" role="group" aria-label="Footwear"><button type="button" class="px" data-type="barefoot">Barefoot</button><button type="button" class="px" data-type="flipflops">Flip-flops</button><button type="button" class="px" data-type="boots">Boots</button></div></div>
+        <div class="grp" id="ffGrp"><h2 class="px">Flip-flops</h2>
+          <div class="row"><span class="lab">Sole</span><div class="sws" data-colour="feet.sole"></div></div>
+          <div class="row"><span class="lab">Strap</span><div class="sws" data-colour="feet.strap"></div></div></div>
+        <div class="grp kit" data-slot="feet" id="bootGrp"><h2 class="px">Boots</h2></div>
+        <div class="grp" id="bootHGrp"><h2 class="px">Boot height</h2>
+          <div class="row"><label for="bH">Height</label><input type="range" id="bH" min="0" max="1" step="0.01" data-num="feet.height"><span class="val" data-show="feet.height"></span></div>
+          <div class="row"><label for="bAuto">Ankle height under trousers and long hems</label><input type="checkbox" id="bAuto"></div>
+          <p class="note">0% is a shoe (cut just above the ankle), 100% is the boot as made.</p></div>
+      </section>
+      <section class="page" id="pEmotes" role="tabpanel" hidden>
+        <div class="grp"><h2 class="px">Your emotes</h2><p class="note">Pick up to 6 to bring into every game you can walk around in. Open the wheel in a game with <b>B</b> or the 😀 button. Tap one here to preview it on her.</p>
+          <div class="emoload" id="emoLoad"></div>
+          <div class="emogrid" id="emoGrid"></div></div>
+      </section>
+      <section class="page" id="pSave" role="tabpanel" hidden>
+        <div class="grp"><h2 class="px">Character file</h2>
+          <div class="row"><label for="cName">Name</label><input type="text" id="cName" maxlength="60" placeholder="e.g. Shopkeeper Rosa" style="flex:1;min-width:0"></div>
+          <div class="btns"><button type="button" class="btn px red" id="bSaveChar">Save character (.json)</button><button type="button" class="btn px" id="bOpenChar">Open character…</button><input type="file" id="charFile" accept=".json,application/json" hidden></div>
+          <p class="note">Saves everything about this character in one small file. Open one here (or drop it on the page) to keep editing; load it in a game with <code>SandyKit.loadCharacter('rosa.json')</code>.</p></div>
+        <div class="grp"><h2 class="px">This Sandy</h2><textarea id="json" spellcheck="false" aria-label="Config JSON"></textarea>
+          <div class="btns"><button type="button" class="btn px red" id="bApply">Apply JSON</button><button type="button" class="btn px" id="bCopy">Copy JSON</button><button type="button" class="btn px" id="bDl">Download JSON</button></div>
+          <p class="note">Edit the JSON and apply it, or paste one saved earlier.</p></div>
+        <div class="grp"><h2 class="px">Share and embed</h2><div class="btns"><button type="button" class="btn px" id="bLink">Copy link</button><button type="button" class="btn px" id="bEmbed">Copy embed code</button><button type="button" class="btn px" id="bPng">Download picture</button></div>
+          <p class="note">The link and embed code carry her whole look. The embed shows her alone, with no wardrobe.</p></div>
+        <div class="grp"><h2 class="px">Using her in a project</h2><p class="note">The read-me (the ? button) explains how to drop Sandy into another page, as the player or as NPCs.</p></div>
+      </section>
+    </div>
+  </aside>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="help" hidden role="dialog" aria-modal="true" aria-labelledby="helpT"><div class="card"><header><h2 class="px" id="helpT">Read me</h2><button type="button" class="btn px" id="bCopyReadme">Copy</button><button type="button" class="btn px" id="bHelpClose">Close</button></header><pre id="helpText"></pre></div></div>
+
+<link rel="stylesheet" href="nav.css">
+<style>/* room for the archive bar */body.ed-nav #app{height:calc(100vh - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 100px);height:calc(100dvh - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 100px)}@media (max-width:860px){#classicBar span{display:none}#classicBar{padding:8px 12px;gap:8px}body.ed-nav #app{height:calc(100dvh - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 80px)}}</style>
+<!-- ===== SANDY EDITOR: END (markup and styles) ===== -->
+<!-- ===== SANDY RUNTIME: BEGIN ===== -->
+<script src="../../assets/sandy-runtime.js"></script>
+<script src="../../assets/sandy-classic.js"></script>
+<script src="../../assets/sandy-view.js"></script>
+<!-- ===== SANDY RUNTIME: END ===== -->
+<!-- ===== SANDY EDITOR: BEGIN (script) ===== -->
+<script id="sandy-editor">
+/* ================= the wardrobe (editor UI). Uses only window.SandyKit; delete this block when you lift the runtime into a project. ================= */
+(function(){
+const $=id=>document.getElementById(id),Q=new URLSearchParams(location.search),K=window.SandyClassicKit,C=K.CATALOG;
+if(Q.get('mode')==='viewer')document.body.classList.add('viewer');if(Q.get('bg')==='transparent')document.body.classList.add('clear');
+// ---------- the stage ----------
+const stage=$('stage'),renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});renderer.outputEncoding=THREE.sRGBEncoding;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.setPixelRatio(Math.min(2,devicePixelRatio||1)*(document.body.classList.contains('viewer')?0.5:1))/* embeds at half resolution; the editor's still picture at full */;stage.prepend(renderer.domElement);
+const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(30,1,5,5000);
+/* Grug: in the editor (not in ?mode=viewer embeds) the stage is a still picture. It is drawn again only when something
+   changes: a slider is let go, a piece goes on or comes off, an emote or a view is picked, the page is resized. No live loop. */
+const STILL=!document.body.classList.contains('viewer');let still=0,stillT=[],LIVE=false;   // LIVE: the full-screen animation page (nav.js) plays her live for a while
+function bump(){if(!STILL)return;still=Math.max(still,2);stillT.forEach(clearTimeout);stillT=[180,450,900,1700,2600].map(ms=>setTimeout(()=>{still=Math.max(still,1)},ms))}   // again as clothes and textures finish loading
+scene.add(new THREE.HemisphereLight(0xfff4e0,0x3a3456,0.75));
+const key=new THREE.DirectionalLight(0xfff0dc,1.1);key.position.set(160,320,240);key.castShadow=true;key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-120,right:120,top:220,bottom:-20,near:50,far:900});key.shadow.bias=-0.0004;scene.add(key);
+const rim=new THREE.DirectionalLight(0x9fc4ff,0.55);rim.position.set(-200,180,-260);scene.add(rim);
+const fill=new THREE.DirectionalLight(0xffd6b0,0.25);fill.position.set(-260,80,180);scene.add(fill);
+const floor=new THREE.Mesh(new THREE.CircleGeometry(150,64),new THREE.ShadowMaterial({opacity:0.35}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+const disc=new THREE.Mesh(new THREE.RingGeometry(70,74,64),new THREE.MeshBasicMaterial({color:new THREE.Color((getComputedStyle(document.documentElement).getPropertyValue('--sel-a')||'#a3e635').trim()||'#a3e635'),transparent:true,opacity:0.55}));disc.rotation.x=-Math.PI/2;disc.position.y=0.2;scene.add(disc);
+const VIEWS={body:{t:[0,102,0],d:440,p:0.06},face:{t:[0,180,0],d:150,p:0.04},feet:{t:[0,8,8],d:120,p:0.42}};
+const O={yaw:0.35,pitch:0.06,d:440,t:new THREE.Vector3(0,102,0),want:null,spin:false};
+function setView(v){const V=VIEWS[v];O.want={t:new THREE.Vector3(...V.t),d:V.d,p:V.p};for(const b of document.querySelectorAll('#views [data-view]'))b.setAttribute('aria-pressed',String(b.dataset.view===v))}
+function size(){const r=stage.getBoundingClientRect();renderer.setSize(r.width,r.height,false);cam.aspect=r.width/Math.max(1,r.height);cam.updateProjectionMatrix();bump()}
+addEventListener('resize',size);new ResizeObserver(size).observe(stage);
+// drag to turn, right-drag / shift-drag / two fingers to pan, wheel / pinch to zoom, double-click to reset; free cam: WASD QE + drag to look
+const FC={on:false,pos:new THREE.Vector3(),yaw:0,pitch:0,keys:new Set()};
+function pan(dx,dy){const k=O.d*0.0011,r=new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld,0),u=new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld,1);O.t.addScaledVector(r,-dx*k).addScaledVector(u,dy*k)}
+function setFree(on){FC.on=on;$('freecam').setAttribute('aria-pressed',String(on));O.want=null;
+  if(on){FC.pos.copy(cam.position);const d=O.t.clone().sub(cam.position).normalize();FC.yaw=Math.atan2(d.x,d.z);FC.pitch=Math.asin(Math.max(-1,Math.min(1,d.y)))}
+  else{const d=new THREE.Vector3(Math.sin(FC.yaw)*Math.cos(FC.pitch),Math.sin(FC.pitch),Math.cos(FC.yaw)*Math.cos(FC.pitch));O.d=Math.max(60,Math.min(800,O.d));O.t.copy(FC.pos).addScaledVector(d,O.d);
+    O.yaw=Math.atan2(-d.x,-d.z);O.pitch=Math.asin(Math.max(-0.25,Math.min(0.9,-d.y)))}}
+addEventListener('keydown',e=>{if(/INPUT|TEXTAREA|SELECT/.test((e.target&&e.target.tagName)||''))return;const k=e.key.toLowerCase();
+  if(FC.on&&'wasdqe'.includes(k)&&k.length===1){FC.keys.add(k);e.preventDefault()}if(k==='shift')FC.keys.add('shift')});
+addEventListener('keyup',e=>{FC.keys.delete(e.key.toLowerCase())});addEventListener('blur',()=>FC.keys.clear());
+if(!STILL){const cv=renderer.domElement,P=new Map();let pinch=null;cv.addEventListener('contextmenu',e=>e.preventDefault());
+  cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);P.set(e.pointerId,{x:e.clientX,y:e.clientY,pan:e.button===2||e.button===1||e.shiftKey});O.want=null;
+    if(P.size===2){const [a,b]=[...P.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),d0:O.d,cx:(a.x+b.x)/2,cy:(a.y+b.y)/2}}});
+  cv.addEventListener('pointermove',e=>{const p=P.get(e.pointerId);if(!p)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
+    if(P.size===2&&pinch){const [a,b]=[...P.values()],cx=(a.x+b.x)/2,cy=(a.y+b.y)/2;if(!FC.on){O.d=Math.min(800,Math.max(60,pinch.d0*pinch.d/Math.max(20,Math.hypot(a.x-b.x,a.y-b.y))));pan((cx-pinch.cx),(cy-pinch.cy))}pinch.cx=cx;pinch.cy=cy;return}
+    if(FC.on){FC.yaw-=dx*0.005;FC.pitch=Math.min(1.45,Math.max(-1.45,FC.pitch-dy*0.005));return}
+    if(p.pan){pan(dx,dy);return}
+    O.yaw-=dx*0.008;O.pitch=Math.min(0.9,Math.max(-0.25,O.pitch+dy*0.005))});
+  const up=e=>{P.delete(e.pointerId);if(P.size<2)pinch=null};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+  cv.addEventListener('wheel',e=>{e.preventDefault();O.want=null;if(FC.on){const d=new THREE.Vector3(Math.sin(FC.yaw)*Math.cos(FC.pitch),Math.sin(FC.pitch),Math.cos(FC.yaw)*Math.cos(FC.pitch));FC.pos.addScaledVector(d,-e.deltaY*0.15);return}
+    O.d=Math.min(800,Math.max(60,O.d*Math.exp(e.deltaY*0.001)))},{passive:false});
+  cv.addEventListener('dblclick',()=>{if(FC.on)setFree(false);O.yaw=0.35;setView('body')})}
+$('freecam').addEventListener('click',()=>setFree(!FC.on));
+for(const b of document.querySelectorAll('#views [data-view]'))b.addEventListener('click',()=>setView(b.dataset.view));
+$('spin').addEventListener('click',()=>{O.spin=!O.spin;$('spin').setAttribute('aria-pressed',String(O.spin))});
+$('anims').innerHTML=(C.animations||['idle']).map(a=>`<button type="button" class="px" data-anim="${a}" aria-pressed="${a==='idle'}">${a[0].toUpperCase()+a.slice(1)}</button>`).join('');
+$('anims').addEventListener('click',e=>{const b=e.target.closest('[data-anim]');if(!b||!sandy)return;if(STILL&&!LIVE)window.SANDY_STILL.pose(b.dataset.anim);else sandy.play(b.dataset.anim);for(const x of $('anims').children)x.setAttribute('aria-pressed',String(x===b))});
+let sandy=null,last=performance.now();
+(function loop(now){requestAnimationFrame(loop);const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(STILL&&!LIVE){if(!still)return;still--;if(O.want){O.t.copy(O.want.t);O.d=O.want.d;O.pitch=O.want.p;O.want=null}}
+  if(O.want){const k=1-Math.exp(-dt*7);O.t.lerp(O.want.t,k);O.d+=(O.want.d-O.d)*k;O.pitch+=(O.want.p-O.pitch)*k}if(O.spin)O.yaw+=dt*0.5;
+  if(FC.on){const f=new THREE.Vector3(Math.sin(FC.yaw)*Math.cos(FC.pitch),Math.sin(FC.pitch),Math.cos(FC.yaw)*Math.cos(FC.pitch)),r=new THREE.Vector3(-f.z,0,f.x).normalize(),sp=(FC.keys.has('shift')?320:110)*dt;
+    if(FC.keys.has('w'))FC.pos.addScaledVector(f,sp);if(FC.keys.has('s'))FC.pos.addScaledVector(f,-sp);if(FC.keys.has('d'))FC.pos.addScaledVector(r,sp);if(FC.keys.has('a'))FC.pos.addScaledVector(r,-sp);
+    if(FC.keys.has('e'))FC.pos.y+=sp;if(FC.keys.has('q'))FC.pos.y-=sp;cam.position.copy(FC.pos);cam.lookAt(FC.pos.clone().add(f))}
+  else{cam.position.set(O.t.x+Math.sin(O.yaw)*Math.cos(O.pitch)*O.d,O.t.y+Math.sin(O.pitch)*O.d,O.t.z+Math.cos(O.yaw)*Math.cos(O.pitch)*O.d);cam.lookAt(O.t)}
+  if(sandy)sandy.update(STILL&&!LIVE?0:dt);renderer.render(scene,cam)})(last);
+// the still stage's controls, used by nav.js (View section, emotes): a view, a turn, or a pose taken from an animation
+window.SANDY_STILL={on:STILL,bump,view(v){if(VIEWS[v]){setView(v);bump()}},turn(y){O.yaw=y;bump()},
+  rotate(d){O.yaw=0.35+Math.round((O.yaw-0.35)/(Math.PI/4)+d)*(Math.PI/4);bump()},   // eight turns of 45 degrees
+  live(on){LIVE=!!on;renderer.setPixelRatio(Math.min(2,devicePixelRatio||1)*(LIVE?0.5:1));
+    if(LIVE){this._o={t:O.t.clone(),d:O.d,p:O.pitch};O.want=null;O.t.set(0,104,0);O.d=600;O.pitch=0.05}else if(this._o){O.t.copy(this._o.t);O.d=this._o.d;O.pitch=this._o.p;this._o=null}   // room to dance, then back to her still view
+   if(!LIVE&&sandy){sandy.play('idle');for(let i=0;i<6;i++)sandy.update(1/60)}size();bump()},
+  play(anim){if(sandy)sandy.play(anim)},
+  pose(anim){if(!sandy)return;sandy.play(anim);for(let i=0;i<42;i++)sandy.update(1/60);bump()}};
+// ---------- the controls ----------
+let cfg=null;const get=(o,p)=>p.split('.').reduce((a,k)=>a==null?a:a[k],o);
+function patchFor(path,v){const ks=path.split('.'),out={};let o=out;ks.forEach((k,i)=>{if(i===ks.length-1)o[k]=v;else o=o[k]={}});return out}
+function apply(patch){if(!sandy)return;sandy.apply(patch);cfg=sandy.getConfig();sync();post({sandy:'change',config:cfg});if(!sliding)bump()}
+const PAL={'earrings.colour':['#f3ede0','#d4af37','#c0c0c0','#b87333','#141414','#e3101c','#3fc1ff','#ff5c8a','#9b7bff','#2ee59d'],skin:C.skinTones,'hair.colour':['#141414','#2a1a12','#4a2a14','#6a3a1a','#9a3f1e','#d6ae58','#e8d7b0','#c8c8c8','#ff5c8a','#3fc1ff','#9b7bff','#e3101c'],
+  nails:['#ffffff','#e3101c','#121212','#ff5c8a','#9b7bff','#3fc1ff','#4ad4b0','#ffcf4a'],
+  cloth:['#ffffff','#f2efe6','#141414','#2a2a2a','#2b3350','#1e3a5f','#6b6864','#3b2a1e','#e3101c','#ff5c8a','#ffcf4a','#4ad4b0','#3fc1ff','#9b7bff','#2ee59d','#ff8a5c'],
+  tint:['#ffffff','#c8c8c8','#6b6864','#2a2a2a','#e3101c','#ff8a5c','#ffcf4a','#2ee59d','#3fc1ff','#1e3a5f','#9b7bff','#ff5c8a']};
+const palFor=p=>PAL[p]||(/colour$/.test(p)&&!/hair/.test(p)?PAL.tint:PAL.cloth);
+function swatches(el){const path=el.dataset.colour;el.innerHTML='';for(const c of palFor(path)){const b=document.createElement('button');b.type='button';b.className='sw';b.style.background=c;b.dataset.c=c;b.setAttribute('aria-label',path+' '+c);b.addEventListener('click',()=>apply(patchFor(path,c)));el.appendChild(b)}
+  const lab=document.createElement('label');lab.className='pick';lab.title='Any colour';lab.innerHTML='<i></i>';const pk=document.createElement('input');pk.type='color';pk.value='#ffffff';pk.setAttribute('aria-label','Pick any colour');pk.addEventListener('input',()=>apply(patchFor(path,pk.value)));lab.appendChild(pk);el.appendChild(lab)}
+/* ---------- Previews: pictures of her wearing each piece, drawn on a small hidden renderer one at a time as tiles scroll into view.
+   Cached per look (body, skin, hair), so changing those redraws the tiles; changing a piece doesn't. ---------- */
+const Previews=(()=>{
+  const SIZE=128,FRAME={top:{t:[0,138,0],d:150,p:0.1},legs:{t:[0,72,0],d:160,p:0.15},feet:{t:[0,12,6],d:95,p:0.55},shoulderL:{t:[16,146,0],d:95,p:0.15},shoulderR:{t:[-16,146,0],d:95,p:0.15}};
+  let rd=null,sc=null,cm=null,pv=null,busy=false,gen=0,lookKey='';const q=[],cache=new Map(),els=new Set();let io=null;
+  function ensure(){if(rd)return;rd=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});rd.setSize(SIZE,SIZE,false);rd.outputEncoding=THREE.sRGBEncoding;rd.setPixelRatio(1);
+    sc=new THREE.Scene();sc.add(new THREE.HemisphereLight(0xfff4e0,0x3a3456,0.9));const k=new THREE.DirectionalLight(0xfff0dc,1.0);k.position.set(160,320,240);sc.add(k);const r=new THREE.DirectionalLight(0x9fc4ff,0.5);r.position.set(-200,180,-260);sc.add(r);
+    cm=new THREE.PerspectiveCamera(28,1,5,3000)}
+  const lk=c=>c?[c.body,c.skin,c.hair&&c.hair.style,c.hair&&c.hair.colour,c.nails,JSON.stringify(c.build||{})].join('|'):'';
+  function baseFor(c){const b=K.merge(K.DEFAULT,{body:c.body,skin:c.skin,hair:c.hair,nails:c.nails,expression:'neutral',build:c.build,faceShape:c.faceShape,ears:c.ears,outfit:{shirt:'#cfd4dc',shorts:'#6b7280',belt:'#141414'},feet:{type:'barefoot'}});return b}
+  async function render(slot,part,key){ensure();const c=cfg;if(!pv){pv=await K.create(baseFor(c));sc.add(pv.object3d);lookKey=lk(c)}
+    else if(lk(c)!==lookKey){pv.apply(baseFor(c),true);lookKey=lk(c)}
+    const p=C.parts[slot].find(x=>x.id===part);const patch={top:null,legs:null,shoulderL:null,shoulderR:null,feet:{type:'barefoot'}};
+    patch[slot]=slot==='feet'?{type:'boots',part,texture:p.set,colour:'#ffffff'}:{part,texture:p.set,colour:'#ffffff'};
+    pv.apply(patch);pv.update(0);const F=FRAME[slot];const t=new THREE.Vector3(...F.t).multiplyScalar((c.build&&c.build.height)||1);cm.position.set(t.x+Math.sin(0.5)*Math.cos(F.p)*F.d,t.y+Math.sin(F.p)*F.d,t.z+Math.cos(0.5)*Math.cos(F.p)*F.d);cm.lookAt(t);
+    rd.render(sc,cm);return rd.domElement.toDataURL('image/png')}
+  async function pump(){if(busy||!q.length||!cfg||!window.SandyClassicKit)return;busy=true;const my=gen;
+    while(q.length){const el=q.shift();const [slot,part]=el.dataset.prev.split('|'),key=lk(cfg)+'|'+slot+'|'+part;
+      if(cache.has(key)){paint(el,cache.get(key));continue}
+      try{const url=await render(slot,part,key);if(gen!==my)break;cache.set(key,url);paint(el,url)}catch(e){console.warn('preview failed',e);el.classList.remove('busy')}
+      await new Promise(r=>requestAnimationFrame(r))}
+    busy=false}
+  function paint(el,url){el.style.backgroundImage=`url(${url})`;el.classList.remove('busy')}
+  function want(el){if(!el||q.includes(el))return;const [slot,part]=el.dataset.prev.split('|'),key=cfg?lk(cfg)+'|'+slot+'|'+part:'';if(key&&cache.has(key)){paint(el,cache.get(key));return}q.push(el);pump()}
+  function watch(root){if(!io)io=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting)want(e.target)},{rootMargin:'200px'});for(const el of root.querySelectorAll('[data-prev]')){els.add(el);io.observe(el)}}
+  // the look changed (body, skin, hair): tiles on screen redraw with it
+  function refresh(){if(!cfg)return;const k=lk(cfg);if(k===refresh.k)return;refresh.k=k;gen++;q.length=0;for(const el of els){const r=el.getBoundingClientRect();el.classList.add('busy');if(r.bottom>-200&&r.top<innerHeight+200)want(el)}}
+  return {watch,refresh}})();
+/* a wardrobe slot: a grid of pieces, each tile a picture of her wearing it (see Previews below), fabric chips, tint swatches */
+function kitBlock(el){const slot=el.dataset.slot,parts=C.parts[slot];const h=el.querySelector('h2').outerHTML;
+  const tile=p=>`<button type="button" data-part="${p.id}" aria-pressed="false" title="${p.label}${p.full?' (full outfit)':''}"><i class="busy" data-prev="${slot}|${p.id}"></i><span>${p.label}</span>${p.full?'<small>Full outfit</small>':p.clothes?'<small>Clothes</small>':'<small>Outfit piece</small>'}</button>`;
+  el.innerHTML=h+`<div class="ccg kitgrid" data-kitgrid="${slot}" role="group" aria-label="${slot} pieces"><button type="button" class="none" data-part="" aria-pressed="false"><i></i><span>${slot==='feet'?'Pick a pair':'None'}</span></button>${parts.map(tile).join('')}</div>
+    <div class="row"><span class="lab">Fabric</span><div class="chips" data-fab="${slot}" role="group" aria-label="${slot} fabric"></div></div>
+    <div class="row"><span class="lab">Tint</span><div class="sws" data-colour="${slot}.colour"></div></div>`;
+  const wear=(v,tex)=>{const cur=Object.assign({texture:null,colour:'#ffffff'},get(cfg,slot)||{});
+    if(v!==undefined){if(!v){apply({[slot]:slot==='feet'?{type:'barefoot'}:null});return}const p=parts.find(x=>x.id===v);cur.part=v;if(!cur.texture||!cur.texture.startsWith(p.set))cur.texture=p.set}
+    if(tex!==undefined)cur.texture=tex;
+    if(slot==='feet')cur.type='boots';if(!cur.part)return;if(slot==='top'||slot==='legs')cur.template=null;apply({[slot]:cur})};
+  el.querySelector('[data-kitgrid]').addEventListener('click',e=>{const b=e.target.closest('[data-part]');if(b)wear(b.dataset.part)});
+  el.querySelector('[data-fab]').addEventListener('click',e=>{const b=e.target.closest('[data-tex]');if(b)wear(undefined,b.dataset.tex)});
+  Previews.watch(el)}
+document.querySelectorAll('.kit').forEach(kitBlock);document.querySelectorAll('[data-colour]').forEach(swatches);
+// a colour pick on an empty slot: nothing to tint yet
+const origApply=apply;apply=function(patch){for(const k of ['top','legs','shoulderL','shoulderR','weapon'])if(patch[k]&&!patch[k].part&&!patch[k].name&&!get(cfg,k)&&Object.keys(patch[k]).every(x=>x==='colour')){toast('Pick a piece first, then tint it');return}
+  if(patch.feet&&!patch.feet.type&&get(cfg,'feet.type')==='barefoot'){toast('Pick footwear first');return}origApply(patch)};
+// ---------- custom clothing (Roblox shirt / pants templates) ----------
+const CC={key:{shirt:'top',pants:'legs'},tex:{gen_tshirt:'gen_tshirt',gen_longsleeve:'gen_longsleeve',mh_cortu_jeans_shorts:'mh_cortu_jeans_shorts',Female_Peasant_Legs:'peasant'},def:{shirt:'gen_tshirt',pants:'Female_Peasant_Legs'},UP:'grug.sandy.uploads.v1'};
+const ccUploads=()=>{try{return JSON.parse(localStorage.getItem(CC.UP)||'{}')||{}}catch(e){return {}}};
+function ccWear(slot,o){const k=CC.key[slot],cur=get(cfg,k)||{},isCC=cur.template&&CC.tex[cur.part];
+  const part=o.part!==undefined?o.part:(isCC?cur.part:CC.def[slot]);if(!part){apply({[k]:null});return}
+  let tpl=o.template||(isCC?cur.template:null);
+  if(!tpl){const C2=window.GrugCatalog,G2=window.Grug;const own=C2&&G2?C2.inSlot(slot).filter(it=>G2.owns(it.id)):[];tpl=own.length?own[0].template:(slot==='shirt'?'shop:grug-tee':'shop:jeans')}
+  apply({[k]:{part,texture:CC.tex[part],colour:(isCC&&cur.colour)||'#ffffff',template:tpl}})}
+function renderCustom(){const C2=window.GrugCatalog,G2=window.Grug;if(!cfg||!C2||!G2)return;const up=ccUploads();
+  for(const slot of ['shirt','pants']){const cur=get(cfg,CC.key[slot])||{},isCC=!!(cur.template&&CC.tex[cur.part]);
+    for(const b of document.querySelectorAll(`[data-ccg="${slot}"] button`))b.setAttribute('aria-pressed',String(isCC?b.dataset.g===cur.part:b.dataset.g===''));
+    const box=document.querySelector(`[data-ccd="${slot}"]`);const tiles=[];
+    if(up[slot])tiles.push(`<button type="button" data-tpl="up:${slot}" aria-pressed="${isCC&&cur.template===up[slot]}"><i style="background-image:url(${up[slot]});background-size:contain;background-color:#fff"></i><span>Your upload</span></button>`);
+    for(const it of C2.inSlot(slot)){const own=G2.owns(it.id);tiles.push(`<button type="button" class="${own?'':'locked'}" data-tpl="${it.template}" data-id="${it.id}" aria-pressed="${isCC&&cur.template===it.template}" title="${own?it.name:it.name+' · '+C2.howText(it)}"><i style="background-image:url(${G2.url(it.thumb)})"></i><span>${it.name}</span></button>`)}
+    box.innerHTML=tiles.join('')}}
+document.querySelectorAll('[data-ccg]').forEach(seg=>seg.addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(b)ccWear(seg.dataset.ccg,{part:b.dataset.g||null})}));
+document.querySelectorAll('[data-ccd]').forEach(box=>box.addEventListener('click',e=>{const b=e.target.closest('[data-tpl]');if(!b)return;const slot=box.dataset.ccd;
+  if(b.classList.contains('locked')){const it=window.GrugCatalog&&window.GrugCatalog.get(b.dataset.id);toast((it?it.name+': '+window.GrugCatalog.howText(it):'Locked')+'. See the shop.');return}
+  const tpl=b.dataset.tpl.startsWith('up:')?ccUploads()[slot]:b.dataset.tpl;if(tpl)ccWear(slot,{template:tpl})}));
+// an uploaded template: any image, scaled to Roblox's 585 x 559 layout and kept on this phone
+document.querySelectorAll('[data-ccu]').forEach(inp=>inp.addEventListener('change',e=>{const f=inp.files&&inp.files[0],slot=inp.dataset.ccu;if(!f)return;const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{
+  const c=document.createElement('canvas');c.width=585;c.height=559;c.getContext('2d').drawImage(im,0,0,585,559);const url=c.toDataURL('image/png');
+  if(Math.abs(im.width/im.height-585/559)>0.08)toast('That image isn’t shaped like a Roblox template (585 × 559), so it may wrap oddly');
+  const up=ccUploads();up[slot]=url;try{localStorage.setItem(CC.UP,JSON.stringify(up))}catch(x){toast('Couldn’t save the upload on this phone (storage full)')}
+  ccWear(slot,{template:url});inp.value=''};im.src=rd.result};rd.readAsDataURL(f)}));
+if(/custom/i.test(location.hash))setTimeout(()=>{const t=$('tabCustom');if(t)t.click()},0);
+addEventListener('load',()=>renderCustom());
+// chest prints: the drawn shapes only. The ready-made picture prints (assets/prints/) were removed with the icon pack;
+// a look saved with one ('print:<name>' or 'pack:<id>') simply shows no print.
+const PRINTS=[];
+$('decals').innerHTML=['none','star','heart','bolt','smile','peace'].map(t=>`<button type="button" data-d="${t}" aria-pressed="false">${t}</button>`).join('')+
+  PRINTS.map(t=>`<button type="button" class="print" data-d="print:${t}" aria-pressed="false" title="${t}" aria-label="${t} print"><img src="../../assets/prints/${t}.png" alt="" width="28" height="28" loading="lazy"></button>`).join('');
+$('decals').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b)apply({decal:{image:b.dataset.d==='none'?null:b.dataset.d}})});
+// the print browser (its icon pack has been removed, so PK.list stays empty)
+const PK={list:null,cats:[],cat:-1,q:'',shown:0,PAGE:72};
+const pkMatches=()=>PK.list.filter(x=>(PK.cat<0||x[2]===PK.cat)&&(!PK.q||x[1].toLowerCase().includes(PK.q)||x[0].includes(PK.q)));
+function pkRender(reset){if(!PK.list)return;const all=pkMatches();if(reset){PK.shown=0;$('pkGrid').innerHTML='';$('pkGrid').scrollTop=0}
+  const cur=cfg&&cfg.decal&&cfg.decal.image,next=all.slice(PK.shown,PK.shown+PK.PAGE);PK.shown+=next.length;
+  $('pkGrid').insertAdjacentHTML('beforeend',next.map(x=>`<button type="button" data-d="pack:${x[0]}" aria-pressed="${cur==='pack:'+x[0]}" title="${x[1]}" aria-label="${x[1]} print"><img src="../../assets/prints/pack/${x[0]}.webp" alt="" loading="lazy" decoding="async"></button>`).join(''));
+  $('pkNone').hidden=all.length>0;$('pkMore').hidden=PK.shown>=all.length;$('pkMore').textContent='Show more ('+(all.length-PK.shown)+' left)'}
+// (the 1,176-print icon pack has been removed from the site: the browser below stays closed and empty. Quick prints and Upload image still work.)
+$('pkCats').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;PK.cat=+b.dataset.c;for(const x of $('pkCats').children)x.setAttribute('aria-pressed',String(x===b));pkRender(true)});
+$('pkQ').addEventListener('input',()=>{PK.q=$('pkQ').value.trim().toLowerCase();pkRender(true)});
+$('pkMore').addEventListener('click',()=>pkRender(false));
+$('pkGrid').addEventListener('scroll',()=>{const g=$('pkGrid');if(!$('pkMore').hidden&&g.scrollTop+g.clientHeight>g.scrollHeight-80)pkRender(false)});
+$('pkGrid').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b)apply({decal:{image:b.dataset.d}})});
+$('decFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const im=new Image(),rd=new FileReader();rd.onload=()=>{im.onload=()=>{
+  // kept small (256 px) so the config stays a reasonable size
+  const k=Math.min(1,256/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));
+  const S=Math.max(c.width,c.height),q=document.createElement('canvas');q.width=q.height=S;q.getContext('2d').drawImage(im,(S-c.width)/2,(S-c.height)/2,c.width,c.height);
+  apply({decal:{image:q.toDataURL('image/png')}});e.target.value=''};im.src=rd.result};rd.readAsDataURL(f)});
+$('bAuto').addEventListener('change',e=>apply({feet:{auto:e.target.checked}}));
+$('hats').innerHTML=[{id:'none',label:'None'}].concat(C.hats||[]).map(t=>`<button type="button" data-h="${t.id}" aria-pressed="false">${t.label}</button>`).join('');
+$('hats').addEventListener('click',e=>{const b=e.target.closest('[data-h]');if(b)apply({hat:{type:b.dataset.h}})});
+$('rings').innerHTML=['none','pearls','hoops'].map(t=>`<button type="button" data-r="${t}" aria-pressed="false">${t}</button>`).join('');
+$('rings').addEventListener('click',e=>{const b=e.target.closest('[data-r]');if(b)apply({earrings:{type:b.dataset.r}})});
+$('bodies').innerHTML=C.bodies.map(b=>`<button type="button" data-b="${b}" aria-pressed="false">${b}</button>`).join('');
+$('bodies').addEventListener('click',e=>{const b=e.target.closest('[data-b]');if(b)apply({body:b.dataset.b})});
+$('exprs').innerHTML=C.expressions.map(e=>`<button type="button" data-e="${e}" aria-pressed="false">${e}</button>`).join('');
+$('exprs').addEventListener('click',e=>{const b=e.target.closest('[data-e]');if(b)apply({expression:b.dataset.e})});
+// sliders: a drag fires many input events; apply only the newest values, at most once per screen frame
+const slidePend=new Map();let slideRaf=0;
+function slideFlush(){slideRaf=0;if(!slidePend.size)return;let patch={};for(const [k,v] of slidePend)patch=K.merge(patch,patchFor(k,v));slidePend.clear();apply(patch)}
+let sliding=false;   // a slider being dragged: the still stage waits until it's let go
+for(const r of document.querySelectorAll('[data-num]')){r.addEventListener('input',()=>{sliding=true;slidePend.set(r.dataset.num,+r.value);if(!slideRaf)slideRaf=requestAnimationFrame(slideFlush)});
+  r.addEventListener('change',()=>{if(slideRaf){cancelAnimationFrame(slideRaf);slideFlush()}sliding=false;bump()})}
+// while a finger or mouse is on a control, the avatar pictures wait (see post())
+let editing=false;addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('input,button,select,.sw'))editing=true},true);
+for(const ev of ['pointerup','pointercancel','blur'])addEventListener(ev,()=>{editing=false},true);
+$('hairStyle').addEventListener('change',()=>apply({hair:{style:+$('hairStyle').value}}));
+const hairStep=d=>{const n=C.hairStyles.length||64;apply({hair:{style:((cfg.hair.style+d)%n+n)%n}})};$('hairPrev').addEventListener('click',()=>hairStep(-1));$('hairNext').addEventListener('click',()=>hairStep(1));
+for(const b of document.querySelectorAll('#feetType button'))b.addEventListener('click',()=>{const t=b.dataset.type,f=cfg.feet||{};
+  if(t==='barefoot')apply({feet:{type:'barefoot'}});else if(t==='flipflops')apply({feet:{type:'flipflops',sole:f.sole||'#f2efe6',strap:f.strap||'#e3101c'}});
+  else{const p=C.parts.feet.find(x=>x.id===f.part)||C.parts.feet[0];apply({feet:{type:'boots',part:p.id,texture:f.texture&&f.texture.startsWith(p.set)?f.texture:p.set,colour:f.colour||'#ffffff'}})}});
+// show the config in every control
+function fabricOptions(box,slot,pid,cur){const p=pid&&C.parts[slot].find(x=>x.id===pid),L=p?K.texturesFor(p.set):[],sig=L.join('|')+'>'+(cur||'');if(box.dataset.sig===sig)return;box.dataset.sig=sig;
+  box.innerHTML=L.length>1?L.map(t=>`<button type="button" data-tex="${t}" aria-pressed="${t===cur}">${p.clothes?'Plain':t.replace(/(\D)(\d)/,'$1 $2')}</button>`).join(''):`<span class="note" style="margin:0">${p?'One fabric':'Pick a piece first'}</span>`}
+function sync(){if(!cfg)return;try{renderCustom()}catch(e){}
+  for(const el of document.querySelectorAll('[data-colour]')){const v=(get(cfg,el.dataset.colour)||'').toLowerCase();let hit=false;for(const b of el.querySelectorAll('.sw')){const on=b.dataset.c.toLowerCase()===v;b.setAttribute('aria-pressed',String(on));hit=hit||on}const lab=el.querySelector('.pick'),pk=lab&&lab.querySelector('input');if(pk&&/^#[0-9a-f]{6}$/.test(v))pk.value=v;if(lab){const custom=!hit&&/^#[0-9a-f]{6}$/.test(v);lab.setAttribute('aria-pressed',String(custom));lab.style.setProperty('--c',custom?v:'transparent')}}
+  for(const b of $('exprs').children)b.setAttribute('aria-pressed',String(b.dataset.e===cfg.expression));
+  for(const b of $('bodies').children)b.setAttribute('aria-pressed',String(b.dataset.b===(cfg.body||'female')));
+  {const im=cfg.decal&&cfg.decal.image,cur=im?((['star','heart','bolt','smile','peace'].includes(im)||/^(print|pack):/.test(im))?im:''):'none';for(const b of $('decals').children)b.setAttribute('aria-pressed',String(b.dataset.d===cur));for(const b of $('pkGrid').children)b.setAttribute('aria-pressed',String(b.dataset.d===cur))}
+  for(const b of $('hats').children)b.setAttribute('aria-pressed',String(b.dataset.h===((cfg.hat&&cfg.hat.type)||'none')));
+  for(const b of $('rings').children)b.setAttribute('aria-pressed',String(b.dataset.r===((cfg.earrings&&cfg.earrings.type)||'none')));
+  for(const r of document.querySelectorAll('[data-num]')){r.value=get(cfg,r.dataset.num);}for(const s of document.querySelectorAll('[data-show]')){const p=s.dataset.show,v=+get(cfg,p)||0;s.textContent=p==='faceY'?(v>=0?'+':'')+Math.round(v*100):/^(decal\.(up|side)|hair\.(up|forward)|hat\.(up|forward))$/.test(p)?v.toFixed(1)+' cm':/^(ears\.(up|forward|out)|earrings\.(drop|forward))$/.test(p)?v.toFixed(1)+' cm':/^(ears\.(twist|flare)|earrings\.angle|hat\.tilt)$/.test(p)?Math.round(v*57.2958)+'°':Math.round(v*100)+'%'};
+  const hs=$('hairStyle');if(hs.options.length!==C.hairStyles.length)hs.innerHTML=C.hairStyles.map((n,i)=>`<option value="${i}">${i+1}. ${n}</option>`).join('');hs.value=cfg.hair.style;
+  for(const g of document.querySelectorAll('[data-kitgrid]')){const slot=g.dataset.kitgrid,v=get(cfg,slot),on=v&&v.part&&!(slot==='feet'&&v.type!=='boots')?v.part:'';for(const b of g.querySelectorAll('[data-part]'))b.setAttribute('aria-pressed',String(b.dataset.part===on));
+    fabricOptions(document.querySelector(`[data-fab="${slot}"]`),slot,on,v&&v.texture)}
+  Previews.refresh();
+  const ft=(cfg.feet&&cfg.feet.type)||'barefoot';for(const b of document.querySelectorAll('#feetType button'))b.setAttribute('aria-pressed',String(b.dataset.type===ft));$('ffGrp').hidden=ft!=='flipflops';$('bootGrp').hidden=ft!=='boots';$('bootHGrp').hidden=ft!=='boots';$('bAuto').checked=!(cfg.feet&&cfg.feet.auto===false);
+  if(document.activeElement!==$('json'))$('json').value=JSON.stringify(cfg,null,2);
+  try{const u=new URL(location.href);u.searchParams.set('config',K.encode(cfg));history.replaceState(null,'',u)}catch(e){}}
+// tabs
+for(const t of document.querySelectorAll('.tab'))t.addEventListener('click',()=>{for(const x of document.querySelectorAll('.tab')){const on=x===t;x.setAttribute('aria-selected',String(on));$(x.dataset.page).hidden=!on}});
+// buttons
+let toastT=0;function toast(s){const el=$('toast');el.textContent=s;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('on'),1800)}
+const copy=(s,msg)=>{(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>toast(msg),()=>{$('json').value=s;toast('Copy blocked here: the text is in the box on the Save tab')})};
+const download=(name,href)=>{const a=document.createElement('a');a.href=href;a.download=name;document.body.appendChild(a);a.click();a.remove()};
+$('bRandom').addEventListener('click',()=>{sandy.apply(K.randomConfig(null,{body:cfg&&cfg.body}),true);cfg=sandy.getConfig();sync();post({sandy:'change',config:cfg});bump()});
+$('bReset').addEventListener('click',()=>{sandy.apply(K.DEFAULT,true);cfg=sandy.getConfig();sync();post({sandy:'change',config:cfg});bump()});
+$('bApply').addEventListener('click',()=>{try{const c=JSON.parse($('json').value);sandy.apply(K.merge(K.DEFAULT,c),true);cfg=sandy.getConfig();sync();toast('Applied')}catch(e){toast('That JSON has an error: '+e.message.slice(0,60))}});
+$('bCopy').addEventListener('click',()=>copy(JSON.stringify(cfg,null,2),'JSON copied'));
+
+// ---------- character files ----------
+const slug=t=>(String(t||'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'sandy-character');
+function characterFile(){const name=$('cName').value.trim();const out=Object.assign({sandyCharacter:1,name:name||undefined},cfg);return JSON.stringify(out,null,2)}
+$('bSaveChar').addEventListener('click',()=>{if(!cfg)return;download(slug($('cName').value)+'.json','data:application/json;charset=utf-8,'+encodeURIComponent(characterFile()));toast('Saved '+slug($('cName').value)+'.json')});
+function openCharacterText(txt,fname){let c;try{c=JSON.parse(txt)}catch(e){toast('That file is not valid JSON');return}
+  if(!c||typeof c!=='object'||Array.isArray(c)){toast('That file is not a Sandy character');return}
+  const name=c.name||(fname||'').replace(/\.json$/i,'');delete c.sandyCharacter;delete c.name;
+  sandy.apply(K.merge(K.DEFAULT,c),true);cfg=sandy.getConfig();$('cName').value=name||'';sync();post({sandy:'change',config:cfg});toast('Opened '+(name||'character'))}
+const readFile=f=>{const rd=new FileReader();rd.onload=()=>openCharacterText(rd.result,f.name);rd.readAsText(f)};
+$('bOpenChar').addEventListener('click',()=>$('charFile').click());
+$('charFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)readFile(f);e.target.value=''});
+addEventListener('dragover',e=>{if([...(e.dataTransfer&&e.dataTransfer.items||[])].some(i=>i.kind==='file')){e.preventDefault()}});
+addEventListener('drop',e=>{const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(!f||!/json/i.test(f.type+f.name))return;e.preventDefault();readFile(f)});
+$('bDl').addEventListener('click',()=>download(slug($('cName').value)+'.json','data:application/json;charset=utf-8,'+encodeURIComponent(characterFile())));
+$('bLink').addEventListener('click',()=>copy(location.href,'Link copied'));
+$('bEmbed').addEventListener('click',()=>copy(`<iframe src="${location.origin+location.pathname}?mode=viewer&bg=transparent&config=${K.encode(cfg)}" width="320" height="480" style="border:0" title="Sandy"></iframe>`,'Embed code copied'));
+$('bPng').addEventListener('click',()=>{renderer.render(scene,cam);download('sandy.png',renderer.domElement.toDataURL('image/png'))});
+$('bHelp').addEventListener('click',()=>{$('helpText').textContent=K.readme();$('help').hidden=false;$('bHelpClose').focus()});
+$('bHelpClose').addEventListener('click',()=>{$('help').hidden=true;$('bHelp').focus()});$('help').addEventListener('click',e=>{if(e.target===$('help'))$('help').hidden=true});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('help').hidden){$('help').hidden=true;$('bHelp').focus()}});
+$('bCopyReadme').addEventListener('click',()=>copy(K.readme(),'Read-me copied'));
+// ---------- saving the look and its pictures ----------
+const SNAP_IDLE=4000;let snapGen=0,snapping=null,snapH;
+// the hash of the look the saved pictures show (read from storage once, then kept here: the pictures are big)
+function snapHash(){if(snapH===undefined){snapH=null;try{const s=JSON.parse(localStorage.getItem(window.SandyView.SNAP_KEY)||'null');snapH=s&&s.hash||null}catch(e){}}return snapH}
+// ARCHIVED EDITOR: the classic look lives in 'grug.sandy.classic.v1'. The player's look ('grug.sandy.v1', the blocky
+// avatar's) only carries classic: true/false and a stamp of the classic look (classicAt), so its pictures are retaken when this changes.
+const CLASSIC_KEY='grug.sandy.classic.v1';
+function v1(){let c=null;try{c=JSON.parse(localStorage.getItem('grug.sandy.v1')||'null')}catch(e){}if(window.SandyKit&&window.SandyKit.player)c=Object.assign(window.SandyKit.player(),c&&c.model==='block'?c:{});return c||{model:'block',classic:false}}
+function saveLook(){clearTimeout(saveLook.t);saveLook.t=0;if(!saveLook.c)return;try{localStorage.setItem(CLASSIC_KEY,JSON.stringify(saveLook.c));const p=v1(),h=window.SandyView?window.SandyView.hash(saveLook.c):String(Date.now());if(p.classicAt!==h){p.classicAt=h;localStorage.setItem('grug.sandy.v1',JSON.stringify(p))}}catch(e){}}
+function takeSnaps(c,gen){if(editing){post.snT=setTimeout(()=>takeSnaps(c,gen),1500);return}
+  const S=window.SandyView;if(!S||snapping)return;
+  if(!v1().classic)return;snapping=S.makeSnaps(v1(),{step:true,cancelled:()=>gen!==snapGen}).then(r=>{if(r)snapH=r.hash}).catch(e=>console.warn('snapshots failed',e)).finally(()=>{snapping=null;if(gen!==snapGen&&cfg&&v1().classic&&snapHash()!==S.hash(v1()))post.snT=setTimeout(()=>takeSnaps(cfg,snapGen),SNAP_IDLE)})}
+// leaving the editor: save now, and take the pictures straight away if they're out of date
+function flushOnLeave(){saveLook();if(!cfg||!window.SandyView)return;const S=window.SandyView;
+  if(v1().classic&&snapHash()!==S.hash(v1())){clearTimeout(post.snT);snapGen++;S.makeSnaps(v1()).then(r=>{if(r)snapH=r.hash}).catch(()=>{})}}
+addEventListener('pagehide',flushOnLeave);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushOnLeave()});
+// ---------- talking to a parent page (when embedded in an iframe) ----------
+function post(m){if(m&&(m.sandy==='change'||m.sandy==='ready')&&m.config){
+  // save the look on the phone, at most every 250 ms while editing
+  saveLook.c=m.config;if(m.sandy==='ready')saveLook();else if(!saveLook.t)saveLook.t=setTimeout(saveLook,250);
+  // pictures of the look for the rest of the site (header, home, profile, games). Taking them is heavy (about a second
+  // on a phone), so it waits until nothing has changed for SNAP_IDLE ms and no control is held, goes one picture at a time,
+  // and stops if anything changes in between. Leaving the page takes them right away (see pagehide below).
+  if(window.SandyView){const S=window.SandyView,c=m.config;
+    snapGen++;clearTimeout(post.snT);if(v1().classic&&snapHash()!==S.hash(v1()))post.snT=setTimeout(()=>takeSnaps(c,snapGen),m.sandy==='ready'?600:SNAP_IDLE)}}
+  try{if(parent!==window)parent.postMessage(m,'*')}catch(e){}}
+addEventListener('message',e=>{const m=e.data;if(!m||typeof m!=='object'||!m.sandy||!sandy)return;const reply=x=>{try{e.source.postMessage(Object.assign({id:m.id},x),'*')}catch(_){}};
+  if(m.sandy==='apply'){sandy.apply(m.replace?K.merge(K.DEFAULT,m.config):m.config||{},!!m.replace);cfg=sandy.getConfig();sync();reply({sandy:'config',config:cfg})}
+  else if(m.sandy==='get')reply({sandy:'config',config:cfg});
+  else if(m.sandy==='random'){sandy.apply(K.randomConfig(m.seed),true);cfg=sandy.getConfig();sync();reply({sandy:'config',config:cfg})}
+  else if(m.sandy==='snapshot'){try{renderer.render(scene,cam);reply({sandy:'png',dataURL:renderer.domElement.toDataURL('image/png')})}catch(err){reply({sandy:'error',message:String(err&&err.message||err)})}}
+  else if(m.sandy==='view'){if(VIEWS[m.view])setView(m.view);if(m.spin!=null)O.spin=!!m.spin;if(m.yaw!=null)O.yaw=+m.yaw}
+  else if(m.sandy==='catalog')reply({sandy:'catalog',catalog:JSON.parse(JSON.stringify({hairStyles:C.hairStyles,skinTones:C.skinTones,expressions:C.expressions,textures:C.textures,parts:C.parts,weapons:C.weapons,slots:C.slots}))})});
+// ---------- go ----------
+let start=K.DEFAULT;try{if(window.SandyKit&&window.SandyKit.migrate)window.SandyKit.migrate();const sv=localStorage.getItem(CLASSIC_KEY);if(sv)start=K.merge(K.DEFAULT,JSON.parse(sv))}catch(e){}try{if(Q.get('config'))start=K.merge(K.DEFAULT,K.decode(Q.get('config')));
+if(Q.get('character'))fetch(Q.get('character')).then(r=>r.text()).then(t=>{const go=()=>sandy?openCharacterText(t,Q.get('character').split('/').pop()):setTimeout(go,200);go()}).catch(()=>{});else if(Q.get('seed'))start=K.randomConfig(Q.get('seed'))}catch(e){console.warn('bad config in the link',e)}
+if(Q.get('view')&&VIEWS[Q.get('view')])setView(Q.get('view'));else setView('body');if(Q.get('spin')==='1'){O.spin=true;$('spin').setAttribute('aria-pressed','true')}
+size();
+K.create(start).then(s=>{sandy=s;scene.add(s.object3d);cfg=s.getConfig();sync();if(STILL){for(let i=0;i<6;i++)s.update(1/60);bump()}$('loading').classList.add('hide');post({sandy:'ready',config:cfg});window.SANDY=s}).catch(e=>{console.error(e);$('loading').textContent='Sandy could not load: '+e.message});
+})();
+
+</script>
+<!-- ===== SANDY EDITOR: END (script) ===== -->
+<script src="../../assets/catalog.js"></script>
+<script src="../../assets/icons.js"></script>
+<script src="../../assets/games.js"></script>
+<script src="../../assets/grug.js"></script>
+<script>(function(){ if (/[?&]mode=viewer/.test(location.search)) return; try { Grug.ui.chrome('avatar'); } catch (e) {} })();</script>
+<script>
+/* ---------- Emotes: pick the ones she brings into games (saved in the Grug profile; the games read them through gamekit.js) ---------- */
+(function () {
+  if (/[?&]mode=viewer/.test(location.search) || !window.Grug) return;
+  const G = Grug, $ = id => document.getElementById(id), ICON = { wave: '👋', dance: '💃', disco: '🕺', shuffle: '👟', robot: '🤖', cheer: '🎉', bow: '🙇', flex: '💪', jump: '🐰' };
+  let loadout = G.emotes.slice();
+  function paint() {
+    $('emoLoad').innerHTML = loadout.length ? loadout.map((id, i) => { const e = G.emoteOf(id); return e ? '<span style="--c:' + e.hue + '"><i>' + (ICON[id] || '✨') + '</i>' + (i + 1) + '. ' + e.name + '</span>' : ''; }).join('') + '<span class="empty">' + loadout.length + ' / ' + G.EMOTE_MAX + '</span>' : '<span class="empty">Nothing picked: tap emotes below</span>';
+    $('emoGrid').innerHTML = G.EMOTES.map(e => { const k = loadout.indexOf(e.id); return '<button type="button" data-emote="' + e.id + '" aria-pressed="' + (k >= 0) + '" style="--c:' + e.hue + '"><span class="n">' + (k + 1) + '</span><i>' + (ICON[e.id] || '✨') + '</i>' + e.name + '</button>'; }).join('');
+  }
+  $('emoGrid').addEventListener('click', e => {
+    const b = e.target.closest('[data-emote]'); if (!b) return; const id = b.dataset.emote, em = G.emoteOf(id), k = loadout.indexOf(id);
+    if (window.SANDY && em) { try { if (window.SANDY_STILL && window.SANDY_STILL.on) window.SANDY_STILL.pose(em.anim); else window.SANDY.play(em.anim); } catch (x) {} for (const x of document.querySelectorAll('#anims button')) x.setAttribute('aria-pressed', String(x.dataset.anim === em.anim)); }   // preview on the stage
+    if (k >= 0) { if (loadout.length === 1) { G.ui.toast('Keep at least one emote', { icon: 'info' }); } else loadout.splice(k, 1); }
+    else if (loadout.length >= G.EMOTE_MAX) { G.ui.toast('That\u2019s ' + G.EMOTE_MAX + ' already. Tap one to drop it first.', { icon: 'warning-circle' }); }
+    else loadout.push(id);
+    G.setEmotes(loadout); loadout = G.emotes.slice(); paint(); G.ui.buzz();
+  });
+  paint();
+  if (/emotes/i.test(location.hash)) setTimeout(() => { const t = $('tabEmotes'); if (t) t.click(); }, 0);
+  G.on((p, what) => { if (what === 'external' || what === 'import' || what === 'reset') { loadout = G.emotes.slice(); paint(); } });
+})();
+</script>
+<script>
+/* the archive bar's switch: classic: true in the player's look makes games build this classic avatar for the player only */
+(function(){const el=document.getElementById('classicOn');if(!el)return;
+  const read=()=>{try{return JSON.parse(localStorage.getItem('grug.sandy.v1')||'null')||{}}catch(e){return {}}};
+  el.checked=read().classic===true;
+  el.addEventListener('change',()=>{const p=read();p.model='block';p.classic=el.checked;try{localStorage.setItem('grug.sandy.v1',JSON.stringify(p))}catch(e){}
+    if(window.Grug&&Grug.ui&&Grug.ui.toast)Grug.ui.toast(el.checked?'Games will use your classic avatar':'Games will use the new avatar',{icon:'check'});
+    if(window.SandyView)SandyView.makeSnaps(p,{step:true}).catch(()=>{})});
+})();
+</script>
+<script src="nav.js"></script>
+</body></html>

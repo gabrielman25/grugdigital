@@ -120,6 +120,9 @@
   // (only used until the 3D avatar loads: the blocky stand-in wears the main colours of what's on)
   function look() {
     let c = null; try { c = JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); } catch (e) {}
+    // the blocky avatar: its skin's main colours (the classic look, when it's on, is in 'grug.sandy.classic.v1')
+    const SKIN = { skaterMaleA: ['#f39a78', '#ef5a42', '#1a5a84'], skaterFemaleA: ['#f39a78', '#1f1f22', '#1f1f22'], cyborgFemaleA: ['#f39a78', '#9fb4c8', '#2d5c8a'], criminalMaleA: ['#f39a78', '#f4f4f4', '#f4f4f4'] };
+    if (c && c.model === 'block') { if (c.classic) { try { c = JSON.parse(localStorage.getItem('grug.sandy.classic.v1') || 'null'); } catch (e) { c = null; } } else { const k = SKIN[c.skin] || SKIN.skaterMaleA; c = { skin: k[0], outfit: { shirt: k[1], shorts: k[2] } }; } }
     const sh = C.get(C.wornIn(c, 'shirt')), pa = C.get(C.wornIn(c, 'pants')), hex = v => /^#[0-9a-f]{6}$/i.test(v || '') ? v : null;
     return {
       skin: hexRgb(hex(c && c.skin) || '#d9a67e'),

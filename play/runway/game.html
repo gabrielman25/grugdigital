@@ -237,21 +237,27 @@ const Bridge = (() => {
 })();
 
 /* =====================================================================================
-   3. AVATARS · the site's 3D avatar runtime (three.js r149 + SandyKit, ~15 MB, cached by the browser)
-   - The player wears the look saved by the Grug avatar editor on this phone (localStorage 'grug.sandy.v1').
-   - Every bot is a female Sandy: SandyKit.randomConfig(seed, {body:'female'}).
+   3. AVATARS · this game dresses everyone in the CLASSIC avatar's clothes (tops, dresses, skirts, boots, earrings), so it
+     runs on the archived classic avatar (assets/sandy-classic.js, ~15 MB), loaded through the site's runtime
+     (assets/sandy-runtime.js: SandyKit.loadClassic()). The rest of the site moved to the blocky avatar in Nov 2026,
+     which can't wear these clothes yet; when it can, switch this game over and drop loadClassic.
+   - The player starts from their classic look ('grug.sandy.classic.v1'; the avatar editor's look is 'grug.sandy.v1').
+   - Every bot is a female Sandy: randomConfig(seed, {body:'female'}).
    - Keep the scene in her own units: 1 unit = 1 cm (she is ~170 cm tall). Her hair breaks at tiny scales, so
      never shrink her to fit a world in metres; size the world in cm instead.
    ===================================================================================== */
 const Avatars = (() => {
   let K = null;
   function loadOne(src) { return new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = () => window.SandyKit ? ok(window.SandyKit) : no(new Error('no SandyKit')); s.onerror = () => { s.remove(); no(new Error('failed ' + src)); }; document.head.appendChild(s); }); }
+  // the classic kit (the clothes live there); an older runtime that is the classic one already is used as it is
+  const classic = async R => (R && R.loadClassic ? await R.loadClassic() : R);
   async function load() {
-    if (window.SandyKit) return (K = window.SandyKit);
-    for (const src of SETTINGS.runtime) { try { return (K = await loadOne(src)); } catch (e) {} }
+    if (window.SandyClassicKit) return (K = window.SandyClassicKit);
+    if (window.SandyKit) return (K = await classic(window.SandyKit));
+    for (const src of SETTINGS.runtime) { try { return (K = await classic(await loadOne(src))); } catch (e) {} }
     throw new Error('Avatar runtime not found');
   }
-  function playerConfig() { let c = null; try { c = JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); } catch (e) {} return K.merge(K.DEFAULT, c && typeof c === 'object' ? c : {}); }
+  function playerConfig() { let c = null; try { c = window.SandyKit && window.SandyKit.classicLook ? window.SandyKit.classicLook() : JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); } catch (e) {} return K.merge(K.DEFAULT, c && typeof c === 'object' ? c : {}); }
   function botConfig(i, shirt) { const c = K.randomConfig(SETTINGS.botSeed + '-' + i, { body: 'female' }); c.weapon = null; if (shirt) { c.top = null; c.legs = null; c.outfit = Object.assign({}, c.outfit, { shirt, shorts: '#24262b' }); } return c; }
   return { load, playerConfig, botConfig, get K() { return K; } };
 })();

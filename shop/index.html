@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Shop · Grug</title>
-<meta name="description" content="Custom clothing for your Grug avatar: Roblox-style shirt and pants templates you earn by playing.">
+<title>Classic closet · Grug</title>
+<meta name="description" content="Clothes for the classic Grug avatar: Roblox-style shirt and pants templates you earn by playing.">
 <meta name="theme-color" content="#eaf6ee">
 <link rel="icon" href="../favicon.png">
 <link rel="stylesheet" href="../assets/grug.css">
@@ -53,8 +53,8 @@
     <p>One balance that works in all Grug games. Spend them on boosts and power-ups.</p>
     <span class="row"><span class="cta">Get Pearls</span><span class="bal" id="pearlsBal"></span></span>
   </a>
-  <div class="sh-head"><h1>Shop</h1><p>Custom clothing for your avatar. Every design is a Roblox-style shirt or pants template, earned by playing. Nothing here costs money.</p></div>
-  <div class="sh-own"><p><b>Have your own Roblox template?</b> Upload any classic shirt or pants template in the avatar editor, under Custom.</p><a class="g-btn sm" href="../avatar/#custom">Upload</a></div>
+  <div class="sh-head"><h1>Classic closet</h1><p>Clothes for the classic avatar, which is archived: they show when you play as your classic avatar (Avatar → Classic). Every design is a Roblox-style shirt or pants template, earned by playing. Nothing here costs money.</p></div>
+  <div class="sh-own"><p><b>Have your own Roblox template?</b> Upload any classic shirt or pants template in the classic avatar editor, under Custom.</p><a class="g-btn sm" href="../avatar/classic/#custom">Upload</a></div>
   <div class="sh-filters" id="filters"></div>
   <div id="groups"></div>
 </main>
@@ -102,7 +102,7 @@
     if (pick === 'claim') { if (G.freeShop() && G.grant(it.id, 'free-shop')) { G.ui.toast('Claimed: ' + it.name, { icon: 'confetti', ms: 3500 }); G.ui.buzz([12, 40, 20]); } else G.ui.toast('The free shop just ended', { icon: 'hourglass' }); render(); }
     else if (pick === 'wear') { G.equip(it.id); G.ui.toast('Wearing ' + it.name, { icon: 'check' }); G.ui.buzz(); render(); }
     else if (pick === 'off') { G.unequip(it.slot); G.ui.toast('Took off ' + it.name, { icon: 'check' }); render(); }
-    else if (pick === 'avatar') location.href = G.url('avatar/#custom');
+    else if (pick === 'avatar') location.href = G.url('avatar/classic/#custom');
     else if (pick === 'go' && game) location.href = G.url(game.play) + (it.get.type === 'points' && G.appState(game) && G.appState(game).store ? '#' + G.appState(game).store + '/rewards' : '');
   }
   $('#groups').addEventListener('click', e => { const b = e.target.closest('[data-item]'); if (b) open(C.get(b.dataset.item)); });

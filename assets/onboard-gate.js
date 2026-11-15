@@ -1,6 +1,6 @@
 /* Grug · onboard-gate.js — the games onboarding's door for pages that don't load grug.js (games/carts/, built by the
    Grug Micro kit). The same check as Grug.onboard.guard() in assets/grug.js: the first time this device opens a games
-   page, it goes to games/welcome/ first (character, birthday, top, bottom) and comes back here afterwards.
+   page, it goes to games/welcome/ first (birthday, character, hat) and comes back here afterwards.
    Finished = profile.seen.onboarded and a saved birthday (profile.prefs.birthday) in 'grug.profile.v1'.
    Keep the two in step. Load it first thing in <head>:  <script src="../../assets/onboard-gate.js"></script> */
 (function () {

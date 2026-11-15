@@ -207,23 +207,45 @@
     profile.inventory.push(id); profile.earned[id] = { at: Date.now(), how: how || it.get.type };
     save('grant'); return true;
   }
-  /* wearing a design = dressing the 3D avatar's look ('grug.sandy.v1') in a custom garment with that template.
-     A garment of the same kind she already wears is kept (T-shirt or long sleeves, shorts or pants). */
-  const LOOK_KEY = 'grug.sandy.v1';
-  const look = () => { const c = readJSON(LOOK_KEY, null); return c && typeof c === 'object' ? c : {}; };
-  const wearing = it => !!it && C.wornIn(look(), it.slot) === it.id;
+  /* The avatar (Nov 2026): 'grug.sandy.v1' is the blocky avatar's look {model: 'block', skin, hat, classic}. The old 3D avatar
+     and its clothes are archived: their look is 'grug.sandy.classic.v1', used only when the player switched on "Classic
+     avatar" (classic: true). A look saved before then (no model) is moved there once, here and in the runtime alike. */
+  const LOOK_KEY = 'grug.sandy.v1', CLASSIC_KEY = 'grug.sandy.classic.v1';
+  const HAT_DEF = { type: 'none', colour: '#ffffff', size: 1, up: 0, forward: 0, tilt: 0 };
+  const SKIN_IDS = ['skaterMaleA', 'skaterFemaleA', 'cyborgFemaleA', 'criminalMaleA'];
+  function migrateLook() {
+    const c = readJSON(LOOK_KEY, null); if (!c || typeof c !== 'object' || c.model === 'block') return;
+    if (!readJSON(CLASSIC_KEY, null)) writeJSON(CLASSIC_KEY, c);
+    writeJSON(LOOK_KEY, { model: 'block', skin: c.body === 'female' ? 'skaterFemaleA' : 'skaterMaleA', classic: false, hat: Object.assign({}, HAT_DEF, c.hat || {}) });
+  }
+  try { migrateLook(); } catch (e) {}
+  const look = () => { const c = readJSON(LOOK_KEY, null); return c && typeof c === 'object' ? c : { model: 'block', skin: 'skaterMaleA', classic: false, hat: Object.assign({}, HAT_DEF) }; };
+  // the new avatar's look: patch {skin, hat, classic}; pass redraw: false to take the pictures later (refreshPictures)
+  function setLook(patch, redraw) {
+    const c = Object.assign(look(), patch || {}, { model: 'block' });
+    if (!SKIN_IDS.includes(c.skin)) c.skin = 'skaterMaleA';
+    c.hat = Object.assign({}, HAT_DEF, c.hat || {});
+    writeJSON(LOOK_KEY, c); save('avatar');
+    if (redraw !== false) refreshPictures(c); return true;
+  }
+  /* closet designs (archived with the classic avatar): wearing one dresses the CLASSIC look in a custom garment with that
+     template. A garment of the same kind already worn is kept (T-shirt or long sleeves, shorts or pants). The player's
+     look gets a stamp (classicAt) so its pictures are retaken; they only show the classic avatar while it is switched on. */
+  const classicLook = () => { const c = readJSON(CLASSIC_KEY, null); return c && typeof c === 'object' ? c : {}; };
+  const wearing = it => !!it && C.wornIn(classicLook(), it.slot) === it.id;
+  function classicChanged(redraw) { const p = look(); p.classicAt = String(Date.now()); writeJSON(LOOK_KEY, p); if (redraw !== false && p.classic) refreshPictures(p); }
   // part (optional): which garment to put it on (a C.GARMENTS part: T-shirt or long sleeves, shorts or pants)
   function equip(id, part, redraw) {
     const it = C.get(id); if (!it || !owns(id)) return false;
-    const c = look(), key = C.CFG_KEY[it.slot], cur = c[key], G0 = C.GARMENTS[it.slot];
+    const c = classicLook(), key = C.CFG_KEY[it.slot], cur = c[key], G0 = C.GARMENTS[it.slot];
     const g = (part && G0.find(x => x.part === part)) || (cur && G0.find(x => x.part === cur.part)) || G0[it.slot === 'shirt' ? 0 : 1];
     c[key] = { part: g.part, texture: g.texture, colour: '#ffffff', template: it.template };
-    writeJSON(LOOK_KEY, c); profile.avatar[it.slot] = id; profile.avatar = C.normalize(profile.avatar); save('avatar');
-    if (redraw !== false) refreshPictures(c); return true;
+    writeJSON(CLASSIC_KEY, c); profile.avatar[it.slot] = id; profile.avatar = C.normalize(profile.avatar); save('avatar');
+    classicChanged(redraw); return true;
   }
   function unequip(slot) {
-    const c = look(), key = C.CFG_KEY[slot]; if (!key) return false;
-    if (c[key] && c[key].template) { c[key] = null; writeJSON(LOOK_KEY, c); refreshPictures(c); }
+    const c = classicLook(), key = C.CFG_KEY[slot]; if (!key) return false;
+    if (c[key] && c[key].template) { c[key] = null; writeJSON(CLASSIC_KEY, c); classicChanged(); }
     profile.avatar[slot] = null; save('avatar'); return true;
   }
   // re-take the avatar's pictures after her look changed outside the editor (loads the 3D runtime once, in the background)
@@ -235,13 +257,11 @@
     return picBusy;
   }
   function setAvatar(patch) { profile.avatar = C.normalize(Object.assign({}, profile.avatar, patch)); save('avatar'); }
-  // the avatar's body (the editor's Body choice, SandyKit.CATALOG.bodies). Saved in her look like the editor does;
-  // pass redraw: false to take the pictures later (refreshPictures) when several changes come together
+  // the classic avatar's body (kept for the classic look only)
   const BODIES = ['female', 'male'];
   function setBody(b, redraw) {
     if (!BODIES.includes(b)) return false;
-    const c = look(); c.body = b; writeJSON(LOOK_KEY, c); save('avatar');
-    if (redraw !== false) refreshPictures(c); return true;
+    const c = classicLook(); c.body = b; writeJSON(CLASSIC_KEY, c); save('avatar'); classicChanged(redraw); return true;
   }
   function setName(name) { name = cleanName(name); if (!name) return false; profile.name = name; save('name'); return true; }
 
@@ -354,7 +374,7 @@
   /* ---------- the games onboarding (games/welcome/) ----------
      The first time someone opens anything games-related on this device (the store, a game page, a game, Carts,
      Favorites, a Play button on the home page) they go through a few short screens first: their own birthday
-     (required), then their character's body, a top and a bottom (each skippable), then on to where they were going (onboard.start(next)). Once finished
+     (required), then their character's look and a hat (each skippable), then on to where they were going (onboard.start(next)). Once finished
      (profile.seen.onboarded, with a birthday saved) it never shows again; Settings → Your character → Set up again replays it.
      games/carts/ (built by the Grug Micro kit, no grug.js) checks the same thing with assets/onboard-gate.js. */
   const WELCOME = 'games/welcome/';
@@ -443,8 +463,8 @@
     { const v = localStorage.getItem(REWARDS_KEY); if (v) { try { apps[REWARDS_KEY] = JSON.parse(v); } catch (e) {} } }   // saved Rewards cards + My creations
     { const v = localStorage.getItem(BIZ_KEY); if (v) { try { apps[BIZ_KEY] = JSON.parse(v); } catch (e) {} } }   // the restaurant account and its websites
     try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^daypart:/.test(k)) apps[k] = JSON.parse(localStorage.getItem(k)); } } catch (e) {}   // the restaurant dashboard (business/)
-    const sandy = readJSON('grug.sandy.v1', null);   // the 3D avatar's look
-    return { format: EXPORT_FORMAT, version: 1, exportedAt: new Date().toISOString(), site: ROOT, profile, apps, sandy };
+    const sandy = readJSON('grug.sandy.v1', null), sandyClassic = readJSON('grug.sandy.classic.v1', null);   // the avatar's look, and the archived classic one
+    return { format: EXPORT_FORMAT, version: 1, exportedAt: new Date().toISOString(), site: ROOT, profile, apps, sandy, sandyClassic };
   }
   function exportText() { return JSON.stringify(exportData(), null, 2); }
   function exportFilename() { return 'grug-profile-' + profile.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + new Date().toISOString().slice(0, 10) + '.json'; }
@@ -471,7 +491,8 @@
     const apps = d.apps && typeof d.apps === 'object' ? d.apps : {};
     const pts = GAMES.filter(g => g.storageKey && apps[g.storageKey]).map(g => ({ game: g, points: Math.max(0, +apps[g.storageKey].points || +apps[g.storageKey].coins || 0) }));
     const sandy = d.sandy && typeof d.sandy === 'object' && !Array.isArray(d.sandy) ? d.sandy : null;
-    return { ok: true, data: { profile: p, apps, sandy }, summary: { name: p.name, items: p.inventory.length, exportedAt: d.exportedAt || '', points: pts } };
+    const sandyClassic = d.sandyClassic && typeof d.sandyClassic === 'object' && !Array.isArray(d.sandyClassic) ? d.sandyClassic : null;
+    return { ok: true, data: { profile: p, apps, sandy, sandyClassic }, summary: { name: p.name, items: p.inventory.length, exportedAt: d.exportedAt || '', points: pts } };
   }
   // Replace everything on this device with the file's contents.
   function applyImport(data) {
@@ -482,17 +503,19 @@
     Object.keys(data.apps).forEach(k => { if (/^daypart:/.test(k)) writeJSON(k, data.apps[k]); });
     profile = p; writeJSON(KEY, profile); try { localStorage.removeItem(SNAP_KEY); } catch (e) {}
     try { syncAge(); } catch (e) {}   // the birthday rule holds across an import (see "age")
-    if (data.sandy) { writeJSON('grug.sandy.v1', data.sandy); try { localStorage.removeItem('grug.sandy.snaps.v1'); } catch (e) {} }
+    if (data.sandyClassic) writeJSON('grug.sandy.classic.v1', data.sandyClassic);
+    if (data.sandy) { if (data.sandy.model !== 'block' && !data.sandyClassic) try { localStorage.removeItem('grug.sandy.classic.v1'); } catch (e) {}
+      writeJSON('grug.sandy.v1', data.sandy); try { migrateLook(); localStorage.removeItem('grug.sandy.snaps.v1'); } catch (e) {} }
     emit('import'); return true;
   }
   function reset(alsoPoints) {
     if (alsoPoints) appKeys().forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
     if (alsoPoints) try { localStorage.removeItem(REWARDS_KEY); } catch (e) {}
-    try { localStorage.removeItem(KEY); localStorage.removeItem(SNAP_KEY); localStorage.removeItem('grug.sandy.v1'); localStorage.removeItem('grug.sandy.snaps.v1'); } catch (e) {}
+    try { localStorage.removeItem(KEY); localStorage.removeItem(SNAP_KEY); localStorage.removeItem('grug.sandy.v1'); localStorage.removeItem('grug.sandy.classic.v1'); localStorage.removeItem('grug.sandy.snaps.v1'); } catch (e) {}
     profile = fresh(); writeJSON(KEY, profile); try { syncAge(); } catch (e) {} emit('reset');
   }
 
-  /* ---------- avatar snapshots: pictures of the new 3D avatar (Sandy) ----------
+  /* ---------- avatar snapshots: pictures of the player's avatar (the blocky one, or the classic one when it's on) ----------
      The avatar editor (avatar/) renders them whenever the look changes and caches them in 'grug.sandy.snaps.v1'
      (see assets/sandy-view.js). Until someone makes their own, everyone gets the default look's pictures. */
   const SANDY_KEY = 'grug.sandy.v1', SANDY_SNAPS = 'grug.sandy.snaps.v1';
@@ -569,7 +592,7 @@
        Make → Link page (creators), Rewards card (shop owners), 3D models (Model Kit + the asset library)
      Everyone sees every tab (the role picked in Settings only changes what the home page shows first). */
   const NAV = [
-    ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'], ['shop', 'Shop', 'storefront', 'shop/'], ['profile', 'Profile', 'user', 'profile/'],
+    ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'], ['shop', 'Classic closet', 'storefront', 'shop/'], ['profile', 'Profile', 'user', 'profile/'],
     ['links', 'Link page', 'share-network', 'links/'], ['rewards', 'Rewards card', 'gift', 'rewards/'], ['create', '3D models', 'cube', 'create/'],
     ['carts', 'Carts', 'device-mobile', 'games/carts/'],
     ['cards', 'Stamp cards', 'ticket', 'me/cards/'],   // the guest's side of rewards: stamp cards from shops and their Pearls (the owner's side is rewards/)
@@ -579,7 +602,7 @@
   // what's in the dock, left to right; a group opens its tray of pages
   const DOCK_GROUPS = [
     { id: 'home' }, { id: 'games', label: 'Games', items: ['games', 'carts'] },
-    { id: 'me', label: 'Me', items: ['avatar', 'shop', 'cards', 'profile'] },
+    { id: 'me', label: 'Me', items: ['avatar', 'cards', 'profile'] },   // the Shop (closet clothes) is archived with the classic avatar: reached from avatar/ → Classic
     { id: 'make', label: 'Make', items: ['links', 'rewards', 'create'] }
   ];
   // the dock's stops, left to right: what a swipe (or Q / E, LB / RB) steps through
@@ -625,7 +648,7 @@
   const dockGroups = () => partnerOn() ? DOCK_GROUPS.filter(g => PARTNER_TABS.includes(g.id)) : bizOn() ? BIZ_TABS.map(id => ({ id })) : DOCK_GROUPS;
   const stops = () => partnerOn() ? PARTNER_TABS : bizOn() ? BIZ_TABS : STOPS;
   const SUB_TEXT = { games: 'The game store: every game, search and favorites', carts: 'Quick one-tap games: swipe up for the next',
-    avatar: 'Dress up your 3D avatar', shop: 'Clothes and how to earn them', cards: 'Stamp cards from shops, and your Pearls', profile: 'Stats, inventory and settings',
+    avatar: 'Your look, a hat and your emotes', shop: 'Clothes for the classic avatar', cards: 'Stamp cards from shops, and your Pearls', profile: 'Stats, inventory and settings',
     links: 'A link page or 3D world for your socials', rewards: 'A free stamp card for your shop', create: 'Model Kit and free 3D presets',
     dashboard: 'Schedule, recipes, checklists and more', website: 'Your shop\u2019s own website' };
   const groupOf = k => { const find = list => list.find(g => g.id === k || (g.items && g.items.includes(k))); return find(dockGroups()) || find(DOCK_GROUPS) || dockGroups()[0]; };
@@ -728,7 +751,7 @@
         '<a role="menuitem" class="hot" href="' + pearlsUrl() + '">' + icon('pearl') + '<span>Buy Pearls</span>' + icon('caret-right') + '</a>' +
         '<a role="menuitem" href="' + url('profile/') + '">' + icon('user') + '<span>Profile</span></a>' +
         '<a role="menuitem" href="' + url('avatar/') + '">' + icon('t-shirt') + '<span>Edit avatar</span></a>' +
-        '<a role="menuitem" href="' + url('shop/?mine') + '">' + icon('shopping-bag') + '<span>My closet</span></a>' +
+        (look().classic ? '<a role="menuitem" href="' + url('shop/?mine') + '">' + icon('shopping-bag') + '<span>Classic closet</span></a>' : '') +
         '<button type="button" role="menuitemcheckbox" data-m="mode" aria-checked="' + !isLight() + '">' + icon('moon') + '<span>Dark mode</span><span class="g-switch sm" aria-hidden="true"></span></button>' +
         '<button type="button" role="menuitem" data-m="settings">' + icon('gear-six') + '<span>Settings</span></button>'; };
     document.body.appendChild(menu);
@@ -809,7 +832,7 @@
     const brand = root.GrugTheme && root.GrugTheme.brand();
     const face = snaps();
     const head = id === 'me'
-      ? '<div class="g-hub-h"><img class="g-hub-face" alt="" src="' + face.bust + '"><h1>' + esc(profile.name) + '</h1><p>Your look, your closet, your stamp cards and your settings.</p></div>'
+      ? '<div class="g-hub-h"><img class="g-hub-face" alt="" src="' + face.bust + '"><h1>' + esc(profile.name) + '</h1><p>Your look, your stamp cards and your settings.</p></div>'
       : '<div class="g-hub-h"><span class="g-hub-ic">' + DOCK.make + '</span><h1>Make</h1><p>Free tools for creators, shops and game makers.</p></div>';
     host.innerHTML = head + '<nav class="g-hub-list" aria-label="' + esc(g.label) + '">' + g.items.map(k => { const n = navOf(k);
       return '<a href="' + url(n[3]) + '" style="--tab:' + (brand ? brand.color : DOCK_SIMPLE[k][1]) + ';--tab-lo:' + (brand ? brand.color : DOCK_LO[k]) + '"><span class="g-hub-ico">' + DOCK[k] + '</span><span class="g-hub-tx"><b>' + esc(n[1]) + '</b><small>' + esc(SUB_TEXT[k] || '') + '</small></span>' + icon('caret-right') + '</a>'; }).join('') + '</nav>';
@@ -949,7 +972,7 @@
     const bd = birthday();
     return '<div class="g-pref" data-bd-row>' + icon('calendar-check') + '<span><b>Your birthday</b><small data-bd-show>' + (bd ? esc(age.format(bd)) : 'Not set yet') + '. Saved on this device only</small></span>' +
       '<button type="button" class="g-btn sm" data-bd-edit>Change</button></div>' +
-      '<div class="g-pref">' + icon('user') + '<span><b>Your character</b><small>Pick your character\u2019s body, top and bottom again</small></span>' +
+      '<div class="g-pref">' + icon('user') + '<span><b>Your character</b><small>Pick your character and hat again</small></span>' +
       '<a class="g-btn sm" href="' + esc(onboard.url(location.href, true)) + '" data-bd-redo>Set up again</a></div>';
   }
   function editBirthday() {
@@ -1157,7 +1180,7 @@
     KEY, ROOT, url, esc, fmt, icon, GAMES, C,
     get profile() { return profile; }, get isNew() { return isNew; }, storageWorks,
     on(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },
-    save, setName, setAvatar, setBody, BODIES, equip, unequip, wearing, refreshPictures, owns, grant, track, totals, statValue, progress, checkMilestones, celebrate,
+    save, setName, setAvatar, setBody, BODIES, setLook, look, SKIN_IDS, equip, unequip, wearing, refreshPictures, owns, grant, track, totals, statValue, progress, checkMilestones, celebrate,
     favs,   // favourite and ignored games (the store, games/favorites/, the game pages)
     age, onboard,   // the birthday and mature games; the games onboarding (games/welcome/)
     points, appState, venueOf, rewardsUrl, exportData, exportText, exportFilename, download, share, parseImport, applyImport, reset,

@@ -1,10 +1,11 @@
-/* Grug · sandy-view.js — the new 3D avatar (Sandy) for the rest of the site.
-   The look is saved on the phone by the avatar editor (localStorage 'grug.sandy.v1').
+/* Grug · sandy-view.js — the 3D avatar for the rest of the site.
+   The look is saved on the phone by the avatar editor (localStorage 'grug.sandy.v1': {model: 'block', skin, hat, classic}).
+   With classic: true the player's pictures are of the archived classic avatar (its look is in 'grug.sandy.classic.v1').
    Pictures of it are cached in 'grug.sandy.snaps.v1' so pages can show the avatar without loading the 3D runtime;
    grug.js serves those through Grug.snaps(). Pages that want her in 3D call SandyView.load() first (15 MB, cached).
 
    SandyView.config()            the saved look (or null)
-   SandyView.load()              Promise: loads assets/sandy-runtime.js once (THREE r149 + SandyKit)
+   SandyView.load()              Promise: loads assets/sandy-runtime.js once (THREE r149 + SandyKit, ~1.7 MB)
    SandyView.snaps()             cached pictures {bust, full, happy, sad, cheer} of the saved look, or the defaults
    SandyView.makeSnaps(cfg, o)   Promise: renders and caches the pictures (call after the look changes); o = {step, cancelled}
    SandyView.DEFAULT_SNAPS       picture URLs of the default look, shipped in assets/sandy/ */
@@ -17,9 +18,18 @@
   const DEFAULT_SNAPS = { def: true, bust: DEF + 'bust.png', full: DEF + 'full.png', happy: DEF + 'happy.png', sad: DEF + 'sad.png', cheer: DEF + 'cheer.png' };
   const read = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
   const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } };
+  const CLASSIC_KEY = 'grug.sandy.classic.v1';
   const hash = (o) => { const s = JSON.stringify(o || null); let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
 
-  function config() { const c = read(KEY); return c && typeof c === 'object' ? c : null; }
+  // a look saved before the blocky avatar (no model) is the classic one: it moves to CLASSIC_KEY and the player gets the
+  // new avatar in the skin of that body, with the same hat (the runtime does the same: SandyKit.migrate)
+  function config() {
+    const c = read(KEY); if (!c || typeof c !== 'object') return null;
+    if (c.model === 'block') return c;
+    if (!read(CLASSIC_KEY)) write(CLASSIC_KEY, c);
+    const n = { model: 'block', skin: c.body === 'female' ? 'skaterFemaleA' : 'skaterMaleA', classic: false, hat: Object.assign({ type: 'none', colour: '#ffffff', size: 1, up: 0, forward: 0, tilt: 0 }, c.hat || {}) };
+    write(KEY, n); return n;
+  }
   function snaps() { const s = read(SNAP_KEY), c = config(); return s && s.bust && (!c || s.hash === hash(c)) ? s : DEFAULT_SNAPS; }
 
   let loading = null;
@@ -45,20 +55,33 @@
     R = { K, T, renderer, scene, cam, sandy: null };
     return R;
   }
+  // where the camera looks for each picture: the blocky avatar (185 cm, a big head) and the classic one
   const FRAMES = {
+    bust: { w: 192, h: 192, t: [0, 150, 0], d: 235, yaw: 0.3, pitch: 0.04 },
+    full: { w: 300, h: 420, t: [0, 100, 0], d: 500, yaw: 0.35, pitch: 0.05 },
+    shirt: { w: 240, h: 240, t: [0, 95, 0], d: 260, yaw: 0.3, pitch: 0.06 },
+    pants: { w: 240, h: 240, t: [0, 45, 0], d: 280, yaw: 0.3, pitch: 0.06 },
+    hat: { w: 192, h: 192, t: [0, 170, 0], d: 255, yaw: 0.45, pitch: 0.1 }   // hat tiles (the editor)
+  };
+  const FRAMES_CLASSIC = {
     bust: { w: 192, h: 192, t: [0, 174, 0], d: 168, yaw: 0.3, pitch: 0.04 },
     full: { w: 300, h: 420, t: [0, 102, 0], d: 470, yaw: 0.35, pitch: 0.05 },
     shirt: { w: 240, h: 240, t: [0, 122, 0], d: 250, yaw: 0.3, pitch: 0.06 },   // closet tiles
     pants: { w: 240, h: 240, t: [0, 68, 0], d: 300, yaw: 0.3, pitch: 0.06 }
   };
   async function picture(cfg, frame, o) {
-    const r = await rig(), F = FRAMES[frame], c = r.K.merge(r.K.DEFAULT, cfg || {});
+    const r = await rig(), c = r.K.merge(r.K.DEFAULT, cfg || {}), classic = c.classic === true;
     if (o && o.expression) c.expression = o.expression;
-    if (!r.sandy) { r.sandy = await r.K.create(c); r.scene.add(r.sandy.object3d); } else { r.sandy.apply(c, true); if (r.sandy.ready) await r.sandy.ready; }
-    if (r.K.customReady) await r.K.customReady();   // custom clothing templates still loading
-    if (r.K.decalReady) await r.K.decalReady();     // chest print images still loading
-    // the male body's face is a picture that loads by itself: wait for it (up to 2 s), or the first shot of him has no face
-    if (c.body === 'male' && typeof root.faceTexture === 'function') { const t = root.faceTexture('male'); for (let k = 0; k < 80 && t && !t.image; k++) await new Promise(ok => setTimeout(ok, 25)); }
+    // classic: the archived Sandy in the classic look (create() builds it), re-dressed in that look for each picture
+    if (r.sandy && !!r.sandy.isClassic !== classic) { r.scene.remove(r.sandy.object3d); try { r.sandy.dispose(); } catch (e) {} r.sandy = null; }
+    if (!r.sandy) { r.sandy = await r.K.create(c); r.scene.add(r.sandy.object3d); }
+    else if (r.sandy.isClassic) { const CK = root.SandyClassicKit, cc = CK.merge(CK.DEFAULT, r.K.classicLook()); if (o && o.expression) cc.expression = o.expression; r.sandy.apply(cc, true); if (r.sandy.ready) await r.sandy.ready; }
+    else r.sandy.apply(c, true);
+    const F = (r.sandy.isClassic ? FRAMES_CLASSIC : FRAMES)[frame];
+    if (r.K.customReady) await r.K.customReady();   // skin textures (and classic clothing templates) still loading
+    if (r.K.decalReady) await r.K.decalReady();
+    // the classic male body's face is a picture that loads by itself: wait for it (up to 2 s), or the first shot of him has no face
+    if (r.sandy.isClassic && typeof root.faceTexture === 'function') { const t = root.faceTexture('male'); for (let k = 0; k < 80 && t && !t.image; k++) await new Promise(ok => setTimeout(ok, 25)); }
     r.sandy.play((o && o.anim) || 'idle');
     for (let i = 0; i < 40; i++) r.sandy.update(((o && o.animT) || 0.6) / 40);   // settle the pose
     r.renderer.setSize(F.w, F.h, false); r.cam.aspect = F.w / F.h; r.cam.updateProjectionMatrix();
@@ -86,5 +109,5 @@
   }
   root.addEventListener('storage', e => { if (e.key === SNAP_KEY) try { root.dispatchEvent(new CustomEvent('grug-sandy-snaps', { detail: snaps() })); } catch (x) {} });
 
-  root.SandyView = { KEY, SNAP_KEY, ASSETS, DEFAULT_SNAPS, config, snaps, load, makeSnaps, picture, hash };
+  root.SandyView = { KEY, SNAP_KEY, CLASSIC_KEY, ASSETS, DEFAULT_SNAPS, config, snaps, load, makeSnaps, picture, hash };
 })(window);

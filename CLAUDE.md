@@ -83,16 +83,16 @@ way until the owner says a business has agreed in writing.
   import that would raise it a second time is put back). Change the rule in `setBirthday` / `syncAge` in grug.js.
 - **The games onboarding** (`games/welcome/?next=…`): the first time a device opens anything games-related (`games/` and
   everything under it, a game's `play/<dir>/`, a shared direct link, the home page's Play buttons, the dock's Games tab), it
-  goes through five screens first: the player's own birthday first (required; no default year, nothing said about what it
-  unlocks), then the character's body (the avatar editor's bodies only), a top, a bottom (from the closet they own, on
-  either garment), then on to where they were going (the store by default). Body, top and bottom each have **Skip**, and
-  **Skip all** goes straight on: only the birthday is required. A pick changes the saved avatar straight away. A bottom's
-  preview shows the whole character wearing the top they picked, never a close-up of the hips. Finished =
+  goes through four screens first: the player's own birthday first (required; no default year, nothing said about what it
+  unlocks), then their character (the avatar's four skins, pictures in `assets/avatar/skins/`), a hat or none (pictures in
+  `assets/avatar/hats/`), then on to where they were going (the store by default). Character and hat each have **Skip**, and
+  **Skip all** goes straight on: only the birthday is required. A pick changes the saved avatar straight away
+  (`Grug.setLook`). Finished =
   `profile.seen.onboarded` plus a birthday; it never shows again. Settings → Your character → **Set up again** replays it
   (`&redo=1`). `Grug.onboard` (grug.js) has the gate; `fossil32.js` asks it before a Play boots the console. Pages inside a
   frame (the showcase) skip it. `games/carts/` has no grug.js, so it loads `assets/onboard-gate.js` (the same check): that
   line was patched into the built feed by hand, **add it to `grug-game-kit/micro` before the next build**.
-- **Clothing fit** (the custom-clothing block at the end of `assets/sandy-runtime.js`): pants made from a closet design
+- **Clothing fit** (classic avatar only: the custom-clothing block at the end of `assets/sandy-classic.js`): pants made from a closet design
   ease out 0.6 cm all over so no body shows through (the male body's thighs did), and their waistband tucks in only above
   the hem of a T-shirt or long-sleeve tee worn over them (`hemOf`). With no shirt over the waist it is never tucked:
   that sank it into the body and showed skin at the waist. Check any change to that block with renders of both bodies in
@@ -164,7 +164,7 @@ Four tabs for everyone (the role in Settings → I'm a… only changes what the 
 The dock's LB / RB badges only show once a controller is plugged in (`html.g-pad`). **Games**, **Me** and
 **Make** are groups: tapping one opens a tray of its pages. Games = Games (the store, `games/`) and Carts (`games/carts/`,
 see below). Me and Make also have their own page (`me/`, `make/`), a plain Linktree-style list (`Grug.ui.hub`) whose
-picked row fills with its colour and slides on. Me = Avatar, Shop, Stamp cards (`me/cards/`: the guest's stamp cards and Pearls), Profile. Make = Link page (`links/`), Rewards card
+picked row fills with its colour and slides on. Me = Avatar, Stamp cards (`me/cards/`: the guest's stamp cards and Pearls), Profile. Make = Link page (`links/`), Rewards card
 (`rewards/`), 3D models (`create/`). `DOCK_GROUPS` / `NAV` in `assets/grug.js`.
 Swiping sideways anywhere (not on sliders, canvases or sideways-scrolling rows; mark others `data-noswipe`) or Q / E /
 LB / RB steps Home ↔ Games ↔ Me ↔ Make, and the next page slides in from that side (`grug.swipe` → `html.g-swipe-*`).
@@ -315,8 +315,9 @@ When a new game is added to `assets/games.js` and listed, also make its box. Don
    - `box.players`, `box.region` (`KATY, TX` for partner games, `WORLDWIDE` for Grug originals)
    - `features`: 3–5 short lines (what you do, what's special, how Pearls/points are used)
 3. **Box art** with the avatar in an **action pose** that shows what the game is about: follow
-   `tools/boxart/README.md` (capture a HUD-free background from the game, pose a Sandy avatar, composite to
-   `assets/boxart/<id>.jpg`, 1580 × 950, no text). Rules: female avatar, long hair or buns only, no hats.
+   `tools/boxart/README.md` (capture a HUD-free background from the game, pose the avatar, composite to
+   `assets/boxart/<id>.jpg`, 1580 × 950, no text). Rules: the blocky avatar (`tools/boxart/pose.html` loads it), no hats.
+   The box art made before Nov 2026 still shows the classic avatar: redo it with the new one when there is time.
    Also save 1–3 back-of-box screenshots to `assets/boxart/shots/`.
 4. Point `thumb` at the box art too, and add a `games/<id>/index.html` like the others (it calls `GrugGamePage('<id>')`).
    The game itself goes in `play/<dir>/game.html` with a thin host `index.html` copied from another game (it calls
@@ -330,21 +331,37 @@ When a new game is added to `assets/games.js` and listed, also make its box. Don
 7. Check it in a browser: the game in the store (capsules, search, the queue), heart it, then its box on Favorites, the
    unbox, the panel, and Play (cartridge → console → game).
 
+## The avatar (`assets/sandy-runtime.js`, Nov 2026)
+
+Every game's avatar is one simple blocky character (Kenney "Animated Characters: Protagonists", CC0): four **skins**
+(Skater, Rocker, Cyborg, Disco) and the classic **hats**, fitted to its head. `window.SandyKit` keeps the old API, so a game
+just loads `assets/sandy-runtime.js` (~1.7 MB, built by `tools/avatar/build.py`; read `tools/avatar/README.md` before
+changing it). Joints keep the classic names. The look is 'grug.sandy.v1' = `{model: 'block', skin, hat, classic}`.
+Choosing your own colours is not built yet: the skins are laid out in regions so it can be a texture job later.
+
+- **The classic avatar is archived**, opt-in and **only ever the player's own character**: Avatar → Classic → "Play as my
+  classic avatar" sets `classic: true`, and then `SandyKit.create(the player's look)` builds the old Sandy
+  (`assets/sandy-classic.js`, ~15 MB, loaded on demand) from 'grug.sandy.classic.v1'. Bots, NPCs, customers and
+  everyone else are always the new avatar (`randomConfig` never sets `classic`). A look saved before the change (no
+  `model`) is moved to the classic key once (`SandyKit.migrate`, `migrateLook` in grug.js, `SandyView.config`) and the
+  player gets the new avatar in the skin of that body, wearing the same hat.
+- **The closet** (`shop/`, "Classic closet") and every clothing design dress the classic look only (`Grug.equip` writes
+  'grug.sandy.classic.v1'). It's off the dock; the editor's Classic section and the account menu (while classic is on)
+  link to it. **Runway Ready** is a dress-up game built on those clothes, so it loads the classic kit for everyone in it
+  until the new avatar can be dressed (see its AVATARS block).
+- **Pictures** (`grug.sandy.snaps.v1`, `assets/sandy-view.js`) are of the player's avatar: the classic one while it's
+  on. The classic editor stamps the player's look (`classicAt`) whenever the classic look changes, so they are retaken.
+
 ## Avatar editor (`avatar/`)
 
-The stage is a **still picture**, not a live 3D view: the editor redraws it only when a slider is let go, a piece goes
-on or comes off, an emote or view is picked, or the page resizes (`STILL`, `bump()`, `window.SANDY_STILL`), and nothing
-sits on top of it. The only things on it are two arrows that turn her 45 degrees at a time (eight still pictures). Where the camera looks is
-the **View** section (Full / Face / Feet), emotes are a **Wardrobe → Emotes** category, and "Watch her animate" (in both)
-opens the **animation page**: just her, full screen and live (at half resolution), with a hotbar of animations along the
-bottom; Back (or the phone's back button, `#animate`) returns to the still picture. `?mode=viewer` embeds stay live and animated.
+Four sections as tabs: **Look** (the skins), **Hat** (none or one of eight, any colour, a size slider), **Emotes** (the
+loadout for the emote wheel, previewed on her) and **Classic** (the switch, Edit classic avatar → `avatar/classic/`,
+Classic closet). The stage is a **still picture**, redrawn when the look changes, with two arrows that turn her 45 degrees
+at a time; an emote preview plays live at half resolution for a few seconds, then it goes still. While classic is on, the
+stage shows the classic avatar and Look / Hat are greyed with a way back.
 
-No scrolling: `avatar/nav.js` + `nav.css` move the editor's own controls (the SANDY EDITOR script, wired by id) into
-screens. A row of section icons (Body, Face, Hair, Wardrobe, Shoes, View, Save) sits over a strip you swipe through;
-buttons open screens on top (Wardrobe's categories, the sliders), screens with more than fits become pages with dots, and
-lists of pieces run sideways in as many rows as fit. A piece's colours, fabric and fit show only once a piece is picked.
-Only a person's own swipe changes the section (the browser re-snapping after a resize doesn't). Add new controls to the
-editor's markup as before, then place them in a section in `nav.js`.
+`avatar/classic/` is the old editor, archived as it was (still picture, `nav.js` screens, wardrobe, custom clothing), under a
+bar with the same switch and a link back. It edits 'grug.sandy.classic.v1' through `window.SandyClassicKit`.
 
 ## The restaurant account (`assets/business.js`)
 
