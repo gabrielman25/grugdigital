@@ -1,5 +1,5 @@
 {
- "v": "c220c8b54e94",
+ "v": "be8d66489f5f",
  "apps": {
   "grug": [
    "grug",
@@ -227,7 +227,7 @@
     "/links/page/": "984b54c854",
     "/make/": "a28011c194",
     "/me/cards/": "bc7189095b",
-    "/me/": "4c538059d9",
+    "/me/": "ace48c1b35",
     "/offline.html": "c1b6421a93",
     "/pearls.html": "7a54ab1121",
     "/privacy.html": "d9f2026432",
@@ -239,7 +239,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "3106453a5e"
    },
-   "bytes": 28557849
+   "bytes": 28557890
   },
   "daypart": {
    "title": "Daypart",
