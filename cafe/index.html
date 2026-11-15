@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Grug Café dashboard</title>
+<link rel="icon" href="/favicon.png">
+<!-- The Café flyer's address (its QR code and the printed grugdigital.com/cafe). It opens the Café
+     dashboard (business/cafe/), which starts with its four setup steps. Keep this address working: it is printed on paper. -->
+<script>
+(function () {
+  var to = '../business/cafe/' + (location.search || '') + (location.hash || '');
+  try { location.replace(to); } catch (e) { location.href = to; }
+})();
+</script>
+<noscript><meta http-equiv="refresh" content="0;url=../business/cafe/"></noscript>
+</head>
+<body style="background:#F3F3F5;color:#16161A;font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0">
+<a href="../business/cafe/" style="color:#3B740B">Open the Grug Café dashboard</a>
+</body>
+</html>

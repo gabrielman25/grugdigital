@@ -467,7 +467,8 @@ account is in use, the active shop, and each shop's card text and website fields
   `?kind=tea|cafe` picks one ahead of time): Restaurant goes through the owners' link to Daypart as before, Bubble tea
   and Café open their own dashboards (`business/tea/?name=…`, `business/cafe/?name=…`), each its own app. The
   dashboard's Home ends with one door to the owners' pitch (`.gamedoor` → `partners/`, "A rewards app that brings guests back"; the game is the bonus, so lead with the rewards app),
-  with its own tour stop. **`managers/` is printed on paper: never move or remove it.**
+  with its own tour stop. **`managers/` is printed on paper: never move or remove it.** The same goes for **`boba/`** and **`cafe/`**, the
+  addresses printed on the Bubble Tea and Café flyers (QR codes too): they open `business/tea/` and `business/cafe/`.
 
 ## The shop dashboards: Bubble Tea and Café (`tools/shop-dashboards/`)
 
