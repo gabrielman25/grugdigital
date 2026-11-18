@@ -1,5 +1,5 @@
 {
- "v": "dc37f6b34444",
+ "v": "64d8e98c155f",
  "apps": {
   "grug": [
    "grug",
@@ -180,7 +180,7 @@
     "/assets/fossil32/logo.png": "f7821b54b3",
     "/assets/gamehost.js": "033b37689b",
     "/assets/games.js": "5a1d73405b",
-    "/assets/gold.js": "6392d30a87",
+    "/assets/gold.js": "473c93ee87",
     "/assets/grug.css": "0dafe96312",
     "/assets/grug.js": "58def08e45",
     "/assets/icons.js": "d421bed707",
@@ -262,7 +262,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 29152864
+   "bytes": 29152897
   },
   "daypart": {
    "title": "Daypart",

@@ -125,7 +125,7 @@ way until the owner says a business has agreed in writing.
 
 ## Grug Gold, the membership (`pearls.html`, `CLUB` in its script)
 
-- Sold on Gumroad as a monthly membership (grug3d.gumroad.com/l/tsbrmm, $3 a month, 1 week free trial). Gumroad gives
+- Sold on Gumroad as a monthly membership (grug3d.gumroad.com/l/tsbrmm, $3 a month, no free trial). Gumroad gives
   each member a **license key**; they paste it on the Pearls page, which asks Gumroad's public license check
   (`api.gumroad.com/v2/licenses/verify`, called from the browser, no secret) whether it's active. No server.
 - Active means not refunded, charged back or disputed, and `subscription_cancelled_at` / `_failed_at` / `_ended_at` empty

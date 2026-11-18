@@ -18,7 +18,7 @@
     name: 'Grug Gold',
     productId: 'TUUlwtm5rYzLF6hPfY6zXQ==',          // Gumroad → the product → Content → License key module
     link: 'https://grug3d.gumroad.com/l/tsbrmm',
-    trialDays: 7,                                   // the free trial set on Gumroad (0 if none)
+    trialDays: 0,                                   // the free trial set on Gumroad (0 if none): straight up paid since Nov 2026
     maxPhones: 2,                                   // one membership works on this many phones
     tiers: [
       { id: 'gold', name: 'Gold', price: '$3', monthly: 200, bonus: 10 }
