@@ -103,8 +103,8 @@ way until the owner says a business has agreed in writing.
   from a wrap, and closet designs tied to a business (`frozen` in `assets/catalog.js`) can't be earned.
 - **Wording:** never call a business a "partner" or say a game was "made with" it on the main site. The demonstrations
   are reached from `partners/` (the "For restaurants" page), which carries the disclaimer.
-- **Never promise a membership, a Pass or a price** for something that isn't on sale (Grug Club is hidden on
-  `pearls.html`; the Pass was removed from `partners/`).
+- **Never promise a membership, a Pass or a price** for something that isn't on sale (Grug Gold on `pearls.html` is
+  the one membership on sale, see "Grug Gold" below; the Pass was removed from `partners/`).
 - **No PeerJS and no connection between browsers.** The live menu board link and Sunrise to Sunset's "Together" are off.
 - **Say where a business's material came from.** `GRUG_DEMO.install(name, id, source)` adds a "Where this came from"
   line to the notice: the partner apps pass `copy.menuCredit`, a wrap and a venue's game pass `source` from its `PARTNERS`
@@ -122,6 +122,19 @@ way until the owner says a business has agreed in writing.
   `privacy.html` in the same change. Third-party work is credited on `credits.html`.
 - The picture prints (`assets/prints/`: the 10 quick prints and the icon pack) were removed; the avatar's chest prints are
   the drawn shapes only. Don't bring picture prints back without a licence on file.
+
+## Grug Gold, the membership (`pearls.html`, `CLUB` in its script)
+
+- Sold on Gumroad as a monthly membership (grug3d.gumroad.com/l/tsbrmm, $3 a month, 1 week free trial). Gumroad gives
+  each member a **license key**; they paste it on the Pearls page, which asks Gumroad's public license check
+  (`api.gumroad.com/v2/licenses/verify`, called from the browser, no secret) whether it's active. No server.
+- Active means not refunded, charged back or disputed, and `subscription_cancelled_at` / `_failed_at` / `_ended_at` empty
+  or still in the future. It is checked again every 12 hours on the Pearls page and right before monthly Pearls are claimed;
+  an answer older than 4 days switches the perks off until the next check. One key works on `maxPhones` phones (uses count).
+- Perks: `monthly` Pearls once per calendar month (claimed on the page, starting after `trialDays` so a free week can't be
+  cashed in), `+bonus`% on every Pearl pack, a member badge. If the price, trial or perks change on Gumroad, change
+  `CLUB` to match, and the terms ("Grug Gold membership") if the rules change. `productId: ''` hides it all again.
+- It never reaches a branded page: no memberships there (the freeze above).
 
 ## Mature games and the games onboarding
 

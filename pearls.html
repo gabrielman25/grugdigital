@@ -48,7 +48,7 @@
 .fine{font-size:13.5px!important;color:var(--mut)!important}
 .badge{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:99px;background:var(--chip-bg);color:var(--chip-fg)}
 .tiers{display:grid;grid-template-columns:1fr;gap:16px;margin-top:14px}
-@media (min-width:700px){.tiers{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:700px){.tiers{grid-template-columns:repeat(3,1fr)}.tiers.one{grid-template-columns:minmax(0,420px)}}
 .tier{position:relative;display:flex;flex-direction:column;gap:6px;padding:20px 16px 16px;background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
 .tier.hot{border:2px solid var(--ink)}
 .tier h3{font-size:20px;color:var(--ink)}
@@ -119,16 +119,16 @@ footer a{color:var(--ink2);font-weight:700}
     <p class="note saves" id="savesNote"><b>Pearls are saved on this device only.</b> They stay in this browser on this phone and don’t move to other phones, browsers or accounts.</p>
     <p class="note" id="payNote">You’ll pay on Stripe’s secure checkout page, then come straight back here.</p>
 
-    <!-- Grug Club (a monthly membership) is not offered, so nothing about it is shown or promised. The markup stays, hidden,
-         because the script below still looks these elements up; CLUB.productId is empty, so nothing ever contacts Gumroad. -->
+    <!-- Grug Gold: the monthly membership, sold on Gumroad and checked with its license key (CLUB in the script below).
+         Empty CLUB.productId hides this whole block again. -->
     <div id="clubOff" hidden>
-    <h2 id="clubH">Grug Club</h2>
-    <p>A monthly membership for every Grug game: Pearls every month, bonus Pearls on every pack and a member badge. Cancel any time.</p>
+    <h2 id="clubH">Grug Gold</h2>
+    <p id="clubLede"></p>
     <div class="box club" id="club" hidden></div>
     <div class="tiers" id="tiers"></div>
     <div class="box act" id="act">
       <b>Already a member?</b>
-      <p>Paste the license key from your Gumroad receipt email to switch on your perks on this phone.</p>
+      <p>Paste the license key from your Gumroad receipt email (or your Gumroad library) to switch on your perks on this phone.</p>
       <div class="row"><input id="key" placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="License key"><button class="g-btn primary" id="actBtn">Activate</button></div>
       <p class="msg" id="actMsg" role="status" aria-live="polite"></p>
     </div>
@@ -189,20 +189,26 @@ const PACKS = [
   { id: 'p600',  pearls: 600,  price: '$9.99',  link: 'https://buy.stripe.com/fZu9AT1ks3yO9nv7gQ5J603' },
   { id: 'p1300', pearls: 1300, price: '$19.99', link: 'https://buy.stripe.com/5kQbJ17IQd9o9nvat25J602', tag: 'Best value' }
 ];
-/* GRUG CLUB · a monthly membership sold on Gumroad. Gumroad emails each member a license key; the member pastes it
-   here, and this page asks Gumroad's public license check whether the membership is still active (no secret key needed).
-   productId: Gumroad → the product's content page → License key module. link: each tier's Gumroad checkout link.
-   Tiers are matched by name to the tier Gumroad reports, so keep the names the same in both places. */
+/* GRUG GOLD · the monthly membership, sold on Gumroad (grug3d.gumroad.com/l/tsbrmm, "Grug Gold"). Gumroad gives each
+   member a license key; the member pastes it here, and this page asks Gumroad's public license check
+   (api.gumroad.com/v2/licenses/verify, no secret key needed) whether the membership is still active. It asks again every
+   12 hours on this page and right before monthly Pearls are claimed, and the perks stop once Gumroad reports the
+   membership cancelled (after its paid time runs out), failed to renew, ended, refunded or charged back.
+   productId: Gumroad → the product → Content → License key module. trialDays: the free trial set on Gumroad (0 if none);
+   the monthly Pearls start once it's over, so a free week can't be cashed in for Pearls. With more than one tier, tiers
+   are matched by name to the tier Gumroad reports, so keep the names the same in both places; one tier always matches. */
 const CLUB = {
-  name: 'Grug Club',
-  productId: '',
+  name: 'Grug Gold',
+  productId: 'TUUlwtm5rYzLF6hPfY6zXQ==',
+  link: 'https://grug3d.gumroad.com/l/tsbrmm',
+  trialDays: 7,
   maxPhones: 2,                  // one membership works on this many phones
   tiers: [
-    { id: 'pebble',  name: 'Pebble',  price: '$1.99', monthly: 150,  bonus: 5,  link: '' },
-    { id: 'stone',   name: 'Stone',   price: '$4.99', monthly: 450,  bonus: 10, link: '', tag: 'Popular' },
-    { id: 'boulder', name: 'Boulder', price: '$9.99', monthly: 1000, bonus: 20, link: '' }
+    { id: 'gold', name: 'Gold', price: '$3', monthly: 200, bonus: 10 }
   ]
 };
+const ONE = CLUB.tiers.length === 1;
+const tierName = t => ONE ? CLUB.name : CLUB.name + ' ' + t.name;
 const WKEY = 'grug.pearls.v1', SITE = location.pathname.replace(/[^/]*$/, '');   // '/' on Cloudflare, '/grugdigital/' on the old address
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -267,7 +273,9 @@ let arrived = null;
 /* ---------- Grug Club ---------- */
 const monthKey = (t) => { const d = new Date(t || Date.now()); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
 const monthName = () => new Date().toLocaleDateString([], {month: 'long'});
-function clubTier(w){ const c = (w || wallet()).club; if(!c || !c.active || Date.now() - (+c.checkedAt || 0) > 4 * 864e5) return null; return CLUB.tiers.find(t => t.id === c.tier) || null; }
+function clubTier(w){ const c = (w || wallet()).club; if(!CLUB.productId || !c || !c.active || Date.now() - (+c.checkedAt || 0) > 4 * 864e5) return null; return CLUB.tiers.find(t => t.id === c.tier) || null; }
+const pearlsFrom = c => (+c.started || 0) + CLUB.trialDays * 864e5;   // monthly Pearls start when the free trial is over
+const dayName = t => new Date(t).toLocaleDateString([], {month: 'long', day: 'numeric'});
 const future = v => !v || new Date(v).getTime() > Date.now();
 async function gumroad(key, count){
   const body = new URLSearchParams({product_id: CLUB.productId, license_key: key, increment_uses_count: count ? 'true' : 'false'});
@@ -275,14 +283,15 @@ async function gumroad(key, count){
   let j = null; try{ j = await r.json(); }catch(e){}
   if(!j || !j.success) return {ok: false, missing: r.status === 404};
   const pu = j.purchase || {}, v = String(pu.variants || '').toLowerCase();
-  const tier = CLUB.tiers.find(t => v.indexOf(t.name.toLowerCase()) >= 0) || CLUB.tiers.find(t => Math.round(parseFloat(t.price.replace(/[^0-9.]/g, '')) * 100) === +pu.price) || null;
+  const tier = ONE ? CLUB.tiers[0] : CLUB.tiers.find(t => v.indexOf(t.name.toLowerCase()) >= 0) || CLUB.tiers.find(t => Math.round(parseFloat(t.price.replace(/[^0-9.]/g, '')) * 100) === +pu.price) || null;
   const active = !pu.refunded && !pu.chargebacked && !pu.disputed && future(pu.subscription_ended_at) && future(pu.subscription_cancelled_at) && future(pu.subscription_failed_at);
-  return {ok: true, active, tier, uses: +j.uses || 0, ends: pu.subscription_cancelled_at || pu.subscription_ended_at || null};
+  const started = new Date(pu.sale_timestamp || pu.created_at || 0).getTime() || Date.now();
+  return {ok: true, active, tier, started, uses: +j.uses || 0, ends: pu.subscription_cancelled_at || pu.subscription_ended_at || null};
 }
 function grantMonth(w){
   const c = w.club, t = clubTier(w); if(!t) return 0;
   c.granted = c.granted && typeof c.granted === 'object' ? c.granted : {};
-  const m = monthKey(); if(c.granted[m]) return 0;
+  const m = monthKey(); if(c.granted[m] || Date.now() < pearlsFrom(c)) return 0;
   c.granted[m] = t.monthly; w.balance += t.monthly; return t.monthly;
 }
 async function activate(){
@@ -296,9 +305,9 @@ async function activate(){
     if(g.uses > CLUB.maxPhones) return msg('This membership is already switched on on ' + CLUB.maxPhones + ' phones. Message us if you got a new phone.', 'err');
     if(!g.active) return msg('That membership has ended. Join again below to get your perks back.', 'err');
     if(!g.tier) return msg('Your membership is active, but its tier didn’t match. Message us with your purchase code.', 'err');
-    const w = wallet(); w.club = Object.assign({}, w.club, {key, tier: g.tier.id, active: true, checkedAt: Date.now(), ends: g.ends, since: (w.club && w.club.since) || Date.now()});
+    const w = wallet(); w.club = Object.assign({}, w.club, {key, tier: g.tier.id, active: true, checkedAt: Date.now(), ends: g.ends, started: g.started, since: (w.club && w.club.since) || Date.now()});
     const got = grantMonth(w); wSet(w); $('#key').value = '';
-    msg('Welcome to ' + CLUB.name + ' ' + g.tier.name + '!' + (got ? ' ' + fmt(got) + ' Pearls added for ' + monthName() + '.' : ''), 'ok');
+    msg('Welcome to ' + tierName(g.tier) + '!' + (got ? ' ' + fmt(got) + ' Pearls added for ' + monthName() + '.' : Date.now() < pearlsFrom(w.club) ? ' Your monthly Pearls start ' + dayName(pearlsFrom(w.club)) + ', when your free week ends.' : ''), 'ok');
     render();
   }catch(e){ msg('Couldn’t reach Gumroad. Check your signal and try again.', 'err'); }
   finally{ $('#actBtn').disabled = false; }
@@ -306,31 +315,49 @@ async function activate(){
 $('#actBtn').addEventListener('click', activate);
 $('#key').addEventListener('keydown', e => { if(e.key === 'Enter') activate(); });
 async function recheck(force){
-  const w = wallet(), c = w.club; if(!c || !c.key || !CLUB.productId) return;
-  if(!force && Date.now() - (+c.checkedAt || 0) < 12 * 3600e3) return;
+  const w = wallet(), c = w.club; if(!c || !c.key || !CLUB.productId) return false;
+  if(!force && Date.now() - (+c.checkedAt || 0) < 12 * 3600e3) return true;
   try{
-    const g = await gumroad(c.key, false); if(!g.ok && !g.missing) return;   // offline: keep the last answer for now
-    const w2 = wallet(); w2.club = Object.assign({}, w2.club, {active: !!(g.ok && g.active && g.tier), tier: g.tier ? g.tier.id : w2.club.tier, checkedAt: Date.now(), ends: g.ends || null});
-    wSet(w2); render();
-  }catch(e){}
+    const g = await gumroad(c.key, false); if(!g.ok && !g.missing) return false;   // offline: keep the last answer for now
+    const w2 = wallet(); w2.club = Object.assign({}, w2.club, {active: !!(g.ok && g.active && g.tier), tier: g.tier ? g.tier.id : w2.club.tier, checkedAt: Date.now(), ends: g.ends || null, started: g.started || w2.club.started});
+    wSet(w2); render(); return true;
+  }catch(e){ return false; }
+}
+/* Monthly Pearls: ask Gumroad first, so a membership that just stopped can't claim another month */
+async function claim(btn){
+  btn.disabled = true; btn.textContent = 'Checking with Gumroad…';
+  const ok = await recheck(true);
+  const w = wallet(); const got = ok ? grantMonth(w) : 0; if(got) wSet(w);
+  render();
+  if(!ok){ const b = $('#claim'); if(b){ b.textContent = 'Couldn’t reach Gumroad. Try again'; } }
 }
 function renderClub(w){
-  const t = clubTier(w), c = w.club;
-  $('#badge').hidden = !t; if(t) $('#badge').textContent = CLUB.name + ' · ' + t.name;
+  $('#clubOff').hidden = !CLUB.productId;
+  if(!CLUB.productId){ $('#badge').hidden = true; return; }
+  const t = clubTier(w), c = w.club, trial = CLUB.trialDays ? ' Your first ' + (CLUB.trialDays === 7 ? 'week' : CLUB.trialDays + ' days') + ' is free.' : '';
+  $('#clubLede').textContent = 'A monthly membership for every Grug game: Pearls every month, bonus Pearls on every pack and a member badge.' + trial + ' Cancel any time on Gumroad.';
+  $('#badge').hidden = !t; if(t) $('#badge').textContent = ONE ? CLUB.name + ' member' : CLUB.name + ' · ' + t.name;
   const box = $('#club'); box.hidden = !(c && c.key);
   if(c && c.key){
-    const claimed = c.granted && c.granted[monthKey()];
-    box.innerHTML = t ? '<b>You’re a ' + esc(t.name) + ' member</b><p>' + fmt(t.monthly) + ' Pearls every month and +' + t.bonus + '% Pearls on every pack.' + (c.ends ? ' Your membership ends ' + esc(new Date(c.ends).toLocaleDateString([], {month: 'long', day: 'numeric'})) + '.' : '') + '</p>' +
-        '<div class="row">' + (claimed ? '<span class="g-btn" aria-disabled="true">' + esc(monthName()) + '’s Pearls claimed</span>' : '<button class="g-btn primary" id="claim">Claim ' + fmt(t.monthly) + ' Pearls for ' + esc(monthName()) + '</button>') + '</div>' +
-        '<p class="fine" style="margin-top:10px">To change tier or cancel, use the “Manage membership” link in your Gumroad receipt email, or message us.</p>'
+    const claimed = c.granted && c.granted[monthKey()], wait = Date.now() < pearlsFrom(c);
+    box.innerHTML = t ? '<b>You’re a ' + esc(tierName(t)) + ' member</b><p>' + fmt(t.monthly) + ' Pearls every month and +' + t.bonus + '% Pearls on every pack.' + (c.ends ? ' Your membership ends ' + esc(dayName(c.ends)) + '.' : '') + '</p>' +
+        '<div class="row">' + (wait ? '<span class="g-btn" aria-disabled="true">Monthly Pearls start ' + esc(dayName(pearlsFrom(c))) + '</span>'
+          : claimed ? '<span class="g-btn" aria-disabled="true">' + esc(monthName()) + '’s Pearls claimed</span>'
+          : '<button class="g-btn primary" id="claim">Claim ' + fmt(t.monthly) + ' Pearls for ' + esc(monthName()) + '</button>') + '</div>' +
+        (wait ? '<p class="fine" style="margin-top:10px">Your free week ends ' + esc(dayName(pearlsFrom(c))) + '. Pack bonuses work now.</p>' : '') +
+        '<p class="fine" style="margin-top:10px">To ' + (ONE ? '' : 'change tier or ') + 'cancel, use “Manage membership” in your Gumroad receipt email, or message us.</p>'
       : '<b>Your membership isn’t active</b><p>Gumroad says this membership has ended or a payment didn’t go through. Join again below, or message us if that’s wrong.</p><div class="row"><button class="g-btn" id="recheck">Check again</button></div>';
-    const cl = $('#claim'); if(cl) cl.onclick = () => { const w2 = wallet(); const got = grantMonth(w2); wSet(w2); render(); };
+    const cl = $('#claim'); if(cl) cl.onclick = () => claim(cl);
     const rc = $('#recheck'); if(rc) rc.onclick = () => recheck(true);
   }
-  $('#tiers').innerHTML = CLUB.tiers.map(x => '<div class="tier' + (x.tag ? ' hot' : '') + '">' + (x.tag ? '<span class="tag">' + esc(x.tag) + '</span>' : '') +
-    '<h3>' + esc(x.name) + '</h3><div class="pr">' + esc(x.price) + ' <small>a month</small></div><ul><li><b>' + fmt(x.monthly) + ' Pearls</b> every month</li><li><b>+' + x.bonus + '%</b> Pearls on every pack</li><li>A ' + esc(x.name) + ' member badge</li></ul>' +
-    (x.link && CLUB.productId ? '<a class="g-btn ' + (t && t.id === x.id ? '' : 'primary') + '" href="' + esc(x.link) + '">' + (t && t.id === x.id ? 'Your tier' : t ? 'Switch to ' + esc(x.name) : 'Join ' + esc(x.name)) + '</a>' : '<span class="g-btn" aria-disabled="true">Coming soon</span>') + '</div>').join('');
-  $('#act').hidden = !!t || !CLUB.productId;
+  $('#tiers').className = 'tiers' + (ONE ? ' one' : '');
+  $('#tiers').innerHTML = CLUB.tiers.map(x => { const link = x.link || CLUB.link, mine = t && t.id === x.id;
+    return '<div class="tier' + (x.tag ? ' hot' : '') + '">' + (x.tag ? '<span class="tag">' + esc(x.tag) + '</span>' : '') +
+    '<h3>' + esc(ONE ? CLUB.name : x.name) + '</h3><div class="pr">' + esc(x.price) + ' <small>a month</small></div><ul><li><b>' + fmt(x.monthly) + ' Pearls</b> every month</li><li><b>+' + x.bonus + '%</b> Pearls on every pack</li><li>A ' + esc(ONE ? CLUB.name : x.name) + ' member badge</li></ul>' +
+    (mine ? '<span class="g-btn" aria-disabled="true">You’re a member</span>'
+      : link ? '<a class="g-btn primary" href="' + esc(link) + '" target="_blank" rel="noopener">' + (t ? 'Switch to ' + esc(x.name) : CLUB.trialDays ? 'Start your free week' : 'Join ' + esc(ONE ? CLUB.name : x.name)) + '</a>'
+      : '<span class="g-btn" aria-disabled="true">Coming soon</span>') + '</div>'; }).join('');
+  $('#act').hidden = !!t;
 }
 
 function render(){

@@ -1,5 +1,5 @@
 {
- "v": "d35f6c1b4c1a",
+ "v": "d9f68b6e2c2a",
  "apps": {
   "grug": [
    "grug",
@@ -250,17 +250,17 @@
     "/me/cards/": "bc7189095b",
     "/me/": "ace48c1b35",
     "/offline.html": "c1b6421a93",
-    "/pearls.html": "7a54ab1121",
-    "/privacy.html": "76e44bc796",
+    "/pearls.html": "088ff4797b",
+    "/privacy.html": "29f900bd27",
     "/profile/": "ec05878579",
     "/rewards/card/": "a0046245b0",
     "/rewards/create/": "ea7269d95f",
     "/rewards/": "792e809f05",
     "/shop/": "5ffea4e357",
     "/support.html": "4e19678ee5",
-    "/terms.html": "3106453a5e"
+    "/terms.html": "a678e1acd0"
    },
-   "bytes": 29121494
+   "bytes": 29125809
   },
   "daypart": {
    "title": "Daypart",
@@ -333,15 +333,15 @@
     "/credits.html": "8f4d08b1ac",
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93",
-    "/privacy.html": "76e44bc796",
+    "/privacy.html": "29f900bd27",
     "/restaurant/": "5da0fc9061",
     "/rewards/create/": "ea7269d95f",
     "/rewards/": "792e809f05",
     "/site/": "e36f83fa5f",
     "/support.html": "4e19678ee5",
-    "/terms.html": "3106453a5e"
+    "/terms.html": "a678e1acd0"
    },
-   "bytes": 2175210
+   "bytes": 2177269
   },
   "tea": {
    "title": "Bubble Tea",
