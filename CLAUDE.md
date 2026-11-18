@@ -436,7 +436,9 @@ Choosing your own colours is not built yet: the skins are laid out in regions so
 - **The classic avatar is archived**, opt-in and **only ever the player's own character**: Avatar → Classic → "Play as my
   classic avatar" sets `classic: true`, and then `SandyKit.create(the player's look)` builds the old Sandy
   (`assets/sandy-classic.js`, ~15 MB, loaded on demand) from 'grug.sandy.classic.v1'. Bots, NPCs, customers and
-  everyone else are always the new avatar (`randomConfig` never sets `classic`). A look saved before the change (no
+  everyone else are always the new avatar (`randomConfig` never sets `classic`). **Exception: Glow Up Spa**: the owner
+  asked for every NPC there (guests, staff, clerks) to be the classic female avatar (its AVATARS block,
+  `Avatars.loadNpc()`); its Nail Salon minigame paints the classic avatar's toenails. The player is unchanged. A look saved before the change (no
   `model`) is moved to the classic key once (`SandyKit.migrate`, `migrateLook` in grug.js, `SandyView.config`) and the
   player gets the new avatar in the skin of that body, wearing the same hat.
 - **The closet** (`shop/`, "Classic closet") and every clothing design dress the classic look only (`Grug.equip` writes

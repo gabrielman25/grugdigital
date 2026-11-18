@@ -1,5 +1,5 @@
 {
- "v": "64d8e98c155f",
+ "v": "83b258cba815",
  "apps": {
   "grug": [
    "grug",
@@ -179,7 +179,7 @@
     "/assets/fossil32/fossil32.js": "2b877eb172",
     "/assets/fossil32/logo.png": "f7821b54b3",
     "/assets/gamehost.js": "033b37689b",
-    "/assets/games.js": "5a1d73405b",
+    "/assets/games.js": "d9e52d9e69",
     "/assets/gold.js": "473c93ee87",
     "/assets/grug.css": "0dafe96312",
     "/assets/grug.js": "58def08e45",
@@ -262,7 +262,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 29152897
+   "bytes": 29153141
   },
   "daypart": {
    "title": "Daypart",
@@ -312,7 +312,7 @@
     "/assets/fonts/shop/playfair-display-latin-700-normal.woff2": "e90a941885",
     "/assets/fonts/shop/righteous-latin-400-normal.woff2": "fad0f31150",
     "/assets/gamehost.js": "033b37689b",
-    "/assets/games.js": "5a1d73405b",
+    "/assets/games.js": "d9e52d9e69",
     "/assets/grug.css": "0dafe96312",
     "/assets/grug.js": "58def08e45",
     "/assets/icons.js": "d421bed707",
@@ -343,7 +343,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 2177518
+   "bytes": 2177762
   },
   "tea": {
    "title": "Bubble Tea",
@@ -390,7 +390,7 @@
     "/assets/fonts/shop/playfair-display-latin-700-normal.woff2": "e90a941885",
     "/assets/fonts/shop/righteous-latin-400-normal.woff2": "fad0f31150",
     "/assets/gamehost.js": "033b37689b",
-    "/assets/games.js": "5a1d73405b",
+    "/assets/games.js": "d9e52d9e69",
     "/assets/grug.css": "0dafe96312",
     "/assets/grug.js": "58def08e45",
     "/assets/qrcode.js": "1695445831",
@@ -407,7 +407,7 @@
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93"
    },
-   "bytes": 1240884
+   "bytes": 1241128
   },
   "cafe": {
    "title": "Caf\u00e9",
@@ -454,7 +454,7 @@
     "/assets/fonts/shop/playfair-display-latin-700-normal.woff2": "e90a941885",
     "/assets/fonts/shop/righteous-latin-400-normal.woff2": "fad0f31150",
     "/assets/gamehost.js": "033b37689b",
-    "/assets/games.js": "5a1d73405b",
+    "/assets/games.js": "d9e52d9e69",
     "/assets/grug.css": "0dafe96312",
     "/assets/grug.js": "58def08e45",
     "/assets/qrcode.js": "1695445831",
@@ -471,7 +471,7 @@
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93"
    },
-   "bytes": 1248585
+   "bytes": 1248829
   },
   "game:runway": {
    "title": "Runway Ready",
@@ -521,10 +521,10 @@
     "/assets/grug-app.js": "299c3e3720",
     "/games/glowupspa/": "33265e898a",
     "/play/glowupspa/CubePets-License.txt": "a939263aa3",
-    "/play/glowupspa/game.html": "85012a7b54",
+    "/play/glowupspa/game.html": "98dc65218c",
     "/play/glowupspa/": "3f516d7b4c"
    },
-   "bytes": 2108259
+   "bytes": 2138211
   },
   "game:petmountainrescue": {
    "title": "Pet Mountain Rescue",

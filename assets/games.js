@@ -208,12 +208,13 @@ window.GRUG_GAMES = [
     tags: ['Tycoon', 'Pets', 'Collecting', 'Rebirth'],
     partner: 'Grug Original', place: 'Plays anywhere',
     blurb: 'Run a salon and spa, sneak eggs out of the Beauty Store, and hatch pets that earn cash.',
-    long: 'Build your own salon and spa: your staff give haircuts, pedicures, hair color and face masks while you grab the cash, add chairs, hire staff and open new rooms. Train your Speed on the treadmill, sneak eggs out of the six-zone Beauty Store mall past the clerks, and hatch pets that roam your field and earn cash on their own. Fuse matching pets to grow them, collect gold, rainbow and colour variants, and rebirth for a bigger multiplier. You play as your own avatar, and Pearls buy speed, passes, boosts and cash packs in the Store.',
+    long: 'Build your own salon and spa: your staff give haircuts, pedicures, hair color and face masks while you grab the cash, add chairs, hire staff and open new rooms. Sit down at the polish station in the Nail Salon to paint a client’s toenails yourself: pick her colours, move her feet, and earn a tip for the shade she asked for. Train your Speed on the treadmill, sneak eggs out of the six-zone Beauty Store mall past the clerks, and hatch pets that roam your field and earn cash on their own. Fuse matching pets to grow them, collect gold, rainbow and colour variants, and rebirth for a bigger multiplier. You play as your own avatar, and Pearls buy speed, passes, boosts and cash packs in the Store.',
     play: 'play/glowupspa/', game: 'play/glowupspa/', save: 'grug-glowupspa-v1', storageKey: '', old: '',
     thumb: 'assets/boxart/glowupspa.jpg', color: '#EC4899', ink: '#FFFFFF',
     avatar: 'You play as your avatar', earn: 'Store items use Pearls, the Grug currency',
     features: [
       "Your staff do haircuts, pedicures, colour and face masks while you collect",
+      "Paint clients' toenails yourself at the Nail Salon's polish station",
       "Sneak eggs out of the six-zone Beauty Store past the clerks",
       "Hatch, fuse and collect gold and rainbow pets that earn cash",
       "Rebirth for a bigger multiplier; Pearls buy passes, boosts and cash packs"

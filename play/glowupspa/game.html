@@ -10,9 +10,10 @@
   Sections, top to bottom:
     1. SETTINGS         names, boost length, demo Store items
     2. BRIDGE           talks to the partner's rewards app (points, Pearls, power-ups, score). Kept from the template.
-    3. AVATARS          loads the site's 3D avatar runtime; the player wears their own look, every NPC is female. Kept from the template.
+    3. AVATARS          loads the site's 3D avatar runtime; the player wears their own look, every NPC is a classic female Sandy.
     4. WORLD + INPUT    the voxel world (spa lot, street, Beauty Store), walking grid (A*) for guests and staff, keyboard / touch / gamepad
-    5. GAME             guests, staff and services, the front desk, pads, treadmill, eggs, clerks, pets, the Store
+    5. GAME             guests, staff and services, the front desk, pads, treadmill, eggs, clerks, pets, the Store,
+                        and your own polish station in the Nail Salon (the toenail-painting minigame)
     6. SCREENS          lobby, HUD, Shop, Store, pets, index, rebirth, gift, pause
   Art: block textures and UI icons from the kit (Steal a Sip); pets: Cube Pets by Kenney (CC0); font Fredoka (OFL);
   menu icons: @icons by Valentin Fossati (MIT).
@@ -449,6 +450,36 @@ html,body{background:#7fd6ff}
 #board .nbar{height:8px;border-radius:5px;background:rgba(255,255,255,.18);overflow:hidden;margin:5px 0 3px;display:block;padding:0}#board .nbar i{display:block;height:100%;background:#10b981;width:0}
 #board small{display:block;color:#cbd5e1;font-size:12px}
 @media (max-width:620px){.petrow{display:none}}
+/* the polish station minigame (covers the 3D view; the camera is fixed on her feet) */
+body.nailing #hud,body.nailing #tags,body.nailing #nudge,body.nailing #stick,body.nailing #stickHint,body.menu-open #nailUI{display:none!important}
+#nailUI{position:fixed;left:var(--sx,0px);top:0;width:var(--sw,100vw);height:var(--sh,100vh);touch-action:none;cursor:crosshair;overflow:hidden;user-select:none;-webkit-user-select:none}
+#nailUI.dragging{cursor:grabbing}
+#nailUI button{font-family:var(--font);cursor:pointer}
+#nailUI .nTop{position:absolute;left:12px;right:74px;top:12px;display:flex;pointer-events:none}
+#nailUI .nCard{background:#fff;border-radius:18px;padding:10px 16px;display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap;color:#111827}
+#nailUI .nWho{display:flex;align-items:baseline;gap:8px}#nailUI .nWho b{font-size:20px}#nailUI .nWho small{font-size:15px;color:#6b7280}
+#nailUI .nWant{display:flex;align-items:center;gap:8px;font-size:18px}#nailUI .nWant i{width:26px;height:26px;border-radius:9px;box-shadow:inset 0 0 0 2px rgba(0,0,0,.12)}
+#nailUI .nProg{display:flex;align-items:baseline;gap:5px;padding-left:12px;border-left:2px solid #eceef3}#nailUI .nProg b{font-size:22px;color:#ec4899}#nailUI .nProg small{font-size:15px;color:#6b7280}
+#nailUI .nX{position:absolute;right:12px;top:12px;width:50px;height:50px;border:0;border-radius:16px;background:#fff;color:#374151;display:grid;place-items:center}
+#nailUI .nX .vi{width:20px;height:20px}
+#nailUI .nLook{position:absolute;right:12px;top:72px;height:50px;border:0;border-radius:16px;background:#fff;color:#374151;display:flex;align-items:center;gap:8px;padding:0 14px;font:700 16px/1 var(--font)}
+#nailUI .nLook .vi{width:20px;height:20px}#nailUI.looking .nLook{background:#ec4899;color:#fff}
+#nailUI.looking .nPal{opacity:.45;pointer-events:none}#nailUI.looking{cursor:default}
+#nailUI .nHint{flex:0 0 100%;text-align:center;align-self:center;max-width:max-content;margin:0 auto;background:rgba(17,24,39,.82);color:#fff;font-size:16px;padding:9px 16px;border-radius:14px;pointer-events:none;transition:opacity .4s}
+#nailUI .nHint.off{opacity:0}
+#nailUI .nBot{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+#nailUI .nPal{background:#fff;border-radius:20px;padding:8px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+#nailUI .nPal button{width:40px;height:40px;border-radius:13px;border:0;background:var(--pc);box-shadow:inset 0 0 0 2px rgba(0,0,0,.12);transition:transform .12s}
+#nailUI .nPal button.on{transform:translateY(-4px);box-shadow:inset 0 0 0 2px rgba(0,0,0,.12),0 0 0 3px #fff,0 0 0 6px #111827}
+#nailUI .nDone{min-width:120px;height:56px;border:0;border-radius:18px;background:#10b981;color:#fff;font:700 22px/1 var(--font);box-shadow:0 5px 0 #047857}
+#nailUI .nDone:disabled{background:#d1d5db;color:#6b7280;box-shadow:0 5px 0 #9ca3af;cursor:default}
+#nailUI.ready .nDone{animation:pulse 1s ease-in-out infinite}
+#nailUI .nRes{position:absolute;inset:0;display:grid;place-items:center;background:rgba(17,24,39,.28);cursor:default}
+#nailUI .nResCard{background:#fff;border-radius:26px;padding:26px 30px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;max-width:min(440px,92%);color:#111827}
+#nailUI .nResT{font-size:26px}#nailUI .nResPay{font-size:44px;font-weight:700;color:#10b981;line-height:1.1}#nailUI .nResCard small{font-size:16px;color:#6b7280}
+#nailUI .nResBtns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;justify-content:center}#nailUI .nResBtns .wb{min-height:56px;font-size:19px;padding:0 20px}
+#nailUI .nResBtns .wb.ghost{background:#e6e8ee;color:#374151}
+@media (max-width:620px){#nailUI .nPal button{width:32px;height:32px;border-radius:10px}#nailUI .nDone{min-width:96px;height:48px;font-size:19px}#nailUI .nWho b{font-size:17px}#nailUI .nWant{font-size:15px}#nailUI .nHint{font-size:13px}#nailUI .nProg b{font-size:18px}#nailUI .nLook b{display:none}#nailUI .nLook{width:50px;padding:0;justify-content:center}#nailUI .nPal{display:grid;grid-template-columns:repeat(5,32px)}#nailUI .nProg{border-left:0;padding-left:0}}
 </style>
 
 </head>
@@ -457,6 +488,13 @@ html,body{background:#7fd6ff}
 <div id="stage"><div id="tags"></div><div id="floaters"></div></div>
 <div id="veil"></div>
 <div class="frame" id="frameL"></div><div class="frame" id="frameR"></div><div class="frame" id="frameB"><div id="stickHint"><i></i></div></div>
+<!-- the polish station minigame: covers the 3D view while you paint (fixed camera) -->
+<div id="nailUI" class="nopass" hidden>
+  <div class="nTop"><div class="nCard"><span class="nWho"></span><span class="nWant"><i></i><b></b></span><span class="nProg"><b>0/10</b><small>toes</small></span></div></div>
+  <button class="nX" data-nail="quit" aria-label="Stop painting"></button>
+  <button class="nLook" data-nail="look"><span></span><b>Look up</b></button>
+  <div class="nBot"><div class="nHint">Brush over each toenail to paint it. Drag a foot to move it. Look up to see her face.</div><div class="nPal"></div><button class="nDone" data-nail="done" disabled>Done</button></div>
+</div>
 <div class="ui">
   <div id="hud" hidden>
     <div class="left">
@@ -602,12 +640,16 @@ const Bridge = (() => {
 /* =====================================================================================
    3. AVATARS · the site's 3D avatar runtime (three.js r149 + SandyKit, ~15 MB, cached by the browser)
    - The player wears the look saved by the Grug avatar editor on this phone (localStorage 'grug.sandy.v1').
-   - Every bot is a female Sandy: SandyKit.randomConfig(seed, {body:'female'}).
+   - Every NPC (guests, staff, clerks) is the CLASSIC female Sandy (assets/sandy-classic.js, ~15 MB, loaded through the
+     runtime's SandyKit.loadClassic()): randomConfig(seed, {body:'female'}) from that kit, so they wear dresses, flip-flops,
+     long hair or buns, and have real toes with painted nails (the Nail Salon's minigame paints them). This game is an
+     exception to the site rule that NPCs use the new blocky avatar: the owner asked for it (Nov 2026).
+   - The player is whatever the avatar editor saved: the new blocky avatar, or their own classic one if they opted in.
    - Keep the scene in her own units: 1 unit = 1 cm (she is ~170 cm tall). Her hair breaks at tiny scales, so
      never shrink her to fit a world in metres; size the world in cm instead.
    ===================================================================================== */
 const Avatars = (() => {
-  let K = null;
+  let K = null, KC = null;
   function loadOne(src) { return new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = () => window.SandyKit ? ok(window.SandyKit) : no(new Error('no SandyKit')); s.onerror = () => { s.remove(); no(new Error('failed ' + src)); }; document.head.appendChild(s); }); }
   async function load() {
     if (window.SandyKit) return (K = window.SandyKit);
@@ -615,8 +657,15 @@ const Avatars = (() => {
     throw new Error('Avatar runtime not found');
   }
   function playerConfig() { let c = null; try { c = JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); } catch (e) {} return K.merge(K.DEFAULT, c && typeof c === 'object' ? c : {}); }
-  function botConfig(i, shirt) { const c = K.randomConfig(SETTINGS.botSeed + '-' + i, { body: 'female' }); c.weapon = null; if (shirt) { c.top = null; c.legs = null; c.outfit = Object.assign({}, c.outfit, { shirt, shorts: '#24262b' }); } return c; }
-  return { load, playerConfig, botConfig, get K() { return K; } };
+  // the NPC kit: the classic avatar (an older runtime that is the classic kit already is used as it is)
+  async function loadNpc() {
+    if (KC) return KC;
+    if (window.SandyClassicKit) return (KC = window.SandyClassicKit);
+    try { KC = K && K.loadClassic ? await K.loadClassic() : K; } catch (e) { console.warn('Classic NPCs off:', e.message); KC = K; }
+    return KC;
+  }
+  function botConfig(i, shirt) { const N = KC || K; const c = N.randomConfig(SETTINGS.botSeed + '-' + i, { body: 'female' }); c.weapon = null; if (shirt) { c.top = null; c.legs = null; c.outfit = Object.assign({}, c.outfit, { shirt, shorts: '#24262b' }); } return c; }
+  return { load, loadNpc, playerConfig, botConfig, get K() { return K; }, get N() { return KC || K; } };
 })();
 
 /* the game's logo (drawn here: a flower on a pink tile) */
@@ -727,6 +776,9 @@ const WAITS = { hair: bench(-20, [-23, -24, -25], -Math.PI / 2), nails: bench(20
 const COUCH = [[-8, -12], [-7, -12], [-6, -12], [-8, -5], [-7, -5], [-6, -5]].map(([x, z], i) => ({ seat: [x, z], entry: [x, i < 3 ? -11 : -6], face: i < 3 ? 0 : Math.PI }));
 const DESK = { cells: [[7, -11], [7, -10], [7, -9], [7, -8]], pay: [5.6, -9.5], pile: [7, -9.5], ring: [8.5, -9.5] };
 const TREAD = { cell: [-21, -8], pad: [-17, -8] };
+// your own polish station in the Nail Salon (against its back wall, between two decor spots): the client's chair, the
+// footrest her feet rest on, and the stool you sit on. face 0 = she faces +z (toward the lobby).
+const MYSTN = { seat: [10, -30], foot: [10, -29.05], stool: [10, -28.25], stand: [10, -27.4], rack: [12.2, -30.2], face: 0 };
 const ZOO = { pad: [14, -3.5] };   // the hatchery room: the pen upgrade pad
 const INCUB = [13.4, -12.6];
 // the pet field (cells): right of the spa, open to the street at the front and reaching back as the pen grows,
@@ -745,7 +797,7 @@ const GATE = { x0: -3, x1: 3, z: -1 };
   for (const k in STATIONS) STATIONS[k].forEach(d => { [d.seat, d.entry, d.staff, d.idle].forEach(pt); d.block.forEach(pt); });
   for (const k in WAITS) WAITS[k].forEach(d => { pt(d.seat); pt(d.entry); });
   COUCH.forEach(d => { pt(d.seat); pt(d.entry); });
-  DESK.cells.forEach(pt); [DESK.pay, DESK.pile, DESK.ring, TREAD.cell, TREAD.pad, ZOO.pad, INCUB].forEach(pt);
+  DESK.cells.forEach(pt); [DESK.pay, DESK.pile, DESK.ring, TREAD.cell, TREAD.pad, ZOO.pad, INCUB, MYSTN.seat, MYSTN.foot, MYSTN.stool, MYSTN.stand, MYSTN.rack].forEach(pt);
 })();
 const SX = x => x + OX;   // a spa-local x (centred on 0) -> world x
 // the yard: the spa's front-right corner, past the incubator room, is open grass that belongs to the pet pen
@@ -843,12 +895,12 @@ const World = (() => {
       set(x, 0, z, b);
     }
     // a room you haven't built yet is a solid block (its LOCKED / COMING SOON sides are a mesh, see Game.refreshSpa), not an empty plate
-    if (['nails', 'color', 'mask'].includes(id)) { const L = lockedSpan(id); for (let z = L.z0; z <= L.z1; z++) for (let x = L.x0; x <= L.x1; x++) for (let y = 1; y <= 3; y++) set(x, y, z, built ? 0 : 'c_black'); }
+    if (['color', 'mask'].includes(id)) { const L = lockedSpan(id); for (let z = L.z0; z <= L.z1; z++) for (let x = L.x0; x <= L.x1; x++) for (let y = 1; y <= 3; y++) set(x, y, z, built ? 0 : 'c_black'); }
   }
   function buildLot() {
     // grass under everything first, then the floors
     for (let z = LOT.z0; z <= LOT.z1; z++) for (let x = LOT.x0; x <= LOT.x1; x++) set(x, 0, z, 'c_white');
-    for (const id in RECT) floorRoom(id, !['nails', 'color', 'mask'].includes(id));
+    for (const id in RECT) floorRoom(id, !['color', 'mask'].includes(id));
     const W = 'c_white', wall = (x, z, b) => set(x, 1, z, b || W);
     // the outer fence: a knee-high hedge with a wide gate at the front
     for (let x = LOT.x0; x <= LOT.x1; x++) { wall(x, LOT.z0, 'hedge'); if (x < GATE.x0 || x > GATE.x1) wall(x, LOT.z1, 'hedge'); }
@@ -1288,6 +1340,7 @@ function flatTiles(cx) {
 addEventListener('keydown', e => {
   if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
   input.keys.add(e.code);
+  if (e.code === 'Escape' && !UI.sheet && Game.G.nail) { Game.nailQuit(); return; }
   if (e.code === 'Escape' || e.code === 'KeyP') { if (UI.sheet && UI.sheet !== 'lobby') UI.close(); else if (!UI.sheet) Game.togglePause(); return; }
   if (/^(Space|ArrowUp|ArrowDown|ArrowLeft|ArrowRight)$/.test(e.code) && !(e.target && e.target.closest && e.target.closest('.sheet'))) e.preventDefault();
   if (e.code === 'Space') input.jump = true;
@@ -1353,10 +1406,11 @@ const clockTxt = s => { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60)
 /* ---------------- the spa: service rooms, in the order you build them ----------------
    k scales every price in the room (chairs, staff, tools, training, decor). Each room earns about 10-15x the one before,
    like the income sources in Sell Lemons. */
+// build 0 = open from the start (the Hair Salon and the Nail Salon); the rest open in order
 const SVC = [
   { id: 'hair', n: 'Hair Salon', svc: 'Haircut', who: 'Stylist', build: 0, price: 14, time: 3.5, k: 1, col: '#f43f5e', tool: 'Pro Scissors', dec: ['Potted Palm', 'Gold Mirrors', 'Disco Ball'] },
-  { id: 'nails', n: 'Pedicure Spa', svc: 'Pedicure', who: 'Nail Artist', build: 650, price: 80, time: 6, k: 10, col: '#ec4899', tool: 'Polish Rack', dec: ['Flower Wall', 'Bubble Tubs', 'Neon Sign'] },
-  { id: 'color', n: 'Color Bar', svc: 'Hair Color', who: 'Colorist', build: 45000, price: 1200, time: 7, k: 260, col: '#7c3aed', tool: 'Rainbow Dyes', dec: ['Swatch Wall', 'Velvet Chairs', 'Chandelier'] },
+  { id: 'nails', n: 'Nail Salon', svc: 'Pedicure', who: 'Nail Artist', build: 0, price: 30, time: 5, k: 3, col: '#ec4899', tool: 'Polish Rack', dec: ['Flower Wall', 'Bubble Tubs', 'Neon Sign'] },
+  { id: 'color', n: 'Color Bar', svc: 'Hair Color', who: 'Colorist', build: 25000, price: 1200, time: 7, k: 260, col: '#7c3aed', tool: 'Rainbow Dyes', dec: ['Swatch Wall', 'Velvet Chairs', 'Chandelier'] },
   { id: 'mask', n: 'Face Mask Lounge', svc: 'Face Mask', who: 'Spa Therapist', build: 2.5e6, price: 16000, time: 8, k: 6000, col: '#10b981', tool: 'Fresh Cucumbers', dec: ['Bamboo', 'Zen Fountain', 'Candles'] }
 ];
 const SVCB = Object.fromEntries(SVC.map(r => [r.id, r]));
@@ -1465,6 +1519,8 @@ const HAIR_STYLES = [0, 1];
 const HAIR_NATURAL = ['#2a1a12', '#3b2414', '#6a3a1a', '#8a5a2b', '#c08a4a', '#1b1a19', '#d9b36a'];
 const HAIR_FUN = ['#ff3d8a', '#a855f7', '#38bdf8', '#14b8a6', '#f43f5e', '#facc15', '#f9a8d4', '#e2e8f0', '#fb923c', '#4f46e5'];
 const NAIL_COLS = ['#ff2d8a', '#e3101c', '#a855f7', '#38bdf8', '#10b981', '#facc15', '#ff7a1a', '#f9a8d4', '#1b1a19', '#ffffff'];
+const NAIL_NAMES = ['Hot Pink', 'Cherry Red', 'Grape', 'Sky Blue', 'Mint', 'Sunshine', 'Tangerine', 'Bubblegum', 'Midnight', 'Pearl White'];
+const CLIENT_NAMES = ['Mia', 'Zoe', 'Luna', 'Ava', 'Chloe', 'Ivy', 'Nia', 'Rosa', 'Kiki', 'Jade', 'Lola', 'Maya', 'Ruby', 'Skye', 'Tia', 'Elle', 'Gigi', 'Nora', 'Bella', 'Daisy', 'Aria', 'Cleo', 'Sana', 'Remi'];
 
 /* =====================================================================================
    5. GAME · Glow Up Spa
@@ -1533,7 +1589,9 @@ function blockGeo(boxes) {
    She faces +z, her left is +x. Euler X swings a limb forward (negative X = forward / up), Z swings it sideways. */
 const Poser = (() => {
   const LIMBS = [['thighL', 'leg_L_upr_jnt', 'leg_L_knee_jnt'], ['calfL', 'leg_L_knee_jnt', 'leg_L_foot_jnt'], ['thighR', 'leg_R_upr_jnt', 'leg_R_knee_jnt'], ['calfR', 'leg_R_knee_jnt', 'leg_R_foot_jnt'],
-    ['armL', 'arm_L_shldr_jnt', 'arm_L_elbow_jnt'], ['foreL', 'arm_L_elbow_jnt', 'arm_L_wrist_jnt'], ['armR', 'arm_R_shldr_jnt', 'arm_R_elbow_jnt'], ['foreR', 'arm_R_elbow_jnt', 'arm_R_wrist_jnt']];
+    ['armL', 'arm_L_shldr_jnt', 'arm_L_elbow_jnt'], ['foreL', 'arm_L_elbow_jnt', 'arm_L_wrist_jnt'], ['armR', 'arm_R_shldr_jnt', 'arm_R_elbow_jnt'], ['foreR', 'arm_R_elbow_jnt', 'arm_R_wrist_jnt'],
+    // optional: the feet (ankle -> ball of the foot), only posed when a pose names them (the polish station keeps them level)
+    ['footL', 'leg_L_foot_jnt', 'leg_L_ball_jnt'], ['footR', 'leg_R_foot_jnt', 'leg_R_ball_jnt']];
   const D2R = Math.PI / 180; let E, q2, pq, down; const ini = () => { if (!E) { E = new THREE.Euler(); q2 = new THREE.Quaternion(); pq = new THREE.Quaternion(); down = new THREE.Vector3(0, -1, 0); } };
   const Q = {}, cacheQ = (k, x, y, z) => { ini(); const key = k; const q = Q[key] || (Q[key] = new THREE.Quaternion()); E.set(x * D2R, y * D2R, z * D2R, 'XYZ'); return q.setFromEuler(E); };
   function rig(sandy) {
@@ -1542,7 +1600,7 @@ const Poser = (() => {
     const inv = body.matrixWorld.clone().invert(), invQ = body.getWorldQuaternion(new THREE.Quaternion()).invert(), wp = n => n.getWorldPosition(new THREE.Vector3()).applyMatrix4(inv);
     const joints = [];
     for (const [k, jn, cn] of LIMBS) {
-      const j = body.getObjectByName(jn), c = body.getObjectByName(cn); if (!j || !c) return null;
+      const j = body.getObjectByName(jn), c = body.getObjectByName(cn); if (!j || !c) { if (/^foot/.test(k)) continue; return null; }
       const d = wp(c).sub(wp(j)).normalize(), A = new THREE.Quaternion().setFromUnitVectors(d, down), R = j.getWorldQuaternion(new THREE.Quaternion()).premultiply(invQ);
       const pj = joints.find(o => o.j === j.parent);   // a limb hanging straight off one we pose (if there's a twist joint between, refresh it instead)
       joints.push({ k, j, AR: A.multiply(R), parentKey: pj ? pj.k : null });
@@ -1704,7 +1762,11 @@ const PROP = {
   weights: () => [[120, 10, 40, 0, 40, 0, '#2b2f36'], [10, 40, 10, -50, 20, 0, '#2b2f36'], [10, 40, 10, 50, 20, 0, '#2b2f36'], [20, 20, 30, -40, 54, 0, '#38bdf8'], [20, 20, 30, 40, 54, 0, '#38bdf8']],
   lipstick: c => [[60, 90, 60, 0, 45, 0, '#facc15'], [50, 60, 50, 0, 120, 0, c], [40, 30, 40, 0, 165, 0, c, 1.1], [26, 16, 26, 0, 188, 0, c, 1.2]],
   perfume: c => [[90, 90, 60, 0, 45, 0, c, 1.1], [30, 26, 30, 0, 103, 0, '#facc15'], [20, 20, 20, 0, 126, 0, '#ffffff']],
-  polish: c => [[60, 70, 60, 0, 35, 0, c], [30, 60, 30, 0, 100, 0, '#1f2937']]
+  polish: c => [[60, 70, 60, 0, 35, 0, c], [30, 60, 30, 0, 100, 0, '#1f2937']],
+  // the polish station: a padded footrest, your stool, and a little table with a bottle of every colour
+  footrest: c => [[56, 30, 46, 0, 15, 0, '#ffffff'], [60, 12, 50, 0, 36, 0, c], [50, 3, 40, 0, 43.5, 0, c, 1.12]],
+  stool: c => [[34, 4, 34, 0, 2, 0, '#2b2f36'], [8, 40, 8, 0, 24, 0, '#c7ced6'], [40, 8, 40, 0, 48, 0, c]],
+  rack: () => [[64, 66, 44, 0, 33, 0, '#ffffff'], [68, 6, 48, 0, 69, 0, '#f472b6']].concat(NAIL_COLS.map((c, i) => [9, 13, 9, -24 + (i % 5) * 12, 78.5, (i < 5 ? -9 : 9), c])).concat(NAIL_COLS.map((c, i) => [4, 6, 4, -24 + (i % 5) * 12, 88, (i < 5 ? -9 : 9), '#1f2937']))
 };
 const PropMat = new Map();
 function propMesh(kind, ...a) {
@@ -1833,17 +1895,19 @@ const Game = (() => {
   const WSEATS = {}; SVC.forEach(R => { WSEATS[R.id] = WAITS[R.id].map(d => ({ d, cust: null })); });
 
   /* ---------- save ---------- */
-  function freshRooms() { const o = {}; SVC.forEach((R, i) => { o[R.id] = { built: i === 0 ? 1 : 0, chairs: i === 0 ? 1 : 0, staff: i === 0 ? 1 : 0, tool: 0, train: 0, decor: 0 }; }); return o; }
+  function freshRooms() { const o = {}; SVC.forEach(R => { const open = R.build ? 0 : 1; o[R.id] = { built: open, chairs: open, staff: open, tool: 0, train: 0, decor: 0 }; }); return o; }
   function fresh(keep) {
     const k = keep || {};
     return { v: 1, cash: 60, tune: 0, shoe: 0, tread: 0, rooms: freshRooms(), flyers: 0, auto: 0, reg: 0, pets: k.pets || [], pen: k.pen || 0, pid: k.pid || 1, follow: k.follow || [],
-      incub: k.incub || [], reb: k.reb || 0, idx: k.idx || { e: {}, p: {} }, daily: k.daily || { day: '', streak: 0 }, boosts: {}, passes: k.passes || {}, best: k.best || 0, t: Date.now(), sound: k.sound !== false, served: k.served || 0 };
+      incub: k.incub || [], reb: k.reb || 0, idx: k.idx || { e: {}, p: {} }, daily: k.daily || { day: '', streak: 0 }, boosts: {}, passes: k.passes || {}, best: k.best || 0, t: Date.now(), sound: k.sound !== false, served: k.served || 0, nailDone: k.nailDone || 0 };
   }
   function load() {
     let s = null; try { s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) { }
     if (!s || s.v !== 1) return fresh();
     const f = fresh(); for (const k in f) if (s[k] === undefined) s[k] = f[k];
-    SVC.forEach(R => { if (!s.rooms[R.id]) s.rooms[R.id] = f.rooms[R.id]; });
+    SVC.forEach(R => { if (!s.rooms[R.id]) s.rooms[R.id] = f.rooms[R.id];
+      // a room that is open from the start now (the Nail Salon) is open in older saves too, with its chair and nail artist
+      const r = s.rooms[R.id]; if (!R.build && !r.built) Object.assign(r, { built: 1, chairs: Math.max(1, r.chairs || 0), staff: Math.max(1, r.staff || 0) }); });
     // older saves: pets with copies -> one pet per variant, sized by how many copies
     if (s.pets.some(p => p && p.c)) { const out = []; s.pets.forEach(p => { if (!p) return; if (!p.c) return out.push(p); const by = {}; p.c.forEach(m => by[m || ''] = (by[m || ''] || 0) + 1); for (const v in by) out.push({ id: p.id, v, f: '', s: by[v] }); }); s.pets = out; s.follow = []; if (s.petSlots) s.pen = Math.max(0, s.petSlots - PEN_BASE); }
     s.pets = s.pets.filter(Boolean); s.pets.forEach(p => { if (!p.u) p.u = s.pid++; p.v = p.v || ''; p.f = p.f || ''; p.s = p.s || 1; });
@@ -1968,6 +2032,7 @@ const Game = (() => {
     DESK.cells.forEach(([x, z]) => World.block(x, z));
     for (let z = -1; z <= 1; z++) World.block(TREAD.cell[0], TREAD.cell[1] + z);
     DECOR_SPOTS.forEach(L => L.forEach(([x, z]) => World.block(SX(x), z)));
+    [[0, -1], [0, 0], [0, 1], [2, 0], [2, -1]].forEach(([dx, dz]) => World.block(MYSTN.seat[0] + dx, MYSTN.seat[1] + dz));
     // lobby: couches, desk, register, plants, the shop sign
     placeProp('couch', COUCH[1].seat[0], COUCH[1].seat[1], 0, ['#f472b6']); placeProp('couch', COUCH[4].seat[0], COUCH[4].seat[1], Math.PI, ['#a78bfa']);
     placeProp('desk', DESK.pile[0], DESK.pile[1], 0); placeProp('pot', SX(-10), -14, 0, ['#22c55e', 70]); placeProp('pot', SX(10), -14, 0, ['#22c55e', 50]); placeProp('pot', SX(-10), -2, 0, ['#4ade80', 40]); placeProp('pot', SX(10), -2, 0, ['#4ade80', 40]);
@@ -1981,6 +2046,7 @@ const Game = (() => {
       const m = k < 2 ? placeProp('tree', x + 0.5, z + 0.5, i, [110 + (i % 4) * 25]) : k === 2 ? placeProp('hay', x + 0.5, z + 0.5, i * 0.7) : placeProp('flowers', x + 0.5, z + 0.5, i, [['#f472b6', '#fde047', '#ffffff', '#c084fc'][i % 4]]);
       m.userData.cell = [x, z]; G.fieldDecor.push(m); }
     placeProp('incubator', INCUB[0], INCUB[1], -Math.PI / 2);
+    setupStation();
     // the front desk's cash pile and the collection ring behind it
     regMesh = new THREE.Group(); scene.add(regMesh); const [rx, rz] = C(DESK.pile[0], DESK.pile[1]); regMesh.position.set(rx, 108, rz);
     ringReg = new THREE.Mesh(new THREE.RingGeometry(70, 120, 36).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: lin('#5dff7a'), transparent: true, opacity: 0.6, depthWrite: false }));
@@ -2070,7 +2136,7 @@ const Game = (() => {
       if (r.built && !A.floor) { A.floor = 1; World.setRoomBuilt(R.id); }
       if (!r.built && A.floor) { A.floor = 0; World.setRoomBuilt && World.rebuildRoom && World.rebuildRoom(R.id); }
       // the locked block: LOCKED (build for $X) once the room before it is open, COMING SOON until then
-      if (window.GK && GK.lockedCube && ['nails', 'color', 'mask'].includes(R.id)) {
+      if (window.GK && GK.lockedCube && R.build > 0) {
         const prevBuilt = ri === 0 || room(SVC[ri - 1].id).built, want = r.built ? '' : prevBuilt ? 'locked' : 'soon';
         if (A.cubeKind !== want) { if (A.cube) { scene.remove(A.cube); A.cube = null; } A.cubeKind = want;
           if (want) { const L = World.lockedSpan(R.id), w = (L.x1 - L.x0 + 1) * BS, d = (L.z1 - L.z0 + 1) * BS;
@@ -2135,7 +2201,7 @@ const Game = (() => {
     }
     // standing on a pad?
     const P = player; let here = null;
-    if (G.started && !G.paused && !UI.modal()) for (const b of pads) { const [x, z] = C(b.cell[0], b.cell[1]); if (Math.hypot(P.x - x, P.z - z) < 70) { here = b; break; } }
+    if (G.started && !G.paused && !UI.modal() && !G.nail) for (const b of pads) { const [x, z] = C(b.cell[0], b.cell[1]); if (Math.hypot(P.x - x, P.z - z) < 70) { here = b; break; } }
     if (!here) { G.padOn = null; G.padT = 0; G.padDone = null; return; }
     if (G.padOn !== here.id) { G.padOn = here.id; G.padT = 0; }
     if (G.padDone === here.id) return;
@@ -2152,12 +2218,16 @@ const Game = (() => {
   const custCap = () => Math.min(14, staffedAll() * 2 + 3);
   async function newCustomer() {
     if (making) return null; making = true;
-    const K = Avatars.K; let sandy = null, cfg = null;
+    const K = Avatars.N; let sandy = null, cfg = null;
     if (K) { cfg = npcHair(K.randomConfig(SETTINGS.botSeed + '-guest-' + (custN++ % 16), { body: 'female' })); cfg.weapon = null; cfg.nails = cfg.skin; cfg.feet = { type: 'flipflops', sole: '#ffffff', strap: pick(['#f472b6', '#38bdf8', '#facc15', '#a78bfa']) }; try { sandy = await K.create(cfg); } catch (e) { console.warn(e); } }
     const c = makeChar(sandy, { kind: 'cust', mode: 'cust' + custN, name: 'Guest', colour: '#f9a8d4', seed: custN * 1.3, cfg, state: 'pool' });
+    newWish(c);
     c.root.visible = false; custs.push(c); making = false; return c;
   }
+  // every guest has a name and a polish colour she'd love (the polish station shows it; the staff use it too)
+  function newWish(c) { c.nick = pick(CLIENT_NAMES); c.wish = Math.floor(Math.random() * NAIL_COLS.length); }
   function freshLook(c) {
+    dropPolish(c); newWish(c);
     if (!c.cfg) return;
     c.cfg.hair = { style: pick(HAIR_STYLES), colour: pick(HAIR_NATURAL), size: 1 };
     look(c, { hair: c.cfg.hair, nails: c.cfg.skin, feet: { type: 'flipflops', sole: '#ffffff', strap: pick(['#f472b6', '#38bdf8', '#facc15', '#a78bfa']) } });
@@ -2180,7 +2250,7 @@ const Game = (() => {
   function spaWrap(c, on) {
     if (!c.cfg) return;
     if (on) { c.lieDepth = 23; look(c, { top: null, legs: null, outfit: { shirt: '#ffffff', shorts: '#f5f5f4', belt: '#e5e7eb' }, hat: { type: 'beanie', colour: '#ffffff' } });
-      const K = Avatars.K; (K && K.customReady ? K.customReady() : Promise.resolve()).then(() => setTimeout(() => measureLie(c), 60)); }
+      const K = Avatars.N; (K && K.customReady ? K.customReady() : Promise.resolve()).then(() => setTimeout(() => measureLie(c), 60)); }
     else { look(c, { top: c.cfg.top || null, legs: c.cfg.legs || null, outfit: c.cfg.outfit, hat: c.cfg.hat || { type: 'none' } }); hairShown(c, true); }
   }
   function hairShown(c, v) { if (c.body) c.body.traverse(o => { if (o.isMesh && /hair/i.test(o.name)) o.visible = v; }); }
@@ -2230,7 +2300,7 @@ const Game = (() => {
         if (st.rid === 'nails') look(c, { feet: { type: 'none' } });
         c.state = 'seated'; st.seated = true;
       } break;
-      case 'seated': case 'svc': break;
+      case 'seated': case 'svc': case 'polish': break;
       case 'up': {
         // up and off to the desk to pay
         const d = c.stn.d; const [ex, ez] = C(d.entry[0], d.entry[1]); c.x = ex; c.z = ez; c.sitMode = ''; c.sitT = null;
@@ -2259,7 +2329,7 @@ const Game = (() => {
   /* ---------- staff ---------- */
   let staffN = 0;
   async function newStaff(rid) {
-    const K = Avatars.K, R = SVCB[rid]; let sandy = null;
+    const K = Avatars.N, R = SVCB[rid]; let sandy = null;
     if (K) { const cfg = npcHair(K.randomConfig(SETTINGS.botSeed + '-staff-' + staffN, { body: 'female' })); cfg.weapon = null; cfg.top = null; cfg.legs = null; cfg.outfit = Object.assign({}, cfg.outfit, { shirt: R.col, shorts: '#1f2937' }); try { sandy = await K.create(cfg); } catch (e) { console.warn(e); } }
     const i = staff.filter(s => s.rid === rid).length, d = STATIONS[rid][i].idle;
     const s = makeChar(sandy, { kind: 'staff', mode: 'staff' + staffN, name: R.who, colour: R.col, seed: staffN * 2.1, rid, idx: i, state: 'idle', job: null });
@@ -2321,7 +2391,7 @@ const Game = (() => {
   function finishService(s, st) {
     const c = st.cust;
     if (s.rid === 'hair' && c.cfg) { c.cfg.hair = { style: c.cfg.hair.style === 0 ? 1 : 0, colour: c.cfg.hair.colour, size: rand(0.9, 1.04) }; look(c, { hair: c.cfg.hair }); }
-    if (s.rid === 'nails' && c.cfg) { c.cfg.nails = pick(NAIL_COLS); look(c, { nails: c.cfg.nails }); }
+    if (s.rid === 'nails' && c.cfg) { c.cfg.nails = NAIL_COLS[c.wish != null ? c.wish : Math.floor(Math.random() * NAIL_COLS.length)]; look(c, { nails: c.cfg.nails }); }
     if (s.rid === 'color' && c.cfg) { c.cfg.hair = Object.assign({}, c.cfg.hair, { colour: pick(HAIR_FUN) }); look(c, { hair: c.cfg.hair }); }
     if (c.mask) { c.mask.parent && c.mask.parent.remove(c.mask); c.mask = null; }
     if (near(c.x, c.z, 2400)) { Parts.burst(c.x, 170, c.z, 16, ['#f472b6', '#fde047', '#ffffff', '#a78bfa'], { size: 9, speed: 220, up: 360, life: 0.7 }); Sfx.play('pop'); }
@@ -2487,7 +2557,7 @@ const Game = (() => {
   /* ---------- the player ---------- */
   const onTread = () => { const [x, z] = C(TREAD.cell[0], TREAD.cell[1]); return Math.abs(player.x - x) < 45 && Math.abs(player.z - z) < 110; };
   function stepPlayer(dt) {
-    const P = player, live = G.started && !G.paused && !UI.modal();
+    const P = player, live = G.started && !G.paused && !UI.modal() && !G.nail;
     const mv = live && P.stun <= 0 ? moveInput() : { x: 0, z: 0, mag: 0 };
     let sp = moveSpeed(myS()); if (boostOn('speed')) sp *= boostAmt('speed'); if (P.carry) sp *= 0.85;
     P.moving = mv.mag > 0.05;
@@ -2535,6 +2605,8 @@ const Game = (() => {
   function findPrompt() {
     const P = player;
     if (P.carry) return null;
+    { const [x, z] = C(MYSTN.stand[0], MYSTN.stand[1]); if (Math.hypot(P.x - x, P.z - z) < 150) { const c = nextClient();
+      return { text: 'Paint toenails', sub: c ? 'Accept ' + c.nick + ': she wants ' + NAIL_NAMES[c.wish] : 'Accept the next client', btn: 'Accept', time: 0.45, go: () => nailStart() }; } }
     let best = null, bd = 190;
     G.spawns.forEach((sp, i) => { if (!sp.item) return; const d = Math.hypot(P.x - sp.x, P.z - sp.z); if (d < bd) { bd = d; best = { sp, i }; } });
     if (best) { const e = best.sp.item; return { text: 'Grab ' + EGGB[e.id].n, sub: RAR[EGGB[e.id].r].n, time: 0.45, go: () => { const s = best.sp; if (!s.item) return; carry(P, { e: s.item, from: { zone: s.zone, sp: best.i } }); s.item = null; artSpawn(s); Sfx.play('grab'); UI.toast(ZONES[s.zone].req > speedOf(P) ? 'Got it! Run! The clerk is coming!' : 'Got it! Take it home to your spa.'); } }; }
@@ -2549,12 +2621,12 @@ const Game = (() => {
     // sitting / lying / kneeling move the body down (and lying turns it over)
     const sm = c.sitMode, kneel = c.poseName === 'kneel';
     if (sm === 'lie') { c.holder.rotation.x = -Math.PI / 2; c.holder.position.set(0, 63 + (c.lieDepth || 23), 0); if (c.frame % 20 === 0) hairShown(c, false); }
-    else { c.holder.rotation.x = 0; c.holder.position.set(0, sm === 'sit' || sm === 'pedi' ? (c.sitH || SEAT_H.couch) + 9 - c.PIV : kneel ? -38 : 0, sm ? -6 : 0); }
+    else { c.holder.rotation.x = 0; c.holder.position.set(0, sm === 'sit' || sm === 'pedi' || sm === 'polish' ? (c.sitH || SEAT_H.couch) + 9 - c.PIV : kneel ? -38 : 0, sm ? -6 : 0); }
     if (c.stun > 0) c.root.rotation.y = c.face + (1.2 - c.stun) * 9;
     { const gy = c.kind === 'player' ? groundFor(c, c.x, c.z) : 0, up = Math.max(0, c.y - gy); c.shadow.position.y = gy - c.y + 2; const k = Math.max(0.45, 1 - up / 500); c.shadow.scale.setScalar(k); c.shadow.material.opacity = sm ? 0 : 0.2 * k; }
     if (!c.sandy || !c.body.visible) return;
     c.frame++; const every = (dist < 1800 ? 1 : dist < 4000 ? 2 : 4) * View.q.every;
-    c.acc = (c.acc || 0) + dt; if (c.frame % every && c.mode !== 'player') return;
+    c.acc = (c.acc || 0) + dt; if (c.frame % every && c.mode !== 'player' && sm !== 'polish') return;
     const adt = c.acc; c.acc = 0;
     let pose = null;
     const running = c === player && G.running;
@@ -2571,6 +2643,7 @@ const Game = (() => {
     if (c.kind === 'clerk' && c.stun <= 0) expr(c, c.chasing ? 'annoyed' : 'neutral');
     const W = pose ? Object.assign({}, Poser.pose(pose, G.t + (c.seed || 0), 0)) : {};
     if (running && !pose) Object.assign(W, Poser.pose('run', G.t));
+    if (sm === 'polish') Object.assign(W, nailPose(c));
     if (Object.keys(W).length) Poser.apply(c.rig, W, c.mode + (pose || ''));
     showTool(c, c.kind === 'staff' && c.state === 'work' ? (c.rid === 'hair' ? 'scissors' : c.rid === 'nails' ? 'polish' : c.rid === 'color' ? 'brush' : 'jar') : '');
     if (c.tool) placeTool(c);
@@ -2597,7 +2670,8 @@ const Game = (() => {
         const pr = GK.prop(THREE, 'garden', x * 13 + z * 3, { block: BS, scale: 0.8 }); pr.position.set((x + 0.5) * BS, 0, (z + 0.5) * BS); scene.add(pr); }
     }
     const K = Avatars.K;
-    const mk = async cfg => { try { return K ? await K.create(cfg) : null; } catch (e) { console.warn(e); return null; } };
+    // the player comes from the runtime (her own look); the clerks, like every NPC, from the classic kit
+    const mk = async (cfg, kit) => { const KK = kit || K; try { return KK ? await KK.create(cfg) : null; } catch (e) { console.warn(e); return null; } };
     const setLoad = t => { const el = document.getElementById('loadTxt'); if (el) el.textContent = t; };
     setLoad('Getting you ready…');
     player = makeChar(await mk(K ? Avatars.playerConfig() : null), { kind: 'player', mode: 'player', name: 'You', colour: '#ec4899' });
@@ -2607,7 +2681,7 @@ const Game = (() => {
     setLoad('Clerks are opening the store…');
     for (let z = 1; z < ZONES.length; z++) {
       let cfg = null; if (K) { cfg = npcHair(Avatars.botConfig(20 + z, ZONES[z].col)); cfg.hat = { type: 'cap', colour: '#ffffff' }; }
-      const a = zoneZ0(z), k = makeChar(await mk(cfg), { kind: 'clerk', mode: 'clerk' + z, name: ZONES[z].n + ' clerk', zone: z, colour: ZONES[z].col, seed: z * 2.3 });
+      const a = zoneZ0(z), k = makeChar(await mk(cfg, Avatars.N), { kind: 'clerk', mode: 'clerk' + z, name: ZONES[z].n + ' clerk', zone: z, colour: ZONES[z].col, seed: z * 2.3 });
       k.post = C(STORE.cx, a + 9); k.x = k.post[0]; k.z = k.post[1]; k.face = Math.PI; clerks.push(k);
       Tags.add({ pos: v => { v.set(k.x, k.y + 215, k.z); return true; }, max: 3000, pri: 1, cls: 'who keeper', html: () => '<b>Clerk</b><u class="' + (myS() >= ZONES[k.zone].req ? 'op' : 'lk') + '">Speed ' + fmt(ZONES[k.zone].req) + '</u>' });
     }
@@ -2673,7 +2747,7 @@ const Game = (() => {
     stepPets(dt);
     G.chars.forEach(c => {
       if (c.kind === 'cust' && c.state === 'pool') { c.root.visible = false; return; }
-      const d = Math.hypot(c.x - player.x, c.z - player.z), vis = d < View.q.chars || c === player; c.root.visible = vis;
+      const d = Math.hypot(c.x - player.x, c.z - player.z), vis = (d < View.q.chars || c === player) && !(c === player && G.nail); c.root.visible = vis;
       const far = c !== player && d > View.q.lod; if (c.sandy && c.body.visible === far) { c.body.visible = !far; c.proxy.visible = far; }
       if (c.tool) c.tool.visible = vis; if (vis) animChar(c, dt, d);
     });
@@ -2687,20 +2761,200 @@ const Game = (() => {
       ringReg.material.opacity = S.reg >= 1 ? 0.55 + Math.sin(tt * 4) * 0.25 : 0.18; }
     // the "do this now" icons
     { const I = G.icons, P = player, bob = Math.sin(tt * 4) * 25, inLot = World.inLot(P.x, P.z);
-      const bb = bestBuy(), bp = bb && bb.pad && S.cash >= bb.cost ? bb : null;
+      const bb = bestBuy(); let bp = bb && bb.pad && S.cash >= bb.cost ? bb : null;
+      if (G.nail) bp = null;
       I.buy.visible = G.started && !!bp && !P.carry; if (bp) { const [x, z] = C(bp.cell[0], bp.cell[1]); I.buy.position.set(x, 260 + bob, z); }
-      I.cash.visible = G.started && S.reg >= Math.max(5, salonRate() * 8) && !P.carry && inLot && !S.auto; { const [x, z] = C(DESK.pile[0], DESK.pile[1]); I.cash.position.set(x, 300 + bob, z); }
+      I.cash.visible = G.started && !G.nail && S.reg >= Math.max(5, salonRate() * 8) && !P.carry && inLot && !S.auto; { const [x, z] = C(DESK.pile[0], DESK.pile[1]); I.cash.position.set(x, 300 + bob, z); }
       I.home.visible = G.started && !!P.carry; I.home.position.set((SX(0) + 0.5) * BS, 900 + bob, -6 * BS);
-      I.run.visible = G.started && !P.carry && inLot && !G.running && ZONES.some(Z => Z.req > myS() && Z.req < myS() * 4) && !bp; { const [x, z] = C(TREAD.cell[0], TREAD.cell[1]); I.run.position.set(x, 300 + bob, z); }
+      I.run.visible = G.started && !G.nail && !P.carry && inLot && !G.running && ZONES.some(Z => Z.req > myS() && Z.req < myS() * 4) && !bp; { const [x, z] = C(TREAD.cell[0], TREAD.cell[1]); I.run.position.set(x, 300 + bob, z); }
       let sp = null, sd = 2600; if (!P.carry && World.inStore(P.x, P.z)) G.spawns.forEach(q => { if (!q.item) return; const d = Math.hypot(q.x - P.x, q.z - P.z); if (d < sd) { sd = d; sp = q; } });
       I.grab.visible = !!sp; if (sp) I.grab.position.set(sp.x, 380 + bob, sp.z); }
+    stepStation(dt);
     Parts.step(dt);
     if (World.clouds) World.clouds.position.x = Math.sin(performance.now() / 60000) * 2500;
     camStep(dt);
   }
 
+  /* ---------- your own polish station in the Nail Salon: accept a client and paint her toenails yourself ----------
+     Stand on the pink ring and hold Accept: the next waiting guest (one who came for a pedicure first) sits down in
+     your chair, barefoot, and tells you the colour she'd love. The camera is fixed, looking down at her feet from
+     your stool. Brush over each toenail to paint it, pick colours from the palette, and drag a foot to move it.
+     Every nail is its own skinned mesh on her toe bones (the nail plates modelled on the classic avatar's toes, found
+     by her kit's findNails), so the polish follows her toes when she wiggles them or you move her feet.
+     All toes painted = Done: she pays you straight away (more than a staff pedicure) and tips for every toe in the
+     colour she asked for, then walks out wearing your work. The rest of the spa keeps running the whole time. */
+  let stnRing = null, nailBusy = false;
+  const WAITING = /^(seek|toCouch|couch|toWait|waitRoom)$/;
+  function setupStation() {
+    const M = MYSTN;
+    placeProp('pediChair', M.seat[0], M.seat[1], M.face, ['#f472b6']);
+    placeProp('footrest', M.foot[0], M.foot[1], M.face, ['#f472b6']);
+    placeProp('stool', M.stool[0], M.stool[1], 0, ['#f472b6']);
+    placeProp('rack', M.rack[0], M.rack[1], 0);
+    stnRing = new THREE.Mesh(new THREE.RingGeometry(46, 74, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: lin('#ff5fb0'), transparent: true, opacity: 0.7, depthWrite: false }));
+    { const [x, z] = C(M.stand[0], M.stand[1]); stnRing.position.set(x, 3, z); stnRing.renderOrder = 1; scene.add(stnRing); }
+    Tags.add({ pos: v => { if (G.nail) return false; const [x, z] = C(M.seat[0], M.seat[1]); v.set(x, 230, z); return true; }, max: 2400, pri: 2, cls: 'sign', html: () => '<b>Polish Station</b><em>Paint toes yourself</em>' });
+  }
+  function stepStation(dt) {
+    if (stnRing) { stnRing.visible = !G.nail; stnRing.material.opacity = 0.5 + Math.sin(performance.now() / 250) * 0.25; }
+    const N = G.nail; if (!N) return;
+    N.t += dt; N.tickle = Math.max(0, N.tickle - dt * 1.2);
+    const n3 = N.c.sandy && N.c.sandy.n3; if (n3 && n3.foot) n3.foot.forEach(f => { f.wig = N.tickle; });
+  }
+  // who sits down next: a guest waiting for a pedicure, else anyone waiting, else a guest from the street
+  function nextClient() { return custs.find(o => WAITING.test(o.state) && o.want === 'nails') || custs.find(o => WAITING.test(o.state)) || custs.find(o => o.state === 'pool' && o.sandy) || null; }
+  // what you earn for one pedicure (match = toes out of 10 in her colour): x3 a staff pedicure, or 12 seconds of your
+  // income if that's more (so it's still worth it later on), plus up to the same again as a tip
+  function nailPay(match) { const base = Math.max(svcPrice('nails') * 3, incomeBase() * 12); return base * (1 + (match || 0) / 10) * glam() * (boostOn('double') ? boostAmt('double') : 1); }
+
+  // one polish mesh per toenail, on her own skeleton (built once per avatar; guests are reused, so are these)
+  function polishFor(c) {
+    if (c.toes) return c.toes;
+    const n3 = c.sandy && c.sandy.n3, body = n3 && n3.body; if (!body || !body.skeleton || !n3.findNails) return null;
+    let lists; try { lists = n3.findNails((n3.polish && n3.polish.edge) || 30); } catch (e) { console.warn(e); return null; }
+    const g = body.geometry, idx = g.index.array, SI = g.attributes.skinIndex.array, SW = g.attributes.skinWeight.array, P = g.attributes.position, bones = body.skeleton.bones;
+    const v = new THREE.Vector3(), toes = [];
+    for (const list of lists) {
+      if (!list || !list.length) continue;
+      const ind = []; for (const f of list) ind.push(idx[f], idx[f + 1], idx[f + 2]);
+      const uniq = [...new Set(ind)], wsum = {};
+      for (const i of uniq) for (let k = 0; k < 4; k++) wsum[SI[i * 4 + k]] = (wsum[SI[i * 4 + k]] || 0) + SW[i * 4 + k];
+      let bi = -1, bw = -1; for (const b in wsum) if (wsum[b] > bw) { bw = wsum[b]; bi = +b; }
+      const bone = bones[bi]; if (!bone) continue;
+      const m = /toe0(\d)_([LR])_/.exec(bone.name || '');
+      // the nail's middle in its toe bone's frame (from the bind pose), so it can be found on screen every frame
+      const ctr = new THREE.Vector3(); uniq.forEach(i => ctr.add(v.fromBufferAttribute(P, i))); ctr.divideScalar(uniq.length);
+      const local = ctr.applyMatrix4(new THREE.Matrix4().copy(body.skeleton.boneInverses[bi]).multiply(body.bindMatrix));
+      const geo = new THREE.BufferGeometry(); ['position', 'normal', 'skinIndex', 'skinWeight'].forEach(k => { if (g.attributes[k]) geo.setAttribute(k, g.attributes[k]); });
+      geo.setIndex(ind); geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1e5);
+      const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.22, metalness: 0, transparent: true, opacity: 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -16 });
+      const mesh = new THREE.SkinnedMesh(geo, mat); mesh.bindMode = body.bindMode; mesh.bind(body.skeleton, body.bindMatrix);
+      mesh.position.copy(body.position); mesh.quaternion.copy(body.quaternion); mesh.scale.copy(body.scale);
+      mesh.frustumCulled = false; mesh.renderOrder = 3; mesh.visible = false; body.parent.add(mesh);
+      toes.push({ mesh, bone, local, side: m ? m[2] : (local.x > 0 ? 'L' : 'R'), n: m ? +m[1] : 0, coat: 0, col: -1, sx: -999, sy: -999, w: new THREE.Vector3() });
+    }
+    if (toes.length < 6) { toes.forEach(t => t.mesh.parent && t.mesh.parent.remove(t.mesh)); return null; }
+    // left to right as you look at her (her right foot is on your left), little toe to little toe
+    toes.sort((a, b) => a.side !== b.side ? (a.side === 'R' ? -1 : 1) : a.side === 'R' ? b.n - a.n : a.n - b.n);
+    c.toes = toes; c.feetB = { L: c.body.getObjectByName('leg_L_foot_jnt'), R: c.body.getObjectByName('leg_R_foot_jnt') };
+    return toes;
+  }
+  function dropPolish(c) { if (c.toes) c.toes.forEach(t => { t.mesh.visible = false; t.coat = 0; t.col = -1; }); }
+
+  async function nailStart() {
+    if (G.nail || nailBusy || !G.started) return;
+    let c = nextClient();
+    if (!c && custs.length < 16) { nailBusy = true; try { c = await newCustomer(); } finally { nailBusy = false; } }
+    if (!c || G.nail) { if (!G.nail) UI.toast('No client is free right now. Try again in a moment.', 'bad'); return; }
+    const toes = polishFor(c);
+    if (!toes) { UI.toast('This client can’t sit for polish right now.', 'bad'); return; }
+    // she leaves wherever she was waiting and sits down in your chair, barefoot
+    if (c.couch) { c.couch.cust = null; c.couch = null; } if (c.wseat) { c.wseat.cust = null; c.wseat = null; }
+    if (c.nick == null) newWish(c);
+    const M = MYSTN, [x, z] = C(M.seat[0], M.seat[1]);
+    Object.assign(c, { state: 'polish', want: 'nails', route: null, x, z, y: 0, face: M.face, sitMode: 'polish', sitT: null, sitH: SEAT_H.pedi, stn: null });
+    c.root.visible = true; dropPolish(c); look(c, { feet: { type: 'none' } }); expr(c, 'happy');
+    const P = player, [sx, sz] = C(M.stand[0], M.stand[1]); P.x = sx; P.z = sz; P.y = 0; P.vy = 0; P.face = M.face + Math.PI; P.moving = false;
+    G.nail = { c, toes, look: 0, lookT: 0, sel: G.nailSel || 0, legs: { L: { x: 0, y: 0 }, R: { x: 0, y: 0 } }, feet: { L: { x: -999, y: -999 }, R: { x: -999, y: -999 } }, drag: null, brush: null, t: 0, tickle: 0, done: false };
+    input.act = false; input.keys.clear(); G.hold = 0;
+    Parts.burst(x, 110, z, 18, ['#f472b6', '#ffffff', NAIL_COLS[c.wish]], { size: 10, speed: 220, up: 360, life: 0.7 }); Sfx.play('pop');
+    UI.nailUI(true, G.nail);
+  }
+  // her legs while you paint: feet held up above the footrest (never through it), moved by dragging (x: side to side
+  // -1..1, y: 0 = resting height .. 1 = lifted higher)
+  function nailPose(c) {
+    const N = G.nail, L = N && N.c === c ? N.legs : { L: { x: 0, y: 0 }, R: { x: 0, y: 0 } };
+    const leg = (o, sg) => [[-108 - o.y * 10, 0, sg * 5 + o.x * 11], [-58 - o.y * 10, 0, sg * 2 + o.x * 6], [-96, 0, 0]];
+    const [tl, cl, fl] = leg(L.L, 1), [tr, cr, fr] = leg(L.R, -1);
+    return { thighL: tl, calfL: cl, footL: fl, thighR: tr, calfR: cr, footR: fr, armL: [-24, 0, 14], foreL: [-60, 0, 0], armR: [-24, 0, -14], foreR: [-60, 0, 0] };
+  }
+  // the fixed camera: from just above your stool, close over her feet, looking down at her toes. It is set once, from
+  // where her toes rest when she sits down (guests come in a few heights), and never moves while you paint.
+  function nailCam(dt) {
+    const N = G.nail, M = MYSTN, fx = Math.sin(M.face), fz = Math.cos(M.face);
+    N.c.root.updateMatrixWorld(true);
+    N.toes.forEach(t => t.w.copy(t.local).applyMatrix4(t.bone.matrixWorld));
+    if (!N.focus) { N.focus = new THREE.Vector3(); N.toes.forEach(t => N.focus.add(t.w)); N.focus.divideScalar(N.toes.length); }
+    const F = N.focus, hd = N.c.rig && N.c.rig.head, k = N.lookT = N.lookT + ((N.look ? 1 : 0) - N.lookT) * Math.min(1, dt * 7), e = k * k * (3 - 2 * k);
+    // looking down at her toes from just above them (painting), or up at her face from the stool
+    if (hd && !N.face) N.face = new THREE.Vector3();
+    if (hd) hd.getWorldPosition(N.face);
+    const H = N.face || F, ty = F.y + 30;
+    camera.position.set(F.x + fx * (30 + e * 34), F.y + 44 + e * (ty - F.y - 44 + 30), F.z + fz * (30 + e * 34));
+    camLook.set(F.x - fx * 4 + (H.x - F.x + fx * 4) * e, F.y - 2 + (H.y - 4 - F.y + 2) * e, F.z - fz * 4 + (H.z - F.z + fz * 4) * e); camera.lookAt(camLook);
+    sun.position.set(F.x + 900, 2000, F.z + 600); sun.target.position.set(F.x, 0, F.z);
+    scene.background.lerp(lin('#7fd6ff'), Math.min(1, dt * 1.5)); scene.fog.color.copy(scene.background);
+    camera.updateMatrixWorld();
+    // where each toenail and each foot is on screen (the brush, the markers and foot dragging use these)
+    const R = View.rect, scr = (p, o) => { v3.copy(p).project(camera); o.x = (v3.x + 1) / 2 * R.w; o.y = (1 - v3.y) / 2 * R.h; };
+    const sum = { L: new THREE.Vector3(), R: new THREE.Vector3() }, cnt = { L: 0, R: 0 };
+    N.toes.forEach(t => { const o = {}; scr(t.w, o); t.sx = o.x; t.sy = o.y; sum[t.side].add(t.w); cnt[t.side]++; });
+    for (const s of ['L', 'R']) { const fb = N.c.feetB && N.c.feetB[s]; if (!cnt[s]) continue; const p = sum[s].divideScalar(cnt[s]); if (fb) p.lerp(fb.getWorldPosition(new THREE.Vector3()), 0.55); scr(p, N.feet[s]); }
+    Floaters.frame(dt);
+    UI.nailUI('frame', N);
+  }
+  const brushR = () => clamp(View.rect.h * 0.024, 12, 24);
+  function segDist(px, py, ax, ay, bx, by) { const dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy, t = L ? clamp(((px - ax) * dx + (py - ay) * dy) / L, 0, 1) : 0; return Math.hypot(px - ax - dx * t, py - ay - dy * t); }
+  function paintAt(x0, y0, x1, y1, tap) {
+    const N = G.nail, r = brushR(), len = Math.hypot(x1 - x0, y1 - y0); let hit = 0;
+    for (const t of N.toes) {
+      if (segDist(t.sx, t.sy, x0, y0, x1, y1) > r) continue; hit++;
+      if (t.col !== N.sel) { t.col = N.sel; t.coat = 0; t.mesh.material.color.copy(lin(NAIL_COLS[N.sel])); }
+      const was = t.coat; t.coat = Math.min(1, t.coat + (tap ? 0.22 : len / (r * 4)));
+      t.mesh.visible = true; t.mesh.material.opacity = 0.35 + 0.65 * t.coat;
+      if (was < 1 && t.coat >= 1) {
+        Sfx.play('ka'); Parts.burst(t.w.x, t.w.y + 4, t.w.z, 5, [NAIL_COLS[t.col], '#ffffff'], { size: 2.5, speed: 40, up: 70, g: 300, life: 0.5 });
+        if (N.toes.every(q => q.coat >= 1)) { Sfx.play('pop'); expr(N.c, 'happy'); }
+      }
+    }
+    if (hit) { N.tickle = Math.min(1, N.tickle + 0.06); if (Math.random() < (tap ? 0.3 : 0.06)) Sfx.play('clink'); if (Math.random() < 0.015) expr(N.c, pick(['laugh', 'blush', 'happy'])); }
+  }
+  function nailDown(x, y) {
+    const N = G.nail; if (!N || N.done || N.lookT > 0.3) return '';
+    let best = null, bd = brushR() * 1.4; N.toes.forEach(t => { const d = Math.hypot(t.sx - x, t.sy - y); if (d < bd) { bd = d; best = t; } });
+    if (!best) { let s = null, fd = View.rect.h * 0.14; for (const k of ['L', 'R']) { const f = N.feet[k], d = Math.hypot(f.x - x, f.y - y); if (d < fd) { fd = d; s = k; } }
+      if (s) { N.drag = { s, x, y }; return 'drag'; } }
+    N.brush = { x, y }; paintAt(x, y, x, y, true); return 'brush';
+  }
+  function nailMove(x, y) {
+    const N = G.nail; if (!N || N.done) return;
+    if (N.drag) { const o = N.legs[N.drag.s], h = View.rect.h; o.x = clamp(o.x + (x - N.drag.x) / h * 3, -1, 1); o.y = clamp(o.y - (y - N.drag.y) / h * 3, 0, 1); N.drag.x = x; N.drag.y = y; return; }
+    if (N.brush) { paintAt(N.brush.x, N.brush.y, x, y, false); N.brush.x = x; N.brush.y = y; }
+  }
+  function nailUp() { const N = G.nail; if (N) { N.drag = null; N.brush = null; } }
+  function nailLook(v) { const N = G.nail; if (!N) return; N.look = v == null ? !N.look : !!v; N.drag = N.brush = null; if (N.look) expr(N.c, pick(['happy', 'curious', 'blush'])); }
+  function nailPick(i) { const N = G.nail; G.nailSel = i; if (N) N.sel = i; Sfx.play('clink'); }
+  function nailDone() {
+    const N = G.nail; if (!N || N.done) return;
+    if (N.toes.some(t => t.coat < 1)) { UI.toast('Paint every toenail first.', 'bad'); return; }
+    N.done = true; N.drag = N.brush = null;
+    const c = N.c, hits = N.toes.filter(t => t.col === c.wish).length, match = hits * 10 / N.toes.length, pay = nailPay(match), base = nailPay(0);
+    S.cash += pay; G.made += pay; S.served++; S.nailDone = (S.nailDone || 0) + 1;
+    // her fingernails get the colour you used most
+    const n = {}; N.toes.forEach(t => { n[t.col] = (n[t.col] || 0) + 1; }); const top = +Object.keys(n).sort((a, b) => n[b] - n[a])[0];
+    if (c.cfg) c.cfg.nails = NAIL_COLS[top]; look(c, { nails: NAIL_COLS[top] });
+    expr(c, hits === N.toes.length ? 'laugh' : hits * 2 >= N.toes.length ? 'happy' : 'neutral');
+    const [x, z] = C(MYSTN.seat[0], MYSTN.seat[1]); Parts.burst(x, 60, z + 80, 30, ['#f472b6', '#fde047', '#ffffff', NAIL_COLS[c.wish]], { size: 8, speed: 260, up: 420, life: 0.8 });
+    Sfx.play('cash'); save();
+    UI.nailUI('result', { pay, tip: pay - base, hits, of: N.toes.length, want: c.wish, name: c.nick, first: S.nailDone === 1 });
+  }
+  // stand up and go: out to the street when she's done, back to waiting when you stopped early
+  function nailEnd() {
+    const N = G.nail; if (!N) return; const c = N.c, M = MYSTN;
+    const n3 = c.sandy && c.sandy.n3; if (n3 && n3.foot) n3.foot.forEach(f => { f.wig = 0; });
+    const [ex, ez] = C(M.seat[0] + 1, M.seat[1] + 1); c.x = ex; c.z = ez; c.sitMode = ''; c.sitT = null;
+    look(c, { feet: { type: 'flipflops', sole: '#ffffff', strap: c.cfg && c.cfg.nails && c.cfg.nails !== c.cfg.skin ? c.cfg.nails : '#f472b6' } });
+    if (N.done) { const side = Math.random() < 0.5 ? -1 : 1; c.state = 'out'; c.route = World.path(c.x, c.z, SX(0), -1).concat([[(SX(0) + 0.5) * BS, (SIDEWALK_Z + 0.5) * BS], [(OX + side * 40) * BS, (SIDEWALK_Z + 0.5) * BS]]); }
+    else { dropPolish(c); c.state = 'seek'; c.want = 'nails'; c.wait = 0; expr(c, 'neutral'); }
+    G.nail = null; UI.nailUI(false);
+    const P = player; P.face = M.face + Math.PI; CAM.yaw = 0; G.camT = null; input.act = false; input.keys.clear(); G.holdLock = true;
+  }
+  function nailQuit() { nailEnd(); }
+  async function nailNext() { nailEnd(); await nailStart(); }
+
   /* ---------- camera ---------- */
   function camStep(dt) {
+    if (G.nail) { nailCam(dt); return; }
     let tx = player.x, ty = player.y, tz = player.z, dist = 700 * CAM.zoom;
     if (!G.started) { dist = 1300; ty += 150; }
     if (!G.camT) G.camT = new THREE.Vector3(tx, ty, tz);
@@ -2750,7 +3004,7 @@ const Game = (() => {
     buy(id) { const b = buyables().find(x => x.id === id); if (b) b.go(); },
     rebirth() {
       const cost = rebirthCost(S.reb); if (S.cash < cost) return UI.toast('You need ' + money(cost) + ' cash to rebirth.', 'bad');
-      const keep = { reb: S.reb + 1, idx: S.idx, daily: S.daily, best: S.best, sound: S.sound, passes: S.passes, pets: S.pets, pen: S.pen, pid: S.pid, follow: S.follow, incub: S.incub, served: S.served };
+      const keep = { reb: S.reb + 1, idx: S.idx, daily: S.daily, best: S.best, sound: S.sound, passes: S.passes, pets: S.pets, pen: S.pen, pid: S.pid, follow: S.follow, incub: S.incub, served: S.served, nailDone: S.nailDone };
       S = fresh(keep); S.justReb = 1; save(); location.reload();
     },
     daily() {
@@ -2814,7 +3068,8 @@ const Game = (() => {
   function start() { const first = !G.started; if (!G.started) { player.face = Math.PI; CAM.yaw = 0; } G.started = true; G.paused = false; Sfx.unlock();
     if (first && window.GK && GK.tutorial) setTimeout(() => GK.tutorial('glowupspa', [
       { title: 'Glow Up Spa', text: matchMedia('(pointer:coarse)').matches ? 'Drag on the left to walk around your salon. Try it!' : 'Walk with W A S D. Try it now!', skill: 'move', until: () => player.moving, hideNext: true },
-      { title: 'Cash', text: 'Your stylist does the haircuts. Walk over the front desk to scoop up the cash.', target: '#hud' },
+      { title: 'Cash', text: 'Your stylist does the haircuts and your nail artist does pedicures. Walk over the front desk to scoop up the cash.', target: '#hud' },
+      { title: 'Nail Salon', text: 'Want to do it yourself? Stand on the pink ring in the Nail Salon, accept a client, and paint her toenails. She pays more, and tips for the colour she asked for.' },
       { title: 'Build', text: 'Step onto a glowing green pad to buy what it shows: chairs, staff and new rooms. Locked rooms open in order.' },
       { title: 'Eggs', text: 'Cross the street into the Beauty Store: grab an egg from a pedestal and bring it home to hatch a pet. Clerks chase slow thieves, so train Speed on the treadmill.' },
       { title: 'Shops', text: 'The Shop, Store, Pets and Index live on these buttons. Hold Shift (or tap Run) to sprint.', target: '[data-side=shop]', doneLabel: 'Got it!' }
@@ -2823,9 +3078,10 @@ const Game = (() => {
   Bridge.on((s, ev) => { if (ev === 'pause') togglePause(true); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) { togglePause(true); save(); } });
   addEventListener('pagehide', save);
-  if (window.GK && GK.emotes) GK.emotes.install({ canEmote: () => G.started && !G.paused && !UI.modal() && player && !player.carry && player.stun <= 0 });
+  if (window.GK && GK.emotes) GK.emotes.install({ canEmote: () => G.started && !G.paused && !UI.modal() && !G.nail && player && !player.carry && player.stun <= 0 });
   return {
     setup, step, start, togglePause, warpHome, goStore, collectWelcome, Shop, save, storeBuy, owned, cashPack, TIMED, buyables, bestBuy,
+    nailStart, nailQuit, nailNext, nailDone, nailLook, nailPick, nailDown, nailMove, nailUp, nailPay,
     get S() { return S; }, get G() { return G; }, get player() { return player; }, staff, custs, clerks, ST, petArt,
     incomeBase, incomeNow, salonRate, petRate, myS, treadRate, hatchMult, cashMult, svcPrice, svcTime, staffed, boostOn, room, arrivals,
     _dbg: { addPet, spawnIn, refreshSpa, deliver, putMask, carry: (e) => carry(player, e) },
@@ -3086,6 +3342,63 @@ const UI = (() => {
   hold('bJump', () => input.jump = true);
   $('bHome').addEventListener('click', () => Game.warpHome());
 
+  /* ---------- the polish station minigame's screen (Game.nailStart opens it) ----------
+     It covers the 3D view (the fixed camera looks at her feet): her card and the colour she wants, how many toes are
+     done, the palette and Done. Nothing is drawn over her toes: you see the polish go on. */
+  const nailEl = $('nailUI');
+  let nailHintOff = false;
+  function nailUI(mode, N) {
+    const el = nailEl;
+    if (mode === true) {
+      el.hidden = false; document.body.classList.add('nailing'); el.querySelector('.nRes') && el.querySelector('.nRes').remove();
+      el.querySelector('.nX').innerHTML = vi('cross'); el.querySelector('.nLook span').innerHTML = vi('eye');
+      el.querySelector('.nWho').innerHTML = '<b>' + esc(N.c.nick) + '</b><small>wants</small>';
+      el.querySelector('.nWant i').style.background = NAIL_COLS[N.c.wish]; el.querySelector('.nWant b').textContent = NAIL_NAMES[N.c.wish];
+      el.querySelector('.nPal').innerHTML = NAIL_COLS.map((c, i) => '<button data-nail="pick" data-i="' + i + '" style="--pc:' + c + '" aria-label="' + esc(NAIL_NAMES[i]) + '"></button>').join('');
+      el.querySelector('.nHint').classList.toggle('off', nailHintOff);
+      nailUI('frame', N); return;
+    }
+    if (mode === false) { el.hidden = true; document.body.classList.remove('nailing'); el.querySelector('.nRes') && el.querySelector('.nRes').remove(); return; }
+    if (mode === 'frame') {
+      const done = N.toes.filter(t => t.coat >= 1).length;
+      const pb = el.querySelector('.nProg b'), txt = done + '/' + N.toes.length; if (pb.textContent !== txt) pb.textContent = txt;
+      const all = done === N.toes.length, db = el.querySelector('.nDone'); if (db.disabled === all) db.disabled = !all; el.classList.toggle('ready', all && !N.done);
+      el.querySelectorAll('.nPal button').forEach((b, i) => b.classList.toggle('on', i === N.sel));
+      const lb = el.querySelector('.nLook b'), lt = N.look ? 'Look down' : 'Look up'; if (lb.textContent !== lt) lb.textContent = lt; el.classList.toggle('looking', !!N.look);
+      if (!nailHintOff && done > 0) { nailHintOff = true; el.querySelector('.nHint').classList.add('off'); }
+      return;
+    }
+    if (mode === 'result') {
+      const R = N, d = document.createElement('div'); d.className = 'nRes';
+      const line = R.hits === R.of ? 'Every toe in ' + NAIL_NAMES[R.want] + '!' : R.hits ? R.hits + ' of ' + R.of + ' toes in ' + NAIL_NAMES[R.want] : 'She wanted ' + NAIL_NAMES[R.want] + ', but she still loves it';
+      d.innerHTML = '<div class="nResCard">' + wIcon('paintbrush', '#ec4899', 1) + '<b class="nResT">' + esc(R.name) + (R.hits * 2 >= R.of ? ' loves it!' : ' says thanks!') + '</b>' +
+        '<span class="nResPay">+' + money(R.pay) + '</span><small>' + esc(line) + (R.tip > 0.5 ? ' · tip ' + money(R.tip) : '') + '</small>' +
+        '<div class="nResBtns"><button class="wb" style="background:#ec4899" data-nail="next">Next client</button><button class="wb ghost" data-nail="quit">Back to the spa</button></div></div>';
+      el.appendChild(d); el.classList.remove('ready');
+      if (R.first) setTimeout(() => toast('Your first pedicure! Come back any time: the polish station is always open.', 'good'), 700);
+    }
+  }
+  (function wireNail() {
+    const el = nailEl; let pid = null;
+    const xy = e => [e.clientX - View.rect.x, e.clientY - View.rect.y];
+    el.addEventListener('pointerdown', e => {
+      if (e.target.closest('button,.nTop,.nBot,.nRes')) return;
+      if (pid !== null) return; pid = e.pointerId; try { el.setPointerCapture(pid); } catch (er) { }
+      const kind = Game.nailDown(...xy(e)); el.classList.toggle('dragging', kind === 'drag'); e.preventDefault();
+    });
+    el.addEventListener('pointermove', e => {
+      if (e.pointerId !== pid) return; Game.nailMove(...xy(e));
+    });
+    const up = e => { if (e.pointerId !== pid) return; pid = null; Game.nailUp(); el.classList.remove('dragging'); };
+    el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+    el.addEventListener('wheel', e => { if (Math.abs(e.deltaY) > 2) Game.nailLook(e.deltaY < 0); }, { passive: true });
+    addEventListener('keydown', e => { if (!Game.G.nail || UI.sheet) return; if (/^(KeyW|ArrowUp)$/.test(e.code)) Game.nailLook(true); else if (/^(KeyS|ArrowDown)$/.test(e.code)) Game.nailLook(false); });
+    el.addEventListener('click', e => {
+      const b = e.target.closest('[data-nail]'); if (!b) return; const a = b.dataset.nail;
+      if (a === 'quit') Game.nailQuit(); else if (a === 'done') Game.nailDone(); else if (a === 'next') Game.nailNext(); else if (a === 'pick') Game.nailPick(+b.dataset.i); else if (a === 'look') Game.nailLook();
+    });
+  })();
+
   /* ---------- HUD ---------- */
   function hud(on) { $('hud').hidden = !on; }
   let last = {};
@@ -3115,7 +3428,7 @@ const UI = (() => {
     if (p) { set('pText', '<b>' + esc(p.text) + '</b><small>' + esc(p.sub || '') + '</small>'); pe.classList.add('on'); $('pRing').style.setProperty('--p', (G.hold / p.time * 100).toFixed(0)); }
     else pe.classList.remove('on');
     $('bUse').classList.toggle('ready', !!p);
-    set('bUseTxt', p ? 'Grab' : 'Grab');
+    set('bUseTxt', p && p.btn ? p.btn : 'Grab');
     if ((sheet === 'shop' || sheet === 'rebirth' || sheet === 'pets') && n % 30 === 0) keepScroll();
     if (n % 15 === 0) { const t = performance.now(); nudgeTick(Math.min(2, (t - (frame.nt || t)) / 1000)); frame.nt = t; }
   }
@@ -3132,6 +3445,7 @@ const UI = (() => {
     if (G.caughtAt && G.t - G.caughtAt < 20) { const it = item('speedx') || shop.find(x => x.effect === 'tune'); list.push({ id: 'caught', pri: 10, offer: it ? 1 : 0, icon: 'gauge', t: 'Too slow for ' + ZONES[G.caughtZone || 1].n + '?', s: it ? it.name + ': ' + (it.desc || '') + '. Or run on the treadmill.' : 'Run on the treadmill in your gym to get faster.', btn: it ? 'See speed' : 'OK', go: it ? () => open('store') : null }); }
     if (S.reg > Math.max(50, inc * 40) && !S.auto) list.push({ id: 'reg', pri: 8, icon: 'coins', t: 'The front desk has ' + money(S.reg) + '!', s: 'Walk past the desk to grab it.', btn: 'OK' });
     if (b && S.cash >= b.cost) list.push({ id: 'b:' + b.id, pri: 7, icon: 'arrow_up', t: 'You can afford: ' + b.t, s: b.s + (b.pad ? '. Step on its green pad in your spa.' : '.'), btn: 'Open Shop', go: () => { tab = 'spa'; open('shop'); } });
+    if (!S.nailDone && G.t > 50) list.push({ id: 'nails', pri: 6, icon: 'paintbrush', t: 'Paint toenails yourself!', s: 'Stand on the pink ring in the Nail Salon and accept a client. She pays more than a staff pedicure.', btn: 'OK' });
     if (!S.pets.some(Boolean) && G.t > 30) list.push({ id: 'firstpet', pri: 8, icon: 'gift', t: 'Get your first pet!', s: 'Cross the street to the Beauty Store, grab an egg, and run it home.', btn: 'OK' });
     if (S.cash >= rebirthCost(S.reb)) list.push({ id: 'reb', pri: 7, icon: 'arrows_clockwise', t: 'You can rebirth!', s: 'All cash x' + (1 + 0.5 * (S.reb + 1)) + ' from then on. Pets stay.', btn: 'Rebirth', go: () => open('rebirth') });
     if (nextZone && sp < nextZone.req) { const it = item('speedx'); if (it) list.push({ id: 'speedx', pri: 6, offer: 1, icon: 'gauge', t: 'Double your Speed forever!', s: 'Just ' + it.cost + ' ' + (st.pearlName || 'points') + '. ' + nextZone.n + ' needs ' + fmt(nextZone.req) + '.', btn: 'Store', go: () => open('store') }); }
@@ -3146,7 +3460,7 @@ const UI = (() => {
   function nudgeTick(dt) {
     const G = Game.G, el = $('nudge');
     if (nudgeT > 0) { nudgeT -= dt; if (nudgeT <= 0) { el.classList.remove('on'); document.body.classList.remove('nudging'); } }
-    if (View.o.tips === false || !G.started || G.paused || sheet || Game.player.carry) return;
+    if (View.o.tips === false || !G.started || G.paused || sheet || G.nail || Game.player.carry) return;
     nudgeNext -= dt; nudgeOfferNext -= dt;
     if (nudgeNext > 0 && !(G.caughtAt && G.t - G.caughtAt < 3 && !nudgeAt.caught)) return;
     const now = G.t, opts = nudgeOptions().filter(o => (!nudgeAt[o.id] || now - nudgeAt[o.id] > 360) && (!o.offer || nudgeOfferNext <= 0)).sort((a, b) => b.pri - a.pri);
@@ -3162,7 +3476,7 @@ const UI = (() => {
   }
   function paused(on) { if (on && !sheet) open('pause'); if (!on && (sheet === 'pause' || sheet === 'menu')) { sheet = ''; close(); } }
   Bridge.on(() => { if (sheet === 'lobby' || sheet === 'store') keepScroll(); });
-  return { get sheet() { return sheet; }, toast, feed, banner, alert, open, close, modal, hud, frame, paused, render, nudgeOptions: () => nudgeOptions(), showNudge: o => showNudge(o) };
+  return { get sheet() { return sheet; }, toast, feed, banner, alert, open, close, modal, hud, frame, paused, render, nudgeOptions: () => nudgeOptions(), showNudge: o => showNudge(o), nailUI };
 })();
 
 /* ---------- boot ---------- */
@@ -3170,11 +3484,13 @@ const UI = (() => {
   const load = document.getElementById('loading'), txt = t => { const el = document.getElementById('loadTxt'); if (el) el.textContent = t; };
   try { await Avatars.load(); } catch (e) { console.warn('Avatars off:', e.message); }
   if (!window.THREE) { txt('This game needs the Grug avatar runtime (sandy-runtime.js).'); return; }
+  const npcKit = Avatars.loadNpc();   // the classic avatar for every NPC (~15 MB): downloads while the spa is built
   txt('Building the spa…');
   makeWorld();
   const img = new Image(); img.src = 'data:image/png;base64,' + ATLAS_B64; await img.decode();
   await loadNormals(); buildWorld(img);
   txt('Waking up the pets…'); await PetKit.load();
+  txt('Dressing the staff…'); await npcKit;
   await Game.setup();
   Bridge.start();
   load.classList.add('done');
