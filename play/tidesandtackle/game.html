@@ -930,6 +930,9 @@ body.ph-market #disTimer{display:none!important}
 #gearBtn{position:fixed;top:calc(10px + env(safe-area-inset-top));left:calc(10px + env(safe-area-inset-left));width:40px;height:40px;border:none;background:#FFFFFF;color:#1E1B16;z-index:8;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 #gearBtn:hover{background:#F1F1F4}
 body:not(.ph-sail):not(.ph-port):not(.ph-market) #gearBtn{display:none}
+#grugBtn{position:fixed;top:calc(10px + env(safe-area-inset-top));left:calc(58px + env(safe-area-inset-left));height:40px;background:#2FAE5A;color:#fff;display:flex;align-items:center;gap:8px;padding:0 12px;font-weight:900;text-decoration:none;border-radius:4px;z-index:8;line-height:1.05;font-size:14px;transition:scale .15s}
+#grugBtn:active{scale:.95}#grugBtn small{display:block;font-size:10px;font-weight:700;opacity:.85}#grugBtn svg{width:18px;height:18px}
+body:not(.ph-sail):not(.ph-port):not(.ph-market) #grugBtn,body.building #grugBtn{display:none}
 #fpsTag{position:fixed;top:calc(56px + env(safe-area-inset-top));left:calc(10px + env(safe-area-inset-left));background:#FFFFFF;color:#1E1B16;font-weight:900;font-size:12px;padding:3px 7px;z-index:8;display:none;pointer-events:none;font-variant-numeric:tabular-nums}
 #fpsTag.on{display:block}
 #setp{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,15,25,.45);z-index:20}
@@ -5391,7 +5394,8 @@ function animR6(r, dt, speed, grounded) {
 // SandyKit keeps that one for itself and the game's own THREE is put straight back. The R6 rig stays underneath for
 // physics and the gun's position: it's only hidden. With no runtime (offline file, no network) the R6 look stays.
 const AVATAR = { p: null, K: null };
-const AV_SRC = ['../../assets/sandy-runtime.js?v=av2', 'https://grugdigital.pages.dev/assets/sandy-runtime.js?v=av2'];
+const AV_SRC = window.TT_ITCH ? ['sandy-runtime.js', 'https://grugdigital.pages.dev/assets/sandy-runtime.js?v=av2']      // v27: the itch.io copy ships the runtime beside index.html
+  : ['../../assets/sandy-runtime.js?v=av2', 'https://grugdigital.pages.dev/assets/sandy-runtime.js?v=av2'];
 function loadAvatarKit() {
   if (AVATAR.p) return AVATAR.p;
   const OURS = window.THREE;
@@ -5545,7 +5549,7 @@ function buildAllies() {
     scene.add(a.g); buildAllyStatic(a);
     // the captain (R6) and a deckhand or two (kit crew, unchanged)
     const r = makeR6(R6_LOOKS[n + 1]), [x, z] = pick(a.free);
-    sandyDress(r, K => K.randomConfig('tides-captain-' + n));          // v25: the other captains are Grug avatars too
+    sandyDress(r, K => K.randomConfig('tides-captain-' + n), 2);       // v25: the other captains are Grug avatars too (v27: twice the size, like yours)
     a.capt = { ch: r, body: makeBody(x, DECK_Y, z), tx: x, tz: z, wait: rand(0, 2), cd: rand(0.5, 1.5), face: Math.PI, stuck: 0, frame: 'ship', jumpT: rand(3, 8) };
     r.g.position.set(x, DECK_Y, z); a.g.add(r.g);
     for (let k = 0; k < Math.max(0, L.crew - L.towers.length); k++) {
@@ -6315,7 +6319,7 @@ function updatePets(dt) {
 // ================= v23: WAVES — the pirates come in waves, with a 20 second break after the last one goes down =================
 // The break only starts once every pirate of the wave is sunk (or has slipped past). Each break, a new area.
 // v25: on the Grug site the game sits in assets/gamehost.js's frame: say hello, and report each wave cleared as the score
-const GRUG_EMBED = (() => { try { return window.parent && window.parent !== window; } catch (e) { return false; } })();
+const GRUG_EMBED = (() => { try { return !window.TT_ITCH && window.parent && window.parent !== window; } catch (e) { return false; } })();
 if (GRUG_EMBED) try { parent.postMessage({ rw: 1, t: 'hello' }, '*'); } catch (e) {}
 function grugScore(n) { if (GRUG_EMBED) try { parent.postMessage({ rw: 1, t: 'score', score: n, beans: 0, level: n }, '*'); } catch (e) {} }
 const WV = { n: 0, state: 'break', t: 8, toSpawn: 0, spawnT: 0, big: 0, disT: -1, ufoT: -1 };
@@ -6409,6 +6413,13 @@ const FPS = { el: null, n: 0, t: 0 };
   gb.addEventListener('pointerdown', e => e.stopPropagation());
   gb.addEventListener('click', e => { e.currentTarget.blur(); toggleSettings(); });
   document.body.appendChild(gb);
+  // v27: the itch.io copy points to the Grug site, where your captain wears the avatar you make there
+  if (window.TT_ITCH) {
+    const a = document.createElement('a'); a.id = 'grugBtn'; a.href = 'https://grugdigital.com/play/tidesandtackle/'; a.target = '_blank'; a.rel = 'noopener';
+    a.innerHTML = `${ic('people')}<span>Customize captain<small>Play on Grug</small></span>`;
+    a.addEventListener('pointerdown', e => e.stopPropagation()); a.addEventListener('click', () => sfx('click'));
+    document.body.appendChild(a);
+  }
   FPS.el = document.createElement('div'); FPS.el.id = 'fpsTag'; document.body.appendChild(FPS.el);
 }
 function updateFps(rawDt) {
@@ -6560,7 +6571,7 @@ function updateSteps(dt) {
   const v = Math.hypot(cap.x - stepX, cap.z - stepZ) / dt; stepX = cap.x; stepZ = cap.z;
   if (v > 0.8 && v < 30) { if ((stepT -= dt) <= 0) { stepT = 0.31; sfx('step'); } } else stepT = 0.05;
 }
-if ('serviceWorker' in navigator && /^https?:/.test(location.protocol) && !GRUG_EMBED && !/\/play\//.test(location.pathname)) navigator.serviceWorker.register('sw.js').catch(() => {});   // installable copy (pwa/)
+if ('serviceWorker' in navigator && /^https?:/.test(location.protocol) && !window.TT_ITCH && !GRUG_EMBED && !/\/play\//.test(location.pathname)) navigator.serviceWorker.register('sw.js').catch(() => {});   // installable copy (pwa/)
 addEventListener('pointerdown', () => ac(), { once: true, capture: true }); addEventListener('keydown', () => ac(), { once: true, capture: true });
 window.__game = {
   sfx, SND,
