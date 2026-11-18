@@ -439,6 +439,14 @@ Choosing your own colours is not built yet: the skins are laid out in regions so
   everyone else are always the new avatar (`randomConfig` never sets `classic`). A look saved before the change (no
   `model`) is moved to the classic key once (`SandyKit.migrate`, `migrateLook` in grug.js, `SandyView.config`) and the
   player gets the new avatar in the skin of that body, wearing the same hat.
+- **The classic feet** (Nov 2026, the same file as `grug-game-kit/vendor/sandy-runtime.js`, made by one patch there):
+  both bodies wear the new feet model, with nails marked per vertex (`_nail`, painted in the look's `nails` colour),
+  their own normal map (creases on the soles, `FEET_NMAP`) and fully matte roughness. `footShape` in a classic look is
+  `'none'` (as modelled) or a preset `'a'`–`'l'` (`FOOT_SHAPES`, bone scales and toe angles; `CATALOG.footShapes`), and
+  `randomConfig` gives every random classic look its own (Runway Ready's crowd); `randomConfig(seed, {footShape})` picks
+  one. With flip-flops on, the toes bend down onto the sole and the strap is refitted to the posed foot (`fitToes`,
+  `fitStraps`). The lower legs taper gradually to the knee and the front of the ankle is rounded. Don't hand-edit the
+  `SANDY_GLB` models or the `ARMORPACK` vertex tables: they are generated together, and the tables follow the mesh.
 - **The closet** (`shop/`, "Classic closet") and every clothing design dress the classic look only (`Grug.equip` writes
   'grug.sandy.classic.v1'). It's off the dock; the editor's Classic section and the account menu (while classic is on)
   link to it. **Runway Ready** is a dress-up game built on those clothes, so it loads the classic kit for everyone in it
