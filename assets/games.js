@@ -263,7 +263,28 @@ window.GRUG_GAMES = [
     ],
     box: { code: 'GD-0034', shell: '#22D3EE', players: '1P', region: 'WORLDWIDE', font: 'Righteous', fill: ["#E0FDFF","#22D3EE"],
            art: 'assets/boxart/mysteryblasters.jpg', shots: ['assets/boxart/shots/mysteryblasters-1.jpg', 'assets/boxart/shots/mysteryblasters-2.jpg'] }
+  },  {
+    // A Grug original (original: true): play/tidesandtackle/ is its standalone game (assets/gamehost.js). No Pearl store:
+    // everything is earned at sea. Its host save ('grug-tidesandtackle-v1') keeps the best wave and runs.
+    id: 'tidesandtackle', app: 'tidesandtackle', original: true,
+    title: 'Broadside Bay', appTitle: 'Tides & Tackle', subtitle: 'Pirate Convoy Defense', kind: '3D boat builder + tower defense', status: 'live',
+    tags: ['Tower Defense', 'Building', 'Pets', 'Collecting'],
+    partner: 'Grug Original', place: 'Plays anywhere',
+    blurb: 'Build your boat, sail in a convoy and hold off waves of pirates. Three of the same part merge into a better one.',
+    long: 'You captain one ship in a convoy of four, sailing a Western desert river. Pirates zig-zag down the line between the ships in waves, lobbing cannon shells: a red circle shows where each one lands, so step out of the way. Mount a turret to aim it yourself, or let your crew and rescued pets man them. Sunk pirates and shot-open crates drop parts: place three of the same turret or crate on your deck and they merge into the next tier. Stand by a damaged part to mend it, rescue castaways and their pets, and climb through the waves as your own avatar. The pirates read your firepower, so every wave is a close call.',
+    play: 'play/tidesandtackle/', game: 'play/tidesandtackle/', save: 'grug-tidesandtackle-v1', storageKey: '', old: '',
+    thumb: 'assets/boxart/tidesandtackle.jpg', color: '#2563EB', ink: '#FFFFFF',
+    avatar: 'You play as your avatar', earn: 'Everything is earned at sea, no Pearls needed',
+    features: [
+      "Hold the convoy against waves of zig-zagging pirates",
+      "Three of the same part merge into the next tier",
+      "Mount a turret yourself, or let your crew and pets man them",
+      "Dodge the red circles: every cannon shell is telegraphed"
+    ],
+    box: { code: 'GD-0036', shell: '#2563EB', players: '1P', region: 'WORLDWIDE', font: 'Luckiest Guy', fill: ["#FFF3C4", "#FFB020"],
+           art: 'assets/boxart/tidesandtackle.jpg', shots: ['assets/boxart/shots/tidesandtackle-1.jpg', 'assets/boxart/shots/tidesandtackle-2.jpg'] }
   },
+
   {
     // Made with Alchemy Bake Lab: a standalone game (play/sugaralchemist/); the venue's rewards app is play/alchemy/.
     id: 'alchemy', app: 'alchemy', venue: 'alchemy',

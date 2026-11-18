@@ -1,5 +1,5 @@
 {
- "v": "64d8e98c155f",
+ "v": "993f890d9fc2",
  "apps": {
   "grug": [
    "grug",
@@ -10,6 +10,7 @@
    "game:glowupspa",
    "game:petmountainrescue",
    "game:mysteryblasters",
+   "game:tidesandtackle",
    "game:placeholder18"
   ],
   "daypart": [
@@ -94,9 +95,12 @@
     "/assets/boxart/shots/soluna-1.jpg": "35fb6da68e",
     "/assets/boxart/shots/takeatea-1.jpg": "b40e5907ef",
     "/assets/boxart/shots/teahouse-1.jpg": "c3a1c03f83",
+    "/assets/boxart/shots/tidesandtackle-1.jpg": "88b589688a",
+    "/assets/boxart/shots/tidesandtackle-2.jpg": "8302dbaf45",
     "/assets/boxart/soluna.jpg": "51abf6353a",
     "/assets/boxart/takeatea.jpg": "e5e906f1f3",
     "/assets/boxart/teahouse.jpg": "b68d4800e1",
+    "/assets/boxart/tidesandtackle.jpg": "0f360cf7c1",
     "/assets/business.js": "3ebbf673cd",
     "/assets/cafe3d.js": "a6c23d9879",
     "/assets/cardchat.css": "e7d3e71785",
@@ -179,7 +183,7 @@
     "/assets/fossil32/fossil32.js": "2b877eb172",
     "/assets/fossil32/logo.png": "f7821b54b3",
     "/assets/gamehost.js": "033b37689b",
-    "/assets/games.js": "5a1d73405b",
+    "/assets/games.js": "7116ea2815",
     "/assets/gold.js": "473c93ee87",
     "/assets/grug.css": "0dafe96312",
     "/assets/grug.js": "58def08e45",
@@ -239,7 +243,7 @@
     "/create/thumbs/scene-village.webp": "a950a571e6",
     "/create/thumbs/shield.webp": "8d62055dc0",
     "/create/thumbs/sword.webp": "8b54bc27ae",
-    "/credits.html": "8f4d08b1ac",
+    "/credits.html": "64b52bab6e",
     "/favicon.png": "25d0921a67",
     "/games/favorites/": "b5fee8fe8a",
     "/games/": "3a2c45fc0c",
@@ -262,7 +266,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 29152897
+   "bytes": 29395069
   },
   "daypart": {
    "title": "Daypart",
@@ -312,7 +316,7 @@
     "/assets/fonts/shop/playfair-display-latin-700-normal.woff2": "e90a941885",
     "/assets/fonts/shop/righteous-latin-400-normal.woff2": "fad0f31150",
     "/assets/gamehost.js": "033b37689b",
-    "/assets/games.js": "5a1d73405b",
+    "/assets/games.js": "7116ea2815",
     "/assets/grug.css": "0dafe96312",
     "/assets/grug.js": "58def08e45",
     "/assets/icons.js": "d421bed707",
@@ -332,7 +336,7 @@
     "/assets/wizard3d.js": "3870ba7150",
     "/business/": "446924d25e",
     "/business/site/": "7beb01205d",
-    "/credits.html": "8f4d08b1ac",
+    "/credits.html": "64b52bab6e",
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93",
     "/privacy.html": "96124e4b9f",
@@ -343,7 +347,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 2177518
+   "bytes": 2179946
   },
   "tea": {
    "title": "Bubble Tea",
@@ -390,7 +394,7 @@
     "/assets/fonts/shop/playfair-display-latin-700-normal.woff2": "e90a941885",
     "/assets/fonts/shop/righteous-latin-400-normal.woff2": "fad0f31150",
     "/assets/gamehost.js": "033b37689b",
-    "/assets/games.js": "5a1d73405b",
+    "/assets/games.js": "7116ea2815",
     "/assets/grug.css": "0dafe96312",
     "/assets/grug.js": "58def08e45",
     "/assets/qrcode.js": "1695445831",
@@ -407,7 +411,7 @@
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93"
    },
-   "bytes": 1240884
+   "bytes": 1243064
   },
   "cafe": {
    "title": "Caf\u00e9",
@@ -454,7 +458,7 @@
     "/assets/fonts/shop/playfair-display-latin-700-normal.woff2": "e90a941885",
     "/assets/fonts/shop/righteous-latin-400-normal.woff2": "fad0f31150",
     "/assets/gamehost.js": "033b37689b",
-    "/assets/games.js": "5a1d73405b",
+    "/assets/games.js": "7116ea2815",
     "/assets/grug.css": "0dafe96312",
     "/assets/grug.js": "58def08e45",
     "/assets/qrcode.js": "1695445831",
@@ -471,7 +475,7 @@
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93"
    },
-   "bytes": 1248585
+   "bytes": 1250765
   },
   "game:runway": {
    "title": "Runway Ready",
@@ -553,6 +557,19 @@
     "/play/mysteryblasters/": "5acac0e009"
    },
    "bytes": 2403074
+  },
+  "game:tidesandtackle": {
+   "title": "Tides & Tackle",
+   "files": {
+    "/assets/gamekit.js": "2d7f5eb0cc",
+    "/assets/gamepage.css": "577b6c7055",
+    "/assets/gamepage.js": "88d3c29439",
+    "/assets/grug-app.js": "299c3e3720",
+    "/games/tidesandtackle/": "d28cad8faa",
+    "/play/tidesandtackle/game.html": "8cca8577d7",
+    "/play/tidesandtackle/": "2f16b61c3d"
+   },
+   "bytes": 14151858
   },
   "game:placeholder18": {
    "title": "Placeholder 18+ game",

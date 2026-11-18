@@ -1124,5 +1124,88 @@
     2.2
    ]
   }
+ },
+ "captain": {
+  "w": 1000,
+  "h": 1300,
+  "fov": 24,
+  "target": [
+   0,
+   100,
+   0
+  ],
+  "dist": 660,
+  "yaw": -0.85,
+  "rim": "#2563EB",
+  "cfg": {
+   "model": "block",
+   "skin": "skaterMaleA",
+   "expression": "laugh",
+   "hat": {
+    "type": "none"
+   }
+  },
+  "pose": [
+   [
+    "spine_M_01_jnt",
+    "x",
+    0.15
+   ],
+   [
+    "leg_L_upr_jnt",
+    "x",
+    -0.8
+   ],
+   [
+    "leg_L_knee_jnt",
+    "x",
+    0.7
+   ],
+   [
+    "leg_R_upr_jnt",
+    "x",
+    0.55
+   ],
+   [
+    "leg_R_knee_jnt",
+    "x",
+    0.6
+   ],
+   [
+    "arm_R_shldr_jnt",
+    "x",
+    -1.55
+   ],
+   [
+    "arm_R_shldr_jnt",
+    "z",
+    0.05
+   ],
+   [
+    "head_M_head_jnt",
+    "y",
+    -0.35
+   ],
+   [
+    "head_M_head_jnt",
+    "x",
+    -0.1
+   ],
+   [
+    "arm_L_shldr_jnt",
+    "z",
+    2.2
+   ],
+   [
+    "arm_L_shldr_jnt",
+    "x",
+    -0.5
+   ],
+   [
+    "arm_L_elbow_jnt",
+    "z",
+    -0.25
+   ]
+  ]
  }
 }

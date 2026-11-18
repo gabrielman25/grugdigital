@@ -59,7 +59,7 @@ def make(id,bg,pose=None,fx=.5,fy=.5,zoom=1.0,blur=0,accent='#ffffff',side='righ
                 ox=random.gauss(0,110); oy=random.gauss(0,90); rr=random.uniform(2,5)
                 d.ellipse((px+ox-rr,py+oy-rr,px+ox+rr,py+oy+rr),fill=(255,255,255,200))
     # top-left darkening for the title + vignette
-    tl=Image.radial_gradient('L').resize((1700,1100)); tl=ImageChops.invert(tl).point(lambda v:int(v*0.45))
+    tl=Image.radial_gradient('L').resize((1700,1100)); tl=ImageChops.invert(tl).point(lambda v:int(max(0,v-60)*0.45*255/195))   # (fades to 0 before the pasted box's edge, so no seam)
     T=Image.new('L',(W,H),0); T.paste(tl,(-650,-560)); dl=Image.new('RGBA',(W,H),(8,6,18,0)); dl.putalpha(T); base=Image.alpha_composite(base,dl)
     vg=Image.radial_gradient('L').resize((int(W*1.5),int(H*1.6))).crop((int(W*.25),int(H*.3),int(W*.25)+W,int(H*.3)+H)).point(lambda v:max(0,int((v-150)*0.55)))
     vl=Image.new('RGBA',(W,H),(0,0,0,0)); vl.putalpha(vg); base=Image.alpha_composite(base,vl)
@@ -77,6 +77,7 @@ jobs={
  'alchemy':dict(bg=C+'al_2.png',pose=C+'pose_cast.png',accent='#c084fc',fx=.6,zoom=1.05,h_av=860,xc=1180,sparkle=(0.02,0.12)),
  'mysteryblasters':dict(bg=C+'mb3_1.png',pose=C+'pose_aim.png',accent='#22D3EE',fx=.5,fy=.5,zoom=1.05,h_av=770,xc=1150,bottom=55),
  'crafthouse':dict(bg=C+'ch_bg.jpg',pose=C+'pose_kick.png',accent='#CFAC52',fx=.5,fy=.5,zoom=1.0,h_av=820,xc=1180,bottom=40),
+ 'tidesandtackle':dict(bg=C+'tt_0.png',pose=C+'pose_captain.png',accent='#FFB020',fx=.3,fy=.5,zoom=1.1,h_av=690,xc=1290,bottom=36),
  'sandalslam':dict(bg=C+'ss_0.png',pose=C+'pose_fling.png',accent='#14B8A6',fx=.42,fy=.5,zoom=1.0,h_av=790,xc=1190,bottom=45),
  'takeatea':dict(bg=TH+'teahouse.jpg',pose=C+'pose_serve.png',accent='#F6C445',blur=2.2,h_av=860,xc=1140),
 }
