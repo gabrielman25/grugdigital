@@ -1,5 +1,5 @@
 {
- "v": "d9f68b6e2c2a",
+ "v": "18524ea616c1",
  "apps": {
   "grug": [
    "grug",
@@ -251,14 +251,14 @@
     "/me/": "ace48c1b35",
     "/offline.html": "c1b6421a93",
     "/pearls.html": "088ff4797b",
-    "/privacy.html": "29f900bd27",
+    "/privacy.html": "21e4db6e34",
     "/profile/": "ec05878579",
     "/rewards/card/": "a0046245b0",
     "/rewards/create/": "ea7269d95f",
     "/rewards/": "792e809f05",
     "/shop/": "5ffea4e357",
     "/support.html": "4e19678ee5",
-    "/terms.html": "a678e1acd0"
+    "/terms.html": "1c4f6664e6"
    },
    "bytes": 29125809
   },
@@ -333,13 +333,13 @@
     "/credits.html": "8f4d08b1ac",
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93",
-    "/privacy.html": "29f900bd27",
+    "/privacy.html": "21e4db6e34",
     "/restaurant/": "5da0fc9061",
     "/rewards/create/": "ea7269d95f",
     "/rewards/": "792e809f05",
     "/site/": "e36f83fa5f",
     "/support.html": "4e19678ee5",
-    "/terms.html": "a678e1acd0"
+    "/terms.html": "1c4f6664e6"
    },
    "bytes": 2177269
   },
