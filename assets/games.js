@@ -158,6 +158,28 @@ window.GRUG_GAMES = [
            art: 'assets/boxart/runway.jpg', shots: ['assets/boxart/shots/runway-1.jpg', 'assets/boxart/shots/runway-2.jpg'] }
   },
   {
+    // A Grug original (original: true): play/sandalslam/ is its standalone game (assets/gamehost.js); power-ups cost Pearls only.
+    // It runs on the CLASSIC avatar for everyone (like Runway Ready): only the classic Sandy has the flip-flops the game is
+    // about, so play/sandalslam/game.html loads assets/sandy-classic.js through SandyKit.loadClassic() (see its AVATARS block).
+    id: 'sandalslam', app: 'sandalslam', original: true,
+    title: 'Flip-Flop Fury', appTitle: 'Sandal Slam', subtitle: 'Last One Dry Wins', kind: '3D party brawler', status: 'live',
+    tags: ['Party', 'Arcade', 'Competitive', 'Quick Runs'],
+    partner: 'Grug Original', place: 'Plays anywhere',
+    blurb: 'You and seven Sandys aim in secret, launch at once and bump each other into the sea. Last one dry wins.',
+    long: 'Everyone on the beach secretly aims a slide or picks an ability (Sandal Toss, Sandcastle, Splash Stomp, Floatie and more), then the whole beach launches at once. Knock flip-flops off, dodge coconuts, jellyfish and flying towels, and be the last Sandy on dry sand. Tactics, a Story coastline and the Sandy Derby wait in the pause menu. You play as your classic Sandy in flip-flops, and Pearls buy one-match power-ups.',
+    play: 'play/sandalslam/', game: 'play/sandalslam/', save: 'grug-sandalslam-v1', storageKey: '', old: '',
+    thumb: 'assets/boxart/sandalslam.jpg', color: '#14B8A6', ink: '#FFFFFF',
+    avatar: 'You play as your classic avatar', earn: 'Power-ups use Pearls, the Grug currency',
+    features: [
+      "Eight Sandys aim in secret, then the whole beach launches at once",
+      "Knock flip-flops off, toss them, and bump rivals into the sea",
+      "Tactics, a Story coastline and the Sandy Derby in the pause menu",
+      "Pearl power-ups: Spare Sandals, Big Launch, Sturdy Stance, Lucky Floatie"
+    ],
+    box: { code: 'GD-0042', shell: '#14B8A6', players: '1-4P', region: 'WORLDWIDE', font: 'Titan One', fill: ["#FFF4C2", "#FF6B5E"],
+           art: 'assets/boxart/sandalslam.jpg', shots: ['assets/boxart/shots/sandalslam-1.jpg', 'assets/boxart/shots/sandalslam-2.jpg'] }
+  },
+  {
     // A Grug original (original: true): play/chestquest/ is its standalone game (assets/gamehost.js); power-ups cost Pearls only.
     // Its save ('grug-chestquest-v1') holds power-ups and best score, not partner points, so no storageKey here.
     id: 'chestquest', app: 'chestquest', original: true,

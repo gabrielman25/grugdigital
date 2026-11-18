@@ -1,10 +1,11 @@
 {
- "v": "14db621190d9",
+ "v": "d35f6c1b4c1a",
  "apps": {
   "grug": [
    "grug",
    "carts",
    "game:runway",
+   "game:sandalslam",
    "game:chestquest",
    "game:glowupspa",
    "game:petmountainrescue",
@@ -70,6 +71,7 @@
     "/assets/boxart/placeholder18.jpg": "e742058dbc",
     "/assets/boxart/rodeo.jpg": "1653be1de4",
     "/assets/boxart/runway.jpg": "2fa47418d7",
+    "/assets/boxart/sandalslam.jpg": "3f4325fc00",
     "/assets/boxart/shots/alchemy-1.jpg": "2858b7f280",
     "/assets/boxart/shots/alchemy-2.jpg": "e62bbebccd",
     "/assets/boxart/shots/chestquest-1.jpg": "7947a5154a",
@@ -87,6 +89,8 @@
     "/assets/boxart/shots/rodeo-2.jpg": "dc3cb90b2f",
     "/assets/boxart/shots/runway-1.jpg": "3fb3559551",
     "/assets/boxart/shots/runway-2.jpg": "a5ba7ca6eb",
+    "/assets/boxart/shots/sandalslam-1.jpg": "52cdf0d017",
+    "/assets/boxart/shots/sandalslam-2.jpg": "bcba1d774c",
     "/assets/boxart/shots/soluna-1.jpg": "35fb6da68e",
     "/assets/boxart/shots/takeatea-1.jpg": "b40e5907ef",
     "/assets/boxart/shots/teahouse-1.jpg": "c3a1c03f83",
@@ -174,7 +178,7 @@
     "/assets/fossil32/fossil32.js": "2b877eb172",
     "/assets/fossil32/logo.png": "f7821b54b3",
     "/assets/gamehost.js": "033b37689b",
-    "/assets/games.js": "a87c15c415",
+    "/assets/games.js": "5a1d73405b",
     "/assets/grug.css": "0dafe96312",
     "/assets/grug.js": "58def08e45",
     "/assets/icons.js": "d421bed707",
@@ -233,7 +237,7 @@
     "/create/thumbs/scene-village.webp": "a950a571e6",
     "/create/thumbs/shield.webp": "8d62055dc0",
     "/create/thumbs/sword.webp": "8b54bc27ae",
-    "/credits.html": "e2379774bb",
+    "/credits.html": "8f4d08b1ac",
     "/favicon.png": "25d0921a67",
     "/games/favorites/": "b5fee8fe8a",
     "/games/": "3a2c45fc0c",
@@ -256,7 +260,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "3106453a5e"
    },
-   "bytes": 28650321
+   "bytes": 29121494
   },
   "daypart": {
    "title": "Daypart",
@@ -306,7 +310,7 @@
     "/assets/fonts/shop/playfair-display-latin-700-normal.woff2": "e90a941885",
     "/assets/fonts/shop/righteous-latin-400-normal.woff2": "fad0f31150",
     "/assets/gamehost.js": "033b37689b",
-    "/assets/games.js": "a87c15c415",
+    "/assets/games.js": "5a1d73405b",
     "/assets/grug.css": "0dafe96312",
     "/assets/grug.js": "58def08e45",
     "/assets/icons.js": "d421bed707",
@@ -326,7 +330,7 @@
     "/assets/wizard3d.js": "3870ba7150",
     "/business/": "446924d25e",
     "/business/site/": "7beb01205d",
-    "/credits.html": "e2379774bb",
+    "/credits.html": "8f4d08b1ac",
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93",
     "/privacy.html": "76e44bc796",
@@ -337,7 +341,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "3106453a5e"
    },
-   "bytes": 2172961
+   "bytes": 2175210
   },
   "tea": {
    "title": "Bubble Tea",
@@ -384,7 +388,7 @@
     "/assets/fonts/shop/playfair-display-latin-700-normal.woff2": "e90a941885",
     "/assets/fonts/shop/righteous-latin-400-normal.woff2": "fad0f31150",
     "/assets/gamehost.js": "033b37689b",
-    "/assets/games.js": "a87c15c415",
+    "/assets/games.js": "5a1d73405b",
     "/assets/grug.css": "0dafe96312",
     "/assets/grug.js": "58def08e45",
     "/assets/qrcode.js": "1695445831",
@@ -401,7 +405,7 @@
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93"
    },
-   "bytes": 1238766
+   "bytes": 1240884
   },
   "cafe": {
    "title": "Caf\u00e9",
@@ -448,7 +452,7 @@
     "/assets/fonts/shop/playfair-display-latin-700-normal.woff2": "e90a941885",
     "/assets/fonts/shop/righteous-latin-400-normal.woff2": "fad0f31150",
     "/assets/gamehost.js": "033b37689b",
-    "/assets/games.js": "a87c15c415",
+    "/assets/games.js": "5a1d73405b",
     "/assets/grug.css": "0dafe96312",
     "/assets/grug.js": "58def08e45",
     "/assets/qrcode.js": "1695445831",
@@ -465,7 +469,7 @@
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93"
    },
-   "bytes": 1246467
+   "bytes": 1248585
   },
   "game:runway": {
    "title": "Runway Ready",
@@ -479,6 +483,19 @@
     "/play/runway/": "d5f8f15f0b"
    },
    "bytes": 391980
+  },
+  "game:sandalslam": {
+   "title": "Sandal Slam",
+   "files": {
+    "/assets/gamekit.js": "2d7f5eb0cc",
+    "/assets/gamepage.css": "577b6c7055",
+    "/assets/gamepage.js": "88d3c29439",
+    "/assets/grug-app.js": "299c3e3720",
+    "/games/sandalslam/": "1b8c7a5152",
+    "/play/sandalslam/game.html": "da11c91010",
+    "/play/sandalslam/": "e5a47f2248"
+   },
+   "bytes": 4673480
   },
   "game:chestquest": {
    "title": "Chest Quest",

@@ -33,13 +33,21 @@ function applyPose(sd, turns) {
 // o: {cfg, pose:[[bone,axis,angle]...], yaw (body), camYaw, camPitch, w, h, target:[x,y,z], dist, rim:'#hex', anim, animT, objRot:[x,y,z], lift}
 window.render = async function (o) {
   const r = await rig(), T = r.T;
-  const c = r.K.merge(r.K.DEFAULT, o.cfg || {});
+  // classic: true poses the archived classic Sandy (games that run on it, like Sandal Slam and Runway Ready)
+  const K = o.classic && r.K.loadClassic ? await r.K.loadClassic() : r.K;
+  const c = K.merge(K.DEFAULT, o.cfg || {});
   if (r.sd) { r.scene.remove(r.sd.object3d); }
-  r.sd = await r.K.create(c); r.scene.add(r.sd.object3d); if (r.sd.ready) await r.sd.ready;
-  const wcfg = (o.cfg || {}).weapon; if (wcfg && r.sd._weapon) { r.sd._weapon(wcfg); if (r.sd.M.weaponMesh) r.sd.M.weaponMesh.scale.multiplyScalar(o.weaponScale || 1.8); } await new Promise(k => setTimeout(k, 400)); if (r.K.customReady) await r.K.customReady(); if (r.K.decalReady) await r.K.decalReady();
+  if (r.loose) { r.scene.remove(r.loose); r.loose = null; }
+  r.sd = await K.create(c); r.scene.add(r.sd.object3d); if (r.sd.ready) await r.sd.ready;
+  const wcfg = (o.cfg || {}).weapon; if (wcfg && r.sd._weapon) { r.sd._weapon(wcfg); if (r.sd.M.weaponMesh) r.sd.M.weaponMesh.scale.multiplyScalar(o.weaponScale || 1.8); } await new Promise(k => setTimeout(k, 400)); if (K.customReady) await K.customReady(); if (K.decalReady) await K.decalReady();
   r.sd.play(o.anim || 'idle'); for (let i = 0; i < 40; i++) r.sd.update((o.animT || 0.6) / 40);
   const ob = r.sd.object3d; ob.rotation.set(...(o.objRot || [0, o.yaw || 0, 0])); ob.position.y = o.lift || 0;
   applyPose(r.sd, o.pose || []);
+  // sandalHand: {i, at:[x,y,z] cm from the right wrist, rot:[x,y,z]}: one of her own flip-flops (classic only) in her hand
+  if (o.sandalHand && r.sd.n3 && r.sd.n3.sandalDetach) { ob.updateMatrixWorld(true);
+    const g = r.sd.n3.sandalDetach(o.sandalHand.i || 0, r.scene), w = r.sd.object3d.getObjectByName('arm_R_wrist_jnt').getWorldPosition(new T.Vector3());
+    g.position.copy(w).add(new T.Vector3(...(o.sandalHand.at || [0, 0, 0]))); g.rotation.set(...(o.sandalHand.rot || [0, 0, 0])); r.loose = g;
+    const ft = c.feet || {}; g.traverse(m => { if (m.isMesh) m.material = new T.MeshStandardMaterial({ color: new T.Color(m.userData.part === 'sole' ? (ft.sole || '#f2efe6') : (ft.strap || '#e3101c')).convertSRGBToLinear(), roughness: 0.6 }); }); }
   if (o.rim) { r.rim.color.set(o.rim); r.rim2.color.set(o.rim); }
   const w = o.w || 900, h = o.h || 1200; r.renderer.setSize(w, h, false); r.cam.aspect = w / h; r.cam.fov = o.fov || 22; r.cam.updateProjectionMatrix();
   const tg = new T.Vector3(...(o.target || [0, 100, 0])), yw = o.camYaw || 0, pt = o.camPitch || 0.05, d = o.dist || 560;

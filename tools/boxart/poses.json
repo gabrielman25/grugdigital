@@ -1006,5 +1006,123 @@
    ]
   ],
   "yaw": -0.5
+ },
+ "fling": {
+  "classic": true,
+  "w": 1000,
+  "h": 1300,
+  "target": [
+   0,
+   100,
+   0
+  ],
+  "dist": 700,
+  "fov": 24,
+  "yaw": 0.75,
+  "rim": "#14B8A6",
+  "lift": 0,
+  "cfg": {
+   "body": "female",
+   "expression": "laugh",
+   "skin": "#b98059",
+   "hair": {
+    "style": 0,
+    "colour": "#3a2416"
+   },
+   "earrings": {
+    "type": "hoops",
+    "colour": "#d4a017"
+   },
+   "top": {
+    "part": "mh_toigo_keyhole_tank_top",
+    "texture": "mh_toigo_keyhole_tank_top",
+    "colour": "#ff6b5e"
+   },
+   "legs": {
+    "part": "mh_cortu_jeans_shorts",
+    "texture": "mh_cortu_jeans_shorts",
+    "colour": "#ffffff"
+   },
+   "feet": {
+    "type": "flipflops",
+    "sole": "#f2efe6",
+    "strap": "#14b8a6"
+   }
+  },
+  "pose": [
+   [
+    "spine_M_01_jnt",
+    "x",
+    -0.15
+   ],
+   [
+    "spine_M_01_jnt",
+    "y",
+    0.3
+   ],
+   [
+    "arm_R_shldr_jnt",
+    "z",
+    -2.5
+   ],
+   [
+    "arm_R_shldr_jnt",
+    "x",
+    0.75
+   ],
+   [
+    "arm_R_elbow_jnt",
+    "z",
+    0.6
+   ],
+   [
+    "arm_L_shldr_jnt",
+    "z",
+    1.0
+   ],
+   [
+    "arm_L_shldr_jnt",
+    "x",
+    -0.95
+   ],
+   [
+    "head_M_head_jnt",
+    "y",
+    0.25
+   ],
+   [
+    "leg_L_upr_jnt",
+    "x",
+    -0.75
+   ],
+   [
+    "leg_L_knee_jnt",
+    "x",
+    0.55
+   ],
+   [
+    "leg_R_upr_jnt",
+    "x",
+    0.35
+   ],
+   [
+    "leg_R_knee_jnt",
+    "x",
+    0.35
+   ]
+  ],
+  "sandalHand": {
+   "i": 0,
+   "at": [
+    -12,
+    20,
+    -2
+   ],
+   "rot": [
+    0.3,
+    0.9,
+    2.2
+   ]
+  }
  }
 }
