@@ -2064,7 +2064,7 @@ function makeCaptain() {
 function dressCaptain() {
   if (cap.ch) { if (cap.ch.r6) { cap.g.remove(cap.ch.g); cap.ch.dead = true; if (cap.ch.sandy) try { cap.ch.sandy.dispose(); } catch (e) {} } else dropChar(cap.ch); }
   cap.ch = makeR6(R6_LOOKS[0]); cap.g.add(cap.ch.g);         // v17: an R6 captain
-  sandyDress(cap.ch, K => K.player ? K.player() : K.DEFAULT);       // v25: wearing your own Grug avatar
+  sandyDress(cap.ch, K => K.player ? K.player() : K.DEFAULT, 2);    // v25: wearing your own Grug avatar (v26: twice the size)
   cap.rodPivot.position.set(0.12, 0.74, 0.36);
   equipGun();
 }
@@ -4689,7 +4689,7 @@ function restartClip(name, ts) {
 // ---- pistol: everything else (a real projectile you can watch fly) ----
 function shoot(tg) {
   ATK.cd = pistolCd();
-  tgtAt(tg, _bv); faceAt(_bv); cap.aimT = 0.35;
+  tgtAt(tg, _bv); faceAt(_bv); cap.aimT = 0.35; if (cap.ch) cap.ch.aim = 0.45;      // v26: the arm comes up to aim
   restartClip('holding-right-shoot', 1);
   cap.g.updateMatrixWorld(true);
   const from = cap.gunM ? cap.gunM.getWorldPosition(new THREE.Vector3()) : capWorld().add(new THREE.Vector3(0, 0.8, 0));
@@ -5371,7 +5371,10 @@ function animR6(r, dt, speed, grounded) {
   if (r.sandy) {          // v25: the site's own avatar plays its clips; the R6 body stays underneath for the physics
     const want = !grounded ? 'leap' : speed > 0.5 * STUD ? 'run' : r.fish ? 'wave' : 'idle';
     if (want !== r.sCur) { r.sCur = want; try { r.sandy.play(want); } catch (e) {} }
-    r.sandy.update(dt); return;
+    r.sandy.update(dt);
+    r.aimK = clamp((r.aimK || 0) + (r.aim > 0 ? dt * 12 : -dt * 5), 0, 1); if (r.aim > 0) r.aim -= dt;
+    if (r.aimK > 0) sandyAim(r.sandy, r.aimK * (grounded ? 1 : 0.6));
+    return;
   }
   let t, rate;
   if (!grounded) { t = { rs: Math.PI, ls: Math.PI, rh: 0, lh: 0 }; rate = 30; r.walkT = 0; }
@@ -5402,18 +5405,38 @@ function loadAvatarKit() {
   return AVATAR.p;
 }
 const R6_H = () => R6B.rootToFeet + R6B.rootToHeadTop;
-function sandyDress(r, cfgOf) {
+// the aiming arm: the right shoulder turns forward about the avatar's own x axis (the same turn SandyKit's emotes use)
+const _aimQ = new THREE.Quaternion(), _aimQ2 = new THREE.Quaternion(), _aimV = new THREE.Vector3();
+function sandyAim(av, k) {
+  const o = av.object3d, sh = o.getObjectByName('arm_R_shldr_jnt'); if (!sh || k <= 0) return;
+  o.updateMatrixWorld(true); o.getWorldQuaternion(_aimQ2);
+  _aimV.set(1, 0, 0).applyQuaternion(_aimQ2).applyQuaternion(sh.parent.getWorldQuaternion(_aimQ).invert()).normalize();
+  sh.quaternion.premultiply(_aimQ.setFromAxisAngle(_aimV, -1.5 * k));
+}
+function sandyDress(r, cfgOf, mult = 1) {
   loadAvatarKit().then(K => K && K.create(cfgOf(K))).then(av => {
     if (!av || !av.object3d) return;
     if (r.dead) { try { av.dispose(); } catch (e) {} return; }
     const o = av.object3d; o.updateMatrixWorld(true);
-    const bx = new THREE.Box3().setFromObject(o), h = Math.max(1, bx.max.y - Math.min(0, bx.min.y)), s = R6_H() / h;
+    const bx = new THREE.Box3().setFromObject(o), h = Math.max(1, bx.max.y - Math.min(0, bx.min.y)), s = R6_H() / h * mult;
     o.scale.setScalar(s); o.traverse(m => { if (m.isMesh) { m.castShadow = true; m.frustumCulled = false; } });
     r.g.add(o); r.g.updateMatrixWorld(true); if (SET.outlines !== false) addOutline(o, 0.02);
     r.rig.visible = false; r.sandy = av; r.sCur = ''; r.sScale = s;
     // the pistol moves into the avatar's right hand
     const wrist = o.getObjectByName('arm_R_wrist_jnt');
-    if (r.gun && wrist) { const ws = new THREE.Vector3(); wrist.getWorldScale(ws); wrist.add(r.gun); r.gun.position.set(0, 0, 0); r.gun.rotation.set(0, 0, 0); r.gun.scale.setScalar(STUD / Math.max(1e-4, ws.x)); r.gunAv = true; }
+    if (r.gun && wrist) {
+      // v26: held like the R6 held it — with the arm raised to aim, the barrel points straight ahead, grip down.
+      // Work that out once in the aiming pose and keep it as the gun's turn in the hand.
+      av.update(0); sandyAim(av, 1); o.updateMatrixWorld(true);
+      const ws = new THREE.Vector3(), wq = new THREE.Quaternion(), rq = new THREE.Quaternion(); wrist.getWorldScale(ws); wrist.getWorldQuaternion(wq); o.getWorldQuaternion(rq);
+      const want = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, -1, 0)));
+      const r0 = r.gun.quaternion.clone();          // the gun's own turn inside the R6 arm (barrel along the arm)
+      const fwd = new THREE.Vector3(0, 0, 1).applyQuaternion(rq), off = fwd.multiplyScalar(0.11 * mult).add(new THREE.Vector3(0, -0.05 * mult, 0));      // the grip in the fist, barrel out front
+      wrist.add(r.gun); r.gun.quaternion.copy(wq.clone().invert().multiply(rq.clone().multiply(want)).multiply(r0));
+      r.gun.position.copy(off.applyQuaternion(wq.clone().invert())).divideScalar(Math.max(1e-4, ws.x));
+      r.gun.scale.setScalar(STUD * Math.max(1, mult * 0.8) / Math.max(1e-4, ws.x)); r.gunAv = true;
+    }
+    if (r === (cap && cap.ch) && typeof VIEW !== 'undefined') VIEW.eyeH = 0;      // first person re-measures the taller captain
   }).catch(e => console.warn('avatar', e));
 }
 const R6_LOOKS = [
