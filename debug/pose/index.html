@@ -11,8 +11,7 @@
   html,body{margin:0;height:100%;font-family:Fredoka,ui-rounded,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:#cfd6e0}
   #app{display:flex;height:100%}
   #stage{position:relative;flex:1;min-width:0}
-  #stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
-  #stage canvas:active{cursor:grabbing}
+  #stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
   #views{position:absolute;left:12px;top:12px;display:flex;gap:6px;flex-wrap:wrap}
   #hint{position:absolute;left:12px;bottom:10px;font-size:13px;color:#3d4250;opacity:.8}
   #busy{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:rgba(207,214,224,.6)}
@@ -31,11 +30,13 @@
   .shapes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
   .shapes button{padding:6px 4px;font-size:13px;line-height:1.15}
   .shapes button b{display:block;font-size:16px}
-  .sl{display:grid;grid-template-columns:96px 1fr 42px;align-items:center;gap:6px;font-size:13px;margin:3px 0}
+  .sl{display:grid;grid-template-columns:96px minmax(120px,1fr) 42px;align-items:center;gap:6px;font-size:13px;margin:3px 0}
   .sl input{width:100%}
   .sl output{text-align:right;color:var(--soft);font-variant-numeric:tabular-nums}
   .sub{font-size:12px;color:var(--soft);margin:8px 0 2px;text-transform:uppercase;letter-spacing:.04em}
-  .toes{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+  details.drop{background:var(--bg);border-radius:10px;padding:6px 10px;margin-top:8px}
+  details.drop>summary{cursor:pointer;font-size:14px;font-weight:600;padding:4px 0;user-select:none}
+  details.drop[open]>summary{margin-bottom:4px}
   @media (max-width:760px){#app{flex-direction:column}#stage{flex:none;height:55vh}#panel{width:100%;max-width:none;flex:1}}
 </style>
 </head>
@@ -47,7 +48,7 @@
       <button data-view="feet">Feet</button>
       <button data-view="soles">Soles</button>
     </div>
-    <div id="hint">Drag to turn the camera, scroll or pinch to zoom.</div>
+    <div id="hint">Right-drag (or drag): look around · Middle-drag: pan · Wheel: in / out · W A S D: move · Q / E: down / up · Shift: slower</div>
     <div id="busy">Loading the avatar…</div>
   </div>
   <div id="panel">
@@ -72,6 +73,7 @@
         <button class="blue" id="lineup">Compare all 12</button>
         <button data-feet="barefoot" class="on">Barefoot</button>
         <button data-feet="flipflops">Flip-flops</button>
+        <button data-feet="boots">Boots</button>
       </div>
     </div>
 
@@ -157,21 +159,21 @@ function buildPoseUI() {
       allSliders.push(slider(el, lab, min, max, 0, v => { pose[key] = { bone, axis, deg: v * sign }; }));
     }
   }
-  const toes = document.getElementById('poseToes'), grid = document.createElement('div'); grid.className = 'toes'; toes.appendChild(grid);
-  for (const S of ['L', 'R']) {
-    const col = document.createElement('div'); const h = document.createElement('div'); h.className = 'sub'; h.textContent = S === 'L' ? 'Left foot' : 'Right foot'; col.appendChild(h);
-    for (let t = 0; t < 5; t++) allSliders.push(slider(col, TOE_NAMES[t], -40, 80, 0, v => { toeCurl[S][t] = v; }));
-    allSliders.push(slider(col, 'Spread', -10, 30, 0, v => { toeSpread[S] = v; }));
-    grid.appendChild(col);
-  }
+  const toes = document.getElementById('poseToes');
   const all = document.createElement('div'); all.className = 'sub'; all.textContent = 'Both feet, all toes'; toes.appendChild(all);
   slider(toes, 'Curl all', -40, 80, 0, v => { for (const S of ['L', 'R']) for (let t = 0; t < 5; t++) toeCurl[S][t] = v; syncToeSliders(); });
+  for (const S of ['L', 'R']) {   // one drop-down per foot, each slider full width
+    const d = document.createElement('details'); d.className = 'drop';
+    d.innerHTML = `<summary>${S === 'L' ? 'Left foot' : 'Right foot'}</summary>`;
+    for (let t = 0; t < 5; t++) { const inp = slider(d, TOE_NAMES[t], -40, 80, 0, v => { toeCurl[S][t] = v; }); inp.dataset.toe = S + t; allSliders.push(inp); }
+    allSliders.push(slider(d, 'Spread', -10, 30, 0, v => { toeSpread[S] = v; }));
+    toes.appendChild(d);
+  }
   for (const c of document.querySelectorAll('.card>h2')) c.addEventListener('click', () => c.parentElement.classList.toggle('shut'));
   for (const id of ['poseArms', 'poseLegs', 'poseToes']) document.getElementById(id).classList.add('shut');
 }
 function syncToeSliders() {   // the per-toe sliders follow "Curl all"
-  const toeInputs = document.querySelectorAll('#poseToes .toes input');
-  let k = 0; for (const S of ['L', 'R']) { for (let t = 0; t < 5; t++) { const i = toeInputs[k++]; i.value = toeCurl[S][t]; i.nextElementSibling.textContent = i.value + '°'; } k++; }
+  for (const i of document.querySelectorAll('#poseToes input[data-toe]')) { const t = +i.dataset.toe[1]; i.value = toeCurl[i.dataset.toe[0]][t]; i.nextElementSibling.textContent = i.value + '°'; }
 }
 
 // turn a joint by an angle about an axis of her own frame, on top of whatever the runtime set this frame
@@ -198,9 +200,10 @@ function applyPose(sandy) {
 
 // ---------------- the scene ----------------
 let K, renderer, scene, cam, sandy = null, lineup = [], current = null;
-const view = { yaw: 0.35, pitch: 0.1, dist: 560, ty: 100 };
-const VIEWS = { full: { yaw: 0.35, pitch: 0.1, dist: 560, ty: 100 }, feet: { yaw: 0.5, pitch: 0.38, dist: 160, ty: 8 }, soles: { yaw: Math.PI, pitch: -0.5, dist: 150, ty: 6 } };
-const LINEUP_VIEWS = { full: { yaw: 0, pitch: 0.1, dist: 1250, ty: 100 }, feet: { yaw: 0, pitch: 0.3, dist: 1000, ty: 10 }, soles: { yaw: Math.PI, pitch: -0.42, dist: 1000, ty: 8 } }, GAP = 44;
+// the camera flies like Roblox Studio's: it keeps a position and a heading (yaw, pitch); the view buttons just place it
+const view = { yaw: 0, pitch: 0 }, keys = new Set();
+const VIEWS = { full: { from: [190, 155, 520], at: [0, 100, 0] }, feet: { from: [75, 62, 135], at: [0, 8, 0] }, soles: { from: [0, -70, -135], at: [0, 6, 0] } };
+const LINEUP_VIEWS = { full: { from: [0, 225, 1240], at: [0, 100, 0] }, feet: { from: [0, 300, 950], at: [0, 10, 0] }, soles: { from: [0, -380, -920], at: [0, 8, 0] } }, GAP = 44;
 
 async function start() {
   K = window.SandyClassicKit || window.SandyKit; AX.x = new THREE.Vector3(1, 0, 0); AX.y = new THREE.Vector3(0, 1, 0); AX.z = new THREE.Vector3(0, 0, 1);
@@ -215,7 +218,7 @@ async function start() {
   const floor = new THREE.Mesh(new THREE.CircleGeometry(400, 64), new THREE.MeshStandardMaterial({ color: 0xb8c0cc, roughness: 1 }));
   floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; floor.name = 'floor'; scene.add(floor);
   cam = new THREE.PerspectiveCamera(30, 1, 1, 5000);
-  new ResizeObserver(resize).observe(stage); resize();
+  new ResizeObserver(resize).observe(stage); resize(); setView('full');
   orbitControls(renderer.domElement);
 
   // the controls
@@ -241,30 +244,48 @@ async function start() {
   let last = performance.now();
   renderer.setAnimationLoop(() => {
     const now = performance.now(), dt = Math.min(0.05, (now - last) / 1000); last = now;
+    fly(dt);
     for (const s of (lineup.length ? lineup : [sandy])) if (s) { s.update(dt); applyPose(s); }
     scene.getObjectByName('floor').visible = cam.position.y > 0.5;
     renderer.render(scene, cam);
   });
 }
-function resize() { const st = document.getElementById('stage'); renderer.setSize(st.clientWidth, st.clientHeight, false); cam.aspect = st.clientWidth / Math.max(1, st.clientHeight); cam.updateProjectionMatrix(); place(); }
-function place() {
-  const cy = Math.cos(view.pitch); cam.position.set(Math.sin(view.yaw) * cy * view.dist, view.ty + Math.sin(view.pitch) * view.dist, Math.cos(view.yaw) * cy * view.dist);
-  cam.lookAt(0, view.ty, 0);
+function resize() { const st = document.getElementById('stage'); renderer.setSize(st.clientWidth, st.clientHeight, false); cam.aspect = st.clientWidth / Math.max(1, st.clientHeight); cam.updateProjectionMatrix(); }
+function place() { cam.quaternion.setFromEuler(new THREE.Euler(view.pitch, view.yaw, 0, 'YXZ')); }
+function lookFrom(from, at) {
+  cam.position.set(...from); const d = new THREE.Vector3(...at).sub(cam.position).normalize();
+  view.yaw = Math.atan2(-d.x, -d.z); view.pitch = Math.asin(Math.max(-1, Math.min(1, d.y))); place();
+}
+function dirs() { const q = cam.quaternion; return { f: new THREE.Vector3(0, 0, -1).applyQuaternion(q), r: new THREE.Vector3(1, 0, 0).applyQuaternion(q), u: new THREE.Vector3(0, 1, 0).applyQuaternion(q) }; }
+function pan(dx, dy) { const { r, u } = dirs(), k = 0.25 * (keys.has('shift') ? 0.3 : 1); cam.position.addScaledVector(r, -dx * k).addScaledVector(u, dy * k); }
+function dolly(amount) { cam.position.addScaledVector(dirs().f, amount); }
+function fly(dt) {   // W A S D move along the view, Q / E down / up, Shift slows it down
+  if (!keys.size) return; const { f, r } = dirs(), v = new THREE.Vector3(), sp = (keys.has('shift') ? 45 : 170) * dt;
+  if (keys.has('w')) v.add(f); if (keys.has('s')) v.sub(f); if (keys.has('d')) v.add(r); if (keys.has('a')) v.sub(r);
+  if (keys.has('e')) v.y += 1; if (keys.has('q')) v.y -= 1;
+  if (v.lengthSq()) cam.position.addScaledVector(v.normalize(), sp);
 }
 function orbitControls(el) {
-  const pts = new Map(); let pinch = 0;
-  el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); });
+  const pts = new Map(); let pinch = 0, mid = null, btn = 0;
+  el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); btn = e.button; const a = document.activeElement; if (a && a.blur) a.blur(); });
   el.addEventListener('pointermove', e => {
-    if (!pts.has(e.pointerId)) return; const [x, y] = pts.get(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
-    if (pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pinch) zoom(pinch / d); pinch = d; return; }
-    view.yaw -= (e.clientX - x) * 0.008; view.pitch = Math.max(-1.3, Math.min(1.35, view.pitch + (e.clientY - y) * 0.006)); place();
+    if (!pts.has(e.pointerId)) return; const [x, y] = pts.get(e.pointerId), dx = e.clientX - x, dy = e.clientY - y; pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+      if (pinch) dolly((d - pinch) * 0.6); if (mid) pan(m[0] - mid[0], m[1] - mid[1]); pinch = d; mid = m; return; }
+    if (btn === 1) { pan(dx, dy); return; }                                       // middle button: pan
+    view.yaw -= dx * 0.005; view.pitch = Math.max(-1.5, Math.min(1.5, view.pitch - dy * 0.005)); place();   // right (or left) button: look around
   });
-  const up = e => { pts.delete(e.pointerId); pinch = 0; }; el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
-  el.addEventListener('wheel', e => { e.preventDefault(); zoom(Math.exp(e.deltaY * 0.001)); }, { passive: false });
+  const up = e => { pts.delete(e.pointerId); pinch = 0; mid = null; }; el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  el.addEventListener('wheel', e => { e.preventDefault(); const step = Math.max(4, Math.min(80, cam.position.length() * 0.08)) * (keys.has('shift') ? 0.3 : 1); dolly(-Math.sign(e.deltaY) * step); }, { passive: false });
   el.addEventListener('contextmenu', e => e.preventDefault());
+  el.addEventListener('auxclick', e => e.preventDefault());
+  el.addEventListener('mousedown', e => { if (e.button === 1) e.preventDefault(); });   // no auto-scroll on a middle click
+  const typing = () => { const a = document.activeElement; return a && (a.tagName === 'SELECT' || a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && a.type !== 'range')); };
+  addEventListener('keydown', e => { if (typing()) return; const k = e.key.toLowerCase(); if (k === 'shift' || (k.length === 1 && 'wasdqe'.includes(k))) { keys.add(k); const a = document.activeElement; if (k !== 'shift' && a && a.type === 'range') a.blur(); } });
+  addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+  addEventListener('blur', () => keys.clear());
 }
-function zoom(f) { view.dist = Math.max(25, Math.min(1400, view.dist * f)); place(); }
-function setView(k) { Object.assign(view, (lineup.length ? LINEUP_VIEWS : VIEWS)[k]); document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === k)); place(); }
+function setView(k) { const v = (lineup.length ? LINEUP_VIEWS : VIEWS)[k]; lookFrom(v.from, v.at); document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === k)); }
 
 // ---------------- the character ----------------
 async function build(cfg) {
@@ -290,7 +311,11 @@ async function change(patch) {
 }
 async function setBody(body) { busy(true); await change({ body }); busy(false); }
 function setShape(k) { change({ footShape: k }); }
-function setFeet(type) { change({ feet: type === 'flipflops' ? { type: 'flipflops', sole: '#f2efe6', strap: '#e3101c' } : { type: 'barefoot' } }); }
+function bootsFor(body) {   // the first boots in the catalogue that fit this body
+  const p = (K.CATALOG.parts.feet || []).find(p => p.wearer === 'u' || p.wearer === (body === 'male' ? 'm' : 'f'));
+  return p ? { type: 'boots', part: p.id, texture: (K.texturesFor(p.set)[0] || p.set), colour: '#ffffff', height: 1, auto: true } : { type: 'barefoot' };
+}
+function setFeet(type) { change({ feet: type === 'flipflops' ? { type: 'flipflops', sole: '#f2efe6', strap: '#e3101c' } : type === 'boots' ? bootsFor(current.body) : { type: 'barefoot' } }); }
 async function randomize() {
   // a new look and outfit; the body, foot shape and pose stay as they are
   const cfg = K.randomConfig(null, { body: current.body, footShape: current.footShape || 'none' });

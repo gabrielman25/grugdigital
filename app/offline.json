@@ -1,5 +1,5 @@
 {
- "v": "ea448b4c4b59",
+ "v": "b3f8d38c2072",
  "apps": {
   "grug": [
    "grug",
@@ -200,7 +200,7 @@
     "/assets/qrcode.js": "1695445831",
     "/assets/rewards.css": "35ee1500c7",
     "/assets/rewards.js": "6467d3f969",
-    "/assets/sandy-classic.js": "f06c4d756a",
+    "/assets/sandy-classic.js": "0d9333b2cd",
     "/assets/sandy-runtime.js": "1969924611",
     "/assets/sandy-view.js": "a2cbe1f825",
     "/assets/sandy/bust.png": "7f0ef0ea50",
@@ -266,7 +266,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 30736633
+   "bytes": 30742985
   },
   "daypart": {
    "title": "Daypart",
