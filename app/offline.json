@@ -1,5 +1,5 @@
 {
- "v": "83b258cba815",
+ "v": "63958a694125",
  "apps": {
   "grug": [
    "grug",
@@ -521,10 +521,10 @@
     "/assets/grug-app.js": "299c3e3720",
     "/games/glowupspa/": "33265e898a",
     "/play/glowupspa/CubePets-License.txt": "a939263aa3",
-    "/play/glowupspa/game.html": "98dc65218c",
+    "/play/glowupspa/game.html": "233314e07d",
     "/play/glowupspa/": "3f516d7b4c"
    },
-   "bytes": 2138211
+   "bytes": 2134849
   },
   "game:petmountainrescue": {
    "title": "Pet Mountain Rescue",
