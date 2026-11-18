@@ -1,5 +1,5 @@
 {
- "v": "18524ea616c1",
+ "v": "dc37f6b34444",
  "apps": {
   "grug": [
    "grug",
@@ -141,6 +141,7 @@
     "/assets/contact.js": "e9505c5e70",
     "/assets/cursors.js": "98b21ae8db",
     "/assets/demo.js": "066caaae68",
+    "/assets/export3d.js": "a039526960",
     "/assets/fogbg.js": "2efa5cf8ae",
     "/assets/fonts/QGYvz_MVcBeNP4NJtEtq.woff2": "d8a316f7cb",
     "/assets/fonts/QGYvz_MVcBeNP4NJuktqQ4E.woff2": "b2a55e977d",
@@ -179,6 +180,7 @@
     "/assets/fossil32/logo.png": "f7821b54b3",
     "/assets/gamehost.js": "033b37689b",
     "/assets/games.js": "5a1d73405b",
+    "/assets/gold.js": "6392d30a87",
     "/assets/grug.css": "0dafe96312",
     "/assets/grug.js": "58def08e45",
     "/assets/icons.js": "d421bed707",
@@ -214,9 +216,9 @@
     "/avatar/classic/nav.js": "6a7b98ad23",
     "/avatar/": "a5128fb3ec",
     "/create/create.js": "b0b471ab18",
-    "/create/": "c3a35868cf",
+    "/create/": "02d9540aef",
     "/create/market-icons.js": "0199a5d977",
-    "/create/market.js": "bc64798495",
+    "/create/market.js": "0a651c6d94",
     "/create/modelkit-core.js": "79feefd50a",
     "/create/modelkit/": "cd632914b0",
     "/create/presets.js": "c9771343f9",
@@ -250,17 +252,17 @@
     "/me/cards/": "bc7189095b",
     "/me/": "ace48c1b35",
     "/offline.html": "c1b6421a93",
-    "/pearls.html": "088ff4797b",
-    "/privacy.html": "21e4db6e34",
+    "/pearls.html": "57dbf13206",
+    "/privacy.html": "96124e4b9f",
     "/profile/": "ec05878579",
     "/rewards/card/": "a0046245b0",
     "/rewards/create/": "ea7269d95f",
     "/rewards/": "792e809f05",
-    "/shop/": "5ffea4e357",
+    "/shop/": "718b1f0402",
     "/support.html": "4e19678ee5",
-    "/terms.html": "1c4f6664e6"
+    "/terms.html": "a1578ecad9"
    },
-   "bytes": 29125809
+   "bytes": 29152864
   },
   "daypart": {
    "title": "Daypart",
@@ -333,15 +335,15 @@
     "/credits.html": "8f4d08b1ac",
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93",
-    "/privacy.html": "21e4db6e34",
+    "/privacy.html": "96124e4b9f",
     "/restaurant/": "5da0fc9061",
     "/rewards/create/": "ea7269d95f",
     "/rewards/": "792e809f05",
     "/site/": "e36f83fa5f",
     "/support.html": "4e19678ee5",
-    "/terms.html": "1c4f6664e6"
+    "/terms.html": "a1578ecad9"
    },
-   "bytes": 2177269
+   "bytes": 2177518
   },
   "tea": {
    "title": "Bubble Tea",

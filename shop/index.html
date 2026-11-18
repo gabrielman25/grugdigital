@@ -53,7 +53,7 @@
     <p>One balance that works in all Grug games. Spend them on boosts and power-ups.</p>
     <span class="row"><span class="cta">Get Pearls</span><span class="bal" id="pearlsBal"></span></span>
   </a>
-  <div class="sh-head"><h1>Classic closet</h1><p>Clothes for the classic avatar, which is archived: they show when you play as your classic avatar (Avatar → Classic). Every design is a Roblox-style shirt or pants template, earned by playing. Nothing here costs money.</p></div>
+  <div class="sh-head"><h1>Classic closet</h1><p>Clothes for the classic avatar, which is archived: they show when you play as your classic avatar (Avatar → Classic). Every design is a Roblox-style shirt or pants template, earned by playing. Nothing here costs money, and any design can be downloaded free as a 3D file (GLB, OBJ or STL) or as its template.</p></div>
   <div class="sh-own"><p><b>Have your own Roblox template?</b> Upload any classic shirt or pants template in the classic avatar editor, under Custom.</p><a class="g-btn sm" href="../avatar/classic/#custom">Upload</a></div>
   <div class="sh-filters" id="filters"></div>
   <div id="groups"></div>
@@ -62,6 +62,7 @@
 <script src="../assets/icons.js"></script>
 <script src="../assets/games.js"></script>
 <script src="../assets/grug.js?v=av2"></script>
+<script src="../assets/export3d.js"></script>
 <script>
 (function(){
   const G = Grug, C = GrugCatalog, $ = s => document.querySelector(s);
@@ -91,19 +92,30 @@
     const app = C.APPS[it.get.app] || C.APPS.grug, game = G.GAMES.find(g => g.app === it.get.app), pr = G.progress(it), owned = G.owns(it.id), wearing = G.wearing(it);
     const how = owned ? (it.get.type === 'free' ? 'Free. Yours from the start.' : 'Yours. ' + G.esc(C.howText(it)) + '.') : (it.get.type === 'points' ? 'Costs <b>' + it.get.cost + ' ' + G.esc(app.short) + ' points</b>. Buy it under Closet in the ' + G.esc(app.short) + ' app.' : G.esc(it.get.text) + (pr ? ' <span class="mut">(' + pr.have + ' of ' + pr.need + ' so far)</span>' : ''));
     const kinds = it.slot === 'shirt' ? 'Wear it as a T-shirt or long sleeves' : 'Wear it as shorts or pants';
-    const actions = [{ label: 'Close', kind: 'quiet', value: null }];
+    const actions = [{ label: 'Close', kind: 'quiet', value: null }, { label: 'Download 3D', kind: 'quiet', value: 'dl' }];
     const free = !owned && G.freeShop();   // a Free Shop Token is running: everything in the catalog is free to claim
     if (free) actions.push({ label: 'Claim free', kind: 'primary', value: 'claim' });
     else if (owned && !wearing) actions.push({ label: 'Wear it', kind: 'primary', value: 'wear' });
     else if (owned && wearing) { actions.push({ label: 'Take off', kind: 'quiet', value: 'off' }); actions.push({ label: 'Open avatar', kind: 'primary', value: 'avatar' }); }
     else if (game) actions.push({ label: 'Open ' + (it.get.type === 'points' ? app.short : game.title), kind: 'primary', value: 'go' });
     const pick = await G.ui.dialog({ title: it.name, html: (free ? '<p class="g-tag free" style="margin-bottom:10px">' + G.icon('ticket') + 'Free Shop is on: ' + Math.ceil(G.freeShopLeft() / 1000) + 's left</p>' : '') + '<div class="row"><span style="width:110px;height:110px;flex:none;border-radius:14px;background:var(--card2) center/cover no-repeat;background-image:url(' + G.url(it.thumb) + ')"></span><div><div class="g-tag" style="margin-bottom:8px">' + G.esc(C.slotName(it.slot)) + ' template</div><div>' + how + '</div>' + (pr && !owned ? '<div class="g-prog" style="margin-top:10px"><i style="width:' + pr.pct + '%"></i></div>' : '') +
-      '<p class="g-fine" style="margin-top:8px">' + kinds + ' (pick in the avatar editor, under Custom).' + (owned ? ' <a href="' + G.url(it.png) + '" download="' + it.id + '-' + it.slot + '-template.png" style="font-weight:800;color:var(--ink)">Download the template</a> to remix it.' : '') + '</p></div></div>', actions });
+      '<p class="g-fine" style="margin-top:8px">' + kinds + ' (pick in the avatar editor, under Custom).' + ' <a href="' + G.url(it.png) + '" download="' + it.id + '-' + it.slot + '-template.png" style="font-weight:800;color:var(--ink)">Download the template</a> to remix it.</p></div></div>', actions });
+    if (pick === 'dl') return download3d(it);
     if (pick === 'claim') { if (G.freeShop() && G.grant(it.id, 'free-shop')) { G.ui.toast('Claimed: ' + it.name, { icon: 'confetti', ms: 3500 }); G.ui.buzz([12, 40, 20]); } else G.ui.toast('The free shop just ended', { icon: 'hourglass' }); render(); }
     else if (pick === 'wear') { G.equip(it.id); G.ui.toast('Wearing ' + it.name, { icon: 'check' }); G.ui.buzz(); render(); }
     else if (pick === 'off') { G.unequip(it.slot); G.ui.toast('Took off ' + it.name, { icon: 'check' }); render(); }
     else if (pick === 'avatar') location.href = G.url('avatar/classic/#custom');
     else if (pick === 'go' && game) location.href = G.url(game.play) + (it.get.type === 'points' && G.appState(game) && G.appState(game).store ? '#' + G.appState(game).store + '/rewards' : '');
+  }
+  /* free 3D downloads of any design (assets/export3d.js): the garment as the classic avatar wears it, with the design on it */
+  async function download3d(it) {
+    const X = window.GrugExport3D, F = X.FORMATS;
+    const fmt = await G.ui.dialog({ title: 'Download ' + it.name + ' in 3D', html: '<p>' + (it.slot === 'shirt' ? 'A T-shirt' : 'A pair of pants') + ' with this design on it, free. Pick a file type:</p><ul style="margin:8px 0 0;padding-left:18px">' + F.map(f => '<li><b>' + f[1] + '</b>: ' + G.esc(f[2]) + '</li>').join('') + '</ul><p class="g-fine" style="margin-top:8px">The first download takes a moment: it builds the garment in your browser.</p>',
+      actions: [{ label: 'Cancel', kind: 'quiet', value: null }].concat(F.map((f, i) => ({ label: f[1], kind: i === 0 ? 'primary' : 'quiet', value: f[0] }))) });
+    if (!fmt) return;
+    G.ui.toast('Building ' + it.name + '…', { icon: 'hourglass' });
+    try { const m = await X.garment(it); await X.save(m, fmt); G.ui.toast('Downloading ' + it.name + ' (' + F.find(f => f[0] === fmt)[1] + ')', { icon: 'download-simple' }); G.ui.buzz(); }
+    catch (e) { console.warn(e); G.ui.toast('Couldn’t build that one. Check your connection and try again.', { icon: 'warning-circle' }); }
   }
   $('#groups').addEventListener('click', e => { const b = e.target.closest('[data-item]'); if (b) open(C.get(b.dataset.item)); });
   render();

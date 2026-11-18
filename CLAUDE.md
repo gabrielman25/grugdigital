@@ -131,9 +131,19 @@ way until the owner says a business has agreed in writing.
 - Active means not refunded, charged back or disputed, and `subscription_cancelled_at` / `_failed_at` / `_ended_at` empty
   or still in the future. It is checked again every 12 hours on the Pearls page and right before monthly Pearls are claimed;
   an answer older than 4 days switches the perks off until the next check. One key works on `maxPhones` phones (uses count).
-- Perks: `monthly` Pearls once per calendar month (claimed on the page, starting after `trialDays` so a free week can't be
-  cashed in), `+bonus`% on every Pearl pack, a member badge. If the price, trial or perks change on Gumroad, change
-  `CLUB` to match, and the terms ("Grug Gold membership") if the rules change. `productId: ''` hides it all again.
+- **`assets/gold.js` (`GrugGold`)** holds `CLUB` (product, price, trial, perks), the Gumroad check and the member test,
+  shared by every page with a perk. `GrugGold.ensure()` right before handing out a perk (it asks Gumroad again when the
+  last answer is over 12 hours old); `GrugGold.offer(what)` is the "that's a Grug Gold perk" dialog.
+- Perks (one card each on the Pearls page, `PERKS` in its script): `monthly` Pearls once per calendar month (claimed on the
+  page, starting after `trialDays` so a free week can't be cashed in), `+bonus`% on every Pearl pack, **OBJ, STL and
+  project downloads in the 3D models library** (`create/market.js`, `FMTS`; GLB stays free for everyone), a member badge.
+  If the price, trial or perks change on Gumroad, change `CLUB` to match, and the terms ("Grug Gold membership") if the
+  rules change. `productId: ''` hides it all again.
+- **Only the 3D library is sold.** The closet's clothing is free to download for everyone, member or not (the owner isn't
+  sure the clothing can be sold): every design's template, and the garment in 3D as GLB / OBJ / STL
+  (`assets/export3d.js`, which builds it with the classic kit; the garment meshes are CC0). Hats are not downloadable:
+  Chibi Hats by PaperPluto has no licence on file for handing out the files.
+- The Model Kit editor (`create/modelkit/`) can still export any preset in every format; it isn't gated.
 - It never reaches a branded page: no memberships there (the freeze above).
 
 ## Mature games and the games onboarding

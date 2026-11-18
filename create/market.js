@@ -195,7 +195,10 @@
   });
 
   /* ---------- item page ---------- */
-  const FMTS = [['glb', 'GLB', 'Unity, Godot, Unreal, Blender and most engines.'], ['obj', 'OBJ', 'A .zip with the .obj and its .mtl colours.'], ['stl', 'STL', 'For 3D printing (no colours).'], ['project', 'Project', 'Open it in Model Kit to change it.']];
+  // [id, label, note, Grug Gold only]: GLB is free for everyone; the other files are a Grug Gold perk (assets/gold.js)
+  const FMTS = [['glb', 'GLB', 'Unity, Godot, Unreal, Blender and most engines. Free for everyone.', false], ['obj', 'OBJ', 'A .zip with the .obj and its .mtl colours. A Grug Gold perk.', true], ['stl', 'STL', 'For 3D printing (no colours). A Grug Gold perk.', true], ['project', 'Project', 'Open it in Model Kit to change it. A Grug Gold perk.', true]];
+  const GOLD = window.GrugGold, goldFmt = f => !!(GOLD && (FMTS.find(x => x[0] === f) || [])[3]);
+  const priceText = () => goldFmt(fmt) ? (GOLD.member() ? 'Grug Gold' : 'Grug Gold perk') : 'Free';
   let fmt = 'glb';
   try { const f = localStorage.getItem('grug.create.fmt'); if (FMTS.some(x => x[0] === f)) fmt = f; } catch (e) {}
   function similar(it) {
@@ -212,8 +215,8 @@
     const more = similar(it);
     const html = '<div class="mk-ip"><div class="mk-view"><canvas></canvas><span class="hint">Drag to turn</span></div><div class="mk-info">' +
       '<h2>' + esc(it.title) + '</h2><div class="mk-by">By Grug Digital<span class="chk" title="Verified creator">' + ic('check') + '</span></div>' +
-      '<div class="mk-buy"><span class="p">Free</span><button type="button" class="g-btn primary" data-get="1">' + ic('download') + 'Get</button></div>' +
-      '<div class="mk-fmt" role="radiogroup" aria-label="Download format">' + FMTS.map(f => '<button type="button" role="radio" data-fmt="' + f[0] + '" aria-pressed="' + (fmt === f[0]) + '">' + f[1] + '</button>').join('') + '</div>' +
+      '<div class="mk-buy"><span class="p">' + priceText() + '</span><button type="button" class="g-btn primary" data-get="1">' + ic('download') + 'Get</button></div>' +
+      '<div class="mk-fmt" role="radiogroup" aria-label="Download format">' + FMTS.map(f => '<button type="button" role="radio" data-fmt="' + f[0] + '" aria-pressed="' + (fmt === f[0]) + '">' + f[1] + (goldFmt(f[0]) ? '<span class="mk-gold">Gold</span>' : '') + '</button>').join('') + '</div>' +
       '<p class="mk-fmt-note">' + esc((FMTS.find(f => f[0] === fmt) || FMTS[0])[2]) + (fmt === 'project' ? ' (' + proj + ')' : '') + '</p>' +
       '<div class="mk-row"><a class="g-btn" href="modelkit/#' + (it.kind === 'scene' ? 'scene' : 'model') + '=' + it.id + '">' + ic('cube') + 'Edit in Model Kit</a><button type="button" class="g-btn mk-heart" data-heart="1" aria-pressed="' + isFav(it) + '" aria-label="Favourite" title="Favourite">' + ic('heart') + '</button></div>' +
       (it.blurb ? '<p class="mk-desc">' + esc(it.blurb) + '</p>' : '') +
@@ -221,7 +224,7 @@
       '<dt>Category</dt><dd>' + link('cat', it.category) + '</dd>' +
       '<dt>Genre</dt><dd>' + it.genres.map(g => link('genre', g)).join(', ') + '</dd>' +
       '<dt>Theme</dt><dd>' + it.themes.map(t => link('theme', t)).join(', ') + '</dd>' +
-      '<dt>Size</dt><dd>' + size(it) + ' blocks</dd><dt>Triangles</dt><dd>' + G.fmt(it.tris) + '</dd><dt>Price</dt><dd>Free to use in your games</dd></dl>' +
+      '<dt>Size</dt><dd>' + size(it) + ' blocks</dd><dt>Triangles</dt><dd>' + G.fmt(it.tris) + '</dd><dt>Price</dt><dd>' + (GOLD ? 'GLB free; OBJ, STL and project with <a href="' + GOLD.url + '">Grug Gold</a>. ' : '') + 'Free to use in your games</dd></dl>' +
       '<div class="mk-tags">' + it.tags.map(t => '<button type="button" data-tag="' + esc(t) + '">' + esc(t) + '</button>').join('') + '</div></div></div>' +
       (more.length ? '<div class="mk-more"><h3>More like this</h3><div class="mk-grid">' + more.map(card).join('') + '</div></div>' : '');
     await G.ui.dialog({ html, actions: [{ label: 'Close', kind: 'quiet', value: null }], onOpen: d => {
@@ -231,9 +234,14 @@
       if (v.ok) { v.set(MK.mesh(it.kind, it.id)); v.run(); } else c.outerHTML = '<img src="' + thumb(it) + '" alt="">';
       d.addEventListener('click', e => {
         const b = e.target.closest('button, a'); if (!b) return;
-        if (b.dataset.get) { MK.download(it.kind, it.id, fmt); G.ui.toast('Downloading ' + it.title + ' (' + (FMTS.find(f => f[0] === fmt) || [])[1] + ')', { icon: 'download-simple' }); G.ui.buzz(); }
+        if (b.dataset.get && goldFmt(fmt)) {   // a member perk: ask Gumroad first if the last answer is old, so a stopped membership can't use it
+          b.disabled = true;
+          GOLD.ensure().then(t => { b.disabled = false; if (!t) return GOLD.offer((FMTS.find(f => f[0] === fmt) || [])[1] + ' downloads');
+            MK.download(it.kind, it.id, fmt); G.ui.toast('Downloading ' + it.title + ' (' + (FMTS.find(f => f[0] === fmt) || [])[1] + ')', { icon: 'download-simple' }); G.ui.buzz(); });
+        }
+        else if (b.dataset.get) { MK.download(it.kind, it.id, fmt); G.ui.toast('Downloading ' + it.title + ' (' + (FMTS.find(f => f[0] === fmt) || [])[1] + ')', { icon: 'download-simple' }); G.ui.buzz(); }
         else if (b.dataset.fmt) { e.preventDefault(); fmt = b.dataset.fmt; try { localStorage.setItem('grug.create.fmt', fmt); } catch (x) {}
-          $$('[data-fmt]', d).forEach(x => x.setAttribute('aria-pressed', String(x === b))); $('.mk-fmt-note', d).textContent = FMTS.find(f => f[0] === fmt)[2] + (fmt === 'project' ? ' (' + proj + ')' : ''); }
+          $$('[data-fmt]', d).forEach(x => x.setAttribute('aria-pressed', String(x === b))); $('.mk-fmt-note', d).textContent = FMTS.find(f => f[0] === fmt)[2] + (fmt === 'project' ? ' (' + proj + ')' : ''); $('.mk-buy .p', d).textContent = priceText(); }
         else if (b.dataset.heart) { e.preventDefault(); toggleFav(it); b.setAttribute('aria-pressed', String(isFav(it))); render(); }
         else if (b.dataset.fav) { e.preventDefault(); e.stopPropagation(); const o = ITEMS.find(i => i.key === b.dataset.fav); toggleFav(o); b.setAttribute('aria-pressed', String(isFav(o))); render(); }
         else if (b.classList.contains('mk-card')) { e.preventDefault(); next = ITEMS.find(i => i.key === b.dataset.key); d.close(''); }
