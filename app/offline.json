@@ -1,5 +1,5 @@
 {
- "v": "a0090955f7bc",
+ "v": "ea448b4c4b59",
  "apps": {
   "grug": [
    "grug",
@@ -200,7 +200,7 @@
     "/assets/qrcode.js": "1695445831",
     "/assets/rewards.css": "35ee1500c7",
     "/assets/rewards.js": "6467d3f969",
-    "/assets/sandy-classic.js": "6b49f7c7fe",
+    "/assets/sandy-classic.js": "f06c4d756a",
     "/assets/sandy-runtime.js": "1969924611",
     "/assets/sandy-view.js": "a2cbe1f825",
     "/assets/sandy/bust.png": "7f0ef0ea50",
