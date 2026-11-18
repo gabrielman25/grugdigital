@@ -447,6 +447,9 @@ Choosing your own colours is not built yet: the skins are laid out in regions so
   one. With flip-flops on, the toes bend down onto the sole and the strap is refitted to the posed foot (`fitToes`,
   `fitStraps`). The lower legs taper gradually to the knee and the front of the ankle is rounded. Don't hand-edit the
   `SANDY_GLB` models or the `ARMORPACK` vertex tables: they are generated together, and the tables follow the mesh.
+- **The pose debugger** (`debug/pose/`): a standalone page for the classic avatar (pose limbs and each toe, pick a foot
+  shape and expression, randomize the look, line up all 12 foot shapes). It is deliberately **not linked from anywhere on
+  the site** and is `noindex`: keep it unlinked and out of `tools/pwa/build.py`. The same page is `grug-game-kit/tools/pose/`.
 - **The closet** (`shop/`, "Classic closet") and every clothing design dress the classic look only (`Grug.equip` writes
   'grug.sandy.classic.v1'). It's off the dock; the editor's Classic section and the account menu (while classic is on)
   link to it. **Runway Ready** is a dress-up game built on those clothes, so it loads the classic kit for everyone in it

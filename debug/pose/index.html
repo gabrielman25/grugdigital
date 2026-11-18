@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Pose debugger · classic avatar</title>
+<style>
+  :root{--bg:#fff;--card:#ebedf2;--card2:#dfe2e9;--ink:#1e1b16;--soft:#6b6f7a;--accent:#7c3aed;--green:#10b981;--sky:#0ea5e9}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:Fredoka,ui-rounded,"Segoe UI",system-ui,sans-serif;color:var(--ink);background:#cfd6e0}
+  #app{display:flex;height:100%}
+  #stage{position:relative;flex:1;min-width:0}
+  #stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+  #stage canvas:active{cursor:grabbing}
+  #views{position:absolute;left:12px;top:12px;display:flex;gap:6px;flex-wrap:wrap}
+  #hint{position:absolute;left:12px;bottom:10px;font-size:13px;color:#3d4250;opacity:.8}
+  #busy{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:rgba(207,214,224,.6)}
+  #panel{width:380px;max-width:46vw;background:var(--bg);overflow-y:auto;padding:14px 14px 40px;scrollbar-width:thin}
+  h1{font-size:22px;margin:2px 0 12px}
+  .card{background:var(--card);border-radius:14px;padding:10px 12px;margin-bottom:10px}
+  .card>h2{font-size:15px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+  .card.shut>:not(h2){display:none}
+  .card>h2 .chev{font-size:12px;color:var(--soft)}
+  .row{display:flex;gap:6px;flex-wrap:wrap}
+  button,select{font:inherit;font-size:14px;border:0;border-radius:10px;padding:8px 12px;background:var(--card2);color:var(--ink);cursor:pointer;min-height:36px}
+  button.on{background:var(--accent);color:#fff}
+  button.main{background:var(--green);color:#fff;font-weight:600}
+  button.blue{background:var(--sky);color:#fff}
+  select{width:100%}
+  .shapes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .shapes button{padding:6px 4px;font-size:13px;line-height:1.15}
+  .shapes button b{display:block;font-size:16px}
+  .sl{display:grid;grid-template-columns:96px 1fr 42px;align-items:center;gap:6px;font-size:13px;margin:3px 0}
+  .sl input{width:100%}
+  .sl output{text-align:right;color:var(--soft);font-variant-numeric:tabular-nums}
+  .sub{font-size:12px;color:var(--soft);margin:8px 0 2px;text-transform:uppercase;letter-spacing:.04em}
+  .toes{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+  @media (max-width:760px){#app{flex-direction:column}#stage{flex:none;height:55vh}#panel{width:100%;max-width:none;flex:1}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <div id="views">
+      <button data-view="full" class="on">Full body</button>
+      <button data-view="feet">Feet</button>
+      <button data-view="soles">Soles</button>
+    </div>
+    <div id="hint">Drag to turn the camera, scroll or pinch to zoom.</div>
+    <div id="busy">Loading the avatar…</div>
+  </div>
+  <div id="panel">
+    <h1>Pose debugger</h1>
+
+    <div class="card">
+      <h2>Character</h2>
+      <div class="row" style="margin-bottom:8px">
+        <button data-body="female" class="on">Female</button>
+        <button data-body="male">Male</button>
+      </div>
+      <div class="row">
+        <button class="main" id="rand">Randomize look</button>
+        <button id="resetPose">Reset pose</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Foot shape</h2>
+      <div class="shapes" id="shapes"></div>
+      <div class="row" style="margin-top:8px">
+        <button class="blue" id="lineup">Compare all 12</button>
+        <button data-feet="barefoot" class="on">Barefoot</button>
+        <button data-feet="flipflops">Flip-flops</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Expression</h2>
+      <select id="expr"></select>
+    </div>
+
+    <div class="card" id="poseBody"><h2>Body and head <span class="chev">▾</span></h2></div>
+    <div class="card" id="poseArms"><h2>Arms <span class="chev">▾</span></h2></div>
+    <div class="card" id="poseLegs"><h2>Legs <span class="chev">▾</span></h2></div>
+    <div class="card" id="poseToes"><h2>Toes <span class="chev">▾</span></h2></div>
+  </div>
+</div>
+
+<script>
+// ---------------- load the avatar ----------------
+// On the website: the site's runtime (three.js + the new avatar), then the classic avatar it archives (SandyClassicKit).
+// In the game kit: vendor/sandy-runtime.js (SandyKit is the classic avatar there). Next to this page: sandy-runtime.js.
+const CHAINS = [['../../assets/sandy-runtime.js', '../../assets/sandy-classic.js'], ['../../vendor/sandy-runtime.js'], ['sandy-runtime.js']];
+function loadScript(src) { return new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => { s.remove(); no(); }; document.head.appendChild(s); }); }
+(async function load() {
+  for (const chain of CHAINS) {
+    try { for (const src of chain) await loadScript(src); return start(); } catch (e) { /* not here: try the next place */ }
+  }
+  document.getElementById('busy').textContent = 'Could not load the avatar';
+})();
+
+// ---------------- the pose: every slider is one joint turn, in her own frame (x: her left, y: up, z: forward) ----------------
+// sign: +1 keeps the slider's direction, -1 flips it, so "forward" or "raise" mean the same thing on both sides.
+const DEG = Math.PI / 180;
+const JOINTS = {
+  poseBody: [
+    ['Lean forward', 'spine_M_01_jnt', 'x', 1, -40, 60],
+    ['Bend sideways', 'spine_M_00_jnt', 'z', 1, -30, 30],
+    ['Twist', 'spine_M_03_jnt', 'y', 1, -45, 45],
+    ['Nod', 'head_M_head_jnt', 'x', 1, -35, 40],
+    ['Turn head', 'head_M_head_jnt', 'y', 1, -70, 70],
+    ['Tilt head', 'head_M_head_jnt', 'z', 1, -30, 30],
+  ],
+  poseArms: [
+    ['L', 'Raise', 'arm_L_shldr_jnt', 'z', 1, -20, 170],
+    ['L', 'Swing forward', 'arm_L_shldr_jnt', 'x', -1, -60, 120],
+    ['L', 'Bend elbow', 'arm_L_elbow_jnt', 'z', 1, 0, 140],
+    ['R', 'Raise', 'arm_R_shldr_jnt', 'z', -1, -20, 170],
+    ['R', 'Swing forward', 'arm_R_shldr_jnt', 'x', -1, -60, 120],
+    ['R', 'Bend elbow', 'arm_R_elbow_jnt', 'z', -1, 0, 140],
+  ],
+  poseLegs: [
+    ['L', 'Hip forward', 'leg_L_upr_jnt', 'x', -1, -40, 110],
+    ['L', 'Hip out', 'leg_L_upr_jnt', 'z', 1, -15, 60],
+    ['L', 'Bend knee', 'leg_L_knee_jnt', 'x', 1, 0, 140],
+    ['L', 'Point foot', 'leg_L_foot_jnt', 'x', -1, -30, 60],
+    ['L', 'Roll foot', 'leg_L_foot_jnt', 'z', 1, -30, 30],
+    ['R', 'Hip forward', 'leg_R_upr_jnt', 'x', -1, -40, 110],
+    ['R', 'Hip out', 'leg_R_upr_jnt', 'z', -1, -15, 60],
+    ['R', 'Bend knee', 'leg_R_knee_jnt', 'x', 1, 0, 140],
+    ['R', 'Point foot', 'leg_R_foot_jnt', 'x', -1, -30, 60],
+    ['R', 'Roll foot', 'leg_R_foot_jnt', 'z', -1, -30, 30],
+  ],
+};
+const TOE_NAMES = ['Big toe', '2nd toe', '3rd toe', '4th toe', 'Little toe'];
+const pose = {};             // key -> degrees
+const toeCurl = { L: [0, 0, 0, 0, 0], R: [0, 0, 0, 0, 0] };   // degrees, + curls down
+const toeSpread = { L: 0, R: 0 };                             // degrees, + fans apart
+
+function slider(parent, label, min, max, val, onInput) {
+  const d = document.createElement('label'); d.className = 'sl';
+  d.innerHTML = `<span>${label}</span><input type="range" min="${min}" max="${max}" step="1" value="${val}"><output>${val}°</output>`;
+  const inp = d.querySelector('input'), out = d.querySelector('output');
+  inp.addEventListener('input', () => { out.textContent = inp.value + '°'; onInput(+inp.value); });
+  inp.addEventListener('dblclick', () => { inp.value = 0; inp.dispatchEvent(new Event('input')); });
+  parent.appendChild(d); return inp;
+}
+const allSliders = [];
+function buildPoseUI() {
+  for (const card of ['poseBody', 'poseArms', 'poseLegs']) {
+    const el = document.getElementById(card); let side = null;
+    for (const j of JOINTS[card]) {
+      const sided = j.length === 7, [lab, bone, axis, sign, min, max] = sided ? j.slice(1) : j;
+      if (sided && j[0] !== side) { side = j[0]; const h = document.createElement('div'); h.className = 'sub'; h.textContent = side === 'L' ? 'Left' : 'Right'; el.appendChild(h); }
+      const key = bone + '|' + axis;
+      allSliders.push(slider(el, lab, min, max, 0, v => { pose[key] = { bone, axis, deg: v * sign }; }));
+    }
+  }
+  const toes = document.getElementById('poseToes'), grid = document.createElement('div'); grid.className = 'toes'; toes.appendChild(grid);
+  for (const S of ['L', 'R']) {
+    const col = document.createElement('div'); const h = document.createElement('div'); h.className = 'sub'; h.textContent = S === 'L' ? 'Left foot' : 'Right foot'; col.appendChild(h);
+    for (let t = 0; t < 5; t++) allSliders.push(slider(col, TOE_NAMES[t], -40, 80, 0, v => { toeCurl[S][t] = v; }));
+    allSliders.push(slider(col, 'Spread', -10, 30, 0, v => { toeSpread[S] = v; }));
+    grid.appendChild(col);
+  }
+  const all = document.createElement('div'); all.className = 'sub'; all.textContent = 'Both feet, all toes'; toes.appendChild(all);
+  slider(toes, 'Curl all', -40, 80, 0, v => { for (const S of ['L', 'R']) for (let t = 0; t < 5; t++) toeCurl[S][t] = v; syncToeSliders(); });
+  for (const c of document.querySelectorAll('.card>h2')) c.addEventListener('click', () => c.parentElement.classList.toggle('shut'));
+  for (const id of ['poseArms', 'poseLegs', 'poseToes']) document.getElementById(id).classList.add('shut');
+}
+function syncToeSliders() {   // the per-toe sliders follow "Curl all"
+  const toeInputs = document.querySelectorAll('#poseToes .toes input');
+  let k = 0; for (const S of ['L', 'R']) { for (let t = 0; t < 5; t++) { const i = toeInputs[k++]; i.value = toeCurl[S][t]; i.nextElementSibling.textContent = i.value + '°'; } k++; }
+}
+
+// turn a joint by an angle about an axis of her own frame, on top of whatever the runtime set this frame
+const AX = {};
+function turn(sandy, name, axis, rad) {
+  const n3 = sandy.n3, b = n3 && n3.bones[name]; if (!b || !rad) return;
+  const rootQ = n3.root.getWorldQuaternion(new THREE.Quaternion());
+  b.parent.updateMatrixWorld(true);
+  const v = AX[axis].clone().applyQuaternion(rootQ).applyQuaternion(b.parent.getWorldQuaternion(new THREE.Quaternion()).invert()).normalize();
+  b.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(v, rad)); b.updateMatrixWorld(true);
+}
+function applyPose(sandy) {
+  // parents first: spine, then shoulders / hips, then elbows / knees, then feet and toes
+  const order = ['spine_M_00', 'spine_M_01', 'spine_M_03', 'head', 'shldr', 'upr', 'elbow', 'knee', 'foot'];
+  const list = Object.values(pose).sort((a, b) => order.findIndex(o => a.bone.includes(o)) - order.findIndex(o => b.bone.includes(o)));
+  for (const p of list) turn(sandy, p.bone, p.axis, p.deg * DEG);
+  for (const S of ['L', 'R']) for (let t = 1; t <= 5; t++) {
+    const chain = [0, 1, 2].map(k => `toe0${t}_${S}_0${k}_jnt`);
+    turn(sandy, chain[0], 'y', (t - 3) * toeSpread[S] * 0.5 * DEG * (S === 'L' ? 1 : -1));
+    const c = toeCurl[S][t - 1] * DEG;
+    chain.forEach((n, k) => turn(sandy, n, 'x', c * (k === 0 ? 0.5 : 0.8)));
+  }
+}
+
+// ---------------- the scene ----------------
+let K, renderer, scene, cam, sandy = null, lineup = [], current = null;
+const view = { yaw: 0.35, pitch: 0.1, dist: 560, ty: 100 };
+const VIEWS = { full: { yaw: 0.35, pitch: 0.1, dist: 560, ty: 100 }, feet: { yaw: 0.5, pitch: 0.38, dist: 160, ty: 8 }, soles: { yaw: Math.PI, pitch: -0.5, dist: 150, ty: 6 } };
+const LINEUP_VIEWS = { full: { yaw: 0, pitch: 0.1, dist: 1250, ty: 100 }, feet: { yaw: 0, pitch: 0.3, dist: 1000, ty: 10 }, soles: { yaw: Math.PI, pitch: -0.42, dist: 1000, ty: 8 } }, GAP = 44;
+
+async function start() {
+  K = window.SandyClassicKit || window.SandyKit; AX.x = new THREE.Vector3(1, 0, 0); AX.y = new THREE.Vector3(0, 1, 0); AX.z = new THREE.Vector3(0, 0, 1);
+  const stage = document.getElementById('stage');
+  renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.outputEncoding = THREE.sRGBEncoding; renderer.shadowMap.enabled = true;
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); stage.prepend(renderer.domElement);
+  scene = new THREE.Scene(); scene.background = new THREE.Color(0xcfd6e0);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x8090a0, 0.85));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.0); sun.position.set(120, 260, 180); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
+  Object.assign(sun.shadow.camera, { left: -120, right: 120, top: 220, bottom: -20, near: 10, far: 700 }); scene.add(sun);
+  const fill = new THREE.DirectionalLight(0xffffff, 0.35); fill.position.set(-150, -60, -100); scene.add(fill);   // lights the soles from below
+  const floor = new THREE.Mesh(new THREE.CircleGeometry(400, 64), new THREE.MeshStandardMaterial({ color: 0xb8c0cc, roughness: 1 }));
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; floor.name = 'floor'; scene.add(floor);
+  cam = new THREE.PerspectiveCamera(30, 1, 1, 5000);
+  new ResizeObserver(resize).observe(stage); resize();
+  orbitControls(renderer.domElement);
+
+  // the controls
+  const shapes = document.getElementById('shapes'), labels = K.CATALOG.footShapeLabels || {};
+  for (const k of K.CATALOG.footShapes || ['none']) {
+    const b = document.createElement('button'); b.dataset.shape = k;
+    b.innerHTML = k === 'none' ? '<b>—</b>As modelled' : `<b>${k}</b>${labels[k] || ''}`;
+    b.onclick = () => setShape(k); shapes.appendChild(b);
+  }
+  const ex = document.getElementById('expr');
+  for (const e of K.CATALOG.expressions) { const o = document.createElement('option'); o.value = o.textContent = e; ex.appendChild(o); }
+  ex.onchange = () => { if (sandy) sandy.setExpression(ex.value); lineup.forEach(s => s.setExpression(ex.value)); };
+  document.querySelectorAll('[data-body]').forEach(b => b.onclick = () => setBody(b.dataset.body));
+  document.querySelectorAll('[data-feet]').forEach(b => b.onclick = () => setFeet(b.dataset.feet));
+  document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
+  document.getElementById('rand').onclick = randomize;
+  document.getElementById('resetPose').onclick = () => { allSliders.forEach(i => { i.value = 0; i.dispatchEvent(new Event('input')); }); for (const k in pose) delete pose[k]; };
+  document.getElementById('lineup').onclick = toggleLineup;
+  buildPoseUI();
+
+  const cfg = K.randomConfig('pose-suite', { body: 'female' }); cfg.feet = { type: 'barefoot' }; cfg.footShape = 'none'; cfg.expression = 'happy';
+  await build(cfg);
+  let last = performance.now();
+  renderer.setAnimationLoop(() => {
+    const now = performance.now(), dt = Math.min(0.05, (now - last) / 1000); last = now;
+    for (const s of (lineup.length ? lineup : [sandy])) if (s) { s.update(dt); applyPose(s); }
+    scene.getObjectByName('floor').visible = cam.position.y > 0.5;
+    renderer.render(scene, cam);
+  });
+}
+function resize() { const st = document.getElementById('stage'); renderer.setSize(st.clientWidth, st.clientHeight, false); cam.aspect = st.clientWidth / Math.max(1, st.clientHeight); cam.updateProjectionMatrix(); place(); }
+function place() {
+  const cy = Math.cos(view.pitch); cam.position.set(Math.sin(view.yaw) * cy * view.dist, view.ty + Math.sin(view.pitch) * view.dist, Math.cos(view.yaw) * cy * view.dist);
+  cam.lookAt(0, view.ty, 0);
+}
+function orbitControls(el) {
+  const pts = new Map(); let pinch = 0;
+  el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); });
+  el.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return; const [x, y] = pts.get(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pts.size === 2) { const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pinch) zoom(pinch / d); pinch = d; return; }
+    view.yaw -= (e.clientX - x) * 0.008; view.pitch = Math.max(-1.3, Math.min(1.35, view.pitch + (e.clientY - y) * 0.006)); place();
+  });
+  const up = e => { pts.delete(e.pointerId); pinch = 0; }; el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  el.addEventListener('wheel', e => { e.preventDefault(); zoom(Math.exp(e.deltaY * 0.001)); }, { passive: false });
+  el.addEventListener('contextmenu', e => e.preventDefault());
+}
+function zoom(f) { view.dist = Math.max(25, Math.min(1400, view.dist * f)); place(); }
+function setView(k) { Object.assign(view, (lineup.length ? LINEUP_VIEWS : VIEWS)[k]); document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === k)); place(); }
+
+// ---------------- the character ----------------
+async function build(cfg) {
+  busy(true);
+  if (sandy) { scene.remove(sandy.object3d); sandy.dispose(); sandy = null; }
+  sandy = await K.create(cfg); current = sandy.getConfig();
+  sandy.object3d.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  scene.add(sandy.object3d); if (K.customReady) await K.customReady();
+  refreshButtons(); busy(false);
+}
+function busy(on, text) { const b = document.getElementById('busy'); b.style.display = on ? 'flex' : 'none'; if (text) b.textContent = text; }
+function refreshButtons() {
+  const c = current;
+  document.querySelectorAll('[data-body]').forEach(b => b.classList.toggle('on', b.dataset.body === c.body));
+  document.querySelectorAll('[data-feet]').forEach(b => b.classList.toggle('on', b.dataset.feet === ((c.feet && c.feet.type) || 'barefoot')));
+  document.querySelectorAll('[data-shape]').forEach(b => b.classList.toggle('on', b.dataset.shape === (c.footShape || 'none')));
+  document.getElementById('expr').value = c.expression || 'neutral';
+}
+async function change(patch) {
+  if (lineup.length) await closeLineup();
+  sandy.apply(patch); await sandy.ready; current = sandy.getConfig();
+  if (K.customReady) await K.customReady(); refreshButtons();
+}
+async function setBody(body) { busy(true); await change({ body }); busy(false); }
+function setShape(k) { change({ footShape: k }); }
+function setFeet(type) { change({ feet: type === 'flipflops' ? { type: 'flipflops', sole: '#f2efe6', strap: '#e3101c' } : { type: 'barefoot' } }); }
+async function randomize() {
+  // a new look and outfit; the body, foot shape and pose stay as they are
+  const cfg = K.randomConfig(null, { body: current.body, footShape: current.footShape || 'none' });
+  cfg.footShape = current.footShape || 'none'; busy(true); await change(cfg); busy(false);
+}
+
+// ---------------- compare all 12 shapes side by side ----------------
+async function toggleLineup() { if (lineup.length) return closeLineup(); await openLineup(); }
+async function openLineup() {
+  busy(true, 'Building the line-up…'); const base = sandy.getConfig(); base.feet = { type: 'barefoot' };
+  const keys = (K.CATALOG.footShapes || []).filter(k => k !== 'none');
+  for (let i = 0; i < keys.length; i++) {
+    const s = await K.create(Object.assign({}, base, { footShape: keys[i] }));
+    s.object3d.position.x = (i - (keys.length - 1) / 2) * GAP; s.object3d.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    scene.add(s.object3d); lineup.push(s);
+    const tag = labelSprite(keys[i]); tag.position.set(0, -2, 26); s.object3d.add(tag);
+  }
+  sandy.object3d.visible = false; document.getElementById('lineup').textContent = 'Back to one';
+  setView('feet'); busy(false);
+}
+async function closeLineup() {
+  for (const s of lineup) { scene.remove(s.object3d); s.dispose(); } lineup = [];
+  sandy.object3d.visible = true; document.getElementById('lineup').textContent = 'Compare all 12'; setView('feet');
+}
+function labelSprite(text) {
+  const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+  g.fillStyle = '#7c3aed'; g.beginPath(); g.arc(64, 64, 58, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#fff'; g.font = 'bold 76px system-ui,sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 64, 70);
+  const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false })); s.scale.set(12, 12, 1); s.renderOrder = 9; return s;
+}
+</script>
+</body>
+</html>
