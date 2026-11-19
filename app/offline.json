@@ -1,5 +1,5 @@
 {
- "v": "c1f818844b7e",
+ "v": "fd4f87cb4b5f",
  "apps": {
   "grug": [
    "grug",
@@ -243,7 +243,7 @@
     "/create/thumbs/scene-village.webp": "a950a571e6",
     "/create/thumbs/shield.webp": "8d62055dc0",
     "/create/thumbs/sword.webp": "8b54bc27ae",
-    "/credits.html": "64b52bab6e",
+    "/credits.html": "85af0c6223",
     "/favicon.png": "25d0921a67",
     "/games/favorites/": "b5fee8fe8a",
     "/games/": "3a2c45fc0c",
@@ -266,7 +266,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 29395349
+   "bytes": 29395581
   },
   "daypart": {
    "title": "Daypart",
@@ -336,7 +336,7 @@
     "/assets/wizard3d.js": "3870ba7150",
     "/business/": "446924d25e",
     "/business/site/": "7beb01205d",
-    "/credits.html": "64b52bab6e",
+    "/credits.html": "85af0c6223",
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93",
     "/privacy.html": "2bea77a8a5",
@@ -347,7 +347,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 2180226
+   "bytes": 2180458
   },
   "tea": {
    "title": "Bubble Tea",

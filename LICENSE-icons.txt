@@ -26,3 +26,6 @@ Chest prints (assets/prints/): from the vector-flat-casual "vector icon pack",
 used under the licence it was bought with.
 
 Single-colour icons (assets/icons.js, GRUG_ICONS, including the 'sh-' shop icons): Phosphor Icons 2.1.1, MIT.
+
+Holiday charms (assets/events-icons/): Events Icon Pack by @gvesster, used under the licence it was bought with (see assets/events-icons/License.txt).
+KIMILAND logos (assets/brands/): supplied by the site owner for KIMILAND's accessories.
