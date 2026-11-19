@@ -622,9 +622,9 @@ button{font-family:var(--g-font)}
   <section id="catalog" class="page shop" data-g-theme="light" hidden>
     <header class="shop-top">
       <a class="brand" href="#"><span data-g-logo="tile" class="tile"></span><span class="ttl">Catalog</span></a>
-      <label class="search"><i data-g-icon="magnifying_glass"></i><input id="catSearch" type="search" placeholder="Search glasses, hair, earrings, necklaces, purses and brands" aria-label="Search the catalog" autocomplete="off"></label>
+      <label class="search"><i data-g-icon="magnifying_glass"></i><input id="catSearch" type="search" placeholder="Search glasses, hair, earrings, necklaces, purses, sandals and brands" aria-label="Search the catalog" autocomplete="off"></label>
       <div class="rollbtn createwrap"><button class="g-btn g-btn--ghost" id="catCreate" aria-haspopup="menu"><i data-g-icon="pencil"></i><span>Create</span></button>
-        <div class="rollmenu createmenu" id="createMenu" role="menu" hidden><a role="menuitem" href="#edit"><i data-g-icon="glasses"></i><span><b>Eyewear editor</b><span>Glasses, shades and goggles, made with dials</span></span></a><a role="menuitem" href="#edit/earrings"><i data-g-icon="diamond"></i><span><b>Earrings editor</b><span>Stack charms and shapes into a pair</span></span></a><a role="menuitem" href="#edit/necklaces"><i data-g-icon="flower"></i><span><b>Necklace editor</b><span>Any length, with charms and shapes on the cord</span></span></a><a role="menuitem" href="#edit/purses"><i data-g-icon="shopping_bag"></i><span><b>Purse editor</b><span>Bag shapes, straps, patterns and keychains</span></span></a><a role="menuitem" id="createHair" href="#"><i data-g-icon="hair"></i><span><b>Hair Studio</b><span>Draw, comb and style hair strand by strand</span></span></a></div></div>
+        <div class="rollmenu createmenu" id="createMenu" role="menu" hidden><a role="menuitem" href="#edit"><i data-g-icon="glasses"></i><span><b>Eyewear editor</b><span>Glasses, shades and goggles, made with dials</span></span></a><a role="menuitem" href="#edit/earrings"><i data-g-icon="diamond"></i><span><b>Earrings editor</b><span>Stack charms and shapes into a pair</span></span></a><a role="menuitem" href="#edit/necklaces"><i data-g-icon="flower"></i><span><b>Necklace editor</b><span>Any length, with charms and shapes on the cord</span></span></a><a role="menuitem" href="#edit/purses"><i data-g-icon="shopping_bag"></i><span><b>Purse editor</b><span>Bag shapes, straps, patterns and keychains</span></span></a><a role="menuitem" href="#edit/sandals"><i data-g-icon="sun"></i><span><b>Sandal editor</b><span>Soles, straps, gradients and strap charms</span></span></a><a role="menuitem" id="createHair" href="#"><i data-g-icon="hair"></i><span><b>Hair Studio</b><span>Draw, comb and style hair strand by strand</span></span></a></div></div>
     </header>
     <div class="cat-wrap">
       <aside class="cat-side">
@@ -635,8 +635,8 @@ button{font-family:var(--g-font)}
         <div class="crumbs" id="crumbs"></div>
         <div class="hero g-has-pattern" id="hero">
           <div class="g-pattern" data-g-pattern="spark"></div>
-          <div><h2>Fresh finds, made by Grug</h2><p>Glasses, shades, goggles, hair, earrings, necklaces and purses, all made from scratch. Open anything to try it on, download it for your game, or make your own.</p>
-            <div class="btnrow"><button class="g-btn g-btn--brand" id="heroRoll"><i data-g-icon="dice"></i><span>Roll a new pair</span></button><a class="g-btn" id="heroHair" href="#" style="background:rgba(255,255,255,.1);color:var(--g-snow)"><i data-g-icon="hair"></i><span>Style some hair</span></a><button class="g-btn" id="heroEar" style="background:rgba(255,255,255,.1);color:var(--g-snow)"><i data-g-icon="diamond"></i><span>Roll earrings</span></button><button class="g-btn" id="heroNeck" style="background:rgba(255,255,255,.1);color:var(--g-snow)"><i data-g-icon="flower"></i><span>Roll a necklace</span></button><button class="g-btn" id="heroPurse" style="background:rgba(255,255,255,.1);color:var(--g-snow)"><i data-g-icon="shopping_bag"></i><span>Roll a purse</span></button><button class="g-btn" id="heroShuffle" style="background:rgba(255,255,255,.1);color:var(--g-snow)"><i data-g-icon="arrow_shuffle"></i><span>Shuffle the catalog</span></button></div></div>
+          <div><h2>Fresh finds, made by Grug</h2><p>Glasses, shades, goggles, hair, earrings, necklaces, purses and sandals, all made from scratch. Open anything to try it on, download it for your game, or make your own.</p>
+            <div class="btnrow"><button class="g-btn g-btn--brand" id="heroRoll"><i data-g-icon="dice"></i><span>Roll a new pair</span></button><a class="g-btn" id="heroHair" href="#" style="background:rgba(255,255,255,.1);color:var(--g-snow)"><i data-g-icon="hair"></i><span>Style some hair</span></a><button class="g-btn" id="heroEar" style="background:rgba(255,255,255,.1);color:var(--g-snow)"><i data-g-icon="diamond"></i><span>Roll earrings</span></button><button class="g-btn" id="heroNeck" style="background:rgba(255,255,255,.1);color:var(--g-snow)"><i data-g-icon="flower"></i><span>Roll a necklace</span></button><button class="g-btn" id="heroPurse" style="background:rgba(255,255,255,.1);color:var(--g-snow)"><i data-g-icon="shopping_bag"></i><span>Roll a purse</span></button><button class="g-btn" id="heroSandal" style="background:rgba(255,255,255,.1);color:var(--g-snow)"><i data-g-icon="sun"></i><span>Roll sandals</span></button><button class="g-btn" id="heroShuffle" style="background:rgba(255,255,255,.1);color:var(--g-snow)"><i data-g-icon="arrow_shuffle"></i><span>Shuffle the catalog</span></button></div></div>
           <div class="strip" id="heroStrip"></div>
         </div>
         <div class="shop-head">
@@ -3796,7 +3796,7 @@ window.GrugCatalogHair = function (ctx) {
 
   /* ---------------------------------------------------------------- vocabulary: kinds, names, tags, specs */
   const earKind = d => d.seq.length === 1 ? (d.seq[0].id === 'ring' && d.seq[0].k === 'shape' ? 'hoops' : 'studs') : d.seq.length <= 3 ? 'drops' : 'danglers';
-  const KIND_LABEL = { studs: 'Studs', drops: 'Drops', danglers: 'Danglers', hoops: 'Hoops', choker: 'Chokers', short: 'Short', medium: 'Medium', long: 'Long', satchel: 'Satchels', tote: 'Totes', bucket: 'Buckets', round: 'Rounds', heart: 'Hearts', clutch: 'Clutches' };
+  const KIND_LABEL = { studs: 'Studs', drops: 'Drops', danglers: 'Danglers', hoops: 'Hoops', choker: 'Chokers', short: 'Short', medium: 'Medium', long: 'Long', satchel: 'Satchels', tote: 'Totes', bucket: 'Buckets', round: 'Rounds', heart: 'Hearts', clutch: 'Clutches', slide: 'Slides', thong: 'Thongs', ankle: 'Ankle straps', gladiator: 'Gladiators', wrap: 'Wraps' };
   const kindOf = (dept, d) => dept === 'earrings' ? earKind(d) : lenClass(d).id;
   const elName = e => e.k === 'charm' ? CHARM_BY[e.id].label : SHAPE_LABEL[e.id];
   const FLAVOUR = ['Cute', 'Fancy', 'Dainty', 'Glam', 'Posh', 'Sparkly', 'Merry', 'Spooky', 'Lovely', 'Bold', 'Sweet', 'Chic', 'Jolly', 'Charming', 'Darling', 'Lucky', 'Super', 'Pretty', 'Royal', 'Magic'];
@@ -4240,13 +4240,221 @@ window.GrugCatalogHair = function (ctx) {
     return { root, d, info: { tris: Math.round(own.tris), lengthCm: info.length }, frame: 'world', dispose() { for (const g of own.geos) g.dispose(); for (const m of own.mats) m.dispose(); } };
   }
 
-  const build = (dept, d, ctx, o) => dept === 'purses' ? buildPurse(d, ctx || CTX) : dept === 'earrings' ? buildEarrings(d, ctx || CTX, o) : buildNecklace(d, ctx || CTX, o);
+
+  /* ================================================================ sandals
+     A sandal is a sole (thickness, a raised heel: wedge or block), a footbed, straps that follow her foot (a band across the
+     instep, a toe post, an ankle strap, laces up the shin, a criss-cross wrap) and charms pinned on the straps.
+     Colours can fade from one to another on the sole and on the straps. Her foot is measured from her own mesh. */
+  const STYLES = [['slide', 'Slide'], ['thong', 'Thong'], ['ankle', 'Ankle strap'], ['gladiator', 'Gladiator'], ['wrap', 'Wrap']];
+  const STYLE_LABEL = Object.fromEntries(STYLES);
+  const HEELS = [['wedge', 'Wedge'], ['block', 'Block']];
+  const HEEL_LABEL = Object.fromEntries(HEELS);
+  const SAN_LIM = { soleH: [0.5, 5], heelH: [0, 8], strapT: [0.1, 1], strapW: [0.6, 3.5], shaft: [6, 26] };
+  const SAN_N = 5;
+  DEF.sandals = () => ({ v: 1, brand: 'grug', style: 'ankle', soleH: 1.2, heelH: 0, heelType: 'wedge', soleCol: '#fff6f2', soleCol2: '#ff8fc2', soleGrad: false, bedCol: '#ffc2d6', strapCol: '#ff6fa8', strapCol2: '#fff6f2', strapGrad: false, strapT: 0.35, strapW: 1.2, shaft: 12, hw: '#d4af37', finish: 'gloss', charms: [EL({ k: 'shape', id: 'heart', size: 1.4, col: '#e8344f', at: 0.6 })] });
+  LIMITS.sandals = { n: SAN_N };
+
+  function validateS(src, brand) {
+    const notes = [], d = Object.assign(DEF.sandals(), src || {}); d.brand = brand || d.brand; if (!BRAND_LABEL[d.brand]) d.brand = 'grug';
+    if (!STYLE_LABEL[d.style]) d.style = 'ankle';
+    for (const k of Object.keys(SAN_LIM)) d[k] = clamp(+d[k] || SAN_LIM[k][0], SAN_LIM[k][0], SAN_LIM[k][1]);
+    if (!(+src && 0) && src && src.heelH === 0) d.heelH = 0;
+    if (d.style === 'slide') d.strapW = Math.max(d.strapW, 1.8);
+    if (!HEEL_LABEL[d.heelType]) d.heelType = 'wedge';
+    for (const k of ['soleCol', 'soleCol2', 'bedCol', 'strapCol', 'strapCol2', 'hw']) if (!isHex(d[k])) d[k] = DEF.sandals()[k];
+    d.soleGrad = !!d.soleGrad; d.strapGrad = !!d.strapGrad; if (!FINISHES.some(f => f[0] === d.finish)) d.finish = 'gloss';
+    d.charms = (d.charms || []).slice(0, SAN_N).map(e => cleanEl(e, 'sandals'));
+    if (d.brand === 'kimiland') {
+      let changed = false;
+      for (const k of ['soleCol', 'soleCol2', 'bedCol', 'strapCol', 'strapCol2', 'hw']) if (!isPastel(d[k])) { d[k] = toPastel(d[k]); changed = true; }
+      for (const e of d.charms) kimiEl(e, { tint: isPastel(e.col) ? e.col : toPastel(e.col) });
+      if (changed) notes.push('Brought to KIMILAND pastels');
+    }
+    return { d, notes };
+  }
+
+  function randomS(seed, o) {
+    o = o || {}; const r = rng('jewel:sandals:' + seed), brand = o.brand || brandFor(seed), kimi = brand === 'kimiland';
+    const theme = kimi ? 'sweet' : r.w({ valentines: 2, christmas: 2, halloween: 2, sweet: 1.5, classic: 3, ocean: 1.2, forest: 1, night: 1.2 });
+    const pal = kimi ? kimiPalette(r) : null, T = THEMES[theme], pick = kimi ? () => r.pick(pal.mains.concat(pal.acc)) : () => r.pick(T.cols), metal = kimi ? pal.metal : r.pick(T.metal);
+    let d = o.base ? JSON.parse(JSON.stringify(o.base)) : DEF.sandals(); d.brand = brand;
+    const recolour = () => {
+      d.strapCol = kimi ? pal.main : pick(); d.strapCol2 = pick(); d.soleCol = kimi ? (r.chance(0.5) ? '#fffafc' : pal.main) : r.chance(0.5) ? r.pick(['#fff6f2', '#16161a', '#c8ccd2', '#8a5a3c']) : pick(); d.soleCol2 = pick(); d.bedCol = kimi ? '#fffafc' : r.pick([d.strapCol, '#fff6f2', pick()]); d.hw = metal;
+      for (const e of d.charms) { if (e.k === 'shape') e.col = e.id === 'pearl' ? (kimi ? '#fffafc' : '#fff6f2') : pick(); else { const c = CHARM_BY[e.id]; e.tint = kimi && !c.brand ? (pal.pink ? pal.main : r.pick(pal.mains)) : ''; } }
+    };
+    if (o.keep === 'shape') { recolour(); return validateS(d, brand).d; }
+    const keepC = o.keep === 'colours' && o.base ? { cols: ['soleCol', 'soleCol2', 'bedCol', 'strapCol', 'strapCol2', 'hw', 'soleGrad', 'strapGrad'].map(k => d[k]), ch: d.charms.map(e => [e.col, e.tint]) } : null;
+    d.style = o.kind && STYLE_LABEL[o.kind] ? o.kind : r.w({ slide: 2.4, thong: 1.6, ankle: 3, gladiator: 1.8, wrap: 1.8 });
+    d.soleH = r.f(0.7, 3.4); d.heelH = r.chance(0.5) ? r.f(1.5, 6.5) : 0; d.heelType = r.pick(['wedge', 'block']);
+    d.strapT = r.f(0.18, 0.75); d.strapW = d.style === 'slide' ? r.f(2, 3.4) : d.style === 'thong' ? r.f(0.8, 1.6) : r.f(0.7, 2.2); d.shaft = r.f(7, 24);
+    d.soleGrad = r.chance(kimi ? 0.4 : 0.3); d.strapGrad = r.chance(kimi ? 0.45 : 0.35); d.finish = r.w({ gloss: 4, matte: 3, metal: kimi ? 0.2 : 0.8 });
+    const n = r.w({ 0: 1.2, 1: 3, 2: 3, 3: 1.6, 4: 0.6 }) | 0; d.charms = [];
+    for (let i = 0; i < n; i++) { const e = randomEl(r, 'necklaces', theme, pal, kimi, {}); e.size = clamp(e.size * 0.65, 0.8, 2.4); e.at = n === 1 ? r.f(0.2, 0.9) : lerp(-0.7, 0.9, i / (n - 1)); e.mode = 'hang'; d.charms.push(e); }
+    recolour();
+    if (keepC) { ['soleCol', 'soleCol2', 'bedCol', 'strapCol', 'strapCol2', 'hw', 'soleGrad', 'strapGrad'].forEach((k, i) => { d[k] = keepC.cols[i]; }); d.charms.forEach((e, i) => { const c = keepC.ch[i % keepC.ch.length]; if (!c) return; if (e.k === 'shape') e.col = c[0]; else if (!CHARM_BY[e.id].brand) e.tint = c[1] || ''; }); }
+    return validateS(d, brand).d;
+  }
+
+  function nameS(d, seed) {
+    const r = rng('jname:' + seed + ':sandals'), kimi = d.brand === 'kimiland', colour = colourName(d.strapCol, kimi), fl = kimi ? r.pick(KIMI_FLAVOUR) : r.pick(FLAVOUR);
+    const noun = { slide: r.pick(['Slides', 'Slide Sandals', 'Sliders']), thong: r.pick(['Flip-Flops', 'Thong Sandals', 'Toe-Post Sandals']), ankle: r.pick(['Ankle Strap Sandals', 'Strappy Sandals', 'Ankle Straps']), gladiator: r.pick(['Gladiators', 'Gladiator Sandals', 'Lace-Up Sandals']), wrap: r.pick(['Wrap Sandals', 'Ribbon Sandals', 'Wraps']) }[d.style];
+    const sole = d.heelH > 3.5 ? (d.heelType === 'block' ? 'Block Heel' : 'Wedge') : d.soleH > 2.8 && d.heelH < 1 ? 'Platform' : '', fade = d.strapGrad || d.soleGrad ? r.pick(['Ombré', 'Sunset', 'Fade']) : '';
+    const sub = d.charms.length ? elName(mainEl(d.charms)) + ' Charm' : '';
+    const forms = [[colour, sole, noun], [fl, fade || colour, noun], [fl, sub || colour, noun], [fade || sole || fl, colour, noun]];
+    return forms[r.i(0, 3)].filter(Boolean).join(' ').replace(/\s+/g, ' ');
+  }
+  function tagsS(d) {
+    const t = ['Sandals', STYLE_LABEL[d.style]], themes = new Set(d.charms.filter(e => e.k === 'charm').map(e => CHARM_BY[e.id].theme));
+    t.push(d.heelH < 1 ? (d.soleH > 2.8 ? 'Platform' : 'Flat') : HEEL_LABEL[d.heelType]); t.push(d.soleGrad || d.strapGrad ? 'Gradient' : 'Solid');
+    for (const th of themes) t.push(THEME_LABEL[th]); if (d.charms.length) t.push('Charms'); if (d.brand === 'kimiland') t.push('Pastel', 'KIMILAND'); return Array.from(new Set(t));
+  }
+  function familiesS(d) { const f = new Set([famOfHex(d.strapCol), famOfHex(d.soleCol)]); if (d.strapGrad) f.add(famOfHex(d.strapCol2)); if (d.soleGrad) f.add(famOfHex(d.soleCol2)); for (const e of d.charms) { if (e.k === 'shape') f.add(famOfHex(e.col)); else { const c = CHARM_BY[e.id]; if (e.tint) f.add(famOfHex(e.tint === 'pastel' ? '#ffc4dc' : e.tint)); else for (const x of c.fam) f.add(x); } } if (f.size > 3) f.add('multi'); return f; }
+  function describeS(d) {
+    const kimi = d.brand === 'kimiland', names = Array.from(new Set(d.charms.map(elName).map(s => s.toLowerCase()))), heel = d.heelH < 1 ? (d.soleH > 2.8 ? 'platform' : 'flat') : HEEL_LABEL[d.heelType].toLowerCase() + ' heel';
+    const ch = names.length ? ', with ' + (names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0]) + ' pinned on the straps' : '';
+    return `A pair of ${colourName(d.strapCol, kimi).toLowerCase()} ${STYLE_LABEL[d.style].toLowerCase()} sandals on a ${heel} sole${d.strapGrad || d.soleGrad ? ', fading from one colour to another' : ''}${ch}.${kimi ? ' A KIMILAND piece: soft pastels, made to be cute.' : ''}`;
+  }
+
+  /* ---- her foot, measured from her own mesh (left foot, x > 0; the right foot is its mirror) */
+  function footField(sandy) {
+    if (sandy.__ffield) return sandy.__ffield;
+    sandy.object3d.updateMatrixWorld(true); let nb = null; sandy.object3d.traverse(o => { if (o.isSkinnedMesh && o.name === 'natBody_geo') nb = o; });
+    const W = [], v = new THREE.Vector3(); if (nb) { nb.skeleton.update(); const P = nb.geometry.attributes.position; for (let i = 0; i < P.count; i++) { const p = nb.boneTransform(i, v.fromBufferAttribute(P, i).clone()).applyMatrix4(nb.matrixWorld); if (p.x > 2 && p.y < 75) W.push(p); } }
+    const Z0 = -15, Z1 = 14.5, DZ = 0.5, NZ = Math.round((Z1 - Z0) / DZ) + 1, x0 = new Float32Array(NZ).fill(NaN), x1 = new Float32Array(NZ).fill(NaN), yt = new Float32Array(NZ).fill(NaN);
+    for (let i = 0; i < NZ; i++) { const z = Z0 + i * DZ; let a = 1e9, b = -1e9, t = -1e9; for (const p of W) { if (Math.abs(p.z - z) > 0.9 || p.y > 21) continue; if (p.y < 9) { a = Math.min(a, p.x); b = Math.max(b, p.x); } if (p.y < 21) t = Math.max(t, p.y); } if (b - a > 1.5) { x0[i] = a; x1[i] = b; } if (t > -1e8) yt[i] = t; }
+    const fill = A => { let last = -1; for (let i = 0; i < A.length; i++) if (!isNaN(A[i])) { if (last >= 0 && i - last > 1) for (let k = last + 1; k < i; k++) A[k] = A[last] + (A[i] - A[last]) * (k - last) / (i - last); last = i; } let f = A.findIndex(x => !isNaN(x)); for (let i = 0; i < f; i++) A[i] = A[f]; for (let i = A.length - 1; i >= 0 && isNaN(A[i]); i--) A[i] = A[last]; for (let pass = 0; pass < 3; pass++) { const B = A.slice(); for (let i = 1; i < A.length - 1; i++) B[i] = (A[i - 1] + 2 * A[i] + A[i + 1]) / 4; A.set(B); } };
+    [x0, x1, yt].forEach(fill);
+    const valid = []; for (let i = 0; i < NZ; i++) if (x1[i] - x0[i] > 1.5) valid.push(Z0 + i * DZ);
+    const at = (A, z) => { const f = clamp((z - Z0) / DZ, 0, NZ - 1.001), i = Math.floor(f); return lerp(A[i], A[i + 1], f - i); };
+    // her lower leg: a box fitted around it every 1 cm of height
+    const ringRaw = new Map(), raw = k => { if (ringRaw.has(k)) return ringRaw.get(k); let a = 1e9, b = -1e9, c = 1e9, d = -1e9; for (const p of W) if (Math.abs(p.y - k) < 1.2) { a = Math.min(a, p.x); b = Math.max(b, p.x); c = Math.min(c, p.z); d = Math.max(d, p.z); } const R = b > a ? { cx: (a + b) / 2, cz: (c + d) / 2, rx: (b - a) / 2, rz: (d - c) / 2 } : { cx: 13.4, cz: -7, rx: 3.6, rz: 5.5 }; ringRaw.set(k, R); return R; };
+    const ringCache = new Map(), ring = y => { const k = Math.round(y); if (ringCache.has(k)) return ringCache.get(k); const R = { cx: 0, cz: 0, rx: 0, rz: 0 }; let n = 0; for (let dy = -3; dy <= 3; dy++) { const w = 4 - Math.abs(dy), Q = raw(k + dy); for (const key of ['cx', 'cz', 'rx', 'rz']) R[key] += Q[key] * w; n += w; } for (const key of ['cx', 'cz', 'rx', 'rz']) R[key] /= n; ringCache.set(k, R); return R; };
+    const back = y => { let m = 1e9; for (const p of W) if (Math.abs(p.y - y) < 0.8 && Math.abs(p.x - 13.2) < 5) m = Math.min(m, p.z); return m > 1e8 ? -13 : m; };
+    return (sandy.__ffield = { zMin: valid[0] != null ? valid[0] : -13, zMax: valid.length ? valid[valid.length - 1] : 14, x0: z => at(x0, z), x1: z => at(x1, z), top: z => at(yt, z), ring, back, yb: 2.45, zBall: 3.2 });
+  }
+
+  /* ---- drawing it */
+  function mirrorGeo(g) {
+    g.applyMatrix4(new THREE.Matrix4().makeScale(-1, 1, 1)); const sw = (A, k) => { for (let i = 0; i < A.count; i += 3) { /* swap vertices 1 and 2 of every triangle */ } };
+    if (g.index) { const I = g.index.array; for (let i = 0; i < I.length; i += 3) { const t = I[i + 1]; I[i + 1] = I[i + 2]; I[i + 2] = t; } g.index.needsUpdate = true; }
+    else for (const k of Object.keys(g.attributes)) { const A = g.attributes[k], s = A.itemSize, a = A.array; for (let i = 0; i < A.count; i += 3) for (let j = 0; j < s; j++) { const t = a[(i + 1) * s + j]; a[(i + 1) * s + j] = a[(i + 2) * s + j]; a[(i + 2) * s + j] = t; } A.needsUpdate = true; }
+    return g;
+  }
+  const GRAD_H = 16, GV = { sole: 2, strap: 6 };
+  const gradTex = (d) => {
+    const cv = document.createElement('canvas'); cv.width = 128; cv.height = GRAD_H; const x = cv.getContext('2d');
+    for (const [row, a, b] of [[0, d.soleCol, d.soleCol2], [4, d.strapCol, d.strapCol2]]) { const g = x.createLinearGradient(0, 0, 128, 0); g.addColorStop(0, a); g.addColorStop(1, b); x.fillStyle = g; x.fillRect(0, row * 2, 128, 8); }
+    const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; t.userData.canvas = cv; return t;
+  };
+  const gv = row => 1 - (row * 2 + 4) / GRAD_H;   // the v of the middle of a gradient row (row 0 = sole, row 4 = strap)
+
+  // a rounded footprint outline (x, z) from her foot
+  function outline(F, m) {
+    const pts = [], z0 = F.zMin - 0.3, z1 = F.zMax + 0.3; const L = [], R = [];
+    for (let z = z0; z <= z1 + 1e-6; z += 0.75) { const zz = clamp(z, F.zMin, F.zMax); L.push([F.x0(zz) - m, z]); R.push([F.x1(zz) + m, z]); }
+    const cap = (a, b, dz, sgn) => { const c = [(a[0] + b[0]) / 2, a[1]], rx = (b[0] - a[0]) / 2, out = []; for (let k = 1; k < 7; k++) { const t = k / 7 * Math.PI; out.push([c[0] - Math.cos(t) * rx, c[1] + sgn * Math.sin(t) * dz]); } return out; };
+    const toe = cap(L[L.length - 1], R[R.length - 1], 2.0, 1), heel = cap(R[0], L[0], 1.6, -1);
+    return L.concat(toe.map(p => [p[0], p[1]]), R.slice().reverse(), heel.map(p => [p[0], p[1]]));
+  }
+
+  // one strap: a flat band swept along a path, `N` the outward normal at each point
+  function sweep(pts, nrm, w, t, uv, tag) {
+    const n = pts.length, P = [], Nn = [], Uv = [], I = []; const T = new THREE.Vector3(), B = new THREE.Vector3();
+    const sec = [];
+    for (let i = 0; i < n; i++) { T.subVectors(pts[Math.min(n - 1, i + 1)], pts[Math.max(0, i - 1)]).normalize(); const N = nrm[i].clone().addScaledVector(T, -nrm[i].dot(T)).normalize(); B.crossVectors(T, N).normalize(); sec.push({ p: pts[i], N, B: B.clone() }); }
+    const corner = [[1, 1], [-1, 1], [-1, -1], [1, -1]], face = [[0, 1, 'N', 1], [1, 2, 'B', -1], [2, 3, 'N', -1], [3, 0, 'B', 1]];
+    for (const [ia, ib, ax, sg] of face) {
+      for (let i = 0; i < n - 1; i++) {
+        const s0 = sec[i], s1 = sec[i + 1], q = [];
+        for (const s of [s0, s1]) for (const k of [ia, ib]) { const [cw, ct] = corner[k]; q.push(s.p.clone().addScaledVector(s.B, cw * w / 2).addScaledVector(s.N, ct * t / 2)); }
+        const nm0 = (ax === 'N' ? s0.N : s0.B).clone().multiplyScalar(sg), nm1 = (ax === 'N' ? s1.N : s1.B).clone().multiplyScalar(sg), base = P.length / 3;
+        const nn = [nm0, nm0, nm1, nm1], us = [uv(i, n), uv(i, n), uv(i + 1, n), uv(i + 1, n)];
+        for (let k = 0; k < 4; k++) { P.push(q[k].x, q[k].y, q[k].z); Nn.push(nn[k].x, nn[k].y, nn[k].z); Uv.push(us[k][0], us[k][1]); }
+        const e1 = new THREE.Vector3().subVectors(q[1], q[0]), e2 = new THREE.Vector3().subVectors(q[2], q[0]), ok = new THREE.Vector3().crossVectors(e1, e2).dot(nm0) >= 0;
+        if (ok) I.push(base, base + 1, base + 2, base + 1, base + 3, base + 2); else I.push(base, base + 2, base + 1, base + 1, base + 2, base + 3);
+      }
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(Nn, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(Uv, 2)); g.setIndex(I); return { geo: g, sec };
+  }
+
+  function buildSandals(d, ctx) {
+    const { sandy } = ctx, F = footField(sandy), own = { geos: [], mats: [], tris: 0 }, root = new THREE.Group(); root.name = 'grugSandals'; root.userData.catalogItem = true; root.userData.jewel = { dept: 'sandals', design: d };
+    const grad = d.soleGrad || d.strapGrad, tex = grad ? gradTex(d) : null; if (tex) own.mats.push({ dispose() { tex.dispose(); } });
+    const finish = d.finish, flat = (hex) => matFor(hex, finish), hwM = matFor(d.hw, 'metal');
+    const gradMat = () => { const m = new THREE.MeshStandardMaterial({ color: 0xffffff, map: tex, roughness: finish === 'matte' ? 0.85 : 0.3, metalness: finish === 'metal' ? 0.6 : 0, envMap: ENV, side: THREE.DoubleSide }); own.mats.push(m); return m; };
+    const soleMat = d.soleGrad ? gradMat() : flat(d.soleCol), strapMat = d.strapGrad ? gradMat() : flat(d.strapCol), bedMat = flat(d.bedCol);
+    const yTop = F.yb, sole = new THREE.Group(); sole.name = 'sole';
+    // ---- the sole: her footprint pushed down; the heel is a wedge (the sole thickens toward the back) or a block under the heel
+    const poly = outline(F, 0.45), shp = new THREE.Shape(); poly.forEach(([x, z], i) => i ? shp.lineTo(x, z) : shp.moveTo(x, z)); shp.closePath();
+    const zH = F.zMin - 1.8, zT = F.zMax + 2.3, thick = z => d.soleH + (d.heelType === 'wedge' ? d.heelH * clamp((F.zBall - z) / (F.zBall - zH), 0, 1) : 0);
+    const place = (geo, gradRow, useThick) => { const P = geo.attributes.position, uv = geo.attributes.uv || null; for (let i = 0; i < P.count; i++) { const X = P.getX(i), Y = P.getY(i), Z = P.getZ(i); P.setXYZ(i, X, yTop - Z * (useThick ? thick(Y) : 1), Y); } P.needsUpdate = true; geo.deleteAttribute('uv'); const U = []; for (let i = 0; i < P.count; i++) U.push(clamp((P.getZ(i) - zH) / (zT - zH), 0, 1), gv(gradRow)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); geo.computeVertexNormals(); return geo; };
+    const sg = place(new THREE.ExtrudeGeometry(shp, { depth: 1, bevelEnabled: false, curveSegments: 8 }), 0, true); own.geos.push(sg); sole.add(new THREE.Mesh(sg, soleMat)); own.tris += triOf(sg);
+    // the footbed, a thin lining on top
+    const inner = new THREE.Shape(), cx0 = poly.reduce((s, p) => s + p[0], 0) / poly.length, cz0 = poly.reduce((s, p) => s + p[1], 0) / poly.length; poly.forEach(([x, z], i) => { const px = cx0 + (x - cx0) * 0.94, pz = cz0 + (z - cz0) * 0.96; i ? inner.lineTo(px, pz) : inner.moveTo(px, pz); }); inner.closePath();
+    const bg = new THREE.ExtrudeGeometry(inner, { depth: 0.5, bevelEnabled: false, curveSegments: 8 }); { const P = bg.attributes.position; for (let i = 0; i < P.count; i++) { const X = P.getX(i), Y = P.getY(i), Z = P.getZ(i); P.setXYZ(i, X, yTop + 0.38 - Z, Y); } bg.computeVertexNormals(); } own.geos.push(bg); sole.add(new THREE.Mesh(bg, bedMat)); own.tris += triOf(bg);
+    if (d.heelType === 'block' && d.heelH > 0.4) {
+      const bw = (F.x1(F.zMin + 3) - F.x0(F.zMin + 3)) * 0.8, cxh = (F.x1(F.zMin + 3) + F.x0(F.zMin + 3)) / 2, bl = 7, bs = new THREE.Shape(), r = Math.min(1.6, bw / 2 - 0.1), x = -bw / 2, z = 0;
+      bs.moveTo(x + r, z); bs.lineTo(x + bw - r, z); bs.quadraticCurveTo(x + bw, z, x + bw, z + r); bs.lineTo(x + bw, z + bl - r); bs.quadraticCurveTo(x + bw, z + bl, x + bw - r, z + bl); bs.lineTo(x + r, z + bl); bs.quadraticCurveTo(x, z + bl, x, z + bl - r); bs.lineTo(x, z + r); bs.quadraticCurveTo(x, z, x + r, z);
+      const kg = new THREE.ExtrudeGeometry(bs, { depth: 1, bevelEnabled: false, curveSegments: 5 }), P = kg.attributes.position, U = []; for (let i = 0; i < P.count; i++) { const X = P.getX(i), Y = P.getY(i), Z = P.getZ(i); P.setXYZ(i, cxh + X, yTop - d.soleH + 0.05 - Z * d.heelH, F.zMin - 0.6 + Y); U.push(clamp((P.getZ(i) - zH) / (zT - zH), 0, 1), gv(0)); } kg.deleteAttribute('uv'); kg.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); kg.computeVertexNormals(); own.geos.push(kg); sole.add(new THREE.Mesh(kg, soleMat)); own.tris += triOf(kg);
+    }
+    // ---- straps
+    const straps = [], T = d.strapT, SW = d.strapW, clear = 0.22 + T / 2;
+    const sectionAt = z => { const a = (F.x1(z) - F.x0(z)) / 2, c = (F.x1(z) + F.x0(z)) / 2, top = Math.max(F.top(z), yTop + 2); return { a, c, h: top - yTop }; };
+    // a band across the foot at z: from her outer edge, over the top, to her inner edge
+    const bandAcross = (z, w) => {
+      const s = sectionAt(z), A = s.a + clear, Bh = s.h + clear, pts = [], nr = [], n = 18, e = 2.8;
+      for (let i = 0; i <= n; i++) { const th = Math.PI * i / n, c = Math.cos(th), sn = Math.sin(th), x = s.c + A * Math.sign(c) * Math.pow(Math.abs(c), 2 / e), y = yTop - 0.3 + (Bh + 0.3) * Math.pow(sn, 2 / e); pts.push(new THREE.Vector3(x, y, z)); const gx = (x - s.c) / (A * A), gy = (y - yTop) / (Bh * Bh); nr.push(new THREE.Vector3(gx, Math.max(gy, 0.02), 0).normalize()); }
+      return { pts, nr, w, mainOuterFirst: true };
+    };
+    const surfY = (x, z) => { const s = sectionAt(z), u = clamp(Math.abs(x - s.c) / s.a, 0, 1); return yTop + s.h * Math.pow(Math.max(0, 1 - Math.pow(u, 2.8)), 1 / 2.8); };
+    const ringAt = (y, w, off0) => { const off = off0 * 0.6;
+      const R = F.ring(y), pts = [], nr = [], n = 24; for (let i = 0; i <= n; i++) { const th = Math.PI * 2 * i / n, ca = Math.cos(th), sa = Math.sin(th), a = R.rx + off, b = R.rz + off; pts.push(new THREE.Vector3(R.cx + a * ca, y, R.cz + b * sa)); nr.push(new THREE.Vector3(ca / a, 0, sa / b).normalize()); }
+      return { pts, nr, w, ring: true };
+    };
+    const ANK = 18.5, shaftTop = ANK + d.shaft;
+    const heelStrap = () => { const pts = [], nr = [], R = F.ring(ANK), cxh = (F.x0(F.zMin + 4) + F.x1(F.zMin + 4)) / 2; for (let i = 0; i <= 14; i++) { const t = i / 14, y = lerp(yTop - 0.2, ANK, t), zb = F.back(clamp(y, 3.5, 17)) - clear * 0.9, x = lerp(cxh, R.cx, t); pts.push(new THREE.Vector3(x, y, i === 14 ? R.cz - R.rz - clear : Math.min(zb, F.back(clamp(y, 3.5, 17)) - clear * 0.5))); nr.push(new THREE.Vector3(0, 0.15, -1).normalize()); } return { pts, nr, w: Math.max(0.8, SW * 0.7) }; };
+    const instepLine = () => {
+      const x = (F.x0(0) + F.x1(0)) / 2, R = F.ring(ANK), cp = [new THREE.Vector3(x, surfY(x, 3) + clear, 3), new THREE.Vector3(x, surfY(x, 1) + clear, 1), new THREE.Vector3(x, F.top(-0.5) + clear, -0.5), new THREE.Vector3(R.cx, F.top(-2) + clear + 0.6, -1.6), new THREE.Vector3(R.cx, ANK, R.cz + R.rz + clear * 0.6)];
+      const curve = new THREE.CatmullRomCurve3(cp, false, 'centripetal'), pts = curve.getPoints(18), nr = pts.map((p, i) => i < 8 ? new THREE.Vector3(0, 1, 0.15).normalize() : new THREE.Vector3(0, 0.5, 1).normalize());
+      return { pts, nr, w: Math.max(0.8, SW * 0.7) };
+    };
+    let main = null;
+    const addBand = (b, row) => { straps.push(b); if (row && !main) main = b; };
+    if (d.style === 'slide') { const b = bandAcross(1.2, SW); addBand(b, true); }
+    else if (d.style === 'thong') {
+      const tx = (F.x0(9.5) + F.x1(9.5)) / 2 + 1.2, tz = 9.6, ty = surfY(tx, tz) + clear; const mk = (ex, ez) => { const pts = [], nr = []; for (let i = 0; i <= 18; i++) { const t = i / 18, x = lerp(tx, ex, t), z = lerp(tz, ez, t); pts.push(new THREE.Vector3(x, Math.max(surfY(x, z) + clear + (1 - t) * 0.1, yTop + clear * 0.6), z)); nr.push(new THREE.Vector3(0, 1, 0).add(new THREE.Vector3((x - (F.x0(z) + F.x1(z)) / 2) * 0.12, 0, 0)).normalize()); } return { pts, nr, w: SW }; };
+      const o = mk(F.x1(0.5) + 0.3, 0.5), inn = mk(F.x0(0.5) - 0.3, 0.5); straps.push(inn); addBand(o, true);
+      const pg = new THREE.CylinderGeometry(Math.max(0.28, T * 0.6), Math.max(0.28, T * 0.6), ty - yTop + 0.1, 8); own.geos.push(pg); const pm = new THREE.Mesh(pg, strapMat); pm.position.set(tx, (ty + yTop) / 2, tz); sole.add(pm); own.tris += 16;
+      const kg = new THREE.SphereGeometry(Math.max(0.5, SW * 0.45), 10, 8); own.geos.push(kg); const km = new THREE.Mesh(kg, hwM); km.position.set(tx, ty + 0.1, tz); sole.add(km); own.tris += triOf(kg);
+    } else {
+      addBand(bandAcross(1.8, Math.max(0.8, SW * 0.8)), true);
+      straps.push(heelStrap()); straps.push(ringAt(ANK, Math.max(0.8, SW), clear)); if (d.style === 'ankle') straps.push(instepLine());
+      if (d.style === 'gladiator') { const n = Math.max(2, Math.round(d.shaft / 4.2)); for (let k = 1; k <= n; k++) straps.push(ringAt(ANK + d.shaft * k / n, Math.max(0.8, SW * 0.9), clear)); const front = { pts: [], nr: [], w: Math.max(0.7, SW * 0.6) }; for (let i = 0; i <= 10; i++) { const y = lerp(ANK, shaftTop, i / 10), R = F.ring(y); front.pts.push(new THREE.Vector3(R.cx, y, R.cz + R.rz + clear)); front.nr.push(new THREE.Vector3(0, 0.1, 1).normalize()); } straps.push(front); }
+      if (d.style === 'wrap') { const n = 44, pts = [], nr = []; for (let i = 0; i <= n; i++) { const t = i / n, y = lerp(ANK - 1.5, shaftTop, t), R = F.ring(y), th = Math.PI * 0.5 + Math.PI * 2 * 2.2 * t; pts.push(new THREE.Vector3(R.cx + (R.rx + clear) * Math.cos(th), y, R.cz + (R.rz + clear) * Math.sin(th))); nr.push(new THREE.Vector3(Math.cos(th) / (R.rx + clear), 0, Math.sin(th) / (R.rz + clear)).normalize()); } straps.push({ pts, nr, w: Math.max(0.8, SW * 0.8), helix: true }); }
+    }
+    const sMesh = new THREE.Group(); sMesh.name = 'straps';
+    for (const s of straps) { const g = sweep(s.pts, s.nr, s.w, T, (i, n) => [s.ring || s.helix ? 1 - Math.abs(2 * i / (n - 1) - 1) : i / (n - 1), gv(4)], 'strap'); own.geos.push(g.geo); s.sec = g.sec; sMesh.add(new THREE.Mesh(g.geo, strapMat)); own.tris += triOf(g.geo); }
+    // a small buckle ring where the ankle strap closes
+    if (d.style !== 'slide' && d.style !== 'thong') { const R = F.ring(ANK), bg2 = new THREE.TorusGeometry(Math.max(0.5, SW * 0.4), 0.14, 5, 10); own.geos.push(bg2); const bm = new THREE.Mesh(bg2, hwM); bm.position.set(R.cx + R.rx + clear + T, ANK, R.cz); bm.rotation.y = Math.PI / 2; sMesh.add(bm); own.tris += 100; }
+    const left = new THREE.Group(); left.add(sole, sMesh);
+    // ---- charms: pinned on the main strap, facing outward
+    const charms = [], list = d.charms.slice().sort((a, b) => a.at - b.at);
+    const mp = main || straps[0];
+    const placeCharms = sgn => { const g = new THREE.Group(); if (!mp) return g; list.forEach(e => { const f = clamp((1 - e.at) / 2, 0, 1) * (mp.pts.length - 1), i = Math.floor(f), j = Math.min(mp.pts.length - 1, i + 1), p = mp.pts[i].clone().lerp(mp.pts[j], f - i), n = mp.nr[i].clone().lerp(mp.nr[j], f - i).normalize(), size = e.size * KN, el = makeEl(Object.assign({}, e, { size }), own, true); const nn = new THREE.Vector3(n.x * sgn, n.y, n.z), up = Math.abs(nn.y) > 0.85 ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(0, 1, 0), yy = up.clone().addScaledVector(nn, -up.dot(nn)).normalize(), xx = new THREE.Vector3().crossVectors(yy, nn).normalize(); el.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xx, yy, nn)); el.position.set(p.x * sgn, p.y, p.z).addScaledVector(nn, T / 2 + size * 0.5 * 0.6 + 0.1); g.add(el); }); return g; };
+    const right = new THREE.Group(); const mirrored = [];
+    left.traverse(o => { if (o.isMesh) { const g = o.geometry.clone(); own.geos.push(g); o.updateMatrix(); g.applyMatrix4(o.matrix); mirrorGeo(g); const m = new THREE.Mesh(g, o.material); m.name = o.name; mirrored.push([o.parent.name, m]); } });
+    const rs = new THREE.Group(), rm = new THREE.Group(); for (const [pn, m] of mirrored) (pn === 'sole' ? rs : rm).add(m); right.add(rs, rm);
+    root.add(left, right, placeCharms(1), placeCharms(-1)); own.tris *= 2;
+    return { root, d, info: { tris: Math.round(own.tris) }, frame: 'world', dispose() { for (const g of own.geos) g.dispose(); for (const m of own.mats) m.dispose(); } };
+  }
+
+  const build = (dept, d, ctx, o) => dept === 'sandals' ? buildSandals(d, ctx || CTX) : dept === 'purses' ? buildPurse(d, ctx || CTX) : dept === 'earrings' ? buildEarrings(d, ctx || CTX, o) : buildNecklace(d, ctx || CTX, o);
   function init(ctx) { CTX = ctx; ENV = ctx.env || null; for (const m of mats.values()) { m.envMap = ENV; m.needsUpdate = true; } }
   const lengthCm = d => { try { return Math.round(buildNecklaceLength(d)); } catch (e) { return 0; } };
   function buildNecklaceLength(d) { const F = bodyField(CTX.sandy), pts = necklacePath(d, F); return new THREE.CatmullRomCurve3(pts, true, 'centripetal').getLength(); }
 
   window.GrugJewelry = {
-    ready, init, build, validate: (dp, s, b) => dp === 'purses' ? validateP(s, b) : validate(dp, s, b), random: (dp, seed, o) => dp === 'purses' ? randomP(seed, o) : random(dp, seed, o), nameFor: (dp, d, s) => dp === 'purses' ? nameP(d, s) : nameFor(dp, d, s), tagsFor: (dp, d) => dp === 'purses' ? tagsP(d) : tagsFor(dp, d), families: (dp, d) => dp === 'purses' ? familiesP(d) : families(dp, d), describe: (dp, d) => dp === 'purses' ? describeP(d) : describe(dp, d), kindOf: (dp, d) => dp === 'purses' ? d.shape : kindOf(dp, d), BAG_SHAPES, BAG_LABEL, PATTERNS, PATTERN_LABEL, STRAPS, STRAP_LABEL, CLOSURES, CLOSURE_LABEL, BAG_LIM, PURSE_N, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
+    ready, init, build, validate: (dp, s, b) => dp === 'sandals' ? validateS(s, b) : dp === 'purses' ? validateP(s, b) : validate(dp, s, b), random: (dp, seed, o) => dp === 'sandals' ? randomS(seed, o) : dp === 'purses' ? randomP(seed, o) : random(dp, seed, o), nameFor: (dp, d, s) => dp === 'sandals' ? nameS(d, s) : dp === 'purses' ? nameP(d, s) : nameFor(dp, d, s), tagsFor: (dp, d) => dp === 'sandals' ? tagsS(d) : dp === 'purses' ? tagsP(d) : tagsFor(dp, d), families: (dp, d) => dp === 'sandals' ? familiesS(d) : dp === 'purses' ? familiesP(d) : families(dp, d), describe: (dp, d) => dp === 'sandals' ? describeS(d) : dp === 'purses' ? describeP(d) : describe(dp, d), kindOf: (dp, d) => dp === 'sandals' ? d.style : dp === 'purses' ? d.shape : kindOf(dp, d), STYLES, STYLE_LABEL, HEELS, HEEL_LABEL, SAN_LIM, SAN_N, footField, BAG_SHAPES, BAG_LABEL, PATTERNS, PATTERN_LABEL, STRAPS, STRAP_LABEL, CLOSURES, CLOSURE_LABEL, BAG_LIM, PURSE_N, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
     DRESS_Y, DEF: dept => DEF[dept](), EL, SHAPES, SHAPE_LABEL, THREAD_SHAPES, FINISHES, CHARMS, CHARM_BY, THEME_LABEL, THEMES, MOUNTS, LINKS, PAIRS, CORDS, KIND_LABEL, BRANDS, BRAND_LABEL, LIMITS, D_MAX,
     PINKS, PASTEL_OTHER, PASTEL_ACC, PASTEL_METALS, METALS, colourName, charmTexture, geoFor, elH, elName, KIMI_CHARMS
   };
@@ -4272,7 +4480,7 @@ window.GrugCatalogHair = function (ctx) {
   const store = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } } };
   const loadMsg = t => { $('#loadMsg').textContent = t; };
   const deptOf = it => (it && it.dept) || 'eyewear';
-  const isJ = it => !!it && (it.dept === 'earrings' || it.dept === 'necklaces' || it.dept === 'purses');
+  const isJ = it => !!it && (it.dept === 'earrings' || it.dept === 'necklaces' || it.dept === 'purses' || it.dept === 'sandals');
   const KIND = { glasses: { label: 'Glasses', icon: 'glasses', c: 'var(--g-teal)' }, shades: { label: 'Shades', icon: 'sun', c: 'var(--g-yellow)' }, goggles: { label: 'Goggles', icon: 'binoculars', c: 'var(--g-pink)' } };
   GRUG.hydrate(document); try { GRUG.favicon(); } catch (e) {}
 
@@ -4348,7 +4556,7 @@ window.GrugCatalogHair = function (ctx) {
   {
     sandy.object3d.updateMatrixWorld(true); const yOf = n => { const b = sandy.object3d.getObjectByName(n); return b ? b.getWorldPosition(new THREE.Vector3()).y : null; };
     const hip = yOf('leg_L_uprTwist00_jnt'), knee = yOf('leg_L_lwrTwist00_jnt'), top = headGroup.getWorldPosition(new THREE.Vector3()).y;
-    const cutY = hip != null && knee != null ? (hip + knee) / 2 : top * 0.46, cut = [new THREE.Plane(new THREE.Vector3(0, 1, 0), -cutY)];
+    const cutY = hip != null && knee != null ? (hip + knee) / 2 : top * 0.46, cut = [new THREE.Plane(new THREE.Vector3(0, 1, 0), -cutY)]; sandy.__cut = cut[0];
     sandy.object3d.traverse(o => { if (o.isMesh) for (const m of [].concat(o.material)) if (m) { m.clippingPlanes = cut; m.needsUpdate = true; } });
   }
   sandy.object3d.updateMatrixWorld(true);
@@ -4476,7 +4684,7 @@ window.GrugCatalogHair = function (ctx) {
   // each card gets a solid colour that complements the item: the opposite hue of its lenses (or its frame when the
   // lenses are clear or grey), or of the hair colour, bright and light so the mannequin and the item both stand out
   function cardHue(it) {
-    if (isJ(it)) { const e = (it.d.seq || it.d.items || it.d.charms)[0] || { col: it.d.body }; return ((GE.util.hsl(e.col)[1] > 0.2 ? GE.util.hsl(e.col)[0] : GE.util.hash(it.id) % 360) + 180) % 360; }
+    if (isJ(it)) { const e = (it.d.seq || it.d.items || it.d.charms)[0] || { col: it.d.body || it.d.strapCol }; return ((GE.util.hsl(e.col)[1] > 0.2 ? GE.util.hsl(e.col)[0] : GE.util.hash(it.id) % 360) + 180) % 360; }
     if (deptOf(it) === 'hair') { const [h, s] = GE.util.hsl(it.hex); return ((s > 0.22 ? h : GE.util.hash(it.id) % 360) + 180) % 360; }
     const d = it.d, [lh, ls] = GE.util.hsl(d.tint), [fh, fs] = GE.util.hsl(d.frame);
     let h = ls > 0.25 && d.dark > 0.12 ? lh : fs > 0.25 ? fh : (GE.util.hash(it.seed) % 360);
@@ -4563,7 +4771,7 @@ window.GrugCatalogHair = function (ctx) {
   }
   const favItem = f => {
     if (f.dept === 'hair') { const h = HD && HD.byId(f.id); return h ? Object.assign({}, h, { favOnly: true }) : null; }
-    if (f.dept === 'earrings' || f.dept === 'necklaces' || f.dept === 'purses') return JM.fromFav(f);
+    if (f.dept === 'earrings' || f.dept === 'necklaces' || f.dept === 'purses' || f.dept === 'sandals') return JM.fromFav(f);
     const d = GE.validate(f.d).d; return { id: f.id, seed: f.seed, d, name: f.name, kind: GE.classify(d), brand: f.brand || 'grug', by: f.by || 'Grug Digital', order: 100000 - (f.when || 0) / 1e9, stamp: 0, gen: f.id.startsWith('g:'), mine: f.id.startsWith('m:'), favOnly: true };
   };
   const genCache = new Map();
@@ -4582,7 +4790,7 @@ window.GrugCatalogHair = function (ctx) {
     return out;
   }
   function itemById(id) {
-    if (/^g[enp]:/.test(id)) return JM.byId(id);
+    if (/^g[enps]:/.test(id)) return JM.byId(id);
     if (/^hm?:/.test(id)) { const h = HD && HD.byId(id); if (h) return h; const f = favs.find(x => x.id === id); return f ? favItem(f) : null; }
     const fv = favs.find(f => f.id === id); if (fv && !(id.startsWith('m:') && mineItems().some(x => x.id === id))) { const c = genCache.get(fv.seed); return c && c.id === id ? c : favItem(fv); }
     if (id.startsWith('m:')) return mineItems().find(x => x.id === id) || null;
@@ -4614,8 +4822,8 @@ window.GrugCatalogHair = function (ctx) {
   /* ---------------------------------------------------------------- catalog page */
   const REFINE_KEYS = ['worn', 'lens', 'logo', 'texture', 'vibe', 'theme', 'cord', 'mount', 'pattern'];
   const cat = { q: '', dept: 'all', sub: 'all', worn: 'any', lens: 'any', logo: 'any', texture: 'any', vibe: 'any', theme: 'any', cord: 'any', mount: 'any', pattern: 'any', brand: 'any', colour: 'any', sort: 'featured', count: 48 };
-  const DEPTS = [['all', 'All items', 'shopping_bag', 'var(--g-lime)'], ['eyewear', 'Eyewear', 'glasses', 'var(--g-teal)'], ['hair', 'Hair', 'hair', 'var(--g-pink)'], ['earrings', 'Earrings', 'diamond', 'var(--g-purple)'], ['necklaces', 'Necklaces', 'flower', 'var(--g-orange)'], ['purses', 'Purses', 'shopping_bag', 'var(--g-pink)'], ['favs', 'Favorites', 'star', 'var(--g-yellow)'], ['yours', 'Your designs', 'heart', 'var(--g-red)']].filter(x => x[0] !== 'hair' || HD);
-  const SUBS = { eyewear: [['glasses', 'Glasses'], ['shades', 'Shades'], ['goggles', 'Goggles']], hair: HD ? HD.SUB : [], earrings: [['studs', 'Studs'], ['drops', 'Drops'], ['danglers', 'Danglers'], ['hoops', 'Hoops']], necklaces: [['choker', 'Chokers'], ['short', 'Short'], ['medium', 'Medium'], ['long', 'Long']], purses: [['satchel', 'Satchels'], ['tote', 'Totes'], ['bucket', 'Buckets'], ['round', 'Rounds'], ['heart', 'Hearts'], ['clutch', 'Clutches']] };
+  const DEPTS = [['all', 'All items', 'shopping_bag', 'var(--g-lime)'], ['eyewear', 'Eyewear', 'glasses', 'var(--g-teal)'], ['hair', 'Hair', 'hair', 'var(--g-pink)'], ['earrings', 'Earrings', 'diamond', 'var(--g-purple)'], ['necklaces', 'Necklaces', 'flower', 'var(--g-orange)'], ['purses', 'Purses', 'shopping_bag', 'var(--g-pink)'], ['sandals', 'Sandals', 'sun', 'var(--g-blue)'], ['favs', 'Favorites', 'star', 'var(--g-yellow)'], ['yours', 'Your designs', 'heart', 'var(--g-red)']].filter(x => x[0] !== 'hair' || HD);
+  const SUBS = { eyewear: [['glasses', 'Glasses'], ['shades', 'Shades'], ['goggles', 'Goggles']], hair: HD ? HD.SUB : [], earrings: [['studs', 'Studs'], ['drops', 'Drops'], ['danglers', 'Danglers'], ['hoops', 'Hoops']], necklaces: [['choker', 'Chokers'], ['short', 'Short'], ['medium', 'Medium'], ['long', 'Long']], sandals: [['slide', 'Slides'], ['thong', 'Thongs'], ['ankle', 'Ankle straps'], ['gladiator', 'Gladiators'], ['wrap', 'Wraps']], purses: [['satchel', 'Satchels'], ['tote', 'Totes'], ['bucket', 'Buckets'], ['round', 'Rounds'], ['heart', 'Hearts'], ['clutch', 'Clutches']] };
   const F_WORN = [['any', 'Any way', 'person'], ['on', 'On the eyes', 'face'], ['up', 'Pushed up', 'arrow_up']];
   const F_LENS = [['any', 'Any lens', 'glass_pane'], ['Clear', 'Clear', 'droplet'], ['Tinted', 'Tinted', 'circle_half_filled'], ['Odd lenses', 'Odd lenses', 'eye'], ['Mirrored', 'Mirrored', 'reflect'], ['Gradient', 'Gradient', 'sky'], ['Bifocal', 'Bifocal', 'book_open'], ['Rose-tinted', 'Rose-tinted', 'flower']];
   const F_LOGO = [['any', 'Any', 'sticker'], ['yes', 'Grug logo', 'star'], ['no', 'No logo', 'circle']];
@@ -4624,6 +4832,7 @@ window.GrugCatalogHair = function (ctx) {
   const REFINE = {
     earrings: [['theme', 'Theme', F_THEME.map(x => [x[0], x[1], null])], ['mount', 'Mount', [['any', 'Any mount', null], ['Stud', 'Studs', null], ['Hook', 'Hooks', null]]]],
     necklaces: [['theme', 'Theme', F_THEME.map(x => [x[0], x[1], null])], ['cord', 'Cord', [['any', 'Any cord', null], ['Chain', 'Chain', null], ['Cord', 'Cord', null], ['Ribbon', 'Ribbon', null], ['Beads', 'Beads', null], ['Pearls', 'Pearls', null]]]],
+    sandals: [['theme', 'Theme', F_THEME.map(x => [x[0], x[1], null])], ['mount', 'Sole', [['any', 'Any sole', null], ['Flat', 'Flat', null], ['Platform', 'Platform', null], ['Wedge', 'Wedge', null], ['Block', 'Block heel', null]]], ['pattern', 'Colour', [['any', 'Any colour style', null], ['Solid', 'Solid colour', null], ['Gradient', 'Gradient', null]]]],
     purses: [['theme', 'Theme', F_THEME.map(x => [x[0], x[1], null])], ['cord', 'Strap', [['any', 'Any strap', null], ['Chain', 'Chain', null], ['Strap', 'Strap', null], ['Wide strap', 'Wide strap', null], ['Cord', 'Cord', null], ['Beads', 'Beads', null], ['Pearls', 'Pearls', null]]], ['pattern', 'Pattern', [['any', 'Any pattern', null], ['Gingham', 'Gingham', null], ['Stripes', 'Stripes', null], ['Polka dots', 'Polka dots', null], ['Quilted', 'Quilted', null], ['Checks', 'Checks', null]]]],
     eyewear: [['worn', 'Worn', F_WORN], ['lens', 'Lenses', F_LENS], ['logo', 'Logo', F_LOGO]],
     hair: HD ? [['texture', 'Texture', [['any', 'Any texture', 'comb']].concat(HD.TEXTURE)], ['vibe', 'Look', [['any', 'Any look', 'hair']].concat(HD.VIBE)]] : []
@@ -4633,7 +4842,7 @@ window.GrugCatalogHair = function (ctx) {
   function allItems() {
     const out = mineItems(); for (let i = 0; i < cat.count; i++) out.push(generated(i));
     out.push(...hairItems());
-    for (let i = 0; i < cat.count; i++) { const a = JM.gen('earrings', catSeed + '-' + i), b = JM.gen('necklaces', catSeed + '-' + i), c = JM.gen('purses', catSeed + '-' + i); a.order = i * 4 + 1.3; b.order = i * 4 + 2.3; c.order = i * 4 + 3.3; out.push(a, b, c); }
+    for (let i = 0; i < cat.count; i++) { const a = JM.gen('earrings', catSeed + '-' + i), b = JM.gen('necklaces', catSeed + '-' + i), c = JM.gen('purses', catSeed + '-' + i), e2 = JM.gen('sandals', catSeed + '-' + i); a.order = i * 5 + 1.3; b.order = i * 5 + 2.3; c.order = i * 5 + 3.3; e2.order = i * 5 + 4.3; out.push(a, b, c, e2); }
     const have = new Set(out.map(x => x.id)); for (const f of favs) if (!have.has(f.id)) { const x = favItem(f); if (x) out.push(x); }
     return out;
   }
@@ -4643,7 +4852,7 @@ window.GrugCatalogHair = function (ctx) {
     if (f.dept === 'favs') { if (!isFav(it.id)) return false; } else if (it.favOnly) return false;
     if (f.dept === 'yours' && !it.mine) return false;
     if (f.brand !== 'any' && (it.brand || 'grug') !== f.brand) return false;
-    if (f.dept === 'eyewear' || f.dept === 'hair' || f.dept === 'earrings' || f.dept === 'necklaces' || f.dept === 'purses') {
+    if (f.dept === 'eyewear' || f.dept === 'hair' || f.dept === 'earrings' || f.dept === 'necklaces' || f.dept === 'purses' || f.dept === 'sandals') {
       if (dp !== f.dept) return false;
       if (f.sub !== 'all') { if (dp === 'eyewear' || isJ(it) ? it.kind !== f.sub : !(it.length === f.sub || it.tags.includes(f.sub))) return false; }
     }
@@ -4750,7 +4959,7 @@ window.GrugCatalogHair = function (ctx) {
     const grid = $('#catGrid'); grid.innerHTML = '';
     if (!items.length) grid.append(el('div', 'cload', cat.dept === 'favs' && !favs.length ? 'No favourites yet. Tap the star on anything to start a collection.' : 'Nothing matches that. Try another filter.'));
     for (const it of items) { const a = card(it, 'worn'); grid.append(a); seen.observe(a); }
-    $('#catMore').parentElement.hidden = total <= items.length && cat.dept !== 'all' && cat.dept !== 'eyewear' && cat.dept !== 'earrings' && cat.dept !== 'necklaces' && cat.dept !== 'purses';
+    $('#catMore').parentElement.hidden = total <= items.length && cat.dept !== 'all' && cat.dept !== 'eyewear' && cat.dept !== 'earrings' && cat.dept !== 'necklaces' && cat.dept !== 'purses' && cat.dept !== 'sandals';
     GRUG.hydrate(grid); GRUG.hydrate($('.cat-side')); GRUG.hydrate($('#crumbs'));
     $('#hero').hidden = !!cat.q || cat.dept === 'yours' || cat.dept === 'favs';
     renderHero();
@@ -4766,7 +4975,7 @@ window.GrugCatalogHair = function (ctx) {
   { const io = new IntersectionObserver(es => { if (appMode === 'catalog' && es.some(e => e.isIntersecting) && cat.count < 480 && $('#catGrid').children.length > 8) { cat.count += 24; renderCatalog(); } }, { root: $('#catalog'), rootMargin: '200px' }); io.observe($('#catMore')); }
   $('#heroShuffle').onclick = () => { catSeed = 'grug-' + Math.random().toString(36).slice(2, 8); store.set(SEED_KEY, catSeed); genCache.clear(); cat.count = 48; renderCatalog(); $('#catalog').scrollTo({ top: 0 }); GRUG.toast('A fresh batch'); };
   $('#heroRoll').onclick = () => { roll('all'); location.hash = '#edit'; };
-  for (const [id, dept] of [['#heroEar', 'earrings'], ['#heroNeck', 'necklaces'], ['#heroPurse', 'purses']]) $(id).onclick = () => { if (location.hash === '#edit/' + dept) return; JM.dept = dept; location.hash = '#edit/' + dept; setTimeout(() => JM.roll('all'), 60); };
+  for (const [id, dept] of [['#heroEar', 'earrings'], ['#heroNeck', 'necklaces'], ['#heroPurse', 'purses'], ['#heroSandal', 'sandals']]) $(id).onclick = () => { if (location.hash === '#edit/' + dept) return; JM.dept = dept; location.hash = '#edit/' + dept; setTimeout(() => JM.roll('all'), 60); };
   // Create: the eyewear editor here, or the Hair Studio
   $('#catCreate').onclick = e => { e.stopPropagation(); const m = $('#createMenu'), open = m.hidden; $$('.rollmenu').forEach(x => x.hidden = true); m.hidden = !open; };
   $('#createHair').href = HAIR_STUDIO; $('#heroHair').href = HAIR_STUDIO; if (!HD) { $('#createHair').hidden = true; $('#heroHair').hidden = true; }
@@ -4862,7 +5071,7 @@ window.GrugCatalogHair = function (ctx) {
     syncFavBtn(); $('#itRemove').hidden = !it.mine || hair; $('#itTry').classList.toggle('is-on', viewer.tryOn); $('#itTry').hidden = isJ(it);
     $('#itEdit').querySelector('span').textContent = hair ? 'Edit in the Hair Studio' : isJ(it) ? 'Edit these' : 'Edit this pair';
     $('#itNote').textContent = hair ? 'Pick a detail level above, then a format: GLB, FBX, OBJ, glTF, STL or PLY. Low is game ready: hidden strands removed and one texture. Sized in centimetres for her head.' : 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres for her head. The lens reflections are painted into the lens texture, so they look the same in any engine.';
-    if (isJ(it)) $('#itNote').textContent = it.dept === 'purses' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres to hang across her body. Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Charms are flat pictures on a card.' : it.dept === 'earrings' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres for her head. Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Charms are flat pictures on a card.' : 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres to sit on her neck and chest. Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Charms are flat pictures on a card.';
+    if (isJ(it)) $('#itNote').textContent = it.dept === 'sandals' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres to fit her feet (a pair, in one mesh). Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart.' : it.dept === 'purses' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres to hang across her body. Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Charms are flat pictures on a card.' : it.dept === 'earrings' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres for her head. Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Charms are flat pictures on a card.' : 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres to sit on her neck and chest. Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Charms are flat pictures on a card.';
     // the same hairstyle in its other colours
     const cbx = $('#itColours'); cbx.innerHTML = ''; const sib = hair && it.base ? HD.styleItems().filter(x => x.base === it.base) : [];
     $('#itColourRow').hidden = sib.length < 2; $('#itColourName').textContent = hair ? it.colour : '';
@@ -5211,7 +5420,7 @@ window.GrugCatalogHair = function (ctx) {
   }
 
   const JKEY = dept => 'grug.jewelry.' + dept + '.v1', JROLLS = 'grug.jewelry.rolls.v1';
-  const JDEPT = { earrings: { label: 'Earrings', one: 'earrings', icon: 'diamond', c: 'var(--g-purple)', studio: 'Earrings studio' }, purses: { label: 'Purses', one: 'purse', icon: 'shopping_bag', c: 'var(--g-pink)', studio: 'Purse studio' }, necklaces: { label: 'Necklaces', one: 'necklace', icon: 'flower', c: 'var(--g-orange)', studio: 'Necklace studio' } };
+  const JDEPT = { earrings: { label: 'Earrings', one: 'earrings', icon: 'diamond', c: 'var(--g-purple)', studio: 'Earrings studio' }, sandals: { label: 'Sandals', one: 'sandals', icon: 'sun', c: 'var(--g-blue)', studio: 'Sandal studio' }, purses: { label: 'Purses', one: 'purse', icon: 'shopping_bag', c: 'var(--g-pink)', studio: 'Purse studio' }, necklaces: { label: 'Necklaces', one: 'necklace', icon: 'flower', c: 'var(--g-orange)', studio: 'Necklace studio' } };
   const JSW = ['#e8344f', '#ff6fa8', '#ffc2d6', '#fff6f2', '#16161a', '#f2801f', '#f5d21f', '#9be338', '#2e9b48', '#14a3a0', '#4fd8e0', '#2b62d9', '#7d3fc4', '#d4af37', '#c8ccd2'];
   const JSW_KIMI = J.PINKS.slice(0, 6).concat(['#fffafc', '#c4e1ff', '#e0d3ff', '#fff2b8', '#c6f3dd', '#ffd8c4']);
   const KIMI_CARD = '#ffc2dc', KIMI_MANN = 'hsl(222, 38%, 62%)';
@@ -5243,6 +5452,17 @@ window.GrugCatalogHair = function (ctx) {
       ['KIMILAND pearls', { brand: 'kimiland', len: 0.3, cord: 'pearls', cordCol: '#ffd1e3', thick: 0.6, items: [E_('heart', 2.4, '#ffb7d5')] }],
       ['KIMILAND KL choker', { brand: 'kimiland', len: 0.04, cord: 'ribbon', cordCol: '#ffc4dc', thick: 0.9, items: [C_('kimiland-kl', 2.4)] }]
     ],
+    sandals: [
+      ['Pink ankle straps', { style: 'ankle', soleH: 1.2, heelH: 0, soleCol: '#fff6f2', bedCol: '#ffc2d6', strapCol: '#ff6fa8', strapT: 0.35, strapW: 1.2, charms: [E_('heart', 1.3, '#e8344f', { at: 0.9 })] }],
+      ['Gold slides', { style: 'slide', soleH: 1, soleCol: '#16161a', bedCol: '#d4af37', strapCol: '#d4af37', strapW: 3, strapT: 0.4, finish: 'metal', charms: [] }],
+      ['Sunset flip-flops', { style: 'thong', soleH: 1.4, soleCol: '#ff8a4c', soleCol2: '#ff6fa8', soleGrad: true, bedCol: '#fff6f2', strapCol: '#ff6fa8', strapCol2: '#f5d21f', strapGrad: true, strapW: 1.1, charms: [] }],
+      ['Ocean gladiators', { style: 'gladiator', shaft: 18, soleH: 1, soleCol: '#fff6f2', bedCol: '#fff6f2', strapCol: '#2b62d9', strapCol2: '#4fd8e0', strapGrad: true, strapW: 1.1, strapT: 0.3, charms: [C_('snowflake', 1.5, { at: 0.6 })] }],
+      ['Ribbon wedges', { style: 'wrap', shaft: 16, soleH: 1.4, heelH: 5, heelType: 'wedge', soleCol: '#c8ccd2', bedCol: '#fff6f2', strapCol: '#7d3fc4', strapW: 0.9, strapT: 0.25, charms: [] }],
+      ['Block heel slingbacks', { style: 'ankle', soleH: 0.8, heelH: 6, heelType: 'block', soleCol: '#e8344f', bedCol: '#fff6f2', strapCol: '#e8344f', strapW: 1.4, charms: [C_('rose', 1.5, { at: 0.8 })] }],
+      ['Pumpkin platforms', { style: 'slide', soleH: 3.6, heelH: 0, soleCol: '#16161a', bedCol: '#f2801f', strapCol: '#f2801f', strapW: 3, charms: [C_('pumpkin', 1.6, { at: 0.5 }), C_('bat', 1.4, { at: -0.4 })] }],
+      ['KIMILAND pastel slides', { brand: 'kimiland', style: 'slide', soleH: 1.6, soleCol: '#ffc4dc', soleCol2: '#e0d3ff', soleGrad: true, bedCol: '#fffafc', strapCol: '#fffafc', strapW: 3, charms: [E_('heart', 1.3, '#ffb7d5', { at: 0.6 })] }],
+      ['KIMILAND KL wraps', { brand: 'kimiland', style: 'wrap', shaft: 14, soleH: 1.4, heelH: 3, soleCol: '#fffafc', bedCol: '#ffc4dc', strapCol: '#ffb7d5', strapCol2: '#fffafc', strapGrad: true, strapW: 0.9, strapT: 0.25, charms: [C_('kimiland-kl', 1.6, { at: 0.8 })] }]
+    ],
     purses: [
       ['Pink satchel', { shape: 'satchel', body: '#ff8fc2', body2: '#fff6f2', closure: 'clasp', strap: 'chain', hw: '#d4af37', strapCol: '#d4af37', charms: [E_('heart', 1.5, '#e8344f', { at: 0.6 })] }],
       ['Black tote', { shape: 'tote', w: 20, h: 16, depth: 7, body: '#2a2a31', body2: '#fff6f2', flap: false, closure: 'none', handle: true, strap: 'strap', strapCol: '#16161a', hw: '#c8ccd2', charms: [] }],
@@ -5258,24 +5478,25 @@ window.GrugCatalogHair = function (ctx) {
 
   const JM = {
     on: false, dept: null, st: null, hist: { stack: [], i: -1 }, tab: 'pieces', saveT: 0, built: null, q: 0, notes: [], orig: null,
-    isJ: it => !!it && (it.dept === 'earrings' || it.dept === 'necklaces' || it.dept === 'purses'),
-    list() { return this.dept === 'earrings' ? this.st.d.seq : this.dept === 'purses' ? this.st.d.charms : this.st.d.items; },
+    isJ: it => !!it && (it.dept === 'earrings' || it.dept === 'necklaces' || it.dept === 'purses' || it.dept === 'sandals'),
+    list() { return this.dept === 'earrings' ? this.st.d.seq : this.dept === 'purses' || this.dept === 'sandals' ? this.st.d.charms : this.st.d.items; },
     // a catalog item from a design
     item(dept, id, seed, d, o) { o = o || {}; const v = J.validate(dept, d, d.brand).d; return Object.assign({ id, dept, seed, d: v, brand: v.brand, name: o.name || J.nameFor(dept, v, seed), kind: J.kindOf(dept, v), by: o.by || brandBy(v.brand), order: 0, stamp: 0, gen: true }, o, { d: v }); },
-    gen(dept, seed) { const id = { earrings: 'ge:', necklaces: 'gn:', purses: 'gp:' }[dept] + seed; if (genCache.has(id)) return genCache.get(id); const d = J.random(dept, seed), it = this.item(dept, id, seed, d); genCache.set(id, it); return it; },
-    byId(id) { const m = /^g([enp]):(.*)$/.exec(id); return m ? this.gen({ e: 'earrings', n: 'necklaces', p: 'purses' }[m[1]], m[2]) : null; },
+    gen(dept, seed) { const id = { earrings: 'ge:', necklaces: 'gn:', purses: 'gp:', sandals: 'gs:' }[dept] + seed; if (genCache.has(id)) return genCache.get(id); const d = J.random(dept, seed), it = this.item(dept, id, seed, d); genCache.set(id, it); return it; },
+    byId(id) { const m = /^g([enps]):(.*)$/.exec(id); return m ? this.gen({ e: 'earrings', n: 'necklaces', p: 'purses', s: 'sandals' }[m[1]], m[2]) : null; },
     fromFav(f) { return this.item(f.dept, f.id, f.seed, f.d, { name: f.name, by: f.by, order: 100000 - (f.when || 0) / 1e9, favOnly: true, gen: /^g/.test(f.id), mine: f.id.startsWith('m:') }); },
     fromMine(m, i) { return this.item(m.dept, 'm:' + m.id, m.seed || m.id, m.d, { name: m.name, by: 'You', order: -1000 + i, stamp: m.when || 0, mine: true, gen: false, saved: m }); },
     text(it) { const list = it.d.seq || it.d.items || it.d.charms; return [it.name, it.dept, JDEPT[it.dept].one].concat(J.tagsFor(it.dept, it.d), list.map(J.elName)).concat(it.brand === 'kimiland' ? ['pastel', 'cute'] : []); },
     families(it) { return J.families(it.dept, it.d); },
     specRows(it) {
       const d = it.d, dept = it.dept, rows = [], kimi = d.brand === 'kimiland', list = d.seq || d.items || d.charms, sw = c => swatch(c);
-      rows.push(['Type', dept === 'purses' ? J.BAG_LABEL[d.shape] + ' purse' : dept === 'earrings' ? J.KIND_LABEL[J.kindOf(dept, d)] + ' earrings' : J.lenClass(d).label + ' necklace']);
+      rows.push(['Type', dept === 'sandals' ? J.STYLE_LABEL[d.style] + ' sandals' : dept === 'purses' ? J.BAG_LABEL[d.shape] + ' purse' : dept === 'earrings' ? J.KIND_LABEL[J.kindOf(dept, d)] + ' earrings' : J.lenClass(d).label + ' necklace']);
       rows.push(['Brand', esc(brandBy(d.brand))]);
       if (dept === 'earrings') { rows.push(['Mount', d.mount === 'stud' ? 'Stud post' : 'Hook']); if (d.link !== 'none' || d.mount === 'hook') rows.push(['Metal', sw(d.metal) + esc(J.colourName(d.metal, kimi))]); rows.push(['Pair', d.pair === 'mismatch' ? 'Mismatched' : 'Matching']); }
       else if (dept === 'necklaces') { rows.push(['Length', J.lenLabel(d.len) + (JM.cm(d) ? ' · ' + JM.cm(d) + ' cm round' : '')]); rows.push(['Cord', { chain: 'Chain', cord: 'Cord', ribbon: 'Ribbon', beads: 'Beads', pearls: 'Pearls' }[d.cord] + ' · ' + sw(d.cordCol) + esc(J.colourName(d.cordCol, kimi))]); }
+      if (dept === 'sandals') { rows.push(['Sole', d.soleH.toFixed(1) + ' cm' + (d.heelH >= 1 ? ' + ' + d.heelH.toFixed(1) + ' cm ' + J.HEEL_LABEL[d.heelType].toLowerCase() + ' heel' : '')]); rows.push(['Straps', sw(d.strapCol) + esc(J.colourName(d.strapCol, kimi)) + (d.strapGrad ? ' fading to ' + esc(J.colourName(d.strapCol2, kimi)) : '') + ' · ' + d.strapT.toFixed(2) + ' cm thick']); rows.push(['Sole colour', sw(d.soleCol) + esc(J.colourName(d.soleCol, kimi)) + (d.soleGrad ? ' fading to ' + esc(J.colourName(d.soleCol2, kimi)) : '')]); }
       if (dept === 'purses') { rows.push(['Strap', J.STRAP_LABEL[d.strap] + ' · ' + sw(d.strapCol) + esc(J.colourName(d.strapCol, kimi))]); rows.push(['Bag', sw(d.body) + esc(J.colourName(d.body, kimi)) + (d.pattern === 'solid' ? '' : ' · ' + J.PATTERN_LABEL[d.pattern].toLowerCase())]); rows.push(['Closure', J.CLOSURE_LABEL[d.closure] + (d.handle ? ' · top handle' : '')]); rows.push(['Size', Math.round(d.w) + ' × ' + Math.round(d.h) + ' cm']); }
-      rows.push([dept === 'earrings' ? 'Sequence' : dept === 'purses' ? 'Keychains' : 'Charms', list.length ? list.map(e => esc(J.elName(e))).join(', ') : 'None']);
+      rows.push([dept === 'earrings' ? 'Sequence' : dept === 'purses' ? 'Keychains' : dept === 'sandals' ? 'Strap charms' : 'Charms', list.length ? list.map(e => esc(J.elName(e))).join(', ') : 'None']);
       if (kimi) rows.push(['Colours', 'KIMILAND pastels']);
       return rows.map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
     },
@@ -5284,9 +5505,9 @@ window.GrugCatalogHair = function (ctx) {
     mountItem(it) { const b = J.build(it.dept, it.d); const parent = b.frame === 'head' ? headGroup : scene; parent.add(b.root); b.root.userData.catalogItem = true; if (b.frame !== 'head') this.necks.add(b.root); this.syncDress(); return b; },
     unmount(b) { if (!b) return; if (b.root.parent) b.root.parent.remove(b.root); this.necks.delete(b.root); b.dispose(); this.syncDress(); },
     // the dress's ruffle is put away while any necklace is on her
-    syncDress() {},
+    syncDress() { const c = sandy.__cut; if (!c) return; if (c.__c0 == null) c.__c0 = c.constant; const on = Array.from(this.necks).some(r => r.userData.jewel && r.userData.jewel.dept === 'sandals'); c.constant = on ? 30 : c.__c0; },
     // what the camera frames: the pieces themselves with some room
-    frameBox(root, it) { sandy.object3d.updateMatrixWorld(true); const near = it.dept === 'earrings' && root.children[0] && root.children[0].children[0]; const box = new THREE.Box3().setFromObject(near || root); box.expandByVector(it.dept === 'earrings' ? new THREE.Vector3(3, 2.5, 4) : it.dept === 'purses' ? new THREE.Vector3(4, 3, 6) : new THREE.Vector3(1.5, 1.5, 4)); return box; },
+    frameBox(root, it) { sandy.object3d.updateMatrixWorld(true); const near = it.dept === 'earrings' && root.children[0] && root.children[0].children[0]; const box = new THREE.Box3().setFromObject(near || root); box.expandByVector(it.dept === 'earrings' ? new THREE.Vector3(3, 2.5, 4) : it.dept === 'purses' ? new THREE.Vector3(4, 3, 6) : it.dept === 'sandals' ? new THREE.Vector3(3, 2, 5) : new THREE.Vector3(1.5, 1.5, 4)); return box; },
     centre() { const b = this.built; if (!b) return new THREE.Vector3(0, this.dept === 'earrings' ? 150 : 135, 0); b.root.updateMatrixWorld(true); return new THREE.Box3().setFromObject(b.root).getCenter(new THREE.Vector3()); },
 
     /* ---- the editor (the eyewear editor's page, switched into this) */
@@ -5301,15 +5522,15 @@ window.GrugCatalogHair = function (ctx) {
         this.hist = { stack: [], i: -1 }; this.tab = 'pieces'; rtab = 'pieces';
       }
       $('#top .brand .ttl').textContent = JDEPT[dept].studio;
-      const tabs = dept === 'purses' ? [['pieces', 'Bag', 'shopping_bag'], ['strap', 'Strap', 'circle'], ['charms', 'Charms', 'star'], ['look', 'Look', 'palette']] : dept === 'earrings' ? [['pieces', 'Pieces', 'diamond'], ['look', 'Look', 'palette'], ['fit', 'Fit', 'person']] : [['pieces', 'Cord', 'flower'], ['charms', 'Charms', 'star'], ['look', 'Look', 'palette']];
+      const tabs = dept === 'sandals' ? [['pieces', 'Sole', 'sun'], ['strap', 'Straps', 'circle'], ['charms', 'Charms', 'star'], ['look', 'Look', 'palette']] : dept === 'purses' ? [['pieces', 'Bag', 'shopping_bag'], ['strap', 'Strap', 'circle'], ['charms', 'Charms', 'star'], ['look', 'Look', 'palette']] : dept === 'earrings' ? [['pieces', 'Pieces', 'diamond'], ['look', 'Look', 'palette'], ['fit', 'Fit', 'person']] : [['pieces', 'Cord', 'flower'], ['charms', 'Charms', 'star'], ['look', 'Look', 'palette']];
       $('#rtabs').innerHTML = tabs.map(([k, l, i], n) => `<button data-rt="${k}"${n ? '' : ' class="is-on"'}>${ic(i)} ${l}</button>`).join('');
       $('#rollMenu').innerHTML = [['all', 'dice', 'Everything', 'R'], ['colours', 'palette', 'Just the colours', 'C'], ['shape', JDEPT[dept].icon, 'Just the pieces', 'S']].map(([k, i, l, kk]) => `<button data-roll="${k}">${ic(i)}${l}<span class="g-kbd k">${kk}</span></button>`).join('')
-        + (dept === 'purses' ? J.BAG_SHAPES.map(([k, l]) => [k, 'New ' + l.toLowerCase()]) : dept === 'earrings' ? [['studs', 'New studs'], ['drops', 'New drops'], ['danglers', 'New danglers'], ['hoops', 'New hoops']] : [['choker', 'New choker'], ['short', 'New short necklace'], ['medium', 'New medium necklace'], ['long', 'New long necklace']]).map(([k, l]) => `<button data-roll="${k}">${ic(JDEPT[dept].icon)}${l}</button>`).join('')
+        + (dept === 'sandals' ? J.STYLES.map(([k, l]) => [k, 'New ' + l.toLowerCase()]) : dept === 'purses' ? J.BAG_SHAPES.map(([k, l]) => [k, 'New ' + l.toLowerCase()]) : dept === 'earrings' ? [['studs', 'New studs'], ['drops', 'New drops'], ['danglers', 'New danglers'], ['hoops', 'New hoops']] : [['choker', 'New choker'], ['short', 'New short necklace'], ['medium', 'New medium necklace'], ['long', 'New long necklace']]).map(([k, l]) => `<button data-roll="${k}">${ic(JDEPT[dept].icon)}${l}</button>`).join('')
         + `<button data-roll="kimiland">${ic('heart')}Roll as KIMILAND</button><button data-roll="grug">${ic('star')}Roll as Grug Digital</button>`;
       $$('#left .sec .g-label').forEach((x, i) => { if (i === 0) x.textContent = 'Starters'; });
       $('#bPublish').dataset.gTip = 'Show it in the catalog'; $('#docName').setAttribute('aria-label', 'Name');
       if (worn) worn.root.visible = false; setHair(true);
-      this.rebuild(true); this.renderStarters(); this.renderRolls(); renderInspector(); GRUG.hydrate($('#rtabs')); GRUG.hydrate($('#rollMenu')); setView('three'); cam.dist = dept === 'earrings' ? 78 : dept === 'purses' ? 150 : 118; cam.yaw = dept === 'earrings' ? 0.9 : dept === 'purses' ? 0.35 : 0.5; this.commit(true); this.undoBtns();
+      this.rebuild(true); this.renderStarters(); this.renderRolls(); renderInspector(); GRUG.hydrate($('#rtabs')); GRUG.hydrate($('#rollMenu')); setView('three'); cam.dist = dept === 'earrings' ? 78 : dept === 'purses' ? 150 : dept === 'sandals' ? 120 : 118; cam.yaw = dept === 'earrings' ? 0.9 : dept === 'purses' ? 0.35 : dept === 'sandals' ? 0.55 : 0.5; if (dept === 'sandals') cam.pitch = 0.22; this.commit(true); this.undoBtns();
     },
     leave() {
       if (!this.on) return; this.on = false; this.dept = null; delete $('#editor').dataset.jm; clearTimeout(this.saveT); this.unmount(this.built); this.built = null;
@@ -5322,7 +5543,7 @@ window.GrugCatalogHair = function (ctx) {
       const r = J.validate(this.dept, this.st.d, this.st.d.brand); this.st.d = r.d; this.notes = r.notes;
       this.unmount(this.built); this.built = this.mountItem({ dept: this.dept, d: this.st.d }); if (worn) worn.root.visible = false;
       const kind = J.kindOf(this.dept, this.st.d), k = JDEPT[this.dept], tri = this.built.info.tris.toLocaleString();
-      $('#reads').innerHTML = `<span class="ib2" style="--c:${k.c}">${ic(k.icon)}</span><span><b>${this.dept === 'purses' ? J.BAG_LABEL[kind] + ' purse' : this.dept === 'earrings' ? J.KIND_LABEL[kind] : J.lenLabel(this.st.d.len)}</b><span>${this.dept === 'necklaces' ? Math.round(this.built.info.lengthCm) + ' cm round · ' : ''}${esc(brandBy(this.st.d.brand))} · ${tri} triangles</span></span>`;
+      $('#reads').innerHTML = `<span class="ib2" style="--c:${k.c}">${ic(k.icon)}</span><span><b>${this.dept === 'sandals' ? J.STYLE_LABEL[kind] + ' sandals' : this.dept === 'purses' ? J.BAG_LABEL[kind] + ' purse' : this.dept === 'earrings' ? J.KIND_LABEL[kind] : J.lenLabel(this.st.d.len)}</b><span>${this.dept === 'necklaces' ? Math.round(this.built.info.lengthCm) + ' cm round · ' : ''}${esc(brandBy(this.st.d.brand))} · ${tri} triangles</span></span>`;
       const fx = $('#fixes'); fx.hidden = !this.notes.length; fx.innerHTML = this.notes.length ? '<b>Adjusted:</b> ' + this.notes.map(esc).join('. ') + '.' : '';
       $('#docName').value = this.st.name;
     },
@@ -5398,7 +5619,7 @@ window.GrugCatalogHair = function (ctx) {
       const acts = el('span', 'jacts'); const mk = (icon, tip, fn, dis) => { const b = el('button', 'g-btn g-btn--ghost g-btn--icon g-btn--sm', ic(icon)); b.setAttribute('aria-label', tip); b.setAttribute('data-g-tip', tip); if (dis) b.disabled = true; b.onclick = fn; acts.append(b); };
       if (dept === 'earrings') { mk('arrow_up', 'Move up', () => { [list[i - 1], list[i]] = [list[i], list[i - 1]]; this.set({}, true); }, i === 0); mk('arrow_down_to_line', 'Move down', () => { [list[i + 1], list[i]] = [list[i], list[i + 1]]; this.set({}, true); }, i === list.length - 1); }
       mk('plus_in_circle', 'Copy', () => { if (list.length < J.LIMITS[dept].n) { list.splice(i + 1, 0, JSON.parse(JSON.stringify(e))); this.set({}, true); } }, list.length >= J.LIMITS[dept].n);
-      const minN = dept === 'purses' ? 0 : 1; mk('trash_can', 'Remove', () => { if (list.length > minN) { list.splice(i, 1); this.set({}, true); } }, list.length <= minN);
+      const minN = dept === 'purses' || dept === 'sandals' ? 0 : 1; mk('trash_can', 'Remove', () => { if (list.length > minN) { list.splice(i, 1); this.set({}, true); } }, list.length <= minN);
       top.append(pic, sel, acts); card.append(top);
       this.slider(card, { label: 'Size', value: e.size, min: 0.5, max: dept === 'earrings' ? 4 : 5, fmt: v => v.toFixed(1) + ' cm', on: (v, f) => this.setEl(i, { size: v }, f) });
       if (e.k === 'shape') { this.colour(card, 'Colour', e.col, (v, f) => this.setEl(i, { col: v }, f)); this.segs(card, J.FINISHES.map(x => [x[0], x[1]]), e.finish, v => this.setEl(i, { finish: v }, true), 3); }
@@ -5407,6 +5628,7 @@ window.GrugCatalogHair = function (ctx) {
         if (!c.noOutline) { const t = el('label', 'row sw2', '<span class="lb">Outlined</span>'), sw = el('input', 'g-switch'); sw.type = 'checkbox'; sw.checked = e.outline; sw.onchange = () => this.setEl(i, { outline: sw.checked }, true); t.append(sw); card.append(t); }
         if (!c.brand) { this.segs(card, [['', 'Original colours'], ['wash', kimi ? 'Pastel wash' : 'Colour wash']], e.tint ? 'wash' : '', v => this.setEl(i, { tint: v === 'wash' ? (J.isPastel(e.col) || !kimi ? e.col : '#ffc4dc') : '' }, true), 2); if (e.tint) this.colour(card, 'Wash colour', e.tint === 'pastel' ? '#ffc4dc' : e.tint, (v, f) => this.setEl(i, { tint: v }, f)); }
       }
+      if (dept === 'sandals') this.slider(card, { label: 'Position', value: e.at, min: -1, max: 1, fmt: v => v < -0.05 ? 'Inner side' : v > 0.05 ? 'Outer side' : 'Top', ends: ['Inner side', 'Outer side'], on: (v, f) => this.setEl(i, { at: v }, f) });
       if (dept === 'purses') {
         this.slider(card, { label: 'Position', value: e.at, min: -1, max: 1, fmt: v => v < -0.05 ? 'Left' : v > 0.05 ? 'Right' : 'Middle', ends: ['Left of the bag', 'Right of the bag'], on: (v, f) => this.setEl(i, { at: v }, f) });
         this.slider(card, { label: 'Chain length', value: e.drop, min: 0.4, max: 9, fmt: v => v.toFixed(1) + ' cm', on: (v, f) => this.setEl(i, { drop: v }, f) });
@@ -5420,18 +5642,19 @@ window.GrugCatalogHair = function (ctx) {
     addGallery(parent) {
       const list = this.list(), full = list.length >= J.LIMITS[this.dept].n, kimi = this.st.d.brand === 'kimiland', g = grp(parent, 'Add');
       g.append(el('div', 'note', full ? 'That\'s the most it holds. Remove one to add another.' : 'Tap a shape or a charm to add it.'));
-      const sh = el('div', 'jgrid'); for (const [v, l] of J.SHAPES) { const b = el('button', '', `<span>${esc(l)}</span>`); b.disabled = full; b.onclick = () => { const e = J.EL({ k: 'shape', id: v, size: this.dept === 'earrings' ? 1.2 : 1.8, col: kimi ? '#ffc4dc' : '#ff8fc2', mode: this.dept === 'necklaces' && J.THREAD_SHAPES.includes(v) ? 'thread' : 'hang', at: this.dept === 'necklaces' ? 0.4 : this.dept === 'purses' ? 0.3 : 0, drop: 2.5 }); list.push(e); this.set({}, true); }; sh.append(b); }
+      const sh = el('div', 'jgrid'); for (const [v, l] of J.SHAPES) { const b = el('button', '', `<span>${esc(l)}</span>`); b.disabled = full; b.onclick = () => { const e = J.EL({ k: 'shape', id: v, size: this.dept === 'earrings' ? 1.2 : 1.8, col: kimi ? '#ffc4dc' : '#ff8fc2', mode: this.dept === 'necklaces' && J.THREAD_SHAPES.includes(v) ? 'thread' : 'hang', at: this.dept === 'necklaces' ? 0.4 : this.dept === 'purses' || this.dept === 'sandals' ? 0.3 : 0, drop: 2.5 }); list.push(e); this.set({}, true); }; sh.append(b); }
       g.append(sh);
       for (const t of ['christmas', 'halloween', 'valentines', 'kimiland']) {
         g.append(el('div', 'g-label', esc(J.THEME_LABEL[t])));
-        const gr = el('div', 'jgrid charms'); for (const c of J.CHARMS.filter(x => x.theme === t)) { const b = el('button', '', `<i style="background-image:url(${c.src})"></i>`); b.disabled = full; b.setAttribute('aria-label', c.label); b.setAttribute('data-g-tip', c.label); b.onclick = () => { const e = J.EL({ k: 'charm', id: c.id, size: this.dept === 'earrings' ? 2.1 : 2.6, outline: !c.noOutline, tint: kimi && !c.brand ? '#ffc4dc' : '', mode: 'hang', at: this.dept === 'necklaces' ? -0.4 : this.dept === 'purses' ? -0.3 : 0, drop: 2.5 }); list.push(e); this.set({}, true); }; gr.append(b); }
+        const gr = el('div', 'jgrid charms'); for (const c of J.CHARMS.filter(x => x.theme === t)) { const b = el('button', '', `<i style="background-image:url(${c.src})"></i>`); b.disabled = full; b.setAttribute('aria-label', c.label); b.setAttribute('data-g-tip', c.label); b.onclick = () => { const e = J.EL({ k: 'charm', id: c.id, size: this.dept === 'earrings' ? 2.1 : 2.6, outline: !c.noOutline, tint: kimi && !c.brand ? '#ffc4dc' : '', mode: 'hang', at: this.dept === 'necklaces' ? -0.4 : this.dept === 'purses' || this.dept === 'sandals' ? -0.3 : 0, drop: 2.5 }); list.push(e); this.set({}, true); }; gr.append(b); }
         g.append(gr);
       }
     },
     inspector() {
       const box = $('#insp'); box.innerHTML = ''; const st = this.st, d = st.d, dept = this.dept, tab = rtab;
       $$('#rtabs button').forEach(b => b.classList.toggle('is-on', b.dataset.rt === tab));
-      if (dept === 'purses') this.pursePanel(box, tab);
+      if (dept === 'sandals') this.sandalPanel(box, tab);
+      else if (dept === 'purses') this.pursePanel(box, tab);
       else if (dept === 'earrings') {
         if (tab === 'pieces') {
           const g = grp(box, 'Top to bottom'); g.append(el('div', 'note', 'Each pair hangs from her ear, first piece on top. Charms and shapes can mix in any order.'));
@@ -5463,6 +5686,29 @@ window.GrugCatalogHair = function (ctx) {
       GRUG.hydrate(box);
     },
     toggle(parent, label, val, on) { const t = el('label', 'row sw2', `<span class="lb">${esc(label)}</span>`), sw = el('input', 'g-switch'); sw.type = 'checkbox'; sw.checked = !!val; sw.onchange = () => on(sw.checked); t.append(sw); parent.append(t); },
+    sandalPanel(box, tab) {
+      const d = this.st.d, L = J.SAN_LIM, kimi = d.brand === 'kimiland';
+      if (tab === 'pieces') {
+        const g1 = grp(box, 'Style'); this.segs(g1, J.STYLES, d.style, v => this.set({ style: v }, true), 3);
+        const g2 = grp(box, 'Sole'); this.slider(g2, { label: 'Sole height', value: d.soleH, min: L.soleH[0], max: L.soleH[1], fmt: v => v.toFixed(1) + ' cm', ends: ['Thin', 'Platform'], on: (v, f) => this.set({ soleH: v }, f) });
+        this.slider(g2, { label: 'Heel lift', value: d.heelH, min: L.heelH[0], max: L.heelH[1], fmt: v => v < 0.5 ? 'Flat' : v.toFixed(1) + ' cm', ends: ['Flat', 'High heel'], on: (v, f) => this.set({ heelH: v }, f) });
+        if (d.heelH >= 0.5) this.segs(g2, J.HEELS, d.heelType, v => this.set({ heelType: v }, true), 2);
+        const g3 = grp(box, 'Sole colour'); this.toggle(g3, 'Fade to a second colour', d.soleGrad, v => this.set({ soleGrad: v }, true));
+        this.colour(g3, d.soleGrad ? 'Heel colour' : 'Colour', d.soleCol, (v, f) => this.set({ soleCol: v }, f)); if (d.soleGrad) this.colour(g3, 'Toe colour', d.soleCol2, (v, f) => this.set({ soleCol2: v }, f));
+        this.colour(g3, 'Footbed', d.bedCol, (v, f) => this.set({ bedCol: v }, f));
+      } else if (tab === 'strap') {
+        const g1 = grp(box, 'Straps');
+        this.slider(g1, { label: 'Strap thickness', value: d.strapT, min: L.strapT[0], max: L.strapT[1], fmt: v => v.toFixed(2) + ' cm', ends: ['Thin', 'Chunky'], on: (v, f) => this.set({ strapT: v }, f) });
+        this.slider(g1, { label: 'Strap width', value: d.strapW, min: d.style === 'slide' ? 1.8 : L.strapW[0], max: L.strapW[1], fmt: v => v.toFixed(1) + ' cm', on: (v, f) => this.set({ strapW: v }, f) });
+        if (d.style === 'gladiator' || d.style === 'wrap') this.slider(g1, { label: 'How high they lace', value: d.shaft, min: L.shaft[0], max: L.shaft[1], fmt: v => Math.round(v) + ' cm', ends: ['Ankle', 'Calf'], on: (v, f) => this.set({ shaft: v }, f) });
+        const g2 = grp(box, 'Strap colour'); this.toggle(g2, 'Fade to a second colour', d.strapGrad, v => this.set({ strapGrad: v }, true));
+        this.colour(g2, d.strapGrad ? 'Start colour' : 'Colour', d.strapCol, (v, f) => this.set({ strapCol: v }, f)); if (d.strapGrad) this.colour(g2, 'End colour', d.strapCol2, (v, f) => this.set({ strapCol2: v }, f));
+        const g3 = grp(box, 'Buckles and hardware'); this.colour(g3, 'Hardware', d.hw, (v, f) => this.set({ hw: v }, f)); this.segs(g3, J.FINISHES.map(x => [x[0], x[1]]), d.finish, v => this.set({ finish: v }, true), 3);
+      } else if (tab === 'charms') {
+        const g = grp(box, 'Strap charms'); g.append(el('div', 'note', 'Charms and shapes are pinned on the main strap, facing out, on both sandals. Position slides each one along the strap.'));
+        for (let i = 0; i < d.charms.length; i++) this.elCard(g, i); this.addGallery(box);
+      } else { const g1 = grp(box, 'Brand'); this.brandChoice(g1); this.nameGroup(box); }
+    },
     pursePanel(box, tab) {
       const d = this.st.d, L = J.BAG_LIM[d.shape], kimi = d.brand === 'kimiland';
       if (tab === 'pieces') {
@@ -5505,7 +5751,7 @@ window.GrugCatalogHair = function (ctx) {
   // a picture for a card or a starter tile
   function thumbJewel(it, bodyColour) {
     const b = JM.mountItem(it), back = soloItem(b.root); sandy.object3d.updateMatrixWorld(true);
-    frameOn(JM.frameBox(b.root, it), it.dept === 'earrings' ? 1.0 : it.dept === 'purses' ? 0.25 : 0.3, 0.08, thumbCam, 26, 1.0);
+    frameOn(JM.frameBox(b.root, it), it.dept === 'earrings' ? 1.0 : it.dept === 'purses' ? 0.25 : it.dept === 'sandals' ? 0.55 : 0.3, it.dept === 'sandals' ? 0.2 : 0.08, thumbCam, 26, 1.0);
     const url = snapScene(bodyColour, true); back(); JM.unmount(b); return url;
   }
   // the jewelry item page: the piece on her, framed
@@ -5513,7 +5759,7 @@ window.GrugCatalogHair = function (ctx) {
     const it = viewer.item; if (viewer.built) { if (viewer.built.root.parent) viewer.built.root.parent.remove(viewer.built.root); viewer.built.dispose(); viewer.built = null; }
     viewer.built = JM.mountItem(it); viewer.shown = viewer.built.root; if (worn) worn.root.visible = false; setHair(true); sandy.object3d.visible = true; sandy.object3d.updateMatrixWorld(true);
     const sph = new THREE.Box3().setFromObject(viewer.built.root).getBoundingSphere(new THREE.Sphere());
-    if (it.dept === 'earrings') sph.radius = Math.max(sph.radius, 13); else sph.radius = Math.max(sph.radius, it.dept === 'purses' ? 22 : 16); cam.target.copy(sph.center); cam.yaw = it.dept === 'earrings' ? 0.8 : it.dept === 'purses' ? 0.35 : 0.45; cam.pitch = 0.1; cam.dist = clamp(sph.radius / Math.sin(15 * Math.PI / 180) * 1.25, ZOOM[0], ZOOM[1]);
+    if (it.dept === 'earrings') sph.radius = Math.max(sph.radius, 13); else sph.radius = Math.max(sph.radius, it.dept === 'purses' ? 22 : it.dept === 'sandals' ? 26 : 16); cam.target.copy(sph.center); cam.yaw = it.dept === 'earrings' ? 0.8 : it.dept === 'purses' ? 0.35 : it.dept === 'sandals' ? 0.6 : 0.45; cam.pitch = 0.1; cam.dist = clamp(sph.radius / Math.sin(15 * Math.PI / 180) * 1.25, ZOOM[0], ZOOM[1]);
   }
   function jewelLike(box, it) {
     const r = rng('like:' + it.id); const kimi = it.brand === 'kimiland';
@@ -5537,7 +5783,7 @@ window.GrugCatalogHair = function (ctx) {
     if (!toldControls) { toldControls = true; GRUG.toast('Drag to turn her. Press R to roll a new pair.'); }
   }
   function enterCatalog() { leaveItem(); showPage('catalog'); renderCatalog(); }
-  function route() { hoverEnd(); const h = location.hash, jm = /^#edit\/(earrings|necklaces|purses)/.exec(h); if (!jm) JM.leave(); if (/^#edit/.test(h)) { enterEditor(); if (jm) JM.enter(jm[1]); } else if (/^#item\//.test(h)) openItem(decodeURIComponent(h.slice(6))); else enterCatalog(); }
+  function route() { hoverEnd(); const h = location.hash, jm = /^#edit\/(earrings|necklaces|purses|sandals)/.exec(h); if (!jm) JM.leave(); if (/^#edit/.test(h)) { enterEditor(); if (jm) JM.enter(jm[1]); } else if (/^#item\//.test(h)) openItem(decodeURIComponent(h.slice(6))); else enterCatalog(); }
   window.addEventListener('hashchange', route);
 
   /* ---------------------------------------------------------------- start */
