@@ -63,7 +63,7 @@
   // the pattern pack (Kenney, CC0): 168 black-and-white tiles in one picture, read once into plain brightness values
   const PAT = { n: 0, cols: 14, T: 64, w: 0, lum: null };
   async function loadPatterns() { const P = window.GRUG_PATTERNS; if (!P || PAT.lum) return; try { const img = await loadImg(P.src), cv = document.createElement('canvas'); cv.width = img.width; cv.height = img.height; const x = cv.getContext('2d'); x.drawImage(img, 0, 0); const D = x.getImageData(0, 0, cv.width, cv.height).data, L = new Uint8Array(cv.width * cv.height); for (let i = 0; i < L.length; i++) L[i] = D[i * 4]; Object.assign(PAT, { n: P.n, cols: P.cols, T: P.tile, w: cv.width, lum: L, img }); } catch (e) { console.warn('patterns', e); } }
-  function ready() { if (!readyP) readyP = Promise.all([loadPatterns()].concat(CHARMS.map(async c => { c.img = await loadImg(c.src); c.imgO = c.noOutline ? c.img : await loadImg(c.outline); IMG[c.id] = c; }))); return readyP; }
+  function ready() { if (!readyP) readyP = Promise.all([loadPatterns(), loadSwords()].concat(CHARMS.map(async c => { c.img = await loadImg(c.src); c.imgO = c.noOutline ? c.img : await loadImg(c.outline); IMG[c.id] = c; }))); return readyP; }
 
   // a charm's picture as a texture, plain or outlined, left as drawn or washed with a colour ('pastel' = washed soft)
   const texCache = new Map();
@@ -210,7 +210,7 @@
 
   /* ---------------------------------------------------------------- vocabulary: kinds, names, tags, specs */
   const earKind = d => d.seq.length === 1 ? (d.seq[0].id === 'ring' && d.seq[0].k === 'shape' ? 'hoops' : 'studs') : d.seq.length <= 3 ? 'drops' : 'danglers';
-  const KIND_LABEL = { studs: 'Studs', drops: 'Drops', danglers: 'Danglers', hoops: 'Hoops', choker: 'Chokers', short: 'Short', medium: 'Medium', long: 'Long', satchel: 'Satchels', tote: 'Totes', bucket: 'Buckets', round: 'Rounds', heart: 'Hearts', clutch: 'Clutches', slide: 'Slides', thong: 'Thongs', ankle: 'Ankle straps', gladiator: 'Gladiators', wrap: 'Wraps', slipper: 'Slippers', over: 'Headphones', muffs: 'Earmuffs', buds: 'Earbuds' };
+  const KIND_LABEL = { studs: 'Studs', drops: 'Drops', danglers: 'Danglers', hoops: 'Hoops', choker: 'Chokers', short: 'Short', medium: 'Medium', long: 'Long', satchel: 'Satchels', tote: 'Totes', bucket: 'Buckets', round: 'Rounds', heart: 'Hearts', clutch: 'Clutches', slide: 'Slides', thong: 'Thongs', ankle: 'Ankle straps', gladiator: 'Gladiators', wrap: 'Wraps', slipper: 'Slippers', over: 'Headphones', muffs: 'Earmuffs', buds: 'Earbuds', back1: 'One sword', back2: 'Two swords', hip: 'Hip sword', top: 'Tops', legs: 'Bottoms', feet: 'Shoes' };
   const kindOf = (dept, d) => dept === 'earrings' ? earKind(d) : lenClass(d).id;
   const elName = e => e.k === 'charm' ? CHARM_BY[e.id].label : SHAPE_LABEL[e.id];
   const FLAVOUR = ['Cute', 'Fancy', 'Dainty', 'Glam', 'Posh', 'Sparkly', 'Merry', 'Spooky', 'Lovely', 'Bold', 'Sweet', 'Chic', 'Jolly', 'Charming', 'Darling', 'Lucky', 'Super', 'Pretty', 'Royal', 'Magic'];
@@ -1358,13 +1358,278 @@
     return { root, d, info: { tris: Math.round(own.tris) }, frame: 'head', dispose() { for (const g of own.geos) g.dispose(); for (const m of own.mats) m.dispose(); } };
   }
 
-  const build = (dept, d, ctx, o) => dept === 'sound' ? buildSound(d, ctx || CTX) : dept === 'sandals' ? buildSandals(d, ctx || CTX) : dept === 'purses' ? buildPurse(d, ctx || CTX) : dept === 'earrings' ? buildEarrings(d, ctx || CTX, o) : buildNecklace(d, ctx || CTX, o);
+
+  /* ================================================================ back (swords)
+     Swords worn on her: one across her back, two crossed on her back, or one at her hip. Each sword is put together from the
+     Modular Sword Kit by MilkAndBanana (CC0, assets/swords/swords.bin: 21 blades, 21 guards, 23 grips, 44 pommels, made with
+     tools/catalog/swords.mjs). Every part keeps the kit's painted shading (a brightness per vertex) under our own colours:
+     blade and edge, the hilt's metal (guard and pommel), the grip and its leather wrap, and a gem. Patterns from the pattern
+     pack go on the blade, the grip, the scabbard and the strap. A strap holds them on: a baldric round her chest for the back,
+     a belt for the hip. World frame, laid over bodyField like the purse strap. */
+  const SWORD_BASE = ON_SITE ? '../../assets/swords/' : 'swords/';
+  const SW = { parts: null, by: { blade: [], guard: [], grip: [], pommel: [] }, geo: new Map() };
+  async function loadSwords() {
+    if (SW.parts) return;
+    try {
+      const buf = await (await fetch(SWORD_BASE + 'swords.bin')).arrayBuffer(), hl = new DataView(buf).getUint32(0, true), head = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 4, hl)).trim()), base = 4 + hl;
+      SW.q = head.q; SW.parts = head.parts; for (const p of SW.parts) { p.buf = buf; p.base = base; SW.by[p.k].push(p); }
+    } catch (e) { console.warn('swords', e); SW.parts = []; }
+  }
+  const BACK_KINDS = [['back1', 'One on the back'], ['back2', 'Two on the back'], ['hip', 'At the hip']];
+  const BACK_LABEL = Object.fromEntries(BACK_KINDS);
+  const BK_LIM = { len: [50, 120], bladeW: [0.7, 1.45], tilt: [12, 42], strapW: [1.4, 5], drop: [-10, 10] };
+  const BK_COLS = ['bladeCol', 'edgeCol', 'hiltCol', 'gripCol', 'wrapCol', 'gemCol', 'sheathCol', 'strapCol', 'bladePatCol', 'gripPatCol', 'sheathPatCol', 'strapPatCol'];
+  const BK_PARTS = ['blade', 'guard', 'grip', 'pommel'];
+  DEF.back = () => ({ v: 1, brand: 'grug', kind: 'back1', blade: 0, guard: 0, grip: 0, pommel: 0, len: 88, bladeW: 1, tilt: 28, drop: 0, finish: 'metal', bladeCol: '#c8ccd2', edgeCol: '#f4f4f2', hiltCol: '#d4af37', gripCol: '#3a2a20', wrapCol: '#7a4a2a', gemCol: '#e8344f', sheath: false, sheathCol: '#2a2a31', strap: true, strapCol: '#6b4428', strapW: 3, bladePat: -1, bladePatCol: '#16161a', gripPat: -1, gripPatCol: '#16161a', sheathPat: -1, sheathPatCol: '#d4af37', strapPat: -1, strapPatCol: '#16161a', charms: [] });
+  LIMITS.back = { n: 0 };
+  const bkCount = k => (SW.by[k] || []).length || 1;
+  const hasWrap = d => { const p = SW.by.grip[d.grip]; return !!(p && p.regs > 1); }, hasGem = d => { const p = SW.by.pommel[d.pommel]; return !!(p && p.regs > 1); };
+  function validateB(src, brand) {
+    const notes = [], D0 = DEF.back(), d = Object.assign(DEF.back(), src || {}); d.brand = brand || d.brand; if (!BRAND_LABEL[d.brand]) d.brand = 'grug';
+    if (!BACK_LABEL[d.kind]) d.kind = 'back1';
+    for (const k of BK_PARTS) { const v = Math.round(+d[k]); d[k] = isFinite(v) ? ((v % bkCount(k)) + bkCount(k)) % bkCount(k) : 0; }
+    for (const k of Object.keys(BK_LIM)) { const v = +d[k]; d[k] = clamp(isFinite(v) && d[k] !== null && d[k] !== '' ? v : D0[k], BK_LIM[k][0], BK_LIM[k][1]); }
+    for (const k of BK_COLS) if (!isHex(d[k])) d[k] = D0[k];
+    for (const k of ['bladePat', 'gripPat', 'sheathPat', 'strapPat']) { const v = Math.round(+d[k]); d[k] = isFinite(v) && v >= 0 && v < PAT_N ? v : -1; }
+    if (!FINISHES.some(f => f[0] === d.finish)) d.finish = 'metal';
+    d.sheath = !!d.sheath; d.strap = !!d.strap; d.charms = [];
+    if (d.brand === 'kimiland') { let changed = false; for (const k of BK_COLS) if (!isPastel(d[k])) { d[k] = toPastel(d[k]); changed = true; } if (changed) notes.push('Brought to KIMILAND pastels'); }
+    return { d, notes };
+  }
+  function randomB(seed, o) {
+    o = o || {}; const r = rng('jewel:back:' + seed), brand = o.brand || brandFor(seed, 0.15), kimi = brand === 'kimiland';
+    const theme = kimi ? 'sweet' : r.w({ classic: 3, night: 2, forest: 1.6, ocean: 1.2, halloween: 1.2, christmas: 0.6, valentines: 0.8, sweet: 1 });
+    const pal = kimi ? kimiPalette(r) : null, T = THEMES[theme], pick = kimi ? () => r.pick(pal.mains.concat(pal.acc)) : () => r.pick(T.cols), metal = kimi ? pal.metal : r.pick(T.metal.concat(['#c8ccd2', '#c8ccd2']));
+    let d = o.base ? JSON.parse(JSON.stringify(o.base)) : DEF.back(); d.brand = brand;
+    const recolour = () => {
+      const steel = kimi ? r.pick(['#fffafc', '#ebe7f2', pal.main]) : r.w({ '#c8ccd2': 5, '#e8ebef': 2, '#50555c': 1.4, '#26272b': 1, [pick()]: 1.6 });
+      d.bladeCol = steel; d.edgeCol = kimi ? '#fffafc' : r.chance(0.7) ? '#f4f6f8' : pick();
+      d.hiltCol = metal; d.gripCol = kimi ? r.pick(pal.mains) : r.pick(['#3a2a20', '#16161a', '#6b4428', '#8a1c2b', '#1b2a55', pick()]);
+      d.wrapCol = kimi ? '#fffafc' : r.pick(['#7a4a2a', '#16161a', '#c98a2b', pick()]); d.gemCol = kimi ? r.pick(pal.acc) : r.pick(['#e8344f', '#4fd8e0', '#9be338', '#7d3fc4', '#2b62d9', '#f5d21f']);
+      d.sheathCol = kimi ? pal.main : r.pick(['#2a2a31', '#16161a', '#6b4428', '#8a1c2b', '#1b2a55', '#f4f4f2', pick()]); d.strapCol = kimi ? r.pick([pal.main, '#fffafc']) : r.pick(['#6b4428', '#3a2a20', '#16161a', '#8a1c2b', d.sheathCol]);
+      d.bladePatCol = shadeOf(d.bladeCol); d.gripPatCol = shadeOf(d.gripCol); d.sheathPatCol = r.chance(0.5) ? d.hiltCol : shadeOf(d.sheathCol); d.strapPatCol = shadeOf(d.strapCol);
+    };
+    if (o.keep === 'shape') { recolour(); return validateB(d, brand).d; }
+    const keepC = o.keep === 'colours' && o.base ? BK_COLS.map(k => d[k]) : null;
+    d.kind = o.kind && BACK_LABEL[o.kind] ? o.kind : r.w({ back1: 4, back2: 2.6, hip: 2.4 });
+    for (const k of BK_PARTS) d[k] = r.i(0, bkCount(k) - 1);
+    d.len = d.kind === 'hip' ? r.f(58, 92) : d.kind === 'back2' ? r.f(60, 95) : r.f(72, 118); d.bladeW = r.f(0.8, 1.3); d.tilt = r.f(18, 38); d.drop = r.f(-4, 4);
+    d.finish = kimi ? r.pick(['gloss', 'gloss', 'metal']) : r.w({ metal: 5, gloss: 1.5, matte: 0.6 });
+    d.sheath = r.chance(d.kind === 'hip' ? 0.6 : 0.3); d.strap = r.chance(0.85); d.strapW = r.f(2, 4.2);
+    d.bladePat = !d.sheath && r.chance(0.18) ? r.i(0, PAT_N - 1) : -1; d.gripPat = r.chance(0.25) ? r.i(0, PAT_N - 1) : -1; d.sheathPat = d.sheath && r.chance(0.35) ? r.i(0, PAT_N - 1) : -1; d.strapPat = d.strap && r.chance(0.25) ? r.i(0, PAT_N - 1) : -1;
+    recolour(); if (keepC) BK_COLS.forEach((k, i) => { d[k] = keepC[i]; });
+    return validateB(d, brand).d;
+  }
+  function nameB(d, seed) {
+    const r = rng('jname:' + seed + ':back'), kimi = d.brand === 'kimiland', colour = colourName(d.sheath ? d.sheathCol : d.bladeCol, kimi), fl = kimi ? r.pick(KIMI_FLAVOUR) : r.pick(['Royal', 'Shadow', 'Storm', 'Ember', 'Frost', 'Iron', 'Moon', 'Sun', 'Wild', 'Noble', 'Rogue', 'Ancient', 'Dragon', 'Knight’s', 'Hero’s']);
+    const noun = { back1: r.pick(['Greatsword', 'Longsword', 'Claymore', 'Back Sword', 'Blade']), back2: r.pick(['Twin Blades', 'Dual Swords', 'Crossed Swords', 'Twin Swords']), hip: r.pick(['Sabre', 'Side Sword', 'Hip Sword', 'Belt Blade', 'Arming Sword']) }[d.kind];
+    const extra = d.sheath ? r.pick(['Sheathed', 'Scabbard']) : d.bladePat >= 0 ? r.pick(['Etched', 'Engraved']) : '';
+    const forms = [[colour, noun], [fl, noun], [fl, colour, noun], [extra || fl, noun], [colour, extra, noun]];
+    return forms[r.i(0, 4)].filter(Boolean).join(' ').replace(/\s+/g, ' ');
+  }
+  function tagsB(d) {
+    const t = ['Back', 'Sword', BACK_LABEL[d.kind], d.kind === 'back2' ? 'Two swords' : 'One sword']; t.push(d.sheath ? 'Sheathed' : 'Bare blade'); if (d.strap) t.push(d.kind === 'hip' ? 'Belt' : 'Strap');
+    if (d.bladePat >= 0 || d.gripPat >= 0 || d.sheathPat >= 0 || d.strapPat >= 0) t.push('Patterned'); if (hasGem(d)) t.push('Gem');
+    if (d.brand === 'kimiland') t.push('Pastel', 'KIMILAND'); return Array.from(new Set(t));
+  }
+  function familiesB(d) { const f = new Set([famOfHex(d.sheath ? d.sheathCol : d.bladeCol), famOfHex(d.hiltCol), famOfHex(d.gripCol)]); if (d.strap) f.add(famOfHex(d.strapCol)); if (f.size > 3) f.add('multi'); return f; }
+  function describeB(d) {
+    const kimi = d.brand === 'kimiland', cn = h => colourName(h, kimi).toLowerCase(), an = w => (/^[aeiou]/.test(w) ? 'an ' : 'a ') + w, sw = d.kind === 'back2' ? 'Two swords' : 'A sword';
+    let s = `${sw} ${d.kind === 'hip' ? 'at her hip' : d.kind === 'back2' ? 'crossed on her back' : 'across her back'}, about ${Math.round(d.len)} cm long: ${d.sheath ? 'in ' + an(cn(d.sheathCol)) + ' scabbard' : an(cn(d.bladeCol)) + ' blade'} with ${an(cn(d.hiltCol))} hilt and ${an(cn(d.gripCol))} grip`;
+    if (d.strap) s += `, on ${an(cn(d.strapCol))} ${d.kind === 'hip' ? 'belt' : 'strap'}`;
+    return s + '.' + (kimi ? ' A KIMILAND piece: soft pastels, made to be cute.' : '') + ' Sword parts: Modular Sword Kit by MilkAndBanana (CC0).';
+  }
+  // one sword part as plain arrays (kit units, y along the blade)
+  function swordPart(kind, i) {
+    const p = SW.by[kind][i] || SW.by[kind][0]; if (!p) return null; if (SW.geo.has(p)) return SW.geo.get(p);
+    const b = p.base, pos = new Int16Array(p.buf, b + p.pos, p.v * 3), nor = new Int8Array(p.buf, b + p.nor, p.v * 3), rs = new Uint8Array(p.buf, b + p.rs, p.v * 2), idx = new Uint16Array(p.buf, b + p.idx, p.i);
+    const P = new Float32Array(p.v * 3), N = new Float32Array(p.v * 3), R = new Uint8Array(p.v), S = new Float32Array(p.v);
+    for (let k = 0; k < p.v * 3; k++) { P[k] = pos[k] / SW.q; N[k] = nor[k] / 127; } for (let k = 0; k < p.v; k++) { R[k] = rs[k * 2]; S[k] = rs[k * 2 + 1] / 255; }
+    const out = { P, N, R, S, I: idx, box: p.box, regs: p.regs }; SW.geo.set(p, out); return out;
+  }
+  // a pattern canvas: colour, and the pattern's dark parts in the pattern colour; tile px wide and tall (so it reads square on the part)
+  function patCanvas(w, h, col, idx, pcol, tx, ty) {
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const x = cv.getContext('2d'); x.fillStyle = col; x.fillRect(0, 0, w, h);
+    if (idx >= 0 && PAT.lum) { const im = x.getImageData(0, 0, w, h), D = im.data, [cr, cg, cb] = hexRGB(pcol), ox = (idx % PAT.cols) * PAT.T, oy = Math.floor(idx / PAT.cols) * PAT.T;
+      for (let yy = 0; yy < h; yy++) { const sy = oy + Math.floor((((yy / ty) % 1) + 1) % 1 * PAT.T); for (let xx = 0; xx < w; xx++) { const sx = ox + Math.floor((((xx / tx) % 1) + 1) % 1 * PAT.T), L = 1 - (1 - PAT.lum[sy * PAT.w + sx] / 255) * PAT_K, a = 1 - L, p = (yy * w + xx) * 4; D[p] = D[p] * L + cr * a; D[p + 1] = D[p + 1] * L + cg * a; D[p + 2] = D[p + 2] * L + cb * a; } }
+      x.putImageData(im, 0, 0); }
+    const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; t.userData.canvas = cv; return t;
+  }
+  const BK_TILE = 3.2;   // cm per pattern tile on swords and straps
+  // one sword, in cm: the guard at the origin, the blade along +y, its flat facing z
+  function swordGroup(d, own, M) {
+    const g = new THREE.Group(), parts = {}; for (const k of BK_PARTS) parts[k] = swordPart(k, d[k]);
+    const B = parts.blade; if (!B) return g;
+    const y0 = Math.min(...BK_PARTS.map(k => parts[k] ? parts[k].box[1] : 0)), y1 = B.box[4], s = d.len / (y1 - y0), bw = d.bladeW;
+    const add = (geo, mat, nm) => { own.geos.push(geo); const m = new THREE.Mesh(geo, mat); m.name = nm; g.add(m); own.tris += triOf(geo); return m; };
+    for (const k of BK_PARTS) {
+      const pt = parts[k]; if (!pt) continue; if (k === 'blade' && d.sheath) continue;
+      for (let reg = 0; reg < 2; reg++) {
+        const I = []; for (let t = 0; t < pt.I.length; t += 3) if (pt.R[pt.I[t]] === reg) I.push(pt.I[t], pt.I[t + 1], pt.I[t + 2]); if (!I.length) continue;
+        const used = new Int32Array(pt.P.length / 3).fill(-1), P = [], N = [], C = [], U = []; let n = 0; const I2 = [];
+        const bx = pt.box, wX = Math.max(1e-3, bx[3] - bx[0]), hY = Math.max(1e-3, bx[4] - bx[1]);
+        for (const v of I) { if (used[v] < 0) { used[v] = n++; const xx = pt.P[v * 3] * (k === 'blade' ? bw : 1), yy = pt.P[v * 3 + 1], zz = pt.P[v * 3 + 2]; P.push(xx * s, yy * s, zz * s); N.push(pt.N[v * 3], pt.N[v * 3 + 1], pt.N[v * 3 + 2]); const sh = 0.72 + 0.4 * pt.S[v]; C.push(sh, sh, sh);
+            if (k === 'blade') U.push((pt.P[v * 3] - bx[0]) / wX, (yy - bx[1]) / hY); else if (k === 'grip') U.push(Math.abs(Math.atan2(zz, pt.P[v * 3])) / Math.PI, (yy - bx[1]) / hY); else U.push(0.5, 0.5); }
+          I2.push(used[v]); }
+        const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(C, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); geo.setIndex(I2);
+        const mat = k === 'blade' ? (reg ? M.edge : M.blade) : k === 'grip' ? (reg ? M.wrap : M.grip) : k === 'pommel' && reg ? M.gem : M.hilt;
+        add(geo, mat, k);
+      }
+    }
+    // the scabbard: the blade's outline, a little bigger, with a throat and a tip in the hilt's metal
+    if (d.sheath) {
+      const bx = B.box, hw = Math.max(Math.abs(bx[0]), Math.abs(bx[3])) * bw * s + 0.7, yA = Math.max(0.2, bx[1] * s - 0.3), yB = bx[4] * s + 1.2, th = Math.max(1.6, (bx[5] - bx[2]) * s + 1.2), tip = Math.min(yB - yA, hw * 2.4);
+      const sh = new THREE.Shape(); sh.moveTo(-hw, yA); sh.lineTo(hw, yA); sh.lineTo(hw * 0.9, yB - tip); sh.quadraticCurveTo(hw * 0.86, yB - tip * 0.2, 0, yB); sh.quadraticCurveTo(-hw * 0.86, yB - tip * 0.2, -hw * 0.9, yB - tip); sh.closePath();
+      const bev = Math.min(0.6, th * 0.35), geo = new THREE.ExtrudeGeometry(sh, { depth: Math.max(0.1, th - 2 * bev), bevelEnabled: true, bevelThickness: bev, bevelSize: bev * 0.9, bevelSegments: 2, curveSegments: 10 }); geo.translate(0, 0, -th / 2 + bev);
+      const P = geo.attributes.position, uv = geo.attributes.uv; for (let i = 0; i < P.count; i++) uv.setXY(i, clamp((P.getX(i) + hw) / (2 * hw), 0, 1), clamp((P.getY(i) - yA) / (yB - yA), 0, 1)); uv.needsUpdate = true; smoothNormals(geo);
+      add(geo, M.sheath, 'sheath');
+      for (const [ya, yb, sc] of [[yA, yA + 2.2, 1.06]]) { const r2 = new THREE.Shape(); const w2 = hw * sc + 0.15; r2.moveTo(-w2, ya); r2.lineTo(w2, ya); r2.lineTo(w2, yb); r2.lineTo(-w2, yb); r2.closePath(); const gg = new THREE.ExtrudeGeometry(r2, { depth: th * 1.04, bevelEnabled: false }); gg.translate(0, 0, -th * 0.52); if (ya > yA) { const PP = gg.attributes.position; for (let i = 0; i < PP.count; i++) { const f = clamp((PP.getY(i) - ya) / (yb - ya), 0, 1); PP.setX(i, PP.getX(i) * (1 - 0.85 * f * f)); } gg.computeVertexNormals(); } add(gg, M.hiltPlain, 'sheathMetal'); }
+    }
+    g.userData.len = d.len; g.userData.hiltLen = -y0 * s; g.userData.halfW = Math.max(Math.abs(B.box[0]), Math.abs(B.box[3])) * bw * s;
+    return g;
+  }
+  // a closed loop round her body (a baldric or a belt), as points with outward normals
+  function bodyLoop(F, at, r) {
+    const pts = [], nr = [];
+    for (let i = 0; i < 64; i++) {
+      const al = i / 64 * TAU, [y, xMax] = at(al), zc = (F.front(0, y) + F.back(0, y)) / 2, b = (F.front(0, y) - F.back(0, y)) / 2 + r + 0.6, a = Math.max(F.halfW(y) + r + 0.6, 6);
+      let x = clamp(a * Math.sin(al), -xMax, xMax), z = zc + b * Math.cos(al);
+      if (Math.cos(al) > 0.05) z = Math.max(z, F.front(x, y) + r + 0.5); else if (Math.cos(al) < -0.05) z = Math.min(z, F.back(x, y) - r - 0.5);
+      pts.push(V3(x, y, z));
+    }
+    for (let pass = 0; pass < 3; pass++) { const c = pts.map(p => p.clone()); for (let i = 0; i < 64; i++) pts[i].copy(c[(i + 63) % 64]).add(c[i].clone().multiplyScalar(2)).add(c[(i + 1) % 64]).multiplyScalar(0.25); }
+    for (let i = 0; i < 64; i++) { const p = pts[i], zc = (F.front(0, p.y) + F.back(0, p.y)) / 2; nr.push(V3(p.x * 0.4, 0, p.z - zc).normalize()); }
+    pts.push(pts[0].clone()); nr.push(nr[0].clone()); return { pts, nr };
+  }
+  function buildBack(d, ctx) {
+    const { sandy } = ctx, F = bodyField(sandy), own = { geos: [], mats: [], tris: 0 }, root = new THREE.Group(); root.name = 'grugBack'; root.userData.catalogItem = true; root.userData.jewel = { dept: 'back', design: d };
+    const metal = d.finish === 'metal', rough = d.finish === 'matte' ? 0.8 : metal ? 0.3 : 0.35, mk = (col, o) => { const m = new THREE.MeshStandardMaterial(Object.assign({ color: new THREE.Color(col).convertSRGBToLinear(), roughness: rough, metalness: metal ? 0.75 : 0.05, envMap: ENV, envMapIntensity: metal ? 1 : 0.5, vertexColors: true, side: THREE.DoubleSide }, o || {})); own.mats.push(m); return m; };
+    const pm = (tex, o) => { own.mats.push({ dispose() { tex.dispose(); } }); return mk('#ffffff', Object.assign({ map: tex }, o || {})); };
+    const parts = {}; for (const k of BK_PARTS) parts[k] = swordPart(k, d[k]);
+    const B = parts.blade, s = B ? d.len / (B.box[4] - Math.min(...BK_PARTS.map(k => parts[k] ? parts[k].box[1] : 0))) : 1;
+    const bwCm = B ? (B.box[3] - B.box[0]) * d.bladeW * s : 6, blCm = B ? (B.box[4] - B.box[1]) * s : 60, gr = parts.grip, gwCm = gr ? Math.PI * (gr.box[3] - gr.box[0]) * s / 2 : 8, glCm = gr ? (gr.box[4] - gr.box[1]) * s : 12;
+    const M = {
+      blade: d.bladePat >= 0 ? pm(patCanvas(128, 512, d.bladeCol, d.bladePat, d.bladePatCol, 128 / bwCm * BK_TILE, 512 / blCm * BK_TILE)) : mk(d.bladeCol), edge: mk(d.edgeCol, { roughness: Math.max(0.15, rough - 0.15) }),
+      hilt: mk(d.hiltCol), hiltPlain: mk(d.hiltCol, { vertexColors: false }), gem: mk(d.gemCol, { roughness: 0.15, metalness: 0.1, envMapIntensity: 1.2 }),
+      grip: d.gripPat >= 0 ? pm(patCanvas(128, 256, d.gripCol, d.gripPat, d.gripPatCol, 128 / gwCm * BK_TILE, 256 / glCm * BK_TILE), { roughness: 0.7, metalness: 0 }) : mk(d.gripCol, { roughness: 0.75, metalness: 0 }), wrap: mk(d.wrapCol, { roughness: 0.8, metalness: 0 }),
+      sheath: null
+    };
+    if (d.sheath) { const hw = bwCm / 2 + 0.7, ln = blCm + 1.5; M.sheath = d.sheathPat >= 0 ? pm(patCanvas(128, 512, d.sheathCol, d.sheathPat, d.sheathPatCol, 128 / (2 * hw) * BK_TILE, 512 / ln * BK_TILE), { vertexColors: false, roughness: 0.5, metalness: 0.05 }) : mk(d.sheathCol, { vertexColors: false, roughness: 0.5, metalness: 0.05 }); }
+    // where each sword goes: a guard point and the blade's direction, with its flat facing `face`
+    const place = (sw, G, dir, face) => { const Y = dir.clone().normalize(), Z = face.clone().addScaledVector(Y, -face.dot(Y)).normalize(), X = V3().crossVectors(Y, Z).normalize(); sw.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(X, Y, Z)); sw.position.copy(G); root.add(sw); };
+    const th = d.tilt * Math.PI / 180, half = bwCm / 2;
+    if (d.kind === 'hip') {
+      const yG = 103 + d.drop * 0.3, xS = F.halfW(yG) + 2.2 + (d.sheath ? 0.8 : 0), zc = (F.front(xS - 3, yG) + F.back(xS - 3, yG)) / 2 + 2.5;
+      const sw = swordGroup(d, own, M); place(sw, V3(xS + 1, yG, zc + 5), V3(0.12, -0.86, -0.5), V3(1, 0, 0));
+    } else {
+      const n = d.kind === 'back2' ? 2 : 1, yG = 138 + d.drop;
+      for (let k = 0; k < n; k++) {
+        const sx = n === 2 ? (k ? 1 : -1) : -1, dir = V3(-sx * Math.sin(th), -Math.cos(th), 0), Gx = sx * (n === 2 ? 6 : 4.5);
+        let zB = 1e9; for (let t = -10; t <= blCm; t += 4) { const p = V3(Gx, yG, 0).addScaledVector(dir, t); if (p.y < 96 || p.y > 168 || Math.abs(p.x) > 17) continue; zB = Math.min(zB, F.back(p.x, p.y)); }
+        if (zB > 1e8) zB = F.back(0, 125);
+        const zz = zB - (d.sheath ? 2.2 : 1.6) - (d.strap ? 0.9 : 0) - k * 2.2;
+        const sw = swordGroup(d, own, M); place(sw, V3(Gx, yG, zz), dir, V3(0, 0, -1));
+      }
+    }
+    // the strap: a baldric (or two crossed) round her chest, or a belt at her hips
+    if (d.strap) {
+      const SP = 16, W = 512, H = 128, PXs = 16, tex = patCanvas(W, H, d.strapCol, d.strapPat, d.strapPatCol, BK_TILE * PXs, BK_TILE * PXs); own.mats.push({ dispose() { tex.dispose(); } });
+      const sm = new THREE.MeshStandardMaterial({ color: 0xffffff, map: tex, roughness: 0.8, metalness: 0, envMap: ENV, envMapIntensity: 0.3, side: THREE.DoubleSide }); own.mats.push(sm);
+      const UVS = { cm: true, period: SP, u: cm => (1 + cm * PXs) / W, v: off => 1 - (H / 2 + off * PXs) / H }, r = 0.25;
+      const loops = d.kind === 'hip' ? [al => [104 + d.drop * 0.3, 40]] : (d.kind === 'back2' ? [-1, 1] : [1]).map(sx => al => { const y = 126 + 21 * sx * Math.sin(al); return [y + (y > 140 ? (y - 140) * 0.25 : 0), y > 138 ? 12.5 : 40]; });
+      for (const at of loops) { const { pts, nr } = bodyLoop(F, at, r + d.strapW * 0.1), geo = roundSweep(pts, nr, d.strapW, 0.45, UVS); own.geos.push(geo); const m = new THREE.Mesh(geo, sm); m.name = 'strap'; root.add(m); own.tris += triOf(geo); }
+    }
+    return { root, d, info: { tris: Math.round(own.tris) }, frame: 'world', dispose() { for (const g of own.geos) g.dispose(); for (const m of own.mats) m.dispose(); } };
+  }
+
+  /* ================================================================ clothing
+     The classic avatar's clothes (SandyClassicKit.CATALOG.parts: tops and dresses, bottoms, boots), each in any colour and with
+     an optional print from the pattern pack. Clothing is worn by the avatar herself (sandy.apply), not added as a mesh: build()
+     puts the piece on her and gives back an empty root whose dispose takes it off again. Pieces mounted at once are kept in
+     sandy.__cloth (one per slot); every change puts all three slots back together, so a dress clears the bottoms and her own
+     look comes back when the last piece comes off. Downloads stay in the classic closet (export3d.js). */
+  const SKIT = () => window.SandyClassicKit || window.SandyKit;
+  const CLOTH_SLOTS = [['top', 'Tops and dresses'], ['legs', 'Bottoms'], ['feet', 'Shoes']];
+  const CLOTH_SLOT_LABEL = Object.fromEntries(CLOTH_SLOTS);
+  const CLOTH = {
+    top: [['gen_tshirt', 'T-shirt'], ['gen_longsleeve', 'Long-sleeve tee'], ['mh_toigo_keyhole_tank_top', 'Keyhole tank'], ['mh_toigo_bodice-style_top', 'Bodice top'], ['mh_toigo_strapless_ruffle_top_dress', 'Strapless ruffle dress', 1], ['mh_toigo_halter_dress_knee_length', 'Halter dress', 1], ['mh_toigo_halter_dress_midi', 'Halter midi dress', 1], ['mh_toigo_bodice_dress_with_lace_ruffle_skirt', 'Bodice dress', 1]],
+    legs: [['mh_cortu_jeans_shorts', 'Denim shorts'], ['mh_frankyaye_mini_skirt_01', 'Mini skirt'], ['mh_frankyaye_mini_skirt_02', 'Flared mini skirt'], ['mh_toigo_tiered_mini_skirt', 'Tiered mini skirt'], ['mh_toigo_tiered_skirt', 'Tiered skirt'], ['mh_toigo_skirt_with_lace_ruffle', 'Lace ruffle skirt'], ['mh_toigo_long_full_skirt', 'Long full skirt'], ['Female_Peasant_Legs', 'Peasant trousers'], ['mh_rehmanpolanski_viking_pants', 'Viking trousers']],
+    feet: [['mh_culturalibre_hero_boots_1', 'Hero boots'], ['Female_Peasant_Feet', 'Laced boots']]
+  };
+  const CLOTH_LABEL = Object.fromEntries(Object.values(CLOTH).flat().map(x => [x[0], x[1]]));
+  const isDress = d => d.slot === 'top' && CLOTH.top.some(x => x[0] === d.part && x[2]);
+  const CL_COLS = ['col', 'patCol'];
+  DEF.clothing = () => ({ v: 1, brand: 'grug', slot: 'top', part: 'gen_tshirt', col: '#f4f4f2', pat: -1, patCol: '#16161a', tiles: 14, charms: [] });
+  LIMITS.clothing = { n: 0 };
+  function validateC(src, brand) {
+    const notes = [], D0 = DEF.clothing(), d = Object.assign(DEF.clothing(), src || {}); d.brand = brand || d.brand; if (!BRAND_LABEL[d.brand]) d.brand = 'grug';
+    if (!CLOTH[d.slot]) d.slot = 'top'; if (!CLOTH[d.slot].some(x => x[0] === d.part)) d.part = CLOTH[d.slot][0][0];
+    for (const k of CL_COLS) if (!isHex(d[k])) d[k] = D0[k];
+    { const v = Math.round(+d.pat); d.pat = isFinite(v) && v >= 0 && v < PAT_N ? v : -1; } d.tiles = clamp(isFinite(+d.tiles) ? +d.tiles : 14, 6, 32); d.charms = [];
+    if (d.brand === 'kimiland') { let ch = false; for (const k of CL_COLS) if (!isPastel(d[k])) { d[k] = toPastel(d[k]); ch = true; } if (ch) notes.push('Brought to KIMILAND pastels'); }
+    return { d, notes };
+  }
+  function randomC(seed, o) {
+    o = o || {}; const r = rng('jewel:clothing:' + seed), brand = o.brand || brandFor(seed, 0.2), kimi = brand === 'kimiland';
+    const theme = kimi ? 'sweet' : r.w({ classic: 3, sweet: 2, ocean: 1.2, forest: 1, night: 1.4, halloween: 0.8, christmas: 0.6, valentines: 1 });
+    const pal = kimi ? kimiPalette(r) : null, T = THEMES[theme], pick = kimi ? () => r.pick(pal.mains.concat(pal.acc)) : () => r.pick(T.cols.concat(['#f4f4f2', '#16161a', '#3b5a8c', '#c9a27e']));
+    let d = o.base ? JSON.parse(JSON.stringify(o.base)) : DEF.clothing(); d.brand = brand;
+    const recolour = () => { d.col = pick(); d.patCol = kimi ? r.pick(['#fffafc', r.pick(pal.acc)]) : r.chance(0.5) ? shadeOf(d.col) : pick(); if (d.patCol === d.col) d.patCol = shadeOf(d.col); };
+    if (o.keep === 'shape') { recolour(); return validateC(d, brand).d; }
+    const keepC = o.keep === 'colours' && o.base ? [d.col, d.patCol] : null;
+    d.slot = o.kind && CLOTH[o.kind] ? o.kind : r.w({ top: 4, legs: 3.4, feet: 1.2 }); d.part = r.pick(CLOTH[d.slot])[0];
+    d.pat = r.chance(d.slot === 'feet' ? 0.15 : 0.35) ? r.i(0, PAT_N - 1) : -1; d.tiles = r.f(9, 22);
+    recolour(); if (keepC) { d.col = keepC[0]; d.patCol = keepC[1]; }
+    return validateC(d, brand).d;
+  }
+  function nameC(d, seed) {
+    const r = rng('jname:' + seed + ':clothing'), kimi = d.brand === 'kimiland', colour = colourName(d.col, kimi), fl = kimi ? r.pick(KIMI_FLAVOUR) : r.pick(FLAVOUR), noun = CLOTH_LABEL[d.part] || 'Top';
+    const pat = d.pat >= 0 ? r.pick(['Print', 'Patterned', 'Printed']) : '';
+    const forms = [[colour, noun], [fl, colour, noun], [pat || fl, noun], [colour, pat, noun]];
+    return forms[r.i(0, 3)].filter(Boolean).join(' ').replace(/\s+/g, ' ');
+  }
+  function tagsC(d) { const t = ['Clothing', CLOTH_SLOT_LABEL[d.slot], CLOTH_LABEL[d.part]]; if (isDress(d)) t.push('Dress'); if (/skirt/i.test(CLOTH_LABEL[d.part])) t.push('Skirt'); if (d.pat >= 0) t.push('Patterned'); else t.push('Solid colour'); if (d.brand === 'kimiland') t.push('Pastel', 'KIMILAND'); return Array.from(new Set(t)); }
+  function familiesC(d) { const f = new Set([famOfHex(d.col)]); if (d.pat >= 0) f.add(famOfHex(d.patCol)); return f; }
+  function describeC(d) { const kimi = d.brand === 'kimiland'; return `${(d.pat >= 0 ? 'A printed ' : 'A ') + colourName(d.col, kimi).toLowerCase()} ${(CLOTH_LABEL[d.part] || '').toLowerCase()}${isDress(d) ? ' (a dress: it covers her legs too)' : ''}${d.pat >= 0 ? ', with a ' + colourName(d.patCol, kimi).toLowerCase() + ' pattern all over' : ''}.` + (kimi ? ' A KIMILAND piece: soft pastels, made to be cute.' : ''); }
+  // her own clothes before any piece went on, and the meshes each slot shows
+  const CLOTH_MESH = { top: ['armor_body'], legs: ['armor_legs'], feet: ['armor_feet', 'armor_feetR'] };
+  function clothMeshes(sandy, slot) { const out = []; sandy.object3d.traverse(o => { if (o.isMesh && CLOTH_MESH[slot].includes(o.name)) out.push(o); }); return out; }
+  function clothTex(d) {
+    const W = 512, t = patCanvas(W, W, d.col, d.pat, d.patCol, W / d.tiles, W / d.tiles); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
+  }
+  function clothSync(sandy) {
+    const st = sandy.__cloth; if (!st) return; const base = st.base, on = st.on, any = Object.values(on).some(Boolean), patch = {}; for (const t of st.tex.splice(0)) t.dispose();
+    const texOf = id => { const p = Object.values(SKIT().CATALOG.parts).flat().find(x => x.id === id); return p ? p.set : id; };
+    for (const [slot] of CLOTH_SLOTS) {
+      const d = on[slot];
+      if (d) patch[slot] = slot === 'feet' ? { type: 'boots', part: d.part, texture: texOf(d.part), colour: d.col } : { part: d.part, texture: texOf(d.part), colour: d.col, template: null };
+      else patch[slot] = !any ? JSON.parse(JSON.stringify(base[slot])) : slot === 'feet' ? JSON.parse(JSON.stringify(base.feet)) : null;
+    }
+    if (on.top && isDress(on.top)) patch.legs = null;
+    if (on.legs && !on.top) patch.top = null;
+    patch.outfit = any ? { shirt: '#f4f4f2', shorts: '#2b2f3a', belt: '#141414' } : JSON.parse(JSON.stringify(base.outfit));
+    sandy.apply(patch); sandy.update(0);
+    // prints: the piece's own colour under the pattern, laid on its material
+    for (const [slot] of CLOTH_SLOTS) {
+      const d = on[slot]; if (!d || d.pat < 0) continue; const tex = clothTex(d); st.tex.push(tex);
+      for (const m of clothMeshes(sandy, slot)) for (const mt of [].concat(m.material)) { mt.map = tex; mt.color.set(0xffffff); mt.needsUpdate = true; }
+    }
+  }
+  function buildClothing(d, ctx) {
+    const { sandy } = ctx, root = new THREE.Group(); root.name = 'grugClothing'; root.userData.catalogItem = true; root.userData.jewel = { dept: 'clothing', design: d };
+    if (!sandy.__cloth) { const c = sandy.getConfig(); sandy.__cloth = { base: JSON.parse(JSON.stringify({ top: c.top, legs: c.legs, feet: c.feet, outfit: c.outfit })), on: {}, tex: [] }; }
+    const st = sandy.__cloth, token = {}, prev = st.on[d.slot]; st.on[d.slot] = Object.assign({}, d, { __t: token }); clothSync(sandy);
+    root.userData.meshes = () => clothMeshes(sandy, d.slot);
+    return { root, d, info: { tris: clothMeshes(sandy, d.slot).reduce((s, m) => s + triOf(m.geometry), 0) }, frame: 'world', dispose() { if (st.on[d.slot] && st.on[d.slot].__t === token) { if (prev) st.on[d.slot] = prev; else delete st.on[d.slot]; clothSync(sandy); } } };
+  }
+
+  const build = (dept, d, ctx, o) => dept === 'clothing' ? buildClothing(d, ctx || CTX) : dept === 'back' ? buildBack(d, ctx || CTX) : dept === 'sound' ? buildSound(d, ctx || CTX) : dept === 'sandals' ? buildSandals(d, ctx || CTX) : dept === 'purses' ? buildPurse(d, ctx || CTX) : dept === 'earrings' ? buildEarrings(d, ctx || CTX, o) : buildNecklace(d, ctx || CTX, o);
   function init(ctx) { CTX = ctx; ENV = ctx.env || null; for (const m of mats.values()) { m.envMap = ENV; m.needsUpdate = true; } }
   const lengthCm = d => { try { return Math.round(buildNecklaceLength(d)); } catch (e) { return 0; } };
   function buildNecklaceLength(d) { const F = bodyField(CTX.sandy), pts = necklacePath(d, F); return new THREE.CatmullRomCurve3(pts, true, 'centripetal').getLength(); }
 
   window.GrugJewelry = {
-    ready, init, build, validate: (dp, s, b) => dp === 'sound' ? validateSnd(s, b) : dp === 'sandals' ? validateS(s, b) : dp === 'purses' ? validateP(s, b) : validate(dp, s, b), random: (dp, seed, o) => dp === 'sound' ? randomSnd(seed, o) : dp === 'sandals' ? randomS(seed, o) : dp === 'purses' ? randomP(seed, o) : random(dp, seed, o), nameFor: (dp, d, s) => dp === 'sound' ? nameSnd(d, s) : dp === 'sandals' ? nameS(d, s) : dp === 'purses' ? nameP(d, s) : nameFor(dp, d, s), tagsFor: (dp, d) => dp === 'sound' ? tagsSnd(d) : dp === 'sandals' ? tagsS(d) : dp === 'purses' ? tagsP(d) : tagsFor(dp, d), families: (dp, d) => dp === 'sound' ? familiesSnd(d) : dp === 'sandals' ? familiesS(d) : dp === 'purses' ? familiesP(d) : families(dp, d), describe: (dp, d) => dp === 'sound' ? describeSnd(d) : dp === 'sandals' ? describeS(d) : dp === 'purses' ? describeP(d) : describe(dp, d), kindOf: (dp, d) => dp === 'sound' ? d.kind : dp === 'sandals' ? d.style : dp === 'purses' ? d.shape : kindOf(dp, d), SOUND_KINDS, SOUND_LABEL, CUPS, CUP_LABEL, TOPPERS, TOPPER_LABEL, YOKES, BUDS, BUD_LABEL, SND_LIM, EAR_DEPTH, soundFit, STYLES, STYLE_LABEL, HEELS, HEEL_LABEL, SAN_LIM, SAN_N, sandalFit, tiltFeet, PAT, PAT_N, PAT_K, BAG_SHAPES, BAG_LABEL, PATTERNS, PATTERN_LABEL, STRAPS, STRAP_LABEL, CLOSURES, CLOSURE_LABEL, BAG_LIM, PURSE_N, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
+    ready, init, build, validate: (dp, s, b) => dp === 'clothing' ? validateC(s, b) : dp === 'back' ? validateB(s, b) : dp === 'sound' ? validateSnd(s, b) : dp === 'sandals' ? validateS(s, b) : dp === 'purses' ? validateP(s, b) : validate(dp, s, b), random: (dp, seed, o) => dp === 'clothing' ? randomC(seed, o) : dp === 'back' ? randomB(seed, o) : dp === 'sound' ? randomSnd(seed, o) : dp === 'sandals' ? randomS(seed, o) : dp === 'purses' ? randomP(seed, o) : random(dp, seed, o), nameFor: (dp, d, s) => dp === 'clothing' ? nameC(d, s) : dp === 'back' ? nameB(d, s) : dp === 'sound' ? nameSnd(d, s) : dp === 'sandals' ? nameS(d, s) : dp === 'purses' ? nameP(d, s) : nameFor(dp, d, s), tagsFor: (dp, d) => dp === 'clothing' ? tagsC(d) : dp === 'back' ? tagsB(d) : dp === 'sound' ? tagsSnd(d) : dp === 'sandals' ? tagsS(d) : dp === 'purses' ? tagsP(d) : tagsFor(dp, d), families: (dp, d) => dp === 'clothing' ? familiesC(d) : dp === 'back' ? familiesB(d) : dp === 'sound' ? familiesSnd(d) : dp === 'sandals' ? familiesS(d) : dp === 'purses' ? familiesP(d) : families(dp, d), describe: (dp, d) => dp === 'clothing' ? describeC(d) : dp === 'back' ? describeB(d) : dp === 'sound' ? describeSnd(d) : dp === 'sandals' ? describeS(d) : dp === 'purses' ? describeP(d) : describe(dp, d), kindOf: (dp, d) => dp === 'clothing' ? d.slot : dp === 'back' ? d.kind : dp === 'sound' ? d.kind : dp === 'sandals' ? d.style : dp === 'purses' ? d.shape : kindOf(dp, d), BACK_KINDS, BACK_LABEL, BK_LIM, SW, swordPart, hasWrap, hasGem, CLOTH, CLOTH_SLOTS, CLOTH_SLOT_LABEL, CLOTH_LABEL, isDress, clothMeshes, clothSync, SOUND_KINDS, SOUND_LABEL, CUPS, CUP_LABEL, TOPPERS, TOPPER_LABEL, YOKES, BUDS, BUD_LABEL, SND_LIM, EAR_DEPTH, soundFit, STYLES, STYLE_LABEL, HEELS, HEEL_LABEL, SAN_LIM, SAN_N, sandalFit, tiltFeet, PAT, PAT_N, PAT_K, BAG_SHAPES, BAG_LABEL, PATTERNS, PATTERN_LABEL, STRAPS, STRAP_LABEL, CLOSURES, CLOSURE_LABEL, BAG_LIM, PURSE_N, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
     DRESS_Y, DEF: dept => DEF[dept](), EL, SHAPES, SHAPE_LABEL, THREAD_SHAPES, FINISHES, CHARMS, CHARM_BY, THEME_LABEL, THEMES, MOUNTS, LINKS, PAIRS, CORDS, KIND_LABEL, BRANDS, BRAND_LABEL, LIMITS, D_MAX,
     PINKS, PASTEL_OTHER, PASTEL_ACC, PASTEL_METALS, METALS, colourName, charmTexture, geoFor, elH, elName, KIMI_CHARMS
   };

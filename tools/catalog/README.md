@@ -37,16 +37,32 @@ The rest of the site still uses `assets/sandy-classic.js` (old feet).
 - **Landscape:** the panel on the left, her stage on the right. **Portrait** (`max-aspect-ratio: 1/1`): the stage on top and
   the panel as a sheet below it; drag or tap its grip to pull it up over her (`data-sheet` half / full).
 - **Marketplace | Customize** toggle at the top. Marketplace: category tabs (the `DEPTS`), sub-tabs (`SUBS`), search, and a
-  filter popover (the catalog's own refine, brand and colour filters: `#fRefine` is moved into it). Tapping a card opens
-  `#item/<id>` in the panel while she **tries it on** (`CL.preview`, one piece per category, so it takes that category's
-  place); **Back** puts her outfit back, **Add to wardrobe** keeps it and puts it on.
-- **Customize:** Body (skin tone, nails, expression, foot shape, build sliders: `sandy.apply` on the classic kit), and the
-  wardrobe by category: tap to put on or take off (one per category), the bin removes it.
+  filter popover (the catalog's own refine, brand and colour filters: `#fRefine` is moved into it).
+- **The feed is endless** (`FEED`, `newFeed`, `feedFill`): opening a tab (or a sub-tab) starts a fresh random set (a new seed),
+  and pieces drawn earlier whose pictures are ready (`genCache` + `thumbs`) are mixed back in, one in three. More cards are
+  appended as the sentinel (`.cl-more`) nears the bottom; the grid is never rebuilt while scrolling. Only Hair, Favourites
+  and Yours end. Search and filters re-filter with the same seed.
+- **An opened piece** (`#item/<id>`) fills the **bottom half of the panel** (`#clDetail`); the feed stays above it and keeps
+  scrolling, so another card can be opened straight away. She **tries it on** (`CL.preview`, one piece per slot);
+  **Back** or the cross puts her outfit back, **Add to wardrobe** keeps it and puts it on.
+- **Customize:** Body has three sub-tabs: **Colour** (skin, nails and the hair she has on, each with swatches and a picker for
+  any colour; hair keeps its colour per wardrobe piece as `entry.col`, `dyedHair`), **Face** (expression) and **Build** (the
+  sliders, then her feet: foot shape, foot and toe length). Then the wardrobe by category: tap to put on or take off, the bin
+  removes it. Undo/redo covers the outfit, her body and piece colours.
+- **Slots, not departments:** what she wears is keyed by `slotOf(it)` (the department; clothing would be three slots,
+  `clothing.top|legs|feet`). `clashes()` keeps pieces that can't be worn together apart (a dress and bottoms, boots and sandals).
 - **She is the classic female avatar in her own colours** here (`look(true)`: each material's own look, kept as
   `userData.grug0` before she's painted grey). Card pictures still use the grey mannequin: `snapScene` switches to
   `look(false)` for the moment a picture is taken. Her skin is the exact colour picked on every part (`applyBody`).
-- After a build or foot change, body-fitted pieces (necklace, purse, sandals, sound's cord) are measured again and refitted.
-  Head items aren't: the build sliders leave her head alone (no head-size sliders, on purpose).
+- After a build or foot change, body-fitted pieces (necklace, purse, sandals, sound's cord, swords) are measured again and
+  refitted (`refitWorld`). Head items aren't: the build sliders leave her head alone (no head-size sliders, on purpose).
+- **Light or dark** follows the site's setting (`profile.prefs.mode` in `grug.profile.v1`, light unless they picked dark),
+  read before the page draws (a script in `<head>`). The sun/moon buttons (`[data-mode-btn]`: the stage bar and the editors'
+  top bar) change it for the whole site. The accent is soft pink (`data-g-accent="pink"`) and the Grug tile is pink.
+- **Her stage** sits on a blurred picture (`assets/closet/stage-bg.jpg`, pre-blurred, about 6 KB). Scrollbars are a thin
+  accent pill (webkit rules; `scrollbar-width` only inside `@supports not selector(::-webkit-scrollbar)`).
+- **The camera** orbits (drag), zooms (wheel or pinch) and **pans**: drag with the middle mouse button (scroll-wheel press),
+  or move two fingers together on a touch screen (`panBy` in `build.py`).
 - Saved on the device: `grug.closet.v1` = `{ wardrobe, wearing, body }`. A first visit starts with one hairstyle on.
 - The editors (`#edit…`) and the Hair Studio are under the Grug button at the top left of the stage; their Back returns here.
   The old catalog and item pages are still in the file (`#catalog`, `#item`) but nothing routes to them.
@@ -57,7 +73,7 @@ The rest of the site still uses `assets/sandy-classic.js` (old feet).
   (`sandy.__cut`) hides her below mid-thigh; `JM.syncDress()` opens it while sandals are on, hides her own flip-flops,
   and sets the foot pose (`J.tiltFeet(sandy, tilt, noToes)`: heels tip the foot, slippers tuck the toes away).
 - **Departments:** eyewear and hair come from `base.html`. `earrings`, `necklaces`, `purses`, `sandals` and `sound` are "jewelry"
-  departments (`isJ(it)`), with generated ids `ge:` `gn:` `gp:` `gs:` `ga:` + seed and saved designs `m:`.
+  departments (`isJ(it)`), with generated ids `ge:` `gn:` `gp:` `gs:` `ga:` `gb:` (back) + seed and saved designs `m:`.
 - **Brands:** `grug` and `kimiland` (KIMILAND: all pastel, about 90% pink, pink cards, logo toast to their Roblox group).
   Validation forces pastels for KIMILAND (`kimiEl`, `toPastel`). Generated `grug` items are made by players about a
   third of the time (`makerOf` in `int.js`, names from the site's NAMES lists) and get the item brand `players`.
@@ -67,7 +83,7 @@ The rest of the site still uses `assets/sandy-classic.js` (old feet).
 ## Adding a new category: the checklist
 
 Use **sandals** (`validateS` / `randomS` / `buildSandals`, `JDEPT.sandals`, `sandalPanel`) or **purses** as the model to copy.
-Pick a one-letter id prefix (taken: `e n p s a`).
+Pick a one-letter id prefix (taken: `e n p s a b c`).
 
 **`src/jewelry.js`** (a new `/* ==== <dept> */` section, before `const build =`)
 1. `DEF.<dept>`, a limits table, `LIMITS.<dept> = { n: <max charms> }`, and the kind list (like `STYLES`) with labels.
@@ -125,6 +141,28 @@ python3 tools/catalog/test/shot.py "#edit/sandals" x.png "$(cat tools/catalog/te
 The page exposes `window.GrugCatalog` = `{ J, JM, GE, sandy, scene, camera, cam, renderer, … }`. They use headless Chrome
 with software WebGL (`--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist`). The
 first load takes 20 to 40 seconds.
+
+## Back: swords (`/* ==== back */`, `backPanel`)
+
+- Three kinds in `d.kind`: `back1` (one sword across her back, hilt over her right shoulder), `back2` (two, crossed) and `hip`
+  (one at her left hip, blade down and back). A strap holds them on: a baldric round her chest (two for `back2`) or a belt.
+- Every sword is four parts from the **Modular Sword Kit by MilkAndBanana** (CC0, credited on `credits.html`): `d.blade`,
+  `d.guard`, `d.grip`, `d.pommel` index the parts in `assets/swords/swords.bin` (21 blades, 21 guards, 23 grips, 44 pommels;
+  loaded by `J.ready()`). The kit's parts share one origin, so they stack as they are (guard at 0, blade up +y).
+- `tools/catalog/swords.mjs` makes the `.bin` from the kit's FBX files (only the Steel set; duplicates dropped): positions
+  (int16), normals (int8), a region per vertex (0 = the kit's steel, 1 = everything else: a blade's edge, a grip's leather
+  wrap, a pommel's gem) and the kit's painted shading (a brightness per vertex, kept as vertex colours under our colours).
+  It reads the kit's palette picture (the texture embedded in each FBX) to do that.
+- Colours: blade and edge, hilt (guard and pommel), grip, wrap, gem, scabbard, strap. Prints go on the blade, the grip, the
+  scabbard and the strap, a fixed size (`BK_TILE` cm) whatever the part. Length 50 to 120 cm, blade width, angle, height.
+- World frame, fitted over `bodyField` (`bodyLoop` lays the strap). Pictures of back swords are taken from behind.
+
+## Clothing (built, switched off)
+
+The classic kit's clothes (tops and dresses, bottoms, boots) are in `jewelry.js` (`/* ==== clothing */`, `clothPanel`,
+`gc:` ids): any colour, an all-over print, worn by her through `sandy.apply` with three slots. The owner found a better pack,
+so the department is off: it isn't in `DEPTS`, the feed (`GEN_DEPTS`), `CL_DEPTS` or the menus. Point it at the new pack and
+switch those back on (see the comment above `CL_DEPTS` in `closet.js`).
 
 ## Sound (`/* ==== sound */`, `soundPanel`)
 
