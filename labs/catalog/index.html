@@ -4542,7 +4542,7 @@ window.GrugCatalogHair = function (ctx) {
       // ---- a slipper: a soft closed shell over the front of her foot, grown from the sole's own outline (its edge runs along the sole's
       //      edge, its toe ends at the sole's tip, rounded like a real slipper), open from the instep back, with a plush collar
       if (d.style === 'slipper' && K.soleEdge) {
-        const NU = 22, NZ = 20, PW = 2.1, gap = 0.4 + T * 0.3, zB = F.A.z + 6.2, inset = 0.15;
+        const NU = 22, NZ = 20, PW = 3.0, BULGE = 0.1, gap = 0.3 + T * 0.3, zB = F.A.z + 7.2, inset = 0.15;
         const zEnd = K.soleZ ? K.soleZ[1] - 0.25 : F.zTip + 1;
         // what the shell must clear: her foot (toes tucked away), slice by slice
         const nbS = sandy.n3.body, SIa = nbS.geometry.attributes.skinIndex, SWa = nbS.geometry.attributes.skinWeight, bones = nbS.skeleton.bones;
@@ -4552,9 +4552,9 @@ window.GrugCatalogHair = function (ctx) {
         // scaled up just enough (one number for the whole slipper) that her foot fits inside with room to spare
         const zs = []; for (let k = 0; k <= NZ; k++) { const t = k / NZ; zs.push(lerp(zB, zEnd, 1 - Math.pow(1 - t, 1.4))); }
         const prof = z => { const t = clamp((z - zB) / (zEnd - zB), 0, 1); return Math.pow(1 - Math.pow(t, 1.45), 1 / 1.45); };
-        let S = 3.5; for (const p of pts0) { if (p[2] < zB || p[2] > zEnd) continue; const t = (p[2] - zB) / (zEnd - zB); if (t > 0.88) continue; const [l, h] = K.soleEdge(p[2]), c = (l + h) / 2, a = Math.max(0.6, (h - l) / 2 - inset), u = Math.abs(p[0] - c) / a; if (u >= 0.85) continue; const need = (p[1] + gap - ytop) / (prof(p[2]) * Math.pow(1 - Math.pow(u, PW), 1 / PW)); if (need > S) S = need; }
+        let S = 3.5; for (const p of pts0) { if (p[2] < zB || p[2] > zEnd) continue; const t = (p[2] - zB) / (zEnd - zB); if (t > 0.88) continue; const [l, h] = K.soleEdge(p[2]), c = (l + h) / 2, a = Math.max(0.6, (h - l) / 2 - inset) * (1 + BULGE * 0.7), u = Math.abs(p[0] - c) / a; if (u >= 0.92) continue; const need = (p[1] + gap - ytop) / (prof(p[2]) * Math.pow(1 - Math.pow(u, PW), 1 / PW)); if (need > S) S = need; }
         S = Math.min(S, 14); const Hs = zs.map(z => Math.max(0.05, S * prof(z)));
-        const rows = zs.map((z, k) => { const [l, h] = K.soleEdge(z), c = (l + h) / 2, a = Math.max(0.3, (h - l) / 2 - inset) * (k === zs.length - 1 ? 0.2 : 1), r = []; for (let j = 0; j < NU; j++) { const th = Math.PI * (1 - j / (NU - 1)), cx = Math.cos(th), sy = Math.sin(th), x = c + a * Math.sign(cx) * Math.pow(Math.abs(cx), 2 / PW), y = ytop - 0.15 + (Hs[k] + 0.15) * Math.pow(sy, 2 / PW); r.push(V3(x, y, z)); } return r; });
+        const rows = zs.map((z, k) => { const [l, h] = K.soleEdge(z), c = (l + h) / 2, a = Math.max(0.3, (h - l) / 2 - inset) * (k === zs.length - 1 ? 0.2 : 1), r = []; for (let j = 0; j < NU; j++) { const th = Math.PI * (1 - j / (NU - 1)), cx = Math.cos(th), sy = Math.sin(th), x = c + a * (1 + BULGE * Math.sin(Math.PI * Math.min(1, sy * 1.15))) * Math.sign(cx) * Math.pow(Math.abs(cx), 2 / PW), y = ytop - 0.15 + (Hs[k] + 0.15) * Math.pow(sy, 2 / PW); r.push(V3(x, y, z)); } return r; });
         // front first, so the opening is the last row
         rows.reverse(); const W = NU, wr = rows.map(r => r.map(p => { const w = K.footPt(p), hf = clamp((p.y - ytop) / 3, 0, 1); if (K.lift) w.y += K.lift(p.z) * (1 - hf); return w; }));
         const pos = [], uv = [], idx = []; wr.forEach((r, ri) => r.forEach((p, j) => { pos.push(p.x, p.y, p.z); uv.push(uFrac(ri / (wr.length - 1)), regV('strap', j / (W - 1))); }));
