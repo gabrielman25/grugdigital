@@ -994,8 +994,8 @@
      Sound is what she wears on her ears: over-ear headphones (two cups on cushions, a headband over her head on a slider or a
      fork, toppers such as cat ears, an optional boom mic and a glowing ring on each cup), fluffy earmuffs, and earbuds (a stem
      or a round bud). Headphones and earbuds can be wired: a cord (straight or coiled; a Y cable with an inline remote for
-     earbuds) runs down her chest to a plug. Charms are pinned on the cups and the band, or dangle from the buds. Patterns
-     from the pattern pack go on the cups (the muffs' fur) and on the band. Her head and ears are measured from her own mesh. */
+     earbuds) runs down her chest to a plug. Sound has no charms. Patterns from the pattern pack go on the cups (the muffs'
+     fur) and on the band. Her head and ears are measured from her own mesh. */
   const SOUND_KINDS = [['over', 'Headphones'], ['muffs', 'Earmuffs'], ['buds', 'Earbuds']];
   const SOUND_LABEL = Object.fromEntries(SOUND_KINDS);
   const CUPS = [['round', 'Round'], ['oval', 'Oval'], ['square', 'Square'], ['heart', 'Heart'], ['cloud', 'Cloud']];
@@ -1006,13 +1006,13 @@
   const BUDS = [['stem', 'Stem'], ['round', 'Round']];
   const BUD_LABEL = Object.fromEntries(BUDS);
   const SND_LIM = { cupR: [4.8, 8.5], cupD: [2, 5.5], padT: [0.8, 2.6], bandW: [0.8, 5], bandT: [0.35, 2], budSize: [2, 5], cordLen: [0, 1] };
-  const SND_N = 6, EAR_DEPTH = 4.4, KS = 1.4;   // a cup and its cushion together are at least EAR_DEPTH deep (her ear sticks out that far); charms are drawn KS larger
+  const EAR_DEPTH = 4.4;   // a cup and its cushion together are at least EAR_DEPTH deep (her ear sticks out that far)
   const SND_COLS = ['cupCol', 'cupCol2', 'padCol', 'bandCol', 'topCol', 'hw', 'cordCol', 'glowCol', 'cupPatCol', 'bandPatCol'];
-  DEF.sound = () => ({ v: 1, brand: 'grug', kind: 'over', cup: 'round', cupR: 6.2, cupD: 3.2, padT: 1.6, bandW: 3, bandT: 1, yoke: 'post', bandPad: true, top: 'none', mic: false, glow: false, bud: 'stem', budSize: 3.6, wired: false, coil: false, remote: false, cordLen: 0.5, cupCol: '#ff8fc2', cupCol2: '#fff6f2', padCol: '#2a2a31', bandCol: '#ff8fc2', topCol: '#ff8fc2', hw: '#c8ccd2', cordCol: '#16161a', glowCol: '#4fd8e0', finish: 'gloss', cupPat: -1, cupPatCol: '#ffffff', bandPat: -1, bandPatCol: '#ffffff', charms: [EL({ k: 'shape', id: 'heart', size: 1.8, col: '#e8344f', at: 0.95 })] });
-  LIMITS.sound = { n: SND_N };
+  DEF.sound = () => ({ v: 1, brand: 'grug', kind: 'over', cup: 'round', cupR: 6.2, cupD: 3.2, padT: 1.6, bandW: 3, bandT: 1, yoke: 'post', bandPad: true, top: 'none', mic: false, glow: false, bud: 'stem', budSize: 3.6, wired: false, coil: false, remote: false, cordLen: 0.5, cupCol: '#ff8fc2', cupCol2: '#fff6f2', padCol: '#2a2a31', bandCol: '#ff8fc2', topCol: '#ff8fc2', hw: '#c8ccd2', cordCol: '#16161a', glowCol: '#4fd8e0', finish: 'gloss', cupPat: -1, cupPatCol: '#ffffff', bandPat: -1, bandPatCol: '#ffffff', charms: [] });
+  LIMITS.sound = { n: 0 };
   // what a design really has (a setting that doesn't apply to its kind is kept, so switching back brings it back)
   const isWired = d => !!d.wired && d.kind !== 'muffs', hasCoil = d => isWired(d) && !!d.coil && d.kind === 'over', hasRemote = d => isWired(d) && !!d.remote && d.kind === 'buds';
-  const hasMic = d => !!d.mic && d.kind === 'over', hasGlow = d => !!d.glow && d.kind !== 'muffs', topOf = d => d.kind === 'buds' ? 'none' : d.top;
+  const hasMic = d => !!d.mic && d.kind === 'over', hasGlow = d => !!d.glow && d.kind === 'over', topOf = d => d.kind === 'buds' ? 'none' : d.top;
   const shadeOf = base => { const c = new THREE.Color(base), h = {}; c.getHSL(h); c.setHSL(h.h, h.s, h.l > 0.55 ? h.l - 0.22 : h.l + 0.22); return '#' + c.getHexString(); };
 
   function validateSnd(src, brand) {
@@ -1024,11 +1024,10 @@
     if (!FINISHES.some(f => f[0] === d.finish)) d.finish = 'gloss';
     for (const k of ['wired', 'coil', 'remote', 'mic', 'glow', 'bandPad']) d[k] = !!d[k];
     if (d.kind === 'over' && d.padT + d.cupD < EAR_DEPTH) { d.cupD = Math.min(SND_LIM.cupD[1], EAR_DEPTH - d.padT); notes.push('Cups kept deep enough to cover her ears'); }
-    d.charms = (d.charms || []).slice(0, SND_N).map(e => cleanEl(e, 'sound'));
+    d.charms = [];   // sound has no charms
     if (d.brand === 'kimiland') {
       let changed = false;
       for (const k of SND_COLS) if (!isPastel(d[k])) { d[k] = toPastel(d[k]); changed = true; }
-      for (const e of d.charms) kimiEl(e, { tint: isPastel(e.col) ? e.col : toPastel(e.col) });
       if (changed) notes.push('Brought to KIMILAND pastels');
     }
     return { d, notes };
@@ -1050,30 +1049,23 @@
       d.hw = metal; d.cordCol = kimi ? r.pick([pal.main, '#fffafc']) : r.pick(['#16161a', '#f4f4f2', d.cupCol, d.cupCol2]);
       d.glowCol = kimi ? r.pick(['#c4e1ff', '#e0d3ff', '#ffb7d5', '#c6f3dd']) : r.pick(NEON);
       d.cupPatCol = shadeOf(d.kind === 'muffs' ? d.cupCol : d.cupCol2); d.bandPatCol = shadeOf(d.bandCol);
-      for (const e of d.charms) { if (e.k === 'shape') e.col = e.id === 'pearl' ? (kimi ? '#fffafc' : '#fff6f2') : pick(); else { const c = CHARM_BY[e.id]; e.tint = kimi && !c.brand ? (pal.pink ? pal.main : r.pick(pal.mains)) : ''; } }
     };
     if (o.keep === 'shape') { recolour(); return validateSnd(d, brand).d; }
-    const keepC = o.keep === 'colours' && o.base ? { cols: SND_COLS.map(k => d[k]), ch: d.charms.map(e => [e.col, e.tint]) } : null;
+    const keepC = o.keep === 'colours' && o.base ? { cols: SND_COLS.map(k => d[k]) } : null;
     d.kind = o.kind && SOUND_LABEL[o.kind] ? o.kind : r.w({ over: 4, muffs: 2.2, buds: 3 });
     d.cup = r.w(kimi ? { round: 2.5, oval: 1.2, square: 0.8, heart: 2, cloud: 1.6 } : { round: 3, oval: 2, square: 1.6, heart: 0.7, cloud: 0.5 });
     d.cupR = d.kind === 'muffs' ? r.f(5.4, 7.6) : r.f(5.4, 7.4); d.padT = r.f(1.1, 2.1); d.cupD = r.f(Math.max(2.4, EAR_DEPTH - d.padT + 0.2), 4.6);
     d.bandW = d.kind === 'muffs' ? r.f(0.9, 2) : r.f(2, 4.2); d.bandT = d.kind === 'muffs' ? r.f(0.4, 0.8) : r.f(0.7, 1.5);
     d.yoke = r.chance(0.45) ? 'fork' : 'post'; d.bandPad = d.kind === 'over' && r.chance(0.55);
     d.top = r.w(kimi ? { none: 2, cat: 2.2, bunny: 1.6, bear: 1.6, devil: 0.3, bow: 1.4 } : theme === 'halloween' || theme === 'night' ? { none: 3, cat: 1.6, devil: 1.8, bunny: 0.4, bear: 0.4, bow: 0.3 } : { none: 6, cat: 1.2, bunny: 0.6, bear: 0.6, devil: 0.3, bow: 0.6 });
-    d.mic = d.kind === 'over' && r.chance(theme === 'night' ? 0.4 : 0.14); d.glow = d.kind !== 'muffs' && r.chance(theme === 'night' || theme === 'halloween' ? 0.35 : kimi ? 0.15 : 0.12);
+    d.mic = d.kind === 'over' && r.chance(theme === 'night' ? 0.4 : 0.14); d.glow = d.kind === 'over' && r.chance(theme === 'night' || theme === 'halloween' ? 0.35 : kimi ? 0.15 : 0.12);
     d.bud = r.chance(0.65) ? 'stem' : 'round'; d.budSize = r.f(3, 4.2);
     d.wired = d.kind !== 'muffs' && r.chance(d.kind === 'buds' ? 0.5 : 0.4); d.coil = d.wired && d.kind === 'over' && r.chance(0.45); d.remote = d.wired && d.kind === 'buds' && r.chance(0.6); d.cordLen = r.f(0.15, 0.95);
     d.cupPat = r.chance(d.kind === 'muffs' ? 0.3 : 0.4) ? r.i(0, PAT_N - 1) : -1; d.bandPat = d.kind === 'over' && r.chance(0.3) ? r.i(0, PAT_N - 1) : -1;
     d.finish = d.kind === 'muffs' ? 'matte' : r.w({ gloss: 4, matte: 3, metal: kimi ? 0.2 : 1 });
-    const n = r.w({ 0: 1.4, 1: 3, 2: 2.4, 3: 1.2 }) | 0; d.charms = [];
-    for (let i = 0; i < n; i++) {
-      const e = randomEl(r, 'necklaces', theme, pal, kimi, {}); e.mode = 'hang';
-      if (d.kind === 'buds') { e.size = clamp(e.size * 0.6, 0.8, 2.2); e.at = n === 1 ? 0 : r.pick([-0.7, 0, 0.7]); e.drop = r.f(0.6, 3); }
-      else { e.size = clamp(e.size * 0.85, 1.2, 3.2); const side = i % 2 ? 1 : -1; e.at = r.chance(0.75) ? side * r.f(0.82, 1) : side * r.f(0.3, 0.65); }
-      d.charms.push(e);
-    }
+    d.charms = [];
     recolour();
-    if (keepC) { SND_COLS.forEach((k, i) => { d[k] = keepC.cols[i]; }); d.charms.forEach((e, i) => { const c = keepC.ch[i % keepC.ch.length]; if (!c) return; if (e.k === 'shape') e.col = c[0]; else if (!CHARM_BY[e.id].brand) e.tint = c[1] || ''; }); }
+    if (keepC) SND_COLS.forEach((k, i) => { d[k] = keepC.cols[i]; });
     return validateSnd(d, brand).d;
   }
 
@@ -1082,33 +1074,31 @@
     let noun = { over: r.pick(['Headphones', 'Headphones', 'Cans', 'Over-Ears', 'Studio Headphones']), muffs: r.pick(['Earmuffs', 'Ear Warmers', 'Fluffy Earmuffs', 'Muffs']), buds: r.pick(['Earbuds', 'Buds', 'In-Ears']) }[d.kind];
     if (hasMic(d)) noun = r.pick(['Headset', 'Gaming Headset']);
     const extra = top !== 'none' ? { cat: 'Kitty', bunny: 'Bunny', bear: 'Teddy', devil: 'Devil', bow: 'Bow' }[top] : hasGlow(d) ? r.pick(['Glow', 'Neon', 'Light-Up']) : hasCoil(d) ? 'Coiled' : isWired(d) ? r.pick(['Wired', 'Corded']) : d.kind === 'buds' && r.chance(0.3) ? 'Wireless' : '';
-    const pat = d.cupPat >= 0 ? r.pick(['Print', 'Patterned', 'Graphic']) : '', sub = d.charms.length ? elName(mainEl(d.charms)) + ' Charm' : '';
-    const forms = [[colour, extra, noun], [fl, extra || colour, noun], [fl, sub || colour, noun], [extra || pat || fl, colour, noun], [colour, pat || extra, noun]];
+    const pat = d.cupPat >= 0 ? r.pick(['Print', 'Patterned', 'Graphic']) : '';
+    const forms = [[colour, extra, noun], [fl, extra || colour, noun], [fl, pat || colour, noun], [extra || pat || fl, colour, noun], [colour, pat || extra, noun]];
     return forms[r.i(0, 4)].filter(Boolean).join(' ').replace(/\s+/g, ' ');
   }
   function tagsSnd(d) {
-    const t = ['Sound', SOUND_LABEL[d.kind]], themes = new Set(d.charms.filter(e => e.k === 'charm').map(e => CHARM_BY[e.id].theme)), top = topOf(d);
+    const t = ['Sound', SOUND_LABEL[d.kind]], top = topOf(d);
     if (d.kind !== 'muffs') t.push(isWired(d) ? 'Wired' : 'Wireless'); if (hasCoil(d)) t.push('Coiled cord'); if (hasRemote(d)) t.push('Remote'); if (hasMic(d)) t.push('Mic'); if (hasGlow(d)) t.push('Glow');
     if (top !== 'none') t.push(TOPPER_LABEL[top]); if (d.kind === 'over') t.push(CUP_LABEL[d.cup] + ' cups'); if (d.kind === 'buds') t.push(BUD_LABEL[d.bud] + ' buds');
     if (d.cupPat >= 0 || (d.kind === 'over' && d.bandPat >= 0)) t.push('Patterned');
-    for (const th of themes) t.push(THEME_LABEL[th]); if (d.charms.length) t.push('Charms'); if (d.brand === 'kimiland') t.push('Pastel', 'KIMILAND'); return Array.from(new Set(t));
+    if (d.brand === 'kimiland') t.push('Pastel', 'KIMILAND'); return Array.from(new Set(t));
   }
   function familiesSnd(d) {
     const f = new Set([famOfHex(d.cupCol)]); if (d.kind !== 'muffs') f.add(famOfHex(d.cupCol2)); if (d.kind !== 'buds') f.add(famOfHex(d.bandCol)); if (d.cupPat >= 0) f.add(famOfHex(d.cupPatCol)); if (hasGlow(d)) f.add(famOfHex(d.glowCol));
-    for (const e of d.charms) { if (e.k === 'shape') f.add(famOfHex(e.col)); else { const c = CHARM_BY[e.id]; if (e.tint) f.add(famOfHex(e.tint === 'pastel' ? '#ffc4dc' : e.tint)); else for (const x of c.fam) f.add(x); } }
     if (f.size > 3) f.add('multi'); return f;
   }
   function describeSnd(d) {
-    const kimi = d.brand === 'kimiland', col = colourName(d.cupCol, kimi).toLowerCase(), top = topOf(d), names = Array.from(new Set(d.charms.map(elName).map(s => s.toLowerCase())));
-    const list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0], ch = names.length ? (d.kind === 'buds' ? ', with ' + list + ' dangling from the buds' : ', with ' + list + ' pinned on') : '';
+    const kimi = d.brand === 'kimiland', col = colourName(d.cupCol, kimi).toLowerCase(), top = topOf(d);
     const topW = top !== 'none' ? ', topped with ' + TOPPER_LABEL[top].toLowerCase() : '';
     let s;
     if (d.kind === 'over') s = `${hasMic(d) ? 'A gaming headset' : 'Over-ear headphones'} with ${col} ${CUP_LABEL[d.cup].toLowerCase()} cups${d.cupPat >= 0 ? ' in a print' : ''} on a ${colourName(d.bandCol, kimi).toLowerCase()} headband${topW}${hasGlow(d) ? ', a glowing ring round each cup' : ''}${hasMic(d) ? ', a mic on a boom' : ''}`;
     else if (d.kind === 'muffs') s = `Fluffy ${col} earmuffs${d.cupPat >= 0 ? ' with a print in the fur' : ''} on a thin ${colourName(d.bandCol, kimi).toLowerCase()} band${topW}`;
-    else s = `A pair of ${col} ${d.bud === 'stem' ? 'stem' : 'round'} earbuds${hasGlow(d) ? ' with a glowing ring' : ''}`;
+    else s = `A pair of ${col} ${d.bud === 'stem' ? 'stem' : 'round'} earbuds`;
     if (isWired(d)) s += d.kind === 'buds' ? `, on a Y cable${hasRemote(d) ? ' with an inline remote' : ''} down to a plug` : `, with a ${hasCoil(d) ? 'coiled' : 'straight'} cord down to a plug`;
     else if (d.kind !== 'muffs') s += ', wireless';
-    return s + ch + '.' + (kimi ? ' A KIMILAND piece: soft pastels, made to be cute.' : '');
+    return s + '.' + (kimi ? ' A KIMILAND piece: soft pastels, made to be cute.' : '');
   }
 
   /* ---- her head, measured: the ears, the side of her head, its outline round the band's plane and round her face (in cm, head frame) */
@@ -1321,36 +1311,21 @@
         if (d.bud === 'stem') {
           const g = new THREE.SphereGeometry(0.5, 16, 12); g.scale(s * 0.9, s * 0.8, s * 0.86); g.translate(c.x, c.y, c.z); add(g, bodyM, 'bud');
           const tipIn = c.clone().add(V3(-sx * s * 0.34, -s * 0.05, -s * 0.18)); ball(tipIn, s * 0.24, padM, 'tip', null, 10);
-          const a = c.clone().add(V3(0, -s * 0.2, s * 0.05)), b = c.clone().add(V3(sx * s * 0.04, -s * 1.3, s * 0.3)); cyl(a, b, s * 0.15, bodyM, 'stem', null, 12); ball(b, s * 0.155, accM, 'stemTip', null, 10);
-          if (glowM) { const g2 = new THREE.TorusGeometry(s * 0.3, s * 0.05, 5, 20); g2.rotateY(Math.PI / 2); g2.translate(c.x + sx * s * 0.43, c.y, c.z); add(g2, glowM, 'glow'); }
-          budAt[sx] = b.clone().add(V3(0, -s * 0.12, 0)); cordFrom[sx] = budAt[sx].clone();
+          // the stem and its tip: one straight round rod (same radius and sides, so the seam is a clean straight line) with a rounded end
+          const a = c.clone().add(V3(0, -s * 0.2, s * 0.05)), b = c.clone().add(V3(sx * s * 0.04, -s * 1.3, s * 0.3)), dir = b.clone().sub(a).normalize(), q = new THREE.Quaternion().setFromUnitVectors(V3(0, -1, 0), dir), sr = s * 0.15, tipL = s * 0.2, seg = 20;
+          const rod = new THREE.CylinderGeometry(sr, sr, a.distanceTo(b), seg, 1, true); rod.translate(0, -a.distanceTo(b) / 2, 0); rod.applyQuaternion(q); rod.translate(a.x, a.y, a.z); add(rod, bodyM, 'stem');
+          const prof = [new THREE.Vector2(sr, 0), new THREE.Vector2(sr, -tipL)]; for (let k = 1; k <= 6; k++) { const an = k / 6 * Math.PI / 2; prof.push(new THREE.Vector2(Math.max(1e-4, sr * Math.cos(an)), -tipL - sr * 0.8 * Math.sin(an))); }
+          const tip = new THREE.LatheGeometry(prof.reverse(), seg); tip.applyQuaternion(q); tip.translate(b.x, b.y, b.z); add(tip, accM, 'stemTip');
+          budAt[sx] = b.clone().addScaledVector(dir, tipL + sr * 0.8); cordFrom[sx] = budAt[sx].clone();
         } else {
           const sh = new THREE.Shape().absarc(0, 0, s * 0.5, 0, TAU, false), g = cupGeo(sh, sb, s * 0.48, s * 0.13, 18), q = new THREE.Quaternion().setFromUnitVectors(V3(0, 0, 1), V3(sx * 0.62, 0, 0.78).normalize()); g.applyQuaternion(q); g.translate(c.x - sx * s * 0.2, c.y, c.z - s * 0.2); add(g, mat, 'bud');
           ball(c.clone().add(V3(-sx * s * 0.3, 0, -s * 0.3)), s * 0.26, padM, 'tip', null, 10);
-          if (glowM) { const ring = []; for (let i = 0; i < 40; i++) { const a = i / 40 * TAU; ring.push(V3(Math.cos(a) * s * 0.42, Math.sin(a) * s * 0.42, s * 0.5)); } const g2 = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ring, true), 28, s * 0.05, 4, true); g2.applyQuaternion(q); g2.translate(c.x - sx * s * 0.2, c.y, c.z - s * 0.2); add(g2, glowM, 'glow'); }
           budAt[sx] = c.clone().add(V3(0, -s * 0.5, 0)); cordFrom[sx] = budAt[sx].clone();
         }
       }
       curP = headP;
     }
 
-    // ---- charms: pinned on the cups and the band (facing out), or dangling from the buds on little chains
-    const list = d.charms.slice().sort((a, b) => a.at - b.at), perBud = { '-1': 0, 1: 0 };
-    for (const e of list) {
-      const size = e.size * KS, el = makeEl(Object.assign({}, e, { size }), own, kind !== 'buds'), lift = e.k === 'charm' ? 0.15 : size * 0.3 + 0.12;
-      if (kind === 'buds') {
-        (e.at < -0.33 ? [-1] : e.at > 0.33 ? [1] : [-1, 1]).forEach((sx, j) => {
-          const k = perBud[sx]++, drop = clamp(e.drop || 2, 0.4, 9), to = budAt[sx].clone().add(V3(0, -drop, (k % 2 ? -1 : 1) * Math.ceil(k / 2) * 1.2));
-          cyl(budAt[sx], to.clone().add(V3(0, 0.05, 0)), 0.07, hwM, 'link', sideG[sx], 5);
-          const it = j === 0 ? el : makeEl(Object.assign({}, e, { size }), own, false); it.rotation.y = sx * Math.PI / 2; it.position.copy(to); sideG[sx].add(it);
-        });
-        continue;
-      }
-      let p, n, up;
-      if (Math.abs(e.at) >= 0.75) { const sx = Math.sign(e.at), f = (Math.abs(e.at) - 0.75) / 0.25; p = V3(sx * (face.x + lift), yC + (1 - f) * face.halfH * 0.5, zM); n = V3(sx, 0, 0); up = V3(0, 1, 0); }
-      else { const t = lerp(-arc.thA, arc.thA, (e.at + 0.75) / 1.5) * 0.9; p = arc.at(t).add(V3(0, 0, d.bandW / 2 + lift)); n = V3(0, 0, 1); up = arc.nrm(t); }
-      const xx = V3().crossVectors(up, n).normalize(), yy = V3().crossVectors(n, xx).normalize(); el.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xx, yy, n)); el.position.copy(p); headP.add(el);
-    }
 
     // ---- the cord: from her left cup (or a Y from both buds) down her chest to a plug
     if (isWired(d)) {
@@ -1389,7 +1364,7 @@
   function buildNecklaceLength(d) { const F = bodyField(CTX.sandy), pts = necklacePath(d, F); return new THREE.CatmullRomCurve3(pts, true, 'centripetal').getLength(); }
 
   window.GrugJewelry = {
-    ready, init, build, validate: (dp, s, b) => dp === 'sound' ? validateSnd(s, b) : dp === 'sandals' ? validateS(s, b) : dp === 'purses' ? validateP(s, b) : validate(dp, s, b), random: (dp, seed, o) => dp === 'sound' ? randomSnd(seed, o) : dp === 'sandals' ? randomS(seed, o) : dp === 'purses' ? randomP(seed, o) : random(dp, seed, o), nameFor: (dp, d, s) => dp === 'sound' ? nameSnd(d, s) : dp === 'sandals' ? nameS(d, s) : dp === 'purses' ? nameP(d, s) : nameFor(dp, d, s), tagsFor: (dp, d) => dp === 'sound' ? tagsSnd(d) : dp === 'sandals' ? tagsS(d) : dp === 'purses' ? tagsP(d) : tagsFor(dp, d), families: (dp, d) => dp === 'sound' ? familiesSnd(d) : dp === 'sandals' ? familiesS(d) : dp === 'purses' ? familiesP(d) : families(dp, d), describe: (dp, d) => dp === 'sound' ? describeSnd(d) : dp === 'sandals' ? describeS(d) : dp === 'purses' ? describeP(d) : describe(dp, d), kindOf: (dp, d) => dp === 'sound' ? d.kind : dp === 'sandals' ? d.style : dp === 'purses' ? d.shape : kindOf(dp, d), SOUND_KINDS, SOUND_LABEL, CUPS, CUP_LABEL, TOPPERS, TOPPER_LABEL, YOKES, BUDS, BUD_LABEL, SND_LIM, SND_N, EAR_DEPTH, soundFit, STYLES, STYLE_LABEL, HEELS, HEEL_LABEL, SAN_LIM, SAN_N, sandalFit, tiltFeet, PAT, PAT_N, PAT_K, BAG_SHAPES, BAG_LABEL, PATTERNS, PATTERN_LABEL, STRAPS, STRAP_LABEL, CLOSURES, CLOSURE_LABEL, BAG_LIM, PURSE_N, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
+    ready, init, build, validate: (dp, s, b) => dp === 'sound' ? validateSnd(s, b) : dp === 'sandals' ? validateS(s, b) : dp === 'purses' ? validateP(s, b) : validate(dp, s, b), random: (dp, seed, o) => dp === 'sound' ? randomSnd(seed, o) : dp === 'sandals' ? randomS(seed, o) : dp === 'purses' ? randomP(seed, o) : random(dp, seed, o), nameFor: (dp, d, s) => dp === 'sound' ? nameSnd(d, s) : dp === 'sandals' ? nameS(d, s) : dp === 'purses' ? nameP(d, s) : nameFor(dp, d, s), tagsFor: (dp, d) => dp === 'sound' ? tagsSnd(d) : dp === 'sandals' ? tagsS(d) : dp === 'purses' ? tagsP(d) : tagsFor(dp, d), families: (dp, d) => dp === 'sound' ? familiesSnd(d) : dp === 'sandals' ? familiesS(d) : dp === 'purses' ? familiesP(d) : families(dp, d), describe: (dp, d) => dp === 'sound' ? describeSnd(d) : dp === 'sandals' ? describeS(d) : dp === 'purses' ? describeP(d) : describe(dp, d), kindOf: (dp, d) => dp === 'sound' ? d.kind : dp === 'sandals' ? d.style : dp === 'purses' ? d.shape : kindOf(dp, d), SOUND_KINDS, SOUND_LABEL, CUPS, CUP_LABEL, TOPPERS, TOPPER_LABEL, YOKES, BUDS, BUD_LABEL, SND_LIM, EAR_DEPTH, soundFit, STYLES, STYLE_LABEL, HEELS, HEEL_LABEL, SAN_LIM, SAN_N, sandalFit, tiltFeet, PAT, PAT_N, PAT_K, BAG_SHAPES, BAG_LABEL, PATTERNS, PATTERN_LABEL, STRAPS, STRAP_LABEL, CLOSURES, CLOSURE_LABEL, BAG_LIM, PURSE_N, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
     DRESS_Y, DEF: dept => DEF[dept](), EL, SHAPES, SHAPE_LABEL, THREAD_SHAPES, FINISHES, CHARMS, CHARM_BY, THEME_LABEL, THEMES, MOUNTS, LINKS, PAIRS, CORDS, KIND_LABEL, BRANDS, BRAND_LABEL, LIMITS, D_MAX,
     PINKS, PASTEL_OTHER, PASTEL_ACC, PASTEL_METALS, METALS, colourName, charmTexture, geoFor, elH, elName, KIMI_CHARMS
   };

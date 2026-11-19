@@ -20,21 +20,41 @@ rep("const ON_SITE = !!(K && K.model === 'block');","const ON_SITE = !!(K && K.m
 rep("renderer.setPixelRatio(ON_SITE ?","renderer.setPixelRatio(ON_SITE || ON_LABS ?")
 # the mannequin's nails: no polish, the same grey as her skin (the new feet mark their nails per vertex and tint them)
 rep("    hideFaceHair();\n  }\n  function hideFaceHair()","    { const NU = sandy.n3._nailU; if (NU) { NU.nailAmt.value = 0; } }\n    hideFaceHair();\n  }\n  function hideFaceHair()")
-# ---- hair: flat-colour dyes (no hair texture, just colour; one colour, a fade, or a rainbow) and a few of them on every style
+# ---- hair: every catalog hairstyle is flat colour (no strand texture: flatHair below); a texture is only a choice in the Hair
+#      Studio's editor. Plus a few extra plain colours (one colour, a fade, or a rainbow) on every style.
 rep("  const DYES = {\n", """  const DYES = {
-    flatpink: { name: 'Flat pink', plain: true, tex: 'white', tint: '#ff8fc2', sw: '#ff8fc2', tags: ['pink', 'flat colour', 'colourful'] },
-    flatlilac: { name: 'Flat lilac', plain: true, tex: 'white', tint: '#b79cff', sw: '#b79cff', tags: ['purple', 'lavender', 'flat colour', 'pastel', 'colourful'] },
-    flatmint: { name: 'Flat mint', plain: true, tex: 'white', tint: '#7fe0b4', sw: '#7fe0b4', tags: ['green', 'mint', 'flat colour', 'pastel', 'colourful'] },
-    flatsky: { name: 'Flat sky', plain: true, tex: 'white', tint: '#7cc4ff', sw: '#7cc4ff', tags: ['blue', 'flat colour', 'colourful'] },
-    flatred: { name: 'Flat red', plain: true, tex: 'white', tint: '#e2383f', sw: '#e2383f', tags: ['red', 'flat colour', 'colourful'] },
-    flatblack: { name: 'Flat black', plain: true, tex: 'white', tint: '#26262c', sw: '#26262c', tags: ['black', 'flat colour', 'dark'] },
-    flatwhite: { name: 'Flat white', plain: true, tex: 'white', tint: '#f4f2f0', sw: '#f4f2f0', tags: ['white', 'flat colour', 'light'] },
-    flatlemon: { name: 'Flat lemon', plain: true, tex: 'white', tint: '#ffe066', sw: '#ffe066', tags: ['yellow', 'blonde', 'flat colour', 'colourful'] },
-    flatsunset: { name: 'Flat sunset', plain: true, tex: 'white', tint: '#ff9a3c', tip: '#ff4f9a', tipMix: 1, tipStart: 0.3, sw: 'linear-gradient(#ff9a3c,#ff4f9a)', tags: ['orange', 'pink', 'ombre', 'two tone', 'flat colour', 'colourful'] },
-    flatcandy: { name: 'Flat cotton candy', plain: true, tex: 'white', tint: '#ff9dcf', tip: '#8ccfff', tipMix: 1, tipStart: 0.3, sw: 'linear-gradient(#ff9dcf,#8ccfff)', tags: ['pink', 'blue', 'ombre', 'pastel', 'two tone', 'flat colour', 'colourful'] },
-    flatocean: { name: 'Flat ocean', plain: true, tex: 'white', tint: '#2b62d9', tip: '#4fd8e0', tipMix: 1, tipStart: 0.35, sw: 'linear-gradient(#2b62d9,#4fd8e0)', tags: ['blue', 'teal', 'ombre', 'two tone', 'flat colour', 'colourful'] },
-    flatrainbow: { name: 'Flat rainbow', plain: true, tex: 'white', rainbow: 0.95, sw: 'conic-gradient(#f43f5e,#f59e0b,#10b981,#0ea5e9,#7c3aed,#f43f5e)', tags: ['rainbow', 'flat colour', 'colourful', 'multicolour'] },
+    flatpink: { name: 'Bubblegum', plain: true, tex: 'white', tint: '#ff8fc2', sw: '#ff8fc2', tags: ['pink', 'colourful'] },
+    flatlilac: { name: 'Lilac', plain: true, tex: 'white', tint: '#b79cff', sw: '#b79cff', tags: ['purple', 'lavender', 'pastel', 'colourful'] },
+    flatmint: { name: 'Mint green', plain: true, tex: 'white', tint: '#7fe0b4', sw: '#7fe0b4', tags: ['green', 'mint', 'pastel', 'colourful'] },
+    flatsky: { name: 'Sky', plain: true, tex: 'white', tint: '#7cc4ff', sw: '#7cc4ff', tags: ['blue', 'colourful'] },
+    flatred: { name: 'Cherry', plain: true, tex: 'white', tint: '#e2383f', sw: '#e2383f', tags: ['red', 'colourful'] },
+    flatblack: { name: 'Jet black', plain: true, tex: 'white', tint: '#26262c', sw: '#26262c', tags: ['black', 'dark'] },
+    flatwhite: { name: 'Snow white', plain: true, tex: 'white', tint: '#f4f2f0', sw: '#f4f2f0', tags: ['white', 'light'] },
+    flatlemon: { name: 'Lemon', plain: true, tex: 'white', tint: '#ffe066', sw: '#ffe066', tags: ['yellow', 'blonde', 'colourful'] },
+    flatsunset: { name: 'Sunset', plain: true, tex: 'white', tint: '#ff9a3c', tip: '#ff4f9a', tipMix: 1, tipStart: 0.3, sw: 'linear-gradient(#ff9a3c,#ff4f9a)', tags: ['orange', 'pink', 'ombre', 'two tone', 'colourful'] },
+    flatcandy: { name: 'Cotton candy', plain: true, tex: 'white', tint: '#ff9dcf', tip: '#8ccfff', tipMix: 1, tipStart: 0.3, sw: 'linear-gradient(#ff9dcf,#8ccfff)', tags: ['pink', 'blue', 'ombre', 'pastel', 'two tone', 'colourful'] },
+    flatocean: { name: 'Ocean', plain: true, tex: 'white', tint: '#2b62d9', tip: '#4fd8e0', tipMix: 1, tipStart: 0.35, sw: 'linear-gradient(#2b62d9,#4fd8e0)', tags: ['blue', 'teal', 'ombre', 'two tone', 'colourful'] },
+    flatrainbow: { name: 'Bright rainbow', plain: true, tex: 'white', rainbow: 0.95, sw: 'conic-gradient(#f43f5e,#f59e0b,#10b981,#0ea5e9,#7c3aed,#f43f5e)', tags: ['rainbow', 'colourful', 'multicolour'] },
 """)
+# every Grug hairstyle in the catalog is flat colour: the strand texture's own colour is multiplied into the tints (the Hair
+# Studio does the same, labs/hair-studio-x8f3k2: keep TEX_HEX and flatHair the same in both)
+rep("  const OWN = (name, tags, sw) => ({ own: true, name, tags, sw });", """  const TEX_HEX = { black: '#1d1f26', blonde: '#e2b98a', blue: '#8dcce0', 'dark blue': '#22357e', 'dark brown': '#4a2a22', green: '#8fdc8b', 'light brown': '#80523c', 'lime green': '#c8dc8b', magenta: '#c598e0', orange: '#de9f8d', pink: '#ee8fb0', purple: '#8d91de', sunset: '#e89369', teal: '#6fd2bf', 'vibrant orange': '#f2a496', white: '#f6f6f6' };
+  const hexMul = (a, b) => { const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)), A = p(/^#[0-9a-f]{6}$/i.test(a || '') ? a : '#9a9a9a'), B = p(/^#[0-9a-f]{6}$/i.test(b || '') ? b : '#ffffff'); return '#' + A.map((v, i) => Math.round(v * B[i] / 255).toString(16).padStart(2, '0')).join(''); };
+  function flatHair(groups) {
+    for (const g of groups) {
+      if (!g || g.plain) continue; const base = TEX_HEX[g.tex] || '#9a9a9a';
+      g.tint = hexMul(base, g.tint); g.tip = hexMul(base, g.tip);
+      if (g.twinTex || g.twinTint) { g.twinTint = hexMul(TEX_HEX[g.twinTex || g.tex] || base, g.twinTint || '#ffffff'); g.twinTex = null; }
+      if (g.hlAmount > 0 || g.hlTex) g.hlColour = hexMul(TEX_HEX[g.hlTex || g.tex] || base, g.hlColour || '#ffffff'); g.hlTex = null;
+      g.plain = true;
+    }
+    return groups;
+  }
+  const OWN = (name, tags, sw) => ({ own: true, name, tags, sw });""")
+rep("try { const gs = makeStyle(id, { tex: 'dark brown', tint: '#ffffff' }); if (dy) applyDye(gs, dy); return gs; } finally { H.seed(null); }",
+    "try { const gs = makeStyle(id, { tex: 'dark brown', tint: '#ffffff' }); if (dy) applyDye(gs, dy); return flatHair(gs); } finally { H.seed(null); }")
+# pictures cached on the device from before (textured hair) are taken again
+rep("const THUMB_V = 'c1:';", "const THUMB_V = 'c2:';")
 rep("      g.hlAmount = 0; g.hlTex = null; g.variety = 0;", "      g.hlAmount = 0; g.hlTex = null; g.variety = 0; g.plain = !!d.plain;")
 rep("slots: [g.tex, g.twinTex || g.tex, g.hlTex || g.tex]", "slots: g.plain ? [null, null, null] : [g.tex, g.twinTex || g.tex, g.hlTex || g.tex]")
 rep("if (scalp) parts.push({ geo: H.buildScalp(fit, scalp, { lod: L, atlas }), slots: [scalp.tex]", "if (scalp) parts.push({ geo: H.buildScalp(fit, scalp, { lod: L, atlas }), slots: [scalp.plain ? null : scalp.tex]")
@@ -95,7 +115,7 @@ rep("  const REFINE = {\n","""  const F_THEME = [['any', 'Any theme', 'sparkle_d
     necklaces: [['theme', 'Theme', F_THEME.map(x => [x[0], x[1], null])], ['cord', 'Cord', [['any', 'Any cord', null], ['Chain', 'Chain', null], ['Cord', 'Cord', null], ['Ribbon', 'Ribbon', null], ['Beads', 'Beads', null], ['Pearls', 'Pearls', null]]]],
     sandals: [['theme', 'Theme', F_THEME.map(x => [x[0], x[1], null])], ['mount', 'Sole', [['any', 'Any sole', null], ['Flat', 'Flat', null], ['Platform', 'Platform', null], ['Wedge', 'Wedge', null], ['Block', 'Block heel', null]]], ['pattern', 'Colour', [['any', 'Any colour style', null], ['Solid', 'Solid colour', null], ['Gradient', 'Gradient', null], ['Patterned', 'Patterned', null]]]],
     purses: [['theme', 'Theme', F_THEME.map(x => [x[0], x[1], null])], ['cord', 'Strap', [['any', 'Any strap', null], ['Chain', 'Chain', null], ['Strap', 'Strap', null], ['Wide strap', 'Wide strap', null], ['Cord', 'Cord', null], ['Beads', 'Beads', null], ['Pearls', 'Pearls', null]]], ['pattern', 'Pattern', [['any', 'Any pattern', null], ['Gingham', 'Gingham', null], ['Stripes', 'Stripes', null], ['Polka dots', 'Polka dots', null], ['Quilted', 'Quilted', null], ['Checks', 'Checks', null], ['Print', 'Prints', null]]]],
-    sound: [['theme', 'Theme', F_THEME.map(x => [x[0], x[1], null])], ['cord', 'Cord', [['any', 'Wired or wireless', null], ['Wired', 'Wired', null], ['Wireless', 'Wireless', null]]], ['mount', 'On top', [['any', 'Anything on top', null], ['Cat ears', 'Cat ears', null], ['Bunny ears', 'Bunny ears', null], ['Bear ears', 'Bear ears', null], ['Devil horns', 'Devil horns', null], ['Bow', 'Bow', null]]], ['pattern', 'Extras', [['any', 'Any extras', null], ['Patterned', 'Patterned', null], ['Glow', 'Glowing ring', null], ['Mic', 'Boom mic', null], ['Coiled cord', 'Coiled cord', null], ['Remote', 'Inline remote', null]]]],
+    sound: [['cord', 'Cord', [['any', 'Wired or wireless', null], ['Wired', 'Wired', null], ['Wireless', 'Wireless', null]]], ['mount', 'On top', [['any', 'Anything on top', null], ['Cat ears', 'Cat ears', null], ['Bunny ears', 'Bunny ears', null], ['Bear ears', 'Bear ears', null], ['Devil horns', 'Devil horns', null], ['Bow', 'Bow', null]]], ['pattern', 'Extras', [['any', 'Any extras', null], ['Patterned', 'Patterned', null], ['Glow', 'Glowing ring', null], ['Mic', 'Boom mic', null], ['Coiled cord', 'Coiled cord', null], ['Remote', 'Inline remote', null]]]],
 """)
 # passes
 rep("    if (f.dept === 'eyewear' || f.dept === 'hair') {\n      if (dp !== f.dept) return false;\n      if (f.sub !== 'all') { if (dp === 'eyewear' ? it.kind !== f.sub : !(it.length === f.sub || it.tags.includes(f.sub))) return false; }\n    }",

@@ -72,6 +72,13 @@ Pick a one-letter id prefix (taken: `e n p s a`).
 
 Then rebuild, test, run the offline build, commit and push (see CLAUDE.md: a branch preview link per change).
 
+## Hair is flat colour
+
+Every Grug hairstyle in the catalog is plain colour, no strand texture: `build.py` runs `flatHair` on each style (each texture's
+own colour, `TEX_HEX`, is multiplied into the tints). A texture is only a choice in the Hair Studio's editor
+(`labs/hair-studio-x8f3k2/`: Colour → Texture → **Use a texture**), which has the same `flatHair` and opens every style flat.
+Keep `TEX_HEX` and `flatHair` the same in both. Hairstyles a player saved from the Hair Studio keep whatever they chose.
+
 ## Things that already work for every category
 
 - One-texture export (`bake.js`), thumbnails, favourites, "Add to catalog", the brand filter, endless scrolling, the
@@ -101,6 +108,8 @@ first load takes 20 to 40 seconds.
 
 - One department, three kinds in `d.kind`: `over` (headphones: cups in five shapes on cushions, a band on a slider or a fork,
   toppers, an optional boom mic and glow ring), `muffs` (fluffy earmuffs: a bumpy flattened sphere) and `buds` (stem or round).
+- **No charms in Sound** (the owner's call): `validateSnd` always empties `d.charms`, and the editor has no Charms tab. The
+  glow ring is headphones only. A stem bud's stem and tip are one straight rod of the same radius and sides (a clean seam).
   Settings that don't apply to a kind are kept, not cleared, so switching back restores them (`isWired`, `hasMic`, `topOf`…).
 - The model is in her head frame (`frame: 'head'`, a `cm` group like the earrings). Its head parts are in `soundHead`
   (`soundL` / `soundR` per ear for buds; earbud pictures frame `soundL`), the cord in `soundCord`. The cord is laid in world
