@@ -4315,49 +4315,6 @@ window.GrugCatalogHair = function (ctx) {
     return `A pair of ${colourName(d.strapCol, kimi).toLowerCase()} ${STYLE_LABEL[d.style].toLowerCase()} sandals on a ${heel} sole${d.strapGrad || d.soleGrad ? ', fading from one colour to another' : ''}${ch}.${kimi ? ' A KIMILAND piece: soft pastels, made to be cute.' : ''}`;
   }
 
-  /* ---- her foot, measured from her own mesh (left foot, x > 0; the right foot is its mirror) */
-  function footField(sandy) {
-    if (sandy.__ffield) return sandy.__ffield;
-    sandy.object3d.updateMatrixWorld(true); let nb = null; sandy.object3d.traverse(o => { if (o.isSkinnedMesh && o.name === 'natBody_geo') nb = o; });
-    const W = [], v = new THREE.Vector3(); if (nb) { nb.skeleton.update(); const P = nb.geometry.attributes.position; for (let i = 0; i < P.count; i++) { const p = nb.boneTransform(i, v.fromBufferAttribute(P, i).clone()).applyMatrix4(nb.matrixWorld); if (p.x > 2 && p.y < 75) W.push(p); } }
-    const Z0 = -15, Z1 = 14.5, DZ = 0.5, NZ = Math.round((Z1 - Z0) / DZ) + 1, x0 = new Float32Array(NZ).fill(NaN), x1 = new Float32Array(NZ).fill(NaN), yt = new Float32Array(NZ).fill(NaN);
-    for (let i = 0; i < NZ; i++) { const z = Z0 + i * DZ; let a = 1e9, b = -1e9, t = -1e9; for (const p of W) { if (Math.abs(p.z - z) > 0.9 || p.y > 21) continue; if (p.y < 9) { a = Math.min(a, p.x); b = Math.max(b, p.x); } if (p.y < 21) t = Math.max(t, p.y); } if (b - a > 1.5) { x0[i] = a; x1[i] = b; } if (t > -1e8) yt[i] = t; }
-    const fill = A => { let last = -1; for (let i = 0; i < A.length; i++) if (!isNaN(A[i])) { if (last >= 0 && i - last > 1) for (let k = last + 1; k < i; k++) A[k] = A[last] + (A[i] - A[last]) * (k - last) / (i - last); last = i; } let f = A.findIndex(x => !isNaN(x)); for (let i = 0; i < f; i++) A[i] = A[f]; for (let i = A.length - 1; i >= 0 && isNaN(A[i]); i--) A[i] = A[last]; for (let pass = 0; pass < 3; pass++) { const B = A.slice(); for (let i = 1; i < A.length - 1; i++) B[i] = (A[i - 1] + 2 * A[i] + A[i + 1]) / 4; A.set(B); } };
-    [x0, x1, yt].forEach(fill);
-    const valid = []; for (let i = 0; i < NZ; i++) if (x1[i] - x0[i] > 1.5) valid.push(Z0 + i * DZ);
-    const at = (A, z) => { const f = clamp((z - Z0) / DZ, 0, NZ - 1.001), i = Math.floor(f); return lerp(A[i], A[i + 1], f - i); };
-    // her lower leg: a box fitted around it every 1 cm of height
-    const ringRaw = new Map(), raw = k => { if (ringRaw.has(k)) return ringRaw.get(k); let a = 1e9, b = -1e9, c = 1e9, d = -1e9; for (const p of W) if (Math.abs(p.y - k) < 1.2) { a = Math.min(a, p.x); b = Math.max(b, p.x); c = Math.min(c, p.z); d = Math.max(d, p.z); } const R = b > a ? { cx: (a + b) / 2, cz: (c + d) / 2, rx: (b - a) / 2, rz: (d - c) / 2 } : { cx: 13.4, cz: -7, rx: 3.6, rz: 5.5 }; ringRaw.set(k, R); return R; };
-    const ringCache = new Map(), ring = y => { const k = Math.round(y); if (ringCache.has(k)) return ringCache.get(k); const R = { cx: 0, cz: 0, rx: 0, rz: 0 }; let n = 0; for (let dy = -3; dy <= 3; dy++) { const w = 4 - Math.abs(dy), Q = raw(k + dy); for (const key of ['cx', 'cz', 'rx', 'rz']) R[key] += Q[key] * w; n += w; } for (const key of ['cx', 'cz', 'rx', 'rz']) R[key] /= n; ringCache.set(k, R); return R; };
-    const back = y => { let m = 1e9; for (const p of W) if (Math.abs(p.y - y) < 0.8 && Math.abs(p.x - 13.2) < 5) m = Math.min(m, p.z); return m > 1e8 ? -13 : m; };
-    return (sandy.__ffield = { zMin: valid[0] != null ? valid[0] : -13, zMax: valid.length ? valid[valid.length - 1] : 14, x0: z => at(x0, z), x1: z => at(x1, z), top: z => at(yt, z), ring, back, yb: 2.45, zBall: 3.2 });
-  }
-
-  /* ---- drawing it */
-  function mirrorGeo(g) {
-    g.applyMatrix4(new THREE.Matrix4().makeScale(-1, 1, 1)); const sw = (A, k) => { for (let i = 0; i < A.count; i += 3) { /* swap vertices 1 and 2 of every triangle */ } };
-    if (g.index) { const I = g.index.array; for (let i = 0; i < I.length; i += 3) { const t = I[i + 1]; I[i + 1] = I[i + 2]; I[i + 2] = t; } g.index.needsUpdate = true; }
-    else for (const k of Object.keys(g.attributes)) { const A = g.attributes[k], s = A.itemSize, a = A.array; for (let i = 0; i < A.count; i += 3) for (let j = 0; j < s; j++) { const t = a[(i + 1) * s + j]; a[(i + 1) * s + j] = a[(i + 2) * s + j]; a[(i + 2) * s + j] = t; } A.needsUpdate = true; }
-    return g;
-  }
-  const GRAD_H = 16, GV = { sole: 2, strap: 6 };
-  const gradTex = (d) => {
-    const cv = document.createElement('canvas'); cv.width = 128; cv.height = GRAD_H; const x = cv.getContext('2d');
-    for (const [row, a, b] of [[0, d.soleCol, d.soleCol2], [4, d.strapCol, d.strapCol2]]) { const g = x.createLinearGradient(0, 0, 128, 0); g.addColorStop(0, a); g.addColorStop(1, b); x.fillStyle = g; x.fillRect(0, row * 2, 128, 8); }
-    const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; t.userData.canvas = cv; return t;
-  };
-  const gv = row => 1 - (row * 2 + 4) / GRAD_H;   // the v of the middle of a gradient row (row 0 = sole, row 4 = strap)
-
-  // a rounded footprint outline (x, z) from her foot
-  function outline(F, m) {
-    const pts = [], z0 = F.zMin - 0.3, z1 = F.zMax + 0.3; const L = [], R = [];
-    for (let z = z0; z <= z1 + 1e-6; z += 0.75) { const zz = clamp(z, F.zMin, F.zMax); L.push([F.x0(zz) - m, z]); R.push([F.x1(zz) + m, z]); }
-    const cap = (a, b, dz, sgn) => { const c = [(a[0] + b[0]) / 2, a[1]], rx = (b[0] - a[0]) / 2, out = []; for (let k = 1; k < 7; k++) { const t = k / 7 * Math.PI; out.push([c[0] - Math.cos(t) * rx, c[1] + sgn * Math.sin(t) * dz]); } return out; };
-    const toe = cap(L[L.length - 1], R[R.length - 1], 2.0, 1), heel = cap(R[0], L[0], 1.6, -1);
-    return L.concat(toe.map(p => [p[0], p[1]]), R.slice().reverse(), heel.map(p => [p[0], p[1]]));
-  }
-
-  // one strap: a flat band swept along a path, `N` the outward normal at each point
   function sweep(pts, nrm, w, t, uv, tag) {
     const n = pts.length, P = [], Nn = [], Uv = [], I = []; const T = new THREE.Vector3(), B = new THREE.Vector3();
     const sec = [];
@@ -4377,74 +4334,177 @@ window.GrugCatalogHair = function (ctx) {
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(Nn, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(Uv, 2)); g.setIndex(I); return { geo: g, sec };
   }
 
+  /* ---- her own flip-flop, as the base: Sandy's sandal (the fitted sole and Y strap from the classic kit, in her foot's bind space)
+     is copied and reshaped; any extra strap is fitted to her foot and leg the same way the kit fits its own straps. */
+  function V3(x, y, z) { return new THREE.Vector3(x, y, z); }
+  /* ---- heels: her feet point down (the ankle bends) while the toes stay flat, so heel and toes both stand on the same floor */
+  function tiltFeet(sandy, th) {
+    const n3 = sandy.n3; th = +th || 0; if (!n3 || !n3.foot || Math.abs((n3.__tilt || 0) - th) < 1e-4) return;
+    if (!n3.__rest0) { sandy.object3d.updateMatrixWorld(true); n3.__rest0 = [0, 1].map(i => { const F = n3._foot && n3._foot[i], f = n3.foot[i]; return F && f && f.ball ? { ballInv: f.ball.matrixWorld.clone().invert(), rig0: new THREE.Matrix4().multiplyMatrices(F.fb.matrixWorld, F.toFoot) } : null; }); }
+    if (!('__pp0' in n3)) n3.__pp0 = n3.postPose || null;
+    const pp0 = n3.__pp0, X = new THREE.Vector3(1, 0, 0), q = new THREE.Quaternion(), qp = new THREE.Quaternion();
+    const rot = (b, a) => { b.parent.getWorldQuaternion(qp); q.setFromAxisAngle(X, a); b.quaternion.premultiply(qp.clone().invert().multiply(q).multiply(qp)); };
+    n3.postPose = (dt, now) => { if (pp0) pp0(dt, now); const t = n3.__tilt || 0; if (!t) return; n3.root.updateMatrixWorld(true); for (const f of n3.foot) { if (!f.foot || !f.ball) continue; rot(f.foot, t); f.foot.updateMatrixWorld(true); rot(f.ball, -t); } };
+    n3.__tilt = th; n3.update(0, performance.now()); n3.__skinW = null; sandy.object3d.updateMatrixWorld(true);
+  }
+  // how far the feet tip for a heel this high (the heel rises by heelH over the length from her heel to the ball of her foot)
+  function tiltFor(sandy, d) {
+    const F = sandy.n3 && sandy.n3._foot && sandy.n3._foot[0]; if (!F || !(d.heelH > 0.4)) return 0;
+    let zMin = 1e9; for (const p of F.hull) zMin = Math.min(zMin, p[1]); const L = (F.Bl.z - zMin) * (F.fb.getWorldScale(new THREE.Vector3()).z || 1);
+    return Math.asin(clamp(d.heelH / Math.max(8, L), 0, 0.55));
+  }
+  function sandalFit(sandy, i) {
+    const n3 = sandy.n3, F = n3 && n3._foot && n3._foot[i], sd = n3 && n3.sandals && n3.sandals[i]; if (!F || !sd || !sd.sole) return null;
+    const nb = n3.body; sandy.object3d.updateMatrixWorld(true); nb.skeleton.update();
+    const rig = new THREE.Matrix4().multiplyMatrices(F.fb.matrixWorld, F.toFoot), rigInv = rig.clone().invert();
+    const legs = F.legV.filter(v => v.p[1] > F.A.y - 2.5), nearLeg = p => { let b = null, bd = 1e9; for (const v of legs) { const d = (v.p[0] - p.x) ** 2 + (v.p[1] - p.y) ** 2 + (v.p[2] - p.z) ** 2; if (d < bd) { bd = d; b = v; } } return b; };
+    // a point in her bind space -> the world: rigid on the foot (as her own sandal rides), following her skin up the leg
+    // on a heel the ball of the foot bends back up: the forefoot follows the ball joint, the rest the foot joint
+    const R0 = n3.__tilt && n3.__rest0 && n3.__rest0[i], ball = n3.foot && n3.foot[i] && n3.foot[i].ball, Mb = R0 && ball ? new THREE.Matrix4().multiplyMatrices(ball.matrixWorld, R0.ballInv).multiply(R0.rig0) : null;
+    const footPt = p => { const a = p.clone().applyMatrix4(rig); if (!Mb) return a; let w = clamp((p.z - (F.Bl.z - 1.5)) / 3, 0, 1); w = w * w * (3 - 2 * w); return w > 0 ? a.lerp(p.clone().applyMatrix4(Mb), w) : a; };
+    const toWorld = p => { const r = footPt(p), t = clamp((p.y - (F.A.y + 0.5)) / 2.5, 0, 1); if (t <= 0) return r; const v = nearLeg(p), s = nb.boneTransform(v.k, p.clone()).applyMatrix4(nb.matrixWorld); return r.lerp(s, t); };
+    // her skin as she stands (posed, the foot drawn larger, toes resting on the sole): world points and normals of this leg
+    if (!n3.__skinW || n3.__skinW.tilt !== (n3.__tilt || 0)) { const g = nb.geometry, P = g.attributes.position, I = g.index.array, pos = new Float32Array(P.count * 3), v = new THREE.Vector3(); for (let k = 0; k < P.count; k++) { v.fromBufferAttribute(P, k); nb.boneTransform(k, v); v.applyMatrix4(nb.matrixWorld); pos[k * 3] = v.x; pos[k * 3 + 1] = v.y; pos[k * 3 + 2] = v.z; }
+      const nrm = new Float32Array(P.count * 3), a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(); for (let t = 0; t < I.length; t += 3) { const i0 = I[t], i1 = I[t + 1], i2 = I[t + 2]; a.fromArray(pos, i0 * 3); b.fromArray(pos, i1 * 3).sub(a); c.fromArray(pos, i2 * 3).sub(a); b.cross(c); for (const q of [i0, i1, i2]) { nrm[q * 3] += b.x; nrm[q * 3 + 1] += b.y; nrm[q * 3 + 2] += b.z; } }
+      for (let k = 0; k < P.count; k++) { const l = Math.hypot(nrm[k * 3], nrm[k * 3 + 1], nrm[k * 3 + 2]) || 1; nrm[k * 3] /= l; nrm[k * 3 + 1] /= l; nrm[k * 3 + 2] /= l; } n3.__skinW = { pos, nrm, n: P.count, tilt: n3.__tilt || 0 }; }
+    const SK = n3.__skinW, A0 = F.A.clone().applyMatrix4(rig), knee = F.K.clone().applyMatrix4(nb.matrixWorld), ids = [];
+    for (let k = 0; k < SK.n; k++) { const x = SK.pos[k * 3], y = SK.pos[k * 3 + 1], z = SK.pos[k * 3 + 2]; if (y < A0.y + 40 && Math.hypot(x - A0.x, z - A0.z) < 22 && Math.sign(x) === Math.sign(A0.x)) ids.push(k); }
+    const skinAt = p => { let bk = -1, bd = 1e9; for (const q of ids) { const d = (SK.pos[q * 3] - p.x) ** 2 + (SK.pos[q * 3 + 1] - p.y) ** 2 + (SK.pos[q * 3 + 2] - p.z) ** 2; if (d < bd) { bd = d; bk = q; } } if (bk < 0) return null; const n = V3(SK.nrm[bk * 3], SK.nrm[bk * 3 + 1], SK.nrm[bk * 3 + 2]); return { n, s: (p.x - SK.pos[bk * 3]) * n.x + (p.y - SK.pos[bk * 3 + 1]) * n.y + (p.z - SK.pos[bk * 3 + 2]) * n.z }; };
+    const fwd = V3(0, 0, 1).transformDirection(rig), up = V3(0, 1, 0).transformDirection(rig);
+    return { F, sd, rig, rigInv, toWorld, footPt, skinAt, fwd, up, outerSign: F.A.x >= 0 ? 1 : -1, outer: V3(F.A.x >= 0 ? 1 : -1, 0, 0).transformDirection(rig) };
+  }
+  function rimArc(F, c, u, gap, n) {
+    const nn = V3(-u.z, 0, u.x), near = F.all.filter(v => Math.abs((v[0] - c.x) * nn.x + (v[2] - c.z) * nn.z) < 1.3); if (near.length < 6) return null;
+    const S = near.map(v => [(v[0] - c.x) * u.x + (v[2] - c.z) * u.z, v[1]]); let sa = 1e9, sb = -1e9, yt = -1e9; S.forEach(p => { sa = Math.min(sa, p[0]); sb = Math.max(sb, p[0]); yt = Math.max(yt, p[1]); });
+    const sc = (sa + sb) / 2, yc = F.ymin + (yt - F.ymin) * 0.3, ytop = F.ytop, pts = [];
+    for (let j = 0; j <= 24; j++) { const th = Math.PI * (1 - j / 24), dx = Math.cos(th), dy = Math.sin(th); let R = 0; for (const p of S) { const ox = p[0] - sc, oy = p[1] - yc, l = Math.hypot(ox, oy); if (l < 1e-3) continue; if ((ox * dx + oy * dy) / l > 0.93) R = Math.max(R, ox * dx + oy * dy); } const sp = sc + dx * (R + gap), yp = yc + dy * (R + gap); if (yp > ytop + 1.2) pts.push([sp, yp]); }
+    const hull = F.hull, ray = (dx, dz) => { let best = 1e9; for (let k = 0; k < hull.length; k++) { const a = hull[k], b = hull[(k + 1) % hull.length], ex = b[0] - a[0], ez = b[1] - a[1], den = dx * ez - dz * ex; if (Math.abs(den) < 1e-9) continue; const t = ((a[0] - c.x) * ez - (a[1] - c.z) * ex) / den, w = ((a[0] - c.x) * dz - (a[1] - c.z) * dx) / den; if (t > 0 && w >= -1e-6 && w <= 1 + 1e-6 && t < best) best = t; } return best < 1e9 ? best : null; };
+    const ra = ray(-u.x, -u.z), rb = ray(u.x, u.z); if (ra == null || rb == null || pts.length < 3) return null; const inset = 0.45;
+    const all = [[-(ra - inset), ytop - 0.05], [-(ra - inset) * 0.97 + pts[0][0] * 0.03, ytop + 0.55], ...pts, [(rb - inset) * 0.97 + pts[pts.length - 1][0] * 0.03, ytop + 0.55], [rb - inset, ytop - 0.05]];
+    return new THREE.CatmullRomCurve3(all.map(p => V3(c.x + u.x * p[0], p[1], c.z + u.z * p[0])), false, 'centripetal').getSpacedPoints(n || 40);
+  }
+  // pull a strap's centre line onto her skin: every inner point sits 'gap' off the skin (both edges of a w-wide strap clear it), smoothly
+  // pull a strap's centre line (world) onto her posed skin: each free point sits 'gap' off it, with both edges of a w-wide strap clear, smoothly
+  function hug(K, pts, sides, w, gap, fixed, opt) {
+    const n = pts.length, closed = opt && opt.closed, nb = k => closed ? (k + n) % n : clamp(k, 0, n - 1);
+    const need = (p, k) => { let m = null, dir = null; for (const e of [-1, 0, 1]) { const o = K.skinAt(p.clone().addScaledVector(sides[k], e * w / 2)); if (!o) continue; const q = gap - o.s; if (m === null || q > m) { m = q; dir = o.n; } } return { m: m || 0, dir }; };
+    for (let pass = 0; pass < 3; pass++) {
+      for (let k = 0; k < n; k++) { if (fixed[k]) continue; const { m, dir } = need(pts[k], k); if (dir) pts[k].addScaledVector(dir, pass < 2 ? m * 0.8 : Math.max(0, m)); }
+      for (let s = 0; s < 3; s++) { const c = pts.map(p => p.clone()); for (let k = 0; k < n; k++) { if (fixed[k] || (!closed && (k === 0 || k === n - 1))) continue; pts[k].copy(c[nb(k - 1)]).add(c[k].clone().multiplyScalar(2)).add(c[nb(k + 1)]).multiplyScalar(0.25); } }
+    }
+    for (let k = 0; k < n; k++) { if (fixed[k]) continue; const { m, dir } = need(pts[k], k); if (dir && m > 0) pts[k].addScaledVector(dir, m); }
+    return pts;
+  }
+  // a strap's outward normals (world): her skin's normal under it, smoothed; the fixed ends lean out from the foot
+  function skinNormals(K, pts, fixed, out, closed) {
+    const n = pts.length, nr = pts.map((p, k) => { const o = K.skinAt(p); return o ? o.n.clone() : out(k); });
+    fixed.forEach((f, k) => { if (f) nr[k] = out(k); });
+    for (let pass = 0; pass < 5; pass++) { const c = nr.map(v => v.clone()); for (let k = 0; k < n; k++) { if (!closed && (k === 0 || k === n - 1)) continue; const a = c[closed ? (k + n - 1) % n : k - 1], b = c[closed ? (k + 1) % n : k + 1]; nr[k].copy(a).add(c[k].clone().multiplyScalar(2)).add(b).normalize(); } }
+    return nr;
+  }
+  const tangentAt = (pts, k, closed) => { const n = pts.length; const a = pts[closed ? (k + n - 1) % n : Math.max(0, k - 1)], b = pts[closed ? (k + 1) % n : Math.min(n - 1, k + 1)]; return b.clone().sub(a).normalize(); };
+  function legRing(F, h, gap, N) {
+    N = N || 32; const V = F.legV; let w = h > F.A.y ? 1.1 : 0.7, S; do { S = V.filter(v => Math.abs(v.p[1] - h) < w); w *= 1.6; } while (S.length < 24 && w < 6);
+    let cx = 0, cz = 0; S.forEach(v => { cx += v.p[0]; cz += v.p[2]; }); cx /= S.length; cz /= S.length; const R = new Float32Array(N).fill(-1);
+    for (let j = 0; j < N; j++) { const th = j / N * Math.PI * 2, dx = Math.sin(th), dz = Math.cos(th); for (const v of S) { const ox = v.p[0] - cx, oz = v.p[2] - cz, l = Math.hypot(ox, oz); if (l < 1e-3) continue; const pr = ox * dx + oz * dz; if (pr / l > 0.86 && pr > R[j]) R[j] = pr; } }
+    for (let it = 0; it < N; it++) { let ok = true; for (let j = 0; j < N; j++) if (R[j] < 0) { ok = false; const a = R[(j + N - 1) % N], b = R[(j + 1) % N]; if (a >= 0 || b >= 0) R[j] = a >= 0 && b >= 0 ? (a + b) / 2 : Math.max(a, b); } if (ok) break; }
+    for (let pass = 0; pass < 3; pass++) { const c = R.slice(); for (let j = 0; j < N; j++) R[j] = Math.max(c[j], (c[(j + N - 1) % N] + 2 * c[j] + c[(j + 1) % N]) / 4); }
+    return { h, cx, cz, R: Array.from(R, r => Math.max(0.5, r) + gap), N, at(th) { const f = ((th / (Math.PI * 2)) % 1 + 1) % 1 * N, j = Math.floor(f) % N, k = (j + 1) % N; return lerp(this.R[j], this.R[k], f - Math.floor(f)); } };
+  }
+  // one palette picture per pair: sole (fade), footbed, strap (fade)
+  const PAL_V = { sole: 1 - 2 / 16, bed: 1 - 6 / 16, strap: 1 - 10 / 16 };
+  function palTex(d) {
+    const cv = document.createElement('canvas'); cv.width = 128; cv.height = 16; const x = cv.getContext('2d');
+    const row = (y, a, b) => { const g = x.createLinearGradient(0, 0, 128, 0); g.addColorStop(0, a); g.addColorStop(1, b); x.fillStyle = g; x.fillRect(0, y, 128, 4); };
+    row(0, d.soleCol, d.soleGrad ? d.soleCol2 : d.soleCol); row(4, d.bedCol, d.bedCol); row(8, d.strapCol, d.strapGrad ? d.strapCol2 : d.strapCol); row(12, d.strapCol, d.strapCol);
+    const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; t.userData.canvas = cv; return t;
+  }
+
   function buildSandals(d, ctx) {
-    const { sandy } = ctx, F = footField(sandy), own = { geos: [], mats: [], tris: 0 }, root = new THREE.Group(); root.name = 'grugSandals'; root.userData.catalogItem = true; root.userData.jewel = { dept: 'sandals', design: d };
-    const grad = d.soleGrad || d.strapGrad, tex = grad ? gradTex(d) : null; if (tex) own.mats.push({ dispose() { tex.dispose(); } });
-    const finish = d.finish, flat = (hex) => matFor(hex, finish), hwM = matFor(d.hw, 'metal');
-    const gradMat = () => { const m = new THREE.MeshStandardMaterial({ color: 0xffffff, map: tex, roughness: finish === 'matte' ? 0.85 : 0.3, metalness: finish === 'metal' ? 0.6 : 0, envMap: ENV, side: THREE.DoubleSide }); own.mats.push(m); return m; };
-    const soleMat = d.soleGrad ? gradMat() : flat(d.soleCol), strapMat = d.strapGrad ? gradMat() : flat(d.strapCol), bedMat = flat(d.bedCol);
-    const yTop = F.yb, sole = new THREE.Group(); sole.name = 'sole';
-    // ---- the sole: her footprint pushed down; the heel is a wedge (the sole thickens toward the back) or a block under the heel
-    const poly = outline(F, 0.45), shp = new THREE.Shape(); poly.forEach(([x, z], i) => i ? shp.lineTo(x, z) : shp.moveTo(x, z)); shp.closePath();
-    const zH = F.zMin - 1.8, zT = F.zMax + 2.3, thick = z => d.soleH + (d.heelType === 'wedge' ? d.heelH * clamp((F.zBall - z) / (F.zBall - zH), 0, 1) : 0);
-    const place = (geo, gradRow, useThick) => { const P = geo.attributes.position, uv = geo.attributes.uv || null; for (let i = 0; i < P.count; i++) { const X = P.getX(i), Y = P.getY(i), Z = P.getZ(i); P.setXYZ(i, X, yTop - Z * (useThick ? thick(Y) : 1), Y); } P.needsUpdate = true; geo.deleteAttribute('uv'); const U = []; for (let i = 0; i < P.count; i++) U.push(clamp((P.getZ(i) - zH) / (zT - zH), 0, 1), gv(gradRow)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); geo.computeVertexNormals(); return geo; };
-    const sg = place(new THREE.ExtrudeGeometry(shp, { depth: 1, bevelEnabled: false, curveSegments: 8 }), 0, true); own.geos.push(sg); sole.add(new THREE.Mesh(sg, soleMat)); own.tris += triOf(sg);
-    // the footbed, a thin lining on top
-    const inner = new THREE.Shape(), cx0 = poly.reduce((s, p) => s + p[0], 0) / poly.length, cz0 = poly.reduce((s, p) => s + p[1], 0) / poly.length; poly.forEach(([x, z], i) => { const px = cx0 + (x - cx0) * 0.94, pz = cz0 + (z - cz0) * 0.96; i ? inner.lineTo(px, pz) : inner.moveTo(px, pz); }); inner.closePath();
-    const bg = new THREE.ExtrudeGeometry(inner, { depth: 0.5, bevelEnabled: false, curveSegments: 8 }); { const P = bg.attributes.position; for (let i = 0; i < P.count; i++) { const X = P.getX(i), Y = P.getY(i), Z = P.getZ(i); P.setXYZ(i, X, yTop + 0.38 - Z, Y); } bg.computeVertexNormals(); } own.geos.push(bg); sole.add(new THREE.Mesh(bg, bedMat)); own.tris += triOf(bg);
-    if (d.heelType === 'block' && d.heelH > 0.4) {
-      const bw = (F.x1(F.zMin + 3) - F.x0(F.zMin + 3)) * 0.8, cxh = (F.x1(F.zMin + 3) + F.x0(F.zMin + 3)) / 2, bl = 7, bs = new THREE.Shape(), r = Math.min(1.6, bw / 2 - 0.1), x = -bw / 2, z = 0;
-      bs.moveTo(x + r, z); bs.lineTo(x + bw - r, z); bs.quadraticCurveTo(x + bw, z, x + bw, z + r); bs.lineTo(x + bw, z + bl - r); bs.quadraticCurveTo(x + bw, z + bl, x + bw - r, z + bl); bs.lineTo(x + r, z + bl); bs.quadraticCurveTo(x, z + bl, x, z + bl - r); bs.lineTo(x, z + r); bs.quadraticCurveTo(x, z, x + r, z);
-      const kg = new THREE.ExtrudeGeometry(bs, { depth: 1, bevelEnabled: false, curveSegments: 5 }), P = kg.attributes.position, U = []; for (let i = 0; i < P.count; i++) { const X = P.getX(i), Y = P.getY(i), Z = P.getZ(i); P.setXYZ(i, cxh + X, yTop - d.soleH + 0.05 - Z * d.heelH, F.zMin - 0.6 + Y); U.push(clamp((P.getZ(i) - zH) / (zT - zH), 0, 1), gv(0)); } kg.deleteAttribute('uv'); kg.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); kg.computeVertexNormals(); own.geos.push(kg); sole.add(new THREE.Mesh(kg, soleMat)); own.tris += triOf(kg);
+    const { sandy } = ctx, own = { geos: [], mats: [], tris: 0 }, root = new THREE.Group(); root.name = 'grugSandals'; root.userData.catalogItem = true; root.userData.jewel = { dept: 'sandals', design: d };
+    const tex = palTex(d); own.mats.push({ dispose() { tex.dispose(); } });
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, map: tex, roughness: d.finish === 'matte' ? 0.85 : d.finish === 'metal' ? 0.28 : 0.3, metalness: d.finish === 'metal' ? 0.6 : 0, envMap: ENV, envMapIntensity: 0.6, side: THREE.DoubleSide }); own.mats.push(mat);
+    const hwM = matFor(d.hw, 'metal'), T = d.strapT, SW = d.strapW, tilt0 = (sandy.n3 && sandy.n3.__tilt) || 0, tilt = tiltFor(sandy, d); tiltFeet(sandy, tilt); root.userData.tilt = tilt;
+    const add = (g, m, name) => { own.geos.push(g); const me = new THREE.Mesh(g, m || mat); me.name = name || ''; root.add(me); own.tris += triOf(g); return me; };
+    const strapUV = (k, n) => [k / Math.max(1, n - 1), PAL_V.strap], ringUV = (k, n) => [1 - Math.abs(2 * k / Math.max(1, n - 1) - 1), PAL_V.strap];
+    // a strap from its world centre line: hugged onto her skin, then swept as a flat band lying on it
+    const strap = (K, pts, fixed, w, out, o) => { o = o || {}; const closed = !!o.closed;
+      let nr = skinNormals(K, pts, fixed, out, closed); const sides = () => pts.map((p, k) => V3().crossVectors(nr[k], tangentAt(pts, k, closed)).normalize());
+      hug(K, pts, sides(), w, o.gap || 0.2, fixed, { closed }); nr = skinNormals(K, pts, fixed, out, closed); hug(K, pts, sides(), w, o.gap || 0.2, fixed, { closed });
+      const P = closed ? pts.concat([pts[0].clone()]) : pts, N = closed ? nr.concat([nr[0].clone()]) : nr;
+      const g = sweep(P.map((p, k) => p.clone().addScaledVector(N[k], T / 2)), N, w, T, o.uv || strapUV, 'strap').geo; add(g, mat, 'strap');
+      return { pts: P.map((p, k) => p.clone().addScaledVector(N[k], T)), nr: N };
+    };
+    for (const i of [0, 1]) {
+      const K = sandalFit(sandy, i); if (!K) continue; const F = K.F, sd = K.sd, ytop = F.ytop, X = V3(1, 0, 0);
+      // ---- the sole: her own flip-flop's sole, deepened (platform); on a heel it bends at the ball with her foot, and a wedge fills down to the floor
+      sd.sole.updateMatrixWorld(true); const sg = sd.sole.geometry.clone().applyMatrix4(sd.sole.matrixWorld).applyMatrix4(K.rigInv), P = sg.attributes.position; sg.computeBoundingBox(); const bb = sg.boundingBox, T0 = Math.max(0.5, ytop - bb.min.y), z0 = bb.min.z, z1 = bb.max.z;
+      for (const k of ['aToeW', 'aToeW5']) if (sg.attributes[k]) sg.deleteAttribute(k);
+      const tops = []; let yFloor = 1e9; for (let k = 0; k < P.count; k++) { const t = K.footPt(V3(P.getX(k), ytop, P.getZ(k))); tops.push(t); yFloor = Math.min(yFloor, t.y); } yFloor -= d.soleH;
+      const wedge = d.heelType === 'wedge' && tilt > 0;
+      { const Nn = (sg.computeVertexNormals(), sg.attributes.normal), U = new Float32Array(P.count * 2); for (let k = 0; k < P.count; k++) { const bed = Nn.getY(k) > 0.3 && P.getY(k) > ytop - 0.35; U[k * 2] = clamp((z1 - P.getZ(k)) / (z1 - z0), 0, 1); U[k * 2 + 1] = bed ? PAL_V.bed : PAL_V.sole; } sg.setAttribute('uv', new THREE.BufferAttribute(U, 2)); }
+      for (let k = 0; k < P.count; k++) { const y = P.getY(k), f = (ytop - y) / T0; let w; if (f <= 0) w = K.footPt(V3(P.getX(k), y, P.getZ(k))); else { const t = tops[k], yb = wedge ? yFloor : t.y - d.soleH; w = V3(t.x, lerp(t.y, yb, clamp(f, 0, 1)), t.z); } P.setXYZ(k, w.x, w.y, w.z); }
+      P.needsUpdate = true; sg.computeVertexNormals(); add(sg, mat, 'sole');
+      // a block heel: the back of the same sole outline, from under her raised heel down to the floor
+      if (d.heelType === 'block' && tilt > 0) {
+        const zHeel = F.A.z + 1.5, zc = zHeel + 2.2, cut = [], H = F.hull; for (let k = 0; k < H.length; k++) { const a = H[k], b = H[(k + 1) % H.length], ia = a[1] <= zc, ib = b[1] <= zc; if (ia) cut.push(a); if (ia !== ib) { const t = (zc - a[1]) / (b[1] - a[1]); cut.push([a[0] + (b[0] - a[0]) * t, zc]); } }
+        if (cut.length > 2) { const cx = cut.reduce((s, p) => s + p[0], 0) / cut.length, cz = cut.reduce((s, p) => s + p[1], 0) / cut.length, sh = new THREE.Shape(cut.map(p => new THREE.Vector2(cx + (p[0] - cx) * 0.86, cz + (p[1] - cz) * 0.86)));
+          const hg = new THREE.ExtrudeGeometry(sh, { depth: 1, bevelEnabled: false, curveSegments: 4 }), HP = hg.attributes.position, U = new Float32Array(HP.count * 2);
+          for (let k = 0; k < HP.count; k++) { const x = HP.getX(k), z = HP.getY(k), dd = HP.getZ(k), t = K.footPt(V3(x, ytop, z)), yTop = t.y - d.soleH + 0.15; HP.setXYZ(k, t.x, lerp(yTop, yFloor, dd), t.z); U[k * 2] = clamp((z1 - z) / (z1 - z0), 0, 1); U[k * 2 + 1] = PAL_V.sole; }
+          HP.needsUpdate = true; hg.setAttribute('uv', new THREE.BufferAttribute(U, 2)); hg.computeVertexNormals(); add(hg, mat, 'heel'); }
+      }
+      const paths = [];
+      // ---- the Y strap: her flip-flop's own strap (as fitted to her standing foot), thickened outward and widened sideways
+      if (d.style !== 'slide' && sd.strap) {
+        sd.strap.updateMatrixWorld(true); const g = sd.strap.geometry.clone().applyMatrix4(sd.strap.matrixWorld).applyMatrix4(K.rigInv); for (const k of ['aToeW', 'aToeW5']) if (g.attributes[k]) g.deleteAttribute(k); const bindP = g.attributes.position.array.slice(); { const GP = g.attributes.position, v = V3(); for (let k = 0; k < GP.count; k++) { const w = K.footPt(v.fromBufferAttribute(GP, k)); GP.setXYZ(k, w.x, w.y, w.z); } GP.needsUpdate = true; }
+        const SP = g.attributes.position; g.computeVertexNormals(); const SN = g.attributes.normal, key = k => Math.round(SP.getX(k) * 50) + ',' + Math.round(SP.getY(k) * 50) + ',' + Math.round(SP.getZ(k) * 50), acc = new Map();
+        for (let k = 0; k < SP.count; k++) { const kk = key(k); let a = acc.get(kk); if (!a) acc.set(kk, a = V3()); a.add(V3(SN.getX(k), SN.getY(k), SN.getZ(k))); }
+        const dt = Math.max(-0.15, T - 0.35), dw = Math.max(-0.25, (SW - 1.2) * 0.4), p = V3(), moved = new Map(), yFloor = V3(0, ytop + 0.25, 0).applyMatrix4(K.rig).y;
+        for (let k = 0; k < SP.count; k++) { const kk = key(k); if (!moved.has(kk)) { p.fromBufferAttribute(SP, k); let m = V3(); if (bindP[k * 3 + 1] > ytop + 0.25) { const n = acc.get(kk).clone().normalize(), o = K.skinAt(p), on = o ? n.dot(o.n) : 1; m = n.multiplyScalar(Math.max(0, on) * dt + (1 - Math.abs(on)) * dw); } moved.set(kk, m); } const m = moved.get(kk); SP.setXYZ(k, SP.getX(k) + m.x, SP.getY(k) + m.y, SP.getZ(k) + m.z); }
+        // gradient along the foot, heel to toe
+        let f0 = 1e9, f1 = -1e9; for (let k = 0; k < SP.count; k++) { const f = p.fromBufferAttribute(SP, k).dot(K.fwd); f0 = Math.min(f0, f); f1 = Math.max(f1, f); }
+        const U = new Float32Array(SP.count * 2); for (let k = 0; k < SP.count; k++) { U[k * 2] = clamp((f1 - p.fromBufferAttribute(SP, k).dot(K.fwd)) / (f1 - f0), 0, 1); U[k * 2 + 1] = PAL_V.strap; } g.setAttribute('uv', new THREE.BufferAttribute(U, 2)); g.computeVertexNormals(); add(g, mat, 'strap');
+        // its outer branch, traced along the top of the strap (for the charms); the knot over the toe post (for the knob)
+        const W = F.t1.clone().add(F.t2).multiplyScalar(0.5), zm = F.Bl.z - 5, [xa, xb] = F.widthAt(zm), xo = K.outerSign > 0 ? Math.max(xa, xb) : Math.min(xa, xb), br = [], bn = [];
+        const SB = []; for (let k = 0; k < SP.count; k++) SB.push(V3(bindP[k * 3], bindP[k * 3 + 1], bindP[k * 3 + 2]));
+        for (let s = 0; s <= 16; s++) { const t = s / 16, x = lerp(W.x, xo, t), z = lerp(W.z, zm, t); let best = null, bk = -1; SB.forEach((q, k) => { const dx = q.x - x, dz = q.z - z; if (dx * dx + dz * dz < 0.7 && (!best || q.y > best.y)) { best = q; bk = k; } }); if (best && best.y > ytop + 0.6) { const wp = p.fromBufferAttribute(SP, bk).clone(), o = K.skinAt(wp); br.push(wp); bn.push((o ? o.n.clone() : K.up.clone()).add(K.up).normalize()); } }
+        if (br.length > 3) paths.push({ pts: br.reverse(), nr: bn.reverse(), main: d.style === 'thong' });
+        if (d.style === 'thong') { const top = br.length ? br[br.length - 1] : K.footPt(W), kg = new THREE.SphereGeometry(Math.max(0.45, SW * 0.38), 10, 8); kg.translate(top.x, top.y + 0.2, top.z); add(kg, hwM, 'knob'); }
+      }
+      // ---- a band across her foot, rim to rim, lying on her skin
+      const across = (z, w, main) => { const c = V3(F.Bl.x, 0, z), pb = rimArc(F, c, X, 0.3, 36); if (!pb) return; const fixed = pb.map(q => q.y < ytop + 0.9), pts = pb.map(q => K.footPt(q));
+        const mid = pts.reduce((a, q) => a.add(q), V3()).multiplyScalar(1 / pts.length); const out = k => { const o = V3().crossVectors(tangentAt(pts, k), K.fwd).normalize(); if (o.dot(pts[k].clone().sub(mid)) < 0) o.negate(); return o; };
+        const r = strap(K, pts, fixed, w, out); const outerFirst = r.pts[0].clone().sub(r.pts[r.pts.length - 1]).dot(K.outer) > 0; paths.push({ pts: outerFirst ? r.pts : r.pts.slice().reverse(), nr: outerFirst ? r.nr : r.nr.slice().reverse(), main }); };
+      if (d.style === 'slide') across(F.Bl.z - 1.6, Math.max(1.8, SW * 1.5), true);
+      // ---- round her leg: an ankle strap, rings up the shin, a wrap; a heel strap up the back of her heel
+      const ANK = F.A.y + 1.6, topY = Math.min(F.calfTop + 1, ANK + d.shaft);
+      const ringW = (h, n) => { const R = legRing(F, h, 0.3, n || 22), pts = []; for (let j = 0; j < R.N; j++) { const th = j / R.N * Math.PI * 2, r = R.R[j]; pts.push(K.toWorld(V3(R.cx + Math.sin(th) * r, h, R.cz + Math.cos(th) * r))); } return { R, pts }; };
+      const ringOut = (pts) => { const c = pts.reduce((a, q) => a.add(q), V3()).multiplyScalar(1 / pts.length); return k => { const o = pts[k].clone().sub(c); o.y = 0; return o.normalize(); }; };
+      if (d.style === 'ankle' || d.style === 'gladiator' || d.style === 'wrap') {
+        const ank = ringW(ANK), wA = Math.max(0.8, SW), r = strap(K, ank.pts, ank.pts.map(() => false), wA, ringOut(ank.pts), { closed: true, uv: ringUV });
+        // the ankle strap's front half, outer side first (charms hang there); a buckle on the outer side
+        { const n = ank.pts.length, ctr = r.pts.slice(0, n).reduce((a, q) => a.add(q), V3()).multiplyScalar(1 / n); let ko = 0, best = -1e9; for (let k = 0; k < n; k++) { const v = r.pts[k].clone().sub(ctr).dot(K.outer); if (v > best) { best = v; ko = k; } }
+          const dirF = r.pts[(ko + 1) % n].clone().sub(r.pts[ko]).dot(K.fwd) > 0 ? 1 : -1, half = [], hn = []; for (let s = 0; s <= n / 2; s++) { const k = ((ko + dirF * s) % n + n) % n; half.push(r.pts[k]); hn.push(r.nr[k]); } paths.push({ pts: half, nr: hn, main: true });
+          const bg = new THREE.TorusGeometry(Math.max(0.5, SW * 0.42), 0.14, 6, 14), bq = new THREE.Quaternion().setFromUnitVectors(V3(0, 0, 1), r.nr[ko]); bg.applyQuaternion(bq); bg.translate(r.pts[ko].x + r.nr[ko].x * 0.15, r.pts[ko].y + r.nr[ko].y * 0.15, r.pts[ko].z + r.nr[ko].z * 0.15); add(bg, hwM, 'buckle'); }
+        // heel strap: from the back of the sole up the back of her heel to the ankle strap
+        { const pts = [], fixed = []; for (let s = 0; s <= 14; s++) { const y = lerp(ytop - 0.1, ANK, s / 14), R = legRing(F, Math.max(ytop + 0.4, y), 0.3), rr = R.at(Math.PI); pts.push(K.toWorld(V3(R.cx, y, R.cz - rr))); fixed.push(s === 0); }
+          strap(K, pts, fixed, Math.max(0.9, SW * 0.9), () => K.fwd.clone().negate()); }
+        if (d.style === 'gladiator') {
+          across(F.Bl.z - 4.6, Math.max(0.8, SW * 0.8), false);
+          const n = Math.max(2, Math.round((topY - ANK) / 4.2)); for (let k = 1; k <= n; k++) { const rg = ringW(ANK + (topY - ANK) * k / n); strap(K, rg.pts, rg.pts.map(() => false), Math.max(0.7, SW * 0.85), ringOut(rg.pts), { closed: true, uv: ringUV }); }
+          const fp = []; for (let s = 0; s <= 12; s++) { const y = lerp(ANK, topY, s / 12), R = legRing(F, y, 0.3 + T); fp.push(K.toWorld(V3(R.cx, y, R.cz + R.at(0)))); } strap(K, fp, fp.map(() => false), Math.max(0.6, SW * 0.55), () => K.fwd.clone(), { gap: 0.2 + T });
+        }
+        if (d.style === 'wrap') { const pts = [], n = 40, turns = Math.max(1.2, (topY - ANK) / 6); for (let s = 0; s <= n; s++) { const t = s / n, y = lerp(ANK, topY, t), R = legRing(F, y, 0.3), th = (K.outerSign > 0 ? Math.PI / 2 : -Math.PI / 2) + K.outerSign * Math.PI * 2 * turns * t, rr = R.at(th); pts.push(K.toWorld(V3(R.cx + Math.sin(th) * rr, y, R.cz + Math.cos(th) * rr))); } strap(K, pts, pts.map(() => false), Math.max(0.7, SW * 0.8), ringOut(pts)); }
+      }
+      // ---- charms, pinned along the main strap, facing out
+      const mp = paths.find(q => q.main) || paths[0]; if (!mp) continue;
+      for (const e of d.charms.slice().sort((a, b) => a.at - b.at)) {
+        const f = clamp((1 - e.at) / 2, 0, 1) * (mp.pts.length - 1), a = Math.floor(f), b = Math.min(mp.pts.length - 1, a + 1), wp = mp.pts[a].clone().lerp(mp.pts[b], f - a), nn = mp.nr[a].clone().lerp(mp.nr[b], f - a).normalize();
+        const size = e.size * KN, el = makeEl(Object.assign({}, e, { size }), own, true), up = Math.abs(nn.y) > 0.85 ? K.fwd.clone() : V3(0, 1, 0), yy = up.clone().addScaledVector(nn, -up.dot(nn)).normalize(), xx = V3().crossVectors(yy, nn).normalize();
+        el.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xx, yy, nn)); el.position.copy(wp).addScaledVector(nn, size * 0.5 * 0.6 + 0.1); root.add(el);
+      }
     }
-    // ---- straps
-    const straps = [], T = d.strapT, SW = d.strapW, clear = 0.22 + T / 2;
-    const sectionAt = z => { const a = (F.x1(z) - F.x0(z)) / 2, c = (F.x1(z) + F.x0(z)) / 2, top = Math.max(F.top(z), yTop + 2); return { a, c, h: top - yTop }; };
-    // a band across the foot at z: from her outer edge, over the top, to her inner edge
-    const bandAcross = (z, w) => {
-      const s = sectionAt(z), A = s.a + clear, Bh = s.h + clear, pts = [], nr = [], n = 18, e = 2.8;
-      for (let i = 0; i <= n; i++) { const th = Math.PI * i / n, c = Math.cos(th), sn = Math.sin(th), x = s.c + A * Math.sign(c) * Math.pow(Math.abs(c), 2 / e), y = yTop - 0.3 + (Bh + 0.3) * Math.pow(sn, 2 / e); pts.push(new THREE.Vector3(x, y, z)); const gx = (x - s.c) / (A * A), gy = (y - yTop) / (Bh * Bh); nr.push(new THREE.Vector3(gx, Math.max(gy, 0.02), 0).normalize()); }
-      return { pts, nr, w, mainOuterFirst: true };
-    };
-    const surfY = (x, z) => { const s = sectionAt(z), u = clamp(Math.abs(x - s.c) / s.a, 0, 1); return yTop + s.h * Math.pow(Math.max(0, 1 - Math.pow(u, 2.8)), 1 / 2.8); };
-    const ringAt = (y, w, off0) => { const off = off0 * 0.6;
-      const R = F.ring(y), pts = [], nr = [], n = 24; for (let i = 0; i <= n; i++) { const th = Math.PI * 2 * i / n, ca = Math.cos(th), sa = Math.sin(th), a = R.rx + off, b = R.rz + off; pts.push(new THREE.Vector3(R.cx + a * ca, y, R.cz + b * sa)); nr.push(new THREE.Vector3(ca / a, 0, sa / b).normalize()); }
-      return { pts, nr, w, ring: true };
-    };
-    const ANK = 18.5, shaftTop = ANK + d.shaft;
-    const heelStrap = () => { const pts = [], nr = [], R = F.ring(ANK), cxh = (F.x0(F.zMin + 4) + F.x1(F.zMin + 4)) / 2; for (let i = 0; i <= 14; i++) { const t = i / 14, y = lerp(yTop - 0.2, ANK, t), zb = F.back(clamp(y, 3.5, 17)) - clear * 0.9, x = lerp(cxh, R.cx, t); pts.push(new THREE.Vector3(x, y, i === 14 ? R.cz - R.rz - clear : Math.min(zb, F.back(clamp(y, 3.5, 17)) - clear * 0.5))); nr.push(new THREE.Vector3(0, 0.15, -1).normalize()); } return { pts, nr, w: Math.max(0.8, SW * 0.7) }; };
-    const instepLine = () => {
-      const x = (F.x0(0) + F.x1(0)) / 2, R = F.ring(ANK), cp = [new THREE.Vector3(x, surfY(x, 3) + clear, 3), new THREE.Vector3(x, surfY(x, 1) + clear, 1), new THREE.Vector3(x, F.top(-0.5) + clear, -0.5), new THREE.Vector3(R.cx, F.top(-2) + clear + 0.6, -1.6), new THREE.Vector3(R.cx, ANK, R.cz + R.rz + clear * 0.6)];
-      const curve = new THREE.CatmullRomCurve3(cp, false, 'centripetal'), pts = curve.getPoints(18), nr = pts.map((p, i) => i < 8 ? new THREE.Vector3(0, 1, 0.15).normalize() : new THREE.Vector3(0, 0.5, 1).normalize());
-      return { pts, nr, w: Math.max(0.8, SW * 0.7) };
-    };
-    let main = null;
-    const addBand = (b, row) => { straps.push(b); if (row && !main) main = b; };
-    if (d.style === 'slide') { const b = bandAcross(1.2, SW); addBand(b, true); }
-    else if (d.style === 'thong') {
-      const tx = (F.x0(9.5) + F.x1(9.5)) / 2 + 1.2, tz = 9.6, ty = surfY(tx, tz) + clear; const mk = (ex, ez) => { const pts = [], nr = []; for (let i = 0; i <= 18; i++) { const t = i / 18, x = lerp(tx, ex, t), z = lerp(tz, ez, t); pts.push(new THREE.Vector3(x, Math.max(surfY(x, z) + clear + (1 - t) * 0.1, yTop + clear * 0.6), z)); nr.push(new THREE.Vector3(0, 1, 0).add(new THREE.Vector3((x - (F.x0(z) + F.x1(z)) / 2) * 0.12, 0, 0)).normalize()); } return { pts, nr, w: SW }; };
-      const o = mk(F.x1(0.5) + 0.3, 0.5), inn = mk(F.x0(0.5) - 0.3, 0.5); straps.push(inn); addBand(o, true);
-      const pg = new THREE.CylinderGeometry(Math.max(0.28, T * 0.6), Math.max(0.28, T * 0.6), ty - yTop + 0.1, 8); own.geos.push(pg); const pm = new THREE.Mesh(pg, strapMat); pm.position.set(tx, (ty + yTop) / 2, tz); sole.add(pm); own.tris += 16;
-      const kg = new THREE.SphereGeometry(Math.max(0.5, SW * 0.45), 10, 8); own.geos.push(kg); const km = new THREE.Mesh(kg, hwM); km.position.set(tx, ty + 0.1, tz); sole.add(km); own.tris += triOf(kg);
-    } else {
-      addBand(bandAcross(1.8, Math.max(0.8, SW * 0.8)), true);
-      straps.push(heelStrap()); straps.push(ringAt(ANK, Math.max(0.8, SW), clear)); if (d.style === 'ankle') straps.push(instepLine());
-      if (d.style === 'gladiator') { const n = Math.max(2, Math.round(d.shaft / 4.2)); for (let k = 1; k <= n; k++) straps.push(ringAt(ANK + d.shaft * k / n, Math.max(0.8, SW * 0.9), clear)); const front = { pts: [], nr: [], w: Math.max(0.7, SW * 0.6) }; for (let i = 0; i <= 10; i++) { const y = lerp(ANK, shaftTop, i / 10), R = F.ring(y); front.pts.push(new THREE.Vector3(R.cx, y, R.cz + R.rz + clear)); front.nr.push(new THREE.Vector3(0, 0.1, 1).normalize()); } straps.push(front); }
-      if (d.style === 'wrap') { const n = 44, pts = [], nr = []; for (let i = 0; i <= n; i++) { const t = i / n, y = lerp(ANK - 1.5, shaftTop, t), R = F.ring(y), th = Math.PI * 0.5 + Math.PI * 2 * 2.2 * t; pts.push(new THREE.Vector3(R.cx + (R.rx + clear) * Math.cos(th), y, R.cz + (R.rz + clear) * Math.sin(th))); nr.push(new THREE.Vector3(Math.cos(th) / (R.rx + clear), 0, Math.sin(th) / (R.rz + clear)).normalize()); } straps.push({ pts, nr, w: Math.max(0.8, SW * 0.8), helix: true }); }
-    }
-    const sMesh = new THREE.Group(); sMesh.name = 'straps';
-    for (const s of straps) { const g = sweep(s.pts, s.nr, s.w, T, (i, n) => [s.ring || s.helix ? 1 - Math.abs(2 * i / (n - 1) - 1) : i / (n - 1), gv(4)], 'strap'); own.geos.push(g.geo); s.sec = g.sec; sMesh.add(new THREE.Mesh(g.geo, strapMat)); own.tris += triOf(g.geo); }
-    // a small buckle ring where the ankle strap closes
-    if (d.style !== 'slide' && d.style !== 'thong') { const R = F.ring(ANK), bg2 = new THREE.TorusGeometry(Math.max(0.5, SW * 0.4), 0.14, 5, 10); own.geos.push(bg2); const bm = new THREE.Mesh(bg2, hwM); bm.position.set(R.cx + R.rx + clear + T, ANK, R.cz); bm.rotation.y = Math.PI / 2; sMesh.add(bm); own.tris += 100; }
-    const left = new THREE.Group(); left.add(sole, sMesh);
-    // ---- charms: pinned on the main strap, facing outward
-    const charms = [], list = d.charms.slice().sort((a, b) => a.at - b.at);
-    const mp = main || straps[0];
-    const placeCharms = sgn => { const g = new THREE.Group(); if (!mp) return g; list.forEach(e => { const f = clamp((1 - e.at) / 2, 0, 1) * (mp.pts.length - 1), i = Math.floor(f), j = Math.min(mp.pts.length - 1, i + 1), p = mp.pts[i].clone().lerp(mp.pts[j], f - i), n = mp.nr[i].clone().lerp(mp.nr[j], f - i).normalize(), size = e.size * KN, el = makeEl(Object.assign({}, e, { size }), own, true); const nn = new THREE.Vector3(n.x * sgn, n.y, n.z), up = Math.abs(nn.y) > 0.85 ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(0, 1, 0), yy = up.clone().addScaledVector(nn, -up.dot(nn)).normalize(), xx = new THREE.Vector3().crossVectors(yy, nn).normalize(); el.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xx, yy, nn)); el.position.set(p.x * sgn, p.y, p.z).addScaledVector(nn, T / 2 + size * 0.5 * 0.6 + 0.1); g.add(el); }); return g; };
-    const right = new THREE.Group(); const mirrored = [];
-    left.traverse(o => { if (o.isMesh) { const g = o.geometry.clone(); own.geos.push(g); o.updateMatrix(); g.applyMatrix4(o.matrix); mirrorGeo(g); const m = new THREE.Mesh(g, o.material); m.name = o.name; mirrored.push([o.parent.name, m]); } });
-    const rs = new THREE.Group(), rm = new THREE.Group(); for (const [pn, m] of mirrored) (pn === 'sole' ? rs : rm).add(m); right.add(rs, rm);
-    root.add(left, right, placeCharms(1), placeCharms(-1)); own.tris *= 2;
+    tiltFeet(sandy, tilt0);
     return { root, d, info: { tris: Math.round(own.tris) }, frame: 'world', dispose() { for (const g of own.geos) g.dispose(); for (const m of own.mats) m.dispose(); } };
   }
 
@@ -4454,7 +4514,7 @@ window.GrugCatalogHair = function (ctx) {
   function buildNecklaceLength(d) { const F = bodyField(CTX.sandy), pts = necklacePath(d, F); return new THREE.CatmullRomCurve3(pts, true, 'centripetal').getLength(); }
 
   window.GrugJewelry = {
-    ready, init, build, validate: (dp, s, b) => dp === 'sandals' ? validateS(s, b) : dp === 'purses' ? validateP(s, b) : validate(dp, s, b), random: (dp, seed, o) => dp === 'sandals' ? randomS(seed, o) : dp === 'purses' ? randomP(seed, o) : random(dp, seed, o), nameFor: (dp, d, s) => dp === 'sandals' ? nameS(d, s) : dp === 'purses' ? nameP(d, s) : nameFor(dp, d, s), tagsFor: (dp, d) => dp === 'sandals' ? tagsS(d) : dp === 'purses' ? tagsP(d) : tagsFor(dp, d), families: (dp, d) => dp === 'sandals' ? familiesS(d) : dp === 'purses' ? familiesP(d) : families(dp, d), describe: (dp, d) => dp === 'sandals' ? describeS(d) : dp === 'purses' ? describeP(d) : describe(dp, d), kindOf: (dp, d) => dp === 'sandals' ? d.style : dp === 'purses' ? d.shape : kindOf(dp, d), STYLES, STYLE_LABEL, HEELS, HEEL_LABEL, SAN_LIM, SAN_N, footField, BAG_SHAPES, BAG_LABEL, PATTERNS, PATTERN_LABEL, STRAPS, STRAP_LABEL, CLOSURES, CLOSURE_LABEL, BAG_LIM, PURSE_N, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
+    ready, init, build, validate: (dp, s, b) => dp === 'sandals' ? validateS(s, b) : dp === 'purses' ? validateP(s, b) : validate(dp, s, b), random: (dp, seed, o) => dp === 'sandals' ? randomS(seed, o) : dp === 'purses' ? randomP(seed, o) : random(dp, seed, o), nameFor: (dp, d, s) => dp === 'sandals' ? nameS(d, s) : dp === 'purses' ? nameP(d, s) : nameFor(dp, d, s), tagsFor: (dp, d) => dp === 'sandals' ? tagsS(d) : dp === 'purses' ? tagsP(d) : tagsFor(dp, d), families: (dp, d) => dp === 'sandals' ? familiesS(d) : dp === 'purses' ? familiesP(d) : families(dp, d), describe: (dp, d) => dp === 'sandals' ? describeS(d) : dp === 'purses' ? describeP(d) : describe(dp, d), kindOf: (dp, d) => dp === 'sandals' ? d.style : dp === 'purses' ? d.shape : kindOf(dp, d), STYLES, STYLE_LABEL, HEELS, HEEL_LABEL, SAN_LIM, SAN_N, sandalFit, tiltFeet, BAG_SHAPES, BAG_LABEL, PATTERNS, PATTERN_LABEL, STRAPS, STRAP_LABEL, CLOSURES, CLOSURE_LABEL, BAG_LIM, PURSE_N, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
     DRESS_Y, DEF: dept => DEF[dept](), EL, SHAPES, SHAPE_LABEL, THREAD_SHAPES, FINISHES, CHARMS, CHARM_BY, THEME_LABEL, THEMES, MOUNTS, LINKS, PAIRS, CORDS, KIND_LABEL, BRANDS, BRAND_LABEL, LIMITS, D_MAX,
     PINKS, PASTEL_OTHER, PASTEL_ACC, PASTEL_METALS, METALS, colourName, charmTexture, geoFor, elH, elName, KIMI_CHARMS
   };
@@ -4492,10 +4552,10 @@ window.GrugCatalogHair = function (ctx) {
   function loadOne(src) { return new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = () => window.SandyKit ? ok(window.SandyKit) : no(new Error('no SandyKit')); s.onerror = () => { s.remove(); no(new Error('failed ' + src)); }; document.head.appendChild(s); }); }
   let K = window.SandyKit;
   // on the site (labs/…) the runtime is two folders up; in the kit it's in vendor/
-  if (/\/labs\//.test(location.pathname)) RUNTIME.unshift(RUNTIME.splice(RUNTIME.indexOf('../../assets/sandy-runtime.js'), 1)[0]);
+  if (/\/labs\//.test(location.pathname)) RUNTIME.unshift(RUNTIME.splice(RUNTIME.indexOf('vendor/sandy-runtime.js'), 1)[0]);
   if (!K) for (const src of RUNTIME) { try { K = await loadOne(src); break; } catch (e) {} }
   // on the Grug site, sandy-runtime.js is the new blocky avatar: the female Sandy (the classic kit) loads through it on demand
-  const ON_SITE = !!(K && K.model === 'block');
+  const ON_SITE = !!(K && K.model === 'block'), ON_LABS = /\/labs\//.test(location.pathname);
   if (ON_SITE) { try { loadMsg('Loading her…'); K = typeof K.loadClassic === 'function' ? await K.loadClassic() : null; } catch (e) { K = null; } }
   if (!K) { const m = 'Couldn\'t load her. Put this page in the Grug game kit (next to vendor/sandy-runtime.js).'; loadMsg(m); $('#catGrid').innerHTML = '<div class="cload">' + esc(m) + '</div>'; return; }
 
@@ -4503,7 +4563,7 @@ window.GrugCatalogHair = function (ctx) {
   loadMsg('Getting her ready…');
   const canvas = $('#c'), view = $('#view');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: false });
-  renderer.outputEncoding = THREE.sRGBEncoding; renderer.localClippingEnabled = true; renderer.setClearColor(0x000000, 0); renderer.setPixelRatio(ON_SITE ? Math.min(2, (devicePixelRatio || 1) * 0.5) : Math.min(2, devicePixelRatio || 1));   // the site renders 3D at half resolution
+  renderer.outputEncoding = THREE.sRGBEncoding; renderer.localClippingEnabled = true; renderer.setClearColor(0x000000, 0); renderer.setPixelRatio(ON_SITE || ON_LABS ? Math.min(2, (devicePixelRatio || 1) * 0.5) : Math.min(2, devicePixelRatio || 1));   // the site renders 3D at half resolution
   const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(30, 1, 1, 6000);
   const lights = () => { const g = new THREE.Group(); g.add(new THREE.HemisphereLight(0xfff8ee, 0x6a6f78, 0.9)); const sun = new THREE.DirectionalLight(0xfff4e6, 1.0); sun.position.set(300, 650, 520); g.add(sun); const rim = new THREE.DirectionalLight(0xe2e8ff, 0.4); rim.position.set(-260, 320, -420); g.add(rim); return g; };
   scene.add(lights());
@@ -4548,6 +4608,7 @@ window.GrugCatalogHair = function (ctx) {
         }
       }
     });
+    { const NU = sandy.n3._nailU; if (NU) { NU.nailAmt.value = 0; } }
     hideFaceHair();
   }
   function hideFaceHair() { if (sandy.n3.faceMesh) sandy.n3.faceMesh.visible = false; if (sandy.n3.hairMesh) sandy.n3.hairMesh.visible = !hairOn; }
@@ -5505,7 +5566,7 @@ window.GrugCatalogHair = function (ctx) {
     mountItem(it) { const b = J.build(it.dept, it.d); const parent = b.frame === 'head' ? headGroup : scene; parent.add(b.root); b.root.userData.catalogItem = true; if (b.frame !== 'head') this.necks.add(b.root); this.syncDress(); return b; },
     unmount(b) { if (!b) return; if (b.root.parent) b.root.parent.remove(b.root); this.necks.delete(b.root); b.dispose(); this.syncDress(); },
     // the dress's ruffle is put away while any necklace is on her
-    syncDress() { const c = sandy.__cut; if (!c) return; if (c.__c0 == null) c.__c0 = c.constant; const on = Array.from(this.necks).some(r => r.userData.jewel && r.userData.jewel.dept === 'sandals'); c.constant = on ? 30 : c.__c0; },
+    syncDress() { const c = sandy.__cut; if (!c) return; if (c.__c0 == null) c.__c0 = c.constant; const on = Array.from(this.necks).some(r => r.userData.jewel && r.userData.jewel.dept === 'sandals'); c.constant = on ? 30 : c.__c0; (sandy.n3.sandals || []).forEach(sd => { if (sd && sd.group) sd.group.visible = !on; }); const sr = Array.from(this.necks).filter(r => r.userData.jewel && r.userData.jewel.dept === 'sandals').pop(); if (J.tiltFeet) J.tiltFeet(sandy, sr ? sr.userData.tilt || 0 : 0); },
     // what the camera frames: the pieces themselves with some room
     frameBox(root, it) { sandy.object3d.updateMatrixWorld(true); const near = it.dept === 'earrings' && root.children[0] && root.children[0].children[0]; const box = new THREE.Box3().setFromObject(near || root); box.expandByVector(it.dept === 'earrings' ? new THREE.Vector3(3, 2.5, 4) : it.dept === 'purses' ? new THREE.Vector3(4, 3, 6) : it.dept === 'sandals' ? new THREE.Vector3(3, 2, 5) : new THREE.Vector3(1.5, 1.5, 4)); return box; },
     centre() { const b = this.built; if (!b) return new THREE.Vector3(0, this.dept === 'earrings' ? 150 : 135, 0); b.root.updateMatrixWorld(true); return new THREE.Box3().setFromObject(b.root).getCenter(new THREE.Vector3()); },
