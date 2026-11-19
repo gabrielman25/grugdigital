@@ -4538,18 +4538,18 @@ window.GrugCatalogHair = function (ctx) {
       // ---- a slipper: a soft closed shell over the front of her foot, grown from the sole's own outline (its edge runs along the sole's
       //      edge, its toe ends at the sole's tip, rounded like a real slipper), open from the instep back, with a plush collar
       if (d.style === 'slipper' && K.soleEdge) {
-        const NU = 22, NZ = 20, PW = 2.6, gap = 0.45 + T * 0.3, zB = F.A.z + 4.2, inset = 0.15;
+        const NU = 22, NZ = 20, PW = 2.1, gap = 0.4 + T * 0.3, zB = F.A.z + 6.2, inset = 0.15;
         const zEnd = K.soleZ ? K.soleZ[1] - 0.25 : F.zTip + 1;
         // what the shell must clear: her foot (toes tucked away), slice by slice
         const nbS = sandy.n3.body, SIa = nbS.geometry.attributes.skinIndex, SWa = nbS.geometry.attributes.skinWeight, bones = nbS.skeleton.bones;
         const isToe = k => { let bi = 0, bw = 0; for (let j = 0; j < 4; j++) { const w = SWa.array[k * 4 + j]; if (w > bw) { bw = w; bi = SIa.array[k * 4 + j]; } } return /^leg_[LR]_(foot|ball)_jnt$/.test(bones[bi].name); };
         const pts0 = F.legV.filter(v => v.p[1] < ytop + 10 && isToe(v.k)).map(v => v.p);
-        const zs = [], Hs = []; for (let k = 0; k <= NZ; k++) { const t = k / NZ, z = lerp(zB, zEnd, 1 - Math.pow(1 - t, 1.6)); zs.push(z); }
-        for (const z of zs) { const [l, h] = K.soleEdge(z), c = (l + h) / 2, a = Math.max(0.6, (h - l) / 2 - inset); let H = 1.2, top = 0; for (const p of pts0) { if (Math.abs(p[2] - z) > 0.9) continue; top = Math.max(top, p[1] - ytop); const u = Math.abs(p[0] - c) / a; if (u >= 0.85) continue; const need = (p[1] + gap - ytop) / Math.pow(1 - Math.pow(u, PW), 1 / PW); if (need > H) H = need; } Hs.push(Math.min(H, top + gap + 0.8)); }
-        // a smooth top line: never lower than needed, eased toward the toe; the toe rounds down onto the sole's tip
-        for (let pass = 0; pass < 4; pass++) { const c = Hs.slice(); for (let k = 1; k < Hs.length - 1; k++) Hs[k] = Math.max(c[k], (c[k - 1] + 2 * c[k] + c[k + 1]) / 4); }
-        const zCap = zEnd - Math.min(5, (zEnd - zB) * 0.35), Hcap = (() => { let i = 0; while (i < zs.length - 1 && zs[i] < zCap) i++; return Hs[i]; })();
-        zs.forEach((z, k) => { if (z > zCap) { const f = (z - zCap) / Math.max(0.5, zEnd - zCap); Hs[k] = Math.max(0.05, Hcap * Math.sqrt(Math.max(0, 1 - f * f))); } });
+        // a fixed shape, not a cast of her foot: a quarter-ellipse from the collar down to the toe, the same arch across every slice,
+        // scaled up just enough (one number for the whole slipper) that her foot fits inside with room to spare
+        const zs = []; for (let k = 0; k <= NZ; k++) { const t = k / NZ; zs.push(lerp(zB, zEnd, 1 - Math.pow(1 - t, 1.4))); }
+        const prof = z => { const t = clamp((z - zB) / (zEnd - zB), 0, 1); return Math.pow(1 - Math.pow(t, 1.45), 1 / 1.45); };
+        let S = 3.5; for (const p of pts0) { if (p[2] < zB || p[2] > zEnd) continue; const t = (p[2] - zB) / (zEnd - zB); if (t > 0.88) continue; const [l, h] = K.soleEdge(p[2]), c = (l + h) / 2, a = Math.max(0.6, (h - l) / 2 - inset), u = Math.abs(p[0] - c) / a; if (u >= 0.85) continue; const need = (p[1] + gap - ytop) / (prof(p[2]) * Math.pow(1 - Math.pow(u, PW), 1 / PW)); if (need > S) S = need; }
+        S = Math.min(S, 14); const Hs = zs.map(z => Math.max(0.05, S * prof(z)));
         const rows = zs.map((z, k) => { const [l, h] = K.soleEdge(z), c = (l + h) / 2, a = Math.max(0.3, (h - l) / 2 - inset) * (k === zs.length - 1 ? 0.2 : 1), r = []; for (let j = 0; j < NU; j++) { const th = Math.PI * (1 - j / (NU - 1)), cx = Math.cos(th), sy = Math.sin(th), x = c + a * Math.sign(cx) * Math.pow(Math.abs(cx), 2 / PW), y = ytop - 0.15 + (Hs[k] + 0.15) * Math.pow(sy, 2 / PW); r.push(V3(x, y, z)); } return r; });
         // front first, so the opening is the last row
         rows.reverse(); const W = NU, wr = rows.map(r => r.map(p => { const w = K.footPt(p), hf = clamp((p.y - ytop) / 3, 0, 1); if (K.lift) w.y += K.lift(p.z) * (1 - hf); return w; }));
