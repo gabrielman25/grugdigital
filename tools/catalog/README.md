@@ -21,6 +21,7 @@ python3 tools/pwa/build.py              # then the offline list, committed in th
 | `build.py` | Patches `base.html` with exact string replacements (`rep` asserts the old text occurs exactly once), injects the scripts below and writes the page. The department lists, filters, routes, cards and item page are wired here. |
 | `src/jewelry.js` | **The accessory engine** (`window.GrugJewelry`, `J` in the page). For every department: the design format (`DEF.<dept>`), `validate`, `random`, names, tags, colour families, description, and `build(design) → { root, info, frame, dispose }` (the 3D meshes). Earrings and necklaces first, then a `/* ==== purses */` section, a `/* ==== sandals */` section and a `/* ==== sound */` section. |
 | `src/int.js` | **The page integration** (`JM`): the department table `JDEPT`, the editor's starter designs `JSTART`, generated catalog items (`gen`, `byId`, `item`), the item page's detail rows (`specRows`), the editor's tabs and inspector panels (`sandalPanel`, `pursePanel`, `soundPanel`, …), the thumbnail and camera framing, and the maker credits (`byHTML`, player names). |
+| `src/closet.js` | **The closet** (`CL`): the page's front door since Nov 2026, the catalog and an avatar editor in one, laid out like Roblox's. See "The closet" below. |
 | `src/bake.js` | `bakeSingle(root)`: every download (all 6 formats) is merged into **one mesh with one texture atlas** (Roblox MeshPart). New categories get this for free; just make sure every textured canvas sets `texture.userData.canvas`. |
 | `src/patterns.png` | Kenney's Pattern Pack + Extra (CC0), 168 tiles of 64 px in a 14-column sheet, injected as `window.GRUG_PATTERNS`. Read through `J.PAT` (`lum` brightness values, `cols`, `T`). Prints are subtle: `PAT_K = 0.4`. |
 | `test/` | Headless Chrome helpers (see Testing). |
@@ -28,6 +29,27 @@ python3 tools/pwa/build.py              # then the offline list, committed in th
 The page loads the avatar from **`labs/catalog/vendor/sandy-runtime.js`**: the game kit's newest runtime (the new feet,
 Nov 2026). It is a copy of `grug-game-kit/vendor/sandy-runtime.js`; refresh it from there if the kit's avatar changes.
 The rest of the site still uses `assets/sandy-classic.js` (old feet).
+
+## The closet (the front door)
+
+`labs/catalog/` opens on the **closet** (`#closet`, `src/closet.js`), laid out like Roblox's avatar editor:
+
+- **Landscape:** the panel on the left, her stage on the right. **Portrait** (`max-aspect-ratio: 1/1`): the stage on top and
+  the panel as a sheet below it; drag or tap its grip to pull it up over her (`data-sheet` half / full).
+- **Marketplace | Customize** toggle at the top. Marketplace: category tabs (the `DEPTS`), sub-tabs (`SUBS`), search, and a
+  filter popover (the catalog's own refine, brand and colour filters: `#fRefine` is moved into it). Tapping a card opens
+  `#item/<id>` in the panel while she **tries it on** (`CL.preview`, one piece per category, so it takes that category's
+  place); **Back** puts her outfit back, **Add to wardrobe** keeps it and puts it on.
+- **Customize:** Body (skin tone, nails, expression, foot shape, build sliders: `sandy.apply` on the classic kit), and the
+  wardrobe by category: tap to put on or take off (one per category), the bin removes it.
+- **She is the classic female avatar in her own colours** here (`look(true)`: each material's own look, kept as
+  `userData.grug0` before she's painted grey). Card pictures still use the grey mannequin: `snapScene` switches to
+  `look(false)` for the moment a picture is taken. Her skin is the exact colour picked on every part (`applyBody`).
+- After a build or foot change, body-fitted pieces (necklace, purse, sandals, sound's cord) are measured again and refitted.
+  Head items aren't: the build sliders leave her head alone (no head-size sliders, on purpose).
+- Saved on the device: `grug.closet.v1` = `{ wardrobe, wearing, body }`. A first visit starts with one hairstyle on.
+- The editors (`#edit…`) and the Hair Studio are under the Grug button at the top left of the stage; their Back returns here.
+  The old catalog and item pages are still in the file (`#catalog`, `#item`) but nothing routes to them.
 
 ## How the page fits together
 

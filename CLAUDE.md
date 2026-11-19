@@ -189,8 +189,10 @@ way until the owner says a business has agreed in writing.
 
 ## The accessory catalog (`labs/catalog/`, unlisted)
 
-Eyewear, hair, earrings, necklaces, purses, sandals and sound (headphones, earmuffs, earbuds) on a grey mannequin, with editors
-and one-texture downloads.
+Eyewear, hair, earrings, necklaces, purses, sandals and sound (headphones, earmuffs, earbuds), with editors and one-texture
+downloads. It opens on the **closet** (`src/closet.js`): the catalog and an avatar editor in one, laid out like Roblox's
+(Marketplace to try things on and add them to the wardrobe; Customize for the wardrobe and her skin, face, feet and build),
+on the classic female avatar in her own colours. Card pictures still show the grey mannequin.
 Hair in the catalog is flat colour; a strand texture is only a choice in the Hair Studio's editor (`labs/hair-studio-x8f3k2/`,
 edited directly: it's a copy of the game kit's studio, so bring changes back to the kit). Sound has no charms.
 `labs/catalog/index.html` is **built**: edit `tools/catalog/` (`src/jewelry.js`, `src/int.js`, `build.py`) and run

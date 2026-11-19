@@ -12,6 +12,7 @@ def rep(old,new,n=1):
     s=s.replace(old,new)
 jew=open(os.path.join(HERE,'src','jewelry.js')).read()
 integ=open(os.path.join(HERE,'src','int.js')).read()
+closet=open(os.path.join(HERE,'src','closet.js')).read()
 
 # ---- script
 # the catalog wears the game kit's newest runtime (the new feet, Nov 2026), shipped next to it in labs/catalog/vendor/
@@ -78,7 +79,40 @@ pat_src='data:image/png;base64,'+base64.b64encode(open(os.path.join(HERE,'src','
 rep('<script id="catalog-app">','<script id="grug-patterns">window.GRUG_PATTERNS={src:"'+pat_src+'",n:168,cols:14,tile:64};</script>\n<script id="grug-jewelry">\n'+jew+'\n</script>\n<script id="catalog-app">')
 rep("const GE = window.GrugEyewear, { clamp, lerp, rng, mix } = GE.util;","const GE = window.GrugEyewear, { clamp, lerp, rng, mix } = GE.util, J = window.GrugJewelry;")
 rep("const deptOf = it => (it && it.dept) || 'eyewear';","const deptOf = it => (it && it.dept) || 'eyewear';\n  const isJ = it => !!it && (it.dept === 'earrings' || it.dept === 'necklaces' || it.dept === 'purses' || it.dept === 'sandals' || it.dept === 'sound');")
-rep("  /* ---------------------------------------------------------------- routing */\n  let toldControls","  await J.ready(); J.init({ sandy, hm, env: envTex });\n"+integ+"\n  /* ---------------------------------------------------------------- routing */\n  let toldControls")
+rep("  /* ---------------------------------------------------------------- routing */\n  let toldControls","  await J.ready(); J.init({ sandy, hm, env: envTex });\n"+integ+"\n"+closet+"\n  /* ---------------------------------------------------------------- routing */\n  let toldControls")
+
+
+# ---- the closet (src/closet.js): the catalog and the avatar editor in one, now the page's front door. Her materials' own
+#      looks are kept before she's painted grey, so the closet can show her in her own colours
+rep("for (const m of dress) for (const mat of [].concat(m.material)) { if (!mat || !mat.color) continue; if (!mat.userData.grugMap)",
+    "for (const m of dress) for (const mat of [].concat(m.material)) { if (!mat || !mat.color) continue; if (!mat.userData.grug0) mat.userData.grug0 = { map: mat.map, vc: !!mat.vertexColors, color: mat.color.clone(), rough: mat.roughness, metal: mat.metalness }; if (!mat.userData.grugMap)")
+rep("          if (!m.userData.grugSkin) m.userData.grugSkin = { map: m.map, vc: !!m.vertexColors };",
+    "          if (!m.userData.grug0) m.userData.grug0 = { map: m.map, vc: !!m.vertexColors, color: m.color.clone(), rough: m.roughness, metal: m.metalness };\n          if (!m.userData.grugSkin) m.userData.grugSkin = { map: m.map, vc: !!m.vertexColors };")
+CLOSET_HTML = r'''
+  <!-- 0. the closet: the catalog and the avatar editor in one (Marketplace | Customize), laid out like Roblox's avatar editor -->
+  <section id="closet" class="page cl" data-g-theme="light" data-sheet="half" data-mode="market" hidden>
+    <div class="cl-stage" id="clStage">
+      <div class="cl-stagebar">
+        <div class="rollbtn cl-menuwrap"><button class="cl-round" id="clMenuBtn" aria-label="Make your own" data-g-tip="Make your own" aria-haspopup="menu"><span data-g-logo="tile" class="tile"></span></button><div class="rollmenu createmenu cl-menu" id="clMenu" role="menu" hidden></div></div>
+        <div class="cl-pillbox"><button class="cl-round" id="clUndo" aria-label="Undo" data-g-tip="Undo" disabled><i data-g-icon="arrow_counterclockwise"></i></button><button class="cl-round" id="clRedo" aria-label="Redo" data-g-tip="Redo" disabled><i data-g-icon="arrow_clockwise"></i></button></div>
+        <button class="cl-round" id="clReset" aria-label="See all of her" data-g-tip="See all of her"><i data-g-icon="person"></i></button>
+      </div>
+      <div class="cl-loading" id="clLoading"><span class="g-brandmark"></span><span>Getting her ready…</span></div>
+    </div>
+    <div class="g-seg cl-mode" id="clMode"><button data-mode="market" class="is-on">Marketplace</button><button data-mode="custom">Customize</button></div>
+    <div class="cl-panel" id="clPanel">
+      <div class="cl-grip" id="clGrip" role="button" aria-label="Drag the panel up or down"></div>
+      <div class="cl-tabrow"><nav class="cl-tabs" id="clTabs"></nav>
+        <div class="cl-tools" id="clTools"><label class="cl-search"><i data-g-icon="magnifying_glass"></i><input id="clSearch" type="search" placeholder="Search" aria-label="Search the marketplace" autocomplete="off"></label><button class="cl-round sm" id="clFilterBtn" aria-label="Filters" data-g-tip="Filters"><i data-g-icon="sliders"></i></button></div></div>
+      <nav class="cl-subs" id="clSubs"></nav>
+      <div class="cl-filters" id="clFilters" hidden><div class="cl-sortrow"><span class="g-label">Sort</span><select id="clSort" class="g-input"><option value="featured">Featured</option><option value="name">Name, A to Z</option><option value="yours">Yours first</option></select></div></div>
+      <div class="cl-body" id="clBody"></div>
+    </div>
+  </section>
+'''
+rep("  <!-- 3. the editor -->", CLOSET_HTML.strip("\n") + "\n\n  <!-- 3. the editor -->")
+rep("  function showPage(p) { appMode = p; for (const id of ['catalog', 'item', 'editor']) document.getElementById(id).hidden = id !== p; }\n  showPage(/^#edit/.test(location.hash) ? 'editor' : /^#item\\//.test(location.hash) ? 'item' : 'catalog');",
+    "  function showPage(p) { appMode = p; for (const id of ['catalog', 'item', 'editor', 'closet']) document.getElementById(id).hidden = id !== p; }\n  showPage(/^#edit/.test(location.hash) ? 'editor' : 'closet');")
 
 # ---- camera centre
 rep("const headCentre = () => headGroup.localToWorld(new THREE.Vector3(0, hm.eyeY + 2.5, 1));","const headCentre = () => JM.on ? JM.centre() : headGroup.localToWorld(new THREE.Vector3(0, hm.eyeY + 2.5, 1));")
@@ -200,7 +234,7 @@ rep("  $('#heroRoll').onclick = () => { roll('all'); location.hash = '#edit'; };
 rep("      if (m.transparent) M.alphaMode = 'BLEND';","      if (m.transparent) M.alphaMode = 'BLEND'; else if (m.alphaTest > 0) { M.alphaMode = 'MASK'; M.alphaCutoff = m.alphaTest; }")
 rep("    hideFaceHair();\n    if (hover.a) {","    hideFaceHair(); JM.syncDress();\n    if (hover.a) {")
 # tweak
-rep("window.EyewearStudio = window.GrugCatalog = { HD,","window.EyewearStudio = window.GrugCatalog = { J, JM, isJ, genEyewear, kimiEye, HD,")
+rep("window.EyewearStudio = window.GrugCatalog = { HD,","window.EyewearStudio = window.GrugCatalog = { J, JM, CL, isJ, genEyewear, kimiEye, HD,")
 
 # ---- CSS
 css = """
@@ -219,6 +253,110 @@ css = """
 .ccard .cb .blogo-g{height:.9rem;width:auto}
 .ccard .cb .verified{flex:none}
 #catMore{visibility:hidden}
+/* the closet: Roblox-style avatar editor + catalog. Landscape: panel left, her stage right. Portrait: stage on top, the panel a sheet */
+#closet{position:fixed;inset:0;overflow:hidden;background:var(--g-bg);--panel-w:clamp(22rem,58vw,calc(100vw - 20rem));--sheet-top:52vh}
+#closet .cl-stage{position:absolute;top:0;bottom:0;right:0;left:var(--panel-w);background:#e8e9ee;overflow:hidden}
+#closet .cl-stage>canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;touch-action:none;cursor:grab}
+#closet .cl-stage>canvas:active{cursor:grabbing}
+#closet .cl-panel{position:absolute;top:0;bottom:0;left:0;width:var(--panel-w);display:flex;flex-direction:column;background:var(--g-surface);padding-top:3.6rem;box-shadow:1px 0 0 var(--g-line);z-index:2}
+#closet .cl-mode{position:absolute;top:.65rem;left:calc(var(--panel-w) / 2);transform:translateX(-50%);z-index:6;box-shadow:var(--g-sh-1);background:var(--g-surface)}
+#closet .cl-mode button{white-space:nowrap}
+#closet .cl-grip{display:none}
+#closet .cl-tabrow{display:flex;align-items:center;gap:.6rem;padding:0 1rem;border-bottom:1px solid var(--g-line)}
+#closet .cl-tabs,#closet .cl-subs{display:flex;gap:.15rem;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+#closet .cl-tabs::-webkit-scrollbar,#closet .cl-subs::-webkit-scrollbar{display:none}
+#closet .cl-tabs button{all:unset;box-sizing:border-box;padding:.8rem .7rem .7rem;font:700 var(--g-fs-md)/1 var(--g-font);color:var(--g-muted);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+#closet .cl-tabs button:hover{color:var(--g-text)}
+#closet .cl-tabs button.on{color:var(--g-text);border-bottom-color:var(--g-ink)}
+#closet .cl-subs{flex:none;padding:0 1rem;background:var(--g-bg)}
+#closet .cl-subs[hidden]{display:none}
+#closet .cl-subs button{all:unset;box-sizing:border-box;padding:.65rem .7rem;font:600 var(--g-fs-sm)/1 var(--g-font);color:var(--g-muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent}
+#closet .cl-subs button:hover{color:var(--g-text)}
+#closet .cl-subs button.on{color:var(--g-text);border-bottom-color:var(--g-text-2)}
+#closet .cl-tools{display:flex;align-items:center;gap:.4rem;flex:none}
+#closet .cl-tools[hidden]{display:none}
+#closet .cl-search{display:flex;align-items:center;gap:.35rem;padding:.35rem .7rem;border-radius:var(--g-r-pill);background:var(--g-bg);color:var(--g-muted);width:9.5rem}
+#closet .cl-search input{all:unset;min-width:0;flex:1;font:500 var(--g-fs-sm)/1.2 var(--g-font);color:var(--g-text)}
+#closet .cl-round{all:unset;box-sizing:border-box;width:2.7rem;height:2.7rem;border-radius:50%;background:var(--g-surface);display:grid;place-items:center;box-shadow:var(--g-sh-1);cursor:pointer;color:var(--g-text);font-size:1.15rem}
+#closet .cl-round.sm{width:2.2rem;height:2.2rem;box-shadow:none;background:var(--g-bg);font-size:1rem}
+#closet .cl-round.on{background:var(--g-ink);color:var(--g-snow)}
+#closet .cl-round:disabled{color:var(--g-faint);cursor:default}
+#closet .cl-round .tile{width:1.7rem;height:1.7rem}
+#closet .cl-stagebar{position:absolute;left:.9rem;top:.9rem;display:flex;flex-direction:column;align-items:flex-start;gap:.55rem;z-index:5}
+#closet .cl-pillbox{display:flex;flex-direction:column;border-radius:var(--g-r-pill);background:var(--g-surface);box-shadow:var(--g-sh-1)}
+#closet .cl-pillbox .cl-round{box-shadow:none;background:none}
+#closet .cl-menuwrap{position:relative}
+#closet .cl-menu{left:0;right:auto;min-width:14rem}
+#closet .cl-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;font:600 var(--g-fs-sm)/1.2 var(--g-font);color:var(--g-muted);background:#e8e9ee;z-index:4}
+#closet .cl-loading.gone{display:none}
+#closet .cl-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:1rem 1.1rem 2rem;scrollbar-width:thin}
+#closet .cl-count{font:600 var(--g-fs-xs)/1 var(--g-font);color:var(--g-muted);margin:0 0 .7rem}
+#closet .cl-grid{grid-template-columns:repeat(auto-fill,minmax(8.4rem,1fr));gap:1.1rem .8rem}
+#closet .cl-more{height:1px}
+#closet .ccard.wearing .ct{box-shadow:0 0 0 3px var(--g-ink)}
+#closet .ccard .ct .tag.own,#closet .ccard .ct .wtag{position:absolute;left:.45rem;bottom:.45rem;top:auto;right:auto}
+#closet .ccard:not(.wearing) .ct .wtag{background:rgba(255,255,255,.85);color:var(--g-ink)}
+#closet .ccard .cl-rm{all:unset;box-sizing:border-box;position:absolute;right:.4rem;top:.4rem;width:1.9rem;height:1.9rem;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.85);color:var(--g-text-2);cursor:pointer;opacity:0;transition:opacity var(--g-dur-1)}
+#closet .ccard:hover .cl-rm,#closet .ccard .cl-rm:focus-visible{opacity:1}
+@media (hover:none){#closet .ccard .cl-rm{opacity:1}}
+#closet .cl-empty{grid-column:1/-1;display:flex;flex-direction:column;align-items:flex-start;gap:.6rem;padding:1.4rem;border-radius:var(--g-r-lg);background:var(--g-bg)}
+#closet .cl-empty span{color:var(--g-text-2)}
+#closet .cl-filters{padding:.8rem 1.1rem 1rem;border-bottom:1px solid var(--g-line);max-height:42vh;overflow:auto;display:flex;flex-direction:column;gap:1rem;background:var(--g-surface)}
+#closet .cl-filters[hidden]{display:none}
+#closet .cl-sortrow{display:flex;align-items:center;gap:.6rem}
+#closet .cl-sortrow select{max-width:14rem}
+#closet .cl-filters .refine{display:flex;flex-direction:column;gap:.9rem}
+#closet .cl-filters .refine .g-label{color:var(--g-muted);margin:0 0 .4rem}
+#closet .cl-filters nav{display:flex;flex-wrap:wrap;gap:.3rem}
+#closet .cl-filters nav button{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:.4rem;padding:.4rem .7rem;border-radius:var(--g-r-pill);background:var(--g-bg);font:600 var(--g-fs-xs)/1.2 var(--g-font);color:var(--g-text-2);cursor:pointer}
+#closet .cl-filters nav button.on{background:var(--g-ink);color:var(--g-snow)}
+#closet .cl-filters nav button .n{color:var(--g-faint);font-variant-numeric:tabular-nums}
+#closet .cl-filters nav button.on .n{color:rgba(255,255,255,.6)}
+#closet .cl-filters nav button .dot{display:none}
+#closet .cl-filters .swgrid{grid-template-columns:repeat(auto-fill,1.9rem);padding:0}
+#closet .cl-ihead{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;flex-wrap:wrap}
+#closet .cl-ihead .crumbs{font:600 var(--g-fs-sm)/1.2 var(--g-font);color:var(--g-muted);display:flex;gap:.4rem;align-items:center}
+#closet .cl-iwrap{display:grid;grid-template-columns:minmax(9rem,15rem) minmax(0,1fr);gap:1.2rem;align-items:start}
+#closet .cl-ipic{position:relative;aspect-ratio:1;border-radius:var(--g-r-lg);background:var(--g-surface-3) center/88% no-repeat}
+#closet .cl-iinfo{display:flex;flex-direction:column;gap:.55rem;min-width:0}
+#closet .cl-iinfo h2{margin:0}
+#closet .cl-by{display:flex;align-items:center;gap:.35rem;min-height:2rem;font-size:var(--g-fs-sm)}
+#closet .cl-by .blogo-k{height:2rem;width:auto}#closet .cl-by .blogo-g{height:1rem;width:auto}
+#closet .cl-price{font:700 var(--g-fs-lg)/1 var(--g-font)}
+#closet .cl-acts,#closet .cl-acts2{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+#closet .cl-acts2 .rollbtn{position:relative}
+#closet .cl-acts2 .fmtmenu{left:0;right:auto;min-width:15rem}
+#closet .favbtn.on{background:var(--g-yellow);color:var(--g-ink)}
+#closet .cl-desc{margin:1.1rem 0 .7rem;color:var(--g-text-2);line-height:1.45}
+#closet .cl-like-h{margin:1.4rem 0 .8rem}
+#closet .cl-grp{display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.4rem;max-width:34rem}
+#closet .cl-note{font-size:var(--g-fs-sm);color:var(--g-muted)}
+#closet .cl-sws{display:flex;flex-wrap:wrap;gap:.55rem;align-items:center}
+#closet .cl-sw{all:unset;box-sizing:border-box;width:2.5rem;height:2.5rem;border-radius:50%;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+#closet .cl-sw.on{box-shadow:0 0 0 3px var(--g-surface),0 0 0 5px var(--g-ink)}
+#closet .cl-pick{width:2.5rem;height:2.5rem;border:0;padding:0;background:none;cursor:pointer}
+#closet .cl-chips{display:flex;flex-wrap:wrap;gap:.4rem}
+#closet .cl-chips button{all:unset;box-sizing:border-box;padding:.55em 1em;border-radius:var(--g-r-pill);background:var(--g-bg);font:600 var(--g-fs-sm)/1.2 var(--g-font);color:var(--g-text-2);cursor:pointer}
+#closet .cl-chips button:hover{color:var(--g-text)}
+#closet .cl-chips button.on{background:var(--g-ink);color:var(--g-snow)}
+#closet .cl-sl{display:grid;grid-template-columns:1fr auto;gap:.15rem .6rem;font:600 var(--g-fs-sm)/1.2 var(--g-font)}
+#closet .cl-sl .val{color:var(--g-muted);font-variant-numeric:tabular-nums}
+#closet .cl-sl input{grid-column:1/-1}
+@media (max-aspect-ratio: 1/1){
+  #closet .cl-stage{left:0;right:0;bottom:auto;height:var(--sheet-top);transition:height .25s var(--g-ease)}
+  #closet[data-sheet="full"]{--sheet-top:4.2rem}
+  #closet .cl-panel{left:0;right:0;width:auto;top:var(--sheet-top);padding-top:0;border-radius:1.1rem 1.1rem 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.08);transition:top .25s var(--g-ease)}
+  #closet.dragging .cl-stage,#closet.dragging .cl-panel{transition:none}
+  #closet .cl-grip{display:block;flex:none;height:1.3rem;cursor:grab;touch-action:none;position:relative}
+  #closet .cl-grip::after{content:'';position:absolute;left:50%;top:.5rem;width:2.4rem;height:.28rem;border-radius:9px;background:var(--g-line);transform:translateX(-50%)}
+  #closet .cl-mode{left:50%}
+  #closet[data-sheet="full"] .cl-stagebar{display:none}
+  #closet .cl-search{width:7rem}
+  #closet .cl-iwrap{grid-template-columns:7.5rem minmax(0,1fr);gap:.9rem}
+  #closet .cl-grid{grid-template-columns:repeat(auto-fill,minmax(7.2rem,1fr))}
+}
+@media (max-width:520px){#closet .cl-tools .cl-search{display:none}}
+
 #editor[data-jm] #topright #bSpin{display:inline-grid}
 #editor[data-jm] .quick{display:none}
 .jel{border:1px solid var(--g-line,rgba(255,255,255,.12));border-radius:var(--g-r-md,12px);padding:.6rem;margin:.5rem 0;display:flex;flex-direction:column;gap:.35rem}
