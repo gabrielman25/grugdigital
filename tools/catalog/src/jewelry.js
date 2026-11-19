@@ -1,5 +1,5 @@
 /* =====================================================================================
-   GRUG JEWELRY · the engine for earrings and necklaces  →  window.GrugJewelry
+   GRUG JEWELRY · the engine for earrings, necklaces, purses, sandals and sound  →  window.GrugJewelry
    Earrings are a sequence of shapes and charms that hang from her ear; a necklace is a cord of any length (almost a choker
    to midway down her torso) with shapes and charms on it. Shapes are made here; charms are the Events Icon Pack pictures
    (assets/events-icons/, by gvesster) and the KIMILAND monogram. Brands: Grug Digital (any colours) and KIMILAND (always
@@ -210,7 +210,7 @@
 
   /* ---------------------------------------------------------------- vocabulary: kinds, names, tags, specs */
   const earKind = d => d.seq.length === 1 ? (d.seq[0].id === 'ring' && d.seq[0].k === 'shape' ? 'hoops' : 'studs') : d.seq.length <= 3 ? 'drops' : 'danglers';
-  const KIND_LABEL = { studs: 'Studs', drops: 'Drops', danglers: 'Danglers', hoops: 'Hoops', choker: 'Chokers', short: 'Short', medium: 'Medium', long: 'Long', satchel: 'Satchels', tote: 'Totes', bucket: 'Buckets', round: 'Rounds', heart: 'Hearts', clutch: 'Clutches', slide: 'Slides', thong: 'Thongs', ankle: 'Ankle straps', gladiator: 'Gladiators', wrap: 'Wraps', slipper: 'Slippers' };
+  const KIND_LABEL = { studs: 'Studs', drops: 'Drops', danglers: 'Danglers', hoops: 'Hoops', choker: 'Chokers', short: 'Short', medium: 'Medium', long: 'Long', satchel: 'Satchels', tote: 'Totes', bucket: 'Buckets', round: 'Rounds', heart: 'Hearts', clutch: 'Clutches', slide: 'Slides', thong: 'Thongs', ankle: 'Ankle straps', gladiator: 'Gladiators', wrap: 'Wraps', slipper: 'Slippers', over: 'Headphones', muffs: 'Earmuffs', buds: 'Earbuds' };
   const kindOf = (dept, d) => dept === 'earrings' ? earKind(d) : lenClass(d).id;
   const elName = e => e.k === 'charm' ? CHARM_BY[e.id].label : SHAPE_LABEL[e.id];
   const FLAVOUR = ['Cute', 'Fancy', 'Dainty', 'Glam', 'Posh', 'Sparkly', 'Merry', 'Spooky', 'Lovely', 'Bold', 'Sweet', 'Chic', 'Jolly', 'Charming', 'Darling', 'Lucky', 'Super', 'Pretty', 'Royal', 'Magic'];
@@ -990,13 +990,406 @@
     return { root, d, info: { tris: Math.round(own.tris) }, frame: 'world', dispose() { for (const g of own.geos) g.dispose(); for (const m of own.mats) m.dispose(); } };
   }
 
-  const build = (dept, d, ctx, o) => dept === 'sandals' ? buildSandals(d, ctx || CTX) : dept === 'purses' ? buildPurse(d, ctx || CTX) : dept === 'earrings' ? buildEarrings(d, ctx || CTX, o) : buildNecklace(d, ctx || CTX, o);
+  /* ================================================================ sound
+     Sound is what she wears on her ears: over-ear headphones (two cups on cushions, a headband over her head on a slider or a
+     fork, toppers such as cat ears, an optional boom mic and a glowing ring on each cup), fluffy earmuffs, and earbuds (a stem
+     or a round bud). Headphones and earbuds can be wired: a cord (straight or coiled; a Y cable with an inline remote for
+     earbuds) runs down her chest to a plug. Charms are pinned on the cups and the band, or dangle from the buds. Patterns
+     from the pattern pack go on the cups (the muffs' fur) and on the band. Her head and ears are measured from her own mesh. */
+  const SOUND_KINDS = [['over', 'Headphones'], ['muffs', 'Earmuffs'], ['buds', 'Earbuds']];
+  const SOUND_LABEL = Object.fromEntries(SOUND_KINDS);
+  const CUPS = [['round', 'Round'], ['oval', 'Oval'], ['square', 'Square'], ['heart', 'Heart'], ['cloud', 'Cloud']];
+  const CUP_LABEL = Object.fromEntries(CUPS);
+  const TOPPERS = [['none', 'None'], ['cat', 'Cat ears'], ['bunny', 'Bunny ears'], ['bear', 'Bear ears'], ['devil', 'Devil horns'], ['bow', 'Bow']];
+  const TOPPER_LABEL = Object.fromEntries(TOPPERS);
+  const YOKES = [['post', 'Slider'], ['fork', 'Fork']];
+  const BUDS = [['stem', 'Stem'], ['round', 'Round']];
+  const BUD_LABEL = Object.fromEntries(BUDS);
+  const SND_LIM = { cupR: [4.8, 8.5], cupD: [2, 5.5], padT: [0.8, 2.6], bandW: [0.8, 5], bandT: [0.35, 2], budSize: [2, 5], cordLen: [0, 1] };
+  const SND_N = 6, EAR_DEPTH = 4.4, KS = 1.4;   // a cup and its cushion together are at least EAR_DEPTH deep (her ear sticks out that far); charms are drawn KS larger
+  const SND_COLS = ['cupCol', 'cupCol2', 'padCol', 'bandCol', 'topCol', 'hw', 'cordCol', 'glowCol', 'cupPatCol', 'bandPatCol'];
+  DEF.sound = () => ({ v: 1, brand: 'grug', kind: 'over', cup: 'round', cupR: 6.2, cupD: 3.2, padT: 1.6, bandW: 3, bandT: 1, yoke: 'post', bandPad: true, top: 'none', mic: false, glow: false, bud: 'stem', budSize: 3.6, wired: false, coil: false, remote: false, cordLen: 0.5, cupCol: '#ff8fc2', cupCol2: '#fff6f2', padCol: '#2a2a31', bandCol: '#ff8fc2', topCol: '#ff8fc2', hw: '#c8ccd2', cordCol: '#16161a', glowCol: '#4fd8e0', finish: 'gloss', cupPat: -1, cupPatCol: '#ffffff', bandPat: -1, bandPatCol: '#ffffff', charms: [EL({ k: 'shape', id: 'heart', size: 1.8, col: '#e8344f', at: 0.95 })] });
+  LIMITS.sound = { n: SND_N };
+  // what a design really has (a setting that doesn't apply to its kind is kept, so switching back brings it back)
+  const isWired = d => !!d.wired && d.kind !== 'muffs', hasCoil = d => isWired(d) && !!d.coil && d.kind === 'over', hasRemote = d => isWired(d) && !!d.remote && d.kind === 'buds';
+  const hasMic = d => !!d.mic && d.kind === 'over', hasGlow = d => !!d.glow && d.kind !== 'muffs', topOf = d => d.kind === 'buds' ? 'none' : d.top;
+  const shadeOf = base => { const c = new THREE.Color(base), h = {}; c.getHSL(h); c.setHSL(h.h, h.s, h.l > 0.55 ? h.l - 0.22 : h.l + 0.22); return '#' + c.getHexString(); };
+
+  function validateSnd(src, brand) {
+    const notes = [], D0 = DEF.sound(), d = Object.assign(DEF.sound(), src || {}); d.brand = brand || d.brand; if (!BRAND_LABEL[d.brand]) d.brand = 'grug';
+    if (!SOUND_LABEL[d.kind]) d.kind = 'over'; if (!CUP_LABEL[d.cup]) d.cup = 'round'; if (!TOPPER_LABEL[d.top]) d.top = 'none'; if (!YOKES.some(y => y[0] === d.yoke)) d.yoke = 'post'; if (!BUD_LABEL[d.bud]) d.bud = 'stem';
+    for (const k of Object.keys(SND_LIM)) { const v = +d[k]; d[k] = clamp(isFinite(v) && d[k] !== null && d[k] !== '' ? v : D0[k], SND_LIM[k][0], SND_LIM[k][1]); }
+    for (const k of SND_COLS) if (!isHex(d[k])) d[k] = D0[k];
+    for (const k of ['cupPat', 'bandPat']) { const v = Math.round(+d[k]); d[k] = isFinite(v) && v >= 0 && v < PAT_N ? v : -1; }
+    if (!FINISHES.some(f => f[0] === d.finish)) d.finish = 'gloss';
+    for (const k of ['wired', 'coil', 'remote', 'mic', 'glow', 'bandPad']) d[k] = !!d[k];
+    if (d.kind === 'over' && d.padT + d.cupD < EAR_DEPTH) { d.cupD = Math.min(SND_LIM.cupD[1], EAR_DEPTH - d.padT); notes.push('Cups kept deep enough to cover her ears'); }
+    d.charms = (d.charms || []).slice(0, SND_N).map(e => cleanEl(e, 'sound'));
+    if (d.brand === 'kimiland') {
+      let changed = false;
+      for (const k of SND_COLS) if (!isPastel(d[k])) { d[k] = toPastel(d[k]); changed = true; }
+      for (const e of d.charms) kimiEl(e, { tint: isPastel(e.col) ? e.col : toPastel(e.col) });
+      if (changed) notes.push('Brought to KIMILAND pastels');
+    }
+    return { d, notes };
+  }
+
+  function randomSnd(seed, o) {
+    o = o || {}; const r = rng('jewel:sound:' + seed), brand = o.brand || brandFor(seed), kimi = brand === 'kimiland';
+    const theme = kimi ? 'sweet' : r.w({ valentines: 1.6, christmas: 1.6, halloween: 1.8, sweet: 2, classic: 3, ocean: 1.2, forest: 0.8, night: 1.8 });
+    const pal = kimi ? kimiPalette(r) : null, T = THEMES[theme], pick = kimi ? () => r.pick(pal.mains.concat(pal.acc)) : () => r.pick(T.cols), metal = kimi ? pal.metal : r.pick(T.metal);
+    const NEON = ['#4fd8e0', '#ff6fb0', '#9be338', '#9a5cf0', '#f5d21f', '#7cc4ff'], DARK = ['#16161a', '#2a2a31', '#3a3b40'];
+    let d = o.base ? JSON.parse(JSON.stringify(o.base)) : DEF.sound(); d.brand = brand;
+    const recolour = () => {
+      const neutral = !kimi && r.chance(0.35);
+      d.cupCol = kimi ? pal.main : neutral ? r.pick(['#16161a', '#f4f4f2', '#c8ccd2', '#3a3b40']) : pick();
+      d.cupCol2 = kimi ? r.pick(pal.acc.concat(pal.mains)) : r.chance(0.3) ? d.cupCol : pick();
+      d.padCol = kimi ? r.pick(['#fffafc', pal.main, r.pick(PINKS)]) : r.pick(DARK.concat(['#f4f4f2', d.cupCol2]));
+      d.bandCol = kimi ? (r.chance(0.5) ? pal.main : '#fffafc') : r.chance(0.6) ? d.cupCol : pick();
+      d.topCol = d.top === 'devil' && !kimi ? r.pick(['#d62f2f', '#16161a', '#7d3fc4']) : r.chance(0.6) ? d.bandCol : d.cupCol2;
+      d.hw = metal; d.cordCol = kimi ? r.pick([pal.main, '#fffafc']) : r.pick(['#16161a', '#f4f4f2', d.cupCol, d.cupCol2]);
+      d.glowCol = kimi ? r.pick(['#c4e1ff', '#e0d3ff', '#ffb7d5', '#c6f3dd']) : r.pick(NEON);
+      d.cupPatCol = shadeOf(d.kind === 'muffs' ? d.cupCol : d.cupCol2); d.bandPatCol = shadeOf(d.bandCol);
+      for (const e of d.charms) { if (e.k === 'shape') e.col = e.id === 'pearl' ? (kimi ? '#fffafc' : '#fff6f2') : pick(); else { const c = CHARM_BY[e.id]; e.tint = kimi && !c.brand ? (pal.pink ? pal.main : r.pick(pal.mains)) : ''; } }
+    };
+    if (o.keep === 'shape') { recolour(); return validateSnd(d, brand).d; }
+    const keepC = o.keep === 'colours' && o.base ? { cols: SND_COLS.map(k => d[k]), ch: d.charms.map(e => [e.col, e.tint]) } : null;
+    d.kind = o.kind && SOUND_LABEL[o.kind] ? o.kind : r.w({ over: 4, muffs: 2.2, buds: 3 });
+    d.cup = r.w(kimi ? { round: 2.5, oval: 1.2, square: 0.8, heart: 2, cloud: 1.6 } : { round: 3, oval: 2, square: 1.6, heart: 0.7, cloud: 0.5 });
+    d.cupR = d.kind === 'muffs' ? r.f(5.4, 7.6) : r.f(5.4, 7.4); d.padT = r.f(1.1, 2.1); d.cupD = r.f(Math.max(2.4, EAR_DEPTH - d.padT + 0.2), 4.6);
+    d.bandW = d.kind === 'muffs' ? r.f(0.9, 2) : r.f(2, 4.2); d.bandT = d.kind === 'muffs' ? r.f(0.4, 0.8) : r.f(0.7, 1.5);
+    d.yoke = r.chance(0.45) ? 'fork' : 'post'; d.bandPad = d.kind === 'over' && r.chance(0.55);
+    d.top = r.w(kimi ? { none: 2, cat: 2.2, bunny: 1.6, bear: 1.6, devil: 0.3, bow: 1.4 } : theme === 'halloween' || theme === 'night' ? { none: 3, cat: 1.6, devil: 1.8, bunny: 0.4, bear: 0.4, bow: 0.3 } : { none: 6, cat: 1.2, bunny: 0.6, bear: 0.6, devil: 0.3, bow: 0.6 });
+    d.mic = d.kind === 'over' && r.chance(theme === 'night' ? 0.4 : 0.14); d.glow = d.kind !== 'muffs' && r.chance(theme === 'night' || theme === 'halloween' ? 0.35 : kimi ? 0.15 : 0.12);
+    d.bud = r.chance(0.65) ? 'stem' : 'round'; d.budSize = r.f(3, 4.2);
+    d.wired = d.kind !== 'muffs' && r.chance(d.kind === 'buds' ? 0.5 : 0.4); d.coil = d.wired && d.kind === 'over' && r.chance(0.45); d.remote = d.wired && d.kind === 'buds' && r.chance(0.6); d.cordLen = r.f(0.15, 0.95);
+    d.cupPat = r.chance(d.kind === 'muffs' ? 0.3 : 0.4) ? r.i(0, PAT_N - 1) : -1; d.bandPat = d.kind === 'over' && r.chance(0.3) ? r.i(0, PAT_N - 1) : -1;
+    d.finish = d.kind === 'muffs' ? 'matte' : r.w({ gloss: 4, matte: 3, metal: kimi ? 0.2 : 1 });
+    const n = r.w({ 0: 1.4, 1: 3, 2: 2.4, 3: 1.2 }) | 0; d.charms = [];
+    for (let i = 0; i < n; i++) {
+      const e = randomEl(r, 'necklaces', theme, pal, kimi, {}); e.mode = 'hang';
+      if (d.kind === 'buds') { e.size = clamp(e.size * 0.6, 0.8, 2.2); e.at = n === 1 ? 0 : r.pick([-0.7, 0, 0.7]); e.drop = r.f(0.6, 3); }
+      else { e.size = clamp(e.size * 0.85, 1.2, 3.2); const side = i % 2 ? 1 : -1; e.at = r.chance(0.75) ? side * r.f(0.82, 1) : side * r.f(0.3, 0.65); }
+      d.charms.push(e);
+    }
+    recolour();
+    if (keepC) { SND_COLS.forEach((k, i) => { d[k] = keepC.cols[i]; }); d.charms.forEach((e, i) => { const c = keepC.ch[i % keepC.ch.length]; if (!c) return; if (e.k === 'shape') e.col = c[0]; else if (!CHARM_BY[e.id].brand) e.tint = c[1] || ''; }); }
+    return validateSnd(d, brand).d;
+  }
+
+  function nameSnd(d, seed) {
+    const r = rng('jname:' + seed + ':sound'), kimi = d.brand === 'kimiland', colour = colourName(d.cupCol, kimi), fl = kimi ? r.pick(KIMI_FLAVOUR) : r.pick(FLAVOUR), top = topOf(d);
+    let noun = { over: r.pick(['Headphones', 'Headphones', 'Cans', 'Over-Ears', 'Studio Headphones']), muffs: r.pick(['Earmuffs', 'Ear Warmers', 'Fluffy Earmuffs', 'Muffs']), buds: r.pick(['Earbuds', 'Buds', 'In-Ears']) }[d.kind];
+    if (hasMic(d)) noun = r.pick(['Headset', 'Gaming Headset']);
+    const extra = top !== 'none' ? { cat: 'Kitty', bunny: 'Bunny', bear: 'Teddy', devil: 'Devil', bow: 'Bow' }[top] : hasGlow(d) ? r.pick(['Glow', 'Neon', 'Light-Up']) : hasCoil(d) ? 'Coiled' : isWired(d) ? r.pick(['Wired', 'Corded']) : d.kind === 'buds' && r.chance(0.3) ? 'Wireless' : '';
+    const pat = d.cupPat >= 0 ? r.pick(['Print', 'Patterned', 'Graphic']) : '', sub = d.charms.length ? elName(mainEl(d.charms)) + ' Charm' : '';
+    const forms = [[colour, extra, noun], [fl, extra || colour, noun], [fl, sub || colour, noun], [extra || pat || fl, colour, noun], [colour, pat || extra, noun]];
+    return forms[r.i(0, 4)].filter(Boolean).join(' ').replace(/\s+/g, ' ');
+  }
+  function tagsSnd(d) {
+    const t = ['Sound', SOUND_LABEL[d.kind]], themes = new Set(d.charms.filter(e => e.k === 'charm').map(e => CHARM_BY[e.id].theme)), top = topOf(d);
+    if (d.kind !== 'muffs') t.push(isWired(d) ? 'Wired' : 'Wireless'); if (hasCoil(d)) t.push('Coiled cord'); if (hasRemote(d)) t.push('Remote'); if (hasMic(d)) t.push('Mic'); if (hasGlow(d)) t.push('Glow');
+    if (top !== 'none') t.push(TOPPER_LABEL[top]); if (d.kind === 'over') t.push(CUP_LABEL[d.cup] + ' cups'); if (d.kind === 'buds') t.push(BUD_LABEL[d.bud] + ' buds');
+    if (d.cupPat >= 0 || (d.kind === 'over' && d.bandPat >= 0)) t.push('Patterned');
+    for (const th of themes) t.push(THEME_LABEL[th]); if (d.charms.length) t.push('Charms'); if (d.brand === 'kimiland') t.push('Pastel', 'KIMILAND'); return Array.from(new Set(t));
+  }
+  function familiesSnd(d) {
+    const f = new Set([famOfHex(d.cupCol)]); if (d.kind !== 'muffs') f.add(famOfHex(d.cupCol2)); if (d.kind !== 'buds') f.add(famOfHex(d.bandCol)); if (d.cupPat >= 0) f.add(famOfHex(d.cupPatCol)); if (hasGlow(d)) f.add(famOfHex(d.glowCol));
+    for (const e of d.charms) { if (e.k === 'shape') f.add(famOfHex(e.col)); else { const c = CHARM_BY[e.id]; if (e.tint) f.add(famOfHex(e.tint === 'pastel' ? '#ffc4dc' : e.tint)); else for (const x of c.fam) f.add(x); } }
+    if (f.size > 3) f.add('multi'); return f;
+  }
+  function describeSnd(d) {
+    const kimi = d.brand === 'kimiland', col = colourName(d.cupCol, kimi).toLowerCase(), top = topOf(d), names = Array.from(new Set(d.charms.map(elName).map(s => s.toLowerCase())));
+    const list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0], ch = names.length ? (d.kind === 'buds' ? ', with ' + list + ' dangling from the buds' : ', with ' + list + ' pinned on') : '';
+    const topW = top !== 'none' ? ', topped with ' + TOPPER_LABEL[top].toLowerCase() : '';
+    let s;
+    if (d.kind === 'over') s = `${hasMic(d) ? 'A gaming headset' : 'Over-ear headphones'} with ${col} ${CUP_LABEL[d.cup].toLowerCase()} cups${d.cupPat >= 0 ? ' in a print' : ''} on a ${colourName(d.bandCol, kimi).toLowerCase()} headband${topW}${hasGlow(d) ? ', a glowing ring round each cup' : ''}${hasMic(d) ? ', a mic on a boom' : ''}`;
+    else if (d.kind === 'muffs') s = `Fluffy ${col} earmuffs${d.cupPat >= 0 ? ' with a print in the fur' : ''} on a thin ${colourName(d.bandCol, kimi).toLowerCase()} band${topW}`;
+    else s = `A pair of ${col} ${d.bud === 'stem' ? 'stem' : 'round'} earbuds${hasGlow(d) ? ' with a glowing ring' : ''}`;
+    if (isWired(d)) s += d.kind === 'buds' ? `, on a Y cable${hasRemote(d) ? ' with an inline remote' : ''} down to a plug` : `, with a ${hasCoil(d) ? 'coiled' : 'straight'} cord down to a plug`;
+    else if (d.kind !== 'muffs') s += ', wireless';
+    return s + ch + '.' + (kimi ? ' A KIMILAND piece: soft pastels, made to be cute.' : '');
+  }
+
+  /* ---- her head, measured: the ears, the side of her head, its outline round the band's plane and round her face (in cm, head frame) */
+  function soundFit(sandy, hm) {
+    const head = sandy.n3.headMesh, P = head.geometry.attributes.position, key = head.geometry.uuid + ':' + P.version + ':' + P.count;
+    if (sandy.__jsnd && sandy.__jsnd.key === key) return sandy.__jsnd;
+    const hg = sandy.n3.headGroup; sandy.object3d.updateMatrixWorld(true);
+    const cmU = hm.unitCm, M = new THREE.Matrix4().makeScale(cmU, cmU, cmU).multiply(new THREE.Matrix4().copy(hg.matrixWorld).invert()).multiply(head.matrixWorld);
+    const E = earInfo(sandy, hm).L, ear = { yMin: E.yMin * cmU, yMax: E.yMax * cmU, z: E.zMid * cmU, zFront: E.zFront * cmU, out: E.xOut * cmU };
+    const yC = (ear.yMin + ear.yMax) / 2, zM = ear.z, V = new Float32Array(P.count * 3), v = new THREE.Vector3();
+    let side = 0, top = -1e9, bot = 1e9, zMin = 1e9, zMax = -1e9;
+    for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i).applyMatrix4(M); V[i * 3] = v.x; V[i * 3 + 1] = v.y; V[i * 3 + 2] = v.z; top = Math.max(top, v.y); bot = Math.min(bot, v.y); zMin = Math.min(zMin, v.z); zMax = Math.max(zMax, v.z); if (Math.abs(v.y - yC) < 2.5 && Math.abs(v.z - zM) < 3) side = Math.max(side, Math.abs(v.x)); }
+    const yMouth = yC - 7.5, zc0 = (zMin + zMax) / 2, NB = 120, prof = new Float32Array(NB), hprof = new Float32Array(NB);
+    for (let i = 0; i < P.count; i++) {
+      const x = V[i * 3], y = V[i * 3 + 1], z = V[i * 3 + 2];
+      if (Math.abs(z - zM) < 2.5) { const th = Math.atan2(x, y - yC), b = Math.round((th + Math.PI) / TAU * NB) % NB, rr = Math.hypot(x, y - yC); if (rr > prof[b]) prof[b] = rr; }
+      if (y > yMouth - 2.5 && y < yC + 1) { const ph = Math.atan2(x, z - zc0), b = Math.round((ph + Math.PI) / TAU * NB) % NB, rr = Math.hypot(x, z - zc0); if (rr > hprof[b]) hprof[b] = rr; }
+    }
+    for (const A of [prof, hprof]) { for (let pass = 0; pass < 12; pass++) for (let b = 0; b < NB; b++) if (!A[b]) A[b] = Math.max(A[(b + 1) % NB], A[(b + NB - 1) % NB]); const S = A.slice(); for (let b = 0; b < NB; b++) A[b] = Math.max(S[b], S[(b + 1) % NB], S[(b + NB - 1) % NB]); }
+    const look = A => th => { const f = ((th + Math.PI) / TAU * NB % NB + NB) % NB, a = Math.floor(f) % NB, b = (a + 1) % NB; return lerp(A[a], A[b], f - Math.floor(f)); };
+    return (sandy.__jsnd = { key, cmU, hg, ear, yC, zM, side: side || 14.8, top, bot, rAt: look(prof), hAt: look(hprof), zc0, yMouth });
+  }
+
+  /* ---- one picture per pair: the cups' outer plate (a rim, an inset in the second colour and its print; the muffs' fur), the
+     cups' shell, the cushions and the band (its print keeps its size along the band, wrapping every PERIOD cm like the sandals') */
+  const SREG = { plate: [0, 0, 256, 256], shell: [256, 0, 256, 128], pad: [256, 128, 256, 128], band: [0, 256, 512, 128] };
+  const sUV = (r, fx, fy) => { const [x0, y0, w, h] = SREG[r]; return [(x0 + 2 + clamp(fx, 0, 1) * (w - 4)) / TW, 1 - (y0 + 2 + clamp(fy, 0, 1) * (h - 4)) / TW]; };
+  const BAND_UV = { cm: true, period: PERIOD, u: uCm, v: off => 1 - (SREG.band[1] + SREG.band[3] / 2 + off * PX) / TW };
+  function cupShape(d) {
+    const R = d.cupR;
+    if (d.cup === 'square') return rrShape(R * 1.84, R * 1.84, R * 0.5);
+    if (d.cup === 'heart') return heartShape(R * 2.3, R * 2.2);
+    const s = new THREE.Shape();
+    if (d.cup === 'oval') s.absellipse(0, 0, R * 0.8, R * 1.12, 0, TAU, false, 0);
+    else if (d.cup === 'cloud') { const n = 60; for (let i = 0; i < n; i++) { const a = i / n * TAU, rr = R * (0.85 + 0.15 * Math.abs(Math.cos(3 * a))); i ? s.lineTo(Math.sin(a) * rr, Math.cos(a) * rr) : s.moveTo(Math.sin(a) * rr, Math.cos(a) * rr); } s.closePath(); }
+    else s.absarc(0, 0, R, 0, TAU, false);
+    return s;
+  }
+  const shapeBox = s => { const pts = s.getPoints(48); let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (const p of pts) { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); } return { pts, x0, x1, y0, y1, w: x1 - x0, h: y1 - y0, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 }; };
+  function soundTex(d, sb) {
+    const cv = document.createElement('canvas'); cv.width = cv.height = TW; const x = cv.getContext('2d');
+    const rect = r => SREG[r], fill = (r, c) => { const [x0, y0, w, h] = rect(r); x.fillStyle = c; x.fillRect(x0, y0, w, h); };
+    const muffs = d.kind === 'muffs';
+    fill('plate', muffs ? d.cupCol : d.cupCol2); fill('shell', d.cupCol); fill('pad', d.padCol); fill('band', d.bandCol);
+    { const [x0, y0, w, h] = rect('pad'); x.strokeStyle = 'rgba(255,255,255,.07)'; x.lineWidth = 2; for (let yy = y0 + 6; yy < y0 + h; yy += 10) { x.beginPath(); x.moveTo(x0, yy); x.lineTo(x0 + w, yy); x.stroke(); } }
+    if (muffs) {   // fur: short light and dark strokes all over
+      const r = rng('fur:' + d.cupCol), [x0, y0, w, h] = rect('plate'); x.lineCap = 'round';
+      for (let i = 0; i < 2600; i++) { const px = x0 + r.f(0, w), py = y0 + r.f(0, h), a = r.f(0, TAU), l = r.f(3, 8); x.strokeStyle = r.chance(0.5) ? 'rgba(255,255,255,.2)' : 'rgba(0,0,0,.13)'; x.lineWidth = r.f(1, 2); x.beginPath(); x.moveTo(px, py); x.lineTo(px + Math.cos(a) * l, py + Math.sin(a) * l); x.stroke(); }
+    }
+    const over = [['plate', d.cupPat, d.cupPatCol], ['band', d.kind === 'over' ? d.bandPat : -1, d.bandPatCol]].filter(o => o[1] >= 0 && PAT.lum);
+    if (over.length) { const im = x.getImageData(0, 0, TW, TW), D = im.data;
+      for (const [r, idx, col] of over) { const [x0, y0, w, h] = rect(r), [cr, cg, cb] = hexRGB(col), ox = (idx % PAT.cols) * PAT.T, oy = Math.floor(idx / PAT.cols) * PAT.T, k = PAT.T / TILE;
+        for (let y = y0; y < y0 + h; y++) for (let xx = x0; xx < x0 + w; xx++) { const sx = ox + Math.floor((((xx - x0) % TILE) + 0.5) * k), sy = oy + Math.floor((((y - y0) % TILE) + 0.5) * k), L = 1 - (1 - PAT.lum[sy * PAT.w + sx] / 255) * PAT_K, a = 1 - L, p = (y * TW + xx) * 4; D[p] = D[p] * L + cr * a; D[p + 1] = D[p + 1] * L + cg * a; D[p + 2] = D[p + 2] * L + cb * a; } }
+      x.putImageData(im, 0, 0); }
+    // the plate's rim: the cup's own colour round an inset of the second colour (headphones, round buds)
+    if (!muffs && sb) { const [x0, y0, w, h] = rect('plate'), map = p => [x0 + 2 + ((p.x * 0.78 + sb.cx * 0.22) - sb.x0) / sb.w * (w - 4), y0 + 2 + (1 - ((p.y * 0.78 + sb.cy * 0.22) - sb.y0) / sb.h) * (h - 4)];
+      x.beginPath(); x.rect(x0, y0, w, h); sb.pts.forEach((p, i) => { const [a, b] = map(p); i ? x.lineTo(a, b) : x.moveTo(a, b); }); x.closePath(); x.fillStyle = d.cupCol; x.fill('evenodd'); }
+    const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; t.anisotropy = 4; t.userData.canvas = cv; cv.__big = true; return t;
+  }
+  // soft shading: a vertex takes the average normal of the faces that meet it at less than `deg` degrees, so bevels and curved
+  // sides read smooth while a real corner stays crisp (ExtrudeGeometry is flat-shaded: every facet would catch the light)
+  function smoothNormals(g, deg) {
+    const P = g.attributes.position, N = g.attributes.normal, n = P.count, cs = Math.cos((deg || 62) * Math.PI / 180), F = new Float32Array(n * 3), a = V3(), b = V3(), c = V3(), groups = new Map();
+    if (g.index) return g;
+    for (let i = 0; i + 2 < n; i += 3) { a.fromBufferAttribute(P, i); b.fromBufferAttribute(P, i + 1); c.fromBufferAttribute(P, i + 2); const f = c.sub(b).cross(a.sub(b)); const l = f.length() || 1; for (let k = 0; k < 3; k++) { F[(i + k) * 3] = f.x / l; F[(i + k) * 3 + 1] = f.y / l; F[(i + k) * 3 + 2] = f.z / l; } }
+    for (let i = 0; i < n; i++) { const key = Math.round(P.getX(i) * 500) + ',' + Math.round(P.getY(i) * 500) + ',' + Math.round(P.getZ(i) * 500); let q = groups.get(key); if (!q) groups.set(key, q = []); q.push(i); }
+    for (const q of groups.values()) for (const i of q) { let x = 0, y = 0, z = 0; for (const j of q) { const d = F[i * 3] * F[j * 3] + F[i * 3 + 1] * F[j * 3 + 1] + F[i * 3 + 2] * F[j * 3 + 2]; if (d >= cs) { x += F[j * 3]; y += F[j * 3 + 1]; z += F[j * 3 + 2]; } } const l = Math.hypot(x, y, z) || 1; N.setXYZ(i, x / l, y / l, z / l); }
+    N.needsUpdate = true; return g;
+  }
+  // a band with a rounded (stadium) cross-section, w across and t thick, along pts with outward normals nrm: smooth all round.
+  // uv: sweep's cm-based object (the print keeps its size and wraps every period) or a function (i, n) -> [u, v]
+  function roundSweep(pts, nrm, w, t, uv) {
+    const n = pts.length, cum = [0], wide = w >= t, r = Math.min(w, t) / 2, h = Math.max(w, t) / 2 - r, m = 4, ring = [];
+    for (let i = 1; i < n; i++) cum.push(cum[i - 1] + pts[i].distanceTo(pts[i - 1]));
+    for (const sd of [1, -1]) for (let k = 0; k <= m; k++) { const a = -Math.PI / 2 + k / m * Math.PI, ca = sd * Math.cos(a), sa = sd * Math.sin(a); ring.push(wide ? [sd * h + ca * r, sa * r, ca, sa] : [ca * r, sd * h + sa * r, ca, sa]); }
+    const R = ring.length, sec = [], T = V3();
+    for (let i = 0; i < n; i++) { T.subVectors(pts[Math.min(n - 1, i + 1)], pts[Math.max(0, i - 1)]).normalize(); const Nn = nrm[i].clone().addScaledVector(T, -nrm[i].dot(T)).normalize(); sec.push({ p: pts[i], N: Nn, B: V3().crossVectors(T, Nn).normalize() }); }
+    const Pp = [], Nr = [], Uv = [], I = [];
+    for (let i = 0; i < n - 1; i++) {
+      const u0 = uv.cm ? cum[i] % uv.period : 0, u1 = uv.cm ? u0 + cum[i + 1] - cum[i] : 0;
+      for (let k = 0; k < R; k++) {
+        const base = Pp.length / 3, k2 = (k + 1) % R;
+        for (const [si, kk, uu] of [[i, k, u0], [i, k2, u0], [i + 1, k, u1], [i + 1, k2, u1]]) { const S = sec[si], [x, y, nx, ny] = ring[kk], q = S.p.clone().addScaledVector(S.B, x).addScaledVector(S.N, y), nn = S.B.clone().multiplyScalar(nx).addScaledVector(S.N, ny).normalize(); Pp.push(q.x, q.y, q.z); Nr.push(nn.x, nn.y, nn.z); const [U, V] = uv.cm ? [uv.u(uu), uv.v(x)] : uv(si, n); Uv.push(U, V); }
+        I.push(base, base + 2, base + 1, base + 1, base + 2, base + 3);
+      }
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(Pp, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(Nr, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(Uv, 2)); g.setIndex(I); return g;
+  }
+  // a cup (or a round bud): the shape extruded along +z from 0 to depth; its outer face takes the plate, the rest the shell
+  function cupGeo(shape, sb, depth, bev, curve) {
+    const g = new THREE.ExtrudeGeometry(shape, { depth: Math.max(0.1, depth - 2 * bev), bevelEnabled: true, bevelThickness: bev, bevelSize: bev * 0.9, bevelSegments: 2, curveSegments: curve || 12 }); g.translate(0, 0, bev);
+    const P = g.attributes.position, N = g.attributes.normal, uv = g.attributes.uv;
+    for (let i = 0; i < P.count; i++) { const px = P.getX(i), py = P.getY(i), pz = P.getZ(i), nz = N.getZ(i); const [u, v] = nz > 0.7 ? sUV('plate', (px - sb.x0) / sb.w, 1 - (py - sb.y0) / sb.h) : sUV('shell', Math.atan2(py - sb.cy, px - sb.cx) / TAU + 0.5, pz / depth); uv.setXY(i, u, v); }
+    uv.needsUpdate = true; return smoothNormals(g);
+  }
+  function ringGeo(shape, depth, kOut, kIn, uvR) {
+    const pts = shape.getPoints(14), sh = new THREE.Shape(pts.map(p => p.clone().multiplyScalar(kOut))), hole = new THREE.Path(pts.map(p => p.clone().multiplyScalar(kIn)).reverse()); sh.holes.push(hole);
+    const bev = Math.min(0.45, depth * 0.3), g = new THREE.ExtrudeGeometry(sh, { depth: Math.max(0.1, depth - 2 * bev), bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelSegments: 1, curveSegments: 6 }); g.translate(0, 0, bev);
+    const P = g.attributes.position, uv = g.attributes.uv; for (let i = 0; i < P.count; i++) { const [u, v] = sUV(uvR || 'pad', Math.atan2(P.getY(i), P.getX(i)) / TAU + 0.5, P.getZ(i) / depth); uv.setXY(i, u, v); } uv.needsUpdate = true; return smoothNormals(g);
+  }
+  // a geometry built facing +z (out of its cup) turned to face out of her head on side sx, then moved to x0 (its inner face), yC, zM
+  const toSide = (g, sx, x0, y, z) => { g.rotateY(sx * Math.PI / 2); g.translate(sx * x0, y, z); return g; };
+  // the band's centre line over her head, in the plane z = zM, from her right attach point (x = -xA) to her left (x = xA)
+  function bandArc(K, xA, yA, clear) {
+    const thA = Math.atan2(xA, yA - K.yC), rA = Math.hypot(xA, yA - K.yC), N = 40, th = [], r = [];
+    for (let i = 0; i <= N; i++) { const t = lerp(-thA, thA, i / N); th.push(t); r.push(Math.max(K.rAt(t) + clear, rA)); }
+    for (let pass = 0; pass < 12; pass++) { const c = r.slice(); for (let i = 1; i < N; i++) r[i] = Math.max((c[i - 1] + 2 * c[i] + c[i + 1]) / 4, K.rAt(th[i]) + clear); }
+    r[0] = r[N] = rA;
+    const rOf = t => { const f = clamp((t + thA) / (2 * thA), 0, 1) * N, i = Math.min(N - 1, Math.floor(f)); return lerp(r[i], r[i + 1], f - i); };
+    const at = (t, dr) => { const rr = rOf(t) + (dr || 0); return V3(Math.sin(t) * rr, K.yC + Math.cos(t) * rr, K.zM); };
+    return { th, r, thA, rOf, at, nrm: t => V3(Math.sin(t), Math.cos(t), 0) };
+  }
+  // a cord's centre line (world): through the control points, then lifted off her chest and smoothed
+  // the front of her body at (x, y), world (bodyField's empty cells read front 0, back -10: nothing there)
+  const bodyZ = (F, x, y) => { const zf = F.front(x, y), zb = F.back(x, y); return (Math.abs(zf) < 0.05 && Math.abs(zb + 10) < 0.05) ? -1e9 : zf; };
+  function drapeCord(F, ctrl, r) {
+    const curve = new THREE.CatmullRomCurve3(ctrl, false, 'centripetal'), N = Math.max(24, Math.round(curve.getLength() / 1.1)), pts = curve.getSpacedPoints(N);
+    for (let pass = 0; pass < 5; pass++) {
+      for (let k = 1; k < pts.length; k++) { const p = pts[k], zf = bodyZ(F, p.x, p.y); if (zf > -1e8 && p.z < zf + r + 0.45) p.z = zf + r + 0.45; }
+      if (pass < 4) { const c = pts.map(p => p.clone()); for (let k = 1; k < pts.length - 1; k++) pts[k].copy(c[k - 1]).add(c[k].clone().multiplyScalar(2)).add(c[k + 1]).multiplyScalar(0.25); }
+    }
+    return pts;
+  }
+
+  function buildSound(d, ctx) {
+    const { sandy, hm } = ctx, K = soundFit(sandy, hm), own = { geos: [], mats: [], tris: 0 }, root = new THREE.Group(); root.name = 'grugSound'; root.userData.catalogItem = true; root.userData.jewel = { dept: 'sound', design: d };
+    sandy.object3d.updateMatrixWorld(true);
+    const cm = new THREE.Group(); cm.scale.setScalar(1 / K.cmU); root.add(cm); const headP = new THREE.Group(); headP.name = 'soundHead'; cm.add(headP); const cordP = new THREE.Group(); cordP.name = 'soundCord'; cm.add(cordP);
+    let curP = headP; const sideG = {}; for (const sx of [-1, 1]) { sideG[sx] = new THREE.Group(); sideG[sx].name = sx > 0 ? 'soundL' : 'soundR'; headP.add(sideG[sx]); }   // her left and right side (earbud pictures frame her left)
+    const add = (geo, mat, nm, parent) => { own.geos.push(geo); const m = new THREE.Mesh(geo, mat); m.name = nm || 'part'; (parent || curP).add(m); own.tris += triOf(geo); return m; };
+    const cyl = (a, b, r, mat, nm, parent, seg) => { const len = a.distanceTo(b); if (len < 1e-3) return null; const g = new THREE.CylinderGeometry(r, r, len, seg || 8, 1, false); g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(V3(0, 1, 0), b.clone().sub(a).normalize())); g.translate((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2); return add(g, mat, nm, parent); };
+    const ball = (p, r, mat, nm, parent, seg) => { const g = new THREE.SphereGeometry(r, seg || 8, Math.max(5, (seg || 8) - 3)); g.translate(p.x, p.y, p.z); return add(g, mat, nm, parent); };
+    const kind = d.kind, metal = d.finish === 'metal', rough = d.finish === 'matte' ? 0.85 : metal ? 0.36 : 0.42;
+    const sb = kind === 'over' ? shapeBox(cupShape(d)) : kind === 'buds' && d.bud === 'round' ? shapeBox(new THREE.Shape().absarc(0, 0, d.budSize * 0.5, 0, TAU, false)) : null;
+    const tex = soundTex(d, sb); own.mats.push({ dispose() { tex.dispose(); } });
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, map: tex, roughness: kind === 'muffs' ? 0.95 : rough, metalness: metal ? 0.5 : 0, envMap: ENV, envMapIntensity: kind === 'muffs' ? 0.2 : 0.75, side: THREE.DoubleSide }); own.mats.push(mat);
+    const soft = new THREE.MeshStandardMaterial({ color: 0xffffff, map: tex, roughness: 0.9, metalness: 0, envMap: ENV, envMapIntensity: 0.3, side: THREE.DoubleSide }); own.mats.push(soft);
+    const hwM = matFor(d.hw, 'metal'), padM = matFor(d.padCol, 'matte'), cordM = matFor(d.cordCol, 'gloss'), topM = matFor(d.topCol, d.finish), accM = matFor(d.cupCol2, d.finish), bodyM = matFor(d.cupCol, d.finish);
+    const glowM = hasGlow(d) ? new THREE.MeshBasicMaterial({ color: new THREE.Color(d.glowCol).convertSRGBToLinear(), toneMapped: false }) : null; if (glowM) own.mats.push(glowM);
+    const side = K.side, yC = K.yC, zM = K.zM;
+    let arc = null, face = null, budAt = {}, cordFrom = {};
+
+    if (kind === 'over' || kind === 'muffs') {
+      let xA, yA, ext, halfH, faceX, clear = 1.0 + d.bandT / 2;
+      if (kind === 'over') {
+        const shape = cupShape(d), x0 = side - 0.35, cupIn = x0 + d.padT - 0.15, cupMid = cupIn + d.cupD / 2, cupOut = cupIn + d.cupD, bev = Math.min(0.6, d.cupD * 0.18);
+        halfH = sb.y1; const halfW = Math.max(-sb.x0, sb.x1), cupTop = yC + sb.y1 + bev * 0.9;
+        faceX = cupOut;
+        for (const sx of [-1, 1]) {
+          add(toSide(cupGeo(shape, sb, d.cupD, bev, 14), sx, cupIn, yC, zM), mat, 'cup');
+          add(toSide(ringGeo(shape, d.padT, 0.96, 0.55), sx, x0, yC, zM), soft, 'cushion');
+          if (glowM) { const ring = shape.getPoints(32).map(p => V3(p.x * 0.89 + sb.cx * 0.11, p.y * 0.89 + sb.cy * 0.11, d.cupD + 0.05)); const g = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ring, true), 44, 0.22, 4, true); add(toSide(g, sx, cupIn, yC, zM), glowM, 'glow'); }
+          if (d.yoke === 'fork') {
+            const Rf = Math.max(halfH, halfW) + bev + 0.8, g = new THREE.TorusGeometry(Rf, 0.36, 6, 22, Math.PI); g.rotateY(Math.PI / 2); g.translate(sx * cupMid, yC, zM); add(g, hwM, 'yoke');
+            for (const sz of [-1, 1]) { const a = V3(sx * cupMid, yC, zM + sz * Rf), b = V3(sx * cupMid, yC, zM + sz * (halfW + bev * 0.5)); cyl(a, b, 0.3, hwM, 'pin'); ball(a, 0.5, hwM, 'pin'); }
+          } else { ball(V3(sx * cupMid, cupTop - 0.2, zM), 0.65, hwM, 'hinge'); }
+        }
+        if (d.yoke === 'fork') { const Rf = Math.max(halfH, halfW) + bev + 0.8; ext = 0.7; xA = cupMid; yA = yC + Rf + ext; }
+        else { ext = 1.6; xA = cupMid; yA = cupTop + 1.0 + ext; for (const sx of [-1, 1]) cyl(V3(sx * xA, yA - ext + 0.4, zM), V3(sx * xA, cupTop - 0.2, zM), 0.42, hwM, 'slider'); }
+        if (d.bandPad) clear += 0.9;
+        face = { x: faceX, halfH, mid: cupMid, bot: yC + sb.y0 - bev };
+        // the boom mic, from her left cup round the side of her face to her mouth
+        if (hasMic(d)) {
+          const M0 = V3(cupMid + 0.2, yC - halfH * 0.42, zM + halfW * 0.72), ph0 = Math.atan2(M0.x, M0.z - K.zc0), r0 = Math.hypot(M0.x, M0.z - K.zc0), ph1 = 0.32, pts = [];
+          for (let i = 0; i <= 12; i++) { const t = i / 12, ph = lerp(ph0, ph1, t), y = lerp(M0.y, K.yMouth, Math.pow(t, 0.8)), want = K.hAt(ph) + (i === 12 ? 1.6 : 2.2), rr = Math.max(want, lerp(r0, want, Math.min(1, t * 1.6))); pts.push(V3(Math.sin(ph) * rr, y, K.zc0 + Math.cos(ph) * rr)); }
+          pts[0].copy(M0); const boom = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, false, 'centripetal'), 30, 0.3, 6, false); add(boom, bodyM, 'boom');
+          ball(pts[pts.length - 1], 1.05, padM, 'mic', headP, 12); ball(M0, 0.7, hwM, 'boom');
+        }
+      } else {
+        // fluffy muffs: a bumpy ball, a little flat, over each ear
+        const R = d.cupR, ax = 0.66, mx = Math.max(side + R * ax * 0.35, K.ear.out + 0.6 - R * ax); halfH = R; faceX = mx + R * ax;
+        for (const sx of [-1, 1]) {
+          const g = new THREE.SphereGeometry(1, 26, 18), P = g.attributes.position, uv = g.attributes.uv;
+          for (let i = 0; i < P.count; i++) { const x = P.getX(i), y = P.getY(i), z = P.getZ(i), nz = Math.sin(9 * x + 3 * y) * Math.sin(7 * y + 5 * z) * Math.sin(6 * z + 8 * x), h = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453, w = 1 + 0.05 * nz + 0.035 * (h - Math.floor(h) - 0.5); P.setXYZ(i, x * w * R * ax, y * w * R, z * w * R * 0.95); const [u, v] = sUV('plate', uv.getX(i), 1 - uv.getY(i)); uv.setXY(i, u, v); }
+          g.computeVertexNormals(); g.translate(sx * mx, yC, zM); add(g, mat, 'muff');
+        }
+        ext = 1.0; xA = mx - R * ax * 0.1; yA = yC + R * 0.86 + ext;
+        face = { x: faceX, halfH, mid: mx, bot: yC - R + 0.8 };
+      }
+      // the band, its sliding ends, and the cushion under its top
+      arc = bandArc(K, xA, yA, clear);
+      const pts = [], nr = [], push = (p, n) => { pts.push(p); nr.push(n); };
+      push(V3(-xA, yA - ext, zM), V3(-1, 0, 0)); for (let i = 0; i < arc.th.length; i++) { const t = arc.th[i]; push(V3(Math.sin(t) * arc.r[i], yC + Math.cos(t) * arc.r[i], zM), arc.nrm(t)); } push(V3(xA, yA - ext, zM), V3(1, 0, 0));
+      add(roundSweep(pts, nr, d.bandW, d.bandT, BAND_UV), mat, 'band');
+      if (kind === 'over' && d.bandPad) {
+        const pp = [], pn = [], lim = Math.min(0.85, arc.thA * 0.62); for (let i = 0; i <= 24; i++) { const t = lerp(-lim, lim, i / 24); pp.push(arc.at(t, -d.bandT / 2 - 0.45)); pn.push(arc.nrm(t)); }
+        add(roundSweep(pp, pn, d.bandW * 0.78, 0.9, (i, n) => sUV('pad', i / Math.max(1, n - 1), 0.5)), soft, 'bandCushion');
+      }
+      // toppers on the band
+      const top = topOf(d);
+      if (top !== 'none') {
+        const place = (g, t, lift, tilt) => { const n = arc.nrm(t), p = arc.at(t, d.bandT / 2 - lift), zz = V3(0, 0, 1), xx = V3().crossVectors(n, zz).normalize(); const M = new THREE.Matrix4().makeBasis(xx, n, zz).multiply(new THREE.Matrix4().makeRotationZ(tilt || 0)); g.applyMatrix4(M); g.translate(p.x, p.y, p.z); return g; };
+        const flat = (s, depth) => { const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelThickness: 0.25, bevelSize: 0.22, bevelSegments: 1, curveSegments: 8 }); g.translate(0, 0, -depth / 2); return smoothNormals(g); };
+        const sc = clamp(d.bandW / 3, 0.75, 1.25);
+        for (const sx of top === 'bow' ? [1] : [-1, 1]) {
+          const t = sx * Math.min(arc.thA * 0.55, top === 'bow' ? 0.5 : 0.42), tilt = -sx * (top === 'bunny' ? 0.22 : top === 'devil' ? 0.3 : 0.12);
+          if (top === 'cat') { const o = poly([[-1.7, 0], [1.7, 0], [0.35, 3.3], [-0.35, 3.3]]), i2 = poly([[-0.95, 0.35], [0.95, 0.35], [0.12, 2.3], [-0.12, 2.3]]); o.closePath(); const g = flat(o, 0.9); g.scale(sc, sc, sc); add(place(g, t, 0.3, tilt), topM, 'topper'); const gi = flat(i2, 0.3); gi.scale(sc, sc, sc); gi.translate(0, 0, 0.55 * sc); add(place(gi, t, 0.3, tilt), padM, 'topper'); }
+          else if (top === 'bunny') { const o = new THREE.Shape(); o.absellipse(0, 3.4, 1.25, 3.6, 0, TAU, false, 0); const i2 = new THREE.Shape(); i2.absellipse(0, 3.6, 0.65, 2.7, 0, TAU, false, 0); const g = flat(o, 0.8); g.scale(sc, sc, sc); add(place(g, t, 0.4, tilt), topM, 'topper'); const gi = flat(i2, 0.3); gi.scale(sc, sc, sc); gi.translate(0, 0, 0.5 * sc); add(place(gi, t, 0.4, tilt), padM, 'topper'); }
+          else if (top === 'bear') { const o = new THREE.Shape(); o.absarc(0, 1.5, 2.1, 0, TAU, false); const i2 = new THREE.Shape(); i2.absarc(0, 1.6, 1.15, 0, TAU, false); const g = flat(o, 0.9); g.scale(sc, sc, sc); add(place(g, t, 0.4, tilt), topM, 'topper'); const gi = flat(i2, 0.3); gi.scale(sc, sc, sc); gi.translate(0, 0, 0.55 * sc); add(place(gi, t, 0.4, tilt), padM, 'topper'); }
+          else if (top === 'devil') { const g = new THREE.ConeGeometry(0.95, 3.4, 12); g.translate(0, 1.7, 0); g.scale(sc, sc, sc); add(place(g, t, 0.3, tilt), topM, 'topper'); }
+          else if (top === 'bow') { const g = geoFor('bow').clone(); g.scale(5.6 * sc, 5.6 * sc, 3 * sc); g.translate(0, 1.1 * sc, 0); add(place(g, t, 0.2, -0.25), topM, 'topper'); const k = new THREE.SphereGeometry(0.75 * sc, 10, 7); k.translate(0, 1.1 * sc, 0.25 * sc); add(place(k, t, 0.2, 0), topM, 'topper'); }
+        }
+      }
+      for (const sx of [-1, 1]) cordFrom[sx] = V3(sx * face.mid, face.bot - 0.1, zM);
+    } else {
+      // earbuds, resting in the front of each ear
+      const s = d.budSize, zF = K.ear.zFront;
+      for (const sx of [-1, 1]) {
+        curP = sideG[sx]; const c = V3(sx * (side + s * 0.42), yC - 0.4, zF + s * 0.36);
+        if (d.bud === 'stem') {
+          const g = new THREE.SphereGeometry(0.5, 16, 12); g.scale(s * 0.9, s * 0.8, s * 0.86); g.translate(c.x, c.y, c.z); add(g, bodyM, 'bud');
+          const tipIn = c.clone().add(V3(-sx * s * 0.34, -s * 0.05, -s * 0.18)); ball(tipIn, s * 0.24, padM, 'tip', null, 10);
+          const a = c.clone().add(V3(0, -s * 0.2, s * 0.05)), b = c.clone().add(V3(sx * s * 0.04, -s * 1.3, s * 0.3)); cyl(a, b, s * 0.15, bodyM, 'stem', null, 12); ball(b, s * 0.155, accM, 'stemTip', null, 10);
+          if (glowM) { const g2 = new THREE.TorusGeometry(s * 0.3, s * 0.05, 5, 20); g2.rotateY(Math.PI / 2); g2.translate(c.x + sx * s * 0.43, c.y, c.z); add(g2, glowM, 'glow'); }
+          budAt[sx] = b.clone().add(V3(0, -s * 0.12, 0)); cordFrom[sx] = budAt[sx].clone();
+        } else {
+          const sh = new THREE.Shape().absarc(0, 0, s * 0.5, 0, TAU, false), g = cupGeo(sh, sb, s * 0.48, s * 0.13, 18), q = new THREE.Quaternion().setFromUnitVectors(V3(0, 0, 1), V3(sx * 0.62, 0, 0.78).normalize()); g.applyQuaternion(q); g.translate(c.x - sx * s * 0.2, c.y, c.z - s * 0.2); add(g, mat, 'bud');
+          ball(c.clone().add(V3(-sx * s * 0.3, 0, -s * 0.3)), s * 0.26, padM, 'tip', null, 10);
+          if (glowM) { const ring = []; for (let i = 0; i < 40; i++) { const a = i / 40 * TAU; ring.push(V3(Math.cos(a) * s * 0.42, Math.sin(a) * s * 0.42, s * 0.5)); } const g2 = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ring, true), 28, s * 0.05, 4, true); g2.applyQuaternion(q); g2.translate(c.x - sx * s * 0.2, c.y, c.z - s * 0.2); add(g2, glowM, 'glow'); }
+          budAt[sx] = c.clone().add(V3(0, -s * 0.5, 0)); cordFrom[sx] = budAt[sx].clone();
+        }
+      }
+      curP = headP;
+    }
+
+    // ---- charms: pinned on the cups and the band (facing out), or dangling from the buds on little chains
+    const list = d.charms.slice().sort((a, b) => a.at - b.at), perBud = { '-1': 0, 1: 0 };
+    for (const e of list) {
+      const size = e.size * KS, el = makeEl(Object.assign({}, e, { size }), own, kind !== 'buds'), lift = e.k === 'charm' ? 0.15 : size * 0.3 + 0.12;
+      if (kind === 'buds') {
+        (e.at < -0.33 ? [-1] : e.at > 0.33 ? [1] : [-1, 1]).forEach((sx, j) => {
+          const k = perBud[sx]++, drop = clamp(e.drop || 2, 0.4, 9), to = budAt[sx].clone().add(V3(0, -drop, (k % 2 ? -1 : 1) * Math.ceil(k / 2) * 1.2));
+          cyl(budAt[sx], to.clone().add(V3(0, 0.05, 0)), 0.07, hwM, 'link', sideG[sx], 5);
+          const it = j === 0 ? el : makeEl(Object.assign({}, e, { size }), own, false); it.rotation.y = sx * Math.PI / 2; it.position.copy(to); sideG[sx].add(it);
+        });
+        continue;
+      }
+      let p, n, up;
+      if (Math.abs(e.at) >= 0.75) { const sx = Math.sign(e.at), f = (Math.abs(e.at) - 0.75) / 0.25; p = V3(sx * (face.x + lift), yC + (1 - f) * face.halfH * 0.5, zM); n = V3(sx, 0, 0); up = V3(0, 1, 0); }
+      else { const t = lerp(-arc.thA, arc.thA, (e.at + 0.75) / 1.5) * 0.9; p = arc.at(t).add(V3(0, 0, d.bandW / 2 + lift)); n = V3(0, 0, 1); up = arc.nrm(t); }
+      const xx = V3().crossVectors(up, n).normalize(), yy = V3().crossVectors(n, xx).normalize(); el.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xx, yy, n)); el.position.copy(p); headP.add(el);
+    }
+
+    // ---- the cord: from her left cup (or a Y from both buds) down her chest to a plug
+    if (isWired(d)) {
+      const F = bodyField(sandy), hg = K.hg, toW = p => hg.localToWorld(p.clone().multiplyScalar(1 / K.cmU)), toL = p => hg.worldToLocal(p.clone()).multiplyScalar(K.cmU);
+      const rr = kind === 'buds' ? 0.14 : 0.24, yPlug = lerp(kind === 'buds' ? 136 : 134, 102, d.cordLen), tube = (pw, r, nm) => { const pl = pw.map(toL); add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pl, false, 'centripetal'), Math.max(8, Math.round(pl.length * 0.8)), r, kind === 'buds' ? 4 : 5, false), cordM, nm || 'cord', cordP); return pl; };
+      let main;
+      if (kind === 'buds') {
+        const B = { '-1': toW(cordFrom[-1]), 1: toW(cordFrom[1]) }, J0 = V3(0.6, 147, 0); J0.z = Math.max(bodyZ(F, 0.6, 147) + 1.4, B[1].z + 3);
+        const legs = {};
+        for (const sx of [-1, 1]) { const b = B[sx], c = [b, b.clone().add(V3(sx * 0.2, -2.6, 0.3)), V3(sx * Math.max(15.6, Math.abs(b.x) + 0.3), 156, b.z + 1.2), V3(sx * 9.5, 151, (b.z + J0.z) / 2 + 1), J0]; legs[sx] = tube(drapeCord(F, c, rr), rr, 'cord'); }
+        const J = toL(J0); { const g = new THREE.CylinderGeometry(0.42, 0.42, 1.5, 10); g.translate(J.x, J.y - 0.5, J.z); add(g, cordM, 'splitter', cordP); }
+        if (hasRemote(d)) { const L = legs[-1], k = Math.floor(L.length * 0.62), a = L[k], b = L[Math.min(L.length - 1, k + 1)], t = b.clone().sub(a).normalize(), g = new THREE.CylinderGeometry(0.55, 0.55, 2.8, 10); g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(V3(0, 1, 0), t)); g.translate(a.x, a.y, a.z); add(g, cordM, 'remote', cordP); ball(a.clone().add(V3(0, 0, 0.5)), 0.22, hwM, 'remote', cordP, 8); }
+        main = tube(drapeCord(F, [J0, V3(1.2, 142, J0.z + 1), V3(2.2, (142 + yPlug) / 2, J0.z + 2), V3(2.8, yPlug, J0.z + 2)], rr), rr, 'cord');
+      } else {
+        const S = toW(cordFrom[1]), c = [S, S.clone().add(V3(0.2, -2.6, 0.5)), V3(Math.max(S.x - 0.5, 16), 154, S.z + 2.5), V3(12.5, 146, S.z + 7), V3(8, (146 + yPlug) / 2, S.z + 9), V3(5.5, yPlug, S.z + 9)], pw = drapeCord(F, c, rr);
+        if (hasCoil(d)) {
+          const pl = pw.map(toL), cv = new THREE.CatmullRomCurve3(pl, false, 'centripetal'), L = cv.getLength(), a = 0.22, b = 0.72, pitch = 0.95, turns = Math.max(4, Math.round(L * (b - a) / pitch)), M = turns * 6, fr = cv.computeFrenetFrames(M, false), hp = [];
+          for (let i = 0; i <= M; i++) { const u = lerp(a, b, i / M), c0 = cv.getPointAt(u), ang = i / 6 * TAU, nn = fr.normals[i], bn = fr.binormals[i], rad = Math.min(0.75, 0.75 * Math.min(i, M - i) / 4); hp.push(c0.clone().addScaledVector(nn, Math.cos(ang) * rad).addScaledVector(bn, Math.sin(ang) * rad)); }
+          const seg = (u0, u1) => { const q = []; for (let i = 0; i <= 14; i++) q.push(cv.getPointAt(lerp(u0, u1, i / 14))); return q; };
+          for (const q of [seg(0, a), seg(b, 1)]) add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(q, false, 'centripetal'), 20, rr, 6, false), cordM, 'cord', cordP);
+          add(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(hp, false, 'catmullrom', 0.5), hp.length, 0.19, 4, false), cordM, 'coil', cordP);
+          main = seg(0.9, 1);
+        } else main = tube(pw, rr, 'cord');
+        ball(cordFrom[1], 0.5, hwM, 'jack', cordP, 8);
+      }
+      // the plug at the end: a housing and a metal jack
+      { const n = main.length, E = main[n - 1], t = E.clone().sub(main[Math.max(0, n - 3)]).normalize(), q = new THREE.Quaternion().setFromUnitVectors(V3(0, 1, 0), t), part = (g, off, m, nm) => { g.applyQuaternion(q); g.translate(E.x + t.x * off, E.y + t.y * off, E.z + t.z * off); add(g, m, nm, cordP); };
+        part(new THREE.CylinderGeometry(rr * 2.2, rr * 2.6, 2.6, 10), 1.3, cordM, 'plug'); part(new THREE.CylinderGeometry(0.22, 0.22, 1.7, 8), 3.4, hwM, 'jack'); part(new THREE.SphereGeometry(0.24, 8, 6), 4.25, hwM, 'jack'); part(new THREE.TorusGeometry(0.24, 0.06, 4, 10).rotateX(Math.PI / 2), 3.1, accM, 'jack'); }
+    }
+    return { root, d, info: { tris: Math.round(own.tris) }, frame: 'head', dispose() { for (const g of own.geos) g.dispose(); for (const m of own.mats) m.dispose(); } };
+  }
+
+  const build = (dept, d, ctx, o) => dept === 'sound' ? buildSound(d, ctx || CTX) : dept === 'sandals' ? buildSandals(d, ctx || CTX) : dept === 'purses' ? buildPurse(d, ctx || CTX) : dept === 'earrings' ? buildEarrings(d, ctx || CTX, o) : buildNecklace(d, ctx || CTX, o);
   function init(ctx) { CTX = ctx; ENV = ctx.env || null; for (const m of mats.values()) { m.envMap = ENV; m.needsUpdate = true; } }
   const lengthCm = d => { try { return Math.round(buildNecklaceLength(d)); } catch (e) { return 0; } };
   function buildNecklaceLength(d) { const F = bodyField(CTX.sandy), pts = necklacePath(d, F); return new THREE.CatmullRomCurve3(pts, true, 'centripetal').getLength(); }
 
   window.GrugJewelry = {
-    ready, init, build, validate: (dp, s, b) => dp === 'sandals' ? validateS(s, b) : dp === 'purses' ? validateP(s, b) : validate(dp, s, b), random: (dp, seed, o) => dp === 'sandals' ? randomS(seed, o) : dp === 'purses' ? randomP(seed, o) : random(dp, seed, o), nameFor: (dp, d, s) => dp === 'sandals' ? nameS(d, s) : dp === 'purses' ? nameP(d, s) : nameFor(dp, d, s), tagsFor: (dp, d) => dp === 'sandals' ? tagsS(d) : dp === 'purses' ? tagsP(d) : tagsFor(dp, d), families: (dp, d) => dp === 'sandals' ? familiesS(d) : dp === 'purses' ? familiesP(d) : families(dp, d), describe: (dp, d) => dp === 'sandals' ? describeS(d) : dp === 'purses' ? describeP(d) : describe(dp, d), kindOf: (dp, d) => dp === 'sandals' ? d.style : dp === 'purses' ? d.shape : kindOf(dp, d), STYLES, STYLE_LABEL, HEELS, HEEL_LABEL, SAN_LIM, SAN_N, sandalFit, tiltFeet, PAT, PAT_N, PAT_K, BAG_SHAPES, BAG_LABEL, PATTERNS, PATTERN_LABEL, STRAPS, STRAP_LABEL, CLOSURES, CLOSURE_LABEL, BAG_LIM, PURSE_N, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
+    ready, init, build, validate: (dp, s, b) => dp === 'sound' ? validateSnd(s, b) : dp === 'sandals' ? validateS(s, b) : dp === 'purses' ? validateP(s, b) : validate(dp, s, b), random: (dp, seed, o) => dp === 'sound' ? randomSnd(seed, o) : dp === 'sandals' ? randomS(seed, o) : dp === 'purses' ? randomP(seed, o) : random(dp, seed, o), nameFor: (dp, d, s) => dp === 'sound' ? nameSnd(d, s) : dp === 'sandals' ? nameS(d, s) : dp === 'purses' ? nameP(d, s) : nameFor(dp, d, s), tagsFor: (dp, d) => dp === 'sound' ? tagsSnd(d) : dp === 'sandals' ? tagsS(d) : dp === 'purses' ? tagsP(d) : tagsFor(dp, d), families: (dp, d) => dp === 'sound' ? familiesSnd(d) : dp === 'sandals' ? familiesS(d) : dp === 'purses' ? familiesP(d) : families(dp, d), describe: (dp, d) => dp === 'sound' ? describeSnd(d) : dp === 'sandals' ? describeS(d) : dp === 'purses' ? describeP(d) : describe(dp, d), kindOf: (dp, d) => dp === 'sound' ? d.kind : dp === 'sandals' ? d.style : dp === 'purses' ? d.shape : kindOf(dp, d), SOUND_KINDS, SOUND_LABEL, CUPS, CUP_LABEL, TOPPERS, TOPPER_LABEL, YOKES, BUDS, BUD_LABEL, SND_LIM, SND_N, EAR_DEPTH, soundFit, STYLES, STYLE_LABEL, HEELS, HEEL_LABEL, SAN_LIM, SAN_N, sandalFit, tiltFeet, PAT, PAT_N, PAT_K, BAG_SHAPES, BAG_LABEL, PATTERNS, PATTERN_LABEL, STRAPS, STRAP_LABEL, CLOSURES, CLOSURE_LABEL, BAG_LIM, PURSE_N, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
     DRESS_Y, DEF: dept => DEF[dept](), EL, SHAPES, SHAPE_LABEL, THREAD_SHAPES, FINISHES, CHARMS, CHARM_BY, THEME_LABEL, THEMES, MOUNTS, LINKS, PAIRS, CORDS, KIND_LABEL, BRANDS, BRAND_LABEL, LIMITS, D_MAX,
     PINKS, PASTEL_OTHER, PASTEL_ACC, PASTEL_METALS, METALS, colourName, charmTexture, geoFor, elH, elName, KIMI_CHARMS
   };

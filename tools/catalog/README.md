@@ -19,8 +19,8 @@ python3 tools/pwa/build.py              # then the offline list, committed in th
 | --- | --- |
 | `base.html` | The game kit's original catalog (eyewear + hair). **Treat it as read-only.** Every change to it is a `rep(old, new)` in `build.py`. |
 | `build.py` | Patches `base.html` with exact string replacements (`rep` asserts the old text occurs exactly once), injects the scripts below and writes the page. The department lists, filters, routes, cards and item page are wired here. |
-| `src/jewelry.js` | **The accessory engine** (`window.GrugJewelry`, `J` in the page). For every department: the design format (`DEF.<dept>`), `validate`, `random`, names, tags, colour families, description, and `build(design) → { root, info, frame, dispose }` (the 3D meshes). Earrings and necklaces first, then a `/* ==== purses */` section, then a `/* ==== sandals */` section. |
-| `src/int.js` | **The page integration** (`JM`): the department table `JDEPT`, the editor's starter designs `JSTART`, generated catalog items (`gen`, `byId`, `item`), the item page's detail rows (`specRows`), the editor's tabs and inspector panels (`sandalPanel`, `pursePanel`, …), the thumbnail and camera framing, and the maker credits (`byHTML`, player names). |
+| `src/jewelry.js` | **The accessory engine** (`window.GrugJewelry`, `J` in the page). For every department: the design format (`DEF.<dept>`), `validate`, `random`, names, tags, colour families, description, and `build(design) → { root, info, frame, dispose }` (the 3D meshes). Earrings and necklaces first, then a `/* ==== purses */` section, a `/* ==== sandals */` section and a `/* ==== sound */` section. |
+| `src/int.js` | **The page integration** (`JM`): the department table `JDEPT`, the editor's starter designs `JSTART`, generated catalog items (`gen`, `byId`, `item`), the item page's detail rows (`specRows`), the editor's tabs and inspector panels (`sandalPanel`, `pursePanel`, `soundPanel`, …), the thumbnail and camera framing, and the maker credits (`byHTML`, player names). |
 | `src/bake.js` | `bakeSingle(root)`: every download (all 6 formats) is merged into **one mesh with one texture atlas** (Roblox MeshPart). New categories get this for free; just make sure every textured canvas sets `texture.userData.canvas`. |
 | `src/patterns.png` | Kenney's Pattern Pack + Extra (CC0), 168 tiles of 64 px in a 14-column sheet, injected as `window.GRUG_PATTERNS`. Read through `J.PAT` (`lum` brightness values, `cols`, `T`). Prints are subtle: `PAT_K = 0.4`. |
 | `test/` | Headless Chrome helpers (see Testing). |
@@ -34,8 +34,8 @@ The rest of the site still uses `assets/sandy-classic.js` (old feet).
 - **The mannequin** is the classic female Sandy, painted one grey (`applyStatue` in `base.html`). A shared clipping plane
   (`sandy.__cut`) hides her below mid-thigh; `JM.syncDress()` opens it while sandals are on, hides her own flip-flops,
   and sets the foot pose (`J.tiltFeet(sandy, tilt, noToes)`: heels tip the foot, slippers tuck the toes away).
-- **Departments:** eyewear and hair come from `base.html`. `earrings`, `necklaces`, `purses` and `sandals` are "jewelry"
-  departments (`isJ(it)`), with generated ids `ge:` `gn:` `gp:` `gs:` + seed and saved designs `m:`.
+- **Departments:** eyewear and hair come from `base.html`. `earrings`, `necklaces`, `purses`, `sandals` and `sound` are "jewelry"
+  departments (`isJ(it)`), with generated ids `ge:` `gn:` `gp:` `gs:` `ga:` + seed and saved designs `m:`.
 - **Brands:** `grug` and `kimiland` (KIMILAND: all pastel, about 90% pink, pink cards, logo toast to their Roblox group).
   Validation forces pastels for KIMILAND (`kimiEl`, `toPastel`). Generated `grug` items are made by players about a
   third of the time (`makerOf` in `int.js`, names from the site's NAMES lists) and get the item brand `players`.
@@ -45,7 +45,7 @@ The rest of the site still uses `assets/sandy-classic.js` (old feet).
 ## Adding a new category: the checklist
 
 Use **sandals** (`validateS` / `randomS` / `buildSandals`, `JDEPT.sandals`, `sandalPanel`) or **purses** as the model to copy.
-Pick a one-letter id prefix (taken: `e n p s`).
+Pick a one-letter id prefix (taken: `e n p s a`).
 
 **`src/jewelry.js`** (a new `/* ==== <dept> */` section, before `const build =`)
 1. `DEF.<dept>`, a limits table, `LIMITS.<dept> = { n: <max charms> }`, and the kind list (like `STYLES`) with labels.
@@ -67,7 +67,7 @@ Pick a one-letter id prefix (taken: `e n p s`).
 **`build.py`** (search for `sandals` to find every spot)
 10. The `isJ` line, the departments list (`['sandals', 'Sandals', 'sun', 'var(--g-blue)']`), `SUBS`, the `REFINE` filters,
     the department filter in the filter function, `allItems` (`JM.gen(<dept>, …)` in the generation loop), `itemById`'s
-    `/^g[enps]:/`, the item note text, the `route()` regex `(earrings|necklaces|purses|sandals)`, the search placeholder
+    `/^g[enpsa]:/`, the item note text, the `route()` regex `(earrings|necklaces|purses|sandals|sound)`, the search placeholder
     and hero text, the Create menu entry and the hero "Roll …" button.
 
 Then rebuild, test, run the offline build, commit and push (see CLAUDE.md: a branch preview link per change).
@@ -79,7 +79,8 @@ Then rebuild, test, run the offline build, commit and push (see CLAUDE.md: a bra
 - Charms and shapes (`EL`, `makeEl`, `CHARMS`, `SHAPES`, themes) and their editor cards (`elCard`, `addGallery`).
 - Pattern prints: `sandalTex` (sandals: regions per part, `STRAP_UV` keeps a fixed size along straps) and
   `patternTex` (purses' `print`). The editor picker is `JM.patPicker(parent, label, key, colKey, opts)`.
-- Fitting to her body: `bodyField` (neck, chest, dress), `earInfo` (ears), `sandalFit` (feet: her flip-flop, posed skin,
+- Fitting to her body: `bodyField` (neck, chest, dress), `earInfo` (ears), `soundFit` (her head measured for headphones: ears, the
+  side of her head, its outline round the band and round her face, cached per head mesh), `sandalFit` (feet: her flip-flop, posed skin,
   `skinAt`, `toWorld`, `footPt`), `GE.headModel` (head, in `base.html`).
 
 ## Testing
@@ -96,8 +97,22 @@ The page exposes `window.GrugCatalog` = `{ J, JM, GE, sandy, scene, camera, cam,
 with software WebGL (`--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist`). The
 first load takes 20 to 40 seconds.
 
+## Sound (`/* ==== sound */`, `soundPanel`)
+
+- One department, three kinds in `d.kind`: `over` (headphones: cups in five shapes on cushions, a band on a slider or a fork,
+  toppers, an optional boom mic and glow ring), `muffs` (fluffy earmuffs: a bumpy flattened sphere) and `buds` (stem or round).
+  Settings that don't apply to a kind are kept, not cleared, so switching back restores them (`isWired`, `hasMic`, `topOf`…).
+- The model is in her head frame (`frame: 'head'`, a `cm` group like the earrings). Its head parts are in `soundHead`
+  (`soundL` / `soundR` per ear for buds; earbud pictures frame `soundL`), the cord in `soundCord`. The cord is laid in world
+  space over `bodyField` (`drapeCord`) and converted back to the head frame.
+- Cups and their cushion together are at least `EAR_DEPTH` (4.4 cm) deep: her ears stick out that far and must stay covered.
+- One 512 px picture per item (`soundTex`): the cups' outer plate (rim, inset, print; the muffs' fur), shell, cushions and
+  band. The band's print keeps its size and wraps every `PERIOD` cm, like the sandals' straps.
+- Shading is soft on purpose: extruded parts get `smoothNormals` (faces under 62 degrees apart share a normal) and the band
+  and its cushion are a rounded section (`roundSweep`), so edges don't catch the light.
+
 ## Known limits
 
 - Heavy gladiator, wrap and slipper pairs are about 6,000 to 7,000 triangles, over Roblox's 4,000. The item page says
-  "over" honestly.
+  "over" honestly. Headphones are about 4,000 (up to 8,000 with cloud cups, a mic, a glow ring and a coiled cord).
 - Her toenails stay (removing them broke the toe mesh); `nailAmt = 0` keeps them her grey.

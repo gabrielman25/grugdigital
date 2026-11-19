@@ -189,7 +189,8 @@ way until the owner says a business has agreed in writing.
 
 ## The accessory catalog (`labs/catalog/`, unlisted)
 
-Eyewear, hair, earrings, necklaces, purses and sandals on a grey mannequin, with editors and one-texture downloads.
+Eyewear, hair, earrings, necklaces, purses, sandals and sound (headphones, earmuffs, earbuds) on a grey mannequin, with editors
+and one-texture downloads.
 `labs/catalog/index.html` is **built**: edit `tools/catalog/` (`src/jewelry.js`, `src/int.js`, `build.py`) and run
 `python3 tools/catalog/build.py`. Read `tools/catalog/README.md` first; it has the map and the checklist for adding a category.
 
