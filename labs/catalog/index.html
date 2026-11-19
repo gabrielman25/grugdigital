@@ -3833,8 +3833,8 @@ window.GrugCatalogHair = function (ctx) {
     const hg = sandy.n3.headGroup; sandy.object3d.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(hg.matrixWorld).invert(), out = [];
     sandy.object3d.traverse(o => { if (o.isMesh && o.name === 'ear' && o.visible !== false) { const M = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld), b = new THREE.Box3(), v = new THREE.Vector3(), P = o.geometry.attributes.position; for (let i = 0; i < P.count; i++) b.expandByPoint(v.fromBufferAttribute(P, i).applyMatrix4(M)); out.push(b); } });
     const info = { L: null, R: null };
-    for (const b of out) { const side = (b.min.x + b.max.x) / 2 > 0 ? 1 : -1; info[side > 0 ? 'L' : 'R'] = { sx: side, x: (b.min.x + b.max.x) / 2, yMin: b.min.y, yMax: b.max.y, zMid: (b.min.z + b.max.z) / 2, zFront: b.max.z }; }
-    if (!info.L) info.L = { sx: 1, x: 10.7, yMin: -1.4, yMax: 4.6, zMid: -0.6, zFront: 0 }; if (!info.R) info.R = Object.assign({}, info.L, { sx: -1, x: -info.L.x });
+    for (const b of out) { const side = (b.min.x + b.max.x) / 2 > 0 ? 1 : -1; info[side > 0 ? 'L' : 'R'] = { sx: side, x: (b.min.x + b.max.x) / 2, xOut: Math.max(Math.abs(b.min.x), Math.abs(b.max.x)), yMin: b.min.y, yMax: b.max.y, zMid: (b.min.z + b.max.z) / 2, zFront: b.max.z }; }
+    if (!info.L) info.L = { sx: 1, x: 10.7, xOut: 13.5, yMin: -1.4, yMax: 4.6, zMid: -0.6, zFront: 0 }; if (!info.R) info.R = Object.assign({}, info.L, { sx: -1, x: -info.L.x });
     return (sandy.__jears = info);
   }
   function buildEarrings(d, ctx, o) {
@@ -3843,22 +3843,23 @@ window.GrugCatalogHair = function (ctx) {
     const cm = new THREE.Group(); cm.scale.setScalar(1 / cmU); root.add(cm);
     for (const side of ['L', 'R']) {
       const ear = E[side], sx = ear.sx, seq = (side === 'R' && d.pair === 'mismatch' ? d.seq.slice().reverse() : d.seq).map(e => Object.assign({}, e, { size: e.size * KE })), gapK = d.gap * KE, g = new THREE.Group(); cm.add(g);
-      const X = ear.x * cmU, zM = ear.zMid * cmU, zF = ear.zFront * cmU;
+      // they sit just outside her ear (not in it), each piece turned to face away from her head
+      const X = sx * (ear.xOut * cmU + 0.4), zM = ear.zMid * cmU, zF = ear.zFront * cmU, yaw = sx * Math.PI / 2;
       const hoop = d.mount === 'hook' && seq[0].k === 'shape' && seq[0].id === 'ring';
       let cursor, zOff;
-      if (d.mount === 'stud') { cursor = (ear.yMin + 1.15) * cmU; zOff = zF + 0.12; }
+      if (d.mount === 'stud') { cursor = (ear.yMin + 1.15) * cmU; zOff = zM; }
       else if (hoop) { cursor = ear.yMin * cmU + 0.35 * KE; zOff = zM + 0.04; }
-      else { const ry = ear.yMin * cmU + 0.25, ringGeo = new THREE.TorusGeometry(0.42, 0.045, 5, 14); own.geos.push(ringGeo); const ring = new THREE.Mesh(ringGeo, metal); ring.rotation.y = Math.PI / 2; ring.position.set(sx * X, ry, zM); g.add(ring); own.tris += 140; cursor = ry - 0.42; zOff = zM + 0.04; }
+      else { const ry = ear.yMin * cmU + 0.25, ringGeo = new THREE.TorusGeometry(0.42, 0.045, 5, 14); own.geos.push(ringGeo); const ring = new THREE.Mesh(ringGeo, metal); ring.rotation.y = Math.PI / 2; ring.position.set(X, ry, zM); g.add(ring); own.tris += 140; cursor = ry - 0.42; zOff = zM + 0.04; }
       let prevBottom = null;
       seq.forEach((e, i) => {
-        const h = elH(e), el = makeEl(e, own, false); let top;
-        if (i === 0 && d.mount === 'stud') { top = cursor + h / 2; el.position.set(sx * X, top, zOff + (e.k === 'charm' ? 0.02 : e.size * 0.12)); g.add(el); prevBottom = top - h; return; }
-        const gap = i === 0 ? (hoop ? 0 : 0.22 * KE) : d.link === 'none' ? 0.12 * KE : gapK; top = (prevBottom == null ? cursor : prevBottom) - gap;
-        el.position.set(sx * X, top, zOff + (e.k === 'charm' ? 0.02 : 0)); g.add(el);
-        const from = new THREE.Vector3(sx * X, prevBottom == null ? cursor : prevBottom, zOff), to = new THREE.Vector3(sx * X, top + 0.04, zOff);
-        if (d.link === 'beaded' && i > 0) { const n = Math.max(1, Math.round(gap / 0.28)), bg = geoFor('bead'); for (let k = 0; k < n; k++) { const b = new THREE.Mesh(bg, metal); b.scale.setScalar(0.16); b.position.lerpVectors(from, to, (k + 0.5) / n); g.add(b); own.tris += triOf(bg); } }
+        const el = makeEl(e, own, false); el.rotation.y = yaw; const bb = new THREE.Box3().setFromObject(el), hgt = bb.max.y - bb.min.y;   // its real height, so nothing overlaps
+        if (i === 0 && d.mount === 'stud') { el.position.set(X, cursor - (bb.max.y + bb.min.y) / 2, zOff); g.add(el); prevBottom = el.position.y + bb.min.y; return; }
+        const gap = Math.max(0.18 * KE, i === 0 ? (hoop ? 0 : 0.22 * KE) : d.link === 'none' ? 0.12 * KE : gapK), start = prevBottom == null ? cursor : prevBottom, top = start - gap;
+        el.position.set(X, top - bb.max.y, zOff); g.add(el);
+        const from = new THREE.Vector3(X, start, zOff), to = new THREE.Vector3(X, top + 0.04, zOff);
+        if (d.link === 'beaded' && i > 0) { const n = Math.max(1, Math.round(gap / 0.28)), bg = geoFor('bead'); for (let k = 0; k < n; k++) { const bd = new THREE.Mesh(bg, metal); bd.scale.setScalar(0.16); bd.position.lerpVectors(from, to, (k + 0.5) / n); g.add(bd); own.tris += triOf(bg); } }
         else { const c = cylBetween(from, to, d.link === 'none' && i > 0 ? 0.03 : 0.035, metal, own); if (c) g.add(c); }
-        prevBottom = top - h;
+        prevBottom = top - hgt;
       });
     }
     return { root, d, info: { tris: Math.round(own.tris) }, frame: 'head', dispose() { for (const g of own.geos) g.dispose(); } };
