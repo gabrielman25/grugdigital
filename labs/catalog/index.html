@@ -593,10 +593,10 @@ button{font-family:var(--g-font)}
 .crumbs .sep{font-style:normal;color:var(--g-faint);font-size:1.05em;line-height:1}
 
 /* jewelry editor, brand */
-.kimilogo{all:unset;box-sizing:border-box;cursor:pointer;background:#fff;border-radius:.6rem;padding:.2rem .35rem;box-shadow:0 1px 4px rgba(0,0,0,.2);display:grid;place-items:center;z-index:3}
-.kimilogo img{height:1.5rem;width:auto;display:block}.kimilogo:hover{transform:scale(1.06)}
+.kimilogo{all:unset;box-sizing:border-box;cursor:pointer;background:none;display:grid;place-items:center;z-index:3;filter:drop-shadow(0 1px 3px rgba(0,0,0,.25))}
+.kimilogo img{height:3rem;width:auto;display:block}.kimilogo:hover{transform:scale(1.06)}
 .ccard .ct .kimilogo.tag{position:absolute;right:.45rem;top:.45rem}
-#itemView .kimilogo{position:absolute;right:1rem;top:1rem}#itemView .kimilogo img{height:2.2rem}
+#itemView .kimilogo{position:absolute;right:1rem;top:1rem}#itemView .kimilogo img{height:4.4rem}
 .kimitoast{position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%);z-index:200;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 2rem);padding:.7rem .9rem;border-radius:1rem;background:#1f1a17;color:#fff;font:600 .9rem/1.3 var(--g-font);box-shadow:0 8px 30px rgba(0,0,0,.35)}
 .kimitoast img{height:1.8rem;background:#fff;border-radius:.4rem;padding:.15rem .3rem}
 #itByRow .blogo{height:1.1rem;width:auto;margin-right:.4rem;vertical-align:-.2rem;border-radius:.2rem}
@@ -3757,9 +3757,11 @@ window.GrugCatalogHair = function (ctx) {
     const { X0, X1, Y0, Y1, S } = FLD, NX = Math.round((X1 - X0) / S) + 1, NY = Math.round((Y1 - Y0) / S) + 1, zF = new Float32Array(NX * NY).fill(-1e9), zB = new Float32Array(NX * NY).fill(1e9), q = new THREE.Vector3();
     const hairM = sandy.n3.hairMesh, hv = hairM && hairM.visible; if (hairM) hairM.visible = false;
     sandy.object3d.traverse(o => {
-      if (!o.isSkinnedMesh || !o.visible || !o.boneTransform) return; o.skeleton.update();
+      if (!o.isMesh || !o.visible) return; for (let a = o; a; a = a.parent) if (a.userData && a.userData.catalogItem) return;
+      const skinned = o.isSkinnedMesh && o.boneTransform; if (!skinned && (o.name || o.isSkinnedMesh)) return;   // her body and her clothes (the plain unnamed meshes), not her head, eyes or hands
+      if (skinned) o.skeleton.update();
       const P = o.geometry.attributes.position, I = o.geometry.index, n = I ? I.count : P.count, W = new Array(P.count);
-      const get = i => W[i] || (W[i] = o.boneTransform(i, new THREE.Vector3().fromBufferAttribute(P, i)).applyMatrix4(o.matrixWorld));
+      const get = i => W[i] || (W[i] = (skinned ? o.boneTransform(i, new THREE.Vector3().fromBufferAttribute(P, i)) : new THREE.Vector3().fromBufferAttribute(P, i)).applyMatrix4(o.matrixWorld));
       for (let k = 0; k < n; k += 3) {
         const a = get(I ? I.getX(k) : k), b = get(I ? I.getX(k + 1) : k + 1), c = get(I ? I.getX(k + 2) : k + 2), L = Math.max(a.distanceTo(b), b.distanceTo(c), c.distanceTo(a)), m = Math.min(40, Math.max(1, Math.ceil(L / 0.3)));
         for (let i = 0; i <= m; i++) for (let j = 0; j <= m - i; j++) { const s = i / m, t = j / m; q.copy(a).multiplyScalar(1 - s - t).addScaledVector(b, s).addScaledVector(c, t); if (q.x < X0 || q.x > X1 || q.y < Y0 || q.y > Y1) continue; const id = Math.round((q.y - Y0) / S) * NX + Math.round((q.x - X0) / S); if (q.z > zF[id]) zF[id] = q.z; if (q.z < zB[id]) zB[id] = q.z; }
@@ -3769,7 +3771,7 @@ window.GrugCatalogHair = function (ctx) {
     // fill small gaps from neighbours so lookups are smooth
     for (let pass = 0; pass < 4; pass++) for (let iy = 1; iy < NY - 1; iy++) for (let ix = 1; ix < NX - 1; ix++) { const id = iy * NX + ix; if (zF[id] > -1e8) continue; let s = 0, c = 0, sb = 0; for (const dd of [-1, 1, -NX, NX]) if (zF[id + dd] > -1e8) { s += zF[id + dd]; sb += zB[id + dd]; c++; } if (c) { zF[id] = s / c; zB[id] = sb / c; } }
     // a necklace lies over her clothes, not in their folds: take the highest (front) and lowest (back) point within 1 cm, then soften
-    const filt = (A, hi) => { const B = new Float32Array(A.length); for (let iy = 0; iy < NY; iy++) for (let ix = 0; ix < NX; ix++) { let v = hi ? -1e9 : 1e9; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) { const x = ix + dx, y = iy + dy; if (x < 0 || y < 0 || x >= NX || y >= NY) continue; const a = A[y * NX + x]; if (Math.abs(a) > 1e8) continue; v = hi ? Math.max(v, a) : Math.min(v, a); } B[iy * NX + ix] = v; } return B; };
+    const filt = (A, hi) => { const B = new Float32Array(A.length); for (let iy = 0; iy < NY; iy++) for (let ix = 0; ix < NX; ix++) { let v = hi ? -1e9 : 1e9; for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) { const x = ix + dx, y = iy + dy; if (x < 0 || y < 0 || x >= NX || y >= NY) continue; const a = A[y * NX + x]; if (Math.abs(a) > 1e8) continue; v = hi ? Math.max(v, a) : Math.min(v, a); } B[iy * NX + ix] = v; } return B; };
     const soft = A => { for (let pass = 0; pass < 2; pass++) { const B = A.slice(); for (let iy = 1; iy < NY - 1; iy++) for (let ix = 1; ix < NX - 1; ix++) { const id = iy * NX + ix, c = [A[id], A[id - 1], A[id + 1], A[id - NX], A[id + NX]]; if (c.some(v => Math.abs(v) > 1e8)) continue; B[id] = (c[0] * 2 + c[1] + c[2] + c[3] + c[4]) / 6; } A.set(B); } return A; };
     const zF2 = soft(filt(zF, true)), zB2 = soft(filt(zB, false)); zF.set(zF2); zB.set(zB2);
     const at = (A, x, y, def) => { const fx = (clamp(x, X0, X1 - S) - X0) / S, fy = (clamp(y, Y0, Y1 - S) - Y0) / S, ix = Math.floor(fx), iy = Math.floor(fy), tx = fx - ix, ty = fy - iy, g = (a, b) => { const v = A[(iy + b) * NX + ix + a]; return Math.abs(v) > 1e8 ? def : v; }; return lerp(lerp(g(0, 0), g(1, 0), tx), lerp(g(0, 1), g(1, 1), tx), ty); };
@@ -3844,17 +3846,17 @@ window.GrugCatalogHair = function (ctx) {
     for (const side of ['L', 'R']) {
       const ear = E[side], sx = ear.sx, seq = (side === 'R' && d.pair === 'mismatch' ? d.seq.slice().reverse() : d.seq).map(e => Object.assign({}, e, { size: e.size * KE })), gapK = d.gap * KE, g = new THREE.Group(); cm.add(g);
       // they sit just outside her ear (not in it), each piece turned to face away from her head
-      const X = sx * (ear.xOut * cmU + 0.4), zM = ear.zMid * cmU, zF = ear.zFront * cmU, yaw = sx * Math.PI / 2;
+      const X = sx * (ear.xOut * cmU + 0.05), zM = ear.zMid * cmU, zF = ear.zFront * cmU, yaw = sx * Math.PI / 2;
       const hoop = d.mount === 'hook' && seq[0].k === 'shape' && seq[0].id === 'ring';
       let cursor, zOff;
       if (d.mount === 'stud') { cursor = (ear.yMin + 1.15) * cmU; zOff = zM; }
       else if (hoop) { cursor = ear.yMin * cmU + 0.35 * KE; zOff = zM + 0.04; }
-      else { const ry = ear.yMin * cmU + 0.25, ringGeo = new THREE.TorusGeometry(0.42, 0.045, 5, 14); own.geos.push(ringGeo); const ring = new THREE.Mesh(ringGeo, metal); ring.rotation.y = Math.PI / 2; ring.position.set(X, ry, zM); g.add(ring); own.tris += 140; cursor = ry - 0.42; zOff = zM + 0.04; }
+      else { const ry = ear.yMin * cmU + 0.5, ringGeo = new THREE.TorusGeometry(0.42, 0.045, 5, 14); own.geos.push(ringGeo); const ring = new THREE.Mesh(ringGeo, metal); ring.rotation.y = Math.PI / 2; ring.position.set(X, ry, zM); g.add(ring); own.tris += 140; cursor = ry - 0.42; zOff = zM + 0.04; }
       let prevBottom = null;
       seq.forEach((e, i) => {
         const el = makeEl(e, own, false); el.rotation.y = yaw; const bb = new THREE.Box3().setFromObject(el), hgt = bb.max.y - bb.min.y;   // its real height, so nothing overlaps
         if (i === 0 && d.mount === 'stud') { el.position.set(X, cursor - (bb.max.y + bb.min.y) / 2, zOff); g.add(el); prevBottom = el.position.y + bb.min.y; return; }
-        const gap = Math.max(0.18 * KE, i === 0 ? (hoop ? 0 : 0.22 * KE) : d.link === 'none' ? 0.12 * KE : gapK), start = prevBottom == null ? cursor : prevBottom, top = start - gap;
+        const gap = Math.max(i === 0 ? 0 : 0.18 * KE, i === 0 ? (hoop ? 0 : 0.04 * KE) : d.link === 'none' ? 0.12 * KE : gapK), start = prevBottom == null ? cursor : prevBottom, top = start - gap;
         el.position.set(X, top - bb.max.y, zOff); g.add(el);
         const from = new THREE.Vector3(X, start, zOff), to = new THREE.Vector3(X, top + 0.04, zOff);
         if (d.link === 'beaded' && i > 0) { const n = Math.max(1, Math.round(gap / 0.28)), bg = geoFor('bead'); for (let k = 0; k < n; k++) { const bd = new THREE.Mesh(bg, metal); bd.scale.setScalar(0.16); bd.position.lerpVectors(from, to, (k + 0.5) / n); g.add(bd); own.tris += triOf(bg); } }
@@ -3872,7 +3874,7 @@ window.GrugCatalogHair = function (ctx) {
     for (let i = 0; i < N; i++) {
       const phi = -Math.PI + (i + 0.5) / N * TAU, c = Math.cos(phi), s = Math.sin(phi);   // phi 0 = straight down the front
       let x = Rx * s, y = y0, z = F.zc + Rz * c;
-      if (c > 0) { const h = D * Math.pow(c, 1.5); y = y0 - h; z = Math.max(z, F.front(x, y) + r); }
+      if (c > 0) { const h = D * Math.pow(c, 1.5); y = y0 - h; z = Math.max(z, F.front(x, y) + r + 0.35); }
       else { y = y0 + 0.5 * (-c); z = Math.min(z, F.back(x, y) - r); }
       pts.push(new THREE.Vector3(x, y, z));
     }
