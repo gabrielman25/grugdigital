@@ -3796,7 +3796,7 @@ window.GrugCatalogHair = function (ctx) {
 
   /* ---------------------------------------------------------------- vocabulary: kinds, names, tags, specs */
   const earKind = d => d.seq.length === 1 ? (d.seq[0].id === 'ring' && d.seq[0].k === 'shape' ? 'hoops' : 'studs') : d.seq.length <= 3 ? 'drops' : 'danglers';
-  const KIND_LABEL = { studs: 'Studs', drops: 'Drops', danglers: 'Danglers', hoops: 'Hoops', choker: 'Chokers', short: 'Short', medium: 'Medium', long: 'Long', satchel: 'Satchels', tote: 'Totes', bucket: 'Buckets', round: 'Rounds', heart: 'Hearts', clutch: 'Clutches', slide: 'Slides', thong: 'Thongs', ankle: 'Ankle straps', gladiator: 'Gladiators', wrap: 'Wraps' };
+  const KIND_LABEL = { studs: 'Studs', drops: 'Drops', danglers: 'Danglers', hoops: 'Hoops', choker: 'Chokers', short: 'Short', medium: 'Medium', long: 'Long', satchel: 'Satchels', tote: 'Totes', bucket: 'Buckets', round: 'Rounds', heart: 'Hearts', clutch: 'Clutches', slide: 'Slides', thong: 'Thongs', ankle: 'Ankle straps', gladiator: 'Gladiators', wrap: 'Wraps', slipper: 'Slippers' };
   const kindOf = (dept, d) => dept === 'earrings' ? earKind(d) : lenClass(d).id;
   const elName = e => e.k === 'charm' ? CHARM_BY[e.id].label : SHAPE_LABEL[e.id];
   const FLAVOUR = ['Cute', 'Fancy', 'Dainty', 'Glam', 'Posh', 'Sparkly', 'Merry', 'Spooky', 'Lovely', 'Bold', 'Sweet', 'Chic', 'Jolly', 'Charming', 'Darling', 'Lucky', 'Super', 'Pretty', 'Royal', 'Magic'];
@@ -4245,7 +4245,7 @@ window.GrugCatalogHair = function (ctx) {
      A sandal is a sole (thickness, a raised heel: wedge or block), a footbed, straps that follow her foot (a band across the
      instep, a toe post, an ankle strap, laces up the shin, a criss-cross wrap) and charms pinned on the straps.
      Colours can fade from one to another on the sole and on the straps. Her foot is measured from her own mesh. */
-  const STYLES = [['slide', 'Slide'], ['thong', 'Thong'], ['ankle', 'Ankle strap'], ['gladiator', 'Gladiator'], ['wrap', 'Wrap']];
+  const STYLES = [['slide', 'Slide'], ['thong', 'Thong'], ['ankle', 'Ankle strap'], ['gladiator', 'Gladiator'], ['wrap', 'Wrap'], ['slipper', 'Slipper']];
   const STYLE_LABEL = Object.fromEntries(STYLES);
   const HEELS = [['wedge', 'Wedge'], ['block', 'Block']];
   const HEEL_LABEL = Object.fromEntries(HEELS);
@@ -4284,7 +4284,7 @@ window.GrugCatalogHair = function (ctx) {
     };
     if (o.keep === 'shape') { recolour(); return validateS(d, brand).d; }
     const keepC = o.keep === 'colours' && o.base ? { cols: ['soleCol', 'soleCol2', 'bedCol', 'strapCol', 'strapCol2', 'hw', 'soleGrad', 'strapGrad'].map(k => d[k]), ch: d.charms.map(e => [e.col, e.tint]) } : null;
-    d.style = o.kind && STYLE_LABEL[o.kind] ? o.kind : r.w({ slide: 2.4, thong: 1.6, ankle: 3, gladiator: 1.8, wrap: 1.8 });
+    d.style = o.kind && STYLE_LABEL[o.kind] ? o.kind : r.w({ slide: 2.4, thong: 1.6, ankle: 3, gladiator: 1.8, wrap: 1.8, slipper: 1.6 });
     d.soleH = r.f(0.7, 3.4); d.heelH = r.chance(0.5) ? r.f(1.5, 6.5) : 0; d.heelType = r.pick(['wedge', 'block']);
     d.strapT = r.f(0.18, 0.75); d.strapW = d.style === 'slide' ? r.f(2, 3.4) : d.style === 'thong' ? r.f(0.8, 1.6) : r.f(0.7, 2.2); d.shaft = r.f(7, 24);
     d.soleGrad = r.chance(kimi ? 0.4 : 0.3); d.strapGrad = r.chance(kimi ? 0.45 : 0.35); d.finish = r.w({ gloss: 4, matte: 3, metal: kimi ? 0.2 : 0.8 });
@@ -4297,7 +4297,7 @@ window.GrugCatalogHair = function (ctx) {
 
   function nameS(d, seed) {
     const r = rng('jname:' + seed + ':sandals'), kimi = d.brand === 'kimiland', colour = colourName(d.strapCol, kimi), fl = kimi ? r.pick(KIMI_FLAVOUR) : r.pick(FLAVOUR);
-    const noun = { slide: r.pick(['Slides', 'Slide Sandals', 'Sliders']), thong: r.pick(['Flip-Flops', 'Thong Sandals', 'Toe-Post Sandals']), ankle: r.pick(['Ankle Strap Sandals', 'Strappy Sandals', 'Ankle Straps']), gladiator: r.pick(['Gladiators', 'Gladiator Sandals', 'Lace-Up Sandals']), wrap: r.pick(['Wrap Sandals', 'Ribbon Sandals', 'Wraps']) }[d.style];
+    const noun = { slide: r.pick(['Slides', 'Slide Sandals', 'Sliders']), thong: r.pick(['Flip-Flops', 'Thong Sandals', 'Toe-Post Sandals']), ankle: r.pick(['Ankle Strap Sandals', 'Strappy Sandals', 'Ankle Straps']), gladiator: r.pick(['Gladiators', 'Gladiator Sandals', 'Lace-Up Sandals']), wrap: r.pick(['Wrap Sandals', 'Ribbon Sandals', 'Wraps']), slipper: r.pick(['Slippers', 'Mule Slippers', 'House Slippers', 'Toe-Cap Slippers']) }[d.style];
     const sole = d.heelH > 3.5 ? (d.heelType === 'block' ? 'Block Heel' : 'Wedge') : d.soleH > 2.8 && d.heelH < 1 ? 'Platform' : '', fade = d.strapGrad || d.soleGrad ? r.pick(['Ombré', 'Sunset', 'Fade']) : '';
     const sub = d.charms.length ? elName(mainEl(d.charms)) + ' Charm' : '';
     const forms = [[colour, sole, noun], [fl, fade || colour, noun], [fl, sub || colour, noun], [fade || sole || fl, colour, noun]];
@@ -4312,7 +4312,7 @@ window.GrugCatalogHair = function (ctx) {
   function describeS(d) {
     const kimi = d.brand === 'kimiland', names = Array.from(new Set(d.charms.map(elName).map(s => s.toLowerCase()))), heel = d.heelH < 1 ? (d.soleH > 2.8 ? 'platform' : 'flat') : HEEL_LABEL[d.heelType].toLowerCase() + ' heel';
     const ch = names.length ? ', with ' + (names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0]) + ' pinned on the straps' : '';
-    return `A pair of ${colourName(d.strapCol, kimi).toLowerCase()} ${STYLE_LABEL[d.style].toLowerCase()} sandals on a ${heel} sole${d.strapGrad || d.soleGrad ? ', fading from one colour to another' : ''}${ch}.${kimi ? ' A KIMILAND piece: soft pastels, made to be cute.' : ''}`;
+    return `A pair of ${colourName(d.strapCol, kimi).toLowerCase()} ${d.style === 'slipper' ? 'slippers, a soft dome over the toes,' : STYLE_LABEL[d.style].toLowerCase() + ' sandals'} on a ${heel} sole${d.strapGrad || d.soleGrad ? ', fading from one colour to another' : ''}${ch}.${kimi ? ' A KIMILAND piece: soft pastels, made to be cute.' : ''}`;
   }
 
   function sweep(pts, nrm, w, t, uv, tag) {
@@ -4382,7 +4382,7 @@ window.GrugCatalogHair = function (ctx) {
     for (let j = 0; j <= 24; j++) { const th = Math.PI * (1 - j / 24), dx = Math.cos(th), dy = Math.sin(th); let R = 0; for (const p of S) { const ox = p[0] - sc, oy = p[1] - yc, l = Math.hypot(ox, oy); if (l < 1e-3) continue; if ((ox * dx + oy * dy) / l > 0.93) R = Math.max(R, ox * dx + oy * dy); } const sp = sc + dx * (R + gap), yp = yc + dy * (R + gap); if (yp > ytop + 1.2) pts.push([sp, yp]); }
     const hull = F.hull, ray = (dx, dz) => { let best = 1e9; for (let k = 0; k < hull.length; k++) { const a = hull[k], b = hull[(k + 1) % hull.length], ex = b[0] - a[0], ez = b[1] - a[1], den = dx * ez - dz * ex; if (Math.abs(den) < 1e-9) continue; const t = ((a[0] - c.x) * ez - (a[1] - c.z) * ex) / den, w = ((a[0] - c.x) * dz - (a[1] - c.z) * dx) / den; if (t > 0 && w >= -1e-6 && w <= 1 + 1e-6 && t < best) best = t; } return best < 1e9 ? best : null; };
     const ra = ray(-u.x, -u.z), rb = ray(u.x, u.z); if (ra == null || rb == null || pts.length < 3) return null; const inset = 0.45;
-    const all = [[-(ra - inset), ytop - 0.05], [-(ra - inset) * 0.97 + pts[0][0] * 0.03, ytop + 0.55], ...pts, [(rb - inset) * 0.97 + pts[pts.length - 1][0] * 0.03, ytop + 0.55], [rb - inset, ytop - 0.05]];
+    const all = [[-(ra - inset), ytop - 0.45], [-(ra - inset) * 0.97 + pts[0][0] * 0.03, ytop + 0.55], ...pts, [(rb - inset) * 0.97 + pts[pts.length - 1][0] * 0.03, ytop + 0.55], [rb - inset, ytop - 0.45]];
     return new THREE.CatmullRomCurve3(all.map(p => V3(c.x + u.x * p[0], p[1], c.z + u.z * p[0])), false, 'centripetal').getSpacedPoints(n || 40);
   }
   // pull a strap's centre line onto her skin: every inner point sits 'gap' off the skin (both edges of a w-wide strap clear it), smoothly
@@ -4442,6 +4442,10 @@ window.GrugCatalogHair = function (ctx) {
       // ---- the sole: her own flip-flop's sole, deepened (platform); on a heel it bends at the ball with her foot, and a wedge fills down to the floor
       sd.sole.updateMatrixWorld(true); const sg = sd.sole.geometry.clone().applyMatrix4(sd.sole.matrixWorld).applyMatrix4(K.rigInv), P = sg.attributes.position; sg.computeBoundingBox(); const bb = sg.boundingBox, T0 = Math.max(0.5, ytop - bb.min.y), z0 = bb.min.z, z1 = bb.max.z;
       for (const k of ['aToeW', 'aToeW5']) if (sg.attributes[k]) sg.deleteAttribute(k);
+      // a little wider than her flip-flop's, so every strap lands on top of it, well inside the edge
+      { const Zb = Math.floor(z0) - 1, nz = Math.ceil(z1) - Zb + 2, lo = new Float32Array(nz).fill(1e9), hi = new Float32Array(nz).fill(-1e9); for (let k = 0; k < P.count; k++) { const bi = Math.round(P.getZ(k)) - Zb; lo[bi] = Math.min(lo[bi], P.getX(k)); hi[bi] = Math.max(hi[bi], P.getX(k)); }
+        const cxAt = z => { const i = clamp(Math.round(z) - Zb, 0, nz - 1); for (let r = 0; r < nz; r++) for (const j of [i - r, i + r]) if (j >= 0 && j < nz && hi[j] > lo[j]) return (lo[j] + hi[j]) / 2; return 0; };
+        for (let k = 0; k < P.count; k++) { const x = P.getX(k), dx = x - cxAt(P.getZ(k)), w = clamp(Math.abs(dx) / 1.5, 0, 1); P.setX(k, x + Math.sign(dx) * 0.75 * w); } lo.forEach((v, j) => { if (hi[j] > v) { lo[j] -= 0.75; hi[j] += 0.75; } }); K.soleEdge = z => { const i = clamp(Math.round(z) - Zb, 0, nz - 1); for (let r = 0; r < nz; r++) for (const j of [i - r, i + r]) if (j >= 0 && j < nz && hi[j] > lo[j]) return [lo[j], hi[j]]; return [-1e9, 1e9]; }; }
       const tops = []; let yFloor = 1e9; for (let k = 0; k < P.count; k++) { const t = K.footPt(V3(P.getX(k), ytop, P.getZ(k))); tops.push(t); yFloor = Math.min(yFloor, t.y); } yFloor -= d.soleH;
       const wedge = d.heelType === 'wedge' && tilt > 0;
       { const Nn = (sg.computeVertexNormals(), sg.attributes.normal), U = new Float32Array(P.count * 2); for (let k = 0; k < P.count; k++) { const bed = Nn.getY(k) > 0.3 && P.getY(k) > ytop - 0.35; U[k * 2] = clamp((z1 - P.getZ(k)) / (z1 - z0), 0, 1); U[k * 2 + 1] = bed ? PAL_V.bed : PAL_V.sole; } sg.setAttribute('uv', new THREE.BufferAttribute(U, 2)); }
@@ -4465,7 +4469,7 @@ window.GrugCatalogHair = function (ctx) {
       }
       const paths = [];
       // ---- the Y strap: her flip-flop's own strap (as fitted to her standing foot), thickened outward and widened sideways
-      if (d.style !== 'slide' && sd.strap) {
+      if (d.style !== 'slide' && d.style !== 'slipper' && sd.strap) {
         sd.strap.updateMatrixWorld(true); const g = sd.strap.geometry.clone().applyMatrix4(sd.strap.matrixWorld).applyMatrix4(K.rigInv); for (const k of ['aToeW', 'aToeW5']) if (g.attributes[k]) g.deleteAttribute(k); const bindP = g.attributes.position.array.slice(); { const GP = g.attributes.position, v = V3(); for (let k = 0; k < GP.count; k++) { const w = K.footPt(v.fromBufferAttribute(GP, k)); GP.setXYZ(k, w.x, w.y, w.z); } GP.needsUpdate = true; }
         const SP = g.attributes.position; g.computeVertexNormals(); const SN = g.attributes.normal, key = k => Math.round(SP.getX(k) * 50) + ',' + Math.round(SP.getY(k) * 50) + ',' + Math.round(SP.getZ(k) * 50), acc = new Map();
         for (let k = 0; k < SP.count; k++) { const kk = key(k); let a = acc.get(kk); if (!a) acc.set(kk, a = V3()); a.add(V3(SN.getX(k), SN.getY(k), SN.getZ(k))); }
@@ -4482,10 +4486,39 @@ window.GrugCatalogHair = function (ctx) {
         if (d.style === 'thong') { const top = br.length ? br[br.length - 1] : K.footPt(W), kg = new THREE.SphereGeometry(Math.max(0.45, SW * 0.38), 10, 8); kg.translate(top.x, top.y + 0.2, top.z); add(kg, hwM, 'knob'); }
       }
       // ---- a band across her foot, rim to rim, lying on her skin
-      const across = (z, w, main) => { const c = V3(F.Bl.x, 0, z), pb = rimArc(F, c, X, 0.3, 36); if (!pb) return; const fixed = pb.map(q => q.y < ytop + 0.9), pts = pb.map(q => K.footPt(q));
+      const across = (z, w, main) => { const c = V3(F.Bl.x, 0, z), pb = rimArc(F, c, X, 0.3, 36); if (!pb) return; if (K.soleEdge) for (const q of pb) { if (q.y > ytop + 1.6) continue; const [l, h] = K.soleEdge(q.z); const m = 0.7 + T * 1.2; q.x = clamp(q.x, l + m, h - m); } const fixed = pb.map(q => q.y < ytop + 0.9), pts = pb.map(q => K.footPt(q));
         const mid = pts.reduce((a, q) => a.add(q), V3()).multiplyScalar(1 / pts.length); const out = k => { const o = V3().crossVectors(tangentAt(pts, k), K.fwd).normalize(); if (o.dot(pts[k].clone().sub(mid)) < 0) o.negate(); return o; };
         const r = strap(K, pts, fixed, w, out); const outerFirst = r.pts[0].clone().sub(r.pts[r.pts.length - 1]).dot(K.outer) > 0; paths.push({ pts: outerFirst ? r.pts : r.pts.slice().reverse(), nr: outerFirst ? r.nr : r.nr.slice().reverse(), main }); };
       if (d.style === 'slide') across(F.Bl.z - 1.6, Math.max(1.8, SW * 1.5), true);
+      // ---- a slipper: a closed dome over her toes and the top of her foot, every row landing inside the sole's edge, open from the instep back
+      if (d.style === 'slipper') {
+        const M = 24, zA = F.zTip - 0.6, zB = F.Bl.z - 4.4, main = [], NR = 10, clampRow = pb => { if (K.soleEdge) for (const q of pb) { if (q.y > ytop + 1.6) continue; const [l, h] = K.soleEdge(q.z), m = 0.7; q.x = clamp(q.x, l + m, h - m); } return pb; };
+        for (let k = 0; k <= NR; k++) { const z = zA + (zB - zA) * k / NR, gp = (k < 3 ? 0.95 : k < 6 ? 0.75 : 0.55) + T * 0.4, pb = rimArc(F, V3(F.Bl.x, 0, z), X, gp, M); if (pb) main.push(clampRow(pb)); }
+        // the toe cap: the front arch sinks forward onto the sole's front edge, closing the slipper
+        const rows = []; if (main.length) { let zEnd = F.zTip + 1.2; if (K.soleEdge) { for (let z = F.zTip; z < F.zTip + 6; z += 0.25) { const [l, h] = K.soleEdge(z); if (h - l < 1.5 || !isFinite(l)) break; zEnd = z; } } const front = main[0], len = Math.max(0.8, zEnd - 0.6 - zA);
+          const [la, ha] = K.soleEdge ? K.soleEdge(zA) : [0, 0], ca = (la + ha) / 2, wa = Math.max(1, (ha - la) / 2);
+          for (let e = 4; e >= 1; e--) { const fr = e / 4, sq = Math.sqrt(1 - fr * fr), zz = zA + len * fr, [lb, hb] = K.soleEdge ? K.soleEdge(zz) : [la, ha], cb = (lb + hb) / 2, k = clamp(((hb - lb) / 2 - 0.8) / wa, 0.2, 1); rows.push(clampRow(front.map(p => V3(cb + (p.x - ca) * k, ytop - 0.3 + (p.y - (ytop - 0.3)) * sq, p.z + len * fr)))); } }
+        rows.push(...main);
+        if (rows.length > 4) {
+          const W = M + 1, wr = rows.map(r => r.map(p => K.footPt(p)));
+          const pos = [], uv = [], idx = []; wr.forEach((r, ri) => r.forEach((p, j) => { pos.push(p.x, p.y, p.z); uv.push(ri / (wr.length - 1), PAL_V.strap); }));
+          for (let r = 0; r < wr.length - 1; r++) for (let j = 0; j < W - 1; j++) { const a = r * W + j, b = a + 1, c = a + W, e = c + 1; idx.push(a, c, b, b, c, e); }
+          const dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); dg.setIndex(idx); dg.computeVertexNormals();
+          // faces outward (away from her foot), then a second skin T inside it, joined round the open edges
+          { const mid = Math.floor(wr.length / 2) * W + Math.floor(W / 2), Np0 = dg.attributes.normal; if (V3(Np0.getX(mid), Np0.getY(mid), Np0.getZ(mid)).dot(K.up) < 0) { for (let t = 0; t < idx.length; t += 3) { const q = idx[t + 1]; idx[t + 1] = idx[t + 2]; idx[t + 2] = q; } dg.setIndex(idx.slice()); dg.computeVertexNormals(); } }
+          { const n = pos.length / 3, Np = dg.attributes.normal, P2 = pos.slice(), U2 = uv.slice(), I2 = idx.slice();
+            for (let k = 0; k < n; k++) { P2.push(pos[k * 3] - Np.getX(k) * T, pos[k * 3 + 1] - Np.getY(k) * T, pos[k * 3 + 2] - Np.getZ(k) * T); U2.push(uv[k * 2], uv[k * 2 + 1]); }
+            for (let t = 0; t < idx.length; t += 3) I2.push(idx[t] + n, idx[t + 2] + n, idx[t + 1] + n);
+            const back = (wr.length - 1) * W; for (let j = 0; j < W - 1; j++) { const a = back + j, b = a + 1; I2.push(a, a + n, b, b, a + n, b + n); }
+            for (const col of [0, W - 1]) for (let r = 0; r < wr.length - 1; r++) { const a = r * W + col, c = a + W; I2.push(a, c, a + n, c, c + n, a + n); }
+            dg.setAttribute('position', new THREE.Float32BufferAttribute(P2, 3)); dg.setAttribute('uv', new THREE.Float32BufferAttribute(U2, 2)); dg.setIndex(I2); dg.computeVertexNormals(); }
+          add(dg, mat, 'slipper');
+          // a soft rolled cuff along its open edge
+          const backRow = wr[wr.length - 1], cg = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(backRow.map(p => p.clone())), 40, 0.35 + T * 0.6, 8, false), CU = cg.attributes.uv; for (let k = 0; k < CU.count; k++) CU.setXY(k, CU.getX(k), PAL_V.strap); add(cg, mat, 'cuff');
+          const cc = backRow.reduce((a, p) => a.add(p), V3()).multiplyScalar(1 / W); cc.y -= 3; const nr = backRow.map(p => p.clone().sub(cc).normalize()), cp = backRow.map((p, k) => p.clone().addScaledVector(nr[k], 0.35 + T * 0.6));
+          const outerFirst = cp[0].clone().sub(cp[cp.length - 1]).dot(K.outer) > 0; paths.push({ pts: outerFirst ? cp : cp.slice().reverse(), nr: outerFirst ? nr : nr.slice().reverse(), main: true });
+        }
+      }
       // ---- round her leg: an ankle strap, rings up the shin, a wrap; a heel strap up the back of her heel
       const ANK = F.A.y + 1.6, topY = Math.min(F.calfTop + 1, ANK + d.shaft);
       const ringW = (h, n) => { const R = legRing(F, h, 0.3, n || 22), pts = []; for (let j = 0; j < R.N; j++) { const th = j / R.N * Math.PI * 2, r = R.R[j]; pts.push(K.toWorld(V3(R.cx + Math.sin(th) * r, h, R.cz + Math.cos(th) * r))); } return { R, pts }; };
@@ -4494,7 +4527,7 @@ window.GrugCatalogHair = function (ctx) {
         const ank = ringW(ANK), wA = Math.max(0.8, SW), r = strap(K, ank.pts, ank.pts.map(() => false), wA, ringOut(ank.pts), { closed: true, uv: ringUV });
         // the ankle strap's front half, outer side first (charms hang there); a buckle on the outer side
         { const n = ank.pts.length, ctr = r.pts.slice(0, n).reduce((a, q) => a.add(q), V3()).multiplyScalar(1 / n); let ko = 0, best = -1e9; for (let k = 0; k < n; k++) { const v = r.pts[k].clone().sub(ctr).dot(K.outer); if (v > best) { best = v; ko = k; } }
-          const dirF = r.pts[(ko + 1) % n].clone().sub(r.pts[ko]).dot(K.fwd) > 0 ? 1 : -1, half = [], hn = []; for (let s = 0; s <= n / 2; s++) { const k = ((ko + dirF * s) % n + n) % n; half.push(r.pts[k]); hn.push(r.nr[k]); } paths.push({ pts: half, nr: hn, main: true });
+          const dirF = r.pts[(ko + 1) % n].clone().sub(r.pts[ko]).dot(K.fwd) > 0 ? 1 : -1, half = [], hn = []; for (let s = 0; s <= n / 2; s++) { const k = ((ko + dirF * s) % n + n) % n; half.push(r.pts[k]); hn.push(r.nr[k]); } paths.push({ pts: half, nr: hn, main: true, leg: true });
           const bg = new THREE.TorusGeometry(Math.max(0.5, SW * 0.42), 0.14, 6, 14), bq = new THREE.Quaternion().setFromUnitVectors(V3(0, 0, 1), r.nr[ko]); bg.applyQuaternion(bq); bg.translate(r.pts[ko].x + r.nr[ko].x * 0.15, r.pts[ko].y + r.nr[ko].y * 0.15, r.pts[ko].z + r.nr[ko].z * 0.15); add(bg, hwM, 'buckle'); }
         // heel strap: from the back of the sole up the back of her heel to the ankle strap
         { const pts = [], fixed = []; for (let s = 0; s <= 14; s++) { const y = lerp(ytop - 0.1, ANK, s / 14), R = legRing(F, Math.max(ytop + 0.4, y), 0.3), rr = R.at(Math.PI); pts.push(K.toWorld(V3(R.cx, y, R.cz - rr))); fixed.push(s === 0); }
@@ -4509,7 +4542,7 @@ window.GrugCatalogHair = function (ctx) {
       // ---- charms, pinned along the main strap, facing out
       const mp = paths.find(q => q.main) || paths[0]; if (!mp) continue;
       for (const e of d.charms.slice().sort((a, b) => a.at - b.at)) {
-        const f = clamp((1 - e.at) / 2, 0, 1) * (mp.pts.length - 1), a = Math.floor(f), b = Math.min(mp.pts.length - 1, a + 1), wp = mp.pts[a].clone().lerp(mp.pts[b], f - a), nn = mp.nr[a].clone().lerp(mp.nr[b], f - a).normalize();
+        const f = lerp(mp.leg ? 0 : 0.12, mp.leg ? 1 : 0.88, clamp((1 - e.at) / 2, 0, 1)) * (mp.pts.length - 1), a = Math.floor(f), b = Math.min(mp.pts.length - 1, a + 1), wp = mp.pts[a].clone().lerp(mp.pts[b], f - a), nn = mp.nr[a].clone().lerp(mp.nr[b], f - a).normalize();
         const size = e.size * KN, el = makeEl(Object.assign({}, e, { size }), own, true), up = Math.abs(nn.y) > 0.85 ? K.fwd.clone() : V3(0, 1, 0), yy = up.clone().addScaledVector(nn, -up.dot(nn)).normalize(), xx = V3().crossVectors(yy, nn).normalize();
         el.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xx, yy, nn)); el.position.copy(wp).addScaledVector(nn, size * 0.5 * 0.6 + 0.1); root.add(el);
       }
@@ -4894,7 +4927,7 @@ window.GrugCatalogHair = function (ctx) {
   const REFINE_KEYS = ['worn', 'lens', 'logo', 'texture', 'vibe', 'theme', 'cord', 'mount', 'pattern'];
   const cat = { q: '', dept: 'all', sub: 'all', worn: 'any', lens: 'any', logo: 'any', texture: 'any', vibe: 'any', theme: 'any', cord: 'any', mount: 'any', pattern: 'any', brand: 'any', colour: 'any', sort: 'featured', count: 48 };
   const DEPTS = [['all', 'All items', 'shopping_bag', 'var(--g-lime)'], ['eyewear', 'Eyewear', 'glasses', 'var(--g-teal)'], ['hair', 'Hair', 'hair', 'var(--g-pink)'], ['earrings', 'Earrings', 'diamond', 'var(--g-purple)'], ['necklaces', 'Necklaces', 'flower', 'var(--g-orange)'], ['purses', 'Purses', 'shopping_bag', 'var(--g-pink)'], ['sandals', 'Sandals', 'sun', 'var(--g-blue)'], ['favs', 'Favorites', 'star', 'var(--g-yellow)'], ['yours', 'Your designs', 'heart', 'var(--g-red)']].filter(x => x[0] !== 'hair' || HD);
-  const SUBS = { eyewear: [['glasses', 'Glasses'], ['shades', 'Shades'], ['goggles', 'Goggles']], hair: HD ? HD.SUB : [], earrings: [['studs', 'Studs'], ['drops', 'Drops'], ['danglers', 'Danglers'], ['hoops', 'Hoops']], necklaces: [['choker', 'Chokers'], ['short', 'Short'], ['medium', 'Medium'], ['long', 'Long']], sandals: [['slide', 'Slides'], ['thong', 'Thongs'], ['ankle', 'Ankle straps'], ['gladiator', 'Gladiators'], ['wrap', 'Wraps']], purses: [['satchel', 'Satchels'], ['tote', 'Totes'], ['bucket', 'Buckets'], ['round', 'Rounds'], ['heart', 'Hearts'], ['clutch', 'Clutches']] };
+  const SUBS = { eyewear: [['glasses', 'Glasses'], ['shades', 'Shades'], ['goggles', 'Goggles']], hair: HD ? HD.SUB : [], earrings: [['studs', 'Studs'], ['drops', 'Drops'], ['danglers', 'Danglers'], ['hoops', 'Hoops']], necklaces: [['choker', 'Chokers'], ['short', 'Short'], ['medium', 'Medium'], ['long', 'Long']], sandals: [['slide', 'Slides'], ['thong', 'Thongs'], ['ankle', 'Ankle straps'], ['gladiator', 'Gladiators'], ['wrap', 'Wraps'], ['slipper', 'Slippers']], purses: [['satchel', 'Satchels'], ['tote', 'Totes'], ['bucket', 'Buckets'], ['round', 'Rounds'], ['heart', 'Hearts'], ['clutch', 'Clutches']] };
   const F_WORN = [['any', 'Any way', 'person'], ['on', 'On the eyes', 'face'], ['up', 'Pushed up', 'arrow_up']];
   const F_LENS = [['any', 'Any lens', 'glass_pane'], ['Clear', 'Clear', 'droplet'], ['Tinted', 'Tinted', 'circle_half_filled'], ['Odd lenses', 'Odd lenses', 'eye'], ['Mirrored', 'Mirrored', 'reflect'], ['Gradient', 'Gradient', 'sky'], ['Bifocal', 'Bifocal', 'book_open'], ['Rose-tinted', 'Rose-tinted', 'flower']];
   const F_LOGO = [['any', 'Any', 'sticker'], ['yes', 'Grug logo', 'star'], ['no', 'No logo', 'circle']];
@@ -5532,6 +5565,7 @@ window.GrugCatalogHair = function (ctx) {
       ['Block heel slingbacks', { style: 'ankle', soleH: 0.8, heelH: 6, heelType: 'block', soleCol: '#e8344f', bedCol: '#fff6f2', strapCol: '#e8344f', strapW: 1.4, charms: [C_('rose', 1.5, { at: 0.8 })] }],
       ['Pumpkin platforms', { style: 'slide', soleH: 3.6, heelH: 0, soleCol: '#16161a', bedCol: '#f2801f', strapCol: '#f2801f', strapW: 3, charms: [C_('pumpkin', 1.6, { at: 0.5 }), C_('bat', 1.4, { at: -0.4 })] }],
       ['KIMILAND pastel slides', { brand: 'kimiland', style: 'slide', soleH: 1.6, soleCol: '#ffc4dc', soleCol2: '#e0d3ff', soleGrad: true, bedCol: '#fffafc', strapCol: '#fffafc', strapW: 3, charms: [E_('heart', 1.3, '#ffb7d5', { at: 0.6 })] }],
+      ['Cosy slippers', { style: 'slipper', soleH: 1.6, heelH: 0, soleCol: '#fff6f2', bedCol: '#ffc2d6', strapCol: '#ff8fc2', strapCol2: '#fff6f2', strapGrad: true, strapT: 0.5, strapW: 1.2, finish: 'matte', charms: [E_('heart', 1.4, '#e8344f', { at: 0.1 })] }],
       ['KIMILAND KL wraps', { brand: 'kimiland', style: 'wrap', shaft: 14, soleH: 1.4, heelH: 3, soleCol: '#fffafc', bedCol: '#ffc4dc', strapCol: '#ffb7d5', strapCol2: '#fffafc', strapGrad: true, strapW: 0.9, strapT: 0.25, charms: [C_('kimiland-kl', 1.6, { at: 0.8 })] }]
     ],
     purses: [
