@@ -3751,6 +3751,14 @@ window.GrugCatalogHair = function (ctx) {
 
   /* ---------------------------------------------------------------- the body (for necklaces): front and back surfaces of her neck and chest */
   const FLD = { X0: -18, X1: 18, Y0: 95, Y1: 170, S: 0.5 };
+  // her dress has a stiff ruffle over the chest that a necklace would sink into: it's put away while a necklace is on her
+  function ruffleOf(sandy) {
+    if (sandy.__ruffle !== undefined) return sandy.__ruffle; let found = null;
+    sandy.object3d.updateMatrixWorld(true);
+    sandy.object3d.traverse(o => { if (!found && o.isMesh && !o.name && !o.isSkinnedMesh && o.parent && o.parent.name === 'spine_M_03_jnt' && new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3()).x > 25) found = o; });
+    return (sandy.__ruffle = found);
+  }
+  const DRESS_Y = 114;   // while a necklace is on, the dress is cut away above this height (its stiff ruffle would swallow the cord)
   function bodyField(sandy) {
     if (sandy.__jfield) return sandy.__jfield;
     sandy.object3d.updateMatrixWorld(true);
@@ -3951,7 +3959,7 @@ window.GrugCatalogHair = function (ctx) {
 
   window.GrugJewelry = {
     ready, init, build, validate, random, nameFor, tagsFor, families, describe, kindOf, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
-    DEF: dept => DEF[dept](), EL, SHAPES, SHAPE_LABEL, THREAD_SHAPES, FINISHES, CHARMS, CHARM_BY, THEME_LABEL, THEMES, MOUNTS, LINKS, PAIRS, CORDS, KIND_LABEL, BRANDS, BRAND_LABEL, LIMITS, D_MAX,
+    DRESS_Y, DEF: dept => DEF[dept](), EL, SHAPES, SHAPE_LABEL, THREAD_SHAPES, FINISHES, CHARMS, CHARM_BY, THEME_LABEL, THEMES, MOUNTS, LINKS, PAIRS, CORDS, KIND_LABEL, BRANDS, BRAND_LABEL, LIMITS, D_MAX,
     PINKS, PASTEL_OTHER, PASTEL_ACC, PASTEL_METALS, METALS, colourName, charmTexture, geoFor, elH, elName, KIMI_CHARMS
   };
 })();
@@ -4917,7 +4925,7 @@ window.GrugCatalogHair = function (ctx) {
   const JDEPT = { earrings: { label: 'Earrings', one: 'earrings', icon: 'diamond', c: 'var(--g-purple)', studio: 'Earrings studio' }, necklaces: { label: 'Necklaces', one: 'necklace', icon: 'flower', c: 'var(--g-orange)', studio: 'Necklace studio' } };
   const JSW = ['#e8344f', '#ff6fa8', '#ffc2d6', '#fff6f2', '#16161a', '#f2801f', '#f5d21f', '#9be338', '#2e9b48', '#14a3a0', '#4fd8e0', '#2b62d9', '#7d3fc4', '#d4af37', '#c8ccd2'];
   const JSW_KIMI = J.PINKS.slice(0, 6).concat(['#fffafc', '#c4e1ff', '#e0d3ff', '#fff2b8', '#c6f3dd', '#ffd8c4']);
-  const KIMI_CARD = 'hsl(205, 80%, 88%)', KIMI_MANN = 'hsl(222, 38%, 62%)';
+  const KIMI_CARD = '#ffc2dc', KIMI_MANN = 'hsl(222, 38%, 62%)';
   const E_ = (id, size, col, o) => J.EL(Object.assign({ k: 'shape', id, size, col: col || '#ff8fc2' }, o || {}));
   const C_ = (id, size, o) => J.EL(Object.assign({ k: 'charm', id, size }, o || {}));
   const JSTART = {
@@ -4971,8 +4979,11 @@ window.GrugCatalogHair = function (ctx) {
       return rows.map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
     },
     cm(d) { try { return d.cord ? Math.round(J.lengthCm(d)) : 0; } catch (e) { return 0; } },
-    mountItem(it) { const b = J.build(it.dept, it.d); const parent = b.frame === 'head' ? headGroup : scene; parent.add(b.root); b.root.userData.catalogItem = true; return b; },
-    unmount(b) { if (!b) return; if (b.root.parent) b.root.parent.remove(b.root); b.dispose(); },
+    necks: new Set(),
+    mountItem(it) { const b = J.build(it.dept, it.d); const parent = b.frame === 'head' ? headGroup : scene; parent.add(b.root); b.root.userData.catalogItem = true; if (b.frame !== 'head') this.necks.add(b.root); this.syncDress(); return b; },
+    unmount(b) { if (!b) return; if (b.root.parent) b.root.parent.remove(b.root); this.necks.delete(b.root); b.dispose(); this.syncDress(); },
+    // the dress's ruffle is put away while any necklace is on her
+    syncDress() {},
     // what the camera frames: the pieces themselves with some room
     frameBox(root, it) { sandy.object3d.updateMatrixWorld(true); const near = it.dept === 'earrings' && root.children[0] && root.children[0].children[0]; const box = new THREE.Box3().setFromObject(near || root); box.expandByVector(it.dept === 'earrings' ? new THREE.Vector3(3, 2.5, 4) : new THREE.Vector3(1.5, 1.5, 4)); return box; },
     centre() { const b = this.built; if (!b) return new THREE.Vector3(0, this.dept === 'earrings' ? 150 : 135, 0); b.root.updateMatrixWorld(true); return new THREE.Box3().setFromObject(b.root).getCenter(new THREE.Vector3()); },
@@ -5213,7 +5224,7 @@ window.GrugCatalogHair = function (ctx) {
   let last = performance.now();
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
-    hideFaceHair();
+    hideFaceHair(); JM.syncDress();
     if (hover.a) {
       // a slow turn around her head
       hover.t += dt; const yaw = 0.5 + hover.t * 0.7, cp = Math.cos(hover.pitch);
