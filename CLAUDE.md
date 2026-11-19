@@ -187,6 +187,12 @@ way until the owner says a business has agreed in writing.
 - **The placeholder** `placeholder18` (games.js, `games/placeholder18/`, `play/placeholder18/`, `assets/boxart/placeholder18.jpg`)
   is a blank 18+ game for previewing all of this. Remove those four before launch.
 
+## The accessory catalog (`labs/catalog/`, unlisted)
+
+Eyewear, hair, earrings, necklaces, purses and sandals on a grey mannequin, with editors and one-texture downloads.
+`labs/catalog/index.html` is **built**: edit `tools/catalog/` (`src/jewelry.js`, `src/int.js`, `build.py`) and run
+`python3 tools/catalog/build.py`. Read `tools/catalog/README.md` first; it has the map and the checklist for adding a category.
+
 ## Contact us (`assets/contact.js`)
 
 Grug Digital's own contact details (Discord, Instagram, text number, email) live in `GRUG_CONTACT` at the top of
