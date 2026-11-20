@@ -74,6 +74,17 @@
     return n;
   }
   function player() { return normal(migrate() || {}); }
+  /* The closet avatar is everyone's default (Nov 2026): a player's look is moved to it once (avatarV: 2), unless they play
+     the archived classic one. Picking a blocky skin or hat in avatar/look.html saves avatarV: 2 without closet, and stays. */
+  function defaultCloset() {
+    try {
+      const c = migrate(); if (c && c.avatarV >= 2) return;
+      const n = Object.assign({ model: 'block', skin: 'skaterFemaleA', hat: clone(HAT_DEF) }, c && typeof c === 'object' ? c : {}, { avatarV: 2 });
+      if (n.classic !== true) { n.closet = true; n.classic = false; }
+      write(KEY, n);
+    } catch (e) {}
+  }
+  defaultCloset();
 
   /* ---------------- the model, decoded once ---------------- */
   const b64buf = s => { const b = atob(s.slice(s.indexOf(',') + 1)), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u.buffer; };

@@ -15,8 +15,8 @@ integ=open(os.path.join(HERE,'src','int.js')).read()
 closet=open(os.path.join(HERE,'src','closet.js')).read()
 
 # ---- script
-# the catalog wears the game kit's newest runtime (the new feet, Nov 2026), shipped next to it in labs/catalog/vendor/
-rep("if (/\\/labs\\//.test(location.pathname)) RUNTIME.unshift(RUNTIME.splice(RUNTIME.indexOf('../../assets/sandy-runtime.js'), 1)[0]);","if (/\\/labs\\//.test(location.pathname)) RUNTIME.unshift(RUNTIME.splice(RUNTIME.indexOf('vendor/sandy-runtime.js'), 1)[0]);")
+# on the site the catalog loads the site's runtime, which loads the classic kit (assets/sandy-classic.js: the only copy, with
+# the new feet); the vendor/ copies it once carried (old and new feet side by side) are gone
 rep("const ON_SITE = !!(K && K.model === 'block');","const ON_SITE = !!(K && K.model === 'block'), ON_LABS = /\\/labs\\//.test(location.pathname);")
 rep("renderer.setPixelRatio(ON_SITE ?","renderer.setPixelRatio(ON_SITE || ON_LABS ?")
 # the mannequin's nails: no polish, the same grey as her skin (the new feet mark their nails per vertex and tint them)
@@ -311,6 +311,9 @@ css = """
 #closet .cl-panel{position:absolute;top:0;bottom:0;left:0;width:var(--panel-w);display:flex;flex-direction:column;background:var(--g-surface);padding-top:3.6rem;box-shadow:1px 0 0 var(--g-line);z-index:2}
 #closet .cl-mode{position:absolute;top:.65rem;left:calc(var(--panel-w) / 2);transform:translateX(-50%);z-index:6;box-shadow:var(--g-sh-1);background:var(--g-surface)}
 #closet .cl-mode button{white-space:nowrap}
+#closet .cl-mode{display:flex;flex-wrap:nowrap;width:max-content;gap:.15rem}
+/* the site's dock (avatar/): room under the lists so nothing hides behind it */
+body.g-chrome #closet .cl-body,body.g-chrome #closet .cl-detail{padding-bottom:6.5rem}
 #closet .cl-grip{display:none}
 #closet .cl-tabrow{display:flex;align-items:center;gap:.6rem;padding:0 1rem;border-bottom:1px solid var(--g-line)}
 #closet .cl-tabs,#closet .cl-subs{display:flex;gap:.15rem;overflow-x:auto;overflow-y:hidden;flex:1;min-width:0;scroll-behavior:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
@@ -489,6 +492,9 @@ open(os.path.join(REPO,'labs','catalog','index.html'),'w').write(s)
 av = s.replace("'../../assets/", "'../assets/").replace('"../../assets/', '"../assets/').replace('(../../assets/', '(../assets/')
 av = av.replace("/\\/labs\\//.test(location.pathname)", "/\\/(labs|avatar)\\//.test(location.pathname)")
 av = av.replace("const HAIR_STUDIO = /\\/(labs|avatar)\\//.test(location.pathname) ? '../hair-studio-x8f3k2/'", "const HAIR_STUDIO = /\\/avatar\\//.test(location.pathname) ? '../labs/hair-studio-x8f3k2/' : /\\/labs\\//.test(location.pathname) ? '../hair-studio-x8f3k2/'")
+# the site's dock (Home, Games, Me, Make) under the closet: the site's styles first (the page's own win), then its scripts
+av = av.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<link rel="stylesheet" href="../assets/grug.css">\n<script src="../assets/theme.js?v=av2"></script>', 1)
+av = av.replace('</body>', '<script src="../assets/sandy-view.js?v=av2"></script>\n<script src="../assets/icons.js"></script>\n<script src="../assets/grug.js?v=av2"></script>\n<script>try { Grug.ui.chrome(\'avatar\', { dockOnly: true }); } catch (e) { console.warn(\'dock\', e); }</script>\n</body>', 1)
 assert '../../' not in av, [m for m in __import__('re').findall(r".{30}\.\./\.\./.{30}", av)][:5]
 open(os.path.join(REPO,'avatar','index.html'),'w').write(av)
 

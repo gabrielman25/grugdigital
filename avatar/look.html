@@ -146,7 +146,7 @@ body.is-classic #pg-character .grid,body.is-classic #pg-hat .grid,body.is-classi
 
   /* ---------- the look ---------- */
   let cfg = K.player();                                   // migrates a classic look the first time
-  const save = () => { const c = { model: 'block', skin: cfg.skin, hat: cfg.hat, classic: !!cfg.classic }; const old = (() => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } })(); if (old.classicAt) c.classicAt = old.classicAt; try { localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) {} return c; };
+  const save = () => { const c = { model: 'block', skin: cfg.skin, hat: cfg.hat, classic: !!cfg.classic, avatarV: 2 };   // a choice made here stays (no closet: the blocky avatar) const old = (() => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } })(); if (old.classicAt) c.classicAt = old.classicAt; try { localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) {} return c; };
 
   /* ---------- the stage: a still picture, live only while an emote plays ---------- */
   const cv = $('cv'), host = $('stage');

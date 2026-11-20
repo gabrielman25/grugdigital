@@ -4391,6 +4391,8 @@ window.GrugClosetRuntime = (function () {
     const J0 = window.GrugJewelry; if (opts.random != null) await J0.ready();
     const st = opts.random != null ? randomState(opts.random, opts.cfg, opts.team) : (read(CL_KEY) || {}), wardrobe = Array.isArray(st.wardrobe) ? st.wardrobe : [], wearing = st.wearing || {}, bare = !!opts.bare;
     const body = Object.assign({ skin: '#d9a67e', nails: '', expression: 'smug', footShape: 'none', build: {} }, st.body || {});
+    // a classic hairstyle she wears in the closet (kit:long, kit:buns): her own hair in that style and colour
+    { const hw = wearing.hair && wardrobe.find(e => e.id === wearing.hair); if (hw && /^kit:/.test(hw.id)) st.kitHair = { style: hw.id === 'kit:buns' ? 1 : 0, colour: hw.col || '#2a1a12', size: 1, up: 0, forward: 0 }; }
     // made in the catalog's colours first, so each part of her can be told apart, then given hers (as the closet does)
     const hat = opts.cfg && opts.cfg.hat && opts.cfg.hat.type && opts.cfg.hat.type !== 'none' ? opts.cfg.hat : { type: 'none' };
     const base = bare ? Object.assign(JSON.parse(JSON.stringify(opts.cfg || {})), { body: 'female', skin: SKIN0, nails: SKIN0 }) : { body: 'female', skin: SKIN0, nails: SKIN0, expression: 'neutral', earrings: { type: 'none' }, hat, top: null, legs: null, feet: { type: 'flipflops', sole: GREY, strap: GREY } };

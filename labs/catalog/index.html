@@ -616,6 +616,9 @@ button{font-family:var(--g-font)}
 #closet .cl-panel{position:absolute;top:0;bottom:0;left:0;width:var(--panel-w);display:flex;flex-direction:column;background:var(--g-surface);padding-top:3.6rem;box-shadow:1px 0 0 var(--g-line);z-index:2}
 #closet .cl-mode{position:absolute;top:.65rem;left:calc(var(--panel-w) / 2);transform:translateX(-50%);z-index:6;box-shadow:var(--g-sh-1);background:var(--g-surface)}
 #closet .cl-mode button{white-space:nowrap}
+#closet .cl-mode{display:flex;flex-wrap:nowrap;width:max-content;gap:.15rem}
+/* the site's dock (avatar/): room under the lists so nothing hides behind it */
+body.g-chrome #closet .cl-body,body.g-chrome #closet .cl-detail{padding-bottom:6.5rem}
 #closet .cl-grip{display:none}
 #closet .cl-tabrow{display:flex;align-items:center;gap:.6rem;padding:0 1rem;border-bottom:1px solid var(--g-line)}
 #closet .cl-tabs,#closet .cl-subs{display:flex;gap:.15rem;overflow-x:auto;overflow-y:hidden;flex:1;min-width:0;scroll-behavior:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
@@ -5550,7 +5553,7 @@ window.GrugCatalogHair = function (ctx) {
   function loadOne(src) { return new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = () => window.SandyKit ? ok(window.SandyKit) : no(new Error('no SandyKit')); s.onerror = () => { s.remove(); no(new Error('failed ' + src)); }; document.head.appendChild(s); }); }
   let K = window.SandyKit;
   // on the site (labs/…) the runtime is two folders up; in the kit it's in vendor/
-  if (/\/labs\//.test(location.pathname)) RUNTIME.unshift(RUNTIME.splice(RUNTIME.indexOf('vendor/sandy-runtime.js'), 1)[0]);
+  if (/\/labs\//.test(location.pathname)) RUNTIME.unshift(RUNTIME.splice(RUNTIME.indexOf('../../assets/sandy-runtime.js'), 1)[0]);
   if (!K) for (const src of RUNTIME) { try { K = await loadOne(src); break; } catch (e) {} }
   // on the Grug site, sandy-runtime.js is the new blocky avatar: the female Sandy (the classic kit) loads through it on demand
   const ON_SITE = !!(K && K.model === 'block'), ON_LABS = /\/labs\//.test(location.pathname);
@@ -7067,6 +7070,12 @@ window.GrugCatalogHair = function (ctx) {
     wardrobe: [], wearing: {}, body: BODY0(), mounted: {}, tok: {}, goal: null, hist: { stack: [], i: -1 }, sheet: 'half', real: false, shapeKey: ''
   };
   { const s = store.get(CL_KEY, null); if (s) { CL.wardrobe = Array.isArray(s.wardrobe) ? s.wardrobe : []; CL.wearing = s.wearing || {}; CL.body = Object.assign(BODY0(), s.body || {}); CL.body.build = Object.assign({}, (s.body && s.body.build) || {}); } else if (HD && HD.byId('h:long')) { const h = HD.byId('h:long'); CL.wardrobe = [{ id: h.id, dept: 'hair', name: h.name, by: h.by }]; CL.wearing = { hair: h.id }; } }
+  // the classic avatar's own long hair and buns (her stock hairstyles 0 and 1), in every wardrobe from the start (once: a player
+  // can still remove them). Worn, her own hair takes that style in its colour (entry.col); the game runtime does the same
+  const KIT_HAIR = [['kit:long', 0, 'Classic long hair', 'long'], ['kit:buns', 1, 'Classic buns', 'medium']], KIT_HAIR_COL = '#2a1a12';
+  const kitHairItem = (id, col) => { const k = KIT_HAIR.find(x => x[0] === id); if (!k) return null; const c = col || KIT_HAIR_COL;
+    return { id, dept: 'hair', kit: k[1], name: k[2], by: 'Grug Digital', brand: 'grug', length: k[3], style: 'Classic', tags: ['classic', k[3]], sw: c, hex: c, colour: J.colourName(c), desc: 'The classic avatar\'s own ' + (k[1] ? 'buns' : 'long hair') + ', in any colour.', base: id, stamp: col || 0, order: 0 }; };
+  { const s = store.get(CL_KEY, null); if (!(s && s.kitHair)) { for (const [id, , name] of KIT_HAIR) if (!CL.wardrobe.some(e => e.id === id)) CL.wardrobe.push({ id, dept: 'hair', name, by: 'Grug Digital' }); CL.kitHair = 1; } else CL.kitHair = 1; }
   // the classic kit's clothing is gone (the Modular Anime Character pack replaced it): its pieces leave the wardrobe
   CL.wardrobe = CL.wardrobe.filter(e => e.dept !== 'clothing'); delete CL.wearing.clothing;
   for (const k of Object.keys(CL.wearing)) if (!CL.wardrobe.some(e => e.id === CL.wearing[k])) delete CL.wearing[k];
@@ -7076,11 +7085,11 @@ window.GrugCatalogHair = function (ctx) {
     try {
       const K = 'grug.sandy.v1', CK = 'grug.sandy.classic.v1'; let c = JSON.parse(localStorage.getItem(K) || 'null');
       if (c && typeof c === 'object' && c.model !== 'block') { if (!localStorage.getItem(CK)) localStorage.setItem(CK, JSON.stringify(c)); c = null; }
-      c = Object.assign({ model: 'block', skin: 'skaterFemaleA', hat: { type: 'none' } }, c || {}, { closet: true, classic: false, closetAt: Date.now() });
+      c = Object.assign({ model: 'block', skin: 'skaterFemaleA', hat: { type: 'none' } }, c || {}, { closet: true, classic: false, closetAt: Date.now(), avatarV: 2 });
       localStorage.setItem(K, JSON.stringify(c));
     } catch (e) {}
   }
-  const clSave = () => { if (!store.set(CL_KEY, { wardrobe: CL.wardrobe, wearing: CL.wearing, body: CL.body })) GRUG.toast('Your browser is out of room for your wardrobe'); clearTimeout(clSave.t); clSave.t = setTimeout(playAsCloset, 400); };
+  const clSave = () => { if (!store.set(CL_KEY, { wardrobe: CL.wardrobe, wearing: CL.wearing, body: CL.body, kitHair: 1 })) GRUG.toast('Your browser is out of room for your wardrobe'); clearTimeout(clSave.t); clSave.t = setTimeout(playAsCloset, 400); };
 
   /* ---- light or dark: the site's own setting */
   const siteMode = () => { try { const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null'); return p && p.prefs && p.prefs.mode === 'dark' ? 'dark' : 'light'; } catch (e) { return 'light'; } };
@@ -7143,17 +7152,34 @@ window.GrugCatalogHair = function (ctx) {
   }
   function itemOf(e) {
     if (!e) return null;
-    if (e.dept === 'hair') { const h = HD ? HD.byId(e.id) : null; return e.col ? dyedHair(h, e.col) : h; }
+    if (e.dept === 'hair') { if (/^kit:/.test(e.id)) return kitHairItem(e.id, e.col); const h = HD ? HD.byId(e.id) : null; return e.col ? dyedHair(h, e.col) : h; }
     if (e.dept === 'eyewear') { const d = GE.validate(e.d).d; return { id: e.id, seed: e.seed, d, name: e.name, kind: GE.classify(d), by: e.by || 'Grug Digital', brand: e.brand || 'grug', order: 0, stamp: e.stamp || 0 }; }
     return JM.item(e.dept, e.id, e.seed, e.d, { name: e.name, by: e.by, brand: e.brand || (e.d && e.d.brand) || 'grug', gen: false, stamp: e.stamp || 0 });
   }
   const wardrobeItems = dept => CL.wardrobe.filter(e => !dept || dept === 'all' || e.dept === dept).map(e => { const it = itemOf(e); if (it) it._entry = e; return it; }).filter(Boolean);
   const wornItem = slot => { const id = CL.wearing[slot]; return id ? itemOf(entryFor(id)) : null; };
   const wornSig = it => it ? it.id + '|' + (it.stamp || 0) : '';
+  // a classic hairstyle on her: her own hair mesh in that style, in its colour (card pictures hide it, as they hide all hair)
+  function kitHairOn(it) {
+    const n3 = sandy.n3, m = n3.hairMesh; if (!m) return { root: new THREE.Group(), dispose() {} };
+    m.material = greyMat; n3.setHairStyle(it.kit);
+    const mat = new THREE.MeshStandardMaterial({ map: greyMat.map, color: new THREE.Color(it.hex).convertSRGBToLinear(), side: THREE.DoubleSide, roughness: 0.75, metalness: 0 });
+    m.material = mat; setHair(false);
+    return { root: new THREE.Group(), dispose() { if (m.material === mat) { m.material = greyMat; setHair(true); } mat.dispose(); } };
+  }
+  // its card picture: the style on the mannequin's head, in the mannequin's colour
+  { const th0 = thumbHair; thumbHair = async function (it, bodyColour) {
+    if (it.kit == null) return th0(it, bodyColour);
+    const n3 = sandy.n3, m = n3.hairMesh, st0 = n3.hairStyle, mat0 = m.material; m.material = greyMat; n3.setHairStyle(it.kit);
+    const back = soloItem(null); sandy.object3d.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(m).union(new THREE.Box3().setFromObject(n3.headMesh)); frameOn(box, 0.5, 0.12, thumbCam, 26, 1.0);
+    const url = snapScene(bodyColour, false); back(); n3.setHairStyle(st0); m.material = mat0; return url;
+  }; }
   async function mountSlot(slot, it) {
     const tok = (CL.tok[slot] = (CL.tok[slot] || 0) + 1); unmountSlot(slot); if (!it) return; let b;
     try {
       if (slot === 'eyewear') { b = GE.build(it.d, hm, { seed: it.seed }); b.root.userData.catalogItem = true; headGroup.add(b.root); }
+      else if (slot === 'hair' && it.kit != null) b = kitHairOn(it);
       else if (slot === 'hair') { b = await HD.live(it, 'low'); if (tok !== CL.tok[slot] || !CL.on) { b.dispose(); return; } headGroup.add(b.root); }
       else { await J.prep(deptOf(it), it.d); if (tok !== CL.tok[slot] || !CL.on) return; b = JM.mountItem(it); }
     } catch (e) { console.warn('wear', slot, e); return; }
@@ -7363,7 +7389,7 @@ window.GrugCatalogHair = function (ctx) {
   // the hair she has on, in any colour
   function hairColour(box) {
     const id = CL.wearing.hair, e = id && entryFor(id); if (!e) return;
-    const h = HD.byId(e.id), g = grp2(box, 'Hair colour', h ? h.name : ''), orig = el('button', 'cl-sw cl-orig' + (e.col ? '' : ' on'), '<span>Original</span>'); orig.style.background = h ? (String(h.sw).includes('gradient') ? h.sw : h.hex) : '#888';
+    const h = /^kit:/.test(e.id) ? kitHairItem(e.id) : HD.byId(e.id), g = grp2(box, 'Hair colour', h ? h.name : ''), orig = el('button', 'cl-sw cl-orig' + (e.col ? '' : ' on'), '<span>Original</span>'); orig.style.background = h ? (String(h.sw).includes('gradient') ? h.sw : h.hex) : '#888';
     orig.setAttribute('data-g-tip', 'Its own colours'); orig.onclick = () => { delete e.col; entryChanged(e); };
     colourRow(g, e.col, HAIR_SW, (c, f) => { e.col = c; entryChanged(e, f); }, orig);
   }
@@ -7449,6 +7475,7 @@ window.GrugCatalogHair = function (ctx) {
     v.querySelector('[data-equip]').onclick = () => { if (on) takeOff(it); else addToWardrobe(it, true); };
     v.querySelector('[data-add]').onclick = () => { if (!mineIt) addToWardrobe(it, false); };
     v.querySelector('[data-fav]').onclick = () => { toggleFav(it); clDetail(); };
+    if (it.kit != null) for (const q of v.querySelectorAll('[data-edit],.rollbtn')) q.remove();   // the classic hairstyles: no studio, no files
     if (v.querySelector('[data-dl]')) formatMenu(v.querySelector('[data-dl]'), v.querySelector('.fmtmenu'), () => it);
     v.querySelector('[data-edit]').onclick = () => openStudio(it);
     const like = v.querySelector('[data-like]'); for (const li of likeOf(it)) { const a = card(li, 'worn', { gen: -1 }); like.append(a); a._thumb(); }

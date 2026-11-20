@@ -202,9 +202,15 @@ The same build writes **`avatar/index.html`** (the site's Avatar section is the 
 folder up) and **`assets/closet-runtime.js`** (below). Never edit either by hand. The old blocky editor (skins, hats, emotes,
 the classic switch) is kept at `avatar/look.html` (the emote wheel's "Emotes are picked in…" link goes there).
 
-**Players wear the closet avatar in games.** Opening or changing the closet saves `closet: true` (and a `closetAt` stamp, so
-the site's pictures are retaken) in the player's look `grug.sandy.v1`; picking a blocky skin, a hat or the classic switch in
-`avatar/look.html` saves a look without it. `SandyKit.create(look)` with `closet: true` loads the classic kit and
+**The closet avatar is everyone's default in games.** sandy-runtime.js moves every player's look (`grug.sandy.v1`) to
+`closet: true` once (`avatarV: 2`, `defaultCloset()` in tools/avatar/src/kit.js), unless they play the archived classic
+look; opening or changing the closet stamps `closetAt` (so the site's pictures are retaken). Only picking a blocky skin, a
+hat or the classic switch in `avatar/look.html` saves a look without `closet` (with `avatarV: 2`, so it stays).
+The wardrobe starts with the classic avatar's own **long hair and buns** (`kit:long`, `kit:buns`: her stock hairstyles 0 and
+1, any colour, no studio or download), worn in games too. The site's dock sits under the closet at `avatar/`
+(`Grug.ui.chrome('avatar', {dockOnly: true})`, added by the build). **One feet model:** `assets/sandy-classic.js` has the new
+feet (feet.obj); the catalog's and the Hair Studio's own `vendor/` copies are gone, so every page and game loads that one.
+**Offline copy:** `python3 tools/catalog/offline.py` zips the editor so it opens from a folder with no server or internet. `SandyKit.create(look)` with `closet: true` loads the classic kit and
 `assets/closet-runtime.js` (the catalog's eyewear, hair, pattern and jewelry engines plus `tools/catalog/src/dress.js`), which
 builds the classic Sandy in the closet's body (`grug.closet.v1`: skin, nails, face, build, feet) wearing what she has on.
 Clothes are skinned and head pieces ride her head; necklaces, purses, sandals, swords and cords are pinned to the nearest bone

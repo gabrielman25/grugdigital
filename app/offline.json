@@ -1,5 +1,5 @@
 {
- "v": "54275c006124",
+ "v": "4ce54c1d823c",
  "apps": {
   "grug": [
    "grug",
@@ -123,7 +123,7 @@
     "/assets/carts/stack.jpg": "305facea0b",
     "/assets/carts/zigzag.jpg": "4ffdf061c4",
     "/assets/catalog.js": "c3fad72d68",
-    "/assets/closet-runtime.js": "63b766f4b9",
+    "/assets/closet-runtime.js": "0482d487be",
     "/assets/closet/stage-bg.jpg": "b6046313ff",
     "/assets/clothes/blazer.bin": "83626c7fd5",
     "/assets/clothes/boots.bin": "61168fe202",
@@ -338,7 +338,7 @@
     "/assets/games.js": "7116ea2815",
     "/assets/gold.js": "473c93ee87",
     "/assets/grug.css": "0dafe96312",
-    "/assets/grug.js": "350cd4f4ec",
+    "/assets/grug.js": "f812c0e493",
     "/assets/icons.js": "d421bed707",
     "/assets/links.css": "5be746f1ee",
     "/assets/links.js": "8ad0bef667",
@@ -352,8 +352,8 @@
     "/assets/qrcode.js": "1695445831",
     "/assets/rewards.css": "35ee1500c7",
     "/assets/rewards.js": "6467d3f969",
-    "/assets/sandy-classic.js": "a0e5fdafbc",
-    "/assets/sandy-runtime.js": "4aac7ae265",
+    "/assets/sandy-classic.js": "d1ff72fde1",
+    "/assets/sandy-runtime.js": "f37798e0d6",
     "/assets/sandy-view.js": "91791b8312",
     "/assets/sandy/bust.png": "7f0ef0ea50",
     "/assets/sandy/cheer.png": "4ef0fb1752",
@@ -371,8 +371,8 @@
     "/avatar/classic/": "fd7b980fbc",
     "/avatar/classic/nav.css": "cf311bd758",
     "/avatar/classic/nav.js": "6a7b98ad23",
-    "/avatar/": "0ba961e594",
-    "/avatar/look.html": "a5128fb3ec",
+    "/avatar/": "5a78401c45",
+    "/avatar/look.html": "83e232eec8",
     "/create/create.js": "b0b471ab18",
     "/create/": "02d9540aef",
     "/create/market-icons.js": "0199a5d977",
@@ -420,7 +420,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 36521275
+   "bytes": 37873776
   },
   "daypart": {
    "title": "Daypart",
@@ -472,7 +472,7 @@
     "/assets/gamehost.js": "033b37689b",
     "/assets/games.js": "7116ea2815",
     "/assets/grug.css": "0dafe96312",
-    "/assets/grug.js": "350cd4f4ec",
+    "/assets/grug.js": "f812c0e493",
     "/assets/icons.js": "d421bed707",
     "/assets/qrcode.js": "1695445831",
     "/assets/rewards.css": "35ee1500c7",
@@ -501,7 +501,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 2181474
+   "bytes": 2181583
   },
   "tea": {
    "title": "Bubble Tea",
@@ -550,7 +550,7 @@
     "/assets/gamehost.js": "033b37689b",
     "/assets/games.js": "7116ea2815",
     "/assets/grug.css": "0dafe96312",
-    "/assets/grug.js": "350cd4f4ec",
+    "/assets/grug.js": "f812c0e493",
     "/assets/qrcode.js": "1695445831",
     "/assets/rewards.js": "6467d3f969",
     "/assets/sandy-view.js": "91791b8312",
@@ -565,7 +565,7 @@
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93"
    },
-   "bytes": 1243553
+   "bytes": 1243662
   },
   "cafe": {
    "title": "Caf\u00e9",
@@ -614,7 +614,7 @@
     "/assets/gamehost.js": "033b37689b",
     "/assets/games.js": "7116ea2815",
     "/assets/grug.css": "0dafe96312",
-    "/assets/grug.js": "350cd4f4ec",
+    "/assets/grug.js": "f812c0e493",
     "/assets/qrcode.js": "1695445831",
     "/assets/rewards.js": "6467d3f969",
     "/assets/sandy-view.js": "91791b8312",
@@ -629,7 +629,7 @@
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93"
    },
-   "bytes": 1251254
+   "bytes": 1251363
   },
   "game:runway": {
    "title": "Runway Ready",

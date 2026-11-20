@@ -728,7 +728,8 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !tray.hidden) { const g = trayFor; closeTray(); const b = $('.g-grp[data-grp="' + g + '"]', tabs); if (b) b.focus(); } });
     root.addEventListener('resize', closeTray); root.addEventListener('scroll', closeTray, { passive: true });
     document.body.appendChild(tray);
-    document.body.prepend(top); document.body.appendChild(tabs);
+    // opts.dockOnly: just the dock (a page with its own top bar: the closet at avatar/)
+    if (!opts.dockOnly) document.body.prepend(top); document.body.appendChild(tabs);
     // partner mode: the partner app's tab bar (.g-pbar) is put in by theme.js with the top bar
     document.body.classList.add('g-chrome');
     // the account menu under the avatar

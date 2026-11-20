@@ -1991,7 +1991,7 @@ window.GrugHairBoot = function () {
    ===================================================================================== */
 (async function () {
   'use strict';
-  const RUNTIME = ['../vendor/sandy-runtime.js', 'vendor/sandy-runtime.js', '../assets/sandy-runtime.js', '../../assets/sandy-runtime.js', 'https://gabrielman25.github.io/grugdigital/assets/sandy-runtime.js'];
+  const RUNTIME = /\/labs\//.test(location.pathname) ? ['../../assets/sandy-runtime.js'] : ['../vendor/sandy-runtime.js', 'vendor/sandy-runtime.js', '../assets/sandy-runtime.js', '../../assets/sandy-runtime.js', 'https://gabrielman25.github.io/grugdigital/assets/sandy-runtime.js'];
   const KEY = 'grug.hair.v1';
   const LOOK = { body: 'female', skin: '#b98059', expression: 'pout', earrings: { type: 'hoops' },
     top: { part: 'mh_toigo_strapless_ruffle_top_dress', texture: 'mh_toigo_strapless_ruffle_top_dress', colour: '#ff6fae' },
@@ -2012,6 +2012,8 @@ window.GrugHairBoot = function () {
   function loadOne(src) { return new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = () => window.SandyKit ? ok(window.SandyKit) : no(new Error('no SandyKit')); s.onerror = () => { s.remove(); no(new Error('failed ' + src)); }; document.head.appendChild(s); }); }
   let K = window.SandyKit;
   if (!K) for (const src of RUNTIME) { try { K = await loadOne(src); break; } catch (e) {} }
+  // on the site the runtime is the blocky avatar's: her (the classic kit, assets/sandy-classic.js) loads through it
+  if (K && K.model === 'block' && typeof K.loadClassic === 'function') { try { K = await K.loadClassic(); } catch (e) { K = null; } }
   if (!K) { const m = 'Couldn\'t load her. Put this page in the Grug game kit (next to vendor/sandy-runtime.js).'; loadMsg(m); const cg = document.getElementById('catGrid'); if (cg) cg.innerHTML = '<div class="cload">' + m + '</div>'; return; }
   if (!window.GrugHair && window.GrugHairBoot) window.GrugHairBoot();
   const H = window.GrugHair, PR = window.GrugHairPresets, { clamp, lerp, D2R } = H.util;
