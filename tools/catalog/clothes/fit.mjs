@@ -98,6 +98,19 @@ for (let i = 0; i < SNV; i++) { const k = hk(SP[i * 3], SP[i * 3 + 1], SP[i * 3 
 function nearS(p, n, region) { const out = []; const cx = Math.floor(p.x / CELL), cy = Math.floor(p.y / CELL), cz = Math.floor(p.z / CELL); for (let R = 1; R <= 6 && out.length < n; R++) { out.length = 0; for (let x = cx - R; x <= cx + R; x++) for (let y = cy - R; y <= cy + R; y++) for (let z = cz - R; z <= cz + R; z++) { const a = HASH.get(x + ',' + y + ',' + z); if (!a) continue; for (const i of a) { if (region && sDom[i] !== region && !(region === 'torso' && /thigh|uarm/.test(sDom[i]))) continue; const d = (SP[i * 3] - p.x) ** 2 + (SP[i * 3 + 1] - p.y) ** 2 + (SP[i * 3 + 2] - p.z) ** 2; out.push([d, i]); } } } out.sort((a, b) => a[0] - b[0]); return out.slice(0, n); }
 
 /* ---- one garment */
+let SHOE = false;
+// each foot: the pack's ankle and toe, hers, and the move from one to the other (turn about the vertical, uniform scale)
+const FEET = ['L', 'R'].map(sd => {
+  const a0 = AJ['CC_BaseFoot' + sd], t0 = AJ['CC_BaseToeBase' + sd], a1 = SJ['leg_' + sd + '_foot_jnt'], t1 = SJ['leg_' + sd + '_ball_jnt'];
+  const h0 = V(t0.x - a0.x, 0, t0.z - a0.z), h1 = V(t1.x - a1.x, 0, t1.z - a1.z), ang = Math.atan2(h1.x, h1.z) - Math.atan2(h0.x, h0.z);
+  const M = new THREE.Matrix4().makeRotationY(ang), k = h1.length() / h0.length();
+  let soleA = 1e9; for (let i = 0; i < AP.length; i++) if (AR[i] === 'foot' + sd) soleA = Math.min(soleA, AP[i].y);
+  let soleS = 1e9; for (let i = 0; i < SNV; i++) if (sDom[i] === 'foot' + sd) soleS = Math.min(soleS, SP[i * 3 + 1]);
+  // her sole where the pack's sole lands after the move
+  const dy = soleS - (a1.y + (soleA - a0.y) * k);
+  if (process.env.FEETDBG) console.log(sd, 'pack ankle', a0.toArray().map(v => v.toFixed(1)), 'hers', a1.toArray().map(v => v.toFixed(1)), 'turn', (ang * 57.3).toFixed(1), 'scale', k.toFixed(2), 'dy', dy.toFixed(2));
+  return { sd, a0, a1, M, k, dy, ankY: a0.y, sx: Math.sign(a0.x), bone: S.bones.indexOf('leg_' + sd + '_foot_jnt') };
+});
 function fit(file) {
   const ms = load(file), parts = [];
   for (const m of ms) {
@@ -120,9 +133,20 @@ function fit(file) {
     for (let t = 0; t < n; t += 3) for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) if (a !== b) nb[wid[t + a]].add(wid[t + b]);
     for (let pass = 0; pass < 6; pass++) { const C = D.slice(); for (let k = 0; k < W; k++) { let x = 0, y = 0, z = 0, c = 0; for (const j of nb[k]) { x += C[j * 3]; y += C[j * 3 + 1]; z += C[j * 3 + 2]; c++; } if (c) { D[k * 3] = C[k * 3] * 0.5 + x / c * 0.5; D[k * 3 + 1] = C[k * 3 + 1] * 0.5 + y / c * 0.5; D[k * 3 + 2] = C[k * 3 + 2] * 0.5 + z / c * 0.5; } } }
     for (let i = 0; i < n; i++) { const p = new THREE.Vector3().fromBufferAttribute(P, i).applyMatrix4(BM); out[i * 3] = p.x + D[wid[i] * 3]; out[i * 3 + 1] = p.y + D[wid[i] * 3 + 1]; out[i * 3 + 2] = p.z + D[wid[i] * 3 + 2]; }
+    // Shoes keep their own shape: the foot part is moved whole (turned to her foot's direction, scaled by foot length, its
+    // sole on her sole) and her feet are hidden under it. Only a boot's shaft, above the ankle, is fitted round her leg.
+    const rigid = new Float32Array(n);
+    if (SHOE) for (let i = 0; i < n; i++) {
+      const p = new THREE.Vector3().fromBufferAttribute(P, i).applyMatrix4(BM), F = FEET[p.x * FEET[0].sx > 0 ? 0 : 1];
+      const t = Math.max(0, Math.min(1, (F.ankY + 14 - p.y) / 6)), w = t * t * (3 - 2 * t); rigid[i] = w; if (!w) continue;
+      const q = p.clone().sub(F.a0).applyMatrix4(F.M).multiplyScalar(F.k).add(F.a1); q.y += F.dy;
+      out[i * 3] += (q.x - out[i * 3]) * w; out[i * 3 + 1] += (q.y - out[i * 3 + 1]) * w; out[i * 3 + 2] += (q.z - out[i * 3 + 2]) * w;
+      const nn = new THREE.Vector3().fromBufferAttribute(N, i).applyMatrix4(F.M), cur = V(nrm[i * 3], nrm[i * 3 + 1], nrm[i * 3 + 2]).lerp(nn, w).normalize(); nrm.set([cur.x, cur.y, cur.z], i * 3);
+    }
     // nothing inside her: pushed out along her skin's normal; and her skin weights, from her nearest skin
     const si = new Uint16Array(n * 4), sw = new Uint8Array(n * 4);
     for (let i = 0; i < n; i++) {
+      if (rigid[i] > 0.5) { const F = FEET[out[i * 3] * Math.sign(FEET[0].a1.x) > 0 ? 0 : 1]; si[i * 4] = F.bone; sw[i * 4] = 255; continue; }
       const p = V(out[i * 3], out[i * 3 + 1], out[i * 3 + 2]), near = nearS(p, 6, main[i]); if (!near.length) continue;
       for (let pass = 0; pass < 3; pass++) for (const [, j] of nearS(p, 10, null)) { const b = V(SP[j * 3], SP[j * 3 + 1], SP[j * 3 + 2]), bn = V(SN[j * 3], SN[j * 3 + 1], SN[j * 3 + 2]), dv = p.clone().sub(b), d = dv.dot(bn), tan = dv.addScaledVector(bn, -d).length(); if (d < GAP && d > -6 && tan < 2.2) p.addScaledVector(bn, GAP - d); }
       out.set([p.x, p.y, p.z], i * 3);
@@ -163,7 +187,13 @@ function hideList(parts) {
   }
   const nbr = Array.from({ length: SNV }, () => []); for (let t = 0; t < SIDX.length; t += 3) for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) if (a !== b) nbr[SIDX[t + a]].push(SIDX[t + b]);
   // her own vertices share positions across seams: treat them as one
-  const out = []; for (let i = 0; i < SNV; i++) if (cov[i] && nbr[i].every(j => cov[j])) out.push(i);
+  // shoes: her whole feet go, and her ankle up to the shoe's rim (the highest point of the shoe close round her ankle), so no
+  // skin pokes through the opening
+  // (any skin with shoe above it, within a centimetre sideways: a tongue leaning over her shin counts)
+  const TOP = new Map(), ck = (x, z) => Math.round(x) + ',' + Math.round(z);
+  if (SHOE) for (const pt of parts) for (let t = 0; t < pt.n; t++) { const x = pt.P[t * 3], y = pt.P[t * 3 + 1], z = pt.P[t * 3 + 2]; if (y > 40) continue; const k = ck(x, z); if (!(TOP.get(k) > y)) TOP.set(k, y); }
+  const under = i => { if (!SHOE || SP[i * 3 + 1] > 40) return false; const x = SP[i * 3], z = SP[i * 3 + 2]; let top = -1e9; for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) { const v = TOP.get(ck(x + dx, z + dz)); if (v > top) top = v; } return SP[i * 3 + 1] < top - 0.3; };
+  const out = []; for (let i = 0; i < SNV; i++) if ((cov[i] && nbr[i].every(j => cov[j])) || (SHOE && /^foot/.test(sDom[i])) || under(i)) out.push(i);
   return out;
 }
 function pack(parts, hide, file) {
@@ -190,6 +220,7 @@ function pack(parts, hide, file) {
 const LIST = JSON.parse(fs.readFileSync(new URL('./clothes.json', import.meta.url)));
 for (const [id, file] of LIST) {
   if (process.argv[5] && !process.argv.slice(5).includes(id)) continue;
-  const t0 = Date.now(), parts = fit(file), hide = hideList(parts), bytes = pack(parts, hide, OUT + '/' + id + '.bin');
+  // the racing suit has its boots built in
+  SHOE = /shoes|outfit\.004/i.test(file); const t0 = Date.now(), parts = fit(file), hide = hideList(parts), bytes = pack(parts, hide, OUT + '/' + id + '.bin');
   console.log(id, parts.map(p => p.name + ':' + p.n).join(' '), 'hide', hide.length, 'bytes', bytes, (Date.now() - t0) + 'ms');
 }

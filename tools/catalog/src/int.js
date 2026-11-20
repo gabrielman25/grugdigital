@@ -537,7 +537,7 @@
   const CHARM_PIC = e => (e.outline && !J.CHARM_BY[e.id].noOutline ? J.CHARM_BY[e.id].outline : J.CHARM_BY[e.id].src);
   // a picture for a card or a starter tile
   function thumbJewel(it, bodyColour) {
-    const b = JM.mountItem(it), back = soloItem(b.root); sandy.object3d.updateMatrixWorld(true);
+    J.CLOTH_PIC.on = true; let b; try { b = JM.mountItem(it); } finally { J.CLOTH_PIC.on = false; } const back = soloItem(b.root); sandy.object3d.updateMatrixWorld(true);
     frameOn(JM.frameBox(b.root, it), it.dept === 'back' ? (it.d.kind === 'hip' ? 1.25 : 2.6) : J.isCloth(it.dept) ? 0.35 : it.dept === 'earrings' ? 1.0 : it.dept === 'sound' ? (it.d.kind === 'buds' ? 0.95 : 0.55) : it.dept === 'purses' ? 0.25 : it.dept === 'sandals' ? 0.55 : 0.3, it.dept === 'sandals' ? 0.2 : it.dept === 'sound' ? 0.12 : it.dept === 'back' || J.isCloth(it.dept) ? 0.1 : 0.08, thumbCam, 26, 1.0);
     const url = snapScene(bodyColour, true); back(); JM.unmount(b); return url;
   }

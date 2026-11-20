@@ -458,7 +458,13 @@
     look(false); paintBody(GREY); floor.visible = false; ZOOM[0] = 45; ZOOM[1] = 210; if (worn) worn.root.visible = true; setHair(false); JM.syncDress(); clBody.innerHTML = ''; clDet.innerHTML = '';
   }
   // card pictures always show the grey mannequin, and no floor
-  { const snap0 = snapScene; snapScene = function (c, h) { const real = CL.real, fv = floor.visible; if (real) look(false); floor.visible = false; try { return snap0(c, h); } finally { floor.visible = fv; if (real) look(true); } }; }
+  // ... and only the piece being pictured: her own clothes come off for the moment (the basic outfit, in the mannequin's colour)
+  { const snap0 = snapScene; snapScene = function (c, h) {
+    const real = CL.real, fv = floor.visible, w = CL.on && sandy.__wear, keep = w && w.on, solo = w && Object.fromEntries(Object.entries(keep).filter(([, d]) => d.__pic));
+    const strip = w && Object.keys(keep).length !== Object.keys(solo).length; if (strip) { w.on = solo; J.clothSync(sandy); }
+    if (real) look(false); floor.visible = false;
+    try { return snap0(c, h); } finally { floor.visible = fv; if (strip) { for (const k of Object.keys(solo)) keep[k] = w.on[k] || keep[k]; for (const k of Object.keys(keep)) if (keep[k].__pic && !w.on[k]) delete keep[k]; w.on = keep; J.clothSync(sandy); } if (real) look(true); }
+  }; }
   { const hf0 = hideFaceHair; hideFaceHair = function () { hf0(); if (CL.real && sandy.n3.faceMesh) sandy.n3.faceMesh.visible = true; }; }
   { const sd0 = JM.syncDress; JM.syncDress = function () { sd0.call(JM); if (CL.on && sandy.__cut) sandy.__cut.constant = 1e5; }; }
   // routing: the closet is the catalog now (#item/… opens a piece in it); the editors are unchanged
