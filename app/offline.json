@@ -1,5 +1,5 @@
 {
- "v": "ae75fc36ea7c",
+ "v": "8ed3d80e9bcc",
  "apps": {
   "grug": [
    "grug",
@@ -123,7 +123,7 @@
     "/assets/carts/stack.jpg": "305facea0b",
     "/assets/carts/zigzag.jpg": "4ffdf061c4",
     "/assets/catalog.js": "c3fad72d68",
-    "/assets/closet-runtime.js": "b3a1953036",
+    "/assets/closet-runtime.js": "92a390866b",
     "/assets/closet/stage-bg.jpg": "b6046313ff",
     "/assets/clothes/blazer.bin": "94d1fdb747",
     "/assets/clothes/boots.bin": "61168fe202",
@@ -352,7 +352,7 @@
     "/assets/qrcode.js": "1695445831",
     "/assets/rewards.css": "35ee1500c7",
     "/assets/rewards.js": "6467d3f969",
-    "/assets/sandy-classic.js": "62800d7b82",
+    "/assets/sandy-classic.js": "4b8fd2a4e3",
     "/assets/sandy-runtime.js": "f37798e0d6",
     "/assets/sandy-view.js": "91791b8312",
     "/assets/sandy/bust.png": "7f0ef0ea50",
@@ -371,7 +371,7 @@
     "/avatar/classic/": "fd7b980fbc",
     "/avatar/classic/nav.css": "cf311bd758",
     "/avatar/classic/nav.js": "6a7b98ad23",
-    "/avatar/": "88b829f2e6",
+    "/avatar/": "4db61c9d7e",
     "/avatar/look.html": "83e232eec8",
     "/create/create.js": "b0b471ab18",
     "/create/": "02d9540aef",
@@ -420,7 +420,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 37944817
+   "bytes": 37949179
   },
   "daypart": {
    "title": "Daypart",

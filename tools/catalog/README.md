@@ -294,3 +294,12 @@ The pack is made for its own body (a CC_Base rig, about 140 cm, A-pose). `fit.mj
 - Heavy gladiator, wrap and slipper pairs are about 6,000 to 7,000 triangles, over Roblox's 4,000. The item page says
   "over" honestly. Headphones are about 4,000 (up to 8,000 with cloud cups, a mic, a glow ring and a coiled cord).
 - Her toenails stay (removing them broke the toe mesh); `nailAmt = 0` keeps them her grey.
+
+## Sandals fit her foot (Nov 2026)
+
+Her feet are drawn as modelled (see `tools/avatar/README.md`), so nothing about a sandal changes them: her toes are not bent
+down onto a sole and not tucked away inside a slipper (`noToes` is always false). The sandals do the fitting instead: the
+classic flip-flop's sole curls up to her toes (`soleToToes` in `assets/sandy-classic.js`), every catalog sole already comes up
+under her skin slice by slice, straps are hugged onto her posed skin, and a slipper's shell is sized (height, width, and a toe
+that reaches just past her longest toe) to close over her whole foot. A heel still tips her foot at the ankle and ball: that is
+a pose, not a change of shape.

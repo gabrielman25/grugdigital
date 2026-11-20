@@ -4631,7 +4631,7 @@ window.GrugCatalogHair = function (ctx) {
     if (!('__pp0' in n3)) n3.__pp0 = n3.postPose || null;
     const pp0 = n3.__pp0, X = new THREE.Vector3(1, 0, 0), q = new THREE.Quaternion(), qp = new THREE.Quaternion();
     const rot = (b, a) => { b.parent.getWorldQuaternion(qp); q.setFromAxisAngle(X, a); b.quaternion.premultiply(qp.clone().invert().multiply(q).multiply(qp)); };
-    // inside a slipper her toes are tucked away (shrunk into the ball of her foot), so the slipper can have a soft, low toe
+    // (noToes is no longer used: sandals are fitted to her foot as it is, so her toes are never shrunk away inside a slipper)
     n3.postPose = (dt, now) => { if (pp0) pp0(dt, now); for (const f of n3.foot) for (const ch of f.toes || []) { const b = ch && ch[0]; if (!b) continue; if (!b.userData.__s0) b.userData.__s0 = b.scale.clone(); if (n3.__noToes) b.scale.setScalar(0.03); else b.scale.copy(b.userData.__s0); } const t = n3.__tilt || 0; if (!t) return; n3.root.updateMatrixWorld(true); for (const f of n3.foot) { if (!f.foot || !f.ball) continue; rot(f.foot, t); f.foot.updateMatrixWorld(true); rot(f.ball, -t); } };
     n3.__tilt = th; n3.__noToes = noToes; n3.update(0, performance.now()); n3.__skinW = null; sandy.object3d.updateMatrixWorld(true);
   }
@@ -4726,7 +4726,7 @@ window.GrugCatalogHair = function (ctx) {
     const { sandy } = ctx, own = { geos: [], mats: [], tris: 0 }, root = new THREE.Group(); root.name = 'grugSandals'; root.userData.catalogItem = true; root.userData.jewel = { dept: 'sandals', design: d };
     const tex = sandalTex(d); own.mats.push({ dispose() { tex.dispose(); } });
     const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, map: tex, roughness: d.finish === 'matte' ? 0.85 : d.finish === 'metal' ? 0.28 : 0.3, metalness: d.finish === 'metal' ? 0.6 : 0, envMap: ENV, envMapIntensity: 0.6, side: THREE.DoubleSide }); own.mats.push(mat);
-    const hwM = matFor(d.hw, 'metal'), T = d.strapT, SW = d.strapW, tilt0 = (sandy.n3 && sandy.n3.__tilt) || 0, toes0 = !!(sandy.n3 && sandy.n3.__noToes), tilt = tiltFor(sandy, d), noToes = d.style === 'slipper'; tiltFeet(sandy, tilt, noToes); root.userData.tilt = tilt; root.userData.noToes = noToes;
+    const hwM = matFor(d.hw, 'metal'), T = d.strapT, SW = d.strapW, tilt0 = (sandy.n3 && sandy.n3.__tilt) || 0, toes0 = !!(sandy.n3 && sandy.n3.__noToes), tilt = tiltFor(sandy, d), noToes = false /* her toes are never tucked away: a slipper is made to fit over them */; tiltFeet(sandy, tilt, noToes); root.userData.tilt = tilt; root.userData.noToes = noToes;
     const add = (g, m, name) => { own.geos.push(g); const me = new THREE.Mesh(g, m || mat); me.name = name || ''; root.add(me); own.tris += triOf(g); return me; };
     const strapUV = STRAP_UV, ringUV = STRAP_UV;
     // a strap from its world centre line: hugged onto her skin, then swept as a flat band lying on it
@@ -4797,19 +4797,23 @@ window.GrugCatalogHair = function (ctx) {
       // ---- a slipper: a soft closed shell over the front of her foot, grown from the sole's own outline (its edge runs along the sole's
       //      edge, its toe ends at the sole's tip, rounded like a real slipper), open from the instep back, with a plush collar
       if (d.style === 'slipper' && K.soleEdge) {
-        const NU = 22, NZ = 20, PW = 3.0, BULGE = 0.1, gap = 0.3 + T * 0.3, zB = F.A.z + 7.2, inset = 0.15;
-        const zEnd = K.soleZ ? K.soleZ[1] - 0.25 : F.zTip + 1;
-        // what the shell must clear: her foot (toes tucked away), slice by slice
+        const NU = 22, NZ = 20, PW = 3.0, BULGE = 0.1, gap = 0.5 + T * 0.3, zB = F.A.z + 7.2, inset = 0;
+        let zEnd = K.soleZ ? K.soleZ[1] - 0.25 : F.zTip + 1;
+        // what the shell must clear: her whole foot, toes included (the slipper fits her foot; her toes are not tucked away), slice by slice
         const nbS = sandy.n3.body, SIa = nbS.geometry.attributes.skinIndex, SWa = nbS.geometry.attributes.skinWeight, bones = nbS.skeleton.bones;
-        const isToe = k => { let bi = 0, bw = 0; for (let j = 0; j < 4; j++) { const w = SWa.array[k * 4 + j]; if (w > bw) { bw = w; bi = SIa.array[k * 4 + j]; } } return /^leg_[LR]_(foot|ball)_jnt$/.test(bones[bi].name); };
+        const isToe = k => { let bi = 0, bw = 0; for (let j = 0; j < 4; j++) { const w = SWa.array[k * 4 + j]; if (w > bw) { bw = w; bi = SIa.array[k * 4 + j]; } } return /^(leg_[LR]_(foot|ball)_jnt|toe0\d_[LR]_\d+_jnt)$/.test(bones[bi].name); };
         const pts0 = F.legV.filter(v => v.p[1] < ytop + 10 && isToe(v.k)).map(v => v.p);
+        // its toe reaches a little past her longest toe (over the sole's tip if it has to), so the tips are inside it too
+        { let zt = -1e9; for (const p of pts0) if (p[2] > zt) zt = p[2]; if (zt > -1e8) zEnd = Math.max(zEnd, zt + 0.9); }
         // a fixed shape, not a cast of her foot: a quarter-ellipse from the collar down to the toe, the same arch across every slice,
         // scaled up just enough (one number for the whole slipper) that her foot fits inside with room to spare
         const zs = []; for (let k = 0; k <= NZ; k++) { const t = k / NZ; zs.push(lerp(zB, zEnd, 1 - Math.pow(1 - t, 1.4))); }
-        const prof = z => { const t = clamp((z - zB) / (zEnd - zB), 0, 1); return Math.pow(1 - Math.pow(t, 1.45), 1 / 1.45); };
-        let S = 3.5; for (const p of pts0) { if (p[2] < zB || p[2] > zEnd) continue; const t = (p[2] - zB) / (zEnd - zB); if (t > 0.88) continue; const [l, h] = K.soleEdge(p[2]), c = (l + h) / 2, a = Math.max(0.6, (h - l) / 2 - inset) * (1 + BULGE * 0.7), u = Math.abs(p[0] - c) / a; if (u >= 0.92) continue; const need = (p[1] + gap - ytop) / (prof(p[2]) * Math.pow(1 - Math.pow(u, PW), 1 / PW)); if (need > S) S = need; }
+        const PF = 3.4, prof = z => { const t = clamp((z - zB) / (zEnd - zB), 0, 1); return Math.pow(1 - Math.pow(t, PF), 1 / PF); };   // a rounder toe box, tall enough over her toes right up to its tip
+        // wide enough for her foot too: if a toe sits out by the sole's edge, the whole shell is that much wider (one number again)
+        let WD = 1; for (const p of pts0) { if (p[2] < zB || p[2] > zEnd || p[1] < ytop + 0.4) continue; const [l, h] = K.soleEdge(p[2]), c = (l + h) / 2, a = Math.max(0.6, (h - l) / 2 - inset) * (1 + BULGE * 0.7); WD = Math.max(WD, Math.abs(p[0] - c) / a / 0.86); } WD = Math.min(WD, 1.3);
+        let S = 3.5; for (const p of pts0) { if (p[2] < zB || p[2] > zEnd) continue; const t = (p[2] - zB) / (zEnd - zB); if (t > 0.97) continue; const [l, h] = K.soleEdge(p[2]), c = (l + h) / 2, a = Math.max(0.6, (h - l) / 2 - inset) * (1 + BULGE * 0.7) * WD, u = Math.abs(p[0] - c) / a; if (u >= 0.96) continue; const need = (p[1] + gap - ytop) / (prof(p[2]) * Math.pow(1 - Math.pow(u, PW), 1 / PW)); if (need > S) S = need; }
         S = Math.min(S, 14); const Hs = zs.map(z => Math.max(0.05, S * prof(z)));
-        const rows = zs.map((z, k) => { const [l, h] = K.soleEdge(z), c = (l + h) / 2, a = Math.max(0.3, (h - l) / 2 - inset) * (k === zs.length - 1 ? 0.2 : 1), r = []; for (let j = 0; j < NU; j++) { const th = Math.PI * (1 - j / (NU - 1)), cx = Math.cos(th), sy = Math.sin(th), x = c + a * (1 + BULGE * Math.sin(Math.PI * Math.min(1, sy * 1.15))) * Math.sign(cx) * Math.pow(Math.abs(cx), 2 / PW), y = ytop - 0.15 + (Hs[k] + 0.15) * Math.pow(sy, 2 / PW); r.push(V3(x, y, z)); } return r; });
+        const rows = zs.map((z, k) => { const [l, h] = K.soleEdge(z), c = (l + h) / 2, a = Math.max(0.3, (h - l) / 2 - inset) * WD * (k === zs.length - 1 ? 0.2 : 1), r = []; for (let j = 0; j < NU; j++) { const th = Math.PI * (1 - j / (NU - 1)), cx = Math.cos(th), sy = Math.sin(th), x = c + a * (1 + BULGE * Math.sin(Math.PI * Math.min(1, sy * 1.15))) * Math.sign(cx) * Math.pow(Math.abs(cx), 2 / PW), y = ytop - 0.15 + (Hs[k] + 0.15) * Math.pow(sy, 2 / PW); r.push(V3(x, y, z)); } return r; });
         // front first, so the opening is the last row
         rows.reverse(); const W = NU, wr = rows.map(r => r.map(p => { const w = K.footPt(p), hf = clamp((p.y - ytop) / 3, 0, 1); if (K.lift) w.y += K.lift(p.z) * (1 - hf); return w; }));
         const pos = [], uv = [], idx = []; wr.forEach((r, ri) => r.forEach((p, j) => { pos.push(p.x, p.y, p.z); uv.push(uFrac(ri / (wr.length - 1)), regV('strap', j / (W - 1))); }));
