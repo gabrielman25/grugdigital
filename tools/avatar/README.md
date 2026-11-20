@@ -51,3 +51,17 @@ pokes through. Check a change with front, side and back renders of all eight hat
 
 Each skin texture is laid out in regions (head and face top left, shirt bottom left, trousers bottom right, shoes top
 right), so recolouring a region or painting a design on the shirt is a texture job: no new geometry needed.
+
+## The classic avatar's feet (`tools/avatar/feet/rebake.py`)
+
+The two classic bodies inside `assets/sandy-classic.js` (`SANDY_GLB`, `SANDY_GLB_MALE`) carry the feet model (feet.obj)
+grafted onto the legs. When the owner hands over a new or cleaner copy of the same model, run
+
+    python3 tools/avatar/feet/rebake.py path/to/feet.obj
+
+It keeps the join (the ankle ring, triangles, skin weights, `_SRC`, `_FOOT`, `_FUV`) and takes every foot vertex's position and
+normal from the OBJ again, so the feet are the model as made; the nail mark (`_NAIL`) becomes a plain 0 or 1. Needs numpy and
+scipy. The OBJ itself is not kept in the repo. The feet are drawn as modelled: `footShape.off` / `soleOff` (the old run-time
+"fuller feet" push along the normals) are 0, and `TOES_TO_SOLE` (toes bent down to rest on a flip-flop) is off, because both
+distorted the toes and nails. After a re-bake, look at both bodies barefoot and in flip-flops, then copy
+`assets/sandy-classic.js` to the game kit's `vendor/`.

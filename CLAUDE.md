@@ -211,6 +211,8 @@ The wardrobe starts with the classic avatar's own **long hair and buns** (`kit:l
 1, any colour, no studio or download), worn in games too. The site's dock sits under the closet at `avatar/`
 (`Grug.ui.chrome('avatar', {dockOnly: true})`, added by the build). **One feet model:** `assets/sandy-classic.js` has the new
 feet (feet.obj); the catalog's and the Hair Studio's own `vendor/` copies are gone, so every page and game loads that one.
+The feet are baked from the owner's feet.obj by `tools/avatar/feet/rebake.py` (see `tools/avatar/README.md`) and drawn as
+modelled: no run-time inflation and no toes bent down onto a flip-flop, since both distorted the toes and nails.
 **Offline copy:** `python3 tools/catalog/offline.py` zips the editor so it opens from a folder with no server or internet. `SandyKit.create(look)` with `closet: true` loads the classic kit and
 `assets/closet-runtime.js` (the catalog's eyewear, hair, pattern and jewelry engines plus `tools/catalog/src/dress.js`), which
 builds the classic Sandy in the closet's body (`grug.closet.v1`: skin, nails, face, build, feet) wearing what she has on.
