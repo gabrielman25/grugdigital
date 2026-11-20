@@ -27,6 +27,8 @@
     wardrobe: [], wearing: {}, body: BODY0(), mounted: {}, tok: {}, goal: null, hist: { stack: [], i: -1 }, sheet: 'half', real: false, shapeKey: ''
   };
   { const s = store.get(CL_KEY, null); if (s) { CL.wardrobe = Array.isArray(s.wardrobe) ? s.wardrobe : []; CL.wearing = s.wearing || {}; CL.body = Object.assign(BODY0(), s.body || {}); CL.body.build = Object.assign({}, (s.body && s.body.build) || {}); } else if (HD && HD.byId('h:long')) { const h = HD.byId('h:long'); CL.wardrobe = [{ id: h.id, dept: 'hair', name: h.name, by: h.by }]; CL.wearing = { hair: h.id }; } }
+  // her saved characters: a look (what she has on and her body) under a name, with a pose for its picture
+  { const s = store.get(CL_KEY, null); CL.characters = s && Array.isArray(s.characters) ? s.characters.filter(c => c && c.wearing && c.body) : []; }
   // the classic avatar's own long hair and buns (her stock hairstyles 0 and 1), in every wardrobe from the start (once: a player
   // can still remove them). Worn, her own hair takes that style in its colour (entry.col); the game runtime does the same
   const KIT_HAIR = [['kit:long', 0, 'Classic long hair', 'long'], ['kit:buns', 1, 'Classic buns', 'medium']], KIT_HAIR_COL = '#2a1a12';
@@ -46,7 +48,7 @@
       localStorage.setItem(K, JSON.stringify(c));
     } catch (e) {}
   }
-  const clSave = () => { if (!store.set(CL_KEY, { wardrobe: CL.wardrobe, wearing: CL.wearing, body: CL.body, kitHair: 1 })) GRUG.toast('Your browser is out of room for your wardrobe'); clearTimeout(clSave.t); clSave.t = setTimeout(playAsCloset, 400); };
+  const clSave = () => { if (!store.set(CL_KEY, { wardrobe: CL.wardrobe, wearing: CL.wearing, body: CL.body, kitHair: 1, characters: CL.characters })) GRUG.toast('Your browser is out of room for your wardrobe'); clearTimeout(clSave.t); clSave.t = setTimeout(playAsCloset, 400); };
 
   /* ---- light or dark: the site's own setting */
   const siteMode = () => { try { const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null'); return p && p.prefs && p.prefs.mode === 'dark' ? 'dark' : 'light'; } catch (e) { return 'light'; } };
@@ -76,6 +78,7 @@
   // her settings onto her (the kit recolours her skin itself); then the colours she shows here are kept for look(true)
   let applying = null;
   async function applyBody(refit) {
+    endPose();
     const b = CL.body, c = JSON.parse(JSON.stringify(sandy.getConfig())), key = JSON.stringify([b.footShape, b.build]);
     Object.assign(c, { skin: b.skin, nails: b.nails || b.skin, expression: b.expression, footShape: b.footShape });
     if (!sandy.__wear || !sandy.__wear.on.feet) c.feet = Object.assign({}, c.feet, { type: 'flipflops', sole: '#f2efe6', strap: '#d9d2c4' });
@@ -99,7 +102,7 @@
   async function refitWorld() { delete sandy.__jfield; delete sandy.__jsnd; const n3 = sandy.n3; n3.__skinW = null; n3.__rest0 = null; for (const s of ['necklaces', 'purses', 'sandals', 'sound', 'back']) if (CL.mounted[s]) { const it = CL.mounted[s].it; unmountSlot(s); await mountSlot(s, it); } }
 
   /* ---- the wardrobe and what she has on */
-  const entryOf = it => { const dp = deptOf(it); return dp === 'hair' ? { id: it.id, dept: 'hair', name: it.name, by: it.by } : { id: it.id, dept: dp, seed: it.seed, d: JSON.parse(JSON.stringify(it.d)), name: it.name, by: it.by, brand: it.brand }; };
+  const entryOf = it => { const dp = deptOf(it); return dp === 'hair' ? Object.assign({ id: it.id, dept: 'hair', name: it.name, by: it.by }, it._col ? { col: it._col } : {}) : { id: it.id, dept: dp, seed: it.seed, d: JSON.parse(JSON.stringify(it.d)), name: it.name, by: it.by, brand: it.brand }; };
   const owned = id => CL.wardrobe.some(e => e.id === id);
   const entryFor = id => CL.wardrobe.find(e => e.id === id);
   // her hair in any colour: every strand group, its tips and the scalp, in one flat colour
@@ -143,14 +146,20 @@
     if (tok !== CL.tok[slot] || !CL.on) { if (isJ(it)) JM.unmount(b); else { if (b.root.parent) b.root.parent.remove(b.root); b.dispose(); } return; }
     CL.mounted[slot] = { it, b, sig: wornSig(it) };
   }
+  // her own hair mesh shows only while a classic hairstyle (kit:long, kit:buns) is on; a Marketplace hairstyle (or none) hides
+  // it. Anything that flips it for a moment (card pictures, the editors) must leave it as this says: re-entering the closet
+  // used to hide it outright, so the classic hair vanished whenever a piece was opened
+  function hairSync() { const m = CL.mounted.hair; setHair(!(m && m.it.kit != null)); }
   function unmountSlot(slot) { const m = CL.mounted[slot]; if (!m) return; delete CL.mounted[slot]; if (isJ(m.it)) JM.unmount(m.b); else { if (m.b.root.parent) m.b.root.parent.remove(m.b.root); m.b.dispose(); } }
   // what she has on, with the piece being tried on in its place; clothes first, and anything fitted to her body after them again
   async function syncOutfit() {
+    endPose();
     const want = {}; for (const s of SLOTS) want[s] = wornItem(s);
     if (CL.preview) { const ps = slotOf(CL.preview); want[ps] = CL.preview; for (const [a, b] of clashes(ps, CL.preview)) if (a === 'drop') want[b] = null; }
     let clothes = false;
     for (const s of SLOT_ORDER) { const it = want[s], m = CL.mounted[s]; if ((it && m && m.sig === wornSig(it)) || (!it && !m)) continue; if (s.startsWith('clothing.')) clothes = true; await mountSlot(s, it); }
     if (clothes) { look(CL.on); await refitWorld(); }
+    if (CL.on) hairSync();
   }
   // pieces that can't be worn together: an outfit and bottoms (and shoes, when the outfit has its own), shoes and sandals
   const outfitOf = it => it && J.CLOTH_BY[it.d && it.d.part] && J.CLOTH_BY[it.d.part].dept === 'outfits' ? J.CLOTH_BY[it.d.part] : null;
@@ -167,7 +176,7 @@
   function clWear(it, on) { const s = slotOf(it); if (on) wearOn(it); else if (CL.wearing[s] === it.id) delete CL.wearing[s]; clSave(); remember(); syncOutfit().then(() => focus(on ? it : null)); clRender(); }
   // Add to wardrobe keeps it; Equip keeps it and puts it on her. Equip again (or tapping a piece she has on) takes it off.
   function addToWardrobe(it, wear) { const had = owned(it.id); if (!had) CL.wardrobe.unshift(entryOf(it)); if (wear) wearOn(it); clSave(); remember(); GRUG.toast(wear ? (had ? 'Equipped' : 'Equipped and added to your wardrobe') : 'Added to your wardrobe'); syncOutfit(); clRender(); }
-  function takeOff(it) { const s = slotOf(it); if (CL.wearing[s] === it.id) delete CL.wearing[s]; if (CL.view && CL.view.id === it.id) closeDetail(); clSave(); remember(); syncOutfit().then(() => focus(null)); clRender(); GRUG.toast('Unequipped'); }
+  function takeOff(it) { const s = slotOf(it); if (CL.wearing[s] === it.id) delete CL.wearing[s]; if (CL.view && CL.view.id === it.id) closeDetail(true); clSave(); remember(); syncOutfit().then(() => focus(null)); clRender(); GRUG.toast('Unequipped'); }
   function removeFromWardrobe(it) { CL.wardrobe = CL.wardrobe.filter(e => e.id !== it.id); for (const s of Object.keys(CL.wearing)) if (CL.wearing[s] === it.id) delete CL.wearing[s]; clSave(); remember(); syncOutfit(); clRender(); GRUG.toast('Removed from your wardrobe'); }
   // a wardrobe piece changed (a colour, a print): it shows on her and gets a new picture
   function entryChanged(e, now) { e.stamp = Date.now(); clSave(); clearTimeout(entryChanged.t); entryChanged.t = setTimeout(() => { syncOutfit(); if (now !== false) { remember(); clRender(); } }, now === false ? 140 : 0); }
@@ -182,6 +191,118 @@
   function undoState() { const h = CL.hist; $('#clUndo').disabled = h.i <= 0; $('#clRedo').disabled = h.i >= h.stack.length - 1; }
   $('#clUndo').onclick = () => { const h = CL.hist; if (h.i > 0) { h.i--; restoreSnap(h.stack[h.i]); } };
   $('#clRedo').onclick = () => { const h = CL.hist; if (h.i < h.stack.length - 1) { h.i++; restoreSnap(h.stack[h.i]); } };
+
+
+  /* ---- characters: her look saved under a name, with a pose. Tap one to wear it (she strikes its pose); the pencil puts it
+     on and lets you rename it, change its pose or save what she has on into it. Characters she isn't wearing turn up as
+     people in the games (src/dress.js reads 'grug.closet.v1'.characters). */
+  const POSES = [['idle', 'Stand'], ['wave', 'Wave'], ['cheer', 'Cheer'], ['flex', 'Flex'], ['bow', 'Bow'], ['dance', 'Dance'], ['robot', 'Robot'], ['disco', 'Disco']];
+  const CHAR_MAX = 30;
+  const sortedObj = o => Object.keys(o || {}).sort().map(k => [k, o[k]]);
+  const lookSig = (wearing, body) => JSON.stringify([sortedObj(wearing), body || {}]);
+  const curSig = () => lookSig(CL.wearing, CL.body);
+  // pose her: the pieces laid over her body are pinned to the bone under them (as in games) so they move with her, the clip
+  // runs to a good moment, and the returned function puts every bone and piece back exactly where it was
+  function boneUnder(c) {
+    const b = n => sandy.object3d.getObjectByName(n), sd = c.x > 0 ? 'L' : 'R';
+    if (c.y < 22) return b('leg_' + sd + '_foot_jnt'); if (c.y < 60) return b('leg_' + sd + '_lwrTwist00_jnt') || b('spine_M_00_jnt');
+    if (c.y < 108) return b('spine_M_00_jnt'); return b('spine_M_04_jnt') || b('spine_M_03_jnt') || b('spine_M_00_jnt');
+  }
+  function poseHer(pose, secs) {
+    if (!pose || pose === 'idle' || !sandy.play) return () => {};
+    const o3 = sandy.object3d, bones = [], st = { a: sandy._anim, p: sandy._animPrev, t: sandy._animT, m: sandy._animMix, pos: o3.position.clone(), q: o3.quaternion.clone() };
+    o3.traverse(o => { bones.push([o, o.position.clone(), o.quaternion.clone(), o.scale.clone()]); });   // her joints are plain objects, not only bones: keep every transform
+    o3.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(o3.matrixWorld).invert(), pinned = [];
+    for (const [slot, m] of Object.entries(CL.mounted)) {
+      if (slot.startsWith('clothing.') || slot === 'hair' || slot === 'eyewear' || slot === 'earrings') continue;
+      const ms = []; m.b.root.traverse(x => { if (x.isMesh && !x.isSkinnedMesh) { let p = x.parent, head = false; while (p) { if (p === headGroup) { head = true; break; } p = p.parent; } if (!head) ms.push(x); } });
+      for (const x of ms) { const c = new THREE.Box3().setFromObject(x).getCenter(new THREE.Vector3()).applyMatrix4(inv), bone = boneUnder(c); if (bone) { pinned.push([x, x.parent, x.position.clone(), x.quaternion.clone(), x.scale.clone()]); bone.attach(x); } }
+    }
+    sandy.play(pose); const n = Math.round((secs == null ? 0.75 : secs) / 0.05); for (let i = 0; i < n; i++) sandy.update(0.05);
+    o3.updateMatrixWorld(true);
+    let done = false;
+    return () => {
+      if (done) return; done = true;
+      for (const [x, p, ps, q, sc] of pinned) { p.add(x); x.position.copy(ps); x.quaternion.copy(q); x.scale.copy(sc); }   // back under its own piece, as it was
+      for (const [b, p, q, sc] of bones) { b.position.copy(p); b.quaternion.copy(q); b.scale.copy(sc); }
+      o3.position.copy(st.pos); o3.quaternion.copy(st.q); Object.assign(sandy, { _anim: st.a, _animPrev: st.p, _animT: st.t, _animMix: st.m });
+      o3.updateMatrixWorld(true);
+    };
+  }
+  // a live pose on the stage for a moment: she plays it, then stands again
+  let livePose = null;
+  function endPose() { if (!livePose) return; const lp = livePose; livePose = null; cancelAnimationFrame(lp.raf); lp.back(); }
+  function strikePose(pose) {
+    endPose(); if (!pose || pose === 'idle' || !CL.on) return;
+    const back = poseHer(pose, 0.05), lp = { back, t0: performance.now(), last: performance.now(), raf: 0 }; livePose = lp;
+    const step = now => { if (livePose !== lp) return; const dt = Math.min(0.05, (now - lp.last) / 1000); lp.last = now; sandy.update(dt); if (now - lp.t0 > 2600) { endPose(); return; } lp.raf = requestAnimationFrame(step); };
+    lp.raf = requestAnimationFrame(step);
+  }
+  // its picture: her whole body, in her own colours, in its pose
+  function charPic(pose) {
+    endPose(); const back = poseHer(pose); let url = '';
+    try {
+      sandy.object3d.updateMatrixWorld(true); const hb = new THREE.Box3().setFromObject(sandy.n3.headMesh); for (const d of ['hair', 'sound', 'eyewear']) if (CL.mounted[d]) hb.union(new THREE.Box3().setFromObject(CL.mounted[d].b.root));
+      const box = new THREE.Box3(new THREE.Vector3(-36, -3, -16), new THREE.Vector3(36, hb.max.y + 6, 16)); frameOn(box, 0.32, 0.05, thumbCam, 26, 0.86);
+      renderer.setRenderTarget(rt()); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(scene, thumbCam); url = readRT(TS, TS); renderer.setRenderTarget(null);
+    } catch (e) { console.warn('character picture', e); renderer.setRenderTarget(null); }
+    finally { back(); }
+    return url;
+  }
+  // what a character keeps: what she has on (the pieces themselves, so it still works if one leaves the wardrobe) and her body
+  function lookNow() {
+    const wearing = JSON.parse(JSON.stringify(CL.wearing)), pieces = [];
+    for (const id of new Set(Object.values(wearing))) { const e = entryFor(id); if (e) pieces.push(JSON.parse(JSON.stringify(e))); }
+    return { wearing, pieces, body: JSON.parse(JSON.stringify(CL.body)) };
+  }
+  async function saveCharacter(f) {
+    const name = (f.name || '').trim().slice(0, 24) || 'Character ' + (CL.characters.length + 1);
+    await (applying || Promise.resolve()); await syncOutfit();
+    const c = Object.assign(f.id ? CL.characters.find(x => x.id === f.id) || {} : { id: 'ch' + Date.now().toString(36) }, lookNow(), { name, pose: f.pose || 'idle', at: Date.now() });
+    c.pic = charPic(c.pose);
+    if (!CL.characters.includes(c)) { if (CL.characters.length >= CHAR_MAX) { GRUG.toast('You have ' + CHAR_MAX + ' characters: delete one to make room'); return; } CL.characters.unshift(c); }
+    CL.charForm = null; clSave(); clRender(); strikePose(c.pose); GRUG.toast(f.id ? 'Saved' : 'Saved as ' + name);
+  }
+  async function wearCharacter(c, pose) {
+    for (const pc of c.pieces || []) { const e = entryFor(pc.id); if (!e) CL.wardrobe.unshift(JSON.parse(JSON.stringify(pc))); else { for (const k of ['d', 'col', 'stamp', 'seed']) { if (pc[k] != null) e[k] = JSON.parse(JSON.stringify(pc[k])); else if (k === 'col') delete e.col; } } }
+    CL.wearing = JSON.parse(JSON.stringify(c.wearing)); for (const k of Object.keys(CL.wearing)) if (!entryFor(CL.wearing[k])) delete CL.wearing[k];
+    const bodyChanged = JSON.stringify(c.body) !== JSON.stringify(CL.body); CL.body = Object.assign(BODY0(), JSON.parse(JSON.stringify(c.body))); CL.body.build = Object.assign({}, CL.body.build || {});
+    clSave(); remember(); clRender(); if (bodyChanged) { applying = applyBody(); await applying; } await syncOutfit(); focus(null);
+    if (pose !== false) strikePose(c.pose);
+  }
+  function charsPanel(box) {
+    const cur = curSig(), f = CL.charForm;
+    if (f) {
+      const form = el('div', 'cl-cform'), editing = f.id && CL.characters.find(x => x.id === f.id);
+      form.append(el('div', 'g-label', editing ? 'Change ' + esc(editing.name) : 'Save this look as a character'));
+      const inp = el('input', 'g-input'); inp.maxLength = 24; inp.value = f.name; inp.placeholder = 'Name'; inp.setAttribute('aria-label', 'Name'); inp.oninput = () => { f.name = inp.value; }; inp.onkeydown = e => { if (e.key === 'Enter') saveCharacter(f); };
+      form.append(inp, el('div', 'cl-note', 'Pose'));
+      const row = el('div', 'cl-chips'); for (const [k, l] of POSES) { const b = el('button', f.pose === k ? 'on' : '', esc(l)); b.onclick = () => { f.pose = k; for (const x of row.children) x.classList.toggle('on', x === b); strikePose(k); }; row.append(b); }
+      form.append(row);
+      if (editing) form.append(el('div', 'cl-note', 'Saving keeps what she has on now in this character.'));
+      const acts = el('div', 'cl-acts2'), sv = el('button', 'g-btn g-btn--primary', `${ic('floppy_disk')}<span>Save</span>`), cn = el('button', 'g-btn g-btn--ghost', `<span>Cancel</span>`);
+      sv.onclick = () => saveCharacter(f); cn.onclick = () => { CL.charForm = null; clRender(); }; acts.append(sv, cn); form.append(acts); box.append(form);
+      setTimeout(() => { if (!editing) inp.focus(); inp.select(); }, 30);
+    }
+    const grid = el('div', 'cl-chars');
+    if (!f) { const add = el('button', 'cl-char add', `<span class="cl-cpic">${ic('plus')}</span><b>Save this look</b>`); add.onclick = () => { CL.charForm = { id: null, name: 'Character ' + (CL.characters.length + 1), pose: 'wave' }; clRender(); strikePose('wave'); }; grid.append(add); }
+    for (const c of CL.characters) {
+      const on = lookSig(c.wearing, c.body) === cur, a = el('div', 'cl-char' + (on ? ' on' : '') + (f && f.id === c.id ? ' editing' : ''));
+      const pic = el('button', 'cl-cpic'); pic.style.backgroundImage = c.pic ? `url(${c.pic})` : ''; pic.setAttribute('aria-label', 'Wear ' + c.name); pic.dataset.gTip = on ? 'She has this on' : 'Wear ' + c.name;
+      pic.onclick = () => { if (on) strikePose(c.pose); else wearCharacter(c); };
+      a.append(pic, el('b', '', esc(c.name)));
+      if (on) a.append(el('span', 'g-pill g-pill--solid tag wtag', 'Wearing'));
+      const ed = el('button', 'cl-cbtn', ic('pencil')); ed.setAttribute('aria-label', 'Change ' + c.name); ed.dataset.gTip = 'Rename, pose or update';
+      ed.onclick = async () => { CL.charForm = { id: c.id, name: c.name, pose: c.pose || 'idle' }; if (!on) await wearCharacter(c, false); clRender(); strikePose(c.pose); };
+      const rm = el('button', 'cl-cbtn rm', ic('trash_can')); rm.setAttribute('aria-label', 'Delete ' + c.name); rm.dataset.gTip = 'Delete';
+      rm.onclick = () => { if (!rm.classList.contains('sure')) { rm.classList.add('sure'); rm.dataset.gTip = 'Tap again to delete'; setTimeout(() => rm.classList.remove('sure'), 2600); return; } CL.characters = CL.characters.filter(x => x !== c); if (CL.charForm && CL.charForm.id === c.id) CL.charForm = null; clSave(); clRender(); GRUG.toast('Deleted ' + c.name); };
+      a.append(el('div', 'cl-cbtns'), ''); a.querySelector('.cl-cbtns').append(ed, rm); grid.append(a);
+    }
+    box.append(grid);
+    box.append(el('p', 'cl-note cl-cnote', CL.characters.length ? 'Characters she isn\'t wearing show up as people in the games.' : 'Dress her up, then save the look as a character. Characters she isn\'t wearing show up as people in the games.'));
+    GRUG.hydrate(box);
+  }
+  $('#clSaveChar').onclick = () => { if (CL.mode !== 'custom') setMode('custom'); CL.cdept = 'chars'; if (!CL.charForm) CL.charForm = { id: null, name: 'Character ' + (CL.characters.length + 1), pose: 'wave' }; if (CL.sheet === 'full' && portrait()) setSheet('half'); clRender(); clBody.scrollTop = 0; strikePose(CL.charForm.pose); };
 
   /* ---- the camera: her whole body, or close on a piece; it glides there */
   // no floor under her: shoes and sandals clipped through it, so the stage is just the blurred picture
@@ -213,7 +334,7 @@
 
   /* ---- the page around her */
   const clEl = $('#closet'), clBody = $('#clBody'), clDet = $('#clDetail');
-  function setMode(m) { CL.mode = m; CL.filters = false; $$('#clMode button').forEach(b => b.classList.toggle('is-on', b.dataset.mode === m)); if (CL.view) { CL.view = null; CL.preview = null; syncOutfit(); focus(null); if (location.hash) history.replaceState(null, '', location.pathname + location.search); } clRender(); clBody.scrollTop = 0; }
+  function setMode(m) { CL.mode = m; CL.filters = false; $$('#clMode button').forEach(b => b.classList.toggle('is-on', b.dataset.mode === m)); if (CL.view) { closeDetail(); if (location.hash) history.replaceState(null, '', location.pathname + location.search); } clRender(); clBody.scrollTop = 0; }
   $$('#clMode button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
   function tabBtn(box, v, label, on, go, icon) { const b = el('button', on ? 'on' : '', (icon ? ic(icon) : '') + `<span>${esc(label)}</span>`); b.onclick = go; box.append(b); return b; }
   function clTabs() {
@@ -223,6 +344,7 @@
       const subs = SUBS[cat.dept] || []; s.hidden = !subs.length;
       if (subs.length) { tabBtn(s, 'all', 'All', cat.sub === 'all', () => { cat.sub = 'all'; newFeed(true); clRender(); clBody.scrollTop = 0; }); for (const [sv, sl] of subs) tabBtn(s, sv, sl, cat.sub === sv, () => { cat.sub = sv; newFeed(true); clRender(); clBody.scrollTop = 0; }); }
     } else {
+      tabBtn(t, 'chars', 'Characters', CL.cdept === 'chars', () => { CL.cdept = 'chars'; clRender(); clBody.scrollTop = 0; });
       tabBtn(t, 'body', 'Body', CL.cdept === 'body', () => { CL.cdept = 'body'; clRender(); }); tabBtn(t, 'all', 'All', CL.cdept === 'all', () => { CL.cdept = 'all'; clRender(); });
       for (const [v, label] of CL_DEPTS) tabBtn(t, v, label, CL.cdept === v, () => { CL.cdept = v; clRender(); clBody.scrollTop = 0; });
       s.hidden = CL.cdept !== 'body';
@@ -413,29 +535,79 @@
     const arch = { glasses: ['classic', 'wire', 'rose', 'readers', 'browline'], shades: ['shades', 'aviators', 'catshades', 'party', 'sport'], goggles: ['goggles', 'ski', 'steampunk'] }[it.kind] || ['classic'];
     return Array.from({ length: 6 }, (_, i) => { const seed = 'like-' + it.seed + '-' + i; if (genCache.has(seed)) return genCache.get(seed); const d = GE.random(seed, { arch: r.pick(arch) }), li = { id: 'g:' + seed, seed, d, name: GE.nameFor(d, seed), kind: GE.classify(d), by: 'Grug Digital', order: i, stamp: 0, gen: true }; genCache.set(seed, li); return li; });
   };
+  /* the opened piece: pictures only, so it reads without reading. The big picture on the left is what she had on in that slot
+     (or a cross: nothing); then the piece that was tapped and colour versions of it. Tapping a picture puts it on her, and it
+     stays on when the panel closes; tapping the left picture puts back what she had. Everything written (name, maker, price,
+     favourite, download, edit, tags, description, details, more like this) is under "More Information". */
+  const VAR_N = 5;
+  function variantsOf(it) {
+    const dp = deptOf(it), out = [];
+    try {
+      if (dp === 'hair') {
+        const own = String(it.hex || '').toLowerCase(), cols = HAIR_SW.filter(c => c !== own), r = rng('hairvar:' + it.id), pick = [];
+        while (pick.length < VAR_N && cols.length) pick.push(cols.splice(Math.floor(r() * cols.length), 1)[0]);
+        for (const c of pick) { const v = it.kit != null ? kitHairItem(it.id, c) : dyedHair(it, c); if (v) { v._col = c; out.push(v); } }
+      } else if (isJ(it)) {
+        // the beads and charms take new colours; the chain or cord (necklaces) and the metal (earrings) change too, so each reads apart
+        const METAL = ['#d4af37', '#c8ccd2', '#e0a68f', '#26272b', '#c3743e', '#50555c'].filter(c => c !== String(it.d.metal || it.d.cordCol || '').toLowerCase()), CORD = ['#e8344f', '#2b62d9', '#16161a', '#9be338', '#ff6fa8', '#f5d21f'];
+        for (let i = 0; i < VAR_N; i++) { const seed = it.seed + '~c' + i, d = J.random(dp, seed, { keep: 'shape', base: it.d, brand: it.d.brand || it.brand });
+          if (dp === 'earrings') d.metal = METAL[i % METAL.length]; if (dp === 'necklaces') { d.cordCol = d.cord === 'chain' ? METAL[i % METAL.length] : CORD[i % CORD.length]; }
+          out.push(JM.item(dp, it.id + '~c' + i, seed, d, { by: it.by, brand: it.brand || d.brand })); }
+      } else {
+        for (let i = 0; i < VAR_N; i++) { const seed = it.seed + '~c' + i, d = GE.random(seed, { base: it.d, keep: 'shape' }); out.push({ id: it.id + '~c' + i, seed, d, name: GE.nameFor(d, seed), kind: GE.classify(d), by: it.by || 'Grug Digital', brand: it.brand || 'grug', order: i, stamp: 0, gen: true }); }
+      }
+    } catch (e) { console.warn('variants', e); }
+    return out;
+  }
+  // what she keeps on: the piece goes in her wardrobe (a hairstyle keeps its colour) and on her
+  function keepOn(it) {
+    if (!it) return; let e = entryFor(it.id);
+    if (!e) { e = entryOf(it); CL.wardrobe.unshift(e); }
+    else if (deptOf(it) === 'hair') { if (it._col) e.col = it._col; else delete e.col; }
+    wearOn(it); clSave(); remember();
+  }
+  function pickTile(it, before) {
+    const t = el('button', 'cl-pick' + (before ? ' before' : '')); t.type = 'button';
+    t.style.backgroundColor = it ? cardColour(it) : ''; t.append(el('span', 'wait'));
+    if (before) t.append(el('span', 'cl-pbadge', ic('arrow_uturn_left_down')));
+    t.append(el('span', 'cl-pon', ic('star')));
+    if (!it) { t.classList.add('none'); t.innerHTML += `<span class="cl-pnone">${ic('cross')}</span>`; t.querySelector('.wait').remove(); }
+    else { const cb = u => { t.style.backgroundImage = `url(${u})`; const w = t.querySelector('.wait'); if (w) w.remove(); }; cb.alive = () => document.body.contains(t); queueThumb(it, 'worn', cb, true); }
+    const name = it ? it.name : 'Nothing'; t.setAttribute('aria-label', before ? 'What she had on: ' + name : name); t.dataset.gTip = before ? 'What she had on' : name;
+    return t;
+  }
+  function selectTile(it) {
+    CL.preview = it; for (const t of clDet.querySelectorAll('.cl-pick')) t.classList.toggle('on', t._it === (it || null));
+    syncOutfit().then(() => { if (CL.view) focus(it || CL.view); });
+  }
   function itemPanel(box, it) {
-    const dp = deptOf(it), hair = dp === 'hair', mineIt = owned(it.id), on = CL.wearing[slotOf(it)] === it.id;
+    const dp = deptOf(it), hair = dp === 'hair', mineIt = owned(it.id);
     const kind = hair ? it.length.charAt(0).toUpperCase() + it.length.slice(1) : isJ(it) ? J.KIND_LABEL[it.kind] || it.kind : GE.CLASS_LABEL[it.kind];
     const tags = hair ? it.tags.filter(t => t !== 'yours').map(t => t.charAt(0).toUpperCase() + t.slice(1)) : isJ(it) ? J.tagsFor(dp, it.d) : GE.tagsFor(it.d);
     const v = el('div', 'cl-item');
-    v.innerHTML = `<div class="cl-ihead"><div class="crumbs"><span>${esc(deptLabel(dp))}</span><i class="sep">›</i><span>${esc(kind || '')}</span></div><button class="cl-round sm cl-x" data-back aria-label="Close" data-g-tip="Close">${ic('cross')}</button></div>
-      <div class="cl-iwrap"><div class="cl-ipic" style="background-color:${cardColour(it)}"><span class="wait"></span></div>
-      <div class="cl-iinfo"><h2 class="g-h3">${esc(it.name)}</h2><div class="cl-by">${byHTML(it)}</div><div class="cl-price">Free</div>
-      <div class="cl-acts"><button class="g-btn g-btn--primary" data-equip>${on ? ic('cross') + '<span>Unequip</span>' : '<span>Equip</span>'}</button><button class="g-btn" data-add${mineIt ? ' disabled' : ''}>${mineIt ? ic('star') + '<span>In your wardrobe</span>' : ic('plus_in_circle') + '<span>Add to wardrobe</span>'}</button><button class="g-btn" data-back>${ic('arrow_left')}<span>Back</span></button></div>
-      <div class="cl-acts2"><button class="g-btn g-btn--sm favbtn${isFav(it.id) ? ' on' : ''}" data-fav>${ic('star')}<span>${isFav(it.id) ? 'Favorited' : 'Favorite'}</span></button>${J.isCloth(dp) ? '' : `<span class="rollbtn"><button class="g-btn g-btn--sm" data-dl>${ic('file_arrow_down')}<span>Download</span>${ic('dropdown')}</button><div class="rollmenu fmtmenu" hidden></div></span>`}<button class="g-btn g-btn--sm g-btn--ghost" data-edit>${ic('pencil')}<span>${hair ? 'Edit in the Hair Studio' : 'Edit'}</span></button></div></div></div>
+    v.innerHTML = `<button class="cl-round sm cl-x" data-back aria-label="Close" data-g-tip="Close">${ic('cross')}</button>
+      <div class="cl-picks"><div class="cl-pbefore"></div><div class="cl-vars"></div></div>
+      <details class="cl-info"><summary><span>More Information</span><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M3 6l5 5 5-5"/></svg></summary>
+      <div class="cl-iinfo"><div class="crumbs"><span>${esc(deptLabel(dp))}</span><i class="sep">›</i><span>${esc(kind || '')}</span></div><h2 class="g-h3">${esc(it.name)}</h2><div class="cl-by">${byHTML(it)}</div><div class="cl-price">Free</div>
+      <div class="cl-acts2"><button class="g-btn g-btn--sm" data-add${mineIt ? ' disabled' : ''}>${mineIt ? ic('star') + '<span>In your wardrobe</span>' : ic('plus_in_circle') + '<span>Add to wardrobe</span>'}</button><button class="g-btn g-btn--sm favbtn${isFav(it.id) ? ' on' : ''}" data-fav>${ic('star')}<span>${isFav(it.id) ? 'Favorited' : 'Favorite'}</span></button>${J.isCloth(dp) ? '' : `<span class="rollbtn"><button class="g-btn g-btn--sm" data-dl>${ic('file_arrow_down')}<span>Download</span>${ic('dropdown')}</button><div class="rollmenu fmtmenu" hidden></div></span>`}<button class="g-btn g-btn--sm g-btn--ghost" data-edit>${ic('pencil')}<span>${hair ? 'Edit in the Hair Studio' : 'Edit'}</span></button></div></div>
       <div class="chips">${tags.map(t => `<span>${esc(t)}</span>`).join('')}</div>
       <p class="cl-desc">${esc(hair ? it.desc : isJ(it) ? J.describe(dp, it.d) : GE.describe(it.d))}</p><div class="g-label">Details</div><dl class="specs">${hair ? [['Style', esc(it.style)], ['Length', esc(kind)], ['Colour', swatch(it.sw) + esc(it.colour)]].map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('') : isJ(it) ? JM.specRows(it) : specRows(it.d)}</dl>
-      <h3 class="g-h4 cl-like-h">More like this</h3><div class="cgrid cl-grid" data-like></div>`;
+      <h3 class="g-h4 cl-like-h">More like this</h3><div class="cgrid cl-grid" data-like></div></details>`;
     box.append(v);
-    const pic = v.querySelector('.cl-ipic'), cb = u => { pic.style.backgroundImage = `url(${u})`; const w = pic.querySelector('.wait'); if (w) w.remove(); }; cb.alive = () => document.body.contains(pic); queueThumb(it, 'worn', cb, true);
+    // the pictures: what she had on, then this piece and its colours
+    const was = wornItem(slotOf(it)), bt = pickTile(was, true); bt._it = null; bt.onclick = () => selectTile(null); v.querySelector('.cl-pbefore').append(bt);
+    const vars = v.querySelector('.cl-vars');
+    for (const x of CL.vars || [it]) { const t = pickTile(x, false); t._it = x; t.onclick = () => selectTile(x); vars.append(t); }
+    for (const t of v.querySelectorAll('.cl-pick')) t.classList.toggle('on', t._it === (CL.preview || null));
     for (const b of v.querySelectorAll('[data-back]')) b.onclick = () => { location.hash = ''; };
-    v.querySelector('[data-equip]').onclick = () => { if (on) takeOff(it); else addToWardrobe(it, true); };
     v.querySelector('[data-add]').onclick = () => { if (!mineIt) addToWardrobe(it, false); };
     v.querySelector('[data-fav]').onclick = () => { toggleFav(it); clDetail(); };
     if (it.kit != null) for (const q of v.querySelectorAll('[data-edit],.rollbtn')) q.remove();   // the classic hairstyles: no studio, no files
-    if (v.querySelector('[data-dl]')) formatMenu(v.querySelector('[data-dl]'), v.querySelector('.fmtmenu'), () => it);
-    v.querySelector('[data-edit]').onclick = () => openStudio(it);
-    const like = v.querySelector('[data-like]'); for (const li of likeOf(it)) { const a = card(li, 'worn', { gen: -1 }); like.append(a); a._thumb(); }
+    if (v.querySelector('[data-dl]')) formatMenu(v.querySelector('[data-dl]'), v.querySelector('.fmtmenu'), () => CL.preview || it);
+    const ed = v.querySelector('[data-edit]'); if (ed) ed.onclick = () => openStudio(CL.preview || it);
+    const det = v.querySelector('.cl-info'), like = v.querySelector('[data-like]'); det.open = false;
+    const fillLike = () => { if (like.childElementCount) return; for (const li of likeOf(it)) { const a = card(li, 'worn', { gen: -1 }); like.append(a); a._thumb(); } GRUG.hydrate(like); };
+    det.addEventListener('toggle', () => { if (det.open) fillLike(); });
     GRUG.hydrate(v);
   }
   function clDetail() {
@@ -447,6 +619,7 @@
     if (!CL.on) return; clTabs(); const box = clBody, top = box.scrollTop; box.innerHTML = ''; clEl.dataset.mode = CL.mode;
     if (CL.mode === 'market') marketGrid(box);
     else if (CL.cdept === 'body') bodyPanel(box);
+    else if (CL.cdept === 'chars') charsPanel(box);
     else wardrobeGrid(box, CL.cdept);
     if (CL.mode !== 'market') $('#clFilters').hidden = true;
     GRUG.hydrate(box); box.scrollTop = top; clDetail();
@@ -455,12 +628,13 @@
   async function clOpen(id) {
     const it = itemById(id); if (!it) { location.hash = ''; return; }
     if (deptOf(it) === 'hair') { viewer.token++; for (const k of Object.keys(viewer.vr)) HD.disposeVersion(viewer.vr[k]); viewer.vr = {}; viewer.vp = {}; viewer.item = it; viewer.level = 'low'; }
-    CL.view = it; CL.preview = it;
+    if (CL.view && CL.preview && slotOf(CL.preview) !== slotOf(it)) keepOn(CL.preview);
+    CL.view = it; CL.vars = [it].concat(variantsOf(it)); CL.preview = it;
     if (!clBody.childElementCount) clRender(); else clDetail();
     if (CL.sheet === 'full' && portrait()) setSheet('half');
     await syncOutfit(); if (CL.view === it) focus(it);
   }
-  function closeDetail() { const was = CL.view; if (!was) return; CL.view = null; CL.preview = null; if (deptOf(was) === 'hair') viewer.item = null; if (/^#item\//.test(location.hash)) history.replaceState(null, '', location.pathname + location.search); syncOutfit(); focus(null); clDetail(); }
+  function closeDetail(drop) { const was = CL.view; if (!was) return; const pick = CL.preview; CL.view = null; CL.preview = null; CL.vars = null; if (pick && !drop) { keepOn(pick); clRender(); } if (deptOf(was) === 'hair') viewer.item = null; if (/^#item\//.test(location.hash)) history.replaceState(null, '', location.pathname + location.search); syncOutfit(); focus(null); clDetail(); }
   function clClose() { closeDetail(); }
 
   /* ---- the stage and the sheet (portrait: the panel is a sheet that drags up over her) */
@@ -480,7 +654,7 @@
   let clReady = false;
   async function clEnter(hash) {
     if (!CL.on && !store.get(CL_KEY, null)) clSave(); else if (!CL.on) { try { const c = JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); if (!c || !c.closet) playAsCloset(); } catch (e) {} }
-    const first = !CL.on; CL.on = true; showPage('closet'); look(true); if (worn) worn.root.visible = false; setHair(true);
+    const first = !CL.on; CL.on = true; showPage('closet'); look(true); if (worn) worn.root.visible = false; hairSync();
     if (canvas.parentElement !== $('#clStage')) { canvas.classList.remove('hovercv'); $('#clStage').prepend(canvas); resize(); }
     ZOOM[0] = 40; ZOOM[1] = 560; floor.visible = true; spin.on = false;
     if (first) { if (!FEED.seed) newFeed(true); if (!clReady) { clReady = true; await applyBody(false); remember(); } else look(true); }
@@ -489,7 +663,7 @@
     if (CL.view) clClose(); else { clRender(); await syncOutfit(); if (first) { CL.goal = fullBody(); Object.assign(cam, { yaw: CL.goal.yaw, pitch: CL.goal.pitch, dist: CL.goal.dist }); cam.target.copy(CL.goal.target); } }
   }
   function clLeave() {
-    if (!CL.on) return; CL.on = false; CL.view = null; CL.preview = null; for (const s of SLOTS) unmountSlot(s); for (const k of Object.keys(CL.tok)) CL.tok[k]++;
+    if (!CL.on) return; endPose(); if (CL.view && CL.preview) keepOn(CL.preview); CL.on = false; CL.view = null; CL.preview = null; CL.vars = null; for (const s of SLOTS) unmountSlot(s); for (const k of Object.keys(CL.tok)) CL.tok[k]++;
     look(false); paintBody(GREY); floor.visible = false; ZOOM[0] = 45; ZOOM[1] = 210; if (worn) worn.root.visible = true; setHair(false); JM.syncDress(); clBody.innerHTML = ''; clDet.innerHTML = '';
   }
   // card pictures always show the grey mannequin, and no floor
@@ -510,4 +684,4 @@
   };
   // the old catalog's renderer draws the closet's grid when the closet is showing (its filters call it)
   { const rc0 = renderCatalog; renderCatalog = function () { if (CL.on) { newFeed(false); return clRender(); } return rc0(); }; }
-  Object.assign(CL, { applyBody, look, focus, syncOutfit, clRender, newFeed, FEED, setSiteMode });
+  Object.assign(CL, { applyBody, look, focus, syncOutfit, clRender, newFeed, FEED, setSiteMode, saveCharacter, wearCharacter, charPic, strikePose, endPose, keepOn, selectTile });

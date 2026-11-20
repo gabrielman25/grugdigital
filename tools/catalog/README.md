@@ -46,10 +46,23 @@ The rest of the site still uses `assets/sandy-classic.js` (old feet).
   appended as the sentinel (`.cl-more`) nears the bottom; the grid is never rebuilt while scrolling. Only Hair, Favourites
   and Yours end. Search and filters re-filter with the same seed.
 - **An opened piece** (`#item/<id>`) fills the **bottom half of the panel** (`#clDetail`); the feed stays above it and keeps
-  scrolling, so another card can be opened straight away. She **tries it on** (`CL.preview`, one piece per slot);
-  **Back** or the cross puts her outfit back. **Equip** keeps it and puts it on her; **Add to wardrobe** only keeps it
-  (both add it to the wardrobe). On a piece she has on, Equip reads **Unequip**. Tapping a card she has on (in the feed or
-  the wardrobe) takes it off; tapping the one she's trying on puts her outfit back.
+  scrolling, so another card can be opened straight away. It is **pictures only**, so someone who can't read can use it: the
+  big picture on the left is what she had on in that slot (a cross when it was empty, with a small "back" badge), then the
+  tapped piece and `VAR_N` (5) colour versions of it (`variantsOf`: the same shape recoloured with `keep: 'shape'`; earrings
+  also change metal and necklaces their chain or cord; hair is dyed with `HAIR_SW`). Opening it puts the piece on her
+  (`CL.preview`); tapping a picture puts that one on; tapping the left picture puts back what she had. **Whatever is picked
+  stays on when the panel closes** (the cross, Back, another tab, opening a piece from another slot) and goes in her wardrobe
+  (`keepOn`); a hair version keeps its colour as `entry.col`. Everything written (name, maker, price, Add to wardrobe,
+  Favourite, Download, Edit, tags, description, details, More like this) is in the **More Information** drop-down, closed
+  each time. Tapping a card she has on (in the feed or the wardrobe) still takes it off.
+- **Characters** (Customize → Characters, or the floppy-disk button on the stage): her look saved under a name with a pose
+  (`POSES`: Stand, Wave, Cheer, Flex, Bow, Dance, Robot, Disco). Kept in `grug.closet.v1`.characters as
+  `{ id, name, pose, wearing, pieces, body, pic, at }` (the worn wardrobe entries themselves, so a character still works if a
+  piece leaves the wardrobe; up to 30). Tapping one puts it on and she strikes its pose for a moment (`strikePose`); the
+  pencil puts it on and opens the form (rename, pose, and Save keeps what she has on now); the bin deletes on a second tap.
+  `poseHer(pose)` pins the pieces laid over her body to the bone under them (as `dress.js` does in games), runs the clip, and
+  returns a function that puts every transform back exactly; `charPic` takes the card picture in her own colours that way.
+  Characters she isn't wearing are **NPCs in games** (see `src/dress.js`, `characterFor`).
 - **Customize:** Body has three sub-tabs: **Colour** (skin, nails and the hair she has on, each with swatches and a picker for
   any colour; hair keeps its colour per wardrobe piece as `entry.col`, `dyedHair`), **Face** (expression) and **Build** (the
   sliders, then her feet: foot shape, foot and toe length). Then the wardrobe by category: tap to put on or take off, the bin
@@ -68,7 +81,11 @@ The rest of the site still uses `assets/sandy-classic.js` (old feet).
   accent pill (webkit rules; `scrollbar-width` only inside `@supports not selector(::-webkit-scrollbar)`).
 - **The camera** orbits (drag), zooms (wheel or pinch) and **pans**: drag with the middle mouse button (scroll-wheel press),
   or move two fingers together on a touch screen (`panBy` in `build.py`).
-- Saved on the device: `grug.closet.v1` = `{ wardrobe, wearing, body }`. A first visit starts with one hairstyle on.
+- Saved on the device: `grug.closet.v1` = `{ wardrobe, wearing, body, kitHair, characters }` (`kitHair: 1` is only a flag that the
+  classic hairstyles were added once; `dress.js` must never read it as a hairstyle). A first visit starts with one hairstyle on.
+- **Her own hair mesh** shows only while a classic hairstyle (`kit:long`, `kit:buns`) is on (`hairSync`): a Marketplace
+  hairstyle, or none, hides it. Anything that flips it for a moment (card pictures, the editors) has to leave it as `hairSync`
+  says; re-entering the closet on every address change used to hide it, so the classic hair vanished whenever a piece was opened.
 - The editors (`#edit…`) and the Hair Studio are under the Grug button at the top left of the stage; their Back returns here.
   The old catalog and item pages are still in the file (`#catalog`, `#item`) but nothing routes to them.
 
@@ -233,7 +250,13 @@ The pack is made for its own body (a CC_Base rig, about 140 cm, A-pose). `fit.mj
    **The neck:** the pack's neck is in its head file (not in the pack), so the plain tee's neckline stands in for its surface,
    and round the middle of the neck everything comes down `NECK_DROP` cm (her neck joint is halfway up her throat; the
    pack's is at the base). Without both, necklines floated up her throat and the back of a collar showed through the gap.
-4. A new piece: add it to `clothes.json` (id, FBX file), its textures to `assets/clothes/tex/`, and its `CLOTHES` entry.
+4. **Layered pieces** (a shirt under a jacket, blazer, vest or open shirt; the tee under overalls): after `fit.mjs`, run
+   `python3 tools/catalog/clothes/layers.py [ids]`. Fitting moved the two layers separately, so the shirt poked through the
+   jacket on her chest and collar. It reads each vertex's layer from the colour mask (`LAYER`: which area is under which),
+   measures both layers outward from her spine or arm, and pulls the shirt in under the jacket wherever it isn't at least
+   `GAP` cm inside (up to 3 cm; the blazer's and vest's shirt collars up to 7.5 cm, never nearer her spine than her neck).
+   A new layered piece goes in its `TEX` (and `LAYER` if its under-layer isn't the first area). Re-running `fit.mjs` undoes it.
+5. A new piece: add it to `clothes.json` (id, FBX file), its textures to `assets/clothes/tex/`, and its `CLOTHES` entry.
    Check it on her in the closet (front and side), in its studio, and on a card picture.
 
 ## Sound (`/* ==== sound */`, `soundPanel`)

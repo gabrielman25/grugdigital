@@ -96,6 +96,7 @@ CLOSET_HTML = r'''
         <div class="rollbtn cl-menuwrap"><button class="cl-round" id="clMenuBtn" aria-label="Make your own" data-g-tip="Make your own" aria-haspopup="menu"><span data-g-logo="tile" class="tile"></span></button><div class="rollmenu createmenu cl-menu" id="clMenu" role="menu" hidden></div></div>
         <div class="cl-pillbox"><button class="cl-round" id="clUndo" aria-label="Undo" data-g-tip="Undo" disabled><i data-g-icon="arrow_counterclockwise"></i></button><button class="cl-round" id="clRedo" aria-label="Redo" data-g-tip="Redo" disabled><i data-g-icon="arrow_clockwise"></i></button></div>
         <button class="cl-round" id="clReset" aria-label="See all of her" data-g-tip="See all of her"><i data-g-icon="person"></i></button>
+        <button class="cl-round" id="clSaveChar" aria-label="Save as a character" data-g-tip="Save as a character"><i data-g-icon="floppy_disk"></i></button>
         <button class="cl-round" id="clModeBtn" data-mode-btn aria-label="Dark mode" data-g-tip="Dark mode"><i data-g-icon="sun_moon"></i></button>
       </div>
       <div class="cl-loading" id="clLoading"><span class="g-brandmark"></span><span>Getting her ready…</span></div>
@@ -432,6 +433,46 @@ body.g-chrome #closet .cl-body,body.g-chrome #closet .cl-detail{padding-bottom:6
 #closet .cl-detail .cl-desc{margin:.7rem 0 .6rem}
 #closet .ccard.viewing .ct{box-shadow:0 0 0 3px var(--g-accent)}
 #closet .cl-round.cl-x{flex:none}
+/* the opened piece: pictures first (what she had on, big, then the piece and its colours); the words are under More Information */
+#closet .cl-item{position:relative}
+#closet .cl-item > .cl-x{position:absolute;right:0;top:0;z-index:2}
+#closet .cl-picks{display:grid;grid-template-columns:minmax(7.5rem,34%) minmax(0,1fr);gap:.8rem;align-items:start;padding-right:2.8rem}
+#closet .cl-vars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.55rem}
+#closet .cl-pick{all:unset;box-sizing:border-box;position:relative;display:block;width:100%;aspect-ratio:1;border-radius:var(--g-r-lg);background:var(--g-surface-3) center/92% no-repeat;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);transition:transform var(--g-dur-1) var(--g-ease),box-shadow var(--g-dur-1)}
+#closet .cl-pick:hover{transform:translateY(-2px)}
+#closet .cl-pick:focus-visible{outline:3px solid var(--mode-text,var(--g-text));outline-offset:2px}
+#closet .cl-pick.on{box-shadow:0 0 0 3px var(--g-surface),0 0 0 6px var(--g-text)}
+#closet .cl-pick .wait{position:absolute;inset:30%;border-radius:50%;background:rgba(255,255,255,.35);animation:phPulse 1.5s var(--g-ease) infinite}
+#closet .cl-pick .cl-pon{position:absolute;right:.35rem;top:.35rem;width:1.5rem;height:1.5rem;border-radius:50%;display:none;place-items:center;background:var(--g-text);color:var(--g-surface);font-size:.8rem}
+#closet .cl-pick.on .cl-pon{display:grid}
+#closet .cl-pick .cl-pbadge{position:absolute;left:.45rem;bottom:.45rem;width:2rem;height:2rem;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.9);color:var(--g-ink);font-size:1rem;box-shadow:var(--g-sh-1)}
+#closet .cl-pick.none{background:var(--g-bg);box-shadow:inset 0 0 0 2px var(--g-line)}
+#closet .cl-pick.none.on{box-shadow:0 0 0 3px var(--g-surface),0 0 0 6px var(--g-text)}
+#closet .cl-pick .cl-pnone{position:absolute;inset:0;display:grid;place-items:center;color:var(--g-faint);font-size:2.6rem}
+#closet .cl-info{margin-top:1rem;border-top:1px solid var(--g-line)}
+#closet .cl-info > summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.85rem .1rem;font:700 var(--g-fs-md)/1 var(--g-font);color:var(--g-text-2);cursor:pointer}
+#closet .cl-info > summary::-webkit-details-marker{display:none}
+#closet .cl-info > summary svg{transition:transform var(--g-dur-1)}
+#closet .cl-info[open] > summary svg{transform:rotate(180deg)}
+#closet .cl-info .crumbs{font:600 var(--g-fs-sm)/1.2 var(--g-font);color:var(--g-muted);display:flex;gap:.4rem;align-items:center}
+#closet .cl-info .chips{margin-top:.8rem}
+/* characters: saved looks, each a picture and a name */
+#closet .cl-chars{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.4rem,1fr));gap:1rem .8rem}
+#closet .cl-char{position:relative;display:flex;flex-direction:column;gap:.4rem;min-width:0}
+#closet .cl-char > b{font:700 var(--g-fs-sm)/1.2 var(--g-font);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#closet .cl-cpic{all:unset;box-sizing:border-box;display:grid;place-items:center;width:100%;aspect-ratio:3/4;border-radius:var(--g-r-lg);background:var(--g-bg) center 30%/118% no-repeat;cursor:pointer;color:var(--g-muted);font-size:2rem;box-shadow:inset 0 0 0 1px var(--g-line)}
+#closet .cl-char.add .cl-cpic{border:2px dashed var(--g-line);box-shadow:none}
+#closet .cl-char.add{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:.4rem;cursor:pointer}
+#closet .cl-char.add:hover .cl-cpic{color:var(--g-text);border-color:var(--g-text-2)}
+#closet .cl-char.on .cl-cpic{box-shadow:0 0 0 3px var(--g-text)}
+#closet .cl-char.editing .cl-cpic{box-shadow:0 0 0 3px var(--g-accent)}
+#closet .cl-char .wtag{position:absolute;left:.45rem;top:.45rem}
+#closet .cl-cbtns{position:absolute;right:.35rem;top:.35rem;display:flex;flex-direction:column;gap:.3rem}
+#closet .cl-cbtn{all:unset;box-sizing:border-box;width:1.9rem;height:1.9rem;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.88);color:var(--g-ink);cursor:pointer;font-size:.9rem;box-shadow:var(--g-sh-1)}
+#closet .cl-cbtn.rm.sure{background:var(--g-red,#e8344f);color:#fff}
+#closet .cl-cform{display:flex;flex-direction:column;gap:.6rem;max-width:30rem;margin-bottom:1.3rem;padding:1rem;border-radius:var(--g-r-lg);background:var(--g-bg)}
+#closet .cl-cform .g-input{font-size:var(--g-fs-md)}
+#closet .cl-cnote{margin-top:1.1rem;max-width:30rem}
 /* colour rows: swatches, an "original" chip and a picker for any colour */
 #closet .cl-sws{gap:.45rem}
 #closet .cl-sw{width:2.2rem;height:2.2rem}

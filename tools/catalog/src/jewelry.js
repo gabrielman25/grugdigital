@@ -1565,7 +1565,7 @@
     ['shirt', 'tops', 'Button-up shirt', 'shirts', 'top004', null, ['Shirt', 'Buttons and cuffs', 'Detail'], ['#cfe3f5', '#f4f4f2', '#16161a']],
     ['vest', 'tops', 'Shirt and vest', 'shirts', 'top005', null, ['Shirt', 'Vest', 'Detail'], ['#f4f4f2', '#3a3b40', '#16161a']],
     ['tie', 'tops', 'Shirt and tie', 'shirts', 'top010', null, ['Shirt', 'Tie', 'Detail'], ['#f4f4f2', '#8a1c2b', '#1b2a55']],
-    ['openshirt', 'tops', 'Open shirt and tee', 'shirts', 'top006', null, ['Open shirt', 'Tee', 'Detail'], ['#8a1c2b', '#f4f4f2', '#16161a']],
+    ['openshirt', 'tops', 'Open shirt and tee', 'shirts', 'top006', null, ['Tee', 'Open shirt', 'Detail'], ['#f4f4f2', '#8a1c2b', '#16161a']],   // its mask's first area is the tee underneath
     ['sweatshirt', 'tops', 'Sweatshirt', 'sweaters', 'top003', null, ['Body', 'Cuffs and hem', 'Detail'], ['#9df2c6', '#f4f4f2', '#16161a']],
     ['hoodie', 'tops', 'Hoodie', 'sweaters', 'top009', null, ['Body', 'Hood lining and cuffs', 'Detail'], ['#3a3b40', '#ff6fb0', '#f4f4f2']],
     ['jacket', 'jackets', 'Zip jacket', 'jackets', 'top002', null, ['Lining', 'Jacket', 'Zip and pulls'], ['#f4f4f2', '#2b62d9', '#c8ccd2']],

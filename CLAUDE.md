@@ -219,7 +219,9 @@ Clothes are skinned and head pieces ride her head; necklaces, purses, sandals, s
 the female body (the catalog only dresses her) in a random catalog look (`randomState` in dress.js: skin, nails, face, build,
 a top / jacket / outfit, bottoms, shoes or sandals, sometimes earrings, a necklace or glasses), with the classic kit's own
 **long hair or buns** in a random colour. The game's `outfit.shirt` / `outfit.shorts` colour her top and bottoms, so team and
-uniform colours carry over. `{catalog: true}` / `{catalog: false}` asks for one kind; a strict male bot is never one.
+uniform colours carry over. **The player's own characters** (looks saved in the closet's Characters tab, `grug.closet.v1`.characters)
+are catalog NPCs too: a catalog NPC is one of the characters she isn't wearing a little over half the time, each at most once
+per page (`characterFor` in dress.js; the made avatar carries `characterName`), with team colours on its top and bottoms. `{catalog: true}` / `{catalog: false}` asks for one kind; a strict male bot is never one.
 **Glow Up Spa** is catalog avatars only (`catalog: true` on its bots, `closet: true` on the player). **Runway Ready** dresses
 everyone in its own (classic) clothes, so it builds them with the runtime's **bare** mode: the player's closet body, face and
 hair, and each model's random catalog body, face and hair (`makeOne`). Every game that builds the player from

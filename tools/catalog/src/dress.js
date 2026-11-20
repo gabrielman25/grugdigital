@@ -89,19 +89,39 @@ window.GrugClosetRuntime = (function () {
     // her hair is the classic kit's own: long or buns (style 0 or 1), in any colour
     return { wardrobe, wearing, body, palette: P.scheme, kitHair: { style: r() < 0.5 ? 0 : 1, colour: pick(HAIR_COL), size: 1, up: 0, forward: 0 } };
   }
+  /* ---- the player's own characters as NPCs: looks saved in the closet ('grug.closet.v1'.characters) that she isn't wearing
+     right now. A catalog NPC is one of them a little over half the time, each character at most once per page (so a game
+     never fills with copies), picked by the NPC's seed. A team or uniform colour still colours her top and bottoms. */
+  const USED = new Set();
+  const sortedObj = o => Object.keys(o || {}).sort().map(k => [k, o[k]]);
+  const lookSig = (wearing, body) => JSON.stringify([sortedObj(wearing), body || {}]);
+  function characterFor(seed, team) {
+    const st = read(CL_KEY), all = st && Array.isArray(st.characters) ? st.characters : [];
+    if (!all.length) return null;
+    const now = lookSig(st.wearing, st.body), free = all.filter(c => c && c.wearing && c.body && !USED.has(c.id) && lookSig(c.wearing, c.body) !== now);
+    const r = rnd('char:' + seed); if (!free.length || r() >= 0.6) return null;
+    const c = free[Math.floor(r() * free.length) % free.length]; USED.add(c.id);
+    const pieces = JSON.parse(JSON.stringify(c.pieces || [])), wearing = JSON.parse(JSON.stringify(c.wearing)), T = team || {};
+    const hex = h => /^#[0-9a-f]{6}$/i.test(h || '') ? h : null;
+    const tint = (slot, col) => { const e = col && pieces.find(p => p.id === wearing[slot]); if (e && e.d) e.d.colA = col; };
+    tint('clothing.top', hex(T.shirt)); tint('clothing.legs', hex(T.shorts));
+    return { wardrobe: pieces, wearing, body: JSON.parse(JSON.stringify(c.body)), name: c.name, charId: c.id };
+  }
   /* create(K, opts): opts.random = a seed (an NPC) with opts.cfg the game's config; opts.bare = her body, face and hair only
      (a game that dresses her itself: Runway Ready), with opts.cfg the classic config it dresses her in. No opts: the player. */
   async function create(K, opts) {
     opts = opts || {};
     const J0 = window.GrugJewelry; if (opts.random != null) await J0.ready();
-    const st = opts.random != null ? randomState(opts.random, opts.cfg, opts.team) : (read(CL_KEY) || {}), wardrobe = Array.isArray(st.wardrobe) ? st.wardrobe : [], wearing = st.wearing || {}, bare = !!opts.bare;
+    const st = opts.random != null ? ((!opts.bare && opts.chars !== false && characterFor(opts.random, opts.team)) || randomState(opts.random, opts.cfg, opts.team)) : (read(CL_KEY) || {}), wardrobe = Array.isArray(st.wardrobe) ? st.wardrobe : [], wearing = st.wearing || {}, bare = !!opts.bare;
     const body = Object.assign({ skin: '#d9a67e', nails: '', expression: 'smug', footShape: 'none', build: {} }, st.body || {});
     // a classic hairstyle she wears in the closet (kit:long, kit:buns): her own hair in that style and colour
     { const hw = wearing.hair && wardrobe.find(e => e.id === wearing.hair); if (hw && /^kit:/.test(hw.id)) st.kitHair = { style: hw.id === 'kit:buns' ? 1 : 0, colour: hw.col || '#2a1a12', size: 1, up: 0, forward: 0 }; }
     // made in the catalog's colours first, so each part of her can be told apart, then given hers (as the closet does)
     const hat = opts.cfg && opts.cfg.hat && opts.cfg.hat.type && opts.cfg.hat.type !== 'none' ? opts.cfg.hat : { type: 'none' };
     const base = bare ? Object.assign(JSON.parse(JSON.stringify(opts.cfg || {})), { body: 'female', skin: SKIN0, nails: SKIN0 }) : { body: 'female', skin: SKIN0, nails: SKIN0, expression: 'neutral', earrings: { type: 'none' }, hat, top: null, legs: null, feet: { type: 'flipflops', sole: GREY, strap: GREY } };
-    if (st.kitHair) base.hair = st.kitHair;
+    // (the closet also saves kitHair: 1 as a flag; only an object is a hairstyle. A flag here broke her whole build, so a player
+    // in a Marketplace hairstyle got the blocky avatar in games)
+    if (st.kitHair && typeof st.kitHair === 'object') base.hair = st.kitHair;
     const sandy = await K.create(K.merge(K.DEFAULT, base));
     sandy.update(0.016);
     const orig = []; sandy.object3d.traverse(o => { if (o.isMesh) for (const m of [].concat(o.material)) if (m && m.color && !orig.some(x => x.m === m)) orig.push({ m, color: m.color.clone(), map: m.map, vc: !!m.vertexColors }); });
@@ -147,6 +167,7 @@ window.GrugClosetRuntime = (function () {
     }
     if (!bare) J.clothSync(sandy);
     sandy.isCloset = true; sandy.__expr0 = body.expression;
+    if (st.charId) { sandy.characterName = st.name; sandy.characterId = st.charId; }
     // anything a game re-applies (an expression is a whole apply in the classic kit) puts back her colours and her clothes'
     // hidden skin (the kit resets that on every apply)
     const a0 = sandy.apply.bind(sandy), after = () => { colours(); if (hairOn) { HD.dress(true); } if (!bare) J.clothSync(sandy); };
@@ -155,5 +176,5 @@ window.GrugClosetRuntime = (function () {
     sandy.dispose = function () { for (const b of extra) { try { if (b.root && b.root.parent) b.root.parent.remove(b.root); b.dispose && b.dispose(); } catch (e) {} } if (d0) d0(); };
     return sandy;
   }
-  return { create, randomState, KEY: CL_KEY };
+  return { create, randomState, characterFor, KEY: CL_KEY };
 })();
