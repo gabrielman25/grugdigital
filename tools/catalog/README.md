@@ -259,8 +259,19 @@ The pack is made for its own body (a CC_Base rig, about 140 cm, A-pose). `fit.mj
    **The neck:** the pack's neck is in its head file (not in the pack), so the plain tee's neckline stands in for its surface,
    and round the middle of the neck everything comes down `NECK_DROP` cm (her neck joint is halfway up her throat; the
    pack's is at the base). Without both, necklines floated up her throat and the back of a collar showed through the gap.
-4. A new piece: add it to `clothes.json` (id, FBX file), its textures to `assets/clothes/tex/`, and its `CLOTHES` entry.
-   Check it on her in the closet (front and side), in its studio, and on a card picture.
+4. **Then, once, on the freshly fitted files** (both work on `assets/clothes/*.bin` in place; `--check` only reports):
+   - `node tighten.mjs sandy.json ../../../assets/clothes [ids…]`: the fit left the tops of trousers, shorts and skirts (and some
+     hems) standing out from her waist like a flared collar. Her waist and hips (84–128 cm) are measured from her skin's
+     triangles; each garment's inner layer there may be at most `TARGET` cm out (bottoms 0.5, outfits 0.7, tops 1.6, hoodies and
+     sweatshirts 2.4, open jackets 3), the excess taken off every layer alike, and on bottoms and outfits anything still past
+     `CAP` (belts, a lip at the top) is pressed in. Sleeves are left alone; it fades out where her legs part and at her ribs.
+   - `python3 layers.py sandy.json ../../../assets/clothes [ids…]` (numpy, scipy, Pillow): for the garments with a top worn
+     under something (`LAYERED`: jacket linings, the open shirt's tee, the cropped jackets' tops, the blazer's and vest's shirt,
+     the overalls' tee, the dress-and-jacket), the inner area of the colour mask is kept `GAP` cm under the outer one, so its
+     colour no longer shows through in blotches.
+   Running either a second time pulls a little more, so re-fit first (`fit.mjs`) if you need to run them again.
+5. A new piece: add it to `clothes.json` (id, FBX file), its textures to `assets/clothes/tex/`, and its `CLOTHES` entry.
+   Check it on her in the closet (front, side and back, with the waist close up), in its studio, and on a card picture.
 
 ## Sound (`/* ==== sound */`, `soundPanel`)
 
