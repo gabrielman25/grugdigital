@@ -1,0 +1,7 @@
+{
+  "name": "grug-catalog-clothes",
+  "private": true,
+  "type": "module",
+  "description": "Fits the Modular Anime Character pack's clothes to the catalog's avatar (see README.md)",
+  "dependencies": { "three": "0.149.0" }
+}

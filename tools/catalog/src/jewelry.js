@@ -210,7 +210,7 @@
 
   /* ---------------------------------------------------------------- vocabulary: kinds, names, tags, specs */
   const earKind = d => d.seq.length === 1 ? (d.seq[0].id === 'ring' && d.seq[0].k === 'shape' ? 'hoops' : 'studs') : d.seq.length <= 3 ? 'drops' : 'danglers';
-  const KIND_LABEL = { studs: 'Studs', drops: 'Drops', danglers: 'Danglers', hoops: 'Hoops', choker: 'Chokers', short: 'Short', medium: 'Medium', long: 'Long', satchel: 'Satchels', tote: 'Totes', bucket: 'Buckets', round: 'Rounds', heart: 'Hearts', clutch: 'Clutches', slide: 'Slides', thong: 'Thongs', ankle: 'Ankle straps', gladiator: 'Gladiators', wrap: 'Wraps', slipper: 'Slippers', over: 'Headphones', muffs: 'Earmuffs', buds: 'Earbuds', back1: 'One sword', back2: 'Two swords', hip: 'Hip sword', top: 'Tops', legs: 'Bottoms', feet: 'Shoes' };
+  const KIND_LABEL = { studs: 'Studs', drops: 'Drops', danglers: 'Danglers', hoops: 'Hoops', choker: 'Chokers', short: 'Short', medium: 'Medium', long: 'Long', satchel: 'Satchels', tote: 'Totes', bucket: 'Buckets', round: 'Rounds', heart: 'Hearts', clutch: 'Clutches', slide: 'Slides', thong: 'Thongs', ankle: 'Ankle straps', gladiator: 'Gladiators', wrap: 'Wraps', slipper: 'Slippers', over: 'Headphones', muffs: 'Earmuffs', buds: 'Earbuds', back1: 'One sword', back2: 'Two swords', hip: 'Hip sword', shirts: 'Shirts', sweaters: 'Sweaters and hoodies', jackets: 'Jackets', trousers: 'Trousers', shorts: 'Shorts', skirts: 'Skirts', sneakers: 'Sneakers', boots: 'Boots', outfits: 'Outfits' };
   const kindOf = (dept, d) => dept === 'earrings' ? earKind(d) : lenClass(d).id;
   const elName = e => e.k === 'charm' ? CHARM_BY[e.id].label : SHAPE_LABEL[e.id];
   const FLAVOUR = ['Cute', 'Fancy', 'Dainty', 'Glam', 'Posh', 'Sparkly', 'Merry', 'Spooky', 'Lovely', 'Bold', 'Sweet', 'Chic', 'Jolly', 'Charming', 'Darling', 'Lucky', 'Super', 'Pretty', 'Royal', 'Magic'];
@@ -1543,93 +1543,164 @@
   }
 
   /* ================================================================ clothing
-     The classic avatar's clothes (SandyClassicKit.CATALOG.parts: tops and dresses, bottoms, boots), each in any colour and with
-     an optional print from the pattern pack. Clothing is worn by the avatar herself (sandy.apply), not added as a mesh: build()
-     puts the piece on her and gives back an empty root whose dispose takes it off again. Pieces mounted at once are kept in
-     sandy.__cloth (one per slot); every change puts all three slots back together, so a dress clears the bottoms and her own
-     look comes back when the last piece comes off. Downloads stay in the classic closet (export3d.js). */
-  const SKIT = () => window.SandyClassicKit || window.SandyKit;
-  const CLOTH_SLOTS = [['top', 'Tops and dresses'], ['legs', 'Bottoms'], ['feet', 'Shoes']];
-  const CLOTH_SLOT_LABEL = Object.fromEntries(CLOTH_SLOTS);
-  const CLOTH = {
-    top: [['gen_tshirt', 'T-shirt'], ['gen_longsleeve', 'Long-sleeve tee'], ['mh_toigo_keyhole_tank_top', 'Keyhole tank'], ['mh_toigo_bodice-style_top', 'Bodice top'], ['mh_toigo_strapless_ruffle_top_dress', 'Strapless ruffle dress', 1], ['mh_toigo_halter_dress_knee_length', 'Halter dress', 1], ['mh_toigo_halter_dress_midi', 'Halter midi dress', 1], ['mh_toigo_bodice_dress_with_lace_ruffle_skirt', 'Bodice dress', 1]],
-    legs: [['mh_cortu_jeans_shorts', 'Denim shorts'], ['mh_frankyaye_mini_skirt_01', 'Mini skirt'], ['mh_frankyaye_mini_skirt_02', 'Flared mini skirt'], ['mh_toigo_tiered_mini_skirt', 'Tiered mini skirt'], ['mh_toigo_tiered_skirt', 'Tiered skirt'], ['mh_toigo_skirt_with_lace_ruffle', 'Lace ruffle skirt'], ['mh_toigo_long_full_skirt', 'Long full skirt'], ['Female_Peasant_Legs', 'Peasant trousers'], ['mh_rehmanpolanski_viking_pants', 'Viking trousers']],
-    feet: [['mh_culturalibre_hero_boots_1', 'Hero boots'], ['Female_Peasant_Feet', 'Laced boots']]
-  };
-  const CLOTH_LABEL = Object.fromEntries(Object.values(CLOTH).flat().map(x => [x[0], x[1]]));
-  const isDress = d => d.slot === 'top' && CLOTH.top.some(x => x[0] === d.part && x[2]);
-  const CL_COLS = ['col', 'patCol'];
-  DEF.clothing = () => ({ v: 1, brand: 'grug', slot: 'top', part: 'gen_tshirt', col: '#f4f4f2', pat: -1, patCol: '#16161a', tiles: 14, charms: [] });
-  LIMITS.clothing = { n: 0 };
-  function validateC(src, brand) {
-    const notes = [], D0 = DEF.clothing(), d = Object.assign(DEF.clothing(), src || {}); d.brand = brand || d.brand; if (!BRAND_LABEL[d.brand]) d.brand = 'grug';
-    if (!CLOTH[d.slot]) d.slot = 'top'; if (!CLOTH[d.slot].some(x => x[0] === d.part)) d.part = CLOTH[d.slot][0][0];
+     Clothes from the Modular Anime Character pack, fitted to her body (tools/catalog/clothes/fit.mjs: assets/clothes/<id>.bin,
+     each garment skinned to her own skeleton, plus the list of her skin it covers) and coloured by the pack's colour masks
+     (assets/clothes/tex/<tex>_m.webp: red, green and blue mark three areas, each channel's brightness is its shading) with
+     its normal maps (<tex>_n.webp). Five departments: tops, jackets, bottoms, shoes and outfits; she wears three slots (top:
+     a top, a jacket or an outfit; legs: bottoms; feet: shoes). A shirt and trousers are her default: they show in any slot
+     with nothing else in it (an outfit covers both). Open-toe shoes from the pack are left out (Sandals covers those).
+     build() puts a piece on her through sandy.__wear (one per slot, stacked so a card picture can borrow a slot) and
+     clothSync() redraws every slot; dispose() puts back what was there. */
+  const CLOTH_BASE = ON_SITE ? '../../assets/clothes/' : 'clothes/';
+  const CLOTH_DEPTS = ['tops', 'jackets', 'bottoms', 'shoes', 'outfits'];
+  const isCloth = dp => CLOTH_DEPTS.includes(dp);
+  const CLOTH_DEPT_LABEL = { tops: 'Tops', jackets: 'Jackets', bottoms: 'Bottoms', shoes: 'Shoes', outfits: 'Outfits' };
+  const CLOTH_SLOT_OF = { tops: 'top', jackets: 'top', outfits: 'top', bottoms: 'legs', shoes: 'feet' };
+  // [id, dept, label, sub-kind, texture key, mask variants, names of the three colour areas, default colours]
+  const CLOTHES = [
+    ['tee', 'tops', 'T-shirt', 'shirts', 'top001', ['Plain', 'Ringer'], ['Shirt', 'Trim', 'Detail'], ['#f4f4f2', '#d9d9d9', '#16161a']],
+    ['longsleeve', 'tops', 'Long-sleeve top', 'shirts', 'top008', ['Plain', 'Striped'], ['Top', 'Trim', 'Detail'], ['#f4f4f2', '#1b2a55', '#16161a']],
+    ['shirt', 'tops', 'Button-up shirt', 'shirts', 'top004', null, ['Shirt', 'Buttons and cuffs', 'Detail'], ['#cfe3f5', '#f4f4f2', '#16161a']],
+    ['vest', 'tops', 'Shirt and vest', 'shirts', 'top005', null, ['Shirt', 'Vest', 'Detail'], ['#f4f4f2', '#3a3b40', '#16161a']],
+    ['tie', 'tops', 'Shirt and tie', 'shirts', 'top010', null, ['Shirt', 'Tie', 'Detail'], ['#f4f4f2', '#8a1c2b', '#1b2a55']],
+    ['openshirt', 'tops', 'Open shirt and tee', 'shirts', 'top006', null, ['Open shirt', 'Tee', 'Detail'], ['#8a1c2b', '#f4f4f2', '#16161a']],
+    ['sweatshirt', 'tops', 'Sweatshirt', 'sweaters', 'top003', null, ['Body', 'Cuffs and hem', 'Detail'], ['#9df2c6', '#f4f4f2', '#16161a']],
+    ['hoodie', 'tops', 'Hoodie', 'sweaters', 'top009', null, ['Body', 'Hood lining and cuffs', 'Detail'], ['#3a3b40', '#ff6fb0', '#f4f4f2']],
+    ['jacket', 'jackets', 'Zip jacket', 'jackets', 'top002', null, ['Lining', 'Jacket', 'Zip and pulls'], ['#f4f4f2', '#2b62d9', '#c8ccd2']],
+    ['cropjacket', 'jackets', 'Cropped jacket', 'jackets', 'xtopsmall', null, ['Top', 'Jacket', 'Detail'], ['#f4f4f2', '#16161a', '#c8ccd2']],
+    ['cropjacket2', 'jackets', 'Cropped jacket and crop top', 'jackets', 'xtop', null, ['Top', 'Jacket', 'Detail'], ['#f4f4f2', '#e8344f', '#c8ccd2']],
+    ['blazer', 'jackets', 'School blazer', 'jackets', 'top011', null, ['Shirt', 'Blazer', 'Tie and trim'], ['#f4f4f2', '#1b2a55', '#8a1c2b']],
+    ['pants', 'bottoms', 'Trousers', 'trousers', 'bot001', null, ['Trousers', 'Trim', 'Belt'], ['#2b3a5c', '#3a3b40', '#16161a']],
+    ['skinny', 'bottoms', 'Skinny jeans', 'trousers', 'bot004', null, ['Jeans', 'Trim', 'Detail'], ['#3b5a8c', '#3b5a8c', '#c9a27e']],
+    ['loosepants', 'bottoms', 'Loose trousers and belt', 'trousers', 'xbot', null, ['Trousers', 'Belt', 'Buckle'], ['#6b4428', '#16161a', '#c8ccd2']],
+    ['shorts', 'bottoms', 'Shorts', 'shorts', 'bot002', null, ['Shorts', 'Trim', 'Detail'], ['#3b5a8c', '#f4f4f2', '#c9a27e']],
+    ['longshorts', 'bottoms', 'Long shorts', 'shorts', 'bot005', null, ['Shorts', 'Trim', 'Detail'], ['#c9a27e', '#6b4428', '#16161a']],
+    ['skirt', 'bottoms', 'Short skirt', 'skirts', 'bot003', null, ['Skirt', 'Trim', 'Detail'], ['#1b2a55', '#f4f4f2', '#16161a']],
+    ['sneakers', 'shoes', 'High-top sneakers', 'sneakers', 'shoes002', null, ['Upper', 'Sole and laces', 'Detail'], ['#e8344f', '#f4f4f2', '#16161a']],
+    ['lowsneakers', 'shoes', 'Sneakers', 'sneakers', 'shoes006', null, ['Upper', 'Sole and laces', 'Detail'], ['#f4f4f2', '#f4f4f2', '#2b62d9']],
+    ['boots', 'shoes', 'Boots and socks', 'boots', 'shoes001', null, ['Boots', 'Laces', 'Socks'], ['#6b4428', '#c9a27e', '#f4f4f2']],
+    ['chelsea', 'shoes', 'Chelsea boots', 'boots', 'shoes007', null, ['Boots', 'Elastic', 'Detail'], ['#16161a', '#3a3b40', '#c9a27e']],
+    ['highboots', 'shoes', 'Tall boots', 'boots', 'shoes005', null, ['Boots', 'Trim', 'Laces'], ['#16161a', '#3a3b40', '#c8ccd2']],
+    ['overalls', 'outfits', 'Overalls and tee', 'outfits', 'overalls', null, ['Overalls', 'Tee', 'Buttons'], ['#3b5a8c', '#f4f4f2', '#d4af37']],
+    ['outfit2', 'outfits', 'Top and skirt', 'outfits', 'outfit002', null, ['Main', 'Second colour', 'Detail'], ['#ff8fc2', '#f4f4f2', '#16161a']],
+    ['outfit3', 'outfits', 'Dress and jacket', 'outfits', 'outfit003', null, ['Main', 'Second colour', 'Detail'], ['#7d3fc4', '#f4f4f2', '#16161a']],
+    ['racer', 'outfits', 'Racing suit', 'outfits', 'outfit004', null, ['Suit', 'Stripes', 'Detail'], ['#e8344f', '#f4f4f2', '#16161a']]
+  ].map(([id, dept, label, sub, tex, vars, areas, cols]) => ({ id, dept, label, sub, tex, vars, areas, cols, feet: id === 'racer' }));
+  const CLOTH_BY = Object.fromEntries(CLOTHES.map(c => [c.id, c]));
+  const CLOTH_LABEL = Object.fromEntries(CLOTHES.map(c => [c.id, c.label]));
+  const CLOTH_SUBS = { tops: [['shirts', 'Shirts'], ['sweaters', 'Sweaters and hoodies']], jackets: [], bottoms: [['trousers', 'Trousers'], ['shorts', 'Shorts'], ['skirts', 'Skirts']], shoes: [['sneakers', 'Sneakers'], ['boots', 'Boots']], outfits: [] };
+  const CLOTH_SUB_LABEL = Object.fromEntries(Object.values(CLOTH_SUBS).flat().concat([['jackets', 'Jackets'], ['outfits', 'Outfits']]));
+  const CLOTH_DEFAULT = { top: { part: 'tee', colA: '#f4f4f2', colB: '#e2e2de', colC: '#16161a', vari: 0, pat: -1 }, legs: { part: 'pants', colA: '#2b3a5c', colB: '#2b3a5c', colC: '#16161a', vari: 0, pat: -1 } };
+  // the garments, loaded once each (geometry, colour mask, normal map)
+  const CDATA = new Map();
+  function clothData(id) {
+    if (CDATA.has(id)) return CDATA.get(id);
+    const c = CLOTH_BY[id], rec = { ready: false };
+    rec.p = (async () => {
+      const buf = await (await fetch(CLOTH_BASE + id + '.bin')).arrayBuffer(), hl = new DataView(buf).getUint32(0, true), head = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 4, hl))), B = 4 + hl;
+      rec.geos = head.parts.map(p => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(buf, B + p.pos, p.v * 3), 3)); g.setAttribute('normal', new THREE.BufferAttribute(new Int8Array(buf, B + p.nor, p.v * 3), 3, true)); g.setAttribute('uv', new THREE.BufferAttribute(new Uint16Array(buf, B + p.uv, p.v * 2), 2, true)); g.setAttribute('skinIndex', new THREE.BufferAttribute(new Uint16Array(buf, B + p.si, p.v * 4), 4)); g.setAttribute('skinWeight', new THREE.BufferAttribute(new Uint8Array(buf, B + p.sw, p.v * 4), 4, true)); g.setIndex(new THREE.BufferAttribute(p.big ? new Uint32Array(buf, B + p.idx, p.i) : new Uint16Array(buf, B + p.idx, p.i), 1)); g.computeBoundingSphere(); return g; });
+      rec.hide = new Uint16Array(buf, B + head.hide, head.nhide); rec.tris = head.parts.reduce((s, p) => s + p.i / 3, 0);
+      const tl = new THREE.TextureLoader(), tex = f => new Promise(ok => tl.load(CLOTH_BASE + 'tex/' + f, t => ok(t), undefined, () => ok(null)));
+      const vs = c.vars ? c.vars.map((v, i) => c.tex + '_' + 'ab'[i] + '_m.webp') : [c.tex + '_m.webp'];
+      rec.masks = await Promise.all(vs.map(tex)); rec.normal = await tex(c.tex + '_n.webp');
+      for (const t of rec.masks.concat([rec.normal])) if (t) { t.encoding = THREE.LinearEncoding; t.anisotropy = 4; t.needsUpdate = true; }
+      rec.ready = true; return rec;
+    })().catch(e => { console.warn('clothes', id, e); rec.failed = true; return rec; });
+    CDATA.set(id, rec); return rec;
+  }
+  const prep = (dp, d) => isCloth(dp) && d && CLOTH_BY[d.part] ? clothData(d.part).p : Promise.resolve();
+  // one tile of a print, as a texture the garment repeats
+  const patTex = new Map();
+  function patTile(idx) {
+    if (patTex.has(idx)) return patTex.get(idx); if (!PAT.lum) return null;
+    const T = PAT.T, D = new Uint8Array(T * T * 4), ox = (idx % PAT.cols) * T, oy = Math.floor(idx / PAT.cols) * T;
+    for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) { const L = Math.round(255 * (1 - (1 - PAT.lum[(oy + y) * PAT.w + ox + x] / 255) * PAT_K)), p = ((T - 1 - y) * T + x) * 4; D[p] = D[p + 1] = D[p + 2] = L; D[p + 3] = 255; }
+    const t = new THREE.DataTexture(D, T, T); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.magFilter = THREE.LinearFilter; t.minFilter = THREE.LinearMipMapLinearFilter; t.generateMipmaps = true; t.needsUpdate = true; patTex.set(idx, t); return t;
+  }
+  // a garment's material: the mask's three areas in three colours, shaded by the mask, with the print on the first area
+  function clothMat(d, rec, paint, cut) {
+    const lin = h => new THREE.Color(h).convertSRGBToLinear(), U = { uA: { value: lin(paint || d.colA) }, uB: { value: lin(paint || d.colB) }, uC: { value: lin(paint || d.colC) }, uPat: { value: null }, uPatCol: { value: lin(d.patCol || '#16161a') }, uTiles: { value: d.tiles || 14 } };
+    const pt = !paint && d.pat >= 0 ? patTile(d.pat) : null; U.uPat.value = pt;
+    const m = new THREE.MeshStandardMaterial({ color: 0xffffff, map: rec.masks[Math.min(d.vari || 0, rec.masks.length - 1)] || null, normalMap: rec.normal || null, roughness: 0.82, metalness: 0, envMap: ENV, envMapIntensity: 0.35, side: THREE.DoubleSide });
+    if (cut) m.clippingPlanes = [cut];
+    m.onBeforeCompile = sh => { Object.assign(sh.uniforms, U); sh.fragmentShader = 'uniform vec3 uA, uB, uC, uPatCol; uniform sampler2D uPat; uniform float uTiles;\n' + sh.fragmentShader.replace('#include <map_fragment>', `#ifdef USE_MAP
+        vec4 mk = texture2D( map, vUv ); float mm = max( max( mk.r, mk.g ), max( mk.b, 0.001 ) );
+        float wb = smoothstep( 0.25, 0.75, mk.g / mm ), wc = smoothstep( 0.25, 0.75, mk.b / mm ); vec3 base = uA;
+        ${pt ? 'base = mix( uPatCol, uA, texture2D( uPat, vUv * uTiles ).r );' : ''}
+        base = mix( mix( base, uB, wb ), uC, wc ); diffuseColor.rgb *= base * ( 0.42 + 0.68 * mm );
+      #endif`); };
+    m.customProgramCacheKey = () => 'grugcloth' + (pt ? 'p' : ''); m.userData.clothU = U; return m;
+  }
+  // what she has on, slot by slot, drawn again from sandy.__wear
+  function clothState(sandy) { return sandy.__wear || (sandy.__wear = { on: {}, meshes: [], paint: null, hide0: null }); }
+  function clothSync(sandy) {
+    const st = clothState(sandy), body = sandy.n3.body; if (!body) return;
+    for (const m of st.meshes) { if (m.parent) m.parent.remove(m); m.material.dispose(); } st.meshes = [];
+    // her old outfit pieces (the kit's shirt, shorts and belt) never show
+    sandy.object3d.traverse(o => { if (/^(shirt_geo|shorts_geo|belt_geo)$/.test(o.name)) o.visible = false; });
+    const on = st.on, top = on.top || null, outfit = top && CLOTH_BY[top.part] && CLOTH_BY[top.part].dept === 'outfits';
+    const want = [['top', top || CLOTH_DEFAULT.top, !top], ['legs', outfit ? null : on.legs || CLOTH_DEFAULT.legs, !on.legs], ['feet', top && CLOTH_BY[top.part] && CLOTH_BY[top.part].feet ? null : on.feet || null, false]];
+    const A = body.geometry.attributes.aHide; if (A && !st.hide0) st.hide0 = A.array.slice(); if (A && st.hide0) { if (st.hide0.length !== A.array.length) st.hide0 = A.array.slice(); A.array.set(st.hide0); }
+    for (const [slot, d, dflt] of want) {
+      if (!d) continue; const rec = clothData(d.part); if (!rec.ready) { rec.p.then(() => { if (sandy.__wear === st) clothSync(sandy); }); continue; }
+      const paint = dflt ? st.paint : null;
+      for (const g of rec.geos) { const m = new THREE.SkinnedMesh(g, clothMat(d, rec, paint, sandy.__cut)); m.name = 'garment_' + slot; m.frustumCulled = false; m.userData.garment = { slot, dflt }; body.parent.add(m); m.position.copy(body.position); m.quaternion.copy(body.quaternion); m.scale.copy(body.scale); m.bind(body.skeleton, body.bindMatrix); st.meshes.push(m); }
+      if (A) for (const i of rec.hide) if (i < A.count) A.array[i] = 1;
+    }
+    if (A) A.needsUpdate = true;
+    // shoes take her flip-flops off
+    const shod = want[2][1] || (top && CLOTH_BY[top.part] && CLOTH_BY[top.part].feet); (sandy.n3.sandals || []).forEach(sd => { if (sd && sd.group) sd.group.visible = !shod && !sd.__hiddenBySandals; });
+    sandy.object3d.traverse(o => { if (o.isMesh && o.material && o.material.userData && o.material.userData.toeU) o.visible = !shod; });
+    delete sandy.__jfield;
+  }
+  // the default pieces take her mannequin paint on card pictures (null: their own colours)
+  function clothPaint(sandy, css) { const st = clothState(sandy); if (st.paint === css) return; st.paint = css; const lin = new THREE.Color(css || '#ffffff').convertSRGBToLinear(); for (const m of st.meshes) { if (!m.userData.garment.dflt) continue; if (css) { const U = m.material.userData.clothU; U.uA.value.copy(lin); U.uB.value.copy(lin); U.uC.value.copy(lin); } else { m.material.dispose(); } } if (!css) clothSync(sandy); }
+  const clothMeshes = (sandy, slot) => (sandy.__wear ? sandy.__wear.meshes : []).filter(m => !slot || m.userData.garment.slot === slot);
+  const CL_COLS = ['colA', 'colB', 'colC', 'patCol'];
+  const defCloth = dept => { const c = CLOTHES.find(x => x.dept === dept); return { v: 2, brand: 'grug', part: c.id, colA: c.cols[0], colB: c.cols[1], colC: c.cols[2], vari: 0, pat: -1, patCol: '#16161a', tiles: 14, charms: [] }; };
+  for (const dp of CLOTH_DEPTS) { DEF[dp] = () => defCloth(dp); LIMITS[dp] = { n: 0 }; }
+  function validateC(dp, src, brand) {
+    const notes = [], D0 = defCloth(dp), d = Object.assign(defCloth(dp), src || {}); d.brand = brand || d.brand; if (!BRAND_LABEL[d.brand]) d.brand = 'grug';
+    if (!CLOTH_BY[d.part] || CLOTH_BY[d.part].dept !== dp) { d.part = D0.part; }
     for (const k of CL_COLS) if (!isHex(d[k])) d[k] = D0[k];
-    { const v = Math.round(+d.pat); d.pat = isFinite(v) && v >= 0 && v < PAT_N ? v : -1; } d.tiles = clamp(isFinite(+d.tiles) ? +d.tiles : 14, 6, 32); d.charms = [];
+    const c = CLOTH_BY[d.part]; d.vari = c.vars ? clamp(Math.round(+d.vari) || 0, 0, c.vars.length - 1) : 0;
+    { const v = Math.round(+d.pat); d.pat = isFinite(v) && v >= 0 && v < PAT_N ? v : -1; } d.tiles = clamp(isFinite(+d.tiles) ? +d.tiles : 14, 4, 40); d.charms = [];
     if (d.brand === 'kimiland') { let ch = false; for (const k of CL_COLS) if (!isPastel(d[k])) { d[k] = toPastel(d[k]); ch = true; } if (ch) notes.push('Brought to KIMILAND pastels'); }
     return { d, notes };
   }
-  function randomC(seed, o) {
-    o = o || {}; const r = rng('jewel:clothing:' + seed), brand = o.brand || brandFor(seed, 0.2), kimi = brand === 'kimiland';
-    const theme = kimi ? 'sweet' : r.w({ classic: 3, sweet: 2, ocean: 1.2, forest: 1, night: 1.4, halloween: 0.8, christmas: 0.6, valentines: 1 });
-    const pal = kimi ? kimiPalette(r) : null, T = THEMES[theme], pick = kimi ? () => r.pick(pal.mains.concat(pal.acc)) : () => r.pick(T.cols.concat(['#f4f4f2', '#16161a', '#3b5a8c', '#c9a27e']));
-    let d = o.base ? JSON.parse(JSON.stringify(o.base)) : DEF.clothing(); d.brand = brand;
-    const recolour = () => { d.col = pick(); d.patCol = kimi ? r.pick(['#fffafc', r.pick(pal.acc)]) : r.chance(0.5) ? shadeOf(d.col) : pick(); if (d.patCol === d.col) d.patCol = shadeOf(d.col); };
-    if (o.keep === 'shape') { recolour(); return validateC(d, brand).d; }
-    const keepC = o.keep === 'colours' && o.base ? [d.col, d.patCol] : null;
-    d.slot = o.kind && CLOTH[o.kind] ? o.kind : r.w({ top: 4, legs: 3.4, feet: 1.2 }); d.part = r.pick(CLOTH[d.slot])[0];
-    d.pat = r.chance(d.slot === 'feet' ? 0.15 : 0.35) ? r.i(0, PAT_N - 1) : -1; d.tiles = r.f(9, 22);
-    recolour(); if (keepC) { d.col = keepC[0]; d.patCol = keepC[1]; }
-    return validateC(d, brand).d;
+  function randomC(dp, seed, o) {
+    o = o || {}; const r = rng('jewel:' + dp + ':' + seed), brand = o.brand || brandFor(seed, 0.18), kimi = brand === 'kimiland';
+    const theme = kimi ? 'sweet' : r.w({ classic: 3, sweet: 1.6, ocean: 1.2, forest: 1, night: 1.4, halloween: 0.6, christmas: 0.5, valentines: 0.8 });
+    const pal = kimi ? kimiPalette(r) : null, T = THEMES[theme], NEUT = ['#f4f4f2', '#16161a', '#3a3b40', '#c8ccd2', '#2b3a5c', '#3b5a8c', '#c9a27e', '#6b4428'], pick = kimi ? () => r.pick(pal.mains.concat(pal.acc)) : () => r.chance(0.45) ? r.pick(NEUT) : r.pick(T.cols);
+    let d = o.base ? JSON.parse(JSON.stringify(o.base)) : defCloth(dp); d.brand = brand;
+    const recolour = () => { d.colA = pick(); d.colB = r.chance(0.35) ? d.colA : pick(); d.colC = kimi ? '#fffafc' : r.chance(0.5) ? r.pick(NEUT) : pick(); d.patCol = kimi ? r.pick(['#fffafc', r.pick(pal.acc)]) : r.chance(0.5) ? shadeOf(d.colA) : pick(); if (d.patCol === d.colA) d.patCol = shadeOf(d.colA); };
+    if (o.keep === 'shape') { recolour(); return validateC(dp, d, brand).d; }
+    const keepC = o.keep === 'colours' && o.base ? CL_COLS.map(k => d[k]) : null;
+    const pool = CLOTHES.filter(c => c.dept === dp && (!o.kind || c.sub === o.kind)); const c = r.pick(pool.length ? pool : CLOTHES.filter(x => x.dept === dp)); d.part = c.id; d.vari = c.vars ? r.i(0, c.vars.length - 1) : 0;
+    d.pat = r.chance(dp === 'shoes' ? 0.12 : 0.3) ? r.i(0, PAT_N - 1) : -1; d.tiles = r.f(8, 22);
+    recolour(); if (keepC) CL_COLS.forEach((k, i) => { d[k] = keepC[i]; });
+    return validateC(dp, d, brand).d;
   }
-  function nameC(d, seed) {
-    const r = rng('jname:' + seed + ':clothing'), kimi = d.brand === 'kimiland', colour = colourName(d.col, kimi), fl = kimi ? r.pick(KIMI_FLAVOUR) : r.pick(FLAVOUR), noun = CLOTH_LABEL[d.part] || 'Top';
-    const pat = d.pat >= 0 ? r.pick(['Print', 'Patterned', 'Printed']) : '';
-    const forms = [[colour, noun], [fl, colour, noun], [pat || fl, noun], [colour, pat, noun]];
-    return forms[r.i(0, 3)].filter(Boolean).join(' ').replace(/\s+/g, ' ');
+  function nameC(dp, d, seed) { const r = rng('jname:' + seed + ':' + dp), kimi = d.brand === 'kimiland', colour = colourName(d.colA, kimi), fl = kimi ? r.pick(KIMI_FLAVOUR) : r.pick(FLAVOUR), noun = CLOTH_LABEL[d.part] || 'Top', pat = d.pat >= 0 ? r.pick(['Print', 'Patterned', 'Printed']) : ''; const forms = [[colour, noun], [fl, colour, noun], [pat || fl, noun], [colour, pat, noun]]; return forms[r.i(0, 3)].filter(Boolean).join(' ').replace(/\s+/g, ' '); }
+  function tagsC(dp, d) { const c = CLOTH_BY[d.part], t = ['Clothing', CLOTH_DEPT_LABEL[dp], c.label, CLOTH_SUB_LABEL[c.sub]]; if (c.vars) t.push(c.vars[d.vari]); t.push(d.pat >= 0 ? 'Patterned' : 'Solid colour'); if (d.brand === 'kimiland') t.push('Pastel', 'KIMILAND'); return Array.from(new Set(t.filter(Boolean))); }
+  function familiesC(dp, d) { const f = new Set([famOfHex(d.colA), famOfHex(d.colB)]); if (d.pat >= 0) f.add(famOfHex(d.patCol)); if (f.size > 2) f.add('multi'); return f; }
+  function describeC(dp, d) { const kimi = d.brand === 'kimiland', c = CLOTH_BY[d.part], cn = h => colourName(h, kimi).toLowerCase(); const lab = c.label.toLowerCase(), pl = w => /[^s]s$/.test(w), ws = lab.split(' '), pair = pl(ws[ws.length - 1]) && !/ and /.test(lab), bare = !pair && pl(ws[0]), head = (d.pat >= 0 ? 'printed ' : '') + cn(d.colA); return `${pair ? 'A pair of ' + head : bare ? head.charAt(0).toUpperCase() + head.slice(1) : (/^[aeiou]/.test(head) ? 'An ' : 'A ') + head} ${lab}${d.colB !== d.colA ? ', with ' + cn(d.colB) + ' ' + c.areas[1].toLowerCase() : ''}${d.pat >= 0 ? ', and a ' + cn(d.patCol) + ' pattern' : ''}.` + (c.dept === 'outfits' ? ' A whole outfit: it takes the place of a top and bottoms.' : '') + (kimi ? ' A KIMILAND piece: soft pastels, made to be cute.' : '') + ' From the Modular Anime Character pack, fitted to her.'; }
+  function buildCloth(dp, d, ctx) {
+    const { sandy } = ctx, root = new THREE.Group(); root.name = 'grugClothing'; root.userData.catalogItem = true; root.userData.jewel = { dept: dp, design: d };
+    const st = clothState(sandy), slot = CLOTH_SLOT_OF[dp], token = {}, prev = st.on[slot]; st.on[slot] = Object.assign({}, d, { __t: token }); clothSync(sandy);
+    root.userData.meshes = () => clothMeshes(sandy, slot); const rec = clothData(d.part);
+    return { root, d, info: { tris: Math.round(rec.tris || 0) }, frame: 'world', dispose() { if (st.on[slot] && st.on[slot].__t === token) { if (prev) st.on[slot] = prev; else delete st.on[slot]; clothSync(sandy); } } };
   }
-  function tagsC(d) { const t = ['Clothing', CLOTH_SLOT_LABEL[d.slot], CLOTH_LABEL[d.part]]; if (isDress(d)) t.push('Dress'); if (/skirt/i.test(CLOTH_LABEL[d.part])) t.push('Skirt'); if (d.pat >= 0) t.push('Patterned'); else t.push('Solid colour'); if (d.brand === 'kimiland') t.push('Pastel', 'KIMILAND'); return Array.from(new Set(t)); }
-  function familiesC(d) { const f = new Set([famOfHex(d.col)]); if (d.pat >= 0) f.add(famOfHex(d.patCol)); return f; }
-  function describeC(d) { const kimi = d.brand === 'kimiland'; return `${(d.pat >= 0 ? 'A printed ' : 'A ') + colourName(d.col, kimi).toLowerCase()} ${(CLOTH_LABEL[d.part] || '').toLowerCase()}${isDress(d) ? ' (a dress: it covers her legs too)' : ''}${d.pat >= 0 ? ', with a ' + colourName(d.patCol, kimi).toLowerCase() + ' pattern all over' : ''}.` + (kimi ? ' A KIMILAND piece: soft pastels, made to be cute.' : ''); }
-  // her own clothes before any piece went on, and the meshes each slot shows
-  const CLOTH_MESH = { top: ['armor_body'], legs: ['armor_legs'], feet: ['armor_feet', 'armor_feetR'] };
-  function clothMeshes(sandy, slot) { const out = []; sandy.object3d.traverse(o => { if (o.isMesh && CLOTH_MESH[slot].includes(o.name)) out.push(o); }); return out; }
-  function clothTex(d) {
-    const W = 512, t = patCanvas(W, W, d.col, d.pat, d.patCol, W / d.tiles, W / d.tiles); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
-  }
-  function clothSync(sandy) {
-    const st = sandy.__cloth; if (!st) return; const base = st.base, on = st.on, any = Object.values(on).some(Boolean), patch = {}; for (const t of st.tex.splice(0)) t.dispose();
-    const texOf = id => { const p = Object.values(SKIT().CATALOG.parts).flat().find(x => x.id === id); return p ? p.set : id; };
-    for (const [slot] of CLOTH_SLOTS) {
-      const d = on[slot];
-      if (d) patch[slot] = slot === 'feet' ? { type: 'boots', part: d.part, texture: texOf(d.part), colour: d.col } : { part: d.part, texture: texOf(d.part), colour: d.col, template: null };
-      else patch[slot] = !any ? JSON.parse(JSON.stringify(base[slot])) : slot === 'feet' ? JSON.parse(JSON.stringify(base.feet)) : null;
-    }
-    if (on.top && isDress(on.top)) patch.legs = null;
-    if (on.legs && !on.top) patch.top = null;
-    patch.outfit = any ? { shirt: '#f4f4f2', shorts: '#2b2f3a', belt: '#141414' } : JSON.parse(JSON.stringify(base.outfit));
-    sandy.apply(patch); sandy.update(0);
-    // prints: the piece's own colour under the pattern, laid on its material
-    for (const [slot] of CLOTH_SLOTS) {
-      const d = on[slot]; if (!d || d.pat < 0) continue; const tex = clothTex(d); st.tex.push(tex);
-      for (const m of clothMeshes(sandy, slot)) for (const mt of [].concat(m.material)) { mt.map = tex; mt.color.set(0xffffff); mt.needsUpdate = true; }
-    }
-  }
-  function buildClothing(d, ctx) {
-    const { sandy } = ctx, root = new THREE.Group(); root.name = 'grugClothing'; root.userData.catalogItem = true; root.userData.jewel = { dept: 'clothing', design: d };
-    if (!sandy.__cloth) { const c = sandy.getConfig(); sandy.__cloth = { base: JSON.parse(JSON.stringify({ top: c.top, legs: c.legs, feet: c.feet, outfit: c.outfit })), on: {}, tex: [] }; }
-    const st = sandy.__cloth, token = {}, prev = st.on[d.slot]; st.on[d.slot] = Object.assign({}, d, { __t: token }); clothSync(sandy);
-    root.userData.meshes = () => clothMeshes(sandy, d.slot);
-    return { root, d, info: { tris: clothMeshes(sandy, d.slot).reduce((s, m) => s + triOf(m.geometry), 0) }, frame: 'world', dispose() { if (st.on[d.slot] && st.on[d.slot].__t === token) { if (prev) st.on[d.slot] = prev; else delete st.on[d.slot]; clothSync(sandy); } } };
-  }
+  // her default shirt and trousers go on as soon as the page has her
+  function clothInit(sandy) { clothData(CLOTH_DEFAULT.top.part); clothData(CLOTH_DEFAULT.legs.part); clothSync(sandy); return Promise.all([clothData(CLOTH_DEFAULT.top.part).p, clothData(CLOTH_DEFAULT.legs.part).p]).then(() => clothSync(sandy)); }
 
-  const build = (dept, d, ctx, o) => dept === 'clothing' ? buildClothing(d, ctx || CTX) : dept === 'back' ? buildBack(d, ctx || CTX) : dept === 'sound' ? buildSound(d, ctx || CTX) : dept === 'sandals' ? buildSandals(d, ctx || CTX) : dept === 'purses' ? buildPurse(d, ctx || CTX) : dept === 'earrings' ? buildEarrings(d, ctx || CTX, o) : buildNecklace(d, ctx || CTX, o);
+  const build = (dept, d, ctx, o) => isCloth(dept) ? buildCloth(dept, d, ctx || CTX) : dept === 'back' ? buildBack(d, ctx || CTX) : dept === 'sound' ? buildSound(d, ctx || CTX) : dept === 'sandals' ? buildSandals(d, ctx || CTX) : dept === 'purses' ? buildPurse(d, ctx || CTX) : dept === 'earrings' ? buildEarrings(d, ctx || CTX, o) : buildNecklace(d, ctx || CTX, o);
   function init(ctx) { CTX = ctx; ENV = ctx.env || null; for (const m of mats.values()) { m.envMap = ENV; m.needsUpdate = true; } }
   const lengthCm = d => { try { return Math.round(buildNecklaceLength(d)); } catch (e) { return 0; } };
   function buildNecklaceLength(d) { const F = bodyField(CTX.sandy), pts = necklacePath(d, F); return new THREE.CatmullRomCurve3(pts, true, 'centripetal').getLength(); }
 
   window.GrugJewelry = {
-    ready, init, build, validate: (dp, s, b) => dp === 'clothing' ? validateC(s, b) : dp === 'back' ? validateB(s, b) : dp === 'sound' ? validateSnd(s, b) : dp === 'sandals' ? validateS(s, b) : dp === 'purses' ? validateP(s, b) : validate(dp, s, b), random: (dp, seed, o) => dp === 'clothing' ? randomC(seed, o) : dp === 'back' ? randomB(seed, o) : dp === 'sound' ? randomSnd(seed, o) : dp === 'sandals' ? randomS(seed, o) : dp === 'purses' ? randomP(seed, o) : random(dp, seed, o), nameFor: (dp, d, s) => dp === 'clothing' ? nameC(d, s) : dp === 'back' ? nameB(d, s) : dp === 'sound' ? nameSnd(d, s) : dp === 'sandals' ? nameS(d, s) : dp === 'purses' ? nameP(d, s) : nameFor(dp, d, s), tagsFor: (dp, d) => dp === 'clothing' ? tagsC(d) : dp === 'back' ? tagsB(d) : dp === 'sound' ? tagsSnd(d) : dp === 'sandals' ? tagsS(d) : dp === 'purses' ? tagsP(d) : tagsFor(dp, d), families: (dp, d) => dp === 'clothing' ? familiesC(d) : dp === 'back' ? familiesB(d) : dp === 'sound' ? familiesSnd(d) : dp === 'sandals' ? familiesS(d) : dp === 'purses' ? familiesP(d) : families(dp, d), describe: (dp, d) => dp === 'clothing' ? describeC(d) : dp === 'back' ? describeB(d) : dp === 'sound' ? describeSnd(d) : dp === 'sandals' ? describeS(d) : dp === 'purses' ? describeP(d) : describe(dp, d), kindOf: (dp, d) => dp === 'clothing' ? d.slot : dp === 'back' ? d.kind : dp === 'sound' ? d.kind : dp === 'sandals' ? d.style : dp === 'purses' ? d.shape : kindOf(dp, d), BACK_KINDS, BACK_LABEL, BK_LIM, SW, swordPart, hasWrap, hasGem, CLOTH, CLOTH_SLOTS, CLOTH_SLOT_LABEL, CLOTH_LABEL, isDress, clothMeshes, clothSync, SOUND_KINDS, SOUND_LABEL, CUPS, CUP_LABEL, TOPPERS, TOPPER_LABEL, YOKES, BUDS, BUD_LABEL, SND_LIM, EAR_DEPTH, soundFit, STYLES, STYLE_LABEL, HEELS, HEEL_LABEL, SAN_LIM, SAN_N, sandalFit, tiltFeet, PAT, PAT_N, PAT_K, BAG_SHAPES, BAG_LABEL, PATTERNS, PATTERN_LABEL, STRAPS, STRAP_LABEL, CLOSURES, CLOSURE_LABEL, BAG_LIM, PURSE_N, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
+    ready, init, build, validate: (dp, s, b) => isCloth(dp) ? validateC(dp, s, b) : dp === 'back' ? validateB(s, b) : dp === 'sound' ? validateSnd(s, b) : dp === 'sandals' ? validateS(s, b) : dp === 'purses' ? validateP(s, b) : validate(dp, s, b), random: (dp, seed, o) => isCloth(dp) ? randomC(dp, seed, o) : dp === 'back' ? randomB(seed, o) : dp === 'sound' ? randomSnd(seed, o) : dp === 'sandals' ? randomS(seed, o) : dp === 'purses' ? randomP(seed, o) : random(dp, seed, o), nameFor: (dp, d, s) => isCloth(dp) ? nameC(dp, d, s) : dp === 'back' ? nameB(d, s) : dp === 'sound' ? nameSnd(d, s) : dp === 'sandals' ? nameS(d, s) : dp === 'purses' ? nameP(d, s) : nameFor(dp, d, s), tagsFor: (dp, d) => isCloth(dp) ? tagsC(dp, d) : dp === 'back' ? tagsB(d) : dp === 'sound' ? tagsSnd(d) : dp === 'sandals' ? tagsS(d) : dp === 'purses' ? tagsP(d) : tagsFor(dp, d), families: (dp, d) => isCloth(dp) ? familiesC(dp, d) : dp === 'back' ? familiesB(d) : dp === 'sound' ? familiesSnd(d) : dp === 'sandals' ? familiesS(d) : dp === 'purses' ? familiesP(d) : families(dp, d), describe: (dp, d) => isCloth(dp) ? describeC(dp, d) : dp === 'back' ? describeB(d) : dp === 'sound' ? describeSnd(d) : dp === 'sandals' ? describeS(d) : dp === 'purses' ? describeP(d) : describe(dp, d), kindOf: (dp, d) => isCloth(dp) ? (CLOTH_BY[d.part] || {}).sub : dp === 'back' ? d.kind : dp === 'sound' ? d.kind : dp === 'sandals' ? d.style : dp === 'purses' ? d.shape : kindOf(dp, d), BACK_KINDS, BACK_LABEL, BK_LIM, SW, swordPart, hasWrap, hasGem, CLOTHES, CLOTH_BY, CLOTH_LABEL, CLOTH_DEPTS, CLOTH_DEPT_LABEL, CLOTH_SLOT_OF, CLOTH_SUBS, CLOTH_SUB_LABEL, isCloth, clothMeshes, clothSync, clothPaint, clothInit, clothData, prep, SOUND_KINDS, SOUND_LABEL, CUPS, CUP_LABEL, TOPPERS, TOPPER_LABEL, YOKES, BUDS, BUD_LABEL, SND_LIM, EAR_DEPTH, soundFit, STYLES, STYLE_LABEL, HEELS, HEEL_LABEL, SAN_LIM, SAN_N, sandalFit, tiltFeet, PAT, PAT_N, PAT_K, BAG_SHAPES, BAG_LABEL, PATTERNS, PATTERN_LABEL, STRAPS, STRAP_LABEL, CLOSURES, CLOSURE_LABEL, BAG_LIM, PURSE_N, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
     DRESS_Y, DEF: dept => DEF[dept](), EL, SHAPES, SHAPE_LABEL, THREAD_SHAPES, FINISHES, CHARMS, CHARM_BY, THEME_LABEL, THEMES, MOUNTS, LINKS, PAIRS, CORDS, KIND_LABEL, BRANDS, BRAND_LABEL, LIMITS, D_MAX,
     PINKS, PASTEL_OTHER, PASTEL_ACC, PASTEL_METALS, METALS, colourName, charmTexture, geoFor, elH, elName, KIMI_CHARMS
   };

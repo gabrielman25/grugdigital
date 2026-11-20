@@ -190,7 +190,7 @@ way until the owner says a business has agreed in writing.
 ## The accessory catalog (`labs/catalog/`, unlisted)
 
 Eyewear, hair, earrings, necklaces, purses, sandals, sound (headphones, earmuffs, earbuds) and back (swords, from MilkAndBanana's
-Modular Sword Kit, CC0), with editors and one-texture downloads. Clothing is built but switched off until a new pack is in. It opens on the **closet** (`src/closet.js`): the catalog and an avatar editor in one, laid out like Roblox's
+Modular Sword Kit, CC0), with editors and one-texture downloads, and **clothing** (Tops, Jackets, Bottoms, Shoes, Outfits: the Modular Anime Character pack fitted to her body by `tools/catalog/clothes/fit.mjs`; she wears its tee and trousers when nothing else is on; never downloadable, as the pack's licence doesn't allow handing out its files). It opens on the **closet** (`src/closet.js`): the catalog and an avatar editor in one, laid out like Roblox's
 (Marketplace to try things on and add them to the wardrobe; Customize for the wardrobe and her skin, face, feet and build),
 on the classic female avatar in her own colours, over a blurred picture. Card pictures still show the grey mannequin. It follows
 the site's light/dark setting (`profile.prefs.mode`) and its sun/moon button changes it site-wide; its accent is soft pink.

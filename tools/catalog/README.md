@@ -38,19 +38,24 @@ The rest of the site still uses `assets/sandy-classic.js` (old feet).
   the panel as a sheet below it; drag or tap its grip to pull it up over her (`data-sheet` half / full).
 - **Marketplace | Customize** toggle at the top. Marketplace: category tabs (the `DEPTS`), sub-tabs (`SUBS`), search, and a
   filter popover (the catalog's own refine, brand and colour filters: `#fRefine` is moved into it).
+- **Both tab rows scroll sideways** when they don't fit (`hScroll` in closet.js): the mouse wheel, a mouse drag, a swipe,
+  round arrows at whichever end has more, and a thin accent bar under the row. The picked tab is kept in view.
+- **No floor under her:** shoes and sandals clipped through the disc, so the stage is just the blurred picture.
 - **The feed is endless** (`FEED`, `newFeed`, `feedFill`): opening a tab (or a sub-tab) starts a fresh random set (a new seed),
   and pieces drawn earlier whose pictures are ready (`genCache` + `thumbs`) are mixed back in, one in three. More cards are
   appended as the sentinel (`.cl-more`) nears the bottom; the grid is never rebuilt while scrolling. Only Hair, Favourites
   and Yours end. Search and filters re-filter with the same seed.
 - **An opened piece** (`#item/<id>`) fills the **bottom half of the panel** (`#clDetail`); the feed stays above it and keeps
   scrolling, so another card can be opened straight away. She **tries it on** (`CL.preview`, one piece per slot);
-  **Back** or the cross puts her outfit back, **Add to wardrobe** keeps it and puts it on.
+  **Back** or the cross puts her outfit back. **Equip** keeps it and puts it on her; **Add to wardrobe** only keeps it
+  (both add it to the wardrobe). On a piece she has on, Equip reads **Unequip**. Tapping a card she has on (in the feed or
+  the wardrobe) takes it off; tapping the one she's trying on puts her outfit back.
 - **Customize:** Body has three sub-tabs: **Colour** (skin, nails and the hair she has on, each with swatches and a picker for
   any colour; hair keeps its colour per wardrobe piece as `entry.col`, `dyedHair`), **Face** (expression) and **Build** (the
   sliders, then her feet: foot shape, foot and toe length). Then the wardrobe by category: tap to put on or take off, the bin
   removes it. Undo/redo covers the outfit, her body and piece colours.
-- **Slots, not departments:** what she wears is keyed by `slotOf(it)` (the department; clothing would be three slots,
-  `clothing.top|legs|feet`). `clashes()` keeps pieces that can't be worn together apart (a dress and bottoms, boots and sandals).
+- **Slots, not departments:** what she wears is keyed by `slotOf(it)` (the department; clothing is three slots,
+  `clothing.top|legs|feet`). `clashes()` keeps pieces that can't be worn together apart (an outfit and bottoms, shoes and sandals).
 - **She is the classic female avatar in her own colours** here (`look(true)`: each material's own look, kept as
   `userData.grug0` before she's painted grey). Card pictures still use the grey mannequin: `snapScene` switches to
   `look(false)` for the moment a picture is taken. Her skin is the exact colour picked on every part (`applyBody`).
@@ -83,7 +88,7 @@ The rest of the site still uses `assets/sandy-classic.js` (old feet).
 ## Adding a new category: the checklist
 
 Use **sandals** (`validateS` / `randomS` / `buildSandals`, `JDEPT.sandals`, `sandalPanel`) or **purses** as the model to copy.
-Pick a one-letter id prefix (taken: `e n p s a b c`).
+Pick a one-letter id prefix (taken: `e n p s a b t j l f u`; `c` was the old clothing).
 
 **`src/jewelry.js`** (a new `/* ==== <dept> */` section, before `const build =`)
 1. `DEF.<dept>`, a limits table, `LIMITS.<dept> = { n: <max charms> }`, and the kind list (like `STYLES`) with labels.
@@ -105,7 +110,7 @@ Pick a one-letter id prefix (taken: `e n p s a b c`).
 **`build.py`** (search for `sandals` to find every spot)
 10. The `isJ` line, the departments list (`['sandals', 'Sandals', 'sun', 'var(--g-blue)']`), `SUBS`, the `REFINE` filters,
     the department filter in the filter function, `allItems` (`JM.gen(<dept>, …)` in the generation loop), `itemById`'s
-    `/^g[enpsa]:/`, the item note text, the `route()` regex `(earrings|necklaces|purses|sandals|sound)`, the search placeholder
+    `/^g[enpsabtjlfu]:/` (and the feed's pool test in closet.js), the item note text, the `route()` regex `(earrings|necklaces|purses|sandals|sound)`, the search placeholder
     and hero text, the Create menu entry and the hero "Roll …" button.
 
 Then rebuild, test, run the offline build, commit and push (see CLAUDE.md: a branch preview link per change).
@@ -157,12 +162,49 @@ first load takes 20 to 40 seconds.
   scabbard and the strap, a fixed size (`BK_TILE` cm) whatever the part. Length 50 to 120 cm, blade width, angle, height.
 - World frame, fitted over `bodyField` (`bodyLoop` lays the strap). Pictures of back swords are taken from behind.
 
-## Clothing (built, switched off)
+## Clothing (`/* ==== clothing */`, `clothPanel`): the Modular Anime Character pack
 
-The classic kit's clothes (tops and dresses, bottoms, boots) are in `jewelry.js` (`/* ==== clothing */`, `clothPanel`,
-`gc:` ids): any colour, an all-over print, worn by her through `sandy.apply` with three slots. The owner found a better pack,
-so the department is off: it isn't in `DEPTS`, the feed (`GEN_DEPTS`), `CL_DEPTS` or the menus. Point it at the new pack and
-switch those back on (see the comment above `CL_DEPTS` in `closet.js`).
+Five departments: **Tops** (`gt:`), **Jackets** (`gj:`), **Bottoms** (`gl:`), **Shoes** (`gf:`) and **Outfits** (`gu:`),
+27 pieces in `CLOTHES` (jewelry.js): `{ id, dept, label, sub, tex, vars, areas, cols, feet }`. The pack's open-toe shoes
+(flip-flops, sandals) are left out on purpose: Sandals has its own department. The classic kit's clothes (and her old
+ruffled dress) are gone; old wardrobe entries with `dept: 'clothing'` are dropped when the closet loads.
+
+- **She always has something on:** with nothing in a slot she wears `CLOTH_DEFAULT` (the white tee and navy trousers). Card
+  pictures paint those two with the mannequin colour (`clothPaint(sandy, css)`; `paintBody` calls it); the closet shows their
+  own colours (`look(true)` passes null).
+- **Three slots** (`CLOTH_SLOT_OF`): tops, jackets and outfits are `top`, bottoms are `legs`, shoes are `feet`. An outfit
+  takes the legs too (and the feet when it has its own boots: `feet: true`, the racing suit). Shoes hide her flip-flops; shoes
+  and Sandals push each other off (`clashes()` in closet.js).
+- **Design** `d = { v: 2, brand, part, colA, colB, colC, vari, pat, patCol, tiles, charms: [] }`. The pack's colour masks
+  mark three regions (red, green, blue channels); each channel's brightness is that region's shading, so a region takes any
+  colour and keeps its folds. `areas` names the three per piece ("Shirt", "Tie", "Detail"…); `vars` are pieces with two masks
+  (stripes or not). The print tiles over the first region. Normal maps come with the pack.
+- **Files:** `assets/clothes/<id>.bin` (the fitted mesh) and `assets/clothes/tex/<key>_m.webp` / `_n.webp` (the mask and the
+  normal map, 1024 px WebP made from the pack's `RGBMap` and `Normal` PNGs). Loaded on demand: `J.prep(dept, d)` (a promise)
+  before anything is framed or pictured; `clothSync` redraws once a piece arrives.
+- **Worn on her:** each piece is a `SkinnedMesh` on her own skeleton (`body.skeleton`, `body.bindMatrix`), so it moves with
+  her and with her build. Her skin under it is hidden through the kit's `aHide` attribute (the `.bin` lists those vertices).
+  State is `sandy.__wear = { on: {top, legs, feet}, meshes, paint }`; `buildCloth` puts a piece in a slot and gives the slot
+  back on dispose.
+- **Not downloadable.** The pack has no licence text of its own (it's from the Unity Asset Store, whose licence lets it ship
+  inside a product but not be handed out as files), so clothing has no Download button and the studio refuses.
+
+### Fitting a piece (`tools/catalog/clothes/`)
+
+The pack is made for its own body (a CC_Base rig, about 140 cm, A-pose). `fit.mjs` moves every garment vertex onto her:
+
+1. Dump her body from the page: open the catalog, run `clothes/dump-body.js` in the console, save the string as `sandy.json`.
+2. `cd tools/catalog/clothes && npm install` (three 0.149.0), then
+   `node fit.mjs <pack>/Assets/Meshes sandy.json ../../../assets/clothes [ids…]` (no ids: every piece in `clothes.json`).
+3. Per body part (torso; upper and lower arms; thighs, calves, feet) each vertex keeps where along the part it is, which way
+   round, and how far out from the pack's skin; that is laid on her matching part (radius grids of both bodies), the move is
+   smoothed over the mesh, nothing is left inside her, and it takes the skin weights of her nearest skin. Anything more than
+   2.5 cm past the pack's wrist is left out (gloves: her hands are round). Weights always add up to exactly 255.
+   **The neck:** the pack's neck is in its head file (not in the pack), so the plain tee's neckline stands in for its surface,
+   and round the middle of the neck everything comes down `NECK_DROP` cm (her neck joint is halfway up her throat; the
+   pack's is at the base). Without both, necklines floated up her throat and the back of a collar showed through the gap.
+4. A new piece: add it to `clothes.json` (id, FBX file), its textures to `assets/clothes/tex/`, and its `CLOTHES` entry.
+   Check it on her in the closet (front and side), in its studio, and on a card picture.
 
 ## Sound (`/* ==== sound */`, `soundPanel`)
 
