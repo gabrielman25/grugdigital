@@ -484,4 +484,24 @@ rep("    top: { part: 'mh_toigo_strapless_ruffle_top_dress', texture: 'mh_toigo_
 rep("  function paintBody(css) { bodyPaint = css || GREY; _c.set(bodyPaint).convertSRGBToLinear(); for (const m of bodyMats) m.color.copy(_c); }", "  function paintBody(css) { bodyPaint = css || GREY; _c.set(bodyPaint).convertSRGBToLinear(); for (const m of bodyMats) m.color.copy(_c); if (sandy.__wear && !paintBody.real) J.clothPaint(sandy, bodyPaint); }")
 rep("</style>\n</head>", css+"</style>\n</head>") if s.count("</style>\n</head>")==1 else None
 open(os.path.join(REPO,'labs','catalog','index.html'),'w').write(s)
+
+# The closet is the site's Avatar section: the same page at avatar/ (one folder up from the assets, the Hair Studio in labs/)
+av = s.replace("'../../assets/", "'../assets/").replace('"../../assets/', '"../assets/').replace('(../../assets/', '(../assets/')
+av = av.replace("/\\/labs\\//.test(location.pathname)", "/\\/(labs|avatar)\\//.test(location.pathname)")
+av = av.replace("const HAIR_STUDIO = /\\/(labs|avatar)\\//.test(location.pathname) ? '../hair-studio-x8f3k2/'", "const HAIR_STUDIO = /\\/avatar\\//.test(location.pathname) ? '../labs/hair-studio-x8f3k2/' : /\\/labs\\//.test(location.pathname) ? '../hair-studio-x8f3k2/'")
+assert '../../' not in av, [m for m in __import__('re').findall(r".{30}\.\./\.\./.{30}", av)][:5]
+open(os.path.join(REPO,'avatar','index.html'),'w').write(av)
+
+# The closet runtime for games (sandy-runtime.js loads it for a player whose look has closet: true): the catalog's eyewear,
+# hair, pattern and jewelry engines as they are on the page, then src/dress.js
+import re as _re
+blocks = {m.group(1): m.group(2) for m in _re.finditer(r'<script id="([\w-]+)">(.*?)</script>', s, _re.S)}
+rt = ['/* Grug · closet-runtime.js: the player\'s closet avatar for games. BUILT FILE: tools/catalog/build.py from the catalog\'s',
+      '   engines (eyewear, hair, patterns, jewelry and clothing) and tools/catalog/src/dress.js. Loaded by sandy-runtime.js. */',
+      "window.GRUG_ASSETS = window.GRUG_ASSETS || ((document.currentScript && document.currentScript.src) || '').replace(/[^/]*$/, '');"]
+for k in ['grug-eyewear', 'hair-textures', 'grug-hair', 'catalog-hair', 'grug-patterns', 'grug-jewelry']:
+    rt.append(';\n/* ---- ' + k + ' */\n' + blocks[k])
+rt.append(';\n' + open(os.path.join(HERE,'src','dress.js')).read())
+open(os.path.join(REPO,'assets','closet-runtime.js'),'w').write('\n'.join(rt))
+print('avatar/index.html', len(av), '· assets/closet-runtime.js', sum(map(len, rt)))
 print('ok',len(s))

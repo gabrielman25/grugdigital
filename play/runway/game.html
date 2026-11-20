@@ -241,8 +241,8 @@ const Bridge = (() => {
      runs on the archived classic avatar (assets/sandy-classic.js, ~15 MB), loaded through the site's runtime
      (assets/sandy-runtime.js: SandyKit.loadClassic()). The rest of the site moved to the blocky avatar in Nov 2026,
      which can't wear these clothes yet; when it can, switch this game over and drop loadClassic.
-   - The player starts from their classic look ('grug.sandy.classic.v1'; the avatar editor's look is 'grug.sandy.v1').
-   - Every bot is a female Sandy: randomConfig(seed, {body:'female'}).
+   - Everyone is a catalog avatar (assets/closet-runtime.js, bare: the closet's body, skin, face and hair; this game's
+     clothes go on top): the player as their closet has her, each model in a random catalog look (makeOne).
    - Keep the scene in her own units: 1 unit = 1 cm (she is ~170 cm tall). Her hair breaks at tiny scales, so
      never shrink her to fit a world in metres; size the world in cm instead.
    ===================================================================================== */
@@ -1084,8 +1084,12 @@ const Game = (() => {
     }
     const m = new THREE.Mesh(shadowGeo, shadowMat); m.rotation.x = -Math.PI / 2; m.position.y = 1.5; return m;
   }
-  async function makeOne(cfg, name, isPlayer, colour) {
-    let s = null; try { s = K ? await K.create(cfg) : null; } catch (e) { console.warn(e); }
+  // everyone is a catalog avatar (the closet runtime, bare: body, skin, face and catalog hair; the game dresses them in its
+  // own clothes): the player as their closet has her, each model in a random catalog look. Without it, the classic Sandy.
+  async function makeOne(cfg, name, isPlayer, colour, seed) {
+    let s = null;
+    try { const SK = window.SandyKit, R = K && SK && SK.loadCloset ? await SK.loadCloset().catch(() => null) : null; s = R ? await R.create(K, { bare: true, cfg, random: isPlayer ? undefined : seed }) : null; } catch (e) { console.warn('catalog avatar', e); }
+    if (!s) try { s = K ? await K.create(cfg) : null; } catch (e) { console.warn(e); }
     const root = new THREE.Group(), o = s ? s.object3d : new THREE.Mesh(new THREE.CapsuleGeometry(28, 110, 6, 12), new THREE.MeshStandardMaterial({ color: colour || 0x9aa3b0 }));
     if (!s) o.position.y = 83;
     root.add(o, blobShadow()); scene.add(root);
@@ -1097,7 +1101,7 @@ const Game = (() => {
     G.player = await makeOne(pc, 'You', true, 0x2b3350); G.cast.push(G.player);
     for (let i = 0; i < BOT_NAMES.length; i++) {
       let cfg = null; try { cfg = K.randomConfig(SETTINGS.botSeed + '-' + i, { body: 'female' }); Object.assign(cfg, JSON.parse(JSON.stringify(STARTER)), { body: 'female', expression: 'happy' }); } catch (e) {}
-      const b = await makeOne(cfg, BOT_NAMES[i], false, 0xff5ca8); b.skill = BOT_SKILL[i]; b.speed = 275 + i * 10; G.cast.push(b);
+      const b = await makeOne(cfg, BOT_NAMES[i], false, 0xff5ca8, SETTINGS.botSeed + '-' + i); b.skill = BOT_SKILL[i]; b.speed = 275 + i * 10; G.cast.push(b);
     }
     G.cast.forEach(dress); toStage(); G.phase = 'lobby';
   }

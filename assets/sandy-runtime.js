@@ -4735,7 +4735,30 @@ window.GRUG_AVATAR={"glb": "data:model/gltf-binary;base64,Z2xURgIAAAAAjwYAYMkBAE
     return CK;
   }
   function classicLook() { const c = read(CLASSIC_KEY); return c && typeof c === 'object' ? c : {}; }
+  /* ---------------- the closet avatar (the player only, once they've dressed her in the Avatar section) ----------------
+     A look with closet: true is the classic Sandy as the closet ('grug.closet.v1') has her: her skin, face, build and feet,
+     and what she has on (clothes, hair, eyewear, jewelry, sandals, swords…). assets/closet-runtime.js (the catalog's own
+     engines, built by tools/catalog/build.py) dresses her; it loads on demand after the classic kit. */
+  let CR = null;
+  function loadCloset() {
+    if (window.GrugClosetRuntime) return Promise.resolve(window.GrugClosetRuntime);
+    if (CR) return CR;
+    CR = new Promise((ok, no) => { const s = document.createElement('script'); s.src = ASSETS + 'closet-runtime.js'; s.onload = () => window.GrugClosetRuntime ? ok(window.GrugClosetRuntime) : no(new Error('no closet runtime')); s.onerror = () => { CR = null; no(new Error('closet runtime failed to load')); }; document.head.appendChild(s); });
+    return CR;
+  }
   function create(cfg) {
+    // an NPC in a random catalog look (randomConfig makes about half of all bots one): the female body, catalog clothes and hair
+    if (cfg && cfg.catalogSeed != null) {
+      // a team or uniform colour is a shirt (or shorts) the game set itself, not the skin's own outfit colours
+      const S0 = SKIN[cfg.skin] && SKIN[cfg.skin].outfit, o = cfg.outfit || {}, team = {};
+      if (o.shirt && (!S0 || o.shirt !== S0.shirt)) team.shirt = o.shirt; if (o.shorts && (!S0 || o.shorts !== S0.shorts)) team.shorts = o.shorts;
+      return loadClassic().then(K => loadCloset().then(R => R.create(K, { random: cfg.catalogSeed, cfg, team }))).then(s => { s.isClassic = true; s.isCloset = true; return s; })
+        .catch(e => { console.warn('SandyKit: catalog NPC unavailable, using the blocky one', e); const c = Object.assign({}, cfg); delete c.catalogSeed; return build(c); });
+    }
+    if (cfg && cfg.closet === true) {
+      return loadClassic().then(K => loadCloset().then(R => R.create(K))).then(s => { s.isClassic = true; s.isCloset = true; return s; })
+        .catch(e => { console.warn('SandyKit: closet avatar unavailable, using the new one', e); return build(Object.assign({}, cfg, { closet: false, classic: false })); });
+    }
     if (cfg && cfg.classic === true) {
       return loadClassic().then(K => K.create(K.merge(K.DEFAULT, classicLook()))).then(s => { s.isClassic = true; return s; })
         .catch(e => { console.warn('SandyKit: classic avatar unavailable, using the new one', e); return build(cfg); });
@@ -4749,8 +4772,12 @@ window.GRUG_AVATAR={"glb": "data:model/gltf-binary;base64,Z2xURgIAAAAAjwYAYMkBAE
     const r = seed == null ? Math.random : mulberry(typeof seed === 'number' ? seed : [...String(seed)].reduce((a, c) => a * 31 + c.charCodeAt(0) | 0, 7));
     // every look is for everyone: a {body} asked for (the classic avatar's bodies) only matters with {strict: true}
     const want = opts && opts.strict && opts.body, L = SKINS.filter(s => !want || s.body === (want === 'male' ? 'male' : 'female'));
-    const s = L[Math.floor(r() * L.length)] || SKINS[0];
-    return normal({ skin: s.id, expression: 'neutral', hat: clone(HAT_DEF) });
+    const s = L[Math.floor(r() * L.length)] || SKINS[0], c = normal({ skin: s.id, expression: 'neutral', hat: clone(HAT_DEF) });
+    // about half of all bots wear a random catalog look (always the female body: the catalog only dresses her). A game asks for
+    // one kind with {catalog: true} (Glow Up Spa) or {catalog: false}; a bot asked for as male ({body: 'male', strict}) never is
+    const male = opts && opts.strict && opts.body === 'male', cat = opts && opts.catalog != null ? !!opts.catalog : r() < 0.5;
+    if (cat && !male) c.catalogSeed = String(seed == null ? Math.random() : seed);
+    return c;
   }
 
   const CATALOG = {
@@ -4764,7 +4791,7 @@ window.GRUG_AVATAR={"glb": "data:model/gltf-binary;base64,Z2xURgIAAAAAjwYAYMkBAE
   const ready = () => skinReady().then(() => window.SandyClassicKit && window.SandyClassicKit.customReady ? window.SandyClassicKit.customReady() : null);
   window.SandyKit = {
     version: '2.0.0', model: 'block', HEIGHT, KEY, CLASSIC_KEY, CATALOG, DEFAULT: clone(DEFAULT),
-    create, randomConfig, merge, normal, migrate, player, loadClassic, classicLook,
+    create, randomConfig, merge, normal, migrate, player, loadClassic, loadCloset, classicLook,
     texturesFor: () => [],
     // pictures wait on these: the skin textures (and, for a classic player, the classic kit's own)
     customReady: ready, decalReady: ready,

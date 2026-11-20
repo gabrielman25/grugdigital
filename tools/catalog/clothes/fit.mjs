@@ -83,14 +83,15 @@ for (const s of [TOR.A, TOR.S]) {
   for (const p of s.pts) { const it = Math.round((p.y - s.y0) / (s.y1 - s.y0) * (NT - 1)), th = Math.atan2(p.x, p.z - s.zc(p.y)), ih = ((Math.round((th + Math.PI) / (2 * Math.PI) * NTH) % NTH) + NTH) % NTH, r = Math.hypot(p.x, p.z - s.zc(p.y)), k = it * NTH + ih; if (r > s.G[k]) s.G[k] = r; }
   fill(s.G);
 }
-const GAP = 0.35;
+const GAP = 0.35, LEG_GAP = 0.9;   // her thighs and calves have few vertices, so their skin bulges between them: more room there
+for (const [k, sg] of Object.entries(SEG)) sg.gap = /^(thigh|calf)/.test(k) ? LEG_GAP : GAP;
 // Her neck joint sits halfway up her throat; the pack's sits at the base of its (longer) neck, where its necklines are. So by
 // the joints alone every neckline and collar rode up her throat. Round the middle of the neck they come down: NECK_DROP cm at
 // the front, less at the back, nothing out at the shoulders (the shoulder seams stay where they are) or below the chest.
 const NECK_DROP = { front: 3.5, back: 2 };
 const neckDrop = p => { const up = Math.max(0, Math.min(1, (p.y - (TL[1][0] - 4)) / 6)), side = Math.max(0, Math.min(1, (11 - Math.abs(p.x)) / 6)), front = Math.max(0, Math.min(1, (p.z - TOR.A.zc(p.y) + 2) / 4)); return up * side * (NECK_DROP.back + (NECK_DROP.front - NECK_DROP.back) * front); };
 function mapTorso(p) { const A = TOR.A, Sx = TOR.S, zA = A.zc(p.y), th = Math.atan2(p.x, p.z - zA), r = Math.hypot(p.x, p.z - zA), h = mapY(p.y) - neckDrop(p), rA = look(A.G, p.y, th, A.y0, A.y1), rS = look(Sx.G, h, th, Sx.y0, Sx.y1), r2 = rS + Math.max(r - rA, GAP); return V(Math.sin(th) * r2, h, Sx.zc(h) + Math.cos(th) * r2); }
-function mapSeg(s, p) { const q = polar(s.FA, p), rA = look(s.GA, q.t, q.th, s.t[0], s.t[1]), rS = look(s.GS, q.t, q.th, s.t[0], s.t[1]), r2 = rS + Math.max(q.r - rA, GAP), F = s.FS; return F.a.clone().addScaledVector(F.Y, q.t * F.L).addScaledVector(F.X, Math.sin(q.th) * r2).addScaledVector(F.Z, Math.cos(q.th) * r2); }
+function mapSeg(s, p) { const q = polar(s.FA, p), rA = look(s.GA, q.t, q.th, s.t[0], s.t[1]), rS = look(s.GS, q.t, q.th, s.t[0], s.t[1]), r2 = rS + Math.max(q.r - rA, s.gap), F = s.FS; return F.a.clone().addScaledVector(F.Y, q.t * F.L).addScaledVector(F.X, Math.sin(q.th) * r2).addScaledVector(F.Z, Math.cos(q.th) * r2); }
 
 /* ---- her body, for the last checks: a grid of her vertices */
 const CELL = 2.5, HASH = new Map(); const hk = (x, y, z) => Math.floor(x / CELL) + ',' + Math.floor(y / CELL) + ',' + Math.floor(z / CELL);
@@ -148,7 +149,7 @@ function fit(file) {
     for (let i = 0; i < n; i++) {
       if (rigid[i] > 0.5) { const F = FEET[out[i * 3] * Math.sign(FEET[0].a1.x) > 0 ? 0 : 1]; si[i * 4] = F.bone; sw[i * 4] = 255; continue; }
       const p = V(out[i * 3], out[i * 3 + 1], out[i * 3 + 2]), near = nearS(p, 6, main[i]); if (!near.length) continue;
-      for (let pass = 0; pass < 3; pass++) for (const [, j] of nearS(p, 10, null)) { const b = V(SP[j * 3], SP[j * 3 + 1], SP[j * 3 + 2]), bn = V(SN[j * 3], SN[j * 3 + 1], SN[j * 3 + 2]), dv = p.clone().sub(b), d = dv.dot(bn), tan = dv.addScaledVector(bn, -d).length(); if (d < GAP && d > -6 && tan < 2.2) p.addScaledVector(bn, GAP - d); }
+      for (let pass = 0; pass < 3; pass++) for (const [, j] of nearS(p, 10, null)) { const b = V(SP[j * 3], SP[j * 3 + 1], SP[j * 3 + 2]), bn = V(SN[j * 3], SN[j * 3 + 1], SN[j * 3 + 2]), dv = p.clone().sub(b), d = dv.dot(bn), tan = dv.addScaledVector(bn, -d).length(); const g = /^(thigh|calf)/.test(sDom[j]) ? LEG_GAP : GAP; if (d < g && d > -6 && tan < 2.2) p.addScaledVector(bn, g - d); }
       out.set([p.x, p.y, p.z], i * 3);
       const acc = new Map(); let tot = 0; for (const [d, j] of near.slice(0, 4)) { const wv = 1 / (Math.sqrt(d) + 0.3); for (let k = 0; k < 4; k++) { const b = SSI[j * 4 + k], ww = SSW[j * 4 + k] * wv; if (ww > 0) { acc.set(b, (acc.get(b) || 0) + ww); tot += ww; } } }
       const top = [...acc.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4), ts = top.reduce((s, x) => s + x[1], 0) || 1; 
@@ -193,8 +194,9 @@ function hideList(parts) {
   const TOP = new Map(), ck = (x, z) => Math.round(x) + ',' + Math.round(z);
   if (SHOE) for (const pt of parts) for (let t = 0; t < pt.n; t++) { const x = pt.P[t * 3], y = pt.P[t * 3 + 1], z = pt.P[t * 3 + 2]; if (y > 40) continue; const k = ck(x, z); if (!(TOP.get(k) > y)) TOP.set(k, y); }
   const under = i => { if (!SHOE || SP[i * 3 + 1] > 40) return false; const x = SP[i * 3], z = SP[i * 3 + 2]; let top = -1e9; for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) { const v = TOP.get(ck(x + dx, z + dz)); if (v > top) top = v; } return SP[i * 3 + 1] < top - 0.3; };
-  const out = []; for (let i = 0; i < SNV; i++) if ((cov[i] && nbr[i].every(j => cov[j])) || (SHOE && /^foot/.test(sDom[i])) || under(i)) out.push(i);
-  return out;
+  const out = [], soft = []; for (let i = 0; i < SNV; i++) { if ((cov[i] && nbr[i].every(j => cov[j])) || (SHOE && /^foot/.test(sDom[i])) || under(i)) out.push(i); else if (cov[i]) soft.push(i); }
+  // the ring left at a hem is hidden part of the way (0.8: the skin shader cuts at 0.5), so it can't poke through the cloth
+  out.soft = soft; return out;
 }
 function pack(parts, hide, file) {
   const chunks = [], head = { parts: [], hide: 0 }; let off = 0;
@@ -212,7 +214,7 @@ function pack(parts, hide, file) {
     const U16 = new Uint16Array(U.length); for (let k = 0; k < U.length; k++) U16[k] = Math.round(Math.min(1, Math.max(0, U[k] - Math.floor(U[k] === 1 ? 0 : U[k]))) * 65535);
     head.parts.push({ name: pt.name, v: nv, i: idxAll.length, groups: gl, mats: pt.mats, pos: push(new Float32Array(Pp)), nor: push(N8), uv: push(U16), si: push(new Uint16Array(SI2)), sw: push(new Uint8Array(SW2)), idx: push(nv > 65535 ? new Uint32Array(idxAll) : new Uint16Array(idxAll)), big: nv > 65535 });
   }
-  head.hide = push(new Uint16Array(hide)); head.nhide = hide.length;
+  head.hide = push(new Uint16Array(hide)); head.nhide = hide.length; head.soft = push(new Uint16Array(hide.soft || [])); head.nsoft = (hide.soft || []).length;
   const body = Buffer.concat(chunks); let hj = JSON.stringify(head); while ((hj.length + 4) % 4) hj += ' '; const hl = Buffer.alloc(4); hl.writeUInt32LE(hj.length);
   fs.writeFileSync(file, Buffer.concat([hl, Buffer.from(hj), body]));
   return 4 + hj.length + body.length;

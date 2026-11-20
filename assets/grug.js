@@ -1030,7 +1030,7 @@
         '<div class="g-pref"><span><b>Animations</b><small>Celebrations and poses</small></span><button type="button" class="g-switch" role="switch" data-pref="motion" aria-checked="' + !!profile.prefs.motion + '" aria-label="Animations"></button></div>' +
         '<div class="g-pref"><span><b>Vibrate on tap</b><small>A light buzz on phones that support it</small></span><button type="button" class="g-switch" role="switch" data-pref="haptics" aria-checked="' + !!profile.prefs.haptics + '" aria-label="Vibrate on tap"></button></div>' +
         '<div id="kInv"></div>' +
-        '<p class="g-fine" style="margin-top:6px">Saved in your profile, so it comes along when you export it. Emotes are picked in the <a href="' + url('avatar/#emotes') + '" style="color:var(--ember);font-weight:800">avatar editor</a>. More in <a href="' + url('profile/') + '" style="color:var(--ember);font-weight:800">Profile</a>.</p>',
+        '<p class="g-fine" style="margin-top:6px">Saved in your profile, so it comes along when you export it. Emotes are picked in the <a href="' + url('avatar/look.html#emotes') + '" style="color:var(--ember);font-weight:800">avatar editor</a>. More in <a href="' + url('profile/') + '" style="color:var(--ember);font-weight:800">Profile</a>.</p>',
       actions: [{ label: 'Done', kind: 'primary', value: true }],
       onOpen: d => {
         d.classList.add('wide'); wireUiSize(d); wireMode(d); wireBrand(d); wireBirthday(d);

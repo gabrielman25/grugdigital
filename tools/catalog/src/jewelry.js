@@ -8,8 +8,10 @@
 (function () {
   'use strict';
   const GE = window.GrugEyewear, U = GE.util, { clamp, lerp, rng, hash, hsl } = U, TAU = Math.PI * 2;
-  const ON_SITE = /\/labs\//.test(location.pathname);
-  const ICON_BASE = ON_SITE ? '../../assets/events-icons/' : 'icons/', BRAND_BASE = ON_SITE ? '../../assets/brands/' : 'brands/';
+  // the site's assets folder: set by the closet runtime in games (window.GRUG_ASSETS), else from where the page is
+  // (labs/catalog/ or avatar/); none in the stand-alone kit, which keeps its files next to the page
+  const AB = window.GRUG_ASSETS || (/\/labs\//.test(location.pathname) ? '../../assets/' : /\/avatar\//.test(location.pathname) ? '../assets/' : null), ON_SITE = !!AB;
+  const ICON_BASE = ON_SITE ? AB + 'events-icons/' : 'icons/', BRAND_BASE = ON_SITE ? AB + 'brands/' : 'brands/';
 
   /* ---------------------------------------------------------------- colour helpers */
   const hex2rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
@@ -1366,7 +1368,7 @@
      blade and edge, the hilt's metal (guard and pommel), the grip and its leather wrap, and a gem. Patterns from the pattern
      pack go on the blade, the grip, the scabbard and the strap. A strap holds them on: a baldric round her chest for the back,
      a belt for the hip. World frame, laid over bodyField like the purse strap. */
-  const SWORD_BASE = ON_SITE ? '../../assets/swords/' : 'swords/';
+  const SWORD_BASE = ON_SITE ? AB + 'swords/' : 'swords/';
   const SW = { parts: null, by: { blade: [], guard: [], grip: [], pommel: [] }, geo: new Map() };
   async function loadSwords() {
     if (SW.parts) return;
@@ -1551,7 +1553,7 @@
      with nothing else in it (an outfit covers both). Open-toe shoes from the pack are left out (Sandals covers those).
      build() puts a piece on her through sandy.__wear (one per slot, stacked so a card picture can borrow a slot) and
      clothSync() redraws every slot; dispose() puts back what was there. */
-  const CLOTH_BASE = ON_SITE ? '../../assets/clothes/' : 'clothes/';
+  const CLOTH_BASE = ON_SITE ? AB + 'clothes/' : 'clothes/';
   const CLOTH_DEPTS = ['tops', 'jackets', 'bottoms', 'shoes', 'outfits'];
   const isCloth = dp => CLOTH_DEPTS.includes(dp);
   const CLOTH_DEPT_LABEL = { tops: 'Tops', jackets: 'Jackets', bottoms: 'Bottoms', shoes: 'Shoes', outfits: 'Outfits' };
@@ -1599,7 +1601,7 @@
     rec.p = (async () => {
       const buf = await (await fetch(CLOTH_BASE + id + '.bin')).arrayBuffer(), hl = new DataView(buf).getUint32(0, true), head = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 4, hl))), B = 4 + hl;
       rec.geos = head.parts.map(p => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(buf, B + p.pos, p.v * 3), 3)); g.setAttribute('normal', new THREE.BufferAttribute(new Int8Array(buf, B + p.nor, p.v * 3), 3, true)); g.setAttribute('uv', new THREE.BufferAttribute(new Uint16Array(buf, B + p.uv, p.v * 2), 2, true)); g.setAttribute('skinIndex', new THREE.BufferAttribute(new Uint16Array(buf, B + p.si, p.v * 4), 4)); g.setAttribute('skinWeight', new THREE.BufferAttribute(new Uint8Array(buf, B + p.sw, p.v * 4), 4, true)); g.setIndex(new THREE.BufferAttribute(p.big ? new Uint32Array(buf, B + p.idx, p.i) : new Uint16Array(buf, B + p.idx, p.i), 1)); g.computeBoundingSphere(); return g; });
-      rec.hide = new Uint16Array(buf, B + head.hide, head.nhide); rec.tris = head.parts.reduce((s, p) => s + p.i / 3, 0);
+      rec.hide = new Uint16Array(buf, B + head.hide, head.nhide); rec.soft = head.nsoft ? new Uint16Array(buf, B + head.soft, head.nsoft) : []; rec.tris = head.parts.reduce((s, p) => s + p.i / 3, 0);
       const tl = new THREE.TextureLoader(), tex = f => new Promise(ok => tl.load(CLOTH_BASE + 'tex/' + f, t => ok(t), undefined, () => ok(null)));
       const vs = c.vars ? c.vars.map((v, i) => c.tex + '_' + 'ab'[i] + '_m.webp') : [c.tex + '_m.webp'];
       rec.masks = await Promise.all(vs.map(tex)); rec.normal = await tex(c.tex + '_n.webp');
@@ -1647,7 +1649,7 @@
       if (!d) continue; const rec = clothData(d.part); if (!rec.ready) { rec.p.then(() => { if (sandy.__wear === st) clothSync(sandy); }); continue; }
       const paint = dflt ? st.paint : null;
       for (const g of rec.geos) { const m = new THREE.SkinnedMesh(g, clothMat(d, rec, paint, sandy.__cut)); m.name = 'garment_' + slot; m.frustumCulled = false; m.userData.garment = { slot, dflt }; body.parent.add(m); m.position.copy(body.position); m.quaternion.copy(body.quaternion); m.scale.copy(body.scale); m.bind(body.skeleton, body.bindMatrix); st.meshes.push(m); }
-      if (A) for (const i of rec.hide) if (i < A.count) A.array[i] = 1;
+      if (A) { for (const i of rec.hide) if (i < A.count) A.array[i] = 1; for (const i of rec.soft) if (i < A.count && A.array[i] < 0.8) A.array[i] = 0.8; }   // a hem's last ring: hidden part of the way
     }
     if (A) A.needsUpdate = true;
     // shoes take her flip-flops off

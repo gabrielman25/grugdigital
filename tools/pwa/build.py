@@ -32,7 +32,7 @@ OUT = os.path.join(ROOT, 'app', 'offline.json')
 
 # Pages that belong to each side. Paths are from the site root; a folder means its index.html.
 GRUG_PAGES = [
-    '', '404.html', 'games/', 'games/favorites/', 'games/welcome/', 'me/', 'me/cards/', 'avatar/', 'avatar/classic/',
+    '', '404.html', 'games/', 'games/favorites/', 'games/welcome/', 'me/', 'me/cards/', 'avatar/', 'avatar/look.html', 'avatar/classic/',
     'profile/', 'shop/', 'make/', 'links/', 'links/create/', 'links/page/', 'rewards/', 'rewards/create/', 'rewards/card/',
     'create/', 'create/modelkit/', 'pearls.html', 'credits.html', 'privacy.html', 'terms.html', 'support.html',
 ]
@@ -52,6 +52,10 @@ EXTRA = {}
 # Folders loaded by a script that builds the file names in code: when the script is in a pack, so is the folder.
 COMPANIONS = {
     'assets/fossil32/fossil32.js': ['assets/fossil32/fonts/'],   # the box-title fonts (FontFace(`url(${base}fonts/…)`))
+    # the closet avatar in games: sandy-runtime.js loads the closet runtime, which builds clothes and swords file names in code
+    'assets/sandy-runtime.js': ['assets/closet-runtime.js'],
+    'assets/closet-runtime.js': ['assets/clothes/', 'assets/clothes/tex/', 'assets/swords/', 'assets/events-icons/', 'assets/brands/'],
+    'avatar/index.html': ['assets/events-icons/', 'assets/brands/'],   # the charm icons (ICON_BASE + name in jewelry.js)
 }
 # What a pack never keeps, even when a shared script names it (shared scripts mention every game's art).
 # Anything left out still works online, and is saved for next time the first time it loads.

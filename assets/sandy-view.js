@@ -70,11 +70,14 @@
     pants: { w: 240, h: 240, t: [0, 68, 0], d: 300, yaw: 0.3, pitch: 0.06 }
   };
   async function picture(cfg, frame, o) {
-    const r = await rig(), c = r.K.merge(r.K.DEFAULT, cfg || {}), classic = c.classic === true;
+    const r = await rig(), c = r.K.merge(r.K.DEFAULT, cfg || {}), kind = c.closet === true ? 'closet' : c.classic === true ? 'classic' : 'block';
     if (o && o.expression) c.expression = o.expression;
-    // classic: the archived Sandy in the classic look (create() builds it), re-dressed in that look for each picture
-    if (r.sandy && !!r.sandy.isClassic !== classic) { r.scene.remove(r.sandy.object3d); try { r.sandy.dispose(); } catch (e) {} r.sandy = null; }
-    if (!r.sandy) { r.sandy = await r.K.create(c); r.scene.add(r.sandy.object3d); }
+    // classic: the archived Sandy in the classic look (create() builds it), re-dressed in that look for each picture;
+    // closet: Sandy as the closet has her (built once per look; only her expression changes between pictures)
+    const kindOf = s => s.isCloset ? 'closet' : s.isClassic ? 'classic' : 'block';
+    if (r.sandy && (kindOf(r.sandy) !== kind || (kind === 'closet' && r.sandy.__look !== hash(cfg)))) { r.scene.remove(r.sandy.object3d); try { r.sandy.dispose(); } catch (e) {} r.sandy = null; }
+    if (!r.sandy) { r.sandy = await r.K.create(c); r.sandy.__look = hash(cfg); r.scene.add(r.sandy.object3d); }
+    else if (r.sandy.isCloset) { if (typeof r.sandy.setExpression === 'function') r.sandy.setExpression((o && o.expression) || r.sandy.__expr0 || 'smug'); }
     else if (r.sandy.isClassic) { const CK = root.SandyClassicKit, cc = CK.merge(CK.DEFAULT, r.K.classicLook()); if (o && o.expression) cc.expression = o.expression; r.sandy.apply(cc, true); if (r.sandy.ready) await r.sandy.ready; }
     else r.sandy.apply(c, true);
     const F = (r.sandy.isClassic ? FRAMES_CLASSIC : FRAMES)[frame];

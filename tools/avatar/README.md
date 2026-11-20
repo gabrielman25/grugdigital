@@ -30,10 +30,15 @@ open the page). It renames the joints to the classic names and keeps the idle, r
   jump, held), `wave`, `dance` and the emotes (`disco`, `shuffle`, `robot`, `cheer`, `bow`, `flex`).
 - A look: `{ model: 'block', skin, hat: {type, colour, size, up, forward, tilt}, classic }`. `skin` is one of
   `CATALOG.skins` (skaterMaleA, skaterFemaleA, cyborgFemaleA, criminalMaleA). Classic fields in a config are ignored.
-- `randomConfig(seed)` picks a skin (any skin: `{body}` only counts with `{strict: true}`); bots never get `classic`.
+- `randomConfig(seed, opts)` picks a skin (any skin: `{body}` only counts with `{strict: true}`); bots never get `classic`.
+  About half get `catalogSeed` instead: `create()` then builds a catalog NPC (the female body in a random catalog look, the
+  classic long hair or buns) through the closet runtime. `{catalog: true | false}` forces one kind; strict male bots never are.
 - `SandyKit.player()` reads the saved look ('grug.sandy.v1'), moving a look saved before the change (no `model`) to
   'grug.sandy.classic.v1' first (`migrate()`). `create({classic: true})` builds the archived classic avatar from that
   key instead (`loadClassic()` loads `sandy-classic.js`, ~15 MB, once).
+- `create({closet: true})` builds the **closet avatar** (the player's look once they've used the closet at `avatar/`): the
+  classic kit, then `assets/closet-runtime.js` (`loadCloset()`, built by `tools/catalog/build.py`) dresses her from
+  'grug.closet.v1'. If either fails to load, the player gets the blocky avatar instead.
 
 ## Hats
 

@@ -602,7 +602,7 @@ const Bridge = (() => {
 /* =====================================================================================
    3. AVATARS · the site's 3D avatar runtime (three.js r149 + SandyKit, ~15 MB, cached by the browser)
    - The player wears the look saved by the Grug avatar editor on this phone (localStorage 'grug.sandy.v1').
-   - Every bot is a female Sandy: SandyKit.randomConfig(seed, {body:'female'}).
+   - Every bot is a catalog avatar (the female body in a random catalog look): SandyKit.randomConfig(seed, {body:'female', catalog: true}).
    - Keep the scene in her own units: 1 unit = 1 cm (she is ~170 cm tall). Her hair breaks at tiny scales, so
      never shrink her to fit a world in metres; size the world in cm instead.
    ===================================================================================== */
@@ -614,8 +614,9 @@ const Avatars = (() => {
     for (const src of SETTINGS.runtime) { try { return (K = await loadOne(src)); } catch (e) {} }
     throw new Error('Avatar runtime not found');
   }
-  function playerConfig() { let c = null; try { c = JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); } catch (e) {} return K.merge(K.DEFAULT, c && typeof c === 'object' ? c : {}); }
-  function botConfig(i, shirt) { const c = K.randomConfig(SETTINGS.botSeed + '-' + i, { body: 'female' }); c.weapon = null; if (shirt) { c.top = null; c.legs = null; c.outfit = Object.assign({}, c.outfit, { shirt, shorts: '#24262b' }); } return c; }
+  // everyone at the spa is a catalog avatar: the player is their closet avatar (the closet's starting look if they haven't dressed her)
+  function playerConfig() { let c = null; try { c = JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); } catch (e) {} return Object.assign(K.merge(K.DEFAULT, c && typeof c === 'object' ? c : {}), { closet: true }); }
+  function botConfig(i, shirt) { const c = K.randomConfig(SETTINGS.botSeed + '-' + i, { body: 'female', catalog: true }); c.weapon = null; if (shirt) { c.top = null; c.legs = null; c.outfit = Object.assign({}, c.outfit, { shirt, shorts: '#24262b' }); } return c; }
   return { load, playerConfig, botConfig, get K() { return K; } };
 })();
 
@@ -2153,7 +2154,7 @@ const Game = (() => {
   async function newCustomer() {
     if (making) return null; making = true;
     const K = Avatars.K; let sandy = null, cfg = null;
-    if (K) { cfg = npcHair(K.randomConfig(SETTINGS.botSeed + '-guest-' + (custN++ % 16), { body: 'female' })); cfg.weapon = null; cfg.nails = cfg.skin; cfg.feet = { type: 'flipflops', sole: '#ffffff', strap: pick(['#f472b6', '#38bdf8', '#facc15', '#a78bfa']) }; try { sandy = await K.create(cfg); } catch (e) { console.warn(e); } }
+    if (K) { cfg = npcHair(K.randomConfig(SETTINGS.botSeed + '-guest-' + (custN++ % 16), { body: 'female', catalog: true })); cfg.weapon = null; cfg.nails = cfg.skin; cfg.feet = { type: 'flipflops', sole: '#ffffff', strap: pick(['#f472b6', '#38bdf8', '#facc15', '#a78bfa']) }; try { sandy = await K.create(cfg); } catch (e) { console.warn(e); } }
     const c = makeChar(sandy, { kind: 'cust', mode: 'cust' + custN, name: 'Guest', colour: '#f9a8d4', seed: custN * 1.3, cfg, state: 'pool' });
     c.root.visible = false; custs.push(c); making = false; return c;
   }
@@ -2260,7 +2261,7 @@ const Game = (() => {
   let staffN = 0;
   async function newStaff(rid) {
     const K = Avatars.K, R = SVCB[rid]; let sandy = null;
-    if (K) { const cfg = npcHair(K.randomConfig(SETTINGS.botSeed + '-staff-' + staffN, { body: 'female' })); cfg.weapon = null; cfg.top = null; cfg.legs = null; cfg.outfit = Object.assign({}, cfg.outfit, { shirt: R.col, shorts: '#1f2937' }); try { sandy = await K.create(cfg); } catch (e) { console.warn(e); } }
+    if (K) { const cfg = npcHair(K.randomConfig(SETTINGS.botSeed + '-staff-' + staffN, { body: 'female', catalog: true })); cfg.weapon = null; cfg.top = null; cfg.legs = null; cfg.outfit = Object.assign({}, cfg.outfit, { shirt: R.col, shorts: '#1f2937' }); try { sandy = await K.create(cfg); } catch (e) { console.warn(e); } }
     const i = staff.filter(s => s.rid === rid).length, d = STATIONS[rid][i].idle;
     const s = makeChar(sandy, { kind: 'staff', mode: 'staff' + staffN, name: R.who, colour: R.col, seed: staffN * 2.1, rid, idx: i, state: 'idle', job: null });
     staffN++; const [x, z] = C(d[0], d[1]); s.x = x; s.z = z; s.face = rid === 'hair' || rid === 'color' ? -Math.PI / 2 : Math.PI / 2; staff.push(s);

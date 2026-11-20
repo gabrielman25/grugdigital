@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Avatar · Grug</title>
+<meta name="description" content="Pick your Grug avatar's look, a hat and the emotes you bring into games. Saved on this phone, no account needed.">
+<meta name="theme-color" content="#F3F3F5">
+<link rel="icon" href="../favicon.png">
+<link rel="stylesheet" href="../assets/grug.css">
+<script src="../assets/theme.js?v=av2"></script>
+<!-- The avatar editor (Nov 2026): the blocky avatar (assets/sandy-runtime.js, SandyKit 2). A look is {model:'block', skin, hat,
+     classic} in localStorage 'grug.sandy.v1'. The skins are whole outfits painted on one texture each; picking your own colours
+     comes later. The old 3D avatar and its clothes are archived in avatar/classic/ and only ever used for the player, when
+     "Classic avatar" is switched on here (classic: true). The stage is a still picture, redrawn when the look changes; an emote
+     preview plays live (half resolution) for a few seconds, then it goes still again. -->
+<style>
+body.g-chrome{padding-bottom:calc(var(--tabs) + var(--sab) + 10px)}
+#app{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:18px;padding-top:6px;height:calc(100vh - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 30px);height:calc(100dvh - var(--top) - var(--sat) - var(--tabs) - var(--sab) - 30px);min-height:460px}
+#stageWrap{position:relative;border-radius:var(--r);background:var(--card);border:1px solid var(--line);overflow:hidden;min-height:0}
+#stage{position:absolute;inset:0}
+#stage canvas{display:block;width:100%;height:100%}
+.turn{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;z-index:2}
+.turn.l{left:12px}.turn.r{right:12px}.turn .gi{width:20px;height:20px}
+.turn:active{transform:translateY(-50%) scale(.94)}
+#loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--mut);font:600 16px/1 var(--display)}
+#loading.hide{display:none}
+#stageTag{position:absolute;left:14px;top:12px;padding:6px 11px;border-radius:999px;background:var(--mode);color:#1E1B16;font:700 12.5px/1 var(--font);display:none;z-index:2}
+#stageTag.on{display:block}
+#panel{display:flex;flex-direction:column;min-height:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+#tabs{display:flex;gap:6px;padding:12px 12px 10px;border-bottom:1px solid var(--line)}
+.tab{appearance:none;flex:1;display:inline-flex;flex-direction:column;align-items:center;gap:5px;min-height:58px;padding:8px 4px;border-radius:14px;background:var(--card2);color:var(--ink);border:1px solid var(--line);font:600 13px/1 var(--font);cursor:pointer}
+.tab .gi{width:20px;height:20px}
+.tab[aria-selected=true]{background:var(--mode);color:#1E1B16;border-color:var(--mode-lo);box-shadow:0 3px 0 var(--mode-lo)}
+.tab:focus-visible,.tile:focus-visible,.sw:focus-visible,.g-btn:focus-visible,.turn:focus-visible{outline:3px solid var(--mode-text);outline-offset:2px}
+.pages{flex:1;min-height:0;overflow:auto;padding:14px 14px 18px}
+.page[hidden]{display:none}
+.page h2{margin:0 0 4px;font:600 19px/1.2 var(--display)}
+.page .note{color:var(--mut);font-size:13.5px;margin:0 0 12px;line-height:1.4}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px}
+.grid.hats{grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px}.hats .tile{font-size:12px;padding:5px}.hats .tile[aria-pressed=true]{padding:4px}
+.tile{appearance:none;position:relative;display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:6px;border-radius:16px;background:var(--card2);border:1px solid var(--line);cursor:pointer;font:600 13px/1.1 var(--font);color:var(--ink);text-align:center;min-width:0}
+.tile i{display:block;aspect-ratio:3/4;border-radius:11px;background:var(--page) center/contain no-repeat}
+.hats .tile i{aspect-ratio:1;background-size:cover}
+.tile.none i{display:grid;place-items:center;color:var(--mut)}.tile.none i .gi{width:28px;height:28px}
+.tile[aria-pressed=true]{border:2px solid var(--mode-lo);padding:5px;background:color-mix(in srgb,var(--mode) 22%,var(--card2))}
+.tile:active{transform:scale(.98)}
+.row{display:flex;align-items:center;gap:10px;margin:14px 0 0;flex-wrap:wrap}
+.row>b{min-width:64px;font:600 14px/1 var(--font);color:var(--ink)}
+.sws{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw{appearance:none;width:32px;height:32px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0;background:var(--c)}
+.sw[aria-pressed=true]{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ink)}
+.pick{position:relative;width:32px;height:32px;border-radius:50%;border:2px solid var(--line);background:conic-gradient(#e3101c,#ffcf4a,#2ee59d,#3fc1ff,#9b7bff,#ff5c8a,#e3101c);overflow:hidden;cursor:pointer}
+.pick input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}
+input[type=range]{flex:1;min-width:140px;accent-color:var(--mode-lo)}
+.hatopts[hidden]{display:none}
+.loadout{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px;min-height:34px;align-items:center}
+.loadout span{display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 5px;border-radius:999px;background:var(--card2);border:1px solid var(--line);font:600 13px/1 var(--font)}
+.loadout span i{width:24px;height:24px;border-radius:50%;background:var(--c);display:grid;place-items:center;color:#fff}
+.loadout span i .gi{width:14px;height:14px}
+.loadout em{font-style:normal;color:var(--mut);font-size:13px}
+.emos{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.emo{appearance:none;position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 6px 10px;border-radius:16px;background:var(--card2);border:1px solid var(--line);cursor:pointer;font:600 13px/1 var(--font);color:var(--ink)}
+.emo i{width:44px;height:44px;border-radius:50%;background:var(--c);display:grid;place-items:center;color:#fff}.emo i .gi{width:22px;height:22px}
+.emo .n{position:absolute;top:6px;left:8px;min-width:18px;height:18px;border-radius:9px;background:var(--ink);color:var(--card);font-size:11px;display:none;place-items:center;padding:0 5px}
+.emo[aria-pressed=true]{border:2px solid var(--mode-lo);padding:11px 5px 9px}.emo[aria-pressed=true] .n{display:grid}
+.classicCard{display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:16px;background:var(--card2);border:1px solid var(--line)}
+.sw2{display:flex;align-items:center;gap:12px;cursor:pointer;font:600 15px/1.2 var(--font);color:var(--ink)}
+.sw2 input{position:absolute;opacity:0;width:1px;height:1px}
+.sw2 i{flex:none;width:48px;height:28px;border-radius:14px;background:var(--line);position:relative;transition:background .15s}
+.sw2 i::after{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+.sw2 input:checked+i{background:var(--mode-lo)}.sw2 input:checked+i::after{transform:translateX(20px)}
+.sw2 input:focus-visible+i{outline:3px solid var(--mode-text);outline-offset:2px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.lockNote{display:none;margin:0 0 12px;padding:10px 12px;border-radius:12px;background:var(--card2);border:1px solid var(--line);font-size:13.5px;color:var(--ink)}
+body.is-classic .lockNote{display:block}
+body.is-classic #pg-character .grid,body.is-classic #pg-hat .grid,body.is-classic #pg-hat .hatopts{opacity:.4;pointer-events:none}
+.credit{color:var(--mut);font-size:12px;margin-top:14px}
+@media (max-width:860px){#app{grid-template-columns:1fr;grid-template-rows:52vh auto;height:auto;min-height:0;gap:12px}#stageWrap{min-height:52vh}.pages{overflow:visible}}
+@media (orientation:landscape) and (max-height:540px){#app{grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:none;height:calc(100vh - var(--top) - var(--sat) - 24px)}}
+@media (prefers-reduced-motion:reduce){.sw2 i,.sw2 i::after{transition:none}}
+</style>
+</head><body>
+<main class="wrap" id="app">
+  <section id="stageWrap" aria-label="Your avatar">
+    <div id="stage"><canvas id="cv"></canvas></div>
+    <span id="stageTag">Classic avatar</span>
+    <button type="button" class="turn l" id="turnL" aria-label="Turn left"></button>
+    <button type="button" class="turn r" id="turnR" aria-label="Turn right"></button>
+    <div id="loading">Loading your avatar…</div>
+  </section>
+  <section id="panel">
+    <nav id="tabs" role="tablist" aria-label="Avatar sections">
+      <button type="button" class="tab" role="tab" data-page="character" aria-selected="true"></button>
+      <button type="button" class="tab" role="tab" data-page="hat" aria-selected="false"></button>
+      <button type="button" class="tab" role="tab" data-page="emotes" aria-selected="false"></button>
+      <button type="button" class="tab" role="tab" data-page="classic" aria-selected="false"></button>
+    </nav>
+    <div class="pages">
+      <div class="page" id="pg-character" role="tabpanel">
+        <h2>Your look</h2>
+        <p class="note">Pick who you play as in every game. Choosing your own colours is coming soon.</p>
+        <p class="lockNote">You're playing as your classic avatar. <a href="#classic" data-goto="classic"><b>Switch back</b></a> to use these looks.</p>
+        <div class="grid" id="skins"></div>
+      </div>
+      <div class="page" id="pg-hat" role="tabpanel" hidden>
+        <h2>Hat</h2>
+        <p class="note">One hat at a time, in any colour.</p>
+        <p class="lockNote">You're playing as your classic avatar. <a href="#classic" data-goto="classic"><b>Switch back</b></a> to pick a hat here.</p>
+        <div class="grid hats" id="hats"></div>
+        <div class="hatopts" id="hatOpts" hidden>
+          <div class="row"><b>Colour</b><div class="sws" id="hatCols"></div></div>
+          <div class="row"><b>Size</b><input type="range" id="hatSize" min="0.8" max="1.25" step="0.01" aria-label="Hat size"></div>
+        </div>
+      </div>
+      <div class="page" id="pg-emotes" role="tabpanel" hidden>
+        <h2>Your emotes</h2>
+        <p class="note">Pick up to 6 to bring into every game you can walk around in. Open the wheel in a game with <b>B</b> or the emote button. Tap one to see it.</p>
+        <div class="loadout" id="emoLoad"></div>
+        <div class="emos" id="emoGrid"></div>
+      </div>
+      <div class="page" id="pg-classic" role="tabpanel" hidden>
+        <h2>Classic avatar</h2>
+        <p class="note">The old 3D avatar, with its bodies, hair and closet clothes, is kept for anyone who'd rather play as it. It's only ever your own character: everyone else in games uses the new avatar.</p>
+        <div class="classicCard">
+          <label class="sw2"><input type="checkbox" id="classicOn"><i aria-hidden="true"></i><span>Play as my classic avatar</span></label>
+          <div class="btns"><a class="g-btn sm" href="classic/">Edit classic avatar</a><a class="g-btn sm quiet" href="../shop/">Classic closet</a></div>
+        </div>
+        <p class="credit">New avatar: “Animated Characters: Protagonists” by Kenney (CC0). Hats: Chibi Hats by PaperPluto.</p>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="../assets/sandy-runtime.js?v=av2"></script>
+<script src="../assets/sandy-view.js?v=av2"></script>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="../assets/games.js"></script>
+<script src="../assets/grug.js?v=av2"></script>
+<script>try { Grug.ui.chrome('avatar'); } catch (e) {}</script>
+<script>
+(function () {
+  'use strict';
+  const K = window.SandyKit, T = window.THREE, G = window.Grug, $ = id => document.getElementById(id);
+  const ic = n => G ? G.icon(n) : '';
+  const KEY = K.KEY, SV = window.SandyView;
+  const toast = (m, o) => { try { G.ui.toast(m, o || { icon: 'check' }); } catch (e) {} };
+  const buzz = () => { try { G.ui.buzz(); } catch (e) {} };
+
+  /* ---------- the look ---------- */
+  let cfg = K.player();                                   // migrates a classic look the first time
+  const save = () => { const c = { model: 'block', skin: cfg.skin, hat: cfg.hat, classic: !!cfg.classic }; const old = (() => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } })(); if (old.classicAt) c.classicAt = old.classicAt; try { localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) {} return c; };
+
+  /* ---------- the stage: a still picture, live only while an emote plays ---------- */
+  const cv = $('cv'), host = $('stage');
+  const renderer = new T.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.outputEncoding = T.sRGBEncoding; renderer.setClearColor(0x000000, 0);
+  const scene = new T.Scene(), cam = new T.PerspectiveCamera(28, 1, 5, 5000);
+  scene.add(new T.HemisphereLight(0xfff4e0, 0x3a3456, 0.85));
+  const key = new T.DirectionalLight(0xfff0dc, 1.05); key.position.set(160, 320, 240); scene.add(key);
+  const rim = new T.DirectionalLight(0x9fc4ff, 0.45); rim.position.set(-200, 180, -260); scene.add(rim);
+  const fill = new T.DirectionalLight(0xffd6b0, 0.3); fill.position.set(-260, 80, 180); scene.add(fill);
+  const shadow = new T.Mesh(new T.CircleGeometry(40, 40), new T.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.12 })); shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.2; scene.add(shadow);
+  let av = null, yaw = 0.35, live = 0, raf = 0, last = 0;
+  const DPR = Math.min(2, window.devicePixelRatio || 1);
+  function size() {
+    const w = host.clientWidth || 300, h = host.clientHeight || 400;
+    renderer.setPixelRatio(live ? DPR * 0.5 : DPR); renderer.setSize(w, h, false);
+    cam.aspect = w / h;
+    // the whole avatar (and a tall hat) fits, whatever the shape of the stage
+    const tall = 235, fov = cam.fov * Math.PI / 180, d1 = (tall / 2) / Math.tan(fov / 2), d2 = (95 / cam.aspect) / Math.tan(fov / 2);
+    const d = Math.max(d1, d2) * 1.08; cam.position.set(0, 112 + d * 0.06, d); cam.lookAt(0, 102, 0); cam.updateProjectionMatrix();
+  }
+  function draw() { if (!av) return; av.object3d.rotation.y = yaw; renderer.render(scene, cam); }
+  function still() { if (!av) return; av.play('idle'); for (let i = 0; i < 4; i++) av.update(1 / 30); draw(); }
+  function loop(t) {
+    raf = 0; if (!av) return;
+    const dt = Math.min(0.05, (t - (last || t)) / 1000); last = t; av.update(dt); draw();
+    if (performance.now() < live) raf = requestAnimationFrame(loop);
+    else { live = 0; size(); still(); }
+  }
+  function playLive(anim, ms) {
+    if (!av) return; const was = live; live = performance.now() + (ms || 3200);
+    if (!was) size(); av.play(anim); last = 0; if (!raf) raf = requestAnimationFrame(loop);
+  }
+  new ResizeObserver(() => { size(); if (!live) draw(); }).observe(host);
+  $('turnL').innerHTML = ic('arrow-left'); $('turnR').innerHTML = ic('arrow-right');
+  $('turnL').onclick = () => { yaw -= Math.PI / 4; if (!live) draw(); buzz(); };
+  $('turnR').onclick = () => { yaw += Math.PI / 4; if (!live) draw(); buzz(); };
+
+  async function build() {
+    if (av) { scene.remove(av.object3d); try { av.dispose(); } catch (e) {} av = null; }
+    $('loading').classList.remove('hide'); $('loading').textContent = cfg.classic ? 'Loading your classic avatar…' : 'Loading your avatar…';
+    av = await K.create(cfg.classic ? { classic: true } : cfg);
+    scene.add(av.object3d); await K.customReady();
+    $('loading').classList.add('hide'); $('stageTag').classList.toggle('on', !!av.isClassic);
+    document.body.classList.toggle('is-classic', !!cfg.classic);
+    size(); still();
+    // classic pictures need their own images to finish loading: draw once more a moment later
+    if (av.isClassic) setTimeout(() => { if (!live) still(); }, 900);
+  }
+
+  /* ---------- pictures for the rest of the site (header, home, profile, games) ---------- */
+  let snapT = 0, snapGen = 0;
+  function snaps(now) {
+    clearTimeout(snapT); const my = ++snapGen;
+    snapT = setTimeout(() => { if (SV) SV.makeSnaps(save(), { step: true, cancelled: () => my !== snapGen }).catch(e => console.warn('pictures failed', e)); }, now ? 50 : 1500);
+  }
+  function changed(redraw) { save(); if (redraw !== false && av && !av.isClassic) { av.apply({ skin: cfg.skin, hat: cfg.hat }); if (!live) still(); } snaps(); }
+  addEventListener('pagehide', () => { save(); if (SV && SV.snaps().hash !== SV.hash(save())) SV.makeSnaps(save()).catch(() => {}); });
+
+  /* ---------- tabs ---------- */
+  const TABS = { character: ['user', 'Look'], hat: ['crown-simple', 'Hat'], emotes: ['smiley', 'Emotes'], classic: ['arrow-counter-clockwise', 'Classic'] };
+  for (const b of document.querySelectorAll('.tab')) { const [i, l] = TABS[b.dataset.page]; b.innerHTML = ic(i) + '<span>' + l + '</span>'; b.id = 'tab-' + b.dataset.page; }
+  function show(p) {
+    if (!TABS[p]) p = 'character';
+    for (const b of document.querySelectorAll('.tab')) b.setAttribute('aria-selected', String(b.dataset.page === p));
+    for (const pg of document.querySelectorAll('.page')) pg.hidden = pg.id !== 'pg-' + p;
+  }
+  $('tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) { show(b.dataset.page); history.replaceState(null, '', '#' + b.dataset.page); buzz(); } });
+  document.addEventListener('click', e => { const a = e.target.closest('[data-goto]'); if (a) { e.preventDefault(); show(a.dataset.goto); } });
+
+  /* ---------- look ---------- */
+  function paintSkins() {
+    $('skins').innerHTML = K.CATALOG.skins.map(s => '<button type="button" class="tile" data-skin="' + s.id + '" aria-pressed="' + (cfg.skin === s.id) + '"><i style="background-image:url(\'' + s.picture + '\')"></i>' + s.label + '</button>').join('');
+  }
+  $('skins').addEventListener('click', e => { const b = e.target.closest('[data-skin]'); if (!b || cfg.classic) return; cfg.skin = b.dataset.skin; paintSkins(); changed(); buzz(); });
+
+  /* ---------- hat ---------- */
+  const HAT_COLS = ['#ffffff', '#141414', '#e3101c', '#ff5c8a', '#ff8a5c', '#ffcf4a', '#4ad4b0', '#3fc1ff', '#1e3a5f', '#9b7bff', '#a0522d', '#d8c8a8'];
+  function paintHats() {
+    const h = cfg.hat || { type: 'none' };
+    $('hats').innerHTML = '<button type="button" class="tile none" data-hat="none" aria-pressed="' + (h.type === 'none') + '"><i>' + ic('x') + '</i>None</button>' +
+      K.CATALOG.hats.map(x => '<button type="button" class="tile" data-hat="' + x.id + '" aria-pressed="' + (h.type === x.id) + '"><i style="background-image:url(\'../assets/avatar/hats/' + x.id + '.png\')"></i>' + x.label + '</button>').join('');
+    $('hatOpts').hidden = h.type === 'none';
+    const col = (h.colour || '#ffffff').toLowerCase();
+    $('hatCols').innerHTML = HAT_COLS.map(c => '<button type="button" class="sw" data-col="' + c + '" style="--c:' + c + '" aria-label="Colour ' + c + '" aria-pressed="' + (col === c) + '"></button>').join('') +
+      '<label class="pick" aria-label="Any colour"><input type="color" id="hatAny" value="' + col + '"></label>';
+    $('hatSize').value = h.size || 1;
+  }
+  $('hats').addEventListener('click', e => { const b = e.target.closest('[data-hat]'); if (!b || cfg.classic) return; cfg.hat = Object.assign({ type: 'none', colour: '#ffffff', size: 1, up: 0, forward: 0, tilt: 0 }, cfg.hat, { type: b.dataset.hat }); paintHats(); changed(); buzz(); });
+  $('hatCols').addEventListener('click', e => { const b = e.target.closest('[data-col]'); if (!b) return; cfg.hat = Object.assign({}, cfg.hat, { colour: b.dataset.col }); paintHats(); changed(); buzz(); });
+  $('hatCols').addEventListener('input', e => { if (e.target.id !== 'hatAny') return; cfg.hat = Object.assign({}, cfg.hat, { colour: e.target.value }); for (const s of document.querySelectorAll('#hatCols .sw')) s.setAttribute('aria-pressed', 'false'); changed(); });
+  $('hatSize').addEventListener('input', e => { cfg.hat = Object.assign({}, cfg.hat, { size: +e.target.value }); changed(); });
+
+  /* ---------- emotes (saved in the Grug profile; games read them through gamekit.js) ---------- */
+  let loadout = G ? G.emotes.slice() : [];
+  function paintEmotes() {
+    if (!G) return;
+    $('emoLoad').innerHTML = loadout.length ? loadout.map((id, i) => { const e = G.emoteOf(id); return e ? '<span style="--c:' + e.hue + '"><i>' + ic(e.icon) + '</i>' + (i + 1) + '. ' + e.name + '</span>' : ''; }).join('') + '<em>' + loadout.length + ' / ' + G.EMOTE_MAX + '</em>' : '<em>Nothing picked: tap emotes below</em>';
+    $('emoGrid').innerHTML = G.EMOTES.map(e => { const k = loadout.indexOf(e.id); return '<button type="button" class="emo" data-emote="' + e.id + '" aria-pressed="' + (k >= 0) + '" style="--c:' + e.hue + '"><span class="n">' + (k + 1) + '</span><i>' + ic(e.icon) + '</i>' + e.name + '</button>'; }).join('');
+  }
+  $('emoGrid').addEventListener('click', e => {
+    const b = e.target.closest('[data-emote]'); if (!b || !G) return; const id = b.dataset.emote, em = G.emoteOf(id), k = loadout.indexOf(id);
+    if (em) playLive(em.anim, 3600);
+    if (k >= 0) { if (loadout.length === 1) toast('Keep at least one emote', { icon: 'info' }); else loadout.splice(k, 1); }
+    else if (loadout.length >= G.EMOTE_MAX) toast('That’s ' + G.EMOTE_MAX + ' already. Tap one to drop it first.', { icon: 'warning-circle' });
+    else loadout.push(id);
+    G.setEmotes(loadout); loadout = G.emotes.slice(); paintEmotes(); buzz();
+  });
+  if (G) G.on((p, what) => { if (what === 'external' || what === 'import' || what === 'reset') { loadout = G.emotes.slice(); paintEmotes(); } });
+
+  /* ---------- classic ---------- */
+  $('classicOn').checked = !!cfg.classic;
+  $('classicOn').addEventListener('change', async e => {
+    cfg.classic = e.target.checked; save(); buzz();
+    toast(cfg.classic ? 'You’ll play as your classic avatar' : 'You’ll play as your new avatar');
+    await build(); snaps(true);
+  });
+
+  // another tab changed the look (the classic editor, onboarding)
+  addEventListener('storage', e => { if (e.key !== KEY) return; const was = !!cfg.classic; cfg = K.player(); $('classicOn').checked = !!cfg.classic; paintSkins(); paintHats(); if (was !== !!cfg.classic) build(); else changed(); });
+
+  show((location.hash || '').slice(1).replace(/^custom$/, 'classic'));
+  paintSkins(); paintHats(); paintEmotes();
+  build().catch(err => { console.error(err); $('loading').textContent = 'Your avatar could not load. Check your connection and try again.'; });
+})();
+</script>
+</body></html>

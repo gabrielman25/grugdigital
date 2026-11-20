@@ -187,7 +187,7 @@ way until the owner says a business has agreed in writing.
 - **The placeholder** `placeholder18` (games.js, `games/placeholder18/`, `play/placeholder18/`, `assets/boxart/placeholder18.jpg`)
   is a blank 18+ game for previewing all of this. Remove those four before launch.
 
-## The accessory catalog (`labs/catalog/`, unlisted)
+## The closet: the Avatar section (`avatar/`) and the accessory catalog (`labs/catalog/`)
 
 Eyewear, hair, earrings, necklaces, purses, sandals, sound (headphones, earmuffs, earbuds) and back (swords, from MilkAndBanana's
 Modular Sword Kit, CC0), with editors and one-texture downloads, and **clothing** (Tops, Jackets, Bottoms, Shoes, Outfits: the Modular Anime Character pack fitted to her body by `tools/catalog/clothes/fit.mjs`; she wears its tee and trousers when nothing else is on; never downloadable, as the pack's licence doesn't allow handing out its files). It opens on the **closet** (`src/closet.js`): the catalog and an avatar editor in one, laid out like Roblox's
@@ -198,6 +198,26 @@ Hair in the catalog is flat colour; a strand texture is only a choice in the Hai
 edited directly: it's a copy of the game kit's studio, so bring changes back to the kit). Sound has no charms.
 `labs/catalog/index.html` is **built**: edit `tools/catalog/` (`src/jewelry.js`, `src/int.js`, `build.py`) and run
 `python3 tools/catalog/build.py`. Read `tools/catalog/README.md` first; it has the map and the checklist for adding a category.
+The same build writes **`avatar/index.html`** (the site's Avatar section is the closet; the same page with its paths one
+folder up) and **`assets/closet-runtime.js`** (below). Never edit either by hand. The old blocky editor (skins, hats, emotes,
+the classic switch) is kept at `avatar/look.html` (the emote wheel's "Emotes are picked in…" link goes there).
+
+**Players wear the closet avatar in games.** Opening or changing the closet saves `closet: true` (and a `closetAt` stamp, so
+the site's pictures are retaken) in the player's look `grug.sandy.v1`; picking a blocky skin, a hat or the classic switch in
+`avatar/look.html` saves a look without it. `SandyKit.create(look)` with `closet: true` loads the classic kit and
+`assets/closet-runtime.js` (the catalog's eyewear, hair, pattern and jewelry engines plus `tools/catalog/src/dress.js`), which
+builds the classic Sandy in the closet's body (`grug.closet.v1`: skin, nails, face, build, feet) wearing what she has on.
+Clothes are skinned and head pieces ride her head; necklaces, purses, sandals, swords and cords are pinned to the nearest bone
+(feet, hips, chest) so they move with her.
+**NPCs are a mix:** `SandyKit.randomConfig(seed, opts)` makes about half of all bots a **catalog NPC** (`catalogSeed`): always
+the female body (the catalog only dresses her) in a random catalog look (`randomState` in dress.js: skin, nails, face, build,
+a top / jacket / outfit, bottoms, shoes or sandals, sometimes earrings, a necklace or glasses), with the classic kit's own
+**long hair or buns** in a random colour. The game's `outfit.shirt` / `outfit.shorts` colour her top and bottoms, so team and
+uniform colours carry over. `{catalog: true}` / `{catalog: false}` asks for one kind; a strict male bot is never one.
+**Glow Up Spa** is catalog avatars only (`catalog: true` on its bots, `closet: true` on the player). **Runway Ready** dresses
+everyone in its own (classic) clothes, so it builds them with the runtime's **bare** mode: the player's closet body, face and
+hair, and each model's random catalog body, face and hair (`makeOne`). Every game that builds the player from
+`grug.sandy.v1` gets it with no change; check one after changing the runtime (dress her in `avatar/`, open a game).
 
 ## Contact us (`assets/contact.js`)
 
@@ -447,8 +467,8 @@ Choosing your own colours is not built yet: the skins are laid out in regions so
 
 - **The classic avatar is archived**, opt-in and **only ever the player's own character**: Avatar → Classic → "Play as my
   classic avatar" sets `classic: true`, and then `SandyKit.create(the player's look)` builds the old Sandy
-  (`assets/sandy-classic.js`, ~15 MB, loaded on demand) from 'grug.sandy.classic.v1'. Bots, NPCs, customers and
-  everyone else are always the new avatar (`randomConfig` never sets `classic`). A look saved before the change (no
+  (`assets/sandy-classic.js`, ~15 MB, loaded on demand) from 'grug.sandy.classic.v1'. Bots never get `classic`;
+  about half of them are catalog NPCs instead (see "The closet" above), and a player who has used the closet plays as it. A look saved before the change (no
   `model`) is moved to the classic key once (`SandyKit.migrate`, `migrateLook` in grug.js, `SandyView.config`) and the
   player gets the new avatar in the skin of that body, wearing the same hat.
 - **The closet** (`shop/`, "Classic closet") and every clothing design dress the classic look only (`Grug.equip` writes
@@ -458,9 +478,9 @@ Choosing your own colours is not built yet: the skins are laid out in regions so
 - **Pictures** (`grug.sandy.snaps.v1`, `assets/sandy-view.js`) are of the player's avatar: the classic one while it's
   on. The classic editor stamps the player's look (`classicAt`) whenever the classic look changes, so they are retaken.
 
-## Avatar editor (`avatar/`)
+## The old avatar editor (`avatar/look.html`)
 
-Four sections as tabs: **Look** (the skins), **Hat** (none or one of eight, any colour, a size slider), **Emotes** (the
+`avatar/` is the closet now (above). The blocky editor that was there has four sections as tabs: **Look** (the skins), **Hat** (none or one of eight, any colour, a size slider), **Emotes** (the
 loadout for the emote wheel, previewed on her) and **Classic** (the switch, Edit classic avatar → `avatar/classic/`,
 Classic closet). The stage is a **still picture**, redrawn when the look changes, with two arrows that turn her 45 degrees
 at a time; an emote preview plays live at half resolution for a few seconds, then it goes still. While classic is on, the

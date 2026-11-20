@@ -113,7 +113,20 @@ Pick a one-letter id prefix (taken: `e n p s a b t j l f u`; `c` was the old clo
     `/^g[enpsabtjlfu]:/` (and the feed's pool test in closet.js), the item note text, the `route()` regex `(earrings|necklaces|purses|sandals|sound)`, the search placeholder
     and hero text, the Create menu entry and the hero "Roll …" button.
 
-Then rebuild, test, run the offline build, commit and push (see CLAUDE.md: a branch preview link per change).
+**`src/closet.js`** (the closet is the site's Avatar section)
+11. `CL_DEPTS` (label and icon) and `GEN_DEPTS` (so the endless feed draws it), `slotOf` if it takes more than one slot,
+    `clashes()` if it can't be worn with something, the camera numbers in `focus()`, the studio in the menu (`#clMenu`), the
+    `route` regex, and the feed's pool test `/^g[…]?:/`.
+
+**Games** (`src/dress.js`, built into `assets/closet-runtime.js`)
+12. A piece built in the world frame is pinned to a bone by where it sits (`boneFor`); check that's the right bone for the new
+    piece (dress her in `avatar/`, then open a game or `assets/sandy-runtime.js` in a test page and play `run`).
+13. Random NPCs (`randomState`): add the new kind there if NPCs should wear it now and then.
+14. If its files are loaded by names built in code, add the folder to `COMPANIONS` in `tools/pwa/build.py` (for
+    `assets/closet-runtime.js` and `avatar/index.html`).
+
+Then rebuild (`python3 tools/catalog/build.py` writes the catalog, `avatar/` and the runtime), test, run the offline build
+(and `node tools/pwa/check.js` when loading changed), commit and push (see CLAUDE.md: a branch preview link per change).
 
 ## Hair is flat colour
 
@@ -162,6 +175,19 @@ first load takes 20 to 40 seconds.
   scabbard and the strap, a fixed size (`BK_TILE` cm) whatever the part. Length 50 to 120 cm, blade width, angle, height.
 - World frame, fitted over `bodyField` (`bodyLoop` lays the strap). Pictures of back swords are taken from behind.
 
+## What the build writes
+
+- `labs/catalog/index.html`: the catalog and closet (unlisted address).
+- `avatar/index.html`: the same page as the site's **Avatar section**, its paths one folder up (`../assets/`, the Hair
+  Studio at `../labs/hair-studio-x8f3k2/`). The jewelry engine finds the assets folder from the page's address, or from
+  `window.GRUG_ASSETS` (the runtime sets it).
+- `assets/closet-runtime.js`: the player's closet avatar for **games**: the page's `grug-eyewear`, `hair-textures`,
+  `grug-hair`, `catalog-hair`, `grug-patterns` and `grug-jewelry` blocks, then `src/dress.js`
+  (`GrugClosetRuntime.create(SandyClassicKit)`). sandy-runtime.js loads it for a look with `closet: true`; the closet sets
+  that on the player's look (`playAsCloset()` in closet.js) whenever it's opened or saved. `dress.js` repeats the closet's
+  `applyBody` colours and `mountSlot` order; world-frame pieces are pinned to bones (`boneFor`). If you change how the
+  closet puts something on her, change `dress.js` to match and check her in a game.
+
 ## Clothing (`/* ==== clothing */`, `clothPanel`): the Modular Anime Character pack
 
 Five departments: **Tops** (`gt:`), **Jackets** (`gj:`), **Bottoms** (`gl:`), **Shoes** (`gf:`) and **Outfits** (`gu:`),
@@ -200,6 +226,10 @@ The pack is made for its own body (a CC_Base rig, about 140 cm, A-pose). `fit.mj
    round, and how far out from the pack's skin; that is laid on her matching part (radius grids of both bodies), the move is
    smoothed over the mesh, nothing is left inside her, and it takes the skin weights of her nearest skin. Anything more than
    2.5 cm past the pack's wrist is left out (gloves: her hands are round). Weights always add up to exactly 255.
+   **Shoes keep their own shape:** the foot part of a shoe (everything up to 14 cm above the pack's ankle, fading out over
+   6 cm) is moved whole onto her foot (turned to her foot's direction, scaled by foot length, its sole on hers) and weighted
+   to her foot bone; only a tall boot's shaft is fitted round her leg. Under shoes her whole feet are hidden, and any skin
+   with shoe above it. The racing suit (its boots are built in) gets the same.
    **The neck:** the pack's neck is in its head file (not in the pack), so the plain tee's neckline stands in for its surface,
    and round the middle of the neck everything comes down `NECK_DROP` cm (her neck joint is halfway up her throat; the
    pack's is at the base). Without both, necklines floated up her throat and the back of a collar showed through the gap.

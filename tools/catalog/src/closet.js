@@ -30,7 +30,17 @@
   // the classic kit's clothing is gone (the Modular Anime Character pack replaced it): its pieces leave the wardrobe
   CL.wardrobe = CL.wardrobe.filter(e => e.dept !== 'clothing'); delete CL.wearing.clothing;
   for (const k of Object.keys(CL.wearing)) if (!CL.wardrobe.some(e => e.id === CL.wearing[k])) delete CL.wearing[k];
-  const clSave = () => { if (!store.set(CL_KEY, { wardrobe: CL.wardrobe, wearing: CL.wearing, body: CL.body })) GRUG.toast('Your browser is out of room for your wardrobe'); };
+  // she is the player's avatar in games: the saved look ('grug.sandy.v1') says closet: true, stamped each time she changes
+  // so the site's pictures of her are retaken (sandy-runtime.js builds her from 'grug.closet.v1' with assets/closet-runtime.js)
+  function playAsCloset() {
+    try {
+      const K = 'grug.sandy.v1', CK = 'grug.sandy.classic.v1'; let c = JSON.parse(localStorage.getItem(K) || 'null');
+      if (c && typeof c === 'object' && c.model !== 'block') { if (!localStorage.getItem(CK)) localStorage.setItem(CK, JSON.stringify(c)); c = null; }
+      c = Object.assign({ model: 'block', skin: 'skaterFemaleA', hat: { type: 'none' } }, c || {}, { closet: true, classic: false, closetAt: Date.now() });
+      localStorage.setItem(K, JSON.stringify(c));
+    } catch (e) {}
+  }
+  const clSave = () => { if (!store.set(CL_KEY, { wardrobe: CL.wardrobe, wearing: CL.wearing, body: CL.body })) GRUG.toast('Your browser is out of room for your wardrobe'); clearTimeout(clSave.t); clSave.t = setTimeout(playAsCloset, 400); };
 
   /* ---- light or dark: the site's own setting */
   const siteMode = () => { try { const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null'); return p && p.prefs && p.prefs.mode === 'dark' ? 'dark' : 'light'; } catch (e) { return 'light'; } };
@@ -445,6 +455,7 @@
   /* ---- in and out */
   let clReady = false;
   async function clEnter(hash) {
+    if (!CL.on && !store.get(CL_KEY, null)) clSave(); else if (!CL.on) { try { const c = JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); if (!c || !c.closet) playAsCloset(); } catch (e) {} }
     const first = !CL.on; CL.on = true; showPage('closet'); look(true); if (worn) worn.root.visible = false; setHair(true);
     if (canvas.parentElement !== $('#clStage')) { canvas.classList.remove('hovercv'); $('#clStage').prepend(canvas); resize(); }
     ZOOM[0] = 40; ZOOM[1] = 560; floor.visible = true; spin.on = false;
