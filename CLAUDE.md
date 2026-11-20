@@ -189,7 +189,8 @@ way until the owner says a business has agreed in writing.
 
 ## The closet: the Avatar section (`avatar/`) and the accessory catalog (`labs/catalog/`)
 
-Eyewear, hair, earrings, necklaces, purses, sandals, sound (headphones, earmuffs, earbuds) and back (swords, from MilkAndBanana's
+Eyewear, hair, hats (the Chibi Hats, with colours, prints, charms and the player's own Position / Rotation / Size; a hat never
+changes her hair or anything else, and random NPCs never wear one), earrings, necklaces, purses, sandals, sound (headphones, earmuffs, earbuds) and back (swords, from MilkAndBanana's
 Modular Sword Kit, CC0), with editors and one-texture downloads, and **clothing** (Tops, Jackets, Bottoms, Shoes, Outfits: the Modular Anime Character pack fitted to her body by `tools/catalog/clothes/fit.mjs`; she wears its tee and trousers when nothing else is on; never downloadable, as the pack's licence doesn't allow handing out its files). It opens on the **closet** (`src/closet.js`): the catalog and an avatar editor in one, laid out like Roblox's
 (Marketplace to try things on and add them to the wardrobe; Customize for the wardrobe and her skin, face, feet and build),
 on the classic female avatar in her own colours, over a blurred picture. Card pictures still show the grey mannequin. It follows

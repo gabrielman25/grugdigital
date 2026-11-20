@@ -45,6 +45,18 @@ The rest of the site still uses `assets/sandy-classic.js` (old feet).
   and pieces drawn earlier whose pictures are ready (`genCache` + `thumbs`) are mixed back in, one in three. More cards are
   appended as the sentinel (`.cl-more`) nears the bottom; the grid is never rebuilt while scrolling. Only Hair, Favourites
   and Yours end. Search and filters re-filter with the same seed.
+- **Equip** is the big Grug-lime button with a tick and a sparkle (`.cl-equip`), twice the height of the others, so it reads
+  without reading. Under it, **quick colours** (`quickColours`): Original plus swatches that change the piece's main colour
+  while she tries it on (`primaryOf` / `withPrimary`: a clothing piece's first area, a hat's colour, a bag's body, a sandal's
+  straps, headphones' cups, a sword's scabbard or hilt, jewelry's shapes, glasses' frame, hair's dye). The piece keeps its id;
+  Equip or Add to wardrobe keeps the colour in the wardrobe entry. A piece already in the wardrobe opens in its own colours.
+- **The panel's width** is dragged at its edge (`#clResize`, landscape only; arrow keys too; double-click resets), kept in
+  `grug.closet.panelw`.
+- **Search** (`qMatch`, `qExtra`, `qGuess` in closet.js; `window.__clq`, used by `passes`): every word must match at the start of
+  a word, through synonym groups (`SYN_GROUPS`: Christmas = xmas, holiday, santa, candy cane…; whole-word matches only, so
+  name flavours like "Merry" don't count) and plurals, over the name, tags, charm names and themes, colour names and families,
+  and holidays read from colours (two or more of a theme's own palette). Nothing found: the feed still fills, from the closest
+  spelling, then every department, then any word, then everything in the tab, with a green line saying what's shown (`FEED.over`).
 - **An opened piece** (`#item/<id>`) fills the **bottom half of the panel** (`#clDetail`); the feed stays above it and keeps
   scrolling, so another card can be opened straight away. She **tries it on** (`CL.preview`, one piece per slot);
   **Back** or the cross puts her outfit back. **Equip** keeps it and puts it on her; **Add to wardrobe** only keeps it
@@ -88,7 +100,7 @@ The rest of the site still uses `assets/sandy-classic.js` (old feet).
 ## Adding a new category: the checklist
 
 Use **sandals** (`validateS` / `randomS` / `buildSandals`, `JDEPT.sandals`, `sandalPanel`) or **purses** as the model to copy.
-Pick a one-letter id prefix (taken: `e n p s a b t j l f u`; `c` was the old clothing).
+Pick a one-letter id prefix (taken: `e n p s a b t j l f u k`; `c` was the old clothing).
 
 **`src/jewelry.js`** (a new `/* ==== <dept> */` section, before `const build =`)
 1. `DEF.<dept>`, a limits table, `LIMITS.<dept> = { n: <max charms> }`, and the kind list (like `STYLES`) with labels.
@@ -127,6 +139,20 @@ Pick a one-letter id prefix (taken: `e n p s a b t j l f u`; `c` was the old clo
 
 Then rebuild (`python3 tools/catalog/build.py` writes the catalog, `avatar/` and the runtime), test, run the offline build
 (and `node tools/pwa/check.js` when loading changed), commit and push (see CLAUDE.md: a branch preview link per change).
+
+## Hats (`/* ==== hats */`, `hatPanel`, id prefix `gk:`)
+
+- The eight classic hats (**Chibi Hats by PaperPluto**, `window.HATPACK`, already inside `assets/sandy-classic.js`; the
+  originals are in the owner's `chibiHats` folder). Kinds: beanie, beret, bucketHat, cap, cowboyHat, sunHat, topHat, witchHat.
+- Colours in up to three areas (`HAT_INFO`): the hat, its brim / visor / cuff / trim (the mesh's islands, `aReg`, or a height
+  for one-piece hats, `brimBelow`), and a band round the crown (a height range). A print tiles over the hat. Charms are pinned
+  on the crown by a ray at `at` (round it) and `up` (height), at `KH` times their size.
+- **A hat never changes anything else on her** (the owner's rule): no hair cut, no skull change. It sits in her head frame
+  where the classic kit seats it, then the player's `pos`, `rot` and `scale` (x, y, z each) about its seat (`J.hatPose`).
+  The closet shows **Position / Rotation / Size** with X, Y, Z sliders over her stage whenever a hat is on her (`poseSync`,
+  `poseKeep`); the Hat studio has the same sliders. Older designs' `up`, `fwd`, `tilt`, `size` are read into those.
+- Not downloadable (no licence on file for handing out the pack). **Random NPCs never wear one** (the owner's call: a hat is
+  placed by hand); a player's own hat goes into games through `dress.js` like any head piece.
 
 ## Hair is flat colour
 

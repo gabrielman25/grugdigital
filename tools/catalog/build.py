@@ -78,7 +78,7 @@ import base64
 pat_src='data:image/png;base64,'+base64.b64encode(open(os.path.join(HERE,'src','patterns.png'),'rb').read()).decode()
 rep('<script id="catalog-app">','<script id="grug-patterns">window.GRUG_PATTERNS={src:"'+pat_src+'",n:168,cols:14,tile:64};</script>\n<script id="grug-jewelry">\n'+jew+'\n</script>\n<script id="catalog-app">')
 rep("const GE = window.GrugEyewear, { clamp, lerp, rng, mix } = GE.util;","const GE = window.GrugEyewear, { clamp, lerp, rng, mix } = GE.util, J = window.GrugJewelry;")
-rep("const deptOf = it => (it && it.dept) || 'eyewear';","const deptOf = it => (it && it.dept) || 'eyewear';\n  const isJ = it => !!it && (it.dept === 'earrings' || it.dept === 'necklaces' || it.dept === 'purses' || it.dept === 'sandals' || it.dept === 'back' || it.dept === 'sound' || it.dept === 'tops' || it.dept === 'jackets' || it.dept === 'bottoms' || it.dept === 'shoes' || it.dept === 'outfits');")
+rep("const deptOf = it => (it && it.dept) || 'eyewear';","const deptOf = it => (it && it.dept) || 'eyewear';\n  const isJ = it => !!it && (it.dept === 'hats' || it.dept === 'earrings' || it.dept === 'necklaces' || it.dept === 'purses' || it.dept === 'sandals' || it.dept === 'back' || it.dept === 'sound' || it.dept === 'tops' || it.dept === 'jackets' || it.dept === 'bottoms' || it.dept === 'shoes' || it.dept === 'outfits');")
 rep("  /* ---------------------------------------------------------------- routing */\n  let toldControls","  await J.ready(); J.init({ sandy, hm, env: envTex }); await J.clothInit(sandy);\n"+integ+"\n"+closet+"\n  /* ---------------------------------------------------------------- routing */\n  let toldControls")
 
 
@@ -98,13 +98,15 @@ CLOSET_HTML = r'''
         <button class="cl-round" id="clReset" aria-label="See all of her" data-g-tip="See all of her"><i data-g-icon="person"></i></button>
         <button class="cl-round" id="clModeBtn" data-mode-btn aria-label="Dark mode" data-g-tip="Dark mode"><i data-g-icon="sun_moon"></i></button>
       </div>
+      <div class="cl-pose" id="clPose" hidden></div>
       <div class="cl-loading" id="clLoading"><span class="g-brandmark"></span><span>Getting her ready…</span></div>
     </div>
+    <div class="cl-resize" id="clResize" role="separator" aria-orientation="vertical" aria-label="Drag to make the catalog wider or narrower" data-g-tip="Drag to resize" tabindex="0"></div>
     <div class="g-seg cl-mode" id="clMode"><button data-mode="market" class="is-on">Marketplace</button><button data-mode="custom">Customize</button></div>
     <div class="cl-panel" id="clPanel">
       <div class="cl-grip" id="clGrip" role="button" aria-label="Drag the panel up or down"></div>
       <div class="cl-tabrow"><nav class="cl-tabs" id="clTabs"></nav>
-        <div class="cl-tools" id="clTools"><label class="cl-search"><i data-g-icon="magnifying_glass"></i><input id="clSearch" type="search" placeholder="Search" aria-label="Search the marketplace" autocomplete="off"></label><button class="cl-round sm" id="clFilterBtn" aria-label="Filters" data-g-tip="Filters"><i data-g-icon="sliders"></i></button></div></div>
+        <div class="cl-tools" id="clTools"><label class="cl-search"><i data-g-icon="magnifying_glass"></i><input id="clSearch" type="search" placeholder="Try: Christmas" aria-label="Search the marketplace" autocomplete="off"></label><button class="cl-round sm" id="clFilterBtn" aria-label="Filters" data-g-tip="Filters"><i data-g-icon="sliders"></i></button></div></div>
       <nav class="cl-subs" id="clSubs"></nav>
       <div class="cl-filters" id="clFilters" hidden><div class="cl-sortrow"><span class="g-label">Sort</span><select id="clSort" class="g-input"><option value="featured">Featured</option><option value="name">Name, A to Z</option><option value="yours">Yours first</option></select></div></div>
       <div class="cl-body" id="clBody"></div>
@@ -122,7 +124,7 @@ rep("const headCentre = () => headGroup.localToWorld(new THREE.Vector3(0, hm.eye
 # ---- card colours (KIMILAND soft blue card, lilac mannequin)
 rep("const cardColour = it => `hsl(${Math.round(cardHue(it))} 78% 72%)`;","const cardColour = it => it.brand === 'kimiland' ? KIMI_CARD : `hsl(${Math.round(cardHue(it))} 78% 72%)`;")
 rep("const mannequinColour = it => `hsl(${Math.round((cardHue(it) + 120) % 360)}, 62%, 80%)`;","const mannequinColour = it => it.brand === 'kimiland' ? KIMI_MANN : `hsl(${Math.round((cardHue(it) + 120) % 360)}, 62%, 80%)`;")
-rep("    if (deptOf(it) === 'hair') { const [h, s] = GE.util.hsl(it.hex);","    if (isJ(it)) { const e = it.dept === 'sound' ? { col: it.d.cupCol } : it.dept === 'back' ? { col: it.d.sheath ? it.d.sheathCol : it.d.hiltCol } : J.isCloth(it.dept) ? { col: it.d.colA } : (it.d.seq || it.d.items || it.d.charms)[0] || { col: it.d.body || it.d.strapCol }; return ((GE.util.hsl(e.col)[1] > 0.2 ? GE.util.hsl(e.col)[0] : GE.util.hash(it.id) % 360) + 180) % 360; }\n    if (deptOf(it) === 'hair') { const [h, s] = GE.util.hsl(it.hex);")
+rep("    if (deptOf(it) === 'hair') { const [h, s] = GE.util.hsl(it.hex);","    if (isJ(it)) { const e = it.dept === 'sound' ? { col: it.d.cupCol } : it.dept === 'back' ? { col: it.d.sheath ? it.d.sheathCol : it.d.hiltCol } : J.isCloth(it.dept) ? { col: it.d.colA } : it.dept === 'hats' ? { col: it.d.col } : (it.d.seq || it.d.items || it.d.charms)[0] || { col: it.d.body || it.d.strapCol }; return ((GE.util.hsl(e.col)[1] > 0.2 ? GE.util.hsl(e.col)[0] : GE.util.hash(it.id) % 360) + 180) % 360; }\n    if (deptOf(it) === 'hair') { const [h, s] = GE.util.hsl(it.hex);")
 
 # ---- thumbs job
 rep("url = hair ? await thumbHair(j.it, mannequinColour(j.it)) : j.mode === 'worn'","url = isJ(j.it) ? (await J.prep(j.it.dept, j.it.d), thumbJewel(j.it, mannequinColour(j.it))) : hair ? await thumbHair(j.it, mannequinColour(j.it)) : j.mode === 'worn'")
@@ -132,19 +134,19 @@ rep("""    const d = GE.random(seed), it = { id: 'g:' + seed, seed, d, name: GE.
     genCache.set(seed, it); return it;""","""    const kg = genEyewear(seed), d = kg.d, it = { id: 'g:' + seed, seed, d, name: kg.name, kind: GE.classify(d), by: brandBy(kg.brand), brand: kg.brand, order: i, stamp: 0, gen: true };
     genCache.set(seed, it); return it;""")
 rep("""const d = GE.random(seed); const it = { id, seed, d, name: GE.nameFor(d, seed), kind: GE.classify(d), by: 'Grug Digital', order: 0, stamp: 0, gen: true }; genCache.set(seed, it); return it; }""","""const kg = genEyewear(seed), d = kg.d; const it = { id, seed, d, name: kg.name, kind: GE.classify(d), by: brandBy(kg.brand), brand: kg.brand, order: 0, stamp: 0, gen: true }; genCache.set(seed, it); return it; }""")
-rep("  function itemById(id) {\n","  function itemById(id) {\n    if (/^g[enpsabtjlfu]:/.test(id)) return JM.byId(id);\n")
+rep("  function itemById(id) {\n","  function itemById(id) {\n    if (/^g[enpsabtjlfuk]:/.test(id)) return JM.byId(id);\n")
 rep("function mineItems() { return mine().map((m, i) => ({ id: 'm:' + m.id, seed: m.seed || m.id, d: GE.validate(m.d).d, name: m.name, kind: GE.classify(GE.validate(m.d).d), by: 'You', order: -1000 + i, stamp: m.when || 0, mine: true, saved: m })); }",
     "function mineItems() { return mine().map((m, i) => m.dept ? JM.fromMine(m, i) : ({ id: 'm:' + m.id, seed: m.seed || m.id, d: GE.validate(m.d).d, name: m.name, kind: GE.classify(GE.validate(m.d).d), by: 'You', brand: m.brand || 'grug', order: -1000 + i, stamp: m.when || 0, mine: true, saved: m })); }")
 rep("{ id: it.id, seed: it.seed, name: it.name, d: it.d, by: it.by, when: Date.now() });","{ id: it.id, seed: it.seed, name: it.name, d: it.d, by: it.by, dept: isJ(it) ? it.dept : undefined, brand: it.brand, when: Date.now() });")
-rep("    const d = GE.validate(f.d).d; return { id: f.id, seed: f.seed, d, name: f.name, kind: GE.classify(d), by: f.by || 'Grug Digital',","    if (f.dept === 'earrings' || f.dept === 'necklaces' || f.dept === 'purses' || f.dept === 'sandals' || f.dept === 'sound' || f.dept === 'back' || J.isCloth(f.dept)) return JM.fromFav(f);\n    const d = GE.validate(f.d).d; return { id: f.id, seed: f.seed, d, name: f.name, kind: GE.classify(d), brand: f.brand || 'grug', by: f.by || 'Grug Digital',")
+rep("    const d = GE.validate(f.d).d; return { id: f.id, seed: f.seed, d, name: f.name, kind: GE.classify(d), by: f.by || 'Grug Digital',","    if (f.dept === 'hats' || f.dept === 'earrings' || f.dept === 'necklaces' || f.dept === 'purses' || f.dept === 'sandals' || f.dept === 'sound' || f.dept === 'back' || J.isCloth(f.dept)) return JM.fromFav(f);\n    const d = GE.validate(f.d).d; return { id: f.id, seed: f.seed, d, name: f.name, kind: GE.classify(d), brand: f.brand || 'grug', by: f.by || 'Grug Digital',")
 rep("    if (deptOf(it) === 'hair') f = HD.families(it);\n","    if (isJ(it)) f = JM.families(it);\n    else if (deptOf(it) === 'hair') f = HD.families(it);\n")
 
 # ---- catalog departments and filters
 rep("const REFINE_KEYS = ['worn', 'lens', 'logo', 'texture', 'vibe'];","const REFINE_KEYS = ['worn', 'lens', 'logo', 'texture', 'vibe', 'theme', 'cord', 'mount', 'pattern'];")
 rep("lens: 'any', logo: 'any', texture: 'any', vibe: 'any', colour: 'any',","lens: 'any', logo: 'any', texture: 'any', vibe: 'any', theme: 'any', cord: 'any', mount: 'any', pattern: 'any', brand: 'any', colour: 'any',")
-rep("['all', 'All items', 'shopping_bag', 'var(--g-lime)'], ['eyewear'","['all', 'All items', 'shopping_bag', 'var(--g-lime)'], ['tops', 'Tops', 'shirt', 'var(--g-yellow)'], ['jackets', 'Jackets', 'jacket', 'var(--g-orange)'], ['bottoms', 'Bottoms', 'pants', 'var(--g-blue)'], ['shoes', 'Shoes', 'shoe', 'var(--g-red)'], ['outfits', 'Outfits', 'outfit', 'var(--g-purple)'], ['eyewear'")
+rep("['all', 'All items', 'shopping_bag', 'var(--g-lime)'], ['eyewear'","['all', 'All items', 'shopping_bag', 'var(--g-lime)'], ['tops', 'Tops', 'shirt', 'var(--g-yellow)'], ['jackets', 'Jackets', 'jacket', 'var(--g-orange)'], ['bottoms', 'Bottoms', 'pants', 'var(--g-blue)'], ['shoes', 'Shoes', 'shoe', 'var(--g-red)'], ['outfits', 'Outfits', 'outfit', 'var(--g-purple)'], ['hats', 'Hats', 'hat', 'var(--g-lime)'], ['eyewear'")
 rep("['hair', 'Hair', 'hair', 'var(--g-pink)'], ['favs'","['hair', 'Hair', 'hair', 'var(--g-pink)'], ['earrings', 'Earrings', 'diamond', 'var(--g-purple)'], ['necklaces', 'Necklaces', 'flower', 'var(--g-orange)'], ['purses', 'Purses', 'shopping_bag', 'var(--g-pink)'], ['sandals', 'Sandals', 'sun', 'var(--g-blue)'], ['sound', 'Sound', 'note', 'var(--g-teal)'], ['back', 'Back', 'sword', 'var(--g-red)'], ['favs'")
-rep("const SUBS = { eyewear: [['glasses', 'Glasses'], ['shades', 'Shades'], ['goggles', 'Goggles']], hair: HD ? HD.SUB : [] };","const SUBS = { eyewear: [['glasses', 'Glasses'], ['shades', 'Shades'], ['goggles', 'Goggles']], hair: HD ? HD.SUB : [], earrings: [['studs', 'Studs'], ['drops', 'Drops'], ['danglers', 'Danglers'], ['hoops', 'Hoops']], necklaces: [['choker', 'Chokers'], ['short', 'Short'], ['medium', 'Medium'], ['long', 'Long']], sandals: [['slide', 'Slides'], ['thong', 'Thongs'], ['ankle', 'Ankle straps'], ['gladiator', 'Gladiators'], ['wrap', 'Wraps'], ['slipper', 'Slippers']], purses: [['satchel', 'Satchels'], ['tote', 'Totes'], ['bucket', 'Buckets'], ['round', 'Rounds'], ['heart', 'Hearts'], ['clutch', 'Clutches']], sound: [['over', 'Headphones'], ['muffs', 'Earmuffs'], ['buds', 'Earbuds']], back: [['back1', 'One on the back'], ['back2', 'Two on the back'], ['hip', 'At the hip']], tops: J.CLOTH_SUBS.tops, jackets: J.CLOTH_SUBS.jackets, bottoms: J.CLOTH_SUBS.bottoms, shoes: J.CLOTH_SUBS.shoes, outfits: J.CLOTH_SUBS.outfits };")
+rep("const SUBS = { eyewear: [['glasses', 'Glasses'], ['shades', 'Shades'], ['goggles', 'Goggles']], hair: HD ? HD.SUB : [] };","const SUBS = { eyewear: [['glasses', 'Glasses'], ['shades', 'Shades'], ['goggles', 'Goggles']], hair: HD ? HD.SUB : [], hats: J.HAT_KINDS.map(([k]) => [k, J.KIND_LABEL[k]]), earrings: [['studs', 'Studs'], ['drops', 'Drops'], ['danglers', 'Danglers'], ['hoops', 'Hoops']], necklaces: [['choker', 'Chokers'], ['short', 'Short'], ['medium', 'Medium'], ['long', 'Long']], sandals: [['slide', 'Slides'], ['thong', 'Thongs'], ['ankle', 'Ankle straps'], ['gladiator', 'Gladiators'], ['wrap', 'Wraps'], ['slipper', 'Slippers']], purses: [['satchel', 'Satchels'], ['tote', 'Totes'], ['bucket', 'Buckets'], ['round', 'Rounds'], ['heart', 'Hearts'], ['clutch', 'Clutches']], sound: [['over', 'Headphones'], ['muffs', 'Earmuffs'], ['buds', 'Earbuds']], back: [['back1', 'One on the back'], ['back2', 'Two on the back'], ['hip', 'At the hip']], tops: J.CLOTH_SUBS.tops, jackets: J.CLOTH_SUBS.jackets, bottoms: J.CLOTH_SUBS.bottoms, shoes: J.CLOTH_SUBS.shoes, outfits: J.CLOTH_SUBS.outfits };")
 rep("  const REFINE = {\n","""  const F_THEME = [['any', 'Any theme', 'sparkle_dummy'], ['Christmas', 'Christmas', null], ['Halloween', 'Halloween', null], ["Valentine's Day", "Valentine's Day", null], ['Shapes', 'Plain shapes', null]];
   const F_BRAND = [['any', 'Any brand'], ['grug', 'Grug Digital'], ['kimiland', 'KIMILAND'], ['players', 'Made by players']];
   const REFINE = {
@@ -153,6 +155,7 @@ rep("  const REFINE = {\n","""  const F_THEME = [['any', 'Any theme', 'sparkle_d
     sandals: [['theme', 'Theme', F_THEME.map(x => [x[0], x[1], null])], ['mount', 'Sole', [['any', 'Any sole', null], ['Flat', 'Flat', null], ['Platform', 'Platform', null], ['Wedge', 'Wedge', null], ['Block', 'Block heel', null]]], ['pattern', 'Colour', [['any', 'Any colour style', null], ['Solid', 'Solid colour', null], ['Gradient', 'Gradient', null], ['Patterned', 'Patterned', null]]]],
     purses: [['theme', 'Theme', F_THEME.map(x => [x[0], x[1], null])], ['cord', 'Strap', [['any', 'Any strap', null], ['Chain', 'Chain', null], ['Strap', 'Strap', null], ['Wide strap', 'Wide strap', null], ['Cord', 'Cord', null], ['Beads', 'Beads', null], ['Pearls', 'Pearls', null]]], ['pattern', 'Pattern', [['any', 'Any pattern', null], ['Gingham', 'Gingham', null], ['Stripes', 'Stripes', null], ['Polka dots', 'Polka dots', null], ['Quilted', 'Quilted', null], ['Checks', 'Checks', null], ['Print', 'Prints', null]]]],
     back: [['mount', 'Blade', [['any', 'Bare or sheathed', null], ['Bare blade', 'Bare blade', null], ['Sheathed', 'Sheathed', null]]], ['pattern', 'Extras', [['any', 'Any extras', null], ['Patterned', 'Patterned', null], ['Gem', 'Gem in the pommel', null], ['Strap', 'With a strap', null], ['Belt', 'With a belt', null]]]],
+    hats: [['theme', 'Theme', F_THEME.map(x => [x[0], x[1], null])], ['pattern', 'Print', [['any', 'Any print', null], ['Solid colour', 'Solid colour', null], ['Patterned', 'Patterned', null]]]],
     tops: [['pattern', 'Print', [['any', 'Any print', null], ['Solid colour', 'Solid colour', null], ['Patterned', 'Patterned', null]]]],
     jackets: [['pattern', 'Print', [['any', 'Any print', null], ['Solid colour', 'Solid colour', null], ['Patterned', 'Patterned', null]]]],
     bottoms: [['pattern', 'Print', [['any', 'Any print', null], ['Solid colour', 'Solid colour', null], ['Patterned', 'Patterned', null]]]],
@@ -162,18 +165,21 @@ rep("  const REFINE = {\n","""  const F_THEME = [['any', 'Any theme', 'sparkle_d
 """)
 # passes
 rep("    if (f.dept === 'eyewear' || f.dept === 'hair') {\n      if (dp !== f.dept) return false;\n      if (f.sub !== 'all') { if (dp === 'eyewear' ? it.kind !== f.sub : !(it.length === f.sub || it.tags.includes(f.sub))) return false; }\n    }",
-    "    if (f.brand !== 'any' && (it.brand || 'grug') !== f.brand) return false;\n    if (f.dept === 'eyewear' || f.dept === 'hair' || f.dept === 'earrings' || f.dept === 'necklaces' || f.dept === 'purses' || f.dept === 'sandals' || f.dept === 'sound' || f.dept === 'back' || J.isCloth(f.dept)) {\n      if (dp !== f.dept) return false;\n      if (f.sub !== 'all') { if (dp === 'eyewear' || isJ(it) ? it.kind !== f.sub : !(it.length === f.sub || it.tags.includes(f.sub))) return false; }\n    }")
+    "    if (f.brand !== 'any' && (it.brand || 'grug') !== f.brand) return false;\n    if (f.dept === 'eyewear' || f.dept === 'hair' || f.dept === 'hats' || f.dept === 'earrings' || f.dept === 'necklaces' || f.dept === 'purses' || f.dept === 'sandals' || f.dept === 'sound' || f.dept === 'back' || J.isCloth(f.dept)) {\n      if (dp !== f.dept) return false;\n      if (f.sub !== 'all') { if (dp === 'eyewear' || isJ(it) ? it.kind !== f.sub : !(it.length === f.sub || it.tags.includes(f.sub))) return false; }\n    }")
 rep("    } else if (dp === 'hair') {\n      if (f.texture","    } else if (isJ(it)) {\n      const tg = J.tagsFor(dp, it.d); if (f.theme !== 'any' && !tg.includes(f.theme)) return false; if (f.cord !== 'any' && !tg.includes(f.cord)) return false; if (f.mount !== 'any' && !tg.includes(f.mount)) return false; if (f.pattern !== 'any' && !tg.includes(f.pattern)) return false;\n    } else if (dp === 'hair') {\n      if (f.texture")
 rep("it._q || (it._q = (deptOf(it) === 'hair' ? [it.name,","it._q || (it._q = (isJ(it) ? JM.text(it) : deptOf(it) === 'hair' ? [it.name,")
 rep(".join(' ').toLowerCase().replace(/colour/g, 'color')",".join(' ').concat(it.brand === 'kimiland' ? ' kimiland pastel' : it.brand === 'players' ? ' ' + it.by + ' player' : ' grug digital').toLowerCase().replace(/colour/g, 'color')")
+# search: the closet's search (synonyms, plurals, charm themes, colours; src/closet.js) once it's there
+rep("    if (q) { const t = searchText(it); if (!q.split(/\\s+/).every(w => t.includes(w))) return false; }",
+    "    if (q) { const t = searchText(it); if (window.__clq ? !window.__clq.match(t + ' ' + window.__clq.extra(it), q, f.qany) : !q.split(/\\s+/).every(w => t.includes(w))) return false; }")
 # allItems
-rep("    out.push(...hairItems());\n","    out.push(...hairItems());\n    for (let i = 0; i < cat.count; i++) { const a = JM.gen('earrings', catSeed + '-' + i), b = JM.gen('necklaces', catSeed + '-' + i), c = JM.gen('purses', catSeed + '-' + i), e2 = JM.gen('sandals', catSeed + '-' + i), f2 = JM.gen('sound', catSeed + '-' + i), g2 = JM.gen('back', catSeed + '-' + i); a.order = i * 6 + 1.3; b.order = i * 6 + 2.3; c.order = i * 6 + 3.3; e2.order = i * 6 + 4.3; f2.order = i * 6 + 5.3; g2.order = i * 6 + 5.6; out.push(a, b, c, e2, f2, g2); J.CLOTH_DEPTS.forEach((dp, k) => { const x = JM.gen(dp, catSeed + '-' + i); x.order = i * 6 + 5.65 + k * 0.06; out.push(x); }); }\n")
+rep("    out.push(...hairItems());\n","    out.push(...hairItems());\n    for (let i = 0; i < cat.count; i++) { const a = JM.gen('earrings', catSeed + '-' + i), b = JM.gen('necklaces', catSeed + '-' + i), c = JM.gen('purses', catSeed + '-' + i), e2 = JM.gen('sandals', catSeed + '-' + i), f2 = JM.gen('sound', catSeed + '-' + i), g2 = JM.gen('back', catSeed + '-' + i); a.order = i * 6 + 1.3; b.order = i * 6 + 2.3; c.order = i * 6 + 3.3; e2.order = i * 6 + 4.3; f2.order = i * 6 + 5.3; g2.order = i * 6 + 5.6; out.push(a, b, c, e2, f2, g2); J.CLOTH_DEPTS.forEach((dp, k) => { const x = JM.gen(dp, catSeed + '-' + i); x.order = i * 6 + 5.65 + k * 0.06; out.push(x); }); if (J.hasHats()) { const h2 = JM.gen('hats', catSeed + '-' + i); h2.order = i * 6 + 5.98; out.push(h2); } }\n")
 # brand group in filters (after refine, before colour)
 rep("    const g = el('div', '', '<div class=\"g-label\">Colour</div>'), grid = el('div', 'swgrid');","""    { const g = el('div', '', '<div class="g-label">Brand</div>'), nav = el('nav'); g.append(nav); rb.append(g);
       for (const [v, l] of F_BRAND) { const n = count({ brand: v }); if (!n && v !== 'any' && cat.brand !== v) continue; btn(nav, l, null, null, n, cat.brand === v, 'plain', () => { cat.brand = v; renderCatalog(); }); } }
     const g = el('div', '', '<div class="g-label">Colour</div>'), grid = el('div', 'swgrid');""")
 rep("const RESET = () => Object.fromEntries(REFINE_KEYS.map(k => [k, 'any']));","const RESET = () => Object.fromEntries(REFINE_KEYS.map(k => [k, 'any']));")
-rep("$('#catMore').parentElement.hidden = total <= items.length && cat.dept !== 'all' && cat.dept !== 'eyewear';","$('#catMore').parentElement.hidden = total <= items.length && cat.dept !== 'all' && cat.dept !== 'eyewear' && cat.dept !== 'earrings' && cat.dept !== 'necklaces' && cat.dept !== 'purses' && cat.dept !== 'sandals' && cat.dept !== 'sound' && cat.dept !== 'back' && !J.isCloth(cat.dept);")
+rep("$('#catMore').parentElement.hidden = total <= items.length && cat.dept !== 'all' && cat.dept !== 'eyewear';","$('#catMore').parentElement.hidden = total <= items.length && cat.dept !== 'all' && cat.dept !== 'eyewear' && cat.dept !== 'hats' && cat.dept !== 'earrings' && cat.dept !== 'necklaces' && cat.dept !== 'purses' && cat.dept !== 'sandals' && cat.dept !== 'sound' && cat.dept !== 'back' && !J.isCloth(cat.dept);")
 # card: KIMILAND tag
 rep("${it.mine ? '<span class=\"g-pill g-pill--solid tag\">Yours</span>' : ''}</span><span class=\"cn\">","${it.mine ? '<span class=\"g-pill g-pill--solid tag\">Yours</span>' : it.brand === 'kimiland' ? '<button class=\"kimilogo tag\" aria-label=\"KIMILAND\"><img src=\"../../assets/brands/kimiland-logo.png\" alt=\"\"></button>' : ''}</span><span class=\"cn\">")
 
@@ -195,7 +201,7 @@ rep("$('#itByRow').innerHTML = 'By <b id=\"itBy\">' + esc(it.by) + '</b>' + (it.
 rep("for (const t of hair ? it.tags.filter(t => t !== 'yours').map(t => t.charAt(0).toUpperCase() + t.slice(1)) : GE.tagsFor(it.d)) tg.append","for (const t of hair ? it.tags.filter(t => t !== 'yours').map(t => t.charAt(0).toUpperCase() + t.slice(1)) : isJ(it) ? J.tagsFor(it.dept, it.d) : GE.tagsFor(it.d)) tg.append")
 rep("$('#itTry').classList.toggle('is-on', viewer.tryOn);\n    $('#itEdit').querySelector('span').textContent = hair ? 'Edit in the Hair Studio' : 'Edit this pair';","$('#itTry').classList.toggle('is-on', viewer.tryOn); $('#itTry').hidden = isJ(it);\n    $('#itEdit').querySelector('span').textContent = hair ? 'Edit in the Hair Studio' : isJ(it) ? 'Edit these' : 'Edit this pair';")
 # note text for jewelry
-rep("    // the same hairstyle in its other colours\n","    if (isJ(it)) $('#itNote').textContent = J.isCloth(it.dept) ? 'Clothing is to wear here, not to download. Change its colours and print in its studio.' : it.dept === 'back' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres for her back or hip. Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Sword parts: Modular Sword Kit by MilkAndBanana (CC0).' : it.dept === 'sound' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres for her head (and her chest, when it has a cord). Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Charms are flat pictures on a card.' : it.dept === 'sandals' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres to fit her feet (a pair, in one mesh). Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart.' : it.dept === 'purses' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres to hang across her body. Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Charms are flat pictures on a card.' : it.dept === 'earrings' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres for her head. Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Charms are flat pictures on a card.' : 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres to sit on her neck and chest. Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Charms are flat pictures on a card.';\n    // the same hairstyle in its other colours\n")
+rep("    // the same hairstyle in its other colours\n","    if (isJ(it)) $('#itNote').textContent = it.dept === 'hats' ? 'Hats are to wear here, not to download. Change their colours, print and charms in the Hat studio.' : J.isCloth(it.dept) ? 'Clothing is to wear here, not to download. Change its colours and print in its studio.' : it.dept === 'back' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres for her back or hip. Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Sword parts: Modular Sword Kit by MilkAndBanana (CC0).' : it.dept === 'sound' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres for her head (and her chest, when it has a cord). Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Charms are flat pictures on a card.' : it.dept === 'sandals' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres to fit her feet (a pair, in one mesh). Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart.' : it.dept === 'purses' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres to hang across her body. Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Charms are flat pictures on a card.' : it.dept === 'earrings' ? 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres for her head. Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Charms are flat pictures on a card.' : 'Pick a format: GLB, FBX, OBJ, glTF, STL or PLY. Sized in centimetres to sit on her neck and chest. Everything is baked into one mesh with one texture (up to 1024 px), ready for a Roblox MeshPart. Charms are flat pictures on a card.';\n    // the same hairstyle in its other colours\n")
 rep("      $('#itSpecs').innerHTML = specRows(it.d);\n      showItemModel();","      $('#itSpecs').innerHTML = isJ(it) ? JM.specRows(it) : specRows(it.d);\n      showItemModel();")
 rep("    } else {\n      const arch = { glasses:","    } else if (isJ(it)) { jewelLike(like, it);\n    } else {\n      const arch = { glasses:")
 # itEdit
@@ -219,7 +225,7 @@ rep("#loading .g-brandmark{width:3.2rem;height:4rem;color:var(--g-lime);", "#loa
 rep('        <button class="g-btn g-btn--ghost g-btn--icon g-btn--sm" id="bRedo"', '        <button class="g-btn g-btn--ghost g-btn--icon g-btn--sm" data-mode-btn aria-label="Dark mode" data-g-tip="Dark mode"><i data-g-icon="sun_moon"></i></button>\n        <button class="g-btn g-btn--ghost g-btn--icon g-btn--sm" id="bRedo"')
 
 # ---- three icons the site's set doesn't have yet (a sword, a shirt, light/dark), added before the page draws its icons
-rep('<script id="grug-colors">', '<script id="grug-icons-extra">Object.assign(window.GRUG_DATA.icons, { sword: [\'<path fill="currentColor" d="M14.6 1.4 14.3 3.3 7.4 10.2 5.8 8.6 12.7 1.7zM3.3 8.7l1.1-1.1 4 4-1.1 1.1zM5 11l.9.9-3 3q-.5.4-1 0l-.8-.8q-.4-.5 0-1z"/>\', \'sword blade weapon back\'], shirt: [\'<path fill="currentColor" d="M5.5 2 2 3.6.8 7l2.4 1 .4-1v7h8.8V7l.4 1 2.4-1L14 3.6 10.5 2Q8 4 5.5 2z"/>\', \'shirt top clothing tee\'], jacket: [\'<path fill="currentColor" d="M5.5 1.6 2.2 3.2 1 8.8 1.6 14h3V7.5L5.5 6V14H8V4.2zM10.5 1.6 13.8 3.2 15 8.8 14.4 14h-3V7.5l-.9-1.5V14H8V4.2z"/>\', \'jacket coat clothing\'], pants: [\'<path fill="currentColor" d="M4 1.5h8l.8 13H9.6L8 6.5 6.4 14.5H3.2z"/>\', \'pants trousers bottoms clothing\'], shoe: [\'<path fill="currentColor" d="M1.5 5h4.2l1.2 2.2 4.6 1.6q3 .8 3 3.2v1.5H1.5zM1.5 12.6h13v.9h-13z"/>\', \'shoe sneaker boot clothing\'], outfit: [\'<path fill="currentColor" d="M5.5 1.5 3 3l-1 4 1.8.6.6-1.6V9L3.6 15h3.6L8 11l.8 4h3.6L11.6 9V6l.6 1.6L14 7l-1-4-2.5-1.5Q8 3 5.5 1.5"/>\', \'outfit overalls suit clothing\'], sun_moon: [\'<path fill="currentColor" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1m0 2v10a5 5 0 0 1 0-10"/>\', \'light dark theme mode\'] });</script>\n<script id="grug-colors">')
+rep('<script id="grug-colors">', '<script id="grug-icons-extra">Object.assign(window.GRUG_DATA.icons, { sword: [\'<path fill="currentColor" d="M14.6 1.4 14.3 3.3 7.4 10.2 5.8 8.6 12.7 1.7zM3.3 8.7l1.1-1.1 4 4-1.1 1.1zM5 11l.9.9-3 3q-.5.4-1 0l-.8-.8q-.4-.5 0-1z"/>\', \'sword blade weapon back\'], shirt: [\'<path fill="currentColor" d="M5.5 2 2 3.6.8 7l2.4 1 .4-1v7h8.8V7l.4 1 2.4-1L14 3.6 10.5 2Q8 4 5.5 2z"/>\', \'shirt top clothing tee\'], jacket: [\'<path fill="currentColor" d="M5.5 1.6 2.2 3.2 1 8.8 1.6 14h3V7.5L5.5 6V14H8V4.2zM10.5 1.6 13.8 3.2 15 8.8 14.4 14h-3V7.5l-.9-1.5V14H8V4.2z"/>\', \'jacket coat clothing\'], pants: [\'<path fill="currentColor" d="M4 1.5h8l.8 13H9.6L8 6.5 6.4 14.5H3.2z"/>\', \'pants trousers bottoms clothing\'], shoe: [\'<path fill="currentColor" d="M1.5 5h4.2l1.2 2.2 4.6 1.6q3 .8 3 3.2v1.5H1.5zM1.5 12.6h13v.9h-13z"/>\', \'shoe sneaker boot clothing\'], outfit: [\'<path fill="currentColor" d="M5.5 1.5 3 3l-1 4 1.8.6.6-1.6V9L3.6 15h3.6L8 11l.8 4h3.6L11.6 9V6l.6 1.6L14 7l-1-4-2.5-1.5Q8 3 5.5 1.5"/>\', \'outfit overalls suit clothing\'], sun_moon: [\'<path fill="currentColor" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1m0 2v10a5 5 0 0 1 0-10"/>\', \'light dark theme mode\'], hat: [\'<path fill="currentColor" d="M4.6 2.2h6.8l.7 8.4H3.9zM.8 11.3q7.2-1.9 14.4 0v1.6q-7.2-1.5-14.4 0z"/>\', \'hat cap beanie headwear\'], check: [\'<path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M2.6 8.6 6.4 12.2 13.4 4.2"/>\', \'check done tick equip\'], sparkle: [\'<path fill="currentColor" d="M8 .8 9.6 6.4 15.2 8 9.6 9.6 8 15.2 6.4 9.6.8 8 6.4 6.4z"/>\', \'sparkle shine new\'] });</script>\n<script id="grug-colors">')
 
 # ---- the camera pans too: middle mouse button (or scroll-wheel press) drag on a computer, two fingers on a touch screen
 rep("""  canvas.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, yaw: cam.yaw, pitch: cam.pitch }; canvas.setPointerCapture(e.pointerId); spin.on = false; renderSpin(); });
@@ -273,7 +279,7 @@ rep("      const g3 = grp(box, 'Name');\n      const nr","      const gb = grp(b
 # ---- start: restore eyewear brand
 rep("if (saved && saved.d) { state = { d: GE.validate(saved.d).d, name: saved.name || '', seed: saved.seed || 'saved', autoName: saved.autoName !== false };","if (saved && saved.d) { state = { d: GE.validate(saved.d).d, name: saved.name || '', seed: saved.seed || 'saved', autoName: saved.autoName !== false, brand: saved.brand || 'grug' };")
 # ---- routing
-rep("function route() { hoverEnd(); const h = location.hash; if (/^#edit/.test(h)) enterEditor();","function route() { hoverEnd(); const h = location.hash, jm = /^#edit\\/(earrings|necklaces|purses|sandals|sound|back|tops|jackets|bottoms|shoes|outfits)/.exec(h); if (!jm) JM.leave(); if (/^#edit/.test(h)) { enterEditor(); if (jm) JM.enter(jm[1]); }")
+rep("function route() { hoverEnd(); const h = location.hash; if (/^#edit/.test(h)) enterEditor();","function route() { hoverEnd(); const h = location.hash, jm = /^#edit\\/(hats|earrings|necklaces|purses|sandals|sound|back|tops|jackets|bottoms|shoes|outfits)/.exec(h); if (!jm) JM.leave(); if (/^#edit/.test(h)) { enterEditor(); if (jm) JM.enter(jm[1]); }")
 # hero + create menu + search text
 rep("Search glasses, shades, goggles and hair","Search glasses, hair, earrings, necklaces, purses, sandals, headphones and brands")
 rep("Glasses, shades, goggles and hair, all made from scratch. Open anything","Glasses, shades, goggles, hair, earrings, necklaces, purses, sandals, headphones, earmuffs and earbuds, all made from scratch. Open anything")
@@ -347,7 +353,51 @@ body.g-chrome #closet .cl-body,body.g-chrome #closet .cl-detail{padding-bottom:6
 #closet .cl-round.sm{width:2.2rem;height:2.2rem;box-shadow:none;background:var(--g-bg);font-size:1rem}
 #closet .cl-round.on{background:var(--g-accent);color:var(--g-ink)}
 #closet .cl-round:disabled{color:var(--g-faint);cursor:default}
-#closet .cl-round .tile{width:1.7rem;height:1.7rem}
+#closet .cl-round .tile{width:1.7rem;height:1.7rem;display:block;line-height:0;padding:0;margin:0;border:0;background:none;box-shadow:none}
+#closet .cl-round .tile svg{width:1.7rem;height:1.7rem;display:block;margin:0;padding:0;border-radius:0;gap:0}   /* the site's .g-logo (grug.css) pads its pill: not here */
+/* the panel's edge: drag it wider or narrower (landscape) */
+#closet .cl-resize{position:absolute;top:0;bottom:0;left:var(--panel-w);width:14px;transform:translateX(-50%);z-index:5;cursor:ew-resize;touch-action:none}
+#closet .cl-resize::after{content:'';position:absolute;left:50%;top:50%;width:6px;height:3.4rem;border-radius:9px;transform:translate(-50%,-50%);background:var(--g-surface);box-shadow:0 0 0 1px var(--g-line),var(--g-sh-1);opacity:.85;transition:opacity var(--g-dur-1),height var(--g-dur-1)}
+#closet .cl-resize:hover::after,#closet .cl-resize:focus-visible::after,#closet.resizing .cl-resize::after{opacity:1;height:5rem;background:var(--g-accent)}
+#closet.resizing{cursor:ew-resize;user-select:none}
+#closet.resizing .cl-stage>canvas{pointer-events:none}
+/* Equip: big, Grug lime, a tick and a little sparkle, so it reads without reading */
+#closet .cl-equip{all:unset;box-sizing:border-box;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:.7rem;width:100%;min-height:5.2rem;padding:.9rem 1.4rem;border-radius:1.3rem;background:#9BE338;color:#1E1B16;font:700 1.55rem/1 var(--g-font);letter-spacing:.01em;cursor:pointer;box-shadow:0 5px 0 #5f9e1a;transition:transform .12s var(--g-ease),box-shadow .12s var(--g-ease),filter .12s;margin:.3rem 0 .5rem}
+#closet .cl-equip:hover{filter:brightness(1.05)}
+#closet .cl-equip:active{transform:translateY(4px);box-shadow:0 1px 0 #5f9e1a}
+#closet .cl-equip:focus-visible{outline:3px solid var(--g-text);outline-offset:3px}
+#closet .cl-equip .ic{display:grid;place-items:center;width:2.6rem;height:2.6rem;border-radius:50%;background:#1E1B16;color:#9BE338;font-size:1.35rem;flex:none}
+#closet .cl-equip .ic svg{width:1.4rem;height:1.4rem}
+#closet .cl-equip::after{content:'';position:absolute;top:-20%;bottom:-20%;left:-40%;width:32%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);transform:skewX(-18deg);animation:clShine 2.8s ease-in-out infinite;pointer-events:none}
+#closet .cl-equip .spk{position:absolute;color:#fff;font-size:.9rem;pointer-events:none;animation:clTwinkle 1.8s ease-in-out infinite;opacity:0}
+#closet .cl-equip .spk svg{width:1em;height:1em;display:block;filter:drop-shadow(0 0 3px rgba(255,255,255,.9))}
+#closet .cl-equip .s1{top:14%;left:9%;font-size:1.05rem}
+#closet .cl-equip .s2{top:20%;right:11%;animation-delay:.6s}
+#closet .cl-equip .s3{bottom:16%;right:24%;font-size:.75rem;animation-delay:1.2s}
+@keyframes clShine{0%,55%{left:-40%}100%{left:130%}}
+@keyframes clTwinkle{0%,100%{opacity:0;transform:scale(.4) rotate(0)}50%{opacity:1;transform:scale(1) rotate(45deg)}}
+#closet .cl-equip.is-on{background:var(--g-bg);color:var(--g-text);box-shadow:0 0 0 2px #9BE338 inset,0 5px 0 color-mix(in srgb,#9BE338 60%,var(--g-line))}
+#closet .cl-equip.is-on .ic{background:var(--g-text-2);color:var(--g-surface)}
+#closet .cl-equip.is-on::after{display:none}
+@media (prefers-reduced-motion:reduce){#closet .cl-equip::after,#closet .cl-equip .spk{animation:none}#closet .cl-equip .spk{opacity:.8}}
+#closet .cl-quick{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.4rem}
+#closet .cl-quickh{display:flex;align-items:baseline;gap:.6rem}
+#closet .cl-quick .cl-sws{gap:.4rem}
+#closet .cl-quick .cl-sw,#closet .cl-quick .cl-pickw{width:2.1rem;height:2.1rem}
+/* a hat's pose: Position / Rotation / Size, and X, Y, Z sliders, over the top of her stage */
+#closet .cl-pose{position:absolute;top:.9rem;left:4.6rem;right:.9rem;margin:0 auto;max-width:24rem;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .7rem;padding:.6rem .8rem;border-radius:1.1rem;background:color-mix(in srgb,var(--g-surface) 92%,transparent);box-shadow:var(--g-sh-1);backdrop-filter:blur(6px)}
+#closet .cl-pose[hidden]{display:none}
+#closet .cl-posemode{display:flex;flex-wrap:nowrap;gap:.15rem}
+#closet .cl-posemode button{white-space:nowrap}
+#closet .cl-posesl{display:flex;flex-direction:column;gap:.15rem;flex:1 1 100%;order:3}
+#closet .cl-posereset{order:2;margin-left:auto}
+#closet .cl-posemode{order:1}
+#closet .cl-posel{display:grid;grid-template-columns:1.1rem 1fr 3.2rem;align-items:center;gap:.5rem;font:700 var(--g-fs-sm)/1 var(--g-font)}
+#closet .cl-posel .val{font:600 var(--g-fs-xs)/1 var(--g-font);color:var(--g-muted);text-align:right;font-variant-numeric:tabular-nums}
+#closet .cl-guess{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;padding:.75rem 1rem;margin:0 0 .9rem;border-radius:var(--g-r-lg);background:color-mix(in srgb,#9BE338 22%,var(--g-bg));font:500 var(--g-fs-sm)/1.35 var(--g-font);color:var(--g-text-2)}
+#closet .cl-guess b{color:var(--g-text)}
+#closet .cl-guess>span{flex:1;min-width:0}
+#closet .cl-guess>svg{flex:none}
 #closet .cl-stagebar{position:absolute;left:.9rem;top:.9rem;display:flex;flex-direction:column;align-items:flex-start;gap:.55rem;z-index:5}
 #closet .cl-pillbox{display:flex;flex-direction:column;border-radius:var(--g-r-pill);background:var(--g-surface);box-shadow:var(--g-sh-1)}
 #closet .cl-pillbox .cl-round{box-shadow:none;background:none}
@@ -418,10 +468,20 @@ body.g-chrome #closet .cl-body,body.g-chrome #closet .cl-detail{padding-bottom:6
   #closet .cl-mode{left:50%}
   #closet[data-sheet="full"] .cl-stagebar{display:none}
   #closet .cl-search{width:7rem}
+  #closet .cl-resize{display:none}
+}
+@media (max-width: 640px){
+  /* phones: the search gets its own row under the tabs (it was squeezed to nothing) */
+  #closet .cl-tabrow{flex-wrap:wrap;row-gap:0}
+  #closet .cl-tools{order:2;flex:1 1 100%;padding:.1rem 0 .55rem}
+  #closet .cl-search{flex:1;width:auto}
+  #closet[data-sheet="full"] .cl-pose{display:none}
+  #closet .cl-pose{left:4.2rem;right:.6rem;top:3.9rem;padding:.45rem .6rem}
+  #closet .cl-equip{min-height:4.4rem;font-size:1.35rem}
   #closet .cl-iwrap{grid-template-columns:7.5rem minmax(0,1fr);gap:.9rem}
   #closet .cl-grid{grid-template-columns:repeat(auto-fill,minmax(7.2rem,1fr))}
 }
-@media (max-width:520px){#closet .cl-tools .cl-search{display:none}}
+@media (max-width:520px){#closet .cl-tools .cl-search{display:flex}}   /* phones keep the search (its own row: see the 640px rule) */
 /* an opened piece fills the bottom half of the panel; the feed keeps scrolling above it */
 #closet .cl-detail{flex:0 0 auto;height:min(54%,36rem);min-height:15rem;overflow-y:auto;overflow-x:hidden;padding:.75rem 1.1rem 1.6rem;border-top:1px solid var(--g-line);background:var(--g-surface);box-shadow:0 -10px 26px rgba(0,0,0,.08);border-radius:1rem 1rem 0 0;position:relative;z-index:2;animation:clUp .22s var(--g-ease)}
 #closet .cl-detail[hidden]{display:none}

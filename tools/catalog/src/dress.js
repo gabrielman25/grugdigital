@@ -87,6 +87,7 @@ window.GrugClosetRuntime = (function () {
     if (r() < 0.22) put('necklaces', 'necklaces', recolour(J.random('necklaces', seed + '-neck'), P, r));
     if (r() < 0.18) { const GE = window.GrugEyewear; put('eyewear', 'eyewear', recolour(GE.random(seed + '-eye'), P, r)); }
     // her hair is the classic kit's own: long or buns (style 0 or 1), in any colour
+    // (never a hat: the player places theirs by hand, so random NPCs go without)
     return { wardrobe, wearing, body, palette: P.scheme, kitHair: { style: r() < 0.5 ? 0 : 1, colour: pick(HAIR_COL), size: 1, up: 0, forward: 0 } };
   }
   /* create(K, opts): opts.random = a seed (an NPC) with opts.cfg the game's config; opts.bare = her body, face and hair only

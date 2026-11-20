@@ -12,7 +12,7 @@
   const CL_KEY = 'grug.closet.v1', PROFILE_KEY = 'grug.profile.v1';
   // clothing (the Modular Anime Character pack, src/jewelry.js) is five departments worn in three slots: tops, jackets and
   // outfits are a top, bottoms are legs, shoes are feet. With nothing in a slot she has the default tee and trousers on.
-  const CL_DEPTS = [['tops', 'Tops', 'shirt'], ['jackets', 'Jackets', 'jacket'], ['bottoms', 'Bottoms', 'pants'], ['shoes', 'Shoes', 'shoe'], ['outfits', 'Outfits', 'outfit'], ['eyewear', 'Eyewear', 'glasses'], ['hair', 'Hair', 'hair'], ['earrings', 'Earrings', 'diamond'], ['necklaces', 'Necklaces', 'flower'], ['purses', 'Purses', 'shopping_bag'], ['sandals', 'Sandals', 'sun'], ['sound', 'Sound', 'note'], ['back', 'Back', 'sword']].filter(x => x[0] !== 'hair' || HD);
+  const CL_DEPTS = [['tops', 'Tops', 'shirt'], ['jackets', 'Jackets', 'jacket'], ['bottoms', 'Bottoms', 'pants'], ['shoes', 'Shoes', 'shoe'], ['outfits', 'Outfits', 'outfit'], ['hats', 'Hats', 'hat'], ['eyewear', 'Eyewear', 'glasses'], ['hair', 'Hair', 'hair'], ['earrings', 'Earrings', 'diamond'], ['necklaces', 'Necklaces', 'flower'], ['purses', 'Purses', 'shopping_bag'], ['sandals', 'Sandals', 'sun'], ['sound', 'Sound', 'note'], ['back', 'Back', 'sword']].filter(x => (x[0] !== 'hair' || HD) && (x[0] !== 'hats' || J.hasHats()));
   const CL_DLABEL = Object.fromEntries(CL_DEPTS.map(x => [x[0], x[1]]));
   // what she wears, one piece per slot: every department is a slot, and clothing is three (top, bottoms, shoes)
   const slotOf = it => { const dp = deptOf(it); return J.isCloth(dp) ? 'clothing.' + J.CLOTH_SLOT_OF[dp] : dp; };
@@ -99,7 +99,7 @@
   async function refitWorld() { delete sandy.__jfield; delete sandy.__jsnd; const n3 = sandy.n3; n3.__skinW = null; n3.__rest0 = null; for (const s of ['necklaces', 'purses', 'sandals', 'sound', 'back']) if (CL.mounted[s]) { const it = CL.mounted[s].it; unmountSlot(s); await mountSlot(s, it); } }
 
   /* ---- the wardrobe and what she has on */
-  const entryOf = it => { const dp = deptOf(it); return dp === 'hair' ? { id: it.id, dept: 'hair', name: it.name, by: it.by } : { id: it.id, dept: dp, seed: it.seed, d: JSON.parse(JSON.stringify(it.d)), name: it.name, by: it.by, brand: it.brand }; };
+  const entryOf = it => { const dp = deptOf(it); return dp === 'hair' ? Object.assign({ id: it.id, dept: 'hair', name: it.name, by: it.by }, it._col ? { col: it._col } : {}) : { id: it.id, dept: dp, seed: it.seed, d: JSON.parse(JSON.stringify(it.d)), name: it.name, by: it.by, brand: it.brand }; };
   const owned = id => CL.wardrobe.some(e => e.id === id);
   const entryFor = id => CL.wardrobe.find(e => e.id === id);
   // her hair in any colour: every strand group, its tips and the scalp, in one flat colour
@@ -132,6 +132,10 @@
     const box = new THREE.Box3().setFromObject(m).union(new THREE.Box3().setFromObject(n3.headMesh)); frameOn(box, 0.5, 0.12, thumbCam, 26, 1.0);
     const url = snapScene(bodyColour, false); back(); n3.setHairStyle(st0); m.material = mat0; return url;
   }; }
+  // her own hair mesh shows only while a classic hairstyle (kit:long, kit:buns) is on; any other hair (or none) hides it and
+  // rounds her skull. Every route change comes through clEnter, so this must not assume a catalog hairstyle (it made her
+  // bald: opening a piece, an outfit say, hid the classic hair she had on)
+  function hairShow() { const m = CL.mounted.hair; setHair(!(m && m.it && m.it.kit != null)); }
   async function mountSlot(slot, it) {
     const tok = (CL.tok[slot] = (CL.tok[slot] || 0) + 1); unmountSlot(slot); if (!it) return; let b;
     try {
@@ -151,6 +155,7 @@
     let clothes = false;
     for (const s of SLOT_ORDER) { const it = want[s], m = CL.mounted[s]; if ((it && m && m.sig === wornSig(it)) || (!it && !m)) continue; if (s.startsWith('clothing.')) clothes = true; await mountSlot(s, it); }
     if (clothes) { look(CL.on); await refitWorld(); }
+    poseSync();
   }
   // pieces that can't be worn together: an outfit and bottoms (and shoes, when the outfit has its own), shoes and sandals
   const outfitOf = it => it && J.CLOTH_BY[it.d && it.d.part] && J.CLOTH_BY[it.d.part].dept === 'outfits' ? J.CLOTH_BY[it.d.part] : null;
@@ -166,7 +171,10 @@
   function wearOn(it) { const s = slotOf(it); CL.wearing[s] = it.id; for (const [a, b] of clashes(s, it)) if (a === 'drop') delete CL.wearing[b]; }
   function clWear(it, on) { const s = slotOf(it); if (on) wearOn(it); else if (CL.wearing[s] === it.id) delete CL.wearing[s]; clSave(); remember(); syncOutfit().then(() => focus(on ? it : null)); clRender(); }
   // Add to wardrobe keeps it; Equip keeps it and puts it on her. Equip again (or tapping a piece she has on) takes it off.
-  function addToWardrobe(it, wear) { const had = owned(it.id); if (!had) CL.wardrobe.unshift(entryOf(it)); if (wear) wearOn(it); clSave(); remember(); GRUG.toast(wear ? (had ? 'Equipped' : 'Equipped and added to your wardrobe') : 'Added to your wardrobe'); syncOutfit(); clRender(); }
+  function addToWardrobe(it, wear) {
+    const had = owned(it.id); if (!had) CL.wardrobe.unshift(entryOf(it));
+    else if (it._base) { const e = entryFor(it.id); if (deptOf(it) === 'hair') { if (it._col) e.col = it._col; else delete e.col; } else { e.d = JSON.parse(JSON.stringify(it.d)); } e.stamp = Date.now(); }
+    if (it._base && CL.view === it) { const e = entryFor(it.id); CL.view = CL.preview = itemOf(e) || it; } if (wear) wearOn(it); clSave(); remember(); GRUG.toast(wear ? (had ? 'Equipped' : 'Equipped and added to your wardrobe') : 'Added to your wardrobe'); syncOutfit(); clRender(); }
   function takeOff(it) { const s = slotOf(it); if (CL.wearing[s] === it.id) delete CL.wearing[s]; if (CL.view && CL.view.id === it.id) closeDetail(); clSave(); remember(); syncOutfit().then(() => focus(null)); clRender(); GRUG.toast('Unequipped'); }
   function removeFromWardrobe(it) { CL.wardrobe = CL.wardrobe.filter(e => e.id !== it.id); for (const s of Object.keys(CL.wearing)) if (CL.wearing[s] === it.id) delete CL.wearing[s]; clSave(); remember(); syncOutfit(); clRender(); GRUG.toast('Removed from your wardrobe'); }
   // a wardrobe piece changed (a colour, a print): it shows on her and gets a new picture
@@ -191,7 +199,7 @@
     const d = Math.max(size.y / 2 / t, Math.max(size.x, size.z) / 2 / (t * asp), sph.radius * 0.9 / t) * (fill || 1.12);
     return { target: sph.center.clone(), dist: d, yaw, pitch };
   }
-  function fullBody() { sandy.object3d.updateMatrixWorld(true); const hb = new THREE.Box3().setFromObject(sandy.n3.headMesh); for (const d of ['hair', 'sound', 'eyewear']) if (CL.mounted[d]) hb.union(new THREE.Box3().setFromObject(CL.mounted[d].b.root)); const top = hb.max.y + (portrait() ? 16 : 8), box = new THREE.Box3(new THREE.Vector3(-30, -3, -14), new THREE.Vector3(30, top, 14)); return goalFor(box, 0.32, 0.04, 1.1); }
+  function fullBody() { sandy.object3d.updateMatrixWorld(true); const hb = new THREE.Box3().setFromObject(sandy.n3.headMesh); for (const d of ['hair', 'hats', 'sound', 'eyewear']) if (CL.mounted[d]) hb.union(new THREE.Box3().setFromObject(CL.mounted[d].b.root)); const top = hb.max.y + (portrait() ? 16 : 8), box = new THREE.Box3(new THREE.Vector3(-30, -3, -14), new THREE.Vector3(30, top, 14)); return goalFor(box, 0.32, 0.04, 1.1); }
   function focus(it) {
     if (!it) { CL.goal = fullBody(); return; } const m = CL.mounted[slotOf(it)]; if (!m) { CL.goal = fullBody(); return; }
     sandy.object3d.updateMatrixWorld(true); let box;
@@ -259,27 +267,129 @@
     return items;
   }
 
+  /* ================================================================ search
+     Every word must match (or its synonyms, or its singular: "hearts" finds "heart"), at the start of a word in what a
+     piece says about itself: its name, department, kind, tags, charms (by name and by theme), colours (its colour families
+     and the names of its colours) and the holidays its colours suggest (red with green is Christmas, orange with black or
+     purple is Halloween, red or pink with white or pink is Valentine's). When nothing matches, the feed still fills: first
+     with the closest spelling ("chrismas" → christmas), then the same search across every department, then any one word,
+     then everything in the tab, with a line saying what's shown. */
+  const SYN_GROUPS = [
+    ['christmas', 'xmas', 'x mas', 'holiday', 'holidays', 'festive', 'santa', 'noel', 'yule', 'candy cane', 'candycane', 'gingerbread', 'ornament', 'snowman', 'snowflake', 'mitten', 'gift', 'elf', 'reindeer', 'jingle', 'christmas tree', 'december'],
+    ['winter', 'snow', 'snowy', 'snowflake', 'snowman', 'mitten', 'cold', 'ice', 'icy', 'frost', 'beanie', 'earmuffs', 'muffs'],
+    ['halloween', 'spooky', 'scary', 'creepy', 'haunted', 'ghost', 'pumpkin', 'bat', 'witch', 'skeleton', 'bone', 'candy corn', 'candycorn', 'cauldron', 'coffin', 'tombstone', 'trick or treat', 'treat bag', 'october', 'goth', 'gothic'],
+    ['valentines', 'valentine', 'valentines day', 'love', 'heart', 'romance', 'romantic', 'cupid', 'rose', 'kiss', 'crush', 'sweetheart', 'february', 'feb 14', 'teddy', 'teddy bear', 'love letter'],
+    ['cute', 'kawaii', 'pastel', 'kimiland', 'adorable', 'girly', 'bow', 'teddy'],
+    ['spring', 'flower', 'floral', 'rose', 'garden', 'blossom'], ['summer', 'sun', 'beach', 'sun hat', 'sandals', 'flip flops', 'shades', 'sunglasses'],
+    ['pink', 'rose', 'blush', 'bubblegum', 'magenta', 'taffy', 'fuchsia', 'hot pink'], ['red', 'cherry', 'crimson', 'scarlet', 'ruby', 'rose', 'maroon'],
+    ['blue', 'navy', 'sky', 'aqua', 'baby blue', 'cobalt', 'azure', 'denim', 'teal'], ['green', 'lime', 'mint', 'forest', 'emerald', 'olive', 'sage'],
+    ['purple', 'violet', 'lilac', 'lavender', 'plum', 'mauve'], ['yellow', 'gold', 'golden', 'butter', 'amber', 'mustard', 'lemon'], ['orange', 'coral', 'peach', 'tangerine', 'amber'],
+    ['black', 'charcoal', 'dark', 'onyx', 'jet'], ['white', 'ivory', 'cream', 'marshmallow', 'snow', 'pearl'], ['brown', 'tan', 'chocolate', 'beige', 'camel', 'coffee', 'caramel'], ['gray', 'silver', 'charcoal', 'ash', 'slate'],
+    ['rainbow', 'multi', 'colorful', 'colourful'], ['metal', 'metallic', 'gold', 'silver', 'chrome', 'shiny'],
+    ['top', 'tops', 'shirt', 'tee', 't shirt', 'tshirt', 'blouse', 'sweater', 'hoodie', 'jumper'], ['jacket', 'coat', 'hoodie', 'blazer', 'cardigan', 'outerwear'],
+    ['bottoms', 'pants', 'trousers', 'jeans', 'slacks', 'shorts', 'skirt', 'leggings'], ['outfit', 'outfits', 'dress', 'suit', 'overalls', 'jumpsuit', 'set', 'costume'],
+    ['shoes', 'shoe', 'sneakers', 'trainers', 'kicks', 'boots', 'footwear'], ['sandals', 'sandal', 'flip flops', 'flipflops', 'slides', 'slippers', 'thong', 'gladiator'],
+    ['eyewear', 'glasses', 'specs', 'spectacles', 'shades', 'sunglasses', 'sunnies', 'goggles', 'visor'], ['sound', 'headphones', 'headset', 'earbuds', 'earphones', 'earmuffs', 'music', 'audio'],
+    ['jewelry', 'jewellery', 'jewel', 'earrings', 'necklace', 'necklaces', 'chain', 'pendant', 'choker', 'charm', 'charms', 'bling'], ['earrings', 'earring', 'studs', 'hoops', 'danglers', 'drops'],
+    ['purse', 'purses', 'bag', 'handbag', 'tote', 'clutch', 'satchel', 'pouch'], ['back', 'sword', 'swords', 'blade', 'katana', 'weapon', 'knight', 'scabbard'],
+    ['hats', 'hat', 'cap', 'beanie', 'beret', 'bucket hat', 'cowboy hat', 'top hat', 'witch hat', 'sun hat', 'headwear', 'beanies', 'caps'], ['cap', 'baseball cap', 'snapback'], ['cowboy', 'cowboy hat', 'western', 'rodeo'], ['witch', 'witch hat', 'wizard'],
+    ['hair', 'hairstyle', 'wig', 'ponytail', 'bun', 'buns', 'braid', 'braids', 'bob', 'curly', 'straight'],
+    ['sport', 'sporty', 'racing', 'racer', 'athletic', 'gym'], ['print', 'printed', 'pattern', 'patterned'], ['solid', 'solid color', 'plain']
+  ];
+  const SYN = new Map(); for (const g of SYN_GROUPS) for (const w of g) { if (!SYN.has(w)) SYN.set(w, new Set()); for (const x of g) SYN.get(w).add(x); }
+  const PHRASES = Array.from(SYN.keys()).filter(w => w.includes(' ')).sort((a, b) => b.length - a.length);
+  const qNorm = s => ' ' + String(s || '').toLowerCase().replace(/colour/g, 'color').replace(/grey/g, 'gray').replace(/['’]/g, '').replace(/[^a-z0-9#]+/g, ' ').trim() + ' ';
+  const qStem = w => w.length > 4 && /ies$/.test(w) ? w.slice(0, -3) + 'y' : w.length > 4 && /(ch|sh|x|ss)es$/.test(w) ? w.slice(0, -2) : w.length > 3 && /s$/.test(w) && !/ss$/.test(w) ? w.slice(0, -1) : w;
+  // a search as words (phrases like "candy cane" kept whole), each with every word that counts as a match
+  const qMemo = new Map();
+  function qParse(q) {
+    if (qMemo.has(q)) return qMemo.get(q); if (qMemo.size > 50) qMemo.clear();
+    let s = qNorm(q); const out = [];
+    for (const p of PHRASES) if (s.includes(' ' + p + ' ')) { out.push(p); s = s.split(' ' + p + ' ').join(' '); }
+    for (const w of s.trim().split(/\s+/)) if (w) out.push(w);
+    const r = out.map(w => { const own = new Set([w, qStem(w)]), alts = new Set(); for (const x of own) if (SYN.has(x)) for (const y of SYN.get(x)) if (!own.has(y)) alts.add(y); return { w, own: Array.from(own), alts: Array.from(alts) }; });
+    qMemo.set(q, r); return r;
+  }
+  // the holidays a piece's colours suggest (used with its charms' themes)
+  const PALETTE_OF = Object.fromEntries(['christmas', 'halloween', 'valentines'].map(t => [t, new Set(J.THEMES[t].cols.filter(c => !['#f4f4f2', '#16161a', '#d4af37'].includes(c)))]));
+  function qExtra(it) {
+    if (it._qx != null) return it._qx; const out = []; let fam = null; try { fam = familiesOf(it); } catch (e) {}
+    if (fam) for (const f of fam) out.push(f === 'grey' ? 'gray' : f);
+    const cols = []; (function walk(v) { if (Array.isArray(v)) v.forEach(walk); else if (v && typeof v === 'object') { for (const k in v) walk(v[k]); } else if (typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v)) cols.push(v.toLowerCase()); })(it.d || {});
+    for (const c of cols.slice(0, 12)) out.push(J.colourName(c));
+    const pal = t => new Set(cols.filter(c => PALETTE_OF[t].has(c))).size >= 2;
+    if (pal('christmas')) out.push('christmas festive'); if (pal('halloween')) out.push('halloween spooky'); if (pal('valentines')) out.push('valentines');
+    const dp = deptOf(it); out.push(dp, (CL_DLABEL[dp] || '')); if (dp === 'hats') out.push('hat headwear');
+    return (it._qx = qNorm(out.join(' ')));
+  }
+  // does a piece's text match the search? every word must (or any one word, for the last-resort guess)
+  function qMatch(text, q, any) {
+    const t = qNorm(text), words = qParse(q); if (!words.length) return true;
+    const hit = x => x.own.some(a => t.includes(' ' + a)) || x.alts.some(a => t.includes(' ' + a + ' ') || t.includes(' ' + a + 's ') || t.includes(' ' + a + 'es '));
+    return any ? words.some(hit) : words.every(hit);
+  }
+  // the words the catalog knows, for "did you mean": synonyms, kinds, charm names, departments, and words seen in pieces
+  let VOCAB = null;
+  function vocab() {
+    const v = new Set(SYN.keys()); for (const c of J.CHARMS) qNorm(c.label).trim().split(' ').forEach(w => v.add(w)); for (const k in J.KIND_LABEL) qNorm(J.KIND_LABEL[k]).trim().split(' ').forEach(w => v.add(w));
+    for (const [, l] of CL_DEPTS) v.add(l.toLowerCase());
+    let n = 0; for (const it of genCache.values()) { if (!it || !it.name || n++ > 600) break; qNorm(it.name).trim().split(' ').forEach(w => w.length > 2 && v.add(w)); }
+    return (VOCAB = Array.from(v).filter(w => w.length > 1));
+  }
+  function editDist(a, b, max) {
+    if (Math.abs(a.length - b.length) > max) return max + 1; const m = a.length, n = b.length; let p2 = null, p = Array.from({ length: n + 1 }, (_, j) => j);
+    for (let i = 1; i <= m; i++) { const c = [i]; let lo = i; for (let j = 1; j <= n; j++) { let x = Math.min(p[j] + 1, c[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); if (p2 && i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) x = Math.min(x, p2[j - 2] + 1); c.push(x); lo = Math.min(lo, x); } if (lo > max) return max + 1; p2 = p; p = c; }
+    return p[n];
+  }
+  // the closest spelling of each word the catalog doesn't know ("chrismas" → "christmas", "sunglases" → "sunglasses")
+  function qGuess(q) {
+    const V = VOCAB || vocab(), words = qNorm(q).trim().split(/\s+/).filter(Boolean);
+    return words.map(w => {
+      if (V.some(x => x === w || x === qStem(w) || x.startsWith(w))) return w;
+      const max = w.length <= 4 ? 1 : w.length <= 7 ? 2 : 3; let best = w, bd = max + 1;
+      for (const x of V) { const dd = editDist(w, x, max); if (dd > max) continue; if (dd < bd || (dd === bd && SYN.has(x) && !SYN.has(best))) { bd = dd; best = x; } }
+      return best;
+    }).join(' ');
+  }
+  window.__clq = { match: qMatch, extra: qExtra, guess: qGuess };
+
   /* ---- the endless feed: a fresh, random set each time a tab is opened. Pieces drawn earlier (their pictures are ready)
      are mixed back in, one in three, so a reopened tab is part new and part familiar. It never stops: there's always
      another piece to make (Hair, Favourites and Yours are the only lists that end) */
-  const GEN_DEPTS = ['tops', 'eyewear', 'bottoms', 'earrings', 'jackets', 'necklaces', 'shoes', 'purses', 'outfits', 'sandals', 'sound', 'back'];
-  const FEED = { key: '', seed: '', items: [], seen: new Set(), pool: [], hairQ: [], gi: 0, n: 0, done: false, finite: false };
+  const GEN_DEPTS = ['tops', 'eyewear', 'bottoms', 'earrings', 'jackets', 'hats', 'necklaces', 'shoes', 'purses', 'outfits', 'sandals', 'sound', 'back'].filter(d => d !== 'hats' || J.hasHats());
+  const FEED = { key: '', seed: '', items: [], seen: new Set(), pool: [], hairQ: [], gi: 0, n: 0, done: false, finite: false, over: null };
+  // what the feed shows: the tab and the search, or the best guess when they find nothing (FEED.over)
+  const fDept = () => FEED.over ? FEED.over.dept : cat.dept;
+  const fPass = it => FEED.over ? passes(it, { dept: FEED.over.dept, q: FEED.over.q, qany: FEED.over.any }) : passes(it);
   const shuffled = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const feedKey = () => [cat.dept, cat.sub, cat.q, cat.sort, cat.colour, cat.brand].concat(REFINE_KEYS.map(k => cat[k])).join('|');
   function newFeed(fresh) {
     if (fresh || !FEED.seed) FEED.seed = 'cl' + Math.random().toString(36).slice(2, 7);
-    Object.assign(FEED, { key: feedKey(), items: [], seen: new Set(), gi: 0, n: 0, done: false, finite: cat.dept === 'favs' || cat.dept === 'yours' || cat.dept === 'hair' });
-    const top = cat.dept === 'favs' ? sortItems(allItems().filter(it => passes(it))) : mineItems().filter(it => passes(it));
+    FEED.over = null; feedStart();
+    // nothing matches the search: still fill the feed, with the closest guess at what they meant
+    const q = (cat.q || '').trim(); if (FEED.items.length || !q || cat.dept === 'favs' || cat.dept === 'yours') return;
+    const g = qGuess(q), here = CL_DLABEL[cat.dept] || (cat.dept === 'all' ? '' : cat.dept), tries = [];
+    const said = `No results for <b>“${esc(q)}”</b>`;
+    if (g !== qNorm(q).trim()) tries.push({ dept: cat.dept, q: g, note: `${said}. Showing results for <b>“${esc(g)}”</b>${here ? ' in ' + esc(here) : ''}.` });
+    if (cat.dept !== 'all') tries.push({ dept: 'all', q: g, note: `${said}${here ? ' in ' + esc(here) : ''}. Showing <b>“${esc(g)}”</b> from every department.` });
+    tries.push({ dept: 'all', q: g, any: true, note: `${said}. Showing the closest matches.` });
+    tries.push({ dept: cat.dept, q: '', note: `${said} yet. Here's everything${here ? ' in ' + esc(here) : ''} instead.` });
+    for (const t of tries) { FEED.over = t; feedStart(); if (FEED.items.length) return; }
+  }
+  function feedStart() {
+    const dept = fDept();
+    Object.assign(FEED, { key: feedKey(), items: [], seen: new Set(), gi: 0, n: 0, done: false, finite: dept === 'favs' || dept === 'yours' || dept === 'hair' });
+    const top = dept === 'favs' ? sortItems(allItems().filter(it => fPass(it))) : mineItems().filter(it => fPass(it));
     for (const it of top) { FEED.seen.add(it.id); FEED.items.push(it); }
-    FEED.pool = cat.dept === 'favs' || cat.dept === 'yours' ? [] : shuffled(Array.from(genCache.values()).filter(it => it && it.id && /^g[enpsabtjlfu]?:/.test(it.id) && thumbs.has(tkey(it, 'worn')) && passes(it)));
-    FEED.hairQ = HD && (cat.dept === 'hair' || cat.dept === 'all') ? shuffled(hairItems().filter(h => !h.mine || cat.dept === 'hair')) : [];
-    if (FEED.finite && cat.dept !== 'hair') FEED.done = true;
+    FEED.pool = dept === 'favs' || dept === 'yours' ? [] : shuffled(Array.from(genCache.values()).filter(it => it && it.id && /^g[enpsabtjlfuk]?:/.test(it.id) && thumbs.has(tkey(it, 'worn')) && fPass(it)));
+    FEED.hairQ = HD && (dept === 'hair' || dept === 'all') ? shuffled(hairItems().filter(h => !h.mine || dept === 'hair')) : [];
+    if (FEED.finite && dept !== 'hair') FEED.done = true;
     feedFill(48);
   }
   // the next new piece: in turn from every department (All), or this one; undefined = skip, null = nothing left
   function nextGen() {
-    if (cat.dept === 'hair') return FEED.hairQ.length ? FEED.hairQ.pop() : null;
-    const list = cat.dept === 'all' ? GEN_DEPTS.concat(FEED.hairQ.length ? ['hair'] : []) : [cat.dept];
+    const dept = fDept(); if (dept === 'hair') return FEED.hairQ.length ? FEED.hairQ.pop() : null;
+    const list = dept === 'all' ? GEN_DEPTS.concat(FEED.hairQ.length ? ['hair'] : []) : [dept];
     const d = list[FEED.gi % list.length], seed = FEED.seed + '-' + (FEED.gi++);
     if (d === 'hair') return FEED.hairQ.pop();
     return d === 'eyewear' ? itemById('g:' + seed) : JM.gen(d, seed);
@@ -289,7 +399,7 @@
     while (FEED.items.length < want && !FEED.done && guard++ < k * 60) {
       const it = FEED.n++ % 3 === 2 && FEED.pool.length ? FEED.pool.pop() : nextGen();
       if (it === null) { FEED.done = !FEED.pool.length; continue; } if (!it) continue;
-      if (FEED.seen.has(it.id) || !passes(it)) continue; FEED.seen.add(it.id); FEED.items.push(it);
+      if (FEED.seen.has(it.id) || !fPass(it)) continue; FEED.seen.add(it.id); FEED.items.push(it);
     }
     if (cat.sort === 'name') sortItems(FEED.items);
   }
@@ -310,6 +420,7 @@
     const fp = $('#clFilters'); fp.hidden = !CL.filters; $('#clFilterBtn').classList.toggle('on', CL.filters || REFINE_KEYS.some(k => cat[k] !== 'any') || cat.colour !== 'any' || cat.brand !== 'any');
     if (CL.filters) { renderFilters(allItems()); fp.append($('#fRefine')); $('#clSort').value = cat.sort; GRUG.hydrate(fp); }
     const feed = el('div', 'cl-feed'); box.append(feed);
+    if (FEED.over && FEED.over.note) feed.append(el('div', 'cl-guess', `${ic('magnifying_glass')}<span>${FEED.over.note}</span>`));
     if (FEED.finite) feed.append(el('div', 'cl-count', `${FEED.items.length.toLocaleString()} ${FEED.items.length === 1 ? 'item' : 'items'}`));
     const grid = el('div', 'cgrid cl-grid'); feed.append(grid);
     if (!FEED.items.length) grid.append(el('div', 'cload', cat.dept === 'favs' && !favs.length ? 'No favourites yet. Tap the star on anything to start a collection.' : 'Nothing matches that. Try another filter.'));
@@ -318,7 +429,7 @@
   }
   /* ---- Customize: the wardrobe, with the colours of what she has on right above it */
   function wardrobeGrid(box, dept) {
-    if (dept === 'hair' || J.isCloth(dept) || dept === 'all') looksPanel(box, dept);
+    if (dept === 'hair' || dept === 'hats' || J.isCloth(dept) || dept === 'all') looksPanel(box, dept);
     const items = wardrobeItems(dept), grid = el('div', 'cgrid cl-grid'); box.append(grid);
     if (!items.length) {
       const e = el('div', 'cl-empty', `<b>${dept === 'all' ? 'Your wardrobe is empty' : 'No ' + esc((CL_DLABEL[dept] || '').toLowerCase()) + ' yet'}</b><span>Find something in the Marketplace, then Add to wardrobe.</span>`), b = el('button', 'g-btn g-btn--primary', `${ic('shopping_bag')}<span>Go to the Marketplace</span>`);
@@ -366,9 +477,19 @@
     if (d.pat >= 0) { card.append(el('div', 'cl-note', 'Print colour')); colourRow(card, d.patCol, CLOTH_SW, (v, f) => set({ patCol: v }, f)); }
     const ed = el('button', 'g-btn g-btn--sm g-btn--ghost', `${ic('pencil')}<span>Open in the ${esc(J.CLOTH_DEPT_LABEL[e.dept] || 'clothing')} studio</span>`); ed.onclick = () => openStudio(itemOf(e)); card.append(ed);
   }
+  // the hat she has on: its colours (as many areas as it has) and the way to its studio (charms, print, how it sits)
+  function hatEditor(box, e) {
+    const d = e.d, hi = J.HAT_INFO[d.kind], card = el('div', 'cl-look'); if (!hi) return; box.append(card);
+    card.append(el('div', 'cl-lookh', `<span class="g-label">Hat</span><b>${esc(e.name)}</b>`));
+    const set = (patch, f) => { Object.assign(d, patch); e.d = J.validate('hats', d, d.brand).d; entryChanged(e, f); };
+    hi.areas.forEach((a, i) => { const k = ['col', 'col2', 'col3'][i]; if (k === 'col3' && !d.band) return; card.append(el('div', 'cl-note', esc(a))); colourRow(card, d[k], CLOTH_SW, (v, f) => set({ [k]: v }, f)); });
+    card.append(el('div', 'cl-note', 'Move, turn or size it with the sliders over her.'));
+    const ed = el('button', 'g-btn g-btn--sm g-btn--ghost', `${ic('pencil')}<span>Open in the Hat studio</span>`); ed.onclick = () => openStudio(itemOf(e)); card.append(ed);
+  }
   function looksPanel(box, dept) {
     const wrap = el('div', 'cl-looks'); let any = false;
     if ((dept === 'hair' || dept === 'all') && CL.wearing.hair && HD) { hairColour(wrap); any = true; }
+    if ((dept === 'hats' || dept === 'all') && CL.wearing.hats) { const e = entryFor(CL.wearing.hats); if (e && e.d) { hatEditor(wrap, e); any = true; } }
     if (J.isCloth(dept) || dept === 'all') for (const s of ['clothing.top', 'clothing.legs', 'clothing.feet']) { const e = CL.wearing[s] && entryFor(CL.wearing[s]); if (e && e.d && (dept === 'all' || e.dept === dept)) { clothEditor(wrap, e); any = true; } }
     if (any) { box.append(wrap); GRUG.hydrate(wrap); }
   }
@@ -414,15 +535,17 @@
     return Array.from({ length: 6 }, (_, i) => { const seed = 'like-' + it.seed + '-' + i; if (genCache.has(seed)) return genCache.get(seed); const d = GE.random(seed, { arch: r.pick(arch) }), li = { id: 'g:' + seed, seed, d, name: GE.nameFor(d, seed), kind: GE.classify(d), by: 'Grug Digital', order: i, stamp: 0, gen: true }; genCache.set(seed, li); return li; });
   };
   function itemPanel(box, it) {
-    const dp = deptOf(it), hair = dp === 'hair', mineIt = owned(it.id), on = CL.wearing[slotOf(it)] === it.id;
+    const dp = deptOf(it), hair = dp === 'hair', mineIt = owned(it.id) && !it._base, on = CL.wearing[slotOf(it)] === it.id && !it._base;
     const kind = hair ? it.length.charAt(0).toUpperCase() + it.length.slice(1) : isJ(it) ? J.KIND_LABEL[it.kind] || it.kind : GE.CLASS_LABEL[it.kind];
     const tags = hair ? it.tags.filter(t => t !== 'yours').map(t => t.charAt(0).toUpperCase() + t.slice(1)) : isJ(it) ? J.tagsFor(dp, it.d) : GE.tagsFor(it.d);
     const v = el('div', 'cl-item');
     v.innerHTML = `<div class="cl-ihead"><div class="crumbs"><span>${esc(deptLabel(dp))}</span><i class="sep">›</i><span>${esc(kind || '')}</span></div><button class="cl-round sm cl-x" data-back aria-label="Close" data-g-tip="Close">${ic('cross')}</button></div>
       <div class="cl-iwrap"><div class="cl-ipic" style="background-color:${cardColour(it)}"><span class="wait"></span></div>
       <div class="cl-iinfo"><h2 class="g-h3">${esc(it.name)}</h2><div class="cl-by">${byHTML(it)}</div><div class="cl-price">Free</div>
-      <div class="cl-acts"><button class="g-btn g-btn--primary" data-equip>${on ? ic('cross') + '<span>Unequip</span>' : '<span>Equip</span>'}</button><button class="g-btn" data-add${mineIt ? ' disabled' : ''}>${mineIt ? ic('star') + '<span>In your wardrobe</span>' : ic('plus_in_circle') + '<span>Add to wardrobe</span>'}</button><button class="g-btn" data-back>${ic('arrow_left')}<span>Back</span></button></div>
-      <div class="cl-acts2"><button class="g-btn g-btn--sm favbtn${isFav(it.id) ? ' on' : ''}" data-fav>${ic('star')}<span>${isFav(it.id) ? 'Favorited' : 'Favorite'}</span></button>${J.isCloth(dp) ? '' : `<span class="rollbtn"><button class="g-btn g-btn--sm" data-dl>${ic('file_arrow_down')}<span>Download</span>${ic('dropdown')}</button><div class="rollmenu fmtmenu" hidden></div></span>`}<button class="g-btn g-btn--sm g-btn--ghost" data-edit>${ic('pencil')}<span>${hair ? 'Edit in the Hair Studio' : 'Edit'}</span></button></div></div></div>
+      <button class="cl-equip${on ? ' is-on' : ''}" data-equip><span class="ic">${ic(on ? 'cross' : 'check')}</span><span class="t">${on ? 'Unequip' : 'Equip'}</span>${on ? '' : '<i class="spk s1">' + ic('sparkle') + '</i><i class="spk s2">' + ic('sparkle') + '</i><i class="spk s3">' + ic('sparkle') + '</i>'}</button>
+      <div class="cl-quick" data-quick></div>
+      <div class="cl-acts"><button class="g-btn" data-add${mineIt ? ' disabled' : ''}>${mineIt ? ic('star') + '<span>In your wardrobe</span>' : ic('plus_in_circle') + '<span>Add to wardrobe</span>'}</button><button class="g-btn" data-back>${ic('arrow_left')}<span>Back</span></button></div>
+      <div class="cl-acts2"><button class="g-btn g-btn--sm favbtn${isFav(it.id) ? ' on' : ''}" data-fav>${ic('star')}<span>${isFav(it.id) ? 'Favorited' : 'Favorite'}</span></button>${J.isCloth(dp) || dp === 'hats' ? '' : `<span class="rollbtn"><button class="g-btn g-btn--sm" data-dl>${ic('file_arrow_down')}<span>Download</span>${ic('dropdown')}</button><div class="rollmenu fmtmenu" hidden></div></span>`}<button class="g-btn g-btn--sm g-btn--ghost" data-edit>${ic('pencil')}<span>${hair ? 'Edit in the Hair Studio' : 'Edit'}</span></button></div></div></div>
       <div class="chips">${tags.map(t => `<span>${esc(t)}</span>`).join('')}</div>
       <p class="cl-desc">${esc(hair ? it.desc : isJ(it) ? J.describe(dp, it.d) : GE.describe(it.d))}</p><div class="g-label">Details</div><dl class="specs">${hair ? [['Style', esc(it.style)], ['Length', esc(kind)], ['Colour', swatch(it.sw) + esc(it.colour)]].map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('') : isJ(it) ? JM.specRows(it) : specRows(it.d)}</dl>
       <h3 class="g-h4 cl-like-h">More like this</h3><div class="cgrid cl-grid" data-like></div>`;
@@ -431,12 +554,90 @@
     for (const b of v.querySelectorAll('[data-back]')) b.onclick = () => { location.hash = ''; };
     v.querySelector('[data-equip]').onclick = () => { if (on) takeOff(it); else addToWardrobe(it, true); };
     v.querySelector('[data-add]').onclick = () => { if (!mineIt) addToWardrobe(it, false); };
+    quickColours(v.querySelector('[data-quick]'), it);
     v.querySelector('[data-fav]').onclick = () => { toggleFav(it); clDetail(); };
     if (it.kit != null) for (const q of v.querySelectorAll('[data-edit],.rollbtn')) q.remove();   // the classic hairstyles: no studio, no files
     if (v.querySelector('[data-dl]')) formatMenu(v.querySelector('[data-dl]'), v.querySelector('.fmtmenu'), () => it);
     v.querySelector('[data-edit]').onclick = () => openStudio(it);
     const like = v.querySelector('[data-like]'); for (const li of likeOf(it)) { const a = card(li, 'worn', { gen: -1 }); like.append(a); a._thumb(); }
     GRUG.hydrate(v);
+  }
+  /* ---- quick colours: a row of swatches under Equip that change the piece's main colour while she tries it on. The piece
+     keeps its id; Equip or Add to wardrobe keeps the new colour (entry.d, or entry.col for hair). Original puts it back. */
+  const QUICK_SW = ['#f4f4f2', '#16161a', '#8a8c92', '#e8344f', '#ff6fa8', '#f2801f', '#f5d21f', '#9be338', '#2e9b48', '#14a3a0', '#4fd8e0', '#2b62d9', '#1b2a55', '#7d3fc4', '#6b4428', '#c9a27e'];
+  const QUICK_KIMI = ['#fffafc', '#ffd1e3', '#ffb7d5', '#ffaed0', '#ffdcea', '#c4e1ff', '#bfe6ff', '#e0d3ff', '#d8d0ff', '#fff2b8', '#c6f3dd', '#ffd8c4'];
+  function primaryOf(it) {
+    const dp = deptOf(it), d = it.d;
+    if (dp === 'hair') return it._col || it.hex || null; if (dp === 'eyewear') return d.frame;
+    if (J.isCloth(dp)) return d.colA; if (dp === 'hats') return d.col; if (dp === 'purses') return d.body; if (dp === 'sandals') return d.strapCol; if (dp === 'sound') return d.cupCol;
+    if (dp === 'back') return d.sheath ? d.sheathCol : d.hiltCol;
+    const sh = (d.seq || d.items || []).find(e => e.k === 'shape'); return sh ? sh.col : dp === 'earrings' ? d.metal : d.cordCol;
+  }
+  function withPrimary(base, hex, cur) {
+    const dp = deptOf(base), st = 'c' + hex.slice(1).toLowerCase();
+    if (dp === 'hair') { const x = /^kit:/.test(base.id) ? kitHairItem(base.id, hex) : dyedHair(HD.byId(base.id), hex); return x ? Object.assign({}, x, { _base: base, _col: hex, stamp: st }) : base; }
+    const d = JSON.parse(JSON.stringify((cur && cur.d) || base.d));
+    if (dp === 'eyewear') { d.frame = hex; const v = GE.validate(base.brand === 'kimiland' ? kimiEye(d) : d).d; return Object.assign({}, base, { d: v, stamp: st, _base: base }); }
+    if (J.isCloth(dp)) d.colA = hex; else if (dp === 'hats') d.col = hex; else if (dp === 'purses') d.body = hex; else if (dp === 'sandals') d.strapCol = hex;
+    else if (dp === 'sound') { for (const k of ['bandCol', 'topCol']) if (d[k] === d.cupCol) d[k] = hex; d.cupCol = hex; }
+    else if (dp === 'back') { if (d.sheath) d.sheathCol = hex; else d.hiltCol = hex; }
+    else { const list = d.seq || d.items || []; let n = 0; for (const e of list) if (e.k === 'shape') { e.col = hex; n++; } if (!n) { if (dp === 'earrings') d.metal = hex; else d.cordCol = hex; } }
+    return JM.item(dp, base.id, base.seed, d, { name: base.name, by: base.by, brand: base.brand, gen: base.gen, mine: base.mine, stamp: st, _base: base });
+  }
+  function quickColours(box, it) {
+    if (!box) return; const base = it._base || it, kimi = (it.brand || (it.d && it.d.brand)) === 'kimiland', cur = (primaryOf(it) || '').toLowerCase(), list = kimi ? QUICK_KIMI : QUICK_SW;
+    box.append(el('div', 'cl-quickh', `<span class="g-label">Colour</span><span class="cl-note">${esc(it._base ? J.colourName(cur, kimi) : 'Tap a colour to try it')}</span>`));
+    const set = hex => { const n = hex ? withPrimary(base, hex, it) : base; CL.view = CL.preview = n; const top = clDet.scrollTop; clDetail(); clDet.scrollTop = top; syncOutfit(); };
+    const orig = el('button', 'cl-sw cl-orig' + (it._base ? '' : ' on'), '<span>Original</span>'); orig.style.background = primaryOf(base) || '#888'; orig.setAttribute('data-g-tip', 'Its own colours'); orig.onclick = () => set(null);
+    colourRow(box, it._base ? cur : '', list, (c, f) => { if (f) set(c); }, orig);
+  }
+
+  /* ---- the hat's pose: Position / Rotation / Size, each with X, Y and Z sliders over her stage. Shown whenever a hat is on
+     her (worn or being tried on). Dragging moves the hat straight away (J.hatPose); letting go keeps it (the wardrobe entry,
+     or the piece being tried on, which Equip then keeps). */
+  const POSE = { mode: 'pos' }, poseEl = $('#clPose');
+  const POSE_AX = { pos: ['Side to side', 'Up and down', 'Back and front'], rot: ['Tip forward and back', 'Turn', 'Lean sideways'], scale: ['Width', 'Height', 'Depth'] };
+  const poseFmt = { pos: v => (v > 0 ? '+' : '') + v.toFixed(1), rot: v => Math.round(v * 180 / Math.PI) + '°', scale: v => Math.round(v * 100) + '%' };
+  function poseSync() {
+    const m = CL.on && CL.mounted.hats; poseEl.hidden = !m; if (!m) { poseEl.innerHTML = ''; return; }
+    const it = m.it, d = it.d, key = POSE.mode, lim = J.HAT_POSE[key];
+    poseEl.innerHTML = `<div class="g-seg cl-posemode">${[['pos', 'Position'], ['rot', 'Rotation'], ['scale', 'Size']].map(([k, l]) => `<button data-pm="${k}" class="${k === key ? 'is-on' : ''}">${l}</button>`).join('')}</div><div class="cl-posesl"></div><button class="cl-round sm cl-posereset" aria-label="Put the hat back" data-g-tip="Put the hat back">${ic('arrow_counterclockwise')}</button>`;
+    for (const b of poseEl.querySelectorAll('[data-pm]')) b.onclick = () => { POSE.mode = b.dataset.pm; poseSync(); };
+    const box = poseEl.querySelector('.cl-posesl');
+    ['X', 'Y', 'Z'].forEach((ax, i) => {
+      const row = el('label', 'cl-posel', `<b>${ax}</b>`), r = el('input', 'g-range'), val = el('span', 'val', poseFmt[key](d[key][i])); r.type = 'range'; r.min = lim[0]; r.max = lim[1]; r.step = key === 'pos' ? 0.05 : 0.01; r.value = d[key][i]; r.setAttribute('aria-label', 'Hat ' + POSE_AX[key][i]); row.setAttribute('data-g-tip', POSE_AX[key][i]);
+      r.oninput = () => { const mm = poseTarget(); if (!mm) return; mm.it.d[key][i] = +r.value; J.hatPose(mm.b.root, mm.it.d); val.textContent = poseFmt[key](+r.value); };
+      r.onchange = () => poseKeep();
+      row.append(r, val); box.append(row);
+    });
+    poseEl.querySelector('.cl-posereset').onclick = () => { const mm = poseTarget(); if (!mm) return; Object.assign(mm.it.d, { pos: [0, 0, 0], rot: [0, 0, 0], scale: [1, 1, 1] }); J.hatPose(mm.b.root, mm.it.d); poseKeep(); poseSync(); };
+    GRUG.hydrate(poseEl);
+  }
+  // keep the pose: on the wardrobe piece she wears, or on the piece being tried on (Equip keeps it then)
+  function poseKeep() {
+    const m = CL.mounted.hats; if (!m) return; const it = m.it, e = CL.wearing.hats === it.id && !(CL.preview && CL.preview === it) ? entryFor(it.id) : null;
+    if (e) { e.d = JSON.parse(JSON.stringify(it.d)); e.stamp = Date.now(); clSave(); m.it = itemOf(e); m.sig = wornSig(m.it); remember(); }
+    else if (CL.preview === it) { const top = clDet.scrollTop; clDetail(); clDet.scrollTop = top; }
+  }
+  // the hat being posed: a piece tried on from the marketplace is copied first, so the catalog's own piece stays as it was
+  function poseTarget() {
+    const m = CL.mounted.hats; if (!m) return null; const it = m.it;
+    if (CL.preview === it && !it._base) { const n = Object.assign({}, it, { d: JSON.parse(JSON.stringify(it.d)), _base: it, stamp: 'p' + Date.now() }); CL.view = CL.preview = n; m.it = n; m.sig = wornSig(n); }
+    return m;
+  }
+
+  /* ---- the panel's width: drag its edge (landscape), double-click to reset; remembered on this device */
+  const PW_KEY = 'grug.closet.panelw';
+  { const h = $('#clResize'); let drag = null;
+    const apply = px => { if (px == null) { clEl.style.removeProperty('--panel-w'); return; } const w = Math.max(300, Math.min(window.innerWidth - 260, px)); clEl.style.setProperty('--panel-w', w + 'px'); };
+    { const w = +store.get(PW_KEY, 0); if (w) apply(w); }
+    h.addEventListener('pointerdown', e => { if (portrait()) return; drag = { x: e.clientX, w: $('#clPanel').getBoundingClientRect().width }; h.setPointerCapture(e.pointerId); clEl.classList.add('resizing'); e.preventDefault(); });
+    h.addEventListener('pointermove', e => { if (!drag) return; apply(drag.w + e.clientX - drag.x); });
+    const up = () => { if (!drag) return; drag = null; clEl.classList.remove('resizing'); store.set(PW_KEY, Math.round($('#clPanel').getBoundingClientRect().width)); resize(); focus(CL.view); };
+    h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up);
+    h.addEventListener('dblclick', () => { apply(null); store.set(PW_KEY, 0); resize(); focus(CL.view); });
+    h.addEventListener('keydown', e => { if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return; e.preventDefault(); apply($('#clPanel').getBoundingClientRect().width + (e.key === 'ArrowLeft' ? -32 : 32)); store.set(PW_KEY, Math.round($('#clPanel').getBoundingClientRect().width)); resize(); });
+    window.addEventListener('resize', () => { const w = +store.get(PW_KEY, 0); if (w) apply(w); });
   }
   function clDetail() {
     const it = CL.view; clEl.classList.toggle('viewing', !!it); clDet.hidden = !it; clDet.innerHTML = ''; if (!it) return;
@@ -453,7 +654,7 @@
   }
   // a piece opened from the marketplace: she tries it on (one per slot, so it takes that slot's place)
   async function clOpen(id) {
-    const it = itemById(id); if (!it) { location.hash = ''; return; }
+    const own = entryFor(id), it = (own && itemOf(own)) || itemById(id); if (!it) { location.hash = ''; return; }
     if (deptOf(it) === 'hair') { viewer.token++; for (const k of Object.keys(viewer.vr)) HD.disposeVersion(viewer.vr[k]); viewer.vr = {}; viewer.vp = {}; viewer.item = it; viewer.level = 'low'; }
     CL.view = it; CL.preview = it;
     if (!clBody.childElementCount) clRender(); else clDetail();
@@ -474,13 +675,13 @@
   new ResizeObserver(() => { if (CL.on && canvas.parentElement === $('#clStage')) { resize(); if (!CL.goal && !CL.view) focus(null); } }).observe($('#clStage'));
   // the menu under the Grug button: the editors and the Hair Studio
   $('#clMenuBtn').onclick = e => { e.stopPropagation(); const m = $('#clMenu'), open = m.hidden; $$('.rollmenu').forEach(x => x.hidden = true); m.hidden = !open; };
-  { const m = $('#clMenu'); m.innerHTML = [['#edit', 'glasses', 'Eyewear editor'], [HAIR_STUDIO, 'hair', 'Hair Studio'], ['#edit/earrings', 'diamond', 'Earrings editor'], ['#edit/necklaces', 'flower', 'Necklace editor'], ['#edit/purses', 'shopping_bag', 'Purse editor'], ['#edit/sandals', 'sun', 'Sandal editor'], ['#edit/sound', 'note', 'Sound editor'], ['#edit/back', 'sword', 'Sword studio'], ['#edit/tops', 'shirt', 'Tops studio'], ['#edit/jackets', 'jacket', 'Jackets studio'], ['#edit/bottoms', 'pants', 'Bottoms studio'], ['#edit/shoes', 'shoe', 'Shoes studio'], ['#edit/outfits', 'outfit', 'Outfits studio']].filter(x => x[0] !== HAIR_STUDIO || HD).map(([h, i, l]) => `<a role="menuitem" href="${h}">${ic(i)}<span><b>${esc(l)}</b></span></a>`).join(''); GRUG.hydrate(m); }
+  { const m = $('#clMenu'); m.innerHTML = [['#edit', 'glasses', 'Eyewear editor'], [HAIR_STUDIO, 'hair', 'Hair Studio'], ['#edit/earrings', 'diamond', 'Earrings editor'], ['#edit/necklaces', 'flower', 'Necklace editor'], ['#edit/purses', 'shopping_bag', 'Purse editor'], ['#edit/sandals', 'sun', 'Sandal editor'], ['#edit/sound', 'note', 'Sound editor'], ['#edit/hats', 'hat', 'Hat studio'], ['#edit/back', 'sword', 'Sword studio'], ['#edit/tops', 'shirt', 'Tops studio'], ['#edit/jackets', 'jacket', 'Jackets studio'], ['#edit/bottoms', 'pants', 'Bottoms studio'], ['#edit/shoes', 'shoe', 'Shoes studio'], ['#edit/outfits', 'outfit', 'Outfits studio']].filter(x => (x[0] !== HAIR_STUDIO || HD) && (x[0] !== '#edit/hats' || J.hasHats())).map(([h, i, l]) => `<a role="menuitem" href="${h}">${ic(i)}<span><b>${esc(l)}</b></span></a>`).join(''); GRUG.hydrate(m); }
 
   /* ---- in and out */
   let clReady = false;
   async function clEnter(hash) {
     if (!CL.on && !store.get(CL_KEY, null)) clSave(); else if (!CL.on) { try { const c = JSON.parse(localStorage.getItem('grug.sandy.v1') || 'null'); if (!c || !c.closet) playAsCloset(); } catch (e) {} }
-    const first = !CL.on; CL.on = true; showPage('closet'); look(true); if (worn) worn.root.visible = false; setHair(true);
+    const first = !CL.on; CL.on = true; showPage('closet'); look(true); if (worn) worn.root.visible = false; hairShow();
     if (canvas.parentElement !== $('#clStage')) { canvas.classList.remove('hovercv'); $('#clStage').prepend(canvas); resize(); }
     ZOOM[0] = 40; ZOOM[1] = 560; floor.visible = true; spin.on = false;
     if (first) { if (!FEED.seed) newFeed(true); if (!clReady) { clReady = true; await applyBody(false); remember(); } else look(true); }
@@ -490,7 +691,7 @@
   }
   function clLeave() {
     if (!CL.on) return; CL.on = false; CL.view = null; CL.preview = null; for (const s of SLOTS) unmountSlot(s); for (const k of Object.keys(CL.tok)) CL.tok[k]++;
-    look(false); paintBody(GREY); floor.visible = false; ZOOM[0] = 45; ZOOM[1] = 210; if (worn) worn.root.visible = true; setHair(false); JM.syncDress(); clBody.innerHTML = ''; clDet.innerHTML = '';
+    poseSync(); look(false); paintBody(GREY); floor.visible = false; ZOOM[0] = 45; ZOOM[1] = 210; if (worn) worn.root.visible = true; setHair(false); JM.syncDress(); clBody.innerHTML = ''; clDet.innerHTML = '';
   }
   // card pictures always show the grey mannequin, and no floor
   // ... and only the piece being pictured: her own clothes come off for the moment (the basic outfit, in the mannequin's colour)
@@ -504,7 +705,7 @@
   { const sd0 = JM.syncDress; JM.syncDress = function () { sd0.call(JM); if (CL.on && sandy.__cut) sandy.__cut.constant = 1e5; }; }
   // routing: the closet is the catalog now (#item/… opens a piece in it); the editors are unchanged
   route = function () {
-    hoverEnd(); const h = location.hash, jm = /^#edit\/(earrings|necklaces|purses|sandals|sound|back|tops|jackets|bottoms|shoes|outfits)/.exec(h);
+    hoverEnd(); const h = location.hash, jm = /^#edit\/(hats|earrings|necklaces|purses|sandals|sound|back|tops|jackets|bottoms|shoes|outfits)/.exec(h);
     if (/^#edit/.test(h)) { clLeave(); if (!jm) JM.leave(); enterEditor(); if (jm) JM.enter(jm[1]); return; }
     JM.leave(); clEnter(h);
   };

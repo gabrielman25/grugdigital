@@ -36,13 +36,26 @@
   }
 
   const JKEY = dept => 'grug.jewelry.' + dept + '.v1', JROLLS = 'grug.jewelry.rolls.v1';
-  const JDEPT = { earrings: { label: 'Earrings', one: 'earrings', icon: 'diamond', c: 'var(--g-purple)', studio: 'Earrings studio' }, sandals: { label: 'Sandals', one: 'sandals', icon: 'sun', c: 'var(--g-blue)', studio: 'Sandal studio' }, purses: { label: 'Purses', one: 'purse', icon: 'shopping_bag', c: 'var(--g-pink)', studio: 'Purse studio' }, necklaces: { label: 'Necklaces', one: 'necklace', icon: 'flower', c: 'var(--g-orange)', studio: 'Necklace studio' }, sound: { label: 'Sound', one: 'headphones', icon: 'note', c: 'var(--g-teal)', studio: 'Sound studio' }, back: { label: 'Back', one: 'sword', icon: 'sword', c: 'var(--g-red)', studio: 'Sword studio' }, tops: { label: 'Tops', one: 'top', icon: 'shirt', c: 'var(--g-yellow)', studio: 'Tops studio' }, jackets: { label: 'Jackets', one: 'jacket', icon: 'jacket', c: 'var(--g-orange)', studio: 'Jackets studio' }, bottoms: { label: 'Bottoms', one: 'pair of bottoms', icon: 'pants', c: 'var(--g-blue)', studio: 'Bottoms studio' }, shoes: { label: 'Shoes', one: 'pair of shoes', icon: 'shoe', c: 'var(--g-red)', studio: 'Shoes studio' }, outfits: { label: 'Outfits', one: 'outfit', icon: 'outfit', c: 'var(--g-purple)', studio: 'Outfits studio' } };
+  const JDEPT = { hats: { label: 'Hats', one: 'hat', icon: 'hat', c: 'var(--g-lime)', studio: 'Hat studio' }, earrings: { label: 'Earrings', one: 'earrings', icon: 'diamond', c: 'var(--g-purple)', studio: 'Earrings studio' }, sandals: { label: 'Sandals', one: 'sandals', icon: 'sun', c: 'var(--g-blue)', studio: 'Sandal studio' }, purses: { label: 'Purses', one: 'purse', icon: 'shopping_bag', c: 'var(--g-pink)', studio: 'Purse studio' }, necklaces: { label: 'Necklaces', one: 'necklace', icon: 'flower', c: 'var(--g-orange)', studio: 'Necklace studio' }, sound: { label: 'Sound', one: 'headphones', icon: 'note', c: 'var(--g-teal)', studio: 'Sound studio' }, back: { label: 'Back', one: 'sword', icon: 'sword', c: 'var(--g-red)', studio: 'Sword studio' }, tops: { label: 'Tops', one: 'top', icon: 'shirt', c: 'var(--g-yellow)', studio: 'Tops studio' }, jackets: { label: 'Jackets', one: 'jacket', icon: 'jacket', c: 'var(--g-orange)', studio: 'Jackets studio' }, bottoms: { label: 'Bottoms', one: 'pair of bottoms', icon: 'pants', c: 'var(--g-blue)', studio: 'Bottoms studio' }, shoes: { label: 'Shoes', one: 'pair of shoes', icon: 'shoe', c: 'var(--g-red)', studio: 'Shoes studio' }, outfits: { label: 'Outfits', one: 'outfit', icon: 'outfit', c: 'var(--g-purple)', studio: 'Outfits studio' } };
   const JSW = ['#e8344f', '#ff6fa8', '#ffc2d6', '#fff6f2', '#16161a', '#f2801f', '#f5d21f', '#9be338', '#2e9b48', '#14a3a0', '#4fd8e0', '#2b62d9', '#7d3fc4', '#d4af37', '#c8ccd2'];
   const JSW_KIMI = J.PINKS.slice(0, 6).concat(['#fffafc', '#c4e1ff', '#e0d3ff', '#fff2b8', '#c6f3dd', '#ffd8c4']);
   const KIMI_CARD = '#ffc2dc', KIMI_MANN = 'hsl(222, 38%, 62%)';
   const E_ = (id, size, col, o) => J.EL(Object.assign({ k: 'shape', id, size, col: col || '#ff8fc2' }, o || {}));
   const C_ = (id, size, o) => J.EL(Object.assign({ k: 'charm', id, size }, o || {}));
   const JSTART = {
+    hats: [
+      ['Red beanie', { kind: 'beanie', col: '#e8344f', col2: '#f4f4f2', charms: [] }],
+      ['Snowy beanie', { kind: 'beanie', col: '#2b62d9', col2: '#f4f4f2', charms: [C_('snowflake', 2.6, { at: 0, up: 0.45 })] }],
+      ['Gingerbread beret', { kind: 'beret', col: '#c9a27e', col2: '#6b4428', charms: [C_('gingerbread', 2.6, { at: 0.2, up: 0.55 })] }],
+      ['Sporty cap', { kind: 'cap', col: '#1b2a55', col2: '#f4f4f2', charms: [E_('star', 1.8, '#f5d21f', { at: 0, up: 0.5 })] }],
+      ['Spooky witch', { kind: 'witchHat', col: '#16161a', col2: '#16161a', col3: '#7d3fc4', charms: [C_('bat', 2.6, { at: -0.2, up: 0.2 }), C_('pumpkin', 2.4, { at: 0.25, up: 0.15 })] }],
+      ['Rodeo hat', { kind: 'cowboyHat', col: '#c9a27e', col2: '#c9a27e', col3: '#6b4428', charms: [] }],
+      ['Garden sun hat', { kind: 'sunHat', col: '#efe6cf', col2: '#efe6cf', col3: '#ff6fa8', charms: [C_('rose', 2.6, { at: 0.45, up: 0.2 })] }],
+      ['Dapper top hat', { kind: 'topHat', col: '#16161a', col2: '#16161a', col3: '#e8344f', charms: [] }],
+      ['Holiday bucket', { kind: 'bucketHat', col: '#1f8a4c', col2: '#c8232c', col3: '#f4f4f2', pat: 21, patCol: '#14573a', charms: [C_('candycane', 2.4, { at: 0.3, up: 0.4 })] }],
+      ['KIMILAND beret', { brand: 'kimiland', kind: 'beret', col: '#ffc4dc', col2: '#fffafc', charms: [C_('kimiland-kl', 2.6, { at: 0, up: 0.5 })] }],
+      ['KIMILAND bucket', { brand: 'kimiland', kind: 'bucketHat', col: '#ffd1e3', col2: '#fffafc', col3: '#ffb7d5', charms: [E_('bow', 2, '#ffb7d5', { at: 0.35, up: 0.4 })] }]
+    ],
     earrings: [
       ['Pearl studs', { mount: 'stud', metal: '#d4af37', seq: [E_('pearl', 1.2, '#fff6f2')] }],
       ['Gold hoops', { mount: 'hook', link: 'none', metal: '#d4af37', seq: [E_('ring', 2.8, '#d4af37', { finish: 'metal' })] }],
@@ -143,19 +156,19 @@
 
   const JM = {
     on: false, dept: null, st: null, hist: { stack: [], i: -1 }, tab: 'pieces', saveT: 0, built: null, q: 0, notes: [], orig: null,
-    isJ: it => !!it && (it.dept === 'earrings' || it.dept === 'necklaces' || it.dept === 'purses' || it.dept === 'sandals' || it.dept === 'sound' || it.dept === 'back' || J.isCloth(it.dept)),
-    list() { return this.dept === 'earrings' ? this.st.d.seq : this.dept === 'purses' || this.dept === 'sandals' || this.dept === 'sound' || this.dept === 'back' || J.isCloth(this.dept) ? this.st.d.charms : this.st.d.items; },
+    isJ: it => !!it && (it.dept === 'hats' || it.dept === 'earrings' || it.dept === 'necklaces' || it.dept === 'purses' || it.dept === 'sandals' || it.dept === 'sound' || it.dept === 'back' || J.isCloth(it.dept)),
+    list() { return this.dept === 'earrings' ? this.st.d.seq : this.dept === 'hats' || this.dept === 'purses' || this.dept === 'sandals' || this.dept === 'sound' || this.dept === 'back' || J.isCloth(this.dept) ? this.st.d.charms : this.st.d.items; },
     // a catalog item from a design
     item(dept, id, seed, d, o) { o = o || {}; const v = J.validate(dept, d, d.brand).d; return Object.assign({ id, dept, seed, d: v, brand: v.brand, name: o.name || J.nameFor(dept, v, seed), kind: J.kindOf(dept, v), by: o.by || brandBy(v.brand), order: 0, stamp: 0, gen: true }, o, { d: v }); },
-    gen(dept, seed) { const id = { earrings: 'ge:', necklaces: 'gn:', purses: 'gp:', sandals: 'gs:', sound: 'ga:', back: 'gb:', tops: 'gt:', jackets: 'gj:', bottoms: 'gl:', shoes: 'gf:', outfits: 'gu:' }[dept] + seed; if (genCache.has(id)) return genCache.get(id); const d = J.random(dept, seed), mk = d.brand === 'grug' ? makerOf(id) : null, it = this.item(dept, id, seed, d, mk ? { by: mk, brand: 'players' } : undefined); genCache.set(id, it); return it; },
-    byId(id) { const m = /^g([enpsabtjlfu]):(.*)$/.exec(id); return m ? this.gen({ e: 'earrings', n: 'necklaces', p: 'purses', s: 'sandals', a: 'sound', b: 'back', t: 'tops', j: 'jackets', l: 'bottoms', f: 'shoes', u: 'outfits' }[m[1]], m[2]) : null; },
+    gen(dept, seed) { const id = { hats: 'gk:', earrings: 'ge:', necklaces: 'gn:', purses: 'gp:', sandals: 'gs:', sound: 'ga:', back: 'gb:', tops: 'gt:', jackets: 'gj:', bottoms: 'gl:', shoes: 'gf:', outfits: 'gu:' }[dept] + seed; if (genCache.has(id)) return genCache.get(id); const d = J.random(dept, seed), mk = d.brand === 'grug' ? makerOf(id) : null, it = this.item(dept, id, seed, d, mk ? { by: mk, brand: 'players' } : undefined); genCache.set(id, it); return it; },
+    byId(id) { const m = /^g([enpsabtjlfuk]):(.*)$/.exec(id); return m ? this.gen({ k: 'hats', e: 'earrings', n: 'necklaces', p: 'purses', s: 'sandals', a: 'sound', b: 'back', t: 'tops', j: 'jackets', l: 'bottoms', f: 'shoes', u: 'outfits' }[m[1]], m[2]) : null; },
     fromFav(f) { return this.item(f.dept, f.id, f.seed, f.d, { name: f.name, by: f.by, order: 100000 - (f.when || 0) / 1e9, favOnly: true, gen: /^g/.test(f.id), mine: f.id.startsWith('m:') }); },
     fromMine(m, i) { return this.item(m.dept, 'm:' + m.id, m.seed || m.id, m.d, { name: m.name, by: 'You', order: -1000 + i, stamp: m.when || 0, mine: true, gen: false, saved: m }); },
     text(it) { const list = it.d.seq || it.d.items || it.d.charms; return [it.name, it.dept, JDEPT[it.dept].one].concat(J.tagsFor(it.dept, it.d), list.map(J.elName)).concat(it.brand === 'kimiland' ? ['pastel', 'cute'] : []); },
     families(it) { return J.families(it.dept, it.d); },
     specRows(it) {
       const d = it.d, dept = it.dept, rows = [], kimi = d.brand === 'kimiland', list = d.seq || d.items || d.charms, sw = c => swatch(c);
-      rows.push(['Type', dept === 'back' ? J.BACK_LABEL[d.kind] : J.isCloth(dept) ? esc(J.CLOTH_LABEL[d.part]) : dept === 'sound' ? J.SOUND_LABEL[d.kind] + (d.kind === 'buds' ? ' (' + J.BUD_LABEL[d.bud].toLowerCase() + ')' : '') : dept === 'sandals' ? J.STYLE_LABEL[d.style] + ' sandals' : dept === 'purses' ? J.BAG_LABEL[d.shape] + ' purse' : dept === 'earrings' ? J.KIND_LABEL[J.kindOf(dept, d)] + ' earrings' : J.lenClass(d).label + ' necklace']);
+      rows.push(['Type', dept === 'hats' ? J.HAT_LABEL[d.kind] : dept === 'back' ? J.BACK_LABEL[d.kind] : J.isCloth(dept) ? esc(J.CLOTH_LABEL[d.part]) : dept === 'sound' ? J.SOUND_LABEL[d.kind] + (d.kind === 'buds' ? ' (' + J.BUD_LABEL[d.bud].toLowerCase() + ')' : '') : dept === 'sandals' ? J.STYLE_LABEL[d.style] + ' sandals' : dept === 'purses' ? J.BAG_LABEL[d.shape] + ' purse' : dept === 'earrings' ? J.KIND_LABEL[J.kindOf(dept, d)] + ' earrings' : J.lenClass(d).label + ' necklace']);
       rows.push(['Brand', esc(it.brand === 'players' ? 'Made by a player' : brandBy(d.brand))]);
       if (dept === 'earrings') { rows.push(['Mount', d.mount === 'stud' ? 'Stud post' : 'Hook']); if (d.link !== 'none' || d.mount === 'hook') rows.push(['Metal', sw(d.metal) + esc(J.colourName(d.metal, kimi))]); rows.push(['Pair', d.pair === 'mismatch' ? 'Mismatched' : 'Matching']); }
       else if (dept === 'necklaces') { rows.push(['Length', J.lenLabel(d.len) + (JM.cm(d) ? ' · ' + JM.cm(d) + ' cm round' : '')]); rows.push(['Cord', { chain: 'Chain', cord: 'Cord', ribbon: 'Ribbon', beads: 'Beads', pearls: 'Pearls' }[d.cord] + ' · ' + sw(d.cordCol) + esc(J.colourName(d.cordCol, kimi))]); }
@@ -177,8 +190,9 @@
         rows.push([d.kind === 'hip' ? 'Belt' : 'Strap', d.strap ? sw(d.strapCol) + esc(J.colourName(d.strapCol, kimi)) + ' · ' + d.strapW.toFixed(1) + ' cm' : 'None']);
         rows.push(['Parts', 'Modular Sword Kit by MilkAndBanana (CC0)']);
       }
+      if (dept === 'hats') { const hi = J.HAT_INFO[d.kind]; rows.push([esc(hi.areas[0]), sw(d.col) + esc(J.colourName(d.col, kimi))]); if (hi.areas[1]) rows.push([esc(hi.areas[1]), sw(d.col2) + esc(J.colourName(d.col2, kimi))]); if (hi.band && d.band) rows.push(['Band', sw(d.col3) + esc(J.colourName(d.col3, kimi))]); rows.push(['Print', d.pat >= 0 ? sw(d.patCol) + 'Pattern ' + (d.pat + 1) : 'None']); rows.push(['Made from', 'Chibi Hats by PaperPluto']); }
       if (J.isCloth(dept)) { const c = J.CLOTH_BY[d.part]; c.areas.forEach((a, i) => { const h = d[['colA', 'colB', 'colC'][i]]; rows.push([esc(a), sw(h) + esc(J.colourName(h, kimi))]); }); if (c.vars) rows.push(['Style', esc(c.vars[d.vari])]); rows.push(['Print', d.pat >= 0 ? sw(d.patCol) + 'Pattern ' + (d.pat + 1) : 'None']); rows.push(['Made from', 'Modular Anime Character pack, fitted to her']); }
-      if (dept !== 'sound' && dept !== 'back' && !J.isCloth(dept)) rows.push([dept === 'earrings' ? 'Sequence' : dept === 'purses' ? 'Keychains' : dept === 'sandals' ? 'Strap charms' : 'Charms', list.length ? list.map(e => esc(J.elName(e))).join(', ') : 'None']);
+      if (dept !== 'sound' && dept !== 'back' && !J.isCloth(dept)) rows.push([dept === 'earrings' ? 'Sequence' : dept === 'hats' ? 'Pinned on' : dept === 'purses' ? 'Keychains' : dept === 'sandals' ? 'Strap charms' : 'Charms', list.length ? list.map(e => esc(J.elName(e))).join(', ') : 'None']);
       if (kimi) rows.push(['Colours', 'KIMILAND pastels']);
       return rows.map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('');
     },
@@ -189,8 +203,8 @@
     // the dress's ruffle is put away while any necklace is on her
     syncDress() { const c = sandy.__cut; if (!c) return; if (c.__c0 == null) c.__c0 = c.constant; const on = Array.from(this.necks).some(r => r.userData.jewel && r.userData.jewel.dept === 'sandals'), whole = Array.from(this.necks).some(r => r.userData.jewel && (J.isCloth(r.userData.jewel.dept) || r.userData.jewel.dept === 'back')); c.constant = whole ? 1e5 : on ? 30 : c.__c0; (sandy.n3.sandals || []).forEach(sd => { if (sd && sd.group) sd.group.visible = !on; }); const sr = Array.from(this.necks).filter(r => r.userData.jewel && r.userData.jewel.dept === 'sandals').pop(); if (J.tiltFeet) J.tiltFeet(sandy, sr ? sr.userData.tilt || 0 : 0, !!(sr && sr.userData.noToes)); },
     // what the camera frames: the pieces themselves with some room
-    frameBox(root, it) { sandy.object3d.updateMatrixWorld(true); if (J.isCloth(it.dept)) { const b = new THREE.Box3(); const v = new THREE.Vector3(); for (const m of root.userData.meshes ? root.userData.meshes() : []) { const n = m.geometry.attributes.position.count, step = Math.max(1, Math.floor(n / 400)); m.updateMatrixWorld(true); for (let i = 0; i < n; i += step) { v.fromBufferAttribute(m.geometry.attributes.position, i); m.boneTransform(i, v); b.expandByPoint(v.applyMatrix4(m.matrixWorld)); } } if (b.isEmpty()) b.setFromCenterAndSize(new THREE.Vector3(0, 110, 0), new THREE.Vector3(40, 60, 30)); return b.expandByVector(new THREE.Vector3(4, 4, 4)); } if (it.dept === 'back') return new THREE.Box3().setFromObject(root).expandByVector(new THREE.Vector3(3, 3, 3)); const near = it.dept === 'earrings' ? root.children[0] && root.children[0].children[0] : it.dept === 'sound' ? (it.d.kind === 'buds' ? root.getObjectByName('soundL') : root.getObjectByName('soundHead')) : null; const box = new THREE.Box3().setFromObject(near || root); box.expandByVector(it.dept === 'earrings' ? new THREE.Vector3(3, 2.5, 4) : it.dept === 'purses' ? new THREE.Vector3(4, 3, 6) : it.dept === 'sandals' ? new THREE.Vector3(3, 2, 5) : it.dept === 'sound' ? (it.d.kind === 'buds' ? new THREE.Vector3(4, 3.5, 5) : new THREE.Vector3(2, 2, 4)) : new THREE.Vector3(1.5, 1.5, 4)); return box; },
-    centre() { const b = this.built; if (!b) return new THREE.Vector3(0, this.dept === 'earrings' || this.dept === 'sound' ? 160 : 135, 0); if (J.isCloth(this.dept) || this.dept === 'back') return this.frameBox(b.root, { dept: this.dept, d: this.st.d }).getCenter(new THREE.Vector3()); b.root.updateMatrixWorld(true); return new THREE.Box3().setFromObject(this.dept === 'sound' ? b.root.getObjectByName('soundHead') || b.root : b.root).getCenter(new THREE.Vector3()); },
+    frameBox(root, it) { sandy.object3d.updateMatrixWorld(true); if (it.dept === 'hats') return new THREE.Box3().setFromObject(root).union(new THREE.Box3().setFromObject(sandy.n3.headMesh)).expandByVector(new THREE.Vector3(2, 2, 3)); if (J.isCloth(it.dept)) { const b = new THREE.Box3(); const v = new THREE.Vector3(); for (const m of root.userData.meshes ? root.userData.meshes() : []) { const n = m.geometry.attributes.position.count, step = Math.max(1, Math.floor(n / 400)); m.updateMatrixWorld(true); for (let i = 0; i < n; i += step) { v.fromBufferAttribute(m.geometry.attributes.position, i); m.boneTransform(i, v); b.expandByPoint(v.applyMatrix4(m.matrixWorld)); } } if (b.isEmpty()) b.setFromCenterAndSize(new THREE.Vector3(0, 110, 0), new THREE.Vector3(40, 60, 30)); return b.expandByVector(new THREE.Vector3(4, 4, 4)); } if (it.dept === 'back') return new THREE.Box3().setFromObject(root).expandByVector(new THREE.Vector3(3, 3, 3)); const near = it.dept === 'earrings' ? root.children[0] && root.children[0].children[0] : it.dept === 'sound' ? (it.d.kind === 'buds' ? root.getObjectByName('soundL') : root.getObjectByName('soundHead')) : null; const box = new THREE.Box3().setFromObject(near || root); box.expandByVector(it.dept === 'earrings' ? new THREE.Vector3(3, 2.5, 4) : it.dept === 'purses' ? new THREE.Vector3(4, 3, 6) : it.dept === 'sandals' ? new THREE.Vector3(3, 2, 5) : it.dept === 'sound' ? (it.d.kind === 'buds' ? new THREE.Vector3(4, 3.5, 5) : new THREE.Vector3(2, 2, 4)) : new THREE.Vector3(1.5, 1.5, 4)); return box; },
+    centre() { const b = this.built; if (!b) return new THREE.Vector3(0, this.dept === 'earrings' || this.dept === 'sound' || this.dept === 'hats' ? 160 : 135, 0); if (J.isCloth(this.dept) || this.dept === 'back') return this.frameBox(b.root, { dept: this.dept, d: this.st.d }).getCenter(new THREE.Vector3()); b.root.updateMatrixWorld(true); return new THREE.Box3().setFromObject(this.dept === 'sound' ? b.root.getObjectByName('soundHead') || b.root : b.root).getCenter(new THREE.Vector3()); },
 
     /* ---- the editor (the eyewear editor's page, switched into this) */
     enter(dept) {
@@ -204,15 +218,15 @@
         this.hist = { stack: [], i: -1 }; this.tab = 'pieces'; rtab = 'pieces';
       }
       $('#top .brand .ttl').textContent = JDEPT[dept].studio;
-      const tabs = dept === 'back' ? [['pieces', 'Sword', 'sword'], ['strap', 'Wear', 'person'], ['look', 'Look', 'palette']] : J.isCloth(dept) ? [['pieces', 'Piece', 'shirt'], ['look', 'Look', 'palette']] : dept === 'sound' ? [['pieces', 'Shape', 'note'], ['strap', 'Cord', 'sine_wave'], ['look', 'Look', 'palette']] : dept === 'sandals' ? [['pieces', 'Sole', 'sun'], ['strap', 'Straps', 'circle'], ['charms', 'Charms', 'star'], ['look', 'Look', 'palette']] : dept === 'purses' ? [['pieces', 'Bag', 'shopping_bag'], ['strap', 'Strap', 'circle'], ['charms', 'Charms', 'star'], ['look', 'Look', 'palette']] : dept === 'earrings' ? [['pieces', 'Pieces', 'diamond'], ['look', 'Look', 'palette'], ['fit', 'Fit', 'person']] : [['pieces', 'Cord', 'flower'], ['charms', 'Charms', 'star'], ['look', 'Look', 'palette']];
+      const tabs = dept === 'hats' ? [['pieces', 'Hat', 'hat'], ['charms', 'Charms', 'star'], ['look', 'Look', 'palette']] : dept === 'back' ? [['pieces', 'Sword', 'sword'], ['strap', 'Wear', 'person'], ['look', 'Look', 'palette']] : J.isCloth(dept) ? [['pieces', 'Piece', 'shirt'], ['look', 'Look', 'palette']] : dept === 'sound' ? [['pieces', 'Shape', 'note'], ['strap', 'Cord', 'sine_wave'], ['look', 'Look', 'palette']] : dept === 'sandals' ? [['pieces', 'Sole', 'sun'], ['strap', 'Straps', 'circle'], ['charms', 'Charms', 'star'], ['look', 'Look', 'palette']] : dept === 'purses' ? [['pieces', 'Bag', 'shopping_bag'], ['strap', 'Strap', 'circle'], ['charms', 'Charms', 'star'], ['look', 'Look', 'palette']] : dept === 'earrings' ? [['pieces', 'Pieces', 'diamond'], ['look', 'Look', 'palette'], ['fit', 'Fit', 'person']] : [['pieces', 'Cord', 'flower'], ['charms', 'Charms', 'star'], ['look', 'Look', 'palette']];
       $('#rtabs').innerHTML = tabs.map(([k, l, i], n) => `<button data-rt="${k}"${n ? '' : ' class="is-on"'}>${ic(i)} ${l}</button>`).join('');
       $('#rollMenu').innerHTML = [['all', 'dice', 'Everything', 'R'], ['colours', 'palette', 'Just the colours', 'C'], ['shape', JDEPT[dept].icon, 'Just the pieces', 'S']].map(([k, i, l, kk]) => `<button data-roll="${k}">${ic(i)}${l}<span class="g-kbd k">${kk}</span></button>`).join('')
-        + (dept === 'back' ? J.BACK_KINDS.map(([k, l]) => [k, 'New: ' + l.toLowerCase()]) : J.isCloth(dept) ? (J.CLOTH_SUBS[dept] || []).map(([k, l]) => [k, 'New: ' + l.toLowerCase()]) : dept === 'sound' ? J.SOUND_KINDS.map(([k, l]) => [k, 'New ' + l.toLowerCase()]) : dept === 'sandals' ? J.STYLES.map(([k, l]) => [k, 'New ' + l.toLowerCase()]) : dept === 'purses' ? J.BAG_SHAPES.map(([k, l]) => [k, 'New ' + l.toLowerCase()]) : dept === 'earrings' ? [['studs', 'New studs'], ['drops', 'New drops'], ['danglers', 'New danglers'], ['hoops', 'New hoops']] : [['choker', 'New choker'], ['short', 'New short necklace'], ['medium', 'New medium necklace'], ['long', 'New long necklace']]).map(([k, l]) => `<button data-roll="${k}">${ic(JDEPT[dept].icon)}${l}</button>`).join('')
+        + (dept === 'hats' ? J.HAT_KINDS.map(([k, l]) => [k, 'New ' + l.toLowerCase()]) : dept === 'back' ? J.BACK_KINDS.map(([k, l]) => [k, 'New: ' + l.toLowerCase()]) : J.isCloth(dept) ? (J.CLOTH_SUBS[dept] || []).map(([k, l]) => [k, 'New: ' + l.toLowerCase()]) : dept === 'sound' ? J.SOUND_KINDS.map(([k, l]) => [k, 'New ' + l.toLowerCase()]) : dept === 'sandals' ? J.STYLES.map(([k, l]) => [k, 'New ' + l.toLowerCase()]) : dept === 'purses' ? J.BAG_SHAPES.map(([k, l]) => [k, 'New ' + l.toLowerCase()]) : dept === 'earrings' ? [['studs', 'New studs'], ['drops', 'New drops'], ['danglers', 'New danglers'], ['hoops', 'New hoops']] : [['choker', 'New choker'], ['short', 'New short necklace'], ['medium', 'New medium necklace'], ['long', 'New long necklace']]).map(([k, l]) => `<button data-roll="${k}">${ic(JDEPT[dept].icon)}${l}</button>`).join('')
         + `<button data-roll="kimiland">${ic('heart')}Roll as KIMILAND</button><button data-roll="grug">${ic('star')}Roll as Grug Digital</button>`;
       $$('#left .sec .g-label').forEach((x, i) => { if (i === 0) x.textContent = 'Starters'; });
       $('#bPublish').dataset.gTip = 'Show it in the catalog'; $('#docName').setAttribute('aria-label', 'Name');
       if (worn) worn.root.visible = false; setHair(true);
-      this.rebuild(true); this.renderStarters(); this.renderRolls(); renderInspector(); GRUG.hydrate($('#rtabs')); GRUG.hydrate($('#rollMenu')); setView('three'); cam.dist = dept === 'back' ? 230 : J.isCloth(dept) ? 200 : dept === 'earrings' ? 78 : dept === 'sound' ? 112 : dept === 'purses' ? 150 : dept === 'sandals' ? 120 : 118; cam.yaw = dept === 'back' ? 2.55 : J.isCloth(dept) ? 0.4 : dept === 'earrings' ? 0.9 : dept === 'sound' ? 0.6 : dept === 'purses' ? 0.35 : dept === 'sandals' ? 0.55 : 0.5; if (dept === 'sound') cam.pitch = 0.12; if (dept === 'sandals') cam.pitch = 0.22; if (dept === 'back' || J.isCloth(dept)) cam.pitch = 0.1; this.commit(true); this.undoBtns();
+      this.rebuild(true); this.renderStarters(); this.renderRolls(); renderInspector(); GRUG.hydrate($('#rtabs')); GRUG.hydrate($('#rollMenu')); setView('three'); cam.dist = dept === 'hats' ? 135 : dept === 'back' ? 230 : J.isCloth(dept) ? 200 : dept === 'earrings' ? 78 : dept === 'sound' ? 112 : dept === 'purses' ? 150 : dept === 'sandals' ? 120 : 118; cam.yaw = dept === 'hats' ? 0.55 : dept === 'back' ? 2.55 : J.isCloth(dept) ? 0.4 : dept === 'earrings' ? 0.9 : dept === 'sound' ? 0.6 : dept === 'purses' ? 0.35 : dept === 'sandals' ? 0.55 : 0.5; if (dept === 'sound') cam.pitch = 0.12; if (dept === 'sandals') cam.pitch = 0.22; if (dept === 'back' || J.isCloth(dept)) cam.pitch = 0.1; this.commit(true); this.undoBtns();
     },
     leave() {
       if (!this.on) return; this.on = false; this.dept = null; delete $('#editor').dataset.jm; clearTimeout(this.saveT); this.unmount(this.built); this.built = null;
@@ -226,7 +240,7 @@
       if (J.isCloth(this.dept) && !J.clothData(this.st.d.part).ready) { const dp = this.dept; J.prep(dp, this.st.d).then(() => { if (this.dept === dp) { this.rebuild(true); if (typeof this.frame === 'function') this.frame(); } }); }
       this.unmount(this.built); this.built = this.mountItem({ dept: this.dept, d: this.st.d }); if (worn) worn.root.visible = false;
       const kind = J.kindOf(this.dept, this.st.d), k = JDEPT[this.dept], tri = this.built.info.tris.toLocaleString();
-      $('#reads').innerHTML = `<span class="ib2" style="--c:${k.c}">${ic(k.icon)}</span><span><b>${this.dept === 'back' ? J.BACK_LABEL[kind] : J.isCloth(this.dept) ? J.CLOTH_LABEL[this.st.d.part] : this.dept === 'sound' ? J.SOUND_LABEL[kind] : this.dept === 'sandals' ? J.STYLE_LABEL[kind] + ' sandals' : this.dept === 'purses' ? J.BAG_LABEL[kind] + ' purse' : this.dept === 'earrings' ? J.KIND_LABEL[kind] : J.lenLabel(this.st.d.len)}</b><span>${this.dept === 'necklaces' ? Math.round(this.built.info.lengthCm) + ' cm round · ' : ''}${esc(brandBy(this.st.d.brand))} · ${tri} triangles</span></span>`;
+      $('#reads').innerHTML = `<span class="ib2" style="--c:${k.c}">${ic(k.icon)}</span><span><b>${this.dept === 'hats' ? J.HAT_LABEL[kind] : this.dept === 'back' ? J.BACK_LABEL[kind] : J.isCloth(this.dept) ? J.CLOTH_LABEL[this.st.d.part] : this.dept === 'sound' ? J.SOUND_LABEL[kind] : this.dept === 'sandals' ? J.STYLE_LABEL[kind] + ' sandals' : this.dept === 'purses' ? J.BAG_LABEL[kind] + ' purse' : this.dept === 'earrings' ? J.KIND_LABEL[kind] : J.lenLabel(this.st.d.len)}</b><span>${this.dept === 'necklaces' ? Math.round(this.built.info.lengthCm) + ' cm round · ' : ''}${esc(brandBy(this.st.d.brand))} · ${tri} triangles</span></span>`;
       const fx = $('#fixes'); fx.hidden = !this.notes.length; fx.innerHTML = this.notes.length ? '<b>Adjusted:</b> ' + this.notes.map(esc).join('. ') + '.' : '';
       $('#docName').value = this.st.name;
     },
@@ -311,7 +325,7 @@
       const acts = el('span', 'jacts'); const mk = (icon, tip, fn, dis) => { const b = el('button', 'g-btn g-btn--ghost g-btn--icon g-btn--sm', ic(icon)); b.setAttribute('aria-label', tip); b.setAttribute('data-g-tip', tip); if (dis) b.disabled = true; b.onclick = fn; acts.append(b); };
       if (dept === 'earrings') { mk('arrow_up', 'Move up', () => { [list[i - 1], list[i]] = [list[i], list[i - 1]]; this.set({}, true); }, i === 0); mk('arrow_down_to_line', 'Move down', () => { [list[i + 1], list[i]] = [list[i], list[i + 1]]; this.set({}, true); }, i === list.length - 1); }
       mk('plus_in_circle', 'Copy', () => { if (list.length < J.LIMITS[dept].n) { list.splice(i + 1, 0, JSON.parse(JSON.stringify(e))); this.set({}, true); } }, list.length >= J.LIMITS[dept].n);
-      const minN = dept === 'purses' || dept === 'sandals' ? 0 : 1; mk('trash_can', 'Remove', () => { if (list.length > minN) { list.splice(i, 1); this.set({}, true); } }, list.length <= minN);
+      const minN = dept === 'purses' || dept === 'sandals' || dept === 'hats' ? 0 : 1; mk('trash_can', 'Remove', () => { if (list.length > minN) { list.splice(i, 1); this.set({}, true); } }, list.length <= minN);
       top.append(pic, sel, acts); card.append(top);
       this.slider(card, { label: 'Size', value: e.size, min: 0.5, max: dept === 'earrings' ? 4 : 5, fmt: v => v.toFixed(1) + ' cm', on: (v, f) => this.setEl(i, { size: v }, f) });
       if (e.k === 'shape') { this.colour(card, 'Colour', e.col, (v, f) => this.setEl(i, { col: v }, f)); this.segs(card, J.FINISHES.map(x => [x[0], x[1]]), e.finish, v => this.setEl(i, { finish: v }, true), 3); }
@@ -321,6 +335,10 @@
         if (!c.brand) { this.segs(card, [['', 'Original colours'], ['wash', kimi ? 'Pastel wash' : 'Colour wash']], e.tint ? 'wash' : '', v => this.setEl(i, { tint: v === 'wash' ? (J.isPastel(e.col) || !kimi ? e.col : '#ffc4dc') : '' }, true), 2); if (e.tint) this.colour(card, 'Wash colour', e.tint === 'pastel' ? '#ffc4dc' : e.tint, (v, f) => this.setEl(i, { tint: v }, f)); }
       }
       if (dept === 'sandals') this.slider(card, { label: 'Position', value: e.at, min: -1, max: 1, fmt: v => v < -0.05 ? 'Inner side' : v > 0.05 ? 'Outer side' : 'Top', ends: ['Inner side', 'Outer side'], on: (v, f) => this.setEl(i, { at: v }, f) });
+      if (dept === 'hats') {
+        this.slider(card, { label: 'Round the hat', value: e.at, min: -1, max: 1, fmt: v => v < -0.05 ? 'Her right' : v > 0.05 ? 'Her left' : 'Front', ends: ['Her right side', 'Her left side'], on: (v, f) => this.setEl(i, { at: v }, f) });
+        this.slider(card, { label: 'Height', value: e.up == null ? 0.45 : e.up, min: 0, max: 1, fmt: v => v < 0.33 ? 'Low' : v < 0.66 ? 'Middle' : 'High', ends: ['Low on the crown', 'High'], on: (v, f) => this.setEl(i, { up: v }, f) });
+      }
       if (dept === 'purses') {
         this.slider(card, { label: 'Position', value: e.at, min: -1, max: 1, fmt: v => v < -0.05 ? 'Left' : v > 0.05 ? 'Right' : 'Middle', ends: ['Left of the bag', 'Right of the bag'], on: (v, f) => this.setEl(i, { at: v }, f) });
         this.slider(card, { label: 'Chain length', value: e.drop, min: 0.4, max: 9, fmt: v => v.toFixed(1) + ' cm', on: (v, f) => this.setEl(i, { drop: v }, f) });
@@ -334,18 +352,19 @@
     addGallery(parent) {
       const list = this.list(), full = list.length >= J.LIMITS[this.dept].n, kimi = this.st.d.brand === 'kimiland', g = grp(parent, 'Add');
       g.append(el('div', 'note', full ? 'That\'s the most it holds. Remove one to add another.' : 'Tap a shape or a charm to add it.'));
-      const sh = el('div', 'jgrid'); for (const [v, l] of J.SHAPES) { const b = el('button', '', `<span>${esc(l)}</span>`); b.disabled = full; b.onclick = () => { const e = J.EL({ k: 'shape', id: v, size: this.dept === 'earrings' ? 1.2 : 1.8, col: kimi ? '#ffc4dc' : '#ff8fc2', mode: this.dept === 'necklaces' && J.THREAD_SHAPES.includes(v) ? 'thread' : 'hang', at: this.dept === 'necklaces' ? 0.4 : this.dept === 'purses' || this.dept === 'sandals' ? 0.3 : 0, drop: 2.5 }); list.push(e); this.set({}, true); }; sh.append(b); }
+      const sh = el('div', 'jgrid'); for (const [v, l] of J.SHAPES) { const b = el('button', '', `<span>${esc(l)}</span>`); b.disabled = full; b.onclick = () => { const e = J.EL({ k: 'shape', id: v, size: this.dept === 'earrings' ? 1.2 : 1.8, col: kimi ? '#ffc4dc' : '#ff8fc2', mode: this.dept === 'necklaces' && J.THREAD_SHAPES.includes(v) ? 'thread' : 'hang', up: 0.45, at: this.dept === 'hats' ? (list.length % 2 ? 0.35 : -0.1) : this.dept === 'necklaces' ? 0.4 : this.dept === 'purses' || this.dept === 'sandals' ? 0.3 : 0, drop: 2.5 }); list.push(e); this.set({}, true); }; sh.append(b); }
       g.append(sh);
       for (const t of ['christmas', 'halloween', 'valentines', 'kimiland']) {
         g.append(el('div', 'g-label', esc(J.THEME_LABEL[t])));
-        const gr = el('div', 'jgrid charms'); for (const c of J.CHARMS.filter(x => x.theme === t)) { const b = el('button', '', `<i style="background-image:url(${c.src})"></i>`); b.disabled = full; b.setAttribute('aria-label', c.label); b.setAttribute('data-g-tip', c.label); b.onclick = () => { const e = J.EL({ k: 'charm', id: c.id, size: this.dept === 'earrings' ? 2.1 : 2.6, outline: !c.noOutline, tint: kimi && !c.brand ? '#ffc4dc' : '', mode: 'hang', at: this.dept === 'necklaces' ? -0.4 : this.dept === 'purses' || this.dept === 'sandals' ? -0.3 : 0, drop: 2.5 }); list.push(e); this.set({}, true); }; gr.append(b); }
+        const gr = el('div', 'jgrid charms'); for (const c of J.CHARMS.filter(x => x.theme === t)) { const b = el('button', '', `<i style="background-image:url(${c.src})"></i>`); b.disabled = full; b.setAttribute('aria-label', c.label); b.setAttribute('data-g-tip', c.label); b.onclick = () => { const e = J.EL({ k: 'charm', id: c.id, size: this.dept === 'earrings' ? 2.1 : 2.6, outline: !c.noOutline, tint: kimi && !c.brand ? '#ffc4dc' : '', mode: 'hang', up: 0.45, at: this.dept === 'hats' ? (list.length % 2 ? -0.35 : 0.1) : this.dept === 'necklaces' ? -0.4 : this.dept === 'purses' || this.dept === 'sandals' ? -0.3 : 0, drop: 2.5 }); list.push(e); this.set({}, true); }; gr.append(b); }
         g.append(gr);
       }
     },
     inspector() {
       const box = $('#insp'); box.innerHTML = ''; const st = this.st, d = st.d, dept = this.dept, tab = rtab;
       $$('#rtabs button').forEach(b => b.classList.toggle('is-on', b.dataset.rt === tab));
-      if (dept === 'back') this.backPanel(box, tab);
+      if (dept === 'hats') this.hatPanel(box, tab);
+      else if (dept === 'back') this.backPanel(box, tab);
       else if (J.isCloth(dept)) this.clothPanel(box, tab);
       else if (dept === 'sound') this.soundPanel(box, tab);
       else if (dept === 'sandals') this.sandalPanel(box, tab);
@@ -495,6 +514,29 @@
         this.nameGroup(box);
       }
     },
+    hatPanel(box, tab) {
+      const d = this.st.d, hi = J.HAT_INFO[d.kind];
+      if (tab === 'pieces') {
+        const g1 = grp(box, 'Hat'); this.segs(g1, J.HAT_KINDS, d.kind, v => this.set({ kind: v }, true), 2);
+        const g2 = grp(box, 'Where it sits'); g2.append(el('div', 'note', 'The hat sits on top of her head and never changes her hair or anything else she wears. Nudge it into place here, or with the sliders over her in the closet.'));
+        const P = J.HAT_POSE, ax = ['X (side to side)', 'Y (up and down)', 'Z (back and front)'], rx = ['X (tip forward or back)', 'Y (turn)', 'Z (lean sideways)'];
+        for (const [key, label, names, lim, fmt] of [['pos', 'Position', ax, P.pos, v => (v > 0 ? '+' : '') + v.toFixed(1)], ['rot', 'Rotation', rx, P.rot, v => Math.round(v * 180 / Math.PI) + '°'], ['scale', 'Size', ['X (width)', 'Y (height)', 'Z (depth)'], P.scale, v => Math.round(v * 100) + '%']]) {
+          g2.append(el('div', 'g-label', esc(label)));
+          for (let i = 0; i < 3; i++) this.slider(g2, { label: names[i], value: d[key][i], min: lim[0], max: lim[1], step: key === 'rot' ? 0.01 : key === 'scale' ? 0.01 : 0.05, fmt, on: (v, f) => { const a = d[key].slice(); a[i] = v; this.set({ [key]: a }, f); } });
+        }
+        const rs = el('button', 'g-btn g-btn--sm', `${ic('arrow_counterclockwise')}<span>Put it back where it was</span>`); rs.onclick = () => this.set({ pos: [0, 0, 0], rot: [0, 0, 0], scale: [1, 1, 1] }, true); g2.append(rs);
+      } else if (tab === 'charms') {
+        const g = grp(box, 'Pinned on'); g.append(el('div', 'note', 'Charms and shapes are pinned on the crown. Slide them round the hat and up or down.'));
+        for (let i = 0; i < d.charms.length; i++) this.elCard(g, i); this.addGallery(box);
+      } else {
+        const g1 = grp(box, 'Brand'); this.brandChoice(g1);
+        const g2 = grp(box, 'Colours'); this.colour(g2, hi.areas[0], d.col, (v, f) => this.set({ col: v }, f)); if (hi.areas[1]) this.colour(g2, hi.areas[1], d.col2, (v, f) => this.set({ col2: v }, f));
+        if (hi.band) { this.toggle(g2, 'A band round the crown', d.band, v => this.set({ band: v }, true)); if (d.band) this.colour(g2, 'Band', d.col3, (v, f) => this.set({ col3: v }, f)); }
+        const g3 = grp(box, 'Print'); this.patPicker(g3, 'Print', 'pat', 'patCol', { base: 'col' }); if (d.pat >= 0) this.slider(g3, { label: 'Print size', value: d.tiles, min: 4, max: 30, fmt: v => v < 10 ? 'Big' : v < 18 ? 'Medium' : 'Small', ends: ['Big', 'Small'], on: (v, f) => this.set({ tiles: v }, f) });
+        const g4 = grp(box, 'Finish'); this.segs(g4, J.FINISHES.map(x => [x[0], x[1]]), d.finish, v => this.set({ finish: v }, true), 3);
+        this.nameGroup(box);
+      }
+    },
     pursePanel(box, tab) {
       const d = this.st.d, L = J.BAG_LIM[d.shape], kimi = d.brand === 'kimiland';
       if (tab === 'pieces') {
@@ -529,7 +571,7 @@
     publish() { const list = mine(); list.unshift({ id: Date.now().toString(36), dept: this.dept, seed: this.st.seed, name: this.st.name || 'My ' + JDEPT[this.dept].one, d: this.st.d, when: Date.now() }); if (saveMine(list.slice(0, 60))) GRUG.toast('Added to the catalog'); },
     rename() { this.st.seed = this.st.seed.replace(/~\d+$/, '') + '~' + Math.floor(Math.random() * 1e6); this.st.name = J.nameFor(this.dept, this.st.d, this.st.seed); this.st.autoName = true; $('#docName').value = this.st.name; this.commit(); },
     async download(w, fmt) {
-      if (J.isCloth(w.dept)) { GRUG.toast('Clothing isn\'t downloadable'); return; }
+      if (J.isCloth(w.dept) || w.dept === 'hats') { GRUG.toast(w.dept === 'hats' ? 'Hats aren\'t downloadable' : 'Clothing isn\'t downloadable'); return; }
       const base = slug(w.name, w.dept), b = J.build(w.dept, w.d); try { const { blob, ext } = await GE.exportModel(b.root, fmt, { scale: b.frame === 'head' ? hm.unitCm : 1, base }); GRUG.download(base + '.' + ext, blob); GRUG.toast('Downloaded ' + base + '.' + ext); } catch (e) { console.error(e); GRUG.toast('Couldn\'t make that file'); }
       b.dispose();
     }
@@ -538,7 +580,7 @@
   // a picture for a card or a starter tile
   function thumbJewel(it, bodyColour) {
     J.CLOTH_PIC.on = true; let b; try { b = JM.mountItem(it); } finally { J.CLOTH_PIC.on = false; } const back = soloItem(b.root); sandy.object3d.updateMatrixWorld(true);
-    frameOn(JM.frameBox(b.root, it), it.dept === 'back' ? (it.d.kind === 'hip' ? 1.25 : 2.6) : J.isCloth(it.dept) ? 0.35 : it.dept === 'earrings' ? 1.0 : it.dept === 'sound' ? (it.d.kind === 'buds' ? 0.95 : 0.55) : it.dept === 'purses' ? 0.25 : it.dept === 'sandals' ? 0.55 : 0.3, it.dept === 'sandals' ? 0.2 : it.dept === 'sound' ? 0.12 : it.dept === 'back' || J.isCloth(it.dept) ? 0.1 : 0.08, thumbCam, 26, 1.0);
+    frameOn(JM.frameBox(b.root, it), it.dept === 'hats' ? 0.55 : it.dept === 'back' ? (it.d.kind === 'hip' ? 1.25 : 2.6) : J.isCloth(it.dept) ? 0.35 : it.dept === 'earrings' ? 1.0 : it.dept === 'sound' ? (it.d.kind === 'buds' ? 0.95 : 0.55) : it.dept === 'purses' ? 0.25 : it.dept === 'sandals' ? 0.55 : 0.3, it.dept === 'sandals' ? 0.2 : it.dept === 'sound' ? 0.12 : it.dept === 'back' || J.isCloth(it.dept) ? 0.1 : 0.08, thumbCam, 26, 1.0);
     const url = snapScene(bodyColour, true); back(); JM.unmount(b); return url;
   }
   // the jewelry item page: the piece on her, framed

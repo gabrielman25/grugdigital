@@ -2793,7 +2793,7 @@ window.GRUG_PATTERNS={src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA4AAAAM
 
   /* ---------------------------------------------------------------- vocabulary: kinds, names, tags, specs */
   const earKind = d => d.seq.length === 1 ? (d.seq[0].id === 'ring' && d.seq[0].k === 'shape' ? 'hoops' : 'studs') : d.seq.length <= 3 ? 'drops' : 'danglers';
-  const KIND_LABEL = { studs: 'Studs', drops: 'Drops', danglers: 'Danglers', hoops: 'Hoops', choker: 'Chokers', short: 'Short', medium: 'Medium', long: 'Long', satchel: 'Satchels', tote: 'Totes', bucket: 'Buckets', round: 'Rounds', heart: 'Hearts', clutch: 'Clutches', slide: 'Slides', thong: 'Thongs', ankle: 'Ankle straps', gladiator: 'Gladiators', wrap: 'Wraps', slipper: 'Slippers', over: 'Headphones', muffs: 'Earmuffs', buds: 'Earbuds', back1: 'One sword', back2: 'Two swords', hip: 'Hip sword', shirts: 'Shirts', sweaters: 'Sweaters and hoodies', jackets: 'Jackets', trousers: 'Trousers', shorts: 'Shorts', skirts: 'Skirts', sneakers: 'Sneakers', boots: 'Boots', outfits: 'Outfits' };
+  const KIND_LABEL = { beanie: 'Beanies', beret: 'Berets', bucketHat: 'Bucket hats', cap: 'Caps', cowboyHat: 'Cowboy hats', sunHat: 'Sun hats', topHat: 'Top hats', witchHat: 'Witch hats', studs: 'Studs', drops: 'Drops', danglers: 'Danglers', hoops: 'Hoops', choker: 'Chokers', short: 'Short', medium: 'Medium', long: 'Long', satchel: 'Satchels', tote: 'Totes', bucket: 'Buckets', round: 'Rounds', heart: 'Hearts', clutch: 'Clutches', slide: 'Slides', thong: 'Thongs', ankle: 'Ankle straps', gladiator: 'Gladiators', wrap: 'Wraps', slipper: 'Slippers', over: 'Headphones', muffs: 'Earmuffs', buds: 'Earbuds', back1: 'One sword', back2: 'Two swords', hip: 'Hip sword', shirts: 'Shirts', sweaters: 'Sweaters and hoodies', jackets: 'Jackets', trousers: 'Trousers', shorts: 'Shorts', skirts: 'Skirts', sneakers: 'Sneakers', boots: 'Boots', outfits: 'Outfits' };
   const kindOf = (dept, d) => dept === 'earrings' ? earKind(d) : lenClass(d).id;
   const elName = e => e.k === 'charm' ? CHARM_BY[e.id].label : SHAPE_LABEL[e.id];
   const FLAVOUR = ['Cute', 'Fancy', 'Dainty', 'Glam', 'Posh', 'Sparkly', 'Merry', 'Spooky', 'Lovely', 'Bold', 'Sweet', 'Chic', 'Jolly', 'Charming', 'Darling', 'Lucky', 'Super', 'Pretty', 'Royal', 'Magic'];
@@ -4279,13 +4279,161 @@ window.GRUG_PATTERNS={src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA4AAAAM
   // her default shirt and trousers go on as soon as the page has her
   function clothInit(sandy) { clothData(CLOTH_DEFAULT.top.part); clothData(CLOTH_DEFAULT.legs.part); clothSync(sandy); return Promise.all([clothData(CLOTH_DEFAULT.top.part).p, clothData(CLOTH_DEFAULT.legs.part).p]).then(() => clothSync(sandy)); }
 
-  const build = (dept, d, ctx, o) => isCloth(dept) ? buildCloth(dept, d, ctx || CTX) : dept === 'back' ? buildBack(d, ctx || CTX) : dept === 'sound' ? buildSound(d, ctx || CTX) : dept === 'sandals' ? buildSandals(d, ctx || CTX) : dept === 'purses' ? buildPurse(d, ctx || CTX) : dept === 'earrings' ? buildEarrings(d, ctx || CTX, o) : buildNecklace(d, ctx || CTX, o);
+  /* ================================================================ hats
+     The classic hats (Chibi Hats by PaperPluto, window.HATPACK: eight low-poly hats and their shaded texture, already in
+     assets/sandy-classic.js), made for her head: they sit in her head frame exactly where the classic kit seats them. Each
+     takes any colour in up to three areas (the hat, its brim or trim, and a band round the crown), a print on the hat, and
+     charms pinned on the crown (raycast onto its surface: at = round the crown, -1 left to 1 right; up = how high, 0 to 1).
+     A hat never changes anything else on her (hair, glasses, her head): it simply sits on top. Where it sits is the
+     player's: pos (x, y, z), rot (x, y, z, radians) and scale (x, y, z), set with the closet's Position / Rotation / Size
+     sliders and applied about the hat's seat (hatPose). Not downloadable: there's no licence on file for handing out the
+     pack's files. */
+  const HAT_KINDS = [['beanie', 'Beanie'], ['beret', 'Beret'], ['bucketHat', 'Bucket hat'], ['cap', 'Cap'], ['cowboyHat', 'Cowboy hat'], ['sunHat', 'Sun hat'], ['topHat', 'Top hat'], ['witchHat', 'Witch hat']];
+  const HAT_LABEL = Object.fromEntries(HAT_KINDS);
+  // per hat: the names of its areas, which islands of the mesh are the second area (brim, visor, trim), a second area drawn
+  // below a height on one-piece hats (brimBelow), the band round the crown [from, to] (heights in the hat's own units), and
+  // the crown's middle for charms
+  const HAT_INFO = {
+    beanie: { areas: ['Beanie', 'Cuff'], brimBelow: 8.2, band: null },
+    beret: { areas: ['Beret', 'Trim'], second: 'small', band: null },
+    bucketHat: { areas: ['Hat', 'Brim', 'Band'], brimBelow: 7.6, band: [7.6, 10.6] },
+    cap: { areas: ['Cap', 'Visor and button'], second: 'cap', band: null },
+    cowboyHat: { areas: ['Hat', 'Brim', 'Band'], second: 'low', band: [7.2, 10] },
+    sunHat: { areas: ['Hat', 'Brim', 'Band'], second: 'low', band: [9.6, 12.6] },
+    topHat: { areas: ['Hat', 'Brim', 'Band'], second: 'low', band: [9, 13.6] },
+    witchHat: { areas: ['Hat', 'Brim', 'Band'], second: 'low', band: [13.6, 18.2] }
+  };
+  const HAT_N = 4, KH = 2.1, HAT_COLS = ['col', 'col2', 'col3', 'patCol'];
+  const hatSrc = kind => { const P = window.HATPACK; return P && P.hats ? P.hats.find(h => h.id === 'hat_' + kind) : null; };
+  const hasHats = () => !!(window.HATPACK && window.HATPACK.hats && window.HATPACK.hats.length);
+  DEF.hats = () => ({ v: 2, brand: 'grug', kind: 'beanie', col: '#e8344f', col2: '#f4f4f2', col3: '#16161a', band: true, pat: -1, patCol: '#16161a', tiles: 12, finish: 'matte', pos: [0, 0, 0], rot: [0, 0, 0], scale: [1, 1, 1], charms: [] });
+  const HAT_POSE = { pos: [-8, 8], rot: [-Math.PI, Math.PI], scale: [0.6, 1.8] };
+  LIMITS.hats = { n: HAT_N };
+  function validateH(src, brand) {
+    const notes = [], D0 = DEF.hats(), d = Object.assign(DEF.hats(), src || {}); d.brand = brand || d.brand; if (!BRAND_LABEL[d.brand]) d.brand = 'grug';
+    if (!HAT_LABEL[d.kind]) d.kind = 'beanie';
+    for (const k of HAT_COLS) if (!isHex(d[k])) d[k] = D0[k];
+    { const v = Math.round(+d.pat); d.pat = isFinite(v) && v >= 0 && v < PAT_N ? v : -1; } d.tiles = clamp(isFinite(+d.tiles) ? +d.tiles : 12, 4, 30);
+    if (!FINISHES.some(f => f[0] === d.finish)) d.finish = 'matte'; d.band = d.band !== false;
+    // where it sits (older designs had up, fwd, tilt and one size)
+    if (src && !Array.isArray(src.pos) && (src.up != null || src.fwd != null || src.tilt != null || src.size != null)) { d.pos = [0, +src.up || 0, +src.fwd || 0]; d.rot = [+src.tilt || 0, 0, 0]; const k = isFinite(+src.size) ? +src.size : 1; d.scale = [k, k, k]; }
+    delete d.up; delete d.fwd; delete d.tilt; delete d.size; d.v = 2;
+    const vec = (v, def, [lo, hi]) => [0, 1, 2].map(i => { const x = Array.isArray(v) ? +v[i] : NaN; return clamp(isFinite(x) ? x : def, lo, hi); });
+    d.pos = vec(d.pos, 0, HAT_POSE.pos); d.rot = vec(d.rot, 0, HAT_POSE.rot); d.scale = vec(d.scale, 1, HAT_POSE.scale);
+    d.charms = (d.charms || []).slice(0, HAT_N).map(e => { const o = cleanEl(e, 'hats'); o.up = clamp(isFinite(+e.up) ? +e.up : 0.45, 0, 1); return o; });
+    if (d.brand === 'kimiland') { let ch = false; for (const k of HAT_COLS) if (!isPastel(d[k])) { d[k] = toPastel(d[k]); ch = true; } for (const e of d.charms) kimiEl(e, { tint: isPastel(e.col) ? e.col : toPastel(e.col) }); if (ch) notes.push('Brought to KIMILAND pastels'); }
+    return { d, notes };
+  }
+  function randomH(seed, o) {
+    o = o || {}; const r = rng('jewel:hats:' + seed), brand = o.brand || brandFor(seed, 0.22), kimi = brand === 'kimiland';
+    const theme = kimi ? 'sweet' : r.w({ classic: 3, christmas: 1.6, halloween: 1.4, valentines: 1.2, sweet: 1.4, ocean: 1, forest: 1, night: 1 });
+    const pal = kimi ? kimiPalette(r) : null, T = THEMES[theme], NEUT = ['#f4f4f2', '#16161a', '#3a3b40', '#c8ccd2', '#c9a27e', '#6b4428', '#efe6cf'], pick = kimi ? () => r.pick(pal.mains.concat(pal.acc)) : () => r.chance(0.35) ? r.pick(NEUT) : r.pick(T.cols);
+    let d = o.base ? JSON.parse(JSON.stringify(o.base)) : DEF.hats(); d.brand = brand;
+    const recolour = () => { d.col = pick(); d.col2 = r.chance(0.45) ? d.col : pick(); d.col3 = kimi ? '#fffafc' : r.chance(0.5) ? r.pick(NEUT) : pick(); d.patCol = kimi ? r.pick(['#fffafc', r.pick(pal.acc)]) : shadeOf(d.col); for (const e of d.charms) { if (e.k === 'shape') e.col = pick(); else { const c = CHARM_BY[e.id]; e.tint = kimi && !c.brand ? (pal.pink ? pal.main : r.pick(pal.mains)) : ''; } } };
+    if (o.keep === 'shape') { recolour(); return validateH(d, brand).d; }
+    const keepC = o.keep === 'colours' && o.base ? HAT_COLS.map(k => d[k]) : null;
+    d.kind = o.kind && HAT_LABEL[o.kind] ? o.kind : r.w(theme === 'halloween' ? { witchHat: 4, topHat: 1.4, beanie: 1, cap: 1, cowboyHat: 1 } : theme === 'christmas' ? { beanie: 4, beret: 1.5, bucketHat: 1, topHat: 1, cap: 1 } : { beanie: 2, beret: 1.6, bucketHat: 1.6, cap: 2.2, cowboyHat: 1.4, sunHat: 1.6, topHat: 1, witchHat: 0.5 });
+    d.band = r.chance(0.7); d.pat = r.chance(0.28) ? r.i(0, PAT_N - 1) : -1; d.tiles = r.f(8, 18); d.finish = r.w({ matte: 5, gloss: 1.5, metal: kimi ? 0 : 0.3 });
+    d.pos = [0, 0, 0]; d.rot = [r.chance(0.25) ? r.f(-0.12, 0.12) : 0, 0, 0]; d.scale = [1, 1, 1];
+    const n = r.w({ 0: 2.4, 1: 3, 2: 1.6, 3: 0.6 }) | 0; d.charms = [];
+    for (let i = 0; i < n; i++) { const e = randomEl(r, 'necklaces', theme, pal, kimi, { charm: T.charm || kimi ? r.chance(0.8) : r.chance(0.4) }); e.size = clamp(e.size * 0.85, 1.4, 3.2); e.at = n === 1 ? r.f(-0.25, 0.25) : lerp(-0.55, 0.55, i / (n - 1)); e.up = r.f(0.3, 0.6); d.charms.push(e); }
+    recolour(); if (keepC) HAT_COLS.forEach((k, i) => { d[k] = keepC[i]; });
+    return validateH(d, brand).d;
+  }
+  const HAT_FL = ['Cozy', 'Classic', 'Comfy', 'Snug', 'Jolly', 'Merry', 'Spooky', 'Sunny', 'Lucky', 'Dapper', 'Sweet', 'Bold'];
+  function nameH(d, seed) {
+    const r = rng('jname:' + seed + ':hats'), kimi = d.brand === 'kimiland', colour = colourName(d.col, kimi), fl = kimi ? r.pick(KIMI_FLAVOUR) : r.pick(HAT_FL), noun = HAT_LABEL[d.kind];
+    const sub = d.charms.length ? elName(mainEl(d.charms)) : '', pat = d.pat >= 0 ? r.pick(['Print', 'Printed', 'Patterned']) : '';
+    const forms = [[colour, noun], [fl, colour, noun], [sub ? sub : fl, noun], [pat || fl, colour, noun]];
+    return forms[r.i(0, 3)].filter(Boolean).join(' ').replace(/\s+/g, ' ');
+  }
+  function tagsH(d) {
+    const t = ['Hat', HAT_LABEL[d.kind]], themes = new Set(d.charms.filter(e => e.k === 'charm').map(e => CHARM_BY[e.id].theme));
+    for (const th of themes) t.push(THEME_LABEL[th]); if (d.charms.length) t.push('Charms'); t.push(d.pat >= 0 ? 'Patterned' : 'Solid colour');
+    if (d.brand === 'kimiland') t.push('Pastel', 'KIMILAND'); return Array.from(new Set(t));
+  }
+  function familiesH(d) { const f = new Set([famOfHex(d.col)]); if (HAT_INFO[d.kind].areas.length > 1) f.add(famOfHex(d.col2)); if (d.pat >= 0) f.add(famOfHex(d.patCol)); for (const e of d.charms) { if (e.k === 'shape') f.add(famOfHex(e.col)); else { const c = CHARM_BY[e.id]; if (e.tint) f.add(famOfHex(e.tint === 'pastel' ? '#ffc4dc' : e.tint)); else for (const x of c.fam) f.add(x); } } if (f.size > 3) f.add('multi'); return f; }
+  function describeH(d) {
+    const kimi = d.brand === 'kimiland', info = HAT_INFO[d.kind], cn = h => colourName(h, kimi).toLowerCase(), names = Array.from(new Set(d.charms.map(elName).map(s => s.toLowerCase())));
+    const head = (d.pat >= 0 ? 'printed ' : '') + cn(d.col), lab = HAT_LABEL[d.kind].toLowerCase();
+    const two = info.areas.length > 1 && d.col2 !== d.col ? `, with a ${cn(d.col2)} ${info.areas[1].toLowerCase()}` : '', band = info.band && d.band ? `${two ? ' and' : ', with'} a ${cn(d.col3)} band` : '';
+    const ch = names.length ? ' Pinned on it: ' + (names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0]) + '.' : '';
+    return `${/^[aeiou]/.test(head) ? 'An' : 'A'} ${head} ${lab}${two}${band}.${ch}${kimi ? ' A KIMILAND piece: soft pastels, made to be cute.' : ''}`;
+  }
+  // the hat's mesh, its areas (an attribute per vertex) and its crown, made once per hat
+  const HGEO = {};
+  function hatData(kind) {
+    if (HGEO[kind]) return HGEO[kind]; const h = hatSrc(kind); if (!h) return null;
+    const b = x => { const s = atob(x), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u.buffer; };
+    const P = new Float32Array(b(h.pos)), N8 = new Int8Array(b(h.nrm)), U16 = new Uint16Array(b(h.uv)), I = new Uint16Array(b(h.idx)), N = new Float32Array(N8.length), UV = new Float32Array(U16.length);
+    for (let i = 0; i < N8.length; i++) N[i] = N8[i] / 127; for (let i = 0; i < U16.length; i++) UV[i] = U16[i] / 65535;
+    // islands: pieces joined in both space and the texture (crown, brim, visor, button…)
+    const nv = P.length / 3, key = i => [P[i * 3], P[i * 3 + 1], P[i * 3 + 2], UV[i * 2], UV[i * 2 + 1]].map(v => v.toFixed(3)).join(','), ids = new Map(), vid = new Int32Array(nv);
+    for (let i = 0; i < nv; i++) { const k = key(i); if (!ids.has(k)) ids.set(k, ids.size); vid[i] = ids.get(k); }
+    const par = Array.from({ length: ids.size }, (_, i) => i), f = x => { while (par[x] !== x) x = par[x] = par[par[x]]; return x; };
+    for (let t = 0; t < I.length; t += 3) { const a = f(vid[I[t]]); par[f(vid[I[t + 1]])] = a; par[f(vid[I[t + 2]])] = a; }
+    const isl = new Map(); for (let t = 0; t < I.length; t += 3) { const r = f(vid[I[t]]); let s = isl.get(r); if (!s) isl.set(r, s = { tris: 0, y: 0, z: 0, lo: new THREE.Vector3(1e9, 1e9, 1e9), hi: new THREE.Vector3(-1e9, -1e9, -1e9) }); s.tris++; for (let k = 0; k < 3; k++) { const v = I[t + k]; s.y += P[v * 3 + 1] / 3; s.z += P[v * 3 + 2] / 3; s.lo.min(new THREE.Vector3(P[v * 3], P[v * 3 + 1], P[v * 3 + 2])); s.hi.max(new THREE.Vector3(P[v * 3], P[v * 3 + 1], P[v * 3 + 2])); } }
+    for (const s of isl.values()) { s.y /= s.tris; s.z /= s.tris; }
+    const info = HAT_INFO[kind], list = Array.from(isl.entries()), big = list.reduce((a, b) => (b[1].tris > a[1].tris ? b : a)), low = list.reduce((a, b) => (b[1].y < a[1].y ? b : a));
+    const second = r => { const s = isl.get(r); if (list.length < 2) return false; if (info.second === 'low') return r === low[0]; if (info.second === 'small') return r !== big[0]; if (info.second === 'cap') return s.z > 4 || s.hi.distanceTo(s.lo) < 6; return false; };
+    const reg = new Float32Array(nv); for (let t = 0; t < I.length; t += 3) { const v = second(f(vid[I[t]])) ? 1 : 0; reg[I[t]] = reg[I[t + 1]] = reg[I[t + 2]] = v; }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.BufferAttribute(N, 3)); g.setAttribute('uv', new THREE.BufferAttribute(UV, 2)); g.setAttribute('aReg', new THREE.BufferAttribute(reg, 1)); g.setIndex(new THREE.BufferAttribute(I, 1)); g.computeBoundingBox(); g.computeBoundingSphere();
+    // the crown: everything not in the second area (its height range, for charms)
+    const cb = new THREE.Box3(); for (let i = 0; i < nv; i++) if (!reg[i] && !(info.brimBelow != null && P[i * 3 + 1] < info.brimBelow)) cb.expandByPoint(new THREE.Vector3(P[i * 3], P[i * 3 + 1], P[i * 3 + 2]));
+    return (HGEO[kind] = { g, seat: new THREE.Vector3(...h.seat), crown: cb.isEmpty() ? g.boundingBox.clone() : cb, tris: I.length / 3 });
+  }
+  let HAT_TEX = null;
+  const hatTex = () => { if (!HAT_TEX && window.HATPACK) { HAT_TEX = new THREE.TextureLoader().load(window.HATPACK.tex); HAT_TEX.encoding = THREE.sRGBEncoding; HAT_TEX.anisotropy = 4; } return HAT_TEX; };
+  function hatMat(d, own) {
+    const lin = h => new THREE.Color(h).convertSRGBToLinear(), info = HAT_INFO[d.kind], band = info.band && d.band ? info.band : [-1e4, -1e4];
+    const U = { uA: { value: lin(d.col) }, uB: { value: lin(info.areas.length > 1 ? d.col2 : d.col) }, uC: { value: lin(d.col3) }, uPatCol: { value: lin(d.patCol) }, uPat: { value: null }, uTiles: { value: d.tiles }, uBelow: { value: info.brimBelow != null ? info.brimBelow : -1e4 }, uBand: { value: new THREE.Vector2(band[0], band[1]) } };
+    const pt = d.pat >= 0 ? patTile(d.pat) : null; U.uPat.value = pt;
+    const m = new THREE.MeshStandardMaterial({ color: 0xffffff, map: hatTex(), roughness: d.finish === 'gloss' ? 0.32 : d.finish === 'metal' ? 0.3 : 0.86, metalness: d.finish === 'metal' ? 0.75 : 0, envMap: ENV, envMapIntensity: d.finish === 'matte' ? 0.3 : 0.7, side: THREE.DoubleSide });
+    m.onBeforeCompile = sh => {
+      Object.assign(sh.uniforms, U);
+      sh.vertexShader = 'attribute float aReg; varying float vReg; varying vec3 vHatP;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n vReg = aReg; vHatP = position;');
+      sh.fragmentShader = 'uniform vec3 uA, uB, uC, uPatCol; uniform sampler2D uPat; uniform float uTiles, uBelow; uniform vec2 uBand; varying float vReg; varying vec3 vHatP;\n' + sh.fragmentShader.replace('#include <map_fragment>', `#ifdef USE_MAP
+        vec4 tx = texture2D( map, vUv ); vec3 base = uA;
+        ${pt ? 'base = mix( uPatCol, uA, texture2D( uPat, vUv * uTiles ).r );' : ''}
+        float wb = max( vReg, 1.0 - smoothstep( uBelow - 0.2, uBelow + 0.2, vHatP.y ) );
+        float wc = ( 1.0 - wb ) * smoothstep( uBand.x - 0.15, uBand.x + 0.15, vHatP.y ) * ( 1.0 - smoothstep( uBand.y - 0.15, uBand.y + 0.15, vHatP.y ) );
+        base = mix( mix( base, uB, wb ), uC, wc ); diffuseColor.rgb *= base * min( vec3( 1.0 ), tx.rgb * 1.12 );
+      #endif`);
+    };
+    m.customProgramCacheKey = () => 'grughat' + (pt ? 'p' : ''); m.userData.hatU = U; own.mats.push(m); return m;
+  }
+  // where the hat sits: about its seat, the player's offset, turn (x, y, z) and size per axis
+  function hatPose(root, d) {
+    const H = hatData(d.kind), g = root.userData.hatGroup; if (!H || !g) return;
+    g.position.copy(H.seat).add(new THREE.Vector3(d.pos[0], d.pos[1], d.pos[2])); g.rotation.set(d.rot[0], d.rot[1], d.rot[2], 'YXZ'); g.scale.set(d.scale[0], d.scale[1], d.scale[2]); g.updateMatrixWorld(true);
+  }
+  function buildHat(d, ctx) {
+    const own = { geos: [], mats: [], tris: 0 }, root = new THREE.Group(); root.name = 'grugHat'; root.userData.catalogItem = true; root.userData.jewel = { dept: 'hats', design: d };
+    const H = hatData(d.kind); if (!H) return { root, d, info: { tris: 0 }, frame: 'head', dispose() {} };
+    // as the classic kit seats it: the hat turns and grows about its seat
+    const g = new THREE.Group(), inner = new THREE.Group(); inner.position.copy(H.seat).negate(); g.add(inner); root.add(g); root.userData.hatGroup = g; hatPose(root, d);
+    const mesh = new THREE.Mesh(H.g, hatMat(d, own)); mesh.name = 'hat'; mesh.castShadow = true; mesh.frustumCulled = false; inner.add(mesh); own.tris += H.tris;
+    // charms pinned on the crown: a ray from outside at that angle and height, onto the crown's surface
+    const C = H.crown, cz = (C.min.z + C.max.z) / 2, ray = new THREE.Raycaster(), probe = new THREE.Mesh(H.g, new THREE.MeshBasicMaterial({ side: THREE.DoubleSide })), reg = H.g.attributes.aReg, info = HAT_INFO[d.kind];
+    for (const e0 of d.charms) {
+      const e = Object.assign({}, e0, { size: e0.size * KH }), a = e.at * 1.75, y = lerp(C.min.y + (C.max.y - C.min.y) * 0.12, C.max.y - (C.max.y - C.min.y) * 0.18, e.up), dir = new THREE.Vector3(Math.sin(a), 0, Math.cos(a));
+      ray.set(new THREE.Vector3(0, y, cz).addScaledVector(dir, 90), dir.clone().negate()); ray.far = 200;
+      const hit = ray.intersectObject(probe, false).find(h => !reg.getX(h.face.a) && !(info.brimBelow != null && h.point.y < info.brimBelow + 0.5)); if (!hit) continue;
+      const n = hit.face.normal.clone(); if (n.dot(dir) < 0) n.negate(); n.y *= 0.6; n.normalize();
+      const el = makeEl(e, own, true), q = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().lookAt(n, new THREE.Vector3(), new THREE.Vector3(0, 1, 0)));
+      el.quaternion.copy(q); el.position.copy(hit.point).addScaledVector(n, e.k === 'charm' ? 0.18 : 0.12 + elH(e) * 0.25); inner.add(el);
+    }
+    probe.material.dispose();
+    return { root, d, info: { tris: Math.round(own.tris) }, frame: 'head', dispose() { for (const g2 of own.geos) g2.dispose(); for (const m of own.mats) m.dispose(); } };
+  }
+
+  const build = (dept, d, ctx, o) => isCloth(dept) ? buildCloth(dept, d, ctx || CTX) : dept === 'hats' ? buildHat(d, ctx || CTX) : dept === 'back' ? buildBack(d, ctx || CTX) : dept === 'sound' ? buildSound(d, ctx || CTX) : dept === 'sandals' ? buildSandals(d, ctx || CTX) : dept === 'purses' ? buildPurse(d, ctx || CTX) : dept === 'earrings' ? buildEarrings(d, ctx || CTX, o) : buildNecklace(d, ctx || CTX, o);
   function init(ctx) { CTX = ctx; ENV = ctx.env || null; for (const m of mats.values()) { m.envMap = ENV; m.needsUpdate = true; } }
   const lengthCm = d => { try { return Math.round(buildNecklaceLength(d)); } catch (e) { return 0; } };
   function buildNecklaceLength(d) { const F = bodyField(CTX.sandy), pts = necklacePath(d, F); return new THREE.CatmullRomCurve3(pts, true, 'centripetal').getLength(); }
 
   window.GrugJewelry = {
-    ready, init, build, validate: (dp, s, b) => isCloth(dp) ? validateC(dp, s, b) : dp === 'back' ? validateB(s, b) : dp === 'sound' ? validateSnd(s, b) : dp === 'sandals' ? validateS(s, b) : dp === 'purses' ? validateP(s, b) : validate(dp, s, b), random: (dp, seed, o) => isCloth(dp) ? randomC(dp, seed, o) : dp === 'back' ? randomB(seed, o) : dp === 'sound' ? randomSnd(seed, o) : dp === 'sandals' ? randomS(seed, o) : dp === 'purses' ? randomP(seed, o) : random(dp, seed, o), nameFor: (dp, d, s) => isCloth(dp) ? nameC(dp, d, s) : dp === 'back' ? nameB(d, s) : dp === 'sound' ? nameSnd(d, s) : dp === 'sandals' ? nameS(d, s) : dp === 'purses' ? nameP(d, s) : nameFor(dp, d, s), tagsFor: (dp, d) => isCloth(dp) ? tagsC(dp, d) : dp === 'back' ? tagsB(d) : dp === 'sound' ? tagsSnd(d) : dp === 'sandals' ? tagsS(d) : dp === 'purses' ? tagsP(d) : tagsFor(dp, d), families: (dp, d) => isCloth(dp) ? familiesC(dp, d) : dp === 'back' ? familiesB(d) : dp === 'sound' ? familiesSnd(d) : dp === 'sandals' ? familiesS(d) : dp === 'purses' ? familiesP(d) : families(dp, d), describe: (dp, d) => isCloth(dp) ? describeC(dp, d) : dp === 'back' ? describeB(d) : dp === 'sound' ? describeSnd(d) : dp === 'sandals' ? describeS(d) : dp === 'purses' ? describeP(d) : describe(dp, d), kindOf: (dp, d) => isCloth(dp) ? (CLOTH_BY[d.part] || {}).sub : dp === 'back' ? d.kind : dp === 'sound' ? d.kind : dp === 'sandals' ? d.style : dp === 'purses' ? d.shape : kindOf(dp, d), BACK_KINDS, BACK_LABEL, BK_LIM, SW, swordPart, hasWrap, hasGem, CLOTHES, CLOTH_BY, CLOTH_LABEL, CLOTH_DEPTS, CLOTH_DEPT_LABEL, CLOTH_SLOT_OF, CLOTH_SUBS, CLOTH_SUB_LABEL, isCloth, CLOTH_PIC, clothMeshes, clothSync, clothPaint, clothInit, clothData, prep, SOUND_KINDS, SOUND_LABEL, CUPS, CUP_LABEL, TOPPERS, TOPPER_LABEL, YOKES, BUDS, BUD_LABEL, SND_LIM, EAR_DEPTH, soundFit, STYLES, STYLE_LABEL, HEELS, HEEL_LABEL, SAN_LIM, SAN_N, sandalFit, tiltFeet, PAT, PAT_N, PAT_K, BAG_SHAPES, BAG_LABEL, PATTERNS, PATTERN_LABEL, STRAPS, STRAP_LABEL, CLOSURES, CLOSURE_LABEL, BAG_LIM, PURSE_N, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
+    ready, init, build, validate: (dp, s, b) => isCloth(dp) ? validateC(dp, s, b) : dp === 'hats' ? validateH(s, b) : dp === 'back' ? validateB(s, b) : dp === 'sound' ? validateSnd(s, b) : dp === 'sandals' ? validateS(s, b) : dp === 'purses' ? validateP(s, b) : validate(dp, s, b), random: (dp, seed, o) => isCloth(dp) ? randomC(dp, seed, o) : dp === 'hats' ? randomH(seed, o) : dp === 'back' ? randomB(seed, o) : dp === 'sound' ? randomSnd(seed, o) : dp === 'sandals' ? randomS(seed, o) : dp === 'purses' ? randomP(seed, o) : random(dp, seed, o), nameFor: (dp, d, s) => isCloth(dp) ? nameC(dp, d, s) : dp === 'hats' ? nameH(d, s) : dp === 'back' ? nameB(d, s) : dp === 'sound' ? nameSnd(d, s) : dp === 'sandals' ? nameS(d, s) : dp === 'purses' ? nameP(d, s) : nameFor(dp, d, s), tagsFor: (dp, d) => isCloth(dp) ? tagsC(dp, d) : dp === 'hats' ? tagsH(d) : dp === 'back' ? tagsB(d) : dp === 'sound' ? tagsSnd(d) : dp === 'sandals' ? tagsS(d) : dp === 'purses' ? tagsP(d) : tagsFor(dp, d), families: (dp, d) => isCloth(dp) ? familiesC(dp, d) : dp === 'hats' ? familiesH(d) : dp === 'back' ? familiesB(d) : dp === 'sound' ? familiesSnd(d) : dp === 'sandals' ? familiesS(d) : dp === 'purses' ? familiesP(d) : families(dp, d), describe: (dp, d) => isCloth(dp) ? describeC(dp, d) : dp === 'hats' ? describeH(d) : dp === 'back' ? describeB(d) : dp === 'sound' ? describeSnd(d) : dp === 'sandals' ? describeS(d) : dp === 'purses' ? describeP(d) : describe(dp, d), kindOf: (dp, d) => isCloth(dp) ? (CLOTH_BY[d.part] || {}).sub : dp === 'hats' ? d.kind : dp === 'back' ? d.kind : dp === 'sound' ? d.kind : dp === 'sandals' ? d.style : dp === 'purses' ? d.shape : kindOf(dp, d), HAT_KINDS, HAT_LABEL, HAT_INFO, HAT_N, HAT_POSE, hatPose, hasHats, BACK_KINDS, BACK_LABEL, BK_LIM, SW, swordPart, hasWrap, hasGem, CLOTHES, CLOTH_BY, CLOTH_LABEL, CLOTH_DEPTS, CLOTH_DEPT_LABEL, CLOTH_SLOT_OF, CLOTH_SUBS, CLOTH_SUB_LABEL, isCloth, CLOTH_PIC, clothMeshes, clothSync, clothPaint, clothInit, clothData, prep, SOUND_KINDS, SOUND_LABEL, CUPS, CUP_LABEL, TOPPERS, TOPPER_LABEL, YOKES, BUDS, BUD_LABEL, SND_LIM, EAR_DEPTH, soundFit, STYLES, STYLE_LABEL, HEELS, HEEL_LABEL, SAN_LIM, SAN_N, sandalFit, tiltFeet, PAT, PAT_N, PAT_K, BAG_SHAPES, BAG_LABEL, PATTERNS, PATTERN_LABEL, STRAPS, STRAP_LABEL, CLOSURES, CLOSURE_LABEL, BAG_LIM, PURSE_N, lengthCm, depthOf, lenClass, lenLabel, brandFor, famOfHex, isPastel, toPastel, bodyField, earInfo,
     DRESS_Y, DEF: dept => DEF[dept](), EL, SHAPES, SHAPE_LABEL, THREAD_SHAPES, FINISHES, CHARMS, CHARM_BY, THEME_LABEL, THEMES, MOUNTS, LINKS, PAIRS, CORDS, KIND_LABEL, BRANDS, BRAND_LABEL, LIMITS, D_MAX,
     PINKS, PASTEL_OTHER, PASTEL_ACC, PASTEL_METALS, METALS, colourName, charmTexture, geoFor, elH, elName, KIMI_CHARMS
   };
@@ -4382,6 +4530,7 @@ window.GrugClosetRuntime = (function () {
     if (r() < 0.22) put('necklaces', 'necklaces', recolour(J.random('necklaces', seed + '-neck'), P, r));
     if (r() < 0.18) { const GE = window.GrugEyewear; put('eyewear', 'eyewear', recolour(GE.random(seed + '-eye'), P, r)); }
     // her hair is the classic kit's own: long or buns (style 0 or 1), in any colour
+    // (never a hat: the player places theirs by hand, so random NPCs go without)
     return { wardrobe, wearing, body, palette: P.scheme, kitHair: { style: r() < 0.5 ? 0 : 1, colour: pick(HAIR_COL), size: 1, up: 0, forward: 0 } };
   }
   /* create(K, opts): opts.random = a seed (an NPC) with opts.cfg the game's config; opts.bare = her body, face and hair only
