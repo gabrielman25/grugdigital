@@ -1257,7 +1257,7 @@ class GLR {
     if (BODY_TYPES[type].hands) ['rarm','larm'].forEach(n => B.hands.push({ part:n, mesh:this.mesh(handGeo(PARTS.find(p => p.name === n), type)) }));
     STUDS.forEach(s => B.studs.push({ part:s.part, mesh:this.mesh(studGeo(s, type, studShape)) }));
     const feetOf = () => [['foot_l', FEET.geoL], ['foot_r', FEET.geoR]].map(([part, g]) => ({ part, mesh: this.mesh(g) }));
-    if (BODY_TYPES[type].feet){ if (FEET.geoL) B.feet = feetOf(); else FEET.load().then(() => { if (this.body === B && !B.feet){ B.feet = feetOf(); B.hullW = -1; } }); }
+    if (BODY_TYPES[type].feet){ if (FEET.geoL) B.feet = feetOf(); else FEET.load().then(() => { if (this.body === B && !B.feet) this.buildBody(type, studShape); }); }   // again with the feet: the hem and boots are shaped around them
     this.body = B; this.buildHulls();
     if (old){ Object.values(old.parts).forEach(m => this.free(m)); this.free(old.head); (old.hulls || []).forEach(h => this.free(h.mesh)); if (old.feet) old.feet.forEach(f => this.free(f.mesh)); old.hands.forEach(h => this.free(h.mesh)); old.studs.forEach(s => this.free(s.mesh)); }
   }
@@ -1431,6 +1431,11 @@ function figureDeform(part, p){
   const meet = kneeY - 0.08, th = sm(meet - 0.22, meet, y) * (FIG.thighs ?? 1), inner = lx*side < 0;
   const fill = inner ? Math.max(0, 2*(FIG.legX - 0.004)/FIG.legW - 1) * th : 0;
   let X = side*FIG.legX + lx*FIG.legW*(1 + fill), Z = lz*FIG.legW*(1 + 0.08*th) + FIG.kneeBend*t;
+  if (!boots && hw > 0 && FEET.topAt){
+    // barefoot: the hem rides up over the top of the foot (arching up at the front, curving down the sides and to the back)
+    // so the pants don't cut into it: each column of the hem is lifted to just above the foot under it
+    y += hemLift(part, side, Math.atan2(p[2], p[0]-cx)) * clamp(1 - p[1]/0.55, 0, 1);
+  }
   if (boots){
     // Boots: the lower leg becomes a boot that would hold the foot. From mid-shin down it reaches the ground (the foot's sole),
     // its back drops straight to just behind the heel and its front slopes down to just past the toes, a little wider than the foot.
@@ -1448,6 +1453,25 @@ function figureDeform(part, p){
     }
   }
   return [X, y, Z];
+}
+/* how far the barefoot hem lifts at each angle around the leg so it clears the foot under it: the hem's bottom ring is
+   walked at 96 angles, each lifted to just above the foot's top right under it, then smoothed round the ring (a smooth arch over the
+   instep, curving down the sides), so no column pokes up on its own */
+const HEM = { key: '', prof: {} };
+function hemLift(part, side, ang){
+  const key = JSON.stringify(FIG) + (FEET.topAt ? 1 : 0); if (HEM.key !== key){ HEM.key = key; HEM.prof = {}; }
+  let P = HEM.prof[side];
+  if (!P){
+    const n = 96, o = FIG.off, k = FIG.foot, fx = side*(FIG.legX + o.legs[0] + o.feet[0]), fy = FIG.legY - (FEET.height || 0.423)*k + o.legs[1] + o.feet[1], fz = FIG.kneeBend + FIG.footFwd + o.legs[2] + o.feet[2];
+    const rr = (BODY_TYPES.figure.round || {}).leg || 0.2, ap = 0.5*(1 + (FIG.legHem ?? 0.08)), bottom = FIG.legY - 0.07; P = new Float32Array(n);
+    for (let i = 0; i < n; i++){ const a = i/n*Math.PI*2, R = rrBound(a, 0.5, rr)*hexScale(a, ap, 1, Math.PI/6), X = side*FIG.legX + Math.cos(a)*R*FIG.legW, Z = Math.sin(a)*R*FIG.legW + FIG.kneeBend;
+      const top = fy + FEET.topAt(side*(X - fx)/k, (Z - fz)/k)*k;   // the foot right under this point of the hem (the ankle inside the leg is fine)
+      P[i] = Math.max(0, top + 0.035 - bottom); }
+    { const Q = P.slice(); for (let i = 0; i < n; i++){ let m = 0; for (let d = -2; d <= 2; d++) m = Math.max(m, Q[(i+d+n)%n]); P[i] = m; } }
+    for (let pass = 0; pass < 4; pass++){ const Q = P.slice(); for (let i = 0; i < n; i++){ let m = 0; for (let d = -3; d <= 3; d++) m += Q[(i+d+n)%n]; P[i] = m/7; } }
+    HEM.prof[side] = P;
+  }
+  const n = P.length, u = ((ang/(Math.PI*2))%1 + 1)%1*n, i = Math.floor(u)%n, f = u - Math.floor(u); return P[i]*(1-f) + P[(i+1)%n]*f;
 }
 /* where a body part is moved to on the Figure: the leg height lifts everything above the hips, plus the per-part offsets */
 function figOffset(name){
@@ -1559,7 +1583,15 @@ const FEET = { geo: null, geoL: null, geoR: null, mask: null, nmap: null, p: nul
     this.geo = { p: dec(J.pos, Float32Array), n: dec(J.nrm, Float32Array), t: uv, t2: uv, tu: dec(J.tu, Float32Array), tv: dec(J.tv, Float32Array), i: dec(J.idx, Uint16Array) };
     this.hullGeo = Object.assign({}, this.geo, { i: J.hullIdx ? dec(J.hullIdx, Uint16Array) : this.geo.i });
     this.height = J.height || 0.423;
-    { let a = 1e9, b = -1e9; for (let i = 2; i < this.geo.p.length; i += 3){ a = Math.min(a, this.geo.p[i]); b = Math.max(b, this.geo.p[i]); } this.zmin = a; this.zmax = b; }   // heel and toe, for the Boots shape
+    { let a = 1e9, b = -1e9; for (let i = 2; i < this.geo.p.length; i += 3){ a = Math.min(a, this.geo.p[i]); b = Math.max(b, this.geo.p[i]); } this.zmin = a; this.zmax = b; }
+    { // the top of the (left) foot as a height map in its own space, so the barefoot hem can ride over it: topAt(x, z) -> y
+      const P0 = this.geo.p, P = []; for (let i = 0; i < P0.length; i += 3) if (P0[i] > 0) P.push(P0[i] - J.legX, P0[i+1], P0[i+2]);
+      const N = 48, x0 = -0.5, x1 = 0.5, z0 = -0.5, z1 = 1.05, G = new Float32Array(N*N);
+      for (let i = 0; i < P.length; i += 3){ const gx = Math.round((P[i]-x0)/(x1-x0)*(N-1)), gz = Math.round((P[i+2]-z0)/(z1-z0)*(N-1)); if (gx < 0 || gz < 0 || gx >= N || gz >= N) continue; G[gz*N+gx] = Math.max(G[gz*N+gx], P[i+1]); }
+      const H = new Float32Array(N*N); for (let z = 0; z < N; z++) for (let x = 0; x < N; x++){ let m = 0; for (let dz = -2; dz <= 2; dz++) for (let dx = -2; dx <= 2; dx++){ const a2 = x+dx, b2 = z+dz; if (a2 >= 0 && b2 >= 0 && a2 < N && b2 < N) m = Math.max(m, G[b2*N+a2]); } H[z*N+x] = m; }
+      this.topAt = (x, z) => { const u = clamp((x-x0)/(x1-x0)*(N-1), 0, N-1), v = clamp((z-z0)/(z1-z0)*(N-1), 0, N-1), i = Math.floor(u), j = Math.floor(v), a2 = u-i, b2 = v-j, i2 = Math.min(N-1, i+1), j2 = Math.min(N-1, j+1);
+        return (H[j*N+i]*(1-a2) + H[j*N+i2]*a2)*(1-b2) + (H[j2*N+i]*(1-a2) + H[j2*N+i2]*a2)*b2; };
+    }   // heel and toe, for the Boots shape
     // one mesh per foot, centred on its own ankle (x = 0), so each can follow its leg
     const split = (G, side) => { const map = new Map(), o = { p: [], n: [], t: [], t2: [], tu: [], tv: [], i: [] };
       for (let t = 0; t < G.i.length; t += 3) { if (Math.sign(G.p[G.i[t]*3]) !== side) continue;

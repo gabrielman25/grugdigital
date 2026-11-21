@@ -1,5 +1,5 @@
 {
- "v": "d6c63c5193b7",
+ "v": "b2aa392ff450",
  "apps": {
   "grug": [
    "grug",
@@ -494,7 +494,7 @@
     "/make/clothing/body/feet-normal.png": "481945ea4f",
     "/make/clothing/body/feet.json": "5c6219bf2c",
     "/make/clothing/body/nails.png": "8df1f89d50",
-    "/make/clothing/": "ed8753ea1c",
+    "/make/clothing/": "ba6c789be3",
     "/make/clothing/outfits/autumn/chip.png": "614a9d6509",
     "/make/clothing/outfits/autumn/pants-figure.png": "c0625f6c54",
     "/make/clothing/outfits/autumn/pants.png": "88b04fc8e8",
@@ -512,7 +512,7 @@
     "/make/clothing/outfits/faces/surprised.png": "2dfd79c562",
     "/make/clothing/outfits/index.json": "9126d07407",
     "/make/clothing/outfits/looks/autumn-blocky.jpg": "4998197211",
-    "/make/clothing/outfits/looks/autumn.jpg": "d2ceca49ac",
+    "/make/clothing/outfits/looks/autumn.jpg": "f263159970",
     "/make/clothing/outfits/looks/night-rider.jpg": "d30a0f4f32",
     "/make/clothing/outfits/looks/rustic.jpg": "e294edcf2d",
     "/make/clothing/outfits/looks/weekend.jpg": "3f19ed390b",
@@ -536,7 +536,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 57895739
+   "bytes": 57899151
   },
   "daypart": {
    "title": "Daypart",

@@ -263,7 +263,7 @@ sheets in `outfits/faces/parts/` (`brows.png`, `eyes.png`, `mouths.png`, 160 px 
 mouth), twist, width, height; brows and eyes are pairs (the tile is the right-hand one, the left mirrored unless turned off);
 brows take a colour; **Random face**. A look keeps `face: 'custom'` and `faceParts`. The Figure's sleeves and trouser legs end
 in loose hexagonal cuffs and hems (`hexScale`) with open ends pushed up inside (`openEnd`) and darkened (`openEnds` in
-outfits-ui.js). Two new spots: **hair** (follows the head) and **feet** (no shoe
+outfits-ui.js); barefoot, the hem rides over the top of the foot (`hemLift`: an arch over the instep, down at the sides and back). Two new spots: **hair** (follows the head) and **feet** (no shoe
 models are listed now; the code stays: a pair is split per foot). The Figure's feet are **Barefoot** (the real feet) or
 **Boots** (`FIG.boots`: the lower legs are reshaped into a boot that would hold the foot, `figureDeform`, and the feet aren't
 drawn). Clothing can carry `pantsFigure` (index.json): Blocky and Boots wear `pants` (shoes painted on), barefoot Figure wears
