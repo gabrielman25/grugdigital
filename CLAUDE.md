@@ -249,6 +249,17 @@ ray-cast against the body, plus the same retro effects), outlines for the avatar
 (`make/clothing/outfits/index.json`: clothing PNGs, looks with their accessories and colours), looks saved in the browser
 (IndexedDB `ccs-library`, key `outfits.looks`) and a zip download. "Wear it" on a finished accessory sends it there.
 Accessories are made to fit the avatar (`wear` in each template; hats use `"fit": "hat"`: brim just above the eyes).
+**Character extras (Nov 2026):** the **Figure** body is behind a password (`FigureLock` in the Studio page: only its SHA-256 is
+in the page; the unlock is remembered in `localStorage` `grug.ccs.figure.v1`, which `privacy.html` mentions); it's a light
+gate the owner asked for, not security. Its arms end flat and sharp over the round hands (`sharpEnds`). Blocky has no
+lock. The stage has **Still / Idle / Walk / Jump / Pose** (`animPose`, GLR `pose` / `poseMV`: joints turn about pivots
+worked out from the Figure's proportions, and worn accessories follow their joint) and a **Pose editor** (per-joint X / Y / Z,
+Copy / Apply JSON). Every 3D view (Clothing preview, Accessories, Character) turns with left- or right-drag, pans with the
+middle button, zooms with the wheel, resets on double-click, and has no right-click menu (`orbitCam`). Figure nails use a
+colour wheel. **Faces** (`make/clothing/outfits/faces/`, `index.json` + transparent PNGs) are drawn on the front of the head
+(`window.HEAD_FACE` in `headTex`); looks keep `face`. Two new spots: **hair** (follows the head) and **feet** (shoes are
+modelled as a pair in the Figure's foot space and split per foot; on Blocky each sits on the bottom of its leg). Clothing can
+carry `pantsFigure` (index.json): Blocky wears `pants` (shoes painted on), Figure wears `pantsFigure` (just pants).
 **The browser's Back and Forward** step through the Studio itself (tabs, the Clothing steps, the open template:
 `#clothing/2`, `#accessories/<slug>`, `#outfits`), never off to another page until the Studio's first screen.
 **Pants are just pants**: the Clothing prompt asks for no shoes, socks or feet (shoes will be accessories), and the example

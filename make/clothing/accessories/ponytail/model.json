@@ -1,0 +1,178 @@
+{
+ "name": "Low ponytail",
+ "object": "hairstyle",
+ "description": "long glossy chestnut-brown hair with a soft middle part, swept smoothly back over the head into a long low ponytail at the nape tied with a dark brown hair tie, two thin loose strands framing the face",
+ "parts": [
+  {
+   "name": "cap",
+   "type": "lathe",
+   "profile": [
+    [
+     0,
+     5.43
+    ],
+    [
+     0.33,
+     5.41
+    ],
+    [
+     0.53,
+     5.36
+    ],
+    [
+     0.68,
+     5.25
+    ],
+    [
+     0.75,
+     5.11
+    ],
+    [
+     0.76,
+     4.98
+    ]
+   ],
+   "sides": 16,
+   "caps": "none",
+   "material": "fur",
+   "seams": false,
+   "group": "Hair"
+  },
+  {
+   "name": "shell",
+   "type": "lathe",
+   "profile": [
+    [
+     0.76,
+     5.08
+    ],
+    [
+     0.77,
+     4.75
+    ],
+    [
+     0.75,
+     4.42
+    ],
+    [
+     0.66,
+     4.2
+    ],
+    [
+     0.5,
+     4.12
+    ]
+   ],
+   "sides": 12,
+   "startAngle": 245,
+   "sweep": 230,
+   "material": "fur",
+   "seams": false,
+   "group": "Hair"
+  },
+  {
+   "name": "tail",
+   "type": "lathe",
+   "center": [
+    0,
+    3.72,
+    -0.8
+   ],
+   "profile": [
+    [
+     0.13,
+     0.66
+    ],
+    [
+     0.21,
+     0.55
+    ],
+    [
+     0.25,
+     0.3
+    ],
+    [
+     0.24,
+     -0.15
+    ],
+    [
+     0.17,
+     -0.5
+    ],
+    [
+     0.05,
+     -0.78
+    ]
+   ],
+   "sides": 9,
+   "scale": [
+    1,
+    0.86
+   ],
+   "rot": [
+    -6,
+    0,
+    0
+   ],
+   "material": "fur",
+   "seams": false,
+   "group": "Hair"
+  },
+  {
+   "name": "tie",
+   "type": "cylinder",
+   "center": [
+    0,
+    4.33,
+    -0.76
+   ],
+   "radius": 0.17,
+   "height": 0.1,
+   "sides": 10,
+   "material": "plastic",
+   "seams": false,
+   "group": "Hair tie"
+  },
+  {
+   "name": "strand",
+   "type": "strap",
+   "points": [
+    [
+     0.66,
+     5.06,
+     0.3
+    ],
+    [
+     0.71,
+     4.78,
+     0.33
+    ],
+    [
+     0.73,
+     4.48,
+     0.31
+    ],
+    [
+     0.71,
+     4.3,
+     0.27
+    ]
+   ],
+   "normal": [
+    1,
+    0,
+    0.35
+   ],
+   "width": 0.08,
+   "thickness": 0.04,
+   "material": "fur",
+   "seams": false,
+   "group": "Hair",
+   "mirror": "x"
+  }
+ ],
+ "wear": {
+  "on": "hair"
+ },
+ "logo": false
+}

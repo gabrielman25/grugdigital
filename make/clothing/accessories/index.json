@@ -28,6 +28,20 @@
   "wear": "lhand"
  },
  {
+  "slug": "ponytail",
+  "name": "Low ponytail",
+  "object": "hairstyle",
+  "description": "long glossy chestnut-brown hair with a soft middle part, swept smoothly back over the head into a long low ponytail at the nape tied with a dark brown hair tie, two thin loose strands framing the face",
+  "wear": "hair"
+ },
+ {
+  "slug": "sneakers",
+  "name": "Low-top sneakers",
+  "object": "pair of low-top sneakers",
+  "description": "pair of casual low-top lace-up sneakers in dark chocolate-brown smooth leather with grey-white waxed laces through small metal eyelets, a soft padded collar, and a worn light tan rubber sole",
+  "wear": "feet"
+ },
+ {
   "slug": "cowboy-hat",
   "name": "Western cowboy hat",
   "object": "cowboy hat",

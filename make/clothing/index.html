@@ -440,6 +440,23 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
   .o-off{border-top:1px solid var(--g-line)}.o-off summary{display:flex;justify-content:space-between;font-weight:500}.o-off summary b{color:var(--g-muted);font-weight:500;font-variant-numeric:tabular-nums}
   .o-worn{border-top:1px solid var(--g-line);padding-top:var(--g-s-2);margin-top:var(--g-s-2)}
   .o-wh{display:flex;gap:8px;align-items:center}.o-wh b{flex:1}.o-wh small{color:var(--g-muted)}
+  .o-anim{position:absolute;right:12px;bottom:12px;display:flex;gap:4px;background:var(--g-surface,rgba(255,255,255,.85));padding:4px;border-radius:999px}
+  .o-anim button{all:unset;cursor:pointer;padding:5px 11px;border-radius:999px;font-size:13px;font-weight:600;color:var(--g-text-2)}
+  .o-anim button.on{background:var(--g-accent);color:#1E1B16}
+  .o-hint{position:absolute;left:12px;top:10px;font-size:11px;color:var(--g-muted);pointer-events:none}
+  .o-faces{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;margin-top:6px}
+  .o-face{all:unset;cursor:pointer;aspect-ratio:1;border-radius:10px;background:var(--g-bg-2) center/86% no-repeat;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--g-muted)}
+  .o-face.on{outline:2px solid var(--g-accent);outline-offset:2px}
+  .o-nailbtn{width:30px;height:26px;border-radius:6px;border:1px solid var(--g-line);cursor:pointer;padding:0}
+  .o-wheel{display:flex;flex-direction:column;gap:6px;padding:var(--g-s-2);border:1px solid var(--g-line);border-radius:12px;margin-top:6px;max-width:220px}
+  .o-wheel canvas{width:180px;height:180px;cursor:crosshair;touch-action:none;align-self:center}
+  .o-wheel .row{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--g-muted)}
+  .o-wheel .sw{width:22px;height:22px;border-radius:6px;border:1px solid var(--g-line)}
+  .o-wheel .chips{display:flex;flex-wrap:wrap;gap:4px}.o-wheel .chips button{all:unset;cursor:pointer;width:20px;height:20px;border-radius:50%;border:1px solid var(--g-line)}
+  #outPose summary{cursor:pointer;font-weight:600;font-size:13px;margin:var(--g-s-2) 0}
+  .o-lock{position:fixed;inset:0;z-index:200;background:rgba(10,10,12,.5);display:flex;align-items:center;justify-content:center}
+  .o-lock form{background:var(--g-page,#fff);color:var(--g-text,#1E1B16);border-radius:16px;padding:20px;max-width:320px;width:calc(100% - 40px);display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+  .o-lock h3{margin:0;font-size:18px}.o-lock p{margin:0;font-size:13px;color:var(--g-muted)}.o-lock .err{color:#d33}
 </style>
 </head>
 <body class="g-root">
@@ -667,17 +684,24 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
 <!-- /ACCESSORIES -->
 <!-- OUTFITS -->
   <section id="outfits" class="step" hidden>
-    <div class="g-card stage o-stage"><canvas id="outView" aria-label="The avatar. Drag to turn, scroll to zoom."></canvas>
-      <div class="o-bar"><button id="outSpin" class="g-btn g-btn--sm on">Turn</button></div></div>
+    <div class="g-card stage o-stage"><canvas id="outView" aria-label="The avatar. Drag to turn, middle-drag to move, scroll to zoom."></canvas>
+      <div class="o-hint">Drag or right-drag: turn · Middle-drag: move · Scroll: zoom · Double-click: reset</div>
+      <div class="o-bar"><button id="outSpin" class="g-btn g-btn--sm on">Turn</button></div>
+      <div class="o-anim" id="outAnim" role="group" aria-label="Animation preview"><button data-a="still" class="on">Still</button><button data-a="idle">Idle</button><button data-a="walk">Walk</button><button data-a="jump">Jump</button><button data-a="pose">Pose</button></div></div>
     <aside class="side">
       <div class="g-card card">
         <h2 class="ttl"><i data-g-icon="person_body"></i>Body</h2>
         <div class="g-seg full" id="outBody"><button data-b="classic" class="on">Blocky</button><button data-b="figure">Figure</button></div>
-        <div class="o-row"><label class="o-pick">Skin <input type="color" id="outSkin" value="#eab892"></label><label class="o-pick" id="outNailRow" hidden>Nails <input type="color" id="outNail" value="#f7f2ee"></label></div>
+        <div class="o-row"><label class="o-pick">Skin <input type="color" id="outSkin" value="#eab892"></label><label class="o-pick" id="outNailRow" hidden>Nails <input type="color" id="outNail" value="#f7f2ee" hidden><button type="button" id="outNailBtn" class="o-nailbtn" aria-label="Nail colour"></button></label></div>
+        <div id="outNailWheel" hidden></div>
+        <div class="o-sub">Face</div><div class="o-faces" id="outFaces"></div>
         <p class="tiny" id="outBodyNote">Blocky is the classic body. Figure has longer arms with a slight bend at the elbow, round hands and feet.</p>
         <details id="outProp" hidden><summary>Proportions</summary><div id="outPropBody"></div>
           <div class="o-acts"><button id="outPropCopy" class="g-btn g-btn--sm g-btn--primary">Copy as JSON</button><button id="outPropApply" class="g-btn g-btn--sm">Apply JSON</button><button id="outPropReset" class="g-btn g-btn--sm g-btn--ghost">Reset</button></div>
           <textarea id="outPropJson" class="g-input" placeholder="Paste proportions JSON here, then Apply JSON" style="min-height:4rem"></textarea></details>
+        <details id="outPose"><summary>Pose editor</summary><p class="tiny">Turn each joint (degrees). Moving a slider switches the stage to Pose.</p><div id="outPoseBody"></div>
+          <div class="o-acts"><button id="outPoseCopy" class="g-btn g-btn--sm g-btn--primary">Copy as JSON</button><button id="outPoseApply" class="g-btn g-btn--sm">Apply JSON</button><button id="outPoseReset" class="g-btn g-btn--sm g-btn--ghost">Reset</button></div>
+          <textarea id="outPoseJson" class="g-input" placeholder="Paste pose JSON here, then Apply JSON" style="min-height:3rem"></textarea></details>
       </div>
       <div class="g-card card">
         <h2 class="ttl"><i data-g-icon="magic_wand"></i>Looks</h2>
@@ -694,7 +718,7 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
       </div>
       <div class="g-card card">
         <h2 class="ttl"><i data-g-icon="archive"></i>Accessories</h2>
-        <p class="sub">Tap to put on or take off: one per spot (head, back, each hand, each shoulder).</p>
+        <p class="sub">Tap to put on or take off: one per spot (head, hair, back, each hand, each shoulder, feet).</p>
         <div id="outAccs" class="lib-grid o-grid"></div>
         <div class="o-acts"><button id="outAccNew" class="g-btn g-btn--sm g-btn--ghost">New accessory</button><button id="outAccClaude" class="g-btn g-btn--sm g-btn--ghost">With Claude</button></div>
       </div>
@@ -1076,6 +1100,7 @@ function m4mul(a, b){ const o = new Float32Array(16); for (let c=0;c<4;c++) for 
 function m4T(x,y,z){ const o=m4I(); o[12]=x; o[13]=y; o[14]=z; return o; }
 function m4RX(a){ const o=m4I(), c=Math.cos(a), s=Math.sin(a); o[5]=c; o[6]=s; o[9]=-s; o[10]=c; return o; }
 function m4RY(a){ const o=m4I(), c=Math.cos(a), s=Math.sin(a); o[0]=c; o[2]=-s; o[8]=s; o[10]=c; return o; }
+function m4RZ(a){ const o=m4I(), c=Math.cos(a), s=Math.sin(a); o[0]=c; o[1]=s; o[4]=-s; o[5]=c; return o; }
 function m4ortho(l,r,b,t,n,f){ const o=new Float32Array(16); o[0]=2/(r-l); o[5]=2/(t-b); o[10]=-2/(f-n); o[12]=-(r+l)/(r-l); o[13]=-(t+b)/(t-b); o[14]=-(f+n)/(f-n); o[15]=1; return o; }
 function m4persp(fy,asp,n,f){ const o=new Float32Array(16), t=1/Math.tan(fy/2); o[0]=t/asp; o[5]=t; o[10]=(f+n)/(n-f); o[11]=-1; o[14]=2*f*n/(n-f); return o; }
 function xf(m,p){ return [m[0]*p[0]+m[4]*p[1]+m[8]*p[2]+m[12], m[1]*p[0]+m[5]*p[1]+m[9]*p[2]+m[13], m[2]*p[0]+m[6]*p[1]+m[10]*p[2]+m[14]]; }
@@ -1277,7 +1302,27 @@ class GLR {
     gl.uniform1f(u.uNStr, nmap ? (nstr || 0) : 0); gl.uniform1f(u.uSpec, unlit ? 0 : this.spec); gl.uniform1f(u.uWrap, this.wrap);
     gl.drawElements(gl.TRIANGLES, m.c, gl.UNSIGNED_SHORT, 0);
   }
+  /* posing (the Character tab's animations and pose editor): this.pose = { bob: [x, y, z], torso, head, larm, rarm, lleg, rleg: [x, y, z] degrees }.
+     Each joint turns about its pivot where the body actually is (Figure proportions included); arms and the head also follow the torso. */
+  jointOf(name){ return { torso:'torso', head:'head', rarm:'rarm', hand_rarm:'rarm', larm:'larm', hand_larm:'larm', rleg:'rleg', foot_r:'rleg', lleg:'lleg', foot_l:'lleg' }[name]; }
+  pivotOf(j){
+    const fig = this.body && this.body.type === 'figure', o = FIG.off, up = fig ? FIG.hip - 2 : 0, side = j[0] === 'l' ? 1 : -1;
+    if (j === 'torso') return [o.torso[0]*fig, 2 + up + o.torso[1]*fig, o.torso[2]*fig];
+    if (j === 'head') return fig ? [o.head[0] + o.torso[0], 4 + up + o.head[1] + o.torso[1], o.head[2] + o.torso[2]] : [0, 4, 0];
+    if (j.endsWith('arm')) return fig ? [side*(FIG.armX - 0.25 + o.arms[0]), 3.72 + up + o.arms[1], o.arms[2]] : [side*1.5, 3.75, 0];
+    return fig ? [side*(FIG.legX + o.legs[0]), FIG.hip + o.legs[1] - 0.1, o.legs[2]] : [side*0.5, 1.9, 0];
+  }
+  poseMV(mv, j){
+    const P = this.pose; if (!P || !j) return mv;
+    const rot = (m, piv, r) => { if (!r || !(r[0] || r[1] || r[2])) return m; const R = m4mul(m4RZ(r[2]*D2R), m4mul(m4RY(r[1]*D2R), m4RX(r[0]*D2R)));
+      return m4mul(m, m4mul(m4T(piv[0], piv[1], piv[2]), m4mul(R, m4T(-piv[0], -piv[1], -piv[2])))); };
+    const b = P.bob || [0, 0, 0]; if (b[0] || b[1] || b[2]) mv = m4mul(mv, m4T(b[0], b[1], b[2]));
+    if (!j.endsWith('leg')) mv = rot(mv, this.pivotOf('torso'), P.torso);
+    if (j !== 'torso') mv = rot(mv, this.pivotOf(j), P[j]);
+    return mv;
+  }
   partMV(mv, name){
+    if (this.pose) mv = this.poseMV(mv, this.jointOf(name));
     if (name === 'foot_l' || name === 'foot_r'){   // the Figure's feet: under each leg, scaled, following the leg offsets and knee bend
       const side = name === 'foot_l' ? 1 : -1, o = FIG.off, k = FIG.foot, h = FEET.height || 0.423;
       const m = m4mul(mv, m4T(side*(FIG.legX + o.legs[0] + o.feet[0]), FIG.legY - h*k + o.legs[1] + o.feet[1], FIG.kneeBend + FIG.footFwd + o.legs[2] + o.feet[2]));
@@ -1322,19 +1367,35 @@ function slenderDeform(part, p){
 /* Figure: the rounded body (slimmer waist, longer arms with a slight bend at the elbow, sphere hands, real feet).
    Every number is a slider in the Character tab's Proportions panel; FIG_DEFAULT is the starting point (paste the panel's
    JSON here to change it). off: extra X / Y / Z moves per part (x mirrors on the right side, so +x spreads both sides out). */
-const FIG_DEFAULT = { torsoW: 0.92, waist: 0.1, waistY: 2.55, torsoD: 0.78, armX: 1.23, armW: 0.62, armLen: 1.25, elbow: 2.85, elbowBend: 0.13,
-  armFwd: 0.12, hand: 0.31, hip: 2, legX: 0.47, legW: 0.8, legY: 0.42, knee: 0.5, kneeBend: 0, foot: 1, footFwd: 0,
-  off: { torso: [0, 0, 0], arms: [0, 0, 0], hands: [0, 0, 0], legs: [0, 0, 0], feet: [0, 0, 0], head: [0, 0, 0] } };
+const FIG_DEFAULT = {"torsoW":0.9,"waist":0.23,"waistY":2.68,"torsoD":1.03,"armX":1.23,"armW":0.57,"armLen":1.04,"elbow":3.14,"elbowBend":0,"armFwd":0.4,"hand":0.39,"hip":2.8,"legX":0.47,"legW":0.8,"legY":0.2,"knee":0.49,"kneeBend":-0.3,"foot":1.27,"footFwd":0.09,"cuffLift":0.12,"thighs":1,"hem":0.07,
+  "off":{"torso":[0,0,0],"arms":[0,0,0],"hands":[0,0,0],"legs":[0,0,0],"feet":[-0.02,0.19,-0.05],"head":[0,0,0]}};   // the owner's tuned figurine (Nov 2026)
 const FIG = JSON.parse(JSON.stringify(FIG_DEFAULT));
 function figureDeform(part, p){
   const k = kindOf(part.name), cx = (part.min[0]+part.max[0])/2, side = Math.sign(cx) || 1;
-  if (k === 'torso'){ const waist = Math.exp(-(((p[1]-FIG.waistY)/0.45)**2)); return [p[0]*(FIG.torsoW - FIG.waist*waist), p[1], p[2]*FIG.torsoD]; }
+  if (k === 'torso'){ const waist = Math.exp(-(((p[1]-FIG.waistY)/0.45)**2)), hem = sm(2.4, 2, p[1]) * (FIG.hem ?? 0.07);   // the shirt's hem flares a little over the tops of the legs
+    return [p[0]*(FIG.torsoW - FIG.waist*waist)*(1 + hem), p[1], p[2]*FIG.torsoD*(1 + hem*1.15)]; }
   if (k === 'arm'){
-    const bot = 4 - 2*FIG.armLen, y = 4 - (4-p[1])*FIG.armLen, up = clamp((4-y)/Math.max(0.05, 4-FIG.elbow), 0, 1), t = clamp((FIG.elbow-y)/Math.max(0.05, FIG.elbow-bot), 0, 1);
-    return [side*FIG.armX + (p[0]-cx)*FIG.armW + side*(0.05*up + FIG.elbowBend*t*t + 0.06*t), y, p[2]*FIG.armW + FIG.armFwd*t*t + 0.03*t];
+    // the sleeve: square at the shoulder, easing into a hexagon at the cuff that's just wide enough to sit over the top of
+    // the round hand without touching it, with the front of the cuff lifted a little (an angled cut)
+    let px = p[0]-cx, pz = p[2]; const ta = clamp((4-p[1])/2, 0, 1), w = sm(0.3, 1, ta);
+    if (w > 0 && (Math.abs(px) > 1e-6 || Math.abs(pz) > 1e-6)){
+      const th = Math.atan2(pz, px), sq = 0.5/Math.max(Math.abs(Math.cos(th)), Math.abs(Math.sin(th)));
+      const ap = Math.max(0.5, (FIG.hand*Math.sqrt(1 - 0.62*0.62) + 0.045)/FIG.armW), seg = ((th % (Math.PI/3)) + Math.PI/3) % (Math.PI/3) - Math.PI/6;
+      const f = 1 + w*(ap/Math.cos(seg)/sq - 1); px *= f; pz *= f;
+    }
+    const bot = 4 - 2*FIG.armLen, up = clamp((4-(4 - (4-p[1])*FIG.armLen))/Math.max(0.05, 4-FIG.elbow), 0, 1);
+    let y = 4 - (4-p[1])*FIG.armLen; const t = clamp((FIG.elbow-y)/Math.max(0.05, FIG.elbow-bot), 0, 1);
+    y += (FIG.cuffLift || 0) * clamp(1 - (p[1]-2)/0.3, 0, 1) * clamp(p[2]/0.5, 0, 1);   // front half only: the hand (on the axis) stays put
+    // the shoulders lean in just enough to touch the top of the torso's sides (a hair of overlap), easing out by the elbow
+    const topHalf = FIG.torsoW - FIG.waist*Math.exp(-(((4-FIG.waistY)/0.45)**2)), lean = Math.max(0, FIG.armX + FIG.off.arms[0] - 0.5*FIG.armW - (topHalf - 0.02 + FIG.off.torso[0]*side)) * (1 - sm(0, 1, up));
+    return [side*(FIG.armX - lean) + px*FIG.armW + side*(0.05*up + FIG.elbowBend*t*t + 0.06*t), y, pz*FIG.armW + FIG.armFwd*t*t + 0.03*t];
   }
-  const y = FIG.legY + p[1]*(FIG.hip-FIG.legY)/2, kneeY = FIG.legY + FIG.knee*(FIG.hip-FIG.legY), t = clamp((kneeY - y)/Math.max(0.05, kneeY - FIG.legY), 0, 1);
-  return [side*FIG.legX + (p[0]-cx)*FIG.legW, y, p[2]*FIG.legW + FIG.kneeBend*t];
+  const y = FIG.legY + p[1]*(FIG.hip + 0.06 - FIG.legY)/2, kneeY = FIG.legY + FIG.knee*(FIG.hip-FIG.legY), t = clamp((kneeY - y)/Math.max(0.05, kneeY - FIG.legY), 0, 1);
+  // the legs fill out on their inner side until they meet in the middle, from the top of the legs down to just below the
+  // knees, then ease back to the calves' own width (the calves keep their gap)
+  const meet = kneeY - 0.08, th = sm(meet - 0.22, meet, y) * (FIG.thighs ?? 1), lx = p[0]-cx, inner = lx*side < 0;
+  const fill = inner ? Math.max(0, 2*(FIG.legX - 0.004)/FIG.legW - 1) * th : 0;
+  return [side*FIG.legX + lx*FIG.legW*(1 + fill), y, p[2]*FIG.legW*(1 + 0.08*th) + FIG.kneeBend*t];
 }
 /* where a body part is moved to on the Figure: the leg height lifts everything above the hips, plus the per-part offsets */
 function figOffset(name){
@@ -1349,11 +1410,52 @@ function figOffset(name){
 }
 const BODY_TYPES = {
   classic: { label:'Classic', round:{} },
-  figure:  { label:'Figure', round:{ torso:0.2, arm:0.24, leg:0.2 }, deform:figureDeform, hands:'sphere', feet:true },
+  figure:  { label:'Figure', round:{ torso:0.2, arm:0.24, leg:0.2 }, sharpEnds:{ arm:true }, deform:figureDeform, hands:'sphere', feet:true },
   smooth:  { label:'Smooth', round:{ torso:0.16, arm:0.16, leg:0.14 } },
   brick:   { label:'Brick', round:{ torso:0.05, arm:0.12, leg:0.05 }, deform:brickDeform, hands:true },
   slender: { label:'Slender', round:{ torso:0.08, arm:0.1, leg:0.08 }, deform:slenderDeform },
 };
+/* The Figure body is behind a password: a light gate, not security (the owner knows). Unlocking once is remembered in this
+   browser (localStorage 'grug.ccs.figure.v1'). The password itself isn't in the page: only its SHA-256. */
+const FigureLock = (() => {
+  const KEY = 'grug.ccs.figure.v1', HASH = '4da6853828677e40c59cb2862c0c47492d67e935ca5b3c44e7bc11a020c0227c';
+  const ok = () => { try { return localStorage.getItem(KEY) === '1'; } catch { return false; } };
+  async function sha(t){ const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(v => v.toString(16).padStart(2, '0')).join(''); }
+  let open = null;
+  function ask(){
+    if (ok()) return Promise.resolve(true); if (open) return open;
+    return (open = new Promise(res => {
+      const w = document.createElement('div'); w.className = 'o-lock';
+      w.innerHTML = '<form><h3>Figure body</h3><p>The Figure body is still being tested. Enter the password to use it.</p><input class="g-input" type="password" autocomplete="off" placeholder="Password" aria-label="Password"><p class="err" hidden>That isn\'t it. Try again.</p><div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="g-btn g-btn--ghost">Cancel</button><button class="g-btn g-btn--primary">Unlock</button></div></form>';
+      const f = w.querySelector('form'), inp = w.querySelector('input'), err = w.querySelector('.err');
+      const done = v => { w.remove(); open = null; res(v); };
+      w.querySelector('button[type=button]').onclick = () => done(false);
+      w.addEventListener('pointerdown', e => { if (e.target === w) done(false); });
+      w.addEventListener('keydown', e => { if (e.key === 'Escape') done(false); });
+      f.onsubmit = async e => { e.preventDefault(); let good = false; try { good = (await sha(inp.value.trim())) === HASH; } catch {}
+        if (good) { try { localStorage.setItem(KEY, '1'); } catch {} done(true); } else { err.hidden = false; inp.select(); } };
+      document.body.appendChild(w); setTimeout(() => inp.focus(), 30);
+    }));
+  }
+  return { ok, ask };
+})();
+/* Camera for the 3D views: drag or right-drag turns, middle-drag moves (pans), the wheel zooms, double-click resets.
+   The browser's right-click menu is turned off on the view. S: { yaw, pitch, dist, pan:[x, y], drag }. */
+function orbitCam(cv, S, o){
+  o = Object.assign({ turn: .008, tilt: .006, minP: -1.2, maxP: 1.35, minD: 5, maxD: 32, reset: null, done: null }, o);
+  S.pan = S.pan || [0, 0];
+  cv.addEventListener('contextmenu', e => e.preventDefault());
+  cv.addEventListener('auxclick', e => { if (e.button === 1) e.preventDefault(); });
+  cv.addEventListener('pointerdown', e => { if (e.button === 1) e.preventDefault();
+    S.drag = { x: e.clientX, y: e.clientY, yaw: S.yaw, pitch: S.pitch, pan: S.pan.slice(), mode: e.button === 1 || (e.button === 0 && e.shiftKey) ? 'pan' : 'turn' }; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove', e => { const d = S.drag; if (!d) return; const dx = e.clientX - d.x, dy = e.clientY - d.y;
+    if (d.mode === 'pan') { const k = S.dist * 1.07 / Math.max(1, cv.clientHeight) * .5; S.pan = [d.pan[0] + dx * k, d.pan[1] - dy * k]; }
+    else { S.yaw = d.yaw + dx * o.turn; S.pitch = clamp(d.pitch + dy * o.tilt, o.minP, o.maxP); } });
+  const up = () => { if (S.drag) { S.drag = null; S.idle = performance.now(); if (o.done) o.done(); } };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  cv.addEventListener('wheel', e => { e.preventDefault(); S.dist = clamp(S.dist * Math.exp(e.deltaY * .001), o.minD, o.maxD); }, { passive: false });
+  cv.addEventListener('dblclick', () => { S.pan = [0, 0]; if (o.reset) o.reset(); });
+}
 const EXPLODE = { torso:[0,0,0], rarm:[-0.9,0.12,0], larm:[0.9,0.12,0], rleg:[-0.3,-0.9,0], lleg:[0.3,-0.9,0], head:[0,1,0] };
 const STUDS = [ { part:'torso', x:-0.5, z:0 }, { part:'torso', x:0.5, z:0 }, { part:'rarm', x:-1.5, z:0 }, { part:'larm', x:1.5, z:0 }, { part:'rleg', x:-0.5, z:0 }, { part:'lleg', x:0.5, z:0 } ];
 
@@ -1370,6 +1472,7 @@ function ticks(len, r, dense){
 function partGeo(part, type){
   const bt = BODY_TYPES[type] || BODY_TYPES.classic, r = bt.round[kindOf(part.name)] || 0, def = bt.deform;
   const i0 = part.min.map(v => v+r), i1 = part.max.map(v => v-r);
+  if (bt.sharpEnds && bt.sharpEnds[kindOf(part.name)]) i0[1] = part.min[1];   // a flat, sharp-edged end at the bottom (the Figure's wrists, over the round hands)
   const P = (f, u, v) => {
     let p = [f.o[0]+u*f.u[0]+v*f.v[0], f.o[1]+u*f.u[1]+v*f.v[1], f.o[2]+u*f.u[2]+v*f.v[2]];
     if (r > 0){ const q = [clamp(p[0],i0[0],i1[0]), clamp(p[1],i0[1],i1[1]), clamp(p[2],i0[2],i1[2])], d = v3sub(p,q), L = Math.hypot(...d); if (L > 1e-9) p = [q[0]+d[0]/L*r, q[1]+d[1]/L*r, q[2]+d[2]/L*r]; }
@@ -1468,9 +1571,17 @@ function addCyl(g, c, h, rad, uv){
     if (s<S){ const b = base+s*2; g.i.push(b,b+1,b+3, b,b+3,b+2); } }
 }
 // Brick-style C-clip hand hanging under each arm
+/* where the Figure's round hand sits: out of the middle of the cuff along the way the sleeve's end faces (the arm curves
+   forward and the cuff's front is lifted), so the ball is as far from the back of the cuff as from its front */
+function figHandCenter(part){
+  const cx = (part.min[0]+part.max[0])/2, d = (x, z) => figureDeform(part, [cx + x, 2, z]), C = [0, 0, 0], N = 12;
+  for (let i = 0; i < N; i++){ const a = i/N*Math.PI*2, q = d(0.5*Math.cos(a), 0.5*Math.sin(a)); C[0] += q[0]/N; C[1] += q[1]/N; C[2] += q[2]/N; }
+  let n = v3norm(v3cross(v3sub(d(0, 0.5), d(0, -0.5)), v3sub(d(0.5, 0), d(-0.5, 0)))); if (n[1] > 0) n = n.map(v => -v);
+  return [C[0] + n[0]*FIG.hand*0.62, C[1] + n[1]*FIG.hand*0.62, C[2] + n[2]*FIG.hand*0.62];
+}
 function handGeo(part, type){
   const def = BODY_TYPES[type].deform, cx = (part.min[0]+part.max[0])/2;
-  if (BODY_TYPES[type].hands === 'sphere'){ const w = def(part, [cx, 2, 0]), g = { p:[], n:[], t:[], i:[] }; addSphere(g, [w[0], w[1] - FIG.hand*0.62, w[2]], FIG.hand); return g; }
+  if (BODY_TYPES[type].hands === 'sphere'){ const g = { p:[], n:[], t:[], i:[] }; addSphere(g, figHandCenter(part), FIG.hand); return g; }
   const w = def ? def(part, [cx, 2, 0]) : [cx, 2, 0];
   const g = { p:[], n:[], t:[], i:[] }, R = 0.19, rr = 0.075, S = 28, T = 12, gap = 1.25;
   const c = [w[0], w[1]-0.32, w[2]+0.04];
@@ -1593,6 +1704,8 @@ function rr(x, X, Y, w, h, r){ x.beginPath(); x.moveTo(X+r,Y); x.arcTo(X+w,Y,X+w
 function headTex(rgb, c){
   c = c || cnv(512,164); const x = c.getContext('2d');
   x.fillStyle = rgbCss(rgb); x.fillRect(0,0,512,164);
+  const F = window.HEAD_FACE;   // a picked face (Character tab): a transparent picture, centred on the front of the head
+  if (F && F.complete && F.naturalWidth) { const w = 150, h = w * F.naturalHeight / F.naturalWidth; x.drawImage(F, 256 - w/2, 76 - h/2, w, h); return c; }
   x.fillStyle = '#1b1b1f';
   [-26,26].forEach(dx => { x.beginPath(); x.ellipse(256+dx, 64, 7, 12.5, 0, 0, Math.PI*2); x.fill(); });
   x.strokeStyle = '#1b1b1f'; x.lineWidth = 6; x.lineCap = 'round';
@@ -2417,13 +2530,9 @@ function initViewer(){
   V3.tex.nmap = V3.r.tex(bodyNormalMap(V3.surf, V3.studs, V3.studShape)); V3.r.nmapTex = V3.tex.nmap;
   V3.tex.stud = V3.r.tex(studNormalMap(V3.studShape)); V3.r.studNMap = V3.tex.stud;
   V3.r.buildBody(V3.body, V3.studShape);
-  viewC.addEventListener('pointerdown', e => { V3.drag = { x:e.clientX, y:e.clientY, yaw:V3.yaw, pitch:V3.pitch }; viewC.setPointerCapture(e.pointerId); });
-  viewC.addEventListener('pointermove', e => { if (!V3.drag) return; V3.yaw = V3.drag.yaw + (e.clientX-V3.drag.x)*0.008; V3.pitch = clamp(V3.drag.pitch + (e.clientY-V3.drag.y)*0.006, -1.2, 1.35); });
-  viewC.addEventListener('pointerup', () => { V3.drag = null; V3.idle = performance.now(); });
-  viewC.addEventListener('wheel', e => { e.preventDefault(); V3.dist = clamp(V3.dist*Math.exp(e.deltaY*0.001), 6, 32); }, { passive:false });
-  viewC.addEventListener('dblclick', resetView);
+  orbitCam(viewC, V3, { minD: 6, maxD: 32, reset: resetView });
 }
-function resetView(){ V3.yaw = -0.6; V3.pitch = 0.18; V3.dist = 13.5; }
+function resetView(){ V3.yaw = -0.6; V3.pitch = 0.18; V3.dist = 13.5; V3.pan = [0, 0]; }
 function updateViewerTextures(){
   if (!V3.r) initViewer();
   const rgb = hexRgb($('#skin').value), nearest = state.fx.filter === 'nearest' && state.fx.div > 1;
@@ -2448,7 +2557,7 @@ function frame(t){
   const r = V3.r, gl = r.gl;
   gl.viewport(0,0,cw,ch); gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   const P = m4persp(30*D2R, cw/Math.max(1,ch), 0.1, 100);
-  const mv = m4mul(m4T(0,0,-V3.dist), m4mul(m4RX(V3.pitch), m4mul(m4RY(V3.yaw), m4T(0,-2.6,0))));
+  const pn = V3.pan || [0,0], mv = m4mul(m4T(pn[0],pn[1],-V3.dist), m4mul(m4RX(V3.pitch), m4mul(m4RY(V3.yaw), m4T(0,-2.6,0))));
   r.affine = 0; r.snap = 0; r.spec = V3.spec; r.nstr = (V3.surf === 'off' && V3.studs !== 'normal') ? 0 : V3.nstr; r.studsOn = V3.studs === '3d'; r.explode = V3.explode*1.2; r.outline.on = V3.olw > 0; r.outline.width = V3.olw || 0.06;
   gl.depthMask(false); r.draw(r.floor, V3.tex.floor, mv, P, [1,1,1], true); gl.depthMask(true);
   if (state.fx.wobble){ r.affine = 1; r.snap = 70; }
@@ -2466,7 +2575,7 @@ $('#skin').addEventListener('input', () => { syncChip(); V3.r && updateViewerTex
   const bt = $('#bodyType');
   Object.entries(BODY_TYPES).forEach(([k, t]) => { const b = document.createElement('button'); b.dataset.v = k; b.textContent = t.label; b.classList.toggle('on', k === V3.body); bt.appendChild(b); });
   const rebuild = () => { if (V3.r){ V3.r.buildBody(V3.body, V3.studShape); } };
-  bt.querySelectorAll('button').forEach(b => b.onclick = () => { V3.body = b.dataset.v; bt.querySelectorAll('button').forEach(o => o.classList.toggle('on', o === b)); rebuild(); });
+  bt.querySelectorAll('button').forEach(b => b.onclick = async () => { if (b.dataset.v === 'figure' && !(await FigureLock.ask())) return; V3.body = b.dataset.v; bt.querySelectorAll('button').forEach(o => o.classList.toggle('on', o === b)); rebuild(); });
   const remap = () => V3.r && V3.r.tex(bodyNormalMap(V3.surf, V3.studs, V3.studShape), V3.tex.nmap);
   $('#surf').onchange = e => { V3.surf = e.target.value; remap(); };
   const BC = $('#bodyCtls');
@@ -3234,10 +3343,15 @@ window.LoPolView = function LoPolView(root, D, opts = {}){
     if (nrmSrc) files.push({ name: 'normal.png', data: await pngOf(nrmSrc) }); save(zip(files.map(f => ({ name: slug + '/' + f.name, data: f.data }))), slug + '-obj.zip'); };
 
   /* ---------- camera + draw ---------- */
-  const S = { yaw: -0.6, pitch: 0.3, dist: D.radius * 4.8, drag: null, idle: 0 };
-  cv.onpointerdown = e => { S.drag = { x: e.clientX, y: e.clientY, yaw: S.yaw, pitch: S.pitch }; cv.setPointerCapture(e.pointerId); };
-  cv.onpointermove = e => { if (!S.drag) return; S.yaw = S.drag.yaw + (e.clientX - S.drag.x) * .01; S.pitch = Math.max(-1.4, Math.min(1.4, S.drag.pitch + (e.clientY - S.drag.y) * .01)); };
-  cv.onpointerup = () => { S.drag = null; S.idle = performance.now(); };
+  // drag or right-drag turns, middle-drag (or shift-drag) moves, the wheel zooms, double-click resets; no right-click menu
+  const S = { yaw: -0.6, pitch: 0.3, dist: D.radius * 4.8, drag: null, idle: 0, pan: [0, 0] };
+  cv.oncontextmenu = e => e.preventDefault(); cv.onauxclick = e => { if (e.button === 1) e.preventDefault(); };
+  cv.onpointerdown = e => { if (e.button === 1) e.preventDefault(); S.drag = { x: e.clientX, y: e.clientY, yaw: S.yaw, pitch: S.pitch, pan: S.pan.slice(), mode: e.button === 1 || (e.button === 0 && e.shiftKey) ? 'pan' : 'turn' }; cv.setPointerCapture(e.pointerId); };
+  cv.onpointermove = e => { const d = S.drag; if (!d) return; const dx = e.clientX - d.x, dy = e.clientY - d.y;
+    if (d.mode === 'pan') { const k = S.dist * .62 / Math.max(1, cv.clientHeight); S.pan = [d.pan[0] + dx * k, d.pan[1] - dy * k]; }
+    else { S.yaw = d.yaw + dx * .01; S.pitch = Math.max(-1.4, Math.min(1.4, d.pitch + dy * .01)); } };
+  cv.onpointerup = cv.onpointercancel = () => { S.drag = null; S.idle = performance.now(); };
+  cv.ondblclick = () => { S.yaw = -0.6; S.pitch = .3; S.dist = D.radius * 4.8; S.pan = [0, 0]; };
   cv.addEventListener('wheel', e => { e.preventDefault(); S.dist = Math.max(D.radius * 1.3, Math.min(D.radius * 9, S.dist * Math.exp(e.deltaY * .001))); }, { passive: false });
   const mul = (a, b) => { const o = new Float32Array(16); for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { let s = 0; for (let k = 0; k < 4; k++) s += a[k*4+j] * b[i*4+k]; o[i*4+j] = s; } return o; };
   const rx = a => new Float32Array([1,0,0,0, 0,Math.cos(a),Math.sin(a),0, 0,-Math.sin(a),Math.cos(a),0, 0,0,0,1]);
@@ -3252,7 +3366,7 @@ window.LoPolView = function LoPolView(root, D, opts = {}){
     const k = Math.min(2, devicePixelRatio || 1);
     const w = Math.max(1, Math.round(cv.clientWidth * k)), h = Math.max(1, Math.round(cv.clientHeight * k)); if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
     gl.viewport(0, 0, w, h); gl.clearColor(.09, .09, .1, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); gl.enable(gl.DEPTH_TEST);
-    const M = mul(tr(0, 0, -S.dist), mul(rx(S.pitch), ry(S.yaw))), P = persp(.6, w / h, D.radius * .05, D.radius * 30);
+    const M = mul(tr(S.pan[0], S.pan[1], -S.dist), mul(rx(S.pitch), ry(S.yaw))), P = persp(.6, w / h, D.radius * .05, D.radius * 30);
     if (texSrc) {
       gl.useProgram(pr); att(pr, bP, 'p', 3); att(pr, bN, 'n', 3); att(pr, bT, 't', 2); att(pr, bG, 'g', 4);
       gl.uniformMatrix4fv(U(pr, 'M'), false, M); gl.uniformMatrix4fv(U(pr, 'P'), false, P);
@@ -3491,13 +3605,20 @@ function partBox(p){
 }
 function partLathe(p){
   const prof = p.profile, n = p.sides || 8, a0 = (p.startAngle || 0) * Math.PI / 180, [sx, sz] = p.scale || [1, 1], cu = p.curl || {}, rmax = Math.max(...prof.map(q => q[0])), r0 = cu.from || 0, amt = cu.amount || 0;
-  const ang = Array.from({ length: n + 1 }, (_, c) => -Math.PI + a0 + 2 * Math.PI * c / n);
+  const sw = (p.sweep ?? 360), full = sw >= 360, ang = Array.from({ length: n + 1 }, (_, c) => -Math.PI + a0 + sw * Math.PI / 180 * c / n);
   const lift = (r, a) => !amt || r <= r0 ? 0 : amt * ((r - r0) / Math.max(1e-6, rmax - r0)) ** 2 * Math.sin(a) ** 2;
   const out = [chart(p.name, 'side', 'grid', prof.map(([r, y]) => ang.map(a => [r * Math.sin(a) * sx, y + lift(r, a), r * Math.cos(a) * sz])))];
-  const caps = p.caps || 'both', [rt, yt] = prof[0], [rb, yb] = prof[prof.length - 1];
+  const caps = full ? (p.caps || 'both') : 'none', [rt, yt] = prof[0], [rb, yb] = prof[prof.length - 1];
   if (rt > 1e-6 && (caps === 'both' || caps === 'top')) out.push(chart(p.name, 'top', 'poly', ang.slice(0, -1).map(a => [rt * Math.sin(a) * sx, yt, rt * Math.cos(a) * sz]).reverse(), 'bottom', 'v'));
   if (rb > 1e-6 && (caps === 'both' || caps === 'bottom')) out.push(chart(p.name, 'bottom', 'poly', ang.slice(0, -1).map(a => [rb * Math.sin(a) * sx, yb, rb * Math.cos(a) * sz]), 'top', 'v'));
   return out;
+}
+function partPrism(p){   // a flat outline [[x, z], ...] with a thickness y [bottom, top]
+  let O = p.outline.map(q => q.slice()); const [y0, y1] = p.y || [0, 0.1];
+  let a = 0; for (let i = 0; i < O.length; i++) { const j = (i + 1) % O.length; a += O[j][0] * O[i][1] - O[i][0] * O[j][1]; } if (a < 0) O = O.reverse();
+  const ring = O.concat([O[0]]);
+  return [chart(p.name, 'side', 'grid', [ring.map(([x, z]) => [x, y1, z]), ring.map(([x, z]) => [x, y0, z])]),
+    chart(p.name, 'top', 'poly', O.map(([x, z]) => [x, y1, z]), 'bottom', 'v'), chart(p.name, 'bottom', 'poly', O.slice().reverse().map(([x, z]) => [x, y0, z]), 'top', 'v')];
 }
 const partCyl = p => partLathe(Object.assign({}, p, { profile: [[p.radiusTop ?? p.radius, p.height / 2], [p.radius, -p.height / 2]] }));
 function partStrap(p){
@@ -3512,7 +3633,16 @@ function partStrap(p){
     out.push(chart(p.name, 'end1', 'poly', cap(0, 1), 'end2'), chart(p.name, 'end2', 'poly', cap(n - 1, -1), 'end1')); }
   return out;
 }
-const BUILD = { box: partBox, cylinder: partCyl, lathe: partLathe, strap: partStrap };
+function partLoft(p){   // rings from the top down [{y, outline: [[x, z], ...]}], the same number of points in each, skinned into a closed shell
+  const O0 = p.rings[0].outline; let a = 0; for (let i = 0; i < O0.length; i++) { const j = (i + 1) % O0.length; a += O0[j][0] * O0[i][1] - O0[i][0] * O0[j][1]; }
+  const rings = p.rings.map(r => [r.y, a < 0 ? r.outline.slice().reverse() : r.outline]), caps = p.caps || 'both';
+  const out = [chart(p.name, 'side', 'grid', rings.map(([y, O]) => O.concat([O[0]]).map(([x, z]) => [x, y, z])))];
+  const [yt, Ot] = rings[0], [yb, Ob] = rings[rings.length - 1];
+  if (caps === 'both' || caps === 'top') out.push(chart(p.name, 'top', 'poly', Ot.map(([x, z]) => [x, yt, z]), 'bottom', 'v'));
+  if (caps === 'both' || caps === 'bottom') out.push(chart(p.name, 'bottom', 'poly', Ob.slice().reverse().map(([x, z]) => [x, yb, z]), 'top', 'v'));
+  return out;
+}
+const BUILD = { box: partBox, cylinder: partCyl, lathe: partLathe, strap: partStrap, prism: partPrism, loft: partLoft };
 const pts = c => c.kind === 'grid' ? c.P.flat() : c.V;
 function polyN(V){ const c = V.reduce((a, v) => add(a, v), [0, 0, 0]).map(x => x / V.length); let s = [0, 0, 0]; for (let i = 0; i < V.length; i++) s = add(s, cross(sub(V[i], c), sub(V[(i + 1) % V.length], c))); return norm(s); }
 function fixCaps(cs){ const mid = cs.flatMap(pts).reduce((a, v) => add(a, v), [0, 0, 0]).map((x, _, a) => x / cs.flatMap(pts).length);
@@ -3678,11 +3808,13 @@ function wearOf(model, M){
 }
 function problems(model){
   const out = []; if (!model || !Array.isArray(model.parts) || !model.parts.length) return ['model.parts must be a list of parts'];
-  model.parts.forEach((p, i) => { const nm = p.name || `#${i}`; if (!p.name) out.push(`part ${i}: needs a name`); if (!BUILD[p.type]) out.push(`${nm}: type must be box, cylinder, lathe or strap`);
+  model.parts.forEach((p, i) => { const nm = p.name || `#${i}`; if (!p.name) out.push(`part ${i}: needs a name`); if (!BUILD[p.type]) out.push(`${nm}: type must be box, cylinder, lathe, strap, prism or loft`);
     if (p.type === 'box' && !(Array.isArray(p.size) && p.size.length === 3)) out.push(`${nm}: box needs size [w, h, d]`);
     if (p.type === 'cylinder' && !(p.radius > 0 && p.height > 0)) out.push(`${nm}: cylinder needs radius and height`);
     if (p.type === 'lathe' && !(Array.isArray(p.profile) && p.profile.length >= 2)) out.push(`${nm}: lathe needs a profile [[radius, y], ...] from top to bottom`);
-    if (p.type === 'strap' && !(Array.isArray(p.points) && p.points.length >= 2 && p.width > 0)) out.push(`${nm}: strap needs points (2 or more) and width`); });
+    if (p.type === 'strap' && !(Array.isArray(p.points) && p.points.length >= 2 && p.width > 0)) out.push(`${nm}: strap needs points (2 or more) and width`);
+    if (p.type === 'prism' && !(Array.isArray(p.outline) && p.outline.length >= 3)) out.push(`${nm}: prism needs an outline [[x, z], ...] of 3 or more points`);
+    if (p.type === 'loft' && !(Array.isArray(p.rings) && p.rings.length >= 2 && p.rings.every(r => Array.isArray(r.outline) && r.outline.length === p.rings[0].outline.length && r.outline.length >= 3))) out.push(`${nm}: loft needs 2 or more rings [{y, outline}], each outline with the same number of points (3 or more)`); });
   const names = model.parts.map(p => p.name); names.forEach((n, i) => { if (names.indexOf(n) !== i) out.push(`two parts are called "${n}"`); });
   return out;
 }
@@ -3931,10 +4063,15 @@ Every part: name, type, center [x,y,z], rot [x,y,z] degrees, mirror "x" | ["x","
 group ("Bag", "Straps": parts that are recoloured together), emissive {color, strength}, hidden.
  box: size [w,h,d], taper [x,z] (top face scale), taperBottom [x,z], shift [x,z] (slides the top), omit ["bottom", ...]
  cylinder: radius, radiusTop, height, sides (6-12), caps "both"|"top"|"bottom"|"none", scale [x,z]
- lathe: profile [[radius, y], ...] top to bottom, sides, scale [x,z], caps, curl {amount, from} (lifts a brim's sides)
+ lathe: profile [[radius, y], ...] top to bottom, sides, scale [x,z], caps, curl {amount, from} (lifts a brim's sides), sweep (degrees, < 360 = an open partial turn, with startAngle: hair around the back of a head)
+ prism: outline [[x, z], ...] seen from above, y [bottom, top] (soles, flat panels)
+ loft: rings [{y, outline: [[x, z], ...]}, ...] top to bottom, the same number of points in each (odd solids made of cross-sections)
  strap: points [[x,y,z], ...] along its middle, width, thickness, normal [x,y,z] or normals (one per point: which way the wide face looks), caps
 materials: ${'${LoPolCore.MATERIALS.join(" ")}'} (fabric and leather get stitched seams)
-wear (where it sits on the avatar): {"on": "head"|"back"|"lhand"|"rhand"|"lshoulder"|"rshoulder"|"face"|"neck"|"waist"|"front", "scale", "rot", "offset"}.
+wear (where it sits on the avatar): {"on": "head"|"hair"|"back"|"lhand"|"rhand"|"lshoulder"|"rshoulder"|"face"|"neck"|"waist"|"front"|"feet", "scale", "rot", "offset"}.
+ Hair ("hair"): model it on the head (cap r ~0.76 over the crown, a lathe with sweep round the back, open at the face).
+ Shoes ("feet"): a pair in the Figure's foot space (left foot x 0.18..0.81, sole y 0, ankle y 0.42, heel z -0.32, toes z 0.91; model the left
+ shoe, mirror "x"), a few foot-sized boxes; each shoe follows its own foot.
  Hats: {"on": "head", "scale": s, "fit": "hat"} puts the brim just above the eyes, centred. Backpacks: model them around the torso
  (straps over the shoulders at x ±0.8, y ~4.05, down the chest at z -0.54), "wear": {"on": "back", "rot": [0,180,0]}.
  Held things hang from the hand at y ~2 (x ±1.5).
@@ -4026,18 +4163,20 @@ const lumO = c => c[0] * .299 + c[1] * .587 + c[2] * .114;
 function slotShift(slot){
   if (OUT.body !== 'figure') return null;
   const o = FIG.off, up = FIG.hip - 2, add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
-  if (slot === 'lhand' || slot === 'rhand') { const n = slot === 'lhand' ? 'larm' : 'rarm', part = PARTS.find(p => p.name === n), cx = (part.min[0] + part.max[0]) / 2, w = figureDeform(part, [cx, 2, 0]);
-    const c = add([w[0], w[1] - FIG.hand * 0.62, w[2]], figOffset('hand_' + n)); return [c[0] - cx, c[1] - 2, c[2]]; }
+  if (slot === 'lhand' || slot === 'rhand') { const n = slot === 'lhand' ? 'larm' : 'rarm', part = PARTS.find(p => p.name === n), cx = (part.min[0] + part.max[0]) / 2;
+    const c = add(figHandCenter(part), figOffset('hand_' + n)); return [c[0] - cx, c[1] - 2, c[2]]; }
   if (slot === 'back') return [o.torso[0], up + o.torso[1], (1 - FIG.torsoD) * 0.5 + o.torso[2]];
   if (slot === 'lshoulder' || slot === 'rshoulder') { const sd = slot === 'lshoulder' ? 1 : -1; return [sd * (FIG.armX - 1.5 + o.arms[0]), up + o.arms[1], o.arms[2]]; }
   if (slot === 'head' || slot === 'face' || slot === 'hair') return figOffset('head');
   return figOffset('torso');
 }
-const SLOT_NAMES = { head: 'Head', back: 'Back', lhand: 'Left hand', rhand: 'Right hand', lshoulder: 'Left shoulder', rshoulder: 'Right shoulder', face: 'Face', neck: 'Neck', waist: 'Waist', front: 'Front', hair: 'Hair' };
-const OUT = { body: 'classic', r: null, raf: 0, yaw: -0.5, pitch: 0.14, dist: 13, spin: true, drag: null, idle: 0, last: 0, ready: false,
+const SLOT_NAMES = { head: 'Head', back: 'Back', lhand: 'Left hand', rhand: 'Right hand', lshoulder: 'Left shoulder', rshoulder: 'Right shoulder', face: 'Face', neck: 'Neck', waist: 'Waist', front: 'Front', hair: 'Hair', feet: 'Feet' };
+/* which joint an accessory moves with when the avatar is posed or animated */
+const SLOT_JOINT = { head: 'head', face: 'head', hair: 'head', lhand: 'larm', rhand: 'rarm' };
+const OUT = { body: 'classic', r: null, raf: 0, yaw: -0.5, pitch: 0.14, dist: 13, pan: [0, 0], spin: true, anim: 'still', pose: null, face: null, faces: [], drag: null, idle: 0, last: 0, ready: false,
   index: null, cloth: null, shirt: null, pants: null, shirtPal: [], pantsPal: [], shirtCols: [], pantsCols: [],
   wardrobe: [], worn: [], tex: {}, comp: null, saved: [],
-  look: { fx: Object.assign({}, LoPolTex.FX_DEFAULT), light: Object.assign({}, LoPolTex.LIGHT_DEFAULT), avatarOutline: true, accOutline: true, width: .06 } };
+  look: { fx: Object.assign({}, LoPolTex.FX_DEFAULT), light: Object.assign({}, LoPolTex.LIGHT_DEFAULT), avatarOutline: false, accOutline: true, width: .06 } };
 
 /* ---------- colour palettes of a clothing template (k-means over the faces), and recolouring ---------- */
 const RECTS = () => [TORSO, RLIMB, LLIMB].flatMap(R => FK.map(k => R[k]));
@@ -4076,19 +4215,33 @@ function initRenderer(){
   OUT.tex.floor = r.tex(fc); OUT.headC = cnv(512, 164); OUT.tex.head = r.tex(headTex(skin(), OUT.headC));
   OUT.tex.upper = r.gl.createTexture(); OUT.tex.legs = r.gl.createTexture();
   OUT.tex.nmap = r.tex(bodyNormalMap('bevel', 'off', 'round')); r.nmapTex = OUT.tex.nmap; r.buildBody(OUT.body, 'round'); r.nail = hexRgb($o('#outNail').value);
-  cv.addEventListener('pointerdown', e => { OUT.drag = { x: e.clientX, y: e.clientY, yaw: OUT.yaw, pitch: OUT.pitch }; cv.setPointerCapture(e.pointerId); });
-  cv.addEventListener('pointermove', e => { if (!OUT.drag) return; OUT.yaw = OUT.drag.yaw + (e.clientX - OUT.drag.x) * .008; OUT.pitch = clamp(OUT.drag.pitch + (e.clientY - OUT.drag.y) * .006, -1.2, 1.35); });
-  cv.addEventListener('pointerup', () => { OUT.drag = null; OUT.idle = performance.now(); });
-  cv.addEventListener('wheel', e => { e.preventDefault(); OUT.dist = clamp(OUT.dist * Math.exp(e.deltaY * .001), 5, 30); }, { passive: false });
-  cv.addEventListener('dblclick', () => { OUT.yaw = -.5; OUT.pitch = .14; OUT.dist = 13; });
+  orbitCam(cv, OUT, { minD: 4, maxD: 30, reset: () => { OUT.yaw = -.5; OUT.pitch = .14; OUT.dist = 13; } });
 }
 const skin = () => hexRgb($o('#outSkin').value);
 /* Baked light for the avatar's own shirt and pants, like an accessory's: ambient occlusion and a soft room light with
    shadows, ray-cast against the blocky body (boxes and the head) for every texel of the classic templates. Worked out once. */
 const NB = Math.max(TW, TH);
+/* The body's shape for the light bake: Blocky is the plain boxes; the Figure is each part bent by its proportions
+   (figureDeform + figOffset), so the inner sides of the arms and torso, which the Figure shows, get real light. */
+function bodyShape(){
+  const fig = OUT.body === 'figure', hd = VIEW_HEAD;
+  const T = (part, p) => { if (!fig) return p; const q = figureDeform(part, p), o = figOffset(part.name); return [q[0] + o[0], q[1] + o[1], q[2] + o[2]]; };
+  const boxes = [];
+  PARTS.forEach(part => { const n = fig ? (part.name === 'torso' ? 4 : 6) : 1;
+    for (let k = 0; k < n; k++) { const y0 = part.min[1] + (part.max[1] - part.min[1]) * k / n, y1 = part.min[1] + (part.max[1] - part.min[1]) * (k + 1) / n, mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9];
+      for (const x of [part.min[0], part.max[0]]) for (const y of [y0, y1]) for (const z of [part.min[2], part.max[2]]) { const q = T(part, [x, y, z]); for (let i = 0; i < 3; i++) { mn[i] = Math.min(mn[i], q[i]); mx[i] = Math.max(mx[i], q[i]); } }
+      if (fig && part.name !== 'torso') { const c = [0, 1, 2].map(i => (mn[i] + mx[i]) / 2); for (let i = 0; i < 3; i += 2) { mn[i] = c[i] + (mn[i] - c[i]) * .86; mx[i] = c[i] + (mx[i] - c[i]) * .86; } }   // rounded limbs: a little slimmer than their corners
+      boxes.push({ name: part.name, mn, mx }); } });
+  const ho = fig ? figOffset('head') : [0, 0, 0];
+  boxes.push({ name: 'head', mn: [-hd.r + ho[0], hd.y0 + ho[1], -hd.r + ho[2]], mx: [hd.r + ho[0], hd.y1 + ho[1], hd.r + ho[2]] });
+  if (fig) ['rarm', 'larm'].forEach(n => { const part = PARTS.find(q => q.name === n), h = figHandCenter(part), o = figOffset('hand_' + n), r = FIG.hand * .9;
+    const c = [h[0] + o[0], h[1] + o[1], h[2] + o[2]]; boxes.push({ name: n, mn: c.map(v => v - r), mx: c.map(v => v + r) }); });
+  return { T, boxes, key: fig ? 'figure:' + JSON.stringify(FIG) : 'blocky' };
+}
 function bodyLight(){
-  if (OUT.bodyMaps) return OUT.bodyMaps;
-  const hd = VIEW_HEAD, boxes = PARTS.map(p => ({ name: p.name, mn: p.min, mx: p.max })).concat([{ name: 'head', mn: [-hd.r, hd.y0, -hd.r], mx: [hd.r, hd.y1, hd.r] }]);
+  const S = bodyShape(); OUT.bodyMapCache = OUT.bodyMapCache || {};
+  if (OUT.bodyMapCache[S.key]) return OUT.bodyMapCache[S.key];
+  const boxes = S.boxes;
   const hit = (o, d, tmax, self) => { for (const b of boxes) { if (b.name === self) continue; let t0 = 1e-4, t1 = tmax;
       for (let a = 0; a < 3; a++) { if (Math.abs(d[a]) < 1e-9) { if (o[a] < b.mn[a] || o[a] > b.mx[a]) { t0 = 2; t1 = 1; break; } continue; }
         let ta = (b.mn[a] - o[a]) / d[a], tb = (b.mx[a] - o[a]) / d[a]; if (ta > tb) { const q = ta; ta = tb; tb = q; } if (ta > t0) t0 = ta; if (tb < t1) t1 = tb; if (t0 > t1) break; }
@@ -4098,11 +4251,14 @@ function bodyLight(){
   for (const [tex, parts] of [['upper', ['torso', 'rarm', 'larm']], ['legs', ['rleg', 'lleg']]]) {
     const AO = new Uint8ClampedArray(NB * NB * 4).fill(255), RM = new Uint8ClampedArray(NB * NB * 4).fill(200);
     for (const name of parts) { const part = PARTS.find(p => p.name === name);
-      FK.forEach(k => { const f = part.geo[k], [rx, ry, rw, rh] = part.rects[k], n = f.n, T = v3norm(Math.abs(n[1]) < .9 ? v3cross([0, 1, 0], n) : v3cross([1, 0, 0], n)), B = v3cross(n, T);
+      FK.forEach(k => { const f = part.geo[k], [rx, ry, rw, rh] = part.rects[k], n0 = f.n;
         for (let y = 0; y < rh; y += 2) for (let x = 0; x < rw; x += 2) {
-          const u = (x + 1) / rw, v = (y + 1) / rh, o = [0, 1, 2].map(i => f.o[i] + u * f.u[i] + v * f.v[i] + n[i] * .004);
+          const u = (x + 1) / rw, v = (y + 1) / rh, at = (uu, vv) => S.T(part, [0, 1, 2].map(i => f.o[i] + uu * f.u[i] + vv * f.v[i]));
+          const p0 = at(u, v), pu = at(u + .01, v), pv = at(u, v + .01); let n = v3norm(v3cross(v3sub(pu, p0), v3sub(pv, p0))); if (dot(n, n0) < 0) n = n.map(q => -q);
+          if (!isFinite(n[0])) n = n0;
+          const T0 = v3norm(Math.abs(n[1]) < .9 ? v3cross([0, 1, 0], n) : v3cross([1, 0, 0], n)), B = v3cross(n, T0), o = p0.map((q, i) => q + n[i] * .004);
           let vis = 0; for (let j = 0; j < K; j++) { const u1 = (j + rnd()) / K, r = Math.sqrt(u1), ph = 2 * Math.PI * rnd(), cz = Math.sqrt(1 - u1);
-            const d = [0, 1, 2].map(i => T[i] * r * Math.cos(ph) + B[i] * r * Math.sin(ph) + n[i] * cz); if (!hit(o, d, reach, name)) vis++; }
+            const d = [0, 1, 2].map(i => T0[i] * r * Math.cos(ph) + B[i] * r * Math.sin(ph) + n[i] * cz); if (!hit(o, d, reach, name)) vis++; }
           let lit = 0; for (let j = 0; j < 6; j++) { const d = v3norm([Ld[0] + (rnd() - .5) * .25, Ld[1] + (rnd() - .5) * .25, Ld[2] + (rnd() - .5) * .25]); if (!hit(o, d, 20, name)) lit++; }
           const ao = vis / K * 255, rm = Math.max(0, dot(n, Ld)) * lit / 6 * 255;
           for (let yy = y; yy < Math.min(rh, y + 2); yy++) for (let xx = x; xx < Math.min(rw, x + 2); xx++) { const i = ((ry + yy) * NB + rx + xx) * 4; AO[i] = AO[i + 1] = AO[i + 2] = ao; RM[i] = RM[i + 1] = RM[i + 2] = rm; } } }); }
@@ -4113,7 +4269,8 @@ function bodyLight(){
   }
   const flat = new Uint8ClampedArray(NB * NB * 4); for (let i = 0; i < flat.length; i += 4) { flat[i] = flat[i + 1] = flat[i + 2] = 128; flat[i + 3] = 255; }
   out.DT = flat; out.EM = new Uint8ClampedArray(NB * NB * 4);
-  return (OUT.bodyMaps = out);
+  const keys = Object.keys(OUT.bodyMapCache); if (keys.length > 3) delete OUT.bodyMapCache[keys.find(k => k !== 'blocky')];   // keep a few (the sliders make new shapes)
+  return (OUT.bodyMapCache[S.key] = out);
 }
 function retroBody(src, which){
   const M = bodyLight(), m = M[which], c = cnv(NB, NB), x = c.getContext('2d'); x.drawImage(src, 0, 0);
@@ -4143,11 +4300,13 @@ function accMeshes(D, wear, outline){
   for (let v = 0; v < nv; v++) { const p = [P[v * 3] + c[0], P[v * 3 + 1] + c[1], P[v * 3 + 2] + c[2]], n = [N[v * 3], N[v * 3 + 1], N[v * 3 + 2]], t = [TG[v * 4], TG[v * 4 + 1], TG[v * 4 + 2]], hw = TG[v * 4 + 3] || 1;
     const b = [(n[1] * t[2] - n[2] * t[1]) * hw, (n[2] * t[0] - n[0] * t[2]) * hw, (n[0] * t[1] - n[1] * t[0]) * hw];
     g.p.push(...W.ap(p)); g.n.push(...W.av(n)); g.tu.push(...W.av(t)); g.tv.push(...W.av(b)); g.t.push(UV[v * 2], UV[v * 2 + 1]); g.t2.push(UV[v * 2], UV[v * 2 + 1]); g.i.push(v); }
-  const out = { mesh: OUT.r.mesh(g) };
+  // shoes (worn on 'feet') are a pair: split into the left shoe (x > 0) and the right one, so each follows its own foot
+  const feet = wear && wear.on === 'feet', halves = idx => feet ? [1, -1].map(side => ({ side, i: idx.filter((_, k) => { const t = Math.floor(k / 3) * 3; return Math.sign(g.p[idx[t] * 3] + g.p[idx[t + 1] * 3] + g.p[idx[t + 2] * 3] || 1) === side; }) })) : [{ side: 0, i: idx }];
+  const out = { parts: halves(g.i).map(h => ({ side: h.side, mesh: OUT.r.mesh(Object.assign({}, g, { i: h.i })) })) };
   if (outline && outline.on !== false) {
     const H = LoPolTex.hullOf(P, (outline.width ?? .027) * D.radius * 2), h = { p: [], n: [], t: [], i: [] }, HN = LoPolTex.flatNormals(H);
     for (let v = 0; v < nv; v++) { h.p.push(...W.ap([H[v * 3] + c[0], H[v * 3 + 1] + c[1], H[v * 3 + 2] + c[2]])); h.n.push(...W.av([HN[v * 3], HN[v * 3 + 1], HN[v * 3 + 2]])); h.t.push(0, 0); h.i.push(v); }
-    out.hull = OUT.r.mesh(h); out.hullColor = (outline.color || [5, 5, 5]).map(v => v / 255);
+    halves(h.i).forEach((q, k) => { out.parts[k].hull = OUT.r.mesh(Object.assign({}, h, { i: q.i })); }); out.hullColor = (outline.color || [5, 5, 5]).map(v => v / 255);
   }
   return out;
 }
@@ -4195,7 +4354,7 @@ function paint(w){
 }
 function takeOff(id, quiet){
   const i = OUT.worn.findIndex(w => w.e.id === id); if (i < 0) return; const w = OUT.worn[i];
-  if (w.tracer) w.tracer.stop(); OUT.r.free(w.mesh); if (w.hull) OUT.r.free(w.hull); OUT.r.gl.deleteTexture(w.tex); OUT.worn.splice(i, 1);
+  if (w.tracer) w.tracer.stop(); w.parts.forEach(q => { OUT.r.free(q.mesh); if (q.hull) OUT.r.free(q.hull); }); OUT.r.gl.deleteTexture(w.tex); OUT.worn.splice(i, 1);
   if (!quiet) drawWorn();
 }
 async function setClothing(id, custom){
@@ -4203,23 +4362,27 @@ async function setClothing(id, custom){
   if (!c) { OUT.cloth = null; OUT.shirt = OUT.pants = null; OUT.shirtPal = OUT.pantsPal = []; OUT.shirtCols = []; OUT.pantsCols = []; bodyTextures(); drawClothing(); return; }
   const img = src => new Promise((res, rej) => { if (!src) return res(null); if (src instanceof HTMLCanvasElement) return res(src); const i = new Image(); i.onload = () => { const k = cnv(TW, TH); k.getContext('2d').drawImage(i, 0, 0, TW, TH); res(k); }; i.onerror = rej; i.src = src; });
   const base = custom || c.custom ? '' : OBASE;
-  [OUT.shirt, OUT.pants] = await Promise.all([img(c.shirt && (typeof c.shirt === 'string' ? base + c.shirt : c.shirt)), img(c.pants && (typeof c.pants === 'string' ? base + c.pants : c.pants))]);
+  const pants = OUT.body === 'figure' && c.pantsFigure ? c.pantsFigure : c.pants;   // the Figure has real feet: its pants have no shoes painted on
+  [OUT.shirt, OUT.pants] = await Promise.all([img(c.shirt && (typeof c.shirt === 'string' ? base + c.shirt : c.shirt)), img(pants && (typeof pants === 'string' ? base + pants : pants))]);
   OUT.cloth = c; OUT.shirtPal = OUT.shirt ? palette(OUT.shirt) : []; OUT.pantsPal = OUT.pants ? palette(OUT.pants) : [];
   OUT.shirtCols = OUT.shirtPal.map(() => null); OUT.pantsCols = OUT.pantsPal.map(() => null);
   bodyTextures(); drawClothing();
 }
 
 function setBody(b){
-  OUT.body = BODY_TYPES[b] ? b : 'classic'; if (OUT.r) OUT.r.buildBody(OUT.body, 'round');
+  const was = OUT.body; OUT.body = BODY_TYPES[b] ? b : 'classic'; if (OUT.r) OUT.r.buildBody(OUT.body, 'round');
+  if (was !== OUT.body) { if (OUT.cloth && OUT.cloth.pantsFigure) setClothing(OUT.cloth.id); else relight(0); }
   document.querySelectorAll('#outBody button').forEach(x => x.classList.toggle('on', x.dataset.b === OUT.body)); $o('#outNailRow').hidden = OUT.body !== 'figure'; $o('#outProp').hidden = OUT.body !== 'figure';
 }
 /* ---------- the Figure's proportions: sliders, X / Y / Z offsets, and JSON to copy (to make it the default) ---------- */
-const PROPS = [['Torso', [['torsoW', 'Width', .6, 1.2], ['waist', 'Waist (narrower)', 0, .3], ['waistY', 'Waist height', 2.1, 3.4], ['torsoD', 'Depth', .5, 1.1]]],
-  ['Arms', [['armLen', 'Length', .9, 1.5], ['armW', 'Thickness', .4, 1], ['armX', 'Shoulder spread', 1, 1.6], ['elbow', 'Elbow height', 2, 3.6], ['elbowBend', 'Elbow bend', 0, .4], ['armFwd', 'Forearm forward', -.2, .4], ['hand', 'Hand size', .15, .5]]],
-  ['Legs', [['hip', 'Leg height (hips)', 1.4, 2.8], ['legY', 'Ankle height', .2, .8], ['legW', 'Thickness', .5, 1.1], ['legX', 'Spacing', .3, .7], ['knee', 'Knee position', .2, .8], ['kneeBend', 'Knee bend', -.3, .3]]],
+const PROPS = [['Torso', [['torsoW', 'Width', .6, 1.2], ['waist', 'Waist (narrower)', 0, .3], ['waistY', 'Waist height', 2.1, 3.4], ['torsoD', 'Depth', .5, 1.1], ['hem', 'Hem flare', 0, .2]]],
+  ['Arms', [['armLen', 'Length', .9, 1.5], ['armW', 'Thickness', .4, 1], ['armX', 'Shoulder spread', 1, 1.6], ['elbow', 'Elbow height', 2, 3.6], ['elbowBend', 'Elbow bend', 0, .4], ['armFwd', 'Forearm forward', -.2, .4], ['hand', 'Hand size', .15, .5], ['cuffLift', 'Cuff lift (front)', 0, .3]]],
+  ['Legs', [['hip', 'Leg height (hips)', 1.4, 2.8], ['legY', 'Ankle height', .2, .8], ['legW', 'Thickness', .5, 1.1], ['legX', 'Spacing', .3, .7], ['knee', 'Knee position', .2, .8], ['kneeBend', 'Knee bend', -.3, .3], ['thighs', 'Legs meet (fill the gap)', 0, 1]]],
   ['Feet', [['foot', 'Size', .6, 1.6], ['footFwd', 'Forward', -.3, .4]]]];
 let propPend = 0;
-const propRebuild = () => { if (propPend) return; propPend = requestAnimationFrame(() => { propPend = 0; if (OUT.r && OUT.body === 'figure') OUT.r.buildBody('figure', 'round'); }); };
+let lightPend = 0;   // the light bake follows the shape: redone a moment after the proportions stop changing
+const relight = (ms = 350) => { clearTimeout(lightPend); lightPend = setTimeout(() => { if (OUT.r) bodyTextures(); }, ms); };
+const propRebuild = () => { if (propPend) return; propPend = requestAnimationFrame(() => { propPend = 0; if (OUT.r && OUT.body === 'figure') { OUT.r.buildBody('figure', 'round'); relight(); } }); };
 function drawProps(){
   const box = $o('#outPropBody'); box.innerHTML = '';
   const rng = (label, get, set, mn, mx, st) => { const l = document.createElement('label'); l.className = 'o-rng';
@@ -4239,7 +4402,9 @@ function setFig(f){ const d = JSON.parse(JSON.stringify(FIG_DEFAULT)); Object.as
 /* ---------- looks: presets, saved ---------- */
 async function applyLook(L){
   if (L.skin) { $o('#outSkin').value = L.skin; }
-  if (L.figure) setFig(L.figure); if (L.body) setBody(L.body); if (L.nail) { $o('#outNail').value = L.nail; if (OUT.r) OUT.r.nail = hexRgb(L.nail); }
+  if (L.figure) setFig(L.figure); if (L.body) setBody(L.body === 'figure' && !(await FigureLock.ask()) ? 'classic' : L.body);
+  await setFace(L.face || null);
+  if (L.nail) { $o('#outNail').value = L.nail; if (OUT.r) OUT.r.nail = hexRgb(L.nail); const w = $o('#outNailWheel'); if (w && w.sync) w.sync(); else if ($o('#outNailBtn')) $o('#outNailBtn').style.background = L.nail; }
   const custom = L.custom ? { id: 'custom', name: L.custom.name || 'Your clothing', shirt: L.custom.shirt, pants: L.custom.pants } : null;
   await setClothing(L.clothing, custom);
   OUT.shirtCols = matchPal(OUT.shirtPal, L.shirtColours); OUT.pantsCols = matchPal(OUT.pantsPal, L.pantsColours);
@@ -4254,7 +4419,7 @@ async function applyLook(L){
 }
 function currentLook(){
   const name = $o('#outName').value.trim() || 'My look', pairs = (pal, cols) => pal.map((p, i) => cols[i] ? { from: p, to: cols[i] } : null).filter(Boolean);
-  const L = { name, skin: $o('#outSkin').value, body: OUT.body, nail: $o('#outNail').value, figure: OUT.body === 'figure' ? JSON.parse(figJSON()) : undefined, clothing: OUT.cloth && OUT.cloth.id !== 'custom' ? OUT.cloth.id : null,
+  const L = { name, skin: $o('#outSkin').value, body: OUT.body, face: OUT.face || undefined, nail: $o('#outNail').value, figure: OUT.body === 'figure' ? JSON.parse(figJSON()) : undefined, clothing: OUT.cloth && OUT.cloth.id !== 'custom' ? OUT.cloth.id : null,
     shirtColours: pairs(OUT.shirtPal, OUT.shirtCols), pantsColours: pairs(OUT.pantsPal, OUT.pantsCols),
     accessories: OUT.worn.map(w => Object.assign({ id: w.e.id, slug: w.e.slug, name: w.e.name, slot: w.slot, colours: w.colours.map(c => c || null) }, w.e.albedo ? { albedo: w.e.albedo, logo: w.e.logo, settings: w.e.settings, thumb: w.e.thumb, model: w.e.model } : {})) };
   if (OUT.cloth && OUT.cloth.id === 'custom') L.custom = { name: OUT.cloth.name, shirt: OUT.shirt && OUT.shirt.toDataURL(), pants: OUT.pants && OUT.pants.toDataURL() };
@@ -4363,6 +4528,98 @@ function drawLookPanel(){
   const wr = ol.querySelector('input[type=range]'); wr.oninput = () => { OUT.look.width = +wr.value; wr.previousElementSibling.querySelector('b').textContent = fmt('width', +wr.value); };
   box.appendChild(ol);
 }
+/* where a worn accessory is drawn: its spot on the body (Figure proportions), moving with its joint when posed.
+   Shoes go one per foot: on the Figure each follows its foot exactly (they're modelled on the same feet); on the blocky
+   body each sits on the bottom of its leg, stretched to the leg's size. */
+function accMV(r, mv, slot, side){
+  if (slot === 'feet' && side) {
+    if (OUT.body === 'figure' && r.body && r.body.feet) return m4mul(r.partMV(mv, side > 0 ? 'foot_l' : 'foot_r'), m4T(-side * 0.47, 0, 0));
+    const S = m4I(); S[0] = 1.4; S[10] = 0.78;
+    return m4mul(r.poseMV(mv, side > 0 ? 'lleg' : 'rleg'), m4mul(m4T(side * 0.5, 0.09, 0), m4mul(S, m4T(-side * 0.49, 0, -0.28))));
+  }
+  const d = slotShift(slot), m = r.poseMV(mv, SLOT_JOINT[slot] || 'torso'); return d ? m4mul(m, m4T(d[0], d[1], d[2])) : m;
+}
+/* ---------- animation previews (Idle, Walk, Jump) and the pose editor ---------- */
+const JOINTS = [['head', 'Head'], ['torso', 'Torso'], ['larm', 'Left arm'], ['rarm', 'Right arm'], ['lleg', 'Left leg'], ['rleg', 'Right leg']];
+const POSE0 = () => ({ bob: [0, 0, 0], head: [0, 0, 0], torso: [0, 0, 0], larm: [0, 0, 0], rarm: [0, 0, 0], lleg: [0, 0, 0], rleg: [0, 0, 0] });
+OUT.custom = POSE0();
+function animPose(t){
+  const a = OUT.anim, P = POSE0(), sin = Math.sin, sm = x => x * x * (3 - 2 * x), cl = x => Math.max(0, Math.min(1, x));
+  if (a === 'still') return null;
+  if (a === 'pose') return OUT.custom;
+  if (a === 'idle') { const b = sin(t * 2.1);
+    P.torso = [1.5 + b * 1.2, 0, 0]; P.head = [-1 - b, sin(t * .7) * 6, sin(t * .9) * 2]; P.larm = [b * 2, 0, 5 + b * 2]; P.rarm = [-b * 2, 0, -5 - b * 2]; return P; }
+  if (a === 'walk') { const ph = t * 6.2, s = sin(ph);
+    P.bob = [0, 0.07 * Math.abs(Math.cos(ph)), 0]; P.lleg = [34 * s, 0, 0]; P.rleg = [-34 * s, 0, 0]; P.larm = [-30 * s, 0, 4]; P.rarm = [30 * s, 0, -4];
+    P.torso = [3, 5 * s, 0]; P.head = [-2, -4 * s, 0]; return P; }
+  if (a === 'jump') { const u = (t % 1.4) / 1.4;
+    const crouch = u < .16 ? sm(u / .16) : u < .24 ? 1 - sm((u - .16) / .08) : u > .8 && u < .92 ? sm(1 - Math.abs(u - .86) / .06) : 0;
+    const air = u >= .22 && u <= .82 ? (u - .22) / .6 : -1, h = air >= 0 ? 4 * air * (1 - air) * 2.2 : 0, up = air >= 0 ? sm(cl(air * 3)) * (1 - sm(cl((air - .6) / .4))) : 0;
+    P.bob = [0, h, 0]; P.torso = [14 * crouch, 0, 0]; P.head = [-8 * crouch, 0, 0];
+    P.lleg = [-22 * crouch + 18 * up, 0, 0]; P.rleg = [-22 * crouch - 6 * up, 0, 0];
+    P.larm = [-30 * crouch, 0, 10 + 140 * up]; P.rarm = [-30 * crouch, 0, -10 - 140 * up]; return P; }
+  return null;
+}
+function setAnim(a){ OUT.anim = a; document.querySelectorAll('#outAnim button').forEach(b => b.classList.toggle('on', b.dataset.a === a)); }
+function drawPoseEditor(){
+  const box = $o('#outPoseBody'); box.innerHTML = '';
+  JOINTS.forEach(([j, label]) => { const d = document.createElement('details'); d.className = 'o-off'; const cur = () => OUT.custom[j].map(v => Math.round(v)).join(' / ');
+    d.innerHTML = `<summary>${label}<b>${cur()}</b></summary>`;
+    [['X', 'forward / back'], ['Y', 'turn'], ['Z', 'sideways']].forEach(([ax, hint], i) => { const l = document.createElement('label'); l.className = 'o-rng';
+      const lim = j.endsWith('leg') ? 120 : j === 'head' ? 80 : j === 'torso' ? 60 : 180;
+      l.innerHTML = `<span>${ax} (${hint})<b>${Math.round(OUT.custom[j][i])}°</b></span><input type="range" min="${-lim}" max="${lim}" step="1" value="${OUT.custom[j][i]}">`;
+      const r = l.querySelector('input'); r.oninput = () => { OUT.custom[j][i] = +r.value; l.querySelector('b').textContent = r.value + '°'; d.querySelector('summary b').textContent = cur(); setAnim('pose'); };
+      d.appendChild(l); });
+    box.appendChild(d); });
+  const l = document.createElement('label'); l.className = 'o-rng';
+  l.innerHTML = `<span>Lift the whole body<b>${OUT.custom.bob[1].toFixed(2)}</b></span><input type="range" min="-1" max="3" step="0.01" value="${OUT.custom.bob[1]}">`;
+  const r = l.querySelector('input'); r.oninput = () => { OUT.custom.bob[1] = +r.value; l.querySelector('b').textContent = (+r.value).toFixed(2); setAnim('pose'); }; box.appendChild(l);
+}
+function setPose(p){ const d = POSE0(); Object.keys(d).forEach(k => { if (Array.isArray(p && p[k]) && p[k].length === 3) d[k] = p[k].map(Number); }); OUT.custom = d; drawPoseEditor(); setAnim('pose'); }
+/* ---------- faces (outfits/faces/index.json): a transparent picture drawn on the front of the head ---------- */
+async function loadFaces(){ try { OUT.faces = await (await fetch(OBASE + 'faces/index.json')).json(); } catch { OUT.faces = []; } drawFaces(); }
+function setFace(id){
+  const f = OUT.faces.find(x => x.id === id); OUT.face = f ? f.id : null;
+  return new Promise(res => { const done = () => { bodyTextures(); drawFaces(); if (typeof updateViewerTextures === 'function' && typeof V3 !== 'undefined' && V3.r) try { updateViewerTextures(); } catch {} res(); };
+    if (!f) { window.HEAD_FACE = null; return done(); }
+    const im = new Image(); im.onload = () => { window.HEAD_FACE = im; done(); }; im.onerror = () => { window.HEAD_FACE = null; done(); }; im.src = AS(OBASE + 'faces/' + f.file); });
+}
+function drawFaces(){
+  const box = $o('#outFaces'); if (!box) return; box.innerHTML = '';
+  [{ id: null, name: 'Default' }].concat(OUT.faces).forEach(f => { const b = document.createElement('button'); b.className = 'o-face' + ((OUT.face || null) === f.id ? ' on' : '');
+    b.title = f.name; b.setAttribute('aria-label', 'Face: ' + f.name); if (f.file) b.style.backgroundImage = `url('${AS(OBASE + 'faces/' + f.file)}')`; else b.textContent = 'Default';
+    b.onclick = () => setFace(f.id); box.appendChild(b); });
+}
+/* ---------- the nail colour wheel (Figure body): hue around, saturation outwards, a brightness slider, polish presets ---------- */
+function nailWheel(){
+  const host = $o('#outNailWheel'), btn = $o('#outNailBtn'), inp = $o('#outNail'); if (!host || host.dataset.on) return; host.dataset.on = 1;
+  host.className = 'o-wheel'; host.innerHTML = `<canvas width="360" height="360" aria-label="Nail colour wheel"></canvas>
+    <label class="o-rng"><span>Brightness<b></b></span><input type="range" min="0" max="1" step="0.01"></label>
+    <div class="row"><span class="sw"></span><code></code></div><div class="chips"></div>`;
+  const cv = host.querySelector('canvas'), x = cv.getContext('2d'), br = host.querySelector('input'), sw = host.querySelector('.sw'), code = host.querySelector('code');
+  const hsv2rgb = (h, s, v) => { const f = n => { const k = (n + h / 60) % 6; return v - v * s * Math.max(0, Math.min(k, 4 - k, 1)); }; return [f(5), f(3), f(1)].map(c => Math.round(c * 255)); };
+  const rgb2hsv = ([r, g, b]) => { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; let h = 0;
+    if (d) h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; return [(h * 60 + 360) % 360, mx ? d / mx : 0, mx]; };
+  let [H, S, V] = rgb2hsv(unhexO(inp.value));
+  const draw = () => { const R = 180, id = x.createImageData(360, 360), d = id.data;
+    for (let y = 0; y < 360; y++) for (let xx = 0; xx < 360; xx++) { const dx = xx - R, dy = y - R, r = Math.hypot(dx, dy), i = (y * 360 + xx) * 4; if (r > R) continue;
+      const c = hsv2rgb((Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360, r / R, V); d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = r > R - 1 ? (R - r) * 255 : 255; }
+    x.putImageData(id, 0, 0); const a = H * Math.PI / 180, px = R + Math.cos(a) * S * R, py = R + Math.sin(a) * S * R;
+    x.lineWidth = 4; x.strokeStyle = V > .5 ? '#1E1B16' : '#fff'; x.beginPath(); x.arc(px, py, 10, 0, 7); x.stroke(); };
+  const set = (fromUser) => { const c = hsv2rgb(H, S, V), hx = hexO(c); inp.value = hx; sw.style.background = hx; btn.style.background = hx; code.textContent = hx.toUpperCase();
+    br.value = V; br.previousElementSibling.querySelector('b').textContent = Math.round(V * 100) + '%'; draw(); if (fromUser) inp.dispatchEvent(new Event('input')); };
+  const pick = e => { const b = cv.getBoundingClientRect(), dx = (e.clientX - b.left) / b.width * 360 - 180, dy = (e.clientY - b.top) / b.height * 360 - 180;
+    H = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360; S = Math.min(1, Math.hypot(dx, dy) / 180); set(true); };
+  cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); pick(e); cv.onpointermove = pick; });
+  cv.addEventListener('pointerup', () => { cv.onpointermove = null; });
+  br.oninput = () => { V = +br.value; set(true); };
+  const chips = host.querySelector('.chips');
+  ['#f7f2ee', '#f2c4c0', '#e8a598', '#d9485a', '#a3132a', '#6b1d3a', '#8e5aa8', '#e98a3a', '#c9a227', '#2b6e8f', '#2f2f35', '#111114'].forEach(c => {
+    const b = document.createElement('button'); b.style.background = c; b.title = c; b.setAttribute('aria-label', 'Polish ' + c); b.onclick = () => { [H, S, V] = rgb2hsv(unhexO(c)); set(true); }; chips.appendChild(b); });
+  host.sync = () => { [H, S, V] = rgb2hsv(unhexO(inp.value)); set(false); };
+  btn.onclick = () => { host.hidden = !host.hidden; if (!host.hidden) host.sync(); };
+  set(false);
+}
 /* ---------- draw loop ---------- */
 function frame(t){
   if (!OUT.on) { OUT.raf = 0; return; }
@@ -4371,14 +4628,15 @@ function frame(t){
   const cv = $o('#outView'), sc = Math.max(1, Math.min(2, (devicePixelRatio || 1) * .75)), cw = Math.max(1, Math.round(cv.clientWidth * sc)), ch = Math.max(1, Math.round(cv.clientHeight * sc));
   if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; }
   const r = OUT.r, gl = r.gl; gl.viewport(0, 0, cw, ch); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  const P = m4persp(30 * D2R, cw / ch, .1, 100), mv = m4mul(m4T(0, 0, -OUT.dist), m4mul(m4RX(OUT.pitch), m4mul(m4RY(OUT.yaw), m4T(0, -2.9, 0))));
+  const P = m4persp(30 * D2R, cw / ch, .1, 100), mv = m4mul(m4T(OUT.pan[0], OUT.pan[1], -OUT.dist), m4mul(m4RX(OUT.pitch), m4mul(m4RY(OUT.yaw), m4T(0, -2.9, 0))));
+  r.pose = animPose(t / 1000);
   r.affine = 0; r.snap = 0; r.explode = 0; r.studsOn = false; r.outline.on = OUT.look.avatarOutline; r.outline.width = OUT.look.width;
   gl.depthMask(false); r.draw(r.floor, OUT.tex.floor, mv, P, [1, 1, 1], true); gl.depthMask(true);
   r.drawChar(mv, P, { upper: OUT.tex.upper, legs: OUT.tex.legs, head: OUT.tex.head, tint: [1, 1, 1], skin: skin().map(v => v / 255) });
   const sp = r.spec; r.spec = 0;
-  OUT.worn.forEach(w => { const d = slotShift(w.slot), m = d ? m4mul(mv, m4T(d[0], d[1], d[2])) : mv;
-    r.draw(w.mesh, w.tex, m, P, [1, 1, 1], false, null, 0);
-    if (w.hull && OUT.look.accOutline) { gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK); r.draw(w.hull, r.white, m, P, w.hullColor, true); gl.disable(gl.CULL_FACE); } });
+  OUT.worn.forEach(w => w.parts.forEach(q => { const m = accMV(r, mv, w.slot, q.side);
+    r.draw(q.mesh, w.tex, m, P, [1, 1, 1], false, null, 0);
+    if (q.hull && OUT.look.accOutline) { gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK); r.draw(q.hull, r.white, m, P, w.hullColor, true); gl.disable(gl.CULL_FACE); } }));
   r.spec = sp;
   OUT.raf = requestAnimationFrame(frame);
 }
@@ -4386,7 +4644,7 @@ async function show(on){
   OUT.on = on; $o('#outfits').hidden = !on;
   if (!on) return;
   initRenderer(); drawLookPanel();
-  if (!OUT.readyP) OUT.readyP = (async () => { await loadIndex(); fileAccessories(); drawClothing(); drawWardrobe(); await loadSaved(); if (OUT.index.looks && OUT.index.looks[0] && !OUT.worn.length && !OUT.cloth) await applyLook(OUT.index.looks[0]); })();
+  if (!OUT.readyP) OUT.readyP = (async () => { await loadIndex(); await loadFaces(); fileAccessories(); drawClothing(); drawWardrobe(); await loadSaved(); if (OUT.index.looks && OUT.index.looks[0] && !OUT.worn.length && !OUT.cloth) await applyLook(OUT.index.looks[0]); })();
   await OUT.readyP; drawClothing(); drawWardrobe();
   bodyTextures();
   if (!OUT.raf) { OUT.last = performance.now(); OUT.raf = requestAnimationFrame(frame); }
@@ -4401,12 +4659,17 @@ async function addFromView(view, tpl){
 }
 
 $o('#outSkin').addEventListener('input', () => { bodyTextures(); const s = document.querySelector('#skin'); if (s) { s.value = $o('#outSkin').value; s.dispatchEvent(new Event('input')); } });
-document.querySelectorAll('#outBody button').forEach(b => b.onclick = () => { setBody(b.dataset.b); });
+document.querySelectorAll('#outBody button').forEach(b => b.onclick = async () => { if (b.dataset.b === 'figure' && !(await FigureLock.ask())) return; setBody(b.dataset.b); });
+document.querySelectorAll('#outAnim button').forEach(b => b.onclick = () => setAnim(b.dataset.a));
+drawPoseEditor(); nailWheel();
+$o('#outPoseCopy').onclick = async () => { const t = JSON.stringify(OUT.custom); $o('#outPoseJson').value = t; try { await navigator.clipboard.writeText(t); toastO('Pose copied as JSON'); } catch { $o('#outPoseJson').select(); } };
+$o('#outPoseApply').onclick = () => { try { setPose(JSON.parse($o('#outPoseJson').value)); toastO('Pose applied'); } catch { toastO("That isn't valid JSON"); } };
+$o('#outPoseReset').onclick = () => { setPose(null); setAnim('still'); };
 drawProps();
 $o('#outPropCopy').onclick = async () => { const t = figJSON(); $o('#outPropJson').value = t; try { await navigator.clipboard.writeText(t); toastO('Proportions copied as JSON'); } catch { $o('#outPropJson').select(); } };
 $o('#outPropApply').onclick = () => { try { setFig(JSON.parse($o('#outPropJson').value)); toastO('Proportions applied'); } catch { toastO("That isn't valid JSON"); } };
 $o('#outPropReset').onclick = () => { setFig(FIG_DEFAULT); toastO('Back to the default proportions'); };
-$o('#outNail').addEventListener('input', () => { if (OUT.r) OUT.r.nail = hexRgb($o('#outNail').value); });
+$o('#outNail').addEventListener('input', () => { if (OUT.r) OUT.r.nail = hexRgb($o('#outNail').value); const b = $o('#outNailBtn'); if (b) b.style.background = $o('#outNail').value; });
 $o('#outClothEdit').onclick = () => {
   if (!OUT.shirtNow && !OUT.pantsNow) return toastO('Pick some clothing first');
   const cp = c => { const k = cnv(TW, TH); if (c) k.getContext('2d').drawImage(c, 0, 0); return k; };
@@ -4425,7 +4688,7 @@ $o('#outPantsFile').onchange = async e => { const f = e.target.files[0]; if (!f)
 
 async function wearClothing(shirt, pants, name){ await show(true); const cp = c => { if (!c) return null; const k = cnv(TW, TH); k.getContext('2d').drawImage(c, 0, 0); return k; };
   await setClothing('custom', { id: 'custom', name: name || 'Your clothing', shirt: cp(shirt), pants: cp(pants) }); }
-window.__outfits = { OUT, show, wear, takeOff, applyLook, currentLook, addFromView, setClothing, saveLook, wearClothing, setBody };
+window.__outfits = { OUT, show, wear, takeOff, applyLook, currentLook, addFromView, setClothing, saveLook, wearClothing, setBody, setAnim, setPose, setFace, animPose };
 })();
 
 </script>

@@ -1,0 +1,89 @@
+{
+ "name": "Low-top sneakers",
+ "object": "pair of low-top sneakers",
+ "description": "pair of casual low-top lace-up sneakers in dark chocolate-brown smooth leather with grey-white waxed laces through small metal eyelets, a soft padded collar, and a worn light tan rubber sole",
+ "parts": [
+  {
+   "name": "sole",
+   "type": "box",
+   "center": [
+    0.49,
+    -0.04,
+    0.28
+   ],
+   "size": [
+    0.74,
+    0.1,
+    1.42
+   ],
+   "material": "plastic",
+   "group": "Sole",
+   "mirror": "x"
+  },
+  {
+   "name": "body",
+   "type": "box",
+   "center": [
+    0.49,
+    0.165,
+    0.275
+   ],
+   "size": [
+    0.7,
+    0.33,
+    1.37
+   ],
+   "material": "leather",
+   "group": "Shoe",
+   "mirror": "x"
+  },
+  {
+   "name": "collar",
+   "type": "box",
+   "center": [
+    0.49,
+    0.385,
+    -0.0
+   ],
+   "size": [
+    0.7,
+    0.11,
+    0.8
+   ],
+   "material": "leather",
+   "group": "Shoe",
+   "mirror": "x"
+  },
+  {
+   "name": "laces",
+   "type": "box",
+   "center": [
+    0.49,
+    0.345,
+    0.56
+   ],
+   "size": [
+    0.32,
+    0.03,
+    0.42
+   ],
+   "material": "leather",
+   "group": "Laces",
+   "mirror": "x"
+  }
+ ],
+ "views": [
+  {
+   "yaw": 30,
+   "pitch": 24
+  },
+  {
+   "yaw": 210,
+   "pitch": 24
+  }
+ ],
+ "wear": {
+  "on": "feet"
+ },
+ "logo": "sole.bottom"
+}
