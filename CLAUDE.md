@@ -250,7 +250,7 @@ ray-cast against the body, plus the same retro effects), outlines for the avatar
 (IndexedDB `ccs-library`, key `outfits.looks`) and a zip download. "Wear it" on a finished accessory sends it there.
 Accessories are made to fit the avatar (`wear` in each template; hats use `"fit": "hat"`: brim just above the eyes).
 **Character extras (Nov 2026):** the **Figure** body is behind a password (`FigureLock` in the Studio page: only its SHA-256 is
-in the page; the unlock is remembered in `localStorage` `grug.ccs.figure.v1`, which `privacy.html` mentions); it's a light
+in the page; one unlock lasts the session: `sessionStorage` `grug.ccs.figure.v1` plus memory, which `privacy.html` mentions); it's a light
 gate the owner asked for, not security. Its arms end flat and sharp over the round hands (`sharpEnds`). Blocky has no
 lock. The stage has **Still / Idle / Walk / Jump / Pose** (`animPose`, GLR `pose` / `poseMV`: joints turn about pivots
 worked out from the Figure's proportions, and worn accessories follow their joint) and a **Pose editor** (per-joint X / Y / Z,

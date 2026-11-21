@@ -548,7 +548,7 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
       <div class="g-pattern" data-g-pattern="dust"></div>
       <canvas id="view3d"></canvas>
       <div class="vtools g-toolbar">
-        <button id="spin" class="g-tool on" data-g-tip="Turntable"><i data-g-icon="orbit"></i></button>
+        <button id="spin" class="g-tool" data-g-tip="Turntable"><i data-g-icon="orbit"></i></button>
         <button id="resetView" class="g-tool" data-g-tip="Reset view"><i data-g-icon="arrow_counterclockwise"></i></button>
         <button id="tShirt" class="g-tool on" data-g-tip="Show shirt" style="--c:var(--g-yellow)"><i data-g-icon="shirt"></i></button>
         <button id="tPants" class="g-tool on" data-g-tip="Show pants" style="--c:var(--g-blue)"><i data-g-icon="pants"></i></button>
@@ -691,7 +691,7 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
   <section id="outfits" class="step" hidden>
     <div class="g-card stage o-stage"><canvas id="outView" aria-label="The avatar. Drag to turn, middle-drag to move, scroll to zoom."></canvas>
       <div class="o-hint">Drag or right-drag: turn · Middle-drag: move · Scroll: zoom · Double-click: reset</div>
-      <div class="o-bar"><button id="outSpin" class="g-btn g-btn--sm on">Turn</button></div>
+      <div class="o-bar"><button id="outSpin" class="g-btn g-btn--sm">Turn</button></div>
       <div class="o-anim" id="outAnim" role="group" aria-label="Animation preview"><button data-a="still" class="on">Still</button><button data-a="idle">Idle</button><button data-a="walk">Walk</button><button data-a="jump">Jump</button><button data-a="pose">Pose</button></div></div>
     <aside class="side">
       <div class="g-card card">
@@ -1379,7 +1379,7 @@ function slenderDeform(part, p){
 /* Figure: the rounded body (slimmer waist, longer arms with a slight bend at the elbow, sphere hands, real feet).
    Every number is a slider in the Character tab's Proportions panel; FIG_DEFAULT is the starting point (paste the panel's
    JSON here to change it). off: extra X / Y / Z moves per part (x mirrors on the right side, so +x spreads both sides out). */
-const FIG_DEFAULT = {"torsoW":0.9,"waist":0.23,"waistY":2.68,"torsoD":1.03,"armX":1.23,"armW":0.57,"armLen":1.04,"elbow":3.14,"elbowBend":0,"armFwd":0.4,"hand":0.39,"hip":2.8,"legX":0.47,"legW":0.8,"legY":0.2,"knee":0.49,"kneeBend":-0.3,"foot":1.27,"footFwd":0.09,"cuffLift":0.12,"thighs":1,"hem":0.07,"legHem":0.08,"boots":false,
+const FIG_DEFAULT = {"torsoW":0.9,"waist":0.23,"waistY":2.68,"torsoD":1.03,"armX":1.23,"armW":0.57,"armLen":1.04,"elbow":3.14,"elbowBend":0,"armFwd":0.4,"hand":0.39,"hip":2.8,"legX":0.47,"legW":0.8,"legY":0.2,"knee":0.49,"kneeBend":-0.3,"foot":1.27,"footFwd":0.09,"cuffLift":0.12,"thighs":1,"hem":0.07,"legHem":0.08,"boots":false,"instep":0.25,
   "off":{"torso":[0,0,0],"arms":[0,0,0],"hands":[0,0,0],"legs":[0,0,0],"feet":[-0.02,0.19,-0.05],"head":[0,0,0]}};   // the owner's tuned figurine (Nov 2026)
 const FIG = JSON.parse(JSON.stringify(FIG_DEFAULT));
 /* distance from the middle to the edge of a rounded square (half-size a, corner radius rr), in direction th */
@@ -1439,9 +1439,10 @@ function figureDeform(part, p){
       const o = FIG.off, k = FIG.foot, sole = FIG.legY - (FEET.height || 0.423)*k + o.legs[1] + o.feet[1] + 0.01;
       const zoff = FIG.kneeBend + FIG.footFwd + o.legs[2] + o.feet[2], heel = (FEET.zmin ?? -0.324)*k + zoff - 0.07, toe = (FEET.zmax ?? 0.91)*k + zoff + 0.06;
       const yTop = FIG.legY + top*(FIG.hip + 0.06 - FIG.legY)/2; y = yTop + (y - yTop)*((yTop - sole)/Math.max(0.05, yTop - FIG.legY));   // stretch down to the sole
-      // front and back are straight lines from the knee (no knee bend in boots) to the toe and the heel
-      const sk = clamp(1 - p[1]/Math.max(0.2, 2*FIG.knee), 0, 1), u = lz/0.5*0.5 + 0.5;        // u: where this point sits, back (0) to front (1)
-      const zb0 = -0.5*FIG.legW, zf0 = 0.5*FIG.legW, zb = zb0 + (Math.min(zb0, heel) - zb0)*sk, zf = zf0 + (toe - zf0)*Math.min(1, sk/0.92);
+      // the back is a straight line from the knee (no knee bend in boots) to the heel; the front stays straight down to the
+      // instep (FIG.instep, in the leg's own height: about halfway down the boot) and only then slopes out to the toe
+      const sk = clamp(1 - p[1]/Math.max(0.2, 2*FIG.knee), 0, 1), sf = clamp(1 - p[1]/(FIG.instep ?? 0.25), 0, 1), u = lz/0.5*0.5 + 0.5;   // u: back (0) to front (1)
+      const zb0 = -0.5*FIG.legW, zf0 = 0.5*FIG.legW, zb = zb0 + (Math.min(zb0, heel) - zb0)*sk, zf = zf0 + (toe - zf0)*Math.min(1, sf/0.9);
       Z = zb + (zf - zb)*u;
       X = side*(FIG.legX + o.feet[0]*0) + lx*FIG.legW*(1 + 0.14*sm(0, 1, s)) + side*0.02*sm(0, 1, s);
     }
@@ -1466,11 +1467,13 @@ const BODY_TYPES = {
   brick:   { label:'Brick', round:{ torso:0.05, arm:0.12, leg:0.05 }, deform:brickDeform, hands:true },
   slender: { label:'Slender', round:{ torso:0.08, arm:0.1, leg:0.08 }, deform:slenderDeform },
 };
-/* The Figure body is behind a password: a light gate, not security (the owner knows). Unlocking once is remembered in this
-   browser (localStorage 'grug.ccs.figure.v1'). The password itself isn't in the page: only its SHA-256. */
+/* The Figure body is behind a password: a light gate, not security (the owner knows). Entering it once unlocks everything
+   for the rest of the session (this tab: sessionStorage 'grug.ccs.figure.v1', plus memory for pages that can't store);
+   the next visit asks again. The password itself isn't in the page: only its SHA-256. */
 const FigureLock = (() => {
-  const KEY = 'grug.ccs.figure.v1', HASH = '4da6853828677e40c59cb2862c0c47492d67e935ca5b3c44e7bc11a020c0227c';
-  const ok = () => { try { return localStorage.getItem(KEY) === '1'; } catch { return false; } };
+  const KEY = 'grug.ccs.figure.v1', HASH = '4da6853828677e40c59cb2862c0c47492d67e935ca5b3c44e7bc11a020c0227c'; let mem = false;
+  try { localStorage.removeItem(KEY); } catch {}   // an older build remembered it for good
+  const ok = () => { if (mem) return true; try { return (mem = sessionStorage.getItem(KEY) === '1'); } catch { return false; } };
   async function sha(t){ const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(v => v.toString(16).padStart(2, '0')).join(''); }
   let open = null;
   function ask(){
@@ -1484,7 +1487,7 @@ const FigureLock = (() => {
       w.addEventListener('pointerdown', e => { if (e.target === w) done(false); });
       w.addEventListener('keydown', e => { if (e.key === 'Escape') done(false); });
       f.onsubmit = async e => { e.preventDefault(); let good = false; try { good = (await sha(inp.value.trim())) === HASH; } catch {}
-        if (good) { try { localStorage.setItem(KEY, '1'); } catch {} done(true); } else { err.hidden = false; inp.select(); } };
+        if (good) { mem = true; try { sessionStorage.setItem(KEY, '1'); } catch {} done(true); } else { err.hidden = false; inp.select(); } };
       document.body.appendChild(w); setTimeout(() => inp.focus(), 30);
     }));
   }
@@ -2566,7 +2569,7 @@ Object.entries(PRESETS).forEach(([k, p]) => {
 syncFX();
 
 /* ---------- 3D viewer ---------- */
-const V3 = { r:null, yaw:-0.6, pitch:0.18, dist:13.5, spin:true, show:{ shirt:true, pants:true }, comp:null, tex:{}, raf:0, last:0, drag:null, idle:0,
+const V3 = { r:null, yaw:-0.6, pitch:0.18, dist:13.5, spin:false, show:{ shirt:true, pants:true }, comp:null, tex:{}, raf:0, last:0, drag:null, idle:0,
   body:'classic', surf:'bevel', nstr:1, spec:0.25, studs:'off', studShape:'round', explode:0, olw:0 };
 const viewC = $('#view3d');
 function initViewer(){
@@ -4226,7 +4229,7 @@ function slotShift(slot){
 const SLOT_NAMES = { head: 'Head', back: 'Back', lhand: 'Left hand', rhand: 'Right hand', lshoulder: 'Left shoulder', rshoulder: 'Right shoulder', face: 'Face', neck: 'Neck', waist: 'Waist', front: 'Front', hair: 'Hair', feet: 'Feet' };
 /* which joint an accessory moves with when the avatar is posed or animated */
 const SLOT_JOINT = { head: 'head', face: 'head', hair: 'head', lhand: 'larm', rhand: 'rarm' };
-const OUT = { body: 'classic', r: null, raf: 0, yaw: -0.5, pitch: 0.14, dist: 13, pan: [0, 0], spin: true, anim: 'still', pose: null, face: null, faces: [], drag: null, idle: 0, last: 0, ready: false,
+const OUT = { body: 'classic', r: null, raf: 0, yaw: -0.5, pitch: 0.14, dist: 13, pan: [0, 0], spin: false, anim: 'still', pose: null, face: null, faces: [], drag: null, idle: 0, last: 0, ready: false,
   index: null, cloth: null, shirt: null, pants: null, shirtPal: [], pantsPal: [], shirtCols: [], pantsCols: [],
   wardrobe: [], worn: [], tex: {}, comp: null, saved: [],
   look: { fx: Object.assign({}, LoPolTex.FX_DEFAULT), light: Object.assign({}, LoPolTex.LIGHT_DEFAULT), avatarOutline: false, accOutline: true, width: .06 } };
@@ -4449,7 +4452,7 @@ function setBody(b){
 const PROPS = [['Torso', [['torsoW', 'Width', .6, 1.2], ['waist', 'Waist (narrower)', 0, .3], ['waistY', 'Waist height', 2.1, 3.4], ['torsoD', 'Depth', .5, 1.1], ['hem', 'Hem flare', 0, .2]]],
   ['Arms', [['armLen', 'Length', .9, 1.5], ['armW', 'Thickness', .4, 1], ['armX', 'Shoulder spread', 1, 1.6], ['elbow', 'Elbow height', 2, 3.6], ['elbowBend', 'Elbow bend', 0, .4], ['armFwd', 'Forearm forward', -.2, .4], ['hand', 'Hand size', .15, .5], ['cuffLift', 'Cuff lift (front)', 0, .3]]],
   ['Legs', [['hip', 'Leg height (hips)', 1.4, 2.8], ['legY', 'Ankle height', .2, .8], ['legW', 'Thickness', .5, 1.1], ['legX', 'Spacing', .3, .7], ['knee', 'Knee position', .2, .8], ['kneeBend', 'Knee bend', -.3, .3], ['thighs', 'Legs meet (fill the gap)', 0, 1]]],
-  ['Feet', [['foot', 'Size', .6, 1.6], ['footFwd', 'Forward', -.3, .4]]]];
+  ['Feet', [['foot', 'Size', .6, 1.6], ['footFwd', 'Forward', -.3, .4], ['instep', 'Boot toe starts at (height)', .08, .7]]]];
 let propPend = 0;
 let lightPend = 0;   // the light bake follows the shape: redone a moment after the proportions stop changing
 const relight = (ms = 350) => { clearTimeout(lightPend); lightPend = setTimeout(() => { if (OUT.r) bodyTextures(); }, ms); };
