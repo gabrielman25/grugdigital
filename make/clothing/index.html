@@ -428,6 +428,8 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
         <h2 class="ttl"><span class="n">1</span>Pick a skin tone</h2>
         <p class="sub">Front on the left, back on the right. Skin the outfit leaves showing keeps this tone.</p>
         <div class="swatches" id="swatches"></div>
+        <label class="g-field-label">Back view</label>
+        <div class="g-seg full" id="layoutSeg" style="margin-bottom:var(--g-s-4)"><button data-v="exploded">Exploded (shows inner sides)</button><button data-v="assembled">Assembled</button></div>
         <button id="dlRef" class="g-btn g-btn--primary full"><i data-g-icon="arrow_down_to_line"></i>Download reference</button>
       </div>
       <div class="g-card card">
@@ -957,18 +959,28 @@ function faceGeom(p, k){
 }
 PARTS.forEach(p => { p.geo = {}; FK.forEach(k => p.geo[k] = faceGeom(p, k)); });
 
+/* Reference layout. 'exploded' (default): the back view's arms, legs and head are pulled apart so the image model can see
+   and paint the inner arms and legs, the torso's sides and the tops of the legs. 'assembled': the original layout.
+   Pick one with ?layout=assembled|exploded (the Studio's toggle reloads with it). */
+const LAYOUT = (() => { try { const v = new URLSearchParams(location.search).get('layout'); if (v === 'assembled' || v === 'exploded') return v; } catch (e) {} return 'exploded'; })();
+const NO_OFF = { torso:[0,0,0], rarm:[0,0,0], larm:[0,0,0], rleg:[0,0,0], lleg:[0,0,0], head:[0,0,0] };
+const BACK_OFF = LAYOUT === 'exploded'
+  ? { torso:[0,0,0], rarm:[-0.8,0.1,0], larm:[0.8,0.1,0], rleg:[-0.42,-0.85,0], lleg:[0.42,-0.85,0], head:[0,0.45,0] }
+  : NO_OFF;
+if (LAYOUT === 'exploded'){ OFFX[0] = -2.75; OFFX[1] = 3.05; }
 const VIEWS = [0,1].map(i => {
   const m = m4mul(m4T(OFFX[i],0,0), m4mul(m4RX(PITCH), m4mul(m4RY(YAWS[i]), m4T(-CENTER[0],-CENTER[1],-CENTER[2]))));
-  return { i, m, dObj: rotT(m, [0,0,1]) };
+  return { i, m, dObj: rotT(m, [0,0,1]), off: i === 1 ? BACK_OFF : NO_OFF };
 });
+const addOff = (p, o) => [p[0]+o[0], p[1]+o[1], p[2]+o[2]];
 
 // Orthographic bounds that frame both characters at 3:2
 const BND = (() => {
   const pts = [];
-  PARTS.forEach(p => { for (let a=0;a<8;a++) pts.push([a&1?p.max[0]:p.min[0], a&2?p.max[1]:p.min[1], a&4?p.max[2]:p.min[2]]); });
-  for (let s=0;s<32;s++){ const t=s/32*Math.PI*2; pts.push([Math.sin(t)*HEAD.r,HEAD.y0,Math.cos(t)*HEAD.r],[Math.sin(t)*HEAD.r,HEAD.y1,Math.cos(t)*HEAD.r]); }
+  PARTS.forEach(p => { for (let a=0;a<8;a++) pts.push([p.name, [a&1?p.max[0]:p.min[0], a&2?p.max[1]:p.min[1], a&4?p.max[2]:p.min[2]]]); });
+  for (let s=0;s<32;s++){ const t=s/32*Math.PI*2; pts.push(['head', [Math.sin(t)*HEAD.r,HEAD.y0,Math.cos(t)*HEAD.r]], ['head', [Math.sin(t)*HEAD.r,HEAD.y1,Math.cos(t)*HEAD.r]]); }
   let l=1e9,r=-1e9,b=1e9,t=-1e9;
-  VIEWS.forEach(V => pts.forEach(p => { const q = xf(V.m,p); l=Math.min(l,q[0]); r=Math.max(r,q[0]); b=Math.min(b,q[1]); t=Math.max(t,q[1]); }));
+  VIEWS.forEach(V => pts.forEach(([n, p]) => { const q = xf(V.m, addOff(p, V.off[n])); l=Math.min(l,q[0]); r=Math.max(r,q[0]); b=Math.min(b,q[1]); t=Math.max(t,q[1]); }));
   const pad = 0.45; l-=pad; r+=pad; b-=pad; t+=pad;
   const cx=(l+r)/2, cy=(b+t)/2; let w=r-l, h=t-b;
   if (w/h < W/H) w = h*W/H; else h = w*H/W;
@@ -993,16 +1005,19 @@ function rayCyl(o,d){
   if (Math.abs(d[1]) > 1e-9){ for (const yy of [HEAD.y0,HEAD.y1]){ const t=(yy-o[1])/d[1]; if (t>1e-5){ const x=o[0]+d[0]*t, z=o[2]+d[2]*t; if (x*x+z*z<=r2) return true; } } }
   return false;
 }
-function occluded(p,n,d,self,shifts){
+function occluded(p,n,d,self,shifts,off){
+  off = off || NO_OFF;
   const o = [p[0]+n[0]*0.002, p[1]+n[1]*0.002, p[2]+n[2]*0.002];
-  for (const q of PARTS) if (rayBox(o,d,q.min,q.max)) return true;
-  if (rayCyl(o,d)) return true;
+  const box = (q, oo) => rayBox(oo, d, addOff(q.min, off[q.name]), addOff(q.max, off[q.name]));
+  const cyl = oo => rayCyl([oo[0]-off.head[0], oo[1]-off.head[1], oo[2]-off.head[2]], d);
+  for (const q of PARTS) if (box(q, o)) return true;
+  if (cyl(o)) return true;
   // also test a few screen-space neighbours so texels right next to an occluding edge
   // don't pick up its anti-aliased colour
   if (shifts) for (const s of shifts){
     const o2 = [o[0]+s[0], o[1]+s[1], o[2]+s[2]];
-    for (const q of PARTS) if (q !== self && rayBox(o2,d,q.min,q.max)) return true;
-    if (rayCyl(o2,d)) return true;
+    for (const q of PARTS) if (q !== self && box(q, o2)) return true;
+    if (cyl(o2)) return true;
   }
   return false;
 }
@@ -1091,6 +1106,7 @@ class GLR {
     gl.drawElements(gl.TRIANGLES, m.c, gl.UNSIGNED_SHORT, 0);
   }
   partMV(mv, name){
+    if (this.offsets){ const o = this.offsets[name]; return (o[0]||o[1]||o[2]) ? m4mul(mv, m4T(o[0], o[1], o[2])) : mv; }
     if (!this.explode) return mv;
     const o = EXPLODE[name], e = this.explode;
     return m4mul(mv, m4T(o[0]*e, o[1]*e, o[2]*e));
@@ -1379,7 +1395,8 @@ function renderScene(tx){
   const gl = refR.gl;
   gl.viewport(0,0,refGLc.width,refGLc.height); gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   const P = m4ortho(BND.l,BND.r,BND.b,BND.t,-50,50);
-  VIEWS.forEach(V => refR.drawChar(V.m, P, tx));
+  VIEWS.forEach(V => { refR.offsets = V.off; refR.drawChar(V.m, P, tx); });
+  refR.offsets = null;
   const c = cnv(W,H), x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(refGLc,0,0,W,H);
   return c;
 }
@@ -1465,6 +1482,13 @@ function setSkin(rgb, silent){
   const inp = c.querySelector('input'); let t = 0;
   inp.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { setSkin(hexRgb(inp.value)); c.classList.add('on'); }, 60); });
 })();
+(() => {
+  const seg = $('#layoutSeg');
+  seg.querySelectorAll('button').forEach(b => { b.classList.toggle('on', b.dataset.v === LAYOUT); b.onclick = () => {
+    if (b.dataset.v === LAYOUT) return;
+    const u = new URL(location.href); u.searchParams.set('layout', b.dataset.v); location.href = u.toString();
+  }; });
+})();
 function download(canvas, name){
   canvas.toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }, 'image/png');
 }
@@ -1474,7 +1498,7 @@ function buildPrompt(){
   $('#prompt').value =
 `Add clothing to these two blocky Roblox avatars: ${outfit}.
 
-Both avatars are the same character wearing the same outfit. The left one shows the FRONT and the right one shows the BACK. Paint the clothes flat onto the blocky body like a classic Roblox shirt and pants texture, covering the torso, both arms and both legs.
+Both avatars are the same character wearing the same outfit. The left one shows the FRONT and the right one shows the BACK.${LAYOUT === 'exploded' ? ' The right one is an exploded view: its arms, legs and head are pulled slightly apart from the torso so you can see the inner sides of the arms and legs, the sides of the torso and the tops of the legs. Paint the outfit on those inner sides and tops too, and keep every part exactly where it is.' : ''} Paint the clothes flat onto the blocky body like a classic Roblox shirt and pants texture, covering the torso, both arms and both legs.
 
 Keep everything else exactly the same: same pose, camera angle, size, position, blocky proportions and plain white background. Don't change the heads, and don't add hair, hats, accessories, shadows or anything that changes the silhouette. Keep the lighting soft and even. Any skin that isn't covered by clothing should keep exactly the same skin color it has now.`;
 }
@@ -1507,7 +1531,7 @@ function loadFile(f){
   img.src = url;
 }
 function setImage(src, w, h){
-  state.img = src; state.imgW = w; state.imgH = h; state.built = false;
+  state.img = src; state.imgW = w; state.imgH = h; state.built = false; state.imgLayout = LAYOUT;
   prepMask();
   autoAlign(true);
   goStep(2);
@@ -1803,8 +1827,9 @@ function extract(A, opt){
         for (const q of vi){
           const uu = q.eu + u*(1-2*q.eu), vv = q.ev + v*(1-2*q.ev);
           const p = [g.o[0]+uu*g.u[0]+vv*g.v[0], g.o[1]+uu*g.u[1]+vv*g.v[1], g.o[2]+uu*g.u[2]+vv*g.v[2]];
-          if (occluded(p, g.n, q.V.dObj, part, q.shifts)) continue;
-          const [X,Y] = project(q.V.m, p);
+          const pw = addOff(p, q.V.off[part.name]);
+          if (occluded(pw, g.n, q.V.dObj, part, q.shifts, q.V.off)) continue;
+          const [X,Y] = project(q.V.m, pw);
           bil(A, X, Y, cs);
           let a = 1;
           if (opt.bare > 0){ bil(refWhiteData, X, Y, cr); const d = Math.hypot(cs[0]-cr[0], cs[1]-cr[1], cs[2]-cr[2]); a = clamp((d - opt.bare)/(opt.bare*0.5 + 4), 0, 1); }
@@ -2361,7 +2386,7 @@ function renderThumb(){
 async function outfitFiles(){
   const name = cleanName($('#oName').value) || 'Outfit';
   const meta = { app: 'classic-clothing-studio', version: 1, name, tags: $('#oTags').value.split(',').map(s => s.trim()).filter(Boolean),
-    colors: outfitColors(), idea: $('#outfit').value.trim(), skin: SKIN, fx: state.fx, preset: state.preset, created: new Date().toISOString() };
+    colors: outfitColors(), idea: $('#outfit').value.trim(), skin: SKIN, layout: state.imgLayout || LAYOUT, fx: state.fx, preset: state.preset, created: new Date().toISOString() };
   const files = [
     ['shirt.png', await toPNG(state.shirt)], ['pants.png', await toPNG(state.pants)],
     ['raw-shirt.png', await toPNG(state.rawShirt)], ['raw-pants.png', await toPNG(state.rawPants)],

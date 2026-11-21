@@ -1,5 +1,5 @@
 {
- "v": "066084755f9e",
+ "v": "3884580dad55",
  "apps": {
   "grug": [
    "grug",
@@ -406,7 +406,7 @@
     "/links/create/": "d40a805a88",
     "/links/": "b9971e3ed4",
     "/links/page/": "984b54c854",
-    "/make/clothing/": "d67f3279e5",
+    "/make/clothing/": "1f298d8719",
     "/make/": "c8b93142a9",
     "/me/cards/": "bc7189095b",
     "/me/": "ace48c1b35",
@@ -421,7 +421,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 38141998
+   "bytes": 38144372
   },
   "daypart": {
    "title": "Daypart",
