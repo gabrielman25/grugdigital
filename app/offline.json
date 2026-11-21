@@ -1,5 +1,5 @@
 {
- "v": "d2e603344707",
+ "v": "56a194eedded",
  "apps": {
   "grug": [
    "grug",
@@ -462,7 +462,7 @@
     "/make/clothing/accessories/handbag/template.json": "13182cb988",
     "/make/clothing/accessories/handbag/texmap.bin": "1ee5e70741",
     "/make/clothing/accessories/handbag/thumb.png": "71cd5c9912",
-    "/make/clothing/accessories/index.json": "59fb053b82",
+    "/make/clothing/accessories/index.json": "6c8757e083",
     "/make/clothing/accessories/lantern/ao.png": "82e744072d",
     "/make/clothing/accessories/lantern/detail.png": "2b9496a069",
     "/make/clothing/accessories/lantern/emit.png": "972b51e987",
@@ -491,24 +491,10 @@
     "/make/clothing/accessories/ponytail/template.json": "6a7862d678",
     "/make/clothing/accessories/ponytail/texmap.bin": "cef2fc9642",
     "/make/clothing/accessories/ponytail/thumb.png": "cb3cc66226",
-    "/make/clothing/accessories/sneakers/ao.png": "2d689fadb4",
-    "/make/clothing/accessories/sneakers/detail.png": "6ef7a5fa54",
-    "/make/clothing/accessories/sneakers/emit.png": "dbd409f162",
-    "/make/clothing/accessories/sneakers/example-albedo.jpg": "bc86c42750",
-    "/make/clothing/accessories/sneakers/example-bounce.jpg": "43346a52e1",
-    "/make/clothing/accessories/sneakers/example-logo.png": "23d7ab4520",
-    "/make/clothing/accessories/sneakers/example.jpg": "9568bbd10b",
-    "/make/clothing/accessories/sneakers/model.json": "b9f2f40b9c",
-    "/make/clothing/accessories/sneakers/normal.png": "faf61519e5",
-    "/make/clothing/accessories/sneakers/reference.png": "93db3f68cf",
-    "/make/clothing/accessories/sneakers/room.png": "87e34a6beb",
-    "/make/clothing/accessories/sneakers/template.json": "3a5fd362fb",
-    "/make/clothing/accessories/sneakers/texmap.bin": "73a67ae60a",
-    "/make/clothing/accessories/sneakers/thumb.png": "5e8ad6c954",
     "/make/clothing/body/feet-normal.png": "481945ea4f",
     "/make/clothing/body/feet.json": "5c6219bf2c",
     "/make/clothing/body/nails.png": "8df1f89d50",
-    "/make/clothing/": "d59059523a",
+    "/make/clothing/": "cf78d9291b",
     "/make/clothing/outfits/autumn/chip.png": "614a9d6509",
     "/make/clothing/outfits/autumn/pants-figure.png": "c0625f6c54",
     "/make/clothing/outfits/autumn/pants.png": "88b04fc8e8",
@@ -524,9 +510,9 @@
     "/make/clothing/outfits/faces/shy.png": "c4b2394d07",
     "/make/clothing/outfits/faces/smirk.png": "dee436f886",
     "/make/clothing/outfits/faces/surprised.png": "2dfd79c562",
-    "/make/clothing/outfits/index.json": "57b94b1af3",
+    "/make/clothing/outfits/index.json": "9126d07407",
     "/make/clothing/outfits/looks/autumn-blocky.jpg": "4998197211",
-    "/make/clothing/outfits/looks/autumn.jpg": "1f80f97899",
+    "/make/clothing/outfits/looks/autumn.jpg": "0bb61dc052",
     "/make/clothing/outfits/looks/night-rider.jpg": "d30a0f4f32",
     "/make/clothing/outfits/looks/rustic.jpg": "e294edcf2d",
     "/make/clothing/outfits/looks/weekend.jpg": "3f19ed390b",
@@ -550,7 +536,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 60164803
+   "bytes": 57895180
   },
   "daypart": {
    "title": "Daypart",

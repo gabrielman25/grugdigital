@@ -35,13 +35,6 @@
   "wear": "hair"
  },
  {
-  "slug": "sneakers",
-  "name": "Low-top sneakers",
-  "object": "pair of low-top sneakers",
-  "description": "pair of casual low-top lace-up sneakers in dark chocolate-brown smooth leather with grey-white waxed laces through small metal eyelets, a soft padded collar, and a worn light tan rubber sole",
-  "wear": "feet"
- },
- {
   "slug": "cowboy-hat",
   "name": "Western cowboy hat",
   "object": "cowboy hat",

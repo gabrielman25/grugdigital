@@ -697,6 +697,7 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
       <div class="g-card card">
         <h2 class="ttl"><i data-g-icon="person_body"></i>Body</h2>
         <div class="g-seg full" id="outBody"><button data-b="classic" class="on">Blocky</button><button data-b="figure">Figure</button></div>
+        <div class="g-seg full" id="outFeet" hidden style="margin-top:6px"><button data-f="bare" class="on">Barefoot</button><button data-f="boots">Boots</button></div>
         <div class="o-row"><label class="o-pick">Skin <input type="color" id="outSkin" value="#eab892"></label><label class="o-pick" id="outNailRow" hidden>Nails <input type="color" id="outNail" value="#f7f2ee" hidden><button type="button" id="outNailBtn" class="o-nailbtn" aria-label="Nail colour"></button></label></div>
         <div id="outNailWheel" hidden></div>
         <div class="o-sub">Face</div><div class="o-faces" id="outFaces"></div>
@@ -1284,7 +1285,7 @@ class GLR {
   drawOutline(mv, P){
     const B = this.body, o = this.outline; if (!o.on) return; if (B.hullW !== o.width) this.buildHulls();
     const gl = this.gl; gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK);
-    B.hulls.forEach(h => this.draw(h.mesh, this.white, this.partMV(mv, h.part), P, o.color.map(v => v / 255), true));
+    B.hulls.forEach(h => { if (FIG.boots && /^foot_/.test(h.part)) return; this.draw(h.mesh, this.white, this.partMV(mv, h.part), P, o.color.map(v => v / 255), true); });
     gl.disable(gl.CULL_FACE);
   }
   tex(src, t, nearest){
@@ -1352,7 +1353,7 @@ class GLR {
     const w0 = this.wrap, sp0 = this.spec; if (this.headDims !== HEAD) { this.wrap = 0.6; this.spec = sp0 * 0.5; }   // soft light on the rounded head: no visible facets
     this.draw(B.head, tx.head, this.partMV(mv, 'head'), P, [1,1,1]); this.wrap = w0; this.spec = sp0;
     B.hands.forEach(h => this.draw(h.mesh, this.white, this.partMV(mv, 'hand_' + h.part), P, tx.skin || tx.tint));
-    if (B.feet){ const w0 = this.wrap; this.wrap = 0.35; B.feet.forEach(f => this.draw(f.mesh, this.feetTex(tx.skin || tx.tint), this.partMV(mv, f.part), P, [1,1,1], false, this.feetNM(), 1)); this.wrap = w0; }
+    if (B.feet && !FIG.boots){ const w0 = this.wrap; this.wrap = 0.35; B.feet.forEach(f => this.draw(f.mesh, this.feetTex(tx.skin || tx.tint), this.partMV(mv, f.part), P, [1,1,1], false, this.feetNM(), 1)); this.wrap = w0; }
     this.drawOutline(mv, P);
     if (this.studsOn) B.studs.forEach(s => this.draw(s.mesh, PARTS.find(p => p.name === s.part).layer === 'legs' ? tx.legs : tx.upper, this.partMV(mv, s.part), P, tx.tint, false, this.studNMap, 1.6));
   }
@@ -1378,7 +1379,7 @@ function slenderDeform(part, p){
 /* Figure: the rounded body (slimmer waist, longer arms with a slight bend at the elbow, sphere hands, real feet).
    Every number is a slider in the Character tab's Proportions panel; FIG_DEFAULT is the starting point (paste the panel's
    JSON here to change it). off: extra X / Y / Z moves per part (x mirrors on the right side, so +x spreads both sides out). */
-const FIG_DEFAULT = {"torsoW":0.9,"waist":0.23,"waistY":2.68,"torsoD":1.03,"armX":1.23,"armW":0.57,"armLen":1.04,"elbow":3.14,"elbowBend":0,"armFwd":0.4,"hand":0.39,"hip":2.8,"legX":0.47,"legW":0.8,"legY":0.2,"knee":0.49,"kneeBend":-0.3,"foot":1.27,"footFwd":0.09,"cuffLift":0.12,"thighs":1,"hem":0.07,"legHem":0.08,
+const FIG_DEFAULT = {"torsoW":0.9,"waist":0.23,"waistY":2.68,"torsoD":1.03,"armX":1.23,"armW":0.57,"armLen":1.04,"elbow":3.14,"elbowBend":0,"armFwd":0.4,"hand":0.39,"hip":2.8,"legX":0.47,"legW":0.8,"legY":0.2,"knee":0.49,"kneeBend":-0.3,"foot":1.27,"footFwd":0.09,"cuffLift":0.12,"thighs":1,"hem":0.07,"legHem":0.08,"boots":false,
   "off":{"torso":[0,0,0],"arms":[0,0,0],"hands":[0,0,0],"legs":[0,0,0],"feet":[-0.02,0.19,-0.05],"head":[0,0,0]}};   // the owner's tuned figurine (Nov 2026)
 const FIG = JSON.parse(JSON.stringify(FIG_DEFAULT));
 /* distance from the middle to the edge of a rounded square (half-size a, corner radius rr), in direction th */
@@ -1420,7 +1421,8 @@ function figureDeform(part, p){
   }
   // the trouser hem: like the cuffs, easing into a loose hexagon (corners front and back, like a crease) that sits over the
   // top of the foot, a little longer, with an open end that goes up inside
-  let lx = p[0]-cx, lz = p[2]; const hw = sm(0.45, 0, p[1]), open = openEnd(part, lx, lz, p[1]);
+  const boots = !!FIG.boots;
+  let lx = p[0]-cx, lz = p[2]; const hw = boots ? 0 : sm(0.45, 0, p[1]), open = boots ? 0 : openEnd(part, lx, lz, p[1]);
   if (hw > 0 && (Math.abs(lx) > 1e-6 || Math.abs(lz) > 1e-6)){ const f = hexScale(Math.atan2(lz, lx), 0.5*(1 + (FIG.legHem ?? 0.08)), hw, Math.PI/6); lx *= f; lz *= f; }
   let y = FIG.legY + p[1]*(FIG.hip + 0.06 - FIG.legY)/2 - 0.07*hw; const kneeY = FIG.legY + FIG.knee*(FIG.hip-FIG.legY), t = clamp((kneeY - y)/Math.max(0.05, kneeY - FIG.legY), 0, 1);
   y += 0.16 * open;
@@ -1428,7 +1430,22 @@ function figureDeform(part, p){
   // knees, then ease back to the calves' own width (the calves keep their gap)
   const meet = kneeY - 0.08, th = sm(meet - 0.22, meet, y) * (FIG.thighs ?? 1), inner = lx*side < 0;
   const fill = inner ? Math.max(0, 2*(FIG.legX - 0.004)/FIG.legW - 1) * th : 0;
-  return [side*FIG.legX + lx*FIG.legW*(1 + fill), y, lz*FIG.legW*(1 + 0.08*th) + FIG.kneeBend*t];
+  let X = side*FIG.legX + lx*FIG.legW*(1 + fill), Z = lz*FIG.legW*(1 + 0.08*th) + FIG.kneeBend*t;
+  if (boots){
+    // Boots: the lower leg becomes a boot that would hold the foot. From mid-shin down it reaches the ground (the foot's sole),
+    // its back drops straight to just behind the heel and its front slopes down to just past the toes, a little wider than the foot.
+    const top = 0.75, s = clamp(1 - p[1]/top, 0, 1);
+    if (s > 0){
+      const o = FIG.off, k = FIG.foot, sole = FIG.legY - (FEET.height || 0.423)*k + o.legs[1] + o.feet[1] + 0.01;
+      const zoff = FIG.kneeBend + FIG.footFwd + o.legs[2] + o.feet[2], heel = (FEET.zmin ?? -0.324)*k + zoff - 0.07, toe = (FEET.zmax ?? 0.91)*k + zoff + 0.06;
+      const yTop = FIG.legY + top*(FIG.hip + 0.06 - FIG.legY)/2; y = yTop + (y - yTop)*((yTop - sole)/Math.max(0.05, yTop - FIG.legY));   // stretch down to the sole
+      const zb0 = -0.5*FIG.legW + FIG.kneeBend*t, zf0 = 0.5*FIG.legW + FIG.kneeBend*t, u = lz/0.5*0.5 + 0.5;        // where this point sits, back (0) to front (1)
+      const zb = zb0 + (Math.min(zb0, heel) - zb0)*sm(0, 1, s), zf = zf0 + (toe - zf0)*Math.min(1, s/0.9);
+      Z = zb + (zf - zb)*u;
+      X = side*(FIG.legX + o.feet[0]*0) + lx*FIG.legW*(1 + 0.14*sm(0, 1, s)) + side*0.02*sm(0, 1, s);
+    }
+  }
+  return [X, y, Z];
 }
 /* where a body part is moved to on the Figure: the leg height lifts everything above the hips, plus the per-part offsets */
 function figOffset(name){
@@ -1538,6 +1555,7 @@ const FEET = { geo: null, geoL: null, geoR: null, mask: null, nmap: null, p: nul
     this.geo = { p: dec(J.pos, Float32Array), n: dec(J.nrm, Float32Array), t: uv, t2: uv, tu: dec(J.tu, Float32Array), tv: dec(J.tv, Float32Array), i: dec(J.idx, Uint16Array) };
     this.hullGeo = Object.assign({}, this.geo, { i: J.hullIdx ? dec(J.hullIdx, Uint16Array) : this.geo.i });
     this.height = J.height || 0.423;
+    { let a = 1e9, b = -1e9; for (let i = 2; i < this.geo.p.length; i += 3){ a = Math.min(a, this.geo.p[i]); b = Math.max(b, this.geo.p[i]); } this.zmin = a; this.zmax = b; }   // heel and toe, for the Boots shape
     // one mesh per foot, centred on its own ankle (x = 0), so each can follow its leg
     const split = (G, side) => { const map = new Map(), o = { p: [], n: [], t: [], t2: [], tu: [], tv: [], i: [] };
       for (let t = 0; t < G.i.length; t += 3) { if (Math.sign(G.p[G.i[t]*3]) !== side) continue;
@@ -1739,7 +1757,7 @@ function headTex(rgb, c){
   x.fillStyle = rgbCss(rgb); x.fillRect(0,0,512,164);
   const F = window.HEAD_FACE;   // a picked face (Character tab): a transparent picture, centred on the front of the head
   const fw = F && (F.naturalWidth || (F instanceof HTMLCanvasElement ? F.width : 0)), fh = F && (F.naturalHeight || F.height);   // a picture, or a canvas (a face built from parts)
-  if (fw) { const w = 150, h = w * fh / fw; x.drawImage(F, 256 - w/2, 76 - h/2, w, h); return c; }
+  if (fw) { const w = F.faceW || 150, h = w * fh / fw; x.drawImage(F, 256 - w/2, 76 - h/2, w, h); return c; }
   x.fillStyle = '#1b1b1f';
   [-26,26].forEach(dx => { x.beginPath(); x.ellipse(256+dx, 64, 7, 12.5, 0, 0, Math.PI*2); x.fill(); });
   x.strokeStyle = '#1b1b1f'; x.lineWidth = 6; x.lineCap = 'round';
@@ -4406,17 +4424,25 @@ async function setClothing(id, custom){
   if (!c) { OUT.cloth = null; OUT.shirt = OUT.pants = null; OUT.shirtPal = OUT.pantsPal = []; OUT.shirtCols = []; OUT.pantsCols = []; bodyTextures(); drawClothing(); return; }
   const img = src => new Promise((res, rej) => { if (!src) return res(null); if (src instanceof HTMLCanvasElement) return res(src); const i = new Image(); i.onload = () => { const k = cnv(TW, TH); k.getContext('2d').drawImage(i, 0, 0, TW, TH); res(k); }; i.onerror = rej; i.src = src; });
   const base = custom || c.custom ? '' : OBASE;
-  const pants = OUT.body === 'figure' && c.pantsFigure ? c.pantsFigure : c.pants;   // the Figure has real feet: its pants have no shoes painted on
+  const pants = OUT.body === 'figure' && !FIG.boots && c.pantsFigure ? c.pantsFigure : c.pants;   // barefoot Figure: plain pants; Blocky and Boots: the pants with the shoes painted on
   [OUT.shirt, OUT.pants] = await Promise.all([img(c.shirt && (typeof c.shirt === 'string' ? base + c.shirt : c.shirt)), img(pants && (typeof pants === 'string' ? base + pants : pants))]);
   OUT.cloth = c; OUT.shirtPal = OUT.shirt ? palette(OUT.shirt) : []; OUT.pantsPal = OUT.pants ? palette(OUT.pants) : [];
   OUT.shirtCols = OUT.shirtPal.map(() => null); OUT.pantsCols = OUT.pantsPal.map(() => null);
   bodyTextures(); drawClothing();
 }
 
+/* the Figure's feet: Barefoot (the real feet, plain pants) or Boots (the lower legs shaped into boots, wearing the pants
+   that have the shoes painted on: the Blocky version of the clothing) */
+function setBoots(on){
+  FIG.boots = !!on; document.querySelectorAll('#outFeet button').forEach(x => x.classList.toggle('on', (x.dataset.f === 'boots') === FIG.boots));
+  $o('#outNailRow').hidden = OUT.body !== 'figure' || FIG.boots;
+  if (OUT.r && OUT.body === 'figure') OUT.r.buildBody('figure', 'round');
+  if (OUT.cloth && OUT.cloth.pantsFigure) setClothing(OUT.cloth.id); else if (OUT.r) bodyTextures();
+}
 function setBody(b){
   const was = OUT.body; OUT.body = BODY_TYPES[b] ? b : 'classic'; if (OUT.r) OUT.r.buildBody(OUT.body, 'round');
   if (was !== OUT.body) { if (OUT.cloth && OUT.cloth.pantsFigure) setClothing(OUT.cloth.id); else relight(0); }
-  document.querySelectorAll('#outBody button').forEach(x => x.classList.toggle('on', x.dataset.b === OUT.body)); $o('#outNailRow').hidden = OUT.body !== 'figure'; $o('#outProp').hidden = OUT.body !== 'figure';
+  document.querySelectorAll('#outBody button').forEach(x => x.classList.toggle('on', x.dataset.b === OUT.body)); $o('#outNailRow').hidden = OUT.body !== 'figure' || !!FIG.boots; $o('#outProp').hidden = OUT.body !== 'figure'; $o('#outFeet').hidden = OUT.body !== 'figure';
 }
 /* ---------- the Figure's proportions: sliders, X / Y / Z offsets, and JSON to copy (to make it the default) ---------- */
 const PROPS = [['Torso', [['torsoW', 'Width', .6, 1.2], ['waist', 'Waist (narrower)', 0, .3], ['waistY', 'Waist height', 2.1, 3.4], ['torsoD', 'Depth', .5, 1.1], ['hem', 'Hem flare', 0, .2]]],
@@ -4442,7 +4468,7 @@ function drawProps(){
 }
 const figJSON = () => JSON.stringify(FIG, (k, v) => typeof v === 'number' ? Math.round(v * 1000) / 1000 : v);
 function setFig(f){ const d = JSON.parse(JSON.stringify(FIG_DEFAULT)); Object.assign(d, f || {}); d.off = Object.assign(JSON.parse(JSON.stringify(FIG_DEFAULT.off)), (f && f.off) || {});
-  Object.keys(FIG).forEach(k => delete FIG[k]); Object.assign(FIG, d); drawProps(); propRebuild(); }
+  Object.keys(FIG).forEach(k => delete FIG[k]); Object.assign(FIG, d); drawProps(); propRebuild(); document.querySelectorAll('#outFeet button').forEach(x => x.classList.toggle('on', (x.dataset.f === 'boots') === !!FIG.boots)); }
 /* ---------- looks: presets, saved ---------- */
 async function applyLook(L){
   if (L.skin) { $o('#outSkin').value = L.skin; }
@@ -4628,7 +4654,7 @@ const FP = { meta: null, img: {}, tab: 'brow' };
 const FPK = { brow: 'brows', eye: 'eyes', mouth: 'mouths' };
 const FACE0 = () => ({ brow: { i: 0, size: 1, x: 1, y: 0, rot: 0, sx: 1, sy: 1, mirror: true, color: '#2a1d18' },
   eye: { i: 0, size: 1, x: 1, y: 0, rot: 0, sx: 1, sy: 1, mirror: true }, mouth: { i: 0, size: 1, x: 0, y: 0, rot: 0, sx: 1, sy: 1 } });
-const FBASE = { brow: { y: 64, gap: 56, d: 88 }, eye: { y: 108, gap: 54, d: 92 }, mouth: { y: 186, gap: 0, d: 100 } };   // in the 300 × 244 face canvas
+const FBASE = { brow: { y: 58, gap: 80, d: 176 }, eye: { y: 106, gap: 78, d: 184 }, mouth: { y: 192, gap: 0, d: 200 } };   // centred on 150 across, in a 600 × 488 canvas offset by (150, 122)
 OUT.faceParts = FACE0();
 async function loadFaces(){
   try { OUT.faces = await (await fetch(OBASE + 'faces/index.json')).json(); } catch { OUT.faces = []; }
@@ -4638,7 +4664,7 @@ async function loadFaces(){
 }
 function tileOf(part, i){ const k = FPK[part], n = FP.meta ? FP.meta[k] : 0; i = ((i % n) + n) % n; return { im: FP.img[k], sx: (i % FP.meta.cols) * FP.meta.tile, sy: Math.floor(i / FP.meta.cols) * FP.meta.tile, t: FP.meta.tile }; }
 function composeFace(F){
-  const c = OUT.faceCanvas || (OUT.faceCanvas = cnv(300, 244)), x = c.getContext('2d'); x.clearRect(0, 0, 300, 244);
+  const c = OUT.faceCanvas || (OUT.faceCanvas = cnv(600, 488)), x = c.getContext('2d'); x.clearRect(0, 0, 600, 488); c.faceW = 300;   // drawn 300 px wide on the head
   if (!FP.meta) return c;
   const tint = cnv(160, 160), tx = tint.getContext('2d');
   for (const part of ['brow', 'eye', 'mouth']) {
@@ -4647,7 +4673,7 @@ function composeFace(F){
     if (part === 'brow' && P.color) { tx.clearRect(0, 0, 160, 160); tx.globalCompositeOperation = 'source-over'; tx.drawImage(T.im, T.sx, T.sy, 160, 160, 0, 0, 160, 160);
       tx.globalCompositeOperation = 'source-in'; tx.fillStyle = P.color; tx.fillRect(0, 0, 160, 160); tx.globalCompositeOperation = 'source-over'; src = tint; sx = sy = 0; }
     const d = B.d * P.size, w = d * P.sx, h = d * P.sy, y = B.y + P.y;
-    const one = (cx, flip) => { x.save(); x.translate(cx, y); x.rotate((flip ? -1 : 1) * P.rot * Math.PI / 180); x.scale(flip ? -1 : 1, 1); x.drawImage(src, sx, sy, T.t, T.t, -w / 2, -h / 2, w, h); x.restore(); };
+    const one = (cx, flip) => { x.save(); x.translate(cx + 150, y + 122); x.rotate((flip ? -1 : 1) * P.rot * Math.PI / 180); x.scale(flip ? -1 : 1, 1); x.drawImage(src, sx, sy, T.t, T.t, -w / 2, -h / 2, w, h); x.restore(); };
     if (part === 'mouth') one(150 + P.x, false);
     else { const g = B.gap * P.x; one(150 + g, false); one(150 - g, P.mirror !== false); }
   }
@@ -4776,6 +4802,7 @@ async function addFromView(view, tpl){
 $o('#outSkin').addEventListener('input', () => { bodyTextures(); const s = document.querySelector('#skin'); if (s) { s.value = $o('#outSkin').value; s.dispatchEvent(new Event('input')); } });
 document.querySelectorAll('#outBody button').forEach(b => b.onclick = async () => { if (b.dataset.b === 'figure' && !(await FigureLock.ask())) return; setBody(b.dataset.b); });
 document.querySelectorAll('#outAnim button').forEach(b => b.onclick = () => setAnim(b.dataset.a));
+document.querySelectorAll('#outFeet button').forEach(b => b.onclick = () => setBoots(b.dataset.f === 'boots'));
 drawPoseEditor(); nailWheel();
 $o('#outPoseCopy').onclick = async () => { const t = JSON.stringify(OUT.custom); $o('#outPoseJson').value = t; try { await navigator.clipboard.writeText(t); toastO('Pose copied as JSON'); } catch { $o('#outPoseJson').select(); } };
 $o('#outPoseApply').onclick = () => { try { setPose(JSON.parse($o('#outPoseJson').value)); toastO('Pose applied'); } catch { toastO("That isn't valid JSON"); } };
@@ -4803,7 +4830,7 @@ $o('#outPantsFile').onchange = async e => { const f = e.target.files[0]; if (!f)
 
 async function wearClothing(shirt, pants, name){ await show(true); const cp = c => { if (!c) return null; const k = cnv(TW, TH); k.getContext('2d').drawImage(c, 0, 0); return k; };
   await setClothing('custom', { id: 'custom', name: name || 'Your clothing', shirt: cp(shirt), pants: cp(pants) }); }
-window.__outfits = { OUT, show, wear, takeOff, applyLook, currentLook, addFromView, setClothing, saveLook, wearClothing, setBody, setAnim, setPose, setFace, animPose, randomFace, composeFace };
+window.__outfits = { OUT, setBoots, show, wear, takeOff, applyLook, currentLook, addFromView, setClothing, saveLook, wearClothing, setBody, setAnim, setPose, setFace, animPose, randomFace, composeFace };
 })();
 
 </script>

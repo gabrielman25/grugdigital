@@ -263,9 +263,11 @@ sheets in `outfits/faces/parts/` (`brows.png`, `eyes.png`, `mouths.png`, 160 px 
 mouth), twist, width, height; brows and eyes are pairs (the tile is the right-hand one, the left mirrored unless turned off);
 brows take a colour; **Random face**. A look keeps `face: 'custom'` and `faceParts`. The Figure's sleeves and trouser legs end
 in loose hexagonal cuffs and hems (`hexScale`) with open ends pushed up inside (`openEnd`) and darkened (`openEnds` in
-outfits-ui.js). Two new spots: **hair** (follows the head) and **feet** (shoes are
-modelled as a pair in the Figure's foot space and split per foot; on Blocky each sits on the bottom of its leg). Clothing can
-carry `pantsFigure` (index.json): Blocky wears `pants` (shoes painted on), Figure wears `pantsFigure` (just pants).
+outfits-ui.js). Two new spots: **hair** (follows the head) and **feet** (no shoe
+models are listed now; the code stays: a pair is split per foot). The Figure's feet are **Barefoot** (the real feet) or
+**Boots** (`FIG.boots`: the lower legs are reshaped into a boot that would hold the foot, `figureDeform`, and the feet aren't
+drawn). Clothing can carry `pantsFigure` (index.json): Blocky and Boots wear `pants` (shoes painted on), barefoot Figure wears
+`pantsFigure` (just pants). Built faces' parts are drawn 2× (a 600 × 488 canvas, 300 px wide on the head).
 **The browser's Back and Forward** step through the Studio itself (tabs, the Clothing steps, the open template:
 `#clothing/2`, `#accessories/<slug>`, `#outfits`), never off to another page until the Studio's first screen.
 **Pants are just pants**: the Clothing prompt asks for no shoes, socks or feet (shoes will be accessories), and the example

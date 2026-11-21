@@ -231,7 +231,8 @@
       0,
       0
      ]
-    }
+    },
+    "boots": true
    },
    "nail": "#a3132a",
    "face": "friendly",
@@ -239,9 +240,6 @@
    "accessories": [
     {
      "slug": "ponytail"
-    },
-    {
-     "slug": "sneakers"
     }
    ]
   },
