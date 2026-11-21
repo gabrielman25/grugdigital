@@ -1742,11 +1742,49 @@ function synthCap(B, part, k){
   for (let j=0;j<rh;j++){ const v=(j+.5)/rh; add(at(0,v)); add(at(1,v)); }
   for (let y=ry;y<ry+rh;y++) for (let x=rx;x<rx+rw;x++){ const idx=y*TW+x; for (let q=0;q<4;q++) B.c[idx*4+q] = acc[q]/n; B.s[idx] = 1; }
 }
+// Which visible face stands in for a hidden side face: [part name, face key, mirror horizontally, drop the hand rows]
+function sideSource(part, k){
+  const n = part.name;
+  if (n === 'torso') return k === 'R' ? ['rarm', 'R', false, true] : k === 'L' ? ['larm', 'L', false, true] : null;
+  if (n === 'rarm' && k === 'L') return ['rarm', 'R', true, false];
+  if (n === 'larm' && k === 'R') return ['larm', 'L', true, false];
+  if (n === 'rleg' && k === 'L') return ['rleg', 'R', true, false];
+  if (n === 'lleg' && k === 'R') return ['lleg', 'L', true, false];
+  return null;
+}
+// rows at the bottom of a sleeve that are bare skin (the hand), so the torso side doesn't show a skin band
+function handRows(B, [rx,ry,rw,rh]){
+  let n = 0;
+  for (let j=rh-1; j>=0 && n < rh*0.4; j--){
+    let skin = 0, tot = 0;
+    for (let i=0;i<rw;i++){ const q = ((ry+j)*TW + rx + i)*4; if (!B.s[(ry+j)*TW + rx + i]) continue; tot++;
+      if (B.c[q+3] < 128 || Math.hypot(B.c[q]-SKIN[0], B.c[q+1]-SKIN[1], B.c[q+2]-SKIN[2]) < 48) skin++; }
+    if (tot && skin/tot > 0.6) n++; else break;
+  }
+  return n;
+}
+function borrowSide(bufs, part, k, hiddenOf){
+  const src = sideSource(part, k); if (!src) return false;
+  const sp = PARTS.find(p => p.name === src[0]); if (hiddenOf[sp.name][src[1]]) return false;
+  const S = bufs[sp.tpl], D = bufs[part.tpl], [sx,sy,sw,sh] = sp.rects[src[1]], [dx,dy,dw,dh] = part.rects[k];
+  const keep = src[3] ? Math.max(1, sh - handRows(S, sp.rects[src[1]])) : sh;
+  for (let j=0;j<dh;j++) for (let i=0;i<dw;i++){
+    // bilinear sample of the source face (stretched to fill the destination's height)
+    let u = (i+.5)/dw*sw - .5, v = (j+.5)/dh*keep - .5; if (src[2]) u = sw - 1 - u;
+    u = clamp(u, 0, sw-1); v = clamp(v, 0, keep-1);
+    const x0 = Math.floor(u), y0 = Math.floor(v), x1 = Math.min(sw-1, x0+1), y1 = Math.min(keep-1, y0+1), fx = u-x0, fy = v-y0;
+    const at = (x, y) => ((sy+y)*TW + sx + x)*4, o = ((dy+j)*TW + dx + i)*4;
+    for (let c=0;c<4;c++) D.c[o+c] = (S.c[at(x0,y0)+c]*(1-fx) + S.c[at(x1,y0)+c]*fx)*(1-fy) + (S.c[at(x0,y1)+c]*(1-fx) + S.c[at(x1,y1)+c]*fx)*fy;
+    D.s[(dy+j)*TW + dx + i] = 1;
+  }
+  return true;
+}
 function extract(A, opt){
   const bufs = { shirt:{ c:new Float32Array(TW*TH*4), s:new Uint8Array(TW*TH) }, pants:{ c:new Float32Array(TW*TH*4), s:new Uint8Array(TW*TH) } };
   const cs = [0,0,0], cr = [0,0,0];
+  const hiddenOf = {};
   for (const part of PARTS){
-    const B = bufs[part.tpl], hidden = {};
+    const B = bufs[part.tpl], hidden = hiddenOf[part.name] = {};
     for (const k of FK){
       const g = part.geo[k], [rx,ry,rw,rh] = part.rects[k], vi = [];
       for (const V of VIEWS){
@@ -1781,9 +1819,15 @@ function extract(A, opt){
         for (let y=ry;y<ry+rh;y++) for (let x=rx;x<rx+rw;x++) B.s[y*TW+x] = 0;
       } else if (filled < total) inpaint(B, part.rects[k]);
     }
-    ['F','B','R','L'].forEach(k => hidden[k] && synthSide(B, part, k));
-    ['U','D'].forEach(k => hidden[k] && synthCap(B, part, k));
+
   }
+  // Hidden side faces: limbs' inner sides reuse the same limb's outer side (mirrored, so front stays next to front);
+  // the torso's sides reuse the matching arm's outer sleeve, minus the bare-hand rows at its bottom, stretched to full height.
+  for (const part of PARTS){
+    const B = bufs[part.tpl], hidden = hiddenOf[part.name];
+    ['F','B','R','L'].forEach(k => { if (hidden[k] && !borrowSide(bufs, part, k, hiddenOf)) synthSide(B, part, k); });
+  }
+  for (const part of PARTS){ const B = bufs[part.tpl], hidden = hiddenOf[part.name]; ['U','D'].forEach(k => hidden[k] && synthCap(B, part, k)); }
   if (opt.pantsTorso){
     const S = bufs.shirt, P = bufs.pants;
     FK.forEach(k => { const [rx,ry,rw,rh] = TORSO[k]; for (let y=ry;y<ry+rh;y++) for (let x=rx;x<rx+rw;x++){ const j=y*TW+x; P.s[j]=S.s[j]; for (let c=0;c<4;c++) P.c[j*4+c]=S.c[j*4+c]; } });
@@ -2461,7 +2505,7 @@ function updateAuto(){
 })();
 
 // Test hooks
-window.__ccs = { LIB, refreshLib, useBrowserStorage, makeFolder, sortUnsorted, saveOutfit, bestFolder, tokenize, composites, renderScene, onWhite, refR, refTex, setImage, SNORM, state, extract, demoShirt, demoPants, iou, applyPreset, setSkin, TORSO, RLIMB, LLIMB };
+window.__ccs = { writeFile, outfitFiles, loadOutfit, LIB, refreshLib, useBrowserStorage, makeFolder, sortUnsorted, saveOutfit, bestFolder, tokenize, composites, renderScene, onWhite, refR, refTex, setImage, SNORM, state, extract, demoShirt, demoPants, iou, applyPreset, setSkin, TORSO, RLIMB, LLIMB };
 </script>
 </body>
 </html>
