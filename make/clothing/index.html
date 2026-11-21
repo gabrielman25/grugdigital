@@ -454,6 +454,11 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
   .o-wheel .sw{width:22px;height:22px;border-radius:6px;border:1px solid var(--g-line)}
   .o-wheel .chips{display:flex;flex-wrap:wrap;gap:4px}.o-wheel .chips button{all:unset;cursor:pointer;width:20px;height:20px;border-radius:50%;border:1px solid var(--g-line)}
   #outPose summary{cursor:pointer;font-weight:600;font-size:13px;margin:var(--g-s-2) 0}
+  .o-faceed{border:1px solid var(--g-line);border-radius:12px;padding:var(--g-s-2);margin-top:6px;display:flex;flex-direction:column;gap:6px}
+  .o-ftiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:4px;max-height:200px;overflow:auto}
+  .o-ftile{all:unset;cursor:pointer;aspect-ratio:1;border-radius:8px;background-color:#fff;background-repeat:no-repeat;border:1px solid var(--g-line)}
+  .o-ftile.on{outline:2px solid var(--g-accent);outline-offset:1px}
+  .o-face.make{font-weight:600;color:var(--g-text-2)}
   .o-lock{position:fixed;inset:0;z-index:200;background:rgba(10,10,12,.5);display:flex;align-items:center;justify-content:center}
   .o-lock form{background:var(--g-page,#fff);color:var(--g-text,#1E1B16);border-radius:16px;padding:20px;max-width:320px;width:calc(100% - 40px);display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
   .o-lock h3{margin:0;font-size:18px}.o-lock p{margin:0;font-size:13px;color:var(--g-muted)}.o-lock .err{color:#d33}
@@ -695,6 +700,12 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
         <div class="o-row"><label class="o-pick">Skin <input type="color" id="outSkin" value="#eab892"></label><label class="o-pick" id="outNailRow" hidden>Nails <input type="color" id="outNail" value="#f7f2ee" hidden><button type="button" id="outNailBtn" class="o-nailbtn" aria-label="Nail colour"></button></label></div>
         <div id="outNailWheel" hidden></div>
         <div class="o-sub">Face</div><div class="o-faces" id="outFaces"></div>
+        <div id="outFaceEd" class="o-faceed" hidden>
+          <div class="g-seg full" id="outFaceTabs"><button data-p="brow" class="on">Brows</button><button data-p="eye">Eyes</button><button data-p="mouth">Mouth</button></div>
+          <div class="o-ftiles" id="outFaceTiles"></div>
+          <div id="outFaceCtl"></div>
+          <div class="o-acts"><button id="outFaceRandom" class="g-btn g-btn--sm g-btn--primary">Random face</button><button id="outFaceReset" class="g-btn g-btn--sm g-btn--ghost">Reset</button></div>
+        </div>
         <p class="tiny" id="outBodyNote">Blocky is the classic body. Figure has longer arms with a slight bend at the elbow, round hands and feet.</p>
         <details id="outProp" hidden><summary>Proportions</summary><div id="outPropBody"></div>
           <div class="o-acts"><button id="outPropCopy" class="g-btn g-btn--sm g-btn--primary">Copy as JSON</button><button id="outPropApply" class="g-btn g-btn--sm">Apply JSON</button><button id="outPropReset" class="g-btn g-btn--sm g-btn--ghost">Reset</button></div>
@@ -1367,9 +1378,27 @@ function slenderDeform(part, p){
 /* Figure: the rounded body (slimmer waist, longer arms with a slight bend at the elbow, sphere hands, real feet).
    Every number is a slider in the Character tab's Proportions panel; FIG_DEFAULT is the starting point (paste the panel's
    JSON here to change it). off: extra X / Y / Z moves per part (x mirrors on the right side, so +x spreads both sides out). */
-const FIG_DEFAULT = {"torsoW":0.9,"waist":0.23,"waistY":2.68,"torsoD":1.03,"armX":1.23,"armW":0.57,"armLen":1.04,"elbow":3.14,"elbowBend":0,"armFwd":0.4,"hand":0.39,"hip":2.8,"legX":0.47,"legW":0.8,"legY":0.2,"knee":0.49,"kneeBend":-0.3,"foot":1.27,"footFwd":0.09,"cuffLift":0.12,"thighs":1,"hem":0.07,
+const FIG_DEFAULT = {"torsoW":0.9,"waist":0.23,"waistY":2.68,"torsoD":1.03,"armX":1.23,"armW":0.57,"armLen":1.04,"elbow":3.14,"elbowBend":0,"armFwd":0.4,"hand":0.39,"hip":2.8,"legX":0.47,"legW":0.8,"legY":0.2,"knee":0.49,"kneeBend":-0.3,"foot":1.27,"footFwd":0.09,"cuffLift":0.12,"thighs":1,"hem":0.07,"legHem":0.08,
   "off":{"torso":[0,0,0],"arms":[0,0,0],"hands":[0,0,0],"legs":[0,0,0],"feet":[-0.02,0.19,-0.05],"head":[0,0,0]}};   // the owner's tuned figurine (Nov 2026)
 const FIG = JSON.parse(JSON.stringify(FIG_DEFAULT));
+/* distance from the middle to the edge of a rounded square (half-size a, corner radius rr), in direction th */
+function rrBound(th, a, rr){
+  const c = Math.abs(Math.cos(th)), s = Math.abs(Math.sin(th)), b = a - rr; let lo = 0, hi = a * 1.5;
+  for (let i = 0; i < 22; i++){ const m = (lo + hi)/2, x = c*m - b, z = s*m - b, d = Math.hypot(Math.max(x, 0), Math.max(z, 0)) + Math.min(Math.max(x, z), 0); if (d < rr) lo = m; else hi = m; }
+  return lo;
+}
+/* an open end (a sleeve's cuff, a trouser hem): the flat end cap is pushed up inside, so it reads as the inside of the
+   fabric (its texture is darkened in the Character tab); 1 in the middle of the end, 0 on its rim and everywhere else */
+function openEnd(part, lx, lz, py){
+  if (py > part.min[1] + 1e-6) return 0; const r = Math.hypot(lx, lz); if (r < 1e-6) return 1;
+  return sm(0.97, 0.74, r / rrBound(Math.atan2(lz, lx), 0.5, (BODY_TYPES.figure.round || {})[kindOf(part.name)] || 0.2));
+}
+/* square to hexagon: how much to scale a point of the cross-section at angle th (w: 0 = square, 1 = hexagon with apothem ap;
+   off turns the hexagon: 0 puts flats front and back, PI/6 puts corners there) */
+function hexScale(th, ap, w, off){
+  const sq = 0.5/Math.max(Math.abs(Math.cos(th)), Math.abs(Math.sin(th))), seg = (((th + off) % (Math.PI/3)) + Math.PI/3) % (Math.PI/3) - Math.PI/6;
+  return 1 + w*(ap/Math.cos(seg)/sq - 1);
+}
 function figureDeform(part, p){
   const k = kindOf(part.name), cx = (part.min[0]+part.max[0])/2, side = Math.sign(cx) || 1;
   if (k === 'torso'){ const waist = Math.exp(-(((p[1]-FIG.waistY)/0.45)**2)), hem = sm(2.4, 2, p[1]) * (FIG.hem ?? 0.07);   // the shirt's hem flares a little over the tops of the legs
@@ -1377,25 +1406,29 @@ function figureDeform(part, p){
   if (k === 'arm'){
     // the sleeve: square at the shoulder, easing into a hexagon at the cuff that's just wide enough to sit over the top of
     // the round hand without touching it, with the front of the cuff lifted a little (an angled cut)
-    let px = p[0]-cx, pz = p[2]; const ta = clamp((4-p[1])/2, 0, 1), w = sm(0.3, 1, ta);
+    let px = p[0]-cx, pz = p[2]; const ta = clamp((4-p[1])/2, 0, 1), w = sm(0.3, 1, ta), open = openEnd(part, px, pz, p[1]);
     if (w > 0 && (Math.abs(px) > 1e-6 || Math.abs(pz) > 1e-6)){
-      const th = Math.atan2(pz, px), sq = 0.5/Math.max(Math.abs(Math.cos(th)), Math.abs(Math.sin(th)));
-      const ap = Math.max(0.5, (FIG.hand*Math.sqrt(1 - 0.62*0.62) + 0.045)/FIG.armW), seg = ((th % (Math.PI/3)) + Math.PI/3) % (Math.PI/3) - Math.PI/6;
-      const f = 1 + w*(ap/Math.cos(seg)/sq - 1); px *= f; pz *= f;
+      const f = hexScale(Math.atan2(pz, px), Math.max(0.5, (FIG.hand*Math.sqrt(1 - 0.62*0.62) + 0.045)/FIG.armW), w, 0); px *= f; pz *= f;
     }
     const bot = 4 - 2*FIG.armLen, up = clamp((4-(4 - (4-p[1])*FIG.armLen))/Math.max(0.05, 4-FIG.elbow), 0, 1);
     let y = 4 - (4-p[1])*FIG.armLen; const t = clamp((FIG.elbow-y)/Math.max(0.05, FIG.elbow-bot), 0, 1);
     y += (FIG.cuffLift || 0) * clamp(1 - (p[1]-2)/0.3, 0, 1) * clamp(p[2]/0.5, 0, 1);   // front half only: the hand (on the axis) stays put
+    y += 0.12 * open;   // the open cuff
     // the shoulders lean in just enough to touch the top of the torso's sides (a hair of overlap), easing out by the elbow
     const topHalf = FIG.torsoW - FIG.waist*Math.exp(-(((4-FIG.waistY)/0.45)**2)), lean = Math.max(0, FIG.armX + FIG.off.arms[0] - 0.5*FIG.armW - (topHalf - 0.02 + FIG.off.torso[0]*side)) * (1 - sm(0, 1, up));
     return [side*(FIG.armX - lean) + px*FIG.armW + side*(0.05*up + FIG.elbowBend*t*t + 0.06*t), y, pz*FIG.armW + FIG.armFwd*t*t + 0.03*t];
   }
-  const y = FIG.legY + p[1]*(FIG.hip + 0.06 - FIG.legY)/2, kneeY = FIG.legY + FIG.knee*(FIG.hip-FIG.legY), t = clamp((kneeY - y)/Math.max(0.05, kneeY - FIG.legY), 0, 1);
+  // the trouser hem: like the cuffs, easing into a loose hexagon (corners front and back, like a crease) that sits over the
+  // top of the foot, a little longer, with an open end that goes up inside
+  let lx = p[0]-cx, lz = p[2]; const hw = sm(0.45, 0, p[1]), open = openEnd(part, lx, lz, p[1]);
+  if (hw > 0 && (Math.abs(lx) > 1e-6 || Math.abs(lz) > 1e-6)){ const f = hexScale(Math.atan2(lz, lx), 0.5*(1 + (FIG.legHem ?? 0.08)), hw, Math.PI/6); lx *= f; lz *= f; }
+  let y = FIG.legY + p[1]*(FIG.hip + 0.06 - FIG.legY)/2 - 0.07*hw; const kneeY = FIG.legY + FIG.knee*(FIG.hip-FIG.legY), t = clamp((kneeY - y)/Math.max(0.05, kneeY - FIG.legY), 0, 1);
+  y += 0.16 * open;
   // the legs fill out on their inner side until they meet in the middle, from the top of the legs down to just below the
   // knees, then ease back to the calves' own width (the calves keep their gap)
-  const meet = kneeY - 0.08, th = sm(meet - 0.22, meet, y) * (FIG.thighs ?? 1), lx = p[0]-cx, inner = lx*side < 0;
+  const meet = kneeY - 0.08, th = sm(meet - 0.22, meet, y) * (FIG.thighs ?? 1), inner = lx*side < 0;
   const fill = inner ? Math.max(0, 2*(FIG.legX - 0.004)/FIG.legW - 1) * th : 0;
-  return [side*FIG.legX + lx*FIG.legW*(1 + fill), y, p[2]*FIG.legW*(1 + 0.08*th) + FIG.kneeBend*t];
+  return [side*FIG.legX + lx*FIG.legW*(1 + fill), y, lz*FIG.legW*(1 + 0.08*th) + FIG.kneeBend*t];
 }
 /* where a body part is moved to on the Figure: the leg height lifts everything above the hips, plus the per-part offsets */
 function figOffset(name){
@@ -1410,7 +1443,7 @@ function figOffset(name){
 }
 const BODY_TYPES = {
   classic: { label:'Classic', round:{} },
-  figure:  { label:'Figure', round:{ torso:0.2, arm:0.24, leg:0.2 }, sharpEnds:{ arm:true }, deform:figureDeform, hands:'sphere', feet:true },
+  figure:  { label:'Figure', round:{ torso:0.2, arm:0.24, leg:0.2 }, sharpEnds:{ arm:true, leg:true }, deform:figureDeform, hands:'sphere', feet:true },
   smooth:  { label:'Smooth', round:{ torso:0.16, arm:0.16, leg:0.14 } },
   brick:   { label:'Brick', round:{ torso:0.05, arm:0.12, leg:0.05 }, deform:brickDeform, hands:true },
   slender: { label:'Slender', round:{ torso:0.08, arm:0.1, leg:0.08 }, deform:slenderDeform },
@@ -1575,7 +1608,7 @@ function addCyl(g, c, h, rad, uv){
    forward and the cuff's front is lifted), so the ball is as far from the back of the cuff as from its front */
 function figHandCenter(part){
   const cx = (part.min[0]+part.max[0])/2, d = (x, z) => figureDeform(part, [cx + x, 2, z]), C = [0, 0, 0], N = 12;
-  for (let i = 0; i < N; i++){ const a = i/N*Math.PI*2, q = d(0.5*Math.cos(a), 0.5*Math.sin(a)); C[0] += q[0]/N; C[1] += q[1]/N; C[2] += q[2]/N; }
+  for (let i = 0; i < N; i++){ const a = i/N*Math.PI*2, rb = rrBound(a, 0.5, BODY_TYPES.figure.round.arm), q = d(rb*Math.cos(a), rb*Math.sin(a)); C[0] += q[0]/N; C[1] += q[1]/N; C[2] += q[2]/N; }
   let n = v3norm(v3cross(v3sub(d(0, 0.5), d(0, -0.5)), v3sub(d(0.5, 0), d(-0.5, 0)))); if (n[1] > 0) n = n.map(v => -v);
   return [C[0] + n[0]*FIG.hand*0.62, C[1] + n[1]*FIG.hand*0.62, C[2] + n[2]*FIG.hand*0.62];
 }
@@ -1705,7 +1738,8 @@ function headTex(rgb, c){
   c = c || cnv(512,164); const x = c.getContext('2d');
   x.fillStyle = rgbCss(rgb); x.fillRect(0,0,512,164);
   const F = window.HEAD_FACE;   // a picked face (Character tab): a transparent picture, centred on the front of the head
-  if (F && F.complete && F.naturalWidth) { const w = 150, h = w * F.naturalHeight / F.naturalWidth; x.drawImage(F, 256 - w/2, 76 - h/2, w, h); return c; }
+  const fw = F && (F.naturalWidth || (F instanceof HTMLCanvasElement ? F.width : 0)), fh = F && (F.naturalHeight || F.height);   // a picture, or a canvas (a face built from parts)
+  if (fw) { const w = 150, h = w * fh / fw; x.drawImage(F, 256 - w/2, 76 - h/2, w, h); return c; }
   x.fillStyle = '#1b1b1f';
   [-26,26].forEach(dx => { x.beginPath(); x.ellipse(256+dx, 64, 7, 12.5, 0, 0, Math.PI*2); x.fill(); });
   x.strokeStyle = '#1b1b1f'; x.lineWidth = 6; x.lineCap = 'round';
@@ -4278,11 +4312,21 @@ function retroBody(src, which){
   const img = x.createImageData(NB, NB); LoPolTex.compose(T, { fx: OUT.look.fx, light: OUT.look.light, colours: [] }, img);
   const o = cnv(TW, TH); x.putImageData(img, 0, 0); o.getContext('2d').drawImage(c, 0, 0); return o;
 }
+/* the open ends of the sleeves and trouser legs (their bottom faces, pushed up inside on the Figure): darker towards the
+   middle, like the inside of the fabric */
+function openEnds(comp){
+  PARTS.forEach(part => { if (part.name === 'torso') return; const k = FK.find(f => part.geo[f].n[1] < -.5); if (!k) return;
+    const [x, y, w, h] = part.rects[k], c = (part.layer === 'legs' ? comp.legs : comp.upper).getContext('2d');
+    const g = c.createRadialGradient(x + w / 2, y + h / 2, 0, x + w / 2, y + h / 2, Math.max(w, h) * .6);
+    g.addColorStop(0, 'rgba(8,6,5,.88)'); g.addColorStop(.55, 'rgba(8,6,5,.7)'); g.addColorStop(.86, 'rgba(8,6,5,.25)'); g.addColorStop(1, 'rgba(8,6,5,0)');
+    c.save(); c.beginPath(); c.rect(x, y, w, h); c.clip(); c.fillStyle = g; c.fillRect(x, y, w, h); c.restore(); });
+}
 function bodyTextures(){
   const r = OUT.r; if (!r) return;
   const s = recolour(OUT.shirt, OUT.shirtPal, OUT.shirtCols), p = recolour(OUT.pants, OUT.pantsPal, OUT.pantsCols);
   OUT.shirtNow = s; OUT.pantsNow = p;
   OUT.comp = composites(s, p, skin(), { shirt: true, pants: true }, OUT.comp);
+  openEnds(OUT.comp);
   const near = OUT.look.fx.pixel > 1 || OUT.look.fx.bits < 8;
   r.tex(retroBody(OUT.comp.upper, 'upper'), OUT.tex.upper, near); r.tex(retroBody(OUT.comp.legs, 'legs'), OUT.tex.legs, near); r.tex(headTex(skin(), OUT.headC), OUT.tex.head);
 }
@@ -4403,7 +4447,7 @@ function setFig(f){ const d = JSON.parse(JSON.stringify(FIG_DEFAULT)); Object.as
 async function applyLook(L){
   if (L.skin) { $o('#outSkin').value = L.skin; }
   if (L.figure) setFig(L.figure); if (L.body) setBody(L.body === 'figure' && !(await FigureLock.ask()) ? 'classic' : L.body);
-  await setFace(L.face || null);
+  await setFace(L.face || null, L.faceParts);
   if (L.nail) { $o('#outNail').value = L.nail; if (OUT.r) OUT.r.nail = hexRgb(L.nail); const w = $o('#outNailWheel'); if (w && w.sync) w.sync(); else if ($o('#outNailBtn')) $o('#outNailBtn').style.background = L.nail; }
   const custom = L.custom ? { id: 'custom', name: L.custom.name || 'Your clothing', shirt: L.custom.shirt, pants: L.custom.pants } : null;
   await setClothing(L.clothing, custom);
@@ -4419,7 +4463,7 @@ async function applyLook(L){
 }
 function currentLook(){
   const name = $o('#outName').value.trim() || 'My look', pairs = (pal, cols) => pal.map((p, i) => cols[i] ? { from: p, to: cols[i] } : null).filter(Boolean);
-  const L = { name, skin: $o('#outSkin').value, body: OUT.body, face: OUT.face || undefined, nail: $o('#outNail').value, figure: OUT.body === 'figure' ? JSON.parse(figJSON()) : undefined, clothing: OUT.cloth && OUT.cloth.id !== 'custom' ? OUT.cloth.id : null,
+  const L = { name, skin: $o('#outSkin').value, body: OUT.body, face: OUT.face || undefined, faceParts: OUT.face === 'custom' ? JSON.parse(JSON.stringify(OUT.faceParts)) : undefined, nail: $o('#outNail').value, figure: OUT.body === 'figure' ? JSON.parse(figJSON()) : undefined, clothing: OUT.cloth && OUT.cloth.id !== 'custom' ? OUT.cloth.id : null,
     shirtColours: pairs(OUT.shirtPal, OUT.shirtCols), pantsColours: pairs(OUT.pantsPal, OUT.pantsCols),
     accessories: OUT.worn.map(w => Object.assign({ id: w.e.id, slug: w.e.slug, name: w.e.name, slot: w.slot, colours: w.colours.map(c => c || null) }, w.e.albedo ? { albedo: w.e.albedo, logo: w.e.logo, settings: w.e.settings, thumb: w.e.thumb, model: w.e.model } : {})) };
   if (OUT.cloth && OUT.cloth.id === 'custom') L.custom = { name: OUT.cloth.name, shirt: OUT.shirt && OUT.shirt.toDataURL(), pants: OUT.pants && OUT.pants.toDataURL() };
@@ -4576,20 +4620,91 @@ function drawPoseEditor(){
   const r = l.querySelector('input'); r.oninput = () => { OUT.custom.bob[1] = +r.value; l.querySelector('b').textContent = (+r.value).toFixed(2); setAnim('pose'); }; box.appendChild(l);
 }
 function setPose(p){ const d = POSE0(); Object.keys(d).forEach(k => { if (Array.isArray(p && p[k]) && p[k].length === 3) d[k] = p[k].map(Number); }); OUT.custom = d; drawPoseEditor(); setAnim('pose'); }
-/* ---------- faces (outfits/faces/index.json): a transparent picture drawn on the front of the head ---------- */
-async function loadFaces(){ try { OUT.faces = await (await fetch(OBASE + 'faces/index.json')).json(); } catch { OUT.faces = []; } drawFaces(); }
-function setFace(id){
-  const f = OUT.faces.find(x => x.id === id); OUT.face = f ? f.id : null;
-  return new Promise(res => { const done = () => { bodyTextures(); drawFaces(); if (typeof updateViewerTextures === 'function' && typeof V3 !== 'undefined' && V3.r) try { updateViewerTextures(); } catch {} res(); };
-    if (!f) { window.HEAD_FACE = null; return done(); }
-    const im = new Image(); im.onload = () => { window.HEAD_FACE = im; done(); }; im.onerror = () => { window.HEAD_FACE = null; done(); }; im.src = AS(OBASE + 'faces/' + f.file); });
+/* ---------- faces: ready-made ones (outfits/faces/index.json: transparent pictures), or one built from parts like a Mii
+   (outfits/faces/parts/: sheets of 160 px tiles, brows / eyes / mouths): each part picked from its sheet, then sized,
+   moved, spaced, turned and stretched; brows and eyes come as a pair, the left one mirrored (or not). The tiles are drawn
+   as the right-hand feature (as you look at the face). The finished face is a canvas drawn on the front of the head. ---------- */
+const FP = { meta: null, img: {}, tab: 'brow' };
+const FPK = { brow: 'brows', eye: 'eyes', mouth: 'mouths' };
+const FACE0 = () => ({ brow: { i: 0, size: 1, x: 1, y: 0, rot: 0, sx: 1, sy: 1, mirror: true, color: '#2a1d18' },
+  eye: { i: 0, size: 1, x: 1, y: 0, rot: 0, sx: 1, sy: 1, mirror: true }, mouth: { i: 0, size: 1, x: 0, y: 0, rot: 0, sx: 1, sy: 1 } });
+const FBASE = { brow: { y: 64, gap: 56, d: 88 }, eye: { y: 108, gap: 54, d: 92 }, mouth: { y: 186, gap: 0, d: 100 } };   // in the 300 × 244 face canvas
+OUT.faceParts = FACE0();
+async function loadFaces(){
+  try { OUT.faces = await (await fetch(OBASE + 'faces/index.json')).json(); } catch { OUT.faces = []; }
+  try { FP.meta = await (await fetch(OBASE + 'faces/parts.json')).json();
+    await Promise.all(Object.values(FPK).map(k => new Promise(res => { const im = new Image(); im.onload = () => { FP.img[k] = im; res(); }; im.onerror = res; im.src = AS(OBASE + 'faces/parts/' + k + '.png'); }))); } catch { FP.meta = null; }
+  drawFaces();
 }
+function tileOf(part, i){ const k = FPK[part], n = FP.meta ? FP.meta[k] : 0; i = ((i % n) + n) % n; return { im: FP.img[k], sx: (i % FP.meta.cols) * FP.meta.tile, sy: Math.floor(i / FP.meta.cols) * FP.meta.tile, t: FP.meta.tile }; }
+function composeFace(F){
+  const c = OUT.faceCanvas || (OUT.faceCanvas = cnv(300, 244)), x = c.getContext('2d'); x.clearRect(0, 0, 300, 244);
+  if (!FP.meta) return c;
+  const tint = cnv(160, 160), tx = tint.getContext('2d');
+  for (const part of ['brow', 'eye', 'mouth']) {
+    const P = F[part], B = FBASE[part], T = tileOf(part, P.i); if (!T.im) continue;
+    let src = T.im, sx = T.sx, sy = T.sy;
+    if (part === 'brow' && P.color) { tx.clearRect(0, 0, 160, 160); tx.globalCompositeOperation = 'source-over'; tx.drawImage(T.im, T.sx, T.sy, 160, 160, 0, 0, 160, 160);
+      tx.globalCompositeOperation = 'source-in'; tx.fillStyle = P.color; tx.fillRect(0, 0, 160, 160); tx.globalCompositeOperation = 'source-over'; src = tint; sx = sy = 0; }
+    const d = B.d * P.size, w = d * P.sx, h = d * P.sy, y = B.y + P.y;
+    const one = (cx, flip) => { x.save(); x.translate(cx, y); x.rotate((flip ? -1 : 1) * P.rot * Math.PI / 180); x.scale(flip ? -1 : 1, 1); x.drawImage(src, sx, sy, T.t, T.t, -w / 2, -h / 2, w, h); x.restore(); };
+    if (part === 'mouth') one(150 + P.x, false);
+    else { const g = B.gap * P.x; one(150 + g, false); one(150 - g, P.mirror !== false); }
+  }
+  return c;
+}
+function setFace(id, parts){
+  if (id === 'custom') { if (parts) OUT.faceParts = JSON.parse(JSON.stringify(parts)); OUT.face = 'custom'; window.HEAD_FACE = composeFace(OUT.faceParts); return faceDone(); }
+  const f = OUT.faces.find(x => x.id === id); OUT.face = f ? f.id : null;
+  if (!f) { window.HEAD_FACE = null; return faceDone(); }
+  return new Promise(res => { const im = new Image(); im.onload = () => { window.HEAD_FACE = im; faceDone().then(res); }; im.onerror = () => { window.HEAD_FACE = null; faceDone().then(res); }; im.src = AS(OBASE + 'faces/' + f.file); });
+}
+function faceDone(){ bodyTextures(); drawFaces(); try { if (typeof V3 !== 'undefined' && V3.r && typeof updateViewerTextures === 'function') updateViewerTextures(); } catch {} return Promise.resolve(); }
+let facePend = 0; const faceRedo = () => { if (facePend) return; facePend = requestAnimationFrame(() => { facePend = 0; window.HEAD_FACE = composeFace(OUT.faceParts); bodyTextures(); }); };
 function drawFaces(){
   const box = $o('#outFaces'); if (!box) return; box.innerHTML = '';
-  [{ id: null, name: 'Default' }].concat(OUT.faces).forEach(f => { const b = document.createElement('button'); b.className = 'o-face' + ((OUT.face || null) === f.id ? ' on' : '');
-    b.title = f.name; b.setAttribute('aria-label', 'Face: ' + f.name); if (f.file) b.style.backgroundImage = `url('${AS(OBASE + 'faces/' + f.file)}')`; else b.textContent = 'Default';
+  const list = [{ id: null, name: 'Default' }].concat(OUT.faces); if (FP.meta) list.push({ id: 'custom', name: 'Make your own' });
+  list.forEach(f => { const b = document.createElement('button'); b.className = 'o-face' + ((OUT.face || null) === f.id ? ' on' : '') + (f.id === 'custom' ? ' make' : '');
+    b.title = f.name; b.setAttribute('aria-label', 'Face: ' + f.name);
+    if (f.file) b.style.backgroundImage = `url('${AS(OBASE + 'faces/' + f.file)}')`;
+    else if (f.id === 'custom' && OUT.faceCanvas && OUT.face === 'custom') b.style.backgroundImage = `url('${OUT.faceCanvas.toDataURL()}')`;
+    else b.textContent = f.id === 'custom' ? 'Make' : 'Default';
     b.onclick = () => setFace(f.id); box.appendChild(b); });
+  const ed = $o('#outFaceEd'); if (ed) { ed.hidden = OUT.face !== 'custom'; if (!ed.hidden) drawFaceEditor(); }
 }
+function drawFaceEditor(){
+  document.querySelectorAll('#outFaceTabs button').forEach(b => b.classList.toggle('on', b.dataset.p === FP.tab));
+  const part = FP.tab, P = OUT.faceParts[part], k = FPK[part], n = FP.meta[k], grid = $o('#outFaceTiles'); grid.innerHTML = '';
+  for (let i = 0; i < n; i++) { const b = document.createElement('button'), s = 44, T = tileOf(part, i); b.className = 'o-ftile' + (P.i === i ? ' on' : '');
+    b.setAttribute('aria-label', `${k} ${i + 1}`); b.style.backgroundImage = `url('${AS(OBASE + 'faces/parts/' + k + '.png')}')`;
+    b.style.backgroundSize = `${FP.meta.cols * s}px auto`; b.style.backgroundPosition = `-${T.sx / T.t * s}px -${T.sy / T.t * s}px`;
+    b.onclick = () => { P.i = i; grid.querySelectorAll('.o-ftile').forEach((q, j) => q.classList.toggle('on', j === i)); faceRedo(); }; grid.appendChild(b); }
+  const ctl = $o('#outFaceCtl'); ctl.innerHTML = '';
+  const rng = (label, key, mn, mx, st, fmt) => { const l = document.createElement('label'); l.className = 'o-rng';
+    l.innerHTML = `<span>${label}<b></b></span><input type="range" min="${mn}" max="${mx}" step="${st}" value="${P[key]}">`;
+    const r = l.querySelector('input'), bb = l.querySelector('b'); bb.textContent = fmt(+r.value); r.oninput = () => { P[key] = +r.value; bb.textContent = fmt(+r.value); faceRedo(); }; ctl.appendChild(l); };
+  const pct = v => Math.round(v * 100) + '%', deg = v => Math.round(v) + '°', px = v => (v > 0 ? '+' : '') + Math.round(v);
+  rng('Size', 'size', .4, 1.8, .01, pct);
+  rng('Up / down', 'y', -70, 70, 1, px);
+  if (part === 'mouth') rng('Left / right', 'x', -40, 40, 1, px); else rng('Spacing', 'x', .4, 1.8, .01, pct);
+  rng(part === 'mouth' ? 'Tilt' : 'Twist', 'rot', -60, 60, 1, deg);
+  rng('Width', 'sx', .5, 1.8, .01, pct); rng('Height', 'sy', .4, 1.8, .01, pct);
+  if (part !== 'mouth') { const l = document.createElement('label'); l.className = 'chk'; l.innerHTML = `<input type="checkbox" class="g-switch" ${P.mirror !== false ? 'checked' : ''}>Mirror the left one`;
+    l.querySelector('input').onchange = e => { P.mirror = e.target.checked; faceRedo(); }; ctl.appendChild(l); }
+  if (part === 'brow') { const l = document.createElement('label'); l.className = 'o-pick'; l.innerHTML = `Colour <input type="color" value="${P.color || '#2a1d18'}">`;
+    l.querySelector('input').oninput = e => { P.color = e.target.value; faceRedo(); }; ctl.appendChild(l); }
+}
+function randomFace(){
+  const r = (a, b) => a + Math.random() * (b - a), pick = k => Math.floor(Math.random() * FP.meta[k]);
+  const hair = ['#2a1d18', '#3b2416', '#5a3a22', '#7a4b2a', '#1b1b1f', '#8a6a3a'];
+  OUT.faceParts = { brow: { i: pick('brows'), size: r(.85, 1.1), x: r(.9, 1.1), y: r(-6, 6), rot: r(-8, 8), sx: r(.9, 1.15), sy: r(.85, 1.15), mirror: true, color: hair[Math.floor(Math.random() * hair.length)] },
+    eye: { i: pick('eyes'), size: r(.85, 1.15), x: r(.9, 1.1), y: r(-4, 6), rot: r(-6, 6), sx: r(.9, 1.1), sy: r(.9, 1.1), mirror: true },
+    mouth: { i: pick('mouths'), size: r(.8, 1.1), x: 0, y: r(-6, 8), rot: r(-4, 4), sx: r(.9, 1.2), sy: r(.85, 1.1) } };
+  setFace('custom');
+}
+document.querySelectorAll('#outFaceTabs button').forEach(b => b.onclick = () => { FP.tab = b.dataset.p; drawFaceEditor(); });
+$o('#outFaceRandom').onclick = randomFace;
+$o('#outFaceReset').onclick = () => { OUT.faceParts = FACE0(); setFace('custom'); };
 /* ---------- the nail colour wheel (Figure body): hue around, saturation outwards, a brightness slider, polish presets ---------- */
 function nailWheel(){
   const host = $o('#outNailWheel'), btn = $o('#outNailBtn'), inp = $o('#outNail'); if (!host || host.dataset.on) return; host.dataset.on = 1;
@@ -4688,7 +4803,7 @@ $o('#outPantsFile').onchange = async e => { const f = e.target.files[0]; if (!f)
 
 async function wearClothing(shirt, pants, name){ await show(true); const cp = c => { if (!c) return null; const k = cnv(TW, TH); k.getContext('2d').drawImage(c, 0, 0); return k; };
   await setClothing('custom', { id: 'custom', name: name || 'Your clothing', shirt: cp(shirt), pants: cp(pants) }); }
-window.__outfits = { OUT, show, wear, takeOff, applyLook, currentLook, addFromView, setClothing, saveLook, wearClothing, setBody, setAnim, setPose, setFace, animPose };
+window.__outfits = { OUT, show, wear, takeOff, applyLook, currentLook, addFromView, setClothing, saveLook, wearClothing, setBody, setAnim, setPose, setFace, animPose, randomFace, composeFace };
 })();
 
 </script>

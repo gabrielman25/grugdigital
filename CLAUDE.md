@@ -257,7 +257,13 @@ worked out from the Figure's proportions, and worn accessories follow their join
 Copy / Apply JSON). Every 3D view (Clothing preview, Accessories, Character) turns with left- or right-drag, pans with the
 middle button, zooms with the wheel, resets on double-click, and has no right-click menu (`orbitCam`). Figure nails use a
 colour wheel. **Faces** (`make/clothing/outfits/faces/`, `index.json` + transparent PNGs) are drawn on the front of the head
-(`window.HEAD_FACE` in `headTex`); looks keep `face`. Two new spots: **hair** (follows the head) and **feet** (shoes are
+(`window.HEAD_FACE` in `headTex`); looks keep `face`. **Make your own** builds a face from parts like a Mii: the owner's
+sheets in `outfits/faces/parts/` (`brows.png`, `eyes.png`, `mouths.png`, 160 px tiles, 9 across; counts in
+`faces/parts.json`: add tiles to a sheet and raise its count). Each part has size, up / down, spacing (or left / right for the
+mouth), twist, width, height; brows and eyes are pairs (the tile is the right-hand one, the left mirrored unless turned off);
+brows take a colour; **Random face**. A look keeps `face: 'custom'` and `faceParts`. The Figure's sleeves and trouser legs end
+in loose hexagonal cuffs and hems (`hexScale`) with open ends pushed up inside (`openEnd`) and darkened (`openEnds` in
+outfits-ui.js). Two new spots: **hair** (follows the head) and **feet** (shoes are
 modelled as a pair in the Figure's foot space and split per foot; on Blocky each sits on the bottom of its leg). Clothing can
 carry `pantsFigure` (index.json): Blocky wears `pants` (shoes painted on), Figure wears `pantsFigure` (just pants).
 **The browser's Back and Forward** step through the Studio itself (tabs, the Clothing steps, the open template:
