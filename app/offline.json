@@ -1,5 +1,5 @@
 {
- "v": "b2aa392ff450",
+ "v": "b94de5d1a3c0",
  "apps": {
   "grug": [
    "grug",
@@ -494,23 +494,16 @@
     "/make/clothing/body/feet-normal.png": "481945ea4f",
     "/make/clothing/body/feet.json": "5c6219bf2c",
     "/make/clothing/body/nails.png": "8df1f89d50",
-    "/make/clothing/": "ba6c789be3",
+    "/make/clothing/": "d030084f48",
     "/make/clothing/outfits/autumn/chip.png": "614a9d6509",
     "/make/clothing/outfits/autumn/pants-figure.png": "c0625f6c54",
     "/make/clothing/outfits/autumn/pants.png": "88b04fc8e8",
     "/make/clothing/outfits/autumn/shirt.png": "e35b908bcc",
-    "/make/clothing/outfits/faces/calm.png": "dcb0f8fba2",
-    "/make/clothing/outfits/faces/friendly.png": "f891b25dd2",
-    "/make/clothing/outfits/faces/grin.png": "2190a7d7b1",
-    "/make/clothing/outfits/faces/index.json": "83db6461ce",
     "/make/clothing/outfits/faces/parts.json": "bfd7e71b27",
     "/make/clothing/outfits/faces/parts/brows.png": "b51e01ed0d",
     "/make/clothing/outfits/faces/parts/eyes.png": "28bdd525f2",
     "/make/clothing/outfits/faces/parts/mouths.png": "22791b7c55",
-    "/make/clothing/outfits/faces/shy.png": "c4b2394d07",
-    "/make/clothing/outfits/faces/smirk.png": "dee436f886",
-    "/make/clothing/outfits/faces/surprised.png": "2dfd79c562",
-    "/make/clothing/outfits/index.json": "9126d07407",
+    "/make/clothing/outfits/index.json": "8ceb8d4612",
     "/make/clothing/outfits/looks/autumn-blocky.jpg": "4998197211",
     "/make/clothing/outfits/looks/autumn.jpg": "f263159970",
     "/make/clothing/outfits/looks/night-rider.jpg": "d30a0f4f32",
@@ -536,7 +529,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 57899151
+   "bytes": 57546562
   },
   "daypart": {
    "title": "Daypart",

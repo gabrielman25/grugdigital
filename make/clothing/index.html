@@ -700,7 +700,7 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
         <div class="g-seg full" id="outFeet" hidden style="margin-top:6px"><button data-f="bare" class="on">Barefoot</button><button data-f="boots">Boots</button></div>
         <div class="o-row"><label class="o-pick">Skin <input type="color" id="outSkin" value="#eab892"></label><label class="o-pick" id="outNailRow" hidden>Nails <input type="color" id="outNail" value="#f7f2ee" hidden><button type="button" id="outNailBtn" class="o-nailbtn" aria-label="Nail colour"></button></label></div>
         <div id="outNailWheel" hidden></div>
-        <div class="o-sub">Face</div><div class="o-faces" id="outFaces"></div>
+        <div class="o-sub">Face</div><div class="o-faces" id="outFaces" hidden></div>
         <div id="outFaceEd" class="o-faceed" hidden>
           <div class="g-seg full" id="outFaceTabs"><button data-p="brow" class="on">Brows</button><button data-p="eye">Eyes</button><button data-p="mouth">Mouth</button></div>
           <div class="o-ftiles" id="outFaceTiles"></div>
@@ -733,6 +733,12 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
         <p class="sub">Tap to put on or take off: one per spot (head, hair, back, each hand, each shoulder, feet).</p>
         <div id="outAccs" class="lib-grid o-grid"></div>
         <div class="o-acts"><button id="outAccNew" class="g-btn g-btn--sm g-btn--ghost">New accessory</button><button id="outAccClaude" class="g-btn g-btn--sm g-btn--ghost">With Claude</button></div>
+      </div>
+      <div class="g-card card">
+        <h2 class="ttl"><i data-g-icon="archive"></i>Catalog</h2>
+        <p class="sub">Pieces from the site's catalog, fitted to this head (and sandals to the Figure's feet: they switch it to barefoot). Tap to put on or take off.</p>
+        <div class="g-seg full" id="ugcTabs"></div>
+        <div id="ugcGrid" class="lib-grid o-grid" style="margin-top:var(--g-s-2)"></div>
       </div>
       <div class="g-card card" id="outWornCard" hidden>
         <h2 class="ttl"><i data-g-icon="pipette"></i>Wearing now</h2>
@@ -1215,9 +1221,9 @@ class GLR {
       void main(){vN=uNM*aN;vTu=uNM*aTu;vTv=uNM*aTv;vT=aT;vT2=aT2;vec4 p=uPr*uMV*vec4(aP,1.0);
         if(uSnap>0.0){vec2 nd=p.xy/p.w;nd=floor(nd*uSnap+0.5)/uSnap;p.xy=nd*p.w;}
         vTA=vec3(aT*p.w,p.w);gl_Position=p;}`;
-    const fs = `precision mediump float;uniform sampler2D uTex,uNMap;uniform vec3 uTint,uL;uniform float uAmb,uDif,uUnlit,uAffine,uNStr,uSpec,uWrap;
+    const fs = `precision mediump float;uniform sampler2D uTex,uNMap;uniform vec3 uTint,uL;uniform float uAmb,uDif,uUnlit,uAffine,uNStr,uSpec,uWrap,uCut;
       varying vec3 vN;varying vec2 vT;varying vec2 vT2;varying vec3 vTA;varying vec3 vTu;varying vec3 vTv;
-      void main(){vec2 uv=uAffine>0.5?vTA.xy/vTA.z:vT;vec4 t=texture2D(uTex,uv);vec3 N=normalize(vN);
+      void main(){vec2 uv=uAffine>0.5?vTA.xy/vTA.z:vT;vec4 t=texture2D(uTex,uv);if(t.a<uCut)discard;vec3 N=normalize(vN);
         if(uNStr>0.0){vec3 m=texture2D(uNMap,vT2).xyz*2.0-1.0;m.xy*=uNStr;vec3 T=vTu-N*dot(N,vTu);vec3 B=vTv-N*dot(N,vTv);
           if(dot(T,T)>1e-6&&dot(B,B)>1e-6){N=normalize(normalize(T)*m.x+normalize(B)*m.y+N*max(m.z,0.05));}}
         float s=uAmb+uDif*max((dot(N,uL)+uWrap)/(1.0+uWrap),0.0);s=mix(s,1.0,uUnlit);
@@ -1228,7 +1234,7 @@ class GLR {
     if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
     gl.useProgram(pr); this.pr = pr;
     this.a = {}; ['aP','aN','aT','aT2','aTu','aTv'].forEach(n => this.a[n] = gl.getAttribLocation(pr,n));
-    this.u = {}; ['uMV','uPr','uNM','uTex','uNMap','uTint','uL','uAmb','uDif','uUnlit','uAffine','uSnap','uNStr','uSpec','uWrap'].forEach(n => this.u[n] = gl.getUniformLocation(pr,n));
+    this.u = {}; ['uMV','uPr','uNM','uTex','uNMap','uTint','uL','uAmb','uDif','uUnlit','uAffine','uSnap','uNStr','uSpec','uWrap','uCut'].forEach(n => this.u[n] = gl.getUniformLocation(pr,n));
     this.affine = 0; this.snap = 0; this.spec = 0; this.nstr = 0; this.explode = 0; this.studsOn = false; this.wrap = 0;
     this.outline = { on: false, width: 0.06, color: [5, 5, 5] };   // the avatar's own inverted-hull outline (studs)
     this.nail = [247, 242, 238];                                     // the Figure body's toenail colour
@@ -1311,7 +1317,7 @@ class GLR {
     gl.uniform3fv(u.uTint, tint || [1,1,1]); gl.uniform3fv(u.uL, this.light);
     gl.uniform1f(u.uAmb, this.amb); gl.uniform1f(u.uDif, this.dif); gl.uniform1f(u.uUnlit, unlit ? 1 : 0);
     gl.uniform1f(u.uAffine, this.affine); gl.uniform1f(u.uSnap, this.snap);
-    gl.uniform1f(u.uNStr, nmap ? (nstr || 0) : 0); gl.uniform1f(u.uSpec, unlit ? 0 : this.spec); gl.uniform1f(u.uWrap, this.wrap);
+    gl.uniform1f(u.uNStr, nmap ? (nstr || 0) : 0); gl.uniform1f(u.uSpec, unlit ? 0 : this.spec); gl.uniform1f(u.uWrap, this.wrap); gl.uniform1f(u.uCut, this.cut ?? 0.02);
     gl.drawElements(gl.TRIANGLES, m.c, gl.UNSIGNED_SHORT, 0);
   }
   /* posing (the Character tab's animations and pose editor): this.pose = { bob: [x, y, z], torso, head, larm, rarm, lleg, rleg: [x, y, z] degrees }.
@@ -1379,7 +1385,7 @@ function slenderDeform(part, p){
 /* Figure: the rounded body (slimmer waist, longer arms with a slight bend at the elbow, sphere hands, real feet).
    Every number is a slider in the Character tab's Proportions panel; FIG_DEFAULT is the starting point (paste the panel's
    JSON here to change it). off: extra X / Y / Z moves per part (x mirrors on the right side, so +x spreads both sides out). */
-const FIG_DEFAULT = {"torsoW":0.9,"waist":0.23,"waistY":2.68,"torsoD":1.03,"armX":1.23,"armW":0.57,"armLen":1.04,"elbow":3.14,"elbowBend":0,"armFwd":0.4,"hand":0.39,"hip":2.8,"legX":0.47,"legW":0.8,"legY":0.2,"knee":0.49,"kneeBend":-0.3,"foot":1.27,"footFwd":0.09,"cuffLift":0.12,"thighs":1,"hem":0.07,"legHem":0.08,"boots":false,"instep":0.25,
+const FIG_DEFAULT = {"torsoW":0.9,"waist":0.23,"waistY":2.68,"torsoD":1.03,"armX":1.23,"armW":0.57,"armLen":1.04,"elbow":3.14,"elbowBend":0,"armFwd":0.4,"hand":0.39,"hip":2.8,"legX":0.47,"legW":0.8,"legY":0.2,"knee":0.49,"kneeBend":-0.3,"foot":1.27,"footFwd":0.09,"cuffLift":0.12,"thighs":1,"hem":0.07,"legHem":0.08,"boots":false,"instep":0.25,"toeH":0.07,
   "off":{"torso":[0,0,0],"arms":[0,0,0],"hands":[0,0,0],"legs":[0,0,0],"feet":[-0.02,0.19,-0.05],"head":[0,0,0]}};   // the owner's tuned figurine (Nov 2026)
 const FIG = JSON.parse(JSON.stringify(FIG_DEFAULT));
 /* distance from the middle to the edge of a rounded square (half-size a, corner radius rr), in direction th */
@@ -1446,8 +1452,11 @@ function figureDeform(part, p){
       const yTop = FIG.legY + top*(FIG.hip + 0.06 - FIG.legY)/2; y = yTop + (y - yTop)*((yTop - sole)/Math.max(0.05, yTop - FIG.legY));   // stretch down to the sole
       // the back is a straight line from the knee (no knee bend in boots) to the heel; the front stays straight down to the
       // instep (FIG.instep, in the leg's own height: about halfway down the boot) and only then slopes out to the toe
-      const sk = clamp(1 - p[1]/Math.max(0.2, 2*FIG.knee), 0, 1), sf = clamp(1 - p[1]/(FIG.instep ?? 0.25), 0, 1), u = lz/0.5*0.5 + 0.5;   // u: back (0) to front (1)
-      const zb0 = -0.5*FIG.legW, zf0 = 0.5*FIG.legW, zb = zb0 + (Math.min(zb0, heel) - zb0)*sk, zf = zf0 + (toe - zf0)*Math.min(1, sf/0.9);
+      // below the instep the front curves out (a quarter ellipse: straight down at the instep, level at the top of the toe)
+      // and the toe ends in a square, upright front (FIG.toeH tall, in the leg's own height)
+      const pi = FIG.instep ?? 0.25, pt = Math.min(pi*0.8, FIG.toeH ?? 0.07), q = clamp((pi - p[1])/Math.max(0.01, pi - pt), 0, 1);
+      const sk = clamp(1 - p[1]/Math.max(0.2, 2*FIG.knee), 0, 1), u = lz/0.5*0.5 + 0.5;   // u: back (0) to front (1)
+      const zb0 = -0.5*FIG.legW, zf0 = 0.5*FIG.legW, zb = zb0 + (Math.min(zb0, heel) - zb0)*sk, zf = toe - (toe - zf0)*Math.sqrt(Math.max(0, 1 - q*q));
       Z = zb + (zf - zb)*u;
       X = side*(FIG.legX + o.feet[0]*0) + lx*FIG.legW*(1 + 0.14*sm(0, 1, s)) + side*0.02*sm(0, 1, s);
     }
@@ -1559,7 +1568,13 @@ function partGeo(part, type){
   const g = { p:[], n:[], t:[], tu:[], tv:[], i:[] };
   FK.forEach(k => {
     const f = part.geo[k], [rx,ry,rw,rh] = part.rects[k];
-    const us = ticks(Math.hypot(...f.u), r, !!def), vs = ticks(Math.hypot(...f.v), r, !!def), nu = us.length, base = g.p.length/3, e = 1e-3;
+    let us = ticks(Math.hypot(...f.u), r, !!def), vs = ticks(Math.hypot(...f.v), r, !!def);
+    if (type === 'figure' && kindOf(part.name) === 'leg'){   // finer rows near the bottom of the leg (the boot's toe curve, the hem)
+      const more = (ts, dir) => { if (Math.abs(dir[1]) < 0.5) return ts; const o = new Set(ts); for (let y = 0; y <= 0.46; y += 0.025){ const t = (y - f.o[1])/dir[1]; if (t > 1e-4 && t < 1 - 1e-4) o.add(t); }
+        for (const y of [FIG.toeH ?? 0.07, FIG.instep ?? 0.25]){ const t = (y - f.o[1])/dir[1]; if (t > 1e-4 && t < 1 - 1e-4) o.add(t); } return [...o].sort((a, b) => a - b); };
+      us = more(us, f.u); vs = more(vs, f.v);
+    }
+    const nu = us.length, base = g.p.length/3, e = 1e-3;
     for (const v of vs) for (const u of us){
       const p = P(f,u,v), du = v3sub(P(f,u+e,v), P(f,u-e,v)), dv = v3sub(P(f,u,v+e), P(f,u,v-e));
       g.p.push(...p); g.n.push(...v3norm(v3cross(dv, du))); g.tu.push(...v3norm(du)); g.tv.push(...v3norm(dv));
@@ -4433,6 +4448,7 @@ async function entryD(e){
 async function wear(e, colours){
   const D = await entryD(e), slot = (D.look.wear && D.look.wear.on) || e.slot;
   OUT.worn.filter(w => w.slot === slot && w.e.id !== e.id).forEach(w => takeOff(w.e.id, true));
+  Object.keys(UGC.worn).forEach(d => { if (UGC_SLOT[d] === slot) ugcOff(d, true); });
   if (OUT.worn.some(w => w.e.id === e.id)) return;
   const T = await LoPolTex.prepare(D); if (e.BO) T.BO = e.BO;
   const set = e.settings || {}, w = { e, D, T, slot, colours: (colours || set.colours || []).slice(), canvas: cnv(T.n, T.n) };
@@ -4470,13 +4486,14 @@ async function setClothing(id, custom){
 /* the Figure's feet: Barefoot (the real feet, plain pants) or Boots (the lower legs shaped into boots, wearing the pants
    that have the shoes painted on: the Blocky version of the clothing) */
 function setBoots(on){
-  FIG.boots = !!on; document.querySelectorAll('#outFeet button').forEach(x => x.classList.toggle('on', (x.dataset.f === 'boots') === FIG.boots));
+  FIG.boots = !!on; if (FIG.boots && UGC.worn.sandals) ugcOff('sandals');   // boots and sandals don't go together document.querySelectorAll('#outFeet button').forEach(x => x.classList.toggle('on', (x.dataset.f === 'boots') === FIG.boots));
   $o('#outNailRow').hidden = OUT.body !== 'figure' || FIG.boots;
   if (OUT.r && OUT.body === 'figure') OUT.r.buildBody('figure', 'round');
   if (OUT.cloth && OUT.cloth.pantsFigure) setClothing(OUT.cloth.id); else if (OUT.r) bodyTextures();
 }
 function setBody(b){
   const was = OUT.body; OUT.body = BODY_TYPES[b] ? b : 'classic'; if (OUT.r) OUT.r.buildBody(OUT.body, 'round');
+  if (OUT.body !== 'figure' && UGC.worn.sandals) ugcOff('sandals');   // sandals are for the Figure's real feet
   if (was !== OUT.body) { if (OUT.cloth && OUT.cloth.pantsFigure) setClothing(OUT.cloth.id); else relight(0); }
   document.querySelectorAll('#outBody button').forEach(x => x.classList.toggle('on', x.dataset.b === OUT.body)); $o('#outNailRow').hidden = OUT.body !== 'figure' || !!FIG.boots; $o('#outProp').hidden = OUT.body !== 'figure'; $o('#outFeet').hidden = OUT.body !== 'figure';
 }
@@ -4509,7 +4526,7 @@ function setFig(f){ const d = JSON.parse(JSON.stringify(FIG_DEFAULT)); Object.as
 async function applyLook(L){
   if (L.skin) { $o('#outSkin').value = L.skin; }
   if (L.figure) setFig(L.figure); if (L.body) setBody(L.body === 'figure' && !(await FigureLock.ask()) ? 'classic' : L.body);
-  await setFace(L.face || null, L.faceParts);
+  if (L.faceParts) await setFace('custom', L.faceParts);   // a look without its own face keeps hers
   if (L.nail) { $o('#outNail').value = L.nail; if (OUT.r) OUT.r.nail = hexRgb(L.nail); const w = $o('#outNailWheel'); if (w && w.sync) w.sync(); else if ($o('#outNailBtn')) $o('#outNailBtn').style.background = L.nail; }
   const custom = L.custom ? { id: 'custom', name: L.custom.name || 'Your clothing', shirt: L.custom.shirt, pants: L.custom.pants } : null;
   await setClothing(L.clothing, custom);
@@ -4521,11 +4538,13 @@ async function applyLook(L){
     if (!e && a.albedo) { e = { id: a.id || 'saved:' + Math.random().toString(36).slice(2), slug: a.slug, name: a.name || a.slug, slot: a.slot, albedo: a.albedo, logo: a.logo, settings: a.settings, thumb: a.thumb, model: a.model }; OUT.wardrobe.push(e); }
     if (e) await wear(e, a.colours);
   }
-  drawWardrobe(); drawWorn(); $o('#outName').value = L.name || '';
+  Object.keys(UGC.worn).forEach(d => ugcOff(d, true));
+  if (L.ugc && L.ugc.length) { await loadUGC(); for (const id of L.ugc) { const e = (UGC.list || []).find(x => x.id === id); if (e) await ugcWear(e); } }
+  drawUGC(); drawWardrobe(); drawWorn(); $o('#outName').value = L.name || '';
 }
 function currentLook(){
   const name = $o('#outName').value.trim() || 'My look', pairs = (pal, cols) => pal.map((p, i) => cols[i] ? { from: p, to: cols[i] } : null).filter(Boolean);
-  const L = { name, skin: $o('#outSkin').value, body: OUT.body, face: OUT.face || undefined, faceParts: OUT.face === 'custom' ? JSON.parse(JSON.stringify(OUT.faceParts)) : undefined, nail: $o('#outNail').value, figure: OUT.body === 'figure' ? JSON.parse(figJSON()) : undefined, clothing: OUT.cloth && OUT.cloth.id !== 'custom' ? OUT.cloth.id : null,
+  const L = { name, ugc: Object.values(UGC.worn).map(w => w.e.id), skin: $o('#outSkin').value, body: OUT.body, face: OUT.face || undefined, faceParts: OUT.face === 'custom' ? JSON.parse(JSON.stringify(OUT.faceParts)) : undefined, nail: $o('#outNail').value, figure: OUT.body === 'figure' ? JSON.parse(figJSON()) : undefined, clothing: OUT.cloth && OUT.cloth.id !== 'custom' ? OUT.cloth.id : null,
     shirtColours: pairs(OUT.shirtPal, OUT.shirtCols), pantsColours: pairs(OUT.pantsPal, OUT.pantsCols),
     accessories: OUT.worn.map(w => Object.assign({ id: w.e.id, slug: w.e.slug, name: w.e.name, slot: w.slot, colours: w.colours.map(c => c || null) }, w.e.albedo ? { albedo: w.e.albedo, logo: w.e.logo, settings: w.e.settings, thumb: w.e.thumb, model: w.e.model } : {})) };
   if (OUT.cloth && OUT.cloth.id === 'custom') L.custom = { name: OUT.cloth.name, shirt: OUT.shirt && OUT.shirt.toDataURL(), pants: OUT.pants && OUT.pants.toDataURL() };
@@ -4596,7 +4615,10 @@ function drawWardrobe(){
     box.appendChild(b); });
 }
 function drawWorn(){
-  const box = $o('#outWorn'); box.innerHTML = ''; $o('#outWornCard').hidden = !OUT.worn.length;
+  const box = $o('#outWorn'); box.innerHTML = ''; $o('#outWornCard').hidden = !OUT.worn.length && !Object.keys(UGC.worn).length;
+  Object.values(UGC.worn).forEach(w => { const card = document.createElement('div'); card.className = 'o-worn';
+    card.innerHTML = `<div class="o-wh"><b></b><small>${SLOT_NAMES[w.slot] || w.slot} · catalog</small><button class="g-btn g-btn--ghost g-btn--sm o-off">Take off</button></div>`;
+    card.querySelector('b').textContent = w.e.name; card.querySelector('.o-off').onclick = () => ugcOff(w.e.dept); box.appendChild(card); });
   OUT.worn.forEach(w => { const card = document.createElement('div'); card.className = 'o-worn';
     card.innerHTML = `<div class="o-wh"><b></b><small>${SLOT_NAMES[w.slot] || w.slot}</small><button class="g-btn g-btn--sm o-ed">Edit</button><button class="g-btn g-btn--ghost g-btn--sm o-off">Take off</button></div>`;
     card.querySelector('b').textContent = w.e.name; card.querySelector('.o-off').onclick = () => { takeOff(w.e.id); drawWardrobe(); };
@@ -4693,7 +4715,7 @@ const FACE0 = () => ({ brow: { i: 0, size: 1, x: 1, y: 0, rot: 0, sx: 1, sy: 1, 
 const FBASE = { brow: { y: 58, gap: 80, d: 176 }, eye: { y: 106, gap: 78, d: 184 }, mouth: { y: 192, gap: 0, d: 200 } };   // centred on 150 across, in a 600 × 488 canvas offset by (150, 122)
 OUT.faceParts = FACE0();
 async function loadFaces(){
-  try { OUT.faces = await (await fetch(OBASE + 'faces/index.json')).json(); } catch { OUT.faces = []; }
+  OUT.faces = [];   // faces are built from the parts sheets only (a random one to start with)
   try { FP.meta = await (await fetch(OBASE + 'faces/parts.json')).json();
     await Promise.all(Object.values(FPK).map(k => new Promise(res => { const im = new Image(); im.onload = () => { FP.img[k] = im; res(); }; im.onerror = res; im.src = AS(OBASE + 'faces/parts/' + k + '.png'); }))); } catch { FP.meta = null; }
   drawFaces();
@@ -4716,10 +4738,9 @@ function composeFace(F){
   return c;
 }
 function setFace(id, parts){
-  if (id === 'custom') { if (parts) OUT.faceParts = JSON.parse(JSON.stringify(parts)); OUT.face = 'custom'; window.HEAD_FACE = composeFace(OUT.faceParts); return faceDone(); }
-  const f = OUT.faces.find(x => x.id === id); OUT.face = f ? f.id : null;
-  if (!f) { window.HEAD_FACE = null; return faceDone(); }
-  return new Promise(res => { const im = new Image(); im.onload = () => { window.HEAD_FACE = im; faceDone().then(res); }; im.onerror = () => { window.HEAD_FACE = null; faceDone().then(res); }; im.src = AS(OBASE + 'faces/' + f.file); });
+  // only built faces now: anything else keeps the face she has
+  if (id === 'custom') { if (parts) OUT.faceParts = JSON.parse(JSON.stringify(parts)); OUT.face = 'custom'; window.HEAD_FACE = composeFace(OUT.faceParts); }
+  return faceDone();
 }
 function faceDone(){ bodyTextures(); drawFaces(); try { if (typeof V3 !== 'undefined' && V3.r && typeof updateViewerTextures === 'function') updateViewerTextures(); } catch {} return Promise.resolve(); }
 let facePend = 0; const faceRedo = () => { if (facePend) return; facePend = requestAnimationFrame(() => { facePend = 0; window.HEAD_FACE = composeFace(OUT.faceParts); bodyTextures(); }); };
@@ -4732,7 +4753,7 @@ function drawFaces(){
     else if (f.id === 'custom' && OUT.faceCanvas && OUT.face === 'custom') b.style.backgroundImage = `url('${OUT.faceCanvas.toDataURL()}')`;
     else b.textContent = f.id === 'custom' ? 'Make' : 'Default';
     b.onclick = () => setFace(f.id); box.appendChild(b); });
-  const ed = $o('#outFaceEd'); if (ed) { ed.hidden = OUT.face !== 'custom'; if (!ed.hidden) drawFaceEditor(); }
+  box.hidden = true; const ed = $o('#outFaceEd'); if (ed && FP.meta) { ed.hidden = false; drawFaceEditor(); }
 }
 function drawFaceEditor(){
   document.querySelectorAll('#outFaceTabs button').forEach(b => b.classList.toggle('on', b.dataset.p === FP.tab));
@@ -4797,6 +4818,53 @@ function nailWheel(){
   btn.onclick = () => { host.hidden = !host.hidden; if (!host.hidden) host.sync(); };
   set(false);
 }
+/* ---------- the catalog (make/clothing/ugc/, written by the site's tools/ugc/export.js): pieces from the site's UGC
+   catalog, already fitted by the catalog's own code to this head (glasses, goggles, hair, headphones) and to the Figure's
+   feet (sandals). Each is one mesh and one texture, drawn on the head (or each foot) like a Roblox accessory: it never
+   changes the body. One piece per spot, shared with the accessories (face, hair, head, feet).
+   Sandals need the real feet: putting them on switches to the Figure, barefoot (no password asked); taking them off puts
+   the boots back. */
+const UBASE = 'ugc/', UGC = { list: null, worn: {}, tab: 'hair', prev: null };
+const UGC_DEPTS = [['hair', 'Hair'], ['eyewear', 'Eyewear'], ['sound', 'Headphones'], ['sandals', 'Sandals']];
+const UGC_SLOT = { eyewear: 'face', hair: 'hair', sound: 'head', sandals: 'feet' };
+async function loadUGC(){ if (UGC.list) return UGC.list; try { UGC.list = await (await fetch(UBASE + 'index.json')).json(); } catch { UGC.list = []; } drawUGC(); return UGC.list; }
+const unb64 = (s, T) => { const b = atob(s), a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return new T(a.buffer); };
+async function ugcWear(e){
+  const slot = UGC_SLOT[e.dept]; if (!slot) return;
+  OUT.worn.filter(w => w.slot === slot).forEach(w => takeOff(w.e.id, true));            // one piece per spot
+  Object.keys(UGC.worn).forEach(d => { if (UGC_SLOT[d] === slot) ugcOff(d, true); });
+  const J = await (await fetch(UBASE + e.file)).json(), P = unb64(J.pos, Float32Array), N = unb64(J.nrm, Float32Array), U = unb64(J.uv, Float32Array), I = unb64(J.idx, Uint16Array);
+  const g = { p: Array.from(P), n: Array.from(N), t: [], i: Array.from(I) }; for (let k = 0; k < U.length; k += 2) g.t.push(U[k], 1 - U[k + 1]);
+  const im = await LoPolTex.loadImg(AS(UBASE + e.tex)), tex = OUT.r.tex(im, null, false);
+  const halves = e.dept === 'sandals' ? [1, -1].map(side => ({ side, i: g.i.filter((_, k) => { const t = Math.floor(k / 3) * 3; return Math.sign(g.p[g.i[t] * 3] + g.p[g.i[t + 1] * 3] + g.p[g.i[t + 2] * 3] || 1) === side; }) })) : [{ side: 0, i: g.i }];
+  UGC.worn[e.dept] = { e, slot, tex, cut: J.alpha === 'mask' ? 0.4 : 0.02, parts: halves.map(h => ({ side: h.side, mesh: OUT.r.mesh(Object.assign({}, g, { i: h.i })) })) };
+  if (e.dept === 'sandals') { if (!UGC.prev) UGC.prev = { body: OUT.body, boots: !!FIG.boots }; if (OUT.body !== 'figure') setBody('figure'); if (FIG.boots) setBoots(false); }
+  drawUGC(); drawWorn();
+}
+function ugcOff(dept, quiet){
+  const w = UGC.worn[dept]; if (!w) return; delete UGC.worn[dept];
+  w.parts.forEach(q => OUT.r.free(q.mesh)); OUT.r.gl.deleteTexture(w.tex);
+  if (dept === 'sandals') { UGC.prev = null; if (OUT.body === 'figure' && !FIG.boots) setBoots(true); }   // back to the boots
+  if (!quiet) { drawUGC(); drawWorn(); }
+}
+function drawUGC(){
+  const tabs = $o('#ugcTabs'), grid = $o('#ugcGrid'); if (!tabs || !grid) return;
+  tabs.innerHTML = ''; UGC_DEPTS.forEach(([d, label]) => { const b = document.createElement('button'); b.textContent = label; b.classList.toggle('on', UGC.tab === d); b.onclick = () => { UGC.tab = d; drawUGC(); }; tabs.appendChild(b); });
+  grid.innerHTML = ''; const list = (UGC.list || []).filter(e => e.dept === UGC.tab);
+  if (!list.length) grid.innerHTML = '<p class="tiny">Nothing here yet.</p>';
+  list.forEach(e => { const on = UGC.worn[e.dept] && UGC.worn[e.dept].e.id === e.id, b = document.createElement('button'); b.className = 'lib-card o-acc' + (on ? ' on' : '');
+    b.innerHTML = `<div class="lib-thumb" style="background-image:url('${AS(UBASE + e.thumb)}')"></div><b></b><small>${e.dept === 'sandals' ? 'Figure, barefoot' : 'Head'}</small>`;
+    b.querySelector('b').textContent = e.name; b.setAttribute('aria-pressed', on);
+    b.onclick = async () => { if (on) ugcOff(e.dept); else { b.disabled = true; try { await ugcWear(e); } catch (err) { console.error(err); toastO("Couldn't load that piece"); } b.disabled = false; } };
+    grid.appendChild(b); });
+}
+function drawUGCWorn(r, mv, P){
+  const gl = r.gl;
+  for (const w of Object.values(UGC.worn)) { r.cut = w.cut;
+    if (w.slot === 'feet' && OUT.body === 'figure' && FIG.boots) continue;
+    w.parts.forEach(q => r.draw(q.mesh, w.tex, accMV(r, mv, w.slot, q.side), P, [1, 1, 1], false, null, 0)); }
+  r.cut = 0.02;
+}
 /* ---------- draw loop ---------- */
 function frame(t){
   if (!OUT.on) { OUT.raf = 0; return; }
@@ -4814,6 +4882,7 @@ function frame(t){
   OUT.worn.forEach(w => w.parts.forEach(q => { const m = accMV(r, mv, w.slot, q.side);
     r.draw(q.mesh, w.tex, m, P, [1, 1, 1], false, null, 0);
     if (q.hull && OUT.look.accOutline) { gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK); r.draw(q.hull, r.white, m, P, w.hullColor, true); gl.disable(gl.CULL_FACE); } }));
+  drawUGCWorn(r, mv, P);
   r.spec = sp;
   OUT.raf = requestAnimationFrame(frame);
 }
@@ -4821,7 +4890,7 @@ async function show(on){
   OUT.on = on; $o('#outfits').hidden = !on;
   if (!on) return;
   initRenderer(); drawLookPanel();
-  if (!OUT.readyP) OUT.readyP = (async () => { await loadIndex(); await loadFaces(); fileAccessories(); drawClothing(); drawWardrobe(); await loadSaved(); if (OUT.index.looks && OUT.index.looks[0] && !OUT.worn.length && !OUT.cloth) await applyLook(OUT.index.looks[0]); })();
+  if (!OUT.readyP) OUT.readyP = (async () => { await loadIndex(); await loadFaces(); if (FP.meta) randomFace(); loadUGC(); fileAccessories(); drawClothing(); drawWardrobe(); await loadSaved(); if (OUT.index.looks && OUT.index.looks[0] && !OUT.worn.length && !OUT.cloth) await applyLook(OUT.index.looks[0]); })();
   await OUT.readyP; drawClothing(); drawWardrobe();
   bodyTextures();
   if (!OUT.raf) { OUT.last = performance.now(); OUT.raf = requestAnimationFrame(frame); }
@@ -4866,7 +4935,7 @@ $o('#outPantsFile').onchange = async e => { const f = e.target.files[0]; if (!f)
 
 async function wearClothing(shirt, pants, name){ await show(true); const cp = c => { if (!c) return null; const k = cnv(TW, TH); k.getContext('2d').drawImage(c, 0, 0); return k; };
   await setClothing('custom', { id: 'custom', name: name || 'Your clothing', shirt: cp(shirt), pants: cp(pants) }); }
-window.__outfits = { OUT, setBoots, show, wear, takeOff, applyLook, currentLook, addFromView, setClothing, saveLook, wearClothing, setBody, setAnim, setPose, setFace, animPose, randomFace, composeFace };
+window.__outfits = { OUT, UGC, ugcWear, ugcOff, loadUGC, setBoots, show, wear, takeOff, applyLook, currentLook, addFromView, setClothing, saveLook, wearClothing, setBody, setAnim, setPose, setFace, animPose, randomFace, composeFace };
 })();
 
 </script>

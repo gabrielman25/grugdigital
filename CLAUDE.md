@@ -257,14 +257,20 @@ worked out from the Figure's proportions, and worn accessories follow their join
 Copy / Apply JSON). Every 3D view (Clothing preview, Accessories, Character) turns with left- or right-drag, pans with the
 middle button, zooms with the wheel, resets on double-click, and has no right-click menu (`orbitCam`). Figure nails use a
 colour wheel. **Faces** (`make/clothing/outfits/faces/`, `index.json` + transparent PNGs) are drawn on the front of the head
-(`window.HEAD_FACE` in `headTex`); looks keep `face`. **Make your own** builds a face from parts like a Mii: the owner's
+(`window.HEAD_FACE` in `headTex`). Faces are **only built from parts** now (the painted presets are gone; a random one at start). Like a Mii: the owner's
 sheets in `outfits/faces/parts/` (`brows.png`, `eyes.png`, `mouths.png`, 160 px tiles, 9 across; counts in
 `faces/parts.json`: add tiles to a sheet and raise its count). Each part has size, up / down, spacing (or left / right for the
 mouth), twist, width, height; brows and eyes are pairs (the tile is the right-hand one, the left mirrored unless turned off);
 brows take a colour; **Random face**. A look keeps `face: 'custom'` and `faceParts`. The Figure's sleeves and trouser legs end
 in loose hexagonal cuffs and hems (`hexScale`) with open ends pushed up inside (`openEnd`) and darkened (`openEnds` in
-outfits-ui.js); barefoot, the hem rides over the top of the foot (`hemLift`: an arch over the instep, down at the sides and back). Two new spots: **hair** (follows the head) and **feet** (no shoe
-models are listed now; the code stays: a pair is split per foot). The Figure's feet are **Barefoot** (the real feet) or
+outfits-ui.js); barefoot, the hem rides over the top of the foot (`hemLift`: an arch over the instep, down at the sides and back). Two new spots: **hair** (follows the head) and **feet** (a pair is split per foot).
+**Catalog** card (experimental, branch `clothing-studio-ugc`): pieces from the site's UGC catalog (`labs/catalog/`): hair,
+eyewear, headphones / earmuffs and sandals, in `make/clothing/ugc/` (index.json, one geometry JSON + texture + picture each).
+`node tools/ugc/export.js [n per department]` (repo served on :8791) makes them: it opens the catalog in headless Chrome,
+swaps her head mesh for the Studio's rounded head (in her head frame, eyes at the same height), so the catalog's own fitting
+builds each piece around THAT head, merges it (`bakeSingle`) and converts it to studs; sandals (flat soles, no slippers) are
+mapped from her posed feet to the Figure's feet. They're drawn like accessories and never touch the body. Sandals switch to the
+Figure, barefoot, with no password; taking them off brings the boots back; Blocky or Boots takes them off. Looks keep `ugc`. The Figure's feet are **Barefoot** (the real feet) or
 **Boots** (`FIG.boots`: the lower legs are reshaped into a boot that would hold the foot, `figureDeform`, and the feet aren't
 drawn). Clothing can carry `pantsFigure` (index.json): Blocky and Boots wear `pants` (shoes painted on), barefoot Figure wears
 `pantsFigure` (just pants). Built faces' parts are drawn 2× (a 600 × 488 canvas, 300 px wide on the head).
