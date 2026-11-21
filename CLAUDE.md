@@ -299,38 +299,32 @@ outside partner mode** (`html.g-rb`, set by theme.js; `rbChrome` in grug.js, sty
 - **Top bar:** the Grug Digital logo (`assets/brand/grug-digital-logo.png`, a light-text copy for dark mode), Games ·
   Marketplace (`avatar/`) · Create (`make/`) · Pearls, a search box (→ `games/#search?q=`), the avatar and name (→ `avatar/`),
   Pearls, full screen, and the gear (the account menu: Settings, dark mode, Download, the restaurant switch).
-- **Sidebar** (≥ 1200 px; a drawer behind the rail's menu button below that): the avatar and name, Home, Games, Profile,
-  Grug Club (the membership's card on `pearls.html`), Avatar, Inventory (`avatar/?tab=custom`), Vids, Make, Studio Toolkit,
+- **Landscape: the sidebar** (≥ 1200 px; below that a slim rail with a drawer behind its menu button): the avatar and name,
+  Home, Games, Profile, Grug Club (the membership's card on `pearls.html`), Avatar, Inventory (`avatar/?tab=custom`), Make, Studio Toolkit,
   Discord (`GRUG_CONTACT.discord`), Buy Pearls, then the **Grug Club box** (perks from `GrugGold.CLUB`), hidden while the
   membership is active. The membership is still sold as "Grug Gold" on the Pearls page and Gumroad.
-- **Rail** (< 1200 px): menu, Home, Games, Vids, Make, Me. Home and Games show "For you | Games" tabs on a phone (< 900 px).
-- **No bottom bar** for players. The restaurant account keeps its dock (below), partner mode its own bars, and the closet
-  (`avatar/`) has neither: `chrome('avatar', {bare: true})` and its own back arrow (to the page it was opened from).
+- **Rail** (landscape, < 1200 px): menu, Home, Games, Make, Me. Home and Games show "For you | Games" tabs under 900 px wide.
+- **Portrait: the bottom bar** (the dock below), no sidebar or rail. Its Me menu holds Avatar, Inventory, Profile, Stamp cards,
+  Grug Club, Buy Pearls and Discord; its Make menu Link page, Rewards card, 3D models and Studio Toolkit (`DOCK_GROUPS`, the
+  pages in `NAV`). Grug Club is left out in shop mode (no memberships on a shop's pages). The CSS picks by orientation.
+  The restaurant account keeps its dock either way, partner mode its own bars, and the closet (`avatar/`) has neither:
+  `chrome('avatar', {bare: true})` and its own back arrow (to the page it was opened from).
 - **Home** (`index.html`): Home, Your characters (where Roblox has friends; the closet's saved characters), a featured game
   banner, Recommended For You (wide cards), Continue, Quick games. **Games** (`games/`): the store's links as pills, then
   rows of square cards (Keep playing, Grug originals, Quick games, Your favorites, the top tags, Every game), like Roblox's
   Charts; Browse all, the queue and Favorites are unchanged. Cards: `Grug.ui.gameList` / `gameCard` / `cardRow` (only real
   numbers on a card, as everywhere). The FOSSIL32 boxes stay on each game's own page and Favorites.
-- **Vids** (`vids/`): Shorts-style clips of NPCs playing the Grug originals, live. Each is the real `play/<dir>/game.html?vid=…`
-  in a frame; `assets/vid-shim.js` (the **first script in every original's game.html**: add it to the game kit's template
-  before the next build) gives that game a throwaway storage seeded with the NPC's look and name, so nothing the NPC does
-  touches the player's saves, and holds its sound at the page's volume (muted to start). The NPC is one of the player's saved
-  characters they aren't wearing, or a random catalog NPC. A small brain picks what it wants (walk, look, hop, click); the
-  owner's **Ambient NPC** library (`assets/vids/ambient-npc.js`, from the Ambient NPC Zoo, unchanged) turns that into keys,
-  camera drags, scrolls, clicks and cursor moves remixed from a real 7-minute recording (`assets/vids/demo.js`), sent into
-  the game as events, with the NPC's cursor drawn over it. It presses Play / Skip tutorial / Got it buttons by moving its
-  cursor to them. Only the vid on screen runs; the next is loaded ahead and frozen once warm (its rAF held), so it shows at
-  once; at most two exist.
 - **Studio Toolkit** (`studio/`): a placeholder landing page for tools for Roblox developers (the owner is making them).
 
-## The dock: Home, Games, Me, Make (the restaurant account and partner mode only now)
+## The dock: Home, Games, Me, Make (players in portrait, and the restaurant account)
 
 Four tabs for everyone (the role in Settings → I'm a… only changes what the home page shows first; nobody is asked it on arrival).
 The dock's LB / RB badges only show once a controller is plugged in (`html.g-pad`). **Games**, **Me** and
 **Make** are groups: tapping one opens a tray of its pages. Games = Games (the store, `games/`) and Carts (`games/carts/`,
 see below). Me and Make also have their own page (`me/`, `make/`), a plain Linktree-style list (`Grug.ui.hub`) whose
 picked row fills with its colour and slides on. Me = Avatar, Stamp cards (`me/cards/`: the guest's stamp cards and Pearls), Profile. Make = Link page (`links/`), Rewards card
-(`rewards/`), 3D models (`create/`). `DOCK_GROUPS` / `NAV` in `assets/grug.js`.
+(`rewards/`), 3D models (`create/`), and since the player's layout Me also has Inventory, Grug Club, Buy Pearls and Discord, Make
+Studio Toolkit. `DOCK_GROUPS` / `NAV` in `assets/grug.js`.
 Swiping sideways anywhere (not on sliders, canvases or sideways-scrolling rows; mark others `data-noswipe`) or Q / E /
 LB / RB steps Home ↔ Games ↔ Me ↔ Make, and the next page slides in from that side (`grug.swipe` → `html.g-swipe-*`).
 

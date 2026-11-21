@@ -35,7 +35,7 @@ GRUG_PAGES = [
     '', '404.html', 'games/', 'games/favorites/', 'games/welcome/', 'me/', 'me/cards/', 'avatar/', 'avatar/look.html', 'avatar/classic/',
     'profile/', 'shop/', 'make/', 'links/', 'links/create/', 'links/page/', 'rewards/', 'rewards/create/', 'rewards/card/',
     'create/', 'create/modelkit/', 'pearls.html', 'credits.html', 'privacy.html', 'terms.html', 'support.html',
-    'vids/', 'studio/',   # Vids (NPCs playing the games) and the Studio Toolkit placeholder
+    'studio/',   # the Studio Toolkit placeholder
 ]
 DAYPART_PAGES = [
     'business/', 'business/site/', 'rewards/', 'rewards/create/', 'restaurant/', 'site/',

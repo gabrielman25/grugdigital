@@ -597,15 +597,19 @@
     ['carts', 'Carts', 'device-mobile', 'games/carts/'],
     ['cards', 'Stamp cards', 'ticket', 'me/cards/'],   // the guest's side of rewards: stamp cards from shops and their Pearls (the owner's side is rewards/)
     ['me', 'Me', 'user', 'me/'], ['make', 'Make', 'magic-wand', 'make/'],   // the groups' own pages: a simple list of where to go
+    // added with the player's layout (Nov 2026): in the sidebar in landscape, in the Me and Make menus on the bottom bar in portrait
+    ['inventory', 'Inventory', 'backpack', 'avatar/?tab=custom'], ['club', 'Grug Club', 'crown-simple', 'pearls.html#clubH'], ['pearls', 'Buy Pearls', 'pearl', 'pearls.html'],
+    ['studio', 'Studio Toolkit', 'wrench', 'studio/'], ['discord', 'Discord', 'chat-circle', ''],   // Discord's address comes from assets/contact.js (GRUG_CONTACT)
     ['dashboard', 'Dashboard', 'dashboard', 'business/'], ['website', 'Website', 'browser', 'business/site/']   // the restaurant account's own pages
   ];
   // the Dashboard tab opens the shop's own dashboard: Daypart (business/), or the bubble tea / café one (business/tea|cafe/)
   Object.defineProperty(NAV.find(n => n[0] === 'dashboard'), 3, { get: () => dashPath(), enumerable: true });
+  Object.defineProperty(NAV.find(n => n[0] === 'discord'), 3, { get: () => (root.GRUG_CONTACT && root.GRUG_CONTACT.discord) || 'support.html', enumerable: true });
   // what's in the dock, left to right; a group opens its tray of pages
   const DOCK_GROUPS = [
     { id: 'home' }, { id: 'games', label: 'Games', items: ['games', 'carts'] },
-    { id: 'me', label: 'Me', items: ['avatar', 'cards', 'profile'] },   // the Shop (closet clothes) is archived with the classic avatar: reached from avatar/ → Classic
-    { id: 'make', label: 'Make', items: ['links', 'rewards', 'create'] }
+    { id: 'me', label: 'Me', items: ['avatar', 'inventory', 'profile', 'cards', 'club', 'pearls', 'discord'] },   // the Shop (closet clothes) is archived with the classic avatar: reached from avatar/ → Classic
+    { id: 'make', label: 'Make', items: ['links', 'rewards', 'create', 'studio'] }
   ];
   // the dock's stops, left to right: what a swipe (or Q / E, LB / RB) steps through
   const STOPS = ['home', 'games', 'me', 'make'];
@@ -653,16 +657,20 @@
   const SUB_TEXT = { games: 'The game store: every game, search and favorites', carts: 'Quick one-tap games: swipe up for the next',
     avatar: 'Your look, a hat and your emotes', shop: 'Clothes for the classic avatar', cards: 'Stamp cards from shops, and your Pearls', profile: 'Stats, inventory and settings',
     links: 'A link page or 3D world for your socials', rewards: 'A free stamp card for your shop', create: 'Model Kit and free 3D presets',
-    dashboard: 'Schedule, recipes, checklists and more', website: 'Your shop\u2019s own website' };
+    dashboard: 'Schedule, recipes, checklists and more', website: 'Your shop\u2019s own website',
+    inventory: 'Everything in your wardrobe', club: 'The membership: Pearls every month and more', pearls: 'Pearls for any game', studio: 'Tools for Roblox developers (coming soon)', discord: 'Chat with us and other players' };
   const groupOf = k => { const find = list => list.find(g => g.id === k || (g.items && g.items.includes(k))); return find(dockGroups()) || find(DOCK_GROUPS) || dockGroups()[0]; };
   // dock icons: the simple set, one colour per tab
   // one colour per section, the same accents theme.js gives each section (Model Kit style)
-  const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], carts: ['device-mobile', '#7EE081'], cards: ['ticket', '#FF9F5A'], rewards: ['gift', '#FF9F5A'], links: ['share-network', '#5AB0FF'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'],
+  const DOCK_SIMPLE = { inventory: ['backpack', '#C59BFF'], club: ['crown-simple', '#FFBE1A'], pearls: ['pearl', '#C59BFF'], studio: ['wrench', '#4FD8C4'], discord: ['chat-circle', '#5865F2'], home: ['house', '#9BE338'], games: ['controller', '#7EE081'], carts: ['device-mobile', '#7EE081'], cards: ['ticket', '#FF9F5A'], rewards: ['gift', '#FF9F5A'], links: ['share-network', '#5AB0FF'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'],
     me: ['person', '#FF8FC2'], make: ['magic-wand', '#4FD8C4'], dashboard: ['dashboard', '#9BE338'], website: ['browser', '#5AB0FF'] };
-  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', carts: '#4FB357', cards: '#E0782F', rewards: '#E0782F', links: '#2F86D6', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E', me: '#E0669E', make: '#25A893', dashboard: '#6FB31C', website: '#2F86D6' };
+  const DOCK_LO = { inventory: '#9A6FE0', club: '#D99A00', pearls: '#9A6FE0', studio: '#25A893', discord: '#3B44C4', home: '#6FB31C', games: '#4FB357', carts: '#4FB357', cards: '#E0782F', rewards: '#E0782F', links: '#2F86D6', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E', me: '#E0669E', make: '#25A893', dashboard: '#6FB31C', website: '#2F86D6' };
   const dockIcon = k => '<svg class="k-ic k-ic-s" viewBox="0 0 16 16" fill="currentColor" style="color:' + DOCK_SIMPLE[k][1] + '" aria-hidden="true" focusable="false">' + (SIMPLE['dock-' + DOCK_SIMPLE[k][0]] || SIMPLE[DOCK_SIMPLE[k][0]] || '') + '</svg>';
   const DOCK = {};
-  ['home', 'games', 'carts', 'cards', 'rewards', 'links', 'create', 'avatar', 'shop', 'profile', 'me', 'make', 'dashboard', 'website'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
+  // a page link: Discord leaves the site in a new tab; Grug Club stays off a shop's own pages (shop mode: no memberships there)
+  const navHref = n => /^https?:/.test(n[3]) ? n[3] + '" target="_blank" rel="noopener' : url(n[3]);
+  const itemsOf = g => g.items.filter(k => !(k === 'club' && root.GrugTheme && root.GrugTheme.brand && root.GrugTheme.brand()));
+  ['home', 'games', 'carts', 'cards', 'rewards', 'links', 'create', 'avatar', 'shop', 'profile', 'me', 'make', 'dashboard', 'website', 'inventory', 'club', 'pearls', 'studio', 'discord'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
   const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
   const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
   const fsOk = () => !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
@@ -673,17 +681,17 @@
   const pearlsUrl = app => /\/pearls(\.html)?$/.test(location.pathname) ? location.pathname + location.search : url('pearls.html') + '?from=' + encodeURIComponent(location.pathname + location.search + location.hash) + '&app=' + encodeURIComponent(app || 'Grug');
   /* ---------- the player's layout (Nov 2026): laid out like Roblox, so players' muscle memory works here ----------
      A top bar (logo; Games, Marketplace, Create, Pearls; search; the avatar and name; Pearls; full screen; the gear for the
-     account menu) and a sidebar on the left (wide screens), or a slim rail (Home, Games, Vids, Make, Me) whose menu
-     button opens the same sidebar as a drawer (Vids: vids/). No bottom bar. The restaurant account keeps its dock, and partner mode its
+     account menu) and a sidebar on the left (wide screens), or a slim rail (Home, Games, Make, Me) whose menu
+     button opens the same sidebar as a drawer, in landscape. In portrait it's the bottom bar (the dock) instead, its Me and Make
+     menus holding the new pages too. The restaurant account keeps its dock, and partner mode its
      own bars. The sidebar ends with the Grug Club box (the membership in assets/gold.js), hidden while it's active. */
   const RB_IC = {
-    vids: '<svg class="gi gi-s" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4.5 1h7A2.5 2.5 0 0 1 14 3.5v9a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 2 12.5v-9A2.5 2.5 0 0 1 4.5 1Zm0 1.6a.9.9 0 0 0-.9.9v9c0 .5.4.9.9.9h7c.5 0 .9-.4.9-.9v-9a.9.9 0 0 0-.9-.9h-7ZM6.6 5.3l4 2.4a.35.35 0 0 1 0 .6l-4 2.4a.35.35 0 0 1-.53-.3V5.6c0-.27.3-.44.53-.3Z"/></svg>',
     search: '<svg class="gi gi-s" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4 14 14"/></svg>',
     discord: '<svg class="gi gi-s" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.3 3.4A12 12 0 0 0 10.4 2.5l-.37.73a11 11 0 0 0-4.06 0L5.6 2.5a12 12 0 0 0-2.9.9C.86 6.1.37 8.8.6 11.4a12 12 0 0 0 3.6 1.8l.77-1.25a7.6 7.6 0 0 1-1.2-.58l.3-.23a8.6 8.6 0 0 0 7.86 0l.3.23c-.38.23-.78.42-1.2.58l.77 1.25a12 12 0 0 0 3.6-1.8c.28-3-.48-5.7-2.1-8ZM5.6 9.8c-.7 0-1.28-.65-1.28-1.44S4.9 6.9 5.6 6.9s1.3.66 1.28 1.45c0 .8-.57 1.44-1.28 1.44Zm4.8 0c-.7 0-1.28-.65-1.28-1.44s.57-1.45 1.28-1.45 1.3.66 1.28 1.45c0 .8-.57 1.44-1.28 1.44Z"/></svg>'
   };
   const rbOn = () => !partnerOn() && !bizOn();
   // which sidebar row a page lights up
-  const RB_HERE = { home: 'home', games: 'games', carts: 'games', avatar: 'avatar', profile: 'profile', cards: 'profile', me: 'profile', make: 'make', links: 'make', rewards: 'make', create: 'make', vids: 'vids', moments: 'vids', studio: 'studio', pearls: 'pearls', club: 'club' };
+  const RB_HERE = { home: 'home', games: 'games', carts: 'games', avatar: 'avatar', profile: 'profile', cards: 'profile', me: 'profile', make: 'make', links: 'make', rewards: 'make', create: 'make', studio: 'studio', pearls: 'pearls', club: 'club' };
   function rbChrome(active, opts, faceImg, top) {
     const here = opts.rbHere || RB_HERE[active] || active, f = snaps(), name = esc(profile.name);
     const face = f ? '<img class="rb-face" alt="" src="' + f.bust + '">' : '<span class="rb-face g-face-empty">' + icon('smiley') + '</span>';
@@ -701,17 +709,18 @@
       '<button type="button" class="g-me rb-ic" aria-label="Settings and your account" aria-haspopup="menu" aria-expanded="false">' + icon('gear-six') + '</button>';
     $('.rb-search', top).addEventListener('submit', e => { e.preventDefault(); const q = $('input', e.target).value.trim(); location.href = url('games/') + '#search' + (q ? '?q=' + encodeURIComponent(q) : ''); });
     // the sidebar (a drawer behind the rail's menu button on narrower screens)
+    const shopMode = !!(root.GrugTheme && root.GrugTheme.brand && root.GrugTheme.brand());
     const rows = [['home', 'Home', icon('house'), url('')], ['games', 'Games', icon('game-controller'), url('games/')], ['profile', 'Profile', icon('user'), url('profile/')],
       ['club', 'Grug Club', icon('crown-simple'), pearlsUrl() + '#clubH'], ['avatar', 'Avatar', icon('t-shirt'), url('avatar/')], ['inventory', 'Inventory', icon('backpack'), url('avatar/?tab=custom')],
-      ['vids', 'Vids', RB_IC.vids, url('vids/')], ['make', 'Make', icon('magic-wand'), url('make/')], ['studio', 'Studio Toolkit', icon('wrench'), url('studio/')],
-      ['discord', 'Discord', RB_IC.discord, '#'], ['pearls', 'Buy Pearls', icon('pearl'), pearlsUrl()]];
+      ['make', 'Make', icon('magic-wand'), url('make/')], ['studio', 'Studio Toolkit', icon('wrench'), url('studio/')],
+      ['discord', 'Discord', RB_IC.discord, '#'], ['pearls', 'Buy Pearls', icon('pearl'), pearlsUrl()]].filter(r => !(shopMode && r[0] === 'club'));
     const side = document.createElement('aside'); side.className = 'rb-side'; side.id = 'rbSide'; side.setAttribute('aria-label', 'Menu');
     side.innerHTML = '<div class="rb-side-in"><a class="rb-me" href="' + url('avatar/') + '">' + face + '<span>' + name + '</span></a>' +
       '<nav aria-label="Sections">' + rows.map(([k, l, ic, h]) => '<a href="' + h + '" data-rb="' + k + '"' + (k === here ? ' aria-current="page"' : '') + (k === 'discord' ? ' target="_blank" rel="noopener"' : '') + '>' + ic + '<span>' + l + '</span></a>').join('') + '</nav>' +
       '<div class="rb-club" hidden></div></div>';
     const rail = document.createElement('nav'); rail.className = 'rb-rail'; rail.setAttribute('aria-label', 'Sections');
     rail.innerHTML = '<button type="button" class="rb-burger" aria-label="Menu" aria-controls="rbSide" aria-expanded="false"><svg class="gi gi-s" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11"/></svg></button>' +
-      [['home', 'Home', icon('house'), url('')], ['games', 'Games', icon('game-controller'), url('games/')], ['vids', 'Vids', RB_IC.vids, url('vids/')], ['make', 'Make', icon('magic-wand'), url('make/')]]
+      [['home', 'Home', icon('house'), url('')], ['games', 'Games', icon('game-controller'), url('games/')], ['make', 'Make', icon('magic-wand'), url('make/')]]
         .map(([k, l, ic, h]) => '<a href="' + h + '"' + (k === here ? ' aria-current="page"' : '') + '>' + ic + '<span>' + l + '</span></a>').join('') +
       '<a href="' + url('avatar/') + '" class="rb-rail-me"' + (here === 'avatar' ? ' aria-current="page"' : '') + '>' + face + '<span>Me</span></a>';
     const scrim = document.createElement('div'); scrim.className = 'rb-scrim';
@@ -724,11 +733,11 @@
     if (here === 'home' || here === 'games') { const m = $('main'); if (m) { const t = document.createElement('nav'); t.className = 'rb-ptabs'; t.setAttribute('aria-label', 'Home or Games');
       t.innerHTML = '<a href="' + url('') + '"' + (here === 'home' ? ' aria-current="page"' : '') + '>For you</a><a href="' + url('games/') + '"' + (here === 'games' ? ' aria-current="page"' : '') + '>Games</a>'; m.prepend(t); } }
     // Discord: the address lives in assets/contact.js (GRUG_CONTACT), the one place for our contact details
-    const dc = $('[data-rb=discord]', side), setDc = () => { const c = root.GRUG_CONTACT; if (c && c.discord) dc.href = c.discord; else dc.hidden = true; };
+    const dc = $('[data-rb=discord]', side), setDc = () => { const c = root.GRUG_CONTACT; if (c && c.discord) { dc.href = c.discord; $$('a[data-k=discord]').forEach(a => { a.href = c.discord; a.target = '_blank'; a.rel = 'noopener'; }); } else dc.hidden = true; };
     if (root.GRUG_CONTACT) setDc(); else { const sc = document.createElement('script'); sc.src = url('assets/contact.js'); sc.onload = setDc; sc.onerror = () => { dc.hidden = true; }; document.head.appendChild(sc); }
     // the Grug Club box: what the membership gives, hidden while it's active (assets/gold.js knows)
     const club = $('.rb-club', side);
-    const paintClub = () => { const GG = root.GrugGold; if (!GG || !GG.CLUB || !GG.CLUB.productId || GG.member()) { club.hidden = true; return; }
+    const paintClub = () => { const GG = root.GrugGold; if (shopMode || !GG || !GG.CLUB || !GG.CLUB.productId || GG.member()) { club.hidden = true; return; }
       const t = GG.CLUB.tiers[0];
       club.innerHTML = '<span class="rb-club-ic">' + icon('crown-simple') + '</span><b>Get more with Grug Club</b><ul><li>' + fmt(t.monthly) + ' Pearls every month</li><li>' + t.bonus + '% more Pearls in every pack</li><li>OBJ and STL downloads of the 3D models</li><li>A member badge</li></ul>' +
         '<a class="rb-club-go" href="' + pearlsUrl() + '#clubH">Join for ' + esc(t.price) + ' a month</a>';
@@ -782,8 +791,8 @@
       const g = DOCK_GROUPS.find(x => x.id === btn.dataset.grp); if (!g) return;
       if (trayFor === g.id) { closeTray(); return; }
       trayFor = g.id;
-      tray.innerHTML = '<b class="g-tray-h">' + esc(g.label) + '</b>' + g.items.map(k => { const n = navOf(k);
-        return '<a role="menuitem" href="' + url(n[3]) + '" style="--tab:' + (brand ? brand.color : DOCK_SIMPLE[k][1]) + ';--tab-lo:' + DOCK_LO[k] + '"' + (k === active ? ' aria-current="page"' : '') + '>' +
+      tray.innerHTML = '<b class="g-tray-h">' + esc(g.label) + '</b>' + itemsOf(g).map(k => { const n = navOf(k);
+        return '<a role="menuitem" href="' + navHref(n) + '" style="--tab:' + (brand ? brand.color : DOCK_SIMPLE[k][1]) + ';--tab-lo:' + DOCK_LO[k] + '"' + (k === active ? ' aria-current="page"' : '') + '>' +
           '<span class="g-tray-ic">' + DOCK[k] + '</span><span class="g-tray-tx"><b>' + esc(n[1]) + '</b><small>' + esc(SUB_TEXT[k] || '') + '</small></span>' + icon('caret-right') + '</a>'; }).join('');
       tray.hidden = false; $$('.g-grp', tabs).forEach(b => b.setAttribute('aria-expanded', String(b === btn)));
       // sit just above the dock, over the group's tab (beside the rail in landscape)
@@ -799,7 +808,7 @@
     root.addEventListener('resize', closeTray); root.addEventListener('scroll', closeTray, { passive: true });
     document.body.appendChild(tray);
     // opts.dockOnly: just the dock (a page with its own top bar: the closet at avatar/)
-    if (!opts.dockOnly) document.body.prepend(top); if (!rb) document.body.appendChild(tabs);
+    if (!opts.dockOnly) document.body.prepend(top); document.body.appendChild(tabs);   // (players: the bottom bar shows in portrait only)
     // partner mode: the partner app's tab bar (.g-pbar) is put in by theme.js with the top bar
     document.body.classList.add('g-chrome');
     // the account menu under the avatar
@@ -870,7 +879,7 @@
     });
     // LB / RB: Q and E (or a controller's shoulder buttons) step through the dock
     // step to the next or previous dock tab (Me and Make open their list pages); wrap = Q / E and the shoulder buttons go round
-    const go = (d, wrap) => { if (partnerOn() || rb) return false; const STOPS = stops(); let i = STOPS.indexOf(here) + d; if (wrap) i = (i + STOPS.length) % STOPS.length; if (i < 0 || i >= STOPS.length) return false;
+    const go = (d, wrap) => { if (partnerOn() || (rb && !matchMedia('(orientation: portrait)').matches)) return false; const STOPS = stops(); let i = STOPS.indexOf(here) + d; if (wrap) i = (i + STOPS.length) % STOPS.length; if (i < 0 || i >= STOPS.length) return false;
       try { sessionStorage.setItem('grug.swipe', d > 0 ? 'next' : 'prev'); } catch (e) {}
       closeTray(); location.href = url(navOf(STOPS[i])[3]); return true; };
     // swipe sideways anywhere on the page to change tabs (not on sliders, 3D views, maps or rows that scroll sideways)
@@ -918,8 +927,8 @@
     const head = id === 'me'
       ? '<div class="g-hub-h"><img class="g-hub-face" alt="" src="' + face.bust + '"><h1>' + esc(profile.name) + '</h1><p>Your look, your stamp cards and your settings.</p></div>'
       : '<div class="g-hub-h"><span class="g-hub-ic">' + DOCK.make + '</span><h1>Make</h1><p>Free tools for creators, shops and game makers.</p></div>';
-    host.innerHTML = head + '<nav class="g-hub-list" aria-label="' + esc(g.label) + '">' + g.items.map(k => { const n = navOf(k);
-      return '<a href="' + url(n[3]) + '" style="--tab:' + (brand ? brand.color : DOCK_SIMPLE[k][1]) + ';--tab-lo:' + (brand ? brand.color : DOCK_LO[k]) + '"><span class="g-hub-ico">' + DOCK[k] + '</span><span class="g-hub-tx"><b>' + esc(n[1]) + '</b><small>' + esc(SUB_TEXT[k] || '') + '</small></span>' + icon('caret-right') + '</a>'; }).join('') + '</nav>';
+    host.innerHTML = head + '<nav class="g-hub-list" aria-label="' + esc(g.label) + '">' + itemsOf(g).map(k => { const n = navOf(k);
+      return '<a data-k="' + k + '" href="' + navHref(n) + '" style="--tab:' + (brand ? brand.color : DOCK_SIMPLE[k][1]) + ';--tab-lo:' + (brand ? brand.color : DOCK_LO[k]) + '"><span class="g-hub-ico">' + DOCK[k] + '</span><span class="g-hub-tx"><b>' + esc(n[1]) + '</b><small>' + esc(SUB_TEXT[k] || '') + '</small></span>' + icon('caret-right') + '</a>'; }).join('') + '</nav>';
     host.addEventListener('click', e => {
       const a = e.target.closest('.g-hub-list a'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
       e.preventDefault(); e.stopPropagation(); buzz();

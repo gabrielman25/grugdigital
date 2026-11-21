@@ -21,7 +21,6 @@
    - GK.prop(THREE, kind, seed)                                a small (≤ 1 block), low-key, no-collision prop for a sparse spot
    - GK.pet(THREE, seed)                                       a flashy little pet for a bot (returns {group, update(dt, pos)})
 */
-/* Vids: assets/vid-shim.js (loaded first by every Grug original) gives a game played by an NPC its own storage. */
 (function (root) {
   'use strict';
   // the custom cursor inside every game too (assets/cursors.js; a game that sets its own cursor keeps it)

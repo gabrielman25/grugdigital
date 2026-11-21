@@ -843,3 +843,14 @@ html.g-rb.g-pre:has(body:not(.g-chrome))::after{display:none}
 .rb-top .g-me,.rb-top .g-fs{background:none!important;box-shadow:none!important;border:0!important;width:40px;height:40px;padding:0;min-width:0}
 .rb-top .g-me:hover,.rb-top .g-fs:hover{background:var(--card2)!important}
 .rb-top .g-me .gi,.rb-top .g-fs .gi{width:22px;height:22px}
+/* portrait: the bottom bar (the dock, its Me and Make menus holding the newer pages) and no sidebar or rail;
+   landscape: the sidebar (or the slim rail and its drawer) and no bottom bar */
+@media (orientation:portrait){
+  html.g-rb{--rbw:0px;--tabs:76px}
+  html.g-rb .rb-rail,html.g-rb .rb-side,html.g-rb .rb-scrim{display:none!important}
+  body.g-rbody{padding-bottom:calc(var(--tabs) + var(--sab) + 26px)}
+  html.g-rb.g-pre body:not(.g-chrome){padding-bottom:calc(var(--tabs) + var(--sab) + 26px)}
+  html.g-rb.g-pre body:not(.g-chrome)::after{display:none}
+  html.g-rb.g-pre:has(body:not(.g-chrome))::after{display:block}
+}
+@media (orientation:landscape){html.g-rb .g-tabs,html.g-rb .g-tray{display:none!important}}

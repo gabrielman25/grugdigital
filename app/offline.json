@@ -1,5 +1,5 @@
 {
- "v": "e9f050396b0c",
+ "v": "e753362939d2",
  "apps": {
   "grug": [
    "grug",
@@ -337,11 +337,10 @@
     "/assets/fossil32/fossil32.js": "2b877eb172",
     "/assets/fossil32/logo.png": "f7821b54b3",
     "/assets/gamehost.js": "033b37689b",
-    "/assets/gamekit.js": "a2d40b56e8",
     "/assets/games.js": "7116ea2815",
     "/assets/gold.js": "473c93ee87",
-    "/assets/grug.css": "de55ce8489",
-    "/assets/grug.js": "9da6723e56",
+    "/assets/grug.css": "6bf0ca7a14",
+    "/assets/grug.js": "985f21d123",
     "/assets/icons.js": "d421bed707",
     "/assets/links.css": "5be746f1ee",
     "/assets/links.js": "8ad0bef667",
@@ -369,8 +368,6 @@
     "/assets/three.min.js": "1dc7b29a4a",
     "/assets/thumbs/cielito.jpg": "d5280f8418",
     "/assets/thumbs/yoshi.jpg": "447d727d48",
-    "/assets/vids/ambient-npc.js": "589c0ed165",
-    "/assets/vids/demo.js": "bc800c28d0",
     "/assets/wizard.css": "eb51fc0402",
     "/assets/wizard3d.js": "3870ba7150",
     "/avatar/classic/": "fd7b980fbc",
@@ -424,10 +421,9 @@
     "/shop/": "718b1f0402",
     "/studio/": "a103b7db7d",
     "/support.html": "4e19678ee5",
-    "/terms.html": "a1578ecad9",
-    "/vids/": "f993bf9874"
+    "/terms.html": "a1578ecad9"
    },
-   "bytes": 38829384
+   "bytes": 37963753
   },
   "daypart": {
    "title": "Daypart",
@@ -481,8 +477,8 @@
     "/assets/gamehost.js": "033b37689b",
     "/assets/games.js": "7116ea2815",
     "/assets/gold.js": "473c93ee87",
-    "/assets/grug.css": "de55ce8489",
-    "/assets/grug.js": "9da6723e56",
+    "/assets/grug.css": "6bf0ca7a14",
+    "/assets/grug.js": "985f21d123",
     "/assets/icons.js": "d421bed707",
     "/assets/qrcode.js": "1695445831",
     "/assets/rewards.css": "35ee1500c7",
@@ -496,8 +492,6 @@
     "/assets/shop-fonts.css": "0a6a35e4e1",
     "/assets/theme.js": "adf90f3eff",
     "/assets/three.min.js": "1dc7b29a4a",
-    "/assets/vids/ambient-npc.js": "589c0ed165",
-    "/assets/vids/demo.js": "bc800c28d0",
     "/assets/wizard.css": "eb51fc0402",
     "/assets/wizard3d.js": "3870ba7150",
     "/business/": "446924d25e",
@@ -513,7 +507,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 3049784
+   "bytes": 2252269
   },
   "tea": {
    "title": "Bubble Tea",
@@ -564,8 +558,8 @@
     "/assets/gamehost.js": "033b37689b",
     "/assets/games.js": "7116ea2815",
     "/assets/gold.js": "473c93ee87",
-    "/assets/grug.css": "de55ce8489",
-    "/assets/grug.js": "9da6723e56",
+    "/assets/grug.css": "6bf0ca7a14",
+    "/assets/grug.js": "985f21d123",
     "/assets/qrcode.js": "1695445831",
     "/assets/rewards.js": "6467d3f969",
     "/assets/sandy-view.js": "91791b8312",
@@ -576,13 +570,11 @@
     "/assets/sandy/sad.png": "4d5eb02075",
     "/assets/shop-fonts.css": "0a6a35e4e1",
     "/assets/theme.js": "adf90f3eff",
-    "/assets/vids/ambient-npc.js": "589c0ed165",
-    "/assets/vids/demo.js": "bc800c28d0",
     "/business/tea/": "19fceee055",
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93"
    },
-   "bytes": 2111863
+   "bytes": 1314348
   },
   "cafe": {
    "title": "Caf\u00e9",
@@ -633,8 +625,8 @@
     "/assets/gamehost.js": "033b37689b",
     "/assets/games.js": "7116ea2815",
     "/assets/gold.js": "473c93ee87",
-    "/assets/grug.css": "de55ce8489",
-    "/assets/grug.js": "9da6723e56",
+    "/assets/grug.css": "6bf0ca7a14",
+    "/assets/grug.js": "985f21d123",
     "/assets/qrcode.js": "1695445831",
     "/assets/rewards.js": "6467d3f969",
     "/assets/sandy-view.js": "91791b8312",
@@ -645,107 +637,105 @@
     "/assets/sandy/sad.png": "4d5eb02075",
     "/assets/shop-fonts.css": "0a6a35e4e1",
     "/assets/theme.js": "adf90f3eff",
-    "/assets/vids/ambient-npc.js": "589c0ed165",
-    "/assets/vids/demo.js": "bc800c28d0",
     "/business/cafe/": "afe06cca1a",
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93"
    },
-   "bytes": 2119564
+   "bytes": 1322049
   },
   "game:runway": {
    "title": "Runway Ready",
    "files": {
+    "/assets/gamekit.js": "2d7f5eb0cc",
     "/assets/gamepage.css": "577b6c7055",
     "/assets/gamepage.js": "88d3c29439",
     "/assets/grug-app.js": "299c3e3720",
-    "/assets/vid-shim.js": "f43afe1316",
     "/games/runway/": "84af79baf8",
-    "/play/runway/game.html": "97d0b1d09b",
+    "/play/runway/game.html": "c42c2bd6d0",
     "/play/runway/": "d5f8f15f0b"
    },
-   "bytes": 349953
+   "bytes": 392571
   },
   "game:sandalslam": {
    "title": "Sandal Slam",
    "files": {
+    "/assets/gamekit.js": "2d7f5eb0cc",
     "/assets/gamepage.css": "577b6c7055",
     "/assets/gamepage.js": "88d3c29439",
     "/assets/grug-app.js": "299c3e3720",
-    "/assets/vid-shim.js": "f43afe1316",
     "/games/sandalslam/": "1b8c7a5152",
-    "/play/sandalslam/game.html": "3d1598ea97",
+    "/play/sandalslam/game.html": "da11c91010",
     "/play/sandalslam/": "e5a47f2248"
    },
-   "bytes": 4630862
+   "bytes": 4673480
   },
   "game:chestquest": {
    "title": "Chest Quest",
    "files": {
+    "/assets/gamekit.js": "2d7f5eb0cc",
     "/assets/gamepage.css": "577b6c7055",
     "/assets/gamepage.js": "88d3c29439",
     "/assets/grug-app.js": "299c3e3720",
-    "/assets/vid-shim.js": "f43afe1316",
     "/games/chestquest/": "3d12113fab",
-    "/play/chestquest/game.html": "961bb0989f",
+    "/play/chestquest/game.html": "26d9bbc829",
     "/play/chestquest/": "600ad0c733"
    },
-   "bytes": 419884
+   "bytes": 462502
   },
   "game:glowupspa": {
    "title": "Glow Up Spa",
    "files": {
+    "/assets/gamekit.js": "2d7f5eb0cc",
     "/assets/gamepage.css": "577b6c7055",
     "/assets/gamepage.js": "88d3c29439",
     "/assets/grug-app.js": "299c3e3720",
-    "/assets/vid-shim.js": "f43afe1316",
     "/games/glowupspa/": "33265e898a",
     "/play/glowupspa/CubePets-License.txt": "a939263aa3",
-    "/play/glowupspa/game.html": "e5154e4426",
+    "/play/glowupspa/game.html": "e987b55e8f",
     "/play/glowupspa/": "3f516d7b4c"
    },
-   "bytes": 2065916
+   "bytes": 2108534
   },
   "game:petmountainrescue": {
    "title": "Pet Mountain Rescue",
    "files": {
+    "/assets/gamekit.js": "2d7f5eb0cc",
     "/assets/gamepage.css": "577b6c7055",
     "/assets/gamepage.js": "88d3c29439",
     "/assets/grug-app.js": "299c3e3720",
-    "/assets/vid-shim.js": "f43afe1316",
     "/games/petmountainrescue/": "9f5e4decae",
     "/play/petmountainrescue/CubePets-License.txt": "a939263aa3",
-    "/play/petmountainrescue/game.html": "c6026a4513",
+    "/play/petmountainrescue/game.html": "081af08ea4",
     "/play/petmountainrescue/": "3986a19bfc"
    },
-   "bytes": 2017232
+   "bytes": 2059850
   },
   "game:mysteryblasters": {
    "title": "Mystery Blasters",
    "files": {
+    "/assets/gamekit.js": "2d7f5eb0cc",
     "/assets/gamepage.css": "577b6c7055",
     "/assets/gamepage.js": "88d3c29439",
     "/assets/grug-app.js": "299c3e3720",
-    "/assets/vid-shim.js": "f43afe1316",
     "/games/mysteryblasters/": "b03af23527",
     "/play/mysteryblasters/CubePets-License.txt": "a939263aa3",
-    "/play/mysteryblasters/game.html": "9da4c298ab",
+    "/play/mysteryblasters/game.html": "30e2a85608",
     "/play/mysteryblasters/": "5acac0e009"
    },
-   "bytes": 2360456
+   "bytes": 2403074
   },
   "game:tidesandtackle": {
    "title": "Tides & Tackle",
    "files": {
+    "/assets/gamekit.js": "2d7f5eb0cc",
     "/assets/gamepage.css": "577b6c7055",
     "/assets/gamepage.js": "88d3c29439",
     "/assets/grug-app.js": "299c3e3720",
-    "/assets/vid-shim.js": "f43afe1316",
     "/games/tidesandtackle/": "d28cad8faa",
-    "/play/tidesandtackle/game.html": "ac8f80a908",
+    "/play/tidesandtackle/game.html": "2b7e816512",
     "/play/tidesandtackle/": "2f16b61c3d"
    },
-   "bytes": 14111310
+   "bytes": 14153928
   },
   "game:placeholder18": {
    "title": "Placeholder 18+ game",
