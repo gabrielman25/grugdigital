@@ -3,30 +3,35 @@
   "slug": "backpack",
   "name": "Canvas backpack",
   "object": "backpack",
-  "description": "brown canvas backpack with a front pocket and a black water bottle in the side pocket"
+  "description": "brown canvas backpack with a front pocket and a black water bottle in the side pocket",
+  "wear": "back"
  },
  {
   "slug": "lantern",
   "name": "Glowing lantern",
   "object": "lantern",
-  "description": "square black iron lantern with crossed frame bars over glowing yellow glass panels, a black roof cap and a black carry handle"
+  "description": "square black iron lantern with crossed frame bars over glowing yellow glass panels, a black roof cap and a black carry handle",
+  "wear": "rhand"
  },
  {
   "slug": "boombox",
   "name": "Golden boombox",
   "object": "boombox",
-  "description": "gold boombox with two round speakers with crossed grilles, a dark cassette panel in the middle, a black top strip with small gold buttons and a gold carry handle"
+  "description": "gold boombox with two round speakers with crossed grilles, a dark cassette panel in the middle, a black top strip with small gold buttons and a gold carry handle",
+  "wear": "rshoulder"
  },
  {
   "slug": "handbag",
   "name": "Leather handbag",
   "object": "handbag",
-  "description": "dark green pebbled leather handbag with two rolled handles and small gold rings"
+  "description": "dark green pebbled leather handbag with two rolled handles and small gold rings",
+  "wear": "lhand"
  },
  {
   "slug": "cowboy-hat",
   "name": "Western cowboy hat",
   "object": "cowboy hat",
-  "description": "brown suede western cowboy hat with a dark tooled leather hat band with silver studs and a small longhorn concho"
+  "description": "brown suede western cowboy hat with a dark tooled leather hat band with silver studs and a small longhorn concho",
+  "wear": "head"
  }
 ]

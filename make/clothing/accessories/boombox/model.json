@@ -1,0 +1,146 @@
+{
+ "name": "Golden boombox",
+ "object": "boombox",
+ "description": "gold boombox with two round speakers with crossed grilles, a dark cassette panel in the middle, a black top strip with small gold buttons and a gold carry handle",
+ "parts": [
+  {
+   "name": "body",
+   "type": "box",
+   "center": [
+    0,
+    1.0,
+    0
+   ],
+   "size": [
+    3.6,
+    1.45,
+    0.9
+   ],
+   "material": "plastic",
+   "group": "Body"
+  },
+  {
+   "name": "top",
+   "type": "box",
+   "center": [
+    0,
+    1.95,
+    0
+   ],
+   "size": [
+    3.4,
+    0.45,
+    0.82
+   ],
+   "material": "plastic",
+   "group": "Body"
+  },
+  {
+   "name": "speaker",
+   "type": "cylinder",
+   "center": [
+    -1.05,
+    0.98,
+    0.47
+   ],
+   "radius": 0.55,
+   "height": 0.12,
+   "sides": 10,
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "mirror": "x",
+   "material": "metal",
+   "seams": false,
+   "group": "Speakers"
+  },
+  {
+   "name": "deck",
+   "type": "box",
+   "center": [
+    0,
+    0.98,
+    0.48
+   ],
+   "size": [
+    0.7,
+    1.05,
+    0.08
+   ],
+   "material": "plastic",
+   "group": "Tape deck"
+  },
+  {
+   "name": "knob",
+   "type": "cylinder",
+   "center": [
+    1.35,
+    2.0,
+    0.42
+   ],
+   "radius": 0.13,
+   "height": 0.08,
+   "sides": 8,
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "material": "metal",
+   "seams": false,
+   "group": "Knobs"
+  },
+  {
+   "name": "handle",
+   "type": "strap",
+   "points": [
+    [
+     -1.1,
+     2.15,
+     0
+    ],
+    [
+     -1.1,
+     2.6,
+     0
+    ],
+    [
+     1.1,
+     2.6,
+     0
+    ],
+    [
+     1.1,
+     2.15,
+     0
+    ]
+   ],
+   "width": 0.16,
+   "thickness": 0.1,
+   "normal": [
+    0,
+    0,
+    1
+   ],
+   "material": "metal",
+   "seams": false,
+   "group": "Handle"
+  }
+ ],
+ "wear": {
+  "on": "rshoulder",
+  "scale": 0.4,
+  "rot": [
+   0,
+   -90,
+   0
+  ],
+  "offset": [
+   -1.5,
+   3.89,
+   0
+  ]
+ }
+}

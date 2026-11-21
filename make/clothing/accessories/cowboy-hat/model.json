@@ -1,0 +1,131 @@
+{
+ "name": "Western cowboy hat",
+ "object": "cowboy hat",
+ "description": "brown suede western cowboy hat with a dark tooled leather hat band with silver studs and a small longhorn concho",
+ "parts": [
+  {
+   "name": "crown",
+   "type": "lathe",
+   "profile": [
+    [
+     0.0,
+     1.36
+    ],
+    [
+     0.45,
+     1.58
+    ],
+    [
+     0.74,
+     1.42
+    ],
+    [
+     0.83,
+     0.95
+    ],
+    [
+     0.86,
+     0.38
+    ]
+   ],
+   "sides": 12,
+   "scale": [
+    0.92,
+    1.15
+   ],
+   "caps": "none",
+   "material": "suede",
+   "seams": false,
+   "group": "Hat"
+  },
+  {
+   "name": "band",
+   "type": "lathe",
+   "profile": [
+    [
+     0.86,
+     0.66
+    ],
+    [
+     0.875,
+     0.42
+    ]
+   ],
+   "sides": 12,
+   "scale": [
+    0.92,
+    1.15
+   ],
+   "caps": "none",
+   "material": "leather",
+   "seams": false,
+   "group": "Band"
+  },
+  {
+   "name": "brim",
+   "type": "lathe",
+   "profile": [
+    [
+     0.82,
+     0.42
+    ],
+    [
+     1.2,
+     0.38
+    ],
+    [
+     1.55,
+     0.43
+    ],
+    [
+     1.8,
+     0.58
+    ],
+    [
+     1.8,
+     0.5
+    ],
+    [
+     1.55,
+     0.35
+    ],
+    [
+     1.2,
+     0.3
+    ],
+    [
+     0.82,
+     0.34
+    ]
+   ],
+   "sides": 14,
+   "scale": [
+    1.0,
+    1.1
+   ],
+   "caps": "none",
+   "curl": {
+    "amount": 0.75,
+    "from": 1.0
+   },
+   "material": "suede",
+   "seams": false,
+   "group": "Hat"
+  }
+ ],
+ "views": [
+  {
+   "yaw": 22,
+   "pitch": 16
+  },
+  {
+   "yaw": 202,
+   "pitch": 16
+  }
+ ],
+ "wear": {
+  "on": "head",
+  "scale": 0.84,
+  "fit": "hat"
+ }
+}

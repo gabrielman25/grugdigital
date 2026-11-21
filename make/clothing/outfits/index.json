@@ -1,0 +1,170 @@
+{
+ "clothing": [
+  {
+   "id": "rustic",
+   "name": "Flannel & jeans",
+   "shirt": "rustic/shirt.png",
+   "pants": "rustic/pants.png",
+   "thumb": "rustic/chip.png"
+  },
+  {
+   "id": "weekend",
+   "name": "Knit & cords",
+   "shirt": "weekend/shirt.png",
+   "pants": "weekend/pants.png",
+   "thumb": "weekend/chip.png"
+  }
+ ],
+ "looks": [
+  {
+   "id": "rustic",
+   "name": "Rustic cowboy",
+   "thumb": "looks/rustic.jpg",
+   "skin": "#eab892",
+   "clothing": "rustic",
+   "accessories": [
+    {
+     "slug": "cowboy-hat"
+    },
+    {
+     "slug": "backpack"
+    },
+    {
+     "slug": "lantern"
+    }
+   ]
+  },
+  {
+   "id": "night-rider",
+   "name": "Night rider",
+   "thumb": "looks/night-rider.jpg",
+   "skin": "#8d5a3b",
+   "clothing": "rustic",
+   "shirtColours": [
+    {
+     "from": [
+      85,
+      36,
+      27
+     ],
+     "to": [
+      22,
+      28,
+      50
+     ]
+    },
+    {
+     "from": [
+      133,
+      50,
+      37
+     ],
+     "to": [
+      48,
+      70,
+      122
+     ]
+    }
+   ],
+   "pantsColours": [
+    {
+     "from": [
+      72,
+      88,
+      106
+     ],
+     "to": [
+      44,
+      44,
+      50
+     ]
+    },
+    {
+     "from": [
+      104,
+      122,
+      140
+     ],
+     "to": [
+      74,
+      74,
+      82
+     ]
+    }
+   ],
+   "accessories": [
+    {
+     "slug": "cowboy-hat",
+     "colours": [
+      {
+       "rgb": [
+        38,
+        36,
+        40
+       ],
+       "amount": 1
+      },
+      {
+       "rgb": [
+        150,
+        120,
+        70
+       ],
+       "amount": 1
+      }
+     ]
+    },
+    {
+     "slug": "backpack",
+     "colours": [
+      {
+       "rgb": [
+        70,
+        82,
+        48
+       ],
+       "amount": 1
+      },
+      {
+       "rgb": [
+        70,
+        82,
+        48
+       ],
+       "amount": 1
+      },
+      null,
+      null,
+      {
+       "rgb": [
+        40,
+        34,
+        30
+       ],
+       "amount": 1
+      },
+      null
+     ]
+    },
+    {
+     "slug": "lantern"
+    }
+   ]
+  },
+  {
+   "id": "weekend",
+   "name": "80s weekend",
+   "thumb": "looks/weekend.jpg",
+   "skin": "#c68e6a",
+   "clothing": "weekend",
+   "accessories": [
+    {
+     "slug": "handbag"
+    },
+    {
+     "slug": "boombox"
+    }
+   ]
+  }
+ ]
+}

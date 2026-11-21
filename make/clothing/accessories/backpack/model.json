@@ -1,0 +1,269 @@
+{
+ "name": "Canvas backpack",
+ "object": "backpack",
+ "description": "brown canvas backpack with a front pocket and a black water bottle in the side pocket",
+ "parts": [
+  {
+   "name": "body",
+   "type": "box",
+   "center": [
+    0,
+    3.0,
+    0.895
+   ],
+   "size": [
+    1.6,
+    1.8,
+    0.75
+   ],
+   "taper": [
+    0.86,
+    0.8
+   ],
+   "shift": [
+    0,
+    -0.075
+   ],
+   "material": "canvas",
+   "group": "Bag"
+  },
+  {
+   "name": "pocket",
+   "type": "box",
+   "center": [
+    0,
+    2.55,
+    1.42
+   ],
+   "size": [
+    1.3,
+    0.8,
+    0.36
+   ],
+   "taper": [
+    1,
+    0.75
+   ],
+   "material": "canvas",
+   "group": "Pocket"
+  },
+  {
+   "name": "bottle_pocket",
+   "type": "box",
+   "center": [
+    0.96,
+    2.4,
+    0.895
+   ],
+   "size": [
+    0.36,
+    0.6,
+    0.62
+   ],
+   "material": "canvas",
+   "group": "Bag"
+  },
+  {
+   "name": "bottle",
+   "type": "cylinder",
+   "center": [
+    1.0,
+    2.82,
+    0.895
+   ],
+   "radius": 0.24,
+   "radiusTop": 0.22,
+   "height": 1.0,
+   "sides": 8,
+   "material": "metal",
+   "seams": false,
+   "group": "Bottle"
+  },
+  {
+   "name": "bottle_cap",
+   "type": "cylinder",
+   "center": [
+    1.0,
+    3.39,
+    0.895
+   ],
+   "radius": 0.16,
+   "height": 0.14,
+   "sides": 8,
+   "material": "plastic",
+   "seams": false,
+   "group": "Bottle cap"
+  },
+  {
+   "name": "handle",
+   "type": "strap",
+   "points": [
+    [
+     -0.22,
+     3.88,
+     0.86
+    ],
+    [
+     -0.17,
+     4.12,
+     0.86
+    ],
+    [
+     0.17,
+     4.12,
+     0.86
+    ],
+    [
+     0.22,
+     3.88,
+     0.86
+    ]
+   ],
+   "width": 0.12,
+   "thickness": 0.05,
+   "normal": [
+    0,
+    0,
+    1
+   ],
+   "material": "leather",
+   "group": "Straps"
+  },
+  {
+   "name": "strap",
+   "type": "strap",
+   "group": "Straps",
+   "material": "canvas",
+   "mirror": "x",
+   "width": 0.28,
+   "thickness": 0.06,
+   "points": [
+    [
+     0.8,
+     3.62,
+     0.56
+    ],
+    [
+     0.8,
+     3.93,
+     0.54
+    ],
+    [
+     0.8,
+     4.04,
+     0.36
+    ],
+    [
+     0.8,
+     4.05,
+     0.0
+    ],
+    [
+     0.8,
+     4.04,
+     -0.36
+    ],
+    [
+     0.8,
+     3.9,
+     -0.535
+    ],
+    [
+     0.8,
+     3.3,
+     -0.54
+    ],
+    [
+     0.8,
+     2.62,
+     -0.54
+    ],
+    [
+     0.8,
+     2.42,
+     -0.47
+    ]
+   ],
+   "normals": [
+    [
+     0,
+     0.3,
+     1
+    ],
+    [
+     0,
+     0.7,
+     0.7
+    ],
+    [
+     0,
+     1,
+     0.2
+    ],
+    [
+     0,
+     1,
+     0
+    ],
+    [
+     0,
+     1,
+     -0.2
+    ],
+    [
+     0,
+     0.7,
+     -0.7
+    ],
+    [
+     0,
+     0,
+     -1
+    ],
+    [
+     0,
+     0,
+     -1
+    ],
+    [
+     0,
+     -0.4,
+     -1
+    ]
+   ]
+  },
+  {
+   "name": "buckle",
+   "type": "box",
+   "center": [
+    0.8,
+    2.75,
+    -0.585
+   ],
+   "size": [
+    0.32,
+    0.16,
+    0.05
+   ],
+   "material": "metal",
+   "mirror": "x",
+   "group": "Buckles"
+  }
+ ],
+ "texture": {},
+ "wear": {
+  "on": "back",
+  "rot": [
+   0,
+   180,
+   0
+  ],
+  "offset": [
+   0,
+   0,
+   0
+  ],
+  "scale": 1
+ },
+ "prompt_notes": "The two straps go over the wearer's shoulders and down the chest, ending in small metal buckles; paint them as padded canvas shoulder straps."
+}

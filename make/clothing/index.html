@@ -410,6 +410,32 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
   #accStage .acc-empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--g-muted);text-align:center;padding:var(--g-s-5)}
   #accMatch.warn{background:var(--g-yellow,#FFBE1A);color:var(--g-ink)}
   #accPrompt{min-height:9rem}
+  #forClaude pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:var(--g-bg-2);padding:var(--g-s-2);border-radius:var(--g-r-md,8px)}
+  #accHandoff{min-height:5rem}
+  .o-stage{position:relative;height:min(78vh,820px);overflow:hidden;padding:0}
+  #outView{position:absolute;inset:0;width:100%;height:100%;cursor:grab;touch-action:none}
+  .o-bar{position:absolute;left:12px;bottom:12px;display:flex;gap:8px;align-items:center}
+  .o-skin{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--g-muted)}
+  .o-skin input{width:28px;height:24px;border:0;padding:0;background:none;cursor:pointer}
+  .o-grid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+  .o-acc.on,.o-chip.on{outline:2px solid var(--g-accent);outline-offset:2px}
+  .o-look{position:relative;padding:0}
+  .o-look .o-lk{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:var(--g-s-2);width:100%;box-sizing:border-box}
+  .o-look .o-del{position:absolute;top:4px;right:4px;all:unset;cursor:pointer;position:absolute;top:6px;right:8px;color:var(--g-muted)}
+  .o-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--g-s-2)}
+  .o-chip{all:unset;cursor:pointer;display:flex;gap:6px;align-items:center;padding:6px 10px;border-radius:999px;background:var(--g-bg-2);font-size:13px}
+  .o-chip i{width:22px;height:22px;border-radius:6px;background-size:cover;background-position:center}
+  .o-sub{font-size:12px;color:var(--g-muted);margin:var(--g-s-2) 0 4px}
+  .o-sw{display:flex;gap:8px;align-items:center;padding:4px 0;font-size:13px}
+  .o-sw input{width:30px;height:26px;border:0;padding:0;background:none;cursor:pointer;flex:none}
+  .o-sw span{flex:1;display:flex;flex-direction:column}
+  .o-sw b{font-weight:600;font-size:12px;color:var(--g-muted);font-variant-numeric:tabular-nums}
+  .o-rng{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--g-muted);margin:4px 0}
+  .o-rng span{display:flex;justify-content:space-between}.o-rng b{color:var(--g-text,inherit);font-variant-numeric:tabular-nums}
+  .o-rng input{width:100%;accent-color:var(--g-accent)}
+  .o-ol{border-top:1px solid var(--g-line);margin-top:var(--g-s-2);padding-top:var(--g-s-2);display:flex;flex-direction:column;gap:6px}
+  .o-worn{border-top:1px solid var(--g-line);padding-top:var(--g-s-2);margin-top:var(--g-s-2)}
+  .o-wh{display:flex;gap:8px;align-items:center}.o-wh b{flex:1}.o-wh small{color:var(--g-muted)}
 </style>
 </head>
 <body class="g-root">
@@ -420,7 +446,7 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
     <div><h1>Classic Clothing Studio</h1><p>AI-dressed avatars → Roblox shirt &amp; pants</p></div>
   </div>
   <div class="top-r">
-  <nav class="g-seg modes" id="modeSeg"><button data-mode="clothing" class="on">Clothing</button><button data-mode="acc">Accessories</button></nav>
+  <nav class="g-seg modes" id="modeSeg"><button data-mode="clothing" class="on">Clothing</button><button data-mode="acc">Accessories</button><button data-mode="outfits">Outfits</button></nav>
   <nav class="steps g-seg">
     <button class="pill active" data-step="1"><b>1</b>Reference</button>
     <button class="pill" data-step="2" disabled><b>2</b>Align</button>
@@ -584,13 +610,26 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
   <section id="acc" class="step" hidden>
     <div class="g-card stage"><div id="accStage"></div></div>
     <aside class="side">
+      <div class="g-card card" id="accClaude">
+        <h2 class="ttl"><i data-g-icon="magic_wand"></i>Use Claude</h2>
+        <p class="sub">Let Claude make it for you. With the Claude extension in Chrome, Claude switches between this page and your image generator, paints the model, bakes it here and shows you the result. It can also build a brand-new block model on this page.</p>
+        <label class="g-field-label" for="accGen">Image generator</label>
+        <select id="accGen" class="g-input"><option value="gemini">Gemini (Nano Banana)</option><option value="chatgpt">ChatGPT</option><option value="copilot">Microsoft Copilot</option><option value="other">Another site…</option></select>
+        <input id="accGenUrl" class="g-input" type="url" placeholder="https://… your image generator" hidden>
+        <label class="g-field-label" for="accWish">What should Claude make? (optional)</label>
+        <input id="accWish" class="g-input" type="text" placeholder="e.g. a red leather backpack with brass buckles">
+        <button id="accClaudeGo" class="g-btn g-btn--primary full"><i data-g-icon="clipboard"></i>Use Claude</button>
+        <div id="accHandoffBox" hidden><p class="tiny">Copied. Open Claude in Chrome on this tab and paste it:</p><textarea id="accHandoff" class="g-input" readonly></textarea></div>
+        <div class="row"><button id="accGenOpen" class="g-btn g-btn--ghost g-btn--sm">Open the generator</button><a class="g-btn g-btn--ghost g-btn--sm" href="claude-kit.zip" download><i data-g-icon="folder_zip"></i>Claude kit (.zip)</a></div>
+        <details id="forClaude"><summary class="tiny">How Claude uses this page</summary><pre class="tiny"></pre></details>
+      </div>
       <div class="g-card card" data-phase="pick">
         <h2 class="ttl"><span class="n">1</span>Pick a template</h2>
         <p class="sub">Each template is a simple block model. An image model paints it in any style you describe, and the Studio turns the picture into a textured low-poly 3D model.</p>
       </div>
       <div class="g-card card" data-phase="prompt result" hidden>
         <h2 class="ttl"><span class="n">1</span><span id="accName"></span></h2>
-        <div class="row"><button id="accRef" class="g-btn g-btn--primary"><i data-g-icon="arrow_down_to_line"></i>Reference</button><button id="accChange" class="g-btn g-btn--ghost">Change template</button></div>
+        <div class="row"><button id="accRef" class="g-btn g-btn--primary"><i data-g-icon="arrow_down_to_line"></i>Reference</button><button id="accCopyRef" class="g-btn"><i data-g-icon="clipboard"></i>Copy reference picture</button><button id="accChange" class="g-btn g-btn--ghost">Change template</button></div>
       </div>
       <div class="g-card card" data-phase="prompt" hidden>
         <h2 class="ttl"><span class="n">2</span>Describe your variant</h2>
@@ -612,12 +651,47 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
         <div id="accMatch" class="g-pill badge"><i></i><span>—</span></div>
         <p class="sub">Drag to turn it. The panel on the right of the preview sets the texture effects (colour depth, dither, pixel size, contrast, saturation, brightness) and bakes lighting into the texture: ambient occlusion, room light, surface detail, light nodes and path-traced bounce light. The outline is on; switch it off in the bottom bar.</p>
         <label class="g-field-label">Retro look</label>
-        <div class="g-seg full" id="accLook"><button data-p="ps1">PS1</button><button data-p="n64">N64</button><button data-p="16bit">16-bit</button><button data-p="clean">Clean</button></div>
+        <div class="g-seg full" id="accLook"><button data-p="grug">Grug</button><button data-p="ps1">PS1</button><button data-p="n64">N64</button><button data-p="16bit">16-bit</button><button data-p="clean">Clean</button></div>
+        <button id="accWear" class="g-btn g-btn--primary full" style="margin-top:var(--g-s-3)"><i data-g-icon="person_body"></i>Wear it on the avatar</button>
         <div class="row" style="margin-top:var(--g-s-3)"><button id="accAgain" class="g-btn"><i data-g-icon="arrow_left"></i>Paint another</button><button id="accChange2" class="g-btn g-btn--ghost">Other template</button></div>
       </div>
     </aside>
   </section>
 <!-- /ACCESSORIES -->
+<!-- OUTFITS -->
+  <section id="outfits" class="step" hidden>
+    <div class="g-card stage o-stage"><canvas id="outView" aria-label="The avatar wearing the outfit. Drag to turn, scroll to zoom."></canvas>
+      <div class="o-bar"><button id="outSpin" class="g-btn g-btn--sm on">Turn</button><label class="o-skin">Skin <input type="color" id="outSkin" value="#eab892"></label></div></div>
+    <aside class="side">
+      <div class="g-card card">
+        <h2 class="ttl"><i data-g-icon="magic_wand"></i>Looks</h2>
+        <div id="outLooks" class="lib-grid o-grid"></div>
+        <div class="row" style="margin-top:var(--g-s-3)"><input id="outName" class="g-input" type="text" placeholder="Name this look" maxlength="40"><button id="outSave" class="g-btn g-btn--primary">Save</button></div>
+        <button id="outZip" class="g-btn g-btn--ghost full" style="margin-top:var(--g-s-2)"><i data-g-icon="arrow_down_to_line"></i>Download the look (.zip)</button>
+      </div>
+      <div class="g-card card">
+        <h2 class="ttl"><i data-g-icon="shirt"></i>Shirt &amp; pants</h2>
+        <div id="outClothes" class="o-chips"></div>
+        <div class="row"><label class="g-btn g-btn--ghost g-btn--sm">Shirt PNG<input type="file" id="outShirtFile" accept="image/png" hidden></label><label class="g-btn g-btn--ghost g-btn--sm">Pants PNG<input type="file" id="outPantsFile" accept="image/png" hidden></label></div>
+        <div id="outClothCols"></div>
+      </div>
+      <div class="g-card card">
+        <h2 class="ttl"><i data-g-icon="archive"></i>Accessories</h2>
+        <p class="sub">Tap to put on or take off. One per spot (head, back, each hand, each shoulder). Paint your own in Accessories, then "Wear it".</p>
+        <div id="outAccs" class="lib-grid o-grid"></div>
+      </div>
+      <div class="g-card card">
+        <h2 class="ttl"><i data-g-icon="magic_wand"></i>Retro look &amp; lighting</h2>
+        <p class="sub">For the whole outfit: the shirt and pants get the same baked light (ambient occlusion, room light, bounce) and retro texture effects as the accessories.</p>
+        <div id="outFx"></div>
+      </div>
+      <div class="g-card card" id="outWornCard" hidden>
+        <h2 class="ttl"><i data-g-icon="pipette"></i>Accessory colours</h2>
+        <div id="outWorn"></div>
+      </div>
+    </aside>
+  </section>
+<!-- /OUTFITS -->
 </main>
 <input type="file" id="file" accept="image/*" hidden>
 <div id="libModal" class="lib-modal" hidden>
@@ -1086,12 +1160,12 @@ class GLR {
       void main(){vN=uNM*aN;vTu=uNM*aTu;vTv=uNM*aTv;vT=aT;vT2=aT2;vec4 p=uPr*uMV*vec4(aP,1.0);
         if(uSnap>0.0){vec2 nd=p.xy/p.w;nd=floor(nd*uSnap+0.5)/uSnap;p.xy=nd*p.w;}
         vTA=vec3(aT*p.w,p.w);gl_Position=p;}`;
-    const fs = `precision mediump float;uniform sampler2D uTex,uNMap;uniform vec3 uTint,uL;uniform float uAmb,uDif,uUnlit,uAffine,uNStr,uSpec;
+    const fs = `precision mediump float;uniform sampler2D uTex,uNMap;uniform vec3 uTint,uL;uniform float uAmb,uDif,uUnlit,uAffine,uNStr,uSpec,uWrap;
       varying vec3 vN;varying vec2 vT;varying vec2 vT2;varying vec3 vTA;varying vec3 vTu;varying vec3 vTv;
       void main(){vec2 uv=uAffine>0.5?vTA.xy/vTA.z:vT;vec4 t=texture2D(uTex,uv);vec3 N=normalize(vN);
         if(uNStr>0.0){vec3 m=texture2D(uNMap,vT2).xyz*2.0-1.0;m.xy*=uNStr;vec3 T=vTu-N*dot(N,vTu);vec3 B=vTv-N*dot(N,vTv);
           if(dot(T,T)>1e-6&&dot(B,B)>1e-6){N=normalize(normalize(T)*m.x+normalize(B)*m.y+N*max(m.z,0.05));}}
-        float s=uAmb+uDif*max(dot(N,uL),0.0);s=mix(s,1.0,uUnlit);
+        float s=uAmb+uDif*max((dot(N,uL)+uWrap)/(1.0+uWrap),0.0);s=mix(s,1.0,uUnlit);
         float sp=uSpec*pow(max(dot(N,normalize(uL+vec3(0.0,0.0,1.0))),0.0),28.0)*(1.0-uUnlit);
         gl_FragColor=vec4((t.rgb*uTint*s+sp)*t.a,t.a);}`;
     const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
@@ -1099,8 +1173,9 @@ class GLR {
     if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
     gl.useProgram(pr); this.pr = pr;
     this.a = {}; ['aP','aN','aT','aT2','aTu','aTv'].forEach(n => this.a[n] = gl.getAttribLocation(pr,n));
-    this.u = {}; ['uMV','uPr','uNM','uTex','uNMap','uTint','uL','uAmb','uDif','uUnlit','uAffine','uSnap','uNStr','uSpec'].forEach(n => this.u[n] = gl.getUniformLocation(pr,n));
-    this.affine = 0; this.snap = 0; this.spec = 0; this.nstr = 0; this.explode = 0; this.studsOn = false;
+    this.u = {}; ['uMV','uPr','uNM','uTex','uNMap','uTint','uL','uAmb','uDif','uUnlit','uAffine','uSnap','uNStr','uSpec','uWrap'].forEach(n => this.u[n] = gl.getUniformLocation(pr,n));
+    this.affine = 0; this.snap = 0; this.spec = 0; this.nstr = 0; this.explode = 0; this.studsOn = false; this.wrap = 0;
+    this.outline = { on: false, width: 0.06, color: [5, 5, 5] };   // the avatar's own inverted-hull outline (studs)
     gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     const solid = (css) => { const c = cnv(1,1), x = c.getContext('2d'); x.fillStyle = css; x.fillRect(0,0,1,1); return this.tex(c); };
     this.white = solid('#fff'); this.flatN = solid('rgb(128,128,255)');
@@ -1122,11 +1197,26 @@ class GLR {
     const old = this.body;
     const B = { type, parts:{}, hands:[], studs:[] };
     PARTS.forEach(p => B.parts[p.name] = this.mesh(partGeo(p, type)));
-    B.head = this.mesh(cylGeo(this.headDims));
+    B.head = this.mesh(this.headDims === HEAD ? cylGeo(this.headDims) : roundHeadGeo(this.headDims));
     if (BODY_TYPES[type].hands) ['rarm','larm'].forEach(n => B.hands.push({ part:n, mesh:this.mesh(handGeo(PARTS.find(p => p.name === n), type)) }));
     STUDS.forEach(s => B.studs.push({ part:s.part, mesh:this.mesh(studGeo(s, type, studShape)) }));
-    this.body = B;
-    if (old){ Object.values(old.parts).forEach(m => this.free(m)); this.free(old.head); old.hands.forEach(h => this.free(h.mesh)); old.studs.forEach(s => this.free(s.mesh)); }
+    this.body = B; this.buildHulls();
+    if (old){ Object.values(old.parts).forEach(m => this.free(m)); this.free(old.head); (old.hulls || []).forEach(h => this.free(h.mesh)); old.hands.forEach(h => this.free(h.mesh)); old.studs.forEach(s => this.free(s.mesh)); }
+  }
+  /* outline shells for every body part and the head, rebuilt when the width changes */
+  buildHulls(){
+    const B = this.body; if (!B) return; (B.hulls || []).forEach(h => this.free(h.mesh)); B.hulls = [];
+    if (!this.outline.on) { B.hullW = 0; return; }
+    const w = this.outline.width, add = (g, part) => B.hulls.push({ part, mesh: this.mesh(hullGeo(g, w)) });
+    PARTS.forEach(p => add(partGeo(p, B.type), p.name));
+    add(this.headDims === HEAD ? cylGeo(this.headDims) : roundHeadGeo(this.headDims), 'head');
+    B.hullW = w;
+  }
+  drawOutline(mv, P){
+    const B = this.body, o = this.outline; if (!o.on) return; if (B.hullW !== o.width) this.buildHulls();
+    const gl = this.gl; gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK);
+    B.hulls.forEach(h => this.draw(h.mesh, this.white, this.partMV(mv, h.part), P, o.color.map(v => v / 255), true));
+    gl.disable(gl.CULL_FACE);
   }
   tex(src, t, nearest){
     const gl = this.gl; t = t || gl.createTexture();
@@ -1151,7 +1241,7 @@ class GLR {
     gl.uniform3fv(u.uTint, tint || [1,1,1]); gl.uniform3fv(u.uL, this.light);
     gl.uniform1f(u.uAmb, this.amb); gl.uniform1f(u.uDif, this.dif); gl.uniform1f(u.uUnlit, unlit ? 1 : 0);
     gl.uniform1f(u.uAffine, this.affine); gl.uniform1f(u.uSnap, this.snap);
-    gl.uniform1f(u.uNStr, nmap ? (nstr || 0) : 0); gl.uniform1f(u.uSpec, unlit ? 0 : this.spec);
+    gl.uniform1f(u.uNStr, nmap ? (nstr || 0) : 0); gl.uniform1f(u.uSpec, unlit ? 0 : this.spec); gl.uniform1f(u.uWrap, this.wrap);
     gl.drawElements(gl.TRIANGLES, m.c, gl.UNSIGNED_SHORT, 0);
   }
   partMV(mv, name){
@@ -1163,8 +1253,10 @@ class GLR {
   drawChar(mv, P, tx){
     const B = this.body;
     PARTS.forEach(p => this.draw(B.parts[p.name], p.layer === 'legs' ? tx.legs : tx.upper, this.partMV(mv, p.name), P, tx.tint, false, this.nmapTex, this.nstr));
-    this.draw(B.head, tx.head, this.partMV(mv, 'head'), P, [1,1,1]);
+    const w0 = this.wrap, sp0 = this.spec; if (this.headDims !== HEAD) { this.wrap = 0.6; this.spec = sp0 * 0.5; }   // soft light on the rounded head: no visible facets
+    this.draw(B.head, tx.head, this.partMV(mv, 'head'), P, [1,1,1]); this.wrap = w0; this.spec = sp0;
     B.hands.forEach(h => this.draw(h.mesh, this.white, this.partMV(mv, h.part), P, tx.skin || tx.tint));
+    this.drawOutline(mv, P);
     if (this.studsOn) B.studs.forEach(s => this.draw(s.mesh, PARTS.find(p => p.name === s.part).layer === 'legs' ? tx.legs : tx.upper, this.partMV(mv, s.part), P, tx.tint, false, this.studNMap, 1.6));
   }
 }
@@ -1227,6 +1319,37 @@ function partGeo(part, type){
   return g;
 }
 function boxGeo(part){ return partGeo(part, 'classic'); }
+/* The 3D views' head: a low-poly rounded cylinder (16 sides, soft rounded top and bottom edges) with smooth normals,
+   so the light rolls over it and the facets hardly show. Same texture mapping as the cylinder (u around, v top to bottom). */
+function roundHeadGeo(H){
+  const g = { p:[], n:[], t:[], i:[] }, S = 16, R = H.r * 1.04, h = H.y1 - H.y0, b = Math.min(0.32, h * 0.26), ARC = 5;
+  const prof = [];   // [radius, y, normal radial, normal y] from the top centre to the bottom centre
+  prof.push([0, H.y1 + 0.02, 0, 1], [(R - b) * 0.55, H.y1 + 0.015, 0.05, 1]);
+  for (let k = 0; k <= ARC; k++) { const a = Math.PI / 2 * (1 - k / ARC); prof.push([R - b + b * Math.cos(a), H.y1 - b + b * Math.sin(a), Math.cos(a), Math.sin(a)]); }
+  for (let k = 0; k <= ARC; k++) { const a = -Math.PI / 2 * k / ARC; prof.push([R - b + b * Math.cos(a), H.y0 + b + b * Math.sin(a), Math.cos(a), Math.sin(a)]); }
+  prof.push([(R - b) * 0.55, H.y0 - 0.015, 0.05, -1], [0, H.y0 - 0.02, 0, -1]);
+  const cols = S + 1;
+  prof.forEach(([r, y, nr, ny]) => { const l = Math.hypot(nr, ny) || 1;
+    for (let s = 0; s <= S; s++) { const u = s / S, th = (u - 0.5) * Math.PI * 2, x = Math.sin(th), z = Math.cos(th);
+      g.p.push(x * r, y, z * r); g.n.push(x * nr / l, ny / l, z * nr / l); g.t.push(u, Math.min(0.995, Math.max(0.005, (H.y1 - y) / h))); } });
+  for (let j = 0; j < prof.length - 1; j++) for (let s = 0; s < S; s++) { const a = j * cols + s, b2 = a + 1, c = a + cols, d = c + 1; g.i.push(a, c, d, a, d, b2); }
+  return g;
+}
+/* inverted hull of an indexed mesh: corners welded, pushed out along the averaged normal, triangles flipped (drawn with
+   back faces culled, so only the shell's far side shows around the edges: the Roblox-style outline) */
+function hullGeo(g, w){
+  const n = g.p.length / 3, key = new Map(), acc = [], idx = new Int32Array(n), q = 1e4;
+  for (let v = 0; v < n; v++) { const k = Math.round(g.p[v*3]*q) + ',' + Math.round(g.p[v*3+1]*q) + ',' + Math.round(g.p[v*3+2]*q); let j = key.get(k); if (j === undefined) { j = acc.length; key.set(k, j); acc.push([0, 0, 0]); } idx[v] = j; }
+  for (let t = 0; t < g.i.length; t += 3) { const [a, b, c] = [g.i[t], g.i[t+1], g.i[t+2]], P = i => [g.p[i*3], g.p[i*3+1], g.p[i*3+2]];
+    const pa = P(a), u = v3sub(P(b), pa), vv = v3sub(P(c), pa), fn = v3cross(u, vv), ref = [g.n[a*3], g.n[a*3+1], g.n[a*3+2]], sg = dot(fn, ref) < 0 ? -1 : 1;
+    [a, b, c].forEach(i => { const A = acc[idx[i]]; A[0] += fn[0]*sg; A[1] += fn[1]*sg; A[2] += fn[2]*sg; }); }
+  const h = { p: [], n: [], t: [], i: [] };
+  for (let v = 0; v < n; v++) { const A = v3norm(acc[idx[v]]); h.p.push(g.p[v*3] + A[0]*w, g.p[v*3+1] + A[1]*w, g.p[v*3+2] + A[2]*w); h.n.push(-A[0], -A[1], -A[2]); h.t.push(0, 0); }
+  for (let t = 0; t < g.i.length; t += 3) { const [a, b, c] = [g.i[t], g.i[t+1], g.i[t+2]], P = i => [h.p[i*3], h.p[i*3+1], h.p[i*3+2]];
+    const fn = v3cross(v3sub(P(b), P(a)), v3sub(P(c), P(a))), out = acc[idx[a]];
+    if (dot(fn, out) > 0) h.i.push(a, c, b); else h.i.push(a, b, c); }   // the shell faces inward
+  return h;
+}
 function cylGeo(HEAD){
   const g = { p:[], n:[], t:[], i:[] }, S = 40, r = HEAD.r;
   for (let s=0;s<=S;s++){
@@ -1379,9 +1502,9 @@ function headTex(rgb, c){
   c = c || cnv(512,164); const x = c.getContext('2d');
   x.fillStyle = rgbCss(rgb); x.fillRect(0,0,512,164);
   x.fillStyle = '#1b1b1f';
-  [-27,27].forEach(dx => { x.beginPath(); x.ellipse(256+dx, 66, 7.5, 13, 0, 0, Math.PI*2); x.fill(); });
-  x.strokeStyle = '#1b1b1f'; x.lineWidth = 6.5; x.lineCap = 'round';
-  x.beginPath(); x.arc(256, 76, 40, 0.22*Math.PI, 0.78*Math.PI); x.stroke();
+  [-26,26].forEach(dx => { x.beginPath(); x.ellipse(256+dx, 64, 7, 12.5, 0, 0, Math.PI*2); x.fill(); });
+  x.strokeStyle = '#1b1b1f'; x.lineWidth = 6; x.lineCap = 'round';
+  x.beginPath(); x.arc(256, 78, 34, 0.26*Math.PI, 0.74*Math.PI); x.stroke();
   return c;
 }
 function faceDraw(x, r, fn){ x.save(); x.translate(r[0], r[1]); x.beginPath(); x.rect(0,0,r[2],r[3]); x.clip(); fn(r[2], r[3]); x.restore(); }
@@ -1547,7 +1670,7 @@ function buildPrompt(){
   $('#prompt').value =
 `Add clothing to these two blocky Roblox avatars: ${outfit}.
 
-Both avatars are the same character wearing the same outfit. The left one shows the FRONT and the right one shows the BACK.${LAYOUT === 'exploded' ? ' The right one is an exploded view: its arms, legs and head are pulled slightly apart from the torso so you can see the inner sides of the arms and legs, the sides of the torso and the tops of the legs. Paint the outfit on those inner sides and tops too, and keep every part exactly where it is.' : ''} Paint the clothes flat onto the blocky body like a classic Roblox shirt and pants texture, covering the torso, both arms and both legs.
+Both avatars are the same character wearing the same outfit. The left one shows the FRONT and the right one shows the BACK.${LAYOUT === 'exploded' ? ' The right one is an exploded view: its arms, legs and head are pulled slightly apart from the torso so you can see the inner sides of the arms and legs, the sides of the torso and the tops of the legs. Paint the outfit on those inner sides and tops too, and keep every part exactly where it is.' : ''} Paint the clothes flat onto the blocky body like a classic Roblox shirt and pants texture, covering the torso, both arms and both legs. Use realistic fabric textures (real cotton weave, denim, knit, flannel, leather and stitching), the way a photo of real clothes would look.
 
 Keep everything else exactly the same: same pose, camera angle, size, position, blocky proportions and plain white background. Don't change the heads, and don't add hair, hats, accessories, shadows or anything that changes the silhouette. Keep the lighting soft and even. Any skin that isn't covered by clothing should keep exactly the same skin color it has now.`;
 }
@@ -2186,7 +2309,7 @@ syncFX();
 
 /* ---------- 3D viewer ---------- */
 const V3 = { r:null, yaw:-0.6, pitch:0.18, dist:13.5, spin:true, show:{ shirt:true, pants:true }, comp:null, tex:{}, raf:0, last:0, drag:null, idle:0,
-  body:'classic', surf:'bevel', nstr:1, spec:0.25, studs:'off', studShape:'round', explode:0 };
+  body:'classic', surf:'bevel', nstr:1, spec:0.25, studs:'off', studShape:'round', explode:0, olw:0 };
 const viewC = $('#view3d');
 function initViewer(){
   if (V3.r) return;
@@ -2234,7 +2357,7 @@ function frame(t){
   gl.viewport(0,0,cw,ch); gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   const P = m4persp(30*D2R, cw/Math.max(1,ch), 0.1, 100);
   const mv = m4mul(m4T(0,0,-V3.dist), m4mul(m4RX(V3.pitch), m4mul(m4RY(V3.yaw), m4T(0,-2.6,0))));
-  r.affine = 0; r.snap = 0; r.spec = V3.spec; r.nstr = (V3.surf === 'off' && V3.studs !== 'normal') ? 0 : V3.nstr; r.studsOn = V3.studs === '3d'; r.explode = V3.explode*1.2;
+  r.affine = 0; r.snap = 0; r.spec = V3.spec; r.nstr = (V3.surf === 'off' && V3.studs !== 'normal') ? 0 : V3.nstr; r.studsOn = V3.studs === '3d'; r.explode = V3.explode*1.2; r.outline.on = V3.olw > 0; r.outline.width = V3.olw || 0.06;
   gl.depthMask(false); r.draw(r.floor, V3.tex.floor, mv, P, [1,1,1], true); gl.depthMask(true);
   if (state.fx.wobble){ r.affine = 1; r.snap = 70; }
   r.drawChar(mv, P, { upper:V3.tex.upper, legs:V3.tex.legs, head:V3.tex.head, tint:[1,1,1], skin:hexRgb($('#skin').value).map(v => v/255) });
@@ -2258,6 +2381,7 @@ $('#skin').addEventListener('input', () => { syncChip(); V3.r && updateViewerTex
   slider(BC,'bN','Detail strength',0,2,0.05,()=>V3.nstr,v=>V3.nstr=v,v=>`${Math.round(v*100)}%`);
   slider(BC,'bS','Shine',0,1,0.05,()=>V3.spec,v=>V3.spec=v,v=>v==0?'off':`${Math.round(v*100)}%`);
   slider(BC,'bE','Pop apart',0,1,0.01,()=>V3.explode,v=>V3.explode=v,v=>v==0?'off':`${Math.round(v*100)}%`);
+  slider(BC,'bO','Outline',0,0.15,0.005,()=>V3.olw,v=>V3.olw=v,v=>v==0?'off':(+v).toFixed(3));
   $('#studMode').querySelectorAll('button').forEach(b => b.onclick = () => {
     V3.studs = b.dataset.v; $('#studMode').querySelectorAll('button').forEach(o => o.classList.toggle('on', o === b)); remap();
   });
@@ -2703,18 +2827,160 @@ const CSS = `
 .lpv .msg{font-size:11px;color:#9A9AA3;font-weight:500;min-height:14px}
 @media (max-width:700px){ .lpv .side{top:auto;bottom:62px;height:44%;left:10px;right:10px;width:auto} }`;
 
+
+/* ---------- the texture, shared by the viewer, the Studio's Outfits and the page API ----------
+   T = { n, A, AO, RM, EM, LG, DT: RGBA Uint8 maps (n x n), BO: bounce Float32 (n*n*3) or null, LI: light nodes Float32 or null,
+         GM: group index per texel (255 = none) or null, means: average colour per group }
+   s = { fx:{bits,dither,pixel,contrast,sat,bright}, light:{ao,room,lights,detail,bounce}, colours:[null | {rgb:[r,g,b], amount}] }
+   Order: recolour -> contrast / saturation / brightness -> bigger pixels + colour depth + dither (the colour only)
+          -> x crisp full-size lighting (AO, room, surface detail, light nodes, bounce) -> glow -> logo. Same as tool/lopol.py. */
+const FX_DEFAULT = { bits: 4, dither: 1, pixel: 2, contrast: .5, sat: 0, bright: 0 };
+const LIGHT_DEFAULT = { ao: 1, room: .6, lights: 1, detail: .32, bounce: 1.05 };
+function groupMap(gmap, n){
+  if (!gmap || !gmap.length) return null; const G = new Uint8Array(n*n).fill(255);
+  for (const [x, y, w, h, g] of gmap) { const x0 = Math.max(0, Math.floor(x*n)), y0 = Math.max(0, Math.floor(y*n)), x1 = Math.min(n, Math.ceil((x + w)*n)), y1 = Math.min(n, Math.ceil((y + h)*n));
+    for (let yy = y0; yy < y1; yy++) G.fill(g, yy*n + x0, yy*n + x1); }
+  return G;
+}
+function groupMeans(T, count){
+  const acc = Array.from({ length: count }, () => [0, 0, 0, 0]), { A, GM, n } = T;
+  if (GM) for (let i = 0; i < n*n; i++) { const g = GM[i]; if (g === 255 || g >= count) continue; const a = acc[g]; a[0] += A[i*4]; a[1] += A[i*4+1]; a[2] += A[i*4+2]; a[3]++; }
+  return acc.map(a => a[3] ? [a[0]/a[3], a[1]/a[3], a[2]/a[3]] : [128, 128, 128]);
+}
+function compose(T, s, img){
+  const { n, A, AO, RM, EM, LG, DT, BO, LI, GM } = T, fx = Object.assign({}, FX_DEFAULT, s.fx), L = Object.assign({}, LIGHT_DEFAULT, s.light), cols = s.colours || [];
+  const od = img.data, bits = Math.round(fx.bits), q = 255 / (Math.pow(2, bits) - 1), dz = fx.dither, px = Math.max(1, Math.round(fx.pixel));
+  if (!T.COL || T.COL.length !== n*n*3) T.COL = new Float32Array(n*n*3);
+  const C = T.COL, lum = (r, g, b) => r*.299 + g*.587 + b*.114;
+  const rec = cols.map((c, g) => c && c.rgb ? { t: c.rgb, a: c.amount ?? 1, m: Math.max(8, lum(...T.means[g])) } : null);
+  for (let i = 0; i < n*n; i++) { const p4 = i*4; let r = A[p4], g = A[p4+1], b = A[p4+2];
+    const rc = GM && GM[i] !== 255 ? rec[GM[i]] : null;
+    if (rc) { const k = lum(r, g, b) / rc.m; r += (rc.t[0]*k - r) * rc.a; g += (rc.t[1]*k - g) * rc.a; b += (rc.t[2]*k - b) * rc.a; }
+    if (fx.contrast) { r = (r - 128) * (1 + fx.contrast) + 128; g = (g - 128) * (1 + fx.contrast) + 128; b = (b - 128) * (1 + fx.contrast) + 128; }
+    if (fx.sat) { const m = (r + g + b) / 3; r = m + (r - m) * (1 + fx.sat); g = m + (g - m) * (1 + fx.sat); b = m + (b - m) * (1 + fx.sat); }
+    if (fx.bright) { r += fx.bright * 255; g += fx.bright * 255; b += fx.bright * 255; }
+    C[i*3] = Math.min(255, Math.max(0, r)); C[i*3+1] = Math.min(255, Math.max(0, g)); C[i*3+2] = Math.min(255, Math.max(0, b)); }
+  // bigger texture pixels (one colour and one dither cell per block), colour depth with ordered dithering
+  for (let by = 0; by < n; by += px) for (let bx = 0; bx < n; bx += px) {
+    let r = 0, g = 0, b = 0, cnt = 0; const ye = Math.min(n, by + px), xe = Math.min(n, bx + px);
+    for (let y = by; y < ye; y++) for (let x = bx; x < xe; x++) { const i = (y*n + x)*3; r += C[i]; g += C[i+1]; b += C[i+2]; cnt++; }
+    const d = ((BAY[((by / px) & 3)*4 + ((bx / px) & 3)] + .5) / 16 - .5) * dz * q;
+    const qz = v => { v /= cnt; if (bits < 8) v = Math.round(Math.min(255, Math.max(0, v + d)) / q) * q; return Math.min(255, Math.max(0, v)); };
+    r = qz(r); g = qz(g); b = qz(b);
+    for (let y = by; y < ye; y++) for (let x = bx; x < xe; x++) { const p4 = (y*n + x)*4; od[p4] = r; od[p4+1] = g; od[p4+2] = b; od[p4+3] = 255; } }
+  // the light, crisp at the full size, multiplied in after the retro look
+  for (let i = 0; i < n*n; i++) { const p4 = i*4, e0 = EM[p4]/255*2, e1 = EM[p4+1]/255*2, e2 = EM[p4+2]/255*2, mx = Math.max(e0, e1, e2);
+    if (mx > .01) { const tg = Math.min(.7, Math.max(0, .45 * L.lights * mx)) * lum(od[p4], od[p4+1], od[p4+2]) / 255;
+      od[p4] = od[p4] * (1 - tg) + e0 / mx * 255 * tg; od[p4+1] = od[p4+1] * (1 - tg) + e1 / mx * 255 * tg; od[p4+2] = od[p4+2] * (1 - tg) + e2 / mx * 255 * tg; continue; }
+    const sh = (1 - L.ao + L.ao * AO[p4]/255) * ((1 - .45*L.room) + .9*L.room * RM[p4]/255) * (1 + L.detail * (DT[p4]/255*2 - 1));
+    for (let k = 0; k < 3; k++) od[p4+k] = Math.min(255, od[p4+k] * (sh + L.lights * (LI ? LI[i*3+k] : 0) + L.bounce * (BO ? BO[i*3+k] : 0))); }
+  if (LG) for (let i = 0; i < n*n; i++) { const p4 = i*4; if (LG[p4+3] > 0) { od[p4] = LG[p4]; od[p4+1] = LG[p4+1]; od[p4+2] = LG[p4+2]; } }
+  return img;
+}
+/* one bounce of path-traced light off the model's own surfaces plus a soft sky, on the live grid; calls back with the map */
+function trace(T, grid, pos, uv, L, onStep, done){
+  const r = grid.r, { m, P, N, eps } = grid, n = T.n, S = new Float32Array(r*r*3), hit = [0, 0, 0], RAYS = 40; let i = 0;
+  const src = T.COL || null, A = T.A, AO = T.AO, RM = T.RM, EM = T.EM, LI = T.LI;
+  const white = (u, v) => { const x = Math.min(n - 1, Math.max(0, Math.floor(u*n))), y = Math.min(n - 1, Math.max(0, Math.floor(v*n))), j = y*n + x, p4 = j*4;
+    const e = EM[p4] + EM[p4+1] + EM[p4+2] > 3, sh = (1 - L.ao + L.ao*AO[p4]/255) * ((1 - .45*L.room) + .9*L.room*RM[p4]/255);
+    return [0, 1, 2].map(c => { const al = (src ? src[j*3+c] : A[p4+c]) / 255; return e ? Math.min(1.5, EM[p4+c]/255*2 + al*.3) : al * Math.min(1, sh + L.lights * (LI ? LI[j*3+c] : 0)); }); };
+  let seedr = 7; const rnd = () => (seedr = Math.imul(seedr ^ (seedr >>> 15), 2246822507) + 0x9e3779b9 >>> 0) / 4294967296;
+  let stopped = false;
+  const step = () => {
+    if (stopped) return; const t0 = performance.now();
+    for (; i < r*r && performance.now() - t0 < 30; i++) { if (!m[i]) continue;
+      const nx = N[i*3], ny = N[i*3+1], nz = N[i*3+2], ox = P[i*3] + nx*eps, oy = P[i*3+1] + ny*eps, oz = P[i*3+2] + nz*eps;
+      const ax = Math.abs(ny) < .9 ? [0, 1, 0] : [1, 0, 0]; let tx = ax[1]*nz - ax[2]*ny, ty = ax[2]*nx - ax[0]*nz, tz = ax[0]*ny - ax[1]*nx; const tl = Math.hypot(tx, ty, tz); tx /= tl; ty /= tl; tz /= tl;
+      const bx = ny*tz - nz*ty, by = nz*tx - nx*tz, bz = nx*ty - ny*tx; let sr = 0, sg = 0, sb = 0;
+      for (let k = 0; k < RAYS; k++) { const u1 = (k + rnd()) / RAYS, rr = Math.sqrt(u1), ph = 2*Math.PI*rnd(), cz = Math.sqrt(1 - u1);
+        const dx = tx*rr*Math.cos(ph) + bx*rr*Math.sin(ph) + nx*cz, dy = ty*rr*Math.cos(ph) + by*rr*Math.sin(ph) + ny*cz, dz = tz*rr*Math.cos(ph) + bz*rr*Math.sin(ph) + nz*cz;
+        if (nearest(ox, oy, oz, dx, dy, dz, pos, eps, hit) >= 0) { const t = hit[0], w0 = 1 - hit[1] - hit[2]; const u = uv[t*6]*w0 + uv[t*6+2]*hit[1] + uv[t*6+4]*hit[2], v = uv[t*6+1]*w0 + uv[t*6+3]*hit[1] + uv[t*6+5]*hit[2];
+          const c = white(u, v); sr += c[0]; sg += c[1]; sb += c[2]; }
+        else { const s = Math.min(1.1, Math.max(.2, dy * .5 + .6)); sr += .55*s; sg += .58*s; sb += .62*s; } }
+      S[i*3] = sr / RAYS; S[i*3+1] = sg / RAYS; S[i*3+2] = sb / RAYS; }
+    if (onStep) onStep(i / (r*r));
+    if (i < r*r) setTimeout(step, 0); else { spread(m, [S], r); done(upsample(S, r, n)); }
+  };
+  step(); return { stop(){ stopped = true; } };
+}
+/* light from the nodes on the live grid (hard shadows; glowing parts let light through) */
+function nodeLight(grid, nodes, ctr, n){
+  if (!grid) return null;
+  const r = grid.r, M = new Float32Array(r*r*3), { m, P, N, B, eps } = grid;
+  for (let i = 0; i < r*r; i++) { if (!m[i]) continue;
+    const nx = N[i*3], ny = N[i*3+1], nz = N[i*3+2], ox = P[i*3] + nx*eps, oy = P[i*3+1] + ny*eps, oz = P[i*3+2] + nz*eps;
+    for (const nd of nodes) { const lx = nd.pos[0] - ctr[0] - ox, ly = nd.pos[1] - ctr[1] - oy, lz = nd.pos[2] - ctr[2] - oz, d = Math.hypot(lx, ly, lz) || 1e-9;
+      const cr = Math.max(0, (nx*lx + ny*ly + nz*lz) / d), qq = d / Math.max(1e-3, nd.range); const w = cr * Math.pow(Math.max(0, 1 - qq*qq*qq*qq), 2) / (1 + 4*qq*qq) * (nd.strength ?? 1);
+      if (w <= 1e-4) continue; if (anyHit(ox, oy, oz, lx/d, ly/d, lz/d, d - eps, B, eps)) continue;
+      for (let c = 0; c < 3; c++) M[i*3+c] += w * (nd.color || [255, 255, 255])[c] / 255; } }
+  for (let i = 0; i < M.length; i++) M[i] = Math.min(2, M[i]);
+  spread(m, [M], r); return upsample(M, r, n);
+}
+/* a GLB with the texture, the normal map, tangents and (optionally) the inverted-hull outline */
+function makeGLB({ name, P, N, uv, tan, png, npng, hull, color }){
+  const nv = P.length / 3, bufs = [P, N, uv, tan].map(a => new Uint8Array(a.buffer.slice(a.byteOffset, a.byteOffset + a.byteLength))).concat([png]);
+  if (npng) bufs.push(npng); if (hull) bufs.push(new Uint8Array(hull.buffer.slice(0)), new Uint8Array(flatNormals(hull).buffer));
+  const views = [], chunks = []; let off = 0;
+  bufs.forEach(b => { views.push({ buffer: 0, byteOffset: off, byteLength: b.length }); chunks.push(b); const pad = (4 - b.length % 4) % 4; if (pad) chunks.push(new Uint8Array(pad)); off += b.length + pad; });
+  [0, 1, 2, 3].forEach(i => views[i].target = 34962);
+  const mm = a => { const mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9]; for (let i = 0; i < a.length; i++) { mn[i % 3] = Math.min(mn[i % 3], a[i]); mx[i % 3] = Math.max(mx[i % 3], a[i]); } return [mn, mx]; };
+  const [mn, mx] = mm(P);
+  const acc = [{ bufferView: 0, componentType: 5126, count: nv, type: 'VEC3', min: mn, max: mx }, { bufferView: 1, componentType: 5126, count: nv, type: 'VEC3' }, { bufferView: 2, componentType: 5126, count: nv, type: 'VEC2' }, { bufferView: 3, componentType: 5126, count: nv, type: 'VEC4' }];
+  const mat = { name: 'lopol', pbrMetallicRoughness: { baseColorTexture: { index: 0 }, metallicFactor: 0, roughnessFactor: 1 } };
+  const images = [{ bufferView: 4, mimeType: 'image/png' }], textures = [{ source: 0, sampler: 0 }];
+  if (npng) { images.push({ bufferView: 5, mimeType: 'image/png' }); textures.push({ source: 1, sampler: 0 }); mat.normalTexture = { index: 1 }; }
+  const prims = [{ attributes: { POSITION: 0, NORMAL: 1, TEXCOORD_0: 2, TANGENT: 3 }, material: 0 }], mats = [mat], J = {};
+  if (hull) { const k = views.length - 2; views[k].target = views[k + 1].target = 34962; const [hn, hx] = mm(hull);
+    acc.push({ bufferView: k, componentType: 5126, count: nv, type: 'VEC3', min: hn, max: hx }, { bufferView: k + 1, componentType: 5126, count: nv, type: 'VEC3' });
+    prims.push({ attributes: { POSITION: acc.length - 2, NORMAL: acc.length - 1 }, material: 1 });
+    mats.push({ name: 'outline', pbrMetallicRoughness: { baseColorFactor: color.map(c => c / 255).concat([1]), metallicFactor: 0, roughnessFactor: 1 }, extensions: { KHR_materials_unlit: {} } }); J.extensionsUsed = ['KHR_materials_unlit']; }
+  Object.assign(J, { asset: { version: '2.0', generator: 'Image2LoPol' }, scene: 0, scenes: [{ nodes: [0] }], nodes: [{ mesh: 0, name }], meshes: [{ name, primitives: prims }],
+    accessors: acc, bufferViews: views, buffers: [{ byteLength: off }], images, samplers: [{ magFilter: 9728, minFilter: 9728 }], textures, materials: mats });
+  let js = new TextEncoder().encode(JSON.stringify(J)); const jp = (4 - js.length % 4) % 4; if (jp) { const t = new Uint8Array(js.length + jp).fill(32); t.set(js); js = t; }
+  const head = new DataView(new ArrayBuffer(20)); head.setUint32(0, 0x46546C67, true); head.setUint32(4, 2, true); head.setUint32(8, 12 + 8 + js.length + 8 + off, true); head.setUint32(12, js.length, true); head.setUint32(16, 0x4E4F534A, true);
+  const bh = new DataView(new ArrayBuffer(8)); bh.setUint32(0, off, true); bh.setUint32(4, 0x004E4942, true);
+  return new Blob([head.buffer, js, bh.buffer, ...chunks], { type: 'model/gltf-binary' });
+}
+function flatNormals(P){ const N = new Float32Array(P.length);
+  for (let i = 0; i < P.length; i += 9) { const ux = P[i+3]-P[i], uy = P[i+4]-P[i+1], uz = P[i+5]-P[i+2], vx = P[i+6]-P[i], vy = P[i+7]-P[i+1], vz = P[i+8]-P[i+2];
+    let nx = uy*vz - uz*vy, ny = uz*vx - ux*vz, nz = ux*vy - uy*vx; const l = Math.hypot(nx, ny, nz) || 1; for (let k = 0; k < 9; k += 3) { N[i+k] = nx/l; N[i+k+1] = ny/l; N[i+k+2] = nz/l; } } return N; }
+/* the inverted hull: every corner pushed out along its smoothed normal, faces flipped. width in model units. */
+function hullOf(P, width){
+  const NV = P.length / 3, q = 1e4, key = new Map(), acc = [], idx = new Int32Array(NV);
+  for (let v = 0; v < NV; v++) { const k = Math.round(P[v*3]*q) + ',' + Math.round(P[v*3+1]*q) + ',' + Math.round(P[v*3+2]*q); let j = key.get(k); if (j === undefined) { j = acc.length; key.set(k, j); acc.push([0, 0, 0]); } idx[v] = j; }
+  for (let i = 0; i < P.length; i += 9) { const ux = P[i+3]-P[i], uy = P[i+4]-P[i+1], uz = P[i+5]-P[i+2], vx = P[i+6]-P[i], vy = P[i+7]-P[i+1], vz = P[i+8]-P[i+2];
+    const nx = uy*vz - uz*vy, ny = uz*vx - ux*vz, nz = ux*vy - uy*vx; for (let k = 0; k < 3; k++) { const a = acc[idx[i/3+k]]; a[0] += nx; a[1] += ny; a[2] += nz; } }
+  const H = new Float32Array(P.length);
+  for (let t = 0; t < NV; t += 3) for (const [k, s] of [[0, 0], [1, 2], [2, 1]]) { const a = acc[idx[t+s]], l = Math.hypot(a[0], a[1], a[2]) || 1; for (let c = 0; c < 3; c++) H[(t+k)*3+c] = P[(t+s)*3+c] + a[c]/l*width; }
+  return H;
+}
+const decodeGrid = g => g ? { r: g.res, m: u8(g.mask), P: f32(g.P), N: f32(g.N), B: f32(g.blockers), eps: g.eps } : null;
+/* load the maps of a model (D.maps data URLs or URLs) into a T for compose() */
+async function prepare(D){
+  const keys = ['albedo', 'ao', 'room', 'emit', 'logo', 'detail'];
+  const ims = await Promise.all(keys.map(k => D.maps[k] ? loadImg(D.maps[k]) : null)); const n = ims[0].naturalWidth;
+  const px = ims.map(im => im ? pixels(im, n) : null);
+  const T = { n, A: px[0], AO: px[1], RM: px[2], EM: px[3], LG: px[4], DT: px[5], BO: null, LI: null };
+  if (!T.LG) T.LG = new Uint8ClampedArray(n*n*4);
+  if (D.maps.bounce) { const b = pixels(await loadImg(D.maps.bounce), n); T.BO = new Float32Array(n*n*3); for (let i = 0; i < n*n; i++) for (let c = 0; c < 3; c++) T.BO[i*3+c] = b[i*4+c] / 255 * 2; }
+  const look = D.look || {}; T.GM = groupMap(look.gmap, n); T.groups = (look.groups || []).map(g => g.name); T.means = groupMeans(T, T.groups.length);
+  return T;
+}
+window.LoPolTex = { compose, prepare, trace, nodeLight, decodeGrid, groupMap, groupMeans, makeGLB, hullOf, flatNormals, FX_DEFAULT, LIGHT_DEFAULT, f32, u8, loadImg };
+
 window.LoPolView = function LoPolView(root, D, opts = {}){
   if (!document.getElementById('lpv-css')) { const st = document.createElement('style'); st.id = 'lpv-css'; st.textContent = CSS; document.head.appendChild(st); }
   root.classList.add('lpv'); root.innerHTML = '';
   const cv = document.createElement('canvas'); cv.className = 'v'; root.appendChild(cv);
   const gl = cv.getContext('webgl', { antialias: false, preserveDrawingBuffer: false });
   const pos = f32(D.pos), nrm = f32(D.nrm), uv = f32(D.uv), tan = D.tan ? f32(D.tan) : null, NV = pos.length / 3;
-  const look = D.look || {}, L = Object.assign({ ao: .8, room: .6, lights: 1, detail: .7, bounce: 0 }, look.light || {});
+  const look = D.look || {}, set0 = opts.settings || {}, L = Object.assign({}, LIGHT_DEFAULT, look.light || {}, set0.light || {});
   const O = { nearest: true, light: true, spin: true, outline: !(look.outline && look.outline.on === false) };
   const OL = Object.assign({ width: .027, color: [5, 5, 5] }, look.outline || {});
   const lf = look.fx || {};
-  const FX = { bits: lf.palette ? 5 : (lf.bits || 8), dither: lf.dither || 0, pixel: lf.pixel || 1, contrast: lf.contrastAdj || 0, sat: lf.satAdj || 0, bright: lf.bright || 0 };
-  const nodes = (look.nodes || []).map(n => ({ pos: n.pos.slice(), color: (n.color || [255, 255, 255]).slice(), strength: n.strength ?? 1, range: n.range ?? 3 }));
+  const FX = Object.assign({}, FX_DEFAULT, { bits: lf.palette ? 5 : (lf.bits ?? FX_DEFAULT.bits) }, ...['dither', 'pixel', 'contrast', 'sat', 'bright'].filter(k => lf[k] !== undefined).map(k => ({ [k]: lf[k] })), set0.fx || {});
+  const groups = (look.groups || []).map(g => g.name), colours = (set0.colours || []).slice(); colours.length = groups.length;
+  const nodes = (set0.nodes || look.nodes || []).map(n => ({ pos: n.pos.slice(), color: (n.color || [255, 255, 255]).slice(), strength: n.strength ?? 1, range: n.range ?? 3 }));
   const ctr = (look.grid && look.grid.centre) || [0, 0, 0];
 
   /* ---------- GL ---------- */
@@ -2769,8 +3035,9 @@ window.LoPolView = function LoPolView(root, D, opts = {}){
   const sl = (key, label, min, max, step, attr = 'data-l') => `<label><span class="lb">${label}<b class="val"></b></span><input type="range" ${attr}="${key}" min="${min}" max="${max}" step="${step}"></label>`;
   side.innerHTML = `<h4>Texture effects</h4>${sl('bits', 'Colour depth', 2, 8, 1, 'data-f')}${sl('dither', 'Dither', 0, 1, .01, 'data-f')}${sl('pixel', 'Pixel size', 1, 8, 1, 'data-f')}
     ${sl('contrast', 'Contrast', -.5, .5, .01, 'data-f')}${sl('sat', 'Saturation', -1, 1, .01, 'data-f')}${sl('bright', 'Brightness', -.4, .4, .01, 'data-f')}
+    <div class="colRow" hidden><h4>Colours</h4><div class="cols"></div></div>
     <h4>Baked lighting</h4>${sl('ao', 'Ambient occlusion', 0, 1, .01)}${sl('room', 'Room light', 0, 1, .01)}${sl('detail', 'Surface detail (normal map)', 0, 1.5, .01)}${sl('lights', 'Light nodes', 0, 2, .01)}
-    <div class="bounceRow" ${D.maps && D.maps.bounce ? '' : 'hidden'}>${sl('bounce', 'Bounce light (path traced)', 0, 1.5, .01)}</div>
+    <div class="bounceRow">${sl('bounce', 'Bounce light (path traced)', 0, 1.5, .01)}</div>
     <div class="row"><button class="ghost pt">Path-trace bounce light</button></div><div class="msg"></div>
     <h4>Light nodes <button class="ghost add" style="flex:none;padding:3px 8px">+ Add</button></h4><div class="nodes"></div>
     <div class="olRow"><h4>Outline</h4>${sl('w', 'Width', .004, .06, .001, 'data-o')}<div class="row">Colour <input type="color" class="olc"><b class="val olv"></b></div></div>
@@ -2788,7 +3055,7 @@ window.LoPolView = function LoPolView(root, D, opts = {}){
     if (k === 'nearest' && texSrc) upload(texC, texSrc, O.nearest);
     if (k === 'outline') $('.olRow').hidden = !O.outline; }; });
   $('.olRow').hidden = !O.outline;
-  if (!D.maps) side.querySelectorAll('h4,label,.row,.nodes,.msg,.bounceRow').forEach(e => { if (!e.closest('.olRow') && !e.querySelector('.glb,.objz,.dtex')) e.hidden = true; });
+  if (!D.maps) side.querySelectorAll('h4,label,.row,.nodes,.msg,.bounceRow,.colRow').forEach(e => { if (!e.closest('.olRow') && !e.querySelector('.glb,.objz,.dtex')) e.hidden = true; });
   const range = D.radius * 1.4;
   function drawNodes(){
     const box = $('.nodes'); box.innerHTML = '';
@@ -2806,81 +3073,45 @@ window.LoPolView = function LoPolView(root, D, opts = {}){
   }
   $('.add').onclick = () => { nodes.push({ pos: [ctr[0], ctr[1] + D.radius * .6, ctr[2] + D.radius * .6], color: [255, 200, 120], strength: 1.2, range: D.radius * 2 }); drawNodes(); relight(); };
 
-  /* ---------- the texture: albedo x lighting, quantised and dithered, logo on top ---------- */
-  let n = 0, A, AO, RM, EM, LG, DT, NMp, BO = null, LI = null, cur = null, octx, oimg, outCanvas;
-  const grid = look.grid ? { r: look.grid.res, m: u8(look.grid.mask), P: f32(look.grid.P), N: f32(look.grid.N), B: f32(look.grid.blockers), eps: look.grid.eps } : null;
-  function nodeMap(){
-    if (!grid) return null;
-    const r = grid.r, M = new Float32Array(r*r*3), { m, P, N, B, eps } = grid;
-    for (let i = 0; i < r*r; i++) { if (!m[i]) continue;
-      const nx = N[i*3], ny = N[i*3+1], nz = N[i*3+2], ox = P[i*3] + nx*eps, oy = P[i*3+1] + ny*eps, oz = P[i*3+2] + nz*eps;
-      for (const nd of nodes) { const lx = nd.pos[0] - ctr[0] - ox, ly = nd.pos[1] - ctr[1] - oy, lz = nd.pos[2] - ctr[2] - oz, d = Math.hypot(lx, ly, lz) || 1e-9;
-        const cr = Math.max(0, (nx*lx + ny*ly + nz*lz) / d), q = d / Math.max(1e-3, nd.range); let w = cr * Math.pow(Math.max(0, 1 - q*q*q*q), 2) / (1 + 4*q*q) * nd.strength;
-        if (w <= 1e-4) continue; if (anyHit(ox, oy, oz, lx/d, ly/d, lz/d, d - eps, B, eps)) continue;
-        for (let c = 0; c < 3; c++) M[i*3+c] += w * nd.color[c] / 255; } }
-    for (let i = 0; i < M.length; i++) M[i] = Math.min(2, M[i]);
-    spread(m, [M], r); return upsample(M, r, n);
-  }
-  function relight(){ LI = nodeMap(); schedule(); }
+  /* ---------- the texture (LoPolTex.compose): recolour, retro look on the colour, crisp light on top ---------- */
+  let n = 0, T = null, cur = null, octx, oimg, outCanvas, nrmSrc0 = null, tracer = null;
+  const grid = decodeGrid(look.grid);
+  function relight(){ if (T) T.LI = nodeLight(grid, nodes, ctr, n); schedule(); }
   let pend = 0; function schedule(){ if (!pend) pend = requestAnimationFrame(() => { pend = 0; bake(); }); }
-  let LIT = null;
   function bake(){
-    if (!A) return; const bits = Math.round(FX.bits), q = 255 / (Math.pow(2, bits) - 1), dz = FX.dither, px = Math.max(1, Math.round(FX.pixel)), od = oimg.data;
-    if (!LIT || LIT.length !== n*n*3) LIT = new Float32Array(n*n*3);
-    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const i = y*n + x, p4 = i*4;
-      const e = Math.max(EM[p4], EM[p4+1], EM[p4+2]) / 255 * 2 > .01;
-      const shade = (1 - L.ao + L.ao * AO[p4]/255) * ((1 - .45*L.room) + .9*L.room * RM[p4]/255), det = 1 + L.detail * (DT[p4]/255*2 - 1);
-      const mx = Math.max(EM[p4], EM[p4+1], EM[p4+2]) / 255 * 2, tg = Math.min(.7, Math.max(0, .45 * L.lights * mx)) * (A[p4]*.299 + A[p4+1]*.587 + A[p4+2]*.114) / 255;
-      let c = [0, 1, 2].map(k => { const li = LI ? LI[i*3+k] : 0, em = EM[p4+k]/255*2, bo = BO ? BO[i*3+k] : 0;
-        return e ? A[p4+k] * (1 - tg) + em / Math.max(mx, 1e-6) * 255 * tg : A[p4+k] * (shade * det + L.lights * li + L.bounce * bo); });
-      if (FX.bright) c = c.map(v => v + FX.bright * 255);
-      if (FX.contrast) c = c.map(v => (v - 128) * (1 + FX.contrast) + 128);
-      if (FX.sat) { const g = (c[0] + c[1] + c[2]) / 3; c = c.map(v => g + (v - g) * (1 + FX.sat)); }
-      for (let k = 0; k < 3; k++) LIT[i*3+k] = Math.min(255, Math.max(0, c[k])); }
-    // bigger texture pixels: average px x px blocks; then colour depth with ordered dithering (one dither cell per big pixel)
-    for (let by = 0; by < n; by += px) for (let bx = 0; bx < n; bx += px) {
-      const acc = [0, 0, 0]; let cnt = 0;
-      for (let y = by; y < Math.min(n, by + px); y++) for (let x = bx; x < Math.min(n, bx + px); x++) { const i = (y*n + x)*3; acc[0] += LIT[i]; acc[1] += LIT[i+1]; acc[2] += LIT[i+2]; cnt++; }
-      const gx = bx / px, gy = by / px, d = ((BAY[(gy & 3)*4 + (gx & 3)] + .5) / 16 - .5) * dz * q;
-      const v = acc.map(t => { let u = t / cnt; if (bits < 8) u = Math.round(Math.min(255, Math.max(0, u + d)) / q) * q; return Math.min(255, Math.max(0, u)); });
-      for (let y = by; y < Math.min(n, by + px); y++) for (let x = bx; x < Math.min(n, bx + px); x++) { const p4 = (y*n + x)*4; od[p4] = v[0]; od[p4+1] = v[1]; od[p4+2] = v[2]; od[p4+3] = 255; } }
-    for (let i = 0; i < n*n; i++) { const p4 = i*4; if (LG[p4+3] > 0) { od[p4] = LG[p4]; od[p4+1] = LG[p4+1]; od[p4+2] = LG[p4+2]; } }  // the logo stays crisp
+    if (!T) return; compose(T, { fx: FX, light: L, colours }, oimg);
     octx.putImageData(oimg, 0, 0); cur = outCanvas; texSrc = outCanvas; upload(texC, outCanvas, O.nearest);
-    if (opts.onTexture) opts.onTexture(outCanvas, L);
+    if (opts.onTexture) opts.onTexture(outCanvas, settings());
   }
-  /* path-traced bounce: one bounce of light off the model's own surfaces, plus a soft sky */
-  $('.pt').onclick = () => {
-    if (!grid || !A) return; const r = grid.r, { m, P, N, eps } = grid, T = pos, S = new Float32Array(r*r*3), hit = [0, 0, 0], RAYS = 40; let i = 0;
-    const white = (u, v) => { const x = Math.min(n - 1, Math.max(0, Math.floor(u*n))), y = Math.min(n - 1, Math.max(0, Math.floor(v*n))), p4 = (y*n + x)*4;
-      const e = EM[p4] + EM[p4+1] + EM[p4+2] > 3, sh = (1 - L.ao + L.ao*AO[p4]/255) * ((1 - .45*L.room) + .9*L.room*RM[p4]/255);
-      return [0, 1, 2].map(c => e ? Math.min(1.5, EM[p4+c]/255*2 + A[p4+c]/255*.3) : A[p4+c]/255 * Math.min(1, sh + L.lights * (LI ? LI[(y*n+x)*3+c] : 0))); };
-    $('.pt').hidden = true; let seedr = 7; const rnd = () => (seedr = Math.imul(seedr ^ (seedr >>> 15), 2246822507) + 0x9e3779b9 >>> 0) / 4294967296;
-    const step = () => {
-      const t0 = performance.now();
-      for (; i < r*r && performance.now() - t0 < 30; i++) { if (!m[i]) continue;
-        const nx = N[i*3], ny = N[i*3+1], nz = N[i*3+2], ox = P[i*3] + nx*eps, oy = P[i*3+1] + ny*eps, oz = P[i*3+2] + nz*eps;
-        const ax = Math.abs(ny) < .9 ? [0, 1, 0] : [1, 0, 0]; let tx = ax[1]*nz - ax[2]*ny, ty = ax[2]*nx - ax[0]*nz, tz = ax[0]*ny - ax[1]*nx; const tl = Math.hypot(tx, ty, tz); tx /= tl; ty /= tl; tz /= tl;
-        const bx = ny*tz - nz*ty, by = nz*tx - nx*tz, bz = nx*ty - ny*tx; let sr = 0, sg = 0, sb = 0;
-        for (let k = 0; k < RAYS; k++) { const u1 = (k + rnd()) / RAYS, rr = Math.sqrt(u1), ph = 2*Math.PI*rnd(), cz = Math.sqrt(1 - u1);
-          const dx = tx*rr*Math.cos(ph) + bx*rr*Math.sin(ph) + nx*cz, dy = ty*rr*Math.cos(ph) + by*rr*Math.sin(ph) + ny*cz, dz = tz*rr*Math.cos(ph) + bz*rr*Math.sin(ph) + nz*cz;
-          if (nearest(ox, oy, oz, dx, dy, dz, T, eps, hit) >= 0) { const t = hit[0], w0 = 1 - hit[1] - hit[2]; const u = uv[t*6]*w0 + uv[t*6+2]*hit[1] + uv[t*6+4]*hit[2], v = uv[t*6+1]*w0 + uv[t*6+3]*hit[1] + uv[t*6+5]*hit[2];
-            const c = white(u, v); sr += c[0]; sg += c[1]; sb += c[2]; }
-          else { const s = Math.min(1.1, Math.max(.2, dy * .5 + .6)); sr += .55*s; sg += .58*s; sb += .62*s; } }
-        S[i*3] = sr / RAYS; S[i*3+1] = sg / RAYS; S[i*3+2] = sb / RAYS; }
-      msg(`Path tracing… ${Math.round(i / (r*r) * 100)}%`);
-      if (i < r*r) setTimeout(step, 0); else { spread(m, [S], r); BO = upsample(S, r, n); if (!L.bounce) L.bounce = .5; $('.bounceRow').hidden = false; $('[data-l=bounce]').value = L.bounce; msg('Bounce light baked in.'); $('.pt').hidden = false; schedule(); }
-    };
-    step();
-  };
+  /* path-traced bounce: automatic when the bounce slider is above 0 and the model has no bounce map yet */
+  function pathTrace(){
+    if (!grid || !T || tracer) return; $('.pt').hidden = true;
+    tracer = trace(T, grid, pos, uv, L, f => msg(`Path tracing… ${Math.round(f * 100)}%`), BO => {
+      tracer = null; T.BO = BO; $('.bounceRow').hidden = false; msg('Bounce light baked in.'); $('.pt').hidden = false; $('.pt').textContent = 'Path-trace again'; schedule(); });
+  }
+  $('.pt').onclick = pathTrace;
+  function drawColours(){
+    const box = $('.cols'); if (!box) return; box.innerHTML = ''; $('.colRow').hidden = !groups.length;
+    groups.forEach((g, i) => { const c = colours[i], base = T ? T.means[i].map(Math.round) : [128, 128, 128], el = document.createElement('div'); el.className = 'node';
+      el.innerHTML = `<div class="row"><input type="color" value="${hex(c ? c.rgb : base)}"><span style="flex:1">${g} <b class="val cv">${c ? 'RGB ' + c.rgb.join(' ') : 'original'}</b></span><button class="x" title="Back to the painted colour" ${c ? '' : 'hidden'}>↺</button></div>
+        <label ${c ? '' : 'hidden'}><span class="lb">Strength<b class="val"></b></span><input type="range" data-v="c" min="0" max="1" step="0.01" value="${c ? c.amount ?? 1 : 1}"></label>`;
+      const rg = el.querySelector('input[type=range]'); show(rg);
+      el.querySelector('input[type=color]').oninput = e => { colours[i] = { rgb: unhex(e.target.value), amount: colours[i] ? colours[i].amount ?? 1 : 1 };
+        el.querySelector('.cv').textContent = 'RGB ' + colours[i].rgb.join(' '); el.querySelector('.x').hidden = false; rg.closest('label').hidden = false; schedule(); };
+      rg.oninput = () => { show(rg); if (colours[i]) { colours[i].amount = +rg.value; schedule(); } };
+      el.querySelector('.x').onclick = () => { colours[i] = null; drawColours(); schedule(); };
+      box.appendChild(el); });
+  }
+  function settings(){ return { fx: Object.assign({}, FX), light: Object.assign({}, L), nodes: nodes.map(n => JSON.parse(JSON.stringify(n))), colours: colours.map(c => c ? { rgb: c.rgb.slice(), amount: c.amount ?? 1 } : null), outline: { on: O.outline, width: OL.width, color: OL.color.slice() } }; }
 
   const ready = (async () => {
     if (D.maps) {
-      const keys = ['albedo', 'ao', 'room', 'emit', 'logo', 'detail', 'normal'].concat(D.maps.bounce ? ['bounce'] : []);
-      const ims = await Promise.all(keys.map(k => loadImg(D.maps[k]))); n = ims[0].naturalWidth;
-      [A, AO, RM, EM, LG, DT, NMp] = ims.slice(0, 7).map(im => pixels(im, n));
-      if (D.maps.bounce) { const b = pixels(ims[7], n); BO = new Float32Array(n*n*3); for (let i = 0; i < n*n; i++) for (let c = 0; c < 3; c++) BO[i*3+c] = b[i*4+c] / 255 * 2; }
+      T = await prepare(D); n = T.n;
       outCanvas = document.createElement('canvas'); outCanvas.width = outCanvas.height = n; octx = outCanvas.getContext('2d'); oimg = octx.createImageData(n, n);
-      nrmSrc = ims[6]; upload(texN, nrmSrc, false); hasNM = true; drawNodes(); LI = nodeMap(); bake();
+      nrmSrc = await loadImg(D.maps.normal); upload(texN, nrmSrc, false); hasNM = true; drawNodes(); drawColours();
+      if (T.BO) $('.bounceRow').hidden = false;
+      T.LI = nodeLight(grid, nodes, ctr, n); bake();
+      if (!T.BO && L.bounce > 0 && opts.autoTrace !== false) pathTrace();
     } else { const im = await loadImg(D.tex); texSrc = im; upload(texC, im, O.nearest); }
   })();
 
@@ -2888,30 +3119,7 @@ window.LoPolView = function LoPolView(root, D, opts = {}){
   const save = (blob, name) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 60000); };
   const slug = (D.name || 'model').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const pngOf = async src => { const c = document.createElement('canvas'); c.width = src.naturalWidth || src.width; c.height = src.naturalHeight || src.height; c.getContext('2d').drawImage(src, 0, 0); return new Uint8Array(await (await new Promise(r => c.toBlob(r, 'image/png'))).arrayBuffer()); };
-  function glb(png, npng){
-    const P = curPos, N = curNrm, nv = P.length / 3, bufs = [P, N, uv, tanF].map(a => new Uint8Array(a.buffer.slice(0))).concat([png]);
-    if (npng) bufs.push(npng); const oh = O.outline && hull; if (oh) { bufs.push(new Uint8Array(hull.buffer.slice(0)), new Uint8Array(flatNormals(hull).buffer)); }
-    const views = [], chunks = []; let off = 0;
-    bufs.forEach(b => { views.push({ buffer: 0, byteOffset: off, byteLength: b.length }); chunks.push(b); const pad = (4 - b.length % 4) % 4; if (pad) chunks.push(new Uint8Array(pad)); off += b.length + pad; });
-    [0, 1, 2, 3].forEach(i => views[i].target = 34962);
-    const mm = a => { const mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9]; for (let i = 0; i < a.length; i++) { mn[i % 3] = Math.min(mn[i % 3], a[i]); mx[i % 3] = Math.max(mx[i % 3], a[i]); } return [mn, mx]; };
-    const [mn, mx] = mm(P);
-    const acc = [{ bufferView: 0, componentType: 5126, count: nv, type: 'VEC3', min: mn, max: mx }, { bufferView: 1, componentType: 5126, count: nv, type: 'VEC3' }, { bufferView: 2, componentType: 5126, count: nv, type: 'VEC2' }, { bufferView: 3, componentType: 5126, count: nv, type: 'VEC4' }];
-    const mat = { name: 'lopol', pbrMetallicRoughness: { baseColorTexture: { index: 0 }, metallicFactor: 0, roughnessFactor: 1 } };
-    const images = [{ bufferView: 4, mimeType: 'image/png' }], textures = [{ source: 0, sampler: 0 }];
-    if (npng) { images.push({ bufferView: 5, mimeType: 'image/png' }); textures.push({ source: 1, sampler: 0 }); mat.normalTexture = { index: 1 }; }
-    const prims = [{ attributes: { POSITION: 0, NORMAL: 1, TEXCOORD_0: 2, TANGENT: 3 }, material: 0 }], mats = [mat], J = {};
-    if (oh) { const k = views.length - 2; views[k].target = views[k + 1].target = 34962; const [hn, hx] = mm(hull);
-      acc.push({ bufferView: k, componentType: 5126, count: nv, type: 'VEC3', min: hn, max: hx }, { bufferView: k + 1, componentType: 5126, count: nv, type: 'VEC3' });
-      prims.push({ attributes: { POSITION: acc.length - 2, NORMAL: acc.length - 1 }, material: 1 });
-      mats.push({ name: 'outline', pbrMetallicRoughness: { baseColorFactor: OL.color.map(c => c / 255).concat([1]), metallicFactor: 0, roughnessFactor: 1 }, extensions: { KHR_materials_unlit: {} } }); J.extensionsUsed = ['KHR_materials_unlit']; }
-    Object.assign(J, { asset: { version: '2.0', generator: 'Image2LoPol' }, scene: 0, scenes: [{ nodes: [0] }], nodes: [{ mesh: 0, name: D.name }], meshes: [{ name: D.name, primitives: prims }],
-      accessors: acc, bufferViews: views, buffers: [{ byteLength: off }], images, samplers: [{ magFilter: 9728, minFilter: 9728 }], textures, materials: mats });
-    let js = new TextEncoder().encode(JSON.stringify(J)); const jp = (4 - js.length % 4) % 4; if (jp) { const t = new Uint8Array(js.length + jp).fill(32); t.set(js); js = t; }
-    const head = new DataView(new ArrayBuffer(20)); head.setUint32(0, 0x46546C67, true); head.setUint32(4, 2, true); head.setUint32(8, 12 + 8 + js.length + 8 + off, true); head.setUint32(12, js.length, true); head.setUint32(16, 0x4E4F534A, true);
-    const bh = new DataView(new ArrayBuffer(8)); bh.setUint32(0, off, true); bh.setUint32(4, 0x004E4942, true);
-    return new Blob([head.buffer, js, bh.buffer, ...chunks], { type: 'model/gltf-binary' });
-  }
+  function glb(png, npng){ return makeGLB({ name: D.name, P: curPos, N: curNrm, uv, tan: tanF, png, npng, hull: O.outline ? hull : null, color: OL.color }); }
   function obj(){
     const P = curPos, N = curNrm, nv = P.length / 3, f = v => v.toFixed(5), Ls = ['# ' + D.name + ', made with Image2LoPol', 'mtllib model.mtl', 'o model'];
     for (let i = 0; i < nv; i++) Ls.push(`v ${f(P[i*3])} ${f(P[i*3+1])} ${f(P[i*3+2])}`);
@@ -2970,19 +3178,23 @@ window.LoPolView = function LoPolView(root, D, opts = {}){
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  return { ready, light: L, fx: FX, nodes, options: O, outline: OL, destroy(){ alive = false; root.innerHTML = ''; }, texture: () => texNow() };
+  return { ready, light: L, fx: FX, nodes, colours, groups, options: O, outline: OL, settings, pathTrace, update: schedule, relight,
+    setColour(i, rgb, amount = 1){ colours[i] = rgb ? { rgb, amount } : null; drawColours(); schedule(); },
+    destroy(){ alive = false; if (tracer) tracer.stop(); root.innerHTML = ''; }, texture: () => texNow(), mesh: { pos, uv, nrm, tan: tanF }, hull: () => hull, bounce: () => T && T.BO, D };
 };
 })();
 
 /* Image2LoPol in the browser: paint a template from an image model's picture.
    LoPolBake.load(baseUrl)           -> template (template.json + texmap.bin + maps)
-   LoPolBake.bake(tpl, imageOrCanvas, {preset}) -> { D (for LoPolView), match:[iou...], albedo canvas }
+   LoPolBake.bake(tpl, imageOrCanvas, {preset}) -> { D (for LoPolView), match:[iou...], albedo canvas, unshade }
+   LoPolBake.example(tpl)            -> D of the template's finished example (no baking)
    Same steps as tool/lopol.py bake: align, sample, match the two views, blend, fill hidden faces, grade, logo. */
 (function () {
 'use strict';
 const PRESETS = {  // the same looks as the Clothing Studio's presets (tool/lopol.py FX_PRESETS)
-  ps1: { bits: 4, dither: 1, contrast: .06, sat: 0 }, n64: { bits: 5, dither: .35, contrast: .04, sat: .1 },
-  '16bit': { palette: 24, dither: .45, contrast: .06, sat: .18 }, clean: { bits: 8, dither: 0, contrast: .04, sat: .05 } };
+  grug: { bits: 4, dither: 1, pixel: 2, contrast: .5, sat: 0, bright: 0 },   // the default look
+  ps1: { bits: 4, dither: 1, pixel: 1, contrast: .06, sat: 0 }, n64: { bits: 5, dither: .35, pixel: 1, contrast: .04, sat: .1 },
+  '16bit': { bits: 5, dither: .45, pixel: 2, contrast: .06, sat: .18 }, clean: { bits: 8, dither: 0, pixel: 1, contrast: .04, sat: .05 } };
 const loadImg = src => new Promise((r, j) => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => r(i); i.onerror = () => j(new Error('Could not load ' + src)); i.src = src; });
 const canvasOf = (src, w, h) => { const c = document.createElement('canvas'); c.width = w || src.naturalWidth || src.width; c.height = h || src.naturalHeight || src.height; c.getContext('2d').drawImage(src, 0, 0, c.width, c.height); return c; };
 const toURL = c => c.toDataURL('image/png');
@@ -2997,8 +3209,8 @@ async function load(base){
   tpl.cid = take(Int16Array, n); tpl.xy = []; for (let v = 0; v < V; v++) tpl.xy.push([take(Uint16Array, n), take(Uint16Array, n)]);
   tpl.wt = []; for (let v = 0; v < V; v++) tpl.wt.push(take(Uint8Array, n)); tpl.sh = []; for (let v = 0; v < V; v++) tpl.sh.push(take(Uint8Array, n));
   tpl.base = base;
-  const [ref, ...maps] = await Promise.all(['reference.png', 'ao.png', 'room.png', 'emit.png', 'detail.png', 'normal.png'].map(f => loadImg(base + f)));
-  tpl.reference = ref; tpl.mapImgs = { ao: maps[0], room: maps[1], emit: maps[2], detail: maps[3], normal: maps[4] };
+  const ref = await loadImg(base + 'reference.png');
+  tpl.reference = ref; tpl.mapUrls = { ao: base + 'ao.png', room: base + 'room.png', emit: base + 'emit.png', detail: base + 'detail.png', normal: base + 'normal.png' };
   tpl.refUrl = base + 'reference.png'; tpl.exampleUrl = tpl.example ? base + 'example.jpg' : null;
   // the reference's silhouette, for lining up the painted picture
   const rc = canvasOf(ref, tpl.ref[0], tpl.ref[1]).getContext('2d').getImageData(0, 0, tpl.ref[0], tpl.ref[1]).data;
@@ -3063,21 +3275,42 @@ function resize(src, sw, sh, dw, dh, flip){  // bilinear, optional 'h' / 'v' mir
   return out;
 }
 
+function followed(stats, charts, nv){  // same as tool/lopol.py shading_followed
+  const by = new Map();
+  for (let v = 0; v < nv; v++) charts.forEach((c, k) => { const st = stats[v*charts.length + k]; if (st[0] <= 30) return; const g = c.group ?? k; if (!by.has(g)) by.set(g, []); by.get(g).push([st[0], st[1] / st[0], st[2] / st[0]]); });
+  let num = 0, den = 0;
+  for (const rows of by.values()) { if (rows.length < 2) continue; const N = rows.reduce((a, r) => a + r[0], 0), ym = rows.reduce((a, r) => a + r[0]*r[1], 0) / N, xm = rows.reduce((a, r) => a + r[0]*r[2], 0) / N;
+    for (const [w, y, x] of rows) { num += w * (x - xm) * (y - ym); den += w * (x - xm) ** 2; } }
+  return den < 1e-6 ? .5 : Math.max(0, Math.min(.9, num / den));
+}
+/* the template's own finished example, ready to wear without baking */
+function example(tpl){
+  const b = tpl.base;
+  return { name: tpl.name, ...tpl.mesh, tex: b + 'example-albedo.jpg', look: JSON.parse(JSON.stringify(tpl.look)),
+    maps: Object.assign({ albedo: b + 'example-albedo.jpg', bounce: b + 'example-bounce.jpg', logo: b + 'example-logo.png' }, tpl.mapUrls) };
+}
+
 async function bake(tpl, painted, opts = {}){
   const pc = canvasOf(painted), w = pc.width, h = pc.height, P = pc.getContext('2d').getImageData(0, 0, w, h).data;
   const res = fgMask(P, w, h), inner = erode(res, w, h, 2), [RW, RH] = tpl.ref, nv = tpl.views;
   const al = align(tpl.refMask, RW, RH, res, w, h, nv);
-  const S = tpl.atlas, unshade = .8, sref = tpl.shadeRef;
+  const S = tpl.atlas, sref = tpl.shadeRef, NC = tpl.charts.length;
   const samp = (x, y, out) => { x = Math.max(0, Math.min(w - 1.001, x - .5)); y = Math.max(0, Math.min(h - 1.001, y - .5)); const x0 = x | 0, y0 = y | 0, fx = x - x0, fy = y - y0;
     for (let c = 0; c < 3; c++) { const a = P[(y0*w+x0)*4+c], b = P[(y0*w+x0+1)*4+c], d = P[((y0+1)*w+x0)*4+c], e = P[((y0+1)*w+x0+1)*4+c]; out[c] = (a*(1-fx) + b*fx)*(1-fy) + (d*(1-fx) + e*fx)*fy; } };
   // 1. sample every texel from every view that saw it
   const col = Array.from({ length: nv }, () => new Float32Array(S*S*3)), wgt = Array.from({ length: nv }, () => new Float32Array(S*S)), tmp = [0, 0, 0];
+  const stats = Array.from({ length: nv * NC }, () => [0, 0, 0]);
   for (let v = 0; v < nv; v++) { const a = al[v], [X, Y] = tpl.xy[v], W8 = tpl.wt[v], SH = tpl.sh[v];
     for (let i = 0; i < S*S; i++) { if (tpl.cid[i] < 0 || !W8[i]) continue;
       const px = X[i] / 16, py = Y[i] / 16, qx = px * a.s + a.tx, qy = py * a.s + a.ty, ix = qx | 0, iy = qy | 0;
       if (ix < 0 || iy < 0 || ix >= w || iy >= h || !inner[iy*w + ix]) continue;
-      samp(qx, qy, tmp); const f = 1 - unshade + unshade * sref / Math.max(.05, SH[i] / 255), fa = W8[i] / 255 - .05;
-      for (let c = 0; c < 3; c++) col[v][i*3+c] = tmp[c] * f; wgt[v][i] = fa * fa; } }
+      samp(qx, qy, tmp); const fa = W8[i] / 255 - .05;
+      for (let c = 0; c < 3; c++) col[v][i*3+c] = tmp[c]; wgt[v][i] = fa * fa;
+      const st = stats[v*NC + tpl.cid[i]]; st[0]++; st[1] += Math.log(Math.max(4, tmp[0]*.299 + tmp[1]*.587 + tmp[2]*.114)); st[2] += Math.log(Math.max(.05, SH[i] / 255)); } }
+  // 1b. how much did the image model keep the reference's shading? (0 = it lit its painting evenly) Undo only that much.
+  const unshade = opts.unshade ?? followed(stats, tpl.charts, nv);
+  if (unshade) for (let v = 0; v < nv; v++) { const SH = tpl.sh[v];
+    for (let i = 0; i < S*S; i++) if (wgt[v][i]) { const f = 1 - unshade + unshade * sref / Math.max(.05, SH[i] / 255); for (let c = 0; c < 3; c++) col[v][i*3+c] *= f; } }
   // 2. the two views are often lit a little differently: match their colours where both saw the surface
   const gain = Array.from({ length: nv }, () => [1, 1, 1]);
   if (nv === 2) { const ma = [0, 0, 0], mb = [0, 0, 0]; let c = 0;
@@ -3113,14 +3346,9 @@ async function bake(tpl, painted, opts = {}){
       for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= S || yy >= S) continue; const j = yy*S + xx; if (!has[j]) continue; n++; for (let q = 0; q < 3; q++) acc[q] += out[j*3+q]; }
       if (n) { nh[i] = 1; changed = true; for (let q = 0; q < 3; q++) out[i*3+q] = acc[q] / n; } }
     has.set(nh); if (!changed) break; }
-  // 4. grade: shrink to the game texture size, contrast and saturation of the chosen look
-  const preset = opts.preset || tpl.look.preset || 'ps1', fx = Object.assign({}, PRESETS[preset] || PRESETS.ps1), n = tpl.size, k = S / n;
-  const alb = document.createElement('canvas'); alb.width = alb.height = n; const ax = alb.getContext('2d'), ad = ax.createImageData(n, n);
-  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const acc = [0, 0, 0];
-    for (let yy = 0; yy < k; yy++) for (let xx = 0; xx < k; xx++) { const i = ((y*k + yy)*S + x*k + xx)*3; for (let q = 0; q < 3; q++) acc[q] += out[i+q]; }
-    let c = acc.map(v => v / (k*k)); if (fx.contrast) c = c.map(v => (v - 128) * (1 + fx.contrast) + 128);
-    if (fx.sat) { const g = (c[0] + c[1] + c[2]) / 3; c = c.map(v => g + (v - g) * (1 + fx.sat)); }
-    const p = (y*n + x)*4; for (let q = 0; q < 3; q++) ad.data[p+q] = Math.max(0, Math.min(255, c[q])); ad.data[p+3] = 255; }
+  // 4. the painted colours at the texture size (the retro look and the light are added live, in LoPolTex.compose)
+  const n = tpl.size, alb = document.createElement('canvas'); alb.width = alb.height = n; const ax = alb.getContext('2d'), ad = ax.createImageData(n, n), up = resize(out, S, S, n, n);
+  for (let i = 0; i < n*n; i++) { for (let q = 0; q < 3; q++) ad.data[i*4+q] = Math.max(0, Math.min(255, up[i*3+q])); ad.data[i*4+3] = 255; }
   ax.putImageData(ad, 0, 0);
   // 5. the logo face: the model's average colour with the Grug Digital logo (stamped after the retro look)
   const lg = document.createElement('canvas'); lg.width = lg.height = n;
@@ -3131,13 +3359,318 @@ async function bake(tpl, painted, opts = {}){
       const im = await loadImg('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(GRUG.logo('stacked', lum > 140 ? 'light' : 'dark', { cls: false, height: 512 })));
       const sc = Math.min((x1 - x0) * .72 / im.naturalWidth, (y1 - y0) * .72 / im.naturalHeight), lw = im.naturalWidth * sc, lh = im.naturalHeight * sc;
       g.drawImage(im, x0 + (x1 - x0 - lw) / 2, y0 + (y1 - y0 - lh) / 2, lw, lh); } }
-  const mi = tpl.mapImgs, look = JSON.parse(JSON.stringify(tpl.look)); look.fx = { bits: fx.bits, dither: fx.dither, palette: fx.palette };
-  const D = { name: tpl.name, ...tpl.mesh, tex: toURL(alb), look,
-    maps: { albedo: toURL(alb), ao: toURL(canvasOf(mi.ao)), room: toURL(canvasOf(mi.room)), emit: toURL(canvasOf(mi.emit)), logo: toURL(lg), detail: toURL(canvasOf(mi.detail)), normal: toURL(canvasOf(mi.normal)) } };
-  return { D, match: al.map(a => a.iou), albedo: alb };
+  const look = JSON.parse(JSON.stringify(tpl.look));
+  if (opts.preset && PRESETS[opts.preset]) look.fx = Object.assign({}, look.fx, PRESETS[opts.preset]);
+  const D = { name: tpl.name, ...tpl.mesh, tex: toURL(alb), look, maps: Object.assign({ albedo: toURL(alb), logo: toURL(lg) }, tpl.mapUrls) };
+  return { D, match: al.map(a => a.iou), albedo: alb, unshade };
 }
 
-window.LoPolBake = { load, bake, PRESETS };
+window.LoPolBake = { load, bake, example, PRESETS };
+})();
+
+/* Image2LoPol model builder in the browser: the same block models as tool/lopol.py, made from a model.json object, with
+   everything the Accessory Studio needs to paint and bake it (reference picture, painting map, light and normal maps).
+   LoPolCore.build(model) -> a template object, the same shape LoPolBake.load() returns, so LoPolBake.bake() works on it.
+   LoPolCore.clay(model, yaws) -> canvas: the grey model from several sides (for checking proportions).
+   See MODEL_FORMAT.md (or AccessoryStudio.modelFormat()) for model.json. */
+(function () {
+'use strict';
+const REF_W = 1536, REF_H = 1024, AMB = .5, DIF = .5, GREY = .8, SHADE_REF = AMB + DIF * .75, ATLAS = 1024, SIZE = 1024, LIVE = 128, LRES = 128, HAT_BRIM_Y = 4.88;
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]], add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]], mul = (a, k) => [a[0] * k, a[1] * k, a[2] * k];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2], cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const norm = a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+const LIGHT = norm([-.45, .8, .4]);
+function rotM(deg){ const [x, y, z] = [0, 1, 2].map(i => ((deg || [])[i] || 0) * Math.PI / 180), cx = Math.cos(x), sx = Math.sin(x), cy = Math.cos(y), sy = Math.sin(y), cz = Math.cos(z), sz = Math.sin(z);
+  const X = [[1, 0, 0], [0, cx, -sx], [0, sx, cx]], Y = [[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]], Z = [[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]];
+  const m = (A, B) => A.map(r => [0, 1, 2].map(j => r[0] * B[0][j] + r[1] * B[1][j] + r[2] * B[2][j])); return m(Z, m(Y, X)); }
+const app = (M, p) => [0, 1, 2].map(i => M[i][0] * p[0] + M[i][1] * p[1] + M[i][2] * p[2]);
+function rng(seed){ let s = seed >>> 0 || 1; return () => (s = Math.imul(s ^ (s >>> 15), 2246822507) + 0x9e3779b9 >>> 0) / 4294967296; }
+
+/* ---------- parts -> charts (grid of quads or flat polygon) ---------- */
+const BOX = { front: [[-1, 1, 1], [1, 1, 1], [-1, -1, 1], [1, -1, 1]], back: [[1, 1, -1], [-1, 1, -1], [1, -1, -1], [-1, -1, -1]], right: [[1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1]],
+  left: [[-1, 1, -1], [-1, 1, 1], [-1, -1, -1], [-1, -1, 1]], top: [[-1, 1, -1], [1, 1, -1], [-1, 1, 1], [1, 1, 1]], bottom: [[-1, -1, 1], [1, -1, 1], [-1, -1, -1], [1, -1, -1]] };
+const OPP = { front: 'back', back: 'front', left: 'right', right: 'left', top: 'bottom', bottom: 'top' };
+const chart = (part, side, kind, data, opposite = null, flip = 'h') => ({ part, side, kind, P: kind === 'grid' ? data : null, V: kind === 'poly' ? data : null, opposite, flip, name: part + '.' + side });
+function partBox(p){
+  const [w, h, d] = p.size, [tx, tz] = p.taper || [1, 1], [ox, oz] = p.shift || [0, 0], [bx, bz] = p.taperBottom || [1, 1], skip = new Set(p.omit || []);
+  const c = ([sx, sy, sz]) => sy > 0 ? [sx * w / 2 * tx + ox, h / 2, sz * d / 2 * tz + oz] : [sx * w / 2 * bx, -h / 2, sz * d / 2 * bz];
+  return Object.entries(BOX).filter(([s]) => !skip.has(s)).map(([s, cs]) => chart(p.name, s, 'grid', [[c(cs[0]), c(cs[1])], [c(cs[2]), c(cs[3])]], OPP[s], s === 'top' || s === 'bottom' ? 'v' : 'h'));
+}
+function partLathe(p){
+  const prof = p.profile, n = p.sides || 8, a0 = (p.startAngle || 0) * Math.PI / 180, [sx, sz] = p.scale || [1, 1], cu = p.curl || {}, rmax = Math.max(...prof.map(q => q[0])), r0 = cu.from || 0, amt = cu.amount || 0;
+  const ang = Array.from({ length: n + 1 }, (_, c) => -Math.PI + a0 + 2 * Math.PI * c / n);
+  const lift = (r, a) => !amt || r <= r0 ? 0 : amt * ((r - r0) / Math.max(1e-6, rmax - r0)) ** 2 * Math.sin(a) ** 2;
+  const out = [chart(p.name, 'side', 'grid', prof.map(([r, y]) => ang.map(a => [r * Math.sin(a) * sx, y + lift(r, a), r * Math.cos(a) * sz])))];
+  const caps = p.caps || 'both', [rt, yt] = prof[0], [rb, yb] = prof[prof.length - 1];
+  if (rt > 1e-6 && (caps === 'both' || caps === 'top')) out.push(chart(p.name, 'top', 'poly', ang.slice(0, -1).map(a => [rt * Math.sin(a) * sx, yt, rt * Math.cos(a) * sz]).reverse(), 'bottom', 'v'));
+  if (rb > 1e-6 && (caps === 'both' || caps === 'bottom')) out.push(chart(p.name, 'bottom', 'poly', ang.slice(0, -1).map(a => [rb * Math.sin(a) * sx, yb, rb * Math.cos(a) * sz]), 'top', 'v'));
+  return out;
+}
+const partCyl = p => partLathe(Object.assign({}, p, { profile: [[p.radiusTop ?? p.radius, p.height / 2], [p.radius, -p.height / 2]] }));
+function partStrap(p){
+  const pts = p.points, w = p.width, t = p.thickness ?? .05, n = pts.length, hint = norm(p.normal || [0, 0, 1]);
+  const T = pts.map((_, i) => norm(sub(pts[Math.min(i + 1, n - 1)], pts[Math.max(i - 1, 0)])));
+  const N = T.map((Ti, i) => { const H = p.normals ? norm(p.normals[i]) : hint; return norm(sub(H, mul(Ti, dot(Ti, H)))); }), R = N.map((Ni, i) => norm(cross(Ni, T[i])));
+  const out = [];
+  for (const [side, D, hd, Rt, hr, opp] of [['front', N, t / 2, R, w / 2, 'back'], ['back', N.map(v => mul(v, -1)), t / 2, R.map(v => mul(v, -1)), w / 2, 'front'],
+    ['edge1', R, w / 2, N.map(v => mul(v, -1)), t / 2, 'edge2'], ['edge2', R.map(v => mul(v, -1)), w / 2, N, t / 2, 'edge1']])
+    out.push(chart(p.name, side, 'grid', pts.map((q, i) => [sub(add(q, mul(D[i], hd)), mul(Rt[i], hr)), add(add(q, mul(D[i], hd)), mul(Rt[i], hr))]), opp));
+  if (p.caps !== false) { const cap = (i, s) => { const c = [add(sub(add(pts[i], mul(N[i], t / 2)), mul(R[i], w / 2)), [0, 0, 0]), add(add(pts[i], mul(N[i], t / 2)), mul(R[i], w / 2)), add(sub(pts[i], mul(N[i], t / 2)), mul(R[i], w / 2)), sub(sub(pts[i], mul(N[i], t / 2)), mul(R[i], w / 2))]; return s > 0 ? c : c.reverse(); };
+    out.push(chart(p.name, 'end1', 'poly', cap(0, 1), 'end2'), chart(p.name, 'end2', 'poly', cap(n - 1, -1), 'end1')); }
+  return out;
+}
+const BUILD = { box: partBox, cylinder: partCyl, lathe: partLathe, strap: partStrap };
+const pts = c => c.kind === 'grid' ? c.P.flat() : c.V;
+function polyN(V){ const c = V.reduce((a, v) => add(a, v), [0, 0, 0]).map(x => x / V.length); let s = [0, 0, 0]; for (let i = 0; i < V.length; i++) s = add(s, cross(sub(V[i], c), sub(V[(i + 1) % V.length], c))); return norm(s); }
+function fixCaps(cs){ const mid = cs.flatMap(pts).reduce((a, v) => add(a, v), [0, 0, 0]).map((x, _, a) => x / cs.flatMap(pts).length);
+  cs.forEach(c => { if (c.kind !== 'poly') return; const m = c.V.reduce((a, v) => add(a, v), [0, 0, 0]).map(x => x / c.V.length); if (dot(sub(m, mid), polyN(c.V)) < 0) c.V = c.V.slice().reverse(); }); }
+function buildCharts(model){
+  let charts = [];
+  for (const p of model.parts) { if (p.hidden) continue; const B = BUILD[p.type]; if (!B) throw new Error(`Part "${p.name}": unknown type "${p.type}" (box, cylinder, lathe, strap)`);
+    const cs = B(p); fixCaps(cs); const R = rotM(p.rot), c = p.center || [0, 0, 0], ex = p.explode || [0, 0, 0], grp = p.group || p.name.replace(/_/g, ' ').replace(/^./, m => m.toUpperCase());
+    cs.forEach(ch => { if (ch.kind === 'grid') ch.P = ch.P.map(r => r.map(q => add(app(R, q), c))); else ch.V = ch.V.map(q => add(app(R, q), c)); ch.explode = ex; ch.group = grp; });
+    let group = cs; const mir = p.mirror ? (typeof p.mirror === 'string' ? [p.mirror] : p.mirror) : [];
+    for (const ax of mir) { const f = [0, 1, 2].map(i => 'xyz'[i] === ax ? -1 : 1), fl = q => [q[0] * f[0], q[1] * f[1], q[2] * f[2]];
+      group = group.concat(group.map(ch => { const m = chart(ch.part + '_m' + ax, ch.side, ch.kind, ch.kind === 'grid' ? ch.P.map(r => r.map(fl).reverse()) : ch.V.map(fl).reverse(), ch.opposite, ch.flip); m.explode = fl(ch.explode); m.group = ch.group; return m; })); }
+    charts = charts.concat(group); }
+  charts.forEach(ch => { if (ch.kind !== 'grid') return; const P = ch.P, len = (a, b) => Math.hypot(...sub(a, b));
+    let hl = 0, wl = 0; for (let r = 1; r < P.length; r++) { let s = 0; for (let c = 0; c < P[0].length; c++) s += len(P[r][c], P[r - 1][c]); hl += s / P[0].length; }
+    for (let c = 1; c < P[0].length; c++) { let s = 0; for (let r = 0; r < P.length; r++) s += len(P[r][c], P[r][c - 1]); wl += s / P.length; }
+    if (hl > 2.5 * wl) ch.P = transposeStrip(P); });
+  const dens = layout(charts, ATLAS, 8), groups = [];
+  charts.forEach(c => { if (!groups.includes(c.group)) groups.push(c.group); }); charts.forEach(c => c.gi = groups.indexOf(c.group));
+  return { charts, dens, groups };
+}
+function transposeStrip(P){ const R = P.slice().reverse(); return R[0].map((_, c) => R.map(row => row[c])); }   // P[::-1].transpose(1, 0, 2)
+
+/* ---------- atlas layout: one texel density, shelf packing, even sizes (so a half-size map lines up) ---------- */
+function dims(ch, dens){
+  if (ch.kind === 'grid') { const P = ch.P, R = P.length, C = P[0].length, len = (a, b) => Math.hypot(...sub(a, b));
+    const cols = [], rows = []; for (let c = 1; c < C; c++) { let s = 0; for (let r = 0; r < R; r++) s += len(P[r][c], P[r][c - 1]); cols.push(Math.max(1, Math.round(s / R * dens))); }
+    for (let r = 1; r < R; r++) { let s = 0; for (let c = 0; c < C; c++) s += len(P[r][c], P[r - 1][c]); rows.push(Math.max(1, Math.round(s / C * dens))); }
+    cols[cols.length - 1] += cols.reduce((a, b) => a + b, 0) % 2; rows[rows.length - 1] += rows.reduce((a, b) => a + b, 0) % 2;
+    ch.cx = [0]; cols.forEach(v => ch.cx.push(ch.cx[ch.cx.length - 1] + v)); ch.cy = [0]; rows.forEach(v => ch.cy.push(ch.cy[ch.cy.length - 1] + v)); ch.w = ch.cx[ch.cx.length - 1]; ch.h = ch.cy[ch.cy.length - 1];
+  } else { const V = ch.V, n = polyN(V); let e1 = sub([1, 0, 0], mul(n, n[0])); if (Math.hypot(...e1) < .3) e1 = sub([0, 0, 1], mul(n, n[2])); e1 = norm(e1); const e2 = cross(e1, n);
+    const a = V.map(v => dot(sub(v, V[0]), e1)), b = V.map(v => dot(sub(v, V[0]), e2)); ch.basis = { V0: V[0], e1, e2, amin: Math.min(...a), bmin: Math.min(...b), dens };
+    ch.w = Math.max(2, Math.ceil((Math.max(...a) - Math.min(...a)) * dens)); ch.h = Math.max(2, Math.ceil((Math.max(...b) - Math.min(...b)) * dens)); ch.w += ch.w % 2; ch.h += ch.h % 2; }
+}
+function pack(charts, S, dens, pad){ charts.forEach(c => dims(c, dens)); let x = pad, y = pad, shelf = 0;
+  for (const c of charts.slice().sort((a, b) => b.h - a.h)) { if (c.w + 2 * pad > S) return false; if (x + c.w + pad > S) { x = pad; y += shelf + pad; shelf = 0; } c.x0 = x; c.y0 = y; x += c.w + pad; shelf = Math.max(shelf, c.h); }
+  return y + shelf + pad <= S; }
+function layout(charts, S, pad){ let lo = 1, hi = 4096; for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (pack(charts, S, m, pad)) lo = m; else hi = m; } pack(charts, S, lo, pad); return lo; }
+
+/* ---------- mesh (flat triangles, atlas uv in pixels) and the 3D point of every texel ---------- */
+function mesh(charts){
+  const pos = [], uv = [], cid = [];
+  charts.forEach((ch, k) => {
+    if (ch.kind === 'grid') { const P = ch.P, U = (r, c) => [ch.x0 + ch.cx[c], ch.y0 + ch.cy[r]];
+      for (let r = 0; r < P.length - 1; r++) for (let c = 0; c < P[0].length - 1; c++) for (const tri of [[[r, c], [r + 1, c], [r + 1, c + 1]], [[r, c], [r + 1, c + 1], [r, c + 1]]]) { pos.push(tri.map(([a, b]) => P[a][b])); uv.push(tri.map(([a, b]) => U(a, b))); cid.push(k); } }
+    else { const { V0, e1, e2, amin, bmin, dens } = ch.basis, U = v => [ch.x0 + (dot(sub(v, V0), e1) - amin) * dens, ch.y0 + (dot(sub(v, V0), e2) - bmin) * dens];
+      for (let i = 1; i < ch.V.length - 1; i++) { const tri = [ch.V[0], ch.V[i], ch.V[i + 1]]; pos.push(tri); uv.push(tri.map(U)); cid.push(k); } } });
+  return { pos, uv, cid, nrm: pos.map(t => norm(cross(sub(t[1], t[0]), sub(t[2], t[0])))) };
+}
+function texels(ch, step = 1){   // [h][w] of {X, N} at texel centres (every `step` texels)
+  const out = [];
+  if (ch.kind === 'grid') { const P = ch.P;
+    for (let y = 0; y < ch.h; y += step) { const row = []; let r = 0; while (r < ch.cy.length - 2 && y + step / 2 >= ch.cy[r + 1]) r++;
+      const t = (y + step / 2 - ch.cy[r]) / (ch.cy[r + 1] - ch.cy[r]);
+      for (let x = 0; x < ch.w; x += step) { let c = 0; while (c < ch.cx.length - 2 && x + step / 2 >= ch.cx[c + 1]) c++; const s = (x + step / 2 - ch.cx[c]) / (ch.cx[c + 1] - ch.cx[c]);
+        const a = P[r][c], b = P[r + 1][c], d = P[r + 1][c + 1], e = P[r][c + 1];
+        if (t >= s) row.push({ X: add(add(mul(a, 1 - t), mul(b, t - s)), mul(d, s)), N: norm(cross(sub(b, a), sub(d, a))) });
+        else row.push({ X: add(add(mul(a, 1 - s), mul(d, t)), mul(e, s - t)), N: norm(cross(sub(d, a), sub(e, a))) }); }
+      out.push(row); } }
+  else { const { V0, e1, e2, amin, bmin, dens } = ch.basis, N = polyN(ch.V);
+    for (let y = 0; y < ch.h; y += step) { const row = []; for (let x = 0; x < ch.w; x += step) row.push({ X: add(add(V0, mul(e1, amin + (x + step / 2) / dens)), mul(e2, bmin + (y + step / 2) / dens)), N }); out.push(row); } }
+  return out;
+}
+
+/* ---------- cameras and a z-buffer rasteriser ---------- */
+function basis(yaw, pitch){ const y = yaw * Math.PI / 180, p = pitch * Math.PI / 180, v = [Math.cos(p) * Math.sin(y), Math.sin(p), Math.cos(p) * Math.cos(y)], f = mul(v, -1), r = norm(cross(f, [0, 1, 0])); return { r, u: cross(r, f), f, v }; }
+function fitViews(views, charts, W, H, margin = .84){
+  const vs = views.map(v => Object.assign({}, v, basis(v.yaw, v.pitch))), n = vs.length;
+  const P = vs.map((v, i) => charts.flatMap(ch => pts(ch).map(q => { const Q = i === 1 ? add(q, ch.explode) : q; return [dot(Q, v.r), -dot(Q, v.u)]; })));
+  const span = Math.max(Math.max(...P.map(L => Math.max(...L.map(p => p[0])) - Math.min(...L.map(p => p[0])))) / (W / n), Math.max(...P.map(L => Math.max(...L.map(p => p[1])) - Math.min(...L.map(p => p[1])))) / H), s = margin / span;
+  vs.forEach((v, i) => { const L = P[i], mx = (Math.max(...L.map(p => p[0])) + Math.min(...L.map(p => p[0]))) / 2, my = (Math.max(...L.map(p => p[1])) + Math.min(...L.map(p => p[1]))) / 2;
+    v.scale = s; v.ox = W / n * (i + .5) - mx * s; v.oy = H * .5 - my * s; });
+  return vs;
+}
+const viewLight = v => norm(add(add(mul(v.r, -.45), mul(v.u, .75)), mul(v.f, -.5)));
+const proj = (v, X) => [dot(X, v.r) * v.scale + v.ox, -dot(X, v.u) * v.scale + v.oy, dot(X, v.f)];
+function raster(tris, W, H){   // tris: [[[x,y,z] x3], id]
+  const depth = new Float32Array(W * H).fill(Infinity), id = new Int32Array(W * H).fill(-1), tri = new Int32Array(W * H).fill(-1);
+  tris.forEach(([[a, b, c], k], ti) => { const area = (b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1]); if (Math.abs(area) < 1e-9) return;
+    const x0 = Math.max(0, Math.floor(Math.min(a[0], b[0], c[0]))), x1 = Math.min(W, Math.ceil(Math.max(a[0], b[0], c[0])) + 1), y0 = Math.max(0, Math.floor(Math.min(a[1], b[1], c[1]))), y1 = Math.min(H, Math.ceil(Math.max(a[1], b[1], c[1])) + 1);
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) { const X = x + .5, Y = y + .5;
+      const w0 = ((b[0] - X) * (c[1] - Y) - (c[0] - X) * (b[1] - Y)) / area, w1 = ((c[0] - X) * (a[1] - Y) - (a[0] - X) * (c[1] - Y)) / area, w2 = 1 - w0 - w1;
+      if (w0 < -1e-4 || w1 < -1e-4 || w2 < -1e-4) continue; const z = w0 * a[2] + w1 * b[2] + w2 * c[2], i = y * W + x; if (z < depth[i]) { depth[i] = z; id[i] = k; tri[i] = ti; } } });
+  return { depth, id, tri };
+}
+/* the grey reference: every view side by side, darker lines where faces meet; ss = supersampling */
+function clayCanvas(M, charts, vs, W, H, ss = 2){
+  const c = document.createElement('canvas'); c.width = W * ss; c.height = H * ss; const x = c.getContext('2d'), img = x.createImageData(W * ss, H * ss), d = img.data; d.fill(255);
+  vs.forEach((v, i) => { const lt = viewLight(v), tris = M.pos.map((t, k) => [t.map(q => { const p = proj(v, i === 1 ? add(q, charts[M.cid[k]].explode) : q); return [p[0] * ss, p[1] * ss, p[2]]; }), M.cid[k]]);
+    const R = raster(tris, W * ss, H * ss);
+    for (let p = 0; p < W * H * ss * ss; p++) { if (R.tri[p] < 0) continue; const sh = AMB + DIF * Math.max(0, dot(M.nrm[R.tri[p]], lt)); let g = GREY * 255 * sh;
+      const px = p % (W * ss), k = R.id[p]; if ((px > 0 && R.id[p - 1] !== k && R.id[p - 1] >= 0) || (p >= W * ss && R.id[p - W * ss] !== k && R.id[p - W * ss] >= 0)) g *= .8;
+      d[p * 4] = d[p * 4 + 1] = d[p * 4 + 2] = g; } });
+  x.putImageData(img, 0, 0); if (ss === 1) return c;
+  const o = document.createElement('canvas'); o.width = W; o.height = H; const ox = o.getContext('2d'); ox.imageSmoothingQuality = 'high'; ox.drawImage(c, 0, 0, W, H); return o;
+}
+
+/* ---------- materials: tangent-space normal maps (same recipes as tool/lopol.py MATERIALS) ---------- */
+function noiseFn(seed){ const r = rng(seed), g = Float32Array.from({ length: 4096 }, r);
+  return (u, v, sc) => { const x = u / sc, y = v / sc, x0 = Math.floor(x), y0 = Math.floor(y); let fx = x - x0, fy = y - y0; fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
+    const G = (a, b) => g[((b % 64 + 64) % 64) * 64 + ((a % 64 + 64) % 64)]; return (G(x0, y0) * (1 - fx) + G(x0 + 1, y0) * fx) * (1 - fy) + (G(x0, y0 + 1) * (1 - fx) + G(x0 + 1, y0 + 1) * fx) * fy; }; }
+function cellsFn(seed){ const r = rng(seed), j = Float32Array.from({ length: 2048 }, r);
+  return (u, v, sc) => { const x = u / sc, y = v / sc, xi = Math.floor(x), yi = Math.floor(y); let best = 9;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const cx = xi + dx, cy = yi + dy, k = (((cy % 32) + 32) % 32 * 32 + (((cx % 32) + 32) % 32)) * 2, dd = (x - cx - j[k]) ** 2 + (y - cy - j[k + 1]) ** 2; if (dd < best) best = dd; }
+    return 1 - Math.min(1, Math.sqrt(best)); }; }
+const nz = [1, 3, 4, 5, 6, 7, 9, 10].reduce((o, s) => (o[s] = noiseFn(s), o), {}), cl = [2, 8].reduce((o, s) => (o[s] = cellsFn(s), o), {});
+const S_ = Math.sin, A_ = Math.abs, PI = Math.PI, md = (a, b) => ((a % b) + b) % b;
+const MATERIALS = {   // [height(u, v) in face units, seams by default, amplitude]
+  none: [() => 0, false, 0], glass: [() => 0, false, 0], plastic: [(u, v) => nz[1](u, v, .6) * .15, false, .4],
+  leather: [(u, v) => cl[2](u, v, .045) ** 2 + .3 * nz[3](u, v, .02), true, 1], suede: [(u, v) => nz[4](u, v, .012) * .6 + nz[5](u, v, .05) * .4, true, .7],
+  canvas: [(u, v) => S_(u / .012 * PI) * S_(v / .012 * PI) * .5 + .5, true, .8], denim: [(u, v) => (S_((u + v) / .016 * PI) * .5 + .5) * .8 + nz[6](u, v, .03) * .2, true, .9],
+  wool: [(u, v) => A_(S_(v / .05 * PI)) ** .5 * (.6 + .4 * A_(S_((u * 2 + A_(md(v, .1) - .05) * 6) / .05 * PI))), true, 1.2],
+  knit: [(u, v) => A_(S_(u / .045 * PI)) * (.5 + .5 * A_(S_((v + A_(md(u, .09) - .045)) / .045 * PI))), true, 1.2],
+  quilted: [(u, v) => 1 - (Math.min(A_(md(u + v, .3) - .15), A_(md(u - v, .3) - .15)) < .012 ? 1 : 0), true, 1],
+  metal: [(u, v) => nz[7](u * .05, v * 8, .05) * .4 + cl[8](u, v, .3) ** 6 * -.6, false, .6], wood: [(u, v) => S_((v + nz[9](u, v, .25) * .15) / .03 * PI) * .5 + .5, false, .7],
+  fur: [(u, v) => nz[10](u * 4, v * .6, .02), false, 1] };
+function normalAtlas(model, charts, dens, res){
+  const k = res / ATLAS, d = dens * k, Hh = new Float32Array(res * res), has = new Uint8Array(res * res), ew = .035, base = n => n.split('_m')[0];
+  charts.forEach(ch => { const p = model.parts.find(q => q.name === base(ch.part)) || {}, m = MATERIALS[p.material || model.material || 'none'] || MATERIALS.none, seams = p.seams ?? m[1];
+    const x0 = Math.floor(ch.x0 * k), y0 = Math.floor(ch.y0 * k), x1 = Math.min(res, Math.ceil((ch.x0 + ch.w) * k)), y1 = Math.min(res, Math.ceil((ch.y0 + ch.h) * k)), W = ch.w / dens, HH = ch.h / dens;
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) { const u = (x + .5 - ch.x0 * k) / d, v = (y + .5 - ch.y0 * k) / d; let h = m[0](u, v) * m[2] * .012;
+      if (seams && ch.kind === 'grid') { const dd = Math.min(u, W - u, v, HH - v), groove = Math.max(0, 1 - A_(dd - ew) / .012), along = Math.min(u, W - u) < Math.min(v, HH - v) ? v : u;
+        h += -groove * .01 + (S_(along / .04 * PI) > .2 ? 1 : 0) * Math.max(0, 1 - A_(dd - ew) / .006) * .006 + Math.max(0, 1 - dd / ew) * -.004; }
+      Hh[y * res + x] = h; has[y * res + x] = 1; } });
+  const N = new Float32Array(res * res * 3), at = (x, y) => Hh[((y + res) % res) * res + ((x + res) % res)];
+  for (let y = 0; y < res; y++) for (let x = 0; x < res; x++) { const i = y * res + x; if (!has[i]) { N[i * 3 + 2] = 1; continue; }
+    const gx = (at(x + 1, y) - at(x - 1, y)) * d / 2, gy = (at(x, y + 1) - at(x, y - 1)) * d / 2, l = Math.hypot(gx, gy, 1); N[i * 3] = -gx / l; N[i * 3 + 1] = -gy / l; N[i * 3 + 2] = 1 / l; }
+  return N;
+}
+
+/* ---------- light: AO, a soft room light, glow; on a grid over the atlas, upsampled ---------- */
+function anyHit(o, d, tmax, T, eps){ for (let i = 0; i < T.length; i += 9) { const ax = T[i], ay = T[i + 1], az = T[i + 2], e1x = T[i + 3] - ax, e1y = T[i + 4] - ay, e1z = T[i + 5] - az, e2x = T[i + 6] - ax, e2y = T[i + 7] - ay, e2z = T[i + 8] - az;
+    const px = d[1] * e2z - d[2] * e2y, py = d[2] * e2x - d[0] * e2z, pz = d[0] * e2y - d[1] * e2x, det = e1x * px + e1y * py + e1z * pz; if (det > -1e-12 && det < 1e-12) continue;
+    const inv = 1 / det, sx = o[0] - ax, sy = o[1] - ay, sz = o[2] - az, u = (sx * px + sy * py + sz * pz) * inv; if (u < 0 || u > 1) continue;
+    const qx = sy * e1z - sz * e1y, qy = sz * e1x - sx * e1z, qz = sx * e1y - sy * e1x, v = (d[0] * qx + d[1] * qy + d[2] * qz) * inv; if (v < 0 || u + v > 1) continue;
+    const t = (e2x * qx + e2y * qy + e2z * qz) * inv; if (t > eps && t < tmax) return true; } return false; }
+function lightGrid(charts, res){
+  const k = res / ATLAS, owner = new Int32Array(res * res).fill(-1), P = new Float32Array(res * res * 3), N = new Float32Array(res * res * 3);
+  charts.forEach((ch, ci) => { const tx = texels(ch);
+    const gx0 = Math.floor(ch.x0 * k), gx1 = Math.min(res, Math.ceil((ch.x0 + ch.w) * k)), gy0 = Math.floor(ch.y0 * k), gy1 = Math.min(res, Math.ceil((ch.y0 + ch.h) * k));
+    for (let gy = gy0; gy < gy1; gy++) for (let gx = gx0; gx < gx1; gx++) { const ix = Math.min(ch.w - 1, Math.max(0, Math.floor((gx + .5) / k - ch.x0))), iy = Math.min(ch.h - 1, Math.max(0, Math.floor((gy + .5) / k - ch.y0)));
+      const t = tx[iy][ix], i = gy * res + gx; owner[i] = ci; P.set(t.X, i * 3); N.set(t.N, i * 3); } });
+  return { owner, P, N };
+}
+function spread(m, maps, r, steps = 4){ const f = m.slice(); for (let it = 0; it < steps; it++) { const nf = f.slice();
+  for (let y = 0; y < r; y++) for (let x = 0; x < r; x++) { const i = y * r + x; if (f[i]) continue; const nb = []; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const j = ((y + dy + r) % r) * r + ((x + dx + r) % r); if (f[j]) nb.push(j); }
+    if (!nb.length) continue; nf[i] = 1; for (const [mp, ch] of maps) for (let c = 0; c < ch; c++) mp[i * ch + c] = nb.reduce((s, j) => s + mp[j * ch + c], 0) / nb.length; } f.set(nf); } }
+function upTo(src, r, ch, n){ const out = new Float32Array(n * n * ch), k = r / n;
+  for (let y = 0; y < n; y++) { const sy = Math.max(0, Math.min(r - 1, (y + .5) * k - .5)), y0 = Math.floor(sy), y1 = Math.min(r - 1, y0 + 1), fy = sy - y0;
+    for (let x = 0; x < n; x++) { const sx = Math.max(0, Math.min(r - 1, (x + .5) * k - .5)), x0 = Math.floor(sx), x1 = Math.min(r - 1, x0 + 1), fx = sx - x0;
+      for (let c = 0; c < ch; c++) out[(y * n + x) * ch + c] = (src[(y0 * r + x0) * ch + c] * (1 - fx) + src[(y0 * r + x1) * ch + c] * fx) * (1 - fy) + (src[(y1 * r + x0) * ch + c] * (1 - fx) + src[(y1 * r + x1) * ch + c] * fx) * fy; } }
+  return out; }
+
+/* ---------- the whole template ---------- */
+const b64 = a => { const u = new Uint8Array(a.buffer, a.byteOffset, a.byteLength); let s = ''; for (let i = 0; i < u.length; i += 32768) s += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(s); };
+const canvasRGBA = (n, fill) => { const c = document.createElement('canvas'); c.width = c.height = n; const x = c.getContext('2d'), im = x.createImageData(n, n); fill(im.data); x.putImageData(im, 0, 0); return c; };
+function wearOf(model, M){
+  const w = model.wear; if (!w) return null;
+  const o = Object.assign({ on: 'back', scale: 1, rot: [0, 0, 0], offset: [0, 0, 0] }, w);
+  if (o.fit === 'hat') { const R = rotM(o.rot), s = Array.isArray(o.scale) ? o.scale : [o.scale, o.scale, o.scale], Q = M.pos.flat().map(p => app(R, [p[0] * s[0], p[1] * s[1], p[2] * s[2]]));
+    const mm = i => [Math.min(...Q.map(q => q[i])), Math.max(...Q.map(q => q[i]))]; o.offset = [-(mm(0)[0] + mm(0)[1]) / 2, HAT_BRIM_Y - mm(1)[0], -(mm(2)[0] + mm(2)[1]) / 2]; }
+  return o;
+}
+function problems(model){
+  const out = []; if (!model || !Array.isArray(model.parts) || !model.parts.length) return ['model.parts must be a list of parts'];
+  model.parts.forEach((p, i) => { const nm = p.name || `#${i}`; if (!p.name) out.push(`part ${i}: needs a name`); if (!BUILD[p.type]) out.push(`${nm}: type must be box, cylinder, lathe or strap`);
+    if (p.type === 'box' && !(Array.isArray(p.size) && p.size.length === 3)) out.push(`${nm}: box needs size [w, h, d]`);
+    if (p.type === 'cylinder' && !(p.radius > 0 && p.height > 0)) out.push(`${nm}: cylinder needs radius and height`);
+    if (p.type === 'lathe' && !(Array.isArray(p.profile) && p.profile.length >= 2)) out.push(`${nm}: lathe needs a profile [[radius, y], ...] from top to bottom`);
+    if (p.type === 'strap' && !(Array.isArray(p.points) && p.points.length >= 2 && p.width > 0)) out.push(`${nm}: strap needs points (2 or more) and width`); });
+  const names = model.parts.map(p => p.name); names.forEach((n, i) => { if (names.indexOf(n) !== i) out.push(`two parts are called "${n}"`); });
+  return out;
+}
+async function build(model, onStep = () => {}){
+  const bad = problems(model); if (bad.length) throw new Error('model.json: ' + bad.join('; '));
+  const step = async m => { onStep(m); await new Promise(r => setTimeout(r, 0)); };
+  await step('Building the blocks');
+  const { charts, dens, groups } = buildCharts(model), M = mesh(charts), views = model.views || [{ yaw: 35, pitch: 22 }, { yaw: 215, pitch: 22 }];
+  const vs = fitViews(views, charts, REF_W, REF_H);
+  await step('Rendering the reference');
+  const ref = clayCanvas(M, charts, vs, REF_W, REF_H, 2);
+  // the painting map at half the atlas: which face, where it lands in each view, how squarely it is seen, its shading
+  await step('Mapping the texture');
+  const h2 = ATLAS / 2, cid = new Int16Array(h2 * h2).fill(-1), xy = vs.map(() => [new Uint16Array(h2 * h2), new Uint16Array(h2 * h2)]), wt = vs.map(() => new Uint8Array(h2 * h2)), sh = vs.map(() => new Uint8Array(h2 * h2));
+  const bufs = vs.map((v, i) => raster(M.pos.map((t, k) => [t.map(q => proj(v, i === 1 ? add(q, charts[M.cid[k]].explode) : q)), M.cid[k]]), REF_W, REF_H));
+  charts.forEach((ch, k) => { const T = texels(ch, 2), X0 = ch.x0 / 2, Y0 = ch.y0 / 2;
+    T.forEach((row, yy) => row.forEach((t, xx) => { const i = (Y0 + yy) * h2 + X0 + xx; cid[i] = k;
+      vs.forEach((v, vi) => { const p = proj(v, vi === 1 ? add(t.X, ch.explode) : t.X), px = Math.max(0, Math.min(REF_W - 1, Math.floor(p[0]))), py = Math.max(0, Math.min(REF_H - 1, Math.floor(p[1]))), B = bufs[vi], j = py * REF_W + px;
+        let vis = B.id[j] === k && Math.abs(B.depth[j] - p[2]) < 2.5 / v.scale;
+        if (vis) for (const [dx, dy] of [[2, 0], [-2, 0], [0, 2], [0, -2]]) { const q = Math.max(0, Math.min(REF_H - 1, py + dy)) * REF_W + Math.max(0, Math.min(REF_W - 1, px + dx)); if (B.id[q] !== k) { vis = 'edge'; break; } }
+        const facing = -dot(t.N, v.f); xy[vi][0][i] = Math.max(0, Math.min(65535, p[0] * 16)); xy[vi][1][i] = Math.max(0, Math.min(65535, p[1] * 16));
+        wt[vi][i] = vis && facing > .05 ? Math.min(255, facing * 255) * (vis === 'edge' ? .6 : 1) : 0;
+        const lt = viewLight(v); sh[vi][i] = Math.min(255, (AMB + DIF * Math.max(0, dot(t.N, lt))) * 255); }); })); });
+  // light: AO and a soft room light with shadows, glow from emissive parts
+  await step('Baking ambient occlusion');
+  const base = n => n.split('_m')[0], em = {}; model.parts.forEach(p => { if (p.emissive) em[p.name] = p.emissive; });
+  const flat = new Float32Array(M.pos.length * 9); M.pos.forEach((t, i) => t.forEach((q, j) => flat.set(q, i * 9 + j * 3)));
+  const blk = new Float32Array(M.pos.filter((t, i) => !em[base(charts[M.cid[i]].part)]).length * 9); { let o = 0; M.pos.forEach((t, i) => { if (em[base(charts[M.cid[i]].part)]) return; t.forEach(q => { blk.set(q, o); o += 3; }); }); }
+  const all = M.pos.flat(), size = Math.max(...[0, 1, 2].map(a => Math.max(...all.map(q => q[a])) - Math.min(...all.map(q => q[a])))), eps = size * 2e-3, lt = model.light || {};
+  const G = lightGrid(charts, LRES), r = LRES, ao = new Float32Array(r * r), room = new Float32Array(r * r), emit = new Float32Array(r * r * 3), K = lt.ao_rays || 24, reach = size * (lt.ao_reach || .35), Ld = norm(lt.room_dir || [-.35, 1, .45]), rnd = rng(7);
+  for (let i = 0; i < r * r; i++) { const ci = G.owner[i]; if (ci < 0) continue; const n = [G.N[i * 3], G.N[i * 3 + 1], G.N[i * 3 + 2]], o = add([G.P[i * 3], G.P[i * 3 + 1], G.P[i * 3 + 2]], mul(n, eps));
+    const T = norm(Math.abs(n[1]) < .9 ? cross([0, 1, 0], n) : cross([1, 0, 0], n)), B = cross(n, T); let vis = 0;
+    for (let j = 0; j < K; j++) { const u1 = (j + rnd()) / K, rr = Math.sqrt(u1), ph = 2 * Math.PI * rnd(); if (!anyHit(o, add(add(mul(T, rr * Math.cos(ph)), mul(B, rr * Math.sin(ph))), mul(n, Math.sqrt(1 - u1))), reach, flat, eps)) vis++; }
+    ao[i] = vis / K; let li = 0; for (let j = 0; j < 6; j++) if (!anyHit(o, norm(add(Ld, [(rnd() - .5) * .24, (rnd() - .5) * .24, (rnd() - .5) * .24])), size * 4, flat, eps)) li++;
+    room[i] = Math.max(0, dot(n, Ld)) * li / 6; const e = em[base(charts[ci].part)]; if (e) { const c = e.color || [255, 220, 140]; for (let q = 0; q < 3; q++) emit[i * 3 + q] = Math.min(2, c[q] / 255 * (e.strength ?? 1)); }
+    if (i % 2048 === 0) await step(`Baking ambient occlusion ${Math.round(i / (r * r) * 100)}%`); }
+  const mk = Uint8Array.from(G.owner, v => v >= 0 ? 1 : 0); spread(mk, [[ao, 1], [room, 1], [emit, 3]], r);
+  const AO = upTo(ao, r, 1, SIZE), RM = upTo(room, r, 1, SIZE), EM = upTo(emit, r, 3, SIZE);
+  await step('Making the normal map');
+  const NM = normalAtlas(model, charts, dens, SIZE), Lt = norm([-.45, -.55, .7]);
+  const maps = { ao: canvasRGBA(SIZE, d => { for (let i = 0; i < SIZE * SIZE; i++) { d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = Math.min(255, AO[i] * 255); d[i * 4 + 3] = 255; } }),
+    room: canvasRGBA(SIZE, d => { for (let i = 0; i < SIZE * SIZE; i++) { d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = Math.min(255, RM[i] * 255); d[i * 4 + 3] = 255; } }),
+    emit: canvasRGBA(SIZE, d => { for (let i = 0; i < SIZE * SIZE; i++) { for (let q = 0; q < 3; q++) d[i * 4 + q] = Math.min(255, EM[i * 3 + q] / 2 * 255); d[i * 4 + 3] = 255; } }),
+    detail: canvasRGBA(SIZE, d => { for (let i = 0; i < SIZE * SIZE; i++) { const v = Math.max(.4, Math.min(1.6, (NM[i * 3] * Lt[0] + NM[i * 3 + 1] * Lt[1] + NM[i * 3 + 2] * Lt[2]) / Lt[2])); d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = v / 2 * 255; d[i * 4 + 3] = 255; } }),
+    normal: canvasRGBA(SIZE, d => { for (let i = 0; i < SIZE * SIZE; i++) { d[i * 4] = (NM[i * 3] * .5 + .5) * 255; d[i * 4 + 1] = (-NM[i * 3 + 1] * .5 + .5) * 255; d[i * 4 + 2] = (NM[i * 3 + 2] * .5 + .5) * 255; d[i * 4 + 3] = 255; } }) };
+  // the live grid (light nodes, path tracing) and the mesh for the viewer
+  await step('Finishing');
+  const L2 = lightGrid(charts, LIVE), ctr = [0, 1, 2].map(a => (Math.max(...all.map(q => q[a])) + Math.min(...all.map(q => q[a]))) / 2);
+  const gP = new Float32Array(LIVE * LIVE * 3); for (let i = 0; i < LIVE * LIVE; i++) for (let a = 0; a < 3; a++) gP[i * 3 + a] = L2.P[i * 3 + a] - ctr[a];
+  const bl = blk.map((v, i) => v - ctr[i % 3]);
+  const nv = M.pos.length * 3, P = new Float32Array(nv * 3), N = new Float32Array(nv * 3), UV = new Float32Array(nv * 2), TG = new Float32Array(nv * 4); let rad = 0;
+  M.pos.forEach((t, ti) => { const u = M.uv[ti], e1 = sub(t[1], t[0]), e2 = sub(t[2], t[0]), d1 = [u[1][0] - u[0][0], u[1][1] - u[0][1]], d2 = [u[2][0] - u[0][0], u[2][1] - u[0][1]];
+    let rr = d1[0] * d2[1] - d2[0] * d1[1]; if (Math.abs(rr) < 1e-12) rr = 1e-12; const n = M.nrm[ti]; let T = mul(sub(mul(e1, d2[1]), mul(e2, d1[1])), 1 / rr); const Bd = mul(sub(mul(e2, d1[0]), mul(e1, d2[0])), 1 / rr);
+    T = norm(sub(T, mul(n, dot(n, T)))); const hw = dot(cross(n, T), mul(Bd, -1)) < 0 ? -1 : 1;
+    t.forEach((q, j) => { const v = ti * 3 + j, c = sub(q, ctr); P.set(c, v * 3); N.set(n, v * 3); UV[v * 2] = u[j][0] / ATLAS; UV[v * 2 + 1] = u[j][1] / ATLAS; TG.set([...T, hw], v * 4); rad = Math.max(rad, Math.hypot(...c)); }); });
+  const bottoms = charts.filter(c => c.side === 'bottom'), lc = model.logo === false ? null : typeof model.logo === 'string' ? charts.find(c => c.name === model.logo) : bottoms.sort((a, b) => b.w * b.h - a.w * a.h)[0];
+  const nodes = (model.lights || []).map(n => Object.assign({}, n)); if (!nodes.length) model.parts.forEach(p => { if (p.emissive) nodes.push({ pos: (p.center || [0, 0, 0]).slice(), color: p.emissive.color || [255, 220, 140], strength: p.emissive.strength ?? 1, range: p.emissive.range ?? 3 }); });
+  const opp = charts.map(c => c.opposite ? charts.findIndex(o => o.name === c.part + '.' + c.opposite) : -1), slug = (model.slug || model.name || 'model').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const fx = Object.assign({}, window.LoPolTex ? LoPolTex.FX_DEFAULT : {}, (model.texture || {}).fx || {}), light = Object.assign({}, window.LoPolTex ? LoPolTex.LIGHT_DEFAULT : {}, lt);
+  const tpl = { slug, name: model.name || slug, object: model.object || slug, description: model.description || '', ref: [REF_W, REF_H], views: vs.length, atlas: h2, layout: ATLAS, size: SIZE, shadeRef: SHADE_REF,
+    charts: charts.map((c, i) => ({ x: c.x0 / 2, y: c.y0 / 2, w: c.w / 2, h: c.h / 2, part: c.part, side: c.side, group: c.gi, opp: opp[i], flip: c.flip })), groups, logo: lc ? charts.indexOf(lc) : -1,
+    mesh: { pos: b64(P), nrm: b64(N), uv: b64(UV), tan: b64(TG), radius: rad, centre: ctr },
+    look: { light, fx, nodes, outline: Object.assign({ width: .027, color: [5, 5, 5] }, typeof model.outline === 'object' ? model.outline : {}, { on: model.outline !== false }),
+      grid: { res: LIVE, mask: b64(Uint8Array.from(L2.owner, v => v >= 0 ? 1 : 0)), P: b64(gP), N: b64(L2.N), blockers: b64(bl), eps, centre: ctr },
+      groups: groups.map(g => ({ name: g, colour: [128, 128, 128] })), gmap: charts.map(c => [(c.x0 - 3) / ATLAS, (c.y0 - 3) / ATLAS, (c.w + 6) / ATLAS, (c.h + 6) / ATLAS, c.gi]) },
+    cid, xy, wt, sh, base: '', model, built: true, triangles: M.pos.length };
+  const w = wearOf(model, M); if (w) tpl.look.wear = w;
+  tpl.reference = ref; tpl.refUrl = ref.toDataURL('image/png'); tpl.exampleUrl = null;
+  tpl.mapUrls = Object.fromEntries(Object.entries(maps).map(([k, c]) => [k, c.toDataURL('image/png')]));
+  const rc = ref.getContext('2d').getImageData(0, 0, REF_W, REF_H).data, rm = new Uint8Array(REF_W * REF_H);
+  for (let i = 0; i < rm.length; i++) rm[i] = Math.max(255 - rc[i * 4], 255 - rc[i * 4 + 1], 255 - rc[i * 4 + 2]) > 28 ? 1 : 0; tpl.refMask = rm;
+  onStep('Ready'); return tpl;
+}
+/* the grey model from several sides, for checking proportions against a picture (like tool/lopol.py clay) */
+function clay(model, yaws = [35, 125, 215, 305], pitch = 22, cell = 420){
+  const bad = problems(model); if (bad.length) throw new Error('model.json: ' + bad.join('; '));
+  const { charts } = buildCharts(model), M = mesh(charts), c = document.createElement('canvas'); c.width = cell * yaws.length; c.height = cell; const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
+  yaws.forEach((y, i) => { const vs = fitViews([{ yaw: y, pitch }], charts.map(ch => Object.assign({}, ch, { explode: [0, 0, 0] })), cell, cell, .82); x.drawImage(clayCanvas(M, charts.map(ch => Object.assign({}, ch, { explode: [0, 0, 0] })), vs, cell, cell, 2), i * cell, 0); });
+  return c;
+}
+window.LoPolCore = { build, clay, problems, MATERIALS: Object.keys(MATERIALS), HAT_BRIM_Y };
 })();
 
 /* Clothing Studio: the Accessories section (block-model templates painted by an image model) */
@@ -3147,17 +3680,20 @@ const $ = s => document.querySelector(s);
 const A = { mode: 'clothing', list: null, tpl: null, view: null, painted: null, preset: 'ps1', busy: false };
 const toastA = m => (window.GRUG && GRUG.toast ? GRUG.toast(m) : console.log(m));
 
-/* ---------- switching between Clothing and Accessories ---------- */
+/* ---------- switching between Clothing, Accessories and Outfits ---------- */
+const TITLES = { clothing: ['Classic Clothing Studio', 'AI-dressed avatars → Roblox shirt & pants'], acc: ['Accessory Studio', 'Block-model templates → AI-painted PS1-style 3D accessories'],
+  outfits: ['Outfit Studio', 'Mix and match shirts, pants and accessories on the blocky avatar'] };
 function setMode(m){
   A.mode = m;
   document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
-  const acc = m === 'acc';
-  $('#acc').hidden = !acc; document.querySelector('header .steps').hidden = acc; $('#libOpen').hidden = acc;
-  if (acc) { [1, 2, 3].forEach(i => { const s = $('#s' + i); if (s) s.hidden = true; }); if (!A.list) gallery(); }
-  else { A.view && A.view.destroy(); A.view = null; if (typeof goStep === 'function') goStep(1); }
-  document.querySelector('.brand h1').textContent = acc ? 'Accessory Studio' : 'Classic Clothing Studio';
-  document.querySelector('.brand p').textContent = acc ? 'Block-model templates → AI-painted PS1-style 3D accessories' : 'AI-dressed avatars → Roblox shirt & pants';
-  history.replaceState(null, '', acc ? '#accessories' : location.pathname + location.search);
+  const acc = m === 'acc', clothing = m === 'clothing';
+  $('#acc').hidden = !acc; document.querySelector('header .steps').hidden = !clothing; $('#libOpen').hidden = !clothing;
+  if (!clothing) [1, 2, 3].forEach(i => { const s = $('#s' + i); if (s) s.hidden = true; });
+  if (acc && !A.list) gallery();
+  if (window.__outfits) __outfits.show(m === 'outfits');
+  if (clothing && typeof goStep === 'function') goStep(window.state && state.step || 1);
+  document.querySelector('.brand h1').textContent = TITLES[m][0]; document.querySelector('.brand p').textContent = TITLES[m][1];
+  history.replaceState(null, '', acc ? '#accessories' : m === 'outfits' ? '#outfits' : location.pathname + location.search);
 }
 document.querySelectorAll('#modeSeg button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
 
@@ -3181,7 +3717,7 @@ async function pick(slug){
   if (A.busy) return; A.busy = true;
   try { A.tpl = await LoPolBake.load(BASE + slug + '/'); }
   catch (e) { toastA("Couldn't load that template"); A.busy = false; return; }
-  A.busy = false; A.preset = A.tpl.look.preset || 'ps1';
+  A.busy = false; A.preset = 'grug';
   $('#accName').textContent = A.tpl.name; $('#accVariant').value = ''; $('#accVariant').placeholder = A.tpl.description;
   $('#accExample').hidden = !A.tpl.exampleUrl; showReference(); buildPrompt(); setPhase('prompt');
 }
@@ -3198,7 +3734,7 @@ function buildPrompt(){
   if (!A.tpl) return; const obj = A.tpl.object, photo = $('#accPhoto').checked, v = ($('#accVariant').value.trim() || A.tpl.description);
   $('#accPrompt').value = `Image 1 is a reference of a simple low-poly 3D model made of grey blocks, shown twice on a white background: the front on the left and the back on the right (the same ${obj} turned around).${photo ? ` Image 2 is a photo of the real ${obj}.` : ''}
 
-Paint the grey blocks in image 1 so the model looks like ${photo ? `the ${obj} in image 2` : `a ${obj}`}: ${v}. Paint its colours, materials, stitching, seams, details and patterns straight onto each flat face like a hand-painted texture for a 1990s video game.
+Paint the grey blocks in image 1 so the model looks like ${photo ? `the ${obj} in image 2` : `a ${obj}`}: ${v}. Paint its colours, materials, stitching, seams, details and patterns straight onto each flat face as a realistic, photo-scanned texture: real material grain (canvas weave, leather, suede, metal, plastic, glass), real colours, stitching and light wear, the way a photo of the real thing would look, not cartoon or hand-painted. Keep the lighting soft and even, with no strong highlights or cast shadows.
 
 Rules:
 - Keep every block exactly where it is, the same size and shape, with the same two camera angles. Do not move, add, remove, round off or bend anything, and do not add shadows on the background.
@@ -3231,16 +3767,447 @@ async function run(){
     const out = await LoPolBake.bake(A.tpl, A.painted, { preset: A.preset });
     const stage = $('#accStage'); A.view && A.view.destroy(); stage.innerHTML = '<div class="acc-view"></div>';
     A.view = LoPolView(stage.firstChild, out.D); setPhase('result');
-    const m = Math.min(...out.match); $('#accMatch span').textContent = `Match ${(m * 100).toFixed(1)}%`;
+    A.match = out.match.map(v => +v.toFixed(4)); A.unshade = +out.unshade.toFixed(3); const m = Math.min(...out.match); $('#accMatch span').textContent = `Match ${(m * 100).toFixed(1)}%`;
     $('#accMatch').classList.toggle('warn', m < .9);
     document.querySelectorAll('#accLook button').forEach(b => b.classList.toggle('on', b.dataset.p === A.preset));
   } catch (e) { toastA(e.message || 'Something went wrong'); console.error(e); }
   A.busy = false;
 }
 document.querySelectorAll('#accLook button').forEach(b => b.onclick = () => { A.preset = b.dataset.p; run(); });
+$('#accWear').onclick = async () => { if (!A.view || !window.__outfits) return; const e = await __outfits.addFromView(A.view, A.tpl); setMode('outfits'); await __outfits.show(true); await __outfits.wear(e); toastA('Wearing it. Recolour it on the right.'); };
 
-if (location.hash === '#accessories') setMode('acc');
+setTimeout(() => { if (location.hash === '#accessories') setMode('acc'); else if (location.hash === '#outfits') setMode('outfits'); }, 0);
+
+/* ---------- Use Claude: the image generator, the hand-off message, and the page API Claude in Chrome drives ---------- */
+const GENS = { gemini: { name: 'Gemini (Nano Banana)', url: 'https://gemini.google.com/app', copy: 'the copy icon above the picture' },
+  chatgpt: { name: 'ChatGPT', url: 'https://chatgpt.com/', copy: 'right-click the picture → Copy image' },
+  copilot: { name: 'Microsoft Copilot', url: 'https://copilot.microsoft.com/', copy: 'right-click the picture → Copy image' },
+  other: { name: 'another image generator', url: '', copy: 'right-click the picture → Copy image' } };
+const GEN_KEY = 'grug.ccs.imagegen.v1';
+const genNow = () => { let g = { id: 'gemini' }; try { g = JSON.parse(localStorage.getItem(GEN_KEY)) || g; } catch {} const b = GENS[g.id] || GENS.gemini; return { id: g.id in GENS ? g.id : 'gemini', name: b.name, url: g.id === 'other' ? (g.url || '') : b.url, copy: b.copy }; };
+function syncGen(){ const g = genNow(); $('#accGen').value = g.id; $('#accGenUrl').hidden = g.id !== 'other'; $('#accGenUrl').value = g.id === 'other' ? g.url : ''; }
+const saveGen = () => { try { localStorage.setItem(GEN_KEY, JSON.stringify({ id: $('#accGen').value, url: $('#accGenUrl').value.trim() })); } catch {} syncGen(); };
+$('#accGen').onchange = saveGen; $('#accGenUrl').onchange = saveGen; syncGen();
+$('#accGenOpen').onclick = () => { const g = genNow(); if (g.url) window.open(g.url, '_blank', 'noopener'); else { $('#accGenUrl').focus(); toastA('Type your image generator’s address first'); } };
+function handoff(){
+  const g = genNow(), wish = $('#accWish').value.trim(), tpl = A.tpl ? `the "${A.tpl.name}" template that's open` : 'a template or a new model';
+  return `Make me a 3D accessory with the Grug Accessory Studio in this tab, using ${tpl}. ${wish ? 'I want: ' + wish + '.' : 'Ask me what I want first.'} ` +
+    `Paint it with ${g.name}${g.url ? ' (' + g.url + ')' : ''} in another tab. Run AccessoryStudio.help() in this tab for the steps, or read "How Claude uses this page" in the Use Claude card.`;
+}
+$('#accClaudeGo').onclick = async () => { const t = handoff(); $('#accHandoff').value = t; $('#accHandoffBox').hidden = false;
+  try { await navigator.clipboard.writeText(t); toastA('Copied. Paste it into Claude in Chrome on this tab'); } catch { $('#accHandoff').select(); } };
+$('#accCopyRef').onclick = async () => {
+  if (!A.tpl) return toastA('Pick a template first');
+  try { const blob = await (await fetch(A.tpl.refUrl)).blob(); await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); toastA('Reference picture copied'); A.copied = Date.now(); }
+  catch (e) { toastA("Couldn't copy the picture here: use Reference to download it"); } };
+
+const HELP = `GRUG ACCESSORY STUDIO: HOW CLAUDE MAKES AN ACCESSORY HERE (with Claude in Chrome)
+Two tabs: this Studio and the image generator (AccessoryStudio.generator() gives its name and address; Gemini by default).
+1. The model.
+   - A template: AccessoryStudio.templates() lists them; AccessoryStudio.open('<slug>').
+   - Something new: write a model.json (AccessoryStudio.modelFormat() explains it; await AccessoryStudio.example('<slug>') gives a finished one to copy from),
+     check it with await AccessoryStudio.clay(model) (the grey model from 4 sides in the big panel: take a screenshot, compare with the picture, fix,
+     2-4 rounds), then await AccessoryStudio.newModel(model). Things worn on the avatar need "wear" (see modelFormat).
+2. The prompt: AccessoryStudio.describe('<what it should look like>') returns the prompt (realistic, photo-scanned textures).
+3. Click the "Copy reference picture" button (a real click: only a click may put a picture on the clipboard).
+4. Generator tab: new chat, click the prompt box, press Ctrl+V (the picture), type the prompt on one line, press Enter, wait ~30 s.
+5. Copy the result: ${'${gen.copy}'}.
+6. Studio tab: click the "Drop the painted image" box and press Ctrl+V. It bakes in 1-2 s. AccessoryStudio.status().match per view:
+   0.95 or more is good; under 0.9 paint again and stress "keep every block exactly where it is".
+7. Finish: AccessoryStudio.look({fx, light, colours}) to adjust, AccessoryStudio.wear() to put it on the avatar (Outfits),
+   AccessoryStudio.download('glb' | 'obj' | 'texture' | 'normal').
+Rules: no brand or platform names in prompts; only send the person's own pictures where they asked; show them the result and the match.`;
+const FORMAT = `model.json: {"name", "object" (short noun for the prompt), "description" (looks, materials, colours), "parts": [...], "wear", "views", "lights", "outline", "logo"}
+Units are studs. Y is up, the front faces +Z. The blocky avatar: torso x -1..1, y 2..4, z -0.5..0.5; arms x 1..2 and -2..-1 (y 2..4); legs y 0..2;
+head a rounded cylinder r 0.625 from y 4 to 5.25 (eyes at y ~4.8).
+Every part: name, type, center [x,y,z], rot [x,y,z] degrees, mirror "x" | ["x","z"], explode [x,y,z] (back view only), material, seams (true/false),
+group ("Bag", "Straps": parts that are recoloured together), emissive {color, strength}, hidden.
+ box: size [w,h,d], taper [x,z] (top face scale), taperBottom [x,z], shift [x,z] (slides the top), omit ["bottom", ...]
+ cylinder: radius, radiusTop, height, sides (6-12), caps "both"|"top"|"bottom"|"none", scale [x,z]
+ lathe: profile [[radius, y], ...] top to bottom, sides, scale [x,z], caps, curl {amount, from} (lifts a brim's sides)
+ strap: points [[x,y,z], ...] along its middle, width, thickness, normal [x,y,z] or normals (one per point: which way the wide face looks), caps
+materials: ${'${LoPolCore.MATERIALS.join(" ")}'} (fabric and leather get stitched seams)
+wear (where it sits on the avatar): {"on": "head"|"back"|"lhand"|"rhand"|"lshoulder"|"rshoulder"|"face"|"neck"|"waist"|"front", "scale", "rot", "offset"}.
+ Hats: {"on": "head", "scale": s, "fit": "hat"} puts the brim just above the eyes, centred. Backpacks: model them around the torso
+ (straps over the shoulders at x ±0.8, y ~4.05, down the chest at z -0.54), "wear": {"on": "back", "rot": [0,180,0]}.
+ Held things hang from the hand at y ~2 (x ±1.5).
+lights: [{pos, color, strength, range}] light nodes. views: [{yaw: 35, pitch: 22}, {yaw: 215, pitch: 22}] (front + back, the default).
+Aim for 50-400 triangles; big readable blocks, parts slightly overlapping.`;
+const fillVals = () => { if (!A.view) return; document.querySelectorAll('#accStage input[data-f]').forEach(el => { el.value = A.view.fx[el.dataset.f]; el.dispatchEvent(new Event('input')); });
+  document.querySelectorAll('#accStage input[data-l]').forEach(el => { el.value = A.view.light[el.dataset.l]; el.dispatchEvent(new Event('input')); }); };
+async function newModel(model){
+  if (!window.LoPolCore) throw new Error('The model builder is not on this page');
+  setMode('acc'); const stage = $('#accStage'); A.view && A.view.destroy(); A.view = null; stage.innerHTML = '<div class="acc-empty" id="accBuild">Building…</div>';
+  const tpl = await LoPolCore.build(JSON.parse(JSON.stringify(model)), m => { const el = $('#accBuild'); if (el) el.textContent = m + '…'; });
+  A.tpl = tpl; A.preset = 'grug'; $('#accName').textContent = tpl.name; $('#accVariant').value = ''; $('#accVariant').placeholder = tpl.description;
+  $('#accExample').hidden = true; showReference(); buildPrompt(); setPhase('prompt');
+  return { ok: true, name: tpl.name, triangles: tpl.triangles, groups: tpl.groups, wear: tpl.look.wear || null };
+}
+window.AccessoryStudio = {
+  help: () => HELP.replace('${gen.copy}', genNow().copy), modelFormat: () => FORMAT.replace('${LoPolCore.MATERIALS.join(" ")}', window.LoPolCore ? LoPolCore.MATERIALS.join(' ') : ''),
+  generator: () => genNow(),
+  async templates(){ if (!A.list) await gallery(); return (A.list || []).map(t => ({ slug: t.slug, name: t.name, object: t.object, description: t.description, wear: t.wear || null })); },
+  async open(slug){ setMode('acc'); if (!A.list) await gallery(); await pick(slug); return { name: A.tpl.name, object: A.tpl.object, description: A.tpl.description, prompt: $('#accPrompt').value }; },
+  async example(slug){ return (await fetch(BASE + slug + '/model.json')).json(); },
+  async clay(model){ setMode('acc'); const c = LoPolCore.clay(model), stage = $('#accStage'); A.view && A.view.destroy(); A.view = null; stage.innerHTML = ''; c.className = 'acc-ref'; stage.appendChild(c);
+    return { ok: true, problems: LoPolCore.problems(model), note: 'The grey model from the front-right, back-right, back-left and front-left. Take a screenshot to check it.' }; },
+  newModel,
+  describe(text, opts = {}){ $('#accVariant').value = text || ''; if (opts.photo !== undefined) $('#accPhoto').checked = !!opts.photo; buildPrompt(); return $('#accPrompt').value.replace(/\n+/g, ' '); },
+  prompt: () => $('#accPrompt').value.replace(/\n+/g, ' '),
+  async paint(src){ const im = await new Promise((r, j) => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => r(i); i.onerror = () => j(new Error('Could not load that picture (copy it and press Ctrl+V on the drop box instead)')); i.src = src; }); A.painted = im; await run(); return this.status(); },
+  status: () => ({ mode: A.mode, phase: document.querySelector('#acc [data-phase]:not([hidden])')?.dataset.phase || null, template: A.tpl ? A.tpl.slug : null, built: !!(A.tpl && A.tpl.built),
+    busy: A.busy, match: A.match || null, unshade: A.unshade ?? null, copiedReference: !!A.copied }),
+  look(o = {}){ if (!A.view) return { ok: false, why: 'Nothing baked yet' }; Object.assign(A.view.fx, o.fx || {}); Object.assign(A.view.light, o.light || {}); fillVals();
+    Object.entries(o.colours || {}).forEach(([g, c]) => { const i = A.view.groups.indexOf(g); if (i >= 0) A.view.setColour(i, c && (c.rgb || c), c && c.amount || 1); });
+    A.view.update(); return { ok: true, groups: A.view.groups }; },
+  async wear(){ $('#accWear').click(); return { ok: !!A.view }; },
+  download(kind = 'glb'){ const b = { glb: '.glb', obj: '.objz', texture: '.dtex', normal: '.dnrm' }[kind]; const el = b && document.querySelector('#accStage ' + b); if (!el) return { ok: false }; el.click(); return { ok: true }; },
+};
+const helpBox = document.querySelector('#forClaude pre'); if (helpBox) helpBox.textContent = AccessoryStudio.help() + '\n\n' + AccessoryStudio.modelFormat();
+
 window.__acc = { A, setMode, pick, run };
+})();
+
+/* Clothing Studio: Outfits. The blocky avatar wearing a shirt, pants and accessories, mixed, matched and recoloured.
+   Looks and clothing come from outfits/index.json; accessories are the templates' finished examples plus anything
+   painted in the Accessories section this session ("Wear it"). Saved looks live in this browser (IndexedDB 'ccs-library'). */
+(() => {
+const OBASE = 'outfits/', ABASE = 'accessories/';
+const $o = s => document.querySelector(s);
+const toastO = m => (window.GRUG && GRUG.toast ? GRUG.toast(m) : console.log(m));
+const hexO = c => '#' + c.map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('');
+const unhexO = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const lumO = c => c[0] * .299 + c[1] * .587 + c[2] * .114;
+const SLOT_NAMES = { head: 'Head', back: 'Back', lhand: 'Left hand', rhand: 'Right hand', lshoulder: 'Left shoulder', rshoulder: 'Right shoulder', face: 'Face', neck: 'Neck', waist: 'Waist', front: 'Front', hair: 'Hair' };
+const OUT = { r: null, raf: 0, yaw: -0.5, pitch: 0.14, dist: 13, spin: true, drag: null, idle: 0, last: 0, ready: false,
+  index: null, cloth: null, shirt: null, pants: null, shirtPal: [], pantsPal: [], shirtCols: [], pantsCols: [],
+  wardrobe: [], worn: [], tex: {}, comp: null, saved: [],
+  look: { fx: Object.assign({}, LoPolTex.FX_DEFAULT), light: Object.assign({}, LoPolTex.LIGHT_DEFAULT), avatarOutline: true, accOutline: true, width: .06 } };
+
+/* ---------- colour palettes of a clothing template (k-means over the faces), and recolouring ---------- */
+const RECTS = () => [TORSO, RLIMB, LLIMB].flatMap(R => FK.map(k => R[k]));
+function palette(c, k = 4){
+  const d = c.getContext('2d').getImageData(0, 0, TW, TH).data, px = [];
+  RECTS().forEach(([x, y, w, h]) => { for (let yy = y; yy < y + h; yy += 3) for (let xx = x; xx < x + w; xx += 3) { const i = (yy * TW + xx) * 4; if (d[i + 3] > 128) px.push([d[i], d[i + 1], d[i + 2]]); } });
+  if (!px.length) return [];
+  px.sort((a, b) => lumO(a) - lumO(b)); let C = Array.from({ length: k }, (_, j) => px[Math.floor((j + .5) / k * px.length)].slice());
+  for (let it = 0; it < 10; it++) { const acc = C.map(() => [0, 0, 0, 0]);
+    for (const p of px) { let b = 0, bd = 1e9; C.forEach((c, j) => { const dd = (p[0] - c[0]) ** 2 + (p[1] - c[1]) ** 2 + (p[2] - c[2]) ** 2; if (dd < bd) { bd = dd; b = j; } }); const a = acc[b]; a[0] += p[0]; a[1] += p[1]; a[2] += p[2]; a[3]++; }
+    C = acc.map((a, j) => a[3] ? [a[0] / a[3], a[1] / a[3], a[2] / a[3], a[3]] : C[j]); }
+  // merge near-identical colours, drop tiny ones, biggest first
+  const out = []; C.filter(c => (c[3] || 0) / px.length > .03).sort((a, b) => b[3] - a[3]).forEach(c => { if (!out.some(o => Math.hypot(o[0] - c[0], o[1] - c[1], o[2] - c[2]) < 22)) out.push(c.slice(0, 3).map(Math.round)); });
+  return out;
+}
+function recolour(src, pal, cols){
+  if (!src || !cols.some(Boolean)) return src;
+  const c = cnv(TW, TH), x = c.getContext('2d'); x.drawImage(src, 0, 0); const id = x.getImageData(0, 0, TW, TH), d = id.data;
+  const P = pal.map(p => ({ p, l: Math.max(10, lumO(p)) }));
+  for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 8) continue; const r = d[i], g = d[i + 1], b = d[i + 2], l = lumO([r, g, b]);
+    let ws = 0, dr = 0, dg = 0, db = 0;
+    P.forEach((q, j) => { const dd = (r - q.p[0]) ** 2 + (g - q.p[1]) ** 2 + (b - q.p[2]) ** 2, w = 1 / (dd + 60) ** 2; ws += w;
+      const t = cols[j]; if (!t) return; const k = l / q.l; dr += w * (t[0] * k - r); dg += w * (t[1] * k - g); db += w * (t[2] * k - b); });
+    d[i] = r + dr / ws; d[i + 1] = g + dg / ws; d[i + 2] = b + db / ws; }
+  x.putImageData(id, 0, 0); return c;
+}
+const matchPal = (pal, list) => pal.map(p => { const m = (list || []).find(e => Math.hypot(e.from[0] - p[0], e.from[1] - p[1], e.from[2] - p[2]) < 70); return m ? m.to : null; });
+
+/* ---------- the avatar renderer (the Studio's own GLR, rounded head) ---------- */
+function initRenderer(){
+  if (OUT.r) return;
+  const cv = $o('#outView'); OUT.r = new GLR(cv, true, { aa: false, head: VIEW_HEAD });
+  const r = OUT.r; r.amb = .55; r.dif = .55; r.spec = .2; r.nstr = 1; r.light = (() => { const l = [-.35, .55, .76], n = Math.hypot(...l); return l.map(v => v / n); })();
+  const fc = cnv(256, 256), fx = fc.getContext('2d'), gr = fx.createRadialGradient(128, 128, 0, 128, 128, 128);
+  gr.addColorStop(0, 'rgba(0,0,0,.5)'); gr.addColorStop(.4, 'rgba(0,0,0,.22)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); fx.fillStyle = gr; fx.fillRect(0, 0, 256, 256);
+  OUT.tex.floor = r.tex(fc); OUT.headC = cnv(512, 164); OUT.tex.head = r.tex(headTex(skin(), OUT.headC));
+  OUT.tex.upper = r.gl.createTexture(); OUT.tex.legs = r.gl.createTexture();
+  OUT.tex.nmap = r.tex(bodyNormalMap('bevel', 'off', 'round')); r.nmapTex = OUT.tex.nmap; r.buildBody('classic', 'round');
+  cv.addEventListener('pointerdown', e => { OUT.drag = { x: e.clientX, y: e.clientY, yaw: OUT.yaw, pitch: OUT.pitch }; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove', e => { if (!OUT.drag) return; OUT.yaw = OUT.drag.yaw + (e.clientX - OUT.drag.x) * .008; OUT.pitch = clamp(OUT.drag.pitch + (e.clientY - OUT.drag.y) * .006, -1.2, 1.35); });
+  cv.addEventListener('pointerup', () => { OUT.drag = null; OUT.idle = performance.now(); });
+  cv.addEventListener('wheel', e => { e.preventDefault(); OUT.dist = clamp(OUT.dist * Math.exp(e.deltaY * .001), 5, 30); }, { passive: false });
+  cv.addEventListener('dblclick', () => { OUT.yaw = -.5; OUT.pitch = .14; OUT.dist = 13; });
+}
+const skin = () => hexRgb($o('#outSkin').value);
+/* Baked light for the avatar's own shirt and pants, like an accessory's: ambient occlusion and a soft room light with
+   shadows, ray-cast against the blocky body (boxes and the head) for every texel of the classic templates. Worked out once. */
+const NB = Math.max(TW, TH);
+function bodyLight(){
+  if (OUT.bodyMaps) return OUT.bodyMaps;
+  const hd = VIEW_HEAD, boxes = PARTS.map(p => ({ name: p.name, mn: p.min, mx: p.max })).concat([{ name: 'head', mn: [-hd.r, hd.y0, -hd.r], mx: [hd.r, hd.y1, hd.r] }]);
+  const hit = (o, d, tmax, self) => { for (const b of boxes) { if (b.name === self) continue; let t0 = 1e-4, t1 = tmax;
+      for (let a = 0; a < 3; a++) { if (Math.abs(d[a]) < 1e-9) { if (o[a] < b.mn[a] || o[a] > b.mx[a]) { t0 = 2; t1 = 1; break; } continue; }
+        let ta = (b.mn[a] - o[a]) / d[a], tb = (b.mx[a] - o[a]) / d[a]; if (ta > tb) { const q = ta; ta = tb; tb = q; } if (ta > t0) t0 = ta; if (tb < t1) t1 = tb; if (t0 > t1) break; }
+      if (t0 <= t1) return true; } return false; };
+  const Ld = v3norm([-0.35, 1, 0.45]), K = 48, reach = 0.8, out = {};
+  let seed = 3; const rnd = () => (seed = Math.imul(seed ^ (seed >>> 15), 2246822507) + 0x9e3779b9 >>> 0) / 4294967296;
+  for (const [tex, parts] of [['upper', ['torso', 'rarm', 'larm']], ['legs', ['rleg', 'lleg']]]) {
+    const AO = new Uint8ClampedArray(NB * NB * 4).fill(255), RM = new Uint8ClampedArray(NB * NB * 4).fill(200);
+    for (const name of parts) { const part = PARTS.find(p => p.name === name);
+      FK.forEach(k => { const f = part.geo[k], [rx, ry, rw, rh] = part.rects[k], n = f.n, T = v3norm(Math.abs(n[1]) < .9 ? v3cross([0, 1, 0], n) : v3cross([1, 0, 0], n)), B = v3cross(n, T);
+        for (let y = 0; y < rh; y += 2) for (let x = 0; x < rw; x += 2) {
+          const u = (x + 1) / rw, v = (y + 1) / rh, o = [0, 1, 2].map(i => f.o[i] + u * f.u[i] + v * f.v[i] + n[i] * .004);
+          let vis = 0; for (let j = 0; j < K; j++) { const u1 = (j + rnd()) / K, r = Math.sqrt(u1), ph = 2 * Math.PI * rnd(), cz = Math.sqrt(1 - u1);
+            const d = [0, 1, 2].map(i => T[i] * r * Math.cos(ph) + B[i] * r * Math.sin(ph) + n[i] * cz); if (!hit(o, d, reach, name)) vis++; }
+          let lit = 0; for (let j = 0; j < 6; j++) { const d = v3norm([Ld[0] + (rnd() - .5) * .25, Ld[1] + (rnd() - .5) * .25, Ld[2] + (rnd() - .5) * .25]); if (!hit(o, d, 20, name)) lit++; }
+          const ao = vis / K * 255, rm = Math.max(0, dot(n, Ld)) * lit / 6 * 255;
+          for (let yy = y; yy < Math.min(rh, y + 2); yy++) for (let xx = x; xx < Math.min(rw, x + 2); xx++) { const i = ((ry + yy) * NB + rx + xx) * 4; AO[i] = AO[i + 1] = AO[i + 2] = ao; RM[i] = RM[i + 1] = RM[i + 2] = rm; } } }); }
+    // soften the ray noise a little, and the sky bounce (no colour bleeding on the body: a soft sky term from the AO)
+    let A2 = AO; for (let pass = 0; pass < 3; pass++) { const S0 = A2, S1 = S0.slice(); for (let y = 2; y < NB - 2; y++) for (let x = 2; x < NB - 2; x++) { const i = (y * NB + x) * 4; S1[i] = S1[i + 1] = S1[i + 2] = (S0[i] * 4 + S0[i - 8] + S0[i + 8] + S0[i - NB * 8] + S0[i + NB * 8]) / 8; } A2 = S1; }
+    const BO = new Float32Array(NB * NB * 3); for (let i = 0; i < NB * NB; i++) { const a = A2[i * 4] / 255; BO[i * 3] = .1 * a; BO[i * 3 + 1] = .106 * a; BO[i * 3 + 2] = .114 * a; }
+    out[tex] = { AO: A2, RM, BO };
+  }
+  const flat = new Uint8ClampedArray(NB * NB * 4); for (let i = 0; i < flat.length; i += 4) { flat[i] = flat[i + 1] = flat[i + 2] = 128; flat[i + 3] = 255; }
+  out.DT = flat; out.EM = new Uint8ClampedArray(NB * NB * 4);
+  return (OUT.bodyMaps = out);
+}
+function retroBody(src, which){
+  const M = bodyLight(), m = M[which], c = cnv(NB, NB), x = c.getContext('2d'); x.drawImage(src, 0, 0);
+  const T = { n: NB, A: x.getImageData(0, 0, NB, NB).data, AO: m.AO, RM: m.RM, EM: M.EM, LG: null, DT: M.DT, BO: m.BO, LI: null, GM: null, means: [] };
+  const img = x.createImageData(NB, NB); LoPolTex.compose(T, { fx: OUT.look.fx, light: OUT.look.light, colours: [] }, img);
+  const o = cnv(TW, TH); x.putImageData(img, 0, 0); o.getContext('2d').drawImage(c, 0, 0); return o;
+}
+function bodyTextures(){
+  const r = OUT.r; if (!r) return;
+  const s = recolour(OUT.shirt, OUT.shirtPal, OUT.shirtCols), p = recolour(OUT.pants, OUT.pantsPal, OUT.pantsCols);
+  OUT.shirtNow = s; OUT.pantsNow = p;
+  OUT.comp = composites(s, p, skin(), { shirt: true, pants: true }, OUT.comp);
+  const near = OUT.look.fx.pixel > 1 || OUT.look.fx.bits < 8;
+  r.tex(retroBody(OUT.comp.upper, 'upper'), OUT.tex.upper, near); r.tex(retroBody(OUT.comp.legs, 'legs'), OUT.tex.legs, near); r.tex(headTex(skin(), OUT.headC), OUT.tex.head);
+}
+function wearMatrix(w){
+  const R = (a, b, c) => { const [x, y, z] = [a, b, c].map(v => (v || 0) * Math.PI / 180), cx = Math.cos(x), sx = Math.sin(x), cy = Math.cos(y), sy = Math.sin(y), cz = Math.cos(z), sz = Math.sin(z);
+    const X = [[1, 0, 0], [0, cx, -sx], [0, sx, cx]], Y = [[cy, 0, sy], [0, 1, 0], [-sy, 0, cy]], Z = [[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]];
+    const mul = (A, B) => A.map((row, i) => [0, 1, 2].map(j => row[0] * B[0][j] + row[1] * B[1][j] + row[2] * B[2][j])); return mul(Z, mul(Y, X)); };
+  const rot = w.rot || [0, 0, 0], M = R(rot[0], rot[1], rot[2]), s = Array.isArray(w.scale) ? w.scale : [w.scale ?? 1, w.scale ?? 1, w.scale ?? 1], o = w.offset || [0, 0, 0];
+  return { M, s, o, ap: p => [0, 1, 2].map(i => M[i][0] * p[0] * s[0] + M[i][1] * p[1] * s[1] + M[i][2] * p[2] * s[2] + o[i]), av: v => { const q = [0, 1, 2].map(i => M[i][0] * v[0] + M[i][1] * v[1] + M[i][2] * v[2]); const l = Math.hypot(...q) || 1; return q.map(x => x / l); } };
+}
+/* an accessory's triangles and outline hull in avatar space, as GLR meshes */
+function accMeshes(D, wear, outline){
+  const { f32 } = LoPolTex, P = f32(D.pos), N = f32(D.nrm), UV = f32(D.uv), TG = f32(D.tan), c = D.centre || [0, 0, 0], W = wearMatrix(wear), nv = P.length / 3;
+  const g = { p: [], n: [], t: [], t2: [], tu: [], tv: [], i: [] };
+  for (let v = 0; v < nv; v++) { const p = [P[v * 3] + c[0], P[v * 3 + 1] + c[1], P[v * 3 + 2] + c[2]], n = [N[v * 3], N[v * 3 + 1], N[v * 3 + 2]], t = [TG[v * 4], TG[v * 4 + 1], TG[v * 4 + 2]], hw = TG[v * 4 + 3] || 1;
+    const b = [(n[1] * t[2] - n[2] * t[1]) * hw, (n[2] * t[0] - n[0] * t[2]) * hw, (n[0] * t[1] - n[1] * t[0]) * hw];
+    g.p.push(...W.ap(p)); g.n.push(...W.av(n)); g.tu.push(...W.av(t)); g.tv.push(...W.av(b)); g.t.push(UV[v * 2], UV[v * 2 + 1]); g.t2.push(UV[v * 2], UV[v * 2 + 1]); g.i.push(v); }
+  const out = { mesh: OUT.r.mesh(g) };
+  if (outline && outline.on !== false) {
+    const H = LoPolTex.hullOf(P, (outline.width ?? .027) * D.radius * 2), h = { p: [], n: [], t: [], i: [] }, HN = LoPolTex.flatNormals(H);
+    for (let v = 0; v < nv; v++) { h.p.push(...W.ap([H[v * 3] + c[0], H[v * 3 + 1] + c[1], H[v * 3 + 2] + c[2]])); h.n.push(...W.av([HN[v * 3], HN[v * 3 + 1], HN[v * 3 + 2]])); h.t.push(0, 0); h.i.push(v); }
+    out.hull = OUT.r.mesh(h); out.hullColor = (outline.color || [5, 5, 5]).map(v => v / 255);
+  }
+  return out;
+}
+
+/* ---------- the wardrobe ---------- */
+async function loadIndex(){
+  if (OUT.index) return OUT.index;
+  try { OUT.index = await (await fetch(OBASE + 'index.json')).json(); } catch { OUT.index = { clothing: [], looks: [] }; }
+  try { const list = await (await fetch(ABASE + 'index.json')).json();
+    list.forEach(t => { if (!OUT.wardrobe.some(w => w.id === 'tpl:' + t.slug)) OUT.wardrobe.push({ id: 'tpl:' + t.slug, slug: t.slug, name: t.name, slot: t.wear || 'back', thumb: ABASE + t.slug + '/thumb.png', example: true }); }); } catch {}
+  return OUT.index;
+}
+const tplCache = {};
+async function tplOf(slug){ return tplCache[slug] || (tplCache[slug] = LoPolBake.load(ABASE + slug + '/')); }
+async function entryD(e){
+  if (e.D) return e.D;
+  if (e.model) { const t = await LoPolCore.build(JSON.parse(JSON.stringify(e.model))); return (e.D = { name: t.name, ...t.mesh, look: t.look, maps: Object.assign({}, t.mapUrls, { albedo: e.albedo, logo: e.logo }) }); }
+  const tpl = await tplOf(e.slug); if (e.albedo) { const D = LoPolBake.example(tpl); D.maps = Object.assign({}, D.maps, { albedo: e.albedo, logo: e.logo || D.maps.logo }); delete D.maps.bounce; return D; }
+  return LoPolBake.example(tpl);
+}
+/* wear one: compose its texture with its colours, build its mesh on the avatar */
+async function wear(e, colours){
+  const D = await entryD(e), slot = (D.look.wear && D.look.wear.on) || e.slot;
+  OUT.worn.filter(w => w.slot === slot && w.e.id !== e.id).forEach(w => takeOff(w.e.id, true));
+  if (OUT.worn.some(w => w.e.id === e.id)) return;
+  const T = await LoPolTex.prepare(D); if (e.BO) T.BO = e.BO;
+  const set = e.settings || {}, w = { e, D, T, slot, colours: (colours || set.colours || []).slice(), canvas: cnv(T.n, T.n) };
+  w.colours.length = T.groups.length;
+  const grid = LoPolTex.decodeGrid(D.look.grid), nodes = set.nodes || D.look.nodes || [];
+  if (nodes.length) T.LI = LoPolTex.nodeLight(grid, nodes, (D.look.grid && D.look.grid.centre) || [0, 0, 0], T.n);
+  w.tex = OUT.r.gl.createTexture(); Object.assign(w, accMeshes(D, D.look.wear || { on: slot }, set.outline || D.look.outline));
+  OUT.worn.push(w); paint(w);
+  if (!T.BO && grid && ((set.light || D.look.light || {}).bounce ?? 1) > 0)   // no bounce map yet (a fresh painting): trace it in the background
+    w.tracer = LoPolTex.trace(T, grid, LoPolTex.f32(D.pos), LoPolTex.f32(D.uv), Object.assign({}, LoPolTex.LIGHT_DEFAULT, D.look.light, set.light), null, BO => { T.BO = BO; e.BO = BO; w.tracer = null; paint(w); });
+  drawWorn();
+}
+function paint(w){
+  const set = w.e.settings || {}, img = w.canvas.getContext('2d').createImageData(w.T.n, w.T.n);
+  LoPolTex.compose(w.T, { fx: OUT.look.fx, light: OUT.look.light, colours: w.colours }, img);
+  w.canvas.getContext('2d').putImageData(img, 0, 0); OUT.r.tex(w.canvas, w.tex, true);
+}
+function takeOff(id, quiet){
+  const i = OUT.worn.findIndex(w => w.e.id === id); if (i < 0) return; const w = OUT.worn[i];
+  if (w.tracer) w.tracer.stop(); OUT.r.free(w.mesh); if (w.hull) OUT.r.free(w.hull); OUT.r.gl.deleteTexture(w.tex); OUT.worn.splice(i, 1);
+  if (!quiet) drawWorn();
+}
+async function setClothing(id, custom){
+  const c = custom || (OUT.index.clothing || []).find(x => x.id === id);
+  if (!c) { OUT.cloth = null; OUT.shirt = OUT.pants = null; OUT.shirtPal = OUT.pantsPal = []; OUT.shirtCols = []; OUT.pantsCols = []; bodyTextures(); drawClothing(); return; }
+  const img = src => new Promise((res, rej) => { if (!src) return res(null); if (src instanceof HTMLCanvasElement) return res(src); const i = new Image(); i.onload = () => { const k = cnv(TW, TH); k.getContext('2d').drawImage(i, 0, 0, TW, TH); res(k); }; i.onerror = rej; i.src = src; });
+  const base = custom ? '' : OBASE;
+  [OUT.shirt, OUT.pants] = await Promise.all([img(c.shirt && (typeof c.shirt === 'string' ? base + c.shirt : c.shirt)), img(c.pants && (typeof c.pants === 'string' ? base + c.pants : c.pants))]);
+  OUT.cloth = c; OUT.shirtPal = OUT.shirt ? palette(OUT.shirt) : []; OUT.pantsPal = OUT.pants ? palette(OUT.pants) : [];
+  OUT.shirtCols = OUT.shirtPal.map(() => null); OUT.pantsCols = OUT.pantsPal.map(() => null);
+  bodyTextures(); drawClothing();
+}
+
+/* ---------- looks: presets, saved ---------- */
+async function applyLook(L){
+  if (L.skin) { $o('#outSkin').value = L.skin; }
+  const custom = L.custom ? { id: 'custom', name: L.custom.name || 'Your clothing', shirt: L.custom.shirt, pants: L.custom.pants } : null;
+  await setClothing(L.clothing, custom);
+  OUT.shirtCols = matchPal(OUT.shirtPal, L.shirtColours); OUT.pantsCols = matchPal(OUT.pantsPal, L.pantsColours);
+  bodyTextures(); drawClothing();
+  [...OUT.worn].forEach(w => takeOff(w.e.id, true));
+  for (const a of L.accessories || []) {
+    let e = OUT.wardrobe.find(w => w.id === (a.id || 'tpl:' + a.slug));
+    if (!e && a.albedo) { e = { id: a.id || 'saved:' + Math.random().toString(36).slice(2), slug: a.slug, name: a.name || a.slug, slot: a.slot, albedo: a.albedo, logo: a.logo, settings: a.settings, thumb: a.thumb, model: a.model }; OUT.wardrobe.push(e); }
+    if (e) await wear(e, a.colours);
+  }
+  drawWardrobe(); drawWorn(); $o('#outName').value = L.name || '';
+}
+function currentLook(){
+  const name = $o('#outName').value.trim() || 'My look', pairs = (pal, cols) => pal.map((p, i) => cols[i] ? { from: p, to: cols[i] } : null).filter(Boolean);
+  const L = { name, skin: $o('#outSkin').value, clothing: OUT.cloth && OUT.cloth.id !== 'custom' ? OUT.cloth.id : null,
+    shirtColours: pairs(OUT.shirtPal, OUT.shirtCols), pantsColours: pairs(OUT.pantsPal, OUT.pantsCols),
+    accessories: OUT.worn.map(w => Object.assign({ id: w.e.id, slug: w.e.slug, name: w.e.name, slot: w.slot, colours: w.colours.map(c => c || null) }, w.e.albedo ? { albedo: w.e.albedo, logo: w.e.logo, settings: w.e.settings, thumb: w.e.thumb, model: w.e.model } : {})) };
+  if (OUT.cloth && OUT.cloth.id === 'custom') L.custom = { name: OUT.cloth.name, shirt: OUT.shirt && OUT.shirt.toDataURL(), pants: OUT.pants && OUT.pants.toDataURL() };
+  return L;
+}
+async function loadSaved(){ try { OUT.saved = (await idb.get('outfits.looks')) || []; } catch { OUT.saved = []; } drawLooks(); }
+async function saveLook(){
+  const L = currentLook(); L.saved = Date.now(); L.thumb = snapshot(160);
+  OUT.saved = OUT.saved.filter(s => s.name !== L.name); OUT.saved.unshift(L);
+  try { await idb.set('outfits.looks', OUT.saved); toastO(`Saved "${L.name}" in this browser`); } catch { toastO("Couldn't save in this browser"); }
+  drawLooks();
+}
+function snapshot(size){ const c = $o('#outView'), k = cnv(size, size), x = k.getContext('2d'), s = Math.min(c.width, c.height); x.drawImage(c, (c.width - s) / 2, (c.height - s) / 2, s, s, 0, 0, size, size); return k.toDataURL('image/jpeg', .8); }
+
+/* ---------- downloads: the look as a zip (shirt, pants, every accessory as GLB + texture, look.json) ---------- */
+async function downloadLook(){
+  const L = currentLook(), slug = s => (s || 'item').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), files = [];
+  const png = async c => new Uint8Array(await (await new Promise(r => c.toBlob(r, 'image/png'))).arrayBuffer());
+  if (OUT.shirtNow) files.push({ name: 'shirt.png', data: await png(OUT.shirtNow) });
+  if (OUT.pantsNow) files.push({ name: 'pants.png', data: await png(OUT.pantsNow) });
+  for (const w of OUT.worn) {
+    const t = await png(w.canvas), nm = await png(await LoPolTex.loadImg(w.D.maps.normal).then(im => { const k = cnv(im.naturalWidth, im.naturalHeight); k.getContext('2d').drawImage(im, 0, 0); return k; }));
+    const { f32 } = LoPolTex, P = f32(w.D.pos), ol = (w.e.settings && w.e.settings.outline) || w.D.look.outline;
+    const glb = LoPolTex.makeGLB({ name: w.e.name, P, N: f32(w.D.nrm), uv: f32(w.D.uv), tan: f32(w.D.tan), png: t, npng: nm, hull: ol && ol.on !== false ? LoPolTex.hullOf(P, (ol.width ?? .027) * w.D.radius * 2) : null, color: (ol && ol.color) || [5, 5, 5] });
+    files.push({ name: `${slug(w.e.name)}.glb`, data: new Uint8Array(await glb.arrayBuffer()) }, { name: `${slug(w.e.name)}-texture.png`, data: t });
+  }
+  files.push({ name: 'look.json', data: new TextEncoder().encode(JSON.stringify(Object.assign({}, L, { custom: undefined, accessories: L.accessories.map(a => Object.assign({}, a, { albedo: undefined, logo: undefined, thumb: undefined, wear: (OUT.worn.find(w => w.e.id === a.id) || {}).D?.look.wear })) }), null, 1)) });
+  const name = slug(L.name);
+  GRUG.download(`${name}.zip`, await GRUG.zip(files.map(f => ({ name: `${name}/${f.name}`, data: f.data }))));
+}
+
+/* ---------- UI ---------- */
+function swatchRow(label, base, cur, onPick, onReset){
+  const el = document.createElement('div'); el.className = 'o-sw';
+  el.innerHTML = `<input type="color" value="${hexO(cur || base)}" aria-label="${label}"><span>${label}<b>${cur ? 'RGB ' + cur.join(' ') : 'original'}</b></span><button class="g-btn g-btn--ghost g-btn--sm" ${cur ? '' : 'hidden'} title="Back to the original colour">Reset</button>`;
+  el.querySelector('input').oninput = e => { const v = unhexO(e.target.value); el.querySelector('b').textContent = 'RGB ' + v.join(' '); el.querySelector('button').hidden = false; onPick(v); };
+  el.querySelector('button').onclick = onReset; return el;
+}
+function drawClothing(){
+  const box = $o('#outClothes'); box.innerHTML = '';
+  const items = [{ id: null, name: 'None' }].concat(OUT.index ? OUT.index.clothing : []);
+  if (window.state && state.shirt) items.push({ id: 'studio', name: 'From the Clothing tab' });
+  items.forEach(c => { const b = document.createElement('button'); b.className = 'o-chip' + ((OUT.cloth ? OUT.cloth.id : null) === c.id || (c.id === 'studio' && OUT.cloth && OUT.cloth.id === 'custom') ? ' on' : '');
+    b.innerHTML = c.thumb ? `<i style="background-image:url('${OBASE + c.thumb}')"></i>${c.name}` : c.name;
+    b.onclick = () => c.id === 'studio' ? setClothing('custom', { id: 'custom', name: $o('#oName') ? $o('#oName').value || 'Your clothing' : 'Your clothing', shirt: state.shirt, pants: state.pants }) : setClothing(c.id);
+    box.appendChild(b); });
+  const cols = $o('#outClothCols'); cols.innerHTML = '';
+  [['Shirt', OUT.shirtPal, OUT.shirtCols], ['Pants', OUT.pantsPal, OUT.pantsCols]].forEach(([nm, pal, arr]) => {
+    if (!pal.length) return; const h = document.createElement('div'); h.className = 'o-sub'; h.textContent = nm + ' colours'; cols.appendChild(h);
+    pal.forEach((p, i) => cols.appendChild(swatchRow(`${nm} colour ${i + 1}`, p, arr[i], v => { arr[i] = v; bodyTextures(); }, () => { arr[i] = null; bodyTextures(); drawClothing(); }))); });
+}
+function drawWardrobe(){
+  const box = $o('#outAccs'); box.innerHTML = '';
+  OUT.wardrobe.forEach(e => { const on = OUT.worn.some(w => w.e.id === e.id), b = document.createElement('button'); b.className = 'lib-card o-acc' + (on ? ' on' : '');
+    b.innerHTML = `<div class="lib-thumb" style="background-image:url('${e.thumb || ''}')"></div><b></b><small>${SLOT_NAMES[e.slot] || ''}${e.example ? '' : ' · yours'}</small>`;
+    b.querySelector('b').textContent = e.name; b.setAttribute('aria-pressed', on);
+    b.onclick = async () => { if (OUT.worn.some(w => w.e.id === e.id)) takeOff(e.id); else { b.disabled = true; try { await wear(e); } catch (err) { console.error(err); toastO("Couldn't load that accessory"); } b.disabled = false; } drawWardrobe(); };
+    box.appendChild(b); });
+}
+function drawWorn(){
+  const box = $o('#outWorn'); box.innerHTML = ''; $o('#outWornCard').hidden = !OUT.worn.length;
+  OUT.worn.forEach(w => { const card = document.createElement('div'); card.className = 'o-worn';
+    card.innerHTML = `<div class="o-wh"><b></b><small>${SLOT_NAMES[w.slot] || w.slot}</small><button class="g-btn g-btn--ghost g-btn--sm">Take off</button></div>`;
+    card.querySelector('b').textContent = w.e.name; card.querySelector('button').onclick = () => { takeOff(w.e.id); drawWardrobe(); };
+    w.T.groups.forEach((g, i) => card.appendChild(swatchRow(g, w.T.means[i].map(Math.round), w.colours[i] && w.colours[i].rgb, v => { w.colours[i] = { rgb: v, amount: 1 }; paint(w); }, () => { w.colours[i] = null; paint(w); drawWorn(); })));
+    box.appendChild(card); });
+  drawWardrobe();
+}
+function drawLooks(){
+  const box = $o('#outLooks'); box.innerHTML = '';
+  const all = (OUT.index ? OUT.index.looks : []).map(l => ({ l, preset: true })).concat(OUT.saved.map(l => ({ l })));
+  all.forEach(({ l, preset }) => { const b = document.createElement('div'); b.className = 'lib-card o-look';
+    b.innerHTML = `<button class="o-lk"><div class="lib-thumb" style="background-image:url('${l.thumb ? (preset ? OBASE + l.thumb : l.thumb) : ''}')"></div><b></b><small>${preset ? 'Example look' : 'Saved in this browser'}</small></button>${preset ? '' : '<button class="o-del" title="Delete this saved look" aria-label="Delete">✕</button>'}`;
+    b.querySelector('b').textContent = l.name; b.querySelector('.o-lk').onclick = () => applyLook(l);
+    const d = b.querySelector('.o-del'); if (d) d.onclick = async () => { OUT.saved = OUT.saved.filter(s => s !== l); await idb.set('outfits.looks', OUT.saved); drawLooks(); };
+    box.appendChild(b); });
+}
+
+function drawLookPanel(){
+  const box = $o('#outFx'); if (!box || box.dataset.on) return; box.dataset.on = 1;
+  const fmt = (k, v) => k === 'bits' ? (v >= 8 ? '8-bit (off)' : v + '-bit') : k === 'pixel' ? v + '×' : k === 'width' ? v.toFixed(3) : (v > 0 && /contrast|sat|bright/.test(k) ? '+' : '') + (+v).toFixed(2);
+  const rows = [['fx', 'bits', 'Colour depth', 2, 8, 1], ['fx', 'dither', 'Dither', 0, 1, .01], ['fx', 'pixel', 'Pixel size', 1, 8, 1], ['fx', 'contrast', 'Contrast', -.5, .5, .01],
+    ['fx', 'sat', 'Saturation', -1, 1, .01], ['fx', 'bright', 'Brightness', -.4, .4, .01], ['light', 'ao', 'Ambient occlusion', 0, 1, .01], ['light', 'room', 'Room light', 0, 1, .01],
+    ['light', 'detail', 'Surface detail (accessories)', 0, 1.5, .01], ['light', 'lights', 'Light nodes', 0, 2, .01], ['light', 'bounce', 'Bounce light', 0, 1.5, .01]];
+  let pend = 0; const redo = () => { if (pend) return; pend = requestAnimationFrame(() => { pend = 0; bodyTextures(); OUT.worn.forEach(paint); }); };
+  rows.forEach(([grp, k, label, mn, mx, st]) => { const l = document.createElement('label'); l.className = 'o-rng';
+    l.innerHTML = `<span>${label}<b></b></span><input type="range" min="${mn}" max="${mx}" step="${st}" value="${OUT.look[grp][k]}">`;
+    const r = l.querySelector('input'), b = l.querySelector('b'); b.textContent = fmt(k, +r.value);
+    r.oninput = () => { OUT.look[grp][k] = +r.value; b.textContent = fmt(k, +r.value); redo(); }; box.appendChild(l); });
+  const ol = document.createElement('div'); ol.className = 'o-ol';
+  ol.innerHTML = `<label class="chk"><input type="checkbox" class="g-switch" id="outOlA" ${OUT.look.avatarOutline ? 'checked' : ''}>Avatar outline</label><label class="chk"><input type="checkbox" class="g-switch" id="outOlB" ${OUT.look.accOutline ? 'checked' : ''}>Accessory outlines</label>
+    <label class="o-rng"><span>Avatar outline width<b>${fmt('width', OUT.look.width)}</b></span><input type="range" min="0.01" max="0.15" step="0.005" value="${OUT.look.width}"></label>`;
+  ol.querySelector('#outOlA').onchange = e => { OUT.look.avatarOutline = e.target.checked; };
+  ol.querySelector('#outOlB').onchange = e => { OUT.look.accOutline = e.target.checked; };
+  const wr = ol.querySelector('input[type=range]'); wr.oninput = () => { OUT.look.width = +wr.value; wr.previousElementSibling.querySelector('b').textContent = fmt('width', +wr.value); };
+  box.appendChild(ol);
+}
+/* ---------- draw loop ---------- */
+function frame(t){
+  if (!OUT.on) { OUT.raf = 0; return; }
+  const dt = Math.min(.05, (t - OUT.last) / 1000); OUT.last = t;
+  if (OUT.spin && !OUT.drag && t - OUT.idle > 1200) OUT.yaw += dt * .6;
+  const cv = $o('#outView'), sc = Math.max(1, Math.min(2, (devicePixelRatio || 1) * .75)), cw = Math.max(1, Math.round(cv.clientWidth * sc)), ch = Math.max(1, Math.round(cv.clientHeight * sc));
+  if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; }
+  const r = OUT.r, gl = r.gl; gl.viewport(0, 0, cw, ch); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  const P = m4persp(30 * D2R, cw / ch, .1, 100), mv = m4mul(m4T(0, 0, -OUT.dist), m4mul(m4RX(OUT.pitch), m4mul(m4RY(OUT.yaw), m4T(0, -2.9, 0))));
+  r.affine = 0; r.snap = 0; r.explode = 0; r.studsOn = false; r.outline.on = OUT.look.avatarOutline; r.outline.width = OUT.look.width;
+  gl.depthMask(false); r.draw(r.floor, OUT.tex.floor, mv, P, [1, 1, 1], true); gl.depthMask(true);
+  r.drawChar(mv, P, { upper: OUT.tex.upper, legs: OUT.tex.legs, head: OUT.tex.head, tint: [1, 1, 1], skin: skin().map(v => v / 255) });
+  const sp = r.spec; r.spec = 0;
+  OUT.worn.forEach(w => { r.draw(w.mesh, w.tex, mv, P, [1, 1, 1], false, null, 0);
+    if (w.hull && OUT.look.accOutline) { gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK); r.draw(w.hull, r.white, mv, P, w.hullColor, true); gl.disable(gl.CULL_FACE); } });
+  r.spec = sp;
+  OUT.raf = requestAnimationFrame(frame);
+}
+async function show(on){
+  OUT.on = on; $o('#outfits').hidden = !on;
+  if (!on) return;
+  initRenderer(); drawLookPanel();
+  if (!OUT.readyP) OUT.readyP = (async () => { await loadIndex(); drawClothing(); drawWardrobe(); await loadSaved(); if (OUT.index.looks && OUT.index.looks[0] && !OUT.worn.length && !OUT.cloth) await applyLook(OUT.index.looks[0]); })();
+  await OUT.readyP; drawClothing(); drawWardrobe();
+  bodyTextures();
+  if (!OUT.raf) { OUT.last = performance.now(); OUT.raf = requestAnimationFrame(frame); }
+}
+/* an accessory painted in the Accessories section: add it to the wardrobe and put it on */
+async function addFromView(view, tpl){
+  const D = view.D, set = view.settings(), name = (document.querySelector('#accVariant').value.trim() || tpl.name).slice(0, 40);
+  const e = { id: 'mine:' + Date.now(), slug: tpl.slug, name, slot: (D.look.wear && D.look.wear.on) || 'back', albedo: D.maps.albedo, logo: D.maps.logo, settings: set, BO: view.bounce(), thumb: null };
+  if (tpl.built) { e.model = tpl.model; e.D = D; }
+  const t = view.texture(); try { const k = cnv(160, 160); k.getContext('2d').drawImage(document.querySelector('#accStage canvas'), 0, 0, 160, 160); e.thumb = k.toDataURL('image/jpeg', .8); } catch {}
+  OUT.wardrobe.unshift(e); return e;
+}
+
+$o('#outSkin').addEventListener('input', () => { bodyTextures(); const s = document.querySelector('#skin'); if (s) { s.value = $o('#outSkin').value; s.dispatchEvent(new Event('input')); } });
+$o('#outSave').onclick = saveLook; $o('#outZip').onclick = downloadLook;
+$o('#outSpin').onclick = e => { OUT.spin = !OUT.spin; e.currentTarget.classList.toggle('on', OUT.spin); };
+$o('#outShirtFile').onchange = async e => { const f = e.target.files[0]; if (!f) return; const url = URL.createObjectURL(f); await setClothing('custom', { id: 'custom', name: f.name.replace(/\.[^.]+$/, ''), shirt: url, pants: OUT.pants }); e.target.value = ''; };
+$o('#outPantsFile').onchange = async e => { const f = e.target.files[0]; if (!f) return; const url = URL.createObjectURL(f); await setClothing('custom', { id: 'custom', name: f.name.replace(/\.[^.]+$/, ''), shirt: OUT.shirt, pants: url }); e.target.value = ''; };
+
+window.__outfits = { OUT, show, wear, takeOff, applyLook, currentLook, addFromView, setClothing, saveLook };
 })();
 
 </script>

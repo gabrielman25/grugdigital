@@ -225,18 +225,32 @@ everyone in its own (classic) clothes, so it builds them with the runtime's **ba
 hair, and each model's random catalog body, face and hair (`makeOne`). Every game that builds the player from
 `grug.sandy.v1` gets it with no change; check one after changing the runtime (dress her in `avatar/`, open a game).
 
-## The Clothing Studio and its Accessories (`make/clothing/`)
+## The Clothing Studio: Clothing, Accessories, Outfits (`make/clothing/`)
 
-Make → Clothing Studio. **Clothing** turns an AI-dressed blocky avatar into classic shirt + pants templates. **Accessories**
-(`#accessories`) paints block-model templates (backpack, handbag, cowboy hat, boombox, lantern…) from an image model's
-picture, in the browser, and gives a PS1-style 3D model (GLB / OBJ zip / texture / normal map) with texture-only retro
-effects (colour depth, dither, pixel size, contrast, saturation, brightness: sliders that show their values), baked AO, room
-light, light nodes, path-traced bounce, material normal maps and an inverted-hull outline (on by default, RGB 5 5 5,
-width 0.027). Nothing moves the model's vertices (no snapping or wobble).
-The page is one file built outside this repo (the owner's Image2LoPol folder: `tool/inline_studio.py` puts the
-Accessories section in, then it is copied here with a Back to Make button). The templates in `make/clothing/accessories/`
-(`index.json` + one folder each) are made by that folder's `python3 tool/lopol.py template items/<slug> <dir>`; never edit them
-by hand. They are an offline companion of the page in `tools/pwa/build.py`.
+Make → Clothing Studio, three tabs. **Clothing** turns an AI-dressed blocky avatar into classic shirt + pants templates
+(its prompt asks for realistic fabric textures). **Accessories** (`#accessories`) paints block-model templates (backpack,
+handbag, cowboy hat, boombox, lantern…) from an image model's picture, in the browser, and gives a 3D model (GLB / OBJ zip /
+texture / normal map). The texture is 1024: the retro look (colour depth, dither, pixel size, contrast, saturation,
+brightness) is on the colour only, then the light is multiplied in crisp at 1024 (AO, room light, surface detail, light
+nodes, path-traced bounce, traced automatically). Defaults are the owner's: 4-bit, dither 1, pixel 2×, contrast +0.5; AO 1,
+room 0.6, detail 0.32, nodes 1, bounce 1.05; outline on, RGB 5 5 5, width 0.027. Every slider shows its value. Nothing moves
+the model's vertices. Each model is split into colour groups (bag, straps, bottle…) that can be recoloured.
+**Outfits** (`#outfits`) puts shirt, pants and accessories on the blocky avatar (rounded smooth-shaded head, generic face),
+one accessory per spot (head, back, each hand, each shoulder), with recolouring of the clothing's main colours and each
+accessory's groups, one "Retro look & lighting" panel for the whole outfit (the shirt and pants get AO and room light
+ray-cast against the body, plus the same retro effects), outlines for the avatar and the accessories, example looks
+(`make/clothing/outfits/index.json`: clothing PNGs, looks with their accessories and colours), looks saved in the browser
+(IndexedDB `ccs-library`, key `outfits.looks`) and a zip download. "Wear it" on a finished accessory sends it there.
+Accessories are made to fit the avatar (`wear` in each template; hats use `"fit": "hat"`: brim just above the eyes).
+**Use Claude** (Accessories): picks the image generator (Gemini by default; saved in `localStorage` `grug.ccs.imagegen.v1`),
+copies a hand-off message for Claude in Chrome, offers `claude-kit.zip` (the Image2LoPol tool, lean) and documents
+`window.AccessoryStudio` (help, modelFormat, templates, open, example, clay, newModel, describe, status, look, wear,
+download): Claude can build a brand-new model on the page (`lopol-core.js`) and moves pictures between the tabs through the
+clipboard. The page is one file built outside this repo (the owner's Image2LoPol folder: `tool/inline_studio.py` inlines
+`lopol-view.js`, `lopol-bake.js`, `lopol-core.js`, `acc-ui.js`, `outfits-ui.js`, then it is copied here with a Back to Make
+button). The templates in `make/clothing/accessories/` (`index.json` + one folder each, with its `model.json`) are made by
+that folder's `python3 tool/lopol.py template items/<slug> <dir>`; never edit them by hand. The accessories and outfits
+folders are offline companions of the page in `tools/pwa/build.py`.
 
 ## Contact us (`assets/contact.js`)
 

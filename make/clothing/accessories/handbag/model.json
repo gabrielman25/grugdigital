@@ -1,0 +1,116 @@
+{
+ "name": "Leather handbag",
+ "object": "handbag",
+ "description": "dark green pebbled leather handbag with two rolled handles and small gold rings",
+ "parts": [
+  {
+   "name": "body",
+   "type": "box",
+   "center": [
+    0,
+    0.8,
+    0
+   ],
+   "size": [
+    2.6,
+    1.6,
+    1.1
+   ],
+   "taper": [
+    0.82,
+    0.18
+   ],
+   "material": "leather",
+   "group": "Bag"
+  },
+  {
+   "name": "handle",
+   "type": "strap",
+   "points": [
+    [
+     -0.62,
+     1.5,
+     0.14
+    ],
+    [
+     -0.6,
+     2.3,
+     0.14
+    ],
+    [
+     -0.35,
+     2.85,
+     0.14
+    ],
+    [
+     0.35,
+     2.85,
+     0.14
+    ],
+    [
+     0.6,
+     2.3,
+     0.14
+    ],
+    [
+     0.62,
+     1.5,
+     0.14
+    ]
+   ],
+   "width": 0.13,
+   "thickness": 0.11,
+   "normal": [
+    0,
+    0,
+    1
+   ],
+   "mirror": "z",
+   "material": "leather",
+   "group": "Handles"
+  },
+  {
+   "name": "tab",
+   "type": "box",
+   "center": [
+    -0.62,
+    1.33,
+    0.21
+   ],
+   "size": [
+    0.24,
+    0.42,
+    0.06
+   ],
+   "taper": [
+    0.55,
+    1
+   ],
+   "rot": [
+    -16,
+    0,
+    0
+   ],
+   "mirror": [
+    "x",
+    "z"
+   ],
+   "material": "leather",
+   "group": "Clasp"
+  }
+ ],
+ "wear": {
+  "on": "lhand",
+  "scale": 0.5,
+  "rot": [
+   0,
+   90,
+   0
+  ],
+  "offset": [
+   1.5,
+   0.6,
+   0
+  ]
+ }
+}

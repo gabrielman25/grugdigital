@@ -56,7 +56,7 @@ COMPANIONS = {
     'assets/sandy-runtime.js': ['assets/closet-runtime.js'],
     'assets/closet-runtime.js': ['assets/clothes/', 'assets/clothes/tex/', 'assets/swords/', 'assets/events-icons/', 'assets/brands/'],
     'avatar/index.html': ['assets/events-icons/', 'assets/brands/'],   # the charm icons (ICON_BASE + name in jewelry.js)
-    'make/clothing/index.html': ['make/clothing/accessories/'],      # the Accessories templates (BASE + slug + '/…' in the page)
+    'make/clothing/index.html': ['make/clothing/accessories/', 'make/clothing/outfits/'],   # the Accessories templates and the Outfits looks (paths built in the page)
 }
 # What a pack never keeps, even when a shared script names it (shared scripts mention every game's art).
 # Anything left out still works online, and is saved for next time the first time it loads.
