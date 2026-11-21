@@ -1,5 +1,5 @@
 {
- "v": "56adc572c8bf",
+ "v": "e9f050396b0c",
  "apps": {
   "grug": [
    "grug",
@@ -101,6 +101,8 @@
     "/assets/boxart/takeatea.jpg": "e5e906f1f3",
     "/assets/boxart/teahouse.jpg": "b68d4800e1",
     "/assets/boxart/tidesandtackle.jpg": "0f360cf7c1",
+    "/assets/brand/grug-digital-logo-light.png": "40b2cb5cec",
+    "/assets/brand/grug-digital-logo.png": "f6edc5fe67",
     "/assets/brands/kimiland-kl.png": "84a9eebe40",
     "/assets/brands/kimiland-logo.png": "62b7243fb3",
     "/assets/business.js": "3ebbf673cd",
@@ -229,7 +231,7 @@
     "/assets/clothing/thumbs/tartan.png": "84caf5b8d9",
     "/assets/clothing/thumbs/varsity.png": "7915735c55",
     "/assets/clothing/thumbs/yoshi-fish.png": "6b0f9287b8",
-    "/assets/contact.js": "e9505c5e70",
+    "/assets/contact.js": "4814e22f3c",
     "/assets/cursors.js": "98b21ae8db",
     "/assets/demo.js": "066caaae68",
     "/assets/events-icons/License.txt": "53ef2d73ba",
@@ -335,10 +337,11 @@
     "/assets/fossil32/fossil32.js": "2b877eb172",
     "/assets/fossil32/logo.png": "f7821b54b3",
     "/assets/gamehost.js": "033b37689b",
+    "/assets/gamekit.js": "a2d40b56e8",
     "/assets/games.js": "7116ea2815",
     "/assets/gold.js": "473c93ee87",
-    "/assets/grug.css": "0dafe96312",
-    "/assets/grug.js": "f812c0e493",
+    "/assets/grug.css": "de55ce8489",
+    "/assets/grug.js": "9da6723e56",
     "/assets/icons.js": "d421bed707",
     "/assets/links.css": "5be746f1ee",
     "/assets/links.js": "8ad0bef667",
@@ -362,16 +365,18 @@
     "/assets/sandy/sad.png": "4d5eb02075",
     "/assets/shop-fonts.css": "0a6a35e4e1",
     "/assets/swords/swords.bin": "f63230ecf8",
-    "/assets/theme.js": "725088b8cc",
+    "/assets/theme.js": "adf90f3eff",
     "/assets/three.min.js": "1dc7b29a4a",
     "/assets/thumbs/cielito.jpg": "d5280f8418",
     "/assets/thumbs/yoshi.jpg": "447d727d48",
+    "/assets/vids/ambient-npc.js": "589c0ed165",
+    "/assets/vids/demo.js": "bc800c28d0",
     "/assets/wizard.css": "eb51fc0402",
     "/assets/wizard3d.js": "3870ba7150",
     "/avatar/classic/": "fd7b980fbc",
     "/avatar/classic/nav.css": "cf311bd758",
     "/avatar/classic/nav.js": "6a7b98ad23",
-    "/avatar/": "17b424628f",
+    "/avatar/": "370eefbe75",
     "/avatar/look.html": "83e232eec8",
     "/create/create.js": "b0b471ab18",
     "/create/": "02d9540aef",
@@ -400,9 +405,9 @@
     "/credits.html": "3992e0fe55",
     "/favicon.png": "25d0921a67",
     "/games/favorites/": "b5fee8fe8a",
-    "/games/": "3a2c45fc0c",
+    "/games/": "1fbaad5ad6",
     "/games/welcome/": "aae83e63c2",
-    "/": "7017de5879",
+    "/": "0182e9d465",
     "/links/create/": "d40a805a88",
     "/links/": "b9971e3ed4",
     "/links/page/": "984b54c854",
@@ -417,10 +422,12 @@
     "/rewards/create/": "ea7269d95f",
     "/rewards/": "792e809f05",
     "/shop/": "718b1f0402",
+    "/studio/": "a103b7db7d",
     "/support.html": "4e19678ee5",
-    "/terms.html": "a1578ecad9"
+    "/terms.html": "a1578ecad9",
+    "/vids/": "f993bf9874"
    },
-   "bytes": 37896597
+   "bytes": 38829384
   },
   "daypart": {
    "title": "Daypart",
@@ -448,11 +455,13 @@
     "/app/icons/tea-512.png": "f40aa25dac",
     "/app/icons/tea-maskable-512.png": "3483f14d4a",
     "/app/icons/tea.svg": "b9c46d822d",
+    "/assets/brand/grug-digital-logo-light.png": "40b2cb5cec",
+    "/assets/brand/grug-digital-logo.png": "f6edc5fe67",
     "/assets/business.js": "3ebbf673cd",
     "/assets/cafe3d.js": "a6c23d9879",
     "/assets/cardchat.css": "e7d3e71785",
     "/assets/catalog.js": "c3fad72d68",
-    "/assets/contact.js": "e9505c5e70",
+    "/assets/contact.js": "4814e22f3c",
     "/assets/cursors.js": "98b21ae8db",
     "/assets/demo.js": "066caaae68",
     "/assets/fogbg.js": "2efa5cf8ae",
@@ -471,8 +480,9 @@
     "/assets/fonts/shop/righteous-latin-400-normal.woff2": "fad0f31150",
     "/assets/gamehost.js": "033b37689b",
     "/assets/games.js": "7116ea2815",
-    "/assets/grug.css": "0dafe96312",
-    "/assets/grug.js": "f812c0e493",
+    "/assets/gold.js": "473c93ee87",
+    "/assets/grug.css": "de55ce8489",
+    "/assets/grug.js": "9da6723e56",
     "/assets/icons.js": "d421bed707",
     "/assets/qrcode.js": "1695445831",
     "/assets/rewards.css": "35ee1500c7",
@@ -484,8 +494,10 @@
     "/assets/sandy/happy.png": "84b398e2dd",
     "/assets/sandy/sad.png": "4d5eb02075",
     "/assets/shop-fonts.css": "0a6a35e4e1",
-    "/assets/theme.js": "725088b8cc",
+    "/assets/theme.js": "adf90f3eff",
     "/assets/three.min.js": "1dc7b29a4a",
+    "/assets/vids/ambient-npc.js": "589c0ed165",
+    "/assets/vids/demo.js": "bc800c28d0",
     "/assets/wizard.css": "eb51fc0402",
     "/assets/wizard3d.js": "3870ba7150",
     "/business/": "446924d25e",
@@ -501,7 +513,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 2181583
+   "bytes": 3049784
   },
   "tea": {
    "title": "Bubble Tea",
@@ -529,8 +541,10 @@
     "/app/icons/tea-maskable-512.png": "3483f14d4a",
     "/app/icons/tea.svg": "b9c46d822d",
     "/app/tea.webmanifest": "5f3ceeb22b",
+    "/assets/brand/grug-digital-logo-light.png": "40b2cb5cec",
+    "/assets/brand/grug-digital-logo.png": "f6edc5fe67",
     "/assets/business.js": "3ebbf673cd",
-    "/assets/contact.js": "e9505c5e70",
+    "/assets/contact.js": "4814e22f3c",
     "/assets/cursors.js": "98b21ae8db",
     "/assets/demo.js": "066caaae68",
     "/assets/fogbg.js": "2efa5cf8ae",
@@ -549,8 +563,9 @@
     "/assets/fonts/shop/righteous-latin-400-normal.woff2": "fad0f31150",
     "/assets/gamehost.js": "033b37689b",
     "/assets/games.js": "7116ea2815",
-    "/assets/grug.css": "0dafe96312",
-    "/assets/grug.js": "f812c0e493",
+    "/assets/gold.js": "473c93ee87",
+    "/assets/grug.css": "de55ce8489",
+    "/assets/grug.js": "9da6723e56",
     "/assets/qrcode.js": "1695445831",
     "/assets/rewards.js": "6467d3f969",
     "/assets/sandy-view.js": "91791b8312",
@@ -560,12 +575,14 @@
     "/assets/sandy/happy.png": "84b398e2dd",
     "/assets/sandy/sad.png": "4d5eb02075",
     "/assets/shop-fonts.css": "0a6a35e4e1",
-    "/assets/theme.js": "725088b8cc",
+    "/assets/theme.js": "adf90f3eff",
+    "/assets/vids/ambient-npc.js": "589c0ed165",
+    "/assets/vids/demo.js": "bc800c28d0",
     "/business/tea/": "19fceee055",
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93"
    },
-   "bytes": 1243662
+   "bytes": 2111863
   },
   "cafe": {
    "title": "Caf\u00e9",
@@ -593,8 +610,10 @@
     "/app/icons/tea-512.png": "f40aa25dac",
     "/app/icons/tea-maskable-512.png": "3483f14d4a",
     "/app/icons/tea.svg": "b9c46d822d",
+    "/assets/brand/grug-digital-logo-light.png": "40b2cb5cec",
+    "/assets/brand/grug-digital-logo.png": "f6edc5fe67",
     "/assets/business.js": "3ebbf673cd",
-    "/assets/contact.js": "e9505c5e70",
+    "/assets/contact.js": "4814e22f3c",
     "/assets/cursors.js": "98b21ae8db",
     "/assets/demo.js": "066caaae68",
     "/assets/fogbg.js": "2efa5cf8ae",
@@ -613,8 +632,9 @@
     "/assets/fonts/shop/righteous-latin-400-normal.woff2": "fad0f31150",
     "/assets/gamehost.js": "033b37689b",
     "/assets/games.js": "7116ea2815",
-    "/assets/grug.css": "0dafe96312",
-    "/assets/grug.js": "f812c0e493",
+    "/assets/gold.js": "473c93ee87",
+    "/assets/grug.css": "de55ce8489",
+    "/assets/grug.js": "9da6723e56",
     "/assets/qrcode.js": "1695445831",
     "/assets/rewards.js": "6467d3f969",
     "/assets/sandy-view.js": "91791b8312",
@@ -624,106 +644,108 @@
     "/assets/sandy/happy.png": "84b398e2dd",
     "/assets/sandy/sad.png": "4d5eb02075",
     "/assets/shop-fonts.css": "0a6a35e4e1",
-    "/assets/theme.js": "725088b8cc",
+    "/assets/theme.js": "adf90f3eff",
+    "/assets/vids/ambient-npc.js": "589c0ed165",
+    "/assets/vids/demo.js": "bc800c28d0",
     "/business/cafe/": "afe06cca1a",
     "/favicon.png": "25d0921a67",
     "/offline.html": "c1b6421a93"
    },
-   "bytes": 1251363
+   "bytes": 2119564
   },
   "game:runway": {
    "title": "Runway Ready",
    "files": {
-    "/assets/gamekit.js": "2d7f5eb0cc",
     "/assets/gamepage.css": "577b6c7055",
     "/assets/gamepage.js": "88d3c29439",
     "/assets/grug-app.js": "299c3e3720",
+    "/assets/vid-shim.js": "f43afe1316",
     "/games/runway/": "84af79baf8",
-    "/play/runway/game.html": "c42c2bd6d0",
+    "/play/runway/game.html": "97d0b1d09b",
     "/play/runway/": "d5f8f15f0b"
    },
-   "bytes": 392571
+   "bytes": 349953
   },
   "game:sandalslam": {
    "title": "Sandal Slam",
    "files": {
-    "/assets/gamekit.js": "2d7f5eb0cc",
     "/assets/gamepage.css": "577b6c7055",
     "/assets/gamepage.js": "88d3c29439",
     "/assets/grug-app.js": "299c3e3720",
+    "/assets/vid-shim.js": "f43afe1316",
     "/games/sandalslam/": "1b8c7a5152",
-    "/play/sandalslam/game.html": "da11c91010",
+    "/play/sandalslam/game.html": "3d1598ea97",
     "/play/sandalslam/": "e5a47f2248"
    },
-   "bytes": 4673480
+   "bytes": 4630862
   },
   "game:chestquest": {
    "title": "Chest Quest",
    "files": {
-    "/assets/gamekit.js": "2d7f5eb0cc",
     "/assets/gamepage.css": "577b6c7055",
     "/assets/gamepage.js": "88d3c29439",
     "/assets/grug-app.js": "299c3e3720",
+    "/assets/vid-shim.js": "f43afe1316",
     "/games/chestquest/": "3d12113fab",
-    "/play/chestquest/game.html": "26d9bbc829",
+    "/play/chestquest/game.html": "961bb0989f",
     "/play/chestquest/": "600ad0c733"
    },
-   "bytes": 462502
+   "bytes": 419884
   },
   "game:glowupspa": {
    "title": "Glow Up Spa",
    "files": {
-    "/assets/gamekit.js": "2d7f5eb0cc",
     "/assets/gamepage.css": "577b6c7055",
     "/assets/gamepage.js": "88d3c29439",
     "/assets/grug-app.js": "299c3e3720",
+    "/assets/vid-shim.js": "f43afe1316",
     "/games/glowupspa/": "33265e898a",
     "/play/glowupspa/CubePets-License.txt": "a939263aa3",
-    "/play/glowupspa/game.html": "e987b55e8f",
+    "/play/glowupspa/game.html": "e5154e4426",
     "/play/glowupspa/": "3f516d7b4c"
    },
-   "bytes": 2108534
+   "bytes": 2065916
   },
   "game:petmountainrescue": {
    "title": "Pet Mountain Rescue",
    "files": {
-    "/assets/gamekit.js": "2d7f5eb0cc",
     "/assets/gamepage.css": "577b6c7055",
     "/assets/gamepage.js": "88d3c29439",
     "/assets/grug-app.js": "299c3e3720",
+    "/assets/vid-shim.js": "f43afe1316",
     "/games/petmountainrescue/": "9f5e4decae",
     "/play/petmountainrescue/CubePets-License.txt": "a939263aa3",
-    "/play/petmountainrescue/game.html": "081af08ea4",
+    "/play/petmountainrescue/game.html": "c6026a4513",
     "/play/petmountainrescue/": "3986a19bfc"
    },
-   "bytes": 2059850
+   "bytes": 2017232
   },
   "game:mysteryblasters": {
    "title": "Mystery Blasters",
    "files": {
-    "/assets/gamekit.js": "2d7f5eb0cc",
     "/assets/gamepage.css": "577b6c7055",
     "/assets/gamepage.js": "88d3c29439",
     "/assets/grug-app.js": "299c3e3720",
+    "/assets/vid-shim.js": "f43afe1316",
     "/games/mysteryblasters/": "b03af23527",
     "/play/mysteryblasters/CubePets-License.txt": "a939263aa3",
-    "/play/mysteryblasters/game.html": "30e2a85608",
+    "/play/mysteryblasters/game.html": "9da4c298ab",
     "/play/mysteryblasters/": "5acac0e009"
    },
-   "bytes": 2403074
+   "bytes": 2360456
   },
   "game:tidesandtackle": {
    "title": "Tides & Tackle",
    "files": {
-    "/assets/gamekit.js": "2d7f5eb0cc",
     "/assets/gamepage.css": "577b6c7055",
     "/assets/gamepage.js": "88d3c29439",
     "/assets/grug-app.js": "299c3e3720",
+    "/assets/vid-shim.js": "f43afe1316",
     "/games/tidesandtackle/": "d28cad8faa",
-    "/play/tidesandtackle/game.html": "2b7e816512",
+    "/play/tidesandtackle/game.html": "ac8f80a908",
     "/play/tidesandtackle/": "2f16b61c3d"
    },
-   "bytes": 14153928
+   "bytes": 14111310
   },
   "game:placeholder18": {
    "title": "Placeholder 18+ game",

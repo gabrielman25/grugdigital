@@ -566,14 +566,35 @@
     else if (deptOf(it) === 'hair') { if (it._col) e.col = it._col; else delete e.col; }
     wearOn(it); clSave(); remember();
   }
+  // the left picture: her as she was before this piece, framed on its slot (her last trousers, her bare face…), taken from the
+  // stage the moment the piece is opened, in her own colours. Kept while pieces of the same slot are opened one after another
+  function slotBox(slot) {
+    sandy.object3d.updateMatrixWorld(true); const hb = new THREE.Box3().setFromObject(sandy.n3.headMesh), V = (x, y, z) => new THREE.Vector3(x, y, z);
+    if (['hair', 'eyewear', 'earrings', 'sound'].includes(slot)) { for (const d of ['hair', 'sound']) if (CL.mounted[d]) hb.union(new THREE.Box3().setFromObject(CL.mounted[d].b.root)); return hb.expandByScalar(1); }
+    const top = hb.min.y;
+    if (slot === 'necklaces') return new THREE.Box3(V(-16, top - 34, -10), V(16, top + 4, 12));
+    if (slot === 'clothing.top' || slot === 'back') return new THREE.Box3(V(-30, top - 62, -14), V(30, top + 2, 14));
+    if (slot === 'purses') return new THREE.Box3(V(-34, top - 80, -14), V(34, top - 20, 14));
+    if (slot === 'clothing.legs') return new THREE.Box3(V(-24, 18, -14), V(24, top - 44, 14));
+    return new THREE.Box3(V(-22, -3, -14), V(22, 30, 18));   // shoes, sandals
+  }
+  function beforeShot(slot) {
+    if (CL.beforeShot && CL.beforeShot.slot === slot) return CL.beforeShot.url; let url = '';
+    try {
+      endPose(); const b = slotBox(slot), yaw = slot === 'back' ? Math.PI - 0.4 : slot === 'earrings' ? 0.9 : slot === 'purses' ? 0.3 : 0.35;
+      frameOn(b, yaw, ['clothing.feet', 'sandals'].includes(slot) ? 0.3 : 0.08, thumbCam, 26, 1.0);
+      renderer.setRenderTarget(rt()); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(scene, thumbCam); url = readRT(TS, TS); renderer.setRenderTarget(null);
+    } catch (e) { console.warn('before', e); renderer.setRenderTarget(null); }
+    CL.beforeShot = { slot, url }; return url;
+  }
   function pickTile(it, before) {
     const t = el('button', 'cl-pick' + (before ? ' before' : '')); t.type = 'button';
     t.style.backgroundColor = it ? cardColour(it) : ''; t.append(el('span', 'wait'));
     if (before) t.append(el('span', 'cl-pbadge', ic('arrow_uturn_left_down')));
     t.append(el('span', 'cl-pon', ic('star')));
-    if (!it) { t.classList.add('none'); t.innerHTML += `<span class="cl-pnone">${ic('cross')}</span>`; t.querySelector('.wait').remove(); }
+    if (before) { t.classList.add('her'); t.querySelector('.wait').remove(); const u = CL.beforeShot && CL.beforeShot.url; if (u) t.style.backgroundImage = `url(${u})`; }
     else { const cb = u => { t.style.backgroundImage = `url(${u})`; const w = t.querySelector('.wait'); if (w) w.remove(); }; cb.alive = () => document.body.contains(t); queueThumb(it, 'worn', cb, true); }
-    const name = it ? it.name : 'Nothing'; t.setAttribute('aria-label', before ? 'What she had on: ' + name : name); t.dataset.gTip = before ? 'What she had on' : name;
+    const name = it ? it.name : 'nothing there'; t.setAttribute('aria-label', before ? 'Put back what she had on: ' + name : name); t.dataset.gTip = before ? 'Put back what she had on' : name;
     return t;
   }
   function selectTile(it) {
@@ -628,13 +649,15 @@
   async function clOpen(id) {
     const it = itemById(id); if (!it) { location.hash = ''; return; }
     if (deptOf(it) === 'hair') { viewer.token++; for (const k of Object.keys(viewer.vr)) HD.disposeVersion(viewer.vr[k]); viewer.vr = {}; viewer.vp = {}; viewer.item = it; viewer.level = 'low'; }
-    if (CL.view && CL.preview && slotOf(CL.preview) !== slotOf(it)) keepOn(CL.preview);
+    if (CL.view && CL.preview && slotOf(CL.preview) !== slotOf(it)) { keepOn(CL.preview); CL.beforeShot = null; await syncOutfit(); }
+    if (!CL.view) CL.beforeShot = null;
+    if (!CL.beforeShot || CL.beforeShot.slot !== slotOf(it)) { await syncOutfit(); beforeShot(slotOf(it)); }
     CL.view = it; CL.vars = [it].concat(variantsOf(it)); CL.preview = it;
     if (!clBody.childElementCount) clRender(); else clDetail();
     if (CL.sheet === 'full' && portrait()) setSheet('half');
     await syncOutfit(); if (CL.view === it) focus(it);
   }
-  function closeDetail(drop) { const was = CL.view; if (!was) return; const pick = CL.preview; CL.view = null; CL.preview = null; CL.vars = null; if (pick && !drop) { keepOn(pick); clRender(); } if (deptOf(was) === 'hair') viewer.item = null; if (/^#item\//.test(location.hash)) history.replaceState(null, '', location.pathname + location.search); syncOutfit(); focus(null); clDetail(); }
+  function closeDetail(drop) { const was = CL.view; if (!was) return; const pick = CL.preview; CL.view = null; CL.preview = null; CL.vars = null; CL.beforeShot = null; if (pick && !drop) { keepOn(pick); clRender(); } if (deptOf(was) === 'hair') viewer.item = null; if (/^#item\//.test(location.hash)) history.replaceState(null, '', location.pathname + location.search); syncOutfit(); focus(null); clDetail(); }
   function clClose() { closeDetail(); }
 
   /* ---- the stage and the sheet (portrait: the panel is a sheet that drags up over her) */
@@ -650,6 +673,11 @@
   $('#clMenuBtn').onclick = e => { e.stopPropagation(); const m = $('#clMenu'), open = m.hidden; $$('.rollmenu').forEach(x => x.hidden = true); m.hidden = !open; };
   { const m = $('#clMenu'); m.innerHTML = [['#edit', 'glasses', 'Eyewear editor'], [HAIR_STUDIO, 'hair', 'Hair Studio'], ['#edit/earrings', 'diamond', 'Earrings editor'], ['#edit/necklaces', 'flower', 'Necklace editor'], ['#edit/purses', 'shopping_bag', 'Purse editor'], ['#edit/sandals', 'sun', 'Sandal editor'], ['#edit/sound', 'note', 'Sound editor'], ['#edit/back', 'sword', 'Sword studio'], ['#edit/tops', 'shirt', 'Tops studio'], ['#edit/jackets', 'jacket', 'Jackets studio'], ['#edit/bottoms', 'pants', 'Bottoms studio'], ['#edit/shoes', 'shoe', 'Shoes studio'], ['#edit/outfits', 'outfit', 'Outfits studio']].filter(x => x[0] !== HAIR_STUDIO || HD).map(([h, i, l]) => `<a role="menuitem" href="${h}">${ic(i)}<span><b>${esc(l)}</b></span></a>`).join(''); GRUG.hydrate(m); }
 
+  /* ---- the back arrow: to the page they came from (the site has no bottom bar here) */
+  { let from = ''; try { const r = document.referrer && new URL(document.referrer); if (r && r.origin === location.origin && !/\/(avatar|labs\/catalog)\//.test(r.pathname)) { from = r.href; sessionStorage.setItem('grug.avatar.from', from); } else from = sessionStorage.getItem('grug.avatar.from') || ''; } catch (e) {}
+    const home = location.pathname.replace(/(avatar|labs\/catalog)\/[^/]*$/, '');   // the site's home page
+    $('#clBack').onclick = () => { location.href = from || home; }; }
+
   /* ---- in and out */
   let clReady = false;
   async function clEnter(hash) {
@@ -657,6 +685,7 @@
     const first = !CL.on; CL.on = true; showPage('closet'); look(true); if (worn) worn.root.visible = false; hairSync();
     if (canvas.parentElement !== $('#clStage')) { canvas.classList.remove('hovercv'); $('#clStage').prepend(canvas); resize(); }
     ZOOM[0] = 40; ZOOM[1] = 560; floor.visible = true; spin.on = false;
+    if (first) { const tq = new URLSearchParams(location.search).get('tab'); if (tq === 'custom' || tq === 'chars') { CL.mode = 'custom'; if (tq === 'chars') CL.cdept = 'chars'; $$('#clMode button').forEach(b => b.classList.toggle('is-on', b.dataset.mode === 'custom')); } }
     if (first) { if (!FEED.seed) newFeed(true); if (!clReady) { clReady = true; await applyBody(false); remember(); } else look(true); }
     $('#clLoading').classList.add('gone');
     if (/^#item\//.test(hash)) { if (first) clRender(); await clOpen(decodeURIComponent(hash.slice(6))); if (first) { CL.goal = CL.goal || fullBody(); } return; }

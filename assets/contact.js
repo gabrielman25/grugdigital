@@ -9,7 +9,7 @@
      GrugContact.open()                    opens the sheet from code
 */
 window.GRUG_CONTACT = {
-  discord: 'https://discord.gg/28Dj4Ws8tu',   // the owners' and managers' server (for/managers/ sends owners here)
+  discord: 'https://discord.gg/3ENePvNGJy',   // Grug Digital's server (Nov 2026; the sidebar's Discord, the dashboards' Contact us, for/managers/)
   instagram: '',                              // the handle without the @, e.g. 'grugdigital'
   text: '954-459-6301',                       // texts only, please, no calls (support.html, privacy.html, terms.html)
   email: ''                                   // e.g. 'hello@grugdigital.com'

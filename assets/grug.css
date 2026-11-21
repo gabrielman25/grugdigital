@@ -739,3 +739,107 @@ html.g-away body{visibility:hidden}
 .g-bd-row input:focus{outline:3px solid var(--ring-a);outline-offset:1px}
 .g-bd-err{min-height:1.4em;margin:10px 0 0;color:var(--danger);font-weight:600;font-size:14.5px}
 @media (max-width:380px){.g-bd-months{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* ---------- the player's layout (Nov 2026): like Roblox's. A top bar, a sidebar on wide screens, a slim rail with a drawer
+   on narrower ones, no bottom bar. grug.js (rbChrome) builds it; html.g-rb is set early by theme.js for the player account
+   outside partner mode, so the placeholder drawn before the page's script runs has the same shape. ---------- */
+html.g-rb{--top:56px;--tabs:0px;--rbw:240px}
+@media (max-width:1199px){html.g-rb{--rbw:72px}}
+body.g-rbody{padding:calc(var(--top) + var(--sat) + 18px) var(--sar) 32px calc(var(--rbw) + var(--sal))}
+body.g-rbody .wrap{max-width:1500px;padding-left:max(20px,var(--sal));padding-right:max(20px,var(--sar))}
+.g-top.rb-top{position:fixed;top:0;left:0;right:0;height:calc(var(--top) + var(--sat));padding:var(--sat) max(12px,var(--sar)) 0 max(12px,var(--sal));display:flex;align-items:center;gap:6px;background:var(--solid);border-bottom:1px solid var(--line);z-index:45;pointer-events:auto}
+.rb-top .rb-logo{display:flex;align-items:center;height:40px;padding:0 8px 0 4px;margin-right:6px;flex:none}
+.rb-top .rb-logo img{height:30px;width:auto;display:block}
+.rb-top .rb-logo .rb-logo-l,[data-theme=dark] .rb-top .rb-logo .rb-logo-d{display:none}
+[data-theme=dark] .rb-top .rb-logo .rb-logo-l{display:block}
+.rb-links{display:flex;align-self:stretch;flex:none}
+.rb-links a{position:relative;display:flex;align-items:center;padding:0 clamp(12px,2.2vw,34px);font:600 16px/1 var(--font);color:var(--ink2);white-space:nowrap}
+.rb-links a:hover{color:var(--ink)}
+.rb-links a[aria-current]{color:var(--ink)}
+.rb-links a[aria-current]::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:3px;border-radius:2px;background:var(--ink)}
+.rb-search{flex:1 1 auto;max-width:520px;min-width:0;display:flex;align-items:center;gap:8px;height:36px;margin:0 10px;padding:0 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line2);color:var(--mut)}
+.rb-search:focus-within{border-color:var(--ring-a)}
+.rb-search input{all:unset;flex:1;min-width:0;font:500 15px/1.2 var(--font);color:var(--ink)}
+.rb-sp{flex:1}
+.rb-who{display:flex;align-items:center;gap:8px;height:40px;padding:0 10px 0 4px;border-radius:999px;font:600 14px/1 var(--font);color:var(--ink);white-space:nowrap;min-width:0}
+.rb-who:hover,.rb-ic:hover,.rb-pearls:hover,.rb-searchbtn:hover{background:var(--card2)}
+.rb-who span{overflow:hidden;text-overflow:ellipsis;max-width:12em}
+.rb-face{width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:50% 20%;background:var(--card2);flex:none;display:grid;place-items:center}
+.rb-ic,.rb-searchbtn{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;flex:none;color:var(--ink)}
+.rb-ic .gi,.rb-searchbtn .gi{width:22px;height:22px}
+.rb-searchbtn{display:none}
+.rb-pearls{display:flex;align-items:center;gap:6px;height:40px;padding:0 12px 0 8px;border-radius:999px;font:700 15px/1 var(--font);color:var(--ink);flex:none}
+.rb-pearls .gi{width:22px;height:22px}
+@media (max-width:899px){.rb-links{display:none}}
+@media (max-width:699px){.rb-search{display:none}.rb-searchbtn{display:grid}.rb-top .g-fs{display:none}.rb-top .rb-logo img{width:30px;height:30px;object-fit:cover;object-position:left center}}
+@media (max-width:420px){.rb-who span{max-width:6.5em}.rb-pearls{padding:0 8px}}
+/* the sidebar */
+.rb-side{position:fixed;top:calc(var(--top) + var(--sat));left:0;bottom:0;width:240px;z-index:44;background:var(--bg);border-right:1px solid var(--line);overflow-y:auto;overscroll-behavior:contain}
+.rb-side-in{display:flex;flex-direction:column;gap:4px;padding:12px 12px calc(20px + var(--sab)) max(12px,var(--sal))}
+.rb-side nav{display:flex;flex-direction:column;gap:2px}
+.rb-me,.rb-side nav a{display:flex;align-items:center;gap:14px;min-height:46px;padding:0 14px;border-radius:12px;font:600 16px/1.1 var(--font);color:var(--ink)}
+.rb-me{font-weight:700;margin-bottom:2px}
+.rb-me:hover,.rb-side nav a:hover{background:var(--card2)}
+.rb-side nav a .gi{width:22px;height:22px;flex:none}
+.rb-side nav a[aria-current]{background:var(--card2);box-shadow:inset 0 0 0 2px var(--ring-a)}
+.rb-club{margin-top:12px;padding:14px;border-radius:14px;border:1px solid var(--line2);background:var(--solid);display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--ink2)}
+.rb-club b{color:var(--ink);font-size:15px}
+.rb-club-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#FFBE1A;color:#1E1B16}
+.rb-club ul{margin:0;padding:0 0 0 18px;display:flex;flex-direction:column;gap:3px}
+.rb-club-go{align-self:flex-start;font-weight:700;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+/* the rail and the drawer (narrower screens) */
+.rb-rail{display:none}
+.rb-scrim{display:none}
+.rb-ptabs{display:none}
+@media (max-width:1199px){
+  .rb-rail{position:fixed;top:calc(var(--top) + var(--sat));left:0;bottom:0;width:72px;z-index:44;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0 calc(8px + var(--sab)) var(--sal);background:var(--bg);border-right:1px solid var(--line)}
+  .rb-rail a,.rb-burger{width:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:58px;border-radius:12px;font:600 11px/1 var(--font);color:var(--ink2)}
+  .rb-burger{min-height:48px}
+  .rb-rail a:hover,.rb-burger:hover{background:var(--card2)}
+  .rb-rail .gi{width:24px;height:24px}
+  .rb-rail a[aria-current]{color:var(--ink);background:var(--card2)}
+  .rb-rail a[aria-current] .gi{color:var(--ring-a)}
+  .rb-rail .rb-face{width:28px;height:28px}
+  .rb-side{top:0;width:min(290px,86vw);z-index:62;transform:translateX(-102%);transition:transform .22s ease;box-shadow:0 0 40px rgba(0,0,0,.18);padding-top:var(--sat)}
+  html.rb-open .rb-side{transform:none}
+  html.rb-open .rb-scrim{display:block;position:fixed;inset:0;z-index:61;background:var(--scrim,rgba(0,0,0,.4))}
+}
+@media (max-width:899px){
+  .rb-ptabs{display:flex;margin:-6px 0 16px;border-bottom:1px solid var(--line)}
+  .rb-ptabs a{flex:1;text-align:center;padding:10px 0 12px;font:600 15px/1 var(--font);color:var(--mut);border-bottom:2px solid transparent;margin-bottom:-1px}
+  .rb-ptabs a[aria-current]{color:var(--ink);border-bottom-color:var(--ink)}
+}
+@media (max-width:520px){html.g-rb{--rbw:64px}.rb-rail{width:64px}.rb-rail a,.rb-burger{width:56px}}
+/* the placeholder drawn before the page's script: a top bar and the sidebar or rail */
+html.g-rb.g-pre body:not(.g-chrome){padding:calc(var(--top) + var(--sat) + 18px) 0 32px calc(var(--rbw) + var(--sal))}
+html.g-rb.g-pre body:not(.g-chrome)::before{top:0;left:0;right:0;width:auto;height:calc(var(--top) + var(--sat));border-radius:0;background:var(--solid);border:0;border-bottom:1px solid var(--line);box-shadow:none}
+html.g-rb.g-pre body:not(.g-chrome)::after{top:calc(var(--top) + var(--sat));left:0;right:auto;bottom:0;width:var(--rbw);height:auto;border-radius:0;background:var(--bg);border:0;border-right:1px solid var(--line);box-shadow:none}
+html.g-rb.g-pre:has(body:not(.g-chrome))::after{display:none}
+/* a game as a card (Grug.ui.gameCard): wide on Home's grid, square in the rows */
+.rb-card{display:flex;flex-direction:column;gap:6px;min-width:0;color:var(--ink)}
+.rb-pic{position:relative;display:block;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:var(--card2)}
+.rb-card.sq .rb-pic{aspect-ratio:1}
+.rb-pic img{width:100%;height:100%;object-fit:cover;transition:transform .25s ease}
+.rb-card:hover .rb-pic img{transform:scale(1.04)}
+.rb-pic i{position:absolute;left:8px;top:8px;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.62);color:#fff;font:700 11px/1.2 var(--font);font-style:normal}
+.rb-pic .rb-rated{position:absolute;right:8px;top:8px}
+.rb-card b{font:600 16px/1.25 var(--font);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rb-card small{display:flex;align-items:center;gap:5px;font:500 13px/1.2 var(--font);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rb-card small .gi{width:14px;height:14px}
+.rb-row{position:relative}
+.rb-strip{display:grid;grid-auto-flow:column;grid-auto-columns:clamp(128px,15vw,170px);gap:16px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;padding-bottom:4px}
+.rb-strip::-webkit-scrollbar{display:none}
+.rb-strip>*{scroll-snap-align:start}
+.rb-arrow{position:absolute;top:calc(clamp(128px,15vw,170px) / 2 - 22px);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--solid);color:var(--ink);box-shadow:0 2px 10px rgba(0,0,0,.18);z-index:2}
+.rb-arrow.l{left:-10px}.rb-arrow.r{right:-10px}
+.rb-arrow .gi{width:20px;height:20px}
+@media (hover:none){.rb-arrow{display:none}}
+.rb-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
+.rb-h h2{font:700 22px/1.2 var(--font)}
+.rb-h h2 a{display:inline-flex;align-items:center;gap:6px}
+.rb-h h2 a .gi{width:20px;height:20px}
+.rb-h .rb-more{font:600 15px/1 var(--font);color:var(--ink2);display:flex;align-items:center;gap:4px}
+.rb-sec{margin:0 0 34px}
+.rb-top .g-me,.rb-top .g-fs{background:none!important;box-shadow:none!important;border:0!important;width:40px;height:40px;padding:0;min-width:0}
+.rb-top .g-me:hover,.rb-top .g-fs:hover{background:var(--card2)!important}
+.rb-top .g-me .gi,.rb-top .g-fs .gi{width:22px;height:22px}

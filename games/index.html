@@ -278,11 +278,24 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
 .st-q-end p{margin:0;color:var(--ink2);max-width:46ch}
 .st-q-end .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
 @media (max-width:760px){.st-q-b{grid-template-columns:1fr}.st-q-sh{display:none}.st-q-a .nx{margin-left:0;flex:1 1 100%}}
+/* the front (Roblox's Charts): a heading and the store's links as pills; the search box is in the site's top bar */
+body.st-front .st-search{display:none}
+.st-h1{font:700 32px/1.1 var(--font);margin:4px 0 18px}
+@media (max-width:899px){.st-h1{display:none}}
+html.g-rb .st-nav{gap:8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 0 26px;padding:2px;border:0;border-radius:0;background:none;box-shadow:none}
+html.g-rb .st-nav::-webkit-scrollbar{display:none}
+html.g-rb .st-nav>a,html.g-rb .st-nav>button{flex:none;min-height:36px;padding:0 16px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:14.5px;font-weight:700;box-shadow:none}
+html.g-rb .st-nav>a:hover,html.g-rb .st-nav>button:hover{background:var(--ink);color:var(--bg);opacity:.88}
+html.g-rb .st-nav>a[aria-current=page]{background:var(--ink);color:var(--bg);box-shadow:0 0 0 3px var(--ring-a)}
+html.g-rb .st-nav>a b{background:rgba(255,255,255,.2)}
+html.g-rb .st-nav>.st-apps{background:var(--mode);color:var(--on-sel)}
+html.g-rb body.st-front .st-nav .lbl-long{display:inline}
+html.g-rb body.st-front .st-nav .lbl-short{display:none}
 </style>
 </head>
 <body>
 <main class="wrap st">
-  <h1 class="vh">Games</h1>
+  <h1 class="st-h1">Games</h1>
   <nav class="st-nav" aria-label="Store">
     <a href="#" data-nav="home"><span class="lbl-long">Your&nbsp;store</span><span class="lbl-short">Store</span></a>
     <a href="#search" data-nav="search">Browse<span class="lbl-long">&nbsp;all</span></a>
@@ -428,6 +441,7 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     const old = /^g\/([\w-]+)/.exec(h);   // the old Games page's #g/<id>: that game's page
     if (old && byId(old[1])) { location.replace(gameHref(byId(old[1]))); return; }
     if (h === 'queue') { history.replaceState(null, '', location.pathname + location.search); home(); startQueue(); return; }
+    document.body.classList.remove('st-front');
     if (/^search(\?|$)/.test(h)) search(new URLSearchParams(h.split('?')[1] || ''));
     else home();
     $$('.st-nav [data-nav]').forEach(a => a.toggleAttribute('aria-current', a.dataset.nav === (/^search/.test(h) ? 'search' : 'home')));
@@ -490,51 +504,26 @@ a.st-tag:hover{background:var(--mode);border-color:transparent;color:var(--on-se
     $('#tabPrev').innerHTML = list[0] ? preview(list[0]) : '';
   }
 
+  /* The store's front, laid out like Roblox's Charts (Nov 2026): "Games", then rows of square cards that scroll sideways,
+     each headed by a link to that list in Browse all. Only real numbers on the cards (your best, your runs). */
   function home(){
-    const vis = visible(), w = tagWeights();
-    feat = vis.filter(g => g.status !== 'legacy').map((g, k) => [g, (pm && g.id === pm.game ? 1e6 : 0) + (g.id === lastId ? 1e5 : 0) + affinity(g, w) * 10 - k]).sort((a, b) => b[1] - a[1]).map(x => x[0]);
-    const originals = vis.filter(g => g.original).sort(sorter('relevance'));
-    const venues = vis.filter(g => !g.original && g.status !== 'legacy').sort(sorter('relevance'));
-    const played = vis.filter(g => plays(g)).sort(sorter('recent'));
-    const mine = pm ? vis.filter(g => g.venue === pm.p) : [];   // partner mode: the venue's own games lead the store
-    // categories: every tag, the busiest first, each pictured by its best match for this player
-    const tc = {}; vis.forEach(g => tagsOf(g).forEach(t => { (tc[t] = tc[t] || []).push(g); }));
-    const used = {};   // each tile pictured by a game (and shot) the tiles before it haven't used, where there is one
-    const cats = Object.keys(tc).sort((a, b) => tc[b].length - tc[a].length || a.localeCompare(b)).slice(0, 12)
-      .map(t => { const g = tc[t].slice().sort((a, b) => (used[a.id] || 0) - (used[b.id] || 0) || affinity(b, w) - affinity(a, w))[0];
-        const pics = shots(g).slice(1).concat(shots(g)[0]), src = pics[(used[g.id] || 0) % pics.length]; used[g.id] = (used[g.id] || 0) + 1;
-        return '<a class="st-cat" href="' + searchHref({ inc: [t] }) + '"><img src="' + src + '" alt="" loading="lazy" decoding="async"><span>' + esc(t) + '<small>' + tc[t].length + '</small></span></a>'; });
-    const peek = queueList().slice(0, 3);
-    const tabs = TABS.filter(t => t[2]().length || t[0] === 'yours');
-    view.innerHTML =
-      (feat.length ? '<section><div class="st-h"><h2>Featured &amp; recommended</h2></div><div class="st-feat">' +
-        '<button type="button" class="st-arrow l" id="fPrev" aria-label="Previous game">' + G.icon('caret-left') + '</button><div id="featHost"></div>' +
-        '<button type="button" class="st-arrow r" id="fNext" aria-label="Next game">' + G.icon('caret-right') + '</button></div>' +
-        '<div class="st-dots" id="featDots">' + feat.map((g, k) => '<button type="button" data-k="' + k + '" aria-label="' + esc(g.title) + '"></button>').join('') + '</div></section>' : '') +
-      row('From ' + (pm ? pm.short || pm.n : ''), mine.map(g => capsule(g))) +
-      row('Keep playing', played.map(g => capsule(g, g.id === lastId ? 'Last played' : ''))) +
-      row('Grug originals', originals.map(g => capsule(g)), searchHref({ made: ['original'] })) +
-      row('Carts · quick one-tap games', CARTS.filter(g => !G.favs.isIgnored(g.id)).map(g => capsule(g)), searchHref({ type: ['cart'] })) +
-      row('Browse by category', cats, searchHref({})) +
-      '<section class="st-qb"><div><h2>Your Discovery Queue</h2><p>Step through games picked from what you play and favorite. Heart the ones you like, ignore the rest, and your store gets sharper.</p>' +
-        '<button type="button" class="st-play" data-queue>' + G.icon('shuffle') + 'Start your queue</button></div>' +
-        '<div class="st-qb-stack" aria-hidden="true">' + peek.map(g => '<img src="' + pic(g) + '" alt="" loading="lazy">').join('') + '</div></section>' +
-      '<section><div class="st-h"><h2>Browse games</h2><a href="' + searchHref({}) + '">Search and filter</a></div>' +
-        '<div class="st-tabs" id="tabs" role="tablist">' + tabs.map(t => '<button type="button" role="tab" data-tab="' + t[0] + '">' + esc(t[1]) + '</button>').join('') + '</div>' +
-        '<div class="st-tabwrap"><div id="tabRows"></div><aside class="st-prev" id="tabPrev" aria-hidden="true"></aside></div></section>';
-    if (feat.length){
-      setFeat(0); featAuto();
-      $('#fPrev').onclick = () => { setFeat(fi - 1); featAuto(); };
-      $('#fNext').onclick = () => { setFeat(fi + 1); featAuto(); };
-      $('#featDots').onclick = e => { const b = e.target.closest('[data-k]'); if (b) { setFeat(+b.dataset.k); featAuto(); } };
-      // hover a screenshot to see it big (the store's trick); leaving puts the cover back
-      $('#featHost').addEventListener('mouseover', e => { const im = e.target.closest('[data-shot]'); if (!im) return; $('#fImg').src = im.dataset.shot; $$('#featHost [data-shot]').forEach(x => x.classList.toggle('on', x === im)); });
-      $('#featHost').addEventListener('click', e => { const im = e.target.closest('[data-shot]'); if (im) { $('#fImg').src = im.dataset.shot; $$('#featHost [data-shot]').forEach(x => x.classList.toggle('on', x === im)); } });
-    }
-    $('#tabs').onclick = e => { const b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); };
-    $('#tabRows').addEventListener('mouseover', e => { const r = e.target.closest('[data-prev]'); if (!r || r.classList.contains('hl')) return;
-      $$('#tabRows .st-trow').forEach(x => x.classList.toggle('hl', x === r)); $('#tabPrev').innerHTML = preview(byId(r.dataset.prev)); });
-    setTab(tabs.some(t => t[0] === tab) ? tab : 'all');
+    document.body.classList.add('st-front');
+    const all = G.ui.gameList().filter(x => !G.favs.isIgnored(x.id)), games = all.filter(x => !x.cart), carts = all.filter(x => x.cart);
+    const played = games.filter(x => x.plays || x.best).sort((a, b) => (b.g.app === st.lastGame) - (a.g.app === st.lastGame) || b.plays - a.plays);
+    const favs = games.filter(x => G.favs.has(x.id));
+    const tc = {}; games.forEach(x => x.tags.forEach(t => { (tc[t] = tc[t] || []).push(x); }));
+    const cats = Object.keys(tc).filter(t => tc[t].length > 1).sort((a, b) => tc[b].length - tc[a].length || a.localeCompare(b)).slice(0, 6);
+    const rowOf = (title, list, href, opts) => !list.length ? '' : '<section class="rb-sec"><div class="rb-h"><h2><a href="' + href + '">' + esc(title) + ' ' + G.icon('arrow-right') + '</a></h2></div>' +
+      '<div class="rb-row"><div class="rb-strip">' + list.map(x => G.ui.gameCard(x, Object.assign({ square: true }, opts && opts(x)))).join('') + '</div></div></section>';
+    view.innerHTML = '' +
+      (pm ? rowOf('From ' + (pm.short || pm.n), games.filter(x => x.g.venue === pm.p), searchHref({})) : '') +
+      rowOf('Keep playing', played, searchHref({ mine: ['played'] }), x => x.g.app === st.lastGame ? { ribbon: 'Last played' } : null) +
+      rowOf('Grug originals', games.filter(x => x.g.original), searchHref({ made: ['original'] })) +
+      rowOf('Quick games', carts, G.url('games/carts/')) +
+      rowOf('Your favorites', favs, G.url('games/favorites/')) +
+      cats.map(t => rowOf(t, tc[t], searchHref({ inc: [t] }))).join('') +
+      rowOf('Every game', games, searchHref({}));
+    $$('.rb-row', view).forEach(r => G.ui.cardRow(r));
   }
 
   /* ================= Browse all (search) ================= */

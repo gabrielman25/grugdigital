@@ -91,6 +91,7 @@ rep("          if (!m.userData.grugSkin) m.userData.grugSkin = { map: m.map, vc:
 CLOSET_HTML = r'''
   <!-- 0. the closet: the catalog and the avatar editor in one (Marketplace | Customize), laid out like Roblox's avatar editor -->
   <section id="closet" class="page cl" data-sheet="half" data-mode="market" hidden>
+    <button class="cl-round cl-back" id="clBack" aria-label="Back" data-g-tip="Back"><i data-g-icon="arrow_left"></i></button>
     <div class="cl-stage" id="clStage">
       <div class="cl-stagebar">
         <div class="rollbtn cl-menuwrap"><button class="cl-round" id="clMenuBtn" aria-label="Make your own" data-g-tip="Make your own" aria-haspopup="menu"><span data-g-logo="tile" class="tile"></span></button><div class="rollmenu createmenu cl-menu" id="clMenu" role="menu" hidden></div></div>
@@ -314,7 +315,6 @@ css = """
 #closet .cl-mode button{white-space:nowrap}
 #closet .cl-mode{display:flex;flex-wrap:nowrap;width:max-content;gap:.15rem}
 /* the site's dock (avatar/): room under the lists so nothing hides behind it */
-body.g-chrome #closet .cl-body,body.g-chrome #closet .cl-detail{padding-bottom:6.5rem}
 #closet .cl-grip{display:none}
 #closet .cl-tabrow{display:flex;align-items:center;gap:.6rem;padding:0 1rem;border-bottom:1px solid var(--g-line)}
 #closet .cl-tabs,#closet .cl-subs{display:flex;gap:.15rem;overflow-x:auto;overflow-y:hidden;flex:1;min-width:0;scroll-behavior:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
@@ -417,6 +417,7 @@ body.g-chrome #closet .cl-body,body.g-chrome #closet .cl-detail{padding-bottom:6
   #closet .cl-grip{display:block;flex:none;height:1.3rem;cursor:grab;touch-action:none;position:relative}
   #closet .cl-grip::after{content:'';position:absolute;left:50%;top:.5rem;width:2.4rem;height:.28rem;border-radius:9px;background:var(--g-line);transform:translateX(-50%)}
   #closet .cl-mode{left:50%}
+  #closet .cl-stagebar{top:3.9rem}
   #closet[data-sheet="full"] .cl-stagebar{display:none}
   #closet .cl-search{width:7rem}
   #closet .cl-iwrap{grid-template-columns:7.5rem minmax(0,1fr);gap:.9rem}
@@ -433,6 +434,9 @@ body.g-chrome #closet .cl-body,body.g-chrome #closet .cl-detail{padding-bottom:6
 #closet .cl-detail .cl-desc{margin:.7rem 0 .6rem}
 #closet .ccard.viewing .ct{box-shadow:0 0 0 3px var(--g-accent)}
 #closet .cl-round.cl-x{flex:none}
+/* the back arrow, top left of the catalog (of the screen in portrait, where the stage is on top) */
+#closet .cl-back{position:absolute;left:.65rem;top:.65rem;z-index:7;width:2.5rem;height:2.5rem}
+#closet .cl-pick.her{background-size:cover;background-position:center}
 /* the opened piece: pictures first (what she had on, big, then the piece and its colours); the words are under More Information */
 #closet .cl-item{position:relative}
 #closet .cl-item > .cl-x{position:absolute;right:0;top:0;z-index:2}
@@ -533,9 +537,9 @@ open(os.path.join(REPO,'labs','catalog','index.html'),'w').write(s)
 av = s.replace("'../../assets/", "'../assets/").replace('"../../assets/', '"../assets/').replace('(../../assets/', '(../assets/')
 av = av.replace("/\\/labs\\//.test(location.pathname)", "/\\/(labs|avatar)\\//.test(location.pathname)")
 av = av.replace("const HAIR_STUDIO = /\\/(labs|avatar)\\//.test(location.pathname) ? '../hair-studio-x8f3k2/'", "const HAIR_STUDIO = /\\/avatar\\//.test(location.pathname) ? '../labs/hair-studio-x8f3k2/' : /\\/labs\\//.test(location.pathname) ? '../hair-studio-x8f3k2/'")
-# the site's dock (Home, Games, Me, Make) under the closet: the site's styles first (the page's own win), then its scripts
+# the site's scripts under the closet (no bottom bar: it has its own back arrow): the site's styles first (the page's own win)
 av = av.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<link rel="stylesheet" href="../assets/grug.css">\n<script src="../assets/theme.js?v=av2"></script>', 1)
-av = av.replace('</body>', '<script src="../assets/sandy-view.js?v=av2"></script>\n<script src="../assets/icons.js"></script>\n<script src="../assets/grug.js?v=av2"></script>\n<script>try { Grug.ui.chrome(\'avatar\', { dockOnly: true }); } catch (e) { console.warn(\'dock\', e); }</script>\n</body>', 1)
+av = av.replace('</body>', '<script src="../assets/sandy-view.js?v=av2"></script>\n<script src="../assets/icons.js"></script>\n<script src="../assets/grug.js?v=av2"></script>\n<script>try { Grug.ui.chrome(\'avatar\', { bare: true }); } catch (e) { console.warn(\'chrome\', e); }</script>\n</body>', 1)
 assert '../../' not in av, [m for m in __import__('re').findall(r".{30}\.\./\.\./.{30}", av)][:5]
 open(os.path.join(REPO,'avatar','index.html'),'w').write(av)
 

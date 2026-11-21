@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Studio Toolkit · Grug</title>
+<meta name="description" content="Grug's Studio Toolkit: tools for Roblox developers to make models and assets with Grug. Coming soon.">
+<link rel="icon" href="../favicon.png">
+<link rel="stylesheet" href="../assets/grug.css">
+<script src="../assets/theme.js?v=av2"></script>
+<style>
+/* Studio Toolkit: a placeholder landing page while the tools are made (tools for Roblox developers to make models and
+   assets with Grug). Replace the cards with the real tools as they land. */
+.sk-hero{display:grid;gap:18px;padding:18px 0 8px;max-width:820px}
+.sk-badge{align-self:flex-start;justify-self:start;display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:var(--card2);font:700 13px/1 var(--font);color:var(--ink2)}
+.sk-badge i{width:8px;height:8px;border-radius:50%;background:var(--mode);display:inline-block}
+.sk-hero h1{font:700 clamp(32px,5vw,52px)/1.05 var(--font)}
+.sk-hero p{font-size:18px;color:var(--ink2);max-width:46ch}
+.sk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin:28px 0}
+.sk-card{padding:20px;border-radius:var(--r);background:var(--card-solid,var(--solid));border:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.sk-card .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--mode) 22%,transparent);color:var(--ink)}
+.sk-card .ic .gi{width:24px;height:24px}
+.sk-card b{font:700 18px/1.2 var(--font)}
+.sk-card p{color:var(--mut);font-size:15px}
+.sk-card small{margin-top:auto;font:700 12px/1 var(--font);color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.sk-cta{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.sk-fine{color:var(--mut);font-size:13px;margin-top:28px;max-width:60ch}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="sk-hero">
+    <span class="sk-badge"><i></i>In the works</span>
+    <h1>Studio Toolkit</h1>
+    <p>Tools made for Roblox developers: make models and assets with Grug, ready to drop into your game.</p>
+    <div class="sk-cta"><a class="g-btn primary big" href="../create/">Try the 3D models library</a><a class="g-btn big" id="dc" href="#" target="_blank" rel="noopener" hidden>Tell us what you need on Discord</a></div>
+  </section>
+  <div class="sk-grid">
+    <div class="sk-card"><span class="ic" data-ic="cube"></span><b>Models for Studio</b><p>Build in Model Kit and take it out as a MeshPart with one texture.</p><small>Coming soon</small></div>
+    <div class="sk-card"><span class="ic" data-ic="t-shirt"></span><b>Accessories</b><p>Glasses, jewelry, bags and more from the closet's editors, sized for avatars.</p><small>Coming soon</small></div>
+    <div class="sk-card"><span class="ic" data-ic="paint-brush"></span><b>Textures and decals</b><p>Prints and patterns that tile cleanly, in any colour.</p><small>Coming soon</small></div>
+    <div class="sk-card"><span class="ic" data-ic="wrench"></span><b>And more</b><p>We're building this with developers. Tell us what would save you time.</p><small>Coming soon</small></div>
+  </div>
+  <p class="sk-fine">Roblox is a trademark of Roblox Corporation. Grug Digital isn't affiliated with or endorsed by Roblox.</p>
+</main>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="../assets/games.js"></script>
+<script src="../assets/contact.js"></script>
+<script src="../assets/grug.js?v=av2"></script>
+<script>
+(function(){
+  const G = Grug;
+  G.ui.chrome('studio');
+  document.querySelectorAll('[data-ic]').forEach(el => { el.innerHTML = G.icon(el.dataset.ic); });
+  const c = window.GRUG_CONTACT; if (c && c.discord) { const a = document.getElementById('dc'); a.href = c.discord; a.hidden = false; }
+})();
+</script>
+</body>
+</html>

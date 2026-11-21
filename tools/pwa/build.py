@@ -35,6 +35,7 @@ GRUG_PAGES = [
     '', '404.html', 'games/', 'games/favorites/', 'games/welcome/', 'me/', 'me/cards/', 'avatar/', 'avatar/look.html', 'avatar/classic/',
     'profile/', 'shop/', 'make/', 'links/', 'links/create/', 'links/page/', 'rewards/', 'rewards/create/', 'rewards/card/',
     'create/', 'create/modelkit/', 'pearls.html', 'credits.html', 'privacy.html', 'terms.html', 'support.html',
+    'vids/', 'studio/',   # Vids (NPCs playing the games) and the Studio Toolkit placeholder
 ]
 DAYPART_PAGES = [
     'business/', 'business/site/', 'rewards/', 'rewards/create/', 'restaurant/', 'site/',
@@ -48,7 +49,7 @@ def shop_files(a):
 APP_FILES = ['offline.html', 'app/app.js', 'app/grug.webmanifest', 'app/daypart.webmanifest', 'favicon.png',
              'app/icons/grug-192.png', 'app/icons/daypart-192.png', 'app/icons/grug-180.png', 'app/icons/daypart-180.png']
 # Files a pack needs that no page names in a way the scan can see. { pack id: [paths] }
-EXTRA = {}
+EXTRA = {'grug': ['assets/brand/grug-digital-logo.png', 'assets/brand/grug-digital-logo-light.png', 'assets/contact.js', 'assets/gold.js']}   # the top bar's logo, and what the sidebar loads on demand
 # Folders loaded by a script that builds the file names in code: when the script is in a pack, so is the folder.
 COMPANIONS = {
     'assets/fossil32/fossil32.js': ['assets/fossil32/fonts/'],   # the box-title fonts (FontFace(`url(${base}fonts/…)`))

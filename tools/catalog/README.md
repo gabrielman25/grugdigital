@@ -47,7 +47,8 @@ The rest of the site still uses `assets/sandy-classic.js` (old feet).
   and Yours end. Search and filters re-filter with the same seed.
 - **An opened piece** (`#item/<id>`) fills the **bottom half of the panel** (`#clDetail`); the feed stays above it and keeps
   scrolling, so another card can be opened straight away. It is **pictures only**, so someone who can't read can use it: the
-  big picture on the left is what she had on in that slot (a cross when it was empty, with a small "back" badge), then the
+  big picture on the left is her as she was before it, framed on that slot (`beforeShot`: taken from the stage in her own
+  colours the moment the piece opens, so it shows her last trousers, her bare face…; a small "back" badge on it), then the
   tapped piece and `VAR_N` (5) colour versions of it (`variantsOf`: the same shape recoloured with `keep: 'shape'`; earrings
   also change metal and necklaces their chain or cord; hair is dyed with `HAIR_SW`). Opening it puts the piece on her
   (`CL.preview`); tapping a picture puts that one on; tapping the left picture puts back what she had. **Whatever is picked
@@ -86,6 +87,9 @@ The rest of the site still uses `assets/sandy-classic.js` (old feet).
 - **Her own hair mesh** shows only while a classic hairstyle (`kit:long`, `kit:buns`) is on (`hairSync`): a Marketplace
   hairstyle, or none, hides it. Anything that flips it for a moment (card pictures, the editors) has to leave it as `hairSync`
   says; re-entering the closet on every address change used to hide it, so the classic hair vanished whenever a piece was opened.
+- **No site bars** here: a back arrow at the top left (`#clBack`) returns to the page the closet was opened from
+  (`grug.avatar.from` in sessionStorage), else home. `?tab=custom` opens on Customize (the sidebar's Inventory), `?tab=chars`
+  on Characters.
 - The editors (`#edit…`) and the Hair Studio are under the Grug button at the top left of the stage; their Back returns here.
   The old catalog and item pages are still in the file (`#catalog`, `#item`) but nothing routes to them.
 

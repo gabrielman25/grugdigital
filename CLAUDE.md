@@ -288,11 +288,42 @@ in `grug.css` (`--page`, `--card-solid`, `--card`, `--ink`, `--line` …): never
 Simplicity is a goal in itself: no dead ends (carousels loop, nothing hits a hard stop), no scrolling inside panels that
 should be static, and nothing on screen that doesn't help the person do the next thing. **Icons are one flat style
 everywhere** (`Grug.icon`: the @icons simple set, then Phosphor bold); there are no colourful icon pictures and no emoji in
-the interface. The top bar shows only the logo, the page name, the Pearls count, a full screen button and the person's avatar (no name;
-a page can drop the name with `noTitle` or the Pearls with `noPearls`, as Home and the restaurants pitch do); Settings
-and the dark-mode switch live in the account menu under the avatar.
+the interface. For players the top bar and sidebar are Roblox's (see "The player's layout" below). The older top bar (logo, page name,
+Pearls, full screen, avatar) is what the restaurant account and partner mode still get; Settings and the dark-mode switch
+live in the account menu (under the gear for players).
 
-## The dock: Home, Games, Me, Make
+## The player's layout: like Roblox's (Nov 2026)
+
+The owner wants the site laid out like Roblox, since players already have the muscle memory. For the **player account
+outside partner mode** (`html.g-rb`, set by theme.js; `rbChrome` in grug.js, styles at the end of grug.css):
+- **Top bar:** the Grug Digital logo (`assets/brand/grug-digital-logo.png`, a light-text copy for dark mode), Games ·
+  Marketplace (`avatar/`) · Create (`make/`) · Pearls, a search box (→ `games/#search?q=`), the avatar and name (→ `avatar/`),
+  Pearls, full screen, and the gear (the account menu: Settings, dark mode, Download, the restaurant switch).
+- **Sidebar** (≥ 1200 px; a drawer behind the rail's menu button below that): the avatar and name, Home, Games, Profile,
+  Grug Club (the membership's card on `pearls.html`), Avatar, Inventory (`avatar/?tab=custom`), Vids, Make, Studio Toolkit,
+  Discord (`GRUG_CONTACT.discord`), Buy Pearls, then the **Grug Club box** (perks from `GrugGold.CLUB`), hidden while the
+  membership is active. The membership is still sold as "Grug Gold" on the Pearls page and Gumroad.
+- **Rail** (< 1200 px): menu, Home, Games, Vids, Make, Me. Home and Games show "For you | Games" tabs on a phone (< 900 px).
+- **No bottom bar** for players. The restaurant account keeps its dock (below), partner mode its own bars, and the closet
+  (`avatar/`) has neither: `chrome('avatar', {bare: true})` and its own back arrow (to the page it was opened from).
+- **Home** (`index.html`): Home, Your characters (where Roblox has friends; the closet's saved characters), a featured game
+  banner, Recommended For You (wide cards), Continue, Quick games. **Games** (`games/`): the store's links as pills, then
+  rows of square cards (Keep playing, Grug originals, Quick games, Your favorites, the top tags, Every game), like Roblox's
+  Charts; Browse all, the queue and Favorites are unchanged. Cards: `Grug.ui.gameList` / `gameCard` / `cardRow` (only real
+  numbers on a card, as everywhere). The FOSSIL32 boxes stay on each game's own page and Favorites.
+- **Vids** (`vids/`): Shorts-style clips of NPCs playing the Grug originals, live. Each is the real `play/<dir>/game.html?vid=…`
+  in a frame; `assets/vid-shim.js` (the **first script in every original's game.html**: add it to the game kit's template
+  before the next build) gives that game a throwaway storage seeded with the NPC's look and name, so nothing the NPC does
+  touches the player's saves, and holds its sound at the page's volume (muted to start). The NPC is one of the player's saved
+  characters they aren't wearing, or a random catalog NPC. A small brain picks what it wants (walk, look, hop, click); the
+  owner's **Ambient NPC** library (`assets/vids/ambient-npc.js`, from the Ambient NPC Zoo, unchanged) turns that into keys,
+  camera drags, scrolls, clicks and cursor moves remixed from a real 7-minute recording (`assets/vids/demo.js`), sent into
+  the game as events, with the NPC's cursor drawn over it. It presses Play / Skip tutorial / Got it buttons by moving its
+  cursor to them. Only the vid on screen runs; the next is loaded ahead and frozen once warm (its rAF held), so it shows at
+  once; at most two exist.
+- **Studio Toolkit** (`studio/`): a placeholder landing page for tools for Roblox developers (the owner is making them).
+
+## The dock: Home, Games, Me, Make (the restaurant account and partner mode only now)
 
 Four tabs for everyone (the role in Settings → I'm a… only changes what the home page shows first; nobody is asked it on arrival).
 The dock's LB / RB badges only show once a controller is plugged in (`html.g-pad`). **Games**, **Me** and
@@ -418,7 +449,7 @@ The panel shows only the game's name, the business it was made for, its short `b
 on its game page; keep blurbs to a sentence or two), its `features` and Play. No catalog codes, tags or Live/Demo
 badges, and the panel never scrolls: only the boxes do.
 
-The **home page** puts games first: the avatar hello with Play (the last game played), then the games, then a row of
+(Superseded for players by the Roblox-style home, see "The player's layout"; this is how it was.) The **home page** puts games first: the avatar hello with Play (the last game played), then the games, then a row of
 quick games (the Carts, `assets/carts.js`), then a slim strip with two doors (restaurant owners → `restaurant/`, online
 creators → `links/`; hidden in shop mode). Someone whose role is owner or creator sees that door first, full width. It
 has no page-name pill in the top bar (`chrome('home', { noTitle: true })`). The games are the one place they show as bare cartridges (no

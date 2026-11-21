@@ -109,59 +109,58 @@ html[data-brand] [data-only-for]{display:none!important}
 html[data-brand] .hero[data-hide-for]{display:grid!important}
 footer{padding:28px 0 10px;color:var(--mut);font-size:13.5px;display:flex;flex-wrap:wrap;gap:8px 18px;border-top:1px solid var(--line);margin-top:26px}
 footer a{color:var(--ink2);font-weight:700}
+
+/* the home page, laid out like Roblox's (Nov 2026): Home, your characters (where Roblox has friends), a featured game,
+   Recommended For You, Continue, quick games */
+.rbh h1.rbh-t{font:700 32px/1.1 var(--font);margin:6px 0 18px}
+.rbh-chars{display:flex;gap:18px;overflow-x:auto;scrollbar-width:none;padding:4px 2px 6px}
+.rbh-chars::-webkit-scrollbar{display:none}
+.rbh-ch{flex:none;width:96px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;color:var(--ink)}
+.rbh-ch .av{width:90px;height:90px;border-radius:50%;background:var(--card2) center 22%/150% no-repeat;display:grid;place-items:center;color:var(--ink2);border:1px solid var(--line)}
+.rbh-ch .av .gi{width:38px;height:38px}
+.rbh-ch.on .av{box-shadow:0 0 0 3px var(--ring-a)}
+.rbh-ch b{font:600 13px/1.2 var(--font);max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rbh-ch small{font:500 11.5px/1.2 var(--font);color:var(--mut);margin-top:-4px}
+.rbh-note{align-self:center;max-width:24em;color:var(--mut);font-size:14px}
+.rbh-banner{position:relative;display:block;margin:6px 0 34px;border-radius:16px;overflow:hidden;aspect-ratio:1552/336;min-height:220px;background:#111 center/cover no-repeat;color:#fff}
+.rbh-banner::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.62),rgba(0,0,0,.18) 55%,rgba(0,0,0,0))}
+.rbh-banner .in{position:absolute;left:clamp(16px,2vw,24px);bottom:clamp(16px,2vw,22px);right:16px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.rbh-banner .tag{position:absolute;left:clamp(16px,2vw,24px);top:clamp(14px,2vw,20px);padding:4px 12px;border-radius:999px;background:#fff;color:#111;font:700 12px/1.2 var(--font)}
+.rbh-banner h2{font:700 clamp(26px,3.4vw,42px)/1.05 var(--font);text-shadow:0 2px 8px rgba(0,0,0,.4)}
+.rbh-banner p{font:500 15px/1.3 var(--font);opacity:.92;max-width:40em;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.rbh-banner .go{margin-top:8px;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:170px;height:48px;padding:0 22px;border-radius:10px;background:var(--mode,#9BE338);color:var(--on-sel,#1E1B16);font:700 17px/1 var(--font)}
+.rbh-dots{position:absolute;right:16px;bottom:16px;display:flex;gap:6px}
+.rbh-dots button{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.45)}
+.rbh-dots button.on{background:#fff}
+.rbh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:22px 16px}
+@media (max-width:600px){.rbh-grid{grid-template-columns:1fr 1fr;gap:18px 12px}.rbh-banner{aspect-ratio:auto;min-height:250px}.rbh h1.rbh-t{display:none}}
+.rbh footer{padding:28px 0 10px;color:var(--mut);font-size:13.5px;display:flex;flex-wrap:wrap;gap:8px 18px;border-top:1px solid var(--line);margin-top:26px}
+.rbh footer a{color:var(--ink2);font-weight:700}
 </style>
 </head>
 <body>
-<main class="wrap">
+<main class="wrap rbh">
   <!-- shop mode (a guest who came from a shop's rewards card): the front door is the shop's -->
   <div data-only-brand><section class="role-hero brand-hero" id="brandHero"></section></div>
-  <!-- someone who said in Settings → I'm a… that they run a restaurant or make content sees their own door first.
-       Everyone else starts on the games; the two doors also sit in the strip near the end. Not in shop mode. -->
-  <div data-only-for="owner" data-hide-brand><a class="door wide" data-owner-door href="restaurant/" style="--c:#FF9F5A;--c-lo:#E0782F">
-    <span class="door-ic" data-ic="storefront"></span>
-    <span class="door-tx"><small>For restaurant owners</small><b>Bring your guests back.</b><span>A free rewards card, a website and a dashboard for your team. Ready in about a minute.</span></span>
-    <span class="g-btn primary door-go">Set up my restaurant</span>
-  </a></div>
-  <div data-only-for="creator" data-hide-brand><a class="door wide" href="links/" style="--c:#5AB0FF;--c-lo:#2F86D6">
-    <span class="door-ic" data-ic="share-network"></span>
-    <span class="door-tx"><small>For online creators</small><b>Turn followers into players.</b><span>One link for all your socials, or a little 3D world to walk through.</span></span>
-    <span class="g-btn primary door-go">Make my link page</span>
-  </a></div>
+  <h1 class="rbh-t">Home</h1>
 
-  <section class="hero">
-    <div class="g-view" id="heroView"><span class="hint">Tap to wave · <a href="avatar/">edit your look</a></span></div>
-    <div class="copy">
-      <h1 id="heroTitle">Free games, made in Katy.</h1>
-      <p id="heroText">Play free as your own avatar and dress it up as you go. No account, nothing to sign up for.</p>
-      <div class="cta">
-        <a class="g-btn primary big" id="heroPlay" href="games/">Play</a>
-        <a class="g-btn big" href="avatar/">Edit avatar</a>
-        <!-- app/app.js shows it where the Grug app can be downloaded (not inside the app, not in shop mode) -->
-        <a class="g-btn big" href="#" data-get-app="grug" hidden><span data-app-ic></span>Download</a>
-      </div>
-      <p class="g-fine" id="heroFine"></p>
-    </div>
-  </section>
+  <!-- where Roblox has your friends: your characters (looks saved in the Avatar section), which also turn up in games -->
+  <section class="rb-sec"><div class="rb-h"><h2 id="chH">Your characters</h2><a class="rb-more" href="avatar/?tab=chars">See all <span data-ic="caret-right"></span></a></div>
+    <div class="rbh-chars" id="chars"></div></section>
 
-  <section class="g-section hc-sec">
-    <div class="g-section-h"><h2>Games</h2><a href="games/">All games</a></div>
-    <div class="hc">
-      <button type="button" class="hc-nav prev" id="hcPrev" aria-label="Previous game"></button>
-      <div class="hc-row" id="gameRow"></div>
-      <button type="button" class="hc-nav next" id="hcNext" aria-label="Next game"></button>
-    </div>
-  </section>
+  <!-- one game at a time, big (Roblox's ad slot), turning every few seconds -->
+  <a class="rbh-banner" id="banner" href="games/"></a>
+
+  <section class="rb-sec"><div class="rb-h"><h2>Recommended For You</h2></div><div class="rbh-grid" id="recs"></div></section>
+
+  <section class="rb-sec" id="contSec" hidden><div class="rb-h"><h2><a href="games/">Continue <span data-ic="arrow-right"></span></a></h2></div><div class="rb-row"><div class="rb-strip" id="cont"></div></div></section>
+
+  <section class="rb-sec" id="quickSec" hidden><div class="rb-h"><h2><a href="games/carts/">Quick games <span data-ic="arrow-right"></span></a></h2></div><div class="rb-row"><div class="rb-strip" id="quick"></div></div></section>
 
   <!-- the Download card (app/app.js): every game, the store and the avatar editor on this device, offline -->
   <div data-app-card="grug" hidden></div>
 
-  <!-- quick games (the Carts, assets/carts.js): a minute each, one tap or one hold -->
-  <section class="g-section" id="quickSec" hidden>
-    <div class="g-section-h"><h2>Quick games · about a minute</h2><a href="games/carts/">See all</a></div>
-    <div class="qc" id="quickRow"></div>
-  </section>
-
-  <!-- the strip: restaurant owners and creators pick their own door here (not in shop mode) -->
+  <!-- restaurant owners and creators pick their own door here (not in shop mode) -->
   <div class="duo" data-hide-brand>
     <a class="strip-door" data-owner-door href="restaurant/" style="--c:#FF9F5A">
       <span class="door-ic" data-ic="storefront" style="background:color-mix(in srgb,#FF9F5A 20%,transparent);color:#E0782F"></span>
@@ -174,12 +173,6 @@ footer a{color:var(--ink2);font-weight:700}
       <span data-ic="caret-right"></span>
     </a>
   </div>
-
-  <section class="g-section" hidden>
-    <div class="g-section-h"><h2>Closet picks</h2><a href="shop/">Shop</a></div>
-    <p class="g-fine" style="margin:-6px 0 12px">Custom clothing you can earn next by playing.</p>
-    <div class="g-items" id="closetPicks"></div>
-  </section>
 
   <footer>
     <span>© 2026 Grug Digital · Katy, Texas</span>
@@ -202,113 +195,63 @@ footer a{color:var(--ink2);font-weight:700}
 <script src="assets/grug.js?v=av2"></script>
 <script>
 (function(){
-  const G = Grug, C = GrugCatalog, $ = s => document.querySelector(s);
-  G.ui.chrome('home', { noTitle: true });   // the page-name pill would only repeat the headline here
+  const G = Grug, $ = s => document.querySelector(s), esc = G.esc;
+  G.ui.chrome('home', { noTitle: true });
   G.ensureSnaps();
   document.querySelectorAll('[data-ic]').forEach(el => { el.innerHTML = G.icon(el.dataset.ic); });
-  // someone who already made a card has a restaurant account: the owners' doors open it instead
+  // someone who already made a card has a restaurant account: the owners' door opens it instead
   const shop = G.business.shop();
   if (shop) document.querySelectorAll('[data-owner-door]').forEach(d => {
     d.href = '#'; d.querySelector('b').textContent = shop.n + '.';
-    const line = d.querySelector('.door-tx > span, .tx small'); if (line) line.textContent = 'Your dashboard, website and rewards card.';
-    const go = d.querySelector('.door-go'); if (go) go.textContent = 'Switch to your restaurant';
+    const line = d.querySelector('.tx small'); if (line) line.textContent = 'Your dashboard, website and rewards card.';
     d.addEventListener('click', e => { e.preventDefault(); G.ui.buzz(); G.business.setAccount('business'); });
   });
 
-  /* quick games: every Cart, opening the swipe feed on it */
-  const carts = window.GRUG_CARTS || [];
-  if (carts.length) {
-    $('#quickRow').innerHTML = carts.map(c => '<a href="games/carts/#' + encodeURIComponent(c.id) + '"><img loading="lazy" alt="" src="assets/carts/' + encodeURIComponent(c.id) + '.jpg"><span><b>' + G.esc(c.title) + '</b><small>' + (c.controls === 'hold' ? 'Hold' : 'Tap') + ' · ' + G.esc(c.len) + '</small></span></a>').join('');
-    $('#quickSec').hidden = false;
-  }
-
-
-  /* hero avatar */
-  const view = G.ui.avatarPic($('#heroView'), { bottom: 30, onTap: () => { view.play(['wave','cheer','dance','happy'][Math.floor(Math.random()*4)], { ms: 2200 }); G.ui.buzz(); } });
-  setTimeout(() => view.play('wave', { ms: 2600 }), 600);
-  G.on((p, what) => { if (what === 'avatar' || what === 'import' || what === 'external' || what === 'reset') view.setAvatar(p.avatar); });
-
   /* shop mode: the shop's welcome, with a way back to its card */
   const B = window.GrugTheme && GrugTheme.brand();
-  if (B) document.title = B.n + ' · Games';
-  if (B) $('#brandHero').innerHTML = '<div class="who"><span class="em" aria-hidden="true">' + G.ui.shopIcon(B.i) + '</span><div><p class="g-fine" style="margin:0 0 6px;font-weight:700">Welcome to</p><h1>' + G.esc(B.n) + '</h1><p>Play a game while you wait. Every visit stamps your card and adds Pearls you can spend in any game.</p></div></div>' +
-    '<div class="row"><a class="g-btn primary big" href="rewards/card/#c=' + encodeURIComponent(B.c) + '">' + G.icon('ticket') + 'My stamp card</a><a class="g-btn big" href="games/">' + G.icon('game-controller') + 'Play</a></div>';
+  if (B) { document.title = B.n + ' · Games';
+    $('#brandHero').innerHTML = '<div class="who"><span class="em" aria-hidden="true">' + G.ui.shopIcon(B.i) + '</span><div><p class="g-fine" style="margin:0 0 6px;font-weight:700">Welcome to</p><h1>' + esc(B.n) + '</h1><p>Play a game while you wait. Every visit stamps your card and adds Pearls you can spend in any game.</p></div></div>' +
+      '<div class="row"><a class="g-btn primary big" href="rewards/card/#c=' + encodeURIComponent(B.c) + '">' + G.icon('ticket') + 'My stamp card</a><a class="g-btn big" href="games/">' + G.icon('game-controller') + 'Play</a></div>'; }
 
-  /* greeting */
-  const t = G.totals();
-  if (!G.isNew && (t.plays > 0 || t.checkins > 0)) {
-    $('#heroTitle').innerHTML = 'Welcome back, <span class="name">' + G.esc(G.profile.name) + '</span>.';
-    $('#heroText').textContent = 'Your avatar and closet are saved on this phone. Pick up where you left off.';
-  } else {
-    $('#heroTitle').innerHTML = 'Hi, <span class="name">' + G.esc(G.profile.name) + '</span>. Free games, made in Katy.';
-  }
-  if (B) { $('#heroTitle').innerHTML = 'Hi, <span class="name">' + G.esc(G.profile.name) + '</span>.'; $('#heroText').textContent = 'Pick a game below, or dress up your avatar. Your stamps and Pearls stay on this phone.'; }
-  // (games made for a named business are demonstrations: they are not shown on the main site, see G.partnerAllows)
-  const last = G.GAMES.find(g => g.id === G.profile.stats.lastGame && G.partnerAllows(g)) || G.GAMES.find(g => g.listed !== false && G.partnerAllows(g)) || G.GAMES[0];
-  $('#heroPlay').href = last.game || last.play; $('#heroPlay').innerHTML = G.icon('play') + 'Play ' + G.esc(last.title);
-  if (!G.storageWorks()) $('#heroFine').textContent = 'This browser isn’t saving (private mode or blocked storage). Your avatar and points will be lost when you close it.';
+  /* your characters: the looks saved in the Avatar section (grug.closet.v1), the one she has on marked */
+  (function chars(){
+    let st = null; try { st = JSON.parse(localStorage.getItem('grug.closet.v1') || 'null'); } catch (e) {}
+    const list = (st && Array.isArray(st.characters) ? st.characters : []).filter(c => c && c.name);
+    const sig = (w, b) => JSON.stringify([Object.keys(w || {}).sort().map(k => [k, w[k]]), b || {}]), now = st ? sig(st.wearing, st.body) : '';
+    $('#chH').textContent = 'Your characters' + (list.length ? ' (' + list.length + ')' : '');
+    $('#chars').innerHTML = '<a class="rbh-ch" href="avatar/?tab=chars"><span class="av">' + G.icon('plus') + '</span><b>New character</b></a>' +
+      list.map(c => { const on = sig(c.wearing, c.body) === now;
+        return '<a class="rbh-ch' + (on ? ' on' : '') + '" href="avatar/?tab=chars"><span class="av" style="' + (c.pic ? 'background-image:url(' + c.pic + ')' : '') + '"></span><b>' + esc(c.name) + '</b>' + (on ? '<small>Wearing</small>' : '<small>In games</small>') + '</a>'; }).join('') +
+      (list.length ? '' : '<p class="rbh-note">Dress up in the Avatar section and save the look as a character. Characters you aren’t wearing show up as people in the games.</p>');
+  })();
 
-  /* games: one carousel, the last-played game first (centred and lit, "Last played"), then the rest */
-  const pts = {}; G.points().forEach(p => { pts[p.game.id] = p; });
-  function tile(g, opts) {
-    const p = pts[g.id];
-    const best = p && p.best ? '<div class="meta">' + G.icon('trophy') + 'Your best ' + G.fmt(p.best) + '</div>' : (p && p.points ? '<div class="meta">' + G.icon('coins') + G.fmt(p.points) + ' points</div>' : '');
-    return G.ui.boxTile(g, Object.assign({ extra: best }, opts));   // a FOSSIL32 box (assets/fossil32/)
-  }
-  const lastG = G.GAMES.find(g => g.id === G.profile.stats.lastGame && g.listed !== false && G.partnerAllows(g));
-  const list = (lastG ? [lastG] : []).concat(G.GAMES.filter(g => g.status !== 'legacy' && g.listed !== false && g !== lastG && G.partnerAllows(g)));
-  const row = $('#gameRow'), N = list.length;
-  // an endless loop: the list three times over; when the row settles in the first or last copy it jumps (unseen) to the
-  // same box in the middle copy, so there's never an end to hit
-  const copies = N > 1 ? 3 : 1;
-  row.innerHTML = Array.from({ length: copies }, () => list.map(g => tile(g, Object.assign({ kind: 'cart' }, g === lastG ? { ribbon: 'Last played' } : {}))).join('')).join('');   // bare cartridges here, boxes elsewhere
-  [...row.children].forEach((el, i) => { const g = list[i % N]; el.style.setProperty('--hc-c', (g.box && g.box.shell) || g.color || 'var(--sel-a)'); if (g === lastG) el.classList.add('lp'); if (copies > 1 && (i < N || i >= 2 * N)) { el.setAttribute('aria-hidden', 'true'); el.tabIndex = -1; } });
+  const all = G.ui.gameList(), games = all.filter(x => !x.cart), carts = all.filter(x => x.cart);
+  const lastApp = G.profile.stats.lastGame;
 
-  // how far each box is from the middle → its size, fade and the lit one
-  let rq = 0;
-  const stepW = () => { const t = row.children[0]; return t ? t.offsetWidth + 16 : 1; };
-  function paint() {
-    rq = 0;
-    const r = row.getBoundingClientRect(), mid = r.left + r.width / 2, tiles = [...row.children];
-    if (!tiles.length) return;
-    const step = stepW(); let best = null, bd = 1e9;
-    tiles.forEach(el => { const b = el.getBoundingClientRect(), dx = Math.abs(b.left + b.width / 2 - mid);
-      el.style.setProperty('--d', Math.min(1, dx / step).toFixed(3)); if (dx < bd) { bd = dx; best = el; } });
-    tiles.forEach(el => el.classList.toggle('on', el === best));
+  /* the featured game: the last one played first, then the rest of the originals; it turns every 8 seconds */
+  const feat = games.slice().sort((a, b) => (b.g.app === lastApp) - (a.g.app === lastApp));
+  let fi = 0, ft = 0;
+  function showFeat(i){
+    if (!feat.length) { $('#banner').hidden = true; return; }
+    fi = (i + feat.length) % feat.length; const x = feat[fi], last = x.g.app === lastApp && (x.plays || x.best);
+    const b = $('#banner'); b.href = x.play; b.style.backgroundImage = 'url(' + x.pic + ')'; b.setAttribute('aria-label', 'Play ' + x.title);
+    b.innerHTML = '<span class="tag">' + (last ? 'Last played' : 'Featured') + '</span><span class="in"><h2>' + esc(x.title) + '</h2><p>' + esc(x.blurb || x.sub) + '</p><span class="go">' + G.icon('play') + 'Play</span></span>' +
+      (feat.length > 1 ? '<span class="rbh-dots">' + feat.map((_, k) => '<button type="button" data-k="' + k + '" aria-label="Game ' + (k + 1) + '"' + (k === fi ? ' class="on"' : '') + '></button>').join('') + '</span>' : '');
   }
-  const queue = () => { if (!rq) rq = requestAnimationFrame(paint); };
-  const centreLeft = el => el.offsetLeft + el.offsetWidth / 2 - row.clientWidth / 2;
-  const centre = (el, instant) => row.scrollTo({ left: centreLeft(el), behavior: instant ? 'instant' : 'smooth' });
-  // back into the middle copy once the row has come to rest
-  let settleT = 0;
-  function recentre() {
-    if (copies < 2 || drag) return;
-    const tiles = [...row.children], i = tiles.findIndex(t => t.classList.contains('on')); if (i < 0) return;
-    if (i < N || i >= 2 * N) { const j = N + (i % N), off = row.scrollLeft - centreLeft(tiles[i]); row.style.scrollSnapType = 'none'; row.scrollLeft = centreLeft(tiles[j]) + off; requestAnimationFrame(() => { row.style.scrollSnapType = ''; paint(); }); }
-  }
-  row.addEventListener('scroll', () => { queue(); clearTimeout(settleT); settleT = setTimeout(recentre, 140); }, { passive: true });
-  if ('onscrollend' in row) row.addEventListener('scrollend', recentre);
-  addEventListener('resize', () => { if (row.children[N]) centre(row.children[N + Math.max(0, [...row.children].findIndex(t => t.classList.contains('on')) % N)], true); queue(); });
-  if (row.children[copies > 1 ? N : 0]) centre(row.children[copies > 1 ? N : 0], true);   // start on the last-played game, middle copy
-  paint();
-  const nudge = d => { const tiles = [...row.children], i = tiles.findIndex(t => t.classList.contains('on')); const t = tiles[Math.max(0, Math.min(tiles.length - 1, i + d))]; if (t) centre(t); G.ui.buzz(6); };
-  $('#hcPrev').innerHTML = G.icon('caret-left'); $('#hcNext').innerHTML = G.icon('caret-right');
-  $('#hcPrev').onclick = () => nudge(-1); $('#hcNext').onclick = () => nudge(1);
-  // a box off to the side slides to the middle first; the middle one opens (FOSSIL32 handles that click)
-  let dragged = false;
-  row.addEventListener('click', e => {
-    const t = e.target.closest('.g-tile'); if (!t) return;
-    if (dragged || !t.classList.contains('on')) { e.preventDefault(); e.stopPropagation(); if (!dragged) centre(t); }
-  }, true);
-  // mouse users can drag the row sideways too (touch already swipes it)
-  let drag = null;
-  row.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' || e.button) return; drag = { x: e.clientX, left: row.scrollLeft }; dragged = false; });
-  addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x; if (Math.abs(dx) > 6) { dragged = true; row.classList.add('drag'); } if (dragged) row.scrollLeft = drag.left - dx; });
-  addEventListener('pointerup', () => { if (!drag) return; drag = null; if (row.classList.contains('drag')) { row.classList.remove('drag'); const on = row.querySelector('.on'); if (on) centre(on); } setTimeout(() => { dragged = false; }, 0); });
+  $('#banner').addEventListener('click', e => { const d = e.target.closest('[data-k]'); if (d) { e.preventDefault(); showFeat(+d.dataset.k); clearInterval(ft); } });
+  showFeat(0);
+  if (!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) && feat.length > 1) ft = setInterval(() => { if (!document.hidden && !$('#banner:hover')) showFeat(fi + 1); }, 8000);
 
-  /* closet picks: hidden for now (players dress up when they choose to, from Me → Avatar) */
+  /* recommended: what shares the most tags with what you've played, then everything else; the Carts after the games */
+  const liked = {}; games.forEach(x => { if (x.plays || x.best) x.tags.forEach(t => { liked[t] = (liked[t] || 0) + 1; }); });
+  const score = x => x.tags.reduce((s, t) => s + (liked[t] || 0), 0) - (x.plays ? 0.5 : 0);
+  $('#recs').innerHTML = games.slice().sort((a, b) => score(b) - score(a)).concat(carts.slice(0, 6)).map(x => G.ui.gameCard(x)).join('');
+
+  /* continue: what you've played, the last one first */
+  const played = games.filter(x => x.plays || x.best).sort((a, b) => (b.g.app === lastApp) - (a.g.app === lastApp) || b.plays - a.plays);
+  if (played.length) { $('#cont').innerHTML = played.map(x => G.ui.gameCard(x, { square: true })).join(''); $('#contSec').hidden = false; G.ui.cardRow($('#contSec .rb-row')); }
+  if (carts.length) { $('#quick').innerHTML = carts.map(x => G.ui.gameCard(x, { square: true })).join(''); $('#quickSec').hidden = false; G.ui.cardRow($('#quickSec .rb-row')); }
 })();
 </script>
-<script type="module" src="assets/fossil32/fossil32.js"></script>
 </body>
 </html>

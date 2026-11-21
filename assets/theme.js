@@ -284,6 +284,8 @@
     // which account is in use (assets/business.js): pages show or hide parts with [data-only-account="business"]
     try { const b = JSON.parse(localStorage.getItem('grug.business.v1') || 'null'); el.setAttribute('data-account', b && b.mode === 'business' && b.active && !brand ? 'business' : 'player'); } catch (e) { el.setAttribute('data-account', 'player'); }   // who's visiting (Settings → I'm a…): pages show or hide parts with [data-only-for] / [data-hide-for]
     if (brand) el.setAttribute('data-brand', ''); else el.removeAttribute('data-brand');
+    // the player's layout (like Roblox's: top bar and sidebar, no bottom bar; grug.js rbChrome) everywhere but the restaurant account and partner mode
+    el.classList.toggle('g-rb', el.getAttribute('data-account') !== 'business' && !(brand && brand.p));
     el.style.setProperty('--h', HUE);
     el.style.setProperty('--sel-a', ac.a); el.style.setProperty('--sel-b', ac.a); el.style.setProperty('--on-sel', inkOn(ac.a));
     el.style.setProperty('--mode', ac.a); el.style.setProperty('--mode-lo', ac.lo); el.style.setProperty('--mode-text', readable(ac.a, bg));

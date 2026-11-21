@@ -671,8 +671,77 @@
   const pearlBalance = () => { const w = readJSON(PEARL_KEY, null); return Math.max(0, Math.floor(+(w && w.balance) || 0)); };
   // the Pearls page, with a way back to where the guest is now
   const pearlsUrl = app => /\/pearls(\.html)?$/.test(location.pathname) ? location.pathname + location.search : url('pearls.html') + '?from=' + encodeURIComponent(location.pathname + location.search + location.hash) + '&app=' + encodeURIComponent(app || 'Grug');
+  /* ---------- the player's layout (Nov 2026): laid out like Roblox, so players' muscle memory works here ----------
+     A top bar (logo; Games, Marketplace, Create, Pearls; search; the avatar and name; Pearls; full screen; the gear for the
+     account menu) and a sidebar on the left (wide screens), or a slim rail (Home, Games, Vids, Make, Me) whose menu
+     button opens the same sidebar as a drawer (Vids: vids/). No bottom bar. The restaurant account keeps its dock, and partner mode its
+     own bars. The sidebar ends with the Grug Club box (the membership in assets/gold.js), hidden while it's active. */
+  const RB_IC = {
+    vids: '<svg class="gi gi-s" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4.5 1h7A2.5 2.5 0 0 1 14 3.5v9a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 2 12.5v-9A2.5 2.5 0 0 1 4.5 1Zm0 1.6a.9.9 0 0 0-.9.9v9c0 .5.4.9.9.9h7c.5 0 .9-.4.9-.9v-9a.9.9 0 0 0-.9-.9h-7ZM6.6 5.3l4 2.4a.35.35 0 0 1 0 .6l-4 2.4a.35.35 0 0 1-.53-.3V5.6c0-.27.3-.44.53-.3Z"/></svg>',
+    search: '<svg class="gi gi-s" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4 14 14"/></svg>',
+    discord: '<svg class="gi gi-s" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.3 3.4A12 12 0 0 0 10.4 2.5l-.37.73a11 11 0 0 0-4.06 0L5.6 2.5a12 12 0 0 0-2.9.9C.86 6.1.37 8.8.6 11.4a12 12 0 0 0 3.6 1.8l.77-1.25a7.6 7.6 0 0 1-1.2-.58l.3-.23a8.6 8.6 0 0 0 7.86 0l.3.23c-.38.23-.78.42-1.2.58l.77 1.25a12 12 0 0 0 3.6-1.8c.28-3-.48-5.7-2.1-8ZM5.6 9.8c-.7 0-1.28-.65-1.28-1.44S4.9 6.9 5.6 6.9s1.3.66 1.28 1.45c0 .8-.57 1.44-1.28 1.44Zm4.8 0c-.7 0-1.28-.65-1.28-1.44s.57-1.45 1.28-1.45 1.3.66 1.28 1.45c0 .8-.57 1.44-1.28 1.44Z"/></svg>'
+  };
+  const rbOn = () => !partnerOn() && !bizOn();
+  // which sidebar row a page lights up
+  const RB_HERE = { home: 'home', games: 'games', carts: 'games', avatar: 'avatar', profile: 'profile', cards: 'profile', me: 'profile', make: 'make', links: 'make', rewards: 'make', create: 'make', vids: 'vids', moments: 'vids', studio: 'studio', pearls: 'pearls', club: 'club' };
+  function rbChrome(active, opts, faceImg, top) {
+    const here = opts.rbHere || RB_HERE[active] || active, f = snaps(), name = esc(profile.name);
+    const face = f ? '<img class="rb-face" alt="" src="' + f.bust + '">' : '<span class="rb-face g-face-empty">' + icon('smiley') + '</span>';
+    const topOn = k => ({ games: 'games', avatar: 'market', make: 'create', pearls: 'pearls' }[here] === k ? ' aria-current="page"' : '');
+    top.classList.add('rb-top');
+    top.innerHTML =
+      '<a class="rb-logo" href="' + url('') + '" aria-label="Grug Digital home"><img class="rb-logo-d" alt="Grug Digital" src="' + url('assets/brand/grug-digital-logo.png') + '"><img class="rb-logo-l" alt="Grug Digital" src="' + url('assets/brand/grug-digital-logo-light.png') + '"></a>' +
+      '<nav class="rb-links" aria-label="Main"><a href="' + url('games/') + '"' + topOn('games') + '>Games</a><a href="' + url('avatar/') + '"' + topOn('market') + '>Marketplace</a><a href="' + url('make/') + '"' + topOn('create') + '>Create</a><a href="' + pearlsUrl() + '"' + topOn('pearls') + '>Pearls</a></nav>' +
+      '<form class="rb-search" role="search" action="' + url('games/') + '">' + RB_IC.search + '<input type="search" name="q" placeholder="Search" aria-label="Search the games" autocomplete="off"></form>' +
+      '<span class="rb-sp"></span>' +
+      '<a class="rb-who" href="' + url('avatar/') + '" aria-label="Your avatar">' + face + '<span>' + name + '</span></a>' +
+      '<a class="rb-searchbtn" href="' + url('games/#search') + '" aria-label="Search">' + RB_IC.search + '</a>' +
+      '<a class="g-pts rb-pearls" href="' + pearlsUrl() + '" title="Your Pearls · tap to get more" aria-label="Pearls: get more">' + icon('pearl') + '<span class="num">' + fmt(pearlBalance()) + '</span></a>' +
+      (fsOk() ? '<button type="button" class="g-fs rb-ic" aria-label="Full screen" aria-pressed="false">' + icon('arrows-out') + '</button>' : '') +
+      '<button type="button" class="g-me rb-ic" aria-label="Settings and your account" aria-haspopup="menu" aria-expanded="false">' + icon('gear-six') + '</button>';
+    $('.rb-search', top).addEventListener('submit', e => { e.preventDefault(); const q = $('input', e.target).value.trim(); location.href = url('games/') + '#search' + (q ? '?q=' + encodeURIComponent(q) : ''); });
+    // the sidebar (a drawer behind the rail's menu button on narrower screens)
+    const rows = [['home', 'Home', icon('house'), url('')], ['games', 'Games', icon('game-controller'), url('games/')], ['profile', 'Profile', icon('user'), url('profile/')],
+      ['club', 'Grug Club', icon('crown-simple'), pearlsUrl() + '#clubH'], ['avatar', 'Avatar', icon('t-shirt'), url('avatar/')], ['inventory', 'Inventory', icon('backpack'), url('avatar/?tab=custom')],
+      ['vids', 'Vids', RB_IC.vids, url('vids/')], ['make', 'Make', icon('magic-wand'), url('make/')], ['studio', 'Studio Toolkit', icon('wrench'), url('studio/')],
+      ['discord', 'Discord', RB_IC.discord, '#'], ['pearls', 'Buy Pearls', icon('pearl'), pearlsUrl()]];
+    const side = document.createElement('aside'); side.className = 'rb-side'; side.id = 'rbSide'; side.setAttribute('aria-label', 'Menu');
+    side.innerHTML = '<div class="rb-side-in"><a class="rb-me" href="' + url('avatar/') + '">' + face + '<span>' + name + '</span></a>' +
+      '<nav aria-label="Sections">' + rows.map(([k, l, ic, h]) => '<a href="' + h + '" data-rb="' + k + '"' + (k === here ? ' aria-current="page"' : '') + (k === 'discord' ? ' target="_blank" rel="noopener"' : '') + '>' + ic + '<span>' + l + '</span></a>').join('') + '</nav>' +
+      '<div class="rb-club" hidden></div></div>';
+    const rail = document.createElement('nav'); rail.className = 'rb-rail'; rail.setAttribute('aria-label', 'Sections');
+    rail.innerHTML = '<button type="button" class="rb-burger" aria-label="Menu" aria-controls="rbSide" aria-expanded="false"><svg class="gi gi-s" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11"/></svg></button>' +
+      [['home', 'Home', icon('house'), url('')], ['games', 'Games', icon('game-controller'), url('games/')], ['vids', 'Vids', RB_IC.vids, url('vids/')], ['make', 'Make', icon('magic-wand'), url('make/')]]
+        .map(([k, l, ic, h]) => '<a href="' + h + '"' + (k === here ? ' aria-current="page"' : '') + '>' + ic + '<span>' + l + '</span></a>').join('') +
+      '<a href="' + url('avatar/') + '" class="rb-rail-me"' + (here === 'avatar' ? ' aria-current="page"' : '') + '>' + face + '<span>Me</span></a>';
+    const scrim = document.createElement('div'); scrim.className = 'rb-scrim';
+    const setOpen = on => { document.documentElement.classList.toggle('rb-open', on); $('.rb-burger', rail).setAttribute('aria-expanded', String(on)); };
+    $('.rb-burger', rail).addEventListener('click', () => { buzz(); setOpen(!document.documentElement.classList.contains('rb-open')); });
+    scrim.addEventListener('click', () => setOpen(false));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.documentElement.classList.contains('rb-open')) setOpen(false); });
+    document.body.append(side, rail, scrim);
+    // Home and Games on a phone: "For you | Games" across the top, like the app
+    if (here === 'home' || here === 'games') { const m = $('main'); if (m) { const t = document.createElement('nav'); t.className = 'rb-ptabs'; t.setAttribute('aria-label', 'Home or Games');
+      t.innerHTML = '<a href="' + url('') + '"' + (here === 'home' ? ' aria-current="page"' : '') + '>For you</a><a href="' + url('games/') + '"' + (here === 'games' ? ' aria-current="page"' : '') + '>Games</a>'; m.prepend(t); } }
+    // Discord: the address lives in assets/contact.js (GRUG_CONTACT), the one place for our contact details
+    const dc = $('[data-rb=discord]', side), setDc = () => { const c = root.GRUG_CONTACT; if (c && c.discord) dc.href = c.discord; else dc.hidden = true; };
+    if (root.GRUG_CONTACT) setDc(); else { const sc = document.createElement('script'); sc.src = url('assets/contact.js'); sc.onload = setDc; sc.onerror = () => { dc.hidden = true; }; document.head.appendChild(sc); }
+    // the Grug Club box: what the membership gives, hidden while it's active (assets/gold.js knows)
+    const club = $('.rb-club', side);
+    const paintClub = () => { const GG = root.GrugGold; if (!GG || !GG.CLUB || !GG.CLUB.productId || GG.member()) { club.hidden = true; return; }
+      const t = GG.CLUB.tiers[0];
+      club.innerHTML = '<span class="rb-club-ic">' + icon('crown-simple') + '</span><b>Get more with Grug Club</b><ul><li>' + fmt(t.monthly) + ' Pearls every month</li><li>' + t.bonus + '% more Pearls in every pack</li><li>OBJ and STL downloads of the 3D models</li><li>A member badge</li></ul>' +
+        '<a class="rb-club-go" href="' + pearlsUrl() + '#clubH">Join for ' + esc(t.price) + ' a month</a>';
+      club.hidden = false; };
+    if (root.GrugGold) paintClub(); else { const sc = document.createElement('script'); sc.src = url('assets/gold.js'); sc.onload = paintClub; document.head.appendChild(sc); }
+    root.addEventListener('grug:gold', paintClub);
+    document.body.classList.add('g-rbody'); document.documentElement.classList.add('g-rb');
+  }
   function chrome(active, opts) {
     opts = opts || {};
+    // a page with its own way around (the closet at avatar/: its own back arrow): no bars, just the site's toast
+    if (opts.bare) { document.body.classList.add('g-chrome', 'g-bare'); if (!$('#g-toast')) { const t = document.createElement('div'); t.id = 'g-toast'; t.className = 'g-toast'; t.setAttribute('role', 'status'); t.setAttribute('aria-live', 'polite'); document.body.appendChild(t); } return null; }
+    const rb = rbOn() && !opts.dockOnly;
     const face = snaps(), biz = bizOn() ? bizShop() : null;
     const faceImg = biz ? shopMark(biz) : face ? '<img class="g-face" alt="" src="' + face.bust + '">' : '<span class="g-face g-face-empty">' + icon('smiley') + '</span>';
     const navLabel = (NAV.find(n => n[0] === active) || NAV[0])[1];
@@ -683,7 +752,8 @@
     const ptb = partnerOn() ? $('header.ptb') : null;
     const top = ptb || document.createElement('header'); if (!ptb) top.className = 'g-top';
     const partner = partnerOn() ? brand : null;
-    if (!ptb) top.innerHTML = (partner ? '<a class="g-logo k-glass is-brand is-partner" href="' + url(partner.app) + '" aria-label="' + esc(partner.n) + ': open their app"><img class="g-partner-logo" alt="' + esc(partner.n) + '" src="' + url(partner.logo) + '">' + (partner.demo ? '<span class="g-partner-demo">Demo</span>' : '') + '</a>'
+    if (rb) rbChrome(active, opts, faceImg, top);
+    else if (!ptb) top.innerHTML = (partner ? '<a class="g-logo k-glass is-brand is-partner" href="' + url(partner.app) + '" aria-label="' + esc(partner.n) + ': open their app"><img class="g-partner-logo" alt="' + esc(partner.n) + '" src="' + url(partner.logo) + '">' + (partner.demo ? '<span class="g-partner-demo">Demo</span>' : '') + '</a>'
       : brand ? '<a class="g-logo k-glass is-brand" href="' + url('') + '" aria-label="' + esc(brand.n) + ' home"><span class="g-brand-mark" aria-hidden="true">' + shopIcon(brand.i) + '</span><span class="g-brand-name">' + esc(brand.n) + '</span></a>'
         : '<a class="g-logo k-glass" href="' + url(biz ? dashPath() : '') + '" aria-label="' + (biz ? 'Your dashboard' : 'Grug home') + '">' + LOGO + '<span>Grug</span></a>') +
       (opts.noTitle ? '' : '<div class="g-title k-glass" aria-hidden="true"><small>' + esc((active !== 'games' && (DOCK_GROUPS.find(g => g.id === (opts.dockAs || groupOf(active).id)) || {}).label) || (pageTitle === navLabel ? (brand ? brand.n : 'Grug') : navLabel)) + '</small><b>' + esc(pageTitle) + '</b></div>') +
@@ -729,7 +799,7 @@
     root.addEventListener('resize', closeTray); root.addEventListener('scroll', closeTray, { passive: true });
     document.body.appendChild(tray);
     // opts.dockOnly: just the dock (a page with its own top bar: the closet at avatar/)
-    if (!opts.dockOnly) document.body.prepend(top); document.body.appendChild(tabs);
+    if (!opts.dockOnly) document.body.prepend(top); if (!rb) document.body.appendChild(tabs);
     // partner mode: the partner app's tab bar (.g-pbar) is put in by theme.js with the top bar
     document.body.classList.add('g-chrome');
     // the account menu under the avatar
@@ -793,13 +863,14 @@
     root.addEventListener('grug:change', () => {
       const s = snaps(); const el = $('.g-me', top); if (!el) return;
       if (ptb) { el.style.backgroundImage = 'url("' + s.bust + '")'; paintPearls(); return; }
+      if (rb) { if (s) $$('img.rb-face').forEach(i => { i.src = s.bust; }); paintPearls(); return; }
       const b = bizOn() ? bizShop() : null;
       el.innerHTML = b ? shopMark(b) : (s ? '<img class="g-face" alt="" src="' + s.bust + '">' : '<span class="g-face g-face-empty">' + icon('smiley') + '</span>');
       paintPearls();
     });
     // LB / RB: Q and E (or a controller's shoulder buttons) step through the dock
     // step to the next or previous dock tab (Me and Make open their list pages); wrap = Q / E and the shoulder buttons go round
-    const go = (d, wrap) => { if (partnerOn()) return false; const STOPS = stops(); let i = STOPS.indexOf(here) + d; if (wrap) i = (i + STOPS.length) % STOPS.length; if (i < 0 || i >= STOPS.length) return false;
+    const go = (d, wrap) => { if (partnerOn() || rb) return false; const STOPS = stops(); let i = STOPS.indexOf(here) + d; if (wrap) i = (i + STOPS.length) % STOPS.length; if (i < 0 || i >= STOPS.length) return false;
       try { sessionStorage.setItem('grug.swipe', d > 0 ? 'next' : 'prev'); } catch (e) {}
       closeTray(); location.href = url(navOf(STOPS[i])[3]); return true; };
     // swipe sideways anywhere on the page to change tabs (not on sliders, 3D views, maps or rows that scroll sideways)
@@ -1116,6 +1187,31 @@
      dark game stage on tap; without it the link goes to the game's page). opts.extra = more HTML for the body;
      opts.ribbon = a short label pinned to the box (the home carousel's "Last played");
      opts.kind = 'cart' shows the bare cartridge instead of the box (the home page). */
+  /* ---------- a game as a card, the way Roblox lists them (Home and Games): its picture (wide 16:9 or square), its name
+     and one line under it. Only real numbers ever go on that line (your best, your runs), else its kind and tags.
+     Works for a game from games.js and for a Cart from carts.js ({cart: true}). ---------- */
+  const microBest = () => { const m = readJSON('grug.micro.v1', null); return (m && m.best) || {}; };
+  function gameList(opts) {
+    opts = opts || {}; const st = profile.stats || { plays: {}, best: {} };
+    const games = GAMES.filter(g => g.listed !== false && g.status !== 'legacy' && partnerAllows(g)).map(g => ({ g, id: g.id, cart: false, title: g.title, pic: url(g.thumb || (g.box && g.box.art) || ''), href: url('games/' + g.id + '/'),
+      play: url(g.game || g.play), tags: g.tags || [], plays: +((st.plays || {})[g.app] || 0), best: +((st.best || {})[g.app] || 0), blurb: g.blurb || '', sub: g.subtitle || '' }));
+    const mb = microBest(), carts = opts.carts === false ? [] : (root.GRUG_CARTS || []).filter(c => age.canSee(c)).map(c => ({ g: c, id: 'cart-' + c.id, cart: true, title: c.title, pic: url('assets/carts/' + c.id + '.jpg'),
+      href: url('games/carts/#' + encodeURIComponent(c.id)), play: url('games/carts/#' + encodeURIComponent(c.id)), tags: ['Cart', c.controls === 'hold' ? 'Hold' : 'Tap'], plays: 0, best: +(mb[c.id] || 0), blurb: c.blurb || '', sub: c.len || '' }));
+    return games.concat(carts);
+  }
+  function gameCard(x, o) {
+    o = o || {};
+    const line = o.meta != null ? o.meta : x.best ? icon('trophy') + 'Your best ' + fmt(x.best) : x.plays ? icon('game-controller') + fmt(x.plays) + (x.plays === 1 ? ' run' : ' runs') : esc((x.cart ? ['Cart'].concat(x.sub ? [x.sub] : []) : x.tags.slice(0, 2)).join(' · '));
+    return '<a class="rb-card' + (o.square ? ' sq' : '') + '" href="' + (o.href || x.href) + '"><span class="rb-pic"><img loading="lazy" decoding="async" alt="" src="' + x.pic + '">' + (o.ribbon ? '<i>' + esc(o.ribbon) + '</i>' : '') + (x.g && x.g.rating === 'mature' ? age.tag(x.g, 'rb-rated') : '') + '</span>' +
+      '<b>' + esc(x.title) + '</b><small>' + line + '</small></a>';
+  }
+  // a row of cards that scrolls sideways, with arrows at its ends on a mouse
+  function cardRow(host) {
+    if (!host || host.__row) return; host.__row = true; const strip = host.querySelector('.rb-strip'); if (!strip) return;
+    const mk = (d, lbl) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'rb-arrow ' + (d < 0 ? 'l' : 'r'); b.setAttribute('aria-label', lbl); b.innerHTML = icon(d < 0 ? 'caret-left' : 'caret-right'); b.onclick = () => strip.scrollBy({ left: d * strip.clientWidth * 0.85, behavior: 'smooth' }); host.appendChild(b); return b; };
+    const l = mk(-1, 'Scroll left'), r = mk(1, 'Scroll right'), upd = () => { l.hidden = strip.scrollLeft < 4; r.hidden = strip.scrollLeft > strip.scrollWidth - strip.clientWidth - 4; };
+    strip.addEventListener('scroll', upd, { passive: true }); root.addEventListener('resize', upd); upd(); setTimeout(upd, 300);
+  }
   function boxTile(g, opts) {
     opts = opts || {};
     const st = g.status === 'live' ? ['live', 'Live'] : g.status === 'legacy' ? ['legacy', 'Classic'] : ['soon', 'Demo'];
@@ -1208,7 +1304,7 @@
     LOGO,   // the Grug stegosaurus mark (an inline SVG)
     ROLES, get role() { return roleOf(); }, setRole, showsTab, partnerAllows,
     business: { on: bizOn, shop: bizShop, setAccount, TABS: BIZ_TABS },
-    ui: { chrome, hub, shopIcon, askRole, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile, uiSizeHtml, wireUiSize, modeHtml, wireMode, setMode, brandHtml, wireBrand, inventoryHtml, wireInventory, freeBar,
+    ui: { chrome, hub, shopIcon, gameList, gameCard, cardRow, askRole, toast, buzz, dialog, itemTile, itemState, fillThumbs, appearance, settings, avatarPic, boxTile, uiSizeHtml, wireUiSize, modeHtml, wireMode, setMode, brandHtml, wireBrand, inventoryHtml, wireInventory, freeBar,
       birthdayHtml, wireBirthday, editBirthday, bdPicker, unavailable }
   };
 })(window);

@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vids · Grug</title>
+<meta name="description" content="Watch NPCs play Grug's games, one after another. Swipe for the next.">
+<link rel="icon" href="../favicon.png">
+<link rel="stylesheet" href="../assets/grug.css">
+<script src="../assets/theme.js?v=av2"></script>
+<style>
+/* Vids: short clips of NPCs playing the games, one per screen like Shorts. Each one is the real game, played live by an
+   NPC whose keys, camera turns, cursor and scroll are replayed from recordings of a real person (assets/vids/: the
+   Ambient NPC library and its built-in recording). The one on screen runs; the next one is loaded ahead and frozen once it's warm (its frame loop held), so it shows the
+   instant it's reached, and the one after it starts loading then. Only those two exist; the rest wait as pictures. */
+body.g-rbody{padding-bottom:0}
+html,body{overscroll-behavior:none}
+.mo-feed{height:calc(100dvh - var(--top) - var(--sat) - 18px);overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;margin-top:-6px}
+.mo-feed::-webkit-scrollbar{display:none}
+.mo{height:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;align-items:center;justify-content:center;gap:14px;padding:6px 0 14px}
+.mo-box{position:relative;height:100%;aspect-ratio:9/16;max-width:calc(100vw - var(--rbw) - 90px);border-radius:16px;overflow:hidden;background:#111 center/cover no-repeat;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.mo-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:#000;pointer-events:none}
+.mo-box .poster{position:absolute;inset:0;background:inherit;filter:saturate(1.05)}
+.mo-box .poster::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,0) 30%,rgba(0,0,0,0) 55%,rgba(0,0,0,.7))}
+.mo-box.live .poster{opacity:0;transition:opacity .5s ease .2s}
+.mo-load{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:8px 16px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;font:600 13px/1.2 var(--font);display:none}
+.mo-box.loading .mo-load{display:block}
+.mo-info{position:absolute;left:0;right:0;bottom:0;padding:60px 16px 16px;color:#fff;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.72));pointer-events:none}
+.mo-who{display:flex;align-items:center;gap:8px;font:700 15px/1.2 var(--font);text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.mo-who .av{width:30px;height:30px;border-radius:50%;background:#fff center 22%/150% no-repeat;flex:none;border:2px solid #fff}
+.mo-who small{font-weight:500;opacity:.85}
+.mo-info h2{font:700 19px/1.2 var(--font);margin:8px 0 3px;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.mo-info p{font:500 13.5px/1.35 var(--font);opacity:.9;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mo-play{pointer-events:auto;margin-top:10px;display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 18px;border-radius:999px;background:var(--mode,#9BE338);color:var(--on-sel,#1E1B16);font:700 15px/1 var(--font)}
+.mo-tag{position:absolute;left:12px;top:12px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;font:700 11.5px/1.2 var(--font);display:flex;align-items:center;gap:6px}
+.mo-tag i{width:8px;height:8px;border-radius:50%;background:#ff4d4d;display:inline-block}
+/* the NPC's cursor, where its hands put it */
+.mo-cur{position:absolute;left:0;top:0;width:22px;height:26px;margin:-2px 0 0 -2px;pointer-events:none;z-index:3;display:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.45));transition:transform .08s linear}
+.mo-box.live .mo-cur{display:block}
+.mo-cur.down svg{transform:scale(.86);transform-origin:2px 2px}
+/* the side buttons */
+.mo-side{display:flex;flex-direction:column;gap:14px;align-self:flex-end;padding-bottom:20px}
+.mo-side button,.mo-side a{width:52px;display:flex;flex-direction:column;align-items:center;gap:4px;font:600 12px/1.1 var(--font);color:var(--ink)}
+.mo-side .b{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--card2);color:var(--ink)}
+.mo-side .b .gi{width:24px;height:24px}
+.mo-side [aria-pressed=true] .b{background:var(--ink);color:var(--bg)}
+.mo-nav{position:fixed;right:max(18px,var(--sar));top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:5}
+.mo-nav button{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--card2);color:var(--ink)}
+.mo-nav button .gi{width:22px;height:22px}
+@media (max-width:899px){
+  .mo-feed{height:calc(100dvh - var(--top) - var(--sat));margin:-18px calc(-1 * max(20px,var(--sar))) 0 calc(-1 * max(20px,var(--sal)))}
+  .mo{padding:0;gap:0}
+  .mo-box{height:100%;width:100%;max-width:none;aspect-ratio:auto;border-radius:0}
+  .mo-side{position:absolute;right:8px;bottom:120px;padding:0;z-index:4}
+  .mo-side button,.mo-side a{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+  .mo-side .b{background:rgba(0,0,0,.35);color:#fff}
+  .mo-info{padding-right:72px}
+  .mo-nav{display:none}
+  .mo{position:relative}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1 class="vh">Vids</h1>
+  <div class="mo-feed" id="feed" data-noswipe></div>
+  <div class="mo-nav"><button type="button" id="prev" aria-label="Previous vid"></button><button type="button" id="next" aria-label="Next vid"></button></div>
+</main>
+<script src="../assets/catalog.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="../assets/games.js"></script>
+<script src="../assets/grug.js?v=av2"></script>
+<script src="../assets/vids/ambient-npc.js"></script>
+<script src="../assets/vids/demo.js"></script>
+<script>
+(function(){
+  const G = Grug, esc = G.esc, $ = s => document.querySelector(s), A = window.Ambient;
+  G.ui.chrome('vids');
+  $('#prev').innerHTML = '<svg class="gi" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10 8 5.5l4.5 4.5"/></svg>';
+  $('#next').innerHTML = '<svg class="gi" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6 8 10.5 12.5 6"/></svg>';
+
+  /* ---- the hands: the built-in recording, remixed (Ambient.Remix) */
+  if (A && window.AMBIENT_DEMO && A.DemoStore.valid(window.AMBIENT_DEMO)) { A.Remix.builtin = A.DemoStore.decode(window.AMBIENT_DEMO); A.Remix.builtin.builtin = true; }
+  if (A) A.Remix.rebuild();
+
+  /* ---- who plays: the player's saved characters they aren't wearing first, then random catalog NPCs */
+  const read = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+  const closet = read('grug.closet.v1') || {}, sig = (w, b) => JSON.stringify([Object.keys(w || {}).sort().map(k => [k, w[k]]), b || {}]);
+  const chars = (Array.isArray(closet.characters) ? closet.characters : []).filter(c => c && c.wearing && c.body && sig(c.wearing, c.body) !== sig(closet.wearing, closet.body));
+  // the game itself (play/<dir>/game.html, under its host page): Grug originals only, never a mature one
+  const games = G.ui.gameList({ carts: false }).filter(x => x.g.original && /^play\/[\w-]+\/$/.test(x.g.play || '') && x.g.rating !== 'mature').map(x => Object.assign(x, { frameSrc: G.url(x.g.play + 'game.html') }));
+  let n = 0;
+  function nextVid() {
+    const k = n++, x = games[k % games.length], c = chars.length && k % 2 === 0 ? chars[(k / 2) % chars.length] : null;
+    const seed = 'm' + Date.now().toString(36) + k;
+    return { x, seed, char: c, name: c ? c.name : (A ? A.makeName() : 'Player ' + (k + 1)), pic: c && c.pic };
+  }
+  // the NPC's throwaway storage inside the game (assets/gamekit.js swaps it in for ?vid=): its look and its name
+  function storeFor(m) {
+    const prof = read('grug.profile.v1') || { v: 1 }, o = {};
+    o['grug.profile.v1'] = JSON.stringify(Object.assign({}, prof, { name: m.name, prefs: Object.assign({}, prof.prefs || {}, { haptics: false }) }));
+    if (localStorage.getItem('grug.age.v1')) o['grug.age.v1'] = localStorage.getItem('grug.age.v1');
+    if (m.char) {
+      o['grug.closet.v1'] = JSON.stringify({ wardrobe: m.char.pieces || [], wearing: m.char.wearing, body: m.char.body, kitHair: 1, characters: closet.characters || [] });
+      o['grug.sandy.v1'] = JSON.stringify({ model: 'block', skin: 'skaterFemaleA', hat: { type: 'none' }, closet: true, classic: false, avatarV: 2 });
+    } else {
+      o['grug.closet.v1'] = JSON.stringify({ wardrobe: [], wearing: {}, body: {}, kitHair: 1, characters: closet.characters || [] });
+      o['grug.sandy.v1'] = JSON.stringify({ model: 'block', skin: 'skaterFemaleA', hat: { type: 'none' }, closet: false, classic: false, avatarV: 2, catalogSeed: m.seed });
+    }
+    return o;
+  }
+
+  /* ---- the feed */
+  const feed = $('#feed'), items = [];
+  const CURSOR = '<svg viewBox="0 0 22 26" width="22" height="26" aria-hidden="true"><path d="M2 2v19l5-4.6 3.4 7.6 3.3-1.5-3.3-7.4H17Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+  function addVid() {
+    const m = nextVid(), el = document.createElement('section'); el.className = 'mo'; m.el = el;
+    el.innerHTML = '<div class="mo-box" style="background-image:url(' + m.x.pic + ')"><div class="poster"></div><span class="mo-load">Loading the game…</span>' +
+      '<span class="mo-tag"><i></i>NPC playing</span><div class="mo-cur">' + CURSOR + '</div>' +
+      '<div class="mo-info"><div class="mo-who"><span class="av"' + (m.pic ? ' style="background-image:url(' + m.pic + ')"' : '') + '></span><span>' + esc(m.name) + ' <small>' + (m.char ? '· your character' : '· NPC') + '</small></span></div>' +
+      '<h2>' + esc(m.x.title) + '</h2><p>' + esc(m.x.blurb || m.x.sub) + '</p><a class="mo-play" href="' + m.x.href + '">' + G.icon('play') + 'Play it yourself</a></div>' +
+      '<div class="mo-side"><button type="button" data-fav aria-pressed="' + G.favs.has(m.x.id) + '"><span class="b">' + G.icon('heart') + '</span>Like</button>' +
+      '<button type="button" data-snd aria-pressed="false"><span class="b">' + SND_OFF + '</span>Sound</button>' +
+      '<button type="button" data-share><span class="b">' + G.icon('share-network') + '</span>Share</button></div></div>';
+    const box = el.querySelector('.mo-box'), side = el.querySelector('.mo-side');
+    if (matchMedia('(min-width:900px)').matches) el.append(side);   // beside the clip on a wide screen, over it on a phone
+    side.querySelector('[data-fav]').onclick = e => { const on = G.favs.toggle(m.x.id); e.currentTarget.setAttribute('aria-pressed', String(on)); G.ui.buzz(); G.ui.toast(on ? 'Added ' + m.x.title + ' to Favorites' : 'Removed from Favorites', { icon: 'heart' }); };
+    side.querySelector('[data-snd]').onclick = () => { sound = !sound; paintSound(); G.ui.buzz(); };
+    side.querySelector('[data-share]').onclick = async () => { const u = location.origin + G.url(m.x.href.replace(/^\//, '').replace(location.origin, '')); try { if (navigator.share) await navigator.share({ title: m.x.title, url: m.x.href }); else { await navigator.clipboard.writeText(new URL(m.x.href, location.href).href); G.ui.toast('Link copied'); } } catch (e) {} };
+    feed.appendChild(el); items.push(m); io.observe(el); return m;
+  }
+  const SND_OFF = '<svg class="gi" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M7.2 2.6 3.9 5.3H1.8c-.4 0-.8.4-.8.8v3.8c0 .4.4.8.8.8h2.1l3.3 2.7c.5.4 1.3 0 1.3-.6V3.2c0-.6-.8-1-1.3-.6Z"/><path d="m10.6 6 3.4 4m0-4-3.4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  const SND_ON = '<svg class="gi" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M7.2 2.6 3.9 5.3H1.8c-.4 0-.8.4-.8.8v3.8c0 .4.4.8.8.8h2.1l3.3 2.7c.5.4 1.3 0 1.3-.6V3.2c0-.6-.8-1-1.3-.6Z"/><path d="M10.5 5.6a3.4 3.4 0 0 1 0 4.8M12.4 3.8a6 6 0 0 1 0 8.4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+  let sound = false;
+  function paintSound() { document.querySelectorAll('[data-snd]').forEach(b => { b.setAttribute('aria-pressed', String(sound)); b.querySelector('.b').innerHTML = sound ? SND_ON : SND_OFF; });
+    if (live && live.win && live.win.GK_VID) live.win.GK_VID.setVolume(sound ? 0.8 : 0); }
+
+  /* ---- the vid on screen plays; the next one is loaded ahead, then frozen (its requestAnimationFrame held) until it's
+     reached, so it shows at once. At most two games exist at a time. */
+  let live = null, onScreen = null;
+  const io = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting && e.intersectionRatio > 0.6) { const m = items.find(x => x.el === e.target); if (m && m !== onScreen) { onScreen = m; start(m); if (items.indexOf(m) >= items.length - 2) { addVid(); addVid(); } } } }, { root: feed, threshold: [0.6] });
+  function freeze(win) { try { if (!win || win.__fz) return; const raf = win.requestAnimationFrame.bind(win), q = []; win.__fz = { raf, q }; win.requestAnimationFrame = cb => { q.push(cb); return 0; }; } catch (e) {} }
+  function thaw(win) { try { const f = win && win.__fz; if (!f) return; delete win.__fz; win.requestAnimationFrame = f.raf; for (const cb of f.q.splice(0)) f.raf(cb); } catch (e) {} }
+  function load(m) {
+    if (m.frame) return m; const box = m.el.querySelector('.mo-box'), frame = document.createElement('iframe');
+    frame.title = m.name + ' playing ' + m.x.title; frame.setAttribute('tabindex', '-1'); frame.setAttribute('aria-hidden', 'true');
+    frame.__vidStore = storeFor(m); m.frame = frame; m.box = box; m.ready = false;
+    box.insertBefore(frame, box.firstChild);
+    frame.addEventListener('load', () => { if (m.frame !== frame) return; m.win = frame.contentWindow; m.ready = true;
+      if (live && live.m === m) show(live); else setTimeout(() => { if (!(live && live.m === m) && m.frame === frame) freeze(m.win); }, 1800); }, { once: true });
+    frame.src = m.x.frameSrc + '?vid=' + encodeURIComponent(m.seed);
+    return m;
+  }
+  function unload(m) { if (!m || !m.frame) return; cancelAnimationFrame(m.raf); clearInterval(m.ui); try { m.frame.src = 'about:blank'; } catch (e) {} m.frame.remove(); m.frame = null; m.win = null; m.ready = false; if (m.box) m.box.classList.remove('live', 'loading'); }
+  function stop() { if (!live) return; const l = live; live = null; if (l.release) l.release(); cancelAnimationFrame(l.raf); clearInterval(l.ui); l.raf = 0; if (l.m.win) freeze(l.m.win); }
+  function show(l) { const m = l.m; l.win = m.win; l.frame = m.frame; thaw(m.win); m.box.classList.remove('loading'); m.box.classList.add('live'); paintSound(); drive(l); }
+  function start(m) {
+    stop(); if (!A) return;
+    load(m); const i = items.indexOf(m), keep = new Set([m, items[i + 1]]);
+    for (const x of items) if (x.frame && !keep.has(x)) unload(x);   // only this one and the next
+    live = { m, box: m.box, frame: m.frame, win: null, raf: 0, ui: 0 };
+    if (m.ready) show(live); else m.box.classList.add('loading');
+    // warm the next one once this one is up (or right away if this one was already warm)
+    const next = items[i + 1]; if (next) setTimeout(() => { if (live && live.m === m) load(next); }, m.ready ? 300 : 2500);
+  }
+
+  /* ---- the NPC: a small brain decides what it wants (walk this way, look around, hop, click), the hands (Ambient.Hands)
+     turn that into the keys, camera drags, scrolls, clicks and cursor moves a person would make, and those go into the game
+     as real events. Its cursor is drawn over the game. */
+  const KEYS = [[A ? A.DK.W : 1, 'KeyW', 'w'], [A ? A.DK.A : 2, 'KeyA', 'a'], [A ? A.DK.S : 4, 'KeyS', 's'], [A ? A.DK.D : 8, 'KeyD', 'd'], [A ? A.DK.SPACE : 16, 'Space', ' ']];
+  const SENS = 0.006;   // radians per pixel of a camera drag, as the games use
+  const UI_WORDS = /^(skip tutorial|skip|got it!?|play|play again|start|continue|ok|okay|next|let'?s go|close|retry|again)$/i;
+  function drive(l) {
+    const w = l.win, d = w.document, tags = l.m.x.tags.join(' ');
+    const jumpy = /Climbing|Exploration|Party|Arcade|Obby/i.test(tags) ? 0.35 : 0.12, clicky = /Party|Mystery|Arcade|Tower Defense|Building/i.test(tags) ? 0.25 : 0.06;
+    const n = { wish: { mx: 0, mz: 0, jump: false, click: false }, cam: { yaw: 0, pitch: 0.32, dist: A.RBX.DEF_DIST, tdist: A.RBX.DEF_DIST, cu: 0, cv: -0.03, shift: false },
+      ch: { x: 0, y: 0, z: 0, input: {}, faceYaw: 0, grounded: true, sit: false, dead: false, lockYaw: null }, motor: A.Hands.fresh(), afk: false };
+    const crowd = { settings: { hands: 'remix' }, view: { aspect: 9 / 16, tanV: Math.tan(35 * Math.PI / 180) }, world: null };
+    const cur = l.box.querySelector('.mo-cur');
+    let mode = 'walk', modeT = 0, off = 0, held = 0, drag = null, lastT = performance.now(), dist0 = n.cam.tdist, clickT = 0, uiGoal = null;
+    const canvas = () => Array.from(d.querySelectorAll('canvas')).sort((a, b) => b.width * b.height - a.width * a.height)[0] || d.body;
+    const key = (type, code, k) => { try { d.dispatchEvent(new w.KeyboardEvent(type, { code, key: k, bubbles: true, cancelable: true })); } catch (e) {} };
+    const ptr = (type, x, y, button, buttons, target) => { try { (target || canvas()).dispatchEvent(new w.PointerEvent(type, { pointerId: 41, pointerType: 'mouse', isPrimary: true, clientX: x, clientY: y, button, buttons, bubbles: true, cancelable: true, composed: true })); } catch (e) {} };
+    const at = () => { const W = w.innerWidth, H = w.innerHeight; return [W / 2 + n.cam.cu * H, H / 2 + n.cam.cv * H]; };
+    // buttons a player would press to get going (Play, Skip tutorial, Got it…): the cursor goes there and clicks
+    l.ui = l.m.ui = setInterval(() => { if (live !== l || uiGoal) return; try {
+      const b = Array.from(d.querySelectorAll('button,a,[role=button]')).find(e => { const t = (e.textContent || '').trim(); if (!UI_WORDS.test(t)) return false; const r = e.getBoundingClientRect(); return r.width > 8 && r.height > 8 && r.top >= 0 && r.bottom <= w.innerHeight && getComputedStyle(e).visibility !== 'hidden'; });
+      if (b) { const r = b.getBoundingClientRect(), H = w.innerHeight; uiGoal = { el: b, u: (r.left + r.width / 2 - w.innerWidth / 2) / H, v: (r.top + r.height / 2 - H / 2) / H, t: 0 }; }
+    } catch (e) {} }, 1300);
+    function brain(dt) {
+      modeT -= dt; const r = Math.random;
+      if (modeT <= 0) {
+        const k = r(); mode = k < 0.62 ? 'walk' : k < 0.8 ? 'look' : k < 0.92 ? 'hop' : 'afk';
+        modeT = mode === 'walk' ? 2 + r() * 5 : mode === 'afk' ? 1.5 + r() * 2 : 1 + r() * 2.5;
+        const t = r(); off = t < 0.55 ? (r() - 0.5) * 0.5 : t < 0.9 ? (r() < 0.5 ? -1 : 1) * (0.6 + r() * 0.9) : Math.PI;
+      }
+      const W = n.wish; W.jump = false; W.click = false; W.mx = W.mz = 0; n.afk = mode === 'afk';
+      if (mode === 'walk' || mode === 'hop') { const y = n.cam.yaw + off; W.mx = -Math.sin(y); W.mz = -Math.cos(y); off *= Math.exp(-0.25 * dt); }
+      if (mode === 'hop' ? r() < dt * 2.2 : r() < dt * jumpy) W.jump = true;
+      if (r() < dt * clicky) W.click = true;
+    }
+    l.release = () => { for (const [b, code, k] of KEYS) if (held & b) key('keyup', code, k); held = 0; if (drag) { ptr('pointerup', drag.x, drag.y, 2, 0); drag = null; } };
+    function frame(now) {
+      if (live !== l) return; l.raf = l.m.raf = requestAnimationFrame(frame);
+      const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; if (document.hidden) return;
+      let y0 = n.cam.yaw, p0 = n.cam.pitch;
+      brain(dt); A.Hands.drive(n, dt, crowd);
+      // a button to press: the cursor flies to it (as a flick would), then clicks
+      if (uiGoal) { uiGoal.t += dt; const k = 1 - Math.exp(-dt * 7); n.cam.cu += (uiGoal.u - n.cam.cu) * k; n.cam.cv += (uiGoal.v - n.cam.cv) * k;
+        if (uiGoal.t > 0.7) { try { uiGoal.el.click(); } catch (e) {} cur.classList.add('down'); setTimeout(() => cur.classList.remove('down'), 140); uiGoal = null; } }
+      // keys: press and release exactly as the hands do
+      const bits = n.motor.keys | 0;
+      for (const [b, code, k] of KEYS) { const on = !!(bits & b), was = !!(held & b); if (on && !was) key('keydown', code, k); else if (!on && was) key('keyup', code, k); }
+      held = bits;
+      // the camera: a right-drag while the hands turn it
+      const [cx, cy] = at(), dy = n.cam.yaw - y0, dp = n.cam.pitch - p0;
+      if (n.motor.rmb && !drag) { drag = { x: cx, y: cy }; ptr('pointerdown', cx, cy, 2, 2); }
+      if (drag && (dy || dp)) { drag.x += -dy / SENS; drag.y += dp / SENS; ptr('pointermove', drag.x, drag.y, -1, 2); }
+      if (drag && !n.motor.rmb) { ptr('pointerup', drag.x, drag.y, 2, 0); drag = null; }
+      // scroll: one wheel notch each time the hands zoom
+      if (Math.abs(n.cam.tdist - dist0) > 0.01) { try { canvas().dispatchEvent(new w.WheelEvent('wheel', { deltaY: n.cam.tdist > dist0 ? 100 : -100, clientX: cx, clientY: cy, bubbles: true, cancelable: true })); } catch (e) {} dist0 = n.cam.tdist; }
+      // a click where the cursor rests (on the game itself, never on its menus)
+      clickT -= dt;
+      if (n.motor.lmb && clickT <= 0 && !drag) { clickT = 0.5; const t = d.elementFromPoint(cx, cy); if (t && t.tagName === 'CANVAS') { ptr('pointerdown', cx, cy, 0, 1, t); ptr('pointerup', cx, cy, 0, 0, t); try { t.dispatchEvent(new w.MouseEvent('click', { clientX: cx, clientY: cy, bubbles: true })); } catch (e) {} cur.classList.add('down'); setTimeout(() => cur.classList.remove('down'), 120); } }
+      // the cursor, drawn over the game
+      const R = l.box.getBoundingClientRect(), s = R.width / Math.max(1, w.innerWidth);
+      cur.style.transform = 'translate(' + (cx * s) + 'px,' + (cy * s) + 'px)';
+    }
+    l.raf = requestAnimationFrame(frame);
+  }
+
+  /* ---- go: a few vids to start, more as you scroll (it never ends) */
+  if (!games.length) { feed.innerHTML = '<p class="mut" style="padding:40px 0;text-align:center">No games to show here yet.</p>'; return; }
+  for (let i = 0; i < 3; i++) addVid();
+  const step = d => { const i = Math.max(0, items.indexOf(onScreen) + d); if (items[i]) items[i].el.scrollIntoView({ behavior: 'smooth' }); };
+  $('#prev').onclick = () => step(-1); $('#next').onclick = () => step(1);
+  addEventListener('keydown', e => { if (e.key === 'ArrowDown' || e.key === 'j') { e.preventDefault(); step(1); } if (e.key === 'ArrowUp' || e.key === 'k') { e.preventDefault(); step(-1); } });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else if (onScreen) start(onScreen); });
+  addEventListener('pagehide', () => { for (const x of items) unload(x); });
+})();
+</script>
+</body>
+</html>
