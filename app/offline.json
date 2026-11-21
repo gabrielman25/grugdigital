@@ -1,5 +1,5 @@
 {
- "v": "b94de5d1a3c0",
+ "v": "2c2fe965164e",
  "apps": {
   "grug": [
    "grug",
@@ -504,11 +504,11 @@
     "/make/clothing/outfits/faces/parts/eyes.png": "28bdd525f2",
     "/make/clothing/outfits/faces/parts/mouths.png": "22791b7c55",
     "/make/clothing/outfits/index.json": "8ceb8d4612",
-    "/make/clothing/outfits/looks/autumn-blocky.jpg": "4998197211",
-    "/make/clothing/outfits/looks/autumn.jpg": "f263159970",
-    "/make/clothing/outfits/looks/night-rider.jpg": "d30a0f4f32",
-    "/make/clothing/outfits/looks/rustic.jpg": "e294edcf2d",
-    "/make/clothing/outfits/looks/weekend.jpg": "3f19ed390b",
+    "/make/clothing/outfits/looks/autumn-blocky.jpg": "355353392e",
+    "/make/clothing/outfits/looks/autumn.jpg": "cd2436aa2e",
+    "/make/clothing/outfits/looks/night-rider.jpg": "2e0c96cc8a",
+    "/make/clothing/outfits/looks/rustic.jpg": "b6be8d5a9f",
+    "/make/clothing/outfits/looks/weekend.jpg": "ce1c15f1ad",
     "/make/clothing/outfits/rustic/chip.png": "f7708968f9",
     "/make/clothing/outfits/rustic/pants.png": "c0f1133659",
     "/make/clothing/outfits/rustic/shirt.png": "b7404b8a98",
@@ -529,7 +529,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 57546562
+   "bytes": 57548476
   },
   "daypart": {
    "title": "Daypart",
