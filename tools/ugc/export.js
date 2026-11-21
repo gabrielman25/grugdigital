@@ -67,12 +67,22 @@ const PAGE = async ({ N }) => {
   // so every point that would sit inside the Studio's head (or closer than 0.5) is pushed out along the head's surface normal
   const sdf = p => { const q = [Math.hypot(p.x, p.z - cz) - (Rh - rr), Math.abs(p.y - (yb + H / 2)) - (H / 2 - rr)]; return Math.min(Math.max(q[0], q[1]), 0) + Math.hypot(Math.max(q[0], 0), Math.max(q[1], 0)) - rr; };
   const pushOut = (v, gap) => { for (let it = 0; it < 6; it++) { const d = sdf(v); if (d >= gap) return; const e = 0.05, g = new V(sdf(new V(v.x + e, v.y, v.z)) - sdf(new V(v.x - e, v.y, v.z)), sdf(new V(v.x, v.y + e, v.z)) - sdf(new V(v.x, v.y - e, v.z)), sdf(new V(v.x, v.y, v.z + e)) - sdf(new V(v.x, v.y, v.z - e))).normalize(); v.addScaledVector(g, gap - d); } };
+  // seat it on the Studio's head: her skull and this head differ (hers is bigger on top), so a point is moved along the ray
+  // from this head's centre by (this head's radius - her skull's radius) there: it keeps its height above the scalp, and
+  // the hairline sits on the head instead of floating. Below the jaw (hanging lengths) the shift eases to the one at ear level.
+  const C = new V(0, yb + H / 2, cz), SEAT = new Map(), _p = new V();
+  const along = (inside, dir) => { let lo = 0, hi = 40; for (let i = 0; i < 26; i++) { const m = (lo + hi) / 2; _p.copy(C).addScaledVector(dir, m); if (inside(_p)) lo = m; else hi = m; } return (lo + hi) / 2; };
+  const shiftAt = dir => { const k = Math.round(Math.atan2(dir.x, dir.z) * 40) + ',' + Math.round(dir.y * 40); let d = SEAT.get(k); if (d === undefined) { d = along(q => sdf(q) < 0, dir) - along(q => hm0.clearance(q) < 0, dir); SEAT.set(k, d); } return d; };
+  const _dir = new V(), _lvl = new V();
+  const seat = v => { _dir.subVectors(v, C); const l = _dir.length(); if (l < 1e-6) return; _dir.multiplyScalar(1 / l);
+    let d; if (_dir.y >= -0.25) d = shiftAt(_dir); else { _lvl.set(_dir.x, -0.25, _dir.z); const h = Math.hypot(_lvl.x, _lvl.z) || 1; _lvl.x *= Math.sqrt(1 - 0.0625) / h; _lvl.z *= Math.sqrt(1 - 0.0625) / h; d = shiftAt(_lvl); }
+    v.addScaledVector(_dir, d); };
   if (n3.hairMesh && n3.setHairStyle) {
     const hm0m = n3.hairMesh, st0 = n3.hairStyle, mat0 = hm0m.material, vis0 = hm0m.visible, map0 = (Array.isArray(mat0) ? mat0[0] : mat0).map;
     for (const [kit, kname] of [[0, 'Classic long hair'], [1, 'Classic buns']]) for (const [cname, hex] of [['dark brown', '#2a1a12'], ['black', '#141416'], ['honey blonde', '#b8874a'], ['auburn', '#6e2a17']]) {
       try { n3.setHairStyle(kit); hm0m.visible = true; sandy.object3d.updateMatrixWorld(true);
         const g = hm0m.geometry.clone(), M = new THREE.Matrix4().multiplyMatrices(toHead, hm0m.matrixWorld); g.applyMatrix4(M);
-        const P = g.attributes.position, v = new V(); for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); pushOut(v, 0.5); P.setXYZ(i, v.x, v.y, v.z); } g.computeVertexNormals();
+        const P = g.attributes.position, v = new V(); for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); seat(v); pushOut(v, 0.5); P.setXYZ(i, v.x, v.y, v.z); } g.computeVertexNormals();
         const mat = new THREE.MeshStandardMaterial({ map: map0, color: new THREE.Color(hex).convertSRGBToLinear(), side: THREE.DoubleSide, roughness: 0.75 });
         const root = new THREE.Group(); root.add(new THREE.Mesh(g, mat)); hg.add(root);
         add({ id: 'kit-' + kit + '-' + cname }, 'hair', kname + ' (' + cname + ')', grab(root, toHead, studOf), true); hg.remove(root); g.dispose(); mat.dispose();
@@ -109,7 +119,7 @@ const PAGE = async ({ N }) => {
   const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const p = await b.newPage({ viewport: { width: 1280, height: 850 } }); const logs = [];
   await p.addInitScript(seed => { try { localStorage.setItem('grug.eyewear.catalog.v1', JSON.stringify(seed)); } catch (e) {} }, SEED);
-  p.on('pageerror', e => logs.push('ERR ' + e.message)); p.on('console', m => { if (m.type() === 'warning' || m.type() === 'error') logs.push(m.text().slice(0, 200)); });
+  p.on('pageerror', e => logs.push('ERR ' + e.message)); p.on('console', m => { if (m.type() === 'warning' || m.type() === 'error') logs.push(m.text().slice(0, 700)); });
   await p.goto('http://127.0.0.1:8791/labs/catalog/'); await p.waitForFunction('window.GrugCatalog && window.GrugCatalog.sandy', null, { timeout: 180000 }); await p.waitForTimeout(5000);
   const res = await p.evaluate(PAGE, { N }); await b.close();
   // sandals: her feet -> the Figure's feet (feet.json: left foot, sole y 0, ankle cut y 0.423)

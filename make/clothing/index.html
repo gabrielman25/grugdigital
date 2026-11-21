@@ -459,6 +459,31 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
   .o-ftile{all:unset;cursor:pointer;aspect-ratio:1;border-radius:8px;background-color:#fff;background-repeat:no-repeat;border:1px solid var(--g-line)}
   .o-ftile.on{outline:2px solid var(--g-accent);outline-offset:1px}
   .o-face.make{font-weight:600;color:var(--g-text-2)}
+  /* Character: the page never scrolls; only the side panel's pane does */
+  html.o-full,html.o-full body{height:100%;overflow:hidden}
+  html.o-full body{display:flex;flex-direction:column}
+  html.o-full header.top{flex:none}
+  html.o-full main{flex:1;min-height:0;width:100%;max-width:none;box-sizing:border-box;padding:var(--g-s-3) var(--g-s-4)}
+  #outfits:not([hidden]){height:100%;grid-template-columns:minmax(0,1fr) 24rem;align-items:stretch;gap:var(--g-s-3)}
+  #outfits>.o-stage{height:auto;min-height:0;position:relative;top:auto}
+  .o-side{display:flex;flex-direction:column;min-height:0;padding:0;overflow:hidden}
+  .o-cats{flex:none;display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:6px;border-bottom:1px solid var(--g-line)}
+  .o-cats button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px 6px;border-radius:10px;font-size:11px;font-weight:600;color:var(--g-text-2);text-align:center}
+  .o-cats button:hover{background:var(--g-bg-2)}
+  .o-cats button.on{background:var(--g-accent);color:#1E1B16}
+  .o-cats svg{width:18px;height:18px}
+  .o-subs{flex:none;display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px 6px}
+  .o-subs:empty{display:none}
+  .o-subs button{all:unset;cursor:pointer;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:600;background:var(--g-bg-2);color:var(--g-text-2)}
+  .o-subs button.on{background:var(--g-accent-lo,var(--g-bg-2));color:var(--g-text);box-shadow:inset 0 0 0 2px var(--g-accent)}
+  .o-pane{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:6px 14px 18px}
+  .o-p{display:none}.o-p.on{display:block}
+  .o-p details>summary{display:none}
+  .o-p .sub{margin-top:0}
+  #outProp:not([hidden])~.o-propnote,#outWornCard:not([hidden])~.o-wornnote{display:none}
+  .o-row:has(#outNailRow:not([hidden]))~.o-nailnote{display:none}
+  @media (max-width:980px){ #outfits:not([hidden]){grid-template-columns:1fr;grid-template-rows:minmax(0,46%) minmax(0,1fr)} }
+  @media (max-width:600px){ .o-hint{display:none} }
   .o-lock{position:fixed;inset:0;z-index:200;background:rgba(10,10,12,.5);display:flex;align-items:center;justify-content:center}
   .o-lock form{background:var(--g-page,#fff);color:var(--g-text,#1E1B16);border-radius:16px;padding:20px;max-width:320px;width:calc(100% - 40px);display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
   .o-lock h3{margin:0;font-size:18px}.o-lock p{margin:0;font-size:13px;color:var(--g-muted)}.o-lock .err{color:#d33}
@@ -472,7 +497,7 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
     <div><h1>Classic Clothing Studio</h1><p>AI-dressed avatars → Roblox shirt &amp; pants</p></div>
   </div>
   <div class="top-r">
-  <nav class="g-seg modes" id="modeSeg"><button data-mode="clothing" class="on">Clothing</button><button data-mode="acc">Accessories</button><button data-mode="outfits">Character</button></nav>
+  <nav class="g-seg modes" id="modeSeg"><button data-mode="outfits" class="on">Character</button><button data-mode="clothing">Clothing</button><button data-mode="acc">Accessories</button></nav>
   <nav class="steps g-seg">
     <button class="pill active" data-step="1"><b>1</b>Reference</button>
     <button class="pill" data-step="2" disabled><b>2</b>Align</button>
@@ -693,61 +718,75 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
       <div class="o-hint">Drag or right-drag: turn · Middle-drag: move · Scroll: zoom · Double-click: reset</div>
       <div class="o-bar"><button id="outSpin" class="g-btn g-btn--sm">Turn</button></div>
       <div class="o-anim" id="outAnim" role="group" aria-label="Animation preview"><button data-a="still" class="on">Still</button><button data-a="idle">Idle</button><button data-a="walk">Walk</button><button data-a="jump">Jump</button><button data-a="pose">Pose</button></div></div>
-    <aside class="side">
-      <div class="g-card card">
-        <h2 class="ttl"><i data-g-icon="person_body"></i>Body</h2>
-        <div class="g-seg full" id="outBody"><button data-b="classic" class="on">Blocky</button><button data-b="figure">Figure</button></div>
-        <div class="g-seg full" id="outFeet" hidden style="margin-top:6px"><button data-f="bare" class="on">Barefoot</button><button data-f="boots">Boots</button></div>
-        <div class="o-row"><label class="o-pick">Skin <input type="color" id="outSkin" value="#eab892"></label><label class="o-pick" id="outNailRow" hidden>Nails <input type="color" id="outNail" value="#f7f2ee" hidden><button type="button" id="outNailBtn" class="o-nailbtn" aria-label="Nail colour"></button></label></div>
-        <div id="outNailWheel" hidden></div>
-        <div class="o-sub">Face</div><div class="o-faces" id="outFaces" hidden></div>
-        <div id="outFaceEd" class="o-faceed" hidden>
-          <div class="g-seg full" id="outFaceTabs"><button data-p="brow" class="on">Brows</button><button data-p="eye">Eyes</button><button data-p="mouth">Mouth</button></div>
-          <div class="o-ftiles" id="outFaceTiles"></div>
-          <div id="outFaceCtl"></div>
-          <div class="o-acts"><button id="outFaceRandom" class="g-btn g-btn--sm g-btn--primary">Random face</button><button id="outFaceReset" class="g-btn g-btn--sm g-btn--ghost">Reset</button></div>
+    <aside class="g-card o-side">
+      <nav class="o-cats" id="outCats" aria-label="Character sections">
+        <button data-c="body" class="on"><i data-g-icon="person_body"></i>Body</button>
+        <button data-c="head"><i data-g-icon="eye"></i>Head</button>
+        <button data-c="clothing"><i data-g-icon="shirt"></i>Clothing</button>
+        <button data-c="acc"><i data-g-icon="archive"></i>Accessories</button>
+        <button data-c="looks"><i data-g-icon="floppy_disk"></i>Looks</button>
+        <button data-c="fx"><i data-g-icon="magic_wand"></i>Effects</button>
+      </nav>
+      <div class="o-subs" id="outSubs" role="tablist"></div>
+      <div class="o-pane" id="outPane">
+        <div class="o-p" data-c="body" data-s="type" data-l="Body type">
+          <div class="g-seg full" id="outBody"><button data-b="classic" class="on">Blocky</button><button data-b="figure">Figure</button></div>
+          <div class="g-seg full" id="outFeet" hidden style="margin-top:6px"><button data-f="bare" class="on">Barefoot</button><button data-f="boots">Boots</button></div>
+          <p class="tiny" id="outBodyNote">Blocky is the classic body. Figure has longer arms with a slight bend at the elbow, round hands and feet.</p>
         </div>
-        <p class="tiny" id="outBodyNote">Blocky is the classic body. Figure has longer arms with a slight bend at the elbow, round hands and feet.</p>
-        <details id="outProp" hidden><summary>Proportions</summary><div id="outPropBody"></div>
-          <div class="o-acts"><button id="outPropCopy" class="g-btn g-btn--sm g-btn--primary">Copy as JSON</button><button id="outPropApply" class="g-btn g-btn--sm">Apply JSON</button><button id="outPropReset" class="g-btn g-btn--sm g-btn--ghost">Reset</button></div>
-          <textarea id="outPropJson" class="g-input" placeholder="Paste proportions JSON here, then Apply JSON" style="min-height:4rem"></textarea></details>
-        <details id="outPose"><summary>Pose editor</summary><p class="tiny">Turn each joint (degrees). Moving a slider switches the stage to Pose.</p><div id="outPoseBody"></div>
-          <div class="o-acts"><button id="outPoseCopy" class="g-btn g-btn--sm g-btn--primary">Copy as JSON</button><button id="outPoseApply" class="g-btn g-btn--sm">Apply JSON</button><button id="outPoseReset" class="g-btn g-btn--sm g-btn--ghost">Reset</button></div>
-          <textarea id="outPoseJson" class="g-input" placeholder="Paste pose JSON here, then Apply JSON" style="min-height:3rem"></textarea></details>
-      </div>
-      <div class="g-card card">
-        <h2 class="ttl"><i data-g-icon="magic_wand"></i>Looks</h2>
-        <div id="outLooks" class="lib-grid o-grid"></div>
-        <div class="row" style="margin-top:var(--g-s-3)"><input id="outName" class="g-input" type="text" placeholder="Name this look" maxlength="40"><button id="outSave" class="g-btn g-btn--primary">Save</button></div>
-        <button id="outZip" class="g-btn g-btn--ghost full" style="margin-top:var(--g-s-2)"><i data-g-icon="arrow_down_to_line"></i>Download the look (.zip)</button>
-      </div>
-      <div class="g-card card">
-        <h2 class="ttl"><i data-g-icon="shirt"></i>Clothing</h2>
-        <div id="outClothes" class="o-chips"></div>
-        <div class="o-acts"><button id="outClothEdit" class="g-btn g-btn--sm">Edit</button><button id="outClothNew" class="g-btn g-btn--sm g-btn--ghost">New</button><button id="outClothClaude" class="g-btn g-btn--sm g-btn--ghost">With Claude</button>
-          <label class="g-btn g-btn--ghost g-btn--sm">Shirt PNG<input type="file" id="outShirtFile" accept="image/png" hidden></label><label class="g-btn g-btn--ghost g-btn--sm">Pants PNG<input type="file" id="outPantsFile" accept="image/png" hidden></label></div>
-        <div id="outClothCols"></div>
-      </div>
-      <div class="g-card card">
-        <h2 class="ttl"><i data-g-icon="archive"></i>Accessories</h2>
-        <p class="sub">Tap to put on or take off: one per spot (head, hair, back, each hand, each shoulder, feet).</p>
-        <div id="outAccs" class="lib-grid o-grid"></div>
-        <div class="o-acts"><button id="outAccNew" class="g-btn g-btn--sm g-btn--ghost">New accessory</button><button id="outAccClaude" class="g-btn g-btn--sm g-btn--ghost">With Claude</button></div>
-      </div>
-      <div class="g-card card">
-        <h2 class="ttl"><i data-g-icon="archive"></i>Catalog</h2>
-        <p class="sub">Pieces from the site's catalog, fitted to this head (and sandals to the Figure's feet: they switch it to barefoot). Tap to put on or take off.</p>
-        <div class="g-seg full" id="ugcTabs"></div>
-        <div id="ugcGrid" class="lib-grid o-grid" style="margin-top:var(--g-s-2)"></div>
-      </div>
-      <div class="g-card card" id="outWornCard" hidden>
-        <h2 class="ttl"><i data-g-icon="pipette"></i>Wearing now</h2>
-        <div id="outWorn"></div>
-      </div>
-      <div class="g-card card">
-        <h2 class="ttl"><i data-g-icon="magic_wand"></i>Retro look &amp; lighting</h2>
-        <p class="sub">For the whole character: the shirt and pants get the same baked light (ambient occlusion, room light, bounce) and retro texture effects as the accessories.</p>
-        <div id="outFx"></div>
+        <div class="o-p" data-c="body" data-s="skin" data-l="Skin &amp; nails">
+          <div class="o-row"><label class="o-pick">Skin <input type="color" id="outSkin" value="#eab892"></label><label class="o-pick" id="outNailRow" hidden>Nails <input type="color" id="outNail" value="#f7f2ee" hidden><button type="button" id="outNailBtn" class="o-nailbtn" aria-label="Nail colour"></button></label></div>
+          <div id="outNailWheel" hidden></div>
+          <p class="tiny o-nailnote">Nails show on the Figure body, barefoot.</p>
+        </div>
+        <div class="o-p" data-c="body" data-s="shape" data-l="Proportions">
+          <details id="outProp" open hidden><summary>Proportions</summary><div id="outPropBody"></div>
+            <div class="o-acts"><button id="outPropCopy" class="g-btn g-btn--sm g-btn--primary">Copy as JSON</button><button id="outPropApply" class="g-btn g-btn--sm">Apply JSON</button><button id="outPropReset" class="g-btn g-btn--sm g-btn--ghost">Reset</button></div>
+            <textarea id="outPropJson" class="g-input" placeholder="Paste proportions JSON here, then Apply JSON" style="min-height:4rem"></textarea></details>
+          <p class="tiny o-propnote">Proportions are for the Figure body: pick Figure under Body type.</p>
+        </div>
+        <div class="o-p" data-c="body" data-s="pose" data-l="Pose">
+          <details id="outPose" open><summary>Pose editor</summary><p class="tiny">Turn each joint (degrees). Moving a slider switches the stage to Pose.</p><div id="outPoseBody"></div>
+            <div class="o-acts"><button id="outPoseCopy" class="g-btn g-btn--sm g-btn--primary">Copy as JSON</button><button id="outPoseApply" class="g-btn g-btn--sm">Apply JSON</button><button id="outPoseReset" class="g-btn g-btn--sm g-btn--ghost">Reset</button></div>
+            <textarea id="outPoseJson" class="g-input" placeholder="Paste pose JSON here, then Apply JSON" style="min-height:3rem"></textarea></details>
+        </div>
+        <div class="o-p" data-c="head" data-s="face" data-l="Face">
+          <div class="o-faces" id="outFaces" hidden></div>
+          <div id="outFaceEd" class="o-faceed" hidden>
+            <div class="g-seg full" id="outFaceTabs"><button data-p="brow" class="on">Brows</button><button data-p="eye">Eyes</button><button data-p="mouth">Mouth</button></div>
+            <div class="o-ftiles" id="outFaceTiles"></div>
+            <div id="outFaceCtl"></div>
+            <div class="o-acts"><button id="outFaceRandom" class="g-btn g-btn--sm g-btn--primary">Random face</button><button id="outFaceReset" class="g-btn g-btn--sm g-btn--ghost">Reset</button></div>
+          </div>
+        </div>
+        <div class="o-p" data-c="head" data-s="hair" data-l="Hair"><p class="sub">Fitted to this head. Tap to put on or take off.</p><div class="lib-grid o-grid" data-ugc-dept="hair"></div></div>
+        <div class="o-p" data-c="head" data-s="eyewear" data-l="Eyewear"><p class="sub">Glasses and goggles from the site's catalog.</p><div class="lib-grid o-grid" data-ugc-dept="eyewear"></div></div>
+        <div class="o-p" data-c="head" data-s="sound" data-l="Headphones"><p class="sub">Headphones and earmuffs from the site's catalog.</p><div class="lib-grid o-grid" data-ugc-dept="sound"></div></div>
+        <div class="o-p" data-c="clothing" data-s="outfit" data-l="Outfits">
+          <div id="outClothes" class="o-chips"></div>
+          <div class="o-acts"><button id="outClothEdit" class="g-btn g-btn--sm">Edit</button><button id="outClothNew" class="g-btn g-btn--sm g-btn--ghost">New</button><button id="outClothClaude" class="g-btn g-btn--sm g-btn--ghost">With Claude</button>
+            <label class="g-btn g-btn--ghost g-btn--sm">Shirt PNG<input type="file" id="outShirtFile" accept="image/png" hidden></label><label class="g-btn g-btn--ghost g-btn--sm">Pants PNG<input type="file" id="outPantsFile" accept="image/png" hidden></label></div>
+        </div>
+        <div class="o-p" data-c="clothing" data-s="colours" data-l="Colours"><div id="outClothCols"></div></div>
+        <div class="o-p" data-c="acc" data-s="items" data-l="Items">
+          <p class="sub">One per spot (head, hair, back, each hand, each shoulder, feet). Tap to put on or take off.</p>
+          <div id="outAccs" class="lib-grid o-grid"></div>
+          <div class="o-acts"><button id="outAccNew" class="g-btn g-btn--sm g-btn--ghost">New accessory</button><button id="outAccClaude" class="g-btn g-btn--sm g-btn--ghost">With Claude</button></div>
+        </div>
+        <div class="o-p" data-c="acc" data-s="sandals" data-l="Sandals"><p class="sub">Fitted to the Figure's feet: putting one on switches to the Figure, barefoot.</p><div class="lib-grid o-grid" data-ugc-dept="sandals"></div></div>
+        <div class="o-p" data-c="acc" data-s="worn" data-l="Position &amp; size">
+          <div id="outWornCard" hidden><div id="outWorn"></div></div>
+          <p class="tiny o-wornnote">Nothing on yet. Put on an accessory or a catalog piece to move, turn or resize it here.</p>
+        </div>
+        <div class="o-p" data-c="looks" data-s="looks" data-l="Looks">
+          <div id="outLooks" class="lib-grid o-grid"></div>
+          <div class="row" style="margin-top:var(--g-s-3)"><input id="outName" class="g-input" type="text" placeholder="Name this look" maxlength="40"><button id="outSave" class="g-btn g-btn--primary">Save</button></div>
+          <button id="outZip" class="g-btn g-btn--ghost full" style="margin-top:var(--g-s-2)"><i data-g-icon="arrow_down_to_line"></i>Download the look (.zip)</button>
+        </div>
+        <div class="o-p" data-c="fx" data-s="fx" data-l="Retro look &amp; lighting">
+          <p class="sub">For the whole character: the shirt and pants get the same baked light (ambient occlusion, room light, bounce) and retro texture effects as the accessories.</p>
+          <div id="outFx"></div>
+        </div>
       </div>
     </aside>
   </section>
@@ -4027,12 +4066,12 @@ function setMode(m){
 /* ---------- the browser's Back and Forward step through the Studio itself (tabs, clothing steps, templates) ---------- */
 const NAV = { restoring: false };
 function navKey(){ if (A.mode === 'acc') return A.tpl && !A.tpl.built ? '#accessories/' + A.tpl.slug : '#accessories'; if (A.mode === 'outfits') return '#outfits';
-  const n = ((typeof state !== 'undefined') && state.step) || 1; return n > 1 ? '#clothing/' + n : ''; }
+  const n = ((typeof state !== 'undefined') && state.step) || 1; return n > 1 ? '#clothing/' + n : '#clothing'; }
 function navPush(){ if (NAV.restoring) return; const k = navKey(); if ((location.hash || '') === k) return; history.pushState({ studio: k }, '', k || location.pathname + location.search); }
 async function navTo(h){
   const [m, x] = (h || '').replace(/^#/, '').split('/');
   if (m === 'accessories') { setMode('acc'); if (x) { if (!A.list) await gallery(); if (!A.tpl || A.tpl.slug !== x) { if ((A.list || []).some(t => t.slug === x)) await pick(x); } } else if (A.list) showGallery(); }
-  else if (m === 'outfits') setMode('outfits');
+  else if (m !== 'clothing') setMode('outfits');   // the Studio opens on the Character tab
   else { setMode('clothing'); let n = +x || 1; if (n === 3 && !state.built) n = state.img ? 2 : 1; if (n === 2 && !state.img) n = 1; if (typeof goStep === 'function') goStep(n); }
 }
 window.addEventListener('popstate', async () => { NAV.restoring = true; try { await navTo(location.hash); } finally { NAV.restoring = false; } });
@@ -4118,7 +4157,7 @@ async function run(){
 document.querySelectorAll('#accLook button').forEach(b => b.onclick = () => { A.preset = b.dataset.p; run(); });
 $('#accWear').onclick = async () => { if (!A.view || !window.__outfits) return; const e = await __outfits.addFromView(A.view, A.tpl); setMode('outfits'); await __outfits.show(true); await __outfits.wear(e); toastA('Wearing it. Recolour it on the right.'); };
 
-setTimeout(async () => { NAV.restoring = true; try { if (location.hash) await navTo(location.hash); } finally { NAV.restoring = false; } history.replaceState({ studio: navKey() }, '', navKey() || location.pathname + location.search); }, 0);
+setTimeout(async () => { NAV.restoring = true; try { await navTo(location.hash || '#outfits'); } finally { NAV.restoring = false; } history.replaceState({ studio: navKey() }, '', navKey() || location.pathname + location.search); }, 0);
 
 /* ---------- Use Claude: the image generator, the hand-off message, and the page API Claude in Chrome drives ---------- */
 const GENS = { gemini: { name: 'Gemini (Nano Banana)', url: 'https://gemini.google.com/app', copy: 'the copy icon above the picture' },
@@ -4887,16 +4926,35 @@ function ugcOff(dept, quiet){
   if (!quiet) { drawUGC(); drawWorn(); }
 }
 function drawUGC(){
+  const card = e => { const on = UGC.worn[e.dept] && UGC.worn[e.dept].e.id === e.id, b = document.createElement('button'); b.className = 'lib-card o-acc' + (on ? ' on' : '');
+    b.innerHTML = `<div class="lib-thumb" style="background-image:url('${AS(UBASE + e.thumb)}')"></div><b></b><small>${e.dept === 'sandals' ? 'Figure, barefoot' : 'Head'}</small>`;
+    b.querySelector('b').textContent = e.name; b.setAttribute('aria-pressed', on);
+    b.onclick = async () => { if (on) ugcOff(e.dept); else { b.disabled = true; try { await ugcWear(e); } catch (err) { console.error(err); toastO("Couldn't load that piece"); } b.disabled = false; } };
+    return b; };
+  // one grid per department (the Character panel's Hair, Eyewear, Headphones and Sandals)
+  const boxes = document.querySelectorAll('[data-ugc-dept]');
+  if (boxes.length) { boxes.forEach(box => { box.innerHTML = ''; const list = (UGC.list || []).filter(e => e.dept === box.dataset.ugcDept);
+    if (!list.length) box.innerHTML = UGC.list ? '<p class="tiny">Nothing here yet.</p>' : '<p class="tiny">Loading…</p>'; list.forEach(e => box.appendChild(card(e))); }); return; }
   const tabs = $o('#ugcTabs'), grid = $o('#ugcGrid'); if (!tabs || !grid) return;
   tabs.innerHTML = ''; UGC_DEPTS.forEach(([d, label]) => { const b = document.createElement('button'); b.textContent = label; b.classList.toggle('on', UGC.tab === d); b.onclick = () => { UGC.tab = d; drawUGC(); }; tabs.appendChild(b); });
   grid.innerHTML = ''; const list = (UGC.list || []).filter(e => e.dept === UGC.tab);
   if (!list.length) grid.innerHTML = '<p class="tiny">Nothing here yet.</p>';
-  list.forEach(e => { const on = UGC.worn[e.dept] && UGC.worn[e.dept].e.id === e.id, b = document.createElement('button'); b.className = 'lib-card o-acc' + (on ? ' on' : '');
-    b.innerHTML = `<div class="lib-thumb" style="background-image:url('${AS(UBASE + e.thumb)}')"></div><b></b><small>${e.dept === 'sandals' ? 'Figure, barefoot' : 'Head'}</small>`;
-    b.querySelector('b').textContent = e.name; b.setAttribute('aria-pressed', on);
-    b.onclick = async () => { if (on) ugcOff(e.dept); else { b.disabled = true; try { await ugcWear(e); } catch (err) { console.error(err); toastO("Couldn't load that piece"); } b.disabled = false; } };
-    grid.appendChild(b); });
+  list.forEach(e => grid.appendChild(card(e)));
 }
+/* the side panel: categories (Body, Head, Clothing, Accessories, Looks, Effects), each with its subsections as chips;
+   only the pane scrolls, never the page */
+const PANEL = { cat: 'body', sub: {} };
+function panelGo(cat, sub){
+  const panes = [...document.querySelectorAll('#outPane .o-p')], mine = panes.filter(p => p.dataset.c === cat); if (!mine.length) return;
+  PANEL.cat = cat; sub = sub || PANEL.sub[cat] || mine[0].dataset.s; if (!mine.some(p => p.dataset.s === sub)) sub = mine[0].dataset.s; PANEL.sub[cat] = sub;
+  document.querySelectorAll('#outCats button').forEach(b => { const on = b.dataset.c === cat; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+  const subs = $o('#outSubs'); subs.innerHTML = '';
+  if (mine.length > 1) mine.forEach(p => { const b = document.createElement('button'); b.textContent = p.dataset.l; b.setAttribute('role', 'tab'); const on = p.dataset.s === sub; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); b.onclick = () => panelGo(cat, p.dataset.s); subs.appendChild(b); });
+  panes.forEach(p => p.classList.toggle('on', p.dataset.c === cat && p.dataset.s === sub));
+  const pane = $o('#outPane'); if (pane) pane.scrollTop = 0;
+}
+document.querySelectorAll('#outCats button').forEach(b => b.onclick = () => panelGo(b.dataset.c));
+if (document.querySelector('#outPane')) panelGo('body', 'type');
 function drawUGCWorn(r, mv, P){
   const gl = r.gl;
   for (const w of Object.values(UGC.worn)) { r.cut = w.cut;
@@ -4926,7 +4984,7 @@ function frame(t){
   OUT.raf = requestAnimationFrame(frame);
 }
 async function show(on){
-  OUT.on = on; $o('#outfits').hidden = !on;
+  OUT.on = on; $o('#outfits').hidden = !on; document.documentElement.classList.toggle('o-full', !!on);
   if (!on) return;
   initRenderer(); drawLookPanel();
   if (!OUT.readyP) OUT.readyP = (async () => { await loadIndex(); await loadFaces(); if (FP.meta) randomFace(); loadUGC(); fileAccessories(); drawClothing(); drawWardrobe(); await loadSaved(); if (OUT.index.looks && OUT.index.looks[0] && !OUT.worn.length && !OUT.cloth) await applyLook(OUT.index.looks[0]); })();

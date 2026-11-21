@@ -1,5 +1,5 @@
 {
- "v": "abd85d328313",
+ "v": "d396364191c8",
  "apps": {
   "grug": [
    "grug",
@@ -494,7 +494,7 @@
     "/make/clothing/body/feet-normal.png": "481945ea4f",
     "/make/clothing/body/feet.json": "5c6219bf2c",
     "/make/clothing/body/nails.png": "8df1f89d50",
-    "/make/clothing/": "60534e0d2d",
+    "/make/clothing/": "8042afb9f8",
     "/make/clothing/outfits/autumn/chip.png": "614a9d6509",
     "/make/clothing/outfits/autumn/pants-figure.png": "c0625f6c54",
     "/make/clothing/outfits/autumn/pants.png": "88b04fc8e8",
@@ -504,12 +504,12 @@
     "/make/clothing/outfits/faces/parts/eyes.png": "28bdd525f2",
     "/make/clothing/outfits/faces/parts/mouths.png": "22791b7c55",
     "/make/clothing/outfits/index.json": "25f6da3003",
-    "/make/clothing/outfits/looks/autumn-blocky.jpg": "f834e7c018",
-    "/make/clothing/outfits/looks/autumn.jpg": "2cd52a324d",
-    "/make/clothing/outfits/looks/night-rider.jpg": "22f3fe9806",
-    "/make/clothing/outfits/looks/pink.jpg": "de6d54a595",
-    "/make/clothing/outfits/looks/rustic.jpg": "a160cd94ae",
-    "/make/clothing/outfits/looks/weekend.jpg": "406a57f9de",
+    "/make/clothing/outfits/looks/autumn-blocky.jpg": "c5b18eda25",
+    "/make/clothing/outfits/looks/autumn.jpg": "0a4cc06ff6",
+    "/make/clothing/outfits/looks/night-rider.jpg": "c6aafb8d0d",
+    "/make/clothing/outfits/looks/pink.jpg": "4516d5a04a",
+    "/make/clothing/outfits/looks/rustic.jpg": "bd3765142c",
+    "/make/clothing/outfits/looks/weekend.jpg": "85c0075824",
     "/make/clothing/outfits/pink/chip.png": "e03339d8e7",
     "/make/clothing/outfits/pink/pants-figure.png": "045e9ab2e7",
     "/make/clothing/outfits/pink/pants.png": "a512e3c36a",
@@ -534,7 +534,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 58084406
+   "bytes": 58090148
   },
   "daypart": {
    "title": "Daypart",

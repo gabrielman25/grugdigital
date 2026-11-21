@@ -264,7 +264,12 @@ mouth), twist, width, height; brows and eyes are pairs (the tile is the right-ha
 brows take a colour; **Random face**. A look keeps `face: 'custom'` and `faceParts`. The Figure's sleeves and trouser legs end
 in loose hexagonal cuffs and hems (`hexScale`) with open ends pushed up inside (`openEnd`) and darkened (`openEnds` in
 outfits-ui.js); barefoot, the hem rides over the top of the foot (`hemLift`: an arch over the instep, down at the sides and back). Two new spots: **hair** (follows the head) and **feet** (a pair is split per foot).
-**Catalog** card (experimental, branch `clothing-studio-ugc`): pieces from the site's UGC catalog (`labs/catalog/`): hair,
+**The Studio opens on Character** (the first tab) with the avatar dressed, and on that tab **the page never scrolls**
+(`html.o-full`): the stage fills the height and the side panel has six sections (Body, Head, Clothing, Accessories, Looks,
+Effects) with their subsections as chips (Body: Body type, Skin & nails, Proportions, Pose; Head: Face, Hair, Eyewear,
+Headphones; Clothing: Outfits, Colours; Accessories: Items, Sandals, Position & size). Only the panel's pane scrolls. A new
+control goes into a pane (`.o-p` with `data-c` / `data-s` / `data-l`, in the Image2LoPol folder's `inline_studio.py`).
+**Catalog** pieces (experimental, branch `clothing-studio-ugc`): from the site's UGC catalog (`labs/catalog/`): hair,
 eyewear, headphones / earmuffs and sandals, in `make/clothing/ugc/` (index.json, one geometry JSON + texture + picture each).
 `node tools/ugc/export.js [n per department]` (repo served on :8791) makes them: it opens the catalog in headless Chrome,
 swaps her head mesh for the Studio's rounded head (in her head frame, eyes at the same height), so the catalog's own fitting
@@ -272,8 +277,8 @@ builds each piece around THAT head, merges it (`bakeSingle`) and converts it to 
 mapped from her posed feet to the Figure's feet. They're drawn like accessories and never touch the body. Sandals switch to the
 Figure, barefoot, with no password (a look with sandals too); taking them off brings the boots back; Blocky or Boots takes
 them off. Looks keep `ugc` (ids are fixed by the export's catalog seed, `grug-cd50gg`: keep it, the example looks name them).
-The export also: puts her **stock long hair and buns** (the classic kit's, in four colours) first in Hair, pushed out of the
-Studio's head where they'd sink in; makes **headphones exactly symmetric** (her left half mirrored); refits **sandals** to the
+The export also: puts her **stock long hair and buns** (the classic kit's, in four colours) first in Hair, seated on the
+Studio's head (each point keeps its height above her own skull, which is taller, so nothing floats) and pushed out where they'd sink in; makes **headphones exactly symmetric** (her left half mirrored); refits **sandals** to the
 Figure's feet (soles widened to its footprint by angle, straps moved onto its skin at the height they sat above hers). In the
 Studio, sandal parts inside the trouser leg are cut off at the hem (`ugcParts`). Every worn piece (accessory or catalog) has
 **Position & size**: X / Y / Z, size 50 to 150%, tilt, turn, roll (`adjMV`; a pair mirrors it on the right foot); looks keep it
