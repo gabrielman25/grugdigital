@@ -235,13 +235,27 @@ brightness) is on the colour only, then the light is multiplied in crisp at 1024
 nodes, path-traced bounce, traced automatically). Defaults are the owner's: 4-bit, dither 1, pixel 2×, contrast +0.5; AO 1,
 room 0.6, detail 0.32, nodes 1, bounce 1.05; outline on, RGB 5 5 5, width 0.027. Every slider shows its value. Nothing moves
 the model's vertices. Each model is split into colour groups (bag, straps, bottle…) that can be recoloured.
-**Outfits** (`#outfits`) puts shirt, pants and accessories on the blocky avatar (rounded smooth-shaded head, generic face),
+**Character** (`#outfits`, the customizer) puts shirt, pants and accessories on the avatar (rounded smooth-shaded head,
+generic face; **Blocky** by default or **Figure**: slimmer waist, longer arms bent a little at the elbow, sphere hands and real
+feet with a toenail colour, from `make/clothing/body/`, made by the Image2LoPol folder's `tool/make_feet.py`; items in a hand,
+on the back or a shoulder follow that body's hands and back). Its **Proportions** panel tunes every number of the Figure
+(torso, arms, elbow, hands, leg height, ankle, knee, feet, X / Y / Z offsets per part) and copies it as JSON: to make the
+owner's JSON the default, paste it into `FIG_DEFAULT` in the Studio page's source (the Image2LoPol folder) and rebuild. Each worn item has **Edit** (opens it in Accessories or
+Clothing with its colours and look; "Wear it" brings it back) and the Clothing and Accessories cards have **New** and
+**With Claude**. It also has
 one accessory per spot (head, back, each hand, each shoulder), with recolouring of the clothing's main colours and each
 accessory's groups, one "Retro look & lighting" panel for the whole outfit (the shirt and pants get AO and room light
 ray-cast against the body, plus the same retro effects), outlines for the avatar and the accessories, example looks
 (`make/clothing/outfits/index.json`: clothing PNGs, looks with their accessories and colours), looks saved in the browser
 (IndexedDB `ccs-library`, key `outfits.looks`) and a zip download. "Wear it" on a finished accessory sends it there.
 Accessories are made to fit the avatar (`wear` in each template; hats use `"fit": "hat"`: brim just above the eyes).
+**The browser's Back and Forward** step through the Studio itself (tabs, the Clothing steps, the open template:
+`#clothing/2`, `#accessories/<slug>`, `#outfits`), never off to another page until the Studio's first screen.
+**Pants are just pants**: the Clothing prompt asks for no shoes, socks or feet (shoes will be accessories), and the example
+clothing in `make/clothing/outfits/` has none. `window.ClothingStudio` (help, describe, status, build, wear) and the Clothing
+tab's "Copy reference picture" / "Use Claude" buttons do for clothing what AccessoryStudio does for accessories.
+An **offline one-file build** (every template, look and the feet packed inside, with notes for Claude and a `studio-items`
+block that new items can be added to) is made in the owner's Image2LoPol folder (`tool/build_offline.py`); it is not on the site.
 **Use Claude** (Accessories): picks the image generator (Gemini by default; saved in `localStorage` `grug.ccs.imagegen.v1`),
 copies a hand-off message for Claude in Chrome, offers `claude-kit.zip` (the Image2LoPol tool, lean) and documents
 `window.AccessoryStudio` (help, modelFormat, templates, open, example, clay, newModel, describe, status, look, wear,

@@ -415,8 +415,10 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
   .o-stage{position:relative;height:min(78vh,820px);overflow:hidden;padding:0}
   #outView{position:absolute;inset:0;width:100%;height:100%;cursor:grab;touch-action:none}
   .o-bar{position:absolute;left:12px;bottom:12px;display:flex;gap:8px;align-items:center}
-  .o-skin{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--g-muted)}
-  .o-skin input{width:28px;height:24px;border:0;padding:0;background:none;cursor:pointer}
+  .o-row{display:flex;gap:var(--g-s-3);margin-top:var(--g-s-2)}
+  .o-pick{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--g-text-2)}
+  .o-pick input{width:30px;height:26px;border:0;padding:0;background:none;cursor:pointer}
+  .o-acts{display:flex;flex-wrap:wrap;gap:6px;margin:var(--g-s-2) 0}
   .o-grid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
   .o-acc.on,.o-chip.on{outline:2px solid var(--g-accent);outline-offset:2px}
   .o-look{position:relative;padding:0}
@@ -434,6 +436,8 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
   .o-rng span{display:flex;justify-content:space-between}.o-rng b{color:var(--g-text,inherit);font-variant-numeric:tabular-nums}
   .o-rng input{width:100%;accent-color:var(--g-accent)}
   .o-ol{border-top:1px solid var(--g-line);margin-top:var(--g-s-2);padding-top:var(--g-s-2);display:flex;flex-direction:column;gap:6px}
+  #outProp summary,.o-off summary{cursor:pointer;font-weight:600;font-size:13px;margin:var(--g-s-2) 0}
+  .o-off{border-top:1px solid var(--g-line)}.o-off summary{display:flex;justify-content:space-between;font-weight:500}.o-off summary b{color:var(--g-muted);font-weight:500;font-variant-numeric:tabular-nums}
   .o-worn{border-top:1px solid var(--g-line);padding-top:var(--g-s-2);margin-top:var(--g-s-2)}
   .o-wh{display:flex;gap:8px;align-items:center}.o-wh b{flex:1}.o-wh small{color:var(--g-muted)}
 </style>
@@ -446,7 +450,7 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
     <div><h1>Classic Clothing Studio</h1><p>AI-dressed avatars → Roblox shirt &amp; pants</p></div>
   </div>
   <div class="top-r">
-  <nav class="g-seg modes" id="modeSeg"><button data-mode="clothing" class="on">Clothing</button><button data-mode="acc">Accessories</button><button data-mode="outfits">Outfits</button></nav>
+  <nav class="g-seg modes" id="modeSeg"><button data-mode="clothing" class="on">Clothing</button><button data-mode="acc">Accessories</button><button data-mode="outfits">Character</button></nav>
   <nav class="steps g-seg">
     <button class="pill active" data-step="1"><b>1</b>Reference</button>
     <button class="pill" data-step="2" disabled><b>2</b>Align</button>
@@ -468,6 +472,8 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
         <label class="g-field-label">Back view</label>
         <div class="g-seg full" id="layoutSeg" style="margin-bottom:var(--g-s-4)"><button data-v="exploded">Exploded (shows inner sides)</button><button data-v="assembled">Assembled</button></div>
         <button id="dlRef" class="g-btn g-btn--primary full"><i data-g-icon="arrow_down_to_line"></i>Download reference</button>
+        <div class="row" style="margin-top:var(--g-s-2)"><button id="clCopyRef" class="g-btn"><i data-g-icon="clipboard"></i>Copy reference picture</button><button id="clClaude" class="g-btn g-btn--ghost"><i data-g-icon="magic_wand"></i>Use Claude</button></div>
+        <textarea id="clHandoff" class="g-input" readonly hidden style="margin-top:var(--g-s-2);min-height:4.5rem"></textarea>
       </div>
       <div class="g-card card">
         <h2 class="ttl"><span class="n">2</span>Dress them with AI</h2>
@@ -530,6 +536,7 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
     </div>
     <aside class="side">
       <div class="g-card card">
+ <button id="clWear" class="g-btn g-btn--primary full" style="margin-bottom:var(--g-s-3)"><i data-g-icon="person_body"></i>Wear it on the character</button>
         <div class="tpl-head"><h2 class="ttl"><i data-g-icon="shirt"></i>Shirt</h2><button id="dlShirt" class="g-btn g-btn--primary g-btn--sm"><i data-g-icon="arrow_down_to_line"></i>Download</button></div>
         <div class="checker"><canvas id="shirtPrev" width="585" height="559"></canvas></div>
       </div>
@@ -660,9 +667,18 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
 <!-- /ACCESSORIES -->
 <!-- OUTFITS -->
   <section id="outfits" class="step" hidden>
-    <div class="g-card stage o-stage"><canvas id="outView" aria-label="The avatar wearing the outfit. Drag to turn, scroll to zoom."></canvas>
-      <div class="o-bar"><button id="outSpin" class="g-btn g-btn--sm on">Turn</button><label class="o-skin">Skin <input type="color" id="outSkin" value="#eab892"></label></div></div>
+    <div class="g-card stage o-stage"><canvas id="outView" aria-label="The avatar. Drag to turn, scroll to zoom."></canvas>
+      <div class="o-bar"><button id="outSpin" class="g-btn g-btn--sm on">Turn</button></div></div>
     <aside class="side">
+      <div class="g-card card">
+        <h2 class="ttl"><i data-g-icon="person_body"></i>Body</h2>
+        <div class="g-seg full" id="outBody"><button data-b="classic" class="on">Blocky</button><button data-b="figure">Figure</button></div>
+        <div class="o-row"><label class="o-pick">Skin <input type="color" id="outSkin" value="#eab892"></label><label class="o-pick" id="outNailRow" hidden>Nails <input type="color" id="outNail" value="#f7f2ee"></label></div>
+        <p class="tiny" id="outBodyNote">Blocky is the classic body. Figure has longer arms with a slight bend at the elbow, round hands and feet.</p>
+        <details id="outProp" hidden><summary>Proportions</summary><div id="outPropBody"></div>
+          <div class="o-acts"><button id="outPropCopy" class="g-btn g-btn--sm g-btn--primary">Copy as JSON</button><button id="outPropApply" class="g-btn g-btn--sm">Apply JSON</button><button id="outPropReset" class="g-btn g-btn--sm g-btn--ghost">Reset</button></div>
+          <textarea id="outPropJson" class="g-input" placeholder="Paste proportions JSON here, then Apply JSON" style="min-height:4rem"></textarea></details>
+      </div>
       <div class="g-card card">
         <h2 class="ttl"><i data-g-icon="magic_wand"></i>Looks</h2>
         <div id="outLooks" class="lib-grid o-grid"></div>
@@ -670,24 +686,26 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
         <button id="outZip" class="g-btn g-btn--ghost full" style="margin-top:var(--g-s-2)"><i data-g-icon="arrow_down_to_line"></i>Download the look (.zip)</button>
       </div>
       <div class="g-card card">
-        <h2 class="ttl"><i data-g-icon="shirt"></i>Shirt &amp; pants</h2>
+        <h2 class="ttl"><i data-g-icon="shirt"></i>Clothing</h2>
         <div id="outClothes" class="o-chips"></div>
-        <div class="row"><label class="g-btn g-btn--ghost g-btn--sm">Shirt PNG<input type="file" id="outShirtFile" accept="image/png" hidden></label><label class="g-btn g-btn--ghost g-btn--sm">Pants PNG<input type="file" id="outPantsFile" accept="image/png" hidden></label></div>
+        <div class="o-acts"><button id="outClothEdit" class="g-btn g-btn--sm">Edit</button><button id="outClothNew" class="g-btn g-btn--sm g-btn--ghost">New</button><button id="outClothClaude" class="g-btn g-btn--sm g-btn--ghost">With Claude</button>
+          <label class="g-btn g-btn--ghost g-btn--sm">Shirt PNG<input type="file" id="outShirtFile" accept="image/png" hidden></label><label class="g-btn g-btn--ghost g-btn--sm">Pants PNG<input type="file" id="outPantsFile" accept="image/png" hidden></label></div>
         <div id="outClothCols"></div>
       </div>
       <div class="g-card card">
         <h2 class="ttl"><i data-g-icon="archive"></i>Accessories</h2>
-        <p class="sub">Tap to put on or take off. One per spot (head, back, each hand, each shoulder). Paint your own in Accessories, then "Wear it".</p>
+        <p class="sub">Tap to put on or take off: one per spot (head, back, each hand, each shoulder).</p>
         <div id="outAccs" class="lib-grid o-grid"></div>
+        <div class="o-acts"><button id="outAccNew" class="g-btn g-btn--sm g-btn--ghost">New accessory</button><button id="outAccClaude" class="g-btn g-btn--sm g-btn--ghost">With Claude</button></div>
+      </div>
+      <div class="g-card card" id="outWornCard" hidden>
+        <h2 class="ttl"><i data-g-icon="pipette"></i>Wearing now</h2>
+        <div id="outWorn"></div>
       </div>
       <div class="g-card card">
         <h2 class="ttl"><i data-g-icon="magic_wand"></i>Retro look &amp; lighting</h2>
-        <p class="sub">For the whole outfit: the shirt and pants get the same baked light (ambient occlusion, room light, bounce) and retro texture effects as the accessories.</p>
+        <p class="sub">For the whole character: the shirt and pants get the same baked light (ambient occlusion, room light, bounce) and retro texture effects as the accessories.</p>
         <div id="outFx"></div>
-      </div>
-      <div class="g-card card" id="outWornCard" hidden>
-        <h2 class="ttl"><i data-g-icon="pipette"></i>Accessory colours</h2>
-        <div id="outWorn"></div>
       </div>
     </aside>
   </section>
@@ -1176,6 +1194,7 @@ class GLR {
     this.u = {}; ['uMV','uPr','uNM','uTex','uNMap','uTint','uL','uAmb','uDif','uUnlit','uAffine','uSnap','uNStr','uSpec','uWrap'].forEach(n => this.u[n] = gl.getUniformLocation(pr,n));
     this.affine = 0; this.snap = 0; this.spec = 0; this.nstr = 0; this.explode = 0; this.studsOn = false; this.wrap = 0;
     this.outline = { on: false, width: 0.06, color: [5, 5, 5] };   // the avatar's own inverted-hull outline (studs)
+    this.nail = [247, 242, 238];                                     // the Figure body's toenail colour
     gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     const solid = (css) => { const c = cnv(1,1), x = c.getContext('2d'); x.fillStyle = css; x.fillRect(0,0,1,1); return this.tex(c); };
     this.white = solid('#fff'); this.flatN = solid('rgb(128,128,255)');
@@ -1200,9 +1219,21 @@ class GLR {
     B.head = this.mesh(this.headDims === HEAD ? cylGeo(this.headDims) : roundHeadGeo(this.headDims));
     if (BODY_TYPES[type].hands) ['rarm','larm'].forEach(n => B.hands.push({ part:n, mesh:this.mesh(handGeo(PARTS.find(p => p.name === n), type)) }));
     STUDS.forEach(s => B.studs.push({ part:s.part, mesh:this.mesh(studGeo(s, type, studShape)) }));
+    const feetOf = () => [['foot_l', FEET.geoL], ['foot_r', FEET.geoR]].map(([part, g]) => ({ part, mesh: this.mesh(g) }));
+    if (BODY_TYPES[type].feet){ if (FEET.geoL) B.feet = feetOf(); else FEET.load().then(() => { if (this.body === B && !B.feet){ B.feet = feetOf(); B.hullW = -1; } }); }
     this.body = B; this.buildHulls();
-    if (old){ Object.values(old.parts).forEach(m => this.free(m)); this.free(old.head); (old.hulls || []).forEach(h => this.free(h.mesh)); old.hands.forEach(h => this.free(h.mesh)); old.studs.forEach(s => this.free(s.mesh)); }
+    if (old){ Object.values(old.parts).forEach(m => this.free(m)); this.free(old.head); (old.hulls || []).forEach(h => this.free(h.mesh)); if (old.feet) old.feet.forEach(f => this.free(f.mesh)); old.hands.forEach(h => this.free(h.mesh)); old.studs.forEach(s => this.free(s.mesh)); }
   }
+  /* the feet's colour: skin, with the toenails (the mask) in the nail colour */
+  feetTex(skin){
+    const key = skin.map(v => Math.round(v*255)).join() + '|' + this.nail.join();
+    if (this._feetKey === key && this._feetT) return this._feetT;
+    if (!FEET.mask) return this.white;
+    const c = cnv(FEET.mask.width, FEET.mask.height), x = c.getContext('2d'); x.drawImage(FEET.mask, 0, 0); const d = x.getImageData(0, 0, c.width, c.height), a = d.data;
+    for (let i = 0; i < a.length; i += 4){ const m = a[i] / 255; for (let k = 0; k < 3; k++) a[i+k] = skin[k]*255*(1-m) + this.nail[k]*m; a[i+3] = 255; }
+    x.putImageData(d, 0, 0); this._feetT = this.tex(c, this._feetT); this._feetKey = key; return this._feetT;
+  }
+  feetNM(){ if (!this._feetN && FEET.nmap) this._feetN = this.tex(FEET.nmap); return this._feetN || this.flatN; }
   /* outline shells for every body part and the head, rebuilt when the width changes */
   buildHulls(){
     const B = this.body; if (!B) return; (B.hulls || []).forEach(h => this.free(h.mesh)); B.hulls = [];
@@ -1210,6 +1241,8 @@ class GLR {
     const w = this.outline.width, add = (g, part) => B.hulls.push({ part, mesh: this.mesh(hullGeo(g, w)) });
     PARTS.forEach(p => add(partGeo(p, B.type), p.name));
     add(this.headDims === HEAD ? cylGeo(this.headDims) : roundHeadGeo(this.headDims), 'head');
+    if (BODY_TYPES[B.type].hands === 'sphere') ['rarm','larm'].forEach(n => add(handGeo(PARTS.find(p => p.name === n), B.type), 'hand_' + n));
+    if (B.feet && FEET.hullL) [['foot_l', FEET.hullL], ['foot_r', FEET.hullR]].forEach(([part, g]) => B.hulls.push({ part, mesh: this.mesh(hullGeo(g, w * 0.6 / FIG.foot)) }));
     B.hullW = w;
   }
   drawOutline(mv, P){
@@ -1245,6 +1278,13 @@ class GLR {
     gl.drawElements(gl.TRIANGLES, m.c, gl.UNSIGNED_SHORT, 0);
   }
   partMV(mv, name){
+    if (name === 'foot_l' || name === 'foot_r'){   // the Figure's feet: under each leg, scaled, following the leg offsets and knee bend
+      const side = name === 'foot_l' ? 1 : -1, o = FIG.off, k = FIG.foot, h = FEET.height || 0.423;
+      const m = m4mul(mv, m4T(side*(FIG.legX + o.legs[0] + o.feet[0]), FIG.legY - h*k + o.legs[1] + o.feet[1], FIG.kneeBend + FIG.footFwd + o.legs[2] + o.feet[2]));
+      const S = m4I(); S[0] = S[5] = S[10] = k; return m4mul(m, S);
+    }
+    if (this.body && this.body.type === 'figure' && !this.offsets){ const f = figOffset(name); if (f[0] || f[1] || f[2]) mv = m4mul(mv, m4T(f[0], f[1], f[2])); }
+    name = name.replace(/^hand_/, '');
     if (this.offsets){ const o = this.offsets[name]; return (o[0]||o[1]||o[2]) ? m4mul(mv, m4T(o[0], o[1], o[2])) : mv; }
     if (!this.explode) return mv;
     const o = EXPLODE[name], e = this.explode;
@@ -1255,7 +1295,8 @@ class GLR {
     PARTS.forEach(p => this.draw(B.parts[p.name], p.layer === 'legs' ? tx.legs : tx.upper, this.partMV(mv, p.name), P, tx.tint, false, this.nmapTex, this.nstr));
     const w0 = this.wrap, sp0 = this.spec; if (this.headDims !== HEAD) { this.wrap = 0.6; this.spec = sp0 * 0.5; }   // soft light on the rounded head: no visible facets
     this.draw(B.head, tx.head, this.partMV(mv, 'head'), P, [1,1,1]); this.wrap = w0; this.spec = sp0;
-    B.hands.forEach(h => this.draw(h.mesh, this.white, this.partMV(mv, h.part), P, tx.skin || tx.tint));
+    B.hands.forEach(h => this.draw(h.mesh, this.white, this.partMV(mv, 'hand_' + h.part), P, tx.skin || tx.tint));
+    if (B.feet){ const w0 = this.wrap; this.wrap = 0.35; B.feet.forEach(f => this.draw(f.mesh, this.feetTex(tx.skin || tx.tint), this.partMV(mv, f.part), P, [1,1,1], false, this.feetNM(), 1)); this.wrap = w0; }
     this.drawOutline(mv, P);
     if (this.studsOn) B.studs.forEach(s => this.draw(s.mesh, PARTS.find(p => p.name === s.part).layer === 'legs' ? tx.legs : tx.upper, this.partMV(mv, s.part), P, tx.tint, false, this.studNMap, 1.6));
   }
@@ -1278,8 +1319,37 @@ function slenderDeform(part, p){
   if (k === 'arm') return [cx + (p[0]-cx)*0.72 - side*0.14, p[1], p[2]*0.72];
   return [cx + (p[0]-cx)*0.86 - side*0.07, p[1], p[2]*0.8];
 }
+/* Figure: the rounded body (slimmer waist, longer arms with a slight bend at the elbow, sphere hands, real feet).
+   Every number is a slider in the Character tab's Proportions panel; FIG_DEFAULT is the starting point (paste the panel's
+   JSON here to change it). off: extra X / Y / Z moves per part (x mirrors on the right side, so +x spreads both sides out). */
+const FIG_DEFAULT = { torsoW: 0.92, waist: 0.1, waistY: 2.55, torsoD: 0.78, armX: 1.23, armW: 0.62, armLen: 1.25, elbow: 2.85, elbowBend: 0.13,
+  armFwd: 0.12, hand: 0.31, hip: 2, legX: 0.47, legW: 0.8, legY: 0.42, knee: 0.5, kneeBend: 0, foot: 1, footFwd: 0,
+  off: { torso: [0, 0, 0], arms: [0, 0, 0], hands: [0, 0, 0], legs: [0, 0, 0], feet: [0, 0, 0], head: [0, 0, 0] } };
+const FIG = JSON.parse(JSON.stringify(FIG_DEFAULT));
+function figureDeform(part, p){
+  const k = kindOf(part.name), cx = (part.min[0]+part.max[0])/2, side = Math.sign(cx) || 1;
+  if (k === 'torso'){ const waist = Math.exp(-(((p[1]-FIG.waistY)/0.45)**2)); return [p[0]*(FIG.torsoW - FIG.waist*waist), p[1], p[2]*FIG.torsoD]; }
+  if (k === 'arm'){
+    const bot = 4 - 2*FIG.armLen, y = 4 - (4-p[1])*FIG.armLen, up = clamp((4-y)/Math.max(0.05, 4-FIG.elbow), 0, 1), t = clamp((FIG.elbow-y)/Math.max(0.05, FIG.elbow-bot), 0, 1);
+    return [side*FIG.armX + (p[0]-cx)*FIG.armW + side*(0.05*up + FIG.elbowBend*t*t + 0.06*t), y, p[2]*FIG.armW + FIG.armFwd*t*t + 0.03*t];
+  }
+  const y = FIG.legY + p[1]*(FIG.hip-FIG.legY)/2, kneeY = FIG.legY + FIG.knee*(FIG.hip-FIG.legY), t = clamp((kneeY - y)/Math.max(0.05, kneeY - FIG.legY), 0, 1);
+  return [side*FIG.legX + (p[0]-cx)*FIG.legW, y, p[2]*FIG.legW + FIG.kneeBend*t];
+}
+/* where a body part is moved to on the Figure: the leg height lifts everything above the hips, plus the per-part offsets */
+function figOffset(name){
+  const o = FIG.off, up = FIG.hip - 2, side = /^r|_r/.test(name) ? -1 : 1, mir = v => [v[0]*side, v[1], v[2]];
+  const add = (...vs) => vs.reduce((a, v) => [a[0]+v[0], a[1]+v[1], a[2]+v[2]], [0, 0, 0]);
+  if (name === 'torso') return add(o.torso, [0, up, 0]);
+  if (name === 'head') return add(o.head, o.torso, [0, up, 0]);
+  if (name === 'rarm' || name === 'larm') return add(mir(o.arms), [0, up, 0]);
+  if (name === 'hand_rarm' || name === 'hand_larm') return add(mir(o.arms), mir(o.hands), [0, up, 0]);
+  if (name === 'rleg' || name === 'lleg') return mir(o.legs);
+  return [0, 0, 0];
+}
 const BODY_TYPES = {
   classic: { label:'Classic', round:{} },
+  figure:  { label:'Figure', round:{ torso:0.2, arm:0.24, leg:0.2 }, deform:figureDeform, hands:'sphere', feet:true },
   smooth:  { label:'Smooth', round:{ torso:0.16, arm:0.16, leg:0.14 } },
   brick:   { label:'Brick', round:{ torso:0.05, arm:0.12, leg:0.05 }, deform:brickDeform, hands:true },
   slender: { label:'Slender', round:{ torso:0.08, arm:0.1, leg:0.08 }, deform:slenderDeform },
@@ -1321,6 +1391,27 @@ function partGeo(part, type){
 function boxGeo(part){ return partGeo(part, 'classic'); }
 /* The 3D views' head: a low-poly rounded cylinder (16 sides, soft rounded top and bottom edges) with smooth normals,
    so the light rolls over it and the facets hardly show. Same texture mapping as the cylinder (u around, v top to bottom). */
+/* The Figure body's feet (body/feet.json, made by the Image2LoPol folder's tool/make_feet.py from feet.obj): already in avatar
+   studs, both feet; nails.png is the toenail mask, feet-normal.png the normal map. */
+const FEET = { geo: null, geoL: null, geoR: null, mask: null, nmap: null, p: null, base: 'body/',
+  load(){ return this.p || (this.p = (async () => {
+    const u = f => (window.ASSET ? ASSET(this.base + f) : this.base + f), img = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+    const J = await (await fetch(u('feet.json'))).json(), dec = (s, T) => { const b = atob(s), a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return new T(a.buffer); };
+    const uv = dec(J.uv, Float32Array);
+    [this.mask, this.nmap] = await Promise.all([img(u('nails.png')), img(u('feet-normal.png'))]);
+    this.geo = { p: dec(J.pos, Float32Array), n: dec(J.nrm, Float32Array), t: uv, t2: uv, tu: dec(J.tu, Float32Array), tv: dec(J.tv, Float32Array), i: dec(J.idx, Uint16Array) };
+    this.hullGeo = Object.assign({}, this.geo, { i: J.hullIdx ? dec(J.hullIdx, Uint16Array) : this.geo.i });
+    this.height = J.height || 0.423;
+    // one mesh per foot, centred on its own ankle (x = 0), so each can follow its leg
+    const split = (G, side) => { const map = new Map(), o = { p: [], n: [], t: [], t2: [], tu: [], tv: [], i: [] };
+      for (let t = 0; t < G.i.length; t += 3) { if (Math.sign(G.p[G.i[t]*3]) !== side) continue;
+        for (let k = 0; k < 3; k++) { const v = G.i[t+k]; let j = map.get(v);
+          if (j === undefined) { j = o.p.length / 3; map.set(v, j); o.p.push(G.p[v*3] - side*J.legX, G.p[v*3+1], G.p[v*3+2]); o.n.push(G.n[v*3], G.n[v*3+1], G.n[v*3+2]);
+            o.t.push(G.t[v*2], G.t[v*2+1]); o.t2.push(G.t[v*2], G.t[v*2+1]); o.tu.push(G.tu[v*3], G.tu[v*3+1], G.tu[v*3+2]); o.tv.push(G.tv[v*3], G.tv[v*3+1], G.tv[v*3+2]); }
+          o.i.push(j); } }
+      return o; };
+    this.geoL = split(this.geo, 1); this.geoR = split(this.geo, -1); this.hullL = split(this.hullGeo, 1); this.hullR = split(this.hullGeo, -1);
+    return this; })()); } };
 function roundHeadGeo(H){
   const g = { p:[], n:[], t:[], i:[] }, S = 16, R = H.r * 1.04, h = H.y1 - H.y0, b = Math.min(0.32, h * 0.26), ARC = 5;
   const prof = [];   // [radius, y, normal radial, normal y] from the top centre to the bottom centre
@@ -1379,6 +1470,7 @@ function addCyl(g, c, h, rad, uv){
 // Brick-style C-clip hand hanging under each arm
 function handGeo(part, type){
   const def = BODY_TYPES[type].deform, cx = (part.min[0]+part.max[0])/2;
+  if (BODY_TYPES[type].hands === 'sphere'){ const w = def(part, [cx, 2, 0]), g = { p:[], n:[], t:[], i:[] }; addSphere(g, [w[0], w[1] - FIG.hand*0.62, w[2]], FIG.hand); return g; }
   const w = def ? def(part, [cx, 2, 0]) : [cx, 2, 0];
   const g = { p:[], n:[], t:[], i:[] }, R = 0.19, rr = 0.075, S = 28, T = 12, gap = 1.25;
   const c = [w[0], w[1]-0.32, w[2]+0.04];
@@ -1670,7 +1762,7 @@ function buildPrompt(){
   $('#prompt').value =
 `Add clothing to these two blocky Roblox avatars: ${outfit}.
 
-Both avatars are the same character wearing the same outfit. The left one shows the FRONT and the right one shows the BACK.${LAYOUT === 'exploded' ? ' The right one is an exploded view: its arms, legs and head are pulled slightly apart from the torso so you can see the inner sides of the arms and legs, the sides of the torso and the tops of the legs. Paint the outfit on those inner sides and tops too, and keep every part exactly where it is.' : ''} Paint the clothes flat onto the blocky body like a classic Roblox shirt and pants texture, covering the torso, both arms and both legs. Use realistic fabric textures (real cotton weave, denim, knit, flannel, leather and stitching), the way a photo of real clothes would look.
+Both avatars are the same character wearing the same outfit. The left one shows the FRONT and the right one shows the BACK.${LAYOUT === 'exploded' ? ' The right one is an exploded view: its arms, legs and head are pulled slightly apart from the torso so you can see the inner sides of the arms and legs, the sides of the torso and the tops of the legs. Paint the outfit on those inner sides and tops too, and keep every part exactly where it is.' : ''} Paint the clothes flat onto the blocky body like a classic Roblox shirt and pants texture, covering the torso, both arms and both legs. The pants are just pants: carry them all the way down to the bottom of the legs, and don't paint shoes, socks or bare feet (shoes are separate accessories). Use realistic fabric textures (real cotton weave, denim, knit, flannel, leather and stitching), the way a photo of real clothes would look.
 
 Keep everything else exactly the same: same pose, camera angle, size, position, blocky proportions and plain white background. Don't change the heads, and don't add hair, hats, accessories, shadows or anything that changes the silhouette. Keep the lighting soft and even. Any skin that isn't covered by clothing should keep exactly the same skin color it has now.`;
 }
@@ -2722,6 +2814,7 @@ function faceVisibility(){
 }
 window.__ccs = { faceVisibility, writeFile, outfitFiles, loadOutfit, LIB, refreshLib, useBrowserStorage, makeFolder, sortUnsorted, saveOutfit, bestFolder, tokenize, composites, renderScene, onWhite, refR, refTex, setImage, SNORM, state, extract, demoShirt, demoPants, iou, applyPreset, setSkin, TORSO, RLIMB, LLIMB };
 </script>
+<script type="application/json" id="studio-items">{"accessories": [], "clothing": [], "looks": []}</script>
 <script id="lopol-js">
 /* Image2LoPol 3D viewer + live re-lighting. Used by the per-model preview page and by the Clothing Studio's
    Accessories section. LoPolView(root, D) builds everything inside `root` (a positioned element).
@@ -3677,12 +3770,13 @@ window.LoPolCore = { build, clay, problems, MATERIALS: Object.keys(MATERIALS), H
 (() => {
 const BASE = 'accessories/';
 const $ = s => document.querySelector(s);
+const AS = u => (window.ASSET ? ASSET(u) : u);
 const A = { mode: 'clothing', list: null, tpl: null, view: null, painted: null, preset: 'ps1', busy: false };
 const toastA = m => (window.GRUG && GRUG.toast ? GRUG.toast(m) : console.log(m));
 
 /* ---------- switching between Clothing, Accessories and Outfits ---------- */
 const TITLES = { clothing: ['Classic Clothing Studio', 'AI-dressed avatars → Roblox shirt & pants'], acc: ['Accessory Studio', 'Block-model templates → AI-painted PS1-style 3D accessories'],
-  outfits: ['Outfit Studio', 'Mix and match shirts, pants and accessories on the blocky avatar'] };
+  outfits: ['Character Studio', 'Dress the avatar: body, clothing and accessories, then edit or make new ones'] };
 function setMode(m){
   A.mode = m;
   document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
@@ -3691,10 +3785,23 @@ function setMode(m){
   if (!clothing) [1, 2, 3].forEach(i => { const s = $('#s' + i); if (s) s.hidden = true; });
   if (acc && !A.list) gallery();
   if (window.__outfits) __outfits.show(m === 'outfits');
-  if (clothing && typeof goStep === 'function') goStep(window.state && state.step || 1);
+  if (clothing && typeof goStep === 'function') goStep((typeof state !== 'undefined') && state.step || 1);
   document.querySelector('.brand h1').textContent = TITLES[m][0]; document.querySelector('.brand p').textContent = TITLES[m][1];
-  history.replaceState(null, '', acc ? '#accessories' : m === 'outfits' ? '#outfits' : location.pathname + location.search);
+  navPush();
 }
+/* ---------- the browser's Back and Forward step through the Studio itself (tabs, clothing steps, templates) ---------- */
+const NAV = { restoring: false };
+function navKey(){ if (A.mode === 'acc') return A.tpl && !A.tpl.built ? '#accessories/' + A.tpl.slug : '#accessories'; if (A.mode === 'outfits') return '#outfits';
+  const n = ((typeof state !== 'undefined') && state.step) || 1; return n > 1 ? '#clothing/' + n : ''; }
+function navPush(){ if (NAV.restoring) return; const k = navKey(); if ((location.hash || '') === k) return; history.pushState({ studio: k }, '', k || location.pathname + location.search); }
+async function navTo(h){
+  const [m, x] = (h || '').replace(/^#/, '').split('/');
+  if (m === 'accessories') { setMode('acc'); if (x) { if (!A.list) await gallery(); if (!A.tpl || A.tpl.slug !== x) { if ((A.list || []).some(t => t.slug === x)) await pick(x); } } else if (A.list) showGallery(); }
+  else if (m === 'outfits') setMode('outfits');
+  else { setMode('clothing'); let n = +x || 1; if (n === 3 && !state.built) n = state.img ? 2 : 1; if (n === 2 && !state.img) n = 1; if (typeof goStep === 'function') goStep(n); }
+}
+window.addEventListener('popstate', async () => { NAV.restoring = true; try { await navTo(location.hash); } finally { NAV.restoring = false; } });
+if (typeof window.goStep === 'function') { const go0 = window.goStep; window.goStep = function (n) { const r = go0.apply(this, arguments); if (A.mode === 'clothing') navPush(); return r; }; }
 document.querySelectorAll('#modeSeg button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
 
 /* ---------- step 1: pick a template ---------- */
@@ -3705,11 +3812,11 @@ async function gallery(){
   showGallery();
 }
 function showGallery(){
-  A.view && A.view.destroy(); A.view = null; A.tpl = null; setPhase('pick');
+  A.view && A.view.destroy(); A.view = null; A.tpl = null; A.editing = null; setPhase('pick'); navPush();
   const stage = $('#accStage'); stage.innerHTML = '<div class="lib-grid acc-grid"></div>';
   const g = stage.firstChild;
   A.list.forEach(t => { const c = document.createElement('button'); c.className = 'lib-card';
-    c.innerHTML = `<div class="lib-thumb" style="background-image:url('${BASE}${t.slug}/thumb.png')"></div><b></b><small></small>`;
+    c.innerHTML = `<div class="lib-thumb" style="background-image:url('${AS(BASE + t.slug + '/thumb.png')}')"></div><b></b><small></small>`;
     c.querySelector('b').textContent = t.name; c.querySelector('small').textContent = t.object;
     c.onclick = () => pick(t.slug); g.appendChild(c); });
 }
@@ -3719,7 +3826,7 @@ async function pick(slug){
   catch (e) { toastA("Couldn't load that template"); A.busy = false; return; }
   A.busy = false; A.preset = 'grug';
   $('#accName').textContent = A.tpl.name; $('#accVariant').value = ''; $('#accVariant').placeholder = A.tpl.description;
-  $('#accExample').hidden = !A.tpl.exampleUrl; showReference(); buildPrompt(); setPhase('prompt');
+  $('#accExample').hidden = !A.tpl.exampleUrl; showReference(); buildPrompt(); setPhase('prompt'); navPush();
 }
 function showReference(){
   A.view && A.view.destroy(); A.view = null;
@@ -3776,7 +3883,7 @@ async function run(){
 document.querySelectorAll('#accLook button').forEach(b => b.onclick = () => { A.preset = b.dataset.p; run(); });
 $('#accWear').onclick = async () => { if (!A.view || !window.__outfits) return; const e = await __outfits.addFromView(A.view, A.tpl); setMode('outfits'); await __outfits.show(true); await __outfits.wear(e); toastA('Wearing it. Recolour it on the right.'); };
 
-setTimeout(() => { if (location.hash === '#accessories') setMode('acc'); else if (location.hash === '#outfits') setMode('outfits'); }, 0);
+setTimeout(async () => { NAV.restoring = true; try { if (location.hash) await navTo(location.hash); } finally { NAV.restoring = false; } history.replaceState({ studio: navKey() }, '', navKey() || location.pathname + location.search); }, 0);
 
 /* ---------- Use Claude: the image generator, the hand-off message, and the page API Claude in Chrome drives ---------- */
 const GENS = { gemini: { name: 'Gemini (Nano Banana)', url: 'https://gemini.google.com/app', copy: 'the copy icon above the picture' },
@@ -3863,23 +3970,71 @@ window.AccessoryStudio = {
   async wear(){ $('#accWear').click(); return { ok: !!A.view }; },
   download(kind = 'glb'){ const b = { glb: '.glb', obj: '.objz', texture: '.dtex', normal: '.dnrm' }[kind]; const el = b && document.querySelector('#accStage ' + b); if (!el) return { ok: false }; el.click(); return { ok: true }; },
 };
+
+/* ---------- clothing: the same hand-off for the Clothing tab, and window.ClothingStudio ---------- */
+const CHELP = () => `GRUG CLOTHING STUDIO: HOW CLAUDE MAKES A SHIRT AND PANTS HERE (with Claude in Chrome)
+Two tabs: this Studio (Clothing tab) and the image generator: ${genNow().name}${genNow().url ? ' ' + genNow().url : ''}.
+1. ClothingStudio.describe('<the outfit: shirt and pants, colours, fabrics>') returns the prompt (realistic fabric; the pants are just pants, no shoes).
+2. Click the "Copy reference picture" button (a real click).
+3. Generator tab: new chat, click the prompt box, Ctrl+V (the picture), type the prompt on one line, Enter, wait ~30 s.
+4. Copy the result: ${genNow().copy}.
+5. Studio tab: press Ctrl+V on the page. It lines the picture up by itself (step 2, Align); check it, then ClothingStudio.build().
+6. ClothingStudio.status() says which step it is on; ClothingStudio.wear() dresses the character in it (Character tab).
+Rules: no brand or platform names in prompts; show the person the result.`;
+window.ClothingStudio = {
+  help: CHELP, generator: () => genNow(),
+  describe(text){ setMode('clothing'); $('#outfit').value = text || ''; $('#outfit').dispatchEvent(new Event('input')); return $('#prompt').value.replace(/\n+/g, ' '); },
+  prompt: () => $('#prompt').value.replace(/\n+/g, ' '),
+  status: () => ({ mode: A.mode, step: (typeof state !== 'undefined') ? state.step : null, image: !!((typeof state !== 'undefined') && state.img), built: !!((typeof state !== 'undefined') && state.built) }),
+  build(){ $('#build').click(); return this.status(); },
+  wear(){ $('#clWear').click(); return { ok: !!((typeof state !== 'undefined') && state.shirt) }; },
+};
+$('#clCopyRef').onclick = async () => { try { const blob = await new Promise(r => refWhite.toBlob(r, 'image/png')); await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]); toastA('Reference picture copied'); }
+  catch { toastA("Couldn't copy the picture here: use Download reference"); } };
+$('#clClaude').onclick = async () => { const g = genNow(), want = $('#outfit').value.trim();
+  const t = `Make me a shirt and pants with the Grug Clothing Studio in this tab. ${want ? 'I want: ' + want + '.' : 'Ask me what I want first.'} Paint it with ${g.name}${g.url ? ' (' + g.url + ')' : ''} in another tab. Run ClothingStudio.help() in this tab for the steps.`;
+  $('#clHandoff').value = t; $('#clHandoff').hidden = false; try { await navigator.clipboard.writeText(t); toastA('Copied. Paste it into Claude in Chrome on this tab'); } catch { $('#clHandoff').select(); } };
+$('#clWear').onclick = async () => { if (!(typeof state !== 'undefined') || !state.shirt) return toastA('Build the clothing first');
+  const name = ($('#oName') && $('#oName').value.trim()) || $('#outfit').value.trim().split(/\s+/).slice(0, 4).join(' ') || 'Your clothing';
+  setMode('outfits'); await __outfits.wearClothing(state.shirt, state.pants, name); toastA('Wearing it. Recolour it on the right.'); };
+
+/* ---------- edit something the character wears: open it here with its painting, colours and look ---------- */
+async function editWorn(w, look){
+  setMode('acc');
+  const tpl = w.e.model ? await LoPolCore.build(JSON.parse(JSON.stringify(w.e.model))) : await LoPolBake.load(BASE + w.e.slug + '/');
+  A.tpl = tpl; A.editing = w.e; A.preset = 'grug'; $('#accName').textContent = w.e.name; $('#accVariant').value = w.e.name === tpl.name ? '' : w.e.name; $('#accVariant').placeholder = tpl.description; buildPrompt();
+  const stage = $('#accStage'); A.view && A.view.destroy(); stage.innerHTML = '<div class="acc-view"></div>';
+  A.view = LoPolView(stage.firstChild, w.D, { settings: { colours: w.colours, fx: look.fx, light: look.light, nodes: (w.e.settings || {}).nodes } }); setPhase('result');
+  $('#accMatch span').textContent = 'Editing: change it, then Wear it'; $('#accMatch').classList.remove('warn'); NAV.restoring || history.pushState({ studio: '#accessories/edit' }, '', '#accessories' + (tpl.built ? '' : '/' + tpl.slug));
+}
 const helpBox = document.querySelector('#forClaude pre'); if (helpBox) helpBox.textContent = AccessoryStudio.help() + '\n\n' + AccessoryStudio.modelFormat();
 
-window.__acc = { A, setMode, pick, run };
+window.__acc = { A, setMode, pick, run, editWorn, showGallery, handoff };
 })();
 
 /* Clothing Studio: Outfits. The blocky avatar wearing a shirt, pants and accessories, mixed, matched and recoloured.
    Looks and clothing come from outfits/index.json; accessories are the templates' finished examples plus anything
    painted in the Accessories section this session ("Wear it"). Saved looks live in this browser (IndexedDB 'ccs-library'). */
 (() => {
-const OBASE = 'outfits/', ABASE = 'accessories/';
+const OBASE = 'outfits/', ABASE = 'accessories/', AS = u => (window.ASSET ? ASSET(u) : u);
 const $o = s => document.querySelector(s);
 const toastO = m => (window.GRUG && GRUG.toast ? GRUG.toast(m) : console.log(m));
 const hexO = c => '#' + c.map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0')).join('');
 const unhexO = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const lumO = c => c[0] * .299 + c[1] * .587 + c[2] * .114;
+/* where a spot moves to on the Figure body: worked out from its proportions (FIG), so accessories follow the sliders */
+function slotShift(slot){
+  if (OUT.body !== 'figure') return null;
+  const o = FIG.off, up = FIG.hip - 2, add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+  if (slot === 'lhand' || slot === 'rhand') { const n = slot === 'lhand' ? 'larm' : 'rarm', part = PARTS.find(p => p.name === n), cx = (part.min[0] + part.max[0]) / 2, w = figureDeform(part, [cx, 2, 0]);
+    const c = add([w[0], w[1] - FIG.hand * 0.62, w[2]], figOffset('hand_' + n)); return [c[0] - cx, c[1] - 2, c[2]]; }
+  if (slot === 'back') return [o.torso[0], up + o.torso[1], (1 - FIG.torsoD) * 0.5 + o.torso[2]];
+  if (slot === 'lshoulder' || slot === 'rshoulder') { const sd = slot === 'lshoulder' ? 1 : -1; return [sd * (FIG.armX - 1.5 + o.arms[0]), up + o.arms[1], o.arms[2]]; }
+  if (slot === 'head' || slot === 'face' || slot === 'hair') return figOffset('head');
+  return figOffset('torso');
+}
 const SLOT_NAMES = { head: 'Head', back: 'Back', lhand: 'Left hand', rhand: 'Right hand', lshoulder: 'Left shoulder', rshoulder: 'Right shoulder', face: 'Face', neck: 'Neck', waist: 'Waist', front: 'Front', hair: 'Hair' };
-const OUT = { r: null, raf: 0, yaw: -0.5, pitch: 0.14, dist: 13, spin: true, drag: null, idle: 0, last: 0, ready: false,
+const OUT = { body: 'classic', r: null, raf: 0, yaw: -0.5, pitch: 0.14, dist: 13, spin: true, drag: null, idle: 0, last: 0, ready: false,
   index: null, cloth: null, shirt: null, pants: null, shirtPal: [], pantsPal: [], shirtCols: [], pantsCols: [],
   wardrobe: [], worn: [], tex: {}, comp: null, saved: [],
   look: { fx: Object.assign({}, LoPolTex.FX_DEFAULT), light: Object.assign({}, LoPolTex.LIGHT_DEFAULT), avatarOutline: true, accOutline: true, width: .06 } };
@@ -3920,7 +4075,7 @@ function initRenderer(){
   gr.addColorStop(0, 'rgba(0,0,0,.5)'); gr.addColorStop(.4, 'rgba(0,0,0,.22)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); fx.fillStyle = gr; fx.fillRect(0, 0, 256, 256);
   OUT.tex.floor = r.tex(fc); OUT.headC = cnv(512, 164); OUT.tex.head = r.tex(headTex(skin(), OUT.headC));
   OUT.tex.upper = r.gl.createTexture(); OUT.tex.legs = r.gl.createTexture();
-  OUT.tex.nmap = r.tex(bodyNormalMap('bevel', 'off', 'round')); r.nmapTex = OUT.tex.nmap; r.buildBody('classic', 'round');
+  OUT.tex.nmap = r.tex(bodyNormalMap('bevel', 'off', 'round')); r.nmapTex = OUT.tex.nmap; r.buildBody(OUT.body, 'round'); r.nail = hexRgb($o('#outNail').value);
   cv.addEventListener('pointerdown', e => { OUT.drag = { x: e.clientX, y: e.clientY, yaw: OUT.yaw, pitch: OUT.pitch }; cv.setPointerCapture(e.pointerId); });
   cv.addEventListener('pointermove', e => { if (!OUT.drag) return; OUT.yaw = OUT.drag.yaw + (e.clientX - OUT.drag.x) * .008; OUT.pitch = clamp(OUT.drag.pitch + (e.clientY - OUT.drag.y) * .006, -1.2, 1.35); });
   cv.addEventListener('pointerup', () => { OUT.drag = null; OUT.idle = performance.now(); });
@@ -4001,6 +4156,10 @@ function accMeshes(D, wear, outline){
 async function loadIndex(){
   if (OUT.index) return OUT.index;
   try { OUT.index = await (await fetch(OBASE + 'index.json')).json(); } catch { OUT.index = { clothing: [], looks: [] }; }
+  // items added to this page file itself (the <script id="studio-items"> block: see the notes at the top of the offline build)
+  try { const extra = JSON.parse((document.getElementById('studio-items') || {}).textContent || '{}');
+    (extra.clothing || []).forEach((c, i) => OUT.index.clothing.push(Object.assign({ id: 'file:' + i, name: 'Clothing ' + (i + 1) }, c, { custom: true })));
+    OUT.fileAccs = extra.accessories || []; OUT.fileLooks = extra.looks || []; OUT.index.looks.push(...OUT.fileLooks); } catch (e) { console.warn('studio-items:', e); }
   try { const list = await (await fetch(ABASE + 'index.json')).json();
     list.forEach(t => { if (!OUT.wardrobe.some(w => w.id === 'tpl:' + t.slug)) OUT.wardrobe.push({ id: 'tpl:' + t.slug, slug: t.slug, name: t.name, slot: t.wear || 'back', thumb: ABASE + t.slug + '/thumb.png', example: true }); }); } catch {}
   return OUT.index;
@@ -4043,16 +4202,44 @@ async function setClothing(id, custom){
   const c = custom || (OUT.index.clothing || []).find(x => x.id === id);
   if (!c) { OUT.cloth = null; OUT.shirt = OUT.pants = null; OUT.shirtPal = OUT.pantsPal = []; OUT.shirtCols = []; OUT.pantsCols = []; bodyTextures(); drawClothing(); return; }
   const img = src => new Promise((res, rej) => { if (!src) return res(null); if (src instanceof HTMLCanvasElement) return res(src); const i = new Image(); i.onload = () => { const k = cnv(TW, TH); k.getContext('2d').drawImage(i, 0, 0, TW, TH); res(k); }; i.onerror = rej; i.src = src; });
-  const base = custom ? '' : OBASE;
+  const base = custom || c.custom ? '' : OBASE;
   [OUT.shirt, OUT.pants] = await Promise.all([img(c.shirt && (typeof c.shirt === 'string' ? base + c.shirt : c.shirt)), img(c.pants && (typeof c.pants === 'string' ? base + c.pants : c.pants))]);
   OUT.cloth = c; OUT.shirtPal = OUT.shirt ? palette(OUT.shirt) : []; OUT.pantsPal = OUT.pants ? palette(OUT.pants) : [];
   OUT.shirtCols = OUT.shirtPal.map(() => null); OUT.pantsCols = OUT.pantsPal.map(() => null);
   bodyTextures(); drawClothing();
 }
 
+function setBody(b){
+  OUT.body = BODY_TYPES[b] ? b : 'classic'; if (OUT.r) OUT.r.buildBody(OUT.body, 'round');
+  document.querySelectorAll('#outBody button').forEach(x => x.classList.toggle('on', x.dataset.b === OUT.body)); $o('#outNailRow').hidden = OUT.body !== 'figure'; $o('#outProp').hidden = OUT.body !== 'figure';
+}
+/* ---------- the Figure's proportions: sliders, X / Y / Z offsets, and JSON to copy (to make it the default) ---------- */
+const PROPS = [['Torso', [['torsoW', 'Width', .6, 1.2], ['waist', 'Waist (narrower)', 0, .3], ['waistY', 'Waist height', 2.1, 3.4], ['torsoD', 'Depth', .5, 1.1]]],
+  ['Arms', [['armLen', 'Length', .9, 1.5], ['armW', 'Thickness', .4, 1], ['armX', 'Shoulder spread', 1, 1.6], ['elbow', 'Elbow height', 2, 3.6], ['elbowBend', 'Elbow bend', 0, .4], ['armFwd', 'Forearm forward', -.2, .4], ['hand', 'Hand size', .15, .5]]],
+  ['Legs', [['hip', 'Leg height (hips)', 1.4, 2.8], ['legY', 'Ankle height', .2, .8], ['legW', 'Thickness', .5, 1.1], ['legX', 'Spacing', .3, .7], ['knee', 'Knee position', .2, .8], ['kneeBend', 'Knee bend', -.3, .3]]],
+  ['Feet', [['foot', 'Size', .6, 1.6], ['footFwd', 'Forward', -.3, .4]]]];
+let propPend = 0;
+const propRebuild = () => { if (propPend) return; propPend = requestAnimationFrame(() => { propPend = 0; if (OUT.r && OUT.body === 'figure') OUT.r.buildBody('figure', 'round'); }); };
+function drawProps(){
+  const box = $o('#outPropBody'); box.innerHTML = '';
+  const rng = (label, get, set, mn, mx, st) => { const l = document.createElement('label'); l.className = 'o-rng';
+    l.innerHTML = `<span>${label}<b></b></span><input type="range" min="${mn}" max="${mx}" step="${st}">`; const r = l.querySelector('input'), b = l.querySelector('b');
+    r.value = get(); b.textContent = (+r.value).toFixed(2); r.oninput = () => { set(+r.value); b.textContent = (+r.value).toFixed(2); propRebuild(); }; return l; };
+  PROPS.forEach(([title, rows]) => { const h = document.createElement('div'); h.className = 'o-sub'; h.textContent = title; box.appendChild(h);
+    rows.forEach(([k, label, mn, mx]) => box.appendChild(rng(label, () => FIG[k], v => { FIG[k] = v; }, mn, mx, .01))); });
+  const h = document.createElement('div'); h.className = 'o-sub'; h.textContent = 'X / Y / Z offsets'; box.appendChild(h);
+  Object.keys(FIG.off).forEach(part => { const d = document.createElement('details'); d.className = 'o-off';
+    d.innerHTML = `<summary>${part[0].toUpperCase() + part.slice(1)}<b>${FIG.off[part].map(v => v.toFixed(2)).join(' / ')}</b></summary>`;
+    ['X', 'Y', 'Z'].forEach((ax, i) => d.appendChild(rng(ax + (i === 0 && part !== 'torso' && part !== 'head' ? ' (outward)' : ''), () => FIG.off[part][i], v => { FIG.off[part][i] = v; d.querySelector('summary b').textContent = FIG.off[part].map(q => q.toFixed(2)).join(' / '); }, -.5, .5, .01)));
+    box.appendChild(d); });
+}
+const figJSON = () => JSON.stringify(FIG, (k, v) => typeof v === 'number' ? Math.round(v * 1000) / 1000 : v);
+function setFig(f){ const d = JSON.parse(JSON.stringify(FIG_DEFAULT)); Object.assign(d, f || {}); d.off = Object.assign(JSON.parse(JSON.stringify(FIG_DEFAULT.off)), (f && f.off) || {});
+  Object.keys(FIG).forEach(k => delete FIG[k]); Object.assign(FIG, d); drawProps(); propRebuild(); }
 /* ---------- looks: presets, saved ---------- */
 async function applyLook(L){
   if (L.skin) { $o('#outSkin').value = L.skin; }
+  if (L.figure) setFig(L.figure); if (L.body) setBody(L.body); if (L.nail) { $o('#outNail').value = L.nail; if (OUT.r) OUT.r.nail = hexRgb(L.nail); }
   const custom = L.custom ? { id: 'custom', name: L.custom.name || 'Your clothing', shirt: L.custom.shirt, pants: L.custom.pants } : null;
   await setClothing(L.clothing, custom);
   OUT.shirtCols = matchPal(OUT.shirtPal, L.shirtColours); OUT.pantsCols = matchPal(OUT.pantsPal, L.pantsColours);
@@ -4067,7 +4254,7 @@ async function applyLook(L){
 }
 function currentLook(){
   const name = $o('#outName').value.trim() || 'My look', pairs = (pal, cols) => pal.map((p, i) => cols[i] ? { from: p, to: cols[i] } : null).filter(Boolean);
-  const L = { name, skin: $o('#outSkin').value, clothing: OUT.cloth && OUT.cloth.id !== 'custom' ? OUT.cloth.id : null,
+  const L = { name, skin: $o('#outSkin').value, body: OUT.body, nail: $o('#outNail').value, figure: OUT.body === 'figure' ? JSON.parse(figJSON()) : undefined, clothing: OUT.cloth && OUT.cloth.id !== 'custom' ? OUT.cloth.id : null,
     shirtColours: pairs(OUT.shirtPal, OUT.shirtCols), pantsColours: pairs(OUT.pantsPal, OUT.pantsCols),
     accessories: OUT.worn.map(w => Object.assign({ id: w.e.id, slug: w.e.slug, name: w.e.name, slot: w.slot, colours: w.colours.map(c => c || null) }, w.e.albedo ? { albedo: w.e.albedo, logo: w.e.logo, settings: w.e.settings, thumb: w.e.thumb, model: w.e.model } : {})) };
   if (OUT.cloth && OUT.cloth.id === 'custom') L.custom = { name: OUT.cloth.name, shirt: OUT.shirt && OUT.shirt.toDataURL(), pants: OUT.pants && OUT.pants.toDataURL() };
@@ -4109,20 +4296,30 @@ function swatchRow(label, base, cur, onPick, onReset){
 function drawClothing(){
   const box = $o('#outClothes'); box.innerHTML = '';
   const items = [{ id: null, name: 'None' }].concat(OUT.index ? OUT.index.clothing : []);
-  if (window.state && state.shirt) items.push({ id: 'studio', name: 'From the Clothing tab' });
+  if (OUT.cloth && OUT.cloth.id === 'custom') items.push({ id: 'custom', name: OUT.cloth.name || 'Your clothing', keep: true });
+  else if ((typeof state !== 'undefined') && state.shirt) items.push({ id: 'studio', name: 'From the Clothing tab' });
   items.forEach(c => { const b = document.createElement('button'); b.className = 'o-chip' + ((OUT.cloth ? OUT.cloth.id : null) === c.id || (c.id === 'studio' && OUT.cloth && OUT.cloth.id === 'custom') ? ' on' : '');
-    b.innerHTML = c.thumb ? `<i style="background-image:url('${OBASE + c.thumb}')"></i>${c.name}` : c.name;
-    b.onclick = () => c.id === 'studio' ? setClothing('custom', { id: 'custom', name: $o('#oName') ? $o('#oName').value || 'Your clothing' : 'Your clothing', shirt: state.shirt, pants: state.pants }) : setClothing(c.id);
+    b.innerHTML = c.thumb ? `<i style="background-image:url('${c.thumb.startsWith('data:') ? c.thumb : AS(OBASE + c.thumb)}')"></i>${c.name}` : c.name;
+    b.onclick = () => c.keep ? null : c.id === 'studio' ? setClothing('custom', { id: 'custom', name: $o('#oName') ? $o('#oName').value || 'Your clothing' : 'Your clothing', shirt: state.shirt, pants: state.pants }) : setClothing(c.id);
     box.appendChild(b); });
   const cols = $o('#outClothCols'); cols.innerHTML = '';
   [['Shirt', OUT.shirtPal, OUT.shirtCols], ['Pants', OUT.pantsPal, OUT.pantsCols]].forEach(([nm, pal, arr]) => {
     if (!pal.length) return; const h = document.createElement('div'); h.className = 'o-sub'; h.textContent = nm + ' colours'; cols.appendChild(h);
     pal.forEach((p, i) => cols.appendChild(swatchRow(`${nm} colour ${i + 1}`, p, arr[i], v => { arr[i] = v; bodyTextures(); }, () => { arr[i] = null; bodyTextures(); drawClothing(); }))); });
 }
+async function fileAccessories(){
+  if (OUT.fileDone || !OUT.fileAccs || !OUT.fileAccs.length) return; OUT.fileDone = true;
+  for (const [i, a] of OUT.fileAccs.entries()) {
+    try { const tpl = await LoPolCore.build(JSON.parse(JSON.stringify(a.model))), im = await LoPolTex.loadImg(a.painted), out = await LoPolBake.bake(tpl, im);
+      OUT.wardrobe.push({ id: a.id || 'file:' + i, slug: tpl.slug, name: a.name || tpl.name, slot: (tpl.look.wear && tpl.look.wear.on) || 'back', model: a.model, D: out.D,
+        albedo: out.D.maps.albedo, logo: out.D.maps.logo, settings: { colours: a.colours || [] }, thumb: a.thumb || null, match: out.match });
+    } catch (e) { console.warn('studio-items accessory', i, e); } }
+  drawWardrobe();
+}
 function drawWardrobe(){
   const box = $o('#outAccs'); box.innerHTML = '';
   OUT.wardrobe.forEach(e => { const on = OUT.worn.some(w => w.e.id === e.id), b = document.createElement('button'); b.className = 'lib-card o-acc' + (on ? ' on' : '');
-    b.innerHTML = `<div class="lib-thumb" style="background-image:url('${e.thumb || ''}')"></div><b></b><small>${SLOT_NAMES[e.slot] || ''}${e.example ? '' : ' · yours'}</small>`;
+    b.innerHTML = `<div class="lib-thumb" style="background-image:url('${e.thumb ? (e.thumb.startsWith('data:') ? e.thumb : AS(e.thumb)) : ''}')"></div><b></b><small>${SLOT_NAMES[e.slot] || ''}${e.example ? '' : ' · yours'}</small>`;
     b.querySelector('b').textContent = e.name; b.setAttribute('aria-pressed', on);
     b.onclick = async () => { if (OUT.worn.some(w => w.e.id === e.id)) takeOff(e.id); else { b.disabled = true; try { await wear(e); } catch (err) { console.error(err); toastO("Couldn't load that accessory"); } b.disabled = false; } drawWardrobe(); };
     box.appendChild(b); });
@@ -4130,8 +4327,9 @@ function drawWardrobe(){
 function drawWorn(){
   const box = $o('#outWorn'); box.innerHTML = ''; $o('#outWornCard').hidden = !OUT.worn.length;
   OUT.worn.forEach(w => { const card = document.createElement('div'); card.className = 'o-worn';
-    card.innerHTML = `<div class="o-wh"><b></b><small>${SLOT_NAMES[w.slot] || w.slot}</small><button class="g-btn g-btn--ghost g-btn--sm">Take off</button></div>`;
-    card.querySelector('b').textContent = w.e.name; card.querySelector('button').onclick = () => { takeOff(w.e.id); drawWardrobe(); };
+    card.innerHTML = `<div class="o-wh"><b></b><small>${SLOT_NAMES[w.slot] || w.slot}</small><button class="g-btn g-btn--sm o-ed">Edit</button><button class="g-btn g-btn--ghost g-btn--sm o-off">Take off</button></div>`;
+    card.querySelector('b').textContent = w.e.name; card.querySelector('.o-off').onclick = () => { takeOff(w.e.id); drawWardrobe(); };
+    card.querySelector('.o-ed').onclick = () => __acc.editWorn(w, OUT.look);
     w.T.groups.forEach((g, i) => card.appendChild(swatchRow(g, w.T.means[i].map(Math.round), w.colours[i] && w.colours[i].rgb, v => { w.colours[i] = { rgb: v, amount: 1 }; paint(w); }, () => { w.colours[i] = null; paint(w); drawWorn(); })));
     box.appendChild(card); });
   drawWardrobe();
@@ -4140,7 +4338,7 @@ function drawLooks(){
   const box = $o('#outLooks'); box.innerHTML = '';
   const all = (OUT.index ? OUT.index.looks : []).map(l => ({ l, preset: true })).concat(OUT.saved.map(l => ({ l })));
   all.forEach(({ l, preset }) => { const b = document.createElement('div'); b.className = 'lib-card o-look';
-    b.innerHTML = `<button class="o-lk"><div class="lib-thumb" style="background-image:url('${l.thumb ? (preset ? OBASE + l.thumb : l.thumb) : ''}')"></div><b></b><small>${preset ? 'Example look' : 'Saved in this browser'}</small></button>${preset ? '' : '<button class="o-del" title="Delete this saved look" aria-label="Delete">✕</button>'}`;
+    b.innerHTML = `<button class="o-lk"><div class="lib-thumb" style="background-image:url('${l.thumb ? (preset ? AS(OBASE + l.thumb) : l.thumb) : ''}')"></div><b></b><small>${preset ? 'Example look' : 'Saved in this browser'}</small></button>${preset ? '' : '<button class="o-del" title="Delete this saved look" aria-label="Delete">✕</button>'}`;
     b.querySelector('b').textContent = l.name; b.querySelector('.o-lk').onclick = () => applyLook(l);
     const d = b.querySelector('.o-del'); if (d) d.onclick = async () => { OUT.saved = OUT.saved.filter(s => s !== l); await idb.set('outfits.looks', OUT.saved); drawLooks(); };
     box.appendChild(b); });
@@ -4178,8 +4376,9 @@ function frame(t){
   gl.depthMask(false); r.draw(r.floor, OUT.tex.floor, mv, P, [1, 1, 1], true); gl.depthMask(true);
   r.drawChar(mv, P, { upper: OUT.tex.upper, legs: OUT.tex.legs, head: OUT.tex.head, tint: [1, 1, 1], skin: skin().map(v => v / 255) });
   const sp = r.spec; r.spec = 0;
-  OUT.worn.forEach(w => { r.draw(w.mesh, w.tex, mv, P, [1, 1, 1], false, null, 0);
-    if (w.hull && OUT.look.accOutline) { gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK); r.draw(w.hull, r.white, mv, P, w.hullColor, true); gl.disable(gl.CULL_FACE); } });
+  OUT.worn.forEach(w => { const d = slotShift(w.slot), m = d ? m4mul(mv, m4T(d[0], d[1], d[2])) : mv;
+    r.draw(w.mesh, w.tex, m, P, [1, 1, 1], false, null, 0);
+    if (w.hull && OUT.look.accOutline) { gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK); r.draw(w.hull, r.white, m, P, w.hullColor, true); gl.disable(gl.CULL_FACE); } });
   r.spec = sp;
   OUT.raf = requestAnimationFrame(frame);
 }
@@ -4187,7 +4386,7 @@ async function show(on){
   OUT.on = on; $o('#outfits').hidden = !on;
   if (!on) return;
   initRenderer(); drawLookPanel();
-  if (!OUT.readyP) OUT.readyP = (async () => { await loadIndex(); drawClothing(); drawWardrobe(); await loadSaved(); if (OUT.index.looks && OUT.index.looks[0] && !OUT.worn.length && !OUT.cloth) await applyLook(OUT.index.looks[0]); })();
+  if (!OUT.readyP) OUT.readyP = (async () => { await loadIndex(); fileAccessories(); drawClothing(); drawWardrobe(); await loadSaved(); if (OUT.index.looks && OUT.index.looks[0] && !OUT.worn.length && !OUT.cloth) await applyLook(OUT.index.looks[0]); })();
   await OUT.readyP; drawClothing(); drawWardrobe();
   bodyTextures();
   if (!OUT.raf) { OUT.last = performance.now(); OUT.raf = requestAnimationFrame(frame); }
@@ -4202,12 +4401,31 @@ async function addFromView(view, tpl){
 }
 
 $o('#outSkin').addEventListener('input', () => { bodyTextures(); const s = document.querySelector('#skin'); if (s) { s.value = $o('#outSkin').value; s.dispatchEvent(new Event('input')); } });
+document.querySelectorAll('#outBody button').forEach(b => b.onclick = () => { setBody(b.dataset.b); });
+drawProps();
+$o('#outPropCopy').onclick = async () => { const t = figJSON(); $o('#outPropJson').value = t; try { await navigator.clipboard.writeText(t); toastO('Proportions copied as JSON'); } catch { $o('#outPropJson').select(); } };
+$o('#outPropApply').onclick = () => { try { setFig(JSON.parse($o('#outPropJson').value)); toastO('Proportions applied'); } catch { toastO("That isn't valid JSON"); } };
+$o('#outPropReset').onclick = () => { setFig(FIG_DEFAULT); toastO('Back to the default proportions'); };
+$o('#outNail').addEventListener('input', () => { if (OUT.r) OUT.r.nail = hexRgb($o('#outNail').value); });
+$o('#outClothEdit').onclick = () => {
+  if (!OUT.shirtNow && !OUT.pantsNow) return toastO('Pick some clothing first');
+  const cp = c => { const k = cnv(TW, TH); if (c) k.getContext('2d').drawImage(c, 0, 0); return k; };
+  state.rawShirt = cp(OUT.shirtNow); state.rawPants = cp(OUT.pantsNow); state.built = true; applyFX();
+  if (OUT.cloth && $o('#oName')) $o('#oName').value = OUT.cloth.name || '';
+  __acc.setMode('clothing'); goStep(3); toastO('Editing in the Clothing tab: "Wear it on the character" brings it back');
+};
+$o('#outClothNew').onclick = () => { __acc.setMode('clothing'); goStep(1); };
+$o('#outClothClaude').onclick = () => { __acc.setMode('clothing'); goStep(1); document.querySelector('#clClaude').click(); };
+$o('#outAccNew').onclick = () => { __acc.setMode('acc'); __acc.showGallery(); };
+$o('#outAccClaude').onclick = () => { __acc.setMode('acc'); const c = document.querySelector('#accClaude'); c.scrollIntoView({ block: 'start' }); document.querySelector('#accClaudeGo').click(); };
 $o('#outSave').onclick = saveLook; $o('#outZip').onclick = downloadLook;
 $o('#outSpin').onclick = e => { OUT.spin = !OUT.spin; e.currentTarget.classList.toggle('on', OUT.spin); };
 $o('#outShirtFile').onchange = async e => { const f = e.target.files[0]; if (!f) return; const url = URL.createObjectURL(f); await setClothing('custom', { id: 'custom', name: f.name.replace(/\.[^.]+$/, ''), shirt: url, pants: OUT.pants }); e.target.value = ''; };
 $o('#outPantsFile').onchange = async e => { const f = e.target.files[0]; if (!f) return; const url = URL.createObjectURL(f); await setClothing('custom', { id: 'custom', name: f.name.replace(/\.[^.]+$/, ''), shirt: OUT.shirt, pants: url }); e.target.value = ''; };
 
-window.__outfits = { OUT, show, wear, takeOff, applyLook, currentLook, addFromView, setClothing, saveLook };
+async function wearClothing(shirt, pants, name){ await show(true); const cp = c => { if (!c) return null; const k = cnv(TW, TH); k.getContext('2d').drawImage(c, 0, 0); return k; };
+  await setClothing('custom', { id: 'custom', name: name || 'Your clothing', shirt: cp(shirt), pants: cp(pants) }); }
+window.__outfits = { OUT, show, wear, takeOff, applyLook, currentLook, addFromView, setClothing, saveLook, wearClothing, setBody };
 })();
 
 </script>

@@ -1,5 +1,5 @@
 {
- "v": "50fedbc78a4c",
+ "v": "fb592a87a2e2",
  "apps": {
   "grug": [
    "grug",
@@ -477,17 +477,20 @@
     "/make/clothing/accessories/lantern/template.json": "f4df3dc95c",
     "/make/clothing/accessories/lantern/texmap.bin": "31c792cb66",
     "/make/clothing/accessories/lantern/thumb.png": "d2ddc2c720",
-    "/make/clothing/": "6a82678cb2",
+    "/make/clothing/body/feet-normal.png": "481945ea4f",
+    "/make/clothing/body/feet.json": "5c6219bf2c",
+    "/make/clothing/body/nails.png": "8df1f89d50",
+    "/make/clothing/": "fa8641d8b0",
     "/make/clothing/outfits/index.json": "ca4db367e8",
-    "/make/clothing/outfits/looks/night-rider.jpg": "b49ae8f3fb",
-    "/make/clothing/outfits/looks/rustic.jpg": "0e1a9bbb73",
-    "/make/clothing/outfits/looks/weekend.jpg": "e350ce6d42",
+    "/make/clothing/outfits/looks/night-rider.jpg": "ed50553262",
+    "/make/clothing/outfits/looks/rustic.jpg": "e00a5f2025",
+    "/make/clothing/outfits/looks/weekend.jpg": "7cb23f057c",
     "/make/clothing/outfits/rustic/chip.png": "f7708968f9",
-    "/make/clothing/outfits/rustic/pants.png": "9fe0afecc8",
-    "/make/clothing/outfits/rustic/shirt.png": "5b889cd785",
+    "/make/clothing/outfits/rustic/pants.png": "c0f1133659",
+    "/make/clothing/outfits/rustic/shirt.png": "b7404b8a98",
     "/make/clothing/outfits/weekend/chip.png": "2f5796c901",
-    "/make/clothing/outfits/weekend/pants.png": "b6617c6969",
-    "/make/clothing/outfits/weekend/shirt.png": "0e3dca64e5",
+    "/make/clothing/outfits/weekend/pants.png": "93db6b62e5",
+    "/make/clothing/outfits/weekend/shirt.png": "227d39f19c",
     "/make/": "c8b93142a9",
     "/me/cards/": "bc7189095b",
     "/me/": "ace48c1b35",
@@ -502,7 +505,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 52875241
+   "bytes": 53484340
   },
   "daypart": {
    "title": "Daypart",
