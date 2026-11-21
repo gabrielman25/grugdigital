@@ -225,6 +225,17 @@ everyone in its own (classic) clothes, so it builds them with the runtime's **ba
 hair, and each model's random catalog body, face and hair (`makeOne`). Every game that builds the player from
 `grug.sandy.v1` gets it with no change; check one after changing the runtime (dress her in `avatar/`, open a game).
 
+## The Clothing Studio and its Accessories (`make/clothing/`)
+
+Make → Clothing Studio. **Clothing** turns an AI-dressed blocky avatar into classic shirt + pants templates. **Accessories**
+(`#accessories`) paints block-model templates (backpack, handbag, cowboy hat, boombox, lantern…) from an image model's
+picture, in the browser, and gives a PS1-style 3D model (GLB / OBJ zip / texture / normal map) with baked AO, room light,
+light nodes, path-traced bounce, material normal maps, an inverted-hull outline and a "hand-made" wobble.
+The page is one file built outside this repo (the owner's Image2LoPol folder: `tool/inline_studio.py` puts the
+Accessories section in, then it is copied here with a Back to Make button). The templates in `make/clothing/accessories/`
+(`index.json` + one folder each) are made by that folder's `python3 tool/lopol.py template items/<slug> <dir>`; never edit them
+by hand. They are an offline companion of the page in `tools/pwa/build.py`.
+
 ## Contact us (`assets/contact.js`)
 
 Grug Digital's own contact details (Discord, Instagram, text number, email) live in `GRUG_CONTACT` at the top of

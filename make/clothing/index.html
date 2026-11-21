@@ -401,6 +401,16 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
   .steps-mini li{margin:.3rem 0}
   .steps-mini b{color:var(--g-text-2)}
 </style>
+<style id="acc-css">
+  .modes button.on{background:var(--g-accent);color:var(--g-on-accent)}
+  #accStage{position:relative;height:min(74vh,760px);border-radius:var(--g-r-lg);overflow:hidden;background:var(--g-bg-2)}
+  #accStage .acc-grid{position:absolute;inset:0;padding:var(--g-s-4);overflow:auto}
+  #accStage .acc-ref{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
+  #accStage .acc-view{position:absolute;inset:0}
+  #accStage .acc-empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--g-muted);text-align:center;padding:var(--g-s-5)}
+  #accMatch.warn{background:var(--g-yellow,#FFBE1A);color:var(--g-ink)}
+  #accPrompt{min-height:9rem}
+</style>
 </head>
 <body class="g-root">
 <header class="top">
@@ -410,6 +420,7 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
     <div><h1>Classic Clothing Studio</h1><p>AI-dressed avatars → Roblox shirt &amp; pants</p></div>
   </div>
   <div class="top-r">
+  <nav class="g-seg modes" id="modeSeg"><button data-mode="clothing" class="on">Clothing</button><button data-mode="acc">Accessories</button></nav>
   <nav class="steps g-seg">
     <button class="pill active" data-step="1"><b>1</b>Reference</button>
     <button class="pill" data-step="2" disabled><b>2</b>Align</button>
@@ -569,6 +580,44 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
       </div>
     </aside>
   </section>
+<!-- ACCESSORIES -->
+  <section id="acc" class="step" hidden>
+    <div class="g-card stage"><div id="accStage"></div></div>
+    <aside class="side">
+      <div class="g-card card" data-phase="pick">
+        <h2 class="ttl"><span class="n">1</span>Pick a template</h2>
+        <p class="sub">Each template is a simple block model. An image model paints it in any style you describe, and the Studio turns the picture into a textured low-poly 3D model.</p>
+      </div>
+      <div class="g-card card" data-phase="prompt result" hidden>
+        <h2 class="ttl"><span class="n">1</span><span id="accName"></span></h2>
+        <div class="row"><button id="accRef" class="g-btn g-btn--primary"><i data-g-icon="arrow_down_to_line"></i>Reference</button><button id="accChange" class="g-btn g-btn--ghost">Change template</button></div>
+      </div>
+      <div class="g-card card" data-phase="prompt" hidden>
+        <h2 class="ttl"><span class="n">2</span>Describe your variant</h2>
+        <label class="g-field-label" for="accVariant">Make it look like</label>
+        <input id="accVariant" class="g-input" type="text">
+        <label class="chk"><input type="checkbox" class="g-switch" id="accPhoto">I'm also attaching a photo of the real thing</label>
+        <textarea id="accPrompt" class="g-input" readonly></textarea>
+        <button id="accCopy" class="g-btn full"><i data-g-icon="clipboard"></i>Copy prompt</button>
+        <p class="tiny">Send the reference (and your photo, if you have one) with this prompt to Gemini (Nano Banana) or another image editor.</p>
+      </div>
+      <div class="g-card card" data-phase="prompt" hidden>
+        <h2 class="ttl"><span class="n">3</span>Bring the result back</h2>
+        <div id="accDrop" class="drop"><i data-g-icon="image"></i><strong>Drop the painted image</strong>or paste (Ctrl/⌘ V), or click to choose</div>
+        <button id="accExample" class="g-btn g-btn--ghost full"><i data-g-icon="magic_wand"></i>Try the example painting</button>
+        <input type="file" id="accFile" accept="image/*" hidden>
+      </div>
+      <div class="g-card card" data-phase="result" hidden>
+        <h2 class="ttl"><i data-g-icon="eye"></i>Your accessory</h2>
+        <div id="accMatch" class="g-pill badge"><i></i><span>—</span></div>
+        <p class="sub">Drag to turn it. The panel on the right of the preview bakes lighting into the texture: ambient occlusion, room light, surface detail, light nodes and path-traced bounce light. Outline and Hand-made are in the bottom bar.</p>
+        <label class="g-field-label">Retro look</label>
+        <div class="g-seg full" id="accLook"><button data-p="ps1">PS1</button><button data-p="n64">N64</button><button data-p="16bit">16-bit</button><button data-p="clean">Clean</button></div>
+        <div class="row" style="margin-top:var(--g-s-3)"><button id="accAgain" class="g-btn"><i data-g-icon="arrow_left"></i>Paint another</button><button id="accChange2" class="g-btn g-btn--ghost">Other template</button></div>
+      </div>
+    </aside>
+  </section>
+<!-- /ACCESSORIES -->
 </main>
 <input type="file" id="file" accept="image/*" hidden>
 <div id="libModal" class="lib-modal" hidden>
@@ -2548,6 +2597,647 @@ function faceVisibility(){
   return out;
 }
 window.__ccs = { faceVisibility, writeFile, outfitFiles, loadOutfit, LIB, refreshLib, useBrowserStorage, makeFolder, sortUnsorted, saveOutfit, bestFolder, tokenize, composites, renderScene, onWhite, refR, refTex, setImage, SNORM, state, extract, demoShirt, demoPants, iou, applyPreset, setSkin, TORSO, RLIMB, LLIMB };
+</script>
+<script id="lopol-js">
+/* Image2LoPol 3D viewer + live re-lighting. Used by the per-model preview page and by the Clothing Studio's
+   Accessories section. LoPolView(root, D) builds everything inside `root` (a positioned element).
+   D: { name, pos, nrm, uv, tan (base64 Float32), radius, tex (data URL of the finished texture),
+        maps: { albedo, ao, room, lights, emit, logo, detail, normal, bounce? } (data URLs),
+        look: { light:{ao,room,lights,detail,bounce}, fx:{bits,dither,palette}, nodes:[{pos,color,strength,range}],
+                grid:{res,mask,P,N,blockers,eps,centre}, outline:{on,width,color} } }
+   Everything a slider changes is re-baked into the texture on the CPU with the same maths as tool/lopol.py. */
+(function () {
+'use strict';
+const f32 = s => { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return new Float32Array(u.buffer); };
+const u8 = s => { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
+const hex = c => '#' + c.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+const unhex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const loadImg = src => new Promise((r, j) => { const i = new Image(); i.onload = () => r(i); i.onerror = j; i.src = src; });
+const pixels = (im, n) => { const c = document.createElement('canvas'); c.width = c.height = n; const x = c.getContext('2d'); x.drawImage(im, 0, 0, n, n); return x.getImageData(0, 0, n, n).data; };
+const BAY = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+
+/* ---------- ray tests against the model's own triangles (flat Float32 array of 9 per triangle) ---------- */
+function anyHit(ox, oy, oz, dx, dy, dz, tmax, T, eps){
+  for (let i = 0; i < T.length; i += 9) {
+    const ax = T[i], ay = T[i+1], az = T[i+2], e1x = T[i+3]-ax, e1y = T[i+4]-ay, e1z = T[i+5]-az, e2x = T[i+6]-ax, e2y = T[i+7]-ay, e2z = T[i+8]-az;
+    const px = dy*e2z - dz*e2y, py = dz*e2x - dx*e2z, pz = dx*e2y - dy*e2x, det = e1x*px + e1y*py + e1z*pz;
+    if (det > -1e-12 && det < 1e-12) continue;
+    const inv = 1 / det, sx = ox-ax, sy = oy-ay, sz = oz-az, u = (sx*px + sy*py + sz*pz) * inv; if (u < 0 || u > 1) continue;
+    const qx = sy*e1z - sz*e1y, qy = sz*e1x - sx*e1z, qz = sx*e1y - sy*e1x, v = (dx*qx + dy*qy + dz*qz) * inv; if (v < 0 || u + v > 1) continue;
+    const t = (e2x*qx + e2y*qy + e2z*qz) * inv; if (t > eps && t < tmax) return true;
+  }
+  return false;
+}
+function nearest(ox, oy, oz, dx, dy, dz, T, eps, out){
+  let best = Infinity, bi = -1, bu = 0, bv = 0;
+  for (let i = 0, k = 0; i < T.length; i += 9, k++) {
+    const ax = T[i], ay = T[i+1], az = T[i+2], e1x = T[i+3]-ax, e1y = T[i+4]-ay, e1z = T[i+5]-az, e2x = T[i+6]-ax, e2y = T[i+7]-ay, e2z = T[i+8]-az;
+    const px = dy*e2z - dz*e2y, py = dz*e2x - dx*e2z, pz = dx*e2y - dy*e2x, det = e1x*px + e1y*py + e1z*pz;
+    if (det > -1e-12 && det < 1e-12) continue;
+    const inv = 1 / det, sx = ox-ax, sy = oy-ay, sz = oz-az, u = (sx*px + sy*py + sz*pz) * inv; if (u < 0 || u > 1) continue;
+    const qx = sy*e1z - sz*e1y, qy = sz*e1x - sx*e1z, qz = sx*e1y - sy*e1x, v = (dx*qx + dy*qy + dz*qz) * inv; if (v < 0 || u + v > 1) continue;
+    const t = (e2x*qx + e2y*qy + e2z*qz) * inv; if (t > eps && t < best) { best = t; bi = k; bu = u; bv = v; }
+  }
+  out[0] = bi; out[1] = bu; out[2] = bv; return bi;
+}
+/* fill the empty grid cells next to used ones (4 passes), like the Python bake */
+function spread(m, maps, r){
+  const f = m.slice();
+  for (let it = 0; it < 4; it++) {
+    const nf = f.slice();
+    for (let y = 0; y < r; y++) for (let x = 0; x < r; x++) {
+      const i = y*r + x; if (f[i]) continue; let c = 0; const nb = [];
+      for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) { const xx = (x - dx + r) % r, yy = (y - dy + r) % r, j = yy*r + xx; if (f[j]) { c++; nb.push(j); } }
+      if (!c) continue; nf[i] = 1;
+      for (const mp of maps) for (let k = 0; k < 3; k++) { let s = 0; for (const j of nb) s += mp[j*3+k]; mp[i*3+k] = s / c; }
+    }
+    f.set(nf);
+  }
+}
+/* bilinear upsample r -> n (pixel centres, edges clamped: same as Pillow) of a 3-channel float map */
+function upsample(src, r, n){
+  const out = new Float32Array(n*n*3), k = r / n;
+  for (let y = 0; y < n; y++) { let sy = (y + .5) * k - .5; sy = Math.max(0, Math.min(r - 1, sy)); const y0 = Math.floor(sy), y1 = Math.min(r - 1, y0 + 1), fy = sy - y0;
+    for (let x = 0; x < n; x++) { let sx = (x + .5) * k - .5; sx = Math.max(0, Math.min(r - 1, sx)); const x0 = Math.floor(sx), x1 = Math.min(r - 1, x0 + 1), fx = sx - x0;
+      for (let c = 0; c < 3; c++) { const a = src[(y0*r+x0)*3+c], b = src[(y0*r+x1)*3+c], d = src[(y1*r+x0)*3+c], e = src[(y1*r+x1)*3+c];
+        out[(y*n+x)*3+c] = (a*(1-fx) + b*fx)*(1-fy) + (d*(1-fx) + e*fx)*fy; } } }
+  return out;
+}
+
+/* ---------- tiny store-only zip ---------- */
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function zip(files){
+  const parts = [], dir = []; let off = 0;
+  for (const f of files) {
+    const name = new TextEncoder().encode(f.name), data = f.data; let c = 0xFFFFFFFF; for (let i = 0; i < data.length; i++) c = CRC[(c ^ data[i]) & 255] ^ (c >>> 8); c = (c ^ 0xFFFFFFFF) >>> 0;
+    const h = new DataView(new ArrayBuffer(30)); h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint32(14, c, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, name.length, true);
+    parts.push(new Uint8Array(h.buffer), name, data);
+    const d = new DataView(new ArrayBuffer(46)); d.setUint32(0, 0x02014b50, true); d.setUint16(4, 20, true); d.setUint16(6, 20, true); d.setUint32(16, c, true); d.setUint32(20, data.length, true); d.setUint32(24, data.length, true); d.setUint16(28, name.length, true); d.setUint32(42, off, true);
+    dir.push(new Uint8Array(d.buffer), name); off += 30 + name.length + data.length;
+  }
+  const dsz = dir.reduce((s, a) => s + a.length, 0), e = new DataView(new ArrayBuffer(22)); e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, dsz, true); e.setUint32(16, off, true);
+  return new Blob([...parts, ...dir, new Uint8Array(e.buffer)], { type: 'application/zip' });
+}
+
+const CSS = `
+.lpv{position:absolute;inset:0;overflow:hidden;color:#ECECEF;font:600 13px/1.3 var(--g-font, system-ui,-apple-system,'Segoe UI',sans-serif)}
+.lpv canvas.v{position:absolute;inset:0;width:100%;height:100%;cursor:grab;touch-action:none}
+.lpv canvas.v.lo{image-rendering:pixelated}
+.lpv .bar{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:3px;background:#232327;padding:4px;border-radius:12px;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 20px)}
+.lpv button{all:unset;cursor:pointer;padding:6px 10px;border-radius:9px;color:#C9C9CF;font-size:12px}
+.lpv button.on{background:#9BE338;color:#1F1A17}
+.lpv button[hidden],.lpv [hidden]{display:none!important}
+.lpv button:focus-visible{outline:2px solid #9BE338}
+.lpv .side{position:absolute;right:10px;top:10px;bottom:62px;width:228px;background:#232327;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:7px;overflow:auto}
+.lpv .side h4{margin:4px 0 0;font-size:12px;color:#C9C9CF;display:flex;justify-content:space-between;align-items:center}
+.lpv .side label{display:flex;flex-direction:column;gap:2px;font-size:11px;color:#9A9AA3;font-weight:500}
+.lpv .side input[type=range]{width:100%;accent-color:#9BE338;margin:0}
+.lpv .row{display:flex;gap:5px;align-items:center}
+.lpv .act{background:#9BE338;color:#1F1A17;text-align:center;flex:1;padding:6px 4px}
+.lpv .ghost{background:#2C2C32;text-align:center;flex:1;padding:6px 4px}
+.lpv .node{background:#1A1A1E;border-radius:9px;padding:6px 7px;display:flex;flex-direction:column;gap:3px}
+.lpv .node .row input[type=color]{width:26px;height:22px;border:0;padding:0;background:none;cursor:pointer}
+.lpv .node .x{padding:2px 7px;color:#9A9AA3}
+.lpv .msg{font-size:11px;color:#9A9AA3;font-weight:500;min-height:14px}
+@media (max-width:700px){ .lpv .side{top:auto;bottom:62px;height:44%;left:10px;right:10px;width:auto} }`;
+
+window.LoPolView = function LoPolView(root, D, opts = {}){
+  if (!document.getElementById('lpv-css')) { const st = document.createElement('style'); st.id = 'lpv-css'; st.textContent = CSS; document.head.appendChild(st); }
+  root.classList.add('lpv'); root.innerHTML = '';
+  const cv = document.createElement('canvas'); cv.className = 'v'; root.appendChild(cv);
+  const gl = cv.getContext('webgl', { antialias: false, preserveDrawingBuffer: false });
+  const pos = f32(D.pos), nrm = f32(D.nrm), uv = f32(D.uv), tan = D.tan ? f32(D.tan) : null, NV = pos.length / 3;
+  const look = D.look || {}, L = Object.assign({ ao: .8, room: .6, lights: 1, detail: .7, bounce: 0 }, look.light || {});
+  const O = { ps1: true, nearest: true, light: true, spin: true, wobble: false, outline: !!(look.outline && look.outline.on) };
+  const OL = Object.assign({ width: .02, color: [22, 18, 16] }, look.outline || {});
+  const nodes = (look.nodes || []).map(n => ({ pos: n.pos.slice(), color: (n.color || [255, 255, 255]).slice(), strength: n.strength ?? 1, range: n.range ?? 3 }));
+  const ctr = (look.grid && look.grid.centre) || [0, 0, 0];
+
+  /* ---------- GL ---------- */
+  const VS = `attribute vec3 p; attribute vec3 n; attribute vec2 t; attribute vec4 g; uniform mat4 M, P; uniform float snap, aff; uniform vec2 res;
+  varying vec3 vt; varying vec3 vN; varying vec3 vT; varying vec3 vB;
+  void main(){ vec4 c = P * M * vec4(p,1.); if (snap > 0.) { vec2 h = res * .5; c.xy = floor(c.xy / c.w * h + .5) / h * c.w; }
+    gl_Position = c; float w = aff > 0. ? c.w : 1.; vt = vec3(t * w, w);
+    vN = normalize((M * vec4(n,0.)).xyz); vT = normalize((M * vec4(g.xyz,0.)).xyz); vB = cross(vN, vT) * g.w; }`;
+  const FS = `precision mediump float; uniform sampler2D tx, nm; uniform float lit, useNM, dith; uniform vec3 L;
+  varying vec3 vt; varying vec3 vN; varying vec3 vT; varying vec3 vB;
+  float bayer(vec2 f){ int x = int(mod(f.x,4.)), y = int(mod(f.y,4.)); int i = x + y*4;
+    if(i==0)return 0.;if(i==1)return 8.;if(i==2)return 2.;if(i==3)return 10.;if(i==4)return 12.;if(i==5)return 4.;if(i==6)return 14.;if(i==7)return 6.;
+    if(i==8)return 3.;if(i==9)return 11.;if(i==10)return 1.;if(i==11)return 9.;if(i==12)return 15.;if(i==13)return 7.;if(i==14)return 13.;return 5.; }
+  void main(){ vec2 u = vt.xy / vt.z; vec3 c = texture2D(tx, u).rgb;
+    if (lit > 0.) { vec3 n = vN; if (useNM > 0.) { vec3 m = texture2D(nm, u).xyz * 2. - 1.; n = normalize(vT * m.x + vB * m.y + vN * m.z); }
+      c *= .55 + .6 * max(dot(n, L), 0.); }
+    if (dith > 0.) { c += (bayer(gl_FragCoord.xy) / 16. - .47) / 31.; c = floor(c * 31. + .5) / 31.; }
+    gl_FragColor = vec4(c, 1.); }`;
+  const SVS = `attribute vec3 p; uniform mat4 M, P; uniform float snap, ps; uniform vec2 res; void main(){ vec4 c = P * M * vec4(p,1.);
+    if (snap > 0.) { vec2 h = res * .5; c.xy = floor(c.xy / c.w * h + .5) / h * c.w; } gl_Position = c; gl_PointSize = ps; }`;
+  const SFS = `precision mediump float; uniform vec3 col; uniform float pt; void main(){ if (pt > 0.) { vec2 d = gl_PointCoord - .5; if (dot(d,d) > .25) discard; } gl_FragColor = vec4(col, 1.); }`;
+  function prog(vs, fs){ const p = gl.createProgram(); for (const [t, s] of [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]]) { const sh = gl.createShader(t); gl.shaderSource(sh, s); gl.compileShader(sh); if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(sh); gl.attachShader(p, sh); } gl.linkProgram(p); return p; }
+  const pr = prog(VS, FS), ps = prog(SVS, SFS);
+  const mk = () => gl.createBuffer(); const bP = mk(), bN = mk(), bT = mk(), bG = mk(), bH = mk(), bL = mk();
+  const put = (b, a) => { gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, a, gl.DYNAMIC_DRAW); };
+  const tanF = tan || new Float32Array(NV * 4).map((_, i) => i % 4 === 3 ? 1 : i % 4 === 0 ? 1 : 0);
+  put(bT, uv); put(bG, tanF);
+  const att = (p, b, name, k) => { const l = gl.getAttribLocation(p, name); if (l < 0) return; gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, k, gl.FLOAT, false, 0, 0); };
+  const U = (p, n) => gl.getUniformLocation(p, n);
+  const texC = gl.createTexture(), texN = gl.createTexture();
+  function upload(t, src, near){ gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, src);
+    for (const k of [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T]) gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE);
+    const f = near ? gl.NEAREST : gl.LINEAR; gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, f); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, f); }
+  let texSrc = null, nrmSrc = null, hasNM = false;
+
+  /* ---------- geometry: hand-made wobble and the outline hull ---------- */
+  let seed = 1, curPos = pos, curNrm = nrm, hull = null;
+  function hash(x, y, z, s){ let h = Math.imul(x, 73856093) ^ Math.imul(y, 19349663) ^ Math.imul(z, 83492791) ^ Math.imul(s, 2654435761); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296 - .5; }
+  function flatNormals(P){ const N = new Float32Array(P.length);
+    for (let i = 0; i < P.length; i += 9) { const ux = P[i+3]-P[i], uy = P[i+4]-P[i+1], uz = P[i+5]-P[i+2], vx = P[i+6]-P[i], vy = P[i+7]-P[i+1], vz = P[i+8]-P[i+2];
+      let nx = uy*vz - uz*vy, ny = uz*vx - ux*vz, nz = ux*vy - uy*vx; const l = Math.hypot(nx, ny, nz) || 1; for (let k = 0; k < 9; k += 3) { N[i+k] = nx/l; N[i+k+1] = ny/l; N[i+k+2] = nz/l; } } return N; }
+  function geometry(){
+    if (O.wobble) { const a = D.radius * .035, q = 1e4, P = new Float32Array(pos.length);
+      for (let i = 0; i < pos.length; i += 3) { const x = Math.round(pos[i]*q), y = Math.round(pos[i+1]*q), z = Math.round(pos[i+2]*q);
+        P[i] = pos[i] + a*hash(x,y,z,seed*3+1); P[i+1] = pos[i+1] + a*hash(x,y,z,seed*3+2); P[i+2] = pos[i+2] + a*hash(x,y,z,seed*3+3); }
+      curPos = P; curNrm = flatNormals(P); } else { curPos = pos; curNrm = nrm; }
+    put(bP, curPos); put(bN, curNrm); buildHull();
+  }
+  function buildHull(){
+    const P = curPos, q = 1e4, key = new Map(), acc = [], idx = new Int32Array(NV);
+    for (let v = 0; v < NV; v++) { const k = Math.round(P[v*3]*q) + ',' + Math.round(P[v*3+1]*q) + ',' + Math.round(P[v*3+2]*q); let j = key.get(k); if (j === undefined) { j = acc.length; key.set(k, j); acc.push([0, 0, 0]); } idx[v] = j; }
+    for (let i = 0; i < P.length; i += 9) { const ux = P[i+3]-P[i], uy = P[i+4]-P[i+1], uz = P[i+5]-P[i+2], vx = P[i+6]-P[i], vy = P[i+7]-P[i+1], vz = P[i+8]-P[i+2];
+      const nx = uy*vz - uz*vy, ny = uz*vx - ux*vz, nz = ux*vy - uy*vx; for (let k = 0; k < 3; k++) { const a = acc[idx[i/3+k]]; a[0] += nx; a[1] += ny; a[2] += nz; } }
+    const w = OL.width * D.radius * 2, H = new Float32Array(P.length);
+    for (let t = 0; t < NV; t += 3) for (const [k, s] of [[0, 0], [1, 2], [2, 1]]) { const a = acc[idx[t+s]], l = Math.hypot(a[0], a[1], a[2]) || 1; for (let c = 0; c < 3; c++) H[(t+k)*3+c] = P[(t+s)*3+c] + a[c]/l*w; }
+    hull = H; put(bH, H);
+  }
+
+  /* ---------- UI ---------- */
+  const bar = document.createElement('div'); bar.className = 'bar';
+  bar.innerHTML = `<button data-k="ps1" class="on">PS1 look</button><button data-k="nearest" class="on">Pixel texture</button><button data-k="light" class="on">Lighting</button>
+    <button data-k="spin" class="on">Turn</button><button data-k="wobble" title="Nudge every corner a little for a hand-made look">Hand-made</button><button class="rr" hidden>Reroll</button>
+    <button data-k="outline" title="An inverted-hull outline, like Roblox items">Outline</button>`;
+  root.appendChild(bar);
+  const side = document.createElement('div'); side.className = 'side'; root.appendChild(side);
+  const sl = (key, label, max) => `<label>${label}<input type="range" data-l="${key}" min="0" max="${max}" step="0.01"></label>`;
+  side.innerHTML = `<h4>Baked lighting</h4>${sl('ao', 'Ambient occlusion', 1)}${sl('room', 'Room light', 1)}${sl('detail', 'Surface detail (normal map)', 1.5)}${sl('lights', 'Light nodes', 2)}
+    <div class="bounceRow" ${D.maps && D.maps.bounce ? '' : 'hidden'}>${sl('bounce', 'Bounce light (path traced)', 1.5)}</div>
+    <div class="row"><button class="ghost pt">Path-trace bounce light</button></div><div class="msg"></div>
+    <h4>Light nodes <button class="ghost add" style="flex:none;padding:3px 8px">+ Add</button></h4><div class="nodes"></div>
+    <div class="olRow" hidden><h4>Outline</h4><label>Width<input type="range" class="olw" min="0.004" max="0.06" step="0.001"></label><div class="row">Colour <input type="color" class="olc"></div></div>
+    <h4>Download</h4><div class="row"><button class="act glb">Model .glb</button><button class="act objz">.obj zip</button></div>
+    <div class="row"><button class="ghost dtex">Texture</button><button class="ghost dnrm">Normal map</button></div>`;
+  const $ = s => root.querySelector(s), msg = t => ($('.msg').textContent = t);
+  side.querySelectorAll('input[data-l]').forEach(el => { el.value = L[el.dataset.l]; el.oninput = () => { L[el.dataset.l] = +el.value; schedule(); }; });
+  $('.olw').value = OL.width; $('.olc').value = hex(OL.color);
+  $('.olw').oninput = e => { OL.width = +e.target.value; buildHull(); }; $('.olc').oninput = e => { OL.color = unhex(e.target.value); };
+  bar.querySelectorAll('button[data-k]').forEach(b => { b.classList.toggle('on', !!O[b.dataset.k]); b.onclick = () => { const k = b.dataset.k; O[k] = !O[k]; b.classList.toggle('on', O[k]);
+    if (k === 'nearest' && texSrc) upload(texC, texSrc, O.nearest);
+    if (k === 'wobble') { bar.querySelector('.rr').hidden = !O.wobble; geometry(); }
+    if (k === 'outline') $('.olRow').hidden = !O.outline; }; });
+  $('.olRow').hidden = !O.outline;
+  bar.querySelector('.rr').onclick = () => { seed++; geometry(); };
+  if (!D.maps) side.querySelectorAll('h4:first-child,label,.row,.nodes,.msg,.bounceRow').forEach(e => { if (!e.closest('.olRow') && !e.querySelector('.glb,.objz,.dtex')) e.hidden = true; });
+  const range = D.radius * 1.4;
+  function drawNodes(){
+    const box = $('.nodes'); box.innerHTML = '';
+    nodes.forEach((n, i) => { const el = document.createElement('div'); el.className = 'node';
+      el.innerHTML = `<div class="row"><input type="color" value="${hex(n.color)}"><span style="flex:1">Light ${i + 1}</span><button class="x" title="Remove">✕</button></div>
+        ${['x', 'y', 'z'].map((a, k) => `<label>${a.toUpperCase()}<input type="range" data-a="${k}" min="${(ctr[k] - range).toFixed(2)}" max="${(ctr[k] + range).toFixed(2)}" step="0.01" value="${n.pos[k]}"></label>`).join('')}
+        <label>Strength<input type="range" data-s min="0" max="4" step="0.01" value="${n.strength}"></label><label>Range<input type="range" data-r min="0.2" max="${(D.radius * 4).toFixed(2)}" step="0.01" value="${n.range}"></label>`;
+      el.querySelector('input[type=color]').oninput = e => { n.color = unhex(e.target.value); relight(); };
+      el.querySelectorAll('input[data-a]').forEach(r => r.oninput = () => { n.pos[+r.dataset.a] = +r.value; relight(); });
+      el.querySelector('[data-s]').oninput = e => { n.strength = +e.target.value; relight(); };
+      el.querySelector('[data-r]').oninput = e => { n.range = +e.target.value; relight(); };
+      el.querySelector('.x').onclick = () => { nodes.splice(i, 1); drawNodes(); relight(); };
+      box.appendChild(el); });
+  }
+  $('.add').onclick = () => { nodes.push({ pos: [ctr[0], ctr[1] + D.radius * .6, ctr[2] + D.radius * .6], color: [255, 200, 120], strength: 1.2, range: D.radius * 2 }); drawNodes(); relight(); };
+
+  /* ---------- the texture: albedo x lighting, quantised and dithered, logo on top ---------- */
+  let n = 0, A, AO, RM, EM, LG, DT, NMp, BO = null, LI = null, cur = null, octx, oimg, outCanvas;
+  const grid = look.grid ? { r: look.grid.res, m: u8(look.grid.mask), P: f32(look.grid.P), N: f32(look.grid.N), B: f32(look.grid.blockers), eps: look.grid.eps } : null;
+  function nodeMap(){
+    if (!grid) return null;
+    const r = grid.r, M = new Float32Array(r*r*3), { m, P, N, B, eps } = grid;
+    for (let i = 0; i < r*r; i++) { if (!m[i]) continue;
+      const nx = N[i*3], ny = N[i*3+1], nz = N[i*3+2], ox = P[i*3] + nx*eps, oy = P[i*3+1] + ny*eps, oz = P[i*3+2] + nz*eps;
+      for (const nd of nodes) { const lx = nd.pos[0] - ctr[0] - ox, ly = nd.pos[1] - ctr[1] - oy, lz = nd.pos[2] - ctr[2] - oz, d = Math.hypot(lx, ly, lz) || 1e-9;
+        const cr = Math.max(0, (nx*lx + ny*ly + nz*lz) / d), q = d / Math.max(1e-3, nd.range); let w = cr * Math.pow(Math.max(0, 1 - q*q*q*q), 2) / (1 + 4*q*q) * nd.strength;
+        if (w <= 1e-4) continue; if (anyHit(ox, oy, oz, lx/d, ly/d, lz/d, d - eps, B, eps)) continue;
+        for (let c = 0; c < 3; c++) M[i*3+c] += w * nd.color[c] / 255; } }
+    for (let i = 0; i < M.length; i++) M[i] = Math.min(2, M[i]);
+    spread(m, [M], r); return upsample(M, r, n);
+  }
+  function relight(){ LI = nodeMap(); schedule(); }
+  let pend = 0; function schedule(){ if (!pend) pend = requestAnimationFrame(() => { pend = 0; bake(); }); }
+  function bake(){
+    if (!A) return; const bits = look.fx && look.fx.palette ? 5 : ((look.fx && look.fx.bits) || 8), q = 255 / (Math.pow(2, bits) - 1), dz = (look.fx && look.fx.dither) || 0, od = oimg.data;
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const i = y*n + x, p4 = i*4;
+      if (LG[p4+3] > 0) { od[p4] = LG[p4]; od[p4+1] = LG[p4+1]; od[p4+2] = LG[p4+2]; od[p4+3] = 255; continue; }
+      const e = Math.max(EM[p4], EM[p4+1], EM[p4+2]) / 255 * 2 > .01;
+      const shade = (1 - L.ao + L.ao * AO[p4]/255) * ((1 - .45*L.room) + .9*L.room * RM[p4]/255), det = 1 + L.detail * (DT[p4]/255*2 - 1);
+      const b = ((BAY[(y & 3)*4 + (x & 3)] + .5) / 16 - .5) * dz * q, mx = Math.max(EM[p4], EM[p4+1], EM[p4+2]) / 255 * 2, tg = Math.min(.7, Math.max(0, .45 * L.lights * mx)) * (A[p4]*.299 + A[p4+1]*.587 + A[p4+2]*.114) / 255;
+      for (let c = 0; c < 3; c++) { const li = LI ? LI[i*3+c] : 0, em = EM[p4+c]/255*2, bo = BO ? BO[i*3+c] : 0;
+        let v = e ? A[p4+c] * (1 - tg) + em / Math.max(mx, 1e-6) * 255 * tg : A[p4+c] * (shade * det + L.lights * li + L.bounce * bo); v = Math.min(255, Math.max(0, v));
+        if (bits < 8) v = Math.round(Math.min(255, Math.max(0, v + b)) / q) * q; od[p4+c] = v; }
+      od[p4+3] = 255; }
+    octx.putImageData(oimg, 0, 0); cur = outCanvas; texSrc = outCanvas; upload(texC, outCanvas, O.nearest);
+    if (opts.onTexture) opts.onTexture(outCanvas, L);
+  }
+  /* path-traced bounce: one bounce of light off the model's own surfaces, plus a soft sky */
+  $('.pt').onclick = () => {
+    if (!grid || !A) return; const r = grid.r, { m, P, N, eps } = grid, T = pos, S = new Float32Array(r*r*3), hit = [0, 0, 0], RAYS = 40; let i = 0;
+    const white = (u, v) => { const x = Math.min(n - 1, Math.max(0, Math.floor(u*n))), y = Math.min(n - 1, Math.max(0, Math.floor(v*n))), p4 = (y*n + x)*4;
+      const e = EM[p4] + EM[p4+1] + EM[p4+2] > 3, sh = (1 - L.ao + L.ao*AO[p4]/255) * ((1 - .45*L.room) + .9*L.room*RM[p4]/255);
+      return [0, 1, 2].map(c => e ? Math.min(1.5, EM[p4+c]/255*2 + A[p4+c]/255*.3) : A[p4+c]/255 * Math.min(1, sh + L.lights * (LI ? LI[(y*n+x)*3+c] : 0))); };
+    $('.pt').hidden = true; let seedr = 7; const rnd = () => (seedr = Math.imul(seedr ^ (seedr >>> 15), 2246822507) + 0x9e3779b9 >>> 0) / 4294967296;
+    const step = () => {
+      const t0 = performance.now();
+      for (; i < r*r && performance.now() - t0 < 30; i++) { if (!m[i]) continue;
+        const nx = N[i*3], ny = N[i*3+1], nz = N[i*3+2], ox = P[i*3] + nx*eps, oy = P[i*3+1] + ny*eps, oz = P[i*3+2] + nz*eps;
+        const ax = Math.abs(ny) < .9 ? [0, 1, 0] : [1, 0, 0]; let tx = ax[1]*nz - ax[2]*ny, ty = ax[2]*nx - ax[0]*nz, tz = ax[0]*ny - ax[1]*nx; const tl = Math.hypot(tx, ty, tz); tx /= tl; ty /= tl; tz /= tl;
+        const bx = ny*tz - nz*ty, by = nz*tx - nx*tz, bz = nx*ty - ny*tx; let sr = 0, sg = 0, sb = 0;
+        for (let k = 0; k < RAYS; k++) { const u1 = (k + rnd()) / RAYS, rr = Math.sqrt(u1), ph = 2*Math.PI*rnd(), cz = Math.sqrt(1 - u1);
+          const dx = tx*rr*Math.cos(ph) + bx*rr*Math.sin(ph) + nx*cz, dy = ty*rr*Math.cos(ph) + by*rr*Math.sin(ph) + ny*cz, dz = tz*rr*Math.cos(ph) + bz*rr*Math.sin(ph) + nz*cz;
+          if (nearest(ox, oy, oz, dx, dy, dz, T, eps, hit) >= 0) { const t = hit[0], w0 = 1 - hit[1] - hit[2]; const u = uv[t*6]*w0 + uv[t*6+2]*hit[1] + uv[t*6+4]*hit[2], v = uv[t*6+1]*w0 + uv[t*6+3]*hit[1] + uv[t*6+5]*hit[2];
+            const c = white(u, v); sr += c[0]; sg += c[1]; sb += c[2]; }
+          else { const s = Math.min(1.1, Math.max(.2, dy * .5 + .6)); sr += .55*s; sg += .58*s; sb += .62*s; } }
+        S[i*3] = sr / RAYS; S[i*3+1] = sg / RAYS; S[i*3+2] = sb / RAYS; }
+      msg(`Path tracing… ${Math.round(i / (r*r) * 100)}%`);
+      if (i < r*r) setTimeout(step, 0); else { spread(m, [S], r); BO = upsample(S, r, n); if (!L.bounce) L.bounce = .5; $('.bounceRow').hidden = false; $('[data-l=bounce]').value = L.bounce; msg('Bounce light baked in.'); $('.pt').hidden = false; schedule(); }
+    };
+    step();
+  };
+
+  const ready = (async () => {
+    if (D.maps) {
+      const keys = ['albedo', 'ao', 'room', 'emit', 'logo', 'detail', 'normal'].concat(D.maps.bounce ? ['bounce'] : []);
+      const ims = await Promise.all(keys.map(k => loadImg(D.maps[k]))); n = ims[0].naturalWidth;
+      [A, AO, RM, EM, LG, DT, NMp] = ims.slice(0, 7).map(im => pixels(im, n));
+      if (D.maps.bounce) { const b = pixels(ims[7], n); BO = new Float32Array(n*n*3); for (let i = 0; i < n*n; i++) for (let c = 0; c < 3; c++) BO[i*3+c] = b[i*4+c] / 255 * 2; }
+      outCanvas = document.createElement('canvas'); outCanvas.width = outCanvas.height = n; octx = outCanvas.getContext('2d'); oimg = octx.createImageData(n, n);
+      nrmSrc = ims[6]; upload(texN, nrmSrc, false); hasNM = true; drawNodes(); LI = nodeMap(); bake();
+    } else { const im = await loadImg(D.tex); texSrc = im; upload(texC, im, O.nearest); }
+  })();
+
+  /* ---------- downloads ---------- */
+  const save = (blob, name) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 60000); };
+  const slug = (D.name || 'model').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const pngOf = async src => { const c = document.createElement('canvas'); c.width = src.naturalWidth || src.width; c.height = src.naturalHeight || src.height; c.getContext('2d').drawImage(src, 0, 0); return new Uint8Array(await (await new Promise(r => c.toBlob(r, 'image/png'))).arrayBuffer()); };
+  function glb(png, npng){
+    const P = curPos, N = curNrm, nv = P.length / 3, bufs = [P, N, uv, tanF].map(a => new Uint8Array(a.buffer.slice(0))).concat([png]);
+    if (npng) bufs.push(npng); const oh = O.outline && hull; if (oh) { bufs.push(new Uint8Array(hull.buffer.slice(0)), new Uint8Array(flatNormals(hull).buffer)); }
+    const views = [], chunks = []; let off = 0;
+    bufs.forEach(b => { views.push({ buffer: 0, byteOffset: off, byteLength: b.length }); chunks.push(b); const pad = (4 - b.length % 4) % 4; if (pad) chunks.push(new Uint8Array(pad)); off += b.length + pad; });
+    [0, 1, 2, 3].forEach(i => views[i].target = 34962);
+    const mm = a => { const mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9]; for (let i = 0; i < a.length; i++) { mn[i % 3] = Math.min(mn[i % 3], a[i]); mx[i % 3] = Math.max(mx[i % 3], a[i]); } return [mn, mx]; };
+    const [mn, mx] = mm(P);
+    const acc = [{ bufferView: 0, componentType: 5126, count: nv, type: 'VEC3', min: mn, max: mx }, { bufferView: 1, componentType: 5126, count: nv, type: 'VEC3' }, { bufferView: 2, componentType: 5126, count: nv, type: 'VEC2' }, { bufferView: 3, componentType: 5126, count: nv, type: 'VEC4' }];
+    const mat = { name: 'lopol', pbrMetallicRoughness: { baseColorTexture: { index: 0 }, metallicFactor: 0, roughnessFactor: 1 } };
+    const images = [{ bufferView: 4, mimeType: 'image/png' }], textures = [{ source: 0, sampler: 0 }];
+    if (npng) { images.push({ bufferView: 5, mimeType: 'image/png' }); textures.push({ source: 1, sampler: 0 }); mat.normalTexture = { index: 1 }; }
+    const prims = [{ attributes: { POSITION: 0, NORMAL: 1, TEXCOORD_0: 2, TANGENT: 3 }, material: 0 }], mats = [mat], J = {};
+    if (oh) { const k = views.length - 2; views[k].target = views[k + 1].target = 34962; const [hn, hx] = mm(hull);
+      acc.push({ bufferView: k, componentType: 5126, count: nv, type: 'VEC3', min: hn, max: hx }, { bufferView: k + 1, componentType: 5126, count: nv, type: 'VEC3' });
+      prims.push({ attributes: { POSITION: acc.length - 2, NORMAL: acc.length - 1 }, material: 1 });
+      mats.push({ name: 'outline', pbrMetallicRoughness: { baseColorFactor: OL.color.map(c => c / 255).concat([1]), metallicFactor: 0, roughnessFactor: 1 }, extensions: { KHR_materials_unlit: {} } }); J.extensionsUsed = ['KHR_materials_unlit']; }
+    Object.assign(J, { asset: { version: '2.0', generator: 'Image2LoPol' }, scene: 0, scenes: [{ nodes: [0] }], nodes: [{ mesh: 0, name: D.name }], meshes: [{ name: D.name, primitives: prims }],
+      accessors: acc, bufferViews: views, buffers: [{ byteLength: off }], images, samplers: [{ magFilter: 9728, minFilter: 9728 }], textures, materials: mats });
+    let js = new TextEncoder().encode(JSON.stringify(J)); const jp = (4 - js.length % 4) % 4; if (jp) { const t = new Uint8Array(js.length + jp).fill(32); t.set(js); js = t; }
+    const head = new DataView(new ArrayBuffer(20)); head.setUint32(0, 0x46546C67, true); head.setUint32(4, 2, true); head.setUint32(8, 12 + 8 + js.length + 8 + off, true); head.setUint32(12, js.length, true); head.setUint32(16, 0x4E4F534A, true);
+    const bh = new DataView(new ArrayBuffer(8)); bh.setUint32(0, off, true); bh.setUint32(4, 0x004E4942, true);
+    return new Blob([head.buffer, js, bh.buffer, ...chunks], { type: 'model/gltf-binary' });
+  }
+  function obj(){
+    const P = curPos, N = curNrm, nv = P.length / 3, f = v => v.toFixed(5), Ls = ['# ' + D.name + ', made with Image2LoPol', 'mtllib model.mtl', 'o model'];
+    for (let i = 0; i < nv; i++) Ls.push(`v ${f(P[i*3])} ${f(P[i*3+1])} ${f(P[i*3+2])}`);
+    for (let i = 0; i < nv; i++) Ls.push(`vt ${uv[i*2].toFixed(6)} ${(1 - uv[i*2+1]).toFixed(6)}`);
+    for (let i = 0; i < nv; i += 3) Ls.push(`vn ${f(N[i*3])} ${f(N[i*3+1])} ${f(N[i*3+2])}`);
+    Ls.push('usemtl lopol', 's off'); for (let t = 0; t < nv / 3; t++) { const a = t*3 + 1; Ls.push(`f ${a}/${a}/${t+1} ${a+1}/${a+1}/${t+1} ${a+2}/${a+2}/${t+1}`); }
+    let mtl = 'newmtl lopol\nKa 1 1 1\nKd 1 1 1\nKs 0 0 0\nd 1\nillum 1\nmap_Kd texture.png\nnorm normal.png\n';
+    if (O.outline && hull) { const HN = flatNormals(hull); Ls.push('o outline'); for (let i = 0; i < nv; i++) Ls.push(`v ${f(hull[i*3])} ${f(hull[i*3+1])} ${f(hull[i*3+2])}`);
+      for (let i = 0; i < nv; i += 3) Ls.push(`vn ${f(HN[i*3])} ${f(HN[i*3+1])} ${f(HN[i*3+2])}`); Ls.push('usemtl outline');
+      for (let t = 0; t < nv / 3; t++) { const a = nv + t*3 + 1, nn = nv / 3 + t + 1; Ls.push(`f ${a}//${nn} ${a+1}//${nn} ${a+2}//${nn}`); }
+      mtl += `newmtl outline\nKa 0 0 0\nKd ${OL.color.map(c => (c / 255).toFixed(3)).join(' ')}\nKs 0 0 0\nd 1\nillum 0\n`; }
+    return [new TextEncoder().encode(Ls.join('\n') + '\n'), new TextEncoder().encode(mtl)];
+  }
+  const texNow = () => cur || texSrc;
+  $('.dtex').onclick = async () => save(new Blob([await pngOf(texNow())], { type: 'image/png' }), slug + '-texture.png');
+  $('.dnrm').onclick = async () => nrmSrc && save(new Blob([await pngOf(nrmSrc)], { type: 'image/png' }), slug + '-normal.png');
+  $('.glb').onclick = async () => save(glb(await pngOf(texNow()), nrmSrc ? await pngOf(nrmSrc) : null), slug + (O.wobble ? '-handmade' : '') + (O.outline ? '-outline' : '') + '.glb');
+  $('.objz').onclick = async () => { const [o, m] = obj(); const files = [{ name: 'model.obj', data: o }, { name: 'model.mtl', data: m }, { name: 'texture.png', data: await pngOf(texNow()) }];
+    if (nrmSrc) files.push({ name: 'normal.png', data: await pngOf(nrmSrc) }); save(zip(files.map(f => ({ name: slug + '/' + f.name, data: f.data }))), slug + '-obj.zip'); };
+
+  /* ---------- camera + draw ---------- */
+  const S = { yaw: -0.6, pitch: 0.3, dist: D.radius * 4.8, drag: null, idle: 0 };
+  cv.onpointerdown = e => { S.drag = { x: e.clientX, y: e.clientY, yaw: S.yaw, pitch: S.pitch }; cv.setPointerCapture(e.pointerId); };
+  cv.onpointermove = e => { if (!S.drag) return; S.yaw = S.drag.yaw + (e.clientX - S.drag.x) * .01; S.pitch = Math.max(-1.4, Math.min(1.4, S.drag.pitch + (e.clientY - S.drag.y) * .01)); };
+  cv.onpointerup = () => { S.drag = null; S.idle = performance.now(); };
+  cv.addEventListener('wheel', e => { e.preventDefault(); S.dist = Math.max(D.radius * 1.3, Math.min(D.radius * 9, S.dist * Math.exp(e.deltaY * .001))); }, { passive: false });
+  const mul = (a, b) => { const o = new Float32Array(16); for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { let s = 0; for (let k = 0; k < 4; k++) s += a[k*4+j] * b[i*4+k]; o[i*4+j] = s; } return o; };
+  const rx = a => new Float32Array([1,0,0,0, 0,Math.cos(a),Math.sin(a),0, 0,-Math.sin(a),Math.cos(a),0, 0,0,0,1]);
+  const ry = a => new Float32Array([Math.cos(a),0,-Math.sin(a),0, 0,1,0,0, Math.sin(a),0,Math.cos(a),0, 0,0,0,1]);
+  const tr = (x, y, z) => new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1]);
+  const persp = (f, a, nn, far) => { const t = 1 / Math.tan(f / 2); return new Float32Array([t/a,0,0,0, 0,t,0,0, 0,0,(far+nn)/(nn-far),-1, 0,0,2*far*nn/(nn-far),0]); };
+  geometry();
+  let last = performance.now(), alive = true;
+  function frame(t){
+    if (!alive) return; const dt = Math.min(.05, (t - last) / 1000); last = t;
+    if (O.spin && !S.drag && t - S.idle > 1200) S.yaw += dt * .5;
+    const k = O.ps1 ? Math.min(1, 320 / Math.max(240, cv.clientHeight)) : Math.min(2, devicePixelRatio || 1); cv.classList.toggle('lo', O.ps1);
+    const w = Math.max(1, Math.round(cv.clientWidth * k)), h = Math.max(1, Math.round(cv.clientHeight * k)); if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    gl.viewport(0, 0, w, h); gl.clearColor(.09, .09, .1, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); gl.enable(gl.DEPTH_TEST);
+    const M = mul(tr(0, 0, -S.dist), mul(rx(S.pitch), ry(S.yaw))), P = persp(.6, w / h, D.radius * .05, D.radius * 30), res = [Math.min(w, 320), Math.min(h, 240)];
+    if (texSrc) {
+      gl.useProgram(pr); att(pr, bP, 'p', 3); att(pr, bN, 'n', 3); att(pr, bT, 't', 2); att(pr, bG, 'g', 4);
+      gl.uniformMatrix4fv(U(pr, 'M'), false, M); gl.uniformMatrix4fv(U(pr, 'P'), false, P);
+      gl.uniform1f(U(pr, 'snap'), O.ps1 ? 1 : 0); gl.uniform1f(U(pr, 'aff'), O.ps1 ? 1 : 0); gl.uniform1f(U(pr, 'dith'), O.ps1 ? 1 : 0); gl.uniform2f(U(pr, 'res'), res[0], res[1]);
+      gl.uniform1f(U(pr, 'lit'), O.light ? 1 : 0); gl.uniform1f(U(pr, 'useNM'), hasNM && O.light ? 1 : 0);
+      const Lv = [-.45, .8, .6], l = Math.hypot(...Lv); gl.uniform3f(U(pr, 'L'), Lv[0]/l, Lv[1]/l, Lv[2]/l);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texC); gl.uniform1i(U(pr, 'tx'), 0);
+      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, texN); gl.uniform1i(U(pr, 'nm'), 1); gl.activeTexture(gl.TEXTURE0);
+      gl.disable(gl.CULL_FACE); gl.drawArrays(gl.TRIANGLES, 0, NV);
+      gl.useProgram(ps); gl.uniformMatrix4fv(U(ps, 'M'), false, M); gl.uniformMatrix4fv(U(ps, 'P'), false, P); gl.uniform1f(U(ps, 'snap'), O.ps1 ? 1 : 0); gl.uniform2f(U(ps, 'res'), res[0], res[1]);
+      if (O.outline && hull) { att(ps, bH, 'p', 3); gl.uniform3f(U(ps, 'col'), OL.color[0]/255, OL.color[1]/255, OL.color[2]/255); gl.uniform1f(U(ps, 'pt'), 0); gl.uniform1f(U(ps, 'ps'), 1);
+        gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK); gl.frontFace(gl.CCW); gl.drawArrays(gl.TRIANGLES, 0, NV); gl.disable(gl.CULL_FACE); }
+      if (nodes.length && D.maps) { const pts = new Float32Array(nodes.flatMap(nd => [nd.pos[0] - ctr[0], nd.pos[1] - ctr[1], nd.pos[2] - ctr[2]])); put(bL, pts); att(ps, bL, 'p', 3);
+        gl.uniform1f(U(ps, 'pt'), 1); gl.uniform1f(U(ps, 'ps'), Math.max(6, 12 * k)); gl.disable(gl.DEPTH_TEST);
+        nodes.forEach((nd, i) => { gl.uniform3f(U(ps, 'col'), nd.color[0]/255, nd.color[1]/255, nd.color[2]/255); gl.drawArrays(gl.POINTS, i, 1); }); gl.enable(gl.DEPTH_TEST); }
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return { ready, light: L, nodes, options: O, outline: OL, destroy(){ alive = false; root.innerHTML = ''; }, texture: () => texNow() };
+};
+})();
+
+/* Image2LoPol in the browser: paint a template from an image model's picture.
+   LoPolBake.load(baseUrl)           -> template (template.json + texmap.bin + maps)
+   LoPolBake.bake(tpl, imageOrCanvas, {preset}) -> { D (for LoPolView), match:[iou...], albedo canvas }
+   Same steps as tool/lopol.py bake: align, sample, match the two views, blend, fill hidden faces, grade, logo. */
+(function () {
+'use strict';
+const PRESETS = {  // the same looks as the Clothing Studio's presets (tool/lopol.py FX_PRESETS)
+  ps1: { bits: 4, dither: 1, contrast: .06, sat: 0 }, n64: { bits: 5, dither: .35, contrast: .04, sat: .1 },
+  '16bit': { palette: 24, dither: .45, contrast: .06, sat: .18 }, clean: { bits: 8, dither: 0, contrast: .04, sat: .05 } };
+const loadImg = src => new Promise((r, j) => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => r(i); i.onerror = () => j(new Error('Could not load ' + src)); i.src = src; });
+const canvasOf = (src, w, h) => { const c = document.createElement('canvas'); c.width = w || src.naturalWidth || src.width; c.height = h || src.naturalHeight || src.height; c.getContext('2d').drawImage(src, 0, 0, c.width, c.height); return c; };
+const toURL = c => c.toDataURL('image/png');
+
+async function load(base){
+  base = base.replace(/\/?$/, '/');
+  const tpl = await (await fetch(base + 'template.json')).json();
+  const res = await fetch(base + 'texmap.bin');
+  const raw = new Uint8Array(await new Response(res.body.pipeThrough(new DecompressionStream('deflate'))).arrayBuffer());
+  const S = tpl.atlas, n = S * S, V = tpl.views; let o = 0;
+  const take = (T, len) => { const a = new T(raw.buffer.slice(o, o + len * T.BYTES_PER_ELEMENT)); o += len * T.BYTES_PER_ELEMENT; return a; };
+  tpl.cid = take(Int16Array, n); tpl.xy = []; for (let v = 0; v < V; v++) tpl.xy.push([take(Uint16Array, n), take(Uint16Array, n)]);
+  tpl.wt = []; for (let v = 0; v < V; v++) tpl.wt.push(take(Uint8Array, n)); tpl.sh = []; for (let v = 0; v < V; v++) tpl.sh.push(take(Uint8Array, n));
+  tpl.base = base;
+  const [ref, ...maps] = await Promise.all(['reference.png', 'ao.png', 'room.png', 'emit.png', 'detail.png', 'normal.png'].map(f => loadImg(base + f)));
+  tpl.reference = ref; tpl.mapImgs = { ao: maps[0], room: maps[1], emit: maps[2], detail: maps[3], normal: maps[4] };
+  tpl.refUrl = base + 'reference.png'; tpl.exampleUrl = tpl.example ? base + 'example.jpg' : null;
+  // the reference's silhouette, for lining up the painted picture
+  const rc = canvasOf(ref, tpl.ref[0], tpl.ref[1]).getContext('2d').getImageData(0, 0, tpl.ref[0], tpl.ref[1]).data;
+  const rm = new Uint8Array(tpl.ref[0] * tpl.ref[1]); for (let i = 0; i < rm.length; i++) rm[i] = (Math.max(Math.abs(rc[i*4]-255), Math.abs(rc[i*4+1]-255), Math.abs(rc[i*4+2]-255)) > 28) ? 1 : 0;
+  tpl.refMask = rm;
+  return tpl;
+}
+
+function fgMask(d, w, h){
+  const bd = []; for (let x = 0; x < w; x++) { bd.push(x, (h - 1) * w + x); } for (let y = 0; y < h; y++) { bd.push(y * w, y * w + w - 1); }
+  const med = c => { const a = bd.map(i => d[i*4+c]).sort((p, q) => p - q); return a[a.length >> 1]; }, bg = [med(0), med(1), med(2)];
+  const m = new Uint8Array(w * h); for (let i = 0; i < w * h; i++) m[i] = Math.max(Math.abs(d[i*4]-bg[0]), Math.abs(d[i*4+1]-bg[1]), Math.abs(d[i*4+2]-bg[2])) > 28 ? 1 : 0;
+  return m;
+}
+function erode(m, w, h, k){ let a = m; for (let it = 0; it < k; it++) { const b = new Uint8Array(w * h); for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y*w + x; b[i] = a[i] & a[i-1] & a[i+1] & a[i-w] & a[i+w]; } a = b; } return a; }
+
+/* scale + shift per view so the painted silhouette sits on the reference's (best overlap, like the Python hill climb) */
+function align(refm, RW, RH, resm, w, h, nv){
+  const out = [];
+  for (let i = 0; i < nv; i++) {
+    const ax0 = Math.floor(RW * i / nv), ax1 = Math.floor(RW * (i + 1) / nv), bx0 = Math.floor(w * i / nv), bx1 = Math.floor(w * (i + 1) / nv);
+    const bb = (m, W, x0, x1, H) => { let a = [1e9, -1e9, 1e9, -1e9], c = 0; for (let y = 0; y < H; y++) for (let x = x0; x < x1; x++) if (m[y*W + x]) { c++; if (x < a[0]) a[0] = x; if (x > a[1]) a[1] = x; if (y < a[2]) a[2] = y; if (y > a[3]) a[3] = y; } return c ? a : null; };
+    const A = bb(refm, RW, ax0, ax1, RH), B = bb(resm, w, bx0, bx1, h);
+    if (!A || !B) throw new Error('No object found in view ' + (i + 1) + ' of the picture.');
+    let s = ((B[3]-B[2]) / Math.max(1, A[3]-A[2]) + (B[1]-B[0]) / Math.max(1, A[1]-A[0])) / 2;
+    let tx = (B[1]+B[0]) / 2 - s * (A[1]+A[0]) / 2, ty = (B[3]+B[2]) / 2 - s * (A[3]+A[2]) / 2;
+    const mx = (A[1]+A[0]) / 2, my = (A[3]+A[2]) / 2;
+    const iou = (s, tx, ty, step) => { let I = 0, Un = 0;
+      for (let qy = 0; qy < h; qy += step) for (let qx = bx0; qx < bx1; qx += step) { const px = Math.floor((qx - tx) / s), py = Math.floor((qy - ty) / s);
+        const a = px >= ax0 && px < ax1 && py >= 0 && py < RH ? refm[py*RW + px] : 0, b = resm[qy*w + qx]; if (a & b) I++; if (a | b) Un++; }
+      return I / Math.max(1, Un); };
+    let best = iou(s, tx, ty, 3);
+    for (const [ds, dt] of [[.02, 6], [.01, 3], [.004, 1.5], [.002, .75]]) { let moved = true, guard = 0;
+      while (moved && guard++ < 60) { moved = false;
+        for (const [sc, cx0, cy0] of [[s*(1+ds), tx, ty], [s*(1-ds), tx, ty], [s, tx+dt, ty], [s, tx-dt, ty], [s, tx, ty+dt], [s, tx, ty-dt]]) {
+          let cx = cx0, cy = cy0; if (sc !== s) { cx = tx + (s - sc) * mx; cy = ty + (s - sc) * my; }
+          const v = iou(sc, cx, cy, ds < .01 ? 2 : 3); if (v > best + 1e-5) { best = v; s = sc; tx = cx; ty = cy; moved = true; } } } }
+    out.push({ s, tx, ty, iou: best });
+  }
+  return out;
+}
+
+function pushpull(img, m, w, h){  // fill holes from coarser levels (img: Float32 w*h*3, m: Uint8 w*h)
+  let all = true, any = false; for (let i = 0; i < w*h; i++) { if (m[i]) any = true; else all = false; }
+  if (all) return img; const out = new Float32Array(img);
+  if (!any) { out.fill(128); return out; } if (w <= 1 && h <= 1) return out;
+  const w2 = (w + 1) >> 1, h2 = (h + 1) >> 1, si = new Float32Array(w2*h2*3), sm = new Float32Array(w2*h2);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y*w + x; if (!m[i]) continue; const j = (y >> 1)*w2 + (x >> 1); sm[j]++; for (let c = 0; c < 3; c++) si[j*3+c] += img[i*3+c]; }
+  const small = new Float32Array(w2*h2*3), smm = new Uint8Array(w2*h2);
+  for (let j = 0; j < w2*h2; j++) if (sm[j]) { smm[j] = 1; for (let c = 0; c < 3; c++) small[j*3+c] = si[j*3+c] / sm[j]; }
+  const up = pushpull(small, smm, w2, h2);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y*w + x; if (m[i]) continue; const j = (y >> 1)*w2 + (x >> 1); for (let c = 0; c < 3; c++) out[i*3+c] = up[j*3+c]; }
+  return out;
+}
+function resize(src, sw, sh, dw, dh, flip){  // bilinear, optional 'h' / 'v' mirror
+  const out = new Float32Array(dw*dh*3);
+  for (let y = 0; y < dh; y++) for (let x = 0; x < dw; x++) {
+    let fx = (x + .5) * sw / dw - .5, fy = (y + .5) * sh / dh - .5; if (flip === 'h') fx = sw - 1 - fx; if (flip === 'v') fy = sh - 1 - fy;
+    fx = Math.max(0, Math.min(sw - 1, fx)); fy = Math.max(0, Math.min(sh - 1, fy)); const x0 = Math.floor(fx), y0 = Math.floor(fy), x1 = Math.min(sw - 1, x0 + 1), y1 = Math.min(sh - 1, y0 + 1), ax = fx - x0, ay = fy - y0;
+    for (let c = 0; c < 3; c++) out[(y*dw+x)*3+c] = (src[(y0*sw+x0)*3+c]*(1-ax) + src[(y0*sw+x1)*3+c]*ax)*(1-ay) + (src[(y1*sw+x0)*3+c]*(1-ax) + src[(y1*sw+x1)*3+c]*ax)*ay;
+  }
+  return out;
+}
+
+async function bake(tpl, painted, opts = {}){
+  const pc = canvasOf(painted), w = pc.width, h = pc.height, P = pc.getContext('2d').getImageData(0, 0, w, h).data;
+  const res = fgMask(P, w, h), inner = erode(res, w, h, 2), [RW, RH] = tpl.ref, nv = tpl.views;
+  const al = align(tpl.refMask, RW, RH, res, w, h, nv);
+  const S = tpl.atlas, unshade = .8, sref = tpl.shadeRef;
+  const samp = (x, y, out) => { x = Math.max(0, Math.min(w - 1.001, x - .5)); y = Math.max(0, Math.min(h - 1.001, y - .5)); const x0 = x | 0, y0 = y | 0, fx = x - x0, fy = y - y0;
+    for (let c = 0; c < 3; c++) { const a = P[(y0*w+x0)*4+c], b = P[(y0*w+x0+1)*4+c], d = P[((y0+1)*w+x0)*4+c], e = P[((y0+1)*w+x0+1)*4+c]; out[c] = (a*(1-fx) + b*fx)*(1-fy) + (d*(1-fx) + e*fx)*fy; } };
+  // 1. sample every texel from every view that saw it
+  const col = Array.from({ length: nv }, () => new Float32Array(S*S*3)), wgt = Array.from({ length: nv }, () => new Float32Array(S*S)), tmp = [0, 0, 0];
+  for (let v = 0; v < nv; v++) { const a = al[v], [X, Y] = tpl.xy[v], W8 = tpl.wt[v], SH = tpl.sh[v];
+    for (let i = 0; i < S*S; i++) { if (tpl.cid[i] < 0 || !W8[i]) continue;
+      const px = X[i] / 16, py = Y[i] / 16, qx = px * a.s + a.tx, qy = py * a.s + a.ty, ix = qx | 0, iy = qy | 0;
+      if (ix < 0 || iy < 0 || ix >= w || iy >= h || !inner[iy*w + ix]) continue;
+      samp(qx, qy, tmp); const f = 1 - unshade + unshade * sref / Math.max(.05, SH[i] / 255), fa = W8[i] / 255 - .05;
+      for (let c = 0; c < 3; c++) col[v][i*3+c] = tmp[c] * f; wgt[v][i] = fa * fa; } }
+  // 2. the two views are often lit a little differently: match their colours where both saw the surface
+  const gain = Array.from({ length: nv }, () => [1, 1, 1]);
+  if (nv === 2) { const ma = [0, 0, 0], mb = [0, 0, 0]; let c = 0;
+    for (let i = 0; i < S*S; i++) if (wgt[0][i] > 0 && wgt[1][i] > 0) { c++; for (let k = 0; k < 3; k++) { ma[k] += col[0][i*3+k]; mb[k] += col[1][i*3+k]; } }
+    if (c > 200) for (let k = 0; k < 3; k++) { const A = ma[k] / c + 1, B = mb[k] / c + 1; gain[0][k] = Math.sqrt(B / A); gain[1][k] = Math.sqrt(A / B); } }
+  const atlas = new Float32Array(S*S*3), seen = new Uint8Array(S*S);
+  for (let i = 0; i < S*S; i++) { let ws = 0; const acc = [0, 0, 0];
+    for (let v = 0; v < nv; v++) { const q = wgt[v][i]; if (!q) continue; ws += q; for (let k = 0; k < 3; k++) acc[k] += col[v][i*3+k] * gain[v][k] * q; }
+    if (ws > 0) { seen[i] = 1; for (let k = 0; k < 3; k++) atlas[i*3+k] = acc[k] / ws; } }
+  // 3. per face: fill what no view saw (push-pull, the opposite face, or a plain cap colour)
+  const ch = tpl.charts, img = [], msk = [], cov = [];
+  let mean = [0, 0, 0], mc = 0;
+  ch.forEach((c, k) => { const a = new Float32Array(c.w*c.h*3), m = new Uint8Array(c.w*c.h); let n = 0;
+    for (let y = 0; y < c.h; y++) for (let x = 0; x < c.w; x++) { const i = (c.y + y)*S + c.x + x, j = y*c.w + x; if (!seen[i] || tpl.cid[i] !== k) continue; m[j] = 1; n++; for (let q = 0; q < 3; q++) { a[j*3+q] = atlas[i*3+q]; mean[q] += atlas[i*3+q]; } mc++; }
+    img.push(a); msk.push(m); cov.push(n / (c.w*c.h)); });
+  mean = mean.map(v => v / Math.max(1, mc));
+  const filled = ch.map((c, k) => cov[k] >= .35 ? pushpull(img[k], msk[k], c.w, c.h) : null);
+  ch.forEach((c, k) => { if (filled[k]) return; const o = c.opp;
+    if (c.side === 'bottom' || o < 0 || cov[o] < .35) {
+      const acc = [0, 0, 0]; let n = 0;
+      ch.forEach((c2, j) => { if (c2.part !== c.part || j === k || cov[j] <= .35) return; const r0 = c2.h - Math.max(1, c2.h >> 3);
+        for (let y = r0; y < c2.h; y++) for (let x = 0; x < c2.w; x++) { const t = y*c2.w + x; if (!msk[j][t]) continue; n++; for (let q = 0; q < 3; q++) acc[q] += img[j][t*3+q]; } });
+      const base = n ? acc.map(v => v / n * .85) : [128, 128, 128];
+      if (cov[k] > .1) filled[k] = pushpull(img[k], msk[k], c.w, c.h);
+      else { const a = new Float32Array(img[k]); for (let t = 0; t < c.w*c.h; t++) if (!msk[k][t]) for (let q = 0; q < 3; q++) a[t*3+q] = base[q]; filled[k] = a; }
+    } else {
+      const so = filled[o] || pushpull(img[o], msk[o], ch[o].w, ch[o].h), src = resize(so, ch[o].w, ch[o].h, c.w, c.h, c.flip), a = new Float32Array(img[k]);
+      for (let t = 0; t < c.w*c.h; t++) if (!msk[k][t]) for (let q = 0; q < 3; q++) a[t*3+q] = src[t*3+q]; filled[k] = a; } });
+  const out = new Float32Array(S*S*3), has = new Uint8Array(S*S);
+  ch.forEach((c, k) => { for (let y = 0; y < c.h; y++) for (let x = 0; x < c.w; x++) { const i = (c.y + y)*S + c.x + x, j = y*c.w + x; has[i] = 1; for (let q = 0; q < 3; q++) out[i*3+q] = filled[k][j*3+q]; } });
+  for (let it = 0; it < 12; it++) { const nh = has.slice(); let changed = false;  // bleed into the gaps
+    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) { const i = y*S + x; if (has[i]) continue; let n = 0; const acc = [0, 0, 0];
+      for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= S || yy >= S) continue; const j = yy*S + xx; if (!has[j]) continue; n++; for (let q = 0; q < 3; q++) acc[q] += out[j*3+q]; }
+      if (n) { nh[i] = 1; changed = true; for (let q = 0; q < 3; q++) out[i*3+q] = acc[q] / n; } }
+    has.set(nh); if (!changed) break; }
+  // 4. grade: shrink to the game texture size, contrast and saturation of the chosen look
+  const preset = opts.preset || tpl.look.preset || 'ps1', fx = Object.assign({}, PRESETS[preset] || PRESETS.ps1), n = tpl.size, k = S / n;
+  const alb = document.createElement('canvas'); alb.width = alb.height = n; const ax = alb.getContext('2d'), ad = ax.createImageData(n, n);
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const acc = [0, 0, 0];
+    for (let yy = 0; yy < k; yy++) for (let xx = 0; xx < k; xx++) { const i = ((y*k + yy)*S + x*k + xx)*3; for (let q = 0; q < 3; q++) acc[q] += out[i+q]; }
+    let c = acc.map(v => v / (k*k)); if (fx.contrast) c = c.map(v => (v - 128) * (1 + fx.contrast) + 128);
+    if (fx.sat) { const g = (c[0] + c[1] + c[2]) / 3; c = c.map(v => g + (v - g) * (1 + fx.sat)); }
+    const p = (y*n + x)*4; for (let q = 0; q < 3; q++) ad.data[p+q] = Math.max(0, Math.min(255, c[q])); ad.data[p+3] = 255; }
+  ax.putImageData(ad, 0, 0);
+  // 5. the logo face: the model's average colour with the Grug Digital logo (stamped after the retro look)
+  const lg = document.createElement('canvas'); lg.width = lg.height = n;
+  if (tpl.logo >= 0 && opts.logo !== false && window.GRUG && GRUG.logo) {
+    const c = ch[tpl.logo], f = n / S, x0 = Math.round(c.x * f), y0 = Math.round(c.y * f), x1 = Math.round((c.x + c.w) * f), y1 = Math.round((c.y + c.h) * f);
+    if (x1 - x0 >= 8 && y1 - y0 >= 8) { const g = lg.getContext('2d'), lum = mean[0]*.299 + mean[1]*.587 + mean[2]*.114;
+      g.fillStyle = `rgb(${mean.map(v => Math.round(v)).join(',')})`; g.fillRect(x0, y0, x1 - x0, y1 - y0);
+      const im = await loadImg('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(GRUG.logo('stacked', lum > 140 ? 'light' : 'dark', { cls: false, height: 512 })));
+      const sc = Math.min((x1 - x0) * .72 / im.naturalWidth, (y1 - y0) * .72 / im.naturalHeight), lw = im.naturalWidth * sc, lh = im.naturalHeight * sc;
+      g.drawImage(im, x0 + (x1 - x0 - lw) / 2, y0 + (y1 - y0 - lh) / 2, lw, lh); } }
+  const mi = tpl.mapImgs, look = JSON.parse(JSON.stringify(tpl.look)); look.fx = { bits: fx.bits, dither: fx.dither, palette: fx.palette };
+  const D = { name: tpl.name, ...tpl.mesh, tex: toURL(alb), look,
+    maps: { albedo: toURL(alb), ao: toURL(canvasOf(mi.ao)), room: toURL(canvasOf(mi.room)), emit: toURL(canvasOf(mi.emit)), logo: toURL(lg), detail: toURL(canvasOf(mi.detail)), normal: toURL(canvasOf(mi.normal)) } };
+  return { D, match: al.map(a => a.iou), albedo: alb };
+}
+
+window.LoPolBake = { load, bake, PRESETS };
+})();
+
+/* Clothing Studio: the Accessories section (block-model templates painted by an image model) */
+(() => {
+const BASE = 'accessories/';
+const $ = s => document.querySelector(s);
+const A = { mode: 'clothing', list: null, tpl: null, view: null, painted: null, preset: 'ps1', busy: false };
+const toastA = m => (window.GRUG && GRUG.toast ? GRUG.toast(m) : console.log(m));
+
+/* ---------- switching between Clothing and Accessories ---------- */
+function setMode(m){
+  A.mode = m;
+  document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
+  const acc = m === 'acc';
+  $('#acc').hidden = !acc; document.querySelector('header .steps').hidden = acc; $('#libOpen').hidden = acc;
+  if (acc) { [1, 2, 3].forEach(i => { const s = $('#s' + i); if (s) s.hidden = true; }); if (!A.list) gallery(); }
+  else { A.view && A.view.destroy(); A.view = null; if (typeof goStep === 'function') goStep(1); }
+  document.querySelector('.brand h1').textContent = acc ? 'Accessory Studio' : 'Classic Clothing Studio';
+  document.querySelector('.brand p').textContent = acc ? 'Block-model templates → AI-painted PS1-style 3D accessories' : 'AI-dressed avatars → Roblox shirt & pants';
+  history.replaceState(null, '', acc ? '#accessories' : location.pathname + location.search);
+}
+document.querySelectorAll('#modeSeg button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+
+/* ---------- step 1: pick a template ---------- */
+async function gallery(){
+  const stage = $('#accStage'); stage.innerHTML = '<div class="acc-empty">Loading templates…</div>';
+  try { A.list = await (await fetch(BASE + 'index.json')).json(); }
+  catch (e) { stage.innerHTML = '<div class="acc-empty">The accessory templates load when the Studio is opened from the website.</div>'; return; }
+  showGallery();
+}
+function showGallery(){
+  A.view && A.view.destroy(); A.view = null; A.tpl = null; setPhase('pick');
+  const stage = $('#accStage'); stage.innerHTML = '<div class="lib-grid acc-grid"></div>';
+  const g = stage.firstChild;
+  A.list.forEach(t => { const c = document.createElement('button'); c.className = 'lib-card';
+    c.innerHTML = `<div class="lib-thumb" style="background-image:url('${BASE}${t.slug}/thumb.png')"></div><b></b><small></small>`;
+    c.querySelector('b').textContent = t.name; c.querySelector('small').textContent = t.object;
+    c.onclick = () => pick(t.slug); g.appendChild(c); });
+}
+async function pick(slug){
+  if (A.busy) return; A.busy = true;
+  try { A.tpl = await LoPolBake.load(BASE + slug + '/'); }
+  catch (e) { toastA("Couldn't load that template"); A.busy = false; return; }
+  A.busy = false; A.preset = A.tpl.look.preset || 'ps1';
+  $('#accName').textContent = A.tpl.name; $('#accVariant').value = ''; $('#accVariant').placeholder = A.tpl.description;
+  $('#accExample').hidden = !A.tpl.exampleUrl; showReference(); buildPrompt(); setPhase('prompt');
+}
+function showReference(){
+  A.view && A.view.destroy(); A.view = null;
+  const stage = $('#accStage'); stage.innerHTML = ''; const im = new Image(); im.src = A.tpl.refUrl; im.className = 'acc-ref'; im.alt = 'Reference: the grey block model, front and back'; stage.appendChild(im);
+}
+function setPhase(p){
+  document.querySelectorAll('#acc [data-phase]').forEach(el => el.hidden = !el.dataset.phase.split(' ').includes(p));
+}
+
+/* ---------- step 2: the prompt for the image model ---------- */
+function buildPrompt(){
+  if (!A.tpl) return; const obj = A.tpl.object, photo = $('#accPhoto').checked, v = ($('#accVariant').value.trim() || A.tpl.description);
+  $('#accPrompt').value = `Image 1 is a reference of a simple low-poly 3D model made of grey blocks, shown twice on a white background: the front on the left and the back on the right (the same ${obj} turned around).${photo ? ` Image 2 is a photo of the real ${obj}.` : ''}
+
+Paint the grey blocks in image 1 so the model looks like ${photo ? `the ${obj} in image 2` : `a ${obj}`}: ${v}. Paint its colours, materials, stitching, seams, details and patterns straight onto each flat face like a hand-painted texture for a 1990s video game.
+
+Rules:
+- Keep every block exactly where it is, the same size and shape, with the same two camera angles. Do not move, add, remove, round off or bend anything, and do not add shadows on the background.
+- Paint every face you can see on both views, including the thin straps, edges and tops. Make the back view show what the back of this ${obj} would look like.
+- Keep the plain white background and keep both views the same size as in image 1.
+- No text, letters or brand logos.`;
+}
+$('#accVariant').addEventListener('input', buildPrompt); $('#accPhoto').addEventListener('change', buildPrompt);
+$('#accCopy').onclick = async () => { try { await navigator.clipboard.writeText($('#accPrompt').value); } catch { $('#accPrompt').select(); document.execCommand('copy'); } toastA('Prompt copied'); };
+$('#accRef').onclick = async () => { const b = await (await fetch(A.tpl.refUrl)).blob(); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = A.tpl.slug + '-reference.png'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 30000); };
+$('#accChange').onclick = showGallery; $('#accChange2').onclick = showGallery;
+$('#accAgain').onclick = () => { showReference(); setPhase('prompt'); };
+
+/* ---------- step 3: bring the painted picture back, bake, preview ---------- */
+const accFile = $('#accFile');
+const dropA = $('#accDrop');
+dropA.onclick = () => accFile.click();
+dropA.addEventListener('dragover', e => { e.preventDefault(); dropA.classList.add('over'); });
+dropA.addEventListener('dragleave', () => dropA.classList.remove('over'));
+accFile.onchange = () => { if (accFile.files[0]) fromFile(accFile.files[0]); accFile.value = ''; };
+const isAcc = () => A.mode === 'acc' && A.tpl;
+window.addEventListener('paste', e => { if (A.mode !== 'acc') return; e.stopImmediatePropagation(); const it = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/')); if (it && isAcc()) { e.preventDefault(); fromFile(it.getAsFile()); } }, true);
+window.addEventListener('drop', e => { if (A.mode !== 'acc') return; e.preventDefault(); e.stopImmediatePropagation(); dropA.classList.remove('over'); const f = [...(e.dataTransfer?.files || [])].find(f => f.type.startsWith('image/')); if (f && isAcc()) fromFile(f); }, true);
+function fromFile(f){ const url = URL.createObjectURL(f), im = new Image(); im.onload = () => { A.painted = im; run(); }; im.onerror = () => toastA("Couldn't read that image"); im.src = url; }
+$('#accExample').onclick = () => { const im = new Image(); im.onload = () => { A.painted = im; run(); }; im.src = A.tpl.exampleUrl; };
+async function run(){
+  if (!A.tpl || !A.painted || A.busy) return; A.busy = true; $('#accMatch span').textContent = 'Painting…';
+  await new Promise(r => setTimeout(r, 30));
+  try {
+    const out = await LoPolBake.bake(A.tpl, A.painted, { preset: A.preset });
+    const stage = $('#accStage'); A.view && A.view.destroy(); stage.innerHTML = '<div class="acc-view"></div>';
+    A.view = LoPolView(stage.firstChild, out.D); setPhase('result');
+    const m = Math.min(...out.match); $('#accMatch span').textContent = `Match ${(m * 100).toFixed(1)}%`;
+    $('#accMatch').classList.toggle('warn', m < .9);
+    document.querySelectorAll('#accLook button').forEach(b => b.classList.toggle('on', b.dataset.p === A.preset));
+  } catch (e) { toastA(e.message || 'Something went wrong'); console.error(e); }
+  A.busy = false;
+}
+document.querySelectorAll('#accLook button').forEach(b => b.onclick = () => { A.preset = b.dataset.p; run(); });
+
+if (location.hash === '#accessories') setMode('acc');
+window.__acc = { A, setMode, pick, run };
+})();
+
 </script>
 </body>
 </html>
