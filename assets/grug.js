@@ -593,7 +593,7 @@
      Everyone sees every tab (the role picked in Settings only changes what the home page shows first). */
   const NAV = [
     ['home', 'Home', 'house', ''], ['games', 'Games', 'game-controller', 'games/'], ['avatar', 'Avatar', 't-shirt', 'avatar/'], ['shop', 'Classic closet', 'storefront', 'shop/'], ['profile', 'Profile', 'user', 'profile/'],
-    ['links', 'Link page', 'share-network', 'links/'], ['rewards', 'Rewards card', 'gift', 'rewards/'], ['create', '3D models', 'cube', 'create/'],
+    ['links', 'Link page', 'share-network', 'links/'], ['rewards', 'Rewards card', 'gift', 'rewards/'], ['create', '3D models', 'cube', 'create/'], ['clothing', 'Clothing Studio', 't-shirt', 'make/clothing/'],
     ['carts', 'Carts', 'device-mobile', 'games/carts/'],
     ['cards', 'Stamp cards', 'ticket', 'me/cards/'],   // the guest's side of rewards: stamp cards from shops and their Pearls (the owner's side is rewards/)
     ['me', 'Me', 'user', 'me/'], ['make', 'Make', 'magic-wand', 'make/'],   // the groups' own pages: a simple list of where to go
@@ -605,7 +605,7 @@
   const DOCK_GROUPS = [
     { id: 'home' }, { id: 'games', label: 'Games', items: ['games', 'carts'] },
     { id: 'me', label: 'Me', items: ['avatar', 'cards', 'profile'] },   // the Shop (closet clothes) is archived with the classic avatar: reached from avatar/ → Classic
-    { id: 'make', label: 'Make', items: ['links', 'rewards', 'create'] }
+    { id: 'make', label: 'Make', items: ['links', 'rewards', 'create', 'clothing'] }
   ];
   // the dock's stops, left to right: what a swipe (or Q / E, LB / RB) steps through
   const STOPS = ['home', 'games', 'me', 'make'];
@@ -652,17 +652,17 @@
   const stops = () => partnerOn() ? PARTNER_TABS : bizOn() ? BIZ_TABS : STOPS;
   const SUB_TEXT = { games: 'The game store: every game, search and favorites', carts: 'Quick one-tap games: swipe up for the next',
     avatar: 'Your look, a hat and your emotes', shop: 'Clothes for the classic avatar', cards: 'Stamp cards from shops, and your Pearls', profile: 'Stats, inventory and settings',
-    links: 'A link page or 3D world for your socials', rewards: 'A free stamp card for your shop', create: 'Model Kit and free 3D presets',
+    links: 'A link page or 3D world for your socials', rewards: 'A free stamp card for your shop', create: 'Model Kit and free 3D presets', clothing: 'Roblox shirts and pants from an AI-dressed avatar',
     dashboard: 'Schedule, recipes, checklists and more', website: 'Your shop\u2019s own website' };
   const groupOf = k => { const find = list => list.find(g => g.id === k || (g.items && g.items.includes(k))); return find(dockGroups()) || find(DOCK_GROUPS) || dockGroups()[0]; };
   // dock icons: the simple set, one colour per tab
   // one colour per section, the same accents theme.js gives each section (Model Kit style)
-  const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], carts: ['device-mobile', '#7EE081'], cards: ['ticket', '#FF9F5A'], rewards: ['gift', '#FF9F5A'], links: ['share-network', '#5AB0FF'], create: ['cube', '#4FD8C4'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'],
+  const DOCK_SIMPLE = { home: ['house', '#9BE338'], games: ['controller', '#7EE081'], carts: ['device-mobile', '#7EE081'], cards: ['ticket', '#FF9F5A'], rewards: ['gift', '#FF9F5A'], links: ['share-network', '#5AB0FF'], create: ['cube', '#4FD8C4'], clothing: ['shirt', '#FFBE1A'], avatar: ['shirt', '#C59BFF'], shop: ['shop', '#FFBE1A'], profile: ['person', '#FF8FC2'],
     me: ['person', '#FF8FC2'], make: ['magic-wand', '#4FD8C4'], dashboard: ['dashboard', '#9BE338'], website: ['browser', '#5AB0FF'] };
-  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', carts: '#4FB357', cards: '#E0782F', rewards: '#E0782F', links: '#2F86D6', create: '#25A893', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E', me: '#E0669E', make: '#25A893', dashboard: '#6FB31C', website: '#2F86D6' };
+  const DOCK_LO = { home: '#6FB31C', games: '#4FB357', carts: '#4FB357', cards: '#E0782F', rewards: '#E0782F', links: '#2F86D6', create: '#25A893', clothing: '#D99A00', avatar: '#9A6FE0', shop: '#D99A00', profile: '#E0669E', me: '#E0669E', make: '#25A893', dashboard: '#6FB31C', website: '#2F86D6' };
   const dockIcon = k => '<svg class="k-ic k-ic-s" viewBox="0 0 16 16" fill="currentColor" style="color:' + DOCK_SIMPLE[k][1] + '" aria-hidden="true" focusable="false">' + (SIMPLE['dock-' + DOCK_SIMPLE[k][0]] || SIMPLE[DOCK_SIMPLE[k][0]] || '') + '</svg>';
   const DOCK = {};
-  ['home', 'games', 'carts', 'cards', 'rewards', 'links', 'create', 'avatar', 'shop', 'profile', 'me', 'make', 'dashboard', 'website'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
+  ['home', 'games', 'carts', 'cards', 'rewards', 'links', 'create', 'clothing', 'avatar', 'shop', 'profile', 'me', 'make', 'dashboard', 'website'].forEach(k => Object.defineProperty(DOCK, k, { get: () => dockIcon(k), enumerable: true }));
   const totalPoints = () => { try { return points().reduce((s, p) => s + (+p.points || 0), 0); } catch (e) { return 0; } };
   const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
   const fsOk = () => !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);

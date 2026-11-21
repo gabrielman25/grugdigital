@@ -34,7 +34,7 @@ OUT = os.path.join(ROOT, 'app', 'offline.json')
 GRUG_PAGES = [
     '', '404.html', 'games/', 'games/favorites/', 'games/welcome/', 'me/', 'me/cards/', 'avatar/', 'avatar/look.html', 'avatar/classic/',
     'profile/', 'shop/', 'make/', 'links/', 'links/create/', 'links/page/', 'rewards/', 'rewards/create/', 'rewards/card/',
-    'create/', 'create/modelkit/', 'pearls.html', 'credits.html', 'privacy.html', 'terms.html', 'support.html',
+    'create/', 'create/modelkit/', 'make/clothing/', 'pearls.html', 'credits.html', 'privacy.html', 'terms.html', 'support.html',
 ]
 DAYPART_PAGES = [
     'business/', 'business/site/', 'rewards/', 'rewards/create/', 'restaurant/', 'site/',
