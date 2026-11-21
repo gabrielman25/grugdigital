@@ -1435,12 +1435,13 @@ function figureDeform(part, p){
     // Boots: the lower leg becomes a boot that would hold the foot. From mid-shin down it reaches the ground (the foot's sole),
     // its back drops straight to just behind the heel and its front slopes down to just past the toes, a little wider than the foot.
     const top = 0.75, s = clamp(1 - p[1]/top, 0, 1);
-    if (s > 0){
+    if (p[1] < 2*FIG.knee){
       const o = FIG.off, k = FIG.foot, sole = FIG.legY - (FEET.height || 0.423)*k + o.legs[1] + o.feet[1] + 0.01;
       const zoff = FIG.kneeBend + FIG.footFwd + o.legs[2] + o.feet[2], heel = (FEET.zmin ?? -0.324)*k + zoff - 0.07, toe = (FEET.zmax ?? 0.91)*k + zoff + 0.06;
       const yTop = FIG.legY + top*(FIG.hip + 0.06 - FIG.legY)/2; y = yTop + (y - yTop)*((yTop - sole)/Math.max(0.05, yTop - FIG.legY));   // stretch down to the sole
-      const zb0 = -0.5*FIG.legW + FIG.kneeBend*t, zf0 = 0.5*FIG.legW + FIG.kneeBend*t, u = lz/0.5*0.5 + 0.5;        // where this point sits, back (0) to front (1)
-      const zb = zb0 + (Math.min(zb0, heel) - zb0)*sm(0, 1, s), zf = zf0 + (toe - zf0)*Math.min(1, s/0.9);
+      // front and back are straight lines from the knee (no knee bend in boots) to the toe and the heel
+      const sk = clamp(1 - p[1]/Math.max(0.2, 2*FIG.knee), 0, 1), u = lz/0.5*0.5 + 0.5;        // u: where this point sits, back (0) to front (1)
+      const zb0 = -0.5*FIG.legW, zf0 = 0.5*FIG.legW, zb = zb0 + (Math.min(zb0, heel) - zb0)*sk, zf = zf0 + (toe - zf0)*Math.min(1, sk/0.92);
       Z = zb + (zf - zb)*u;
       X = side*(FIG.legX + o.feet[0]*0) + lx*FIG.legW*(1 + 0.14*sm(0, 1, s)) + side*0.02*sm(0, 1, s);
     }
