@@ -229,8 +229,10 @@ hair, and each model's random catalog body, face and hair (`makeOne`). Every gam
 
 Make → Clothing Studio. **Clothing** turns an AI-dressed blocky avatar into classic shirt + pants templates. **Accessories**
 (`#accessories`) paints block-model templates (backpack, handbag, cowboy hat, boombox, lantern…) from an image model's
-picture, in the browser, and gives a PS1-style 3D model (GLB / OBJ zip / texture / normal map) with baked AO, room light,
-light nodes, path-traced bounce, material normal maps, an inverted-hull outline and a "hand-made" wobble.
+picture, in the browser, and gives a PS1-style 3D model (GLB / OBJ zip / texture / normal map) with texture-only retro
+effects (colour depth, dither, pixel size, contrast, saturation, brightness: sliders that show their values), baked AO, room
+light, light nodes, path-traced bounce, material normal maps and an inverted-hull outline (on by default, RGB 5 5 5,
+width 0.027). Nothing moves the model's vertices (no snapping or wobble).
 The page is one file built outside this repo (the owner's Image2LoPol folder: `tool/inline_studio.py` puts the
 Accessories section in, then it is copied here with a Back to Make button). The templates in `make/clothing/accessories/`
 (`index.json` + one folder each) are made by that folder's `python3 tool/lopol.py template items/<slug> <dir>`; never edit them

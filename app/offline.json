@@ -1,5 +1,5 @@
 {
- "v": "81178878d34e",
+ "v": "91f08dcc16fe",
  "apps": {
   "grug": [
    "grug",
@@ -413,7 +413,7 @@
     "/make/clothing/accessories/backpack/normal.png": "3a77d97b86",
     "/make/clothing/accessories/backpack/reference.png": "0bdb267720",
     "/make/clothing/accessories/backpack/room.png": "eee137e522",
-    "/make/clothing/accessories/backpack/template.json": "12d319edfc",
+    "/make/clothing/accessories/backpack/template.json": "4a626b71f7",
     "/make/clothing/accessories/backpack/texmap.bin": "a18c608cae",
     "/make/clothing/accessories/backpack/thumb.png": "61b0039152",
     "/make/clothing/accessories/boombox/ao.png": "aca16e5282",
@@ -423,7 +423,7 @@
     "/make/clothing/accessories/boombox/normal.png": "07433ca3d1",
     "/make/clothing/accessories/boombox/reference.png": "7f13184c5c",
     "/make/clothing/accessories/boombox/room.png": "3aca5a6ec1",
-    "/make/clothing/accessories/boombox/template.json": "54633a5189",
+    "/make/clothing/accessories/boombox/template.json": "b8953412e8",
     "/make/clothing/accessories/boombox/texmap.bin": "8ff106b376",
     "/make/clothing/accessories/boombox/thumb.png": "e028d6c79e",
     "/make/clothing/accessories/cowboy-hat/ao.png": "ac2c84cb45",
@@ -433,7 +433,7 @@
     "/make/clothing/accessories/cowboy-hat/normal.png": "8af495763f",
     "/make/clothing/accessories/cowboy-hat/reference.png": "8592aa00ac",
     "/make/clothing/accessories/cowboy-hat/room.png": "ec6d0175b2",
-    "/make/clothing/accessories/cowboy-hat/template.json": "ba8e4134e3",
+    "/make/clothing/accessories/cowboy-hat/template.json": "8c2c440126",
     "/make/clothing/accessories/cowboy-hat/texmap.bin": "61f575f77d",
     "/make/clothing/accessories/cowboy-hat/thumb.png": "039c9f94f0",
     "/make/clothing/accessories/handbag/ao.png": "bd9c789047",
@@ -443,7 +443,7 @@
     "/make/clothing/accessories/handbag/normal.png": "e1940a5dbf",
     "/make/clothing/accessories/handbag/reference.png": "dee72920cd",
     "/make/clothing/accessories/handbag/room.png": "36cb292fbf",
-    "/make/clothing/accessories/handbag/template.json": "f7802bcc3b",
+    "/make/clothing/accessories/handbag/template.json": "e3a1b8cd66",
     "/make/clothing/accessories/handbag/texmap.bin": "ca39e532d8",
     "/make/clothing/accessories/handbag/thumb.png": "52ec468e61",
     "/make/clothing/accessories/index.json": "18bb99ba1c",
@@ -454,10 +454,10 @@
     "/make/clothing/accessories/lantern/normal.png": "6f1d4d3e91",
     "/make/clothing/accessories/lantern/reference.png": "3153b13878",
     "/make/clothing/accessories/lantern/room.png": "870e61cd39",
-    "/make/clothing/accessories/lantern/template.json": "274ad4b37e",
+    "/make/clothing/accessories/lantern/template.json": "68772a39f0",
     "/make/clothing/accessories/lantern/texmap.bin": "56a810fc7b",
     "/make/clothing/accessories/lantern/thumb.png": "d1398cd08d",
-    "/make/clothing/": "008d0fbdad",
+    "/make/clothing/": "714ae04fd4",
     "/make/": "c8b93142a9",
     "/me/cards/": "bc7189095b",
     "/me/": "ace48c1b35",
@@ -472,7 +472,7 @@
     "/support.html": "4e19678ee5",
     "/terms.html": "a1578ecad9"
    },
-   "bytes": 45997245
+   "bytes": 45997999
   },
   "daypart": {
    "title": "Daypart",
