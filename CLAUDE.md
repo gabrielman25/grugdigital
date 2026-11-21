@@ -270,7 +270,14 @@ eyewear, headphones / earmuffs and sandals, in `make/clothing/ugc/` (index.json,
 swaps her head mesh for the Studio's rounded head (in her head frame, eyes at the same height), so the catalog's own fitting
 builds each piece around THAT head, merges it (`bakeSingle`) and converts it to studs; sandals (flat soles, no slippers) are
 mapped from her posed feet to the Figure's feet. They're drawn like accessories and never touch the body. Sandals switch to the
-Figure, barefoot, with no password; taking them off brings the boots back; Blocky or Boots takes them off. Looks keep `ugc`. The Figure's feet are **Barefoot** (the real feet) or
+Figure, barefoot, with no password (a look with sandals too); taking them off brings the boots back; Blocky or Boots takes
+them off. Looks keep `ugc` (ids are fixed by the export's catalog seed, `grug-cd50gg`: keep it, the example looks name them).
+The export also: puts her **stock long hair and buns** (the classic kit's, in four colours) first in Hair, pushed out of the
+Studio's head where they'd sink in; makes **headphones exactly symmetric** (her left half mirrored); refits **sandals** to the
+Figure's feet (soles widened to its footprint by angle, straps moved onto its skin at the height they sat above hers). In the
+Studio, sandal parts inside the trouser leg are cut off at the hem (`ugcParts`). Every worn piece (accessory or catalog) has
+**Position & size**: X / Y / Z, size 50 to 150%, tilt, turn, roll (`adjMV`; a pair mirrors it on the right foot); looks keep it
+(`adj`, `ugcAdj`). Example look **Pink sweetheart** (clothing `pink`: blocky pants have sandals painted on). The Figure's feet are **Barefoot** (the real feet) or
 **Boots** (`FIG.boots`: the lower legs are reshaped into a boot that would hold the foot, `figureDeform`, and the feet aren't
 drawn). Clothing can carry `pantsFigure` (index.json): Blocky and Boots wear `pants` (shoes painted on), barefoot Figure wears
 `pantsFigure` (just pants). Built faces' parts are drawn 2× (a 600 × 488 canvas, 300 px wide on the head).

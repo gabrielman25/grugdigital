@@ -1385,7 +1385,7 @@ function slenderDeform(part, p){
 /* Figure: the rounded body (slimmer waist, longer arms with a slight bend at the elbow, sphere hands, real feet).
    Every number is a slider in the Character tab's Proportions panel; FIG_DEFAULT is the starting point (paste the panel's
    JSON here to change it). off: extra X / Y / Z moves per part (x mirrors on the right side, so +x spreads both sides out). */
-const FIG_DEFAULT = {"torsoW":0.9,"waist":0.23,"waistY":2.68,"torsoD":1.03,"armX":1.23,"armW":0.57,"armLen":1.04,"elbow":3.14,"elbowBend":0,"armFwd":0.4,"hand":0.39,"hip":2.8,"legX":0.47,"legW":0.8,"legY":0.2,"knee":0.49,"kneeBend":-0.3,"foot":1.27,"footFwd":0.09,"cuffLift":0.12,"thighs":1,"hem":0.07,"legHem":0.08,"boots":false,"instep":0.25,"toeH":0.07,
+const FIG_DEFAULT = {"torsoW":0.9,"waist":0.23,"waistY":2.68,"torsoD":1.03,"armX":1.23,"armW":0.57,"armLen":1.04,"elbow":3.14,"elbowBend":0,"armFwd":0.4,"hand":0.39,"hip":2.8,"legX":0.47,"legW":0.8,"legY":0.2,"knee":0.49,"kneeBend":-0.3,"foot":1.27,"footFwd":0.09,"cuffLift":0.12,"thighs":1,"hem":0.07,"legHem":0.08,"boots":false,"instep":0.32,"toeH":0.15,
   "off":{"torso":[0,0,0],"arms":[0,0,0],"hands":[0,0,0],"legs":[0,0,0],"feet":[-0.02,0.19,-0.05],"head":[0,0,0]}};   // the owner's tuned figurine (Nov 2026)
 const FIG = JSON.parse(JSON.stringify(FIG_DEFAULT));
 /* distance from the middle to the edge of a rounded square (half-size a, corner radius rr), in direction th */
@@ -1454,7 +1454,7 @@ function figureDeform(part, p){
       // instep (FIG.instep, in the leg's own height: about halfway down the boot) and only then slopes out to the toe
       // below the instep the front curves out (a quarter ellipse: straight down at the instep, level at the top of the toe)
       // and the toe ends in a square, upright front (FIG.toeH tall, in the leg's own height)
-      const pi = FIG.instep ?? 0.25, pt = Math.min(pi*0.8, FIG.toeH ?? 0.07), q = clamp((pi - p[1])/Math.max(0.01, pi - pt), 0, 1);
+      const pi = FIG.instep ?? 0.32, pt = Math.min(pi*0.8, FIG.toeH ?? 0.15), q = clamp((pi - p[1])/Math.max(0.01, pi - pt), 0, 1);
       const sk = clamp(1 - p[1]/Math.max(0.2, 2*FIG.knee), 0, 1), u = lz/0.5*0.5 + 0.5;   // u: back (0) to front (1)
       const zb0 = -0.5*FIG.legW, zf0 = 0.5*FIG.legW, zb = zb0 + (Math.min(zb0, heel) - zb0)*sk, zf = toe - (toe - zf0)*Math.sqrt(Math.max(0, 1 - q*q));
       Z = zb + (zf - zb)*u;
@@ -1474,7 +1474,7 @@ function hemLift(part, side, ang){
     const n = 96, o = FIG.off, k = FIG.foot, fx = side*(FIG.legX + o.legs[0] + o.feet[0]), fy = FIG.legY - (FEET.height || 0.423)*k + o.legs[1] + o.feet[1], fz = FIG.kneeBend + FIG.footFwd + o.legs[2] + o.feet[2];
     const rr = (BODY_TYPES.figure.round || {}).leg || 0.2, ap = 0.5*(1 + (FIG.legHem ?? 0.08)), bottom = FIG.legY - 0.07; P = new Float32Array(n);
     for (let i = 0; i < n; i++){ const a = i/n*Math.PI*2, R = rrBound(a, 0.5, rr)*hexScale(a, ap, 1, Math.PI/6), X = side*FIG.legX + Math.cos(a)*R*FIG.legW, Z = Math.sin(a)*R*FIG.legW + FIG.kneeBend;
-      const top = fy + FEET.topAt(side*(X - fx)/k, (Z - fz)/k)*k;   // the foot right under this point of the hem (the ankle inside the leg is fine)
+      const top = FEET.topAt ? fy + FEET.topAt(side*(X - fx)/k, (Z - fz)/k)*k : -1e9;   // (feet not loaded yet: no lift)   // the foot right under this point of the hem (the ankle inside the leg is fine)
       P[i] = Math.max(0, top + 0.035 - bottom); }
     { const Q = P.slice(); for (let i = 0; i < n; i++){ let m = 0; for (let d = -2; d <= 2; d++) m = Math.max(m, Q[(i+d+n)%n]); P[i] = m; } }
     for (let pass = 0; pass < 4; pass++){ const Q = P.slice(); for (let i = 0; i < n; i++){ let m = 0; for (let d = -3; d <= 3; d++) m += Q[(i+d+n)%n]; P[i] = m/7; } }
@@ -1571,7 +1571,7 @@ function partGeo(part, type){
     let us = ticks(Math.hypot(...f.u), r, !!def), vs = ticks(Math.hypot(...f.v), r, !!def);
     if (type === 'figure' && kindOf(part.name) === 'leg'){   // finer rows near the bottom of the leg (the boot's toe curve, the hem)
       const more = (ts, dir) => { if (Math.abs(dir[1]) < 0.5) return ts; const o = new Set(ts); for (let y = 0; y <= 0.46; y += 0.025){ const t = (y - f.o[1])/dir[1]; if (t > 1e-4 && t < 1 - 1e-4) o.add(t); }
-        for (const y of [FIG.toeH ?? 0.07, FIG.instep ?? 0.25]){ const t = (y - f.o[1])/dir[1]; if (t > 1e-4 && t < 1 - 1e-4) o.add(t); } return [...o].sort((a, b) => a - b); };
+        for (const y of [FIG.toeH ?? 0.15, FIG.instep ?? 0.32]){ const t = (y - f.o[1])/dir[1]; if (t > 1e-4 && t < 1 - 1e-4) o.add(t); } return [...o].sort((a, b) => a - b); };
       us = more(us, f.u); vs = more(vs, f.v);
     }
     const nu = us.length, base = g.p.length/3, e = 1e-3;
@@ -4406,6 +4406,26 @@ function wearMatrix(w){
   const rot = w.rot || [0, 0, 0], M = R(rot[0], rot[1], rot[2]), s = Array.isArray(w.scale) ? w.scale : [w.scale ?? 1, w.scale ?? 1, w.scale ?? 1], o = w.offset || [0, 0, 0];
   return { M, s, o, ap: p => [0, 1, 2].map(i => M[i][0] * p[0] * s[0] + M[i][1] * p[1] * s[1] + M[i][2] * p[2] * s[2] + o[i]), av: v => { const q = [0, 1, 2].map(i => M[i][0] * v[0] + M[i][1] * v[1] + M[i][2] * v[2]); const l = Math.hypot(...q) || 1; return q.map(x => x / l); } };
 }
+/* the middle of a set of triangles (their bounding box): what an accessory turns and grows about */
+function centreOf(p, idx){ const mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9]; for (const v of idx) for (let a = 0; a < 3; a++) { mn[a] = Math.min(mn[a], p[v * 3 + a]); mx[a] = Math.max(mx[a], p[v * 3 + a]); } return mn[0] > 1e8 ? [0, 0, 0] : mn.map((v, a) => (v + mx[a]) / 2); }
+/* each worn piece's own fine-tuning: X / Y / Z, size (up to 1.5x), tilt, turn and roll. adj = {x, y, z, s, rx, ry, rz};
+   a pair (shoes, sandals) mirrors it on the right foot, so both move out or turn in together */
+const ADJ0 = () => ({ x: 0, y: 0, z: 0, s: 1, rx: 0, ry: 0, rz: 0 });
+function adjMV(m, adj, pivot, side){
+  if (!adj) return m; const sd = side < 0 ? -1 : 1, c = pivot || [0, 0, 0], R = m4mul(m4RZ(adj.rz * sd * D2R), m4mul(m4RY(adj.ry * sd * D2R), m4RX(adj.rx * D2R))), S = m4I(); S[0] = S[5] = S[10] = adj.s;
+  return m4mul(m, m4mul(m4T(c[0] + adj.x * sd, c[1] + adj.y, c[2] + adj.z), m4mul(R, m4mul(S, m4T(-c[0], -c[1], -c[2])))));
+}
+function adjRows(w, redraw){
+  const d = document.createElement('details'); d.className = 'o-off'; w.adj = w.adj || ADJ0();
+  const sum = () => { const a = w.adj; return a.x || a.y || a.z || a.s !== 1 || a.rx || a.ry || a.rz ? 'changed' : ''; };
+  d.innerHTML = `<summary>Position & size<b>${sum()}</b></summary>`;
+  [['x', 'Left / right', -0.6, 0.6, 0.01, v => (+v).toFixed(2)], ['y', 'Up / down', -0.6, 0.6, 0.01, v => (+v).toFixed(2)], ['z', 'Forward / back', -0.6, 0.6, 0.01, v => (+v).toFixed(2)],
+   ['s', 'Size', 0.5, 1.5, 0.01, v => Math.round(v * 100) + '%'], ['rx', 'Tilt', -60, 60, 1, v => Math.round(v) + '°'], ['ry', 'Turn', -180, 180, 1, v => Math.round(v) + '°'], ['rz', 'Roll', -60, 60, 1, v => Math.round(v) + '°']].forEach(([k, label, mn, mx, st, f]) => {
+    const l = document.createElement('label'); l.className = 'o-rng'; l.innerHTML = `<span>${label}<b>${f(w.adj[k])}</b></span><input type="range" min="${mn}" max="${mx}" step="${st}" value="${w.adj[k]}">`;
+    const r = l.querySelector('input'); r.oninput = () => { w.adj[k] = +r.value; l.querySelector('b').textContent = f(r.value); d.querySelector('summary b').textContent = sum(); if (redraw) redraw(); }; d.appendChild(l); });
+  const b = document.createElement('button'); b.className = 'g-btn g-btn--ghost g-btn--sm'; b.textContent = 'Reset'; b.onclick = () => { w.adj = ADJ0(); const o = d.open; const n = adjRows(w, redraw); n.open = o; d.replaceWith(n); }; d.appendChild(b);
+  return d;
+}
 /* an accessory's triangles and outline hull in avatar space, as GLR meshes */
 function accMeshes(D, wear, outline){
   const { f32 } = LoPolTex, P = f32(D.pos), N = f32(D.nrm), UV = f32(D.uv), TG = f32(D.tan), c = D.centre || [0, 0, 0], W = wearMatrix(wear), nv = P.length / 3;
@@ -4415,7 +4435,7 @@ function accMeshes(D, wear, outline){
     g.p.push(...W.ap(p)); g.n.push(...W.av(n)); g.tu.push(...W.av(t)); g.tv.push(...W.av(b)); g.t.push(UV[v * 2], UV[v * 2 + 1]); g.t2.push(UV[v * 2], UV[v * 2 + 1]); g.i.push(v); }
   // shoes (worn on 'feet') are a pair: split into the left shoe (x > 0) and the right one, so each follows its own foot
   const feet = wear && wear.on === 'feet', halves = idx => feet ? [1, -1].map(side => ({ side, i: idx.filter((_, k) => { const t = Math.floor(k / 3) * 3; return Math.sign(g.p[idx[t] * 3] + g.p[idx[t + 1] * 3] + g.p[idx[t + 2] * 3] || 1) === side; }) })) : [{ side: 0, i: idx }];
-  const out = { parts: halves(g.i).map(h => ({ side: h.side, mesh: OUT.r.mesh(Object.assign({}, g, { i: h.i })) })) };
+  const out = { parts: halves(g.i).map(h => ({ side: h.side, pivot: centreOf(g.p, h.i), mesh: OUT.r.mesh(Object.assign({}, g, { i: h.i })) })) };
   if (outline && outline.on !== false) {
     const H = LoPolTex.hullOf(P, (outline.width ?? .027) * D.radius * 2), h = { p: [], n: [], t: [], i: [] }, HN = LoPolTex.flatNormals(H);
     for (let v = 0; v < nv; v++) { h.p.push(...W.ap([H[v * 3] + c[0], H[v * 3 + 1] + c[1], H[v * 3 + 2] + c[2]])); h.n.push(...W.av([HN[v * 3], HN[v * 3 + 1], HN[v * 3 + 2]])); h.t.push(0, 0); h.i.push(v); }
@@ -4501,10 +4521,10 @@ function setBody(b){
 const PROPS = [['Torso', [['torsoW', 'Width', .6, 1.2], ['waist', 'Waist (narrower)', 0, .3], ['waistY', 'Waist height', 2.1, 3.4], ['torsoD', 'Depth', .5, 1.1], ['hem', 'Hem flare', 0, .2]]],
   ['Arms', [['armLen', 'Length', .9, 1.5], ['armW', 'Thickness', .4, 1], ['armX', 'Shoulder spread', 1, 1.6], ['elbow', 'Elbow height', 2, 3.6], ['elbowBend', 'Elbow bend', 0, .4], ['armFwd', 'Forearm forward', -.2, .4], ['hand', 'Hand size', .15, .5], ['cuffLift', 'Cuff lift (front)', 0, .3]]],
   ['Legs', [['hip', 'Leg height (hips)', 1.4, 2.8], ['legY', 'Ankle height', .2, .8], ['legW', 'Thickness', .5, 1.1], ['legX', 'Spacing', .3, .7], ['knee', 'Knee position', .2, .8], ['kneeBend', 'Knee bend', -.3, .3], ['thighs', 'Legs meet (fill the gap)', 0, 1]]],
-  ['Feet', [['foot', 'Size', .6, 1.6], ['footFwd', 'Forward', -.3, .4], ['instep', 'Boot toe starts at (height)', .08, .7]]]];
+  ['Feet', [['foot', 'Size', .6, 1.6], ['footFwd', 'Forward', -.3, .4], ['instep', 'Boot toe starts at (height)', .08, .7], ['toeH', 'Boot toe height', .04, .35]]]];
 let propPend = 0;
 let lightPend = 0;   // the light bake follows the shape: redone a moment after the proportions stop changing
-const relight = (ms = 350) => { clearTimeout(lightPend); lightPend = setTimeout(() => { if (OUT.r) bodyTextures(); }, ms); };
+const relight = (ms = 350) => { clearTimeout(lightPend); lightPend = setTimeout(() => { if (OUT.r) { bodyTextures(); if (UGC.worn.sandals) ugcParts(UGC.worn.sandals); } }, ms); };
 const propRebuild = () => { if (propPend) return; propPend = requestAnimationFrame(() => { propPend = 0; if (OUT.r && OUT.body === 'figure') { OUT.r.buildBody('figure', 'round'); relight(); } }); };
 function drawProps(){
   const box = $o('#outPropBody'); box.innerHTML = '';
@@ -4525,7 +4545,9 @@ function setFig(f){ const d = JSON.parse(JSON.stringify(FIG_DEFAULT)); Object.as
 /* ---------- looks: presets, saved ---------- */
 async function applyLook(L){
   if (L.skin) { $o('#outSkin').value = L.skin; }
-  if (L.figure) setFig(L.figure); if (L.body) setBody(L.body === 'figure' && !(await FigureLock.ask()) ? 'classic' : L.body);
+  // a look with sandals on is a Figure look by itself (sandals never ask for the password)
+  const sandalsOn = !!(L.ugc && L.ugc.length && (await loadUGC()).some(e => e.dept === 'sandals' && L.ugc.includes(e.id)));
+  if (L.figure) setFig(L.figure); if (L.body) setBody(L.body === 'figure' && !sandalsOn && !(await FigureLock.ask()) ? 'classic' : L.body);
   if (L.faceParts) await setFace('custom', L.faceParts);   // a look without its own face keeps hers
   if (L.nail) { $o('#outNail').value = L.nail; if (OUT.r) OUT.r.nail = hexRgb(L.nail); const w = $o('#outNailWheel'); if (w && w.sync) w.sync(); else if ($o('#outNailBtn')) $o('#outNailBtn').style.background = L.nail; }
   const custom = L.custom ? { id: 'custom', name: L.custom.name || 'Your clothing', shirt: L.custom.shirt, pants: L.custom.pants } : null;
@@ -4536,9 +4558,10 @@ async function applyLook(L){
   for (const a of L.accessories || []) {
     let e = OUT.wardrobe.find(w => w.id === (a.id || 'tpl:' + a.slug));
     if (!e && a.albedo) { e = { id: a.id || 'saved:' + Math.random().toString(36).slice(2), slug: a.slug, name: a.name || a.slug, slot: a.slot, albedo: a.albedo, logo: a.logo, settings: a.settings, thumb: a.thumb, model: a.model }; OUT.wardrobe.push(e); }
-    if (e) await wear(e, a.colours);
+    if (e) { await wear(e, a.colours); const w = OUT.worn.find(x => x.e.id === e.id); if (w && a.adj) w.adj = Object.assign(ADJ0(), a.adj); }
   }
   Object.keys(UGC.worn).forEach(d => ugcOff(d, true));
+  UGC.adj = L.ugcAdj || {};
   if (L.ugc && L.ugc.length) { await loadUGC(); for (const id of L.ugc) { const e = (UGC.list || []).find(x => x.id === id); if (e) await ugcWear(e); } }
   drawUGC(); drawWardrobe(); drawWorn(); $o('#outName').value = L.name || '';
 }
@@ -4546,7 +4569,8 @@ function currentLook(){
   const name = $o('#outName').value.trim() || 'My look', pairs = (pal, cols) => pal.map((p, i) => cols[i] ? { from: p, to: cols[i] } : null).filter(Boolean);
   const L = { name, ugc: Object.values(UGC.worn).map(w => w.e.id), skin: $o('#outSkin').value, body: OUT.body, face: OUT.face || undefined, faceParts: OUT.face === 'custom' ? JSON.parse(JSON.stringify(OUT.faceParts)) : undefined, nail: $o('#outNail').value, figure: OUT.body === 'figure' ? JSON.parse(figJSON()) : undefined, clothing: OUT.cloth && OUT.cloth.id !== 'custom' ? OUT.cloth.id : null,
     shirtColours: pairs(OUT.shirtPal, OUT.shirtCols), pantsColours: pairs(OUT.pantsPal, OUT.pantsCols),
-    accessories: OUT.worn.map(w => Object.assign({ id: w.e.id, slug: w.e.slug, name: w.e.name, slot: w.slot, colours: w.colours.map(c => c || null) }, w.e.albedo ? { albedo: w.e.albedo, logo: w.e.logo, settings: w.e.settings, thumb: w.e.thumb, model: w.e.model } : {})) };
+    ugcAdj: Object.fromEntries(Object.values(UGC.worn).map(w => [w.e.id, w.adj])),
+    accessories: OUT.worn.map(w => Object.assign({ id: w.e.id, slug: w.e.slug, name: w.e.name, slot: w.slot, adj: w.adj, colours: w.colours.map(c => c || null) }, w.e.albedo ? { albedo: w.e.albedo, logo: w.e.logo, settings: w.e.settings, thumb: w.e.thumb, model: w.e.model } : {})) };
   if (OUT.cloth && OUT.cloth.id === 'custom') L.custom = { name: OUT.cloth.name, shirt: OUT.shirt && OUT.shirt.toDataURL(), pants: OUT.pants && OUT.pants.toDataURL() };
   return L;
 }
@@ -4618,11 +4642,11 @@ function drawWorn(){
   const box = $o('#outWorn'); box.innerHTML = ''; $o('#outWornCard').hidden = !OUT.worn.length && !Object.keys(UGC.worn).length;
   Object.values(UGC.worn).forEach(w => { const card = document.createElement('div'); card.className = 'o-worn';
     card.innerHTML = `<div class="o-wh"><b></b><small>${SLOT_NAMES[w.slot] || w.slot} · catalog</small><button class="g-btn g-btn--ghost g-btn--sm o-off">Take off</button></div>`;
-    card.querySelector('b').textContent = w.e.name; card.querySelector('.o-off').onclick = () => ugcOff(w.e.dept); box.appendChild(card); });
+    card.querySelector('b').textContent = w.e.name; card.querySelector('.o-off').onclick = () => ugcOff(w.e.dept); card.appendChild(adjRows(w)); box.appendChild(card); });
   OUT.worn.forEach(w => { const card = document.createElement('div'); card.className = 'o-worn';
     card.innerHTML = `<div class="o-wh"><b></b><small>${SLOT_NAMES[w.slot] || w.slot}</small><button class="g-btn g-btn--sm o-ed">Edit</button><button class="g-btn g-btn--ghost g-btn--sm o-off">Take off</button></div>`;
     card.querySelector('b').textContent = w.e.name; card.querySelector('.o-off').onclick = () => { takeOff(w.e.id); drawWardrobe(); };
-    card.querySelector('.o-ed').onclick = () => __acc.editWorn(w, OUT.look);
+    card.querySelector('.o-ed').onclick = () => __acc.editWorn(w, OUT.look); card.appendChild(adjRows(w));
     w.T.groups.forEach((g, i) => card.appendChild(swatchRow(g, w.T.means[i].map(Math.round), w.colours[i] && w.colours[i].rgb, v => { w.colours[i] = { rgb: v, amount: 1 }; paint(w); }, () => { w.colours[i] = null; paint(w); drawWorn(); })));
     box.appendChild(card); });
   drawWardrobe();
@@ -4837,9 +4861,24 @@ async function ugcWear(e){
   const g = { p: Array.from(P), n: Array.from(N), t: [], i: Array.from(I) }; for (let k = 0; k < U.length; k += 2) g.t.push(U[k], 1 - U[k + 1]);
   const im = await LoPolTex.loadImg(AS(UBASE + e.tex)), tex = OUT.r.tex(im, null, false);
   const halves = e.dept === 'sandals' ? [1, -1].map(side => ({ side, i: g.i.filter((_, k) => { const t = Math.floor(k / 3) * 3; return Math.sign(g.p[g.i[t] * 3] + g.p[g.i[t + 1] * 3] + g.p[g.i[t + 2] * 3] || 1) === side; }) })) : [{ side: 0, i: g.i }];
-  UGC.worn[e.dept] = { e, slot, tex, cut: J.alpha === 'mask' ? 0.4 : 0.02, parts: halves.map(h => ({ side: h.side, mesh: OUT.r.mesh(Object.assign({}, g, { i: h.i })) })) };
-  if (e.dept === 'sandals') { if (!UGC.prev) UGC.prev = { body: OUT.body, boots: !!FIG.boots }; if (OUT.body !== 'figure') setBody('figure'); if (FIG.boots) setBoots(false); }
+  if (e.dept === 'sandals') { if (!UGC.prev) UGC.prev = { body: OUT.body, boots: !!FIG.boots }; if (OUT.body !== 'figure') setBody('figure'); if (FIG.boots) setBoots(false); await FEET.load(); }
+  UGC.worn[e.dept] = { e, slot, tex, g, halves, adj: (UGC.adj && UGC.adj[e.id]) || ADJ0(), cut: J.alpha === 'mask' ? 0.4 : 0.02, parts: [] };
+  ugcParts(UGC.worn[e.dept]);
   drawUGC(); drawWorn();
+}
+/* a piece's meshes. Sandals: whatever would sit inside the trouser leg (a gladiator's straps up the shin) is cut off at the
+   hem, worked out from the Figure's proportions (the hem's own lift over the foot included) */
+function ugcParts(w){
+  w.parts.forEach(q => OUT.r.free(q.mesh)); const g = w.g;
+  const keep = w.e.dept !== 'sandals' ? null : (() => { const o = FIG.off, k = FIG.foot, h = (typeof FEET !== 'undefined' && FEET.height) || 0.423;
+    return (a, side) => { const px = g.p[a * 3], py = g.p[a * 3 + 1], pz = g.p[a * 3 + 2];
+      const X = side * (FIG.legX + o.legs[0] + o.feet[0]) + k * (px - side * 0.47), Y = FIG.legY - h * k + o.legs[1] + o.feet[1] + k * py, Z = FIG.kneeBend + FIG.footFwd + o.legs[2] + o.feet[2] + k * pz;
+      const dx = X - side * (FIG.legX + o.legs[0]), dz = Z - (FIG.kneeBend + o.legs[2]), hw = 0.5 * FIG.legW * (1 + (FIG.legHem ?? 0.08));
+      if (Math.abs(dx) > hw * 1.12 || Math.abs(dz) > hw * 1.2) return true;
+      const hem = FIG.legY - 0.07 + o.legs[1] + (typeof hemLift === 'function' ? hemLift(null, side, Math.atan2(dz, dx)) : 0);
+      return Y < hem - 0.01; }; })();
+  w.parts = w.halves.map(hf => { let i = hf.i; if (keep) { const o = []; for (let t = 0; t < i.length; t += 3) if (keep(i[t], hf.side) && keep(i[t + 1], hf.side) && keep(i[t + 2], hf.side)) o.push(i[t], i[t + 1], i[t + 2]); i = o; }
+    return { side: hf.side, pivot: centreOf(g.p, hf.i), mesh: OUT.r.mesh(Object.assign({}, g, { i })) }; });
 }
 function ugcOff(dept, quiet){
   const w = UGC.worn[dept]; if (!w) return; delete UGC.worn[dept];
@@ -4862,7 +4901,7 @@ function drawUGCWorn(r, mv, P){
   const gl = r.gl;
   for (const w of Object.values(UGC.worn)) { r.cut = w.cut;
     if (w.slot === 'feet' && OUT.body === 'figure' && FIG.boots) continue;
-    w.parts.forEach(q => r.draw(q.mesh, w.tex, accMV(r, mv, w.slot, q.side), P, [1, 1, 1], false, null, 0)); }
+    w.parts.forEach(q => r.draw(q.mesh, w.tex, adjMV(accMV(r, mv, w.slot, q.side), w.adj, q.pivot, q.side), P, [1, 1, 1], false, null, 0)); }
   r.cut = 0.02;
 }
 /* ---------- draw loop ---------- */
@@ -4879,7 +4918,7 @@ function frame(t){
   gl.depthMask(false); r.draw(r.floor, OUT.tex.floor, mv, P, [1, 1, 1], true); gl.depthMask(true);
   r.drawChar(mv, P, { upper: OUT.tex.upper, legs: OUT.tex.legs, head: OUT.tex.head, tint: [1, 1, 1], skin: skin().map(v => v / 255) });
   const sp = r.spec; r.spec = 0;
-  OUT.worn.forEach(w => w.parts.forEach(q => { const m = accMV(r, mv, w.slot, q.side);
+  OUT.worn.forEach(w => w.parts.forEach(q => { const m = adjMV(accMV(r, mv, w.slot, q.side), w.adj, q.pivot, q.side);
     r.draw(q.mesh, w.tex, m, P, [1, 1, 1], false, null, 0);
     if (q.hull && OUT.look.accOutline) { gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK); r.draw(q.hull, r.white, m, P, w.hullColor, true); gl.disable(gl.CULL_FACE); } }));
   drawUGCWorn(r, mv, P);

@@ -1,93 +1,165 @@
 [
  {
-  "id": "e-g-grug-zr43yq-0",
+  "id": "h-kit-0-dark-brown",
+  "dept": "hair",
+  "name": "Classic long hair (dark brown)",
+  "file": "h-kit-0-dark-brown.json",
+  "tex": "h-kit-0-dark-brown.png",
+  "thumb": "h-kit-0-dark-brown-thumb.png",
+  "verts": 3080
+ },
+ {
+  "id": "h-kit-0-black",
+  "dept": "hair",
+  "name": "Classic long hair (black)",
+  "file": "h-kit-0-black.json",
+  "tex": "h-kit-0-black.png",
+  "thumb": "h-kit-0-black-thumb.png",
+  "verts": 3080
+ },
+ {
+  "id": "h-kit-0-honey-blonde",
+  "dept": "hair",
+  "name": "Classic long hair (honey blonde)",
+  "file": "h-kit-0-honey-blonde.json",
+  "tex": "h-kit-0-honey-blonde.png",
+  "thumb": "h-kit-0-honey-blonde-thumb.png",
+  "verts": 3080
+ },
+ {
+  "id": "h-kit-0-auburn",
+  "dept": "hair",
+  "name": "Classic long hair (auburn)",
+  "file": "h-kit-0-auburn.json",
+  "tex": "h-kit-0-auburn.png",
+  "thumb": "h-kit-0-auburn-thumb.png",
+  "verts": 3080
+ },
+ {
+  "id": "h-kit-1-dark-brown",
+  "dept": "hair",
+  "name": "Classic buns (dark brown)",
+  "file": "h-kit-1-dark-brown.json",
+  "tex": "h-kit-1-dark-brown.png",
+  "thumb": "h-kit-1-dark-brown-thumb.png",
+  "verts": 3502
+ },
+ {
+  "id": "h-kit-1-black",
+  "dept": "hair",
+  "name": "Classic buns (black)",
+  "file": "h-kit-1-black.json",
+  "tex": "h-kit-1-black.png",
+  "thumb": "h-kit-1-black-thumb.png",
+  "verts": 3502
+ },
+ {
+  "id": "h-kit-1-honey-blonde",
+  "dept": "hair",
+  "name": "Classic buns (honey blonde)",
+  "file": "h-kit-1-honey-blonde.json",
+  "tex": "h-kit-1-honey-blonde.png",
+  "thumb": "h-kit-1-honey-blonde-thumb.png",
+  "verts": 3502
+ },
+ {
+  "id": "h-kit-1-auburn",
+  "dept": "hair",
+  "name": "Classic buns (auburn)",
+  "file": "h-kit-1-auburn.json",
+  "tex": "h-kit-1-auburn.png",
+  "thumb": "h-kit-1-auburn-thumb.png",
+  "verts": 3502
+ },
+ {
+  "id": "e-g-grug-cd50gg-0",
   "dept": "eyewear",
-  "name": "Reading Readers",
-  "file": "e-g-grug-zr43yq-0.json",
-  "tex": "e-g-grug-zr43yq-0.png",
-  "thumb": "e-g-grug-zr43yq-0-thumb.png",
+  "name": "Crystal Round Sunglasses",
+  "file": "e-g-grug-cd50gg-0.json",
+  "tex": "e-g-grug-cd50gg-0.png",
+  "thumb": "e-g-grug-cd50gg-0-thumb.png",
   "verts": 4503
  },
  {
-  "id": "e-g-grug-zr43yq-1",
+  "id": "e-g-grug-cd50gg-1",
   "dept": "eyewear",
-  "name": "Aqua Bold Sunglasses",
-  "file": "e-g-grug-zr43yq-1.json",
-  "tex": "e-g-grug-zr43yq-1.png",
-  "thumb": "e-g-grug-zr43yq-1-thumb.png",
+  "name": "Distinguished Teal Bold Shades",
+  "file": "e-g-grug-cd50gg-1.json",
+  "tex": "e-g-grug-cd50gg-1.png",
+  "thumb": "e-g-grug-cd50gg-1-thumb.png",
   "verts": 4503
  },
  {
-  "id": "e-g-grug-zr43yq-2",
+  "id": "e-g-grug-cd50gg-2",
   "dept": "eyewear",
-  "name": "Teal Trapezoid Frames",
-  "file": "e-g-grug-zr43yq-2.json",
-  "tex": "e-g-grug-zr43yq-2.png",
-  "thumb": "e-g-grug-zr43yq-2-thumb.png",
-  "verts": 4503
+  "name": "Dreamy Grug Ivory Visor",
+  "file": "e-g-grug-cd50gg-2.json",
+  "tex": "e-g-grug-cd50gg-2.png",
+  "thumb": "e-g-grug-cd50gg-2-thumb.png",
+  "verts": 1839
  },
  {
-  "id": "e-g-grug-zr43yq-3",
+  "id": "e-g-grug-cd50gg-3",
   "dept": "eyewear",
-  "name": "Cat-eye Pink-and-Blue Sunglasses",
-  "file": "e-g-grug-zr43yq-3.json",
-  "tex": "e-g-grug-zr43yq-3.png",
-  "thumb": "e-g-grug-zr43yq-3-thumb.png",
-  "verts": 4503
- },
- {
-  "id": "e-g-grug-zr43yq-4",
-  "dept": "eyewear",
-  "name": "Cloud Lavish Rose-Coloured Glasses",
-  "file": "e-g-grug-zr43yq-4.json",
-  "tex": "e-g-grug-zr43yq-4.png",
-  "thumb": "e-g-grug-zr43yq-4-thumb.png",
-  "verts": 4759
- },
- {
-  "id": "e-g-grug-zr43yq-5",
-  "dept": "eyewear",
-  "name": "Square Goggles of Coolness",
-  "file": "e-g-grug-zr43yq-5.json",
-  "tex": "e-g-grug-zr43yq-5.png",
-  "thumb": "e-g-grug-zr43yq-5-thumb.png",
+  "name": "Turbo Sunset Flight Goggles",
+  "file": "e-g-grug-cd50gg-3.json",
+  "tex": "e-g-grug-cd50gg-3.png",
+  "thumb": "e-g-grug-cd50gg-3-thumb.png",
   "verts": 6358
  },
  {
-  "id": "e-g-grug-zr43yq-6",
+  "id": "e-g-grug-cd50gg-4",
   "dept": "eyewear",
-  "name": "Midnight Lab Goggles",
-  "file": "e-g-grug-zr43yq-6.json",
-  "tex": "e-g-grug-zr43yq-6.png",
-  "thumb": "e-g-grug-zr43yq-6-thumb.png",
+  "name": "Lavish Wire-Frame Sunglasses",
+  "file": "e-g-grug-cd50gg-4.json",
+  "tex": "e-g-grug-cd50gg-4.png",
+  "thumb": "e-g-grug-cd50gg-4-thumb.png",
+  "verts": 4824
+ },
+ {
+  "id": "e-g-grug-cd50gg-5",
+  "dept": "eyewear",
+  "name": "Two-Tone Lens Hexagon Shades",
+  "file": "e-g-grug-cd50gg-5.json",
+  "tex": "e-g-grug-cd50gg-5.png",
+  "thumb": "e-g-grug-cd50gg-5-thumb.png",
+  "verts": 4587
+ },
+ {
+  "id": "e-g-grug-cd50gg-6",
+  "dept": "eyewear",
+  "name": "Grug Rectangle Glasses",
+  "file": "e-g-grug-cd50gg-6.json",
+  "tex": "e-g-grug-cd50gg-6.png",
+  "thumb": "e-g-grug-cd50gg-6-thumb.png",
+  "verts": 4503
+ },
+ {
+  "id": "e-g-grug-cd50gg-7",
+  "dept": "eyewear",
+  "name": "Sugar Rose-Tinted Oval Goggles",
+  "file": "e-g-grug-cd50gg-7.json",
+  "tex": "e-g-grug-cd50gg-7.png",
+  "thumb": "e-g-grug-cd50gg-7-thumb.png",
   "verts": 6358
  },
  {
-  "id": "e-g-grug-zr43yq-7",
+  "id": "e-g-grug-cd50gg-8",
   "dept": "eyewear",
-  "name": "Royal Wire White-and-Sky Frames",
-  "file": "e-g-grug-zr43yq-7.json",
-  "tex": "e-g-grug-zr43yq-7.png",
-  "thumb": "e-g-grug-zr43yq-7-thumb.png",
-  "verts": 4759
- },
- {
-  "id": "e-g-grug-zr43yq-8",
-  "dept": "eyewear",
-  "name": "Grug Forehead Split-Lens Sunnies",
-  "file": "e-g-grug-zr43yq-8.json",
-  "tex": "e-g-grug-zr43yq-8.png",
-  "thumb": "e-g-grug-zr43yq-8-thumb.png",
-  "verts": 4740
- },
- {
-  "id": "e-g-grug-zr43yq-9",
-  "dept": "eyewear",
-  "name": "Two-Tone Lens Shades",
-  "file": "e-g-grug-zr43yq-9.json",
-  "tex": "e-g-grug-zr43yq-9.png",
-  "thumb": "e-g-grug-zr43yq-9-thumb.png",
+  "name": "Fabulous Crystal Star Shades",
+  "file": "e-g-grug-cd50gg-8.json",
+  "tex": "e-g-grug-cd50gg-8.png",
+  "thumb": "e-g-grug-cd50gg-8-thumb.png",
   "verts": 4503
+ },
+ {
+  "id": "e-g-grug-cd50gg-9",
+  "dept": "eyewear",
+  "name": "Steampunk Lab Goggles of Swagger",
+  "file": "e-g-grug-cd50gg-9.json",
+  "tex": "e-g-grug-cd50gg-9.png",
+  "thumb": "e-g-grug-cd50gg-9-thumb.png",
+  "verts": 6358
  },
  {
   "id": "h-h-long",
@@ -180,183 +252,183 @@
   "verts": 1327
  },
  {
-  "id": "s-ga-grug-zr43yq-1",
+  "id": "s-ga-grug-cd50gg-0",
   "dept": "sound",
-  "name": "Royal Silver Headphones",
-  "file": "s-ga-grug-zr43yq-1.json",
-  "tex": "s-ga-grug-zr43yq-1.png",
-  "thumb": "s-ga-grug-zr43yq-1-thumb.png",
-  "verts": 11726
+  "name": "Silver Kitty Studio Headphones",
+  "file": "s-ga-grug-cd50gg-0.json",
+  "tex": "s-ga-grug-cd50gg-0.png",
+  "thumb": "s-ga-grug-cd50gg-0-thumb.png",
+  "verts": 8482
  },
  {
-  "id": "s-ga-grug-zr43yq-6",
+  "id": "s-ga-grug-cd50gg-1",
   "dept": "sound",
-  "name": "Cute Pink Muffs",
-  "file": "s-ga-grug-zr43yq-6.json",
-  "tex": "s-ga-grug-zr43yq-6.png",
-  "thumb": "s-ga-grug-zr43yq-6-thumb.png",
-  "verts": 2706
+  "name": "Black Headphones",
+  "file": "s-ga-grug-cd50gg-1.json",
+  "tex": "s-ga-grug-cd50gg-1.png",
+  "thumb": "s-ga-grug-cd50gg-1-thumb.png",
+  "verts": 7266
  },
  {
-  "id": "s-ga-grug-zr43yq-7",
+  "id": "s-ga-grug-cd50gg-3",
   "dept": "sound",
-  "name": "Spooky Silver Headset",
-  "file": "s-ga-grug-zr43yq-7.json",
-  "tex": "s-ga-grug-zr43yq-7.png",
-  "thumb": "s-ga-grug-zr43yq-7-thumb.png",
-  "verts": 12637
+  "name": "White Fluffy Earmuffs",
+  "file": "s-ga-grug-cd50gg-3.json",
+  "tex": "s-ga-grug-cd50gg-3.png",
+  "thumb": "s-ga-grug-cd50gg-3-thumb.png",
+  "verts": 2702
  },
  {
-  "id": "s-ga-grug-zr43yq-8",
+  "id": "s-ga-grug-cd50gg-4",
   "dept": "sound",
-  "name": "Sweet Yellow Earmuffs",
-  "file": "s-ga-grug-zr43yq-8.json",
-  "tex": "s-ga-grug-zr43yq-8.png",
-  "thumb": "s-ga-grug-zr43yq-8-thumb.png",
-  "verts": 2706
+  "name": "Silver Coiled Headset",
+  "file": "s-ga-grug-cd50gg-4.json",
+  "tex": "s-ga-grug-cd50gg-4.png",
+  "thumb": "s-ga-grug-cd50gg-4-thumb.png",
+  "verts": 13662
  },
  {
-  "id": "s-ga-grug-zr43yq-9",
+  "id": "s-ga-grug-cd50gg-5",
   "dept": "sound",
-  "name": "Cherry Print Muffs",
-  "file": "s-ga-grug-zr43yq-9.json",
-  "tex": "s-ga-grug-zr43yq-9.png",
-  "thumb": "s-ga-grug-zr43yq-9-thumb.png",
-  "verts": 2706
+  "name": "Kitty Gold Studio Headphones",
+  "file": "s-ga-grug-cd50gg-5.json",
+  "tex": "s-ga-grug-cd50gg-5.png",
+  "thumb": "s-ga-grug-cd50gg-5-thumb.png",
+  "verts": 8032
  },
  {
-  "id": "s-ga-grug-zr43yq-10",
+  "id": "s-ga-grug-cd50gg-6",
   "dept": "sound",
-  "name": "Glow Lilac Headphones",
-  "file": "s-ga-grug-zr43yq-10.json",
-  "tex": "s-ga-grug-zr43yq-10.png",
-  "thumb": "s-ga-grug-zr43yq-10-thumb.png",
-  "verts": 13358
+  "name": "White Gaming Headset",
+  "file": "s-ga-grug-cd50gg-6.json",
+  "tex": "s-ga-grug-cd50gg-6.png",
+  "thumb": "s-ga-grug-cd50gg-6-thumb.png",
+  "verts": 7494
  },
  {
-  "id": "s-ga-grug-zr43yq-11",
+  "id": "s-ga-grug-cd50gg-7",
   "dept": "sound",
-  "name": "Corded Silver Cans",
-  "file": "s-ga-grug-zr43yq-11.json",
-  "tex": "s-ga-grug-zr43yq-11.png",
-  "thumb": "s-ga-grug-zr43yq-11-thumb.png",
-  "verts": 12236
+  "name": "Blush Earmuffs",
+  "file": "s-ga-grug-cd50gg-7.json",
+  "tex": "s-ga-grug-cd50gg-7.png",
+  "thumb": "s-ga-grug-cd50gg-7-thumb.png",
+  "verts": 2702
  },
  {
-  "id": "s-ga-grug-zr43yq-12",
+  "id": "s-ga-grug-cd50gg-8",
   "dept": "sound",
-  "name": "Cherry Fluffy Earmuffs",
-  "file": "s-ga-grug-zr43yq-12.json",
-  "tex": "s-ga-grug-zr43yq-12.png",
-  "thumb": "s-ga-grug-zr43yq-12-thumb.png",
-  "verts": 2706
+  "name": "White Glow Cans",
+  "file": "s-ga-grug-cd50gg-8.json",
+  "tex": "s-ga-grug-cd50gg-8.png",
+  "thumb": "s-ga-grug-cd50gg-8-thumb.png",
+  "verts": 8676
  },
  {
-  "id": "s-ga-grug-zr43yq-13",
+  "id": "s-ga-grug-cd50gg-10",
   "dept": "sound",
-  "name": "Pretty Charcoal Ear Warmers",
-  "file": "s-ga-grug-zr43yq-13.json",
-  "tex": "s-ga-grug-zr43yq-13.png",
-  "thumb": "s-ga-grug-zr43yq-13-thumb.png",
-  "verts": 2808
+  "name": "Spooky Bow Headphones",
+  "file": "s-ga-grug-cd50gg-10.json",
+  "tex": "s-ga-grug-cd50gg-10.png",
+  "thumb": "s-ga-grug-cd50gg-10-thumb.png",
+  "verts": 7172
  },
  {
-  "id": "s-ga-grug-zr43yq-14",
+  "id": "s-ga-grug-cd50gg-11",
   "dept": "sound",
-  "name": "Magic Navy Muffs",
-  "file": "s-ga-grug-zr43yq-14.json",
-  "tex": "s-ga-grug-zr43yq-14.png",
-  "thumb": "s-ga-grug-zr43yq-14-thumb.png",
-  "verts": 2706
+  "name": "Teddy Black Ear Warmers",
+  "file": "s-ga-grug-cd50gg-11.json",
+  "tex": "s-ga-grug-cd50gg-11.png",
+  "thumb": "s-ga-grug-cd50gg-11-thumb.png",
+  "verts": 4286
  },
  {
-  "id": "s-gs-grug-zr43yq-0",
+  "id": "s-gs-grug-cd50gg-0",
   "dept": "sandals",
-  "name": "Fancy Fade Slide Sandals",
-  "file": "s-gs-grug-zr43yq-0.json",
-  "tex": "s-gs-grug-zr43yq-0.png",
-  "thumb": "s-gs-grug-zr43yq-0-thumb.png",
+  "name": "Navy Ankle Straps",
+  "file": "s-gs-grug-cd50gg-0.json",
+  "tex": "s-gs-grug-cd50gg-0.png",
+  "thumb": "s-gs-grug-cd50gg-0-thumb.png",
+  "verts": 8490
+ },
+ {
+  "id": "s-gs-grug-cd50gg-1",
+  "dept": "sandals",
+  "name": "Sweet Purple Treat Bag Charm Slide Sandals",
+  "file": "s-gs-grug-cd50gg-1.json",
+  "tex": "s-gs-grug-cd50gg-1.png",
+  "thumb": "s-gs-grug-cd50gg-1-thumb.png",
+  "verts": 2334
+ },
+ {
+  "id": "s-gs-grug-cd50gg-2",
+  "dept": "sandals",
+  "name": "Cozy Rose Charm Ankle Straps",
+  "file": "s-gs-grug-cd50gg-2.json",
+  "tex": "s-gs-grug-cd50gg-2.png",
+  "thumb": "s-gs-grug-cd50gg-2-thumb.png",
+  "verts": 7200
+ },
+ {
+  "id": "s-gs-grug-cd50gg-4",
+  "dept": "sandals",
+  "name": "Lucky Patterned Lace-Up Sandals",
+  "file": "s-gs-grug-cd50gg-4.json",
+  "tex": "s-gs-grug-cd50gg-4.png",
+  "thumb": "s-gs-grug-cd50gg-4-thumb.png",
+  "verts": 12218
+ },
+ {
+  "id": "s-gs-grug-cd50gg-5",
+  "dept": "sandals",
+  "name": "Cherry Slide Sandals",
+  "file": "s-gs-grug-cd50gg-5.json",
+  "tex": "s-gs-grug-cd50gg-5.png",
+  "thumb": "s-gs-grug-cd50gg-5-thumb.png",
+  "verts": 3526
+ },
+ {
+  "id": "s-gs-grug-cd50gg-6",
+  "dept": "sandals",
+  "name": "Ombré Black Slide Sandals",
+  "file": "s-gs-grug-cd50gg-6.json",
+  "tex": "s-gs-grug-cd50gg-6.png",
+  "thumb": "s-gs-grug-cd50gg-6-thumb.png",
   "verts": 4238
  },
  {
-  "id": "s-gs-grug-zr43yq-1",
+  "id": "s-gs-grug-cd50gg-7",
   "dept": "sandals",
-  "name": "Aqua Platform Slide Sandals",
-  "file": "s-gs-grug-zr43yq-1.json",
-  "tex": "s-gs-grug-zr43yq-1.png",
-  "thumb": "s-gs-grug-zr43yq-1-thumb.png",
-  "verts": 2286
+  "name": "Bubblegum Thong Sandals",
+  "file": "s-gs-grug-cd50gg-7.json",
+  "tex": "s-gs-grug-cd50gg-7.png",
+  "thumb": "s-gs-grug-cd50gg-7-thumb.png",
+  "verts": 6086
  },
  {
-  "id": "s-gs-grug-zr43yq-2",
+  "id": "s-gs-grug-cd50gg-8",
   "dept": "sandals",
-  "name": "Charming Snowflake Charm Ankle Strap Sandals",
-  "file": "s-gs-grug-zr43yq-2.json",
-  "tex": "s-gs-grug-zr43yq-2.png",
-  "thumb": "s-gs-grug-zr43yq-2-thumb.png",
-  "verts": 7202
+  "name": "Sunset Bubblegum Strappy Sandals",
+  "file": "s-gs-grug-cd50gg-8.json",
+  "tex": "s-gs-grug-cd50gg-8.png",
+  "thumb": "s-gs-grug-cd50gg-8-thumb.png",
+  "verts": 7186
  },
  {
-  "id": "s-gs-grug-zr43yq-4",
+  "id": "s-gs-grug-cd50gg-9",
   "dept": "sandals",
-  "name": "Ombré Blush Thong Sandals",
-  "file": "s-gs-grug-zr43yq-4.json",
-  "tex": "s-gs-grug-zr43yq-4.png",
-  "thumb": "s-gs-grug-zr43yq-4-thumb.png",
-  "verts": 5764
+  "name": "Print Navy Gladiators",
+  "file": "s-gs-grug-cd50gg-9.json",
+  "tex": "s-gs-grug-cd50gg-9.png",
+  "thumb": "s-gs-grug-cd50gg-9-thumb.png",
+  "verts": 11546
  },
  {
-  "id": "s-gs-grug-zr43yq-5",
+  "id": "s-gs-grug-cd50gg-11",
   "dept": "sandals",
-  "name": "Lilac Wedge Ribbon Sandals",
-  "file": "s-gs-grug-zr43yq-5.json",
-  "tex": "s-gs-grug-zr43yq-5.png",
-  "thumb": "s-gs-grug-zr43yq-5-thumb.png",
-  "verts": 8224
- },
- {
-  "id": "s-gs-grug-zr43yq-6",
-  "dept": "sandals",
-  "name": "Red Block Heel Ankle Strap Sandals",
-  "file": "s-gs-grug-zr43yq-6.json",
-  "tex": "s-gs-grug-zr43yq-6.png",
-  "thumb": "s-gs-grug-zr43yq-6-thumb.png",
-  "verts": 6944
- },
- {
-  "id": "s-gs-grug-zr43yq-7",
-  "dept": "sandals",
-  "name": "Super Mint Slides",
-  "file": "s-gs-grug-zr43yq-7.json",
-  "tex": "s-gs-grug-zr43yq-7.png",
-  "thumb": "s-gs-grug-zr43yq-7-thumb.png",
-  "verts": 2278
- },
- {
-  "id": "s-gs-grug-zr43yq-8",
-  "dept": "sandals",
-  "name": "Spooky Broken Heart Charm Slides",
-  "file": "s-gs-grug-zr43yq-8.json",
-  "tex": "s-gs-grug-zr43yq-8.png",
-  "thumb": "s-gs-grug-zr43yq-8-thumb.png",
-  "verts": 3456
- },
- {
-  "id": "s-gs-grug-zr43yq-9",
-  "dept": "sandals",
-  "name": "Sparkly Ghost Charm Ankle Straps",
-  "file": "s-gs-grug-zr43yq-9.json",
-  "tex": "s-gs-grug-zr43yq-9.png",
-  "thumb": "s-gs-grug-zr43yq-9-thumb.png",
-  "verts": 6936
- },
- {
-  "id": "s-gs-grug-zr43yq-11",
-  "dept": "sandals",
-  "name": "Royal Rose Charm Slides",
-  "file": "s-gs-grug-zr43yq-11.json",
-  "tex": "s-gs-grug-zr43yq-11.png",
-  "thumb": "s-gs-grug-zr43yq-11-thumb.png",
-  "verts": 2520
+  "name": "Sweet Sunset Ankle Straps",
+  "file": "s-gs-grug-cd50gg-11.json",
+  "tex": "s-gs-grug-cd50gg-11.png",
+  "thumb": "s-gs-grug-cd50gg-11-thumb.png",
+  "verts": 7434
  }
 ]
