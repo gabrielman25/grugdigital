@@ -1,0 +1,111 @@
+{
+ "name": "Knit beanie",
+ "object": "knit beanie",
+ "description": "chunky mustard yellow cable-knit wool beanie with a folded ribbed cuff and a big fluffy cream pom-pom on top",
+ "parts": [
+  {
+   "name": "body",
+   "type": "lathe",
+   "profile": [
+    [
+     0.0,
+     1.18
+    ],
+    [
+     0.4,
+     1.13
+    ],
+    [
+     0.7,
+     0.98
+    ],
+    [
+     0.85,
+     0.72
+    ],
+    [
+     0.87,
+     0.45
+    ]
+   ],
+   "sides": 12,
+   "caps": "none",
+   "material": "knit",
+   "seams": false,
+   "group": "Beanie"
+  },
+  {
+   "name": "cuff",
+   "type": "lathe",
+   "profile": [
+    [
+     0.86,
+     0.66
+    ],
+    [
+     0.94,
+     0.64
+    ],
+    [
+     0.95,
+     0.3
+    ],
+    [
+     0.86,
+     0.3
+    ]
+   ],
+   "sides": 12,
+   "caps": "none",
+   "material": "knit",
+   "seams": false,
+   "group": "Beanie"
+  },
+  {
+   "name": "pompom",
+   "type": "lathe",
+   "profile": [
+    [
+     0.0,
+     1.72
+    ],
+    [
+     0.26,
+     1.66
+    ],
+    [
+     0.4,
+     1.45
+    ],
+    [
+     0.3,
+     1.22
+    ],
+    [
+     0.0,
+     1.13
+    ]
+   ],
+   "sides": 10,
+   "caps": "none",
+   "material": "fur",
+   "seams": false,
+   "group": "Pom-pom"
+  }
+ ],
+ "views": [
+  {
+   "yaw": 25,
+   "pitch": 15
+  },
+  {
+   "yaw": 205,
+   "pitch": 15
+  }
+ ],
+ "wear": {
+  "on": "head",
+  "scale": 0.8,
+  "fit": "hat"
+ }
+}

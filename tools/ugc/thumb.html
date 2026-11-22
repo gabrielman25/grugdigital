@@ -1,0 +1,17 @@
+<!doctype html><meta charset="utf-8"><body style="margin:0;background:transparent">
+<canvas id="c" width="320" height="320"></canvas>
+<script src="../../assets/three.min.js"></script>
+<script>
+/* tools/ugc/flipflops.js's thumbnail renderer: draws one catalog piece (a pair of flip-flops) on a clear background. */
+window.render = async (file, tex) => {
+  const J = await (await fetch('../../make/clothing/ugc/' + file)).json(), d = (s, T) => { const b = atob(s), a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return new T(a.buffer); };
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(d(J.pos, Float32Array), 3)); g.setAttribute('normal', new THREE.BufferAttribute(d(J.nrm, Float32Array), 3));
+  g.setAttribute('uv', new THREE.BufferAttribute(d(J.uv, Float32Array), 2)); g.setIndex(new THREE.BufferAttribute(d(J.idx, Uint16Array), 1)); g.computeBoundingBox();
+  const t = await new THREE.TextureLoader().loadAsync('../../make/clothing/ugc/' + tex); t.flipY = true; if ('colorSpace' in t) t.colorSpace = THREE.SRGBColorSpace; else if (THREE.sRGBEncoding) t.encoding = THREE.sRGBEncoding;
+  const r = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), alpha: true, antialias: true, preserveDrawingBuffer: true }); r.setClearColor(0, 0); if (!('outputColorSpace' in r) && THREE.sRGBEncoding) r.outputEncoding = THREE.sRGBEncoding;
+  const s = new THREE.Scene(), m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: t, roughness: 0.75 })); s.add(m);
+  s.add(new THREE.HemisphereLight(0xffffff, 0x444455, 1.0)); const dl = new THREE.DirectionalLight(0xffffff, 1.6); dl.position.set(0.6, 2, 1.4); s.add(dl);
+  const c = new THREE.Vector3(); g.boundingBox.getCenter(c); m.position.sub(c);
+  const cam = new THREE.PerspectiveCamera(30, 1, 0.01, 50); cam.position.set(0.0, 2.65, 2.1); cam.lookAt(0, -0.05, 0); r.render(s, cam);
+  return r.domElement.toDataURL('image/png'); };
+</script>

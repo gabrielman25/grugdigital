@@ -1,0 +1,124 @@
+{
+ "name": "Straw sun hat",
+ "object": "straw sun hat",
+ "description": "natural woven straw sun hat with a wide floppy brim and a pale pink satin ribbon tied in a bow at the back",
+ "parts": [
+  {
+   "name": "crown",
+   "type": "lathe",
+   "profile": [
+    [
+     0.0,
+     0.98
+    ],
+    [
+     0.5,
+     0.96
+    ],
+    [
+     0.72,
+     0.85
+    ],
+    [
+     0.8,
+     0.36
+    ]
+   ],
+   "sides": 14,
+   "caps": "none",
+   "material": "canvas",
+   "seams": false,
+   "group": "Straw"
+  },
+  {
+   "name": "ribbon",
+   "type": "lathe",
+   "profile": [
+    [
+     0.79,
+     0.58
+    ],
+    [
+     0.815,
+     0.4
+    ]
+   ],
+   "sides": 14,
+   "caps": "none",
+   "material": "none",
+   "seams": false,
+   "group": "Ribbon"
+  },
+  {
+   "name": "bow",
+   "type": "box",
+   "center": [
+    0,
+    0.5,
+    -0.82
+   ],
+   "size": [
+    0.42,
+    0.2,
+    0.08
+   ],
+   "taper": [
+    1.0,
+    1.0
+   ],
+   "material": "none",
+   "seams": false,
+   "group": "Ribbon"
+  },
+  {
+   "name": "brim",
+   "type": "lathe",
+   "profile": [
+    [
+     0.78,
+     0.4
+    ],
+    [
+     1.2,
+     0.38
+    ],
+    [
+     1.62,
+     0.33
+    ],
+    [
+     1.64,
+     0.29
+    ],
+    [
+     1.2,
+     0.34
+    ],
+    [
+     0.78,
+     0.35
+    ]
+   ],
+   "sides": 16,
+   "caps": "none",
+   "material": "canvas",
+   "seams": false,
+   "group": "Straw"
+  }
+ ],
+ "views": [
+  {
+   "yaw": 25,
+   "pitch": 24
+  },
+  {
+   "yaw": 205,
+   "pitch": 24
+  }
+ ],
+ "wear": {
+  "on": "head",
+  "scale": 0.9,
+  "fit": "hat"
+ }
+}

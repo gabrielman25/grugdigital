@@ -467,7 +467,7 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
   #outfits:not([hidden]){height:100%;grid-template-columns:minmax(0,1fr) 24rem;align-items:stretch;gap:var(--g-s-3)}
   #outfits>.o-stage{height:auto;min-height:0;position:relative;top:auto}
   .o-side{display:flex;flex-direction:column;min-height:0;padding:0;overflow:hidden}
-  .o-cats{flex:none;display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:6px;border-bottom:1px solid var(--g-line)}
+  .o-cats{flex:none;display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:6px;border-bottom:1px solid var(--g-line)}
   .o-cats button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px 6px;border-radius:10px;font-size:11px;font-weight:600;color:var(--g-text-2);text-align:center}
   .o-cats button:hover{background:var(--g-bg-2)}
   .o-cats button.on{background:var(--g-accent);color:#1E1B16}
@@ -484,6 +484,14 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
   .o-row:has(#outNailRow:not([hidden]))~.o-nailnote{display:none}
   @media (max-width:980px){ #outfits:not([hidden]){grid-template-columns:1fr;grid-template-rows:minmax(0,46%) minmax(0,1fr)} }
   @media (max-width:600px){ .o-hint{display:none} }
+  .o-exbtn{position:absolute;right:12px;top:10px}
+  .o-xh{margin:14px 0 6px;font-size:13px;color:var(--g-text-2)}
+  .o-xrow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--g-line)}
+  .o-xrow>div:first-child{min-width:0;display:flex;flex-direction:column}
+  .o-xrow b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .o-xrow small{font-size:11px;color:var(--g-muted)}
+  .o-xbtns{display:flex;gap:4px;flex:none}
+  #outExAll{margin-top:4px}
   .o-lock{position:fixed;inset:0;z-index:200;background:rgba(10,10,12,.5);display:flex;align-items:center;justify-content:center}
   .o-lock form{background:var(--g-page,#fff);color:var(--g-text,#1E1B16);border-radius:16px;padding:20px;max-width:320px;width:calc(100% - 40px);display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 40px rgba(0,0,0,.3)}
   .o-lock h3{margin:0;font-size:18px}.o-lock p{margin:0;font-size:13px;color:var(--g-muted)}.o-lock .err{color:#d33}
@@ -717,6 +725,7 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
     <div class="g-card stage o-stage"><canvas id="outView" aria-label="The avatar. Drag to turn, middle-drag to move, scroll to zoom."></canvas>
       <div class="o-hint">Drag or right-drag: turn · Middle-drag: move · Scroll: zoom · Double-click: reset</div>
       <div class="o-bar"><button id="outSpin" class="g-btn g-btn--sm">Turn</button></div>
+      <button id="outExportBtn" class="g-btn g-btn--primary g-btn--sm o-exbtn"><i data-g-icon="arrow_down_to_line"></i>Export</button>
       <div class="o-anim" id="outAnim" role="group" aria-label="Animation preview"><button data-a="still" class="on">Still</button><button data-a="idle">Idle</button><button data-a="walk">Walk</button><button data-a="jump">Jump</button><button data-a="pose">Pose</button></div></div>
     <aside class="g-card o-side">
       <nav class="o-cats" id="outCats" aria-label="Character sections">
@@ -726,6 +735,7 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
         <button data-c="acc"><i data-g-icon="archive"></i>Accessories</button>
         <button data-c="looks"><i data-g-icon="floppy_disk"></i>Looks</button>
         <button data-c="fx"><i data-g-icon="magic_wand"></i>Effects</button>
+        <button data-c="export"><i data-g-icon="arrow_down_to_line"></i>Export</button>
       </nav>
       <div class="o-subs" id="outSubs" role="tablist"></div>
       <div class="o-pane" id="outPane">
@@ -761,6 +771,7 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
         </div>
         <div class="o-p" data-c="head" data-s="hair" data-l="Hair"><p class="sub">Fitted to this head. Tap to put on or take off.</p><div class="lib-grid o-grid" data-ugc-dept="hair"></div></div>
         <div class="o-p" data-c="head" data-s="eyewear" data-l="Eyewear"><p class="sub">Glasses and goggles from the site's catalog.</p><div class="lib-grid o-grid" data-ugc-dept="eyewear"></div></div>
+        <div class="o-p" data-c="head" data-s="hats" data-l="Hats"><p class="sub">Tap to put one on or take it off (one hat at a time).</p><div id="outHats" class="lib-grid o-grid"></div></div>
         <div class="o-p" data-c="head" data-s="sound" data-l="Headphones"><p class="sub">Headphones and earmuffs from the site's catalog.</p><div class="lib-grid o-grid" data-ugc-dept="sound"></div></div>
         <div class="o-p" data-c="clothing" data-s="outfit" data-l="Outfits">
           <div id="outClothes" class="o-chips"></div>
@@ -782,6 +793,12 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
           <div id="outLooks" class="lib-grid o-grid"></div>
           <div class="row" style="margin-top:var(--g-s-3)"><input id="outName" class="g-input" type="text" placeholder="Name this look" maxlength="40"><button id="outSave" class="g-btn g-btn--primary">Save</button></div>
           <button id="outZip" class="g-btn g-btn--ghost full" style="margin-top:var(--g-s-2)"><i data-g-icon="arrow_down_to_line"></i>Download the look (.zip)</button>
+        </div>
+        <div class="o-p" data-c="export" data-s="export" data-l="Export">
+          <p class="sub">Download the whole look, or any piece of it.</p>
+          <button id="outExAll" class="g-btn g-btn--primary full"><i data-g-icon="arrow_down_to_line"></i>Download everything (.zip)</button>
+          <p class="tiny">Shirt and pants templates, every accessory as GLB and OBJ with its textures, a picture and the look file.</p>
+          <div id="outExport"></div>
         </div>
         <div class="o-p" data-c="fx" data-s="fx" data-l="Retro look &amp; lighting">
           <p class="sub">For the whole character: the shirt and pants get the same baked light (ambient occlusion, room light, bounce) and retro texture effects as the accessories.</p>
@@ -1308,6 +1325,7 @@ class GLR {
   }
   /* the feet's colour: skin, with the toenails (the mask) in the nail colour */
   feetTex(skin){
+    if (this.feetBake){ const k2 = 'bake' + this.feetBakeId; if (this._feetKey !== k2){ this._feetT = this.tex(this.feetBake, this._feetT, false); this._feetKey = k2; } return this._feetT; }   // the Character tab's light bake (outfits-ui.js feetTextures)
     const key = skin.map(v => Math.round(v*255)).join() + '|' + this.nail.join();
     if (this._feetKey === key && this._feetT) return this._feetT;
     if (!FEET.mask) return this.white;
@@ -4414,6 +4432,72 @@ function bodyLight(){
   const keys = Object.keys(OUT.bodyMapCache); if (keys.length > 3) delete OUT.bodyMapCache[keys.find(k => k !== 'blocky')];   // keep a few (the sliders make new shapes)
   return (OUT.bodyMapCache[S.key] = out);
 }
+/* the Figure's bare feet: the same ambient occlusion and lighting bake as the body, in the feet texture's own layout (left foot
+   on the right half, right foot on the left; V runs down). Occluders: the body (bodyShape's boxes: the trouser legs above),
+   both feet themselves (a voxel grid, so the toes shade each other) and the ground under the soles. Cached per Figure shape. */
+function feetLight(){
+  if (typeof FEET === 'undefined' || !FEET.geoL || !FEET.mask) return null;
+  const S = bodyShape(), key = 'feet:' + S.key; OUT.bodyMapCache = OUT.bodyMapCache || {}; if (OUT.bodyMapCache[key]) return OUT.bodyMapCache[key];
+  const o = FIG.off, k = FIG.foot, h = FEET.height || 0.423;
+  const place = side => { const t = [side * (FIG.legX + o.legs[0] + o.feet[0]), FIG.legY - h * k + o.legs[1] + o.feet[1], FIG.kneeBend + FIG.footFwd + o.legs[2] + o.feet[2]]; return p => [t[0] + p[0] * k, t[1] + p[1] * k, t[2] + p[2] * k]; };
+  const feet = [[1, FEET.geoL], [-1, FEET.geoR]].map(([side, g]) => { const f = place(side), P = []; for (let i = 0; i < g.p.length; i += 3) P.push(f([g.p[i], g.p[i + 1], g.p[i + 2]])); return { side, g, P }; });
+  // a voxel grid of both feet (their surface, thickened by one cell)
+  const VX = 0.02, mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9]; feet.forEach(f => f.P.forEach(q => { for (let a = 0; a < 3; a++) { mn[a] = Math.min(mn[a], q[a]); mx[a] = Math.max(mx[a], q[a]); } }));
+  for (let a = 0; a < 3; a++) { mn[a] -= 2 * VX; mx[a] += 2 * VX; }
+  const nx = Math.ceil((mx[0] - mn[0]) / VX), ny = Math.ceil((mx[1] - mn[1]) / VX), nz = Math.ceil((mx[2] - mn[2]) / VX), G = new Uint8Array(nx * ny * nz);
+  const cell = q => { const i = Math.floor((q[0] - mn[0]) / VX), j = Math.floor((q[1] - mn[1]) / VX), l = Math.floor((q[2] - mn[2]) / VX); return i < 0 || j < 0 || l < 0 || i >= nx || j >= ny || l >= nz ? -1 : (l * ny + j) * nx + i; };
+  feet.forEach(({ g, P }) => { for (let t = 0; t < g.i.length; t += 3) { const A = P[g.i[t]], B = P[g.i[t + 1]], C = P[g.i[t + 2]], L = Math.max(Math.hypot(B[0] - A[0], B[1] - A[1], B[2] - A[2]), Math.hypot(C[0] - A[0], C[1] - A[1], C[2] - A[2])), n = Math.max(2, Math.ceil(L / (VX * 0.5)));
+    for (let a = 0; a <= n; a++) for (let b = 0; a + b <= n; b++) { const u = a / n, v = b / n, q = [0, 1, 2].map(c => A[c] + (B[c] - A[c]) * u + (C[c] - A[c]) * v), c0 = cell(q); if (c0 >= 0) G[c0] = 1; } } });
+  { const G2 = G.slice(); for (let l = 1; l < nz - 1; l++) for (let j = 1; j < ny - 1; j++) for (let i = 1; i < nx - 1; i++) { const c = (l * ny + j) * nx + i; if (G[c]) continue;
+      if (G[c - 1] || G[c + 1] || G[c - nx] || G[c + nx] || G[c - nx * ny] || G[c + nx * ny]) G2[c] = 1; } G.set(G2); }
+  const ground = mn[1] + 2 * VX + 0.004;
+  // the trouser legs only reach down to the hem: below it the foot is open to the room (it rides over the instep a little)
+  const hemY = FIG.legY - 0.07 + o.legs[1];
+  const boxes = S.boxes.map(b => /leg$/.test(b.name) ? Object.assign({}, b, { mn: [b.mn[0], Math.max(b.mn[1], hemY), b.mn[2]] }) : b), hitBox = (q, d, tmax) => { for (const b of boxes) { if (q[0] > b.mn[0] && q[0] < b.mx[0] && q[1] > b.mn[1] && q[1] < b.mx[1] && q[2] > b.mn[2] && q[2] < b.mx[2]) continue;   /* a point under the hem's arch sits inside the leg's box: that box doesn't count */
+    let t0 = 1e-4, t1 = tmax;
+      for (let a = 0; a < 3; a++) { if (Math.abs(d[a]) < 1e-9) { if (q[a] < b.mn[a] || q[a] > b.mx[a]) { t0 = 2; t1 = 1; break; } continue; }
+        let ta = (b.mn[a] - q[a]) / d[a], tb = (b.mx[a] - q[a]) / d[a]; if (ta > tb) { const z = ta; ta = tb; tb = z; } if (ta > t0) t0 = ta; if (tb < t1) t1 = tb; if (t0 > t1) break; }
+      if (t0 <= t1) return true; } return false; };
+  const hit = (q, d, tmax) => { if (d[1] < 0 && (q[1] - ground) / -d[1] < tmax) return true;
+    // the foot itself: only cells met after the ray has left the surface it starts on count (no self-shadowing speckle)
+    let out = false; for (let t = VX * 0.5, e = Math.min(tmax, 1.2); t < e; t += VX * 0.5) { const c = cell([q[0] + d[0] * t, q[1] + d[1] * t, q[2] + d[2] * t]); if (c >= 0 && G[c]) { if (out) return true; } else out = true; }
+    return hitBox(q, d, tmax); };
+  // rasterise both feet into the texture at half size, ray-trace each texel
+  const W = FEET.mask.width, H = FEET.mask.height, w = W >> 1, hh = H >> 1, AO = new Float32Array(w * hh).fill(-1), RM = new Float32Array(w * hh);
+  const Ld = v3norm([-0.35, 1, 0.45]), K = 48, reach = 0.6; let seed = 7; const rnd = () => (seed = Math.imul(seed ^ (seed >>> 15), 2246822507) + 0x9e3779b9 >>> 0) / 4294967296;
+  feet.forEach(({ g, P }) => { for (let t = 0; t < g.i.length; t += 3) { const ia = g.i[t], ib = g.i[t + 1], ic = g.i[t + 2], ta = [g.t[ia * 2] * w, g.t[ia * 2 + 1] * hh], tb = [g.t[ib * 2] * w, g.t[ib * 2 + 1] * hh], tc = [g.t[ic * 2] * w, g.t[ic * 2 + 1] * hh];
+    const den = (tb[1] - tc[1]) * (ta[0] - tc[0]) + (tc[0] - tb[0]) * (ta[1] - tc[1]); if (Math.abs(den) < 1e-9) continue;
+    const x0 = Math.max(0, Math.floor(Math.min(ta[0], tb[0], tc[0]))), x1 = Math.min(w - 1, Math.ceil(Math.max(ta[0], tb[0], tc[0]))), y0 = Math.max(0, Math.floor(Math.min(ta[1], tb[1], tc[1]))), y1 = Math.min(hh - 1, Math.ceil(Math.max(ta[1], tb[1], tc[1])));
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { const px = x + .5, py = y + .5, l1 = ((tb[1] - tc[1]) * (px - tc[0]) + (tc[0] - tb[0]) * (py - tc[1])) / den, l2 = ((tc[1] - ta[1]) * (px - tc[0]) + (ta[0] - tc[0]) * (py - tc[1])) / den, l3 = 1 - l1 - l2;
+      if (l1 < -0.02 || l2 < -0.02 || l3 < -0.02 || AO[y * w + x] >= 0) continue;
+      const q = [0, 1, 2].map(c => P[ia][c] * l1 + P[ib][c] * l2 + P[ic][c] * l3), n = v3norm([0, 1, 2].map(c => g.n[ia * 3 + c] * l1 + g.n[ib * 3 + c] * l2 + g.n[ic * 3 + c] * l3));
+      const T0 = v3norm(Math.abs(n[1]) < .9 ? v3cross([0, 1, 0], n) : v3cross([1, 0, 0], n)), B = v3cross(n, T0), q0 = q.map((v, c) => v + n[c] * VX * 0.6);
+      let vis = 0; for (let j = 0; j < K; j++) { const u1 = (j + rnd()) / K, r = Math.sqrt(u1), ph = 2 * Math.PI * rnd(), cz = Math.sqrt(1 - u1); if (!hit(q0, [0, 1, 2].map(c => T0[c] * r * Math.cos(ph) + B[c] * r * Math.sin(ph) + n[c] * cz), reach)) vis++; }
+      let lit = 0; for (let j = 0; j < 12; j++) if (!hit(q0, v3norm([Ld[0] + (rnd() - .5) * .25, Ld[1] + (rnd() - .5) * .25, Ld[2] + (rnd() - .5) * .25]), 20)) lit++;
+      AO[y * w + x] = vis / K; RM[y * w + x] = Math.max(0, dot(n, Ld)) * lit / 12; } } });
+  // fill the gaps round each island (so filtering never pulls in white), soften the noise, then scale up to the full texture
+  for (let pass = 0; pass < 4; pass++) { const A0 = AO.slice(), R0 = RM.slice(); for (let y = 0; y < hh; y++) for (let x = 0; x < w; x++) { const i = y * w + x; if (A0[i] >= 0) continue; let sa = 0, sr = 0, n = 0;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const X = x + dx, Y = y + dy; if (X < 0 || Y < 0 || X >= w || Y >= hh) continue; const j = Y * w + X; if (A0[j] >= 0) { sa += A0[j]; sr += R0[j]; n++; } } if (n) { AO[i] = sa / n; RM[i] = sr / n; } } }
+  for (const F of [AO, RM]) for (let pass = 0; pass < 4; pass++) { const A0 = F.slice(); for (let y = 1; y < hh - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x; if (AO[i] < 0) continue; let s2 = A0[i] * 2, n = 2; for (const j of [i - 1, i + 1, i - w, i + w, i - w - 1, i - w + 1, i + w - 1, i + w + 1]) if (AO[j] >= 0) { s2 += A0[j]; n++; } F[i] = s2 / n; } }
+  const N2 = Math.max(W, H), up = (src, fill) => { const c = cnv(w, hh), x = c.getContext('2d'), d = x.createImageData(w, hh); for (let i = 0; i < w * hh; i++) { const v = (src[i] < 0 ? fill : src[i]) * 255; d.data[i * 4] = d.data[i * 4 + 1] = d.data[i * 4 + 2] = v; d.data[i * 4 + 3] = 255; }
+    x.putImageData(d, 0, 0); const b = cnv(N2, N2), y = b.getContext('2d'); y.fillStyle = `rgb(${fill * 255},${fill * 255},${fill * 255})`; y.fillRect(0, 0, N2, N2); y.imageSmoothingEnabled = true; y.drawImage(c, 0, 0, W, H); return y.getImageData(0, 0, N2, N2).data; };
+  const AOi = up(AO, 1), RMi = up(RM, .8), BO = new Float32Array(N2 * N2 * 3); for (let i = 0; i < N2 * N2; i++) { const a = AOi[i * 4] / 255; BO[i * 3] = .1 * a; BO[i * 3 + 1] = .106 * a; BO[i * 3 + 2] = .114 * a; }
+  const flat = new Uint8ClampedArray(N2 * N2 * 4); for (let i = 0; i < flat.length; i += 4) { flat[i] = flat[i + 1] = flat[i + 2] = 128; flat[i + 3] = 255; }
+  const out = { N2, W, H, AO: AOi, RM: RMi, BO, DT: flat, EM: new Uint8ClampedArray(N2 * N2 * 4) };
+  return (OUT.bodyMapCache[key] = out);
+}
+/* the feet texture (skin and nails) with that bake (light only, no retro colour steps), for GLR's feetTex (r.feetBake) */
+function feetTextures(){
+  const r = OUT.r; if (!r) return;
+  if (OUT.body !== 'figure' || FIG.boots || typeof FEET === 'undefined') { r.feetBake = null; return; }
+  if (!FEET.mask || !FEET.geoL) { r.feetBake = null; FEET.load().then(() => { if (FEET.geoL) feetTextures(); }); return; }
+  const M = feetLight(); if (!M) { r.feetBake = null; return; }
+  const sk = skin(), nl = r.nail || [247, 242, 238], c = cnv(M.N2, M.N2), x = c.getContext('2d'); x.drawImage(FEET.mask, 0, 0);
+  const d = x.getImageData(0, 0, M.N2, M.N2), a = d.data; for (let i = 0; i < a.length; i += 4) { const m = a[i] / 255; for (let q = 0; q < 3; q++) a[i + q] = sk[q] * (1 - m) + nl[q] * m; a[i + 3] = 255; }
+  const T = { n: M.N2, A: a, AO: M.AO, RM: M.RM, EM: M.EM, LG: null, DT: M.DT, BO: M.BO, LI: null, GM: null, means: [] };
+  const img = x.createImageData(M.N2, M.N2); LoPolTex.compose(T, { fx: { bits: 8, dither: 0, pixel: 1, contrast: 0, sat: 0, bright: (OUT.look.fx && OUT.look.fx.bright) || 0 }, light: OUT.look.light, colours: [] }, img); x.putImageData(img, 0, 0);   // light only: skin stays smooth like the hands
+  const o = cnv(M.W, M.H); o.getContext('2d').drawImage(c, 0, 0); r.feetBake = o; r.feetBakeId = (r.feetBakeId || 0) + 1;
+}
 function retroBody(src, which){
   const M = bodyLight(), m = M[which], c = cnv(NB, NB), x = c.getContext('2d'); x.drawImage(src, 0, 0);
   const T = { n: NB, A: x.getImageData(0, 0, NB, NB).data, AO: m.AO, RM: m.RM, EM: M.EM, LG: null, DT: M.DT, BO: m.BO, LI: null, GM: null, means: [] };
@@ -4437,6 +4521,7 @@ function bodyTextures(){
   openEnds(OUT.comp);
   const near = OUT.look.fx.pixel > 1 || OUT.look.fx.bits < 8;
   r.tex(retroBody(OUT.comp.upper, 'upper'), OUT.tex.upper, near); r.tex(retroBody(OUT.comp.legs, 'legs'), OUT.tex.legs, near); r.tex(headTex(skin(), OUT.headC), OUT.tex.head);
+  try { feetTextures(); } catch (e) { console.warn('feet bake', e); OUT.r.feetBake = null; }
 }
 function wearMatrix(w){
   const R = (a, b, c) => { const [x, y, z] = [a, b, c].map(v => (v || 0) * Math.PI / 180), cx = Math.cos(x), sx = Math.sin(x), cy = Math.cos(y), sy = Math.sin(y), cz = Math.cos(z), sz = Math.sin(z);
@@ -4622,21 +4707,77 @@ async function saveLook(){
 }
 function snapshot(size){ const c = $o('#outView'), k = cnv(size, size), x = k.getContext('2d'), s = Math.min(c.width, c.height); x.drawImage(c, (c.width - s) / 2, (c.height - s) / 2, s, s, 0, 0, size, size); return k.toDataURL('image/jpeg', .8); }
 
-/* ---------- downloads: the look as a zip (shirt, pants, every accessory as GLB + texture, look.json) ---------- */
+/* ---------- Export: the look and every piece of it, from the Character panel's Export section (and the stage's Export
+   button). Clothing: the classic shirt and pants templates. Accessories: GLB (with its outline), OBJ (+ MTL, texture, normal
+   map) and the texture. Catalog pieces: GLB and texture, except the ones that aren't ours to hand out (her stock long hair
+   and buns, the flip-flops), which stay in the Studio. Everything: one zip with all of it, a picture and look.json. ---------- */
+const xslug = s => (s || 'item').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'item';
+const xpng = async c => new Uint8Array(await (await new Promise(r => c.toBlob(r, 'image/png'))).arrayBuffer());
+const ugcShareable = e => !(/^h-kit-/.test(e.id) || /^f-/.test(e.id));
+function objFiles(name, P, N, uv){   // a triangle soup -> OBJ + MTL (texture.png, normal.png beside it)
+  const nv = P.length / 3, f = v => (+v).toFixed(5), L = ['# ' + name + ', from the Grug Clothing Studio', 'mtllib model.mtl', 'o ' + xslug(name)];
+  for (let i = 0; i < nv; i++) L.push(`v ${f(P[i*3])} ${f(P[i*3+1])} ${f(P[i*3+2])}`);
+  for (let i = 0; i < nv; i++) L.push(`vt ${uv[i*2].toFixed(6)} ${(1 - uv[i*2+1]).toFixed(6)}`);
+  for (let i = 0; i < nv; i++) L.push(`vn ${f(N[i*3])} ${f(N[i*3+1])} ${f(N[i*3+2])}`);
+  L.push('usemtl item', 's 1'); for (let t = 0; t < nv / 3; t++) { const a = t*3 + 1; L.push(`f ${a}/${a}/${a} ${a+1}/${a+1}/${a+1} ${a+2}/${a+2}/${a+2}`); }
+  const enc = new TextEncoder(); return [{ name: 'model.obj', data: enc.encode(L.join('\n') + '\n') }, { name: 'model.mtl', data: enc.encode('newmtl item\nKa 1 1 1\nKd 1 1 1\nKs 0 0 0\nd 1\nillum 1\nmap_Kd texture.png\nnorm normal.png\n') }];
+}
+async function accFiles(w){   // one worn accessory: {glb, obj: [files], tex, nrm}
+  const t = await xpng(w.canvas), nm = await xpng(await LoPolTex.loadImg(w.D.maps.normal).then(im => { const k = cnv(im.naturalWidth, im.naturalHeight); k.getContext('2d').drawImage(im, 0, 0); return k; }));
+  const { f32 } = LoPolTex, P = f32(w.D.pos), N = f32(w.D.nrm), uv = f32(w.D.uv), ol = (w.e.settings && w.e.settings.outline) || w.D.look.outline;
+  const glb = LoPolTex.makeGLB({ name: w.e.name, P, N, uv, tan: f32(w.D.tan), png: t, npng: nm, hull: ol && ol.on !== false ? LoPolTex.hullOf(P, (ol.width ?? .027) * w.D.radius * 2) : null, color: (ol && ol.color) || [5, 5, 5] });
+  return { glb: new Uint8Array(await glb.arrayBuffer()), obj: objFiles(w.e.name, P, N, uv).concat([{ name: 'texture.png', data: t }, { name: 'normal.png', data: nm }]), tex: t };
+}
+async function ugcFiles(w){   // one worn catalog piece (indexed) -> GLB + texture
+  const g = w.g, n = g.i.length, P = new Float32Array(n * 3), N = new Float32Array(n * 3), uv = new Float32Array(n * 2), tan = new Float32Array(n * 4);
+  g.i.forEach((v, k) => { for (let c = 0; c < 3; c++) { P[k*3+c] = g.p[v*3+c]; N[k*3+c] = g.n[v*3+c]; } uv[k*2] = g.t[v*2]; uv[k*2+1] = g.t[v*2+1]; tan[k*4] = 1; tan[k*4+3] = 1; });
+  const tex = new Uint8Array(await (await fetch(AS(UBASE + w.e.tex))).arrayBuffer());
+  const glb = LoPolTex.makeGLB({ name: w.e.name, P, N, uv, tan, png: tex, npng: null, hull: null, color: [5, 5, 5] });
+  return { glb: new Uint8Array(await glb.arrayBuffer()), obj: objFiles(w.e.name, P, N, uv).concat([{ name: 'texture.png', data: tex }]), tex };
+}
+const snapPng = async () => { const c = $o('#outView'); return xpng(c); };
 async function downloadLook(){
-  const L = currentLook(), slug = s => (s || 'item').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), files = [];
-  const png = async c => new Uint8Array(await (await new Promise(r => c.toBlob(r, 'image/png'))).arrayBuffer());
-  if (OUT.shirtNow) files.push({ name: 'shirt.png', data: await png(OUT.shirtNow) });
-  if (OUT.pantsNow) files.push({ name: 'pants.png', data: await png(OUT.pantsNow) });
-  for (const w of OUT.worn) {
-    const t = await png(w.canvas), nm = await png(await LoPolTex.loadImg(w.D.maps.normal).then(im => { const k = cnv(im.naturalWidth, im.naturalHeight); k.getContext('2d').drawImage(im, 0, 0); return k; }));
-    const { f32 } = LoPolTex, P = f32(w.D.pos), ol = (w.e.settings && w.e.settings.outline) || w.D.look.outline;
-    const glb = LoPolTex.makeGLB({ name: w.e.name, P, N: f32(w.D.nrm), uv: f32(w.D.uv), tan: f32(w.D.tan), png: t, npng: nm, hull: ol && ol.on !== false ? LoPolTex.hullOf(P, (ol.width ?? .027) * w.D.radius * 2) : null, color: (ol && ol.color) || [5, 5, 5] });
-    files.push({ name: `${slug(w.e.name)}.glb`, data: new Uint8Array(await glb.arrayBuffer()) }, { name: `${slug(w.e.name)}-texture.png`, data: t });
-  }
-  files.push({ name: 'look.json', data: new TextEncoder().encode(JSON.stringify(Object.assign({}, L, { custom: undefined, accessories: L.accessories.map(a => Object.assign({}, a, { albedo: undefined, logo: undefined, thumb: undefined, wear: (OUT.worn.find(w => w.e.id === a.id) || {}).D?.look.wear })) }), null, 1)) });
-  const name = slug(L.name);
-  GRUG.download(`${name}.zip`, await GRUG.zip(files.map(f => ({ name: `${name}/${f.name}`, data: f.data }))));
+  const L = currentLook(), name = xslug(L.name), files = [], btn = $o('#outExAll'); if (btn) { btn.disabled = true; btn.dataset.t = btn.textContent; btn.textContent = 'Packing…'; }
+  try {
+    if (OUT.shirtNow) files.push({ name: 'clothing/shirt.png', data: await xpng(OUT.shirtNow) });
+    if (OUT.pantsNow) files.push({ name: 'clothing/pants.png', data: await xpng(OUT.pantsNow) });
+    for (const w of OUT.worn) { const s = xslug(w.e.name), F = await accFiles(w);
+      files.push({ name: `accessories/${s}.glb`, data: F.glb }, ...F.obj.map(f => ({ name: `accessories/${s}-obj/${f.name}`, data: f.data }))); }
+    for (const w of Object.values(UGC.worn)) { if (!ugcShareable(w.e)) continue; const s = xslug(w.e.name), F = await ugcFiles(w);
+      files.push({ name: `catalog/${s}.glb`, data: F.glb }, ...F.obj.map(f => ({ name: `catalog/${s}-obj/${f.name}`, data: f.data }))); }
+    files.push({ name: 'picture.png', data: await snapPng() });
+    files.push({ name: 'look.json', data: new TextEncoder().encode(JSON.stringify(Object.assign({}, L, { custom: undefined, accessories: L.accessories.map(a => Object.assign({}, a, { albedo: undefined, logo: undefined, thumb: undefined, wear: (OUT.worn.find(w => w.e.id === a.id) || {}).D?.look.wear })) }), null, 1)) });
+    GRUG.download(`${name}.zip`, await GRUG.zip(files.map(f => ({ name: `${name}/${f.name}`, data: f.data }))));
+  } catch (e) { console.error(e); toastO("Couldn't pack the look"); }
+  if (btn) { btn.disabled = false; btn.textContent = btn.dataset.t; }
+}
+const dl = (name, data, type) => GRUG.download(name, data instanceof Blob ? data : new Blob([data], { type: type || 'application/octet-stream' }));
+function drawExport(){
+  const box = $o('#outExport'); if (!box) return; box.innerHTML = '';
+  const row = (label, sub, btns) => { const r = document.createElement('div'); r.className = 'o-xrow'; r.innerHTML = '<div><b></b><small></small></div><div class="o-xbtns"></div>';
+    r.querySelector('b').textContent = label; r.querySelector('small').textContent = sub || '';
+    btns.forEach(([t, fn, off]) => { const b = document.createElement('button'); b.className = 'g-btn g-btn--sm'; b.textContent = t; b.disabled = !!off;
+      b.onclick = async () => { b.disabled = true; try { await fn(); } catch (e) { console.error(e); toastO("Couldn't make that file"); } b.disabled = false; }; r.querySelector('.o-xbtns').appendChild(b); });
+    box.appendChild(r); return r; };
+  const head = t => { const h = document.createElement('h4'); h.className = 'o-xh'; h.textContent = t; box.appendChild(h); };
+  head('Clothing');
+  row('Shirt', 'Classic shirt template (585 × 559)', [['PNG', async () => dl('shirt.png', await xpng(OUT.shirtNow), 'image/png'), !OUT.shirtNow]]);
+  row('Pants', 'Classic pants template (585 × 559)', [['PNG', async () => dl('pants.png', await xpng(OUT.pantsNow), 'image/png'), !OUT.pantsNow]]);
+  head('Accessories');
+  if (!OUT.worn.length) { const p = document.createElement('p'); p.className = 'tiny'; p.textContent = 'Nothing on yet: put on an accessory under Accessories → Items.'; box.appendChild(p); }
+  OUT.worn.forEach(w => { const s = xslug(w.e.name); row(w.e.name, 'Worn on: ' + ((typeof SLOT_NAMES !== 'undefined' && SLOT_NAMES[w.slot]) || w.slot || 'head'), [
+    ['GLB', async () => dl(s + '.glb', (await accFiles(w)).glb, 'model/gltf-binary')],
+    ['OBJ', async () => { const F = await accFiles(w); dl(s + '-obj.zip', await GRUG.zip(F.obj.map(f => ({ name: `${s}/${f.name}`, data: f.data })))); }],
+    ['Texture', async () => dl(s + '-texture.png', (await accFiles(w)).tex, 'image/png')]]); });
+  const ugc = Object.values(UGC.worn);
+  if (ugc.length) { head('Catalog pieces');
+    ugc.forEach(w => { const s = xslug(w.e.name);
+      if (!ugcShareable(w.e)) { row(w.e.name, 'Stays in the Studio: not ours to hand out', []); return; }
+      row(w.e.name, 'From the site\'s catalog', [['GLB', async () => dl(s + '.glb', (await ugcFiles(w)).glb, 'model/gltf-binary')],
+        ['OBJ', async () => { const F = await ugcFiles(w); dl(s + '-obj.zip', await GRUG.zip(F.obj.map(f => ({ name: `${s}/${f.name}`, data: f.data })))); }],
+        ['Texture', async () => dl(s + '-texture.png', (await ugcFiles(w)).tex, 'image/png')]]); }); }
+  head('Picture');
+  row('The character as shown', 'PNG of the stage, as you have it turned', [['PNG', async () => dl(xslug(currentLook().name) + '.png', await snapPng(), 'image/png')]]);
 }
 
 /* ---------- UI ---------- */
@@ -4670,14 +4811,16 @@ async function fileAccessories(){
   drawWardrobe();
 }
 function drawWardrobe(){
-  const box = $o('#outAccs'); box.innerHTML = '';
-  OUT.wardrobe.forEach(e => { const on = OUT.worn.some(w => w.e.id === e.id), b = document.createElement('button'); b.className = 'lib-card o-acc' + (on ? ' on' : '');
+  // every accessory in Accessories → Items; the hats again in Head → Hats (#outHats)
+  [['#outAccs', () => true], ['#outHats', e => e.slot === 'head']].forEach(([sel, keep]) => { const box = $o(sel); if (!box) return; box.innerHTML = '';
+  OUT.wardrobe.filter(keep).forEach(e => { const on = OUT.worn.some(w => w.e.id === e.id), b = document.createElement('button'); b.className = 'lib-card o-acc' + (on ? ' on' : '');
     b.innerHTML = `<div class="lib-thumb" style="background-image:url('${e.thumb ? (e.thumb.startsWith('data:') ? e.thumb : AS(e.thumb)) : ''}')"></div><b></b><small>${SLOT_NAMES[e.slot] || ''}${e.example ? '' : ' · yours'}</small>`;
     b.querySelector('b').textContent = e.name; b.setAttribute('aria-pressed', on);
     b.onclick = async () => { if (OUT.worn.some(w => w.e.id === e.id)) takeOff(e.id); else { b.disabled = true; try { await wear(e); } catch (err) { console.error(err); toastO("Couldn't load that accessory"); } b.disabled = false; } drawWardrobe(); };
-    box.appendChild(b); });
+    box.appendChild(b); }); });
 }
 function drawWorn(){
+  if (window.__oPanelCat === 'export') setTimeout(drawExport, 0);
   const box = $o('#outWorn'); box.innerHTML = ''; $o('#outWornCard').hidden = !OUT.worn.length && !Object.keys(UGC.worn).length;
   Object.values(UGC.worn).forEach(w => { const card = document.createElement('div'); card.className = 'o-worn';
     card.innerHTML = `<div class="o-wh"><b></b><small>${SLOT_NAMES[w.slot] || w.slot} · catalog</small><button class="g-btn g-btn--ghost g-btn--sm o-off">Take off</button></div>`;
@@ -4951,6 +5094,7 @@ function panelGo(cat, sub){
   const subs = $o('#outSubs'); subs.innerHTML = '';
   if (mine.length > 1) mine.forEach(p => { const b = document.createElement('button'); b.textContent = p.dataset.l; b.setAttribute('role', 'tab'); const on = p.dataset.s === sub; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); b.onclick = () => panelGo(cat, p.dataset.s); subs.appendChild(b); });
   panes.forEach(p => p.classList.toggle('on', p.dataset.c === cat && p.dataset.s === sub));
+  window.__oPanelCat = cat; if (cat === 'export') drawExport();
   const pane = $o('#outPane'); if (pane) pane.scrollTop = 0;
 }
 document.querySelectorAll('#outCats button').forEach(b => b.onclick = () => panelGo(b.dataset.c));
@@ -5013,7 +5157,7 @@ drawProps();
 $o('#outPropCopy').onclick = async () => { const t = figJSON(); $o('#outPropJson').value = t; try { await navigator.clipboard.writeText(t); toastO('Proportions copied as JSON'); } catch { $o('#outPropJson').select(); } };
 $o('#outPropApply').onclick = () => { try { setFig(JSON.parse($o('#outPropJson').value)); toastO('Proportions applied'); } catch { toastO("That isn't valid JSON"); } };
 $o('#outPropReset').onclick = () => { setFig(FIG_DEFAULT); toastO('Back to the default proportions'); };
-$o('#outNail').addEventListener('input', () => { if (OUT.r) OUT.r.nail = hexRgb($o('#outNail').value); const b = $o('#outNailBtn'); if (b) b.style.background = $o('#outNail').value; });
+$o('#outNail').addEventListener('input', () => { if (OUT.r) { OUT.r.nail = hexRgb($o('#outNail').value); clearTimeout(OUT.nailT); OUT.nailT = setTimeout(() => { try { feetTextures(); } catch (e) {} }, 120); } const b = $o('#outNailBtn'); if (b) b.style.background = $o('#outNail').value; });
 $o('#outClothEdit').onclick = () => {
   if (!OUT.shirtNow && !OUT.pantsNow) return toastO('Pick some clothing first');
   const cp = c => { const k = cnv(TW, TH); if (c) k.getContext('2d').drawImage(c, 0, 0); return k; };
@@ -5025,14 +5169,15 @@ $o('#outClothNew').onclick = () => { __acc.setMode('clothing'); goStep(1); };
 $o('#outClothClaude').onclick = () => { __acc.setMode('clothing'); goStep(1); document.querySelector('#clClaude').click(); };
 $o('#outAccNew').onclick = () => { __acc.setMode('acc'); __acc.showGallery(); };
 $o('#outAccClaude').onclick = () => { __acc.setMode('acc'); const c = document.querySelector('#accClaude'); c.scrollIntoView({ block: 'start' }); document.querySelector('#accClaudeGo').click(); };
-$o('#outSave').onclick = saveLook; $o('#outZip').onclick = downloadLook;
+$o('#outSave').onclick = saveLook; $o('#outZip').onclick = downloadLook; if ($o('#outExAll')) $o('#outExAll').onclick = downloadLook;
+if ($o('#outExportBtn')) $o('#outExportBtn').onclick = () => panelGo('export');
 $o('#outSpin').onclick = e => { OUT.spin = !OUT.spin; e.currentTarget.classList.toggle('on', OUT.spin); };
 $o('#outShirtFile').onchange = async e => { const f = e.target.files[0]; if (!f) return; const url = URL.createObjectURL(f); await setClothing('custom', { id: 'custom', name: f.name.replace(/\.[^.]+$/, ''), shirt: url, pants: OUT.pants }); e.target.value = ''; };
 $o('#outPantsFile').onchange = async e => { const f = e.target.files[0]; if (!f) return; const url = URL.createObjectURL(f); await setClothing('custom', { id: 'custom', name: f.name.replace(/\.[^.]+$/, ''), shirt: OUT.shirt, pants: url }); e.target.value = ''; };
 
 async function wearClothing(shirt, pants, name){ await show(true); const cp = c => { if (!c) return null; const k = cnv(TW, TH); k.getContext('2d').drawImage(c, 0, 0); return k; };
   await setClothing('custom', { id: 'custom', name: name || 'Your clothing', shirt: cp(shirt), pants: cp(pants) }); }
-window.__outfits = { OUT, UGC, ugcWear, ugcOff, loadUGC, setBoots, show, wear, takeOff, applyLook, currentLook, addFromView, setClothing, saveLook, wearClothing, setBody, setAnim, setPose, setFace, animPose, randomFace, composeFace };
+window.__outfits = { feetLight, feetTextures, OUT, UGC, ugcWear, ugcOff, loadUGC, setBoots, show, wear, takeOff, applyLook, currentLook, addFromView, setClothing, saveLook, wearClothing, setBody, setAnim, setPose, setFace, animPose, randomFace, composeFace };
 })();
 
 </script>

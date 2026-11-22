@@ -267,19 +267,29 @@ outfits-ui.js); barefoot, the hem rides over the top of the foot (`hemLift`: an 
 **The Studio opens on Character** (the first tab) with the avatar dressed, and on that tab **the page never scrolls**
 (`html.o-full`): the stage fills the height and the side panel has six sections (Body, Head, Clothing, Accessories, Looks,
 Effects) with their subsections as chips (Body: Body type, Skin & nails, Proportions, Pose; Head: Face, Hair, Eyewear,
-Headphones; Clothing: Outfits, Colours; Accessories: Items, Sandals, Position & size). Only the panel's pane scrolls. A new
+Headphones; Clothing: Outfits, Colours; Accessories: Items, Sandals, Position & size). Only the panel's pane scrolls.
+**Head → Hats** lists the head-spot accessories (cowboy hat, baseball cap, knit beanie, bucket hat, straw sun hat: templates made
+in the Image2LoPol folder like the others). **Export** (the seventh section, and the Export button on the stage) downloads
+everything as one zip (shirt and pants templates, each accessory as GLB and OBJ with its textures, catalog pieces, a picture,
+look.json) or any piece on its own (`drawExport`, `downloadLook` in outfits-ui.js). Her stock long hair and buns and the
+flip-flops are never exported (`ugcShareable`). **The Figure's bare feet are light-baked** like the body (`feetLight` /
+`feetTextures`: AO and room light traced against the trouser legs, both feet and the ground, in the feet texture's own
+layout; light only, no retro colour steps, so they match the hands; cached per Figure shape). A new
 control goes into a pane (`.o-p` with `data-c` / `data-s` / `data-l`, in the Image2LoPol folder's `inline_studio.py`).
 **Catalog** pieces (experimental, branch `clothing-studio-ugc`): from the site's UGC catalog (`labs/catalog/`): hair,
-eyewear, headphones / earmuffs and sandals, in `make/clothing/ugc/` (index.json, one geometry JSON + texture + picture each).
+eyewear and headphones / earmuffs (every one of the catalog's 31 hairstyles, one colour each), plus the **flip-flops**, in
+`make/clothing/ugc/` (index.json, one geometry JSON + texture + picture each).
 `node tools/ugc/export.js [n per department]` (repo served on :8791) makes them: it opens the catalog in headless Chrome,
 swaps her head mesh for the Studio's rounded head (in her head frame, eyes at the same height), so the catalog's own fitting
 builds each piece around THAT head, merges it (`bakeSingle`) and converts it to studs; sandals (flat soles, no slippers) are
-mapped from her posed feet to the Figure's feet. They're drawn like accessories and never touch the body. Sandals switch to the
+(no longer: the catalog's sandals are replaced by the **flip-flops**, `node tools/ugc/flipflops.js`, which export.js runs:
+`tools/ugc/flipflops/FlipFlops.obj` + one texture per colour, ten colours, fitted to the Figure's feet: the sole mapped to
+the footprint and widened, the toe post moved into the gap by the big toe, the Y strap laid on the skin; pictures by
+`tools/ugc/thumb.html`). They're drawn like accessories and never touch the body. Sandals switch to the
 Figure, barefoot, with no password (a look with sandals too); taking them off brings the boots back; Blocky or Boots takes
 them off. Looks keep `ugc` (ids are fixed by the export's catalog seed, `grug-cd50gg`: keep it, the example looks name them).
 The export also: puts her **stock long hair and buns** (the classic kit's, in four colours) first in Hair, seated on the
-Studio's head (each point keeps its height above her own skull, which is taller, so nothing floats) and pushed out where they'd sink in; makes **headphones exactly symmetric** (her left half mirrored); refits **sandals** to the
-Figure's feet (soles widened to its footprint by angle, straps moved onto its skin at the height they sat above hers). In the
+Studio's head (each point keeps its height above her own skull, which is taller, so nothing floats) and pushed out where they'd sink in; makes **headphones exactly symmetric** (her left half mirrored). In the
 Studio, sandal parts inside the trouser leg are cut off at the hem (`ugcParts`). Every worn piece (accessory or catalog) has
 **Position & size**: X / Y / Z, size 50 to 150%, tilt, turn, roll (`adjMV`; a pair mirrors it on the right foot); looks keep it
 (`adj`, `ugcAdj`). Example look **Pink sweetheart** (clothing `pink`: blocky pants have sandals painted on). The Figure's feet are **Barefoot** (the real feet) or

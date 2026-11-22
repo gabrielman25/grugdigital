@@ -252,6 +252,195 @@
   "verts": 1327
  },
  {
+  "id": "h-h-sleek",
+  "dept": "hair",
+  "name": "Blonde sleek hair",
+  "file": "h-h-sleek.json",
+  "tex": "h-h-sleek.png",
+  "thumb": "h-h-sleek-thumb.png",
+  "verts": 1732
+ },
+ {
+  "id": "h-h-space",
+  "dept": "hair",
+  "name": "Periwinkle space buns",
+  "file": "h-h-space.json",
+  "tex": "h-h-space.png",
+  "thumb": "h-h-space-thumb.png",
+  "verts": 1677
+ },
+ {
+  "id": "h-h-sidepart",
+  "dept": "hair",
+  "name": "Brunette side part",
+  "file": "h-h-sidepart.json",
+  "tex": "h-h-sidepart.png",
+  "thumb": "h-h-sidepart-thumb.png",
+  "verts": 1456
+ },
+ {
+  "id": "h-h-hime",
+  "dept": "hair",
+  "name": "Black hime cut",
+  "file": "h-h-hime.json",
+  "tex": "h-h-hime.png",
+  "thumb": "h-h-hime-thumb.png",
+  "verts": 1914
+ },
+ {
+  "id": "h-h-messybun",
+  "dept": "hair",
+  "name": "Brown messy bun",
+  "file": "h-h-messybun.json",
+  "tex": "h-h-messybun.png",
+  "thumb": "h-h-messybun-thumb.png",
+  "verts": 1679
+ },
+ {
+  "id": "h-h-twinbraids",
+  "dept": "hair",
+  "name": "Ginger braids",
+  "file": "h-h-twinbraids.json",
+  "tex": "h-h-twinbraids.png",
+  "thumb": "h-h-twinbraids-thumb.png",
+  "verts": 1380
+ },
+ {
+  "id": "h-h-waves",
+  "dept": "hair",
+  "name": "Highlighted long waves",
+  "file": "h-h-waves.json",
+  "tex": "h-h-waves.png",
+  "thumb": "h-h-waves-thumb.png",
+  "verts": 2026
+ },
+ {
+  "id": "h-h-wolf",
+  "dept": "hair",
+  "name": "Brown wolf cut",
+  "file": "h-h-wolf.json",
+  "tex": "h-h-wolf.png",
+  "thumb": "h-h-wolf-thumb.png",
+  "verts": 1843
+ },
+ {
+  "id": "h-h-sidepony",
+  "dept": "hair",
+  "name": "Lavender side ponytail",
+  "file": "h-h-sidepony.json",
+  "tex": "h-h-sidepony.png",
+  "thumb": "h-h-sidepony-thumb.png",
+  "verts": 1365
+ },
+ {
+  "id": "h-h-partybob",
+  "dept": "hair",
+  "name": "Hot pink party bob",
+  "file": "h-h-partybob.json",
+  "tex": "h-h-partybob.png",
+  "thumb": "h-h-partybob-thumb.png",
+  "verts": 1797
+ },
+ {
+  "id": "h-h-curls",
+  "dept": "hair",
+  "name": "Brunette long curls",
+  "file": "h-h-curls.json",
+  "tex": "h-h-curls.png",
+  "thumb": "h-h-curls-thumb.png",
+  "verts": 2845
+ },
+ {
+  "id": "h-h-pig",
+  "dept": "hair",
+  "name": "Pink pigtails",
+  "file": "h-h-pig.json",
+  "tex": "h-h-pig.png",
+  "thumb": "h-h-pig-thumb.png",
+  "verts": 1532
+ },
+ {
+  "id": "h-h-split",
+  "dept": "hair",
+  "name": "Blue and pink split spikes",
+  "file": "h-h-split.json",
+  "tex": "h-h-split.png",
+  "thumb": "h-h-split-thumb.png",
+  "verts": 1242
+ },
+ {
+  "id": "h-h-bun",
+  "dept": "hair",
+  "name": "Brunette bun",
+  "file": "h-h-bun.json",
+  "tex": "h-h-bun.png",
+  "thumb": "h-h-bun-thumb.png",
+  "verts": 1402
+ },
+ {
+  "id": "h-h-scene",
+  "dept": "hair",
+  "name": "Navy and rainbow scene hair",
+  "file": "h-h-scene.json",
+  "tex": "h-h-scene.png",
+  "thumb": "h-h-scene-thumb.png",
+  "verts": 1471
+ },
+ {
+  "id": "h-h-topbun",
+  "dept": "hair",
+  "name": "Black top bun",
+  "file": "h-h-topbun.json",
+  "tex": "h-h-topbun.png",
+  "thumb": "h-h-topbun-thumb.png",
+  "verts": 1310
+ },
+ {
+  "id": "h-h-curlycrop",
+  "dept": "hair",
+  "name": "Brunette curly crop",
+  "file": "h-h-curlycrop.json",
+  "tex": "h-h-curlycrop.png",
+  "thumb": "h-h-curlycrop-thumb.png",
+  "verts": 1716
+ },
+ {
+  "id": "h-h-braid",
+  "dept": "hair",
+  "name": "Blonde braid",
+  "file": "h-h-braid.json",
+  "tex": "h-h-braid.png",
+  "thumb": "h-h-braid-thumb.png",
+  "verts": 1445
+ },
+ {
+  "id": "h-h-pixie",
+  "dept": "hair",
+  "name": "Brown pixie cut",
+  "file": "h-h-pixie.json",
+  "tex": "h-h-pixie.png",
+  "thumb": "h-h-pixie-thumb.png",
+  "verts": 1187
+ },
+ {
+  "id": "h-h-spiky",
+  "dept": "hair",
+  "name": "Navy spiky hair",
+  "file": "h-h-spiky.json",
+  "tex": "h-h-spiky.png",
+  "thumb": "h-h-spiky-thumb.png",
+  "verts": 1247
+ },
+ {
+  "id": "h-h-clawup",
+  "dept": "hair",
+  "name": "Brunette half-up twist",
+  "file": "h-h-clawup.json",
+  "tex": "h-h-clawup.png",
+  "thumb": "h-h-clawup-thumb.png",
+  "verts": 1812
+ },
+ {
   "id": "s-ga-grug-cd50gg-0",
   "dept": "sound",
   "name": "Silver Kitty Studio Headphones",
@@ -342,93 +531,93 @@
   "verts": 4286
  },
  {
-  "id": "s-gs-grug-cd50gg-0",
+  "id": "f-flipflops-pink",
   "dept": "sandals",
-  "name": "Navy Ankle Straps",
-  "file": "s-gs-grug-cd50gg-0.json",
-  "tex": "s-gs-grug-cd50gg-0.png",
-  "thumb": "s-gs-grug-cd50gg-0-thumb.png",
-  "verts": 8490
+  "name": "Pink flip-flops",
+  "file": "f-flipflops.json",
+  "tex": "f-flipflops-pink.png",
+  "thumb": "f-flipflops-pink-thumb.png",
+  "verts": 2243
  },
  {
-  "id": "s-gs-grug-cd50gg-1",
+  "id": "f-flipflops-white",
   "dept": "sandals",
-  "name": "Sweet Purple Treat Bag Charm Slide Sandals",
-  "file": "s-gs-grug-cd50gg-1.json",
-  "tex": "s-gs-grug-cd50gg-1.png",
-  "thumb": "s-gs-grug-cd50gg-1-thumb.png",
-  "verts": 2334
+  "name": "White flip-flops",
+  "file": "f-flipflops.json",
+  "tex": "f-flipflops-white.png",
+  "thumb": "f-flipflops-white-thumb.png",
+  "verts": 2243
  },
  {
-  "id": "s-gs-grug-cd50gg-2",
+  "id": "f-flipflops-black",
   "dept": "sandals",
-  "name": "Cozy Rose Charm Ankle Straps",
-  "file": "s-gs-grug-cd50gg-2.json",
-  "tex": "s-gs-grug-cd50gg-2.png",
-  "thumb": "s-gs-grug-cd50gg-2-thumb.png",
-  "verts": 7200
+  "name": "Black flip-flops",
+  "file": "f-flipflops.json",
+  "tex": "f-flipflops-black.png",
+  "thumb": "f-flipflops-black-thumb.png",
+  "verts": 2243
  },
  {
-  "id": "s-gs-grug-cd50gg-4",
+  "id": "f-flipflops-blue",
   "dept": "sandals",
-  "name": "Lucky Patterned Lace-Up Sandals",
-  "file": "s-gs-grug-cd50gg-4.json",
-  "tex": "s-gs-grug-cd50gg-4.png",
-  "thumb": "s-gs-grug-cd50gg-4-thumb.png",
-  "verts": 12218
+  "name": "Sky blue flip-flops",
+  "file": "f-flipflops.json",
+  "tex": "f-flipflops-blue.png",
+  "thumb": "f-flipflops-blue-thumb.png",
+  "verts": 2243
  },
  {
-  "id": "s-gs-grug-cd50gg-5",
+  "id": "f-flipflops-bluedark",
   "dept": "sandals",
-  "name": "Cherry Slide Sandals",
-  "file": "s-gs-grug-cd50gg-5.json",
-  "tex": "s-gs-grug-cd50gg-5.png",
-  "thumb": "s-gs-grug-cd50gg-5-thumb.png",
-  "verts": 3526
+  "name": "Navy flip-flops",
+  "file": "f-flipflops.json",
+  "tex": "f-flipflops-bluedark.png",
+  "thumb": "f-flipflops-bluedark-thumb.png",
+  "verts": 2243
  },
  {
-  "id": "s-gs-grug-cd50gg-6",
+  "id": "f-flipflops-tirquoise",
   "dept": "sandals",
-  "name": "Ombré Black Slide Sandals",
-  "file": "s-gs-grug-cd50gg-6.json",
-  "tex": "s-gs-grug-cd50gg-6.png",
-  "thumb": "s-gs-grug-cd50gg-6-thumb.png",
-  "verts": 4238
+  "name": "Turquoise flip-flops",
+  "file": "f-flipflops.json",
+  "tex": "f-flipflops-tirquoise.png",
+  "thumb": "f-flipflops-tirquoise-thumb.png",
+  "verts": 2243
  },
  {
-  "id": "s-gs-grug-cd50gg-7",
+  "id": "f-flipflops-green",
   "dept": "sandals",
-  "name": "Bubblegum Thong Sandals",
-  "file": "s-gs-grug-cd50gg-7.json",
-  "tex": "s-gs-grug-cd50gg-7.png",
-  "thumb": "s-gs-grug-cd50gg-7-thumb.png",
-  "verts": 6086
+  "name": "Green flip-flops",
+  "file": "f-flipflops.json",
+  "tex": "f-flipflops-green.png",
+  "thumb": "f-flipflops-green-thumb.png",
+  "verts": 2243
  },
  {
-  "id": "s-gs-grug-cd50gg-8",
+  "id": "f-flipflops-yellow",
   "dept": "sandals",
-  "name": "Sunset Bubblegum Strappy Sandals",
-  "file": "s-gs-grug-cd50gg-8.json",
-  "tex": "s-gs-grug-cd50gg-8.png",
-  "thumb": "s-gs-grug-cd50gg-8-thumb.png",
-  "verts": 7186
+  "name": "Yellow flip-flops",
+  "file": "f-flipflops.json",
+  "tex": "f-flipflops-yellow.png",
+  "thumb": "f-flipflops-yellow-thumb.png",
+  "verts": 2243
  },
  {
-  "id": "s-gs-grug-cd50gg-9",
+  "id": "f-flipflops-orange",
   "dept": "sandals",
-  "name": "Print Navy Gladiators",
-  "file": "s-gs-grug-cd50gg-9.json",
-  "tex": "s-gs-grug-cd50gg-9.png",
-  "thumb": "s-gs-grug-cd50gg-9-thumb.png",
-  "verts": 11546
+  "name": "Orange flip-flops",
+  "file": "f-flipflops.json",
+  "tex": "f-flipflops-orange.png",
+  "thumb": "f-flipflops-orange-thumb.png",
+  "verts": 2243
  },
  {
-  "id": "s-gs-grug-cd50gg-11",
+  "id": "f-flipflops-purple",
   "dept": "sandals",
-  "name": "Sweet Sunset Ankle Straps",
-  "file": "s-gs-grug-cd50gg-11.json",
-  "tex": "s-gs-grug-cd50gg-11.png",
-  "thumb": "s-gs-grug-cd50gg-11-thumb.png",
-  "verts": 7434
+  "name": "Purple flip-flops",
+  "file": "f-flipflops.json",
+  "tex": "f-flipflops-purple.png",
+  "thumb": "f-flipflops-purple-thumb.png",
+  "verts": 2243
  }
 ]

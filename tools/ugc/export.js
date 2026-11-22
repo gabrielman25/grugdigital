@@ -62,7 +62,7 @@ const PAGE = async ({ N }) => {
   // glasses and goggles
   for (const it of all.filter(i => !i.dept && i.d).slice(0, N)) { try { const b = GE.build(it.d, hm, { seed: it.seed }); hg.add(b.root); add(it, 'eyewear', it.name, grab(b.root, toHead, studOf)); hg.remove(b.root); b.dispose(); } catch (e) { console.warn('eyewear', it.id, e.message); } }
   // hair (the department measured on this head)
-  if (HD2) { HD2.dress(true); const bases = new Set(); for (const it of HD2.styleItems()) { if (out.filter(o => o.dept === 'hair').length >= N) break; const base = it.base || it.id.split('-')[0]; if (bases.has(base)) continue; bases.add(base); try { const b = await HD2.live(it, 'low'); hg.add(b.root); add(it, 'hair', it.name, grab(b.root, toHead, studOf), true); hg.remove(b.root); b.dispose(); } catch (e) { console.warn('hair', it.id, e.message); } } }
+  if (HD2) { HD2.dress(true); const bases = new Set(); for (const it of HD2.styleItems()) { if (out.filter(o => o.dept === 'hair').length >= Math.max(N, 40)) break;   /* every hairstyle the catalog has, one colour each */ const base = it.base || it.id.split('-')[0]; if (bases.has(base)) continue; bases.add(base); try { const b = await HD2.live(it, 'low'); hg.add(b.root); add(it, 'hair', it.name, grab(b.root, toHead, studOf), true); hg.remove(b.root); b.dispose(); } catch (e) { console.warn('hair', it.id, e.message); } } }
   // her stock hairstyles (the classic kit's long hair and buns, the best-looking ones), in a few colours: made for her head,
   // so every point that would sit inside the Studio's head (or closer than 0.5) is pushed out along the head's surface normal
   const sdf = p => { const q = [Math.hypot(p.x, p.z - cz) - (Rh - rr), Math.abs(p.y - (yb + H / 2)) - (H / 2 - rr)]; return Math.min(Math.max(q[0], q[1]), 0) + Math.hypot(Math.max(q[0], 0), Math.max(q[1], 0)) - rr; };
@@ -95,7 +95,8 @@ const PAGE = async ({ N }) => {
   head.geometry = g0;
   // sandals: flat soles (no heel tilt), no slippers (they tuck her toes away)
   const sand = []; let feetBox = null;
-  for (const it of all.filter(i => i.dept === 'sandals' && i.d && i.d.style !== 'slipper').slice(0, N)) {
+  // (the catalog's sandals are no longer exported: the Studio's sandals are the flip-flops, tools/ugc/flipflops.js, run below)
+  for (const it of all.filter(i => i.dept === 'sandals' && i.d && i.d.style !== 'slipper').slice(0, 0)) {
     try { const d = Object.assign({}, it.d, { heelH: 0 }); await J.prep('sandals', d); const b = J.build('sandals', d, { sandy, hm: hm0 }); G.scene.add(b.root);
       if (!feetBox) { // her posed skin below the ankle, left foot (+x): the box the sandals were fitted to
         const SK = n3.__skinW, F = n3._foot[0], rig = new THREE.Matrix4().multiplyMatrices(F.fb.matrixWorld, F.toFoot), A = F.A.clone().applyMatrix4(rig), mn = [1e9, 1e9, 1e9], mx = [-1e9, -1e9, -1e9];
@@ -174,5 +175,6 @@ const PAGE = async ({ N }) => {
   }
   index.sort((a, b) => (b.first ? 1 : 0) - (a.first ? 1 : 0)); index.forEach(e => delete e.first);   // her stock hairstyles first
   fs.writeFileSync(path.join(OUT, 'index.json'), JSON.stringify(index, null, 1));
+  require('child_process').execFileSync('node', [path.join(__dirname, 'flipflops.js')], { stdio: 'inherit', cwd: process.cwd() });
   console.log(JSON.stringify({ n: index.length, byDept: index.reduce((a, x) => (a[x.dept] = (a[x.dept] || 0) + 1, a), {}), feet: !!map, logs: logs.slice(0, 12) }));
 })();
