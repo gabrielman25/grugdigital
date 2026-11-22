@@ -521,14 +521,15 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
         <div class="checker"><canvas id="headPrev3" width="512" height="164" style="width:100%;height:auto"></canvas></div>
         <div class="tpl-head" style="margin-top:var(--g-s-3)"><h2 class="ttl" style="font-size:var(--g-fs-md)">Happy</h2><button id="dlHeadHappy" class="g-btn g-btn--sm"><i data-g-icon="arrow_down_to_line"></i>Download</button></div>
         <div class="checker"><canvas id="headPrev4" width="512" height="164" style="width:100%;height:auto"></canvas></div>
+        <div id="emoMore"></div>
         <label class="g-field-label" for="emoSel" style="margin-top:var(--g-s-3)">Face in the 3D preview</label>
-        <select id="emoSel" class="g-input"><option value="open">Neutral</option><option value="scared">Scared</option><option value="happy">Happy</option></select>
+        <select id="emoSel" class="g-input"></select>
         <label class="chk"><input type="checkbox" class="g-switch" id="blinkOn" checked>Blink in the 3D preview</label>
         <label class="g-field-label" for="setName" style="margin-top:var(--g-s-3)">Set name</label>
         <input id="setName" class="g-input" type="text" value="Character">
         <button id="dlGLB" class="g-btn full" style="margin-top:var(--g-s-3)"><i data-g-icon="arrow_down_to_line"></i>Download the animated character (.glb)</button>
         <button id="dlSet" class="g-btn g-btn--primary full" style="margin-top:var(--g-s-2)"><i data-g-icon="folder_zip"></i>Download the whole set (.zip)</button>
-        <p class="tiny">The head texture wraps around the round head: the front is in the middle, the back at both edges. Use head.png, head-blink.png, head-scared.png and head-happy.png on any round head and swap them to change the expression. The .glb has a skeleton with idle, walk, run, wave, jump, sit, cheer and scared animations, and the four faces as material variants.</p>
+        <p class="tiny">The head texture wraps around the round head: the front is in the middle, the back at both edges. Use head.png and the other head-*.png faces on any round head and swap them to change the expression; the talking mouths (ah, oh, ee) can be cycled while a character speaks. The .glb has a skeleton with idle, walk, run, wave, jump, sit, cheer and scared animations, and the four faces as material variants.</p>
       </div>
       <div class="g-card card" id="saveCard">
         <h2 class="ttl"><i data-g-icon="floppy_disk"></i>Save outfit</h2>
@@ -1741,7 +1742,7 @@ const GRAY = [176,176,180];
 const grayRef = renderScene({ upper:refR.white, legs:refR.white, head:refR.tex(headTex(GRAY)), tint:GRAY.map(v => v/255) });
 const refAlpha = grayRef.getContext('2d').getImageData(0,0,W,H).data;
 /* ===== Head and face, part A: the reference's face panels and labels (added by build_clothing.py) ===== */
-var FACE_K = 0.82, FACE_PITCH = 8*Math.PI/180, HEAD_TW = 512, HEAD_TH = 164, FACE_U = 87, _panels;
+var FACE_K = 0.82, FACE_PITCH = 8*Math.PI/180, HEAD_TW = 512, HEAD_TH = 164, FACE_U = 110, _panels;
 function facePanels(){
   if (_panels !== undefined) return _panels;
   const has = new Uint8Array(W);
@@ -1756,41 +1757,75 @@ function facePanels(){
   const gw = best.e - best.s, sc = W/(BND.r - BND.l), bw = Math.min(Math.floor((gw - 24)/2), Math.round(HEAD.r*2*sc*FACE_K*1.25)), bh = Math.round((HEAD.y1 - HEAD.y0)*sc*FACE_K*1.3);
   const lab = 30, gap = 12, total = 2*(bh + lab) + gap, y0 = Math.round((H - total)/2) - 90, cx = Math.round((best.s + best.e)/2), mid = (HEAD.y0 + HEAD.y1)/2, colGap = 8;
   let L = 0, R = W - 1; while (L < W && !has[L]) L++; while (R > 0 && !has[R]) R--;
-  const rects = [0, 1, 2, 3].map(k => {
-    const col = k % 2, row = k >> 1, ccx = cx + (col ? 1 : -1)*Math.round((bw + colGap)/2), y = y0 + lab + row*(bh + lab + gap), cy = y + bh/2, tx = BND.l + ccx/W*(BND.r - BND.l), ty = BND.t - cy/H*(BND.t - BND.b);
-    return { x: ccx - Math.round(bw/2), y, w: bw, h: bh, cx: ccx, cy, k: FACE_K, tx, ty, m: m4mul(m4T(tx, ty, 0), m4mul(m4RX(FACE_PITCH), m4T(0, -mid, 0))) };
-  });
-  _panels = { gap: best, rects, cx, L, R, labY: [y0 + lab/2, y0 + lab*1.5 + bh + gap] };
+  const mkRect = (ccx, y) => { const cy = y + bh/2, tx = BND.l + ccx/W*(BND.r - BND.l), ty = BND.t - cy/H*(BND.t - BND.b);
+    return { x: ccx - Math.round(bw/2), y, w: bw, h: bh, cx: ccx, cy, k: FACE_K, tx, ty, m: m4mul(m4T(tx, ty, 0), m4mul(m4RX(FACE_PITCH), m4T(0, -mid, 0))) }; };
+  const rects = [0, 1, 2, 3].map(k => mkRect(cx + (k % 2 ? 1 : -1)*Math.round((bw + colGap)/2), y0 + lab + (k >> 1)*(bh + lab + gap)));
+  // the rest sit in a row along the bottom-left corner, under the sitting character
+  const nS = EMOTIONS.length - 4, bwS = Math.round(HEAD.r*2*sc*FACE_K*1.25), pitch = bwS + 8, sx0 = 24, syc = 912, sTop = syc - bh/2;
+  for (let k = 0; k < nS; k++){ const r = mkRect(sx0 + Math.round(bwS/2) + k*pitch, sTop); r.w = bwS; r.x = r.cx - Math.round(bwS/2); rects.push(r); }
+  const strip = { x0: sx0 - 4, x1: sx0 + nS*pitch + 4, y0: sTop - lab - 6 };
+  _panels = { gap: best, rects, strip, cx, L, R, labY: [y0 + lab/2, y0 + lab*1.5 + bh + gap] };
   return _panels;
 }
-var EMOTIONS = ['open', 'blink', 'scared', 'happy'];
-const projF = (R, p) => { const q = project(R.m, p); return [R.cx + (q[0] - R.cx)*R.k, R.cy + (q[1] - R.cy)*R.k]; };
+var EMO = [
+  { id:'open', label:'EYES OPEN', col:'#1f9d55', say:'the face with the eyes OPEN, calm' },
+  { id:'blink', label:'EYES CLOSED', col:'#2f6fe0', say:'exactly the same face with the eyes CLOSED, as in a blink' },
+  { id:'scared', label:'SCARED', col:'#d9822b', say:'SCARED: wide eyes, raised eyebrows, a small open mouth' },
+  { id:'happy', label:'HAPPY', col:'#c2409b', say:'HAPPY: cheerful curved eyes and a big open smile' },
+  { id:'angry', label:'ANGRY', col:'#d33a3a', say:'ANGRY: eyebrows slanting down toward the nose, narrowed eyes, a frown' },
+  { id:'sad', label:'SAD', col:'#3b7fb8', say:'SAD: eyebrows slanting up toward the middle, a small frown and one tear' },
+  { id:'wink', label:'WINK', col:'#8a4fd0', say:'WINKING: one eye closed and a cheeky smile' },
+  { id:'ah', label:'TALK: AH', col:'#0f8f8f', say:'TALKING, saying the vowel "ah": eyes open and the mouth wide open' },
+  { id:'oh', label:'TALK: OH', col:'#7a8a12', say:'TALKING, saying the vowel "oh": eyes open and the mouth a small round O' },
+  { id:'ee', label:'TALK: EE', col:'#a3562a', say:'TALKING, saying the vowel "ee": eyes open and the mouth stretched wide with the teeth showing' }];
+var EMOTIONS = EMO.map(e => e.id), TALK = ['ah', 'oh', 'ee', 'open', 'ee', 'ah', 'oh', 'open'];
 function facePlate(kind){
   if (kind === 'open' || kind === false) return headTex(SKIN);
   const t = cnv(HEAD_TW, HEAD_TH), x = t.getContext('2d'), ink = '#1b1b1f';
   x.fillStyle = rgbCss(SKIN); x.fillRect(0, 0, HEAD_TW, HEAD_TH); x.strokeStyle = ink; x.fillStyle = ink; x.lineCap = 'round'; x.lineJoin = 'round';
-  const smile = (r, w) => { x.lineWidth = w; x.beginPath(); x.arc(256, 78, r, 0.26*Math.PI, 0.74*Math.PI); x.stroke(); };
+  const smile = (r, w, cy) => { x.lineWidth = w; x.beginPath(); x.arc(256, cy || 78, r, 0.26*Math.PI, 0.74*Math.PI); x.stroke(); };
+  const eyes = (ry, cy) => { x.fillStyle = ink; [-26, 26].forEach(dx => { x.beginPath(); x.ellipse(256 + dx, cy || 64, 7, ry || 12.5, 0, 0, Math.PI*2); x.fill(); }); };
+  const brow = (s, xo, yo, xi, yi, w) => { x.lineWidth = w || 5; x.beginPath(); x.moveTo(256 + s*xo, yo); x.lineTo(256 + s*xi, yi); x.stroke(); };
   if (kind === 'blink' || kind === true){
     x.lineWidth = 5; [-26, 26].forEach(dx => { x.beginPath(); x.arc(256 + dx, 58, 10, 0.15*Math.PI, 0.85*Math.PI); x.stroke(); }); smile(34, 6);
   } else if (kind === 'scared'){
-    [-26, 26].forEach(dx => { x.beginPath(); x.ellipse(256 + dx, 66, 9, 17, 0, 0, Math.PI*2); x.fill(); });
-    x.fillStyle = '#fff'; [-26, 26].forEach(dx => { x.beginPath(); x.ellipse(256 + dx - 3, 59, 3, 5, 0, 0, Math.PI*2); x.fill(); });
-    x.lineWidth = 5; [[-1, 1], [1, -1]].forEach(([s]) => { x.beginPath(); x.moveTo(256 + s*44, 40); x.lineTo(256 + s*14, 28); x.stroke(); });
+    eyes(17, 66); x.fillStyle = '#fff'; [-26, 26].forEach(dx => { x.beginPath(); x.ellipse(256 + dx - 3, 59, 3, 5, 0, 0, Math.PI*2); x.fill(); });
+    brow(-1, 44, 40, 14, 28); brow(1, 44, 40, 14, 28);
     x.fillStyle = ink; x.beginPath(); x.ellipse(256, 106, 10, 15, 0, 0, Math.PI*2); x.fill();
   } else if (kind === 'happy'){
     x.lineWidth = 6; [-26, 26].forEach(dx => { x.beginPath(); x.arc(256 + dx, 72, 12, 1.15*Math.PI, 1.85*Math.PI); x.stroke(); });
     x.beginPath(); x.moveTo(256 - 36, 88); x.quadraticCurveTo(256, 88, 256 + 36, 88); x.quadraticCurveTo(256 + 30, 122, 256, 122); x.quadraticCurveTo(256 - 30, 122, 256 - 36, 88); x.fill();
     x.fillStyle = '#d8575f'; x.beginPath(); x.ellipse(256, 116, 14, 6, 0, 0, Math.PI*2); x.fill();
+  } else if (kind === 'angry'){
+    eyes(9, 68); brow(-1, 46, 34, 12, 54, 6); brow(1, 46, 34, 12, 54, 6);
+    x.lineWidth = 6; x.beginPath(); x.arc(256, 128, 26, 1.22*Math.PI, 1.78*Math.PI); x.stroke();
+  } else if (kind === 'sad'){
+    eyes(11, 70); brow(-1, 44, 50, 14, 36); brow(1, 44, 50, 14, 36);
+    x.fillStyle = '#7ec8f0'; x.beginPath(); x.moveTo(256 - 31, 86); x.quadraticCurveTo(256 - 38, 100, 256 - 31, 104); x.quadraticCurveTo(256 - 24, 100, 256 - 31, 86); x.fill();
+    x.strokeStyle = ink; x.lineWidth = 6; x.beginPath(); x.arc(256, 130, 22, 1.2*Math.PI, 1.8*Math.PI); x.stroke();
+  } else if (kind === 'wink'){
+    x.fillStyle = ink; x.beginPath(); x.ellipse(256 - 26, 64, 7, 12.5, 0, 0, Math.PI*2); x.fill();
+    x.lineWidth = 6; x.beginPath(); x.arc(256 + 26, 72, 11, 1.15*Math.PI, 1.85*Math.PI); x.stroke(); smile(36, 6, 76);
+  } else if (kind === 'ah'){
+    eyes(); x.fillStyle = ink; x.beginPath(); x.ellipse(256, 104, 17, 21, 0, 0, Math.PI*2); x.fill();
+    x.fillStyle = '#d8575f'; x.beginPath(); x.ellipse(256, 116, 11, 7, 0, 0, Math.PI*2); x.fill();
+  } else if (kind === 'oh'){
+    eyes(); x.fillStyle = ink; x.beginPath(); x.ellipse(256, 102, 9, 12, 0, 0, Math.PI*2); x.fill();
+  } else if (kind === 'ee'){
+    eyes(); x.fillStyle = '#fff'; x.strokeStyle = ink; x.lineWidth = 5; x.beginPath();
+    if (x.roundRect) x.roundRect(256 - 36, 90, 72, 20, 9); else x.rect(256 - 36, 90, 72, 20); x.fill(); x.stroke();
+    x.lineWidth = 2; x.beginPath(); x.moveTo(256, 90); x.lineTo(256, 110); x.stroke();
   }
   return t;
 }
+const projF = (R, p) => { const q = project(R.m, p); return [R.cx + (q[0] - R.cx)*R.k, R.cy + (q[1] - R.cy)*R.k]; };
 /* the head alone, drawn with the reference's own renderer: the same round head, straight on */
 refR.drawChar = function(mv, P, tx){
   if (!this.headOnly) return GLR.prototype.drawChar.call(this, mv, P, tx);
   const w0 = this.wrap, sp0 = this.spec; if (this.headDims !== HEAD){ this.wrap = 0.6; this.spec = sp0*0.5; }
   this.draw(this.body.head, tx.head, this.partMV(mv, 'head'), P, [1,1,1]); this.wrap = w0; this.spec = sp0;
 };
-var _ft = [null, null, null, null];
+var _ft = [];
 function renderFaceHead(r, kind){
   const k = EMOTIONS.indexOf(kind); _ft[k] = refR.tex(facePlate(kind), _ft[k] || undefined);
   const gl = refR.gl, q = 1/r.k, P = m4ortho(r.tx + (BND.l - r.tx)*q, r.tx + (BND.r - r.tx)*q, r.ty + (BND.b - r.ty)*q, r.ty + (BND.t - r.ty)*q, -50, 50);   // the same camera, zoomed out a little so the four heads fit
@@ -1803,9 +1838,7 @@ function decorateReference(c){
   const x = c.getContext('2d'); x.save(); x.textAlign = 'center'; x.textBaseline = 'middle';
   const tx = (t, X, Y, col, px) => { x.font = '700 ' + px + 'px system-ui, Arial, sans-serif'; x.fillStyle = col; x.fillText(t, X, Y); };
   tx('FRONT VIEW (SITTING)', (P.L + P.gap.s)/2, 24, '#444', 22); tx('BACK VIEW (EXPLODED)', (P.gap.e + P.R)/2, 24, '#444', 22);
-  [['HEAD A: EYES OPEN', '#1f9d55'], ['HEAD B: EYES CLOSED', '#2f6fe0'], ['HEAD C: SCARED', '#d9822b'], ['HEAD D: HAPPY', '#c2409b']].forEach(([label, col], i) => {
-    const r = P.rects[i]; x.drawImage(renderFaceHead(r, EMOTIONS[i]), 0, 0); tx(label, r.cx, r.y - 14, col, 12);
-  });
+  EMO.forEach((e, i) => { const r = P.rects[i]; x.drawImage(renderFaceHead(r, e.id), 0, 0); tx('HEAD ' + String.fromCharCode(65 + i) + ': ' + e.label, r.cx, r.y - 14, e.col, i < 4 ? 12 : 11); });
   x.restore();
 }
 
@@ -1990,7 +2023,8 @@ function prepMask(){
   const m = new Uint8Array(sw*sh);
   for (let i=0;i<sw*sh;i++){ const j=i*4; m[i] = Math.max(Math.abs(d[j]-bg[0]),Math.abs(d[j+1]-bg[1]),Math.abs(d[j+2]-bg[2])) > 38 ? 1 : 0; }
   { const P = facePanels(); if (P){ const x0 = Math.floor((P.gap.s + 4)/W*sw), x1 = Math.ceil((P.gap.e - 4)/W*sw), y1 = Math.ceil(44/H*sh);
-      for (let y = 0; y < sh; y++) for (let x = 0; x < sw; x++) if ((x >= x0 && x < x1) || y < y1) m[y*sw + x] = 0; } }
+      const S = P.strip, sx0 = Math.floor(S.x0/W*sw), sx1 = Math.ceil(S.x1/W*sw), sy0 = Math.floor(S.y0/H*sh);
+      for (let y = 0; y < sh; y++) for (let x = 0; x < sw; x++) if ((x >= x0 && x < x1) || y < y1 || (x >= sx0 && x < sx1 && y >= sy0)) m[y*sw + x] = 0; } }
   upMask = { m, sw, sh };
 }
 // Reference masks at two resolutions
@@ -2961,8 +2995,9 @@ function extractHead(A, opt){
     for (let tx = 0; tx < HEAD_TW; tx++){
       const th = ((tx + .5)/HEAD_TW - .5)*Math.PI*2, nx = Math.sin(th), nz = Math.cos(th), n = [nx, 0, nz], p = [nx*rHead(y), y, nz*rHead(y)], i = ty*HEAD_TW + tx;
       for (const V of VIEWS){
-        if (V.only) continue; const nv = rot(V.m, n); if (nv[2] < 0.3) continue;
+        if (V.only) continue; const nv = rot(V.m, n); if (nv[2] < 0.35) continue;
         const [X, Y] = project(V.m, addOff(p, V.off.head)); bil(A, X, Y, cs);
+        if (nv[2] < 0.6 && cs[0] > 238 && cs[1] > 238 && cs[2] > 238) continue;   // the white background at the edge of the head: not paint
         const w = nv[2]*nv[2], mul = 1 + (SNORM/shadeOf(nv) - 1)*opt.deshade;
         col[i*3] += w*cs[0]*mul; col[i*3 + 1] += w*cs[1]*mul; col[i*3 + 2] += w*cs[2]*mul; wsum[i] += w;
       }
@@ -2973,7 +3008,7 @@ function extractHead(A, opt){
     const rr = HEAD.r*0.8*Math.sqrt((a + .5)/6), ang = b/12*Math.PI*2, p = [Math.sin(ang)*rr, HEAD.y1, Math.cos(ang)*rr];
     for (const V of VIEWS){ if (V.only) continue; const nv = rot(V.m, [0, 1, 0]); if (nv[2] < 0.05) continue; const [X, Y] = project(V.m, addOff(p, V.off.head)); bil(A, X, Y, cs); const w = nv[2]; top[0] += w*cs[0]; top[1] += w*cs[1]; top[2] += w*cs[2]; tw += w; }
   }
-  const P = facePanels(), usable = [null, null];
+  const P = facePanels(), usable = EMOTIONS.map(() => null);
   if (P) P.rects.forEach((r, k) => { let white = 0, n = 0; for (let a = 0; a < 8; a++) for (let b = 0; b < 8; b++){ bil(A, r.cx + ((a + .5)/8 - .5)*r.w*0.5, r.cy + ((b + .5)/8 - .5)*r.h*0.5, cs); n++; if (cs[0] > 240 && cs[1] > 240 && cs[2] > 240) white++; } if (white/n < 0.5) usable[k] = r; });
   /* texels no camera saw (the seams between the two views): blend across them from the nearest seen texels in the same row */
   const base = new Float32Array(N*3);
@@ -2996,7 +3031,8 @@ function extractHead(A, opt){
       for (let tx = 256 - FACE_U; tx < 256 + FACE_U; tx++){
         const th = ((tx + .5)/HEAD_TW - .5)*Math.PI*2, nx = Math.sin(th), nz = Math.cos(th), nv = rot(R.m, [nx, 0, nz]); if (nv[2] < 0.2) continue;
         const [X, Y] = projF(R, [nx*rHead(yy), yy, nz*rHead(yy)]); bil(A, X, Y, cs);
-        const mul = 1 + (SNORM/shadeOf(nv) - 1)*opt.deshade, a = clamp(Math.min(tx - (256 - FACE_U), 256 + FACE_U - 1 - tx)/16, 0, 1), j = (ty*HEAD_TW + tx)*4;
+        if (nv[2] < 0.6 && cs[0] > 238 && cs[1] > 238 && cs[2] > 238) continue;
+        const mul = 1 + (SNORM/shadeOf(nv) - 1)*opt.deshade, a = clamp(Math.min(tx - (256 - FACE_U), 256 + FACE_U - 1 - tx)/24, 0, 1), j = (ty*HEAD_TW + tx)*4;
         d[j] = d[j]*(1 - a) + cs[0]*mul*a; d[j + 1] = d[j + 1]*(1 - a) + cs[1]*mul*a; d[j + 2] = d[j + 2]*(1 - a) + cs[2]*mul*a;
       }
     }
@@ -3031,11 +3067,23 @@ function applyFX(){
   updateViewerTextures();
   if (typeof updateAuto === 'function') updateAuto();
 }
+function emoCanvas(id){ return $(id === 'open' ? '#headPrev' : id === 'blink' ? '#headPrev2' : id === 'scared' ? '#headPrev3' : id === 'happy' ? '#headPrev4' : '#headPrev_' + id); }
 function drawHeadPreview(){
   const card = $('#headCard'); if (card) card.hidden = !state.head;
   if (!state.head) return;
-  [['#headPrev', state.head.open], ['#headPrev2', state.head.blink], ['#headPrev3', state.head.scared], ['#headPrev4', state.head.happy]].forEach(([sel, src]) => { const c = $(sel), x = c.getContext('2d'); x.clearRect(0, 0, HEAD_TW, HEAD_TH); x.drawImage(src, 0, 0); });
+  EMOTIONS.forEach(id => { const c = emoCanvas(id); if (!c || !state.head[id]) return; const x = c.getContext('2d'); x.clearRect(0, 0, HEAD_TW, HEAD_TH); x.drawImage(state.head[id], 0, 0); });
 }
+(function buildEmoCards(){
+  const more = $('#emoMore'), sel = $('#emoSel');
+  EMO.forEach((e, i) => {
+    const nice = e.label.replace('TALK: ', 'Talking: ').toLowerCase().replace(/^./, m => m.toUpperCase());
+    sel.insertAdjacentHTML('beforeend', '<option value="' + e.id + '">' + (i ? nice : 'Neutral') + '</option>');
+    if (i < 4) return;
+    more.insertAdjacentHTML('beforeend', '<div class="tpl-head" style="margin-top:var(--g-s-3)"><h2 class="ttl" style="font-size:var(--g-fs-md)">' + nice + '</h2><button id="dl_' + e.id + '" class="g-btn g-btn--sm">Download</button></div><div class="checker"><canvas id="headPrev_' + e.id + '" width="512" height="164" style="width:100%;height:auto"></canvas></div>');
+    $('#dl_' + e.id).onclick = () => state.head && download(state.head[e.id], 'head-' + e.id + '.png');
+  });
+  sel.insertAdjacentHTML('beforeend', '<option value="talk">Talking (cycles the mouth)</option>');
+})();
 function headTexUpload(){
   const rgb = hexRgb($('#skin').value), nearest = state.fx.filter === 'nearest' && state.fx.div > 1;
   V3.r.tex(state.head ? (V3.blinkClosed ? state.head.blink : state.head[V3.emo || 'open']) : headTex(rgb, V3.headC), V3.tex.head, state.head ? nearest : undefined);
@@ -3049,7 +3097,8 @@ function updateViewerTextures(){
 }
 setInterval(() => {
   if (!V3.r) return;
-  const on = state.step === 3 && state.head && $('#blinkOn').checked, now = performance.now(), ph = now % 3400;
+  if (state.step === 3 && state.head && $('#emoSel').value === 'talk'){ const id = TALK[Math.floor(performance.now()/150) % TALK.length]; if (id !== V3.emo){ V3.emo = id; headTexUpload(); } }
+  const on = state.step === 3 && state.head && $('#blinkOn').checked && $('#emoSel').value !== 'talk', now = performance.now(), ph = now % 3400;
   const closed = !!on && (ph < 140 || (ph > 400 && ph < 520 && Math.floor(now/3400) % 3 === 0));
   if (closed !== !!V3.blinkClosed){ V3.blinkClosed = closed; headTexUpload(); }
 }, 40);
@@ -3057,11 +3106,11 @@ $('#dlHead').onclick = () => state.head && download(state.head.open, 'head.png')
 $('#dlHeadBlink').onclick = () => state.head && download(state.head.blink, 'head-blink.png');
 $('#dlHeadScared').onclick = () => state.head && download(state.head.scared, 'head-scared.png');
 $('#dlHeadHappy').onclick = () => state.head && download(state.head.happy, 'head-happy.png');
-$('#emoSel').onchange = () => { V3.emo = $('#emoSel').value; headTexUpload(); };
+$('#emoSel').onchange = () => { V3.emo = $('#emoSel').value === 'talk' ? 'ah' : $('#emoSel').value; headTexUpload(); };
 $('#dlSet').onclick = async () => {
   if (!state.shirt) return;
   const name = cleanName($('#setName').value) || 'Character', files = [['shirt.png', await toPNG(state.shirt)], ['pants.png', await toPNG(state.pants)]];
-  if (state.head) files.push(['head.png', await toPNG(state.head.open)], ['head-blink.png', await toPNG(state.head.blink)], ['head-scared.png', await toPNG(state.head.scared)], ['head-happy.png', await toPNG(state.head.happy)]);
+  if (state.head) files.push(['head.png', await toPNG(state.head.open)], ['head-blink.png', await toPNG(state.head.blink)], ...(await Promise.all(EMOTIONS.slice(2).map(async e => ['head-' + e + '.png', await toPNG(state.head[e])]))));
   files.push(['character.glb', await buildCharacterGLB()]);
   files.push(['preview.png', await toPNG(renderThumb())]);
   GRUG.download(name + '.zip', await GRUG.zip(files.map(([n, d]) => ({ name: name + '/' + n, data: d }))));
@@ -3079,7 +3128,7 @@ CLOTHES: paint the clothes flat onto the blocky body like a classic blocky-game 
 
 HEAD: each head is a smooth, rounded head (a round column with softly rounded top and bottom edges). Paint the face on its front, and paint the hair flat onto the head's surface: on top, along the front hairline, down both sides and across the back, so the hairstyle reads from every side (the left avatar shows the front and the character's right side, the right avatar shows the back and the character's left side). Hair is only a painted texture: don't add 3D hair, buns, hats or anything that changes the silhouette.${P ? `
 
-FACES: between the two avatars are four copies of the same round head, shown from the front and drawn on their own, in a 2 by 2 grid. HEAD A (green label, top left) is the face with the eyes OPEN. HEAD B (blue label, top right) is exactly the same head with the eyes CLOSED, as in a blink. HEAD C (orange label, bottom left) is the same head looking SCARED: wide eyes, raised eyebrows, a small open mouth. HEAD D (pink label, bottom right) is the same head looking HAPPY: cheerful curved eyes and a big open smile. All four have the same skin, hair, fringe and style as the front of the head, and only the expression changes. They are the same rounded 3D heads as on the two avatars, not flat squares or cubes: keep their shape, position and size, and keep the labels where they are.` : ''}\n\nHANDS: the end of each arm is the hand. Keep a little bit of bare skin visible all the way around the end of each sleeve, so the bottom of each hand can be one plain skin colour.\n\nKeep everything else exactly the same: same pose, camera angle, size, position, blocky proportions and plain white background, with no shadows. Keep the lighting soft and even. Any skin that isn't covered by clothing or hair should keep exactly the same skin color it has now.`;
+FACES: besides the two avatars there are ten copies of the same round head, shown from the front and drawn on their own, each with a small label. Heads A to D are in a 2 by 2 grid between the two avatars, and heads E to J are in a row in the bottom-left corner. The ten faces are:${EMO.map((e, i) => ' HEAD ' + String.fromCharCode(65 + i) + ' (' + e.label.toLowerCase() + '): ' + e.say + '.').join('')} All ten have the same skin, hair, fringe and style as the front of the head, and only the expression or mouth changes. They are the same rounded 3D heads as on the two avatars, not flat squares or cubes: keep their shape, position and size, and keep the labels where they are.` : ''}\n\nHANDS: the end of each arm is the hand. Keep a little bit of bare skin visible all the way around the end of each sleeve, so the bottom of each hand can be one plain skin colour.\n\nKeep everything else exactly the same: same pose, camera angle, size, position, blocky proportions and plain white background, with no shadows. Keep the lighting soft and even. Any skin that isn't covered by clothing or hair should keep exactly the same skin color it has now.`;
 }
 $('#headIdea').addEventListener('input', buildPrompt); buildPrompt();
 
@@ -3142,7 +3191,7 @@ async function buildCharacterGLB(){
   const gltfMeshes = meshes.map((m, i) => { const prim = { attributes:{ POSITION:m.POSITION, NORMAL:m.NORMAL, TEXCOORD_0:m.TEXCOORD_0 }, indices:m.indices, material: defs[i].mat };
     if (defs[i].head) prim.extensions = { KHR_materials_variants:{ mappings: emo.map((e, k) => ({ material: 2 + k, variants:[k] })) } };
     return { name: defs[i].name, primitives:[prim] }; });
-  const json = { asset:{ version:'2.0', generator:'Shirt & Pants Studio', extras:{ units:'1 stud = 0.28 m', faces: emo, clips: RIG_CLIPS.map(c => c.name), note:'Parts are rigid and parented to the hips; each clip rotates the head, arms and legs and moves the hips. Switch faces with KHR_materials_variants.' } },
+  const json = { asset:{ version:'2.0', generator:'Shirt & Pants Studio', extras:{ units:'1 stud = 0.28 m', faces: emo, clips: RIG_CLIPS.map(c => c.name), talk: TALK, note:'Parts are rigid and parented to the hips; each clip rotates the head, arms and legs and moves the hips. Switch faces with KHR_materials_variants.' } },
     extensionsUsed:['KHR_materials_variants'], extensions:{ KHR_materials_variants:{ variants: emo.map(e => ({ name:e })) } },
     scene:0, scenes:[{ name:'Character', nodes:[nodes.length - 1] }], nodes, meshes:gltfMeshes, materials, textures, images,
     samplers:[{ magFilter:9728, minFilter:9728, wrapS:33071, wrapT:33071 }, { magFilter:9728, minFilter:9728, wrapS:10497, wrapT:33071 }],
