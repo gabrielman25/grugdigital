@@ -371,6 +371,13 @@ With noticeable lashes (a common pick for a female character): 2, 4, 5, 10, 11, 
 | `r6Base64()` | the `.glb` as base64 |
 | `r6Script()` | the Roblox Studio R6 setup script |
 
+## The Claude skill
+
+People building Roblox games can install a Claude skill that sends Claude here whenever their game needs
+characters: https://grugdigital.pages.dev/character/roblox-characters.zip (add it in Claude under Customize › Skills,
++ › Create skill › Upload a skill; for Claude Code, unzip it into `~/.claude/skills/`). It also covers importing the
+`.glb` into Roblox Studio, setting up the R6 rig, and spawning NPCs.
+
 ## Good manners
 
 - Send Gemini only the template picture and the prompt.

@@ -43,6 +43,8 @@ CSS = r"""
   .cg-how li{display:grid;grid-template-columns:1.7rem 1fr;gap:.6rem;align-items:start;line-height:1.4;color:var(--g-text-2,#47443F)}
   .cg-how b{display:grid;place-items:center;width:1.7rem;height:1.7rem;border-radius:.55rem;background:var(--g-lime,#9BE338);color:#1F1A17;font-weight:700}
   .cg .cg-need{margin:1rem 0 0;font-size:.88rem;color:var(--g-muted,#6E6B66);line-height:1.45}
+  .cg .cg-need a{color:inherit;font-weight:600}
+  .cg .cg-need b{color:var(--g-text-2,#47443F)}
   .cg details{margin-top:1rem;border-top:1px solid var(--g-line,#D9D9D2);padding-top:.8rem}
   .cg summary{cursor:pointer;font-weight:600}
   .cg-agent{font-size:.85rem;line-height:1.5;color:var(--g-text-2,#47443F)}
@@ -88,6 +90,9 @@ SHEET = f'''<body class="g-root flat" data-cat="head">
     </ol>
     <p class="cg-need">Claude needs a browser it can use (Claude in Chrome) to do this for you, and for custom outfits you need to be
       signed in to Gemini in that browser. Without one, Claude gives you a link that opens this studio with your character already set up.</p>
+    <p class="cg-need"><b>Building a Roblox game?</b> <a href="/character/roblox-characters.zip" download>Download the Claude skill</a>
+      so Claude makes your NPCs here whenever your game needs characters. Add it in Claude under Customize › Skills
+      (+ › Create skill › Upload a skill).</p>
     <details>
       <summary>Instructions for Claude and other AI agents</summary>
       <div class="cg-agent" id="forAgents">

@@ -57,6 +57,9 @@ h2{font-size:24px;line-height:1.15;font-weight:600;margin:0 0 8px}
   color:var(--ink);font-size:15px;line-height:1.45;font-weight:500;overflow-wrap:break-word;user-select:all}
 .new .claude .btn--sm{border:0;cursor:pointer;height:auto;min-height:40px;padding:0 18px;font-size:15px;box-shadow:0 3px 0 var(--accent-lo)}
 .new .claude p.fine{font-size:13px;margin:12px 0 0;line-height:1.4}
+.new .claude .skill{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.new .claude .btn--ghost{box-shadow:inset 0 0 0 2px var(--line);background:var(--card)}
+.new .claude code{font-size:12px;background:var(--card);padding:1px 5px;border-radius:5px}
 </style>
 </head>
 <body>
@@ -79,6 +82,13 @@ h2{font-size:24px;line-height:1.15;font-weight:600;margin:0 0 8px}
       <blockquote id="claudePrompt">Use https://grugdigital.pages.dev/<wbr>character/ to make a female character wearing a warm fall outfit. Paint the outfit in Gemini, then download the Roblox R6 file for me.</blockquote>
       <button class="btn btn--sm" id="copyClaude" type="button">Copy prompt</button>
       <p class="fine">Claude picks the hair and face, paints the outfit in Gemini and hands you the R6 file. It needs Claude in Chrome turned on, and you signed in to Gemini in that Chrome.</p>
+      <div class="skill">
+        <p><b>Building a Roblox game?</b> Add the Claude skill and Claude will make your NPCs and characters here
+          whenever your game needs them, then help you put them in your place.</p>
+        <a class="btn btn--sm btn--ghost" href="/character/roblox-characters.zip" download>Download the skill</a>
+        <p class="fine">In Claude, open Customize › Skills, click +, then Create skill › Upload a skill, and choose the zip.
+          For Claude Code, unzip it into <code>~/.claude/skills/</code>.</p>
+      </div>
     </div>
   </section>
 </main>

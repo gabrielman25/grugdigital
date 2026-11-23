@@ -11,3 +11,5 @@
 - [Guide for Claude and other AI agents](https://grugdigital.pages.dev/character/claude.md): how to make a character
   for someone who pasted the studio's link into a chat, step by step, including the `window.GrugStudio` JavaScript API
   and recipe links (`/character/?hair=…&outfit=…`) for when you can't use a browser.
+- [Claude skill (zip)](https://grugdigital.pages.dev/character/roblox-characters.zip): install it so Claude uses the
+  studio whenever a Roblox game needs characters or NPCs, and brings them into the game.
