@@ -1752,8 +1752,8 @@ const ALLY_HL = 0x3d9bff, ENEMY_HL = 0xff2a2a, YOU_CSS = '#ffe36b', WANTED_CSS =
 // kit: the Grug outfit the townsfolk in this job wear (arcade/outfits/<kit>.glb); hat: worn on top
 const TEAMS = [
   { id: 'cit', name: 'Citizen', shirt: 0xd8d8d8, pants: 0x3a4a6a, css: '#e8e8e8', ink: '#111', pay: 10, guns: [], bld: 'cityhall', desc: 'Live your life: shop, eat, hit the beach, claim a mansion. Step on any job pad to take that job.' },
-  { id: 'pol', name: 'Police Officer', shirt: 0x1f3f8f, pants: 0x14213f, css: '#2f63e0', ink: '#fff', pay: 30, guns: ['pistol', 'rifle'], bld: 'police', kit: 'medic', hat: ['cap', 0x14213f], desc: 'Keep the peace. Wanted people show red outlines and stars: take them down to send them to jail and collect the bounty.' },
-  { id: 'crim', name: 'Criminal', shirt: 0x2b2b2b, pants: 0x1a1a1a, css: '#8b1e1e', ink: '#fff', pay: 0, guns: ['pistol', 'smg'], bld: 'hideout', kit: 'scavenger', hat: ['beanie', 0x151515], desc: 'Hold G at a shop till to rob it. Every crime adds wanted stars, and the police will come for you. Lose them and the stars fade.' },
+  { id: 'pol', name: 'Police Officer', shirt: 0x1f3f8f, pants: 0x14213f, css: '#2f63e0', ink: '#fff', pay: 30, guns: ['pistol', 'rifle'], bld: 'police', kit: 'medic', desc: 'Keep the peace. Wanted people show red outlines and stars: take them down to send them to jail and collect the bounty.' },
+  { id: 'crim', name: 'Criminal', shirt: 0x2b2b2b, pants: 0x1a1a1a, css: '#8b1e1e', ink: '#fff', pay: 0, guns: ['pistol', 'smg'], bld: 'hideout', kit: 'scavenger', desc: 'Hold G at a shop till to rob it. Every crime adds wanted stars, and the police will come for you. Lose them and the stars fade.' },
   { id: 'pris', name: 'Prisoner', shirt: 0xff7a1a, pants: 0xff7a1a, css: '#ff7a1a', ink: '#111', pay: 0, guns: [], bld: 'jail', desc: 'An inmate in the jail yard.' },
   { id: 'styl', name: 'Stylist', shirt: 0xd65aa8, pants: 0x3a2a3a, css: '#e06ab8', ink: '#111', pay: 20, guns: [], bld: 'salon', desc: 'Work the chairs at Snip & Sip Salon.' },
   { id: 'ice', name: 'Ice Cream Server', shirt: 0xff9ecf, pants: 0xffffff, css: '#ff9ecf', ink: '#111', pay: 18, guns: [], bld: 'icecream', desc: 'Scoop cones at Sundae Funday on the boardwalk.' },
@@ -1767,7 +1767,7 @@ const TEAMS = [
   { id: 'bar', name: 'Barista', shirt: 0x1e6b45, pants: 0x222222, css: '#2e9b65', ink: '#fff', pay: 18, guns: [], bld: 'coffee', desc: 'Pull shots at Moonbucks Coffee.' },
   { id: 'mus', name: 'Music Clerk', shirt: 0x2d2d6b, pants: 0x1a1a1a, css: '#5a5ad8', ink: '#fff', pay: 20, guns: [], bld: 'music', desc: 'Tune guitars at Tune Town Music in the mall.' },
   { id: 'life', name: 'Lifeguard', shirt: 0xe02020, pants: 0xf5cd30, css: '#ff3a3a', ink: '#111', pay: 22, guns: [], bld: 'lifeguard', desc: 'Watch the beach from the tower.' },
-  { id: 'crew', name: 'Cruise Crew', shirt: 0xffffff, pants: 0x1a2a4a, css: '#ffffff', ink: '#111', pay: 24, guns: [], bld: 'ship', hat: ['cap', 0xffffff], desc: 'Keep the S.S. Grug Princess shipshape.' },
+  { id: 'crew', name: 'Cruise Crew', shirt: 0xffffff, pants: 0x1a2a4a, css: '#ffffff', ink: '#111', pay: 24, guns: [], bld: 'ship', desc: 'Keep the S.S. Grug Princess shipshape.' },
 ];
 const T = Object.fromEntries(TEAMS.map((t, i) => [t.id.toUpperCase(), i]));   // T.CIT, T.POL, T.CRIM, T.PRIS, ...
 const chip = t => `<i class="tc" style="background:${TEAMS[t].css}"></i>`;
@@ -2148,7 +2148,7 @@ const SHOPS = {
   tarjay: { title: 'Tarjay', items: [['Snack pack', 6, { heal: 20 }], ['New outfit', 30, { outfit: 1 }], ['Board game', 15, {}], ['Phone charger', 12, {}]], rob: 250 },
   burlingtown: { title: 'Burlingtown', items: [['Winter coat (new outfit)', 40, { outfit: 1 }], ['Sneakers', 25, {}], ['Handbag', 35, {}]], rob: 200 },
   coffee: { title: 'Moonbucks Coffee', items: [['Latte', 4, { heal: 15 }], ['Iced mocha', 5, { heal: 15 }], ['Croissant', 3, { heal: 10 }]], rob: 120 },
-  salon: { title: 'Snip & Sip Salon', items: [['Fresh cut', 15, { hat: 'hair' }], ['Beanie look', 12, { hat: 'beanie' }], ['Top hat look', 25, { hat: 'tophat' }], ['Headphones', 20, { hat: 'headphones' }], ['Just the hair, thanks (no hat)', 5, { hat: 'none' }]], rob: 100 },
+  salon: { title: 'Snip & Sip Salon', items: [['Haircut', 15, {}], ['Wash and style', 12, {}], ['Manicure', 10, {}], ['Full makeover (new outfit)', 30, { outfit: 1 }]], rob: 100 },
   police: { title: 'Front desk', items: [['Report a crime (free)', 0, { report: 1 }]], rob: 0 },
   cityhall: { title: 'City Hall', items: [['Get a new name', 0, { rename: 1 }], ['Quit your job (become a Citizen)', 0, { quit: 1 }]], rob: 0 },
   jail: { title: 'Jail desk', items: [['Visit an inmate', 0, {}]], rob: 0 },
@@ -2159,7 +2159,7 @@ const SHOPS = {
   bbq: { title: 'Smokestack BBQ', items: [['Brisket plate', 12, { heal: 40 }], ['Ribs', 15, { heal: 45 }], ['Sweet tea', 3, { heal: 10 }]], rob: 180 },
   pizza: { title: 'Leaning Tower Pizza', items: [['Pepperoni slice', 4, { heal: 20 }], ['Whole pizza', 14, { heal: 60 }], ['Garlic knots', 5, { heal: 15 }]], rob: 140 },
   icecream: { title: 'Sundae Funday', items: [['Cone (2 scoops)', 3, { heal: 10 }], ['Milkshake', 5, { heal: 15 }], ['Banana split', 7, { heal: 20 }]], rob: 90 },
-  ship: { title: 'Ship bar', items: [['Tropical drink', 6, { heal: 15 }], ['Buffet plate', 10, { heal: 35 }], ['Captain hat', 15, { hat: 'cap' }]], rob: 200 },
+  ship: { title: 'Ship bar', items: [['Tropical drink', 6, { heal: 15 }], ['Buffet plate', 10, { heal: 35 }], ['Souvenir T-shirt (new outfit)', 15, { outfit: 1 }]], rob: 200 },
 };
 
 // ---------------------------------------------------------------- roads
@@ -2334,6 +2334,8 @@ function buildMall() {
     jobPad(B, sh.team, sh.x1 - 4, -114, via); TEAMS[sh.team].spawn.B = B;
     const s = sign([sh.name, sh.sub], c, 11, -86.94, 18, 4.4, 0, 1, sh.bg, '#fff'); s.userData.keep = true;
     B.spots.idle.push(spot(c - 8, -96, { B, via }), spot(c + 8, -96, { B, via }));
+    R.spots.idle.push(spot(c - 8, -96, { B, via }), spot(c + 8, -96, { B, via }), spot(sh.x0 + 4, -112, { B, via }));
+    R.doorIn = spot(c, -93, { B, via: [via[0]] }); R.doorOut = spot(c, -80, { B }); R.parent = B;
   }
   furn(14, 0, -100, 18, 3, -92, 0x2a2a2e); furn(38, 0, -100, 42, 3, -92, 0x2a2a2e);
   furn(46, 0, -100, 49, 3, -92, 0x9fd4ff); furn(72, 0, -100, 75, 3, -92, 0x9fd4ff);
@@ -2909,8 +2911,7 @@ function applyLook(f) {
   // prisoners keep their own look, dyed jail orange from the neck down
   if (f.team === T.PRIS && r.outfit) for (const m of r.outfit.meshes) if (m.name !== 'outfit:Head') { m.material = m.material.clone(); m.material.color.setHex(0xffa050); }
   dressRig(r, { skin: f.look.skin, shirt: Tm.shirt, pants: Tm.pants });
-  const h = Tm.hat ? Tm.hat : f.hat && Tm.id !== 'pris' ? [f.hat, HAT_COL[f.hat] || 0x222222] : null;
-  setHat(r, h);
+  setHat(r, null);   // no hats: just the outfits
   if (r.hl) for (const m of r.hl) m.visible = !!f.wanted;
   if (f.tag) f.tag.st = '';
 }
@@ -3054,6 +3055,7 @@ function animatePlayer(f, dt) {
   else if (pose === 'walk') { r.walkT += dt; const s = Math.sin(r.walkT * 9); t = { rs: s, ls: -s, rh: -s, lh: s, rz: 0 }; }
   else { t = { rs: 0, ls: 0, rh: 0, lh: 0, rz: 0 }; rate = 9; r.walkT = 0; }
   if (f.robbing) { t.rs = P / 2 + 0.3; t.ls = P / 2 + 0.3; }
+  else if (f.isBot && f.station && f.arrived && pose === 'idle' && busyKind(f.station.kind)) { const w = Game.clock * (f.station.kind === 'sweep' ? 5 : 3.2) + f.ch.id; t.rs = 0.9 + Math.sin(w) * 0.45; t.ls = 0.7 + Math.sin(w + 1.6) * 0.35; rate = 8; }
   if (f.meleeT < 0.45) { const w = RULES.whipWindup, k = f.meleeT; t.rs = k < w ? P / 2 + 1.4 * (k / w) : P / 2 + 1.4 - 2.3 * Math.min(1, (k - w) / 0.09) + 0.9 * Math.max(0, (k - w - 0.12) / 0.17); t.rz = -0.35; j.rs += clamp(t.rs - j.rs, -70 * dt, 70 * dt); }
   else if (armed && pose !== 'sit') { t.rs = P / 2 + clamp(f.aimPitch || 0, -1.2, 1.2); j.rs += clamp(t.rs - j.rs, -40 * dt, 40 * dt); }
   for (const k in j) j[k] += clamp(t[k] - j[k], -rate * dt, rate * dt);
@@ -3063,7 +3065,8 @@ function animatePlayer(f, dt) {
     if (k >= 1) { FX.rollEnd(ch.x, ch.y - 3, ch.z); f.roll = null; r.root.rotation.set(0, 0, 0); r.root.position.y = 3; }
     else { const yw = r.g.rotation.y, c = Math.cos(yw), sn = Math.sin(yw), lx = f.roll.fx * c - f.roll.fz * sn, lz = f.roll.fx * sn + f.roll.fz * c; rollAx.set(lz, 0, -lx).normalize(); r.root.quaternion.setFromAxisAngle(rollAx, Math.PI * 2 * (k * k * (3 - 2 * k))); r.root.position.y = 3 - 1.3 * Math.sin(Math.PI * k); j.rh = j.lh = -1.2; j.rs = j.ls = 2.2; }
   }
-  r.root.position.y = pose === 'sit' && !f.roll ? (f.car ? 2.4 : 2) : f.roll ? r.root.position.y : 3;
+  // seated: the engine puts the root 1 stud over the seat; lift the body so the hips (and the legs, out in front) rest on top of it
+  r.root.position.y = pose === 'sit' && !f.roll ? (f.car ? 2.4 : 3.5) : f.roll ? r.root.position.y : 3;
   r.rs.rotation.order = 'YXZ'; f.armYawJ += ((Game.clock - f.lastShot < 0.9 || f.meleeT < 0.45 ? f.armYaw : 0) - f.armYawJ) * Math.min(1, dt * 16);
   r.rs.rotation.y = f.armYawJ; r.rs.rotation.x = j.rs; r.ls.rotation.x = j.ls; r.rh.rotation.x = j.rh; r.lh.rotation.x = j.lh; r.rs.rotation.z = j.rz;
   if (r.hasGuns) {
@@ -3076,17 +3079,80 @@ function animatePlayer(f, dt) {
 //  THE TOWNSFOLK: the Ambient kit's names, looks and remixed human hands, with a city brain
 // =====================================================================
 const BOT_LINES = {
-  idle: ['hi', 'yo', 'nice day', 'lol', 'anyone wanna hang', 'brb', 'this city is cool', 'whats up', 'xd', 'hey', 'going shopping', 'im hungry', 'who wants pizza'],
+  idle: ['*window shops*', '*checks phone*', '*stretches*', 'hi', 'yo', 'nice day', 'lol', 'anyone wanna hang', 'brb', 'this city is cool', 'whats up', 'xd', 'hey', 'going shopping', 'im hungry', 'who wants pizza'],
   work: ['welcome in!', 'can i help you?', 'hi! what can i get you', 'next!', 'we have a sale today', 'thanks for coming', 'have a nice day!', 'need anything?'],
-  cop: ['all clear', 'patrolling', 'stay safe', 'no running', 'keep it legal', 'anything to report?'],
+  cop: ['all clear', 'patrolling', 'stay safe', 'keep it legal', 'anything to report?', '*radios dispatch*', '*writes a parking ticket*', '*eats a donut*', '*tips hat*'],
   chase: ['STOP! POLICE!', 'freeze!', 'hands up!', 'suspect spotted', 'backup needed', 'you are under arrest!'],
   crook: ['heh', 'shh', 'dont look at me', 'nothing to see here', 'lol'],
   rob: ['THIS IS A ROBBERY', 'hands up! cash please', 'empty the till!!', 'nobody move'],
   flee: ['help!!', 'police!!', 'ahh', 'stop it!', 'someone call 911', 'run!!'],
   hurt: ['ow', 'hey!', 'stop', 'rude', 'why'], died: ['oof', 'bruh', 'noooo', 'ow'], arrest: ['got him', 'suspect down', 'off to jail', 'case closed'],
-  jail: ['let me out', 'i did nothing', 'this is boring', 'how long left', 'i want pizza'], beach: ['beach day!', 'surfs up', 'so sunny', 'swimming time'],
+  jail: ['*paces the yard*', '*does push-ups*', 'let me out', 'i did nothing', 'this is boring', 'how long left', 'i want pizza'], beach: ['beach day!', 'surfs up', 'so sunny', 'swimming time'],
+  rp: [],
   ship: ['all aboard!', 'love this ship', 'cruise life', 'look at the ocean'],
 };
+// shopkeepers act out their job: what they say depends on what they're doing and where they work
+const RP = {
+  register: ['*counts the cash in the till*', '*wipes down the counter*', '*rings up a customer*', 'next in line please!', '*straightens the tip jar*', 'how can I help you today?'],
+  shelf: ['*stocks shelves*', '*straightens the display*', '*checks the price tags*', '*restocks*', '*faces the products*', '*counts inventory*'],
+  table: ['*wipes down a table*', '*clears the empty plates*', '*pushes in the chairs*', '*refills the napkins*'],
+  door: ['welcome in!', '*holds the door open*', 'come on in, we\'re open!', 'hi there! let me know if you need anything'],
+  sweep: ['*sweeps the sidewalk*', '*waves at people walking by*', '*flips the sign to OPEN*', '*wipes the front window*'],
+  customer: ['*rings up a customer*', 'that\'ll be all? great!', '*bags the order*', 'here you go, have a good one!'],
+  store: {
+    coffee: ['*steams the milk*', '*pulls an espresso shot*', '*writes a name wrong on a cup*', '*grinds fresh beans*'],
+    salon: ['*sweeps up hair clippings*', '*sharpens the scissors*', '*folds fresh towels*', '*gives a trim*'],
+    icecream: ['*scoops a cone*', '*wipes the freezer glass*', '*refills the sprinkles*', '*blends a milkshake*'],
+    tarjay: ['*fixes a wobbly cart*', '*restocks the snack aisle*', 'attention shoppers: cleanup on aisle 3', '*scans a barcode*'],
+    burlingtown: ['*hangs up coats*', '*refolds the sweaters*', '*hunts for a size medium*', '*tags new arrivals*'],
+    bbq: ['*flips the brisket*', '*adds wood to the smoker*', '*sauces the ribs*', '*checks the meat thermometer*'],
+    tech: ['*charges the demo phones*', '*wipes fingerprints off the screens*', '*unboxes a new console*', '*updates a display phone*'],
+    pizza: ['*tosses the dough*', '*slides a pie into the oven*', '*sprinkles the cheese*', '*slices a fresh pizza*'],
+    jewelry: ['*polishes a diamond*', '*locks the display case*', '*inspects a ring with a loupe*', '*shines the gold chains*'],
+    chicken: ['*drops a basket of fries*', '*breads the chicken*', 'my pleasure!', '*squeezes fresh lemonade*'],
+    music: ['*tunes a guitar*', '*plays a quick riff*', '*dusts the vinyl records*', '*restrings a bass*'],
+    lifeguard: ['*blows the whistle*', '*scans the water*', '*puts on sunscreen*', 'no running on the beach!', '*adjusts the umbrella*'],
+    ship: ['*mops the deck*', '*checks the lifeboats*', '*greets the passengers*', 'all aboard!', '*polishes the railing*', '*mixes a tropical drink*'],
+  },
+};
+function sayText(b, t) { if (b.ch.dead) return; b.bubble = 4 + t.length * 0.08; b.tag.bub.textContent = t; b.tag.bub.style.display = 'block'; }
+function rpLine(b, kind) {
+  const store = RP.store[TEAMS[b.team].bld] || [], gen = RP[kind] || RP.shelf;
+  return Math.random() < (kind === 'door' || kind === 'customer' ? 0.2 : 0.5) && store.length ? pick(store) : pick(gen);
+}
+// everywhere a worker can be busy: the till, the shelves, behind the chairs and tables, the door, the pavement outside
+function stations(t) {
+  const Tm = TEAMS[t]; if (Tm._st) return Tm._st;
+  const B = BLD[Tm.bld], st = [], add = (s, kind, w) => { if (s) st.push({ s, kind, w }); };
+  if (t === T.LIFE) { for (const s of Tm.posts) add(s, 'beach', 1); }
+  else if (B) {
+    const H = B.parent || B, inside = (x, z) => x > H.x0 + 1.8 && x < H.x1 - 1.8 && z > H.z0 + 1.8 && z < H.z1 - 1.8;
+    for (const s of B.spots.work) add(s, 'register', 4);
+    for (const s of B.spots.idle) add(s, 'shelf', 2);
+    for (const s of B.spots.seat) { const y = s.seat && s.seat.data ? s.seat.data.yaw : 0, x = s.x + Math.sin(y) * 2.8, z = s.z + Math.cos(y) * 2.8; if (inside(x, z)) add(spot(x, z, { y: s.y, B: s.B, via: s.via, look: { x: s.x, z: s.z } }), 'table', 1.5); }
+    if (B.parent) { add(B.doorIn, 'door', 1); add(B.doorOut, 'sweep', 1); }
+    else if (B.doorPts.length) { const D = B.doorPts[0]; add(spot(D.ix, D.iz, { y: B.y, B }), 'door', 1); add(spot(D.ox + (D.oz === D.iz ? 0 : 5), D.oz + (D.oz === D.iz ? 5 : 0), { y: B.y, B: B.ship ? null : null, ship: !!B.ship }), 'sweep', 1); }
+    if (B.ship) for (const s of PUBLIC.filter(s => s.ship)) add(s, 'sweep', 0.6);
+  }
+  return (Tm._st = st);
+}
+const busyKind = k => k !== 'door';
+function workerJob(b, dt) {
+  const st = stations(b.team); if (!st.length) return null;
+  // a customer waiting at your counter comes first
+  if ((b.custT = (b.custT || 0) - dt) <= 0) {
+    b.custT = 1;
+    const mine = st.filter(q => q.kind === 'register').map(q => q.s), C = COUNTERS.find(c => mine.includes(c.work) && PEOPLE().some(p => p !== b && !p.ch.dead && dist2(p.ch, c.spot) < 3.5 && Math.abs(p.ch.y - 3 - c.y) < 2));
+    if (C && b.goal !== C.work) { b.station = { s: C.work, kind: 'customer' }; b.saidAt = null; return C.work; }
+  }
+  if (b.arrived && b.station && b.saidAt !== b.goal) { b.saidAt = b.goal; if (Math.random() < 0.8) setTimeout(() => sayText(b, rpLine(b, b.station.kind)), rnd(300, 1500)); }
+  if (!b.goal || !b.station || b.arrived && (b.idleT -= dt) <= 0) {
+    b.idleT = rnd(7, 16);
+    const options = st.filter(q => q.s !== b.goal);
+    const q = wpick(options.map(o => [o, o.w])) || st[0]; b.station = q; b.saidAt = null; return q.s;
+  }
+  return null;
+}
 const HC = { settings: { hands: 'remix' }, view: { tanV: Math.tan(35 * Math.PI / 180), aspect: 16 / 9 }, world: W };
 function botSay(b, kind) { if (b.ch.dead && kind !== 'died') return; const t = pick(BOT_LINES[kind]); b.bubble = 4 + t.length * 0.08; b.tag.bub.textContent = t; b.tag.bub.style.display = 'block'; }
 // highlights: a red outline round anyone wanted
@@ -3209,15 +3275,7 @@ function botJob(b, dt) {
     if (!b.goal || b.arrived && (b.idleT -= dt) <= 0) { b.idleT = rnd(6, 20); return Math.random() < 0.4 ? pickSpot(BLD.hideout.spots.idle) : pickSpot(PUBLIC); }
     return null;
   }
-  if (t === T.LIFE) { if (!b.goal || b.arrived && (b.idleT -= dt) <= 0) { b.idleT = rnd(8, 25); return pickSpot(Tm.posts); } return null; }
-  if (t === T.CREW) { if (!b.goal || b.arrived && (b.idleT -= dt) <= 0) { b.idleT = rnd(8, 25); const S = BLD.ship; return Math.random() < 0.5 ? pickSpot(S.spots.work) : pickSpot([...S.spots.idle, ...PUBLIC.filter(s => s.ship)]); } return null; }
-  if (isJob(t)) {   // a shop job: behind the counter, with the odd break
-    const B = BLD[Tm.bld], work = B && B.spots.work.length ? B.spots.work : null;
-    if ((b.breakT -= dt) <= 0) { b.breakT = rnd(80, 200); b.onBreak = rnd(15, 30); return pickSpot(PUBLIC); }
-    if (b.onBreak > 0) { b.onBreak -= dt; return null; }
-    if (work && (!b.goal || !work.includes(b.goal))) return pickSpot(work);
-    return null;
-  }
+  if (t === T.LIFE || t === T.CREW || isJob(t) && t !== T.POL) return workerJob(b, dt);
   // citizens: shops, seats, the beach, the ship, home
   if (!b.goal || b.arrived && (b.idleT -= dt) <= 0) { b.idleT = rnd(8, 30) * b.P.lazy + 4; return citizenTarget(b); }
   return null;
@@ -3241,7 +3299,8 @@ function robTill(f, C) {
 function botBrain(b, dt) {
   const ch = b.ch, w = b.wish, P = b.P; w.mx = w.mz = 0; w.jump = false; w.look = null; w.face = null; w.precise = true; w.noHop = true; w.lookName = null;
   if (ch.dead) return;
-  if ((b.chatT -= dt) <= 0) { b.chatT = rnd(50, 160) / P.chat; botSay(b, b.team === T.PRIS ? 'jail' : b.team === T.POL ? (b.hunt ? 'chase' : 'cop') : b.team === T.CRIM ? 'crook' : isJob(b.team) && b.arrived && b.team !== T.LIFE && b.team !== T.CREW ? 'work' : ch.x > 300 ? 'ship' : ch.x > 200 ? 'beach' : 'idle'); }
+  if ((b.chatT -= dt) <= 0 && b.station && b.arrived) { b.chatT = rnd(25, 60) / P.chat; sayText(b, rpLine(b, b.station.kind)); }
+  else if (b.chatT <= 0) { b.chatT = rnd(50, 160) / P.chat; botSay(b, b.team === T.PRIS ? 'jail' : b.team === T.POL ? (b.hunt ? 'chase' : 'cop') : b.team === T.CRIM ? 'crook' : isJob(b.team) && b.arrived && b.team !== T.LIFE && b.team !== T.CREW ? 'work' : ch.x > 300 ? 'ship' : ch.x > 200 ? 'beach' : 'idle'); }
   // running away from someone who hit them
   if (b.fleeT > 0 && b.fleeFrom) {
     b.fleeT -= dt; ch.wantSit = false; const dx = ch.x - b.fleeFrom.ch.x, dz = ch.z - b.fleeFrom.ch.z, d = Math.hypot(dx, dz) || 1;
@@ -3379,7 +3438,7 @@ function makeCar(kind, x, z, yaw) {
 function dressCar(car, M) {
   const sc = M.scene.clone(true); sc.scale.setScalar(M.s); sc.position.z = -(M.front - M.back) / 2;   // centre it front to back
   car.body.remove(car.block); car.body.add(sc); car.hl = M.len / 2; car.h = M.h;
-  car.wheels = []; sc.traverse(o => { if (/^wheel-(front|back)/.test(o.name)) { o.rotation.order = 'YXZ'; car.wheels.push({ p: o, front: /front/.test(o.name), rest: o.rotation.y }); } });
+  car.wheels = []; sc.traverse(o => { if (/^wheel-(front|back)-(left|right)$/.test(o.name)) { o.rotation.order = 'YXZ'; car.wheels.push({ p: o, front: /front/.test(o.name), rest: o.rotation.y }); } });
   // the siren lights on top of the emergency ones
   if (car.K.siren) { car.lights = [0xff2020, 0x2040ff].map((c, i) => { const m = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 1), new THREE.MeshBasicMaterial({ color: c })); m.position.set(i ? 1 : -1, car.h + 0.3, 0); m.visible = false; car.body.add(m); return m; }); }
   placeCarPart(car);
@@ -4246,6 +4305,7 @@ function frame(now) {
   else {
     const ch = player.ch; fx = ch.x; fy = ch.y; fz = ch.z;
     if (!ch.dead) animatePlayer(player, dt);
+    player.rig.g.visible = !ch.dead && !player.car;   // nobody shown in the driver's seat: just the car
     let r;
     if (player.car) {   // driving: the camera swings round behind the car on its own (unless you're dragging it round)
       const car = player.car, sp = Math.hypot(car.vx, car.vz);
