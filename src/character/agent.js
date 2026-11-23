@@ -293,4 +293,17 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && sheet.classList.con
 $q('#cgCopy').onclick = async () => { try { await navigator.clipboard.writeText(words()); toast('Copied. Paste it into Claude.'); } catch (e) { const r = document.createRange(); r.selectNodeContents(out); getSelection().removeAllRanges(); getSelection().addRange(r); } };
 syncSheet();
 if (location.hash === '#claude' || qs.has('claude')) showSheet(true);
+
+/* ---------- the Claude skill panel: download + how to install ---------- */
+const skill = $q('#skillGuide');
+function showSkill(on){ if (on) showSheet(false); skill.classList.toggle('open', on); if (on) setTimeout(() => $q('#skClose').focus(), 30); }
+function skTab(code){ $q('#skTabApp').setAttribute('aria-selected', String(!code)); $q('#skTabCode').setAttribute('aria-selected', String(code)); $q('#skApp').hidden = code; $q('#skCode').hidden = !code; }
+$q('#toSkill').onclick = $q('#toSkillM').onclick = $q('#cgSkillHow').onclick = () => showSkill(true);
+$q('#skClose').onclick = () => showSkill(false);
+$q('#skTabApp').onclick = () => skTab(false); $q('#skTabCode').onclick = () => skTab(true);
+skill.addEventListener('click', e => { if (e.target === skill) showSkill(false); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && skill.classList.contains('open')) showSkill(false); });
+skill.querySelectorAll('a[download]').forEach(a => a.addEventListener('click', () => toast('Downloading roblox-characters.zip. Next: add it in Claude.')));
+$q('#skCopy').onclick = async () => { try { await navigator.clipboard.writeText($q('#skTry').textContent.trim()); toast('Copied. Paste it into Claude.'); } catch (e) {} };
+if (location.hash === '#skill' || qs.has('skill')) showSkill(true);
 })();
