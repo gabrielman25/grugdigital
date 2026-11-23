@@ -86,13 +86,14 @@ async function set(r){
   if (r.mouth != null) C.pickPart('mouth', pick(L.mouths, r.mouth, 'mouth'));
   if (r.browColor != null) F.brow.color = toHex(r.browColor, L.hairColors);
   if (r.outfit != null){ $q('#outfit').value = String(r.outfit); buildPrompt(); }
-  if (r.tee != null) C.wearTee(toHex(r.tee));
-  if (r.look != null) await wearLook(r.look);
+  if (r.tee != null){ C.wearTee(toHex(r.tee)); outfit.worn = false; }
+  if (r.look != null){ await wearLook(r.look); outfit.worn = false; }
   C.touch();
   const view = r.view != null ? r.view : null;
   if (view != null){ const v = VIEWS.find(x => slug(x) === slug(view)); if (!v) throw new Error(`Unknown view "${view}". Options: ${VIEWS.join(', ')}.`); C.setCat(v); }
   else { C.aimCamera(); C.drawPanel(); }
-  return get();
+  syncWarn();
+  return Object.assign(get(), { next: status().next });
 }
 async function wearLook(name){
   const list = typeof EXAMPLES !== 'undefined' ? EXAMPLES : [], e = list[pick(list.map(x => x.name), name, 'look')];
@@ -104,13 +105,15 @@ async function wearLook(name){
 }
 function prompt(outfit){ if (outfit != null){ $q('#outfit').value = String(outfit); } buildPrompt(); return $q('#prompt').value; }
 const templateBlob = () => new Promise(res => refWhite.toBlob(res, 'image/png'));
+const CLICK_NOTE = 'The clipboard needs a real click. Click the "Copy picture" / "Copy prompt" button in the studio instead of calling this from code.';
+const within = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timed out')), ms))]);
 async function copyTemplate(){
-  try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': templateBlob() })]); toast('Picture copied. Paste it into Gemini.'); return true; }
-  catch (e) { toast("Couldn't copy here. Use Download instead."); return false; }
+  try { await within(navigator.clipboard.write([new ClipboardItem({ 'image/png': templateBlob() })]), 5000); toast('Picture copied. Paste it into Gemini.'); return true; }
+  catch (e) { toast("Couldn't copy here. Use Download instead."); return { copied: false, note: CLICK_NOTE }; }
 }
 async function copyPrompt(outfit){
   const t = prompt(outfit);
-  try { await navigator.clipboard.writeText(t); toast('Prompt copied'); return true; } catch (e) { return false; }
+  try { await within(navigator.clipboard.writeText(t), 5000); toast('Prompt copied'); return true; } catch (e) { return { copied: false, note: CLICK_NOTE }; }
 }
 async function wear(src, o){
   o = o || {};
@@ -122,25 +125,52 @@ async function wear(src, o){
 }
 function wearIt(){
   if (!state.img) throw new Error('No painted image yet. Paste the Gemini image into the page first (or call GrugStudio.wear(image)).');
-  const m = match(); build();
-  return { match: m, wearing: true, note: m != null && m < 0.85 ? 'The silhouette match is low: the outfit may be shifted. Check the 3D view; if it looks wrong, ask Gemini again for the same picture with nothing moved, or line it up by hand on the alignment sheet.' : 'Looks lined up.' };
+  const m = match(); build(); outfit.worn = outfit.source === 'pasted'; syncWarn();
+  return { match: m, wearing: true, customOutfit: outfit.worn, note: m != null && m < 0.85 ? 'The silhouette match is low: the outfit may be shifted. Check the 3D view; if it looks wrong, ask Gemini again for the same picture with nothing moved, or line it up by hand on the alignment sheet.' : 'Looks lined up.' };
 }
 async function r6Blob(){ if (!state.shirt) throw new Error('No outfit yet.'); return buildCharacterGLB(); }
 const fileName = () => (cleanName($q('#setName').value) || 'Character') + '.glb';
-async function downloadR6(name){
+function needOutfit(o){
+  if (outfit.worn || (o && o.starterOutfit)) return;
+  throw new Error('Not finished: the character is still wearing the ' + (outfit.source === 'demo' ? 'demo' : 'starter') + ' outfit. ' +
+    'Painting the custom shirt and pants in Gemini is part of the job. Call GrugStudio.paintOutfit("<garments, colours, materials, shoes>") and follow the steps it returns, ' +
+    'then download. (Only if the person explicitly said they want no custom outfit: downloadR6(name, { starterOutfit: true }).)');
+}
+async function downloadR6(name, o){
+  needOutfit(o);
   if (name != null){ const n = $q('#setName'); n.value = String(name).slice(0, 24); n.dispatchEvent(new Event('input')); }
   const b = await r6Blob(), f = fileName(); GRUG.download(f, b);
   return { file: f, bytes: b.size, note: 'Saved to the browser\'s downloads folder. Import it into Roblox Studio with the 3D Importer and add a Humanoid (R6). If the parts arrive wrapped in Models or without joints, run r6Script() in the Command Bar.' };
 }
-async function r6Base64(){ const b = await r6Blob(); const u = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(b); }); return u.slice(u.indexOf(',') + 1); }
+async function r6Base64(o){ needOutfit(o); const b = await r6Blob(); const u = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(b); }); return u.slice(u.indexOf(',') + 1); }
 function status(){
   const m = match();
   return {
     ready: api.ready, view: C.UI.tab, customImage: !!state.img, aligning: !$q('#s2').hidden, match: m,
-    wearing: !!state.built, canDownload: !!state.shirt, file: fileName(),
-    next: !state.img ? 'Pick hair and a face, then paint an outfit (Outfit > Create outfit with Claude) or call set({look}).'
-        : !$q('#s2').hidden ? 'Alignment sheet is open: click "Wear it" or call wearIt().' : 'Ready: call downloadR6() or click Save / Finish > Roblox R6 character (.glb).'
+    customOutfit: outfit.worn, file: fileName(),
+    next: outfit.worn ? 'Done painting. Call await GrugStudio.downloadR6() and give the person the .glb.'
+        : !$q('#s2').hidden ? 'The alignment sheet is open with the pasted picture: click "Wear it" (or call GrugStudio.wearIt()), then downloadR6().'
+        : 'REQUIRED NEXT: paint the custom shirt and pants in Gemini. Call GrugStudio.paintOutfit("<garments, colours, materials, shoes>") and follow the steps it returns.'
   };
+}
+
+const STEPS = [
+  'In this studio tab: await GrugStudio.paintOutfit("<garments, colours, materials, shoes>") (already done if you are reading this from it).',
+  'CLICK the studio button "Copy picture" (a real click; copying from code does not work). Wait for the toast "Picture copied".',
+  'Open https://gemini.google.com/app in a new tab. Click the message box and press Ctrl+V (Cmd+V on a Mac). A thumbnail of two grey blocky avatars appears. If Gemini asks the person to sign in, ask them to.',
+  'Back in the studio, CLICK "Copy prompt". In Gemini, click the message box (after the thumbnail) and press Ctrl+V. Do not type the prompt yourself: it has line breaks and Enter would send it too early.',
+  'Click Gemini\'s Send button. Wait 20 to 60 seconds for the painted picture. If Gemini answers with text only, reply "Please generate the edited image now."',
+  'In Gemini, hover the painted picture and click its "Copy image" button.',
+  'Back in the studio, click the 3D view (not a text box) and press Ctrl+V. The alignment sheet opens. GrugStudio.status().match should be 0.85 or more; if it is lower, ask Gemini to keep the exact layout and only paint the clothes, then copy and paste again.',
+  'Click "Wear it" (or call GrugStudio.wearIt()). Take a screenshot to check the outfit on the 3D character.',
+  'await GrugStudio.downloadR6() saves <Name>.glb. Give it to the person.'
+];
+function paintOutfit(desc){
+  if (desc != null){ $q('#outfit').value = String(desc); }
+  buildPrompt(); C.setCat('paint');
+  const b = $q('#clCopyRef'); b.scrollIntoView({ block: 'center' });
+  return { outfit: $q('#outfit').value || '(empty: pass a description)', steps: STEPS.slice(1).map((t, i) => `${i + 1}. ${t}`),
+    note: 'The custom outfit is the point of this studio. Do every step; don\'t download before the painted outfit is worn.' };
 }
 
 const api = window.GrugStudio = {
@@ -148,13 +178,30 @@ const api = window.GrugStudio = {
   options, get, set, random: () => set({ random: true }),
   prompt, copyPrompt, copyTemplate, templateDataURL: () => refWhite.toDataURL('image/png'),
   downloadTemplate: () => { download(refWhite, 'roblox-clothing-reference.png'); return 'roblox-clothing-reference.png'; },
-  openPaint: () => { C.setCat('paint'); return 'Outfit painting steps are open.'; },
+  paintOutfit, openPaint: () => paintOutfit(), steps: () => STEPS.map((t, i) => `${i + 1}. ${t}`),
   wear, wearIt, match, finish: () => { C.setCat('finish'); return status(); },
-  downloadR6, r6Base64, downloadZip: () => $q('#dlSet').onclick(), r6Script: () => R6_SETUP_LUA,
-  status, help: () => `Grug Avatar Studio agent API v1. Guide: ${location.origin}/character/claude.md\n` +
-    'GrugStudio.options() · set({name, skin, body, head, headSize, hair, hairColor, hairFlip, eyes, brows, mouth, browColor, outfit, look, tee, view})\n' +
-    'prompt(outfit) · copyTemplate() · copyPrompt(outfit) · downloadTemplate() · wear(image) · wearIt() · status() · downloadR6(name) · r6Base64() · downloadZip()'
+  downloadR6, r6Base64, downloadZip: o => { needOutfit(o); return $q('#dlSet').onclick(); }, r6Script: () => R6_SETUP_LUA,
+  status, help: () => `Grug Avatar Studio agent API v2. Guide: ${location.origin}/character/claude.md\n` +
+    'A character is finished only when it wears a custom shirt and pants painted in Gemini.\n' +
+    '1. await GrugStudio.set({name, skin, head, hair, hairColor, eyes, brows, mouth})   (GrugStudio.options() lists the choices)\n' +
+    '2. await GrugStudio.paintOutfit("<garments, colours, materials, shoes>") and follow the steps it returns (Gemini round trip)\n' +
+    '3. await GrugStudio.downloadR6()\n' +
+    'Also: get() · status() · prompt() · wear(image) · wearIt() · downloadZip() · r6Base64() · r6Script()'
 };
+/* which outfit is on: the starter tee, a demo, or a picture pasted back from an image editor */
+const outfit = { source: 'starter', worn: false, demoClick: false };
+const _setImage = window.setImage;
+window.setImage = function(){ outfit.source = outfit.demoClick ? 'demo' : 'pasted'; outfit.demoClick = false; outfit.worn = false; return _setImage.apply(this, arguments); };
+$q('#demo').addEventListener('click', () => { outfit.demoClick = true; }, true);
+$q('#build').addEventListener('click', () => { outfit.worn = outfit.source === 'pasted'; syncWarn(); });
+$q('#exGrid').addEventListener('click', () => { outfit.worn = false; outfit.source = 'starter'; }, true);
+
+/* finish page: remind (people and agents) when the painted outfit is missing */
+var warn = $q('#noOutfit');
+function syncWarn(){ warn.hidden = $q('#s3').hidden || outfit.worn; }
+new MutationObserver(syncWarn).observe($q('#s3'), { attributes: true, attributeFilter: ['hidden'] });
+$q('#noOutfitGo').onclick = () => paintOutfit();
+
 api.whenReady = (C.sheetsReady || Promise.resolve()).then(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))).then(() => { api.ready = true; return api; });
 
 /* the template picture's Copy button (step 1 of painting) */
@@ -171,7 +218,7 @@ if (Object.keys(recipe).length) api.whenReady.then(() => set(recipe)).catch(e =>
 const sheet = $q('#claudeGuide'), idea = $q('#cgIdea'), out = $q('#cgPrompt'), open = $q('#cgOpen');
 const CANON = 'https://grugdigital.pages.dev/character/';
 const here = () => location.protocol.startsWith('http') && location.hostname !== 'grugdigital.pages.dev' ? location.origin + '/character/' : CANON;
-const words = () => `Use ${here()} to make ${(idea.value.trim() || 'a character wearing a cool outfit').replace(/[.\s]+$/, '')}. Download the Roblox R6 file for me.`;
+const words = () => `Use ${here()} to make ${(idea.value.trim() || 'a character wearing a cool outfit').replace(/[.\s]+$/, '')}. Paint the outfit in Gemini, then download the Roblox R6 file for me.`;
 function syncSheet(){ const t = words(); out.textContent = t; open.href = 'https://claude.ai/new?q=' + encodeURIComponent(t); }
 function showSheet(on){ sheet.classList.toggle('open', on); if (on){ syncSheet(); setTimeout(() => idea.focus(), 30); } }
 idea.addEventListener('input', syncSheet);

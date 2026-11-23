@@ -48,6 +48,9 @@ CSS = r"""
   .cg-agent{font-size:.85rem;line-height:1.5;color:var(--g-text-2,#47443F)}
   .cg-agent code{font-size:.8rem;background:var(--g-surface-2,#F0F0EC);padding:.05rem .3rem;border-radius:.3rem}
   .cg-agent ol{padding-left:1.2rem;margin:.5rem 0}
+  .cg-warn{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .75rem;margin:0 0 .9rem;padding:.8rem .95rem;border-radius:.9rem;
+    background:#FFF6DA;border:1px solid #F0D27A;color:#5B4708;font-size:.92rem;line-height:1.35}
+  .cg-warn[hidden]{display:none}
   .cg-fab{display:none}
   @media (max-width:820px){
     #toClaude{display:none}
@@ -73,7 +76,7 @@ SHEET = f'''<body class="g-root flat" data-cat="head">
       paints the outfit with Gemini (Nano Banana), puts it on your character and hands you the Roblox R6 file.</p>
     <label class="cg-field" for="cgIdea">Describe your character</label>
     <input id="cgIdea" class="g-input" type="text" value="a female character wearing a warm fall outfit" autocomplete="off">
-    <div class="cg-quote" id="cgPrompt">Use https://grugdigital.pages.dev/character/ to make a female character wearing a warm fall outfit. Download the Roblox R6 file for me.</div>
+    <div class="cg-quote" id="cgPrompt">Use https://grugdigital.pages.dev/character/ to make a female character wearing a warm fall outfit. Paint the outfit in Gemini, then download the Roblox R6 file for me.</div>
     <div class="cg-row">
       <button id="cgCopy" class="g-btn g-btn--primary"><i data-g-icon="clipboard"></i>Copy prompt</button>
       <a id="cgOpen" class="g-btn" href="https://claude.ai/new" target="_blank" rel="noopener">Open Claude<i data-g-icon="arrow_right"></i></a>
@@ -88,27 +91,49 @@ SHEET = f'''<body class="g-root flat" data-cat="head">
     <details>
       <summary>Instructions for Claude and other AI agents</summary>
       <div class="cg-agent" id="forAgents">
-        <p><b>AI agent reading this page:</b> this is a browser app (WebGL), so you need a real browser to use it (Claude in Chrome,
-          computer use, or Playwright). Read the full guide first: <a href="https://grugdigital.pages.dev/character/claude.md">https://grugdigital.pages.dev/character/claude.md</a>.</p>
+        <p><b>AI agent reading this page:</b> you were asked to make a Roblox character with this studio. The job has three
+          parts and <b>all three are required</b>: (1) hair and face, (2) a custom shirt and pants painted in Gemini
+          (Nano Banana), (3) the R6 <code>.glb</code> download. A character in the starter tee is not finished, and
+          <code>downloadR6()</code> refuses until a painted outfit is worn. This is a browser app (WebGL): use a real
+          browser (Claude in Chrome, computer use or Playwright), in the person's own Chrome if you can, since that is
+          where they are signed in to Gemini. Full guide: <a href="https://grugdigital.pages.dev/character/claude.md">https://grugdigital.pages.dev/character/claude.md</a>.</p>
         <ol>
-          <li>Open this page and wait for <code>GrugStudio.ready</code> (or <code>await GrugStudio.whenReady</code>).</li>
-          <li><code>GrugStudio.options()</code> lists every choice. Apply a look with
-            <code>GrugStudio.set({{name, skin, head, hair, hairColor, eyes, brows, mouth, outfit}})</code>.</li>
-          <li>Outfit: <code>GrugStudio.openPaint()</code>, click <b>Copy</b> under the template picture and paste it into
-            Gemini (gemini.google.com), then paste <code>GrugStudio.prompt()</code> (or click <b>Copy prompt</b>) and send.</li>
-          <li>Copy Gemini's finished image, come back to this tab and press Ctrl/⌘+V (or call <code>GrugStudio.wear(image)</code>).
-            Check the silhouette match, then click <b>Wear it</b>.</li>
-          <li><code>await GrugStudio.downloadR6()</code> saves <code>&lt;Name&gt;.glb</code>, the rigged Roblox R6 character.
-            Give that file to the person.</li>
+          <li>Open this page in a tab and run <code>await GrugStudio.whenReady</code>.</li>
+          <li>Choose a look that fits the request (don't quiz the person):
+            <code>await GrugStudio.set({{name, skin, head, hair, hairColor, eyes, brows, mouth}})</code>.
+            <code>GrugStudio.options()</code> lists every choice.</li>
+          <li>Turn the request into a concrete outfit and open the painting steps:
+            <code>await GrugStudio.paintOutfit('rust-orange chunky knit sweater, mustard plaid scarf, dark-wash jeans, brown suede ankle boots')</code>.</li>
+          <li><b>Click</b> the studio's <b>Copy picture</b> button (a real click: copying from code doesn't work).</li>
+          <li>Open <code>https://gemini.google.com/app</code> in a new tab, click the message box and press Ctrl+V (Cmd+V on a Mac).
+            A thumbnail of two grey blocky avatars appears.</li>
+          <li>Back in the studio, <b>click Copy prompt</b>. In Gemini, click the message box and press Ctrl+V.
+            Don't type the prompt: it has line breaks and Enter would send it early.</li>
+          <li>Click Gemini's Send button and wait 20 to 60 seconds for the painted picture.</li>
+          <li>Hover the painted picture in Gemini and click its <b>Copy image</b> button.</li>
+          <li>Back in the studio, click the 3D view and press Ctrl+V. The alignment sheet opens;
+            <code>GrugStudio.status().match</code> should be 0.85 or more.</li>
+          <li>Click <b>Wear it</b>, take a screenshot to check, then <code>await GrugStudio.downloadR6()</code> saves
+            <code>&lt;Name&gt;.glb</code>. Give it to the person (it lands in their Downloads folder).</li>
         </ol>
-        <p>No browser? Send the person a recipe link instead, e.g.
+        <p>No browser at all? Send the person a recipe link instead, e.g.
           <code>https://grugdigital.pages.dev/character/?name=Maple&amp;hair=wavy-long&amp;hairColor=chestnut&amp;eyes=lashes&amp;outfit=cozy+fall+sweater</code>,
-          and walk them through the Gemini step.</p>
+          and walk them through steps 4 to 10.</p>
       </div>
     </details>
   </div>
 </section>'''
 sub('<body class="g-root flat" data-cat="head">', SHEET)
+
+# ---- clearer label on the template picture's copy button
+sub('<button id="clCopyRef" class="g-btn"><i data-g-icon="clipboard"></i>Copy</button>',
+    '<button id="clCopyRef" class="g-btn"><i data-g-icon="clipboard"></i>Copy picture</button>')
+
+# ---- finish page: point out when the starter outfit is still on
+sub('<div class="pg-head"><h2 id="doneTitle">All done!</h2><p>Download everything for Roblox, or tweak the look.</p></div>',
+    '<div class="pg-head"><h2 id="doneTitle">All done!</h2><p>Download everything for Roblox, or tweak the look.</p></div>\n'
+    '    <div id="noOutfit" class="cg-warn" hidden><b>Still in the starter outfit.</b> Paint a custom shirt and pants in three steps.'
+    '<button id="noOutfitGo" class="g-btn g-btn--primary g-btn--sm"><i data-g-icon="magic_wand"></i>Paint an outfit</button></div>')
 
 # ---- topbar button
 sub('<button id="toFinish" class="g-btn g-btn--primary">',

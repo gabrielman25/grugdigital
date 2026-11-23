@@ -4,15 +4,24 @@ This page is for Claude (and other AI agents). Someone pasted
 **https://grugdigital.pages.dev/character/** into a chat and asked for a Roblox character, something like
 *"Use this site to make a female character wearing a warm fall outfit."* Here is how to make it and hand them the file.
 
+> **The job has three parts, and all three are required:**
+> 1. hair and a face that fit the request,
+> 2. **a custom shirt and pants painted in Gemini (Nano Banana)** to match the outfit they described,
+> 3. the rigged Roblox R6 `.glb`, handed to them.
+>
+> A character still in the starter tee is not finished, even if they only said "a character". The painted outfit is
+> the point of this studio, so `GrugStudio.downloadR6()` refuses until one is worn. If Gemini truly can't be reached
+> (for example the person won't sign in), say so and ask before falling back to a ready-made outfit.
+
 **What you hand over:** a rigged Roblox R6 character, `<Name>.glb` (HumanoidRootPart, Torso, Head, Right/Left Arm,
-Right/Left Leg, hair mesh, face, studs, and a set of animations), painted with a custom shirt and pants. Optionally a
+Right/Left Leg, hair mesh, face, studs, and a set of animations), wearing the painted shirt and pants. Optionally a
 `.zip` with the same `.glb` plus `shirt.png` and `pants.png` (585 × 559 classic Roblox clothing templates), the face
 texture, a preview and a Studio setup script.
 
 **How it works:** the studio runs in the browser (WebGL). You pick the hair and face, then copy the studio's template
-picture (two grey blocky avatars) into Gemini (Nano Banana) with a prompt the studio writes for you. Gemini paints the
-outfit onto the picture. You paste Gemini's picture back into the studio, it lines it up and cuts it into Roblox
-textures, the character wears them, and you download the R6 file.
+picture (two grey blocky avatars) into Gemini with a prompt the studio writes for you. Gemini paints the outfit onto
+the picture. You copy Gemini's picture back into the studio, it lines it up and cuts it into Roblox textures, the
+character wears them, and you download the R6 file. The whole Gemini round trip takes about a minute.
 
 ## Choose your route
 
@@ -50,8 +59,7 @@ await GrugStudio.set({
   skin: 'Light orange',                // a skin tone name below, or any hex
   head: 'Egg',                         // head shape
   hair: 'Wavy & long', hairColor: 'chestnut',
-  eyes: 'long glam lashes', brows: 'thin arch', mouth: 'simple smile line',
-  outfit: 'a cozy fall outfit: rust-orange chunky knit sweater, mustard plaid scarf, dark-wash jeans and brown suede ankle boots'
+  eyes: 'long glam lashes', brows: 'thin arch', mouth: 'simple smile line'
 })
 ```
 
@@ -60,56 +68,56 @@ the valid options. Take a screenshot to check the face and hair look right.
 
 Tips:
 
-- **outfit** goes into the Gemini prompt word for word, so be concrete: each garment, colours, materials, patterns and
-  shoes. "Warm fall outfit" → *"rust-orange chunky knit sweater, mustard plaid scarf, dark-wash jeans, brown suede ankle
-  boots"*.
+- The outfit description (next step) goes into the Gemini prompt word for word, so be concrete: each garment, colours,
+  materials, patterns and shoes. "Warm fall outfit" → *"rust-orange chunky knit sweater, mustard plaid scarf, dark-wash
+  jeans, brown suede ankle boots"*.
 - Painted clothes cover the torso, arms and legs only. Hats and accessories can't be painted on (they'd break the
   silhouette); hair is a 3D mesh chosen here.
 - The eyebrows follow the hair colour unless you set `browColor`.
 - `hairFlip: true` mirrors a side-swept style. `headSize` runs from 0.8 to 1.3 (default 1.1).
 - `body`: leave it as `classic` unless asked. Don't use the locked "Figure" body type (the API won't set it).
 
-### 3. Paint the outfit in Gemini
+### 3. Paint the outfit in Gemini (required)
 
-1. `GrugStudio.openPaint()` opens the painting steps (or click the shirt icon, then **Create outfit with Claude**).
-2. Copy the template picture: click **Copy** under *Grab the reference picture* (a real click works best, since the
-   clipboard wants a user gesture; `await GrugStudio.copyTemplate()` also works and returns `true` on success). Wait for
-   the "Picture copied" toast, which can take a second or two.
-   *If copying fails:* `GrugStudio.downloadTemplate()` saves `roblox-clothing-reference.png` to Downloads; attach that
-   file in Gemini with its upload button instead.
-3. Open **https://gemini.google.com/app** in a new tab. If it asks the person to sign in, ask them to do it (never type a
-   password for them). Click the message box and paste (Ctrl+V, or ⌘+V on a Mac) to attach the picture. Wait for the
-   thumbnail.
-4. Get the prompt: `GrugStudio.prompt()` returns the full text with the outfit in it. Type or paste it into Gemini's
-   message box after the picture (or click **Copy prompt** in the studio and paste; attach the picture first, because the
-   clipboard holds one thing at a time). Send it.
-5. Gemini should answer with an edited picture. If it replies with text only, or asks a question, reply: *"Please
-   generate the edited image now, keeping the picture exactly the same apart from the clothes."* If Gemini shows an image
-   tool switch ("Create image" / Nano Banana), turn it on.
-6. Check Gemini's picture: the same two avatars in the same places and poses, on white, with no hair, hats or props
+Turn the request into a concrete outfit (each garment, colours, materials, patterns, shoes) and open the painting steps:
+
+```js
+await GrugStudio.paintOutfit('rust-orange chunky knit sweater, mustard plaid scarf, dark-wash jeans and brown suede ankle boots')
+```
+
+It returns the numbered steps below. This exact sequence has been tested end to end with Claude in Chrome and Gemini:
+
+1. **Click** the studio's **Copy picture** button (under the template picture). Use a real click: copying from code
+   doesn't work, because the browser only lets a click put a picture on the clipboard. Wait for the toast
+   "Picture copied".
+2. Open **https://gemini.google.com/app** in a new tab. If Gemini asks the person to sign in, ask them to do it (never
+   type a password for them). Click the message box and press **Ctrl+V** (**Cmd+V** on a Mac). A thumbnail of two grey
+   blocky avatars appears in the box.
+3. Back in the studio, **click Copy prompt**. In Gemini, click the message box (after the thumbnail) and press Ctrl+V.
+   **Don't type the prompt yourself:** it has line breaks, and Enter sends the message before it's complete.
+4. Click Gemini's **Send** button. The painted picture takes 20 to 60 seconds. If Gemini answers with text only or asks
+   a question, reply *"Please generate the edited image now, keeping the picture exactly the same apart from the
+   clothes."*
+5. Check Gemini's picture: the same two avatars in the same places and poses, on white, with no hair, hats or props
    added. If it moved, rotated, cropped or restyled them, ask again: *"Keep the exact same picture, layout and camera.
    Only paint the clothes onto the blocks."*
-7. Copy Gemini's picture: hover over it and use its **Copy image** button (or right-click › Copy image).
-   *Or:* use Gemini's download button (full size), then in the studio click the *Drop the dressed image* box and upload
-   the downloaded file.
+6. Hover the painted picture and click its **Copy image** button (`find` it as "Copy image"). Copying the picture with a
+   script in Gemini's tab doesn't work reliably; use the button.
+
+If copying the template picture fails: `GrugStudio.downloadTemplate()` saves `roblox-clothing-reference.png` to
+Downloads; attach it in Gemini with the **+** (upload) button instead. If copying Gemini's picture fails: use its
+**Download full size** button, then in the studio upload the file to the *Drop the dressed image* box.
 
 ### 4. Bring it back and wear it
 
-1. Switch to the studio tab, click on the 3D view (not inside a text box) and paste (Ctrl/⌘+V). The alignment sheet
-   opens and shows **Silhouette match NN%**.
-2. 90% or more: click **Wear it**. Between 78% and 90%: click **Auto-align**, check that the blue outlines sit on the
-   painted avatars, then **Wear it**. Below 78%: Gemini probably moved the figures or it's the wrong image; go back to
-   Gemini and ask again.
-3. With JavaScript: `GrugStudio.status()` reports `match` (0–1) and what to do next, and `GrugStudio.wearIt()` is the
-   same as **Wear it**.
-4. Shortcut, if you already have the painted picture inside the studio page as a `data:` URL, base64 PNG, Blob or
-   same-site URL: `await GrugStudio.wear(image)` pastes, aligns and wears it in one go and returns `{ match }`.
-   (Gemini's own image addresses usually can't be read from another site, so the clipboard is the reliable way across.)
-5. Take a screenshot and check the character in 3D. If the clothes look shifted or smeared, the alignment was off: paste
-   again and line it up, or regenerate in Gemini.
-
-No Gemini at all? The studio can still dress the character: `set({ look: 'Flannel & jeans' })` wears a ready-made
-outfit, and `set({ tee: '#ff9f3a' })` wears a plain tee in that colour with jeans and sneakers. Say that's what you did.
+1. Switch to the studio tab, click on the 3D view (not inside a text box) and press **Ctrl+V**. The alignment sheet opens
+   and shows **Silhouette match NN%**.
+2. 85% or more: click **Wear it** (or call `GrugStudio.wearIt()`). Lower: click **Auto-align** and check that the blue
+   outlines sit on the painted avatars; below about 78% Gemini probably moved the figures, so go back and ask again.
+3. `GrugStudio.status()` reports `match` and `customOutfit`, and its `next` field always says what's left.
+4. Take a screenshot and check the outfit on the 3D character before downloading.
+5. Shortcut, if you already have the painted picture inside the studio page as a `data:` URL, base64 PNG, Blob or
+   same-site URL: `await GrugStudio.wear(image)` pastes, aligns and wears it in one go.
 
 ### 5. Download the R6 file
 
@@ -143,7 +151,7 @@ already written, then walk the person through steps 3 to 6 themselves. Every key
 https://grugdigital.pages.dev/character/?name=Maple&skin=light-orange&head=egg&hair=wavy-long&hairColor=chestnut&eyes=long-glam-lashes&brows=thin-arch&mouth=simple-smile-line&outfit=rust-orange+chunky+knit+sweater%2C+mustard+plaid+scarf%2C+dark-wash+jeans+and+brown+suede+ankle+boots
 ```
 
-Then tell them: click **Copy** under the picture and paste it into Gemini, click **Copy prompt** and paste that too, send,
+Then tell them: click **Copy picture** and paste it into Gemini, click **Copy prompt** and paste that too, send,
 copy Gemini's picture, paste it back into the studio (Ctrl/⌘+V), click **Wear it**, then **Save / Finish** › **Roblox
 R6 character (.glb)**.
 
@@ -331,8 +339,8 @@ With noticeable lashes (a common pick for a female character): 2, 4, 5, 10, 11, 
 | `hairFlip` | `true` mirrors the hair |
 | `body` | `classic`, `smooth`, `brick`, `slender` |
 | `outfit` | free text for the Gemini prompt |
-| `look` | ready-made outfit: `Flannel & jeans` |
-| `tee` | a plain tee in any colour (hex), with jeans and sneakers |
+| `look` | ready-made outfit, only if the person turns down a painted one: `Flannel & jeans` |
+| `tee` | a plain tee in any colour (hex), with jeans and sneakers (same: only if they turn down a painted outfit) |
 | `view` | which panel to show: `head`, `hair`, `hairShape`, `hairTuft`, `brow`, `eye`, `mouth`, `shirt`, `paint`, `anim`, `finish` |
 | `random` | `true` for a random character (then adjust) |
 | `reset` | `true` to start from the default character |
@@ -346,7 +354,8 @@ With noticeable lashes (a common pick for a female character): 2, 4, 5, 10, 11, 
 | `get()` | the current look |
 | `set(look)` | apply any of the keys above; returns `get()` |
 | `random()` | a random character |
-| `openPaint()` | show the outfit painting steps |
+| `paintOutfit(outfit)` | set the outfit description, open the painting steps, and return the numbered Gemini steps |
+| `steps()` | the whole recipe as numbered steps |
 | `prompt(outfit?)` | the Gemini prompt (sets the outfit text first if given) |
 | `copyTemplate()` | copy the template picture to the clipboard |
 | `copyPrompt(outfit?)` | copy the prompt to the clipboard |
@@ -355,9 +364,9 @@ With noticeable lashes (a common pick for a female character): 2, 4, 5, 10, 11, 
 | `wear(image, { review })` | load a painted picture, auto-align, and wear it (`review: true` stops at the alignment sheet) |
 | `wearIt()` | same as **Wear it** on the alignment sheet |
 | `match()` | silhouette match 0–1 for the pasted picture |
-| `status()` | where things stand and what to do next |
+| `status()` | where things stand (`customOutfit`, `match`) and `next`: what's left to do |
 | `finish()` | open the finish page |
-| `downloadR6(name?)` | download `<Name>.glb` (rigged Roblox R6) |
+| `downloadR6(name?, { starterOutfit }?)` | download `<Name>.glb` (rigged Roblox R6). Refuses until a painted outfit is worn; `starterOutfit: true` overrides, only when the person asked for no custom outfit |
 | `downloadZip()` | download the whole set |
 | `r6Base64()` | the `.glb` as base64 |
 | `r6Script()` | the Roblox Studio R6 setup script |
