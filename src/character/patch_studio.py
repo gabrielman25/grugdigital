@@ -20,6 +20,7 @@ sub('<title>Grug Avatar Studio · Grug Digital</title>',
     'and download the rigged .glb. Works with Claude: paste this page\'s link into a Claude chat and ask for the character you want.">\n'
     '<link rel="icon" href="/favicon.png">\n'
     '<link rel="canonical" href="https://grugdigital.com/character/">\n'
+    '<script src="/static/pearls.js"></script>\n'
     '<link rel="alternate" type="text/markdown" href="/character/claude.md" title="How AI agents (Claude) use this studio">\n'
     '<link rel="help" href="/character/claude.md">')
 
@@ -54,9 +55,12 @@ CSS = r"""
   .cg-warn{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .75rem;margin:0 0 .9rem;padding:.8rem .95rem;border-radius:.9rem;
     background:#FFF6DA;border:1px solid #F0D27A;color:#5B4708;font-size:.92rem;line-height:1.35}
   .cg-warn[hidden]{display:none}
+  .pearl-chip{gap:.4rem;font-variant-numeric:tabular-nums;text-decoration:none}
+  .pearl-chip svg{width:1.15rem;height:1.15rem;flex:none}
   .cg-fab{display:none}
   @media (max-width:820px){
     #toClaude{display:none}
+    .pearl-chip{padding-inline:.7rem}
     .cg-fab{display:inline-flex;position:fixed;z-index:5;right:.75rem;top:4.4rem;gap:.35rem;min-height:2.3rem;padding:0 .85rem;font-size:.9rem;
       border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
     .cg-fab svg{width:1rem;height:1rem}
@@ -65,6 +69,8 @@ CSS = r"""
 </head>"""
 sub('</style>\n</head>', '</style>' + CSS)
 
+PEARL = ('<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#E9E1F7" stroke="#9C8BC0" stroke-width="1.6"/>'
+         '<circle cx="9" cy="9" r="2.6" fill="#fff"/></svg>')
 SPARK = ('<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5c.5 4.6 2.4 6.9 7 7.5-4.6.6-6.5 2.9-7 7.5-.5-4.6-2.4-6.9-7-7.5 '
          '4.6-.6 6.5-2.9 7-7.5z"/><path d="M19 15.5c.25 2 1 2.9 3 3.2-2 .3-2.75 1.2-3 3.2-.25-2-1-2.9-3-3.2 2-.3 2.75-1.2 3-3.2z"/></svg>')
 
@@ -87,7 +93,7 @@ SHEET = f'''<body class="g-root flat" data-cat="head">
     <ol class="cg-how">
       <li><b>1</b><span>Paste the prompt into a Claude chat.</span></li>
       <li><b>2</b><span>Claude builds the character here and paints the outfit in Gemini.</span></li>
-      <li><b>3</b><span>You get a rigged R6 <code>.glb</code>, ready for Roblox Studio's 3D Importer.</span></li>
+      <li><b>3</b><span>You get a rigged R6 <code>.glb</code>, ready for Roblox Studio's 3D Importer. Exporting costs 25 Pearls; Claude asks you first.</span></li>
     </ol>
     <p class="cg-need">Claude needs a browser it can use (Claude in Chrome) to do this for you, and for custom outfits you need to be
       signed in to Gemini in that browser. Without one, Claude gives you a link that opens this studio with your character already set up.</p>
@@ -99,7 +105,7 @@ SHEET = f'''<body class="g-root flat" data-cat="head">
       <div class="cg-agent" id="forAgents">
         <p><b>AI agent reading this page:</b> you were asked to make a Roblox character with this studio. The job has three
           parts and <b>all three are required</b>: (1) hair and face, (2) a custom shirt and pants painted in Gemini
-          (Nano Banana), (3) the R6 <code>.glb</code> download. A character in the starter tee is not finished, and
+          (Nano Banana), (3) the R6 <code>.glb</code> download, which costs Pearls (the site's currency): tell the person the price and ask before spending. A character in the starter tee is not finished, and
           <code>downloadR6()</code> refuses until a painted outfit is worn. This is a browser app (WebGL): use a real
           browser (Claude in Chrome, computer use or Playwright), in the person's own Chrome if you can, since that is
           where they are signed in to Gemini. Full guide: <a href="https://grugdigital.com/character/claude.md">https://grugdigital.com/character/claude.md</a>.</p>
@@ -119,12 +125,16 @@ SHEET = f'''<body class="g-root flat" data-cat="head">
           <li>Hover the painted picture in Gemini and click its <b>Copy image</b> button.</li>
           <li>Back in the studio, click the 3D view and press Ctrl+V. The alignment sheet opens;
             <code>GrugStudio.status().match</code> should be 0.85 or more.</li>
-          <li>Click <b>Wear it</b>, take a screenshot to check, then <code>await GrugStudio.downloadR6()</code> saves
-            <code>&lt;Name&gt;.glb</code>. Give it to the person (it lands in their Downloads folder).</li>
+          <li>Click <b>Wear it</b> and take a screenshot to check.</li>
+          <li>Exporting costs Pearls (25; re-downloading the same character is free). <code>GrugStudio.status().pearls</code>
+            has the price and their balance. <b>Tell the person the price and ask before spending.</b> Then
+            <code>await GrugStudio.downloadR6(null, {{ spendPearls: true }})</code> saves <code>&lt;Name&gt;.glb</code>.
+            Give it to the person (it lands in their Downloads folder). Short of Pearls? Tell them; they get free Pearls
+            every day or can buy more at <code>/character/pearls/</code>. Never buy Pearls for them.</li>
         </ol>
         <p>No browser at all? Send the person a recipe link instead, e.g.
           <code>https://grugdigital.com/character/?name=Maple&amp;hair=wavy-long&amp;hairColor=chestnut&amp;eyes=lashes&amp;outfit=cozy+fall+sweater</code>,
-          and walk them through steps 4 to 10.</p>
+          and walk them through steps 4 to 11.</p>
       </div>
     </details>
   </div>
@@ -143,6 +153,7 @@ sub('<div class="pg-head"><h2 id="doneTitle">All done!</h2><p>Download everythin
 
 # ---- topbar button
 sub('<button id="toFinish" class="g-btn g-btn--primary">',
+    f'<a id="pearlChip" class="g-btn pearl-chip" href="/character/pearls/" title="Your Pearls: tap for more">{PEARL}<span id="pearlNum">0</span></a>\n  '
     f'<button id="toClaude" class="g-btn" title="Let Claude make your avatar">{SPARK}Make with Claude</button>\n  <button id="toFinish" class="g-btn g-btn--primary">')
 sub('<div id="say" class="say box" hidden></div>',
     f'<div id="say" class="say box" hidden></div>\n<button id="toClaudeM" class="g-btn cg-fab" title="Let Claude make your avatar">{SPARK}Claude</button>')
@@ -153,7 +164,21 @@ sub('window.__creator = { CH, HAIR, HEADS, PT, get FACE(){ return FACE; }, setCa
 
 # ---- the agent API, after the creator
 agent = open(here / 'agent.js', encoding='utf-8').read().replace('__LABELS__', json.dumps(labels, ensure_ascii=False))
-sub('</script>\n</body>\n</html>', '</script>\n<script id="agent-api">\n' + agent + '</script>\n</body>\n</html>')
+PAY = f'''<section id="payDlg" class="cg-wrap" aria-labelledby="payTitle">
+  <div class="cg box" role="dialog" aria-modal="true">
+    <div class="cg-tag">{PEARL.replace('<svg ', '<svg width="16" height="16" ')}Pearls</div>
+    <h2 id="payTitle">Export for 25 Pearls?</h2>
+    <p id="payText"></p>
+    <div class="cg-row">
+      <button id="payNo" class="g-btn">Not now</button>
+      <button id="payGo" class="g-btn g-btn--primary">Export</button>
+      <a id="payMore" class="g-btn g-btn--primary" href="/character/pearls/" hidden>Get Pearls</a>
+    </div>
+    <p class="cg-need">Making and saving characters is always free. Pearls are only for exporting an R6 character.</p>
+  </div>
+</section>
+'''
+sub('</script>\n</body>\n</html>', '</script>\n' + PAY + '<script id="agent-api">\n' + agent + '</script>\n</body>\n</html>')
 
 open(out, 'w', encoding='utf-8').write(s)
 print('wrote', out, len(s))

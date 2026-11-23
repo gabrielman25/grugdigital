@@ -26,6 +26,19 @@ printed QR code (`managers/`), NFC tag and installed app working, and keeps peop
 other Claude sessions follow when someone pastes the studio's link into a chat, so keep it accurate when the studio or
 the API changes, and test the whole flow headless (set → wear an image → downloadR6) before pushing.
 
+## Pearls on the new site (`static/pearls.js`)
+
+The new pages share the legacy site's Pearls wallet (`localStorage 'grug.pearls.v1'`, same address, so the same data):
+never rename it or drop fields you don't know (the legacy pages keep `buys`, `code`, `club`, `ret` there). The numbers
+live in `CFG` at the top of `static/pearls.js`: new players start with 80, `/tizzy` (any capitalisation, see the middleware)
+starts a brand-new player at 280, everyone gets 5 Pearls once per calendar day they visit (20 for Grug Gold members,
+checked with the legacy `/assets/gold.js`), no cap. In the Avatar Studio, making and saving characters is free and an R6
+export (`.glb` or the zip) costs 25 Pearls once per character (re-downloads are free); the shirt/pants/face PNGs stay
+free. `character/pearls/` sells the same Stripe packs as the legacy `/pearls.html`; Stripe returns buyers to
+`/pearls.html` (set per link in Stripe), which credits the wallet and links back. Keep the packs in step with it. There's
+no server: the wallet is per browser, like the rest of Grug. Claude sessions must ask the person before spending Pearls
+(`downloadR6(null, { spendPearls: true })`) and never buy Pearls for them.
+
 ## Always send the owner a preview link (not just screenshots)
 
 Work on a branch and push it (not `main`, unless the owner says to). Cloudflare Pages builds every pushed branch at

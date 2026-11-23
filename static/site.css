@@ -1,0 +1,35 @@
+/* The new site's small pages (Pearls, promo links): the same look as the home page. */
+@font-face{font-family:'Fredoka';font-style:normal;font-weight:300 700;font-display:swap;src:url(/static/fredoka.woff2) format('woff2')}
+:root{--page:#F3F3F5;--card:#FFFFFF;--ink:#1E1B16;--soft:#6B6B73;--line:#E2E2E7;--accent:#9BE338;--accent-lo:#6FB31C;--pearl:#9C8BC0;--pearl-bg:#F1ECFA;color-scheme:light}
+html.dark{--page:#17171A;--card:#232327;--ink:#F3F3F5;--soft:#A3A3AD;--line:#33333A;--pearl-bg:#2C2736;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Fredoka',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--page) url(/static/pattern.png) repeat;background-size:96px;color:var(--ink);
+  min-height:100vh;display:grid;place-items:start center;padding:24px 16px 48px;-webkit-font-smoothing:antialiased}
+main{width:100%;max-width:520px;display:grid;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:24px}
+h1{font-size:30px;line-height:1.1;font-weight:600;margin:0}
+h2{font-size:21px;line-height:1.2;font-weight:600;margin:0 0 8px}
+p{font-size:16px;line-height:1.45;color:var(--soft);margin:0 0 12px}
+p:last-child{margin-bottom:0}
+a{color:inherit}
+.tag{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);margin-bottom:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:14px;border:0;cursor:pointer;
+  background:var(--accent);color:#1E1B16;font:600 16px/1 'Fredoka',system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 0 var(--accent-lo);transition:transform .12s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--accent-lo)}
+.btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.btn:disabled{opacity:.55;cursor:default;transform:none}
+.btn--ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}
+.btn--ghost:active{box-shadow:inset 0 0 0 2px var(--line)}
+.btn--sm{min-height:40px;padding:0 16px;font-size:15px}
+.back{display:inline-flex;align-items:center;gap:6px;font-weight:600;text-decoration:none;color:var(--soft);padding:4px 2px}
+.back svg{width:18px;height:18px}
+.pearl{width:1em;height:1em;flex:none;vertical-align:-.12em}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input.field{width:100%;min-height:48px;padding:0 14px;border-radius:12px;border:2px solid var(--line);background:var(--page);color:var(--ink);font:500 16px 'Fredoka',system-ui,sans-serif}
+input.field:focus{outline:none;border-color:var(--accent-lo)}
+.msg{font-size:14px;margin:8px 0 0;min-height:1em}
+.msg.err{color:#C2452D}
+.msg.ok{color:var(--accent-lo)}
+.fine{font-size:13px;line-height:1.45}
+code{font-size:.9em;background:var(--page);padding:1px 6px;border-radius:6px}

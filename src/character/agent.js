@@ -139,16 +139,17 @@ function needOutfit(o){
 async function downloadR6(name, o){
   needOutfit(o);
   if (name != null){ const n = $q('#setName'); n.value = String(name).slice(0, 24); n.dispatchEvent(new Event('input')); }
+  const paidNow = await payFromApi(o);
   const b = await r6Blob(), f = fileName(); GRUG.download(f, b);
-  return { file: f, bytes: b.size, note: 'Saved to the browser\'s downloads folder. Import it into Roblox Studio with the 3D Importer and add a Humanoid (R6). If the parts arrive wrapped in Models or without joints, run r6Script() in the Command Bar.' };
+  return { file: f, bytes: b.size, pearls: paidNow, note: 'Saved to the browser\'s downloads folder. Import it into Roblox Studio with the 3D Importer and add a Humanoid (R6). If the parts arrive wrapped in Models or without joints, run r6Script() in the Command Bar.' };
 }
-async function r6Base64(o){ needOutfit(o); const b = await r6Blob(); const u = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(b); }); return u.slice(u.indexOf(',') + 1); }
+async function r6Base64(o){ needOutfit(o); await payFromApi(o); const b = await r6Blob(); const u = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(b); }); return u.slice(u.indexOf(',') + 1); }
 function status(){
   const m = match();
   return {
     ready: api.ready, view: C.UI.tab, customImage: !!state.img, aligning: !$q('#s2').hidden, match: m,
-    customOutfit: outfit.worn, file: fileName(),
-    next: outfit.worn ? 'Done painting. Call await GrugStudio.downloadR6() and give the person the .glb.'
+    customOutfit: outfit.worn, file: fileName(), pearls: pearlInfo(),
+    next: outfit.worn ? (paidNow() ? 'Done painting, and this character is already paid for: call await GrugStudio.downloadR6() and give the person the .glb.' : 'Done painting. Exporting costs ' + FEE() + ' Pearls (they have ' + P().balance() + '). Ask the person, then call await GrugStudio.downloadR6(null, { spendPearls: true }) and give them the .glb.')
         : !$q('#s2').hidden ? 'The alignment sheet is open with the pasted picture: click "Wear it" (or call GrugStudio.wearIt()), then downloadR6().'
         : 'REQUIRED NEXT: paint the custom shirt and pants in Gemini. Call GrugStudio.paintOutfit("<garments, colours, materials, shoes>") and follow the steps it returns.'
   };
@@ -163,7 +164,7 @@ const STEPS = [
   'In Gemini, hover the painted picture and click its "Copy image" button.',
   'Back in the studio, click the 3D view (not a text box) and press Ctrl+V. The alignment sheet opens. GrugStudio.status().match should be 0.85 or more; if it is lower, ask Gemini to keep the exact layout and only paint the clothes, then copy and paste again.',
   'Click "Wear it" (or call GrugStudio.wearIt()). Take a screenshot to check the outfit on the 3D character.',
-  'await GrugStudio.downloadR6() saves <Name>.glb. Give it to the person.'
+  'Exporting costs Pearls (GrugStudio.status().pearls has the price and their balance; re-downloading the same character is free). Tell the person the price and ask before spending, then await GrugStudio.downloadR6(null, { spendPearls: true }) saves <Name>.glb. Give it to the person. Never buy Pearls for them.'
 ];
 function paintOutfit(desc){
   if (desc != null){ $q('#outfit').value = String(desc); }
@@ -173,6 +174,68 @@ function paintOutfit(desc){
     note: 'The custom outfit is the point of this studio. Do every step; don\'t download before the painted outfit is worn.' };
 }
 
+/* ---------- Pearls: making and saving characters is free; exporting one as an R6 file costs CFG.exportFee ---------- */
+const P = () => window.GrugPearls, FEE = () => (P() ? P().CFG.exportFee : 0);
+let charIdCache = { key: '', id: '' };
+async function charId(){   // the same character (look + painted outfit) gives the same id, whatever it's called
+  const F = C.FACE, look = JSON.stringify({ CH: Object.assign({}, C.CH), face: [F.eye.i, F.brow.i, F.mouth.i, F.brow.color], skin: $q('#skin').value, body: V3.body });
+  const pix = c => (c && c.toDataURL) ? c.toDataURL('image/png') : '';
+  const data = look + '|' + pix(state.shirt) + '|' + pix(state.pants);
+  if (charIdCache.key === data) return charIdCache.id;
+  const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(data));
+  const id = 'c' + [...new Uint8Array(h)].slice(0, 12).map(b => b.toString(16).padStart(2, '0')).join('');
+  charIdCache = { key: data, id }; return id;
+}
+let lastPaidId = null;
+const paidNow = () => !!(lastPaidId && P() && P().paid(lastPaidId));
+function pearlInfo(){ return P() ? { balance: P().balance(), exportFee: FEE(), paidForThisCharacter: paidNow(), getMore: location.origin + '/character/pearls/' } : null; }
+async function payFromApi(o){
+  if (!P()) return 0;
+  const id = await charId(); lastPaidId = id;
+  if (P().paid(id)) return 0;
+  const fee = FEE(), have = P().balance();
+  if (have < fee) throw new Error(`Not enough Pearls: exporting costs ${fee} and the person has ${have}. They get ${P().CFG.daily} free every day (${P().CFG.dailyGold} with Grug Gold) or can buy more at ${location.origin}/character/pearls/. Tell them; don't buy Pearls for them.`);
+  if (!(o && o.spendPearls)) throw new Error(`Exporting this character costs ${fee} Pearls (the person has ${have}; re-downloading the same character later is free). Ask the person whether to spend them, then call again with { spendPearls: true }.`);
+  await P().spend(fee, 'R6 export: ' + fileName()); P().markPaid(id); paintPearls(); toast(`${fee} Pearls spent. Enjoy ${fileName().replace(/\.glb$/, '')}!`);
+  return fee;
+}
+/* the price sheet behind the R6 and zip buttons */
+function payDialog(){
+  return new Promise(async res => {
+    const id = await charId(); lastPaidId = id;
+    if (!P() || P().paid(id)) return res(true);
+    const fee = FEE(), have = P().balance(), short = have < fee, d = $q('#payDlg');
+    $q('#payTitle').textContent = short ? 'You need a few more Pearls' : `Export for ${fee} Pearls?`;
+    $q('#payText').textContent = short
+      ? `Exporting ${fileName().replace(/\.glb$/, '')} as a Roblox R6 character costs ${fee} Pearls, and you have ${have}. You get ${P().CFG.daily} free Pearls every day you visit (${P().CFG.dailyGold} with Grug Gold), or you can get more now.`
+      : `Exporting ${fileName().replace(/\.glb$/, '')} as a Roblox R6 character costs ${fee} Pearls. You have ${have}. Downloading this same character again later is free.`;
+    $q('#payGo').hidden = short; $q('#payMore').hidden = !short;
+    $q('#payGo').textContent = `Export · ${fee} Pearls`;
+    d.classList.add('open');
+    const done = ok => { d.classList.remove('open'); $q('#payGo').onclick = $q('#payNo').onclick = d.onclick = null; res(ok); };
+    $q('#payNo').onclick = () => done(false);
+    d.onclick = e => { if (e.target === d) done(false); };
+    $q('#payGo').onclick = async () => {
+      try { await P().spend(fee, 'R6 export: ' + fileName()); P().markPaid(id); paintPearls(); done(true); }
+      catch (e) { toast(e.message); done(false); }
+    };
+  });
+}
+const GLB_RAW = $q('#dlGLB').onclick, ZIP_RAW = $q('#dlSet').onclick;
+$q('#dlGLB').onclick = async e => { if (!state.shirt) return; if (await payDialog()) return GLB_RAW.call($q('#dlGLB'), e); };
+$q('#dlSet').onclick = async e => { if (!state.shirt) return; if (await payDialog()) return ZIP_RAW.call($q('#dlSet'), e); };
+function paintPearls(){ const n = $q('#pearlNum'); if (n && P()) n.textContent = P().balance().toLocaleString(); }
+addEventListener('grug:pearls', paintPearls);
+function startPearls(){
+  if (!P()) return;
+  paintPearls();
+  P().start().then(r => {
+    paintPearls();
+    if (r.welcome) toast(`Welcome! You've got ${r.welcome} Pearls to spend on exports.`);
+    else if (r.daily) toast(`+${r.daily} daily Pearls${r.gold ? ' (Grug Gold)' : ''}. See you tomorrow!`);
+  }).catch(() => {});
+}
+
 const api = window.GrugStudio = {
   version: 1, ready: false, guide: '/character/claude.md',
   options, get, set, random: () => set({ random: true }),
@@ -180,12 +243,12 @@ const api = window.GrugStudio = {
   downloadTemplate: () => { download(refWhite, 'roblox-clothing-reference.png'); return 'roblox-clothing-reference.png'; },
   paintOutfit, openPaint: () => paintOutfit(), steps: () => STEPS.map((t, i) => `${i + 1}. ${t}`),
   wear, wearIt, match, finish: () => { C.setCat('finish'); return status(); },
-  downloadR6, r6Base64, downloadZip: o => { needOutfit(o); return $q('#dlSet').onclick(); }, r6Script: () => R6_SETUP_LUA,
+  downloadR6, r6Base64, downloadZip: async o => { needOutfit(o); await payFromApi(o); return ZIP_RAW(); }, r6Script: () => R6_SETUP_LUA,
   status, help: () => `Grug Avatar Studio agent API v2. Guide: ${location.origin}/character/claude.md\n` +
     'A character is finished only when it wears a custom shirt and pants painted in Gemini.\n' +
     '1. await GrugStudio.set({name, skin, head, hair, hairColor, eyes, brows, mouth})   (GrugStudio.options() lists the choices)\n' +
     '2. await GrugStudio.paintOutfit("<garments, colours, materials, shoes>") and follow the steps it returns (Gemini round trip)\n' +
-    '3. await GrugStudio.downloadR6()\n' +
+    '3. Exporting costs ' + FEE() + ' Pearls (re-downloads of the same character are free). Ask the person first, then await GrugStudio.downloadR6(null, { spendPearls: true })\n' +
     'Also: get() · status() · prompt() · wear(image) · wearIt() · downloadZip() · r6Base64() · r6Script()'
 };
 /* which outfit is on: the starter tee, a demo, or a picture pasted back from an image editor */
@@ -202,6 +265,7 @@ function syncWarn(){ warn.hidden = $q('#s3').hidden || outfit.worn; }
 new MutationObserver(syncWarn).observe($q('#s3'), { attributes: true, attributeFilter: ['hidden'] });
 $q('#noOutfitGo').onclick = () => paintOutfit();
 
+startPearls();
 api.whenReady = (C.sheetsReady || Promise.resolve()).then(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))).then(() => { api.ready = true; return api; });
 
 /* the template picture's Copy button (step 1 of painting) */

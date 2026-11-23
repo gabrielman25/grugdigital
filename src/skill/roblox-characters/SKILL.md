@@ -29,7 +29,7 @@ gold lion, brown leather belt, grey wool trousers, black boots"*. Fit the game's
 
 If the request is clear, pick sensible looks yourself and show the person. If the cast is big (more than about four),
 or the style is unclear, confirm the list in one short message first: each character is a separate Gemini round trip
-of about a minute.
+of about a minute, and each export costs Pearls.
 
 ## 2. Make each character
 
@@ -62,9 +62,14 @@ For each character:
       `GrugStudio.status().match` should be 0.85 or more; if it's lower, ask Gemini to keep the exact layout and
       only paint the clothes, then copy and paste again.
    7. Click **Wear it**, then take a screenshot and check the outfit.
-4. `await GrugStudio.downloadR6()` saves `<Name>.glb` to the browser's Downloads folder.
-   `await GrugStudio.downloadZip()` saves the whole set instead: the `.glb`, `shirt.png`, `pants.png`, the face,
-   `R6-setup.lua` and a preview.
+4. Export it. Making and saving characters is free; **exporting costs Pearls** (the site's currency, 25 per character,
+   kept in the person's browser; re-downloading the same character is free). `GrugStudio.status().pearls` has the price
+   and their balance. **Tell the person the price and ask before spending.** With their yes,
+   `await GrugStudio.downloadR6(null, { spendPearls: true })` saves `<Name>.glb` to the browser's Downloads folder, or
+   `await GrugStudio.downloadZip({ spendPearls: true })` saves the whole set (the `.glb`, `shirt.png`, `pants.png`, the
+   face, `R6-setup.lua` and a preview). For a big cast, give the total up front (for example 5 characters × 25 Pearls).
+   Short of Pearls: tell them. Everyone gets free Pearls once a day by visiting (5, or 20 with Grug Gold), new players
+   start with 80, and they can buy more at https://grugdigital.com/character/pearls/. Never buy Pearls for them.
 
 `GrugStudio.status().next` always says what's left. `GrugStudio.help()` prints a short summary of the API.
 

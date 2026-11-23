@@ -7,7 +7,8 @@ This page is for Claude (and other AI agents). Someone pasted
 > **The job has three parts, and all three are required:**
 > 1. hair and a face that fit the request,
 > 2. **a custom shirt and pants painted in Gemini (Nano Banana)** to match the outfit they described,
-> 3. the rigged Roblox R6 `.glb`, handed to them.
+> 3. the rigged Roblox R6 `.glb`, handed to them. Exporting costs **25 Pearls** (the site's currency); you must tell
+>    the person and get a yes before spending them.
 >
 > A character still in the starter tee is not finished, even if they only said "a character". The painted outfit is
 > the point of this studio, so `GrugStudio.downloadR6()` refuses until one is worn. If Gemini truly can't be reached
@@ -119,14 +120,29 @@ Downloads; attach it in Gemini with the **+** (upload) button instead. If copyin
 5. Shortcut, if you already have the painted picture inside the studio page as a `data:` URL, base64 PNG, Blob or
    same-site URL: `await GrugStudio.wear(image)` pastes, aligns and wears it in one go.
 
-### 5. Download the R6 file
+### 5. Download the R6 file (costs Pearls: ask first)
+
+Making, painting and saving characters is free. **Exporting** a character as an R6 file (the `.glb` or the whole set)
+costs **25 Pearls**, the site's currency, kept in the person's browser. Downloading the same character again later is free.
+
+1. Check the price and their balance: `GrugStudio.status().pearls` →
+   `{ balance, exportFee, paidForThisCharacter, getMore }`.
+2. **Tell the person the price and their balance and ask whether to spend the Pearls.** Don't spend them without a yes.
+3. With their yes:
 
 ```js
-await GrugStudio.downloadR6()     // → { file: 'Maple.glb', bytes: … }, saved by the browser
-await GrugStudio.downloadZip()    // optional: the whole set (.glb, shirt.png, pants.png, face, setup script, preview)
+await GrugStudio.downloadR6(null, { spendPearls: true })   // → { file: 'Maple.glb', bytes: …, pearls: 25 }
+await GrugStudio.downloadZip({ spendPearls: true })        // or the whole set (.glb, shirt.png, pants.png, face, setup script, preview)
 ```
 
-By clicking: **Save / Finish** → **Roblox R6 character (.glb)** (or **Download the whole set (.zip)**).
+Without `spendPearls: true` these throw an error that states the price (unless this character is already paid for).
+By clicking: **Save / Finish** → **Roblox R6 character (.glb)** shows a "Export for 25 Pearls?" sheet; only click
+**Export** once the person has said yes.
+
+**Not enough Pearls?** Tell the person. Everyone gets free Pearls once a day just by visiting (5, or 20 with Grug Gold),
+new players start with 80, and more can be bought at `/character/pearls/`. **Never buy Pearls or a membership for
+them**; they do that themselves. The shirt, pants and face pictures stay free (`dlShirt`, `dlPants`, `dlHead` on the
+finish page), which is enough for classic Roblox clothing.
 
 `await GrugStudio.r6Base64()` returns the `.glb` as base64 if you need the bytes themselves (it's around 1 MB, so only
 do this when you can write it straight to a file, as with Playwright).
@@ -221,11 +237,11 @@ All of these come from `GrugStudio.options()`. Use the name (or a few words of i
 | `wear(image, { review })` | load a painted picture, auto-align, and wear it (`review: true` stops at the alignment sheet) |
 | `wearIt()` | same as **Wear it** on the alignment sheet |
 | `match()` | silhouette match 0–1 for the pasted picture |
-| `status()` | where things stand (`customOutfit`, `match`) and `next`: what's left to do |
+| `status()` | where things stand (`customOutfit`, `match`, `pearls`) and `next`: what's left to do |
 | `finish()` | open the finish page |
-| `downloadR6(name?, { starterOutfit }?)` | download `<Name>.glb` (rigged Roblox R6). Refuses until a painted outfit is worn; `starterOutfit: true` overrides, only when the person asked for no custom outfit |
-| `downloadZip()` | download the whole set |
-| `r6Base64()` | the `.glb` as base64 |
+| `downloadR6(name?, { spendPearls, starterOutfit }?)` | download `<Name>.glb` (rigged Roblox R6). Refuses until a painted outfit is worn (`starterOutfit: true` overrides, only when the person asked for no custom outfit) and costs 25 Pearls the first time (`spendPearls: true`, only after the person said yes) |
+| `downloadZip({ spendPearls }?)` | download the whole set (same price and rules as `downloadR6`) |
+| `r6Base64({ spendPearls }?)` | the `.glb` as base64 (same price and rules) |
 | `r6Script()` | the Roblox Studio R6 setup script |
 
 ## The Claude skill
@@ -239,6 +255,7 @@ characters: https://grugdigital.com/character/roblox-characters.zip (add it in C
 
 - Send Gemini only the template picture and the prompt.
 - Leave signing in to the person. Never type passwords or payment details.
+- Spend Pearls only after the person says yes, and never buy Pearls or Grug Gold for them.
 - Don't open the studio's Library (it asks for folder access on the person's computer) unless they ask you to.
 - Tell the person what you made and where the file is. If a step didn't work and you fell back to something else (a
   ready-made outfit, a recipe link), say so.

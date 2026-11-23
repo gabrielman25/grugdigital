@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pearls · Grug Avatar Studio</title>
+<meta name="description" content="Pearls for the Grug Avatar Studio: free every day, and used to export a character as a Roblox R6 file.">
+<link rel="icon" href="/favicon.png">
+<link rel="canonical" href="https://grugdigital.com/character/pearls/">
+<script>try { var p = (JSON.parse(localStorage.getItem('grug.profile.v1') || 'null') || {}).prefs || {}; if (p.mode === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}</script>
+<link rel="stylesheet" href="/static/site.css">
+<script src="/static/pearls.js"></script>
+<style>
+.hero{display:grid;gap:4px;text-align:center;padding:28px 24px}
+.hero .big{display:inline-flex;align-items:center;justify-content:center;gap:12px;font-size:54px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.hero .big .pearl{width:44px;height:44px}
+.hero small{color:var(--soft);font-size:15px}
+.daily{display:flex;align-items:center;gap:12px;margin-top:16px;padding:12px 14px;border-radius:16px;background:var(--pearl-bg);text-align:left}
+.daily b{display:block}
+.daily span{color:var(--soft);font-size:14px}
+.daily .ic{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--card);flex:none}
+.uses{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.uses li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:16px;line-height:1.4}
+.uses i{font-style:normal;font-weight:600;min-width:72px;text-align:center;padding:2px 8px;border-radius:999px;background:var(--page);font-size:14px}
+.uses i.free{background:var(--accent);color:#1E1B16}
+.packs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pack{position:relative;display:grid;gap:4px;justify-items:center;padding:18px 10px 14px;border-radius:18px;border:2px solid var(--line);background:var(--card);cursor:pointer;color:var(--ink);font:inherit}
+.pack:hover{border-color:var(--pearl)}
+.pack:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.pack b{font-size:24px;display:inline-flex;align-items:center;gap:6px}
+.pack span{color:var(--soft);font-size:15px}
+.pack em{position:absolute;top:-10px;font-style:normal;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--pearl);color:#fff}
+.pack small{color:var(--accent-lo);font-weight:600;font-size:13px}
+.gold{background:linear-gradient(160deg,#FFF6D6,#FFE9A8);border-color:#F0D27A;color:#3D2F05}
+html.dark .gold{background:linear-gradient(160deg,#3A3015,#4A3A10);border-color:#6B5518;color:#FFF3CC}
+.gold p,.gold .fine{color:inherit;opacity:.85}
+.gold ul{margin:0 0 14px;padding-left:20px;line-height:1.6}
+.gold .member{display:inline-flex;gap:8px;align-items:center;font-weight:600;padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.55)}
+html.dark .gold .member{background:rgba(0,0,0,.25)}
+details summary{cursor:pointer;font-weight:600;margin-top:12px}
+.dlg{position:fixed;inset:0;z-index:20;display:none;place-items:center;padding:16px;background:rgba(31,26,23,.4)}
+.dlg.open{display:grid}
+.dlg .card{max-width:460px;width:100%;max-height:100%;overflow:auto}
+.dlg ul{margin:8px 0 12px;padding-left:20px;color:var(--soft);font-size:14px;line-height:1.5}
+.dlg label{display:flex;gap:10px;align-items:flex-start;font-size:15px;line-height:1.4;margin:6px 0 16px}
+.dlg label input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--accent-lo)}
+.note{padding:12px 14px;border-radius:14px;background:#FFF6DA;color:#5B4708;font-size:15px}
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="/character/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Avatar Studio</a>
+
+  <section class="card hero" aria-labelledby="balTitle">
+    <div class="tag" id="balTitle">Your Pearls</div>
+    <div class="big"><svg class="pearl" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#E9E1F7" stroke="#9C8BC0" stroke-width="1.6"/><circle cx="9" cy="9" r="2.6" fill="#fff"/></svg><span id="bal">0</span></div>
+    <small>Saved in this browser on this device</small>
+    <div class="daily" id="daily">
+      <div class="ic"><svg class="pearl" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#E9E1F7" stroke="#9C8BC0" stroke-width="1.6"/><circle cx="9" cy="9" r="2.6" fill="#fff"/></svg></div>
+      <div><b id="dailyH">Daily Pearls</b><span id="dailyT">Checking…</span></div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="usesTitle">
+    <h2 id="usesTitle">What Pearls do here</h2>
+    <ul class="uses">
+      <li><i class="free">Free</i><span>Making characters, painting outfits and saving them to your Library.</span></li>
+      <li><i id="feeTag">25</i><span>Exporting a character as a Roblox R6 file (<code>.glb</code>, or the whole set). Downloading the same character again later is free.</span></li>
+      <li><i class="free">Free</i><span>Shirt, pants and face pictures (the classic clothing templates).</span></li>
+    </ul>
+  </section>
+
+  <section class="card" aria-labelledby="packsTitle">
+    <h2 id="packsTitle">Get more Pearls</h2>
+    <p id="packsLead">Pay once with Stripe. Pearls work in the Avatar Studio and everywhere else on Grug.</p>
+    <div class="note" id="packsOff" hidden></div>
+    <div class="packs" id="packs"></div>
+  </section>
+
+  <section class="card gold" aria-labelledby="goldTitle" id="goldCard">
+    <div class="tag" style="color:inherit;opacity:.8">Membership</div>
+    <h2 id="goldTitle">Grug Gold</h2>
+    <div id="goldBody"><p>Checking…</p></div>
+  </section>
+
+  <p class="fine" style="text-align:center">Your purchase code: <code id="code">…</code> · Keep it: support needs it to look into a purchase.
+    <br><a href="/pearls.html">All Pearls on Grug</a> · <a href="/terms.html">Terms</a> · <a href="/privacy.html">Privacy</a></p>
+</main>
+
+<div class="dlg" id="cf" role="dialog" aria-modal="true" aria-labelledby="cfH">
+  <div class="card">
+    <h2 id="cfH">Before you buy</h2>
+    <p id="cfSum"></p>
+    <b>Your Pearls are saved on this device only</b>
+    <ul>
+      <li>They’re stored in <b>this browser on this device</b>. They won’t appear on another device, another browser or after switching accounts.</li>
+      <li>Clearing your browser’s history or site data, using private or incognito mode, or deleting the browser <b>will erase them</b>.</li>
+      <li>Buy on the same device and browser you use the studio on, and don’t close the Stripe page until it brings you back.</li>
+      <li>Keep your purchase code <code id="cfCode"></code>. Support needs it to look into a purchase.</li>
+    </ul>
+    <label><input type="checkbox" id="cfOk"> I understand my Pearls are saved only in this browser on this device and can be lost if its data is cleared.</label>
+    <div class="row"><button class="btn btn--ghost" id="cfNo" type="button">Cancel</button><button class="btn" id="cfGo" type="button" disabled>Continue to Stripe</button></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const $ = s => document.querySelector(s), P = window.GrugPearls, fmt = n => (+n || 0).toLocaleString();
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const PEARL = '<svg class="pearl" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#E9E1F7" stroke="#9C8BC0" stroke-width="1.6"/><circle cx="9" cy="9" r="2.6" fill="#fff"/></svg>';
+  /* The site's Pearl packs: the same Stripe Payment Links as /pearls.html (PACKS there). Stripe sends the buyer back to
+     /pearls.html?pack=…&cs=…, which adds the Pearls to this same wallet (and the Grug Gold bonus) and offers the way back
+     here (wallet.ret, the legacy page's own "back to the app" note). Keep these in step with /pearls.html. */
+  const PACKS = [
+    { id: 'p100',  pearls: 100,  price: '$1.99',  link: 'https://buy.stripe.com/00wfZh2owfhw9nv1Ww5J604' },
+    { id: 'p275',  pearls: 275,  price: '$4.99',  link: 'https://buy.stripe.com/3cI00jbZ64CS43b0Ss5J607', tag: 'Popular' },
+    { id: 'p600',  pearls: 600,  price: '$9.99',  link: 'https://buy.stripe.com/fZu9AT1ks3yO9nv7gQ5J603' },
+    { id: 'p1300', pearls: 1300, price: '$19.99', link: 'https://buy.stripe.com/5kQbJ17IQd9o9nvat25J602', tag: 'Best value' }
+  ];
+  let G = null, tier = null, pending = null;
+
+  /* the same guards as /pearls.html: a browser that can't keep the wallet, or the installed iPhone app, can't buy */
+  function storageOK() {
+    try { const ls = localStorage, k = 'grug.storetest', v = String(Date.now()) + Math.random(); ls.setItem(k, v); const back = ls.getItem(k); ls.removeItem(k);
+      if (back !== v || ls.getItem(k) !== null) return false;
+      const r = JSON.parse(ls.getItem('grug.pearls.v1') || 'null'); return !!(r && /^GR-/.test(r.code)); } catch (e) { return false; }   // the wallet itself reads back (made by GrugPearls.start)
+  }
+  function iosApp() {
+    try { const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      return ios && (navigator.standalone === true || matchMedia('(display-mode: standalone)').matches); } catch (e) { return false; }
+  }
+
+  function paint() {
+    $('#bal').textContent = fmt(P.balance());
+    $('#code').textContent = P.wallet().code;
+    $('#feeTag').innerHTML = PEARL + ' ' + P.CFG.exportFee;
+    const per = tier ? P.CFG.dailyGold : P.CFG.daily;
+    if (P.claimedToday()) {
+      const h = Math.max(1, Math.round((P.nextDaily() - Date.now()) / 3600e3));
+      $('#dailyH').textContent = 'Today’s Pearls are in'; $('#dailyT').textContent = `Come back tomorrow for ${per} more${tier ? ' (Grug Gold)' : ''}: about ${h} hour${h === 1 ? '' : 's'} to go. No limit on how many you save up.`;
+    } else { $('#dailyH').textContent = 'Daily Pearls'; $('#dailyT').textContent = `${per} free Pearls every day you visit.`; }
+    const off = !storageOK() ? 'This browser can’t save Pearls right now (private mode, or site data is blocked), so buying is switched off here.'
+      : iosApp() ? 'Buying is off inside the installed iPhone and iPad app. Open grugdigital.com in Safari to buy Pearls.' : '';
+    $('#packsOff').hidden = !off; $('#packsOff').textContent = off;
+    const bonus = tier ? tier.bonus : 0;
+    $('#packs').innerHTML = PACKS.map(p => `<button type="button" class="pack" data-pack="${p.id}"${off ? ' disabled' : ''}>${p.tag ? `<em>${esc(p.tag)}</em>` : ''}<b>${PEARL}${fmt(p.pearls)}</b><span>${esc(p.price)}</span>${bonus ? `<small>+${fmt(Math.round(p.pearls * bonus / 100))} Gold bonus</small>` : ''}</button>`).join('');
+    paintGold();
+  }
+  function paintGold() {
+    const b = $('#goldBody');
+    if (!G || !G.CLUB || !G.CLUB.productId) { b.innerHTML = '<p>Grug Gold isn’t available right now.</p>'; return; }
+    const C = G.CLUB, t = C.tiers[0];
+    const perks = `<ul><li><b>${P.CFG.dailyGold} Pearls every day</b> in the Avatar Studio (instead of ${P.CFG.daily})</li><li>+${t.bonus}% on every Pearl pack</li><li>${fmt(t.monthly)} Pearls every month and the other Gold perks across Grug</li></ul>`;
+    if (tier) { b.innerHTML = `<p class="member">You’re a ${esc(C.name)} member</p>${perks}<p class="fine">Manage or cancel your membership on Gumroad.</p>`; return; }
+    b.innerHTML = `<p>${esc(t.price)} a month on Gumroad. Cancel any time.</p>${perks}
+      <div class="row"><a class="btn" href="${esc(C.link)}" target="_blank" rel="noopener">Join ${esc(C.name)}</a></div>
+      <details><summary>Already a member? Add your license key</summary>
+        <p class="fine" style="margin-top:8px">Gumroad emails you a license key when you join. Paste it here to switch on your perks on this device.</p>
+        <div class="row"><input class="field" id="key" placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX" autocomplete="off" spellcheck="false" style="flex:1 1 220px"><button class="btn btn--sm" id="keyGo" type="button">Switch on</button></div>
+        <p class="msg" id="keyMsg"></p></details>`;
+    $('#keyGo').onclick = activate; $('#key').onkeydown = e => { if (e.key === 'Enter') activate(); };
+  }
+  /* the same key check as /pearls.html (activate there): Gumroad's public license check through GrugGold.verify */
+  async function activate() {
+    const key = $('#key').value.trim().toUpperCase(), msg = (t, k) => { $('#keyMsg').textContent = t; $('#keyMsg').className = 'msg ' + (k || ''); };
+    if (!/^[A-Z0-9-]{16,64}$/.test(key)) return msg('That doesn’t look like a license key. Copy it from your Gumroad receipt email.', 'err');
+    $('#keyGo').disabled = true; msg('Checking with Gumroad…');
+    try {
+      const g = await G.verify(key, true);
+      if (!g.ok) return msg(g.missing ? 'Gumroad doesn’t know that key. Check it and try again.' : 'Couldn’t reach Gumroad. Check your signal and try again.', 'err');
+      if (g.uses > G.CLUB.maxPhones) return msg('This membership is already switched on on ' + G.CLUB.maxPhones + ' devices. Message us if you got a new one.', 'err');
+      if (!g.active) return msg('That membership has ended. Join again to get your perks back.', 'err');
+      if (!g.tier) return msg('Your membership is active, but its tier didn’t match. Message us with your purchase code.', 'err');
+      const w = G.wallet(); w.club = Object.assign({}, w.club, { key, tier: g.tier.id, active: true, checkedAt: Date.now(), ends: g.ends, started: g.started, since: (w.club && w.club.since) || Date.now() });
+      G.setWallet(w); tier = G.member(); msg('');
+      paint();
+    } catch (e) { msg('Couldn’t reach Gumroad. Check your signal and try again.', 'err'); }
+    finally { const b = $('#keyGo'); if (b) b.disabled = false; }
+  }
+
+  /* buying: the same "before you buy" step as /pearls.html, then Stripe in this tab */
+  function openCf(p) {
+    pending = p;
+    $('#cfSum').innerHTML = 'You’re buying <b>' + fmt(p.pearls) + ' Pearls</b> for <b>' + esc(p.price) + '</b>. You’ll pay on Stripe’s secure checkout page.';
+    $('#cfCode').textContent = P.wallet().code; $('#cfOk').checked = false; $('#cfGo').disabled = true; $('#cf').classList.add('open'); $('#cfOk').focus();
+  }
+  const closeCf = () => { $('#cf').classList.remove('open'); pending = null; };
+  $('#packs').addEventListener('click', e => { const b = e.target.closest('[data-pack]'); if (!b || b.disabled) return; const p = PACKS.find(x => x.id === b.dataset.pack); if (p) openCf(p); });
+  $('#cfOk').addEventListener('change', () => { $('#cfGo').disabled = !$('#cfOk').checked; });
+  $('#cfNo').addEventListener('click', closeCf);
+  $('#cf').addEventListener('click', e => { if (e.target === $('#cf')) closeCf(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && $('#cf').classList.contains('open')) closeCf(); });
+  $('#cfGo').addEventListener('click', () => {
+    const p = pending; if (!p || !$('#cfOk').checked) return;
+    if (!storageOK() || iosApp()) { closeCf(); paint(); return; }
+    const w = P.wallet(); w.ret = { path: '/character/pearls/', app: 'the Avatar Studio', at: Date.now() };   // /pearls.html shows the way back after Stripe
+    localStorage.setItem('grug.pearls.v1', JSON.stringify(w));
+    $('#cfGo').disabled = true; $('#cfGo').textContent = 'Opening Stripe…';
+    location.href = p.link + (p.link.indexOf('?') < 0 ? '?' : '&') + 'client_reference_id=' + encodeURIComponent(w.code);
+  });
+
+  addEventListener('grug:pearls', () => { if (ready) paint(); });
+  addEventListener('grug:gold', () => { tier = G && G.member(); if (ready) paint(); });
+  let ready = false;
+  P.start().then(async r => {
+    ready = true; paint();
+    G = await P.loadGold(); tier = G ? await G.ensure() : null; paint();
+    if (r.welcome) { $('#dailyH').textContent = `Welcome! ${r.welcome} Pearls to start`; }
+    else if (r.daily) { $('#dailyH').textContent = `+${r.daily} Pearls today${r.gold ? ' (Grug Gold)' : ''}`; }
+  });
+})();
+</script>
+</body>
+</html>

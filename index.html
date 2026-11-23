@@ -6,6 +6,7 @@
 <title>Grug · Under construction</title>
 <meta name="description" content="The new Grug site is being built. The legacy site is still open.">
 <link rel="icon" href="/favicon.png">
+<script src="/static/pearls.js"></script>
 <script>
 /* Someone browsing the legacy site who taps its Home button or logo lands here (the legacy pages all point at "/").
    Send them back to the legacy home instead, unless they chose "Go to the new site" in the legacy banner.
@@ -49,6 +50,9 @@ body{height:auto;min-height:100%}
 .new .tag i.new-dot{border-radius:50%;background:var(--accent)}
 h2{font-size:24px;line-height:1.15;font-weight:600;margin:0 0 8px}
 .new p{margin-bottom:20px}
+.new .pearls{display:inline-flex;align-items:center;gap:8px;margin:-6px 0 20px;padding:8px 14px;border-radius:999px;background:var(--page);color:var(--ink);font-size:15px;font-weight:500;text-decoration:none}
+.new .pearls svg{width:18px;height:18px}
+.new .pearls span{color:var(--accent-lo);font-weight:600}
 .new .claude{margin:24px 0 0;padding:16px 16px 14px;border-radius:18px;background:var(--page);text-align:left}
 .new .claude-h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;margin-bottom:6px}
 .new .claude-h svg{width:18px;height:18px;flex:none;color:var(--accent-lo)}
@@ -74,6 +78,7 @@ h2{font-size:24px;line-height:1.15;font-weight:600;margin:0 0 8px}
     <div class="tag"><i class="new-dot"></i>New</div>
     <h2 id="newTitle">Avatar Studio</h2>
     <p>Make a blocky Roblox character: pick hair and a face, paint a custom outfit, and download a rigged R6 file.</p>
+    <a class="pearls" id="pearls" href="/character/pearls/" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#E9E1F7" stroke="#9C8BC0" stroke-width="1.6"/><circle cx="9" cy="9" r="2.6" fill="#fff"/></svg><b id="pearlN">0</b> Pearls<span id="pearlNote"></span></a>
     <a class="btn" href="/character/">Make a character
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     <div class="claude" id="withClaude">
@@ -93,6 +98,13 @@ h2{font-size:24px;line-height:1.15;font-weight:600;margin:0 0 8px}
   </section>
 </main>
 <script>
+/* Pearls: a new player's starting balance, then free Pearls once a day (static/pearls.js) */
+(function () {
+  const P = window.GrugPearls; if (!P) return;
+  const paint = r => { document.getElementById('pearlN').textContent = P.balance().toLocaleString(); document.getElementById('pearls').hidden = false;
+    if (r) document.getElementById('pearlNote').textContent = r.welcome ? ' · welcome gift' : r.daily ? ' · +' + r.daily + ' today' : ''; };
+  P.start().then(paint); addEventListener('grug:pearls', () => paint());
+})();
 document.getElementById('copyClaude').addEventListener('click', async e => {
   const b = e.currentTarget, t = document.getElementById('claudePrompt').textContent.trim();
   try { await navigator.clipboard.writeText(t); b.textContent = 'Copied!'; }
