@@ -1,0 +1,34 @@
+{
+  "eyes": [
+    "small dot with lashes", "big round eye, lashes", "big white eye, lashes", "side glance, lashes",
+    "big heavy-lidded eye, lashes", "upper and lower lashes", "simple dot", "sleepy line",
+    "tiny sparkle dot", "white almond eye", "white almond eye, lashes", "long glam lashes",
+    "huge round stare", "wink squint", "shocked wide eye", "cute dot, lashes",
+    "angry squint", "side glance, curled lashes", "closed line", "closed thick line",
+    "sleepy double line", "half-lidded dot", "half-lidded, lashes", "white half-moon eye",
+    "dreamy closed, lashes", "closed bold", "bored half-lid", "closed happy, lashes",
+    "looking up", "tired small, lashes", "bored white eye", "goofy",
+    "tall oval", "dizzy spiral", "tiny squint", "huge cartoon eye",
+    "squeezed shut (>_<)", "white eye, lashes", "raised small dot", "tilted white eye",
+    "tired, eye bags", "buzzing flies (silly)", "blocky F (silly)", "happy closed ^",
+    "happy closed U"
+  ],
+  "brows": [
+    "soft arch", "thin arch", "bold thick arch", "bold thick slant",
+    "thin gentle curve", "flat straight", "short flat", "high arch (surprised)",
+    "curled hook", "dashed thin", "peaked thin", "bold sharp slant",
+    "flat squared", "scar cut", "deep U (worried)", "wavy",
+    "long flat taper", "wavy arch"
+  ],
+  "mouths": [
+    "smile with a tooth", "small open o, dimples", "big open laugh", "smirk",
+    "shocked open", "lopsided smirk", "simple smile line", "tongue out",
+    "small o", "buck-tooth grin", "stitched", "wide toothy grimace"
+  ],
+  "hairColors": {
+    "black": "#1b1b1f", "dark brown": "#2a1d18", "brown": "#5a3a22", "chestnut": "#7a4b2a",
+    "caramel": "#a8703a", "golden": "#d9a441", "blonde": "#f1d27a", "red": "#c2452d",
+    "ginger": "#e8743b", "grey": "#8e8e96", "white": "#ece8df", "pink": "#ff8fc2",
+    "blue": "#8aa8ff", "teal": "#4fd8c4", "lime": "#9be338", "lavender": "#c59bff"
+  }
+}

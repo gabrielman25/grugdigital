@@ -18,6 +18,14 @@ printed QR code (`managers/`), NFC tag and installed app working, and keeps peop
 - A file on `main` takes over the old page at the same path. Avoid the old top-level names (listed in README.md) until you
   mean to replace them.
 
+## Avatar Studio (`/character/`)
+
+`character/index.html` is generated from the owner's Grug Avatar Studio file plus the Claude layer in `src/character/`
+(the "Make with Claude" sheet, the agent instructions, `window.GrugStudio`, recipe links). Edit the sources there and run
+`python3 src/character/build.py <studio.html>`; read `src/character/README.md` first. `character/claude.md` is the guide
+other Claude sessions follow when someone pastes the studio's link into a chat, so keep it accurate when the studio or
+the API changes, and test the whole flow headless (set → wear an image → downloadR6) before pushing.
+
 ## Always send the owner a preview link (not just screenshots)
 
 Work on a branch and push it (not `main`, unless the owner says to). Cloudflare Pages builds every pushed branch at

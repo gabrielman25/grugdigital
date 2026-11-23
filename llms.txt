@@ -1,0 +1,13 @@
+# Grug Digital
+
+> Grug Digital makes playful web tools and games. The new site is being rebuilt at this address; the old site is still
+> served at its old paths.
+
+## Avatar Studio (Roblox characters)
+
+- [Avatar Studio](https://grugdigital.pages.dev/character/): a browser app (WebGL) that makes a blocky Roblox R6
+  character: hair, face, a custom shirt and pants painted with an AI image editor (Gemini / Nano Banana), and a rigged
+  `.glb` download.
+- [Guide for Claude and other AI agents](https://grugdigital.pages.dev/character/claude.md): how to make a character
+  for someone who pasted the studio's link into a chat, step by step, including the `window.GrugStudio` JavaScript API
+  and recipe links (`/character/?hair=…&outfit=…`) for when you can't use a browser.

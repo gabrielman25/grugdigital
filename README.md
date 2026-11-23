@@ -24,6 +24,18 @@ The site is being rebuilt from scratch on `main`. The old site is kept, unchange
   `support.html`, `credits.html`. `managers/` is printed on business cards: keep it working.
 - The new site's own files so far live in `static/` (the Fredoka font and the background pattern).
 
+## Avatar Studio (`/character/`)
+
+The Roblox character maker: hair, face, a custom shirt and pants painted with Gemini (Nano Banana), and a rigged R6
+`.glb` download. It's built for Claude too: someone can paste https://grugdigital.pages.dev/character/ into a Claude
+chat, describe a character, and Claude makes it.
+
+- `character/index.html`: the studio. Generated, so don't hand-edit it: see `src/character/README.md`.
+- `character/claude.md`: the guide Claude (and other AI agents) follow. Linked from the page and from `/llms.txt`.
+- `window.GrugStudio` in the page is the agent API; recipe links like `/character/?hair=ponytail&outfit=…` open the
+  studio with a character already set up.
+- A new studio version: `python3 src/character/build.py path/to/studio.html`.
+
 ## Changing the legacy site
 
 Push to the `legacy` branch. It redeploys to the legacy address and the main address picks it up straight away.
