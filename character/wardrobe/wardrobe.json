@@ -63,6 +63,20 @@
    "match": 0.797
   },
   {
+   "id": "firefighter",
+   "name": "Firefighter",
+   "theme": "Work",
+   "desc": "tan firefighter turnout coat with bright yellow and silver reflective stripes on the chest, arms and hem, matching tan turnout trousers with reflective stripes, black rubber fire boots",
+   "match": 0.889
+  },
+  {
+   "id": "police",
+   "name": "Police Officer",
+   "theme": "Work",
+   "desc": "navy blue police uniform shirt with a silver badge, shoulder patches and a black duty belt, navy trousers, polished black shoes",
+   "match": 0.967
+  },
+  {
    "id": "scientist",
    "name": "Scientist",
    "theme": "Work",
@@ -89,6 +103,20 @@
    "theme": "Formal",
    "desc": "black tuxedo jacket with satin lapels over a white dress shirt with a black bow tie, black tuxedo trousers with a satin side stripe, shiny black patent leather shoes",
    "match": 0.963
+  },
+  {
+   "id": "business",
+   "name": "Business Suit",
+   "theme": "Formal",
+   "desc": "charcoal grey suit jacket over a light blue dress shirt and a red tie, charcoal suit trousers, brown leather oxford shoes",
+   "match": 0.941
+  },
+  {
+   "id": "velvet-blazer",
+   "name": "Velvet Blazer",
+   "theme": "Formal",
+   "desc": "emerald green velvet blazer with gold buttons over a black turtleneck, slim black trousers, black leather loafers",
+   "match": 0.93
   },
   {
    "id": "linen-suit",
@@ -187,6 +215,20 @@
    "theme": "Outdoors",
    "desc": "teal fleece hiking jacket with zip chest pockets and backpack straps, tan hiking trousers with side pockets, brown leather hiking boots with red laces",
    "match": 0.86
+  },
+  {
+   "id": "festive",
+   "name": "Festive Sweater",
+   "theme": "Outdoors",
+   "desc": "red christmas jumper with white reindeer and snowflakes knitted across it, green and red tartan pajama trousers, fuzzy brown slippers",
+   "match": 0.923
+  },
+  {
+   "id": "aerobics",
+   "name": "80s Aerobics",
+   "theme": "Retro",
+   "desc": "neon pink and turquoise colour-block windbreaker jacket with a purple zigzag, black leggings with neon pink leg warmers, chunky plain white high-top sneakers with no logos",
+   "match": 0.823
   },
   {
    "id": "look-grug",
