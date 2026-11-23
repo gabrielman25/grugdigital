@@ -1,0 +1,303 @@
+{
+ "updated": "2026-11-23T15:25:39.133Z",
+ "profile": "https://polysw.itch.io/",
+ "collections": [
+  {
+   "id": 8515954,
+   "title": "Avatar Accessories",
+   "url": "https://itch.io/c/8515954/avatar-accessories",
+   "items": [
+    5233506,
+    5233502,
+    5384515,
+    5412501,
+    5414387,
+    5384596,
+    5384553,
+    5384475
+   ]
+  },
+  {
+   "id": 8550309,
+   "title": "Characters & Avatars",
+   "url": "https://itch.io/c/8550309/characters-avatars",
+   "items": [
+    5233408,
+    5233374,
+    5406127
+   ]
+  },
+  {
+   "id": 8550318,
+   "title": "Pets & Creatures",
+   "url": "https://itch.io/c/8550318/pets-creatures",
+   "items": [
+    5233470,
+    5233454,
+    5233430
+   ]
+  },
+  {
+   "id": 8550322,
+   "title": "Game Kits & Props",
+   "url": "https://itch.io/c/8550322/game-kits-props",
+   "items": [
+    5390379,
+    5233517,
+    5397868,
+    5233511,
+    5233515
+   ]
+  }
+ ],
+ "items": [
+  {
+   "id": 5414387,
+   "title": "Shred Season Goggles",
+   "url": "https://polysw.itch.io/shred-season-goggles",
+   "cover": "https://img.itch.zone/aW1nLzMyNjE1OTcyLnBuZw==/315x250%23c/T%2BAF1G.png",
+   "gif": "",
+   "price": "$3.99",
+   "text": "20 snowboard goggles: mirrored, gradient and retro lenses on striped straps. GLB, FBX and OBJ.",
+   "cats": [
+    8515954
+   ],
+   "new": true
+  },
+  {
+   "id": 5412501,
+   "title": "Cozy Christmas Accessories",
+   "url": "https://polysw.itch.io/cozy-christmas-accessories",
+   "cover": "https://img.itch.zone/aW1nLzMyNjAzODYyLnBuZw==/315x250%23c/7MWURM.png",
+   "gif": "",
+   "price": "$3.99",
+   "text": "24 cozy Christmas head accessories: earmuffs, shades, earrings, necklaces and hair. GLB, FBX and OBJ.",
+   "cats": [
+    8515954
+   ],
+   "new": true
+  },
+  {
+   "id": 5406127,
+   "title": "Summer Festival Avatars",
+   "url": "https://polysw.itch.io/summer-festival-avatars",
+   "cover": "https://img.itch.zone/aW1nLzMyNTYxMjcyLnBuZw==/315x250%23c/S1B12Q.png",
+   "gif": "",
+   "price": "$5.99",
+   "text": "4 faceless rigged summer avatars, plus every outfit piece, 4 base bodies and 16 head accessories to mix.",
+   "cats": [
+    8550309
+   ],
+   "new": true
+  },
+  {
+   "id": 5397868,
+   "title": "Pixel Armory: Weapons & Loot",
+   "url": "https://polysw.itch.io/pixel-armory",
+   "cover": "https://img.itch.zone/aW1nLzMyNTA2MzM3LnBuZw==/315x250%23c/xiM0IW.png",
+   "gif": "",
+   "price": "$4.99",
+   "text": "35 chunky swords, axes, bows, shields, potions, gems and a treasure chest.",
+   "cats": [
+    8550322
+   ],
+   "new": false
+  },
+  {
+   "id": 5390379,
+   "title": "Grug Icon Studio",
+   "url": "https://polysw.itch.io/grug-icon-studio",
+   "cover": "https://img.itch.zone/aW1nLzMyNDUxMzcyLmdpZg==/315x250%23c/JbTXm4.gif",
+   "gif": "https://img.itch.zone/aW1nLzMyNDUxMzcyLmdpZg==/original/hPnC%2BK.gif",
+   "price": "$1.99",
+   "text": "87 animated Roblox UI icons and an editor to make your own. Export Luau, SVG and GIF.",
+   "cats": [
+    8550322
+   ],
+   "new": false
+  },
+  {
+   "id": 5384596,
+   "title": "Y2K & Pastel Goth Headwear",
+   "url": "https://polysw.itch.io/y2k-pastel-goth-headwear",
+   "cover": "https://img.itch.zone/aW1nLzMyNDA4ODkxLnBuZw==/315x250%23c/I4Ix0%2F.png",
+   "gif": "",
+   "price": "$3.99",
+   "text": "12 Y2K and pastel goth headbands, bunny ears, hoods, halos and clips for a blocky 8x8 head.",
+   "cats": [
+    8515954
+   ],
+   "new": false
+  },
+  {
+   "id": 5384553,
+   "title": "Kawaii Critter Hats",
+   "url": "https://polysw.itch.io/kawaii-critter-hats",
+   "cover": "https://img.itch.zone/aW1nLzMyNDA4NTA1LnBuZw==/315x250%23c/fgUEov.png",
+   "gif": "",
+   "price": "$3.99",
+   "text": "12 cute critter hats for a blocky 8x8 head: animal hoods, ears, a sleeping cat, koala, kiwi and a goat mask.",
+   "cats": [
+    8515954
+   ],
+   "new": false
+  },
+  {
+   "id": 5384515,
+   "title": "Winter Wonderland Hats",
+   "url": "https://polysw.itch.io/winter-wonderland-hats",
+   "cover": "https://img.itch.zone/aW1nLzMyNDA4Mjc1LnBuZw==/315x250%23c/PWO%2Fxm.png",
+   "gif": "",
+   "price": "$3.99",
+   "text": "12 cozy winter and holiday hats for a blocky 8x8 head: ushanka, earmuffs, fur hood, Christmas tree hat and more.",
+   "cats": [
+    8515954
+   ],
+   "new": false
+  },
+  {
+   "id": 5384475,
+   "title": "Bows, Buns & Blooms",
+   "url": "https://polysw.itch.io/bows-buns-blooms",
+   "cover": "https://img.itch.zone/aW1nLzMyNDEwNjczLnBuZw==/315x250%23c/%2BzXG2g.png",
+   "gif": "",
+   "price": "$5.99",
+   "text": "43 cute hairstyles, bows, clips, flowers, tiaras and hats fitted to a blocky 8x8 head.",
+   "cats": [
+    8515954
+   ],
+   "new": false
+  },
+  {
+   "id": 5233517,
+   "title": "Village & Nature Props",
+   "url": "https://polysw.itch.io/village-nature-props",
+   "cover": "https://img.itch.zone/aW1nLzMyMjg3NzAzLnBuZw==/315x250%23c/h3XMnt.png",
+   "gif": "",
+   "price": "$6.99",
+   "text": "Trees, bushes, rocks, camp gear, market stall, furniture, fountain, street props and more.",
+   "cats": [
+    8550322
+   ],
+   "new": false
+  },
+  {
+   "id": 5233515,
+   "title": "Tycoon & Obby Kit",
+   "url": "https://polysw.itch.io/tycoon-obby-kit",
+   "cover": "https://img.itch.zone/aW1nLzMyMjg3NjE1LnBuZw==/315x250%23c/EusP%2F8.png",
+   "gif": "",
+   "price": "$3.99",
+   "text": "Droppers, conveyors, buy buttons, cash, checkpoints, jump/speed pads, kill bricks, podium, VIP door.",
+   "cats": [
+    8550322
+   ],
+   "new": false
+  },
+  {
+   "id": 5233511,
+   "title": "Loot & Hatch",
+   "url": "https://polysw.itch.io/loot-and-hatch",
+   "cover": "https://img.itch.zone/aW1nLzMyMjg3NTk5LnBuZw==/315x250%23c/z5yHMr.png",
+   "gif": "",
+   "price": "$4.99",
+   "text": "7 rarity eggs, 4 lucky blocks and spinning pickups: coins, gems, potions, swords and more.",
+   "cats": [
+    8550322
+   ],
+   "new": false
+  },
+  {
+   "id": 5233506,
+   "title": "Wings, Capes & Pet Gear",
+   "url": "https://polysw.itch.io/wings-capes-pet-gear",
+   "cover": "https://img.itch.zone/aW1nLzMyMjg3NjY2LnBuZw==/315x250%23c/b0PqVE.png",
+   "gif": "",
+   "price": "$4.99",
+   "text": "Wings, capes, backpack and jetpack, mini pet hats and emote icons.",
+   "cats": [
+    8515954
+   ],
+   "new": false
+  },
+  {
+   "id": 5233502,
+   "title": "Hats & Headgear",
+   "url": "https://polysw.itch.io/hats-headgear",
+   "cover": "https://img.itch.zone/aW1nLzMyMjg3NjM4LnBuZw==/315x250%23c/m6vedb.png",
+   "gif": "",
+   "price": "$7.99",
+   "text": "67 hats, crowns, helmets, goggles, glasses and masks fitted to a blocky 8x8 head.",
+   "cats": [
+    8515954
+   ],
+   "new": false
+  },
+  {
+   "id": 5233470,
+   "title": "Pond Pals: Frogs & Axolotls",
+   "url": "https://polysw.itch.io/pond-pals",
+   "cover": "https://img.itch.zone/aW1nLzMyMjg3NTg0LnBuZw==/315x250%23c/EcgVNk.png",
+   "gif": "",
+   "price": "$5.99",
+   "text": "Frogs, toads, axolotls, salamanders and a glowing newt (14 animated amphibians).",
+   "cats": [
+    8550318
+   ],
+   "new": false
+  },
+  {
+   "id": 5233454,
+   "title": "Mythic Pets",
+   "url": "https://polysw.itch.io/mythic-pets",
+   "cover": "https://img.itch.zone/aW1nLzMyMjg3NjUxLnBuZw==/315x250%23c/VtRPb8.png",
+   "gif": "",
+   "price": "$6.99",
+   "text": "Unicorns, baby dragons, bats, a spirit fox and a void cat (12 animated pets).",
+   "cats": [
+    8550318
+   ],
+   "new": false
+  },
+  {
+   "id": 5233430,
+   "title": "Pet Pals: Dogs, Cats & Critters",
+   "url": "https://polysw.itch.io/pet-pals",
+   "cover": "https://img.itch.zone/aW1nLzMyMjg3NTExLnBuZw==/315x250%23c/FvPvDH.png",
+   "gif": "",
+   "price": "$9.99",
+   "text": "35 animated everyday pets plus 10 pet-care props (dog house, beds, bowls, toys).",
+   "cats": [
+    8550318
+   ],
+   "new": false
+  },
+  {
+   "id": 5233408,
+   "title": "Brainrot Mutations",
+   "url": "https://polysw.itch.io/brainrot-mutations",
+   "cover": "https://img.itch.zone/aW1nLzMyMjg3NjkyLnBuZw==/315x250%23c/1Ch0RC.png",
+   "gif": "",
+   "price": "$6.99",
+   "text": "All 16 brainrot characters in Golden, Diamond, Rainbow, Shadow and Neon (80 animated models).",
+   "cats": [
+    8550309
+   ],
+   "new": false
+  },
+  {
+   "id": 5233374,
+   "title": "Brainrot Squad",
+   "url": "https://polysw.itch.io/brainrot-squad",
+   "cover": "https://img.itch.zone/aW1nLzMyMjg3NjgyLnBuZw==/315x250%23c/qzTWZn.png",
+   "gif": "",
+   "price": "$9.99",
+   "text": "16 original animated brainrot characters: croissant crocodiles, toaster legends, burger gorillas and more.",
+   "cats": [
+    8550309
+   ],
+   "new": false
+  }
+ ],
+ "errors": []
+}

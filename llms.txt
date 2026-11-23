@@ -1,7 +1,13 @@
 # Grug Digital
 
-> Grug Digital makes playful web tools and games. The new site is being rebuilt at this address; the old site is still
-> served at its old paths.
+> Grug Digital makes game asset packs, playful web tools and games, and is building a new gaming platform and engine.
+> The old site is still served at its old paths.
+
+## Asset packs
+
+- [Asset packs on itch.io](https://polysw.itch.io/): low-poly 3D packs (avatar accessories, characters, pets, game kits).
+- [The list as JSON](https://grugdigital.com/api/itch-assets): every pack with its price, description, cover and itch link,
+  grouped into categories.
 
 ## Avatar Studio (Roblox characters)
 

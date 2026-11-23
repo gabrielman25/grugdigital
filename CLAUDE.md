@@ -49,6 +49,13 @@ and link straight to the pages that changed. A preview also falls back to the le
 
 ## The look
 
-The under-construction page keeps a touch of the old look: Fredoka (`static/fredoka.woff2`, OFL), the light `#F3F3F5`
-page with a faint pixel pattern (`static/pattern.png`, PatternMix), the lime `#9BE338` accent with a darker `#6FB31C`
-lip, and the Grug dino mark. It follows the dark mode saved in the old site's profile (`grug.profile.v1`).
+The new pages keep a touch of the old look: Fredoka (`static/fredoka.woff2`, OFL), a plain light page (no background
+pattern any more), the lime `#9BE338` accent with a darker `#6FB31C` lip, and the Grug dino mark. The home page is light
+by default, full width, with a sticky top bar (nav, Pearls, a light/dark button saved as `grug.home.mode`).
+
+## The itch.io asset list (home page)
+
+`/api/itch-assets` (`functions/api/itch-assets.js` + `src/itch/itch.js`) reads https://polysw.itch.io/ and four itch
+collections (the categories, by number in `ITCH.COLLECTIONS`). itch answers 429 to bursts: keep the requests one at a
+time and cached, never fan out. `static/itch-assets.json` is the fallback; see README.md. itch cover URLs are signed per
+size, so only the `315x250` covers itch gives us work: don't rewrite them to other sizes.
