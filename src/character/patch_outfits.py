@@ -34,6 +34,33 @@ CSS = r"""<!--go:css--><style id="go-css">
   .go-finish{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .8rem;margin:0 0 .9rem}
   .go-finish span{font-size:.88rem;color:var(--g-muted,#6E6B66)}
   @media (max-width:820px){ #toOutfits{display:none} }
+  /* wardrobe (src/character/wardrobe.js) */
+  .g-card:has(> #exGrid){display:none}
+  .wd-head{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem}
+  .wd-count{font-size:.8rem;color:var(--g-muted,#6E6B66)}
+  .wd-tabs{display:grid;grid-template-columns:1fr 1fr;gap:.3rem;padding:.25rem;border-radius:.9rem;background:var(--g-surface-2,#F0F0EC);margin:.2rem 0 .6rem}
+  .wd-tabs button,.wd-seg button,.wd-chip{all:unset;cursor:pointer;text-align:center;font-weight:600;font-size:.92rem;border-radius:.7rem;padding:.5rem .6rem}
+  .wd-tabs button.on{background:var(--g-lime-500,#9BE338);color:#1a1a1a}
+  .wd-chips{display:flex;gap:.35rem;overflow-x:auto;padding-bottom:.35rem;margin-bottom:.4rem;scrollbar-width:thin}
+  .wd-chip{flex:none;font-size:.82rem;padding:.35rem .7rem;border-radius:999px;background:var(--g-surface-2,#F0F0EC)}
+  .wd-chip.on{background:var(--g-text,#1F1A17);color:var(--g-surface,#fff)}
+  .wd-arms{margin:0 0 .6rem}
+  .wd-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem;padding:.2rem;border-radius:.8rem;background:var(--g-surface-2,#F0F0EC)}
+  .wd-seg button{font-size:.8rem;padding:.4rem .3rem}
+  .wd-seg button.on{background:var(--g-surface,#fff);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .wd-mix{font-size:.8rem;color:var(--g-muted,#6E6B66);margin:.45rem .1rem 0;line-height:1.45}
+  .wd-mix b{color:var(--g-text,#1a1a1a);font-weight:600}
+  .wd-link{all:unset;cursor:pointer;text-decoration:underline;margin-left:.3rem;color:var(--g-text,#1a1a1a)}
+  .wd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:.5rem}
+  .wd-item{all:unset;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;gap:.1rem;padding:.35rem .35rem .5rem;border-radius:.9rem;background:var(--g-surface-2,#F0F0EC);border:2px solid transparent;text-align:center;transition:transform .12s}
+  .wd-item:hover{transform:translateY(-2px)}
+  .wd-item.on{border-color:var(--g-lime-500,#9BE338);background:var(--g-lime-50,#F3FCE6)}
+  .wd-item img{width:100%;aspect-ratio:1;object-fit:contain}
+  .wd-item b{font-size:.8rem;font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .wd-item small{font-size:.7rem;color:var(--g-muted,#6E6B66)}
+  .wd-tag{position:absolute;top:.35rem;right:.35rem;font-size:.68rem;font-weight:700;padding:.1rem .35rem;border-radius:.4rem;background:var(--g-text,#1F1A17);color:var(--g-surface,#fff)}
+  .wd-empty{grid-column:1/-1;color:var(--g-muted,#6E6B66);text-align:center;margin:1rem 0}
+  .flat .wd-item{background:var(--off,#F0F0EC);box-shadow:inset 0 0 0 1px var(--edge,transparent)}
 </style><!--/go:css-->"""
 
 SHEET = f"""<!--go:sheet--><section id="goSheet" class="cg-wrap" aria-labelledby="goTitle">
@@ -79,7 +106,8 @@ def apply(s, agent_js=None, labels=None):
         a = s.index('<script id="agent-api">\n') + len('<script id="agent-api">\n'); b = s.index('</script>', a)
         s = s[:a] + agent_js.replace('__LABELS__', json.dumps(labels, ensure_ascii=False)) + s[b:]
     js = (HERE / 'outfits.js').read_text(encoding='utf-8')
-    sub('</script>\n</body>\n</html>', '</script>\n<!--go:js-->' + SHEET + '\n<script id="game-outfits">\n' + js + '</script>\n<!--/go:js--></body>\n</html>')
+    wd = (HERE / 'wardrobe.js').read_text(encoding='utf-8')
+    sub('</script>\n</body>\n</html>', '</script>\n<!--go:js-->' + SHEET + '\n<script id="game-outfits">\n' + js + '</script>\n<script id="wardrobe">\n' + wd + '</script>\n<!--/go:js--></body>\n</html>')
     return s
 
 if __name__ == '__main__':

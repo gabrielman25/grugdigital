@@ -1,0 +1,248 @@
+{
+ "themes": [
+  "Casual",
+  "Streetwear",
+  "Sports",
+  "Work",
+  "Formal",
+  "Fantasy",
+  "Sci-Fi",
+  "Spooky",
+  "Outdoors",
+  "Retro",
+  "Grug games"
+ ],
+ "items": [
+  {
+   "id": "breton-stripe",
+   "name": "Breton Stripe",
+   "theme": "Casual",
+   "desc": "navy and white horizontal striped long-sleeve breton shirt, khaki cotton chino trousers, brown leather boat shoes",
+   "match": 0.89
+  },
+  {
+   "id": "techwear",
+   "name": "Techwear",
+   "theme": "Streetwear",
+   "desc": "glossy black puffer vest over a charcoal grey hoodie, black techwear cargo trousers with buckled straps and many zip pockets, black sneakers with neon green soles",
+   "match": 0.954
+  },
+  {
+   "id": "camo-hoodie",
+   "name": "Orange Camo",
+   "theme": "Streetwear",
+   "desc": "orange and black camouflage pullover hoodie, black joggers with an orange stripe down each side, black and orange sneakers",
+   "match": 0.937
+  },
+  {
+   "id": "tie-dye",
+   "name": "Tie-Dye Summer",
+   "theme": "Streetwear",
+   "desc": "rainbow spiral tie-dye short-sleeve t-shirt, light-wash denim shorts ending above the knee with bare legs below, white crew socks and white sneakers",
+   "match": 0.933
+  },
+  {
+   "id": "football",
+   "name": "Gridiron",
+   "theme": "Sports",
+   "desc": "red American football jersey with white number 88 and shoulder stripes, white football pants with a red stripe down the sides, black cleats",
+   "match": 0.938
+  },
+  {
+   "id": "karate",
+   "name": "Karate Gi",
+   "theme": "Sports",
+   "desc": "white karate gi jacket with a black belt tied at the waist, white gi trousers, barefoot (bare skin feet, no shoes)",
+   "match": 0.902
+  },
+  {
+   "id": "chef",
+   "name": "Chef",
+   "theme": "Work",
+   "desc": "white double-breasted chef jacket with black buttons and a white apron tied at the waist, black and white houndstooth chef trousers, black kitchen clogs",
+   "match": 0.797
+  },
+  {
+   "id": "scientist",
+   "name": "Scientist",
+   "theme": "Work",
+   "desc": "white lab coat with pens in the chest pocket over a light blue shirt and a dark tie, grey slacks, brown leather loafers",
+   "match": 0.849
+  },
+  {
+   "id": "builder",
+   "name": "Construction",
+   "theme": "Work",
+   "desc": "orange high-visibility safety vest with silver reflective stripes over a grey t-shirt, blue work jeans with a brown leather tool belt, tan steel-toe work boots",
+   "match": 0.936
+  },
+  {
+   "id": "mechanic",
+   "name": "Mechanic",
+   "theme": "Work",
+   "desc": "blue mechanic coveralls with grease stains, a red oval name patch and rolled sleeves, matching blue coverall trousers with a rag in the pocket, black work boots",
+   "match": 0.928
+  },
+  {
+   "id": "tuxedo",
+   "name": "Tuxedo",
+   "theme": "Formal",
+   "desc": "black tuxedo jacket with satin lapels over a white dress shirt with a black bow tie, black tuxedo trousers with a satin side stripe, shiny black patent leather shoes",
+   "match": 0.963
+  },
+  {
+   "id": "linen-suit",
+   "name": "Summer Linen",
+   "theme": "Formal",
+   "desc": "cream linen suit jacket with a pink pocket square over a white shirt, cream linen trousers, tan suede loafers",
+   "match": 0.968
+  },
+  {
+   "id": "wizard",
+   "name": "Wizard",
+   "theme": "Fantasy",
+   "desc": "deep blue wizard robe covered in silver stars and crescent moons with wide sleeves and a rope belt, the robe continuing down over the legs, pointed brown leather shoes",
+   "match": 0.965
+  },
+  {
+   "id": "pirate",
+   "name": "Pirate Captain",
+   "theme": "Fantasy",
+   "desc": "white puffy linen shirt under an open crimson long coat with gold trim and gold buttons, a black sash belt, black breeches, tall black boots with gold buckles",
+   "match": 0.966
+  },
+  {
+   "id": "viking",
+   "name": "Viking",
+   "theme": "Fantasy",
+   "desc": "grey fur-lined leather vest over a rough cream linen tunic, wide leather belt with a knotwork buckle, brown wool trousers with criss-cross leg wraps, fur-trimmed leather boots",
+   "match": 0.94
+  },
+  {
+   "id": "royal",
+   "name": "Royal",
+   "theme": "Fantasy",
+   "desc": "purple velvet royal robe with white ermine fur trim and a heavy gold chain over a gold embroidered tunic, purple velvet trousers, gold buckled shoes",
+   "match": 0.934
+  },
+  {
+   "id": "cyberpunk",
+   "name": "Cyberpunk",
+   "theme": "Sci-Fi",
+   "desc": "black leather jacket with glowing neon cyan circuit lines over a hot pink top, black trousers with glowing cyan stripes, chunky black platform boots with neon soles",
+   "match": 0.955
+  },
+  {
+   "id": "star-captain",
+   "name": "Star Captain",
+   "theme": "Sci-Fi",
+   "desc": "navy and gold starship captain uniform tunic with a gold star insignia on the chest and gold cuff stripes, black uniform trousers, black boots",
+   "match": 0.962
+  },
+  {
+   "id": "vampire",
+   "name": "Vampire",
+   "theme": "Spooky",
+   "desc": "black high-collared vampire coat with blood red lining over a red brocade vest and a white cravat, black trousers, pointed black boots",
+   "match": 0.928
+  },
+  {
+   "id": "skeleton",
+   "name": "Skeleton",
+   "theme": "Spooky",
+   "desc": "black bodysuit printed with white skeleton bones (ribcage on the chest, arm bones on the sleeves), black trousers printed with white leg bones, black shoes",
+   "match": 0.954
+  },
+  {
+   "id": "zombie",
+   "name": "Zombie",
+   "theme": "Spooky",
+   "desc": "torn and stained green plaid shirt with ripped sleeves and green slime splotches, ripped dirty brown trousers with holes, worn-out muddy shoes",
+   "match": 0.938
+  },
+  {
+   "id": "witch",
+   "name": "Witch",
+   "theme": "Spooky",
+   "desc": "dark purple witch dress top with black lace sleeves and a silver crescent moon pendant, black and purple striped tights, black buckled boots",
+   "match": 0.929
+  },
+  {
+   "id": "pumpkin",
+   "name": "Pumpkin Patch",
+   "theme": "Spooky",
+   "desc": "orange knit sweater with a jack-o-lantern face on the chest, black trousers with green vine embroidery, orange sneakers",
+   "match": 0.963
+  },
+  {
+   "id": "mummy",
+   "name": "Mummy",
+   "theme": "Spooky",
+   "desc": "wrapped all over in old off-white linen bandages with loose ends and dusty stains on the torso and arms, bandage-wrapped legs, bandage-wrapped feet",
+   "match": 0.921
+  },
+  {
+   "id": "hiker",
+   "name": "Hiker",
+   "theme": "Outdoors",
+   "desc": "teal fleece hiking jacket with zip chest pockets and backpack straps, tan hiking trousers with side pockets, brown leather hiking boots with red laces",
+   "match": 0.86
+  },
+  {
+   "id": "look-grug",
+   "name": "Grug",
+   "theme": "Grug games",
+   "desc": "lime green zip-up hoodie with white drawstrings and a small dark green stegosaurus patch on the chest, dark charcoal grey jeans with a black belt, white high-top sneakers with lime green laces and lime green soles",
+   "look": "grug"
+  },
+  {
+   "id": "look-skater",
+   "name": "Skater",
+   "theme": "Grug games",
+   "desc": "mustard yellow t-shirt with a retro orange and pink sunset graphic, open light-blue denim jacket with the sleeves rolled up and a few small enamel pins, black ripped skinny jeans with a silver wallet chain, black and white checkerboard slip-on sneakers",
+   "look": "skater"
+  },
+  {
+   "id": "look-ranger",
+   "name": "Ranger",
+   "theme": "Grug games",
+   "desc": "woodland camo military field jacket with rolled sleeves and a small green dinosaur unit patch on one shoulder, tan plate carrier vest with ammo pouches and a radio, black web belt, woodland camo cargo trousers with black knee pads, brown leather combat boots",
+   "look": "ranger"
+  },
+  {
+   "id": "look-scavenger",
+   "name": "Scavenger",
+   "theme": "Grug games",
+   "desc": "faded olive waxed-canvas jacket with patched elbows and duct-tape repairs over a dark red hoodie, a mustard yellow bandana around the neck, backpack straps over the shoulders, dark denim jeans with knee patches and a utility belt with a flashlight, scuffed tan hiking boots",
+   "look": "scavenger"
+  },
+  {
+   "id": "look-medic",
+   "name": "Medic",
+   "theme": "Grug games",
+   "desc": "white long-sleeve thermal shirt under a dark navy tactical vest with medical pouches, a green armband with a white plus sign on the upper arm, fingerless black gloves, grey cargo trousers with bandage rolls strapped to one thigh, black combat boots",
+   "look": "medic"
+  },
+  {
+   "id": "look-racer",
+   "name": "Racer",
+   "theme": "Grug games",
+   "desc": "retro racing jumpsuit in bright red and white with bold racing stripes down the sides, a checkered-flag patch and a number 7 on the chest, white racing gloves, matching red and white jumpsuit trousers, black and white racing shoes",
+   "look": "racer"
+  },
+  {
+   "id": "look-snow-rider",
+   "name": "Snow Rider",
+   "theme": "Grug games",
+   "desc": "puffy purple winter ski jacket with white chest stripes and a fur-trimmed hood folded down, chunky yellow knit scarf, black ski gloves, light grey padded snow pants with reflective strips, chunky white snow boots",
+   "look": "snow-rider"
+  },
+  {
+   "id": "look-flannel",
+   "name": "Lumberjack",
+   "theme": "Grug games",
+   "desc": "Flannel & jeans",
+   "look": "flannel"
+  }
+ ]
+}
