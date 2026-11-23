@@ -1736,6 +1736,7 @@ const RULES = {
   starDecayAfter: 40, starDecayEvery: 25,   // wanted stars start dropping this long after your last crime, one per starDecayEvery
   bounty: 50, copCarDmg: 0.1,   // police get bounty x stars per arrest; police shots do 10% damage to someone in a car
   robTime: 3, robCooldown: 90, selfDefense: 15,   // seconds holding G to rob a till; how long before it can be robbed again; how long hitting back counts as self-defence
+  maxPolice: 2,                 // officers on duty at once, you included
   shiftPearls: 300,             // a 5-minute shift on any job pays a Pearl (once every 12 hours)
 };
 CFG.walkSpeed = 20; CFG.accel = 13;
@@ -2919,11 +2920,16 @@ function setTeam(f, t, o = {}) {
   if (f.team === t && !o.force) return;
   const was = f.team; f.team = t; f.weapon = 'fists'; f.reload = null; for (const k of GUN_ORDER) f.ammo[k] = GUNS[k].mag;
   applyLook(f);
-  if (f.isPlayer) { if (t !== T.PRIS) Save.team = t; Save.save(); barKey = ''; shiftT = 0; payT = RULES.payEvery; }
+  if (f.isPlayer) { if (t !== T.PRIS) Save.team = t; Save.save(); barKey = ''; shiftT = 0; payT = RULES.payEvery; balancePolice(); }
   if (f.isBot) { f.path = null; f.goal = null; f.at = null; f.idleT = 0; f.job = null; }
   f.ch.spawn = spawnFor(f);
 }
 
+// at most RULES.maxPolice officers, you included: when you put on the badge one of them goes off duty (and back on when you quit)
+function balancePolice() {
+  const slots = bots.filter(b => b.copSlot), want = RULES.maxPolice - (player && player.team === T.POL ? 1 : 0);
+  slots.forEach((b, i) => { const t = i < want ? T.POL : T.CIT; if (b.team !== t) { setTeam(b, t); b.hunt = null; b.tgt = null; } });
+}
 // ---------------------------------------------------------------- crime, wanted stars, jail
 // a hit is a crime unless: the one you hit is wanted, or they hit you first (self-defence). Police can hit wanted people all day.
 const justified = (by, s) => s.wanted > 0 || (by.hitLog.get(s) || -99) > Game.clock - RULES.selfDefense;
@@ -4210,7 +4216,7 @@ touchButton('robBtn', () => { gDown = true; }, () => { gDown = false; });
 // ---------------------------------------------------------------- the townsfolk
 function populate() {
   const at = s => ({ x: s.x + rnd(-1, 1), y: s.y || 0, z: s.z + rnd(-1, 1) });
-  for (let i = 0; i < 6; i++) makeBot(T.POL, { at: at(pick(STREET)) });
+  for (let i = 0; i < RULES.maxPolice; i++) { const b = makeBot(T.POL, { at: at(pick(STREET)) }); b.copSlot = true; }
   for (let i = 0; i < 4; i++) makeBot(T.CRIM, { at: at(i < 2 ? BLD.hideout.spots.idle[i] : pick(PUBLIC)) });
   for (const t of [T.STYL, T.ICE, T.TAR, T.TAR, T.BUR, T.GRILL, T.TECH, T.PIZ, T.JEW, T.CHK, T.BAR, T.MUS, T.LIFE, T.CREW, T.CREW]) {
     const B = BLD[TEAMS[t].bld], w = B && B.spots && B.spots.work.length ? B.spots.work[bots.filter(b => b.team === t).length % B.spots.work.length] : TEAMS[t].posts ? TEAMS[t].posts[0] : TEAMS[t].padSpot;
