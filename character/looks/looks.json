@@ -17,8 +17,9 @@
    "eyes": 6,
    "brows": 2,
    "mouth": 6,
-   "outfit": "lime green zip-up hoodie with white drawstrings and a small dark green stegosaurus dinosaur emblem on the chest, dark charcoal grey jeans, white sneakers with lime green laces"
-  }
+   "outfit": "lime green zip-up hoodie with white drawstrings and a small dark green stegosaurus patch on the chest, dark charcoal grey jeans with a black belt, white high-top sneakers with lime green laces and lime green soles"
+  },
+  "v": 2
  },
  {
   "id": "skater",
@@ -37,8 +38,9 @@
    "eyes": 6,
    "brows": 2,
    "mouth": 6,
-   "outfit": "mustard yellow t-shirt with a retro orange sunset graphic, open light-blue denim jacket with the sleeves rolled up, black ripped skinny jeans, red canvas high-top sneakers"
-  }
+   "outfit": "mustard yellow t-shirt with a retro orange and pink sunset graphic, open light-blue denim jacket with the sleeves rolled up and a few small enamel pins, black ripped skinny jeans with a silver wallet chain, black and white checkerboard slip-on sneakers"
+  },
+  "v": 2
  },
  {
   "id": "ranger",
@@ -54,11 +56,12 @@
    "hairColor": "#2a1d18",
    "eyes": 6,
    "brows": 3,
-   "mouth": 0,
+   "mouth": 6,
    "browColor": "#2a1d18",
-   "outfit": "olive-drab military field jacket with woodland camo pattern and rolled sleeves, tan tactical vest with ammo pouches and a radio, black web belt, olive camo cargo trousers with knee pads, black combat boots"
+   "outfit": "woodland camo military field jacket with rolled sleeves and a small green dinosaur unit patch on one shoulder, tan plate carrier vest with ammo pouches and a radio, black web belt, woodland camo cargo trousers with black knee pads, brown leather combat boots"
   },
-  "starter": true
+  "starter": true,
+  "v": 2
  },
  {
   "id": "scavenger",
@@ -76,9 +79,10 @@
    "brows": 0,
    "mouth": 6,
    "browColor": "#2a1d18",
-   "outfit": "rugged survival gear: faded brown waxed-canvas jacket with patched elbows and duct-tape repairs over a grey hoodie, red bandana tied around the neck, backpack straps over the shoulders, dark denim jeans with knee patches and a utility belt with a flashlight, scuffed brown hiking boots"
+   "outfit": "faded olive waxed-canvas jacket with patched elbows and duct-tape repairs over a dark red hoodie, a mustard yellow bandana around the neck, backpack straps over the shoulders, dark denim jeans with knee patches and a utility belt with a flashlight, scuffed tan hiking boots"
   },
-  "starter": true
+  "starter": true,
+  "v": 2
  },
  {
   "id": "medic",
@@ -96,9 +100,10 @@
    "brows": 0,
    "mouth": 6,
    "browColor": "#2a1d18",
-   "outfit": "survival field medic: white long-sleeve thermal shirt under a grey tactical vest with medical pouches, a green armband with a white plus sign on the upper arm, fingerless black gloves, navy blue cargo trousers with bandage rolls strapped to one thigh, black combat boots"
+   "outfit": "white long-sleeve thermal shirt under a dark navy tactical vest with medical pouches, a green armband with a white plus sign on the upper arm, fingerless black gloves, grey cargo trousers with bandage rolls strapped to one thigh, black combat boots"
   },
-  "starter": true
+  "starter": true,
+  "v": 2
  },
  {
   "id": "racer",
@@ -114,11 +119,12 @@
    "hairColor": "#f1d27a",
    "eyes": 6,
    "brows": 1,
-   "mouth": 0,
+   "mouth": 6,
    "browColor": "#2a1d18",
-   "outfit": "retro racing jumpsuit in bright blue and white with bold racing stripes down the sides, a checkered-flag patch and a number 9 on the chest, white racing gloves, matching blue and white jumpsuit trousers, red and white high-top sneakers"
+   "outfit": "retro racing jumpsuit in bright red and white with bold racing stripes down the sides, a checkered-flag patch and a number 7 on the chest, white racing gloves, matching red and white jumpsuit trousers, black and white racing shoes"
   },
-  "starter": true
+  "starter": true,
+  "v": 2
  },
  {
   "id": "snow-rider",
@@ -136,9 +142,10 @@
    "brows": 1,
    "mouth": 6,
    "browColor": "#2a1d18",
-   "outfit": "puffy teal winter ski jacket with white chest stripes and a fur-trimmed hood folded down, chunky orange knit scarf, black ski gloves, grey padded snow pants with reflective strips, chunky white snow boots"
+   "outfit": "puffy purple winter ski jacket with white chest stripes and a fur-trimmed hood folded down, chunky yellow knit scarf, black ski gloves, light grey padded snow pants with reflective strips, chunky white snow boots"
   },
-  "starter": true
+  "starter": true,
+  "v": 2
  },
  {
   "id": "flannel",

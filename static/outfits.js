@@ -16,8 +16,9 @@
 
    Starter outfits: the first time a browser uses this, the looks marked "starter" in /character/looks/looks.json (Grug,
    the default, plus a few game outfits) are saved here as ordinary outfits (ids 'starter-<id>', starter: true), and
-   Grug becomes the one they play as unless they already picked one. It happens once (localStorage 'grug.outfit.starters');
-   deleting them afterwards is fine, they don't come back.
+   Grug becomes the one they play as unless they already picked one. Each look is added once (localStorage
+   'grug.outfit.starters'); deleting one is fine, it doesn't come back. Bump a look's "v" in looks.json after repainting it
+   and browsers swap in the new version, unless they edited their copy.
 
    API (all async except active/setActive)
      GrugOutfits.list()            [{ id, name, created, updated, preview }]  newest first (no glb: cheap to list)
@@ -51,27 +52,42 @@
   const ping = () => { try { dispatchEvent(new CustomEvent('grug:outfits')); } catch (e) {} try { localStorage.setItem('grug.outfit.ping', String(Date.now())); } catch (e) {} };
   const newId = () => 'o' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
-  // the starter outfits, once per browser (see the top of this file)
+  // the starter outfits (see the top of this file). localStorage 'grug.outfit.starters' remembers which looks this browser
+  // has had, and at which version ({ id: v }; looks.json gives each look a "v", 1 if missing). A look this browser never had
+  // is added; a newer version replaces the saved copy only while it's still untouched (starter: true; editing it in the
+  // studio saves a record without that flag). Deleted ones don't come back.
   const SKEY = 'grug.outfit.starters';
-  let seeding = null;
+  let seeding = null, checked = false;
+  function seenMap() {
+    let raw = null; try { raw = localStorage.getItem(SKEY); } catch (e) { return null; }
+    if (!raw) return {};
+    if (raw === '1') return { grug: 1, skater: 1, ranger: 1, scavenger: 1, medic: 1, racer: 1, 'snow-rider': 1, flannel: 1 };   // the first release
+    try { return JSON.parse(raw) || {}; } catch (e) { return {}; }
+  }
   function seed() {
-    let done = '1'; try { done = localStorage.getItem(SKEY); } catch (e) {}
-    if (done || !window.fetch) return Promise.resolve();
+    if (checked || !window.fetch) return Promise.resolve();
+    const seen = seenMap(); if (!seen) return Promise.resolve();
     return seeding || (seeding = (async () => {
       const r = await fetch('/character/looks/looks.json'); if (!r.ok) throw new Error('looks.json ' + r.status);
-      const L = (await r.json()).filter(k => k.starter), have = await tx('readonly', (st, set) => req(st.getAllKeys()).then(set)), now = Date.now();
-      const blob = u => fetch(u).then(x => x.ok ? x.blob() : null).catch(() => null);
-      const recs = await Promise.all(L.map(async (k, i) => {
-        const id = 'starter-' + k.id; if ((have || []).includes(id)) return null;
-        const [glb, preview, shirt, pants] = await Promise.all([`/arcade/outfits/${k.id}.glb`, `/character/looks/${k.id}/preview.png`, `/character/looks/${k.id}/shirt.png`, `/character/looks/${k.id}/pants.png`].map(blob));
-        if (!glb) throw new Error('starter ' + k.id);
-        const t = now - i * 1000;   // the default first in the list
-        return { id, name: k.name, created: t, updated: t, glb, preview, shirt, pants, look: Object.assign({}, k.look, { name: k.name }), custom: true, starter: true };
-      }));
-      await tx('readwrite', st => Promise.all(recs.filter(Boolean).map(r => req(st.put(r)))));
+      const L = (await r.json()).filter(k => k.starter), now = Date.now();
+      const todo = L.filter(k => !(k.id in seen) || seen[k.id] < (k.v || 1));
+      if (todo.length) {
+        const blob = u => fetch(u).then(x => x.ok ? x.blob() : null).catch(() => null);
+        const recs = await Promise.all(todo.map(async k => {
+          const id = 'starter-' + k.id, old = k.id in seen ? await get(id) : null;
+          if (k.id in seen && !(old && old.starter)) return { skip: k };   // deleted or edited: leave it be
+          const [glb, preview, shirt, pants] = await Promise.all([`/arcade/outfits/${k.id}.glb`, `/character/looks/${k.id}/preview.png`, `/character/looks/${k.id}/shirt.png`, `/character/looks/${k.id}/pants.png`].map(blob));
+          if (!glb) throw new Error('starter ' + k.id);
+          const t = old ? old.updated : now - L.indexOf(k) * 1000;   // new ones keep the list order (the default first); updates keep their place
+          return { k, rec: { id, name: old ? old.name : k.name, created: old ? old.created : t, updated: t, glb, preview, shirt, pants, look: Object.assign({}, k.look, { name: old ? old.name : k.name }), custom: true, starter: true } };
+        }));
+        await tx('readwrite', st => Promise.all(recs.filter(x => x.rec).map(x => req(st.put(x.rec)))));
+        recs.forEach(x => { const k = x.k || x.skip; seen[k.id] = k.v || 1; });
+      }
       const def = L.find(k => k.default);
-      try { if (def && !localStorage.getItem(AKEY)) localStorage.setItem(AKEY, 'starter-' + def.id); localStorage.setItem(SKEY, '1'); } catch (e) {}
-      ping();
+      try { if (def && !localStorage.getItem(AKEY) && !localStorage.getItem(SKEY)) localStorage.setItem(AKEY, 'starter-' + def.id); localStorage.setItem(SKEY, JSON.stringify(seen)); } catch (e) {}
+      checked = true;
+      if (todo.length) ping();
     })().catch(e => { console.warn('starter outfits', e); }).then(() => { seeding = null; }));
   }
 

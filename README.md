@@ -63,6 +63,8 @@ chat, describe a character, and Claude makes it.
   out black).
 - Home page showcase: `static/showcase/` (Blender Cycles renders of the outfits in action poses, transparent WebP, over
   scenes from the games); the slides and their prompts are in the script at the bottom of `index.html`.
+- "Stop the Claude slop" (home page): characters Claude made on its own (`static/slop/`, from the owner) next to the
+  same showcase renders.
 - Saved outfits ("My outfits": save, edit, rename, delete, **Play as**): `static/outfits.js` (`window.GrugOutfits`, an
   IndexedDB store per browser) and the studio layer `src/character/outfits.js`, injected by
   `src/character/patch_outfits.py`. Ready-made game looks: `character/looks/` (`looks.json` + the clothing PNGs).

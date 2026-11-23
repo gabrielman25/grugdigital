@@ -103,6 +103,27 @@ h1{font-size:clamp(34px,4.6vw,60px);line-height:1.04;font-weight:600;margin:0 0 
 @media (max-width:600px){.show{aspect-ratio:4/5}.show .fg{bottom:27%;height:62%}.show .s .fg,.show .s.left .fg{right:auto;left:50%;translate:-50% 0}.show .ask p{font-size:15px}.show .who b{font-size:16px}}
 @media (prefers-reduced-motion:reduce){.show .s{transition:none}.show .s.go .bg,.show .s.go .fg{animation:none}.show .ask p::after{animation:none}}
 
+/* ---------- before / after: Claude alone vs Claude + the Avatar Studio ---------- */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.vs .side{border-radius:24px;padding:20px 20px 22px;display:flex;flex-direction:column;gap:14px}
+.vs .bad{background:#E9E9EE;color:var(--ink)}
+.vs .good{background:#1E1B16;color:#F3F3F5}
+.vs .lab{margin:0;font-size:13px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--soft)}
+.vs .good .lab{color:#BDBDC6}
+.vs .lab b{display:block;margin-top:4px;font-size:22px;letter-spacing:0;text-transform:none;color:var(--ink)}
+.vs .good .lab b{color:#fff}
+.vs .pics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.vs .pics div{position:relative;aspect-ratio:4/5;border-radius:14px;overflow:hidden}
+.vs .bad .pics div{background:#F6F6F8}
+.vs .good .pics div{background:#2A2621}
+.vs .pics img{position:absolute;left:8%;top:8%;width:84%;height:86%;max-width:none;object-fit:contain;object-position:50% 100%}
+.vs ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.vs li{font-size:14px;font-weight:500;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,.06)}
+.vs .good li{background:rgba(255,255,255,.09);color:#E6E6EA}
+.slop-ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+html.dark .vs .bad{background:#2A2A2F}html.dark .vs .bad .pics div{background:#34343A}html.dark .vs .good{box-shadow:inset 0 0 0 1px var(--line)}
+@media (max-width:860px){.vs{grid-template-columns:1fr}}
+
 /* ---------- sections ---------- */
 section.block{padding-block:clamp(28px,4vw,48px)}
 .head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:18px}
@@ -227,6 +248,45 @@ footer .sp{margin-left:auto}
     </div>
     <div class="show" id="show" role="region" aria-roledescription="carousel" aria-label="Characters made in the Avatar Studio">
       <noscript><img class="bg" src="/static/showcase/bg-slide-1.jpg" alt=""><img class="fg" src="/static/showcase/grug.webp" alt="Grug, made in the Avatar Studio"></noscript>
+    </div>
+  </section>
+
+  <section class="block wrap" id="slop" aria-labelledby="slopTitle">
+    <div class="head">
+      <div>
+        <h2 id="slopTitle">Stop the Claude slop.</h2>
+        <p>Ask Claude for a Roblox character on its own and you get the left. Point it at the Avatar Studio and you get the right.</p>
+      </div>
+    </div>
+    <div class="vs">
+      <div class="side bad">
+        <p class="lab">Before<b>Claude on its own</b></p>
+        <div class="pics">
+          <div><img src="/static/slop/before-1.webp" alt="A plain blocky figure in a red cap and blue shirt" loading="lazy" width="314" height="480"></div>
+          <div><img src="/static/slop/before-2.webp" alt="A plain blocky figure in a pink shirt" loading="lazy" width="333" height="480"></div>
+          <div><img src="/static/slop/before-3.webp" alt="A plain blocky figure in a top hat" loading="lazy" width="285" height="480"></div>
+          <div><img src="/static/slop/before-4.webp" alt="A plain blocky figure with spiky red hair" loading="lazy" width="307" height="480"></div>
+          <div><img src="/static/slop/before-5.webp" alt="A blocky wizard made of a cone and a stick" loading="lazy" width="239" height="480"></div>
+          <div><img src="/static/slop/before-6.webp" alt="A plain blocky figure in a green number 7 shirt" loading="lazy" width="311" height="480"></div>
+        </div>
+        <ul><li>Flat colour blocks</li><li>Clothes glued on as shapes</li><li>No real textures</li></ul>
+      </div>
+      <div class="side good">
+        <p class="lab">After<b>Claude + Grug Avatar Studio</b></p>
+        <div class="pics">
+          <div><img src="/static/showcase/grug.webp" alt="Grug in a lime dino hoodie" loading="lazy"></div>
+          <div><img src="/static/showcase/ranger.webp" alt="Ranger in woodland camo and a plate carrier" loading="lazy"></div>
+          <div><img src="/static/showcase/skater.webp" alt="Skater in a denim jacket and checkerboard shoes" loading="lazy"></div>
+          <div><img src="/static/showcase/medic.webp" alt="Medic in a navy vest with a green armband" loading="lazy"></div>
+          <div><img src="/static/showcase/snow-rider.webp" alt="Snow Rider in a puffy purple ski jacket" loading="lazy"></div>
+          <div><img src="/static/showcase/racer.webp" alt="Racer in a red and white jumpsuit" loading="lazy"></div>
+        </div>
+        <ul><li>Real painted clothes</li><li>Rigged Roblox R6</li><li>Works with Roblox animations</li></ul>
+      </div>
+    </div>
+    <div class="slop-ctas">
+      <a class="btn" href="/character/">Make a character <svg class="i" aria-hidden="true"><use href="#arrow"/></svg></a>
+      <a class="btn btn--ghost" href="#studio">Use it from Claude</a>
     </div>
   </section>
 
@@ -364,11 +424,11 @@ document.getElementById('copyClaude').addEventListener('click', async e => {
 (function () {
   const S = [
     { id: 'grug', name: 'Grug', from: 'Slide 999 KM', bg: 'bg-slide-1', ask: 'Make me a character in a lime green hoodie with a little dino on it.' },
-    { id: 'ranger', name: 'Ranger', from: 'Zombie Zones', bg: 'bg-zombie-1', left: true, ask: 'Make a soldier in woodland camo with a tactical vest and knee pads.' },
-    { id: 'skater', name: 'Skater', from: 'Slide 999 KM', bg: 'bg-slide-2', ask: 'Make a skater in a denim jacket over a sunset tee, with ripped black jeans.' },
-    { id: 'medic', name: 'Medic', from: 'Zombie Zones', bg: 'bg-zombie-2', left: true, ask: 'Make a field medic with a grey vest and a green armband.' },
-    { id: 'snow-rider', name: 'Snow Rider', from: 'Slide 999 KM', bg: 'bg-slide-3', ask: 'Make a snowboarder in a puffy teal ski jacket and a chunky orange scarf.' },
-    { id: 'racer', name: 'Racer', from: 'Slide 999 KM', bg: 'bg-slide-4', left: true, ask: 'Make a racer in a blue and white jumpsuit with a number 9 on it.' }
+    { id: 'ranger', name: 'Ranger', from: 'Zombie Zones', bg: 'bg-zombie-1', left: true, ask: 'Make a soldier in woodland camo with a tan plate carrier and knee pads.' },
+    { id: 'skater', name: 'Skater', from: 'Slide 999 KM', bg: 'bg-slide-2', ask: 'Make a skater in a denim jacket, ripped black jeans and checkerboard slip-ons.' },
+    { id: 'medic', name: 'Medic', from: 'Zombie Zones', bg: 'bg-zombie-2', left: true, ask: 'Make a field medic in a navy vest with a green armband.' },
+    { id: 'snow-rider', name: 'Snow Rider', from: 'Slide 999 KM', bg: 'bg-slide-3', ask: 'Make a snowboarder in a puffy purple ski jacket and a chunky yellow scarf.' },
+    { id: 'racer', name: 'Racer', from: 'Slide 999 KM', bg: 'bg-slide-4', left: true, ask: 'Make a racer in a red and white jumpsuit with a number 7 on it.' }
   ];
   const root = document.getElementById('show'); if (!root) return;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, DUR = 7000;
