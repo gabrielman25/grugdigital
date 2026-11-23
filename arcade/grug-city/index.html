@@ -387,7 +387,7 @@
   <div><b>E</b> use: shop counters (buy food, outfits, hairstyles), the ATM, a mansion's mailbox (claim it) · <b>hold G</b> rob a till</div>
   <div><b>Click</b> punch (fists) or shoot (police and criminals carry guns) · <b>1 2 3</b> fists / guns · <b>R</b> reload · <b>V</b> swing · <b>Tab</b> everyone in town · <b>M</b> menu</div>
   <div><b>Jobs:</b> every shop has a coloured job pad inside. Step on it: that's your job, your uniform colours and your spawn. Payday every minute</div>
-  <div><b>Crime:</b> hitting an innocent person, taking someone down or robbing a till gives you <span style="color:#ff4a4a">wanted stars</span>. Police come after anyone with stars. Get taken down by the police while wanted and you respawn in jail. Lie low and the stars fade. Hitting back at someone who hit you first is self-defence</div>
+  <div><b>Crime:</b> hitting an innocent person, taking someone down or robbing a till gives you <span style="color:#ff4a4a">wanted stars</span>. Police come after anyone with stars. Get taken down by the police while wanted and you respawn in the jail yard (walk out through the jail whenever you like). Lie low and the stars fade. Hitting back at someone who hit you first is self-defence</div>
   <div><b>Cars:</b> walk into a parked car to get in. <b>W/S</b> gas and brake (hold S to reverse) · <b>A/D</b> steer · <b>Shift</b> drift · <b>H</b> horn · <b>F</b> siren · <b>Space</b> jump out. Stealing a police car gets you a star; running people over counts as a crime</div>
   <div><b>Homes:</b> the mansions across the river are free: press E at a mailbox to claim one. Citizens respawn at home</div>
 </div>
@@ -407,6 +407,7 @@
 <div id="err"><div><b>Couldn't load the 3D library.</b><br>This page loads Three.js from cdnjs, so it needs an internet connection.</div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>window.THREE || document.write('<script src="/static/vendor/three-r128.min.js"><\/script>');</script>
 <script>window.THREE || document.write('<script src="https://grugdigital.com/static/vendor/three-r128.min.js"><\/script>');</script>
 <!-- Grug site kit: the GLTF loader, the Pearls wallet, saved outfits. Served from this site on grugdigital.com, or fetched from it anywhere else -->
 <script src="/static/vendor/three-r128-GLTFLoader.js"></script>
@@ -1733,16 +1734,16 @@ const RULES = {
   rollSpeed: 42, rollTime: 0.3, rollCd: 0.75, aimAssistPx: 40, shotKnock: 14, shotKnockT: 0.06,
   payEvery: 60,                 // seconds between paychecks
   starDecayAfter: 40, starDecayEvery: 25,   // wanted stars start dropping this long after your last crime, one per starDecayEvery
-  jailBase: 25, jailPerStar: 20, bounty: 50,   // jail seconds = base + perStar x stars; police get bounty x stars per arrest
+  bounty: 50, copCarDmg: 0.1,   // police get bounty x stars per arrest; police shots do 10% damage to someone in a car
   robTime: 3, robCooldown: 90, selfDefense: 15,   // seconds holding G to rob a till; how long before it can be robbed again; how long hitting back counts as self-defence
   shiftPearls: 300,             // a 5-minute shift on any job pays a Pearl (once every 12 hours)
 };
 CFG.walkSpeed = 20; CFG.accel = 13;
 // guns: only the police and criminals carry them. Everyone else has fists.
 const GUNS = {
-  pistol: { name: 'Pistol', model: 'pistol', scale: 3.8, grip: 0.06, range: 70, body: 24, head: 48, mag: 10, reload: 1.2, tapGap: 0.12, cd: 0.25, spread: 0.004, bloom: 0.006, fall: [80, 240, 0.5] },
-  rifle: { name: 'Rifle', model: 'rifle', scale: 3.6, grip: 0.12, range: 90, body: 18, head: 36, mag: 20, reload: 1.8, tapGap: 0.08, cd: 0.12, spread: 0.01, bloom: 0.004, fall: [120, 320, 0.6] },
-  smg: { name: 'SMG', model: 'smg', scale: 3.8, grip: 0.07, range: 60, body: 14, head: 28, mag: 24, reload: 1.4, tapGap: 0.06, cd: 0.08, spread: 0.018, bloom: 0.005, fall: [60, 200, 0.5] },
+  pistol: { name: 'Pistol', model: 'pistol', scale: 3.8, grip: 0.06, range: 70, body: 14, head: 28, mag: 10, reload: 1.2, tapGap: 0.12, cd: 0.25, spread: 0.004, bloom: 0.006, fall: [80, 240, 0.5] },
+  rifle: { name: 'Rifle', model: 'rifle', scale: 3.6, grip: 0.12, range: 90, body: 11, head: 22, mag: 20, reload: 1.8, tapGap: 0.08, cd: 0.12, spread: 0.01, bloom: 0.004, fall: [120, 320, 0.6] },
+  smg: { name: 'SMG', model: 'smg', scale: 3.8, grip: 0.07, range: 60, body: 8, head: 16, mag: 24, reload: 1.4, tapGap: 0.06, cd: 0.08, spread: 0.018, bloom: 0.005, fall: [60, 200, 0.5] },
 };
 const GUN_ORDER = Object.keys(GUNS);
 const ALLY_HL = 0x3d9bff, ENEMY_HL = 0xff2a2a, YOU_CSS = '#ffe36b', WANTED_CSS = '#ff4a4a', POLICE_CSS = '#6fb0ff';
@@ -1753,7 +1754,7 @@ const TEAMS = [
   { id: 'cit', name: 'Citizen', shirt: 0xd8d8d8, pants: 0x3a4a6a, css: '#e8e8e8', ink: '#111', pay: 10, guns: [], bld: 'cityhall', desc: 'Live your life: shop, eat, hit the beach, claim a mansion. Step on any job pad to take that job.' },
   { id: 'pol', name: 'Police Officer', shirt: 0x1f3f8f, pants: 0x14213f, css: '#2f63e0', ink: '#fff', pay: 30, guns: ['pistol', 'rifle'], bld: 'police', kit: 'medic', hat: ['cap', 0x14213f], desc: 'Keep the peace. Wanted people show red outlines and stars: take them down to send them to jail and collect the bounty.' },
   { id: 'crim', name: 'Criminal', shirt: 0x2b2b2b, pants: 0x1a1a1a, css: '#8b1e1e', ink: '#fff', pay: 0, guns: ['pistol', 'smg'], bld: 'hideout', kit: 'scavenger', hat: ['beanie', 0x151515], desc: 'Hold G at a shop till to rob it. Every crime adds wanted stars, and the police will come for you. Lose them and the stars fade.' },
-  { id: 'pris', name: 'Prisoner', shirt: 0xff7a1a, pants: 0xff7a1a, css: '#ff7a1a', ink: '#111', pay: 0, guns: [], bld: 'jail', desc: 'Doing time. Wait out your sentence in the yard and you walk free.' },
+  { id: 'pris', name: 'Prisoner', shirt: 0xff7a1a, pants: 0xff7a1a, css: '#ff7a1a', ink: '#111', pay: 0, guns: [], bld: 'jail', desc: 'An inmate in the jail yard.' },
   { id: 'styl', name: 'Stylist', shirt: 0xd65aa8, pants: 0x3a2a3a, css: '#e06ab8', ink: '#111', pay: 20, guns: [], bld: 'salon', desc: 'Work the chairs at Snip & Sip Salon.' },
   { id: 'ice', name: 'Ice Cream Server', shirt: 0xff9ecf, pants: 0xffffff, css: '#ff9ecf', ink: '#111', pay: 18, guns: [], bld: 'icecream', desc: 'Scoop cones at Sundae Funday on the boardwalk.' },
   { id: 'tar', name: 'Tarjay Cashier', shirt: 0xcc0000, pants: 0x2a2a2a, css: '#e01b1b', ink: '#fff', pay: 20, guns: [], bld: 'tarjay', desc: 'Run a till at Tarjay.' },
@@ -2881,7 +2882,7 @@ const who = f => `${chip(f.team)}<b style="color:${f.isPlayer ? YOU_CSS : f.want
 
 // where someone respawns: jail if they're doing time, home (if they have one and no job), else their job's pad
 function spawnFor(f) {
-  if (f.team === T.PRIS) { const s = TEAMS[T.PRIS].spawn; return { x: s.x + rnd(-12, 12), y: 3.2, z: s.z + rnd(-6, 6) }; }
+  if (f.team === T.PRIS || f.jailSpawn) { const s = TEAMS[T.PRIS].spawn; return { x: s.x + rnd(-12, 12), y: 3.2, z: s.z + rnd(-6, 6) }; }
   if (f.team === T.CIT && f.home) return Object.assign({}, f.home.spawn);
   const s = TEAMS[f.team].spawn; return { x: s.x + rnd(-1.5, 1.5), y: s.y, z: s.z + rnd(-1.5, 1.5) };
 }
@@ -2944,22 +2945,14 @@ function decayWanted(f, dt) {
   if (!f.wanted) return; f.crimeT += dt;
   if (f.crimeT > RULES.starDecayAfter && (f.starT += dt) >= RULES.starDecayEvery) { f.starT = 0; f.wanted--; if (f.isPlayer) Pts.add(null, f.wanted ? `Wanted level down: ${'★'.repeat(f.wanted)}` : 'You lost the police', 'bank'); if (!f.wanted) { if (f.rig.hl) for (const m of f.rig.hl) m.visible = false; } if (f.tag) f.tag.st = ''; }
 }
+// an arrest: your next spawn is the jail yard, and you lose your stars. That's all: walk out whenever you like
 function arrest(s, by) {
-  const n = s.wanted, secs = RULES.jailBase + RULES.jailPerStar * n;
-  by.stats.arrests++;
+  const n = s.wanted; by.stats.arrests++;
   if (by.isPlayer) { const pay = RULES.bounty * n; Save.cash += pay; Save.arrests++; money(pay, `Bounty: ${s.name} (${'★'.repeat(n)})`, 'gate'); Snd.ding('bank'); }
   else if (Math.random() < 0.5) setTimeout(() => botSay(by, 'arrest'), rnd(300, 1200));
-  Feed.add(`${who(by)} <span class="fx">sent</span> ${who(s)} <span class="fx">to jail (${secs}s)</span>`);
-  s.wanted = 0; s.crimeT = 99; s.jailT = secs; if (s.team !== T.PRIS) s.prevTeam = s.team;
-  setTeam(s, T.PRIS); s.arrestedBy = by;
-  if (s.isPlayer) { Save.jail = secs; Save.prev = s.prevTeam; Save.save(); announce('ARRESTED', `${by.name} took you down · ${secs}s in jail`, '#ff8a3a'); }
-}
-function release(s) {
-  s.jailT = 0; const back = s.prevTeam >= 0 && s.prevTeam !== T.PRIS ? s.prevTeam : T.CIT; s.prevTeam = -1;
-  setTeam(s, back); Object.assign(s.ch, { x: JAIL_OUT.x + rnd(-2, 2), y: 3.2, z: JAIL_OUT.z + rnd(-3, 3), vx: 0, vy: 0, vz: 0, faceYaw: -Math.PI / 2 });
-  s.protect = 2;
-  if (s.isPlayer) { Save.jail = 0; Save.prev = -1; Save.save(); announce('RELEASED', `You did your time. Back to being a ${TEAMS[back].name}`, '#8aff8a'); Snd.ding('gate'); cam.yaw = -Math.PI / 2; }
-  else { s.path = null; s.at = null; }
+  Feed.add(`${who(by)} <span class="fx">arrested</span> ${who(s)}`);
+  s.wanted = 0; s.crimeT = 99; s.starT = 0; s.jailSpawn = true; s.arrestedBy = by; if (s.rig.hl) for (const m of s.rig.hl) m.visible = false; if (s.tag) s.tag.st = '';
+  if (s.isPlayer) announce('ARRESTED', `${by.name} took you down · you'll respawn in jail`, '#ff8a3a');
 }
 
 // ---------------------------------------------------------------- health
@@ -2986,6 +2979,7 @@ function onDied(s) {
 function onRespawn(s) {
   s.hp = RULES.hp; s.hurtT = 9; s.protect = RULES.spawnProtect; s.reload = null; s.weapon = 'fists'; for (const k of GUN_ORDER) s.ammo[k] = GUNS[k].mag;
   s.rig.g.visible = true; s.hitLog.clear();
+  if (s.jailSpawn) { s.jailSpawn = false; s.ch.spawn = spawnFor(s); if (s.isPlayer) msg('You\'re in the jail yard: walk out through the jail when you\'re ready', 3); }
 }
 
 // ---------------------------------------------------------------- guns and fists (the shooting is Zombie Zones', the targets are people)
@@ -3011,7 +3005,8 @@ function shoot(f, dx, dy, dz, maxT = 600) {
     if (seen) FX.shotHit(hx, hy, hz, head);
     const [a, b, m] = G.fall, fall = best <= a ? 1 : best >= b ? m : 1 - (1 - m) * (best - a) / (b - a), vc = hit.ch;
     if (!(vc.dashT > 0)) { const hl = Math.hypot(ex, ez) || 1; vc.dashT = RULES.shotKnockT; vc.dashVx = ex / hl * RULES.shotKnock; vc.dashVz = ez / hl * RULES.shotKnock; }
-    hurt(hit, Math.round((head ? G.head : G.body) * fall), f, head);
+    let dmg = (head ? G.head : G.body) * fall; if (hit.car && f.team === T.POL) dmg *= RULES.copCarDmg;
+    hurt(hit, Math.max(1, Math.round(dmg)), f, head);
   } else if (wallT < maxT - 1 && seen) FX.wallHit(ox + ex * (wallT - 0.6), oy + ey * (wallT - 0.6), oz + ez * (wallT - 0.6));
   if (f.ammo[k] <= 0) startReload(f);
   return hit;
@@ -3125,6 +3120,8 @@ const sideOf = z => z < RIVER.z0 ? -1 : z > RIVER.z1 ? 1 : 0;
 function nearDoor(B, x, z) { let D = B.doorPts[0], bd = 1e9; for (const d of B.doorPts) { const e = Math.hypot(d.ox - x, d.oz - z); if (e < bd) { bd = e; D = d; } } return D; }
 function planPath(b, to) {
   const ch = b.ch, feet = ch.y - 3, pts = [], onShip = feet > 5 && ch.x > 300, toShip = !!(to.ship || (to.B && to.B.ship));
+  const inYard = x => x.x > YARD.x0 - 1 && x.x < YARD.x1 + 1 && x.z > YARD.z0 - 1 && x.z < YARD.z1 + 1;
+  if (inYard(ch) && !inYard(to)) { pts.push({ x: -360, z: -54 }, { x: -360, z: -66 }, { x: -346, z: -85 }, { x: -334, z: -85 }, { x: -326, z: -85 }, { x: JAIL_OUT.x, z: JAIL_OUT.z }); if (to.B !== BLD.jail) { const r = planPath({ ch: { x: JAIL_OUT.x, y: 3.2, z: JAIL_OUT.z }, at: null }, to); return pts.concat(r); } }
   const Bf = bldAt(ch.x, feet, ch.z), Bt = to.B || null, viaNow = b.at && b.at.B === Bf ? b.at.via : null;
   if (Bf && Bf !== Bt) { if (viaNow) pts.push(...viaNow.slice().reverse()); const D = nearDoor(Bf, to.x, to.z); pts.push({ x: D.ix, z: D.iz }, { x: D.ox, z: D.oz }); }
   else if (Bf && Bf === Bt && viaNow !== to.via && viaNow) pts.push(...viaNow.slice().reverse());
@@ -3312,7 +3309,6 @@ function updateBot(b, dt) {
   if (b.whip && !b.whip.done && b.meleeT >= RULES.whipWindup) bashStrike(b);
   if (ch.dead) return;
   decayWanted(b, dt);
-  if (b.team === T.PRIS && b.jailT > 0 && (b.jailT -= dt) <= 0) release(b);
   if (b.hp < RULES.hp && b.hurtT > RULES.regenDelay) b.hp = Math.min(RULES.hp, b.hp + RULES.regen * dt);
 }
 
@@ -3755,7 +3751,6 @@ function updatePlayer(dt) {
   if (ch.dead) return;
   if (p.hp < RULES.hp && p.hurtT > RULES.regenDelay) p.hp = Math.min(RULES.hp, p.hp + RULES.regen * dt);
   decayWanted(p, dt);
-  if (p.team === T.PRIS) { p.jailT -= dt; Save.jail = Math.max(0, p.jailT); if (p.jailT <= 0) release(p); }
   if (!p.car) { checkPads(p); checkCarEntry(p); }
   if (p.car && p.car.y < -3.5) { exitCar(p, true); msg('Your car went in the water!', 2); }
   // pay day, and a Pearl for a whole shift
@@ -3949,8 +3944,8 @@ function updateTags(dt) {
     if (!g.on) { el.style.display = ''; g.on = true; }
     el.style.transform = `translate(${((tv.x * 0.5 + 0.5) * Wd).toFixed(1)}px,${((-tv.y * 0.5 + 0.5) * Hd).toFixed(1)}px) translate(-50%,-100%)`;
     const hp = Math.max(0, Math.round(b.hp / RULES.hp * 100)); if (g.hp !== hp) { g.hp = hp; g.hb.style.width = hp + '%'; g.hbw.style.visibility = hp < 100 ? 'visible' : 'hidden'; }
-    const st = b.team + '|' + b.wanted + '|' + (b.robbing ? 1 : 0) + '|' + Math.ceil(b.jailT / 10);
-    if (g.st !== st) { g.st = st; const Tm = TEAMS[b.team]; g.nm.style.color = b.wanted ? WANTED_CSS : '#fff'; g.nm.innerHTML = `${chip(b.team)}${b.name}`; g.rl.innerHTML = `<span style="color:${Tm.css === '#ffffff' || Tm.css === '#f0f0f0' ? '#eee' : Tm.css}">${Tm.name}</span>${b.wanted ? ` <span class="st">${'★'.repeat(b.wanted)}</span>` : ''}${b.robbing ? ' <span class="st">ROBBING</span>' : ''}${b.team === T.PRIS && b.jailT > 0 ? ` <small>${mmss(b.jailT)} left</small>` : ''}`; }
+    const st = b.team + '|' + b.wanted + '|' + (b.robbing ? 1 : 0) + '|';
+    if (g.st !== st) { g.st = st; const Tm = TEAMS[b.team]; g.nm.style.color = b.wanted ? WANTED_CSS : '#fff'; g.nm.innerHTML = `${chip(b.team)}${b.name}`; g.rl.innerHTML = `<span style="color:${Tm.css === '#ffffff' || Tm.css === '#f0f0f0' ? '#eee' : Tm.css}">${Tm.name}</span>${b.wanted ? ` <span class="st">${'★'.repeat(b.wanted)}</span>` : ''}${b.robbing ? ' <span class="st">ROBBING</span>' : ''}`; }
   }
   const tg = $('tgt'), z = Aim.target;
   if (z && player && !player.ch.dead && alive(z) && player.weapon !== 'fists') {
@@ -4039,7 +4034,7 @@ function renderBar() {
 }
 function renderStatus() {
   const p = player, Tm = TEAMS[p.team];
-  const h = `<div class="role" style="background:${Tm.css};color:${Tm.ink}">${Tm.name.toUpperCase()}</div><div class="cash ol">$${Save.cash.toLocaleString()}</div><div class="stars ol${p.wanted ? ' on' : ''}">${stars(p.wanted)}</div>${p.team === T.PRIS ? `<div class="jt ol">${mmss(Math.max(0, p.jailT))} left</div>` : ''}${p.car ? `<div class="spd ol"><b>${Math.round(Math.hypot(p.car.vx, p.car.vz) * 0.68)}</b> mph</div>` : ''}`;
+  const h = `<div class="role" style="background:${Tm.css};color:${Tm.ink}">${Tm.name.toUpperCase()}</div><div class="cash ol">$${Save.cash.toLocaleString()}</div><div class="stars ol${p.wanted ? ' on' : ''}">${stars(p.wanted)}</div>${p.car ? `<div class="spd ol"><b>${Math.round(Math.hypot(p.car.vx, p.car.vz) * 0.68)}</b> mph</div>` : ''}`;
   if (h !== stKey) { stKey = h; $('status').innerHTML = h; }
 }
 function renderRoster() {
@@ -4061,8 +4056,7 @@ function renderRoster() {
 function renderRole() {
   const p = player, Tm = TEAMS[p.team];
   let h = `<div class="qh" style="color:${Tm.css === '#ffffff' ? '#fff' : Tm.css}">${Tm.name}</div><div class="qq">${Tm.desc}</div>`;
-  if (p.team === T.PRIS) h += `<div class="qq main">Sentence: ${mmss(Math.max(0, p.jailT))} left<div class="qb"><i style="width:${clamp(100 - p.jailT / (RULES.jailBase + RULES.jailPerStar * 5) * 100, 0, 100).toFixed(0)}%"></i></div></div>`;
-  else if (Tm.pay) h += `<div class="qq main">Paycheck $${Tm.pay} in ${Math.ceil(payT)}s<div class="qb"><i style="width:${(100 - payT / RULES.payEvery * 100).toFixed(0)}%"></i></div></div>`;
+  if (Tm.pay) h += `<div class="qq main">Paycheck $${Tm.pay} in ${Math.ceil(payT)}s<div class="qb"><i style="width:${(100 - payT / RULES.payEvery * 100).toFixed(0)}%"></i></div></div>`;
   if (p.wanted) h += `<div class="qq" style="color:${WANTED_CSS}">Wanted ${'★'.repeat(p.wanted)} · ${p.crimeT < RULES.starDecayAfter ? `stars start fading in ${Math.ceil(RULES.starDecayAfter - p.crimeT)}s` : 'stars fading…'}</div>`;
   if (p.team === T.POL) h += `<div class="qq">Arrests: <b>${Save.arrests}</b> · bounty $${RULES.bounty} a star</div>`;
   h += `<div class="qq"><small>${p.home ? `Home: Mansion ${p.home.i + 1}` : 'No home yet: claim a mansion across the river'} · ${Save.items.length} things bought</small></div>`;
@@ -4090,7 +4084,7 @@ function updateHud(dt) {
   if (p.ch.dead) {
     const K = p.killer, s = Math.ceil(p.ch.deadT); if (s !== p.tickN && s > 0) { p.tickN = s; Snd.play('tick'); }
     const by = K ? `Taken down by <span style="color:${TEAMS[K.team].css}">${K.name}</span> <small>(${TEAMS[K.team].name})</small>` : 'You fell apart';
-    $('dead').innerHTML = p.team === T.PRIS && p.arrestedBy ? `<b style="color:#ff8a3a;font-size:24px">ARRESTED</b><br>${by}<br>Off to jail for ${mmss(p.jailT)} · respawning in the yard in ${s}` : `${by}<br>Respawning ${p.home && p.team === T.CIT ? 'at home' : 'at your job'} in ${s}`;
+    $('dead').innerHTML = p.jailSpawn ? `<b style="color:#ff8a3a;font-size:24px">ARRESTED</b><br>${by}<br>Respawning in the jail yard in ${s}` : `${by}<br>Respawning ${p.home && p.team === T.CIT ? 'at home' : 'at your job'} in ${s}`;
   }
   { const zb = $('zoneBadge'), nm = p.ch.dead ? '' : placeName(p.ch.x, p.ch.y - 3, p.ch.z), key = nm + '|' + p.wanted;
     if (zb.dataset.k !== key) { zb.dataset.k = key; zb.style.display = nm ? '' : 'none'; zb.className = 'ol' + (p.wanted ? ' pvp' : ''); zb.innerHTML = `<b>${nm.toUpperCase()}</b>`; } }
@@ -4098,8 +4092,8 @@ function updateHud(dt) {
   renderRoster(); renderRole();
   let h;
   if (p.car) h = `${CAR_NAMES[p.car.kind] || 'Car'} · W/S gas and brake · A/D steer · Shift drift · H horn${p.car.K.siren ? ' · F siren' : ''} · <b>Space: jump out</b>`;
-  else if (p.ch.dead) h = p.team === T.PRIS ? 'Arrested! You\'ll respawn in the jail yard' : 'Respawning…';
-  else if (p.team === T.PRIS) h = `Serve your time: ${mmss(Math.max(0, p.jailT))} left, then you walk free`;
+  else if (p.ch.dead) h = p.jailSpawn ? 'Arrested! You\'ll respawn in the jail yard' : 'Respawning…';
+  else if (placeName(p.ch.x, p.ch.y - 3, p.ch.z) === 'Jail yard') h = 'You got arrested. Walk out through the jail building (the door in the yard, then the front door)';
   else if (p.robbing) h = 'Robbing the till… keep holding G!';
   else if (p.wanted) h = `You're WANTED ${'★'.repeat(p.wanted)}: the police will chase you. Hide until the stars fade`;
   else if (p.team === T.POL) { const n = bots.filter(b => b.wanted && !b.ch.dead).length; h = n ? `${n} wanted ${n > 1 ? 'people' : 'person'} in the city: follow the red markers` : 'All quiet. Patrol the streets'; }
@@ -4141,7 +4135,6 @@ function renderPick() {
 $('pick').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b) { pickTeam = +b.dataset.t; renderPick(); } });
 $('play').addEventListener('click', () => {
   if (!player) return join();
-  if (player.team === T.PRIS) { showPick(false); msg('Finish your sentence first!', 2); return; }
   if (player.wanted && pickTeam === T.POL) { msg('Wanted people can\'t join the police', 2); return; }
   setTeam(player, pickTeam); const s = spawnFor(player); Object.assign(player.ch, { x: s.x, y: s.y, z: s.z, vx: 0, vy: 0, vz: 0 }); player.ch.sit = null;
   showPick(false); announce(`YOU'RE A ${TEAMS[pickTeam].name.toUpperCase()}`, TEAMS[pickTeam].desc, TEAMS[pickTeam].css); Snd.ding('gate');
@@ -4165,7 +4158,7 @@ function populate() {
     const b = makeBot(t, { at: at(w) }); b.goal = w; b.at = w; b.arrived = true;
   }
   for (let i = 0; i < 12; i++) { const s = pick(PUBLIC); const b = makeBot(T.CIT, { at: at(s) }); b.at = s; }
-  for (let i = 0; i < 2; i++) { const b = makeBot(T.PRIS, { at: { x: rnd(-370, -330), y: 0, z: rnd(-50, -30) } }); b.jailT = rnd(200, 500); b.prevTeam = T.CIT; }
+  for (let i = 0; i < 2; i++) { const b = makeBot(T.PRIS, { at: { x: rnd(-370, -330), y: 0, z: rnd(-50, -30) } }); }
   // two of the citizens already own a mansion
   const cits = bots.filter(b => b.team === T.CIT);
   claimHome(cits[0], MANSIONS[1]); claimHome(cits[1], MANSIONS[3]);
@@ -4202,15 +4195,14 @@ addEventListener('grug:outfits', () => { if (player && window.GrugOutfitRig) Gru
 
 function join() {
   if (player) return;
-  const t = Save.jail > 0 ? T.PRIS : pickTeam; Save.team = pickTeam; Save.save();
+  const t = pickTeam; Save.team = pickTeam; Save.jail = 0; Save.save();
   makePlayer(t);
-  if (t === T.PRIS) { player.jailT = Save.jail; player.prevTeam = Save.prev >= 0 ? Save.prev : T.CIT; const s = spawnFor(player); Object.assign(player.ch, { x: s.x, y: s.y, z: s.z }); }
   { const B = TEAMS[t].spawn && TEAMS[t].spawn.B, ch = player.ch; if (B && B.doorPts.length) { const D = nearDoor(B, ch.x, ch.z); cam.yaw = ch.faceYaw = Math.atan2(-(D.ox - ch.x), -(D.oz - ch.z)); } }
   document.body.classList.add('joined'); showPick(false);
   const wake = () => { Snd.init(); if (Snd.ctx && Snd.ctx.state === 'suspended') Snd.ctx.resume(); canvas.focus(); removeEventListener('keydown', wake, true); removeEventListener('pointerdown', wake, true); };
   addEventListener('keydown', wake, true); addEventListener('pointerdown', wake, true); canvas.focus();
   if (innerWidth < innerHeight) cam.tdist = cam.dist = 22;
-  const Tm = TEAMS[t]; announce(t === T.PRIS ? 'STILL IN JAIL' : `WELCOME TO GRUG CITY`, t === T.PRIS ? `${mmss(player.jailT)} left on your sentence` : `You're a ${Tm.name}. Walk into a shop's job pad to change jobs, or pick a role in the Game Menu (Esc)`, Tm.css);
+  const Tm = TEAMS[t]; announce(`WELCOME TO GRUG CITY`, `You're a ${Tm.name}. Walk into a shop's job pad to change jobs, or pick a role in the Game Menu (Esc)`, Tm.css);
   Snd.ding('gate'); wearOutfits();
 }
 function resize() {
@@ -4287,7 +4279,7 @@ if (window.GrugPearls) GrugPearls.start().then(r => { if (!window.GrugPearlPopup
 $('saveInfo').textContent = Save.cash !== 150 || Save.arrests ? `$${Save.cash.toLocaleString()} cash · ${Save.arrests} arrests · ${Save.crimes} crimes${Save.home >= 0 ? ' · Mansion ' + (Save.home + 1) : ''}` : '';
 for (const id of ['plist']) { const f = e => { e.stopPropagation(); if (e.target.closest('[data-a]')) { plFull = !plFull; plKey = ''; renderRoster(); } }; $(id).addEventListener('mousedown', f); $(id).addEventListener('touchstart', e => { e.preventDefault(); f(e); }, { passive: false }); }
 // for testing from the console
-window.CITY = { CARS, enterCar, exitCar, BLDS, BLD, TEAMS, T, bots, COUNTERS, PADS, MANSIONS, PUBLIC, SEATS, W, VIS, zfightCheck, Save, Game, cam, camera, renderer, setTeam, addWanted, arrest, release, join, get player() { return player; }, planPath, bldAt, GRID, TILES };
+window.CITY = { CARS, enterCar, exitCar, BLDS, BLD, TEAMS, T, bots, COUNTERS, PADS, MANSIONS, PUBLIC, SEATS, W, VIS, zfightCheck, Save, Game, cam, camera, renderer, setTeam, addWanted, arrest, join, get player() { return player; }, planPath, bldAt, GRID, TILES };
 </script>
 
 </body>
