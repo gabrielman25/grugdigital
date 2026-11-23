@@ -318,6 +318,14 @@
   #useBtn, #robBtn { position: fixed; right: calc(86px + env(safe-area-inset-right)); width: 66px; height: 46px; background: rgba(60, 60, 60, .6); border: 2px solid rgba(255, 255, 255, .6); color: #fff; font-size: 14px; display: none; }
   #useBtn { top: 56%; background: rgba(40, 120, 40, .7); } #robBtn { top: calc(56% + 54px); background: rgba(150, 30, 30, .7); } #useBtn.on, #robBtn.on { filter: brightness(1.4); }
   #help { width: 380px; }
+  #safechat { position: fixed; left: 6px; top: 230px; width: 270px; display: none; background: rgba(0, 0, 0, .35); padding: 5px 8px 7px; box-sizing: border-box; z-index: 3; }
+  body.joined #safechat { display: block; } body.menuopen #safechat { display: none; }
+  #safechat .sh { font-size: 13px; color: #9fd8ff; margin-bottom: 3px; }
+  #safechat .ord { font-size: 12px; margin: 3px 0 4px; } #safechat .ord small { color: #ffd24a; }
+  #safechat button { display: block; width: 100%; text-align: left; margin-top: 3px; padding: 4px 7px; color: #fff; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .3); font-size: 12px; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+  #safechat button.so { background: rgba(60, 140, 60, .45); border-color: #8aff8a; font-size: 13px; } #safechat button em { font-style: normal; color: #ffd24a; margin-right: 6px; }
+  #safechat button:hover, #safechat button.hov { background: rgba(255, 255, 255, .25); }
+  @media (max-width: 720px) { #safechat { width: 190px; } #safechat .sg { display: none; } }
   @media (max-width: 720px) {
     #status { top: 42px; gap: 2px; } #status > div { padding: 1px 5px; } #status .role { font-size: 10px; } #status .cash, #status .stars { font-size: 14px; }
     #mm { width: 110px; height: 110px; } #feed { top: auto; } #lb { top: 230px !important; } #modes, #jobs { grid-template-columns: 1fr 1fr; }
@@ -362,6 +370,7 @@
   <div class="brand"><img src="data:image/png;base64,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" alt="Grug Digital"><small>a Grug Digital game</small></div>
 </div>
 <div id="quests" class="ol"></div>
+<div id="safechat" class="ol"></div>
 <div id="lb" class="ol"><div id="plist"></div></div>
 <div id="dead" class="ol"></div>
 <div id="paused" class="ol"><div>Paused · click to play</div></div>
@@ -1753,22 +1762,22 @@ const ALLY_HL = 0x3d9bff, ENEMY_HL = 0xff2a2a, YOU_CSS = '#ffe36b', WANTED_CSS =
 // kit: the Grug outfit the townsfolk in this job wear (arcade/outfits/<kit>.glb); hat: worn on top
 const TEAMS = [
   { id: 'cit', name: 'Citizen', shirt: 0xd8d8d8, pants: 0x3a4a6a, css: '#e8e8e8', ink: '#111', pay: 10, guns: [], bld: 'cityhall', desc: 'Live your life: shop, eat, hit the beach, claim a mansion. Step on any job pad to take that job.' },
-  { id: 'pol', name: 'Police Officer', shirt: 0x1f3f8f, pants: 0x14213f, css: '#2f63e0', ink: '#fff', pay: 30, guns: ['pistol', 'rifle'], bld: 'police', kit: 'medic', desc: 'Keep the peace. Wanted people show red outlines and stars: take them down to send them to jail and collect the bounty.' },
+  { id: 'pol', name: 'Police Officer', shirt: 0x1f3f8f, pants: 0x14213f, css: '#2f63e0', ink: '#fff', pay: 30, guns: ['pistol', 'rifle'], bld: 'police', kit: 'medic', desc: 'Keep the peace. Criminals and anyone with wanted stars are fair game: take them down to send them to jail and collect the bounty. Criminals fight back!' },
   { id: 'crim', name: 'Criminal', shirt: 0x2b2b2b, pants: 0x1a1a1a, css: '#8b1e1e', ink: '#fff', pay: 0, guns: ['pistol', 'smg'], bld: 'hideout', kit: 'scavenger', desc: 'Hold G at a shop till to rob it. Every crime adds wanted stars, and the police will come for you. Lose them and the stars fade.' },
   { id: 'pris', name: 'Prisoner', shirt: 0xff7a1a, pants: 0xff7a1a, css: '#ff7a1a', ink: '#111', pay: 0, guns: [], bld: 'jail', desc: 'An inmate in the jail yard.' },
-  { id: 'styl', name: 'Stylist', shirt: 0xd65aa8, pants: 0x3a2a3a, css: '#e06ab8', ink: '#111', pay: 20, guns: [], bld: 'salon', desc: 'Work the chairs at Snip & Sip Salon.' },
-  { id: 'ice', name: 'Ice Cream Server', shirt: 0xff9ecf, pants: 0xffffff, css: '#ff9ecf', ink: '#111', pay: 18, guns: [], bld: 'icecream', desc: 'Scoop cones at Sundae Funday on the boardwalk.' },
-  { id: 'tar', name: 'Tarjay Cashier', shirt: 0xcc0000, pants: 0x2a2a2a, css: '#e01b1b', ink: '#fff', pay: 20, guns: [], bld: 'tarjay', desc: 'Run a till at Tarjay.' },
-  { id: 'bur', name: 'Burlingtown Clerk', shirt: 0x7a1f2b, pants: 0x222222, css: '#a32a3b', ink: '#fff', pay: 20, guns: [], bld: 'burlingtown', desc: 'Fold coats at Burlingtown.' },
-  { id: 'grill', name: 'Grill Cook', shirt: 0x6b3a1f, pants: 0x2a1a10, css: '#a0582c', ink: '#fff', pay: 22, guns: [], bld: 'bbq', desc: 'Man the pit at Smokestack BBQ.' },
-  { id: 'tech', name: 'Tech Clerk', shirt: 0x3aa0d8, pants: 0x1a2a3a, css: '#3aa0d8', ink: '#111', pay: 24, guns: [], bld: 'tech', desc: 'Sell phones at Byte Phones in the mall.' },
-  { id: 'piz', name: 'Pizza Chef', shirt: 0xf2f2f2, pants: 0x2a7a3a, css: '#f0f0f0', ink: '#111', pay: 20, guns: [], bld: 'pizza', desc: 'Toss pies at Leaning Tower Pizza.' },
-  { id: 'jew', name: 'Jeweler', shirt: 0x9b59d0, pants: 0x221a2a, css: '#b070e8', ink: '#111', pay: 28, guns: [], bld: 'jewelry', desc: 'Guard the diamonds at Bling Bling Jewelers in the mall.' },
-  { id: 'chk', name: 'Chicken Cook', shirt: 0xe03131, pants: 0x222222, css: '#ff4a4a', ink: '#111', pay: 20, guns: [], bld: 'chicken', desc: 'Fry it up at Chick-fil-Yay.' },
-  { id: 'bar', name: 'Barista', shirt: 0x1e6b45, pants: 0x222222, css: '#2e9b65', ink: '#fff', pay: 18, guns: [], bld: 'coffee', desc: 'Pull shots at Moonbucks Coffee.' },
-  { id: 'mus', name: 'Music Clerk', shirt: 0x2d2d6b, pants: 0x1a1a1a, css: '#5a5ad8', ink: '#fff', pay: 20, guns: [], bld: 'music', desc: 'Tune guitars at Tune Town Music in the mall.' },
-  { id: 'life', name: 'Lifeguard', shirt: 0xe02020, pants: 0xf5cd30, css: '#ff3a3a', ink: '#111', pay: 22, guns: [], bld: 'lifeguard', desc: 'Watch the beach from the tower.' },
-  { id: 'crew', name: 'Cruise Crew', shirt: 0xffffff, pants: 0x1a2a4a, css: '#ffffff', ink: '#111', pay: 24, guns: [], bld: 'ship', desc: 'Keep the S.S. Grug Princess shipshape.' },
+  { id: 'styl', name: 'Stylist', shirt: 0xd65aa8, pants: 0x3a2a3a, css: '#e06ab8', ink: '#111', pay: 5, guns: [], bld: 'salon', desc: 'Work the chairs at Snip & Sip Salon.' },
+  { id: 'ice', name: 'Ice Cream Server', shirt: 0xff9ecf, pants: 0xffffff, css: '#ff9ecf', ink: '#111', pay: 5, guns: [], bld: 'icecream', desc: 'Scoop cones at Sundae Funday on the boardwalk.' },
+  { id: 'tar', name: 'Tarjay Cashier', shirt: 0xcc0000, pants: 0x2a2a2a, css: '#e01b1b', ink: '#fff', pay: 5, guns: [], bld: 'tarjay', desc: 'Run a till at Tarjay.' },
+  { id: 'bur', name: 'Burlingtown Clerk', shirt: 0x7a1f2b, pants: 0x222222, css: '#a32a3b', ink: '#fff', pay: 5, guns: [], bld: 'burlingtown', desc: 'Fold coats at Burlingtown.' },
+  { id: 'grill', name: 'Grill Cook', shirt: 0x6b3a1f, pants: 0x2a1a10, css: '#a0582c', ink: '#fff', pay: 5, guns: [], bld: 'bbq', desc: 'Man the pit at Smokestack BBQ.' },
+  { id: 'tech', name: 'Tech Clerk', shirt: 0x3aa0d8, pants: 0x1a2a3a, css: '#3aa0d8', ink: '#111', pay: 5, guns: [], bld: 'tech', desc: 'Sell phones at Byte Phones in the mall.' },
+  { id: 'piz', name: 'Pizza Chef', shirt: 0xf2f2f2, pants: 0x2a7a3a, css: '#f0f0f0', ink: '#111', pay: 5, guns: [], bld: 'pizza', desc: 'Toss pies at Leaning Tower Pizza.' },
+  { id: 'jew', name: 'Jeweler', shirt: 0x9b59d0, pants: 0x221a2a, css: '#b070e8', ink: '#111', pay: 5, guns: [], bld: 'jewelry', desc: 'Guard the diamonds at Bling Bling Jewelers in the mall.' },
+  { id: 'chk', name: 'Chicken Cook', shirt: 0xe03131, pants: 0x222222, css: '#ff4a4a', ink: '#111', pay: 5, guns: [], bld: 'chicken', desc: 'Fry it up at Chick-fil-Yay.' },
+  { id: 'bar', name: 'Barista', shirt: 0x1e6b45, pants: 0x222222, css: '#2e9b65', ink: '#fff', pay: 5, guns: [], bld: 'coffee', desc: 'Pull shots at Moonbucks Coffee.' },
+  { id: 'mus', name: 'Music Clerk', shirt: 0x2d2d6b, pants: 0x1a1a1a, css: '#5a5ad8', ink: '#fff', pay: 5, guns: [], bld: 'music', desc: 'Tune guitars at Tune Town Music in the mall.' },
+  { id: 'life', name: 'Lifeguard', shirt: 0xe02020, pants: 0xf5cd30, css: '#ff3a3a', ink: '#111', pay: 5, guns: [], bld: 'lifeguard', desc: 'Watch the beach from the tower.' },
+  { id: 'crew', name: 'Cruise Crew', shirt: 0xffffff, pants: 0x1a2a4a, css: '#ffffff', ink: '#111', pay: 5, guns: [], bld: 'ship', desc: 'Keep the S.S. Grug Princess shipshape.' },
 ];
 const T = Object.fromEntries(TEAMS.map((t, i) => [t.id.toUpperCase(), i]));   // T.CIT, T.POL, T.CRIM, T.PRIS, ...
 const chip = t => `<i class="tc" style="background:${TEAMS[t].css}"></i>`;
@@ -2336,6 +2345,7 @@ function buildMall() {
     const s = sign([sh.name, sh.sub], c, 11, -86.94, 18, 4.4, 0, 1, sh.bg, '#fff'); s.userData.keep = true;
     B.spots.idle.push(spot(c - 8, -96, { B, via }), spot(c + 8, -96, { B, via }));
     R.spots.idle.push(spot(c - 8, -96, { B, via }), spot(c + 8, -96, { B, via }), spot(sh.x0 + 4, -112, { B, via }));
+    R.x0 = sh.x0; R.x1 = sh.x1; R.z0 = -117; R.z1 = -88;
     R.doorIn = spot(c, -93, { B, via: [via[0]] }); R.doorOut = spot(c, -80, { B }); R.parent = B;
   }
   furn(14, 0, -100, 18, 3, -92, 0x2a2a2e); furn(38, 0, -100, 42, 3, -92, 0x2a2a2e);
@@ -2932,7 +2942,8 @@ function balancePolice() {
 }
 // ---------------------------------------------------------------- crime, wanted stars, jail
 // a hit is a crime unless: the one you hit is wanted, or they hit you first (self-defence). Police can hit wanted people all day.
-const justified = (by, s) => s.wanted > 0 || (by.hitLog.get(s) || -99) > Game.clock - RULES.selfDefense;
+// and police vs. criminals is fair game for the police: that's the cat and mouse
+const justified = (by, s) => s.wanted > 0 || (by.team === T.POL && s.team === T.CRIM) || (by.hitLog.get(s) || -99) > Game.clock - RULES.selfDefense;
 function crime(by, s, kill) {
   if (!by || by === s || justified(by, s)) return;
   if (kill) addWanted(by, 2, `took down ${s.name}`);
@@ -2954,7 +2965,7 @@ function decayWanted(f, dt) {
 }
 // an arrest: your next spawn is the jail yard, and you lose your stars. That's all: walk out whenever you like
 function arrest(s, by) {
-  const n = s.wanted; by.stats.arrests++;
+  const n = Math.max(1, s.wanted); by.stats.arrests++;
   if (by.isPlayer) { const pay = RULES.bounty * n; Save.cash += pay; Save.arrests++; money(pay, `Bounty: ${s.name} (${'★'.repeat(n)})`, 'gate'); Snd.ding('bank'); }
   else if (Math.random() < 0.5) setTimeout(() => botSay(by, 'arrest'), rnd(300, 1200));
   Feed.add(`${who(by)} <span class="fx">arrested</span> ${who(s)}`);
@@ -2977,7 +2988,7 @@ function onDied(s) {
   const K = s.lastHitBy && Game.clock - s.lastHitT < 6 ? s.lastHitBy : null;
   s.killer = K; s.lastHitBy = null; s.hp = 0; s.roll = null; s.reload = null; s.whip = null;
   if (K && K !== s) {
-    if (s.wanted > 0 && K.team === T.POL) arrest(s, K);
+    if ((s.wanted > 0 || s.team === T.CRIM) && K.team === T.POL) arrest(s, K);
     else crime(K, s, true);
     Feed.add(`${who(K)} <span class="fx">▸</span> ${who(s)}`);
   }
@@ -3256,6 +3267,7 @@ const freeSeat = s => !s.seat || !s.seat.occupant;
 function citizenTarget(b) {
   const r = Math.random();
   if (b.home && r < 0.15) return b.home.B.home;
+  const Wp = player && workplace(player); if (Wp && Wp.B && Math.random() < 0.4) { const S = Wp.B.parent ? Wp.B.spots : Wp.B.spots, l = [...S.idle, ...S.shop, ...S.seat.filter(freeSeat)]; if (l.length) return pickSpot(l); }
   if (r < 0.55) { const C = pickSpot(COUNTERS.filter(c => c.shop && c.shop.items.length && c.shop.rob)); return C ? C.spot : pickSpot(PUBLIC); }
   if (r < 0.75) { const s = pickSpot(SEATS.filter(freeSeat)); if (s) return s; }
   return pickSpot(PUBLIC);
@@ -3282,7 +3294,8 @@ function botJob(b, dt) {
     return null;
   }
   if (t === T.LIFE || t === T.CREW || isJob(t) && t !== T.POL) return workerJob(b, dt);
-  // citizens: shops, seats, the beach, the ship, home
+  // citizens: shops, seats, the beach, the ship, home (or, when you're working, your shop more often). A customer heads for your counter
+  if (b.customer) { if (b.goal !== b.customer.spot) return b.customer.spot; return null; }
   if (!b.goal || b.arrived && (b.idleT -= dt) <= 0) { b.idleT = rnd(8, 30) * b.P.lazy + 4; return citizenTarget(b); }
   return null;
 }
@@ -3323,6 +3336,7 @@ function botBrain(b, dt) {
   }
   const to = botJob(b, dt);
   if (to) go(b, to);
+  if (b.customer && b.arrived && player) { w.face = w.look = { x: player.ch.x, y: player.ch.y, z: player.ch.z }; return; }
   if (b.robbing && b.arrived) { w.look = b.robC ? { x: b.robC.wx, y: 3, z: b.robC.wz } : null; return; }
   if (b.path && b.path.length) { if (follow(b, dt)) { b.arrived = true; } }
   else if (b.goal && b.goal.look && b.arrived) w.face = w.look = { x: b.goal.look.x, y: 3, z: b.goal.look.z };
@@ -3338,7 +3352,7 @@ function pickTargetBot(b) {
   }
   if (b.team === T.CRIM) {
     const recent = [...b.hitLog.entries()].filter(([s, t]) => Game.clock - t < 12 && !s.ch.dead).map(([s]) => s);
-    const cops = PEOPLE().filter(s => s.team === T.POL && !s.ch.dead && b.wanted && dist2(s.ch, ch) < 70);
+    const cops = PEOPLE().filter(s => s.team === T.POL && !s.ch.dead && !s.car && dist2(s.ch, ch) < (b.wanted ? 80 : 55)).sort((a, c) => dist2(a.ch, ch) - dist2(c.ch, ch));   // criminals go for any officer nearby
     for (const s of [...recent, ...cops]) if (clear(ch.x, ch.y + 1.5, ch.z, s.ch.x, s.ch.y + 0.5, s.ch.z)) return s;
   }
   return null;
@@ -3662,6 +3676,7 @@ function makePlayer(team) {
   const p = newPerson(team, { name: Save.name });
   Object.assign(p, { isPlayer: true, look: { skin: 0xf5cd30, face: 'smile' }, hat: Save.hat, robT: 0 });
   p.rig = makeRig({ skin: 0xf5cd30, shirt: TEAMS[team].shirt, pants: TEAMS[team].pants, face: 'smile' }, { guns: true }); addHighlight(p.rig);
+  { const el = document.createElement('div'); el.className = 'tag'; el.style.display = 'none'; el.innerHTML = '<div class="bub"></div>'; $('tags').appendChild(el); p.tag = { el, bub: el.querySelector('.bub') }; p.bubble = 0; }
   player = p;
   if (Save.home >= 0 && MANSIONS[Save.home]) claimHome(p, MANSIONS[Save.home], true);
   p.ch.spawn = spawnFor(p); Object.assign(p.ch, { x: p.ch.spawn.x, y: p.ch.spawn.y, z: p.ch.spawn.z });
@@ -3821,6 +3836,7 @@ function updatePlayer(dt) {
   // pay day, and a Pearl for a whole shift
   if ((payT -= dt) <= 0) { payT = RULES.payEvery; const pay = TEAMS[p.team].pay; if (pay) { Save.cash += pay; Save.save(); money(pay, `Paycheck · ${TEAMS[p.team].name}`); Snd.ding('gem'); } }
   if (isJob(p.team) || p.team === T.POL) { shiftT += dt; if (shiftT >= RULES.shiftPearls && !shiftPaid && window.GrugPearls) { shiftPaid = true; GrugPearls.reward('grug-city-rp', 1, 12 * 3600e3, 'Grug City RP: a work shift').then(() => window.GrugPearlPopup && GrugPearlPopup.show(1, { title: 'Shift complete!' })).catch(() => { }); } }
+  updateOrders(dt);
   // things to use, and robbing
   useNow = shopOpen() || p.car ? null : findUse();
   const C = useNow && useNow.kind === 'counter' ? useNow.C : null;
@@ -4041,7 +4057,7 @@ const Waypoints = { list: [], n: 0,
   update() {
     const p = player; let i = 0; const put = (...a) => this.place(i++, ...a);
     if (p && !p.ch.dead && !pickOpen()) {
-      if (p.team === T.POL) { let s = null, bd = 400; for (const b of bots) if (b.wanted && !b.ch.dead) { const d = dist2(b.ch, p.ch); if (d < bd) { bd = d; s = b; } } if (s) put(s.ch.x, s.ch.y + 4, s.ch.z, s.name, WANTED_CSS, `wanted ${'★'.repeat(s.wanted)}`); }
+      if (p.team === T.POL) { let s = null, bd = 400; for (const b of bots) if ((b.wanted || b.team === T.CRIM) && !b.ch.dead) { const d = dist2(b.ch, p.ch); if (d < bd) { bd = d; s = b; } } if (s) put(s.ch.x, s.ch.y + 4, s.ch.z, s.name, WANTED_CSS, s.wanted ? `wanted ${'★'.repeat(s.wanted)}` : 'criminal'); }
       if (p.team === T.CRIM && p.wanted) { const H = BLD.hideout; put(H.signAt.x, 14, H.signAt.z, 'Hideout', TEAMS[T.CRIM].css, 'lie low till the stars fade'); }
       if (p.home && dist2(p.home, p.ch) > 60) put(p.home.cx, 16, 249, 'Home', '#ffe36b', `Mansion ${p.home.i + 1}`);
       const Tm = TEAMS[p.team]; if (p.team !== T.PRIS && p.team !== T.CIT && Tm.spawn && dist2(Tm.spawn, p.ch) > 150) put(Tm.spawn.x, Tm.spawn.y + 6, Tm.spawn.z, 'Your job', Tm.css, Tm.name);
@@ -4153,6 +4169,7 @@ function updateHud(dt) {
   }
   { const zb = $('zoneBadge'), nm = p.ch.dead ? '' : placeName(p.ch.x, p.ch.y - 3, p.ch.z), key = nm + '|' + p.wanted;
     if (zb.dataset.k !== key) { zb.dataset.k = key; zb.style.display = nm ? '' : 'none'; zb.className = 'ol' + (p.wanted ? ' pvp' : ''); zb.innerHTML = `<b>${nm.toUpperCase()}</b>`; } }
+  renderSafe();
   if ((hudT -= dt) > 0) return; hudT = 0.25;
   renderRoster(); renderRole();
   let h;
@@ -4162,6 +4179,7 @@ function updateHud(dt) {
   else if (p.robbing) h = 'Robbing the till… keep holding G!';
   else if (p.wanted) h = `You're WANTED ${'★'.repeat(p.wanted)}: the police will chase you. Hide until the stars fade`;
   else if (p.team === T.POL) { const n = bots.filter(b => b.wanted && !b.ch.dead).length; h = n ? `${n} wanted ${n > 1 ? 'people' : 'person'} in the city: follow the red markers` : 'All quiet. Patrol the streets'; }
+  else if (workplace(p)) h = order && order.asked ? `${order.b.name} wants something: pick the right reply in Safe Chat (or Z / X / C) to get paid` : 'You\'re on the clock: customers come to your counter. Answer them in Safe Chat to get paid';
   else if (p.team === T.CRIM) h = 'Hold G at a shop till to rob it · get away from the police until your stars fade';
   else if (p.team === T.CIT) h = 'Walk into any shop: press E at the counter to buy, step on a job pad to take the job · claim a mansion across the river';
   else h = `You're a ${TEAMS[p.team].name}: stay near your counter, payday every minute`;
@@ -4206,6 +4224,109 @@ $('play').addEventListener('click', () => {
 });
 $('pickBack').addEventListener('click', () => showPick(false));
 for (const id of ['pick', 'shop']) $(id).addEventListener('mousedown', e => e.stopPropagation());
+
+
+// =====================================================================
+//  SAFE CHAT (left side): lines to say, picked from a list, that change with your job. Working your own shop, customers
+//  come to your counter and ask for something: pick the right reply (or press Z / X / C) and they pay you, plus a tip.
+//  That's how a shop job makes money (the paycheck is only a small base).
+// =====================================================================
+// what customers ask for, by shop: [what they say, the right reply, what they pay]
+const ORDERS = {
+  tarjay: [['can I get a bag for these?', '*gives a bag*', 4], ['I\'d like to check out please', '*scans the items*', 14], ['where are the snacks?', 'Aisle 3!', 3], ['do you price match?', '*matches the price*', 8], ['can I return this?', '*processes the return*', 5]],
+  coffee: [['one latte please!', '*hands over a latte*', 5], ['iced mocha, extra ice', '*hands over an iced mocha*', 6], ['can I get a croissant?', '*hands over a croissant*', 4], ['just a black coffee', '*pours a black coffee*', 3]],
+  salon: [['just a trim please', '*gives a trim*', 15], ['can you style my hair?', '*styles hair*', 18], ['I\'d love a manicure', '*does a manicure*', 12], ['wash and blow dry?', '*washes and blow dries*', 14]],
+  icecream: [['chocolate cone please!', '*hands over a chocolate cone*', 4], ['a vanilla milkshake', '*hands over a milkshake*', 5], ['banana split!!', '*hands over a banana split*', 7], ['extra sprinkles on mine', '*adds extra sprinkles*', 2]],
+  burlingtown: [['do you have this in medium?', '*finds a medium*', 10], ['where\'s the fitting room?', 'Right over there!', 3], ['I\'ll take this coat', '*rings up the coat*', 35], ['any shoes on sale?', '*shows the shoe sale*', 8]],
+  bbq: [['brisket plate please', '*serves the brisket*', 12], ['half rack of ribs', '*serves the ribs*', 15], ['a sweet tea', '*pours a sweet tea*', 3], ['extra sauce?', '*hands over extra sauce*', 2]],
+  tech: [['my phone screen is cracked', '*fixes the screen*', 25], ['I want the new Grug Phone', '*hands over a Grug Phone*', 40], ['do you have earbuds?', '*hands over earbuds*', 15], ['my console won\'t turn on', '*fixes the console*', 20]],
+  pizza: [['pepperoni slice please', '*hands over a slice*', 4], ['whole pizza to go', '*boxes a pizza*', 14], ['garlic knots!', '*hands over garlic knots*', 5], ['extra cheese on mine', '*adds extra cheese*', 2]],
+  jewelry: [['can I see that ring?', '*shows the ring*', 10], ['I\'ll take the gold chain', '*wraps the gold chain*', 60], ['how much is the diamond?', '$250. A real beauty!', 5], ['can you clean my watch?', '*polishes the watch*', 15]],
+  chicken: [['chicken sandwich please', '*hands over a sandwich*', 7], ['large waffle fries', '*hands over fries*', 4], ['a lemonade', '*pours a lemonade*', 3], ['thanks so much!', 'My pleasure!', 2]],
+  music: [['can you tune my guitar?', '*tunes the guitar*', 10], ['I need drum sticks', '*hands over drum sticks*', 8], ['got any vinyl records?', '*hands over a record*', 20], ['can I try that keyboard?', '*plugs in the keyboard*', 5]],
+  lifeguard: [['help! I can\'t swim!', '*dives in to the rescue*', 20], ['is it safe to swim today?', 'Yep, stay near the flags!', 4], ['can I borrow sunscreen?', '*hands over sunscreen*', 5], ['I lost my flip flop in the sea', '*finds the flip flop*', 8]],
+  ship: [['where\'s my cabin?', '*shows the way*', 6], ['a tropical drink please', '*mixes a tropical drink*', 7], ['when do we set sail?', 'Soon! Enjoy the deck', 3], ['can I get a towel for the pool?', '*hands over a towel*', 4]],
+};
+// what you can always say, by role
+const SAFE = {
+  work: ['Welcome in!', 'How can I help you?', 'Thank you!', 'Have a nice day!'],
+  pol: ['Freeze! Police!', 'Hands where I can see them!', 'Move along, citizen', 'Stay safe out there', 'Suspect spotted!'],
+  crim: ['This is a robbery!', 'Nobody move!', 'You didn\'t see me', 'Heh heh', 'Gotta go!'],
+  cit: ['Hi!', 'How\'s it going?', 'Nice day!', 'I\'m going shopping', 'Anyone want to hang out?'],
+  pris: ['Let me out!', 'I\'m innocent!', 'Nice day for a jailbreak'],
+};
+const THANKS = ['thank you!!', 'perfect, thanks!', 'you\'re the best', 'keep the change!', 'awesome, thanks!'];
+const WRONG = ['huh? that\'s not what I asked for', 'umm... no?', 'that\'s not it lol', 'I didn\'t ask for that'];
+let order = null, orderT = 4, served = 0, safeKey = '';
+// where you work, if you're there right now (your shop's counters, or the beach for a lifeguard)
+function workplace(p) {
+  const t = p.team; if (!isJob(t) || t === T.POL || p.ch.dead || p.car) return null;
+  const Tm = TEAMS[t], key = Tm.bld, ch = p.ch;
+  if (t === T.LIFE) return Math.hypot(ch.x - 251, ch.z - 55) < 45 ? { key, spot: spot(258, 62) } : null;
+  const B = BLD[key]; if (!B) return null;
+  const H = B.parent ? B : B, inside = B.parent ? ch.x > B.x0 && ch.x < B.x1 && ch.z > B.z0 && ch.z < B.z1 && ch.y < 10 : bldAt(ch.x, ch.y - 3, ch.z) === B;
+  if (!inside) return null;
+  const cs = COUNTERS.filter(c => c.B === B); if (!cs.length) return null;
+  const C = cs.reduce((a, c) => dist2(c.spot, ch) < dist2(a.spot, ch) ? c : a);
+  return { key, B, C, spot: C.spot };
+}
+function sayMine(text) { const p = player; if (!p) return; p.bubble = 4 + text.length * 0.08; p.tag.bub.textContent = text; p.tag.bub.style.display = 'block'; }
+function endOrder(leave) { if (!order) return; const b = order.b; b.customer = null; if (leave) { b.goal = null; b.path = null; b.idleT = 0; } order = null; safeKey = ''; }
+function updateOrders(dt) {
+  const p = player; if (!p) return;
+  if (p.bubble > 0 && (p.bubble -= dt) <= 0) p.tag.bub.style.display = 'none';
+  const Wp = workplace(p);
+  if (order) {
+    const b = order.b;
+    if (!Wp || Wp.key !== order.key || b.ch.dead || b.fleeT > 0 || b.team !== T.CIT) { if (!b.ch.dead && order.asked) sayText(b, 'oh, never mind'); endOrder(true); }
+    else if ((order.t -= dt) <= 0) { sayText(b, order.asked ? '*sighs* never mind then' : 'eh, maybe later'); endOrder(true); }
+    else if (!order.asked && dist2(b.ch, order.spot) < 4.5) { order.asked = true; order.t = 35; sayText(b, order.req); Snd.ding('gem'); }
+  } else if (Wp && (orderT -= dt) <= 0) {
+    orderT = rnd(5, 10);
+    const cand = bots.filter(b => b.team === T.CIT && !b.ch.dead && !b.customer && !(b.fleeT > 0) && !b.car).sort((a, b) => dist2(a.ch, Wp.spot) - dist2(b.ch, Wp.spot)).slice(0, 4);
+    const b = pick(cand); if (b) {
+      const [req, ans, price] = pick(ORDERS[Wp.key]), others = ORDERS[Wp.key].filter(o => o[1] !== ans).map(o => o[1]).sort(() => Math.random() - 0.5).slice(0, 2);
+      order = { b, key: Wp.key, req, ans, price, opts: [ans, ...others].sort(() => Math.random() - 0.5), spot: Wp.spot, asked: false, t: 70 };
+      b.customer = order; b.ch.wantSit = false; if (b.ch.sit) b.ch.input.jump = true; go(b, Wp.spot);
+    }
+  }
+}
+// answering a customer
+function reply(i) {
+  const p = player; if (!order || !order.asked || !p) return; const ans = order.opts[i]; if (!ans) return;
+  sayMine(ans); const b = order.b;
+  if (ans === order.ans) {
+    const tip = Math.floor(rnd(1, 5)), pay = order.price + tip; Save.cash += pay; Save.save(); served++;
+    money(pay, `${b.name} paid ($${order.price} + $${tip} tip)`, 'gate'); Snd.ding('bank');
+    setTimeout(() => sayText(b, pick(THANKS)), 500); endOrder(true); orderT = rnd(3, 7);
+  } else { sayText(b, pick(WRONG)); Snd.play('hit'); order.t = Math.min(order.t, 25); }
+  safeKey = '';
+}
+function sayLine(i) { const L = safeLines(); if (L[i]) sayMine(L[i]); }
+function safeLines() { const t = player.team; return t === T.POL ? SAFE.pol : t === T.CRIM ? SAFE.crim : t === T.PRIS ? SAFE.pris : t === T.CIT ? SAFE.cit : SAFE.work; }
+function renderSafe() {
+  const p = player, el = $('safechat'); if (!p) return;
+  const Wp = workplace(p), L = safeLines(), o = order;
+  let h = `<div class="sh">Safe Chat</div>`;
+  if (o && o.asked) h += `<div class="ord"><b>${o.b.name}</b>: "${o.req}" <small>${Math.ceil(o.t)}s</small></div>` + o.opts.map((a, i) => `<button class="so" data-o="${i}"><em>${'ZXC'[i]}</em>${a}</button>`).join('');
+  else if (o) h += `<div class="ord dim">${o.b.name} is coming to the counter…</div>`;
+  else if (Wp) h += `<div class="ord dim">You're on the clock: customers will come to you</div>`;
+  else if (isJob(p.team) && p.team !== T.POL && !p.ch.dead) h += `<div class="ord dim">Go to your ${TEAMS[p.team].bld === 'lifeguard' ? 'tower' : 'counter'} to serve customers (that's how you earn)</div>`;
+  h += L.map((l, i) => `<button class="sg" data-g="${i}">${l}</button>`).join('');
+  if (served) h += `<div class="ord dim"><small>${served} customer${served > 1 ? 's' : ''} served</small></div>`;
+  if (h !== safeKey) { safeKey = h; el.innerHTML = h; for (const b of el.querySelectorAll('button')) b.style.cursor = cssCur('hand'); }
+  const q = $('quests'); el.style.top = (q.offsetTop + q.offsetHeight + 6) + 'px';
+}
+$('safechat').addEventListener('click', e => { const o = e.target.closest('[data-o]'), g = e.target.closest('[data-g]'); if (o) reply(+o.dataset.o); else if (g) sayLine(+g.dataset.g); });
+$('safechat').addEventListener('mousedown', e => e.stopPropagation());
+$('safechat').addEventListener('touchstart', e => { const o = e.target.closest('[data-o]'), g = e.target.closest('[data-g]'); if (o || g) { e.preventDefault(); e.stopPropagation(); if (o) reply(+o.dataset.o); else sayLine(+g.dataset.g); } }, { passive: false });
+addEventListener('keydown', e => { if (!player || e.repeat || shopOpen() || pickOpen()) return; const i = { KeyZ: 0, KeyX: 1, KeyC: 2 }[e.code]; if (i !== undefined && order && order.asked) reply(i); });
+// your speech bubble
+function updatePlayerBubble() {
+  const p = player; if (!p || !(p.bubble > 0) || p.ch.dead) { if (p && p.tag) p.tag.el.style.display = 'none'; return; }
+  tv.set(p.ch.x, p.ch.y + 3.1, p.ch.z).project(camera); if (tv.z > 1) { p.tag.el.style.display = 'none'; return; }
+  p.tag.el.style.display = ''; p.tag.el.style.transform = `translate(${((tv.x * 0.5 + 0.5) * innerWidth).toFixed(1)}px,${((-tv.y * 0.5 + 0.5) * innerHeight).toFixed(1)}px) translate(-50%,-100%)`;
+}
 
 
 touchButton('gunBtn', nextGun);
@@ -4311,7 +4432,7 @@ function frame(now) {
   else {
     const ch = player.ch; fx = ch.x; fy = ch.y; fz = ch.z;
     if (!ch.dead) animatePlayer(player, dt);
-    player.rig.g.visible = !ch.dead && !player.car;   // nobody shown in the driver's seat: just the car
+    player.rig.g.visible = !ch.dead && !player.car; updatePlayerBubble();   // nobody shown in the driver's seat: just the car
     let r;
     if (player.car) {   // driving: the camera swings round behind the car on its own (unless you're dragging it round)
       const car = player.car, sp = Math.hypot(car.vx, car.vz);
