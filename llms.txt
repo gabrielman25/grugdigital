@@ -5,11 +5,11 @@
 
 ## Avatar Studio (Roblox characters)
 
-- [Avatar Studio](https://grugdigital.pages.dev/character/): a browser app (WebGL) that makes a blocky Roblox R6
+- [Avatar Studio](https://grugdigital.com/character/): a browser app (WebGL) that makes a blocky Roblox R6
   character: hair, face, a custom shirt and pants painted with an AI image editor (Gemini / Nano Banana), and a rigged
   `.glb` download.
-- [Guide for Claude and other AI agents](https://grugdigital.pages.dev/character/claude.md): how to make a character
+- [Guide for Claude and other AI agents](https://grugdigital.com/character/claude.md): how to make a character
   for someone who pasted the studio's link into a chat, step by step, including the `window.GrugStudio` JavaScript API
   and recipe links (`/character/?hair=…&outfit=…`) for when you can't use a browser.
-- [Claude skill (zip)](https://grugdigital.pages.dev/character/roblox-characters.zip): install it so Claude uses the
+- [Claude skill (zip)](https://grugdigital.com/character/roblox-characters.zip): install it so Claude uses the
   studio whenever a Roblox game needs characters or NPCs, and brings them into the game.

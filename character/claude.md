@@ -1,7 +1,7 @@
 # Grug Avatar Studio: guide for Claude
 
 This page is for Claude (and other AI agents). Someone pasted
-**https://grugdigital.pages.dev/character/** into a chat and asked for a Roblox character, something like
+**https://grugdigital.com/character/** into a chat and asked for a Roblox character, something like
 *"Use this site to make a female character wearing a warm fall outfit."* Here is how to make it and hand them the file.
 
 > **The job has three parts, and all three are required:**
@@ -37,7 +37,7 @@ sensible choice.
 
 ### 1. Open the studio
 
-Open `https://grugdigital.pages.dev/character/` in a new tab. If you can run JavaScript in the page, wait until it's ready:
+Open `https://grugdigital.com/character/` in a new tab. If you can run JavaScript in the page, wait until it's ready:
 
 ```js
 await GrugStudio.whenReady   // then GrugStudio.ready === true
@@ -148,7 +148,7 @@ already written, then walk the person through steps 3 to 6 themselves. Every key
 (colours as names or hex without the `#`). With `outfit=` the studio opens straight on the painting steps.
 
 ```
-https://grugdigital.pages.dev/character/?name=Maple&skin=light-orange&head=egg&hair=wavy-long&hairColor=chestnut&eyes=long-glam-lashes&brows=thin-arch&mouth=simple-smile-line&outfit=rust-orange+chunky+knit+sweater%2C+mustard+plaid+scarf%2C+dark-wash+jeans+and+brown+suede+ankle+boots
+https://grugdigital.com/character/?name=Maple&skin=light-orange&head=egg&hair=wavy-long&hairColor=chestnut&eyes=long-glam-lashes&brows=thin-arch&mouth=simple-smile-line&outfit=rust-orange+chunky+knit+sweater%2C+mustard+plaid+scarf%2C+dark-wash+jeans+and+brown+suede+ankle+boots
 ```
 
 Then tell them: click **Copy picture** and paste it into Gemini, click **Copy prompt** and paste that too, send,
@@ -374,7 +374,7 @@ With noticeable lashes (a common pick for a female character): 2, 4, 5, 10, 11, 
 ## The Claude skill
 
 People building Roblox games can install a Claude skill that sends Claude here whenever their game needs
-characters: https://grugdigital.pages.dev/character/roblox-characters.zip (add it in Claude under Customize › Skills,
+characters: https://grugdigital.com/character/roblox-characters.zip (add it in Claude under Customize › Skills,
 + › Create skill › Upload a skill; for Claude Code, unzip it into `~/.claude/skills/`). It also covers importing the
 `.glb` into Roblox Studio, setting up the R6 rig, and spawning NPCs.
 

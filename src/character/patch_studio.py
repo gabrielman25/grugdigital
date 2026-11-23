@@ -19,6 +19,7 @@ sub('<title>Grug Avatar Studio · Grug Digital</title>',
     '<meta name="description" content="Make a blocky Roblox R6 character: pick hair and a face, paint a custom shirt and pants with an AI image editor, '
     'and download the rigged .glb. Works with Claude: paste this page\'s link into a Claude chat and ask for the character you want.">\n'
     '<link rel="icon" href="/favicon.png">\n'
+    '<link rel="canonical" href="https://grugdigital.com/character/">\n'
     '<link rel="alternate" type="text/markdown" href="/character/claude.md" title="How AI agents (Claude) use this studio">\n'
     '<link rel="help" href="/character/claude.md">')
 
@@ -78,7 +79,7 @@ SHEET = f'''<body class="g-root flat" data-cat="head">
       paints the outfit with Gemini (Nano Banana), puts it on your character and hands you the Roblox R6 file.</p>
     <label class="cg-field" for="cgIdea">Describe your character</label>
     <input id="cgIdea" class="g-input" type="text" value="a female character wearing a warm fall outfit" autocomplete="off">
-    <div class="cg-quote" id="cgPrompt">Use https://grugdigital.pages.dev/character/ to make a female character wearing a warm fall outfit. Paint the outfit in Gemini, then download the Roblox R6 file for me.</div>
+    <div class="cg-quote" id="cgPrompt">Use https://grugdigital.com/character/ to make a female character wearing a warm fall outfit. Paint the outfit in Gemini, then download the Roblox R6 file for me.</div>
     <div class="cg-row">
       <button id="cgCopy" class="g-btn g-btn--primary"><i data-g-icon="clipboard"></i>Copy prompt</button>
       <a id="cgOpen" class="g-btn" href="https://claude.ai/new" target="_blank" rel="noopener">Open Claude<i data-g-icon="arrow_right"></i></a>
@@ -101,7 +102,7 @@ SHEET = f'''<body class="g-root flat" data-cat="head">
           (Nano Banana), (3) the R6 <code>.glb</code> download. A character in the starter tee is not finished, and
           <code>downloadR6()</code> refuses until a painted outfit is worn. This is a browser app (WebGL): use a real
           browser (Claude in Chrome, computer use or Playwright), in the person's own Chrome if you can, since that is
-          where they are signed in to Gemini. Full guide: <a href="https://grugdigital.pages.dev/character/claude.md">https://grugdigital.pages.dev/character/claude.md</a>.</p>
+          where they are signed in to Gemini. Full guide: <a href="https://grugdigital.com/character/claude.md">https://grugdigital.com/character/claude.md</a>.</p>
         <ol>
           <li>Open this page in a tab and run <code>await GrugStudio.whenReady</code>.</li>
           <li>Choose a look that fits the request (don't quiz the person):
@@ -122,7 +123,7 @@ SHEET = f'''<body class="g-root flat" data-cat="head">
             <code>&lt;Name&gt;.glb</code>. Give it to the person (it lands in their Downloads folder).</li>
         </ol>
         <p>No browser at all? Send the person a recipe link instead, e.g.
-          <code>https://grugdigital.pages.dev/character/?name=Maple&amp;hair=wavy-long&amp;hairColor=chestnut&amp;eyes=lashes&amp;outfit=cozy+fall+sweater</code>,
+          <code>https://grugdigital.com/character/?name=Maple&amp;hair=wavy-long&amp;hairColor=chestnut&amp;eyes=lashes&amp;outfit=cozy+fall+sweater</code>,
           and walk them through steps 4 to 10.</p>
       </div>
     </details>

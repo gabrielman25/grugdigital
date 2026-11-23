@@ -216,8 +216,8 @@ if (Object.keys(recipe).length) api.whenReady.then(() => set(recipe)).catch(e =>
 
 /* ---------- "Make with Claude": the sheet people copy their Claude prompt from ---------- */
 const sheet = $q('#claudeGuide'), idea = $q('#cgIdea'), out = $q('#cgPrompt'), open = $q('#cgOpen');
-const CANON = 'https://grugdigital.pages.dev/character/';
-const here = () => location.protocol.startsWith('http') && location.hostname !== 'grugdigital.pages.dev' ? location.origin + '/character/' : CANON;
+const CANON = 'https://grugdigital.com/character/';
+const here = () => location.protocol.startsWith('http') && !/^(grugdigital\.com|www\.grugdigital\.com|grugdigital\.pages\.dev)$/.test(location.hostname) ? location.origin + '/character/' : CANON;
 const words = () => `Use ${here()} to make ${(idea.value.trim() || 'a character wearing a cool outfit').replace(/[.\s]+$/, '')}. Paint the outfit in Gemini, then download the Roblox R6 file for me.`;
 function syncSheet(){ const t = words(); out.textContent = t; open.href = 'https://claude.ai/new?q=' + encodeURIComponent(t); }
 function showSheet(on){ sheet.classList.toggle('open', on); if (on){ syncSheet(); setTimeout(() => idea.focus(), 30); } }

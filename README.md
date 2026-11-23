@@ -1,6 +1,6 @@
 # Grug
 
-The Grug site: https://grugdigital.pages.dev/ (Cloudflare Pages, deploys on every push to `main`).
+The Grug site: https://grugdigital.com/ (Cloudflare Pages, deploys on every push to `main`; also reachable at grugdigital.pages.dev).
 
 The site is being rebuilt from scratch on `main`. The old site is kept, unchanged, on the **`legacy`** branch.
 
@@ -27,7 +27,7 @@ The site is being rebuilt from scratch on `main`. The old site is kept, unchange
 ## Avatar Studio (`/character/`)
 
 The Roblox character maker: hair, face, a custom shirt and pants painted with Gemini (Nano Banana), and a rigged R6
-`.glb` download. It's built for Claude too: someone can paste https://grugdigital.pages.dev/character/ into a Claude
+`.glb` download. It's built for Claude too: someone can paste https://grugdigital.com/character/ into a Claude
 chat, describe a character, and Claude makes it.
 
 - `character/index.html`: the studio. Generated, so don't hand-edit it: see `src/character/README.md`.
