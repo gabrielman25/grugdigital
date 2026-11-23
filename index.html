@@ -49,11 +49,14 @@ body{height:auto;min-height:100%}
 .new .tag i.new-dot{border-radius:50%;background:var(--accent)}
 h2{font-size:24px;line-height:1.15;font-weight:600;margin:0 0 8px}
 .new p{margin-bottom:20px}
-.new p.claude{display:flex;gap:10px;align-items:flex-start;text-align:left;font-size:15px;margin:22px 0 0;padding:12px 14px;border-radius:14px;background:var(--page)}
-.new p.claude svg{width:18px;height:18px;flex:none;margin-top:2px;color:var(--accent-lo)}
-.new p.claude b{color:var(--ink);font-weight:600}
-.new p.claude .url{color:var(--ink);font-weight:500;white-space:nowrap}
-.new p.claude a{color:var(--ink);font-weight:600}
+.new .claude{margin:24px 0 0;padding:16px 16px 14px;border-radius:18px;background:var(--page);text-align:left}
+.new .claude-h{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;margin-bottom:6px}
+.new .claude-h svg{width:18px;height:18px;flex:none;color:var(--accent-lo)}
+.new .claude p{font-size:15px;margin:0 0 10px;text-align:left}
+.new .claude blockquote{margin:0 0 12px;padding:12px 14px;border-radius:12px;background:var(--card);border:1.5px dashed var(--accent-lo);
+  color:var(--ink);font-size:15px;line-height:1.45;font-weight:500;overflow-wrap:break-word;user-select:all}
+.new .claude .btn--sm{border:0;cursor:pointer;height:auto;min-height:40px;padding:0 18px;font-size:15px;box-shadow:0 3px 0 var(--accent-lo)}
+.new .claude p.fine{font-size:13px;margin:12px 0 0;line-height:1.4}
 </style>
 </head>
 <body>
@@ -70,10 +73,22 @@ h2{font-size:24px;line-height:1.15;font-weight:600;margin:0 0 8px}
     <p>Make a blocky Roblox character: pick hair and a face, paint a custom outfit, and download a rigged R6 file.</p>
     <a class="btn" href="/character/">Make a character
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-    <p class="claude"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5c.5 4.6 2.4 6.9 7 7.5-4.6.6-6.5 2.9-7 7.5-.5-4.6-2.4-6.9-7-7.5 4.6-.6 6.5-2.9 7-7.5z"/></svg>
-      <span><b>Works with Claude.</b> Paste <span class="url">grugdigital.pages.dev/character</span> into a Claude chat and describe the character you want.
-      <a href="/character/#claude">How it works</a></span></p>
+    <div class="claude" id="withClaude">
+      <div class="claude-h"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5c.5 4.6 2.4 6.9 7 7.5-4.6.6-6.5 2.9-7 7.5-.5-4.6-2.4-6.9-7-7.5 4.6-.6 6.5-2.9 7-7.5z"/></svg>Make it with Claude</div>
+      <p>Paste this into a Claude chat, swapping in the character you want:</p>
+      <blockquote id="claudePrompt">Use https://grugdigital.pages.dev/<wbr>character/ to make a female character wearing a warm fall outfit. Paint the outfit in Gemini, then download the Roblox R6 file for me.</blockquote>
+      <button class="btn btn--sm" id="copyClaude" type="button">Copy prompt</button>
+      <p class="fine">Claude picks the hair and face, paints the outfit in Gemini and hands you the R6 file. It needs Claude in Chrome turned on, and you signed in to Gemini in that Chrome.</p>
+    </div>
   </section>
 </main>
+<script>
+document.getElementById('copyClaude').addEventListener('click', async e => {
+  const b = e.currentTarget, t = document.getElementById('claudePrompt').textContent.trim();
+  try { await navigator.clipboard.writeText(t); b.textContent = 'Copied!'; }
+  catch (_) { const r = document.createRange(); r.selectNodeContents(document.getElementById('claudePrompt')); getSelection().removeAllRanges(); getSelection().addRange(r); b.textContent = 'Press Ctrl+C to copy'; }
+  setTimeout(() => { b.textContent = 'Copy prompt'; }, 2000);
+});
+</script>
 </body>
 </html>
