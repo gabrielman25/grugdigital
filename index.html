@@ -1,314 +1,56 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><script>/* old address → new home */(function(){var p=location.pathname;if(location.hostname==='gabrielman25.github.io'&&p.indexOf('/grugdigital/')===0)location.replace('https://grugdigital.pages.dev/'+p.slice(13)+location.search+location.hash);})();</script>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Grug · free games made in Katy, Texas</title>
-<meta name="description" content="Free 3D games from Grug Digital in Katy, Texas. Play as your own avatar and dress it up. No account needed.">
-<meta name="theme-color" content="#03050f">
-<meta name='impact-site-verification' value='c5aa1990-f972-4278-9ccf-b03ba19f790b'>
-<link rel="icon" href="favicon.png">
-<link rel="stylesheet" href="assets/grug.css">
-<script src="assets/theme.js?v=av2"></script>
-<link rel="stylesheet" href="assets/fossil32/fossil32.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grug · Under construction</title>
+<meta name="description" content="The new Grug site is being built. The legacy site is still open.">
+<link rel="icon" href="/favicon.png">
 <script>
-/* old links into the business half of the site (#business, #work, #contact …) now live on partners/ */
-(function(){ var h = location.hash.replace('#',''); if (/^(business|work|included|how|about|contact|pass|pricing)$/.test(h)) location.replace('partners/#' + h); })();
+/* Someone browsing the legacy site who taps its Home button or logo lands here (the legacy pages all point at "/").
+   Send them back to the legacy home instead, unless they chose "Go to the new site" in the legacy banner.
+   functions/_middleware.js writes the banner; it notes the page being left in sessionStorage. */
+(function () {
+  try {
+    var ss = sessionStorage, nav = (performance.getEntriesByType('navigation')[0] || {}).type;
+    var from = ss.getItem('grug.legacy.from'), leaving = ss.getItem('grug.legacy.leaving');
+    ss.removeItem('grug.legacy.leaving');
+    if (nav === 'navigate' && !leaving && from && document.referrer && document.referrer === from) location.replace('/legacy' + location.search + location.hash);
+  } catch (e) {}
+})();
+/* follow the dark mode the person picked on the old site (same address, same saved profile) */
+try { var p = (JSON.parse(localStorage.getItem('grug.profile.v1') || 'null') || {}).prefs || {}; if (p.mode === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}
 </script>
 <style>
-.hero{display:grid;grid-template-columns:1fr;gap:18px;padding:18px 0 6px}
-.hero .g-view{height:230px}
-.hero .copy{display:flex;flex-direction:column;gap:14px;justify-content:center}
-.hero .copy p{color:var(--ink2);font-size:17px;max-width:46ch}
-.hero .cta{display:flex;gap:10px;flex-wrap:wrap}
-.hero .name{color:var(--moss)}
-@media (min-width:760px){.hero{grid-template-columns:minmax(300px,380px) 1fr;gap:28px;padding:24px 0 6px}.hero .g-view{height:340px}}
-@media (orientation:landscape) and (max-height:540px){.hero{grid-template-columns:minmax(220px,38%) 1fr;gap:22px;padding:8px 0 6px;align-items:center}.hero .g-view{height:calc(100vh - 110px);min-height:220px}.hero h1{font-size:30px}.hero .copy p{font-size:15px}.hero .g-btn.big{min-height:48px;font-size:18px;padding:0 20px}}
-.steps{display:grid;gap:10px;grid-template-columns:1fr}
-.step{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;background:var(--card);border-radius:var(--r);border:1px solid var(--line)}
-.step .n{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--ember-soft);color:var(--ember);flex:none}
-.step .n .gi{width:22px;height:22px}
-.step b{display:block;font-size:17px}
-.step span{color:var(--mut);font-size:14.5px}
-@media (min-width:760px){.steps{grid-template-columns:repeat(3,1fr)}}
-/* games: one horizontal carousel of bare FOSSIL32 cartridges floating in the fog (no card behind them), the middle one big
-   with nothing behind it; it opens on the last-played game */
-.hc-sec{padding-top:6px}
-.hc{position:relative;margin-inline:calc(50% - 50vw)}
-.hc-row{--tw:min(330px,72vw);--gap:16px;display:flex;gap:var(--gap);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;
-  padding:20px calc(50vw - var(--tw) / 2) 26px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
-.hc-row::-webkit-scrollbar{display:none}
-.hc-row.drag{scroll-snap-type:none;cursor:grabbing}
-.hc-row>.g-tile{flex:none;width:var(--tw);scroll-snap-align:center;transform:scale(calc(1 - var(--d,1) * .16));opacity:calc(1 - var(--d,1) * .45);
-  background:none;border:0;box-shadow:none;border-radius:0;overflow:visible;will-change:transform}
-.hc-row>.g-tile:hover,.hc-row>.g-tile:focus-within{transform:scale(calc(1 - var(--d,1) * .16));box-shadow:none}
-.hc-row>.g-tile:focus-visible{outline:none}
-.hc-row>.g-tile:focus-visible .f32-stage{outline:3px solid var(--ring-a);outline-offset:-6px;border-radius:24px}
-/* bare cartridges: no glow or colour pool behind them */
-.hc-row .f32-stage{overflow:visible;background:none}
-.hc-row .body{align-items:center;text-align:center;padding:2px 10px 0}
-.hc-row .g-tile .meta{justify-content:center}
-.hc-row .f32-stage .badge{left:50%;top:2px;transform:translateX(-50%)}
-.hc-row .f32-ribbon{right:auto;left:50%;top:auto;bottom:2px;transform:translateX(-50%)}
-.hc-row .f32-flat{left:22%;width:56%;top:20%;height:50%}
-.hc-nav{position:absolute;top:50%;z-index:3;display:grid;place-items:center;width:46px;height:46px;margin-top:-23px;border-radius:50%;background:var(--glass-strong);border:1px solid var(--line2);color:var(--ink);
-  box-shadow:var(--shadow);transition:transform .15s var(--spring),opacity .2s}
-.hc-nav:hover{transform:scale(1.07)}
-.hc-nav:disabled{opacity:0;pointer-events:none}
-.hc-nav .gi{width:22px;height:22px}
-.hc-nav.prev{left:calc(50vw - var(--tw,330px) / 2 - 64px)}
-.hc-nav.next{right:calc(50vw - var(--tw,330px) / 2 - 64px)}
-.hc{--tw:min(330px,72vw)}
-@media (max-width:640px){.hc-nav{display:none}}
-/* a visitor who said they run a restaurant or make content (Settings → I'm a…) gets their door first, full width */
-.door.wide{margin-top:16px;flex-direction:row;flex-wrap:wrap;align-items:center;gap:14px 18px}
-.door.wide .door-tx{flex:1 1 260px}
-.door.wide .door-go{margin-top:0;align-self:center}
-/* quick games (the Carts): a sideways row of covers that opens the swipe feed on that cart */
-.qc{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 10px;margin-inline:-2px;scrollbar-width:none}
-.qc::-webkit-scrollbar{display:none}
-.qc a{flex:none;width:min(200px,44vw);scroll-snap-align:start;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;background:var(--card);border:1px solid var(--line);transition:transform .18s var(--spring)}
-.qc a:hover{transform:translateY(-2px)}
-.qc a:focus-visible{outline:3px solid var(--ring-a);outline-offset:2px}
-.qc img{width:100%;aspect-ratio:1580/950;object-fit:cover;display:block;background:var(--card2)}
-.qc span{display:flex;flex-direction:column;gap:2px;padding:8px 11px 10px}
-.qc b{font-size:15px;line-height:1.2}
-.qc small{font-size:12.5px;color:var(--mut)}
-/* the slim strip near the end: one door for restaurant owners, one for creators */
-.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
-.strip-door{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--r);background:var(--card);border:1px solid var(--line);border-left:5px solid var(--c);transition:transform .18s var(--spring)}
-.strip-door:hover{transform:translateY(-2px)}
-.strip-door .door-ic{width:40px;height:40px;border-radius:12px;flex:none}
-.strip-door .door-ic .gi{width:22px;height:22px}
-.strip-door span.tx{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
-.strip-door b{font:600 17px/1.2 var(--display)}
-.strip-door small{color:var(--ink2);font-size:14px}
-.strip-door>span[data-ic]{display:grid;color:var(--mut);flex:none}.strip-door>span[data-ic] .gi{width:20px;height:20px}
-@media (max-width:640px){.duo{grid-template-columns:1fr}}
-.door{display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:var(--r);background:var(--card);border:1px solid var(--line);transition:transform .18s var(--spring)}
-.door:hover{transform:translateY(-2px)}
-.door-ic{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:color-mix(in srgb,var(--c) 20%,transparent);color:var(--c)}
-.door-ic .gi{width:26px;height:26px}
-.door-tx{display:flex;flex-direction:column;gap:4px}
-.door-tx small{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mut)}
-.door-tx b{font:600 clamp(22px,3vw,28px)/1.1 var(--display)}
-.door-tx span{color:var(--ink2);font-size:15.5px}
-.door .door-go{align-self:flex-start;margin-top:auto;background:var(--c);box-shadow:0 4px 0 var(--c-lo);color:#1E1B16}
-.role-hero{margin-top:18px;padding:26px;border-radius:var(--r);background:var(--card-solid);border:1px solid var(--line2);display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;justify-content:space-between}
-.role-hero h1{font-size:clamp(28px,5vw,42px)}
-.role-hero p{color:var(--ink2);font-size:17px;margin-top:8px;max-width:52ch}
-.role-hero .row{flex:none}
-.brand-hero{border:0;background:var(--brand);color:var(--brand-ink)}
-.brand-hero .em .gi{width:48px;height:48px}
-.brand-hero .em{line-height:1;width:84px;height:84px;display:grid;place-items:center;border-radius:24px;background:rgba(255,255,255,.22);flex:none}
-.brand-hero .who{display:flex;gap:18px;align-items:center}
-.brand-hero p{color:inherit!important;opacity:.85}
-.brand-hero .g-btn.primary{background:var(--brand-ink);color:var(--brand);box-shadow:none}
-.brand-hero .g-btn:not(.primary){background:rgba(255,255,255,.2);color:inherit;border-color:transparent}
-html[data-brand] [data-only-for]{display:none!important}
-html[data-brand] .hero[data-hide-for]{display:grid!important}
-footer{padding:28px 0 10px;color:var(--mut);font-size:13.5px;display:flex;flex-wrap:wrap;gap:8px 18px;border-top:1px solid var(--line);margin-top:26px}
-footer a{color:var(--ink2);font-weight:700}
+@font-face{font-family:'Fredoka';font-style:normal;font-weight:300 700;font-display:swap;src:url(/static/fredoka.woff2) format('woff2')}
+:root{--page:#F3F3F5;--card:#FFFFFF;--ink:#1E1B16;--soft:#6B6B73;--line:#E2E2E7;--accent:#9BE338;--accent-lo:#6FB31C;color-scheme:light}
+html.dark{--page:#17171A;--card:#232327;--ink:#F3F3F5;--soft:#A3A3AD;--line:#33333A;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:'Fredoka',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--page) url(/static/pattern.png) repeat;background-size:96px;color:var(--ink);
+  display:grid;place-items:center;padding:24px;-webkit-font-smoothing:antialiased}
+main{width:100%;max-width:440px;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:28px;padding:44px 32px 36px}
+.logo{width:76px;height:76px;display:block;margin:0 auto 22px}
+.tag{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);margin-bottom:10px}
+.tag i{width:10px;height:10px;border-radius:3px;background:repeating-linear-gradient(45deg,var(--ink) 0 3px,var(--accent) 3px 6px)}
+h1{font-size:32px;line-height:1.1;font-weight:600;margin:0 0 12px}
+p{font-size:17px;line-height:1.45;color:var(--soft);margin:0 0 28px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;border-radius:14px;
+  background:var(--accent);color:#1E1B16;font:600 17px/1 'Fredoka',system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 0 var(--accent-lo);transition:transform .12s}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--accent-lo)}
+.btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.btn svg{width:18px;height:18px}
 </style>
 </head>
 <body>
-<main class="wrap">
-  <!-- shop mode (a guest who came from a shop's rewards card): the front door is the shop's -->
-  <div data-only-brand><section class="role-hero brand-hero" id="brandHero"></section></div>
-  <!-- someone who said in Settings → I'm a… that they run a restaurant or make content sees their own door first.
-       Everyone else starts on the games; the two doors also sit in the strip near the end. Not in shop mode. -->
-  <div data-only-for="owner" data-hide-brand><a class="door wide" data-owner-door href="restaurant/" style="--c:#FF9F5A;--c-lo:#E0782F">
-    <span class="door-ic" data-ic="storefront"></span>
-    <span class="door-tx"><small>For restaurant owners</small><b>Bring your guests back.</b><span>A free rewards card, a website and a dashboard for your team. Ready in about a minute.</span></span>
-    <span class="g-btn primary door-go">Set up my restaurant</span>
-  </a></div>
-  <div data-only-for="creator" data-hide-brand><a class="door wide" href="links/" style="--c:#5AB0FF;--c-lo:#2F86D6">
-    <span class="door-ic" data-ic="share-network"></span>
-    <span class="door-tx"><small>For online creators</small><b>Turn followers into players.</b><span>One link for all your socials, or a little 3D world to walk through.</span></span>
-    <span class="g-btn primary door-go">Make my link page</span>
-  </a></div>
-
-  <section class="hero">
-    <div class="g-view" id="heroView"><span class="hint">Tap to wave · <a href="avatar/">edit your look</a></span></div>
-    <div class="copy">
-      <h1 id="heroTitle">Free games, made in Katy.</h1>
-      <p id="heroText">Play free as your own avatar and dress it up as you go. No account, nothing to sign up for.</p>
-      <div class="cta">
-        <a class="g-btn primary big" id="heroPlay" href="games/">Play</a>
-        <a class="g-btn big" href="avatar/">Edit avatar</a>
-        <!-- app/app.js shows it where the Grug app can be downloaded (not inside the app, not in shop mode) -->
-        <a class="g-btn big" href="#" data-get-app="grug" hidden><span data-app-ic></span>Download</a>
-      </div>
-      <p class="g-fine" id="heroFine"></p>
-    </div>
-  </section>
-
-  <section class="g-section hc-sec">
-    <div class="g-section-h"><h2>Games</h2><a href="games/">All games</a></div>
-    <div class="hc">
-      <button type="button" class="hc-nav prev" id="hcPrev" aria-label="Previous game"></button>
-      <div class="hc-row" id="gameRow"></div>
-      <button type="button" class="hc-nav next" id="hcNext" aria-label="Next game"></button>
-    </div>
-  </section>
-
-  <!-- the Download card (app/app.js): every game, the store and the avatar editor on this device, offline -->
-  <div data-app-card="grug" hidden></div>
-
-  <!-- quick games (the Carts, assets/carts.js): a minute each, one tap or one hold -->
-  <section class="g-section" id="quickSec" hidden>
-    <div class="g-section-h"><h2>Quick games · about a minute</h2><a href="games/carts/">See all</a></div>
-    <div class="qc" id="quickRow"></div>
-  </section>
-
-  <!-- the strip: restaurant owners and creators pick their own door here (not in shop mode) -->
-  <div class="duo" data-hide-brand>
-    <a class="strip-door" data-owner-door href="restaurant/" style="--c:#FF9F5A">
-      <span class="door-ic" data-ic="storefront" style="background:color-mix(in srgb,#FF9F5A 20%,transparent);color:#E0782F"></span>
-      <span class="tx"><b>Own a restaurant?</b><small>A free rewards card, website and dashboard.</small></span>
-      <span data-ic="caret-right"></span>
-    </a>
-    <a class="strip-door" href="links/" style="--c:#5AB0FF">
-      <span class="door-ic" data-ic="share-network" style="background:color-mix(in srgb,#5AB0FF 20%,transparent);color:#2F86D6"></span>
-      <span class="tx"><b>Make content?</b><small>A free link page for all your socials.</small></span>
-      <span data-ic="caret-right"></span>
-    </a>
-  </div>
-
-  <section class="g-section" hidden>
-    <div class="g-section-h"><h2>Closet picks</h2><a href="shop/">Shop</a></div>
-    <p class="g-fine" style="margin:-6px 0 12px">Custom clothing you can earn next by playing.</p>
-    <div class="g-items" id="closetPicks"></div>
-  </section>
-
-  <footer>
-    <span>© 2026 Grug Digital · Katy, Texas</span>
-    <a href="partners/" data-hide-brand>For restaurants</a>
-    <a href="showcase/" data-hide-brand>Showcase</a>
-    <a href="support.html">Support</a>
-    <a href="terms.html">Terms</a>
-    <a href="privacy.html">Privacy</a>
-    <a href="credits.html">Credits</a>
-    <a href="profile/">Profile &amp; settings</a>
-    <span class="sp"></span>
-    <span>Made with Grug, our own engine.</span>
-  </footer>
+<main>
+  <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="16" fill="#9BE338"/><path d="M19.8 51C19.5 50.9 18.9 50.9 18.4 50.9C17.2 50.9 17.1 50.7 17 48.6C16.8 46.5 17 45.5 17.9 43.8C18.1 43.3 18.3 42.8 18.3 42.8C18.3 42.6 19 41.2 19.3 40.7C19.8 39.8 19.8 39.8 19.7 39.6C19.5 38.9 19.2 38.3 18.8 37.8C17.9 36.4 17.6 35.3 17.7 34C17.8 32.5 18.1 32 19.1 31.1C19.5 30.8 19.9 30.5 20 30.5C20.5 30 21.2 29.7 21.7 29.7C22.5 29.7 22.8 29.4 22.8 28.8C22.8 27.9 23.5 28.4 23.6 29.3C23.6 30 23.1 30.5 21.7 30.8C20.7 31 20.2 33 21 33.9C21.9 35 25.6 34.7 26.6 33.5C26.6 33.4 26.7 33.4 26.7 33.4C26.8 33.4 27 33.3 27.3 33.2C27.5 33.1 28 32.9 28.2 32.8C29.5 32.4 29.8 32.4 30 32.4C30 32.4 30.3 32.3 30.5 32.2C31 32.1 31.5 32 33 31.9C34.8 31.8 35.5 31.7 35.8 31.6C35.9 31.5 36.2 31.4 36.4 31.4C37.8 31 38.2 30.7 39 29.2C39.6 28.1 39.6 25.4 39 24.6C38.9 24.5 38.8 24.4 38.8 24.4C38.8 24.3 38.1 23 37.9 22.8C37.8 22.7 37.3 22.4 36.8 22.1C36.3 21.8 35.8 21.5 35.7 21.5C35.3 21.2 33.8 20.9 32.9 20.9C32.5 20.9 32 20.9 31.9 20.8C31.8 20.8 31.5 20.7 31.3 20.7C30.3 20.5 30 20.3 29.2 19.5C28 18.3 27.9 17.7 28.3 15.9C28.4 15.7 28.5 15.4 28.5 15.3C28.6 15.2 28.7 15 28.7 14.9C29.1 14.2 29.8 13.4 30.4 13.3C31.1 13.1 31.3 13.1 32.3 13C33.2 13 34.1 13.1 34.9 13.3C35.2 13.3 35.6 13.4 35.8 13.5C36.7 13.6 37.3 13.8 38.7 14.4C39.5 14.7 40.5 15.4 41.3 16.1C41.5 16.2 41.9 16.5 42.1 16.6C42.2 16.8 42.5 17 42.6 17.1C42.7 17.3 42.9 17.5 43 17.6C43.3 18 43.8 18.7 44 19.2C44.1 19.5 44.3 19.9 44.5 20.1C44.6 20.3 44.8 20.6 44.8 20.9C44.9 21.1 45.1 21.4 45.3 21.7C45.5 21.9 45.6 22.2 45.7 22.3C45.7 22.4 45.8 22.7 45.8 22.9C45.9 23.1 46 23.6 46.1 23.9C46.2 24.2 46.4 24.6 46.4 24.7C46.6 25.2 46.8 26.3 46.9 26.8C46.9 27 47 27.4 47 27.7C47.1 28.3 47.1 32.1 46.9 32.4C46.9 32.5 46.9 33.2 46.9 34C46.9 34.8 46.9 35.6 46.8 35.8C46.8 36 46.7 36.3 46.7 36.5C46.6 36.9 46.5 37.4 46.4 37.7C46.3 37.8 46.3 38.1 46.2 38.3C46.2 38.6 46.1 38.9 46.1 39C46 39.1 46 39.3 45.9 39.5C45.6 40.7 45.3 41.5 45 42.3C45 42.4 44.9 42.7 44.8 43C44.7 43.4 44.5 43.9 44.3 44.3C44.1 44.7 43.9 45.2 43.8 45.5C43.7 45.8 43.6 46.1 43.5 46.2C43.5 46.2 43.5 46.3 43.5 46.3C43.5 46.4 43.4 46.5 43.3 46.7C43.2 46.8 43.1 47.1 43 47.2C43 47.3 42.9 47.5 42.8 47.7C42.6 47.9 42.4 48.3 42.3 48.6C41.1 50.8 41.2 50.8 38.3 50.8C34.9 50.8 34.8 50.7 34.8 49.5C34.8 49 34.8 48.8 34.7 48.6C33.3 46.1 32.8 45.5 31.8 45.2C31.6 45.1 31.3 45 31.1 45C30.4 44.8 29.9 44.9 28.2 45.4C27.2 45.7 26 46.8 26 47.5C26 47.6 26 47.7 26 47.7C25.9 47.8 25.9 48 25.8 48.2C25.8 48.4 25.6 48.8 25.4 49.1C25.3 49.4 25.2 49.7 25.2 49.7C25.2 50.3 24.3 50.8 23.4 50.8C23 50.9 22.5 50.9 22.3 50.9C22 51 20.6 51 19.8 51Z" fill="#1F1A17"/></svg>
+  <div class="tag"><i></i>Under construction</div>
+  <h1>Something new is on the way</h1>
+  <p>We're rebuilding Grug from the ground up. The old site is still open in the meantime, with all your saved games, avatar and Pearls.</p>
+  <a class="btn" href="/legacy">Visit the legacy site
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
 </main>
-
-<script src="assets/catalog.js"></script>
-<script src="assets/icons.js"></script>
-<script src="assets/games.js"></script>
-<script src="assets/carts.js"></script>
-<script src="assets/grug.js?v=av2"></script>
-<script>
-(function(){
-  const G = Grug, C = GrugCatalog, $ = s => document.querySelector(s);
-  G.ui.chrome('home', { noTitle: true });   // the page-name pill would only repeat the headline here
-  G.ensureSnaps();
-  document.querySelectorAll('[data-ic]').forEach(el => { el.innerHTML = G.icon(el.dataset.ic); });
-  // someone who already made a card has a restaurant account: the owners' doors open it instead
-  const shop = G.business.shop();
-  if (shop) document.querySelectorAll('[data-owner-door]').forEach(d => {
-    d.href = '#'; d.querySelector('b').textContent = shop.n + '.';
-    const line = d.querySelector('.door-tx > span, .tx small'); if (line) line.textContent = 'Your dashboard, website and rewards card.';
-    const go = d.querySelector('.door-go'); if (go) go.textContent = 'Switch to your restaurant';
-    d.addEventListener('click', e => { e.preventDefault(); G.ui.buzz(); G.business.setAccount('business'); });
-  });
-
-  /* quick games: every Cart, opening the swipe feed on it */
-  const carts = window.GRUG_CARTS || [];
-  if (carts.length) {
-    $('#quickRow').innerHTML = carts.map(c => '<a href="games/carts/#' + encodeURIComponent(c.id) + '"><img loading="lazy" alt="" src="assets/carts/' + encodeURIComponent(c.id) + '.jpg"><span><b>' + G.esc(c.title) + '</b><small>' + (c.controls === 'hold' ? 'Hold' : 'Tap') + ' · ' + G.esc(c.len) + '</small></span></a>').join('');
-    $('#quickSec').hidden = false;
-  }
-
-
-  /* hero avatar */
-  const view = G.ui.avatarPic($('#heroView'), { bottom: 30, onTap: () => { view.play(['wave','cheer','dance','happy'][Math.floor(Math.random()*4)], { ms: 2200 }); G.ui.buzz(); } });
-  setTimeout(() => view.play('wave', { ms: 2600 }), 600);
-  G.on((p, what) => { if (what === 'avatar' || what === 'import' || what === 'external' || what === 'reset') view.setAvatar(p.avatar); });
-
-  /* shop mode: the shop's welcome, with a way back to its card */
-  const B = window.GrugTheme && GrugTheme.brand();
-  if (B) document.title = B.n + ' · Games';
-  if (B) $('#brandHero').innerHTML = '<div class="who"><span class="em" aria-hidden="true">' + G.ui.shopIcon(B.i) + '</span><div><p class="g-fine" style="margin:0 0 6px;font-weight:700">Welcome to</p><h1>' + G.esc(B.n) + '</h1><p>Play a game while you wait. Every visit stamps your card and adds Pearls you can spend in any game.</p></div></div>' +
-    '<div class="row"><a class="g-btn primary big" href="rewards/card/#c=' + encodeURIComponent(B.c) + '">' + G.icon('ticket') + 'My stamp card</a><a class="g-btn big" href="games/">' + G.icon('game-controller') + 'Play</a></div>';
-
-  /* greeting */
-  const t = G.totals();
-  if (!G.isNew && (t.plays > 0 || t.checkins > 0)) {
-    $('#heroTitle').innerHTML = 'Welcome back, <span class="name">' + G.esc(G.profile.name) + '</span>.';
-    $('#heroText').textContent = 'Your avatar and closet are saved on this phone. Pick up where you left off.';
-  } else {
-    $('#heroTitle').innerHTML = 'Hi, <span class="name">' + G.esc(G.profile.name) + '</span>. Free games, made in Katy.';
-  }
-  if (B) { $('#heroTitle').innerHTML = 'Hi, <span class="name">' + G.esc(G.profile.name) + '</span>.'; $('#heroText').textContent = 'Pick a game below, or dress up your avatar. Your stamps and Pearls stay on this phone.'; }
-  // (games made for a named business are demonstrations: they are not shown on the main site, see G.partnerAllows)
-  const last = G.GAMES.find(g => g.id === G.profile.stats.lastGame && G.partnerAllows(g)) || G.GAMES.find(g => g.listed !== false && G.partnerAllows(g)) || G.GAMES[0];
-  $('#heroPlay').href = last.game || last.play; $('#heroPlay').innerHTML = G.icon('play') + 'Play ' + G.esc(last.title);
-  if (!G.storageWorks()) $('#heroFine').textContent = 'This browser isn’t saving (private mode or blocked storage). Your avatar and points will be lost when you close it.';
-
-  /* games: one carousel, the last-played game first (centred and lit, "Last played"), then the rest */
-  const pts = {}; G.points().forEach(p => { pts[p.game.id] = p; });
-  function tile(g, opts) {
-    const p = pts[g.id];
-    const best = p && p.best ? '<div class="meta">' + G.icon('trophy') + 'Your best ' + G.fmt(p.best) + '</div>' : (p && p.points ? '<div class="meta">' + G.icon('coins') + G.fmt(p.points) + ' points</div>' : '');
-    return G.ui.boxTile(g, Object.assign({ extra: best }, opts));   // a FOSSIL32 box (assets/fossil32/)
-  }
-  const lastG = G.GAMES.find(g => g.id === G.profile.stats.lastGame && g.listed !== false && G.partnerAllows(g));
-  const list = (lastG ? [lastG] : []).concat(G.GAMES.filter(g => g.status !== 'legacy' && g.listed !== false && g !== lastG && G.partnerAllows(g)));
-  const row = $('#gameRow'), N = list.length;
-  // an endless loop: the list three times over; when the row settles in the first or last copy it jumps (unseen) to the
-  // same box in the middle copy, so there's never an end to hit
-  const copies = N > 1 ? 3 : 1;
-  row.innerHTML = Array.from({ length: copies }, () => list.map(g => tile(g, Object.assign({ kind: 'cart' }, g === lastG ? { ribbon: 'Last played' } : {}))).join('')).join('');   // bare cartridges here, boxes elsewhere
-  [...row.children].forEach((el, i) => { const g = list[i % N]; el.style.setProperty('--hc-c', (g.box && g.box.shell) || g.color || 'var(--sel-a)'); if (g === lastG) el.classList.add('lp'); if (copies > 1 && (i < N || i >= 2 * N)) { el.setAttribute('aria-hidden', 'true'); el.tabIndex = -1; } });
-
-  // how far each box is from the middle → its size, fade and the lit one
-  let rq = 0;
-  const stepW = () => { const t = row.children[0]; return t ? t.offsetWidth + 16 : 1; };
-  function paint() {
-    rq = 0;
-    const r = row.getBoundingClientRect(), mid = r.left + r.width / 2, tiles = [...row.children];
-    if (!tiles.length) return;
-    const step = stepW(); let best = null, bd = 1e9;
-    tiles.forEach(el => { const b = el.getBoundingClientRect(), dx = Math.abs(b.left + b.width / 2 - mid);
-      el.style.setProperty('--d', Math.min(1, dx / step).toFixed(3)); if (dx < bd) { bd = dx; best = el; } });
-    tiles.forEach(el => el.classList.toggle('on', el === best));
-  }
-  const queue = () => { if (!rq) rq = requestAnimationFrame(paint); };
-  const centreLeft = el => el.offsetLeft + el.offsetWidth / 2 - row.clientWidth / 2;
-  const centre = (el, instant) => row.scrollTo({ left: centreLeft(el), behavior: instant ? 'instant' : 'smooth' });
-  // back into the middle copy once the row has come to rest
-  let settleT = 0;
-  function recentre() {
-    if (copies < 2 || drag) return;
-    const tiles = [...row.children], i = tiles.findIndex(t => t.classList.contains('on')); if (i < 0) return;
-    if (i < N || i >= 2 * N) { const j = N + (i % N), off = row.scrollLeft - centreLeft(tiles[i]); row.style.scrollSnapType = 'none'; row.scrollLeft = centreLeft(tiles[j]) + off; requestAnimationFrame(() => { row.style.scrollSnapType = ''; paint(); }); }
-  }
-  row.addEventListener('scroll', () => { queue(); clearTimeout(settleT); settleT = setTimeout(recentre, 140); }, { passive: true });
-  if ('onscrollend' in row) row.addEventListener('scrollend', recentre);
-  addEventListener('resize', () => { if (row.children[N]) centre(row.children[N + Math.max(0, [...row.children].findIndex(t => t.classList.contains('on')) % N)], true); queue(); });
-  if (row.children[copies > 1 ? N : 0]) centre(row.children[copies > 1 ? N : 0], true);   // start on the last-played game, middle copy
-  paint();
-  const nudge = d => { const tiles = [...row.children], i = tiles.findIndex(t => t.classList.contains('on')); const t = tiles[Math.max(0, Math.min(tiles.length - 1, i + d))]; if (t) centre(t); G.ui.buzz(6); };
-  $('#hcPrev').innerHTML = G.icon('caret-left'); $('#hcNext').innerHTML = G.icon('caret-right');
-  $('#hcPrev').onclick = () => nudge(-1); $('#hcNext').onclick = () => nudge(1);
-  // a box off to the side slides to the middle first; the middle one opens (FOSSIL32 handles that click)
-  let dragged = false;
-  row.addEventListener('click', e => {
-    const t = e.target.closest('.g-tile'); if (!t) return;
-    if (dragged || !t.classList.contains('on')) { e.preventDefault(); e.stopPropagation(); if (!dragged) centre(t); }
-  }, true);
-  // mouse users can drag the row sideways too (touch already swipes it)
-  let drag = null;
-  row.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' || e.button) return; drag = { x: e.clientX, left: row.scrollLeft }; dragged = false; });
-  addEventListener('pointermove', e => { if (!drag) return; const dx = e.clientX - drag.x; if (Math.abs(dx) > 6) { dragged = true; row.classList.add('drag'); } if (dragged) row.scrollLeft = drag.left - dx; });
-  addEventListener('pointerup', () => { if (!drag) return; drag = null; if (row.classList.contains('drag')) { row.classList.remove('drag'); const on = row.querySelector('.on'); if (on) centre(on); } setTimeout(() => { dragged = false; }, 0); });
-
-  /* closet picks: hidden for now (players dress up when they choose to, from Me → Avatar) */
-})();
-</script>
-<script type="module" src="assets/fossil32/fossil32.js"></script>
 </body>
 </html>

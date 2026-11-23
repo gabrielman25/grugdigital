@@ -1,5 +1,3 @@
-dist/
-tools/fossil32/node_modules
-tools/boxart/work/
-tools/fossil32/package-lock.json
-tools/partner-app/partners/*/img_data.json
+node_modules/
+.wrangler/
+.dev.vars
