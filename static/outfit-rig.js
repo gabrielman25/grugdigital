@@ -2,7 +2,9 @@
 
    Needs three.js r128 (window.THREE) and its GLTFLoader (/static/vendor/three-r128-GLTFLoader.js), plus /static/outfits.js.
 
-   const look = await GrugOutfitRig.load()      // the active outfit, parsed: { id, name, parts } or null (none picked / unavailable)
+   const look = await GrugOutfitRig.load()      // the outfit they play as, parsed: { id, name, parts, starter, isDefault }; with none
+                                                //   picked it's the default character, Grug (isDefault: true); null only if three/GLTFLoader are missing
+   Games keep their own player / NPC names when look.starter or look.isDefault is set (those outfits are named "Grug", "Ranger"…).
    const npcs = await GrugOutfitRig.others(6)   // the player's other saved outfits, for the game's other players / NPCs
    const kit  = await GrugOutfitRig.fromURL('/arcade/outfits/ranger.glb', 'Ranger')   // a character file shipped with the site
    GrugOutfitRig.dress(rig, look)               // dress a rig; returns the new meshes (or [] if look is null)
@@ -40,21 +42,24 @@
   async function loadRecord(rec) {
     if (!ok() || !rec || !rec.glb) return null;
     const k = rec.id + ':' + rec.updated; if (cache[k]) return cache[k];
-    try { return (cache[k] = await parse(await rec.glb.arrayBuffer(), rec.id, rec.name)); } catch (e) { console.warn('outfit', rec.name, e); return null; }
+    try { const L = await parse(await rec.glb.arrayBuffer(), rec.id, rec.name); L.starter = !!rec.starter; return (cache[k] = L); } catch (e) { console.warn('outfit', rec.name, e); return null; }
   }
-  // the outfit the player picked ("Play as"), or null
+  // the default character, for anyone who hasn't picked an outfit (never the old blocky one)
+  const DEFAULT = '/arcade/outfits/grug.glb';
+  async function fallback() { const L = await fromURL(DEFAULT, 'Grug'); if (L) L.isDefault = true; return L; }
+  // the outfit the player picked ("Play as"), or the default character
   async function load() {
-    if (!window.GrugOutfits) return null;
-    let rec; try { rec = await GrugOutfits.activeRecord(); } catch (e) { return null; }
-    return loadRecord(rec);
+    // straight from the store, without waiting for the starter outfits to be saved (until then it's the default anyway)
+    let rec = null; try { const id = window.GrugOutfits && GrugOutfits.active(); rec = id ? await GrugOutfits.get(id) : null; } catch (e) {}
+    return (await loadRecord(rec)) || fallback();
   }
   // the player's other saved outfits (not the one they play as): games dress their other players in these
   async function others(max) {
     if (!window.GrugOutfits) return [];
     let list = []; try { list = await GrugOutfits.list(); } catch (e) { return []; }
-    const act = GrugOutfits.active(), out = [];
-    for (const o of list.filter(o => o.id !== act).slice(0, max || 8)) { const L = await loadRecord(await GrugOutfits.get(o.id)); if (L) out.push(L); }
-    return out;
+    const act = GrugOutfits.active();
+    const all = await Promise.all(list.filter(o => o.id !== act).slice(0, max || 8).map(o => GrugOutfits.get(o.id).then(loadRecord).catch(() => null)));
+    return all.filter(Boolean);
   }
   // a character .glb from the site (e.g. a game's own outfits in /arcade/outfits/)
   async function fromURL(url, name) {
@@ -98,5 +103,5 @@
     }
     rig.outfit = null;
   }
-  window.GrugOutfitRig = { load, others, fromURL, loadRecord, dress, undress };
+  window.GrugOutfitRig = { load, others, fromURL, loadRecord, dress, undress, DEFAULT };
 })();

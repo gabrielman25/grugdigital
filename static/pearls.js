@@ -1,7 +1,7 @@
 /* GrugPearls · the Pearls wallet on the new site.
    It is the SAME wallet the legacy pages use (localStorage 'grug.pearls.v1': {v, balance, code, buys, club, …}); the new site
    and the legacy pages share one address, so Pearls bought, won or spent anywhere show up everywhere. Fields this file adds to
-   the wallet: started, promo, daily (the last day the daily Pearls were claimed), spends, r6 (characters already exported),
+   the wallet: started, promo, promosUsed, daily (the last day the daily Pearls were claimed), spends, r6 (characters already exported),
    rewards ({game: when it last paid out}, so clearing a game's own save can't skip its cooldown), earns (a log, like spends).
 
    GrugPearls.CFG            the numbers: starting balance, promo balances, daily Pearls (free / Grug Gold), R6 export fee
@@ -20,7 +20,8 @@
   'use strict';
   const CFG = {
     start: 80,                      // a new player's first balance
-    promos: { tizzy: 280 },         // grugdigital.com/<promo>: a new player's first balance instead (first visit only)
+    promos: { tizzy: 600 },         // grugdigital.com/<promo>: bonus Pearls (600 = the $9.99 pack), for new players on top of
+                                    // the starting 80, for existing wallets added to the balance. Once per wallet (w.promosUsed).
     daily: 5,                       // Pearls once per calendar day for everyone
     dailyGold: 20,                  // … and for Grug Gold members (instead of 5)
     exportFee: 25                   // exporting a character as a Roblox R6 file (.glb / the whole set)
@@ -58,13 +59,18 @@
       const out = { welcome: 0, promo: null, promoRefused: false, daily: 0, gold: null };
       let w = raw();
       if (!w) {   // a new player on this device
-        const n = CFG.promos[promo] != null ? CFG.promos[promo] : CFG.start;
+        const n = CFG.start + (CFG.promos[promo] != null ? CFG.promos[promo] : 0);
         w = wallet(); w.balance = n; w.started = Date.now(); w.daily = today();   // the welcome Pearls count as today's
-        if (CFG.promos[promo] != null) { w.promo = promo; out.promo = promo; }
+        if (CFG.promos[promo] != null) { w.promo = promo; w.promosUsed = [promo]; out.promo = promo; }
         save(w); out.welcome = n;
       } else {
-        if (promo && CFG.promos[promo] != null) out.promoRefused = true;   // promo links are for new players only
         w = wallet();
+        // a promo link works for existing players too, once per wallet
+        if (promo && CFG.promos[promo] != null) {
+          const used = Array.isArray(w.promosUsed) ? w.promosUsed : (w.promo ? [w.promo] : []);
+          if (used.includes(promo)) out.promoRefused = true;
+          else { const n = CFG.promos[promo]; w.balance += n; w.promosUsed = used.concat(promo); save(w); out.promo = promo; out.bonus = n; }
+        }
         if (!/^GR-/.test(raw().code || '')) save(w);   // an older wallet without a purchase code gets one (the Pearls pages need it)
         if (w.daily !== today()) {
           const t = await gold(); out.gold = t;

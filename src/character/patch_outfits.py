@@ -5,6 +5,7 @@
 patch_studio.py calls apply() as its last step, so a full rebuild (build.py) includes it. Run this file on its own to update
 an already-built character/index.html when only src/character/outfits.js, agent.js or this file changed (no studio file
 needed). Everything it adds sits between <!--go:…--> markers, so running it again replaces the old copy."""
+import sys, pathlib; sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import json, pathlib, re, sys
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -13,8 +14,12 @@ SHIRT = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-widt
 
 CSS = r"""<!--go:css--><style id="go-css">
   #toOutfits{gap:.45rem} #toOutfits svg{width:1.15rem;height:1.15rem;flex:none}
+  .go-back{flex:none;width:2.5rem;min-width:0;height:2.5rem;padding:0!important;display:grid;place-items:center;border-radius:.8rem}
+  .go-back svg{width:1.2rem;height:1.2rem}
+  #match > i{display:none}
+  @media (max-width:1500px) and (min-width:761px){.topbar > h1{display:none}}   /* room for the Back button and every tab */
   .go-float{position:fixed;z-index:5;left:1.25rem;top:5.9rem;border-radius:999px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
-  #goCount:not(:empty){min-width:1.3rem;height:1.3rem;padding:0 .35rem;border-radius:99px;background:var(--g-lime,#9BE338);color:#1F1A17;font-size:.78rem;display:inline-grid;place-items:center}
+  #goCount:not(:empty){color:var(--g-muted,#6E6B66);font-weight:500}
   .go-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:.7rem;margin-top:1rem}
   .go-card{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.6rem;border-radius:1rem;background:var(--g-surface-2,#F0F0EC);border:2px solid transparent;text-align:center}
   .go-card.on{border-color:var(--g-lime-500,#7FC423);background:var(--g-lime-50,#F3FCE6)}
@@ -52,6 +57,7 @@ def strip(s):
 
 def apply(s, agent_js=None, labels=None):
     """Add (or replace) the outfits layer. agent_js/labels: also refresh the agent API block from source."""
+    import patch_pose; s = patch_pose.apply(s)   # the standing reference picture (and black soles / leg tops)
     s = strip(s)
     def sub(old, new):
         nonlocal s
@@ -60,6 +66,10 @@ def apply(s, agent_js=None, labels=None):
     sub('<link rel="help" href="/character/claude.md">',
         '<link rel="help" href="/character/claude.md"><!--go:head-->\n<script src="/static/outfits.js"></script><!--/go:head-->')
     sub('</head>', CSS + '</head>')
+    # a Back button at the start of the top bar: to the page they came from on this site, or the home page
+    sub('<header class="topbar box">\n  <span class="g-brandmark"', '<header class="topbar box">\n  <!--go:back--><a id="goBack" class="g-btn go-back" href="/" title="Back" aria-label="Back to the previous page">'
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>'
+        '<script>document.getElementById("goBack").addEventListener("click", e => { let same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin && new URL(document.referrer).pathname !== location.pathname; } catch (x) {} if (same && history.length > 1) { e.preventDefault(); history.back(); } });</script>\n  <!--/go:back--><span class="g-brandmark"')
     sub('<div class="cg-fabs">', f'<!--go:btn--><button id="toOutfits" class="g-btn go-float" title="Save characters for the Grug games and pick who you play as">{SHIRT}My outfits<span id="goCount"></span></button><!--/go:btn--><div class="cg-fabs">')
     sub('<div class="cg-fabs">', f'<div class="cg-fabs"><!--go:fab--><button id="toOutfitsM" class="g-btn cg-fab" title="My outfits">{SHIRT}Outfits</button><!--/go:fab-->')
     i = s.index('<div id="noOutfit"'); j = s.index('</div>', i) + len('</div>')

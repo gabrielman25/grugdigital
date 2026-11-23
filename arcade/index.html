@@ -79,7 +79,7 @@ main{max-width:880px}
       <div class="in">
         <h2>Zombie Zones</h2>
         <p>Four teams, one zombie-filled middle. Supply runs, capture the flag, deathmatch and survival. You drop straight into a battle.</p>
-        <div class="chips"><span class="chip">4 modes</span><span class="chip">Skill tree</span><span class="chip">Loot guns</span></div>
+        <div class="chips"><span class="chip">4 modes</span><span class="chip">Dodge roll</span><span class="chip">Loot guns</span></div>
         <span class="btn" style="justify-self:start">Play</span>
       </div>
     </a>
@@ -98,13 +98,13 @@ main{max-width:880px}
     const act = O ? O.active() : '', cur = list.find(o => o.id === act);
     const src = o => { if (!o || !o.preview) return ''; const u = URL.createObjectURL(o.preview); urls.push(u); return u; };
     const u = src(cur);
-    $('mePic').innerHTML = u ? `<img src="${u}" alt="">` : PERSON;
-    $('meT').textContent = cur ? cur.name : "The game's own character";
+    $('mePic').innerHTML = `<img src="${u || '/character/looks/grug/preview.png'}" alt="">`;
+    $('meT').textContent = cur ? cur.name : 'Grug (the default)';
     $('meP').textContent = cur ? `${list.length > 1 ? `Your ${list.length - 1} other outfit${list.length > 2 ? 's show' : ' shows'} up as other players.` : 'Save more outfits and they show up as the other players.'}`
       : list.length ? 'Pick one of your outfits below to play as it.' : 'Make a character in the Avatar Studio and save it for the games to play as yourself.';
     $('picks').hidden = !list.length;
     $('picks').innerHTML = list.map(o => { const s2 = src(o); return `<button class="pk${o.id === act ? ' on' : ''}" data-id="${o.id}">${s2 ? `<img src="${s2}" alt="">` : '<div class="none">?</div>'}<span>${esc(o.name)}</span></button>`; }).join('') +
-      `<button class="pk${act ? '' : ' on'}" data-id=""><div class="none">${PERSON.replace('<svg ', '<svg width="34" height="34" ')}</div><span>Default</span></button>`;
+      (list.some(o => o.id === 'starter-grug') ? '' : `<button class="pk${act ? '' : ' on'}" data-id=""><img src="/character/looks/grug/preview.png" alt=""><span>Grug</span></button>`);
   }
   $('picks').addEventListener('click', e => { const b = e.target.closest('.pk'); if (b && O) O.setActive(b.dataset.id); });
   addEventListener('grug:outfits', render);

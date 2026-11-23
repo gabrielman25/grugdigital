@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Welcome to Grug · 280 Pearls to start</title>
-<meta name="description" content="New to Grug? Start with 280 Pearls and make your own Roblox character.">
+<title>Welcome to Grug · 600 bonus Pearls</title>
+<meta name="description" content="Get 600 bonus Pearls on Grug and make your own Roblox character.">
 <meta name="robots" content="noindex">
 <link rel="icon" href="/favicon.png">
 <script>try { var p = (JSON.parse(localStorage.getItem('grug.profile.v1') || 'null') || {}).prefs || {}; if (p.mode === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}</script>
@@ -33,17 +33,20 @@ main{max-width:440px}
   </section>
 </main>
 <script>
-/* grugdigital.com/tizzy: a new player starts with GrugPearls.CFG.promos.tizzy Pearls instead of the usual starting balance.
-   Only on a device that has never had a Pearls wallet: someone who already plays gets today's daily Pearls as usual. */
+/* grugdigital.com/tizzy: GrugPearls.CFG.promos.tizzy (600) bonus Pearls, on top of a new player's starting 80.
+   Someone who already plays gets the 600 added to their wallet. Once per wallet (GrugPearls.start handles both). */
 (function () {
   const $ = s => document.querySelector(s), P = window.GrugPearls;
   P.start('tizzy').then(r => {
     $('#n').textContent = P.balance().toLocaleString(); $('#big').hidden = false;
-    if (r.promo) {
-      $('#text').textContent = 'You start with ' + r.welcome + ' Pearls. Make your own Roblox character for free, and spend Pearls to export it as an R6 file for your game.';
+    if (r.promo && r.bonus) {
+      $('#tag').textContent = 'Welcome back'; $('#title').textContent = 'You got ' + r.bonus + ' bonus Pearls';
+      $('#text').textContent = 'Thanks for coming back! ' + r.bonus + ' Pearls were added to your wallet' + (r.daily ? ' (plus ' + r.daily + ' for today)' : '') + '. Spend them to export characters from the Avatar Studio.';
+    } else if (r.promo) {
+      $('#text').textContent = 'You start with ' + r.welcome + ' Pearls, including a 600 Pearl bonus. Make your own Roblox character for free, and spend Pearls to export it as an R6 file for your game.';
     } else {
       $('#tag').textContent = 'Welcome back'; $('#title').textContent = 'You’re already a Grug player';
-      $('#text').textContent = 'This welcome gift is for brand-new players, so your Pearls stay as they are' + (r.daily ? ' (plus ' + r.daily + ' for today)' : '') + '. You still get free Pearls every day you visit.';
+      $('#text').textContent = 'You already got this bonus, so your Pearls stay as they are' + (r.daily ? ' (plus ' + r.daily + ' for today)' : '') + '. You still get free Pearls every day you visit.';
     }
   });
 })();

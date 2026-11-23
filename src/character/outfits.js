@@ -24,7 +24,7 @@ async function save(asNew){
   try {
     const snap = await snapshot(), keep = !asNew && editing ? await O.get(editing.id) : null;
     const id = await O.put(Object.assign(keep ? { id: keep.id, created: keep.created } : {}, snap));
-    if (!O.active()) O.setActive(id);
+    if (!O.active() || /^starter-/.test(O.active())) O.setActive(id);   // your first own character replaces the default
     editing = { id, name: snap.name };
     say(keep ? `Saved changes to ${snap.name}` : `${snap.name} saved for the games`);
     await render(); open();
@@ -56,12 +56,12 @@ async function render(){
       <b title="${esc(o.name)}">${esc(o.name)}</b>
       ${o.id === act ? '<span class="go-badge">Playing as</span>' : `<button class="g-btn g-btn--primary g-btn--sm" data-a="play">Play as</button>`}
       <div class="go-acts"><button class="g-btn g-btn--sm" data-a="edit">Edit</button><button class="g-btn g-btn--sm" data-a="ren">Rename</button><button class="g-btn g-btn--sm" data-a="del">Delete</button></div>
-    </div>`; }).join('') + (act ? '<button class="g-btn g-btn--sm go-none" data-a="none">Play as the game\'s own character</button>' : '');
+    </div>`; }).join('') + (act ? '<button class="g-btn g-btn--sm go-none" data-a="none">Play as Grug (the default)</button>' : '');
 }
 grid.addEventListener('click', async e => {
   const b = e.target.closest('button'); if (!b) return;
   const card = b.closest('.go-card'), id = card && card.dataset.id, a = b.dataset.a;
-  if (a === 'none'){ O.setActive(''); say('The games will use their own character'); }
+  if (a === 'none'){ O.setActive(''); say('You\'ll play as Grug, the default character'); }
   if (a === 'play'){ O.setActive(id); say('You\'ll play as this character in the Grug games'); }
   if (a === 'edit') return edit(id);
   if (a === 'ren'){
@@ -92,7 +92,7 @@ if (/[?&]outfits\b/.test(location.search) || location.hash === '#outfits') setTi
 fetch('/character/looks/looks.json').then(r => r.ok ? r.json() : []).then(kit => {
   const grid = $q('#exGrid'); if (!grid || !Array.isArray(kit)) return;
   const toC = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => { const c = cnv(TW, TH); c.getContext('2d').drawImage(i, 0, 0); res(c); }; i.onerror = rej; i.src = src; });
-  for (const k of kit) {
+  for (const k of kit.filter(k => !k.builtin)) {   // builtin: already one of the studio's own looks
     const shirt = `/character/looks/${k.id}/shirt.png`, pants = `/character/looks/${k.id}/pants.png`;
     if (typeof EXAMPLES !== 'undefined') EXAMPLES.push({ name: k.name, shirt, pants });   // so GrugStudio.set({ look: 'Ranger' }) works too
     const b = document.createElement('button'); b.className = 'ex'; b.innerHTML = `<img alt=""><span>${esc(k.name)}</span><small>from ${esc(k.game)}</small>`; b.querySelector('img').src = shirt;

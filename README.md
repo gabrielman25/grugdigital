@@ -55,6 +55,14 @@ chat, describe a character, and Claude makes it.
   R6 exports cost Pearls; making and saving characters is free.
 - The Claude skill: `src/skill/` (served as `/character/roblox-characters.zip`).
 
+- Starter outfits: every look in `character/looks/looks.json` (Gemini-painted, with `arcade/outfits/<id>.glb`) is saved
+  into a new browser's My outfits once (`GrugOutfits.seed()`); Grug (`default: true`) is who they play as. A new look:
+  paint it in the studio, put shirt/pants PNGs in `character/looks/<id>/`, add it to `looks.json`, then build its .glb and
+  preview headlessly from the studio (`buildCharacterGLB()`, animation clips stripped).
+- The studio's Gemini reference shows the front avatar standing (`src/character/patch_pose.py`; soles and leg tops come
+  out black).
+- Home page showcase: `static/showcase/` (Blender Cycles renders of the outfits in action poses, transparent WebP, over
+  scenes from the games); the slides and their prompts are in the script at the bottom of `index.html`.
 - Saved outfits ("My outfits": save, edit, rename, delete, **Play as**): `static/outfits.js` (`window.GrugOutfits`, an
   IndexedDB store per browser) and the studio layer `src/character/outfits.js`, injected by
   `src/character/patch_outfits.py`. Ready-made game looks: `character/looks/` (`looks.json` + the clothing PNGs).

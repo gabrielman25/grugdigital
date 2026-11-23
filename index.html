@@ -59,37 +59,49 @@ html:not(.dark) .sun, html.dark .moon{display:none}
 
 /* ---------- buttons ---------- */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;border-radius:14px;border:0;cursor:pointer;
-  background:var(--accent);color:#1E1B16;font:600 17px/1 'Fredoka',system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 0 var(--accent-lo);transition:transform .12s}
+  background:var(--accent);color:#1E1B16;font:600 17px/1 'Fredoka',system-ui,sans-serif;text-decoration:none;transition:transform .12s,filter .12s}
 .btn:hover{transform:translateY(-1px)}
-.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--accent-lo)}
+.btn:active{transform:translateY(1px);filter:brightness(.95)}
 .btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .btn--ghost{background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}
 .btn--ghost:active{box-shadow:inset 0 0 0 2px var(--line)}
-.btn--sm{min-height:40px;padding:0 16px;font-size:15px;box-shadow:0 3px 0 var(--accent-lo)}
+.btn--sm{min-height:40px;padding:0 16px;font-size:15px}
 .btn--sm.btn--ghost{box-shadow:inset 0 0 0 2px var(--line)}
 
 /* ---------- hero ---------- */
-.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:clamp(20px,3vw,40px);align-items:stretch;padding-block:clamp(28px,5vw,64px) clamp(20px,3vw,36px)}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:clamp(20px,3vw,40px);align-items:stretch;padding-block:clamp(28px,5vw,64px) clamp(20px,3vw,36px)}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);margin:0 0 12px}
-.eyebrow i{width:10px;height:10px;border-radius:50%;background:var(--accent)}
 h1{font-size:clamp(34px,4.6vw,60px);line-height:1.04;font-weight:600;margin:0 0 16px;letter-spacing:-.01em;max-width:16ch}
 .lead{font-size:clamp(17px,1.5vw,20px);color:var(--soft);margin:0 0 28px;max-width:46ch}
 .ctas{display:flex;flex-wrap:wrap;gap:12px}
 .hero-main{align-self:center}
 
-.soon{position:relative;overflow:hidden;border-radius:28px;padding:clamp(24px,3vw,36px);background:#1E1B16;color:#F3F3F5;display:flex;flex-direction:column;justify-content:flex-end;min-height:280px}
-.soon::before{content:"";position:absolute;inset:0;background:
-  radial-gradient(60% 70% at 85% 10%,rgba(155,227,56,.32),transparent 70%),
-  radial-gradient(40% 50% at 10% 100%,rgba(155,227,56,.14),transparent 70%)}
-.soon>*{position:relative}
-.soon .tape{position:absolute;top:22px;right:-56px;transform:rotate(30deg);width:240px;height:28px;background:repeating-linear-gradient(-45deg,#1E1B16 0 12px,#9BE338 12px 24px);opacity:.9}
-.soon .eyebrow{color:#9BE338;margin-bottom:10px}
-.soon .eyebrow i{animation:pulse 1.8s ease-in-out infinite}
-@keyframes pulse{50%{opacity:.25}}
-.soon h2{font-size:clamp(26px,2.6vw,36px);line-height:1.08;margin:0 0 10px;font-weight:600;max-width:15ch}
-.soon p{margin:0;color:#BDBDC6;font-size:17px;max-width:40ch}
-.soon .bits{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
-.soon .bits span{font-size:14px;font-weight:500;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);color:#E6E6EA}
+.show{position:relative;overflow:hidden;border-radius:28px;background:#1E1B16;min-height:340px;aspect-ratio:16/11;isolation:isolate}
+.show .s{position:absolute;inset:0;opacity:0;transition:opacity .9s ease;pointer-events:none}
+.show .s.on{opacity:1;pointer-events:auto}
+.show .bg{position:absolute;left:-10%;top:-6%;width:120%;height:112%;max-width:none;object-fit:cover;filter:blur(1.5px) saturate(1.05);transform:translateX(3%) scale(1.1)}
+.show .fg{position:absolute;bottom:4%;right:7%;height:86%;width:auto;max-width:none;transform:translateX(-4%)}
+.show .s.left .fg{right:auto;left:8%}
+.show .s.go .bg{animation:drift-bg var(--dur,7s) linear forwards}
+.show .s.go .fg{animation:drift-fg var(--dur,7s) cubic-bezier(.3,.1,.3,1) forwards}
+@keyframes drift-bg{from{transform:translateX(3%) scale(1.1)}to{transform:translateX(-3%) scale(1.14)}}
+@keyframes drift-fg{from{transform:translateX(-4%) scale(.98)}to{transform:translateX(4%) scale(1.02)}}
+.show .s.left.go .fg{animation-name:drift-fg-l}
+@keyframes drift-fg-l{from{transform:translateX(4%) scale(.98)}to{transform:translateX(-4%) scale(1.02)}}
+.show .who{position:absolute;top:18px;left:18px;z-index:2;display:flex;flex-direction:column;gap:2px;padding:10px 14px;border-radius:14px;background:rgba(20,18,15,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff}
+.show .s.left .who{left:auto;right:18px;text-align:right}
+.show .who b{font-size:18px;font-weight:600;line-height:1.1}
+.show .who span{font-size:13px;color:#D6D6DC}
+.show .ask{position:absolute;left:18px;right:18px;bottom:18px;z-index:2;max-width:430px;padding:12px 16px 13px;border-radius:16px;background:rgba(255,255,255,.94);color:#1E1B16;box-shadow:0 10px 30px -12px rgba(0,0,0,.45)}
+.show .s.left .ask{left:auto}
+.show .ask small{display:block;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#6B6B73;margin-bottom:3px}
+.show .ask p{margin:0;font-size:17px;line-height:1.35;font-weight:500;min-height:2.7em}
+.show .ask p::after{content:"";display:inline-block;width:2px;height:1.05em;margin-left:2px;vertical-align:-.15em;background:#1E1B16;animation:caret 1s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+.show .nav2{position:absolute;inset:0;z-index:1;display:flex;justify-content:space-between;align-items:stretch}
+.show .nav2 button{width:22%;border:0;background:transparent;cursor:pointer;opacity:0}
+@media (max-width:600px){.show{aspect-ratio:4/5}.show .fg{bottom:27%;height:62%}.show .s .fg,.show .s.left .fg{right:auto;left:50%;translate:-50% 0}.show .ask p{font-size:15px}.show .who b{font-size:16px}}
+@media (prefers-reduced-motion:reduce){.show .s{transition:none}.show .s.go .bg,.show .s.go .fg{animation:none}.show .ask p::after{animation:none}}
 
 /* ---------- sections ---------- */
 section.block{padding-block:clamp(28px,4vw,48px)}
@@ -131,10 +143,10 @@ section.block{padding-block:clamp(28px,4vw,48px)}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:clamp(22px,2.6vw,32px)}
 .panel h2{font-size:clamp(26px,2.4vw,34px);line-height:1.1;margin:0 0 10px;font-weight:600}
 .panel h3{font-size:20px;margin:0 0 8px;font-weight:600;display:flex;align-items:center;gap:8px}
-.panel h3 svg{color:var(--accent-lo)}
+.panel h3 svg{color:var(--ink)}
 .panel p{margin:0 0 16px;color:var(--soft);font-size:17px}
 .panel .ctas{gap:10px}
-.prompt{margin:0 0 12px;padding:12px 14px;border-radius:12px;background:var(--page);border:1.5px dashed var(--accent-lo);color:var(--ink);font-size:15px;font-weight:500;overflow-wrap:break-word;user-select:all}
+.prompt{margin:0 0 12px;padding:12px 14px;border-radius:12px;background:var(--page);border:1px solid var(--line);color:var(--ink);font-size:15px;font-weight:500;overflow-wrap:break-word;user-select:all}
 .fine{font-size:14px!important;line-height:1.45;margin:12px 0 0!important}
 details.more{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
 details.more summary{cursor:pointer;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px}
@@ -152,7 +164,7 @@ footer .sp{margin-left:auto}
 
 @media (max-width:900px){
   .hero,.studio{grid-template-columns:1fr}
-  .soon{min-height:0}
+  .show{aspect-ratio:4/3;min-height:0}
 }
 @media (max-width:720px){
   .nav,.legacy{display:none}
@@ -172,7 +184,6 @@ footer .sp{margin-left:auto}
   .price{font-size:14px;padding:3px 8px}
   .badge{top:8px;left:8px;font-size:11px;padding:4px 7px}
 }
-html.dark .soon{box-shadow:inset 0 0 0 1px var(--line)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -190,7 +201,6 @@ html.dark .soon{box-shadow:inset 0 0 0 1px var(--line)}
       <a href="#assets">Assets</a>
       <a href="#studio">Avatar Studio</a>
       <a href="/arcade/">Arcade</a>
-      <a href="#soon">What's next</a>
     </nav>
     <div class="end">
       <a class="pearls" id="pearls" href="/character/pearls/" hidden title="Your Pearls"><svg viewBox="0 0 16 16" aria-hidden="true" fill="#d16be8"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></svg><b id="pearlN">0</b> Pearls<span class="note" id="pearlNote"></span></a>
@@ -206,7 +216,7 @@ html.dark .soon{box-shadow:inset 0 0 0 1px var(--line)}
 <main>
   <section class="hero wrap">
     <div class="hero-main">
-      <p class="eyebrow"><i></i>Game assets &amp; creator tools</p>
+      <p class="eyebrow">Game assets &amp; creator tools</p>
       <h1>Make your game look great, faster.</h1>
       <p class="lead">Ready-to-use 3D asset packs for Roblox and other engines, plus free tools like the Avatar Studio.</p>
       <div class="ctas">
@@ -215,13 +225,9 @@ html.dark .soon{box-shadow:inset 0 0 0 1px var(--line)}
         <a class="btn btn--ghost" href="/arcade/">Play the arcade</a>
       </div>
     </div>
-    <aside class="soon" id="soon" aria-labelledby="soonTitle">
-      <div class="tape" aria-hidden="true"></div>
-      <p class="eyebrow"><i></i>In the works</p>
-      <h2 id="soonTitle">A new Grug gaming platform, on our own engine</h2>
-      <p>We're building a new place to play, make and share games, and the engine that runs it. More soon.</p>
-      <div class="bits" aria-hidden="true"><span>Play</span><span>Make</span><span>Share</span></div>
-    </aside>
+    <div class="show" id="show" role="region" aria-roledescription="carousel" aria-label="Characters made in the Avatar Studio">
+      <noscript><img class="bg" src="/static/showcase/bg-slide-1.jpg" alt=""><img class="fg" src="/static/showcase/grug.webp" alt="Grug, made in the Avatar Studio"></noscript>
+    </div>
   </section>
 
   <section class="block wrap" id="assets" aria-labelledby="assetsTitle">
@@ -241,7 +247,7 @@ html.dark .soon{box-shadow:inset 0 0 0 1px var(--line)}
   <section class="block wrap" id="studio" aria-labelledby="studioTitle">
     <div class="studio">
       <div class="panel">
-        <p class="eyebrow"><i></i>Free tool</p>
+        <p class="eyebrow">Free tool</p>
         <h2 id="studioTitle">Avatar Studio</h2>
         <p>Make a blocky Roblox character: pick hair and a face, paint a custom outfit, and download a rigged R6 file.</p>
         <div class="ctas"><a class="btn" href="/character/">Make a character <svg class="i" aria-hidden="true"><use href="#arrow"/></svg></a></div>
@@ -348,6 +354,56 @@ document.getElementById('copyClaude').addEventListener('click', async e => {
     chips.hidden = true;
     grid.innerHTML = '<p class="empty">The packs couldn\'t load right now. See them all at <a href="https://polysw.itch.io/" target="_blank" rel="noopener">polysw.itch.io</a>.</p>';
   });
+})();
+</script>
+<script>
+/* The hero showcase: characters made in the Avatar Studio (Cycles ray-traced renders with a transparent background,
+   static/showcase/<id>.webp) over scenes from the Grug Arcade games (static/showcase/bg-*.jpg). Each slide drifts for a few
+   seconds (the scene one way, the character the other) while the short prompt that made the outfit types itself out, then
+   the next one fades in. Click the left or right side to step through. */
+(function () {
+  const S = [
+    { id: 'grug', name: 'Grug', from: 'Slide 999 KM', bg: 'bg-slide-1', ask: 'Make me a character in a lime green hoodie with a little dino on it.' },
+    { id: 'ranger', name: 'Ranger', from: 'Zombie Zones', bg: 'bg-zombie-1', left: true, ask: 'Make a soldier in woodland camo with a tactical vest and knee pads.' },
+    { id: 'skater', name: 'Skater', from: 'Slide 999 KM', bg: 'bg-slide-2', ask: 'Make a skater in a denim jacket over a sunset tee, with ripped black jeans.' },
+    { id: 'medic', name: 'Medic', from: 'Zombie Zones', bg: 'bg-zombie-2', left: true, ask: 'Make a field medic with a grey vest and a green armband.' },
+    { id: 'snow-rider', name: 'Snow Rider', from: 'Slide 999 KM', bg: 'bg-slide-3', ask: 'Make a snowboarder in a puffy teal ski jacket and a chunky orange scarf.' },
+    { id: 'racer', name: 'Racer', from: 'Slide 999 KM', bg: 'bg-slide-4', left: true, ask: 'Make a racer in a blue and white jumpsuit with a number 9 on it.' }
+  ];
+  const root = document.getElementById('show'); if (!root) return;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, DUR = 7000;
+  const esc = t => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  root.textContent = '';
+  const els = S.map((d, i) => {
+    const s = document.createElement('div'); s.className = 's' + (d.left ? ' left' : ''); s.style.setProperty('--dur', (DUR + 900) / 1000 + 's');
+    s.setAttribute('role', 'group'); s.setAttribute('aria-roledescription', 'slide'); s.setAttribute('aria-label', (i + 1) + ' of ' + S.length + ': ' + d.name);
+    s.innerHTML = `<img class="bg" alt="" decoding="async" src="/static/showcase/${d.bg}.jpg"><img class="fg" decoding="async" alt="${esc(d.name)}, a character made in the Avatar Studio" src="/static/showcase/${d.id}.webp">` +
+      `<div class="who"><b>${esc(d.name)}</b><span>${esc(d.from)}</span></div><div class="ask"><small>Prompt</small><p aria-label="${esc(d.ask)}"></p></div>`;
+    root.appendChild(s); return s;
+  });
+  const nav = document.createElement('div'); nav.className = 'nav2';
+  nav.innerHTML = '<button type="button" aria-label="Previous character"></button><button type="button" aria-label="Next character"></button>';
+  root.appendChild(nav);
+  let cur = -1, timer = 0, typeT = 0, typeD = 0;
+  function type(p, text) {
+    clearInterval(typeT); if (reduce) { p.textContent = text; return; }
+    let n = 0; p.textContent = ''; typeT = setInterval(() => { n += 1; p.textContent = text.slice(0, n); if (n >= text.length) clearInterval(typeT); }, 34);
+  }
+  function go(i) {
+    i = (i + S.length) % S.length; if (i === cur) return;
+    const prev = els[cur]; if (prev) { prev.classList.remove('on'); setTimeout(() => { if (!prev.classList.contains('on')) prev.classList.remove('go'); }, 950); }
+    const s = els[i]; s.classList.remove('go'); void s.offsetWidth; s.classList.add('on', 'go'); cur = i;
+    const p = s.querySelector('.ask p'); p.textContent = ''; clearTimeout(typeD); typeD = setTimeout(() => type(p, S[i].ask), reduce ? 0 : 450);
+    clearTimeout(timer); timer = setTimeout(() => go(cur + 1), DUR);
+    const nx = els[(i + 1) % S.length]; nx.querySelectorAll('img').forEach(im => { im.loading = 'eager'; });
+  }
+  nav.children[0].addEventListener('click', () => go(cur - 1));
+  nav.children[1].addEventListener('click', () => go(cur + 1));
+  const first = els[0].querySelectorAll('img'); let left = first.length;
+  const begin = () => { if (cur < 0) go(0); };
+  first.forEach(im => { if (im.complete) left--; else im.addEventListener('load', () => { if (--left <= 0) begin(); }, { once: true }); });
+  if (left <= 0) begin(); setTimeout(begin, 1500);
+  document.addEventListener('visibilitychange', () => { clearTimeout(timer); if (!document.hidden) timer = setTimeout(() => go(cur + 1), DUR); });
 })();
 </script>
 </body>

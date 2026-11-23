@@ -44,7 +44,9 @@ without them.
 ## 3. Play as your own character (required)
 
 Players make characters in the Avatar Studio (`/character/`), save them with **My outfits › Save for the Grug games**
-and pick one with **Play as**. Every Grug game dresses the player in it, and dresses the other players / NPCs in the
+and pick one with **Play as**. Every browser starts with a library of ready-made outfits already saved (Grug, the default, plus the
+games' own outfits: the looks in `character/looks/looks.json`), so there is always someone to play as and dress NPCs in.
+**Nobody in a Grug game is ever the plain blocky rig**: the player, every NPC and every enemy wears a character file. Every Grug game dresses the player in it, and dresses the other players / NPCs in the
 player's *other* saved outfits.
 
 **Build your characters on the classic Grug rig** so outfits fit (1 unit = 1 stud, facing −Z, right arm on +X):
@@ -63,13 +65,19 @@ clips. Then:
 ```js
 async function wearOutfits() {
   if (!window.GrugOutfitRig) return;                       // not on grugdigital.com: keep the game's own look
-  const me = await GrugOutfitRig.load();                    // the outfit they play as, or null
-  if (me) { GrugOutfitRig.dress(player.rig, me); player.name = me.name; }
-  const others = await GrugOutfitRig.others(npcs.length);  // their other saved outfits
-  others.forEach((o, i) => { GrugOutfitRig.dress(npcs[i].rig, o); npcs[i].name = o.name; });
-  // optional: the game's own outfits for the rest (character files in /arcade/outfits/, see section 6)
-  const kit = (await Promise.all(['ranger', 'medic'].map(n => GrugOutfitRig.fromURL('/arcade/outfits/' + n + '.glb', n)))).filter(Boolean);
-  for (let i = others.length; i < npcs.length && kit.length; i += 3) GrugOutfitRig.dress(npcs[i].rig, kit[i % kit.length]);
+  const all = [player, ...npcs];
+  all.forEach(c => { c.rig.root.visible = false; });         // nobody is ever shown blocky: hidden until dressed
+  const cap = setTimeout(() => all.forEach(c => { c.rig.root.visible = true; }), 8000);
+  const me = await GrugOutfitRig.load();                    // the outfit they play as (Grug, the default, if none)
+  if (me) { GrugOutfitRig.dress(player.rig, me); if (!me.starter && !me.isDefault) player.name = me.name; }
+  player.rig.root.visible = true;                           // you first, then the others as they load
+  const [others, kit] = await Promise.all([
+    GrugOutfitRig.others(npcs.length),                      // their other saved outfits
+    Promise.all(['ranger', 'skater', 'grug'].map(n => GrugOutfitRig.fromURL('/arcade/outfits/' + n + '.glb', n))).then(a => a.filter(Boolean))]);
+  others.forEach((o, i) => { GrugOutfitRig.dress(npcs[i].rig, o); if (!o.starter) npcs[i].name = o.name; });
+  // everyone left wears the game's own outfits (character files in /arcade/outfits/, see section 6): never a blocky NPC
+  for (let i = others.length, k = 0; i < npcs.length && kit.length; i++, k++) GrugOutfitRig.dress(npcs[i].rig, kit[k % kit.length]);
+  clearTimeout(cap); all.forEach(c => { c.rig.root.visible = true; });
 }
 wearOutfits();
 addEventListener('grug:outfits', () => { /* they picked another outfit in another tab: load() and dress() again */ });

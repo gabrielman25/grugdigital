@@ -707,8 +707,12 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
 </style>
 <!--go:css--><style id="go-css">
   #toOutfits{gap:.45rem} #toOutfits svg{width:1.15rem;height:1.15rem;flex:none}
+  .go-back{flex:none;width:2.5rem;min-width:0;height:2.5rem;padding:0!important;display:grid;place-items:center;border-radius:.8rem}
+  .go-back svg{width:1.2rem;height:1.2rem}
+  #match > i{display:none}
+  @media (max-width:1500px) and (min-width:761px){.topbar > h1{display:none}}   /* room for the Back button and every tab */
   .go-float{position:fixed;z-index:5;left:1.25rem;top:5.9rem;border-radius:999px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
-  #goCount:not(:empty){min-width:1.3rem;height:1.3rem;padding:0 .35rem;border-radius:99px;background:var(--g-lime,#9BE338);color:#1F1A17;font-size:.78rem;display:inline-grid;place-items:center}
+  #goCount:not(:empty){color:var(--g-muted,#6E6B66);font-weight:500}
   .go-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:.7rem;margin-top:1rem}
   .go-card{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.6rem;border-radius:1rem;background:var(--g-surface-2,#F0F0EC);border:2px solid transparent;text-align:center}
   .go-card.on{border-color:var(--g-lime-500,#7FC423);background:var(--g-lime-50,#F3FCE6)}
@@ -828,7 +832,8 @@ i[data-g-icon]{display:inline-flex;font-style:normal;line-height:0}
 <canvas id="view3d"></canvas>
 
 <header class="topbar box">
-  <span class="g-brandmark" aria-hidden="true"></span>
+  <!--go:back--><a id="goBack" class="g-btn go-back" href="/" title="Back" aria-label="Back to the previous page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a><script>document.getElementById("goBack").addEventListener("click", e => { let same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin && new URL(document.referrer).pathname !== location.pathname; } catch (x) {} if (same && history.length > 1) { e.preventDefault(); history.back(); } });</script>
+  <!--/go:back--><span class="g-brandmark" aria-hidden="true"></span>
   <h1>Grug Avatar Studio</h1>
   <nav class="cats" id="cats" aria-label="What to change"></nav>
   <a id="pearlChip" class="g-btn pearl-chip" href="/character/pearls/" title="Your Pearls: tap for more"><svg viewBox="0 0 16 16" fill="#d16be8" aria-hidden="true"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></svg><span id="pearlNum">0</span></a>
@@ -1447,7 +1452,7 @@ const SEAT_SPREAD = 0, SEAT_R = 1, SEAT_FWD = 0.5; const SEAT = (() => { const m
   return { rleg: mk('rleg'), lleg: mk('lleg') }; })();
 VIEWS[0].pose = SEAT;
 const HEAD_YAW = 0; VIEWS[0].headRot = m4RY(HEAD_YAW);   // the head keeps the body's own direction (the face is completed by mirroring)
-VIEWS[0].off = Object.assign({}, NO_OFF, { head: Object.assign([0,0,0], { M: VIEWS[0].headRot }), rleg: Object.assign([0,0,0], { M: SEAT.rleg.M }), lleg: Object.assign([0,0,0], { M: SEAT.lleg.M }), box: { rleg: SEAT.rleg.box, lleg: SEAT.lleg.box } });
+/*grug:standing*/ VIEWS[0].pose = null; VIEWS[0].off = Object.assign({}, NO_OFF, { head: Object.assign([0,0,0], { M: VIEWS[0].headRot }) });
 const SNORM = (shadeOf(rot(VIEWS[0].m,[0,0,1])) + shadeOf(rot(VIEWS[0].m,[-1,0,0]))) / 2;
 
 // Occlusion: ray from a surface point toward the (orthographic) camera
@@ -2380,7 +2385,7 @@ function renderFaceHead(r, kind){
 }
 function decorateReference(c){
   const x = c.getContext('2d'); x.save(); x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = '700 22px system-ui, Arial, sans-serif'; x.fillStyle = '#444';
-  x.fillText('FRONT VIEW (SITTING)', 343, 24); x.fillText('BACK VIEW (EXPLODED)', 1166, 24); x.restore();
+  x.fillText('FRONT VIEW (STANDING)', 343, 24); x.fillText('BACK VIEW (EXPLODED)', 1166, 24); x.restore();
 }
 
 let refClear, refWhite, refWhiteData;
@@ -3674,7 +3679,7 @@ function headFXPair(raw, fx){
     const r = cnv(HEAD_TW, HEAD_TH); r.getContext('2d').drawImage(out, 0, 0, HEAD_TW, HEAD_TH, 0, 0, HEAD_TW, HEAD_TH); return r; });
 }
 function runExtract(){
-  const r = extract(alignedData, state.opts);
+  const r = extract(alignedData, state.opts); /*grug:standing*/ { const x = r.pants.getContext('2d'); x.fillStyle = '#111111'; for (const [px, py] of [[217, 289], [308, 289], [217, 485], [308, 485]]) x.fillRect(px, py, 64, 64); }
   state.rawShirt = r.shirt; state.rawPants = r.pants;
   state.rawHead = null;   // the head isn't painted any more: its face comes from the face generator
   
@@ -3723,7 +3728,7 @@ $('#dlSet').onclick = async () => {
 var buildPrompt = function buildPrompt(){
   const outfit = $('#outfit').value.trim() || 'a classic Roblox-style outfit: a bright t-shirt with a simple graphic, blue jeans and chunky sneakers', hair = ($('#headIdea') && $('#headIdea').value.trim()) || 'a classic Roblox-style face (simple eyes, a small smile) with blocky brown hair, rendered realistically';
   $('#prompt').value =
-`You are painting the textures of ONE blocky 3D game character with the design of a classic Roblox character (blocky body, simple friendly face, t-shirt and jeans) but with realistic 3D rendering: real materials, real textures, real soft lighting, not a flat cartoon. The picture shows two grey blocky avatars on a white background: the FRONT VIEW on the left (sitting) and the BACK VIEW on the right (an exploded view, with the cube head, torso, arms and legs pulled slightly apart; the legs are straight blocks hanging under the torso). They are the same character. In the front view the character is sitting: the two legs lie side by side, pointing towards you, straight out in front of the torso. The grey blocks are tinted in different colours ONLY so you can tell the body parts apart: the blue block is the torso; the red block is one arm and the green block is the other arm; the yellow and purple blocks are the legs. The torso is just the blue middle block, never as wide as the arms and torso together. Don't keep those tint colours in your painting. Repaint the grey blocks so the finished picture shows this character:
+`You are painting the textures of ONE blocky 3D game character with the design of a classic Roblox character (blocky body, simple friendly face, t-shirt and jeans) but with realistic 3D rendering: real materials, real textures, real soft lighting, not a flat cartoon. The picture shows two grey blocky avatars on a white background: the FRONT VIEW on the left (standing) and the BACK VIEW on the right (an exploded view, with the cube head, torso, arms and legs pulled slightly apart; the legs are straight blocks hanging under the torso). They are the same character. In the front view the character is standing: the two legs hang straight down under the torso, side by side. The grey blocks are tinted in different colours ONLY so you can tell the body parts apart: the blue block is the torso; the red block is one arm and the green block is the other arm; the yellow and purple blocks are the legs. The torso is just the blue middle block, never as wide as the arms and torso together. Don't keep those tint colours in your painting. Repaint the grey blocks so the finished picture shows this character:
 
 OUTFIT: ${outfit}.
 
@@ -3731,8 +3736,8 @@ KEEP THE PICTURE EXACTLY AS IT IS: same two avatars, same blocky shapes and prop
 
 1. THE HEAD: leave the small round head exactly as it is, plain skin with its simple face. Don't paint hair, a hat or anything else on it (the face is added later).
 2. SHIRT: paint the shirt flat onto the torso and both arms, front, back, sides and the tops of the shoulders, like a classic Roblox shirt template (a simple chest design) but painted as real cloth. Use realistic fabric: real weave, stitching, seams and soft wear, in a realistic 3D render look.
-3. PANTS: paint the pants flat onto both legs, including the tops of the legs and the inner sides, in realistic denim or cloth with stitching and seams, in the same realistic 3D render style as the shirt.
-4. SHOES: the bottom part of each leg is the foot, so paint a pair of shoes there that match the outfit (sneakers, boots, sandals or whatever fits): shoe colour and material, laces or straps, stitching, and a rubber sole on the bottom end of each leg, which is visible in the sitting view. The shoes are painted onto the legs, never as extra 3D shapes.
+3. PANTS: paint the pants flat onto both legs, including the inner sides, in realistic denim or cloth with stitching and seams, in the same realistic 3D render style as the shirt.
+4. SHOES: the bottom part of each leg is the foot, so paint a pair of shoes there that match the outfit (sneakers, boots, sandals or whatever fits): shoe colour and material, laces or straps, stitching, and the edge of a rubber sole along the bottom of each leg. The shoes are painted onto the legs, never as extra 3D shapes.
 5. HANDS: the end of each arm is the hand. Leave a little bare skin all the way around the end of each sleeve, so the bottom of each hand is one plain skin colour.
 
 Any skin that isn't covered by clothing keeps exactly the same skin colour it has now. Paint every visible face of every block, including the insides and the tops and bottoms you can see, and don't leave any area grey or blank.`;
@@ -5367,7 +5372,7 @@ async function save(asNew){
   try {
     const snap = await snapshot(), keep = !asNew && editing ? await O.get(editing.id) : null;
     const id = await O.put(Object.assign(keep ? { id: keep.id, created: keep.created } : {}, snap));
-    if (!O.active()) O.setActive(id);
+    if (!O.active() || /^starter-/.test(O.active())) O.setActive(id);   // your first own character replaces the default
     editing = { id, name: snap.name };
     say(keep ? `Saved changes to ${snap.name}` : `${snap.name} saved for the games`);
     await render(); open();
@@ -5399,12 +5404,12 @@ async function render(){
       <b title="${esc(o.name)}">${esc(o.name)}</b>
       ${o.id === act ? '<span class="go-badge">Playing as</span>' : `<button class="g-btn g-btn--primary g-btn--sm" data-a="play">Play as</button>`}
       <div class="go-acts"><button class="g-btn g-btn--sm" data-a="edit">Edit</button><button class="g-btn g-btn--sm" data-a="ren">Rename</button><button class="g-btn g-btn--sm" data-a="del">Delete</button></div>
-    </div>`; }).join('') + (act ? '<button class="g-btn g-btn--sm go-none" data-a="none">Play as the game\'s own character</button>' : '');
+    </div>`; }).join('') + (act ? '<button class="g-btn g-btn--sm go-none" data-a="none">Play as Grug (the default)</button>' : '');
 }
 grid.addEventListener('click', async e => {
   const b = e.target.closest('button'); if (!b) return;
   const card = b.closest('.go-card'), id = card && card.dataset.id, a = b.dataset.a;
-  if (a === 'none'){ O.setActive(''); say('The games will use their own character'); }
+  if (a === 'none'){ O.setActive(''); say('You\'ll play as Grug, the default character'); }
   if (a === 'play'){ O.setActive(id); say('You\'ll play as this character in the Grug games'); }
   if (a === 'edit') return edit(id);
   if (a === 'ren'){
@@ -5435,7 +5440,7 @@ if (/[?&]outfits\b/.test(location.search) || location.hash === '#outfits') setTi
 fetch('/character/looks/looks.json').then(r => r.ok ? r.json() : []).then(kit => {
   const grid = $q('#exGrid'); if (!grid || !Array.isArray(kit)) return;
   const toC = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => { const c = cnv(TW, TH); c.getContext('2d').drawImage(i, 0, 0); res(c); }; i.onerror = rej; i.src = src; });
-  for (const k of kit) {
+  for (const k of kit.filter(k => !k.builtin)) {   // builtin: already one of the studio's own looks
     const shirt = `/character/looks/${k.id}/shirt.png`, pants = `/character/looks/${k.id}/pants.png`;
     if (typeof EXAMPLES !== 'undefined') EXAMPLES.push({ name: k.name, shirt, pants });   // so GrugStudio.set({ look: 'Ranger' }) works too
     const b = document.createElement('button'); b.className = 'ex'; b.innerHTML = `<img alt=""><span>${esc(k.name)}</span><small>from ${esc(k.game)}</small>`; b.querySelector('img').src = shirt;

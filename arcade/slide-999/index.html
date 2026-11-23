@@ -1321,18 +1321,27 @@ addEventListener('pointerdown', () => { Snd.init(); if (Snd.ctx && Snd.ctx.state
 function setName(r, n) { r.name = String(n).slice(0, 24); r.tag.nm.textContent = r.name; }
 async function wearOutfits() {
   if (!window.GrugOutfitRig) return;
+  me.baseName = me.baseName || me.name;
+  // nobody shows up blocky: each character stays hidden until its outfit is on (8 s at most)
+  const all = racers.filter(r => !r.clone), show = r => { r.rig.root.visible = true; };
+  all.forEach(r => { r.rig.root.visible = false; });
+  const cap = setTimeout(() => all.forEach(show), 8000);
+  const KIT = ['racer', 'snow-rider', 'skater', 'flannel', 'grug'];   // the slide's own outfits (arcade/outfits/*.glb)
+  const kitP = Promise.all(KIT.map(n => GrugOutfitRig.fromURL('/arcade/outfits/' + n + '.glb', n))).then(a => a.filter(Boolean));
   try {
-    const look = await GrugOutfitRig.load();
-    if (look) { GrugOutfitRig.dress(me.rig, look); setName(me, look.name); }
-    const bots = racers.filter(r => r.bot && !r.clone), others = await GrugOutfitRig.others(bots.length);
-    others.forEach((o, i) => { GrugOutfitRig.dress(bots[i].rig, o); setName(bots[i], o.name); });
-    // the rest wear the slide's own outfits (made in the Avatar Studio for this game)
-    const kit = (await Promise.all(['racer', 'snow-rider'].map(n => GrugOutfitRig.fromURL('/arcade/outfits/' + n + '.glb', n)))).filter(Boolean);
-    if (kit.length) for (let i = others.length; i < bots.length; i += 2) GrugOutfitRig.dress(bots[i].rig, kit[((i - others.length) / 2) % kit.length]);
+    const look = await GrugOutfitRig.load();   // you first
+    if (look) { GrugOutfitRig.dress(me.rig, look); if (!look.starter && !look.isDefault) setName(me, look.name); }
+    show(me);
+    const bots = racers.filter(r => r.bot && !r.clone);
+    const [others, kit] = await Promise.all([GrugOutfitRig.others(bots.length), kitP]);
+    others.forEach((o, i) => { GrugOutfitRig.dress(bots[i].rig, o); if (!o.starter) setName(bots[i], o.name); show(bots[i]); });
+    // everyone else wears the slide's own outfits
+    if (kit.length) for (let i = others.length, k = 0; i < bots.length; i++, k++) { GrugOutfitRig.dress(bots[i].rig, kit[(k * 3) % kit.length]); show(bots[i]); }
   } catch (e) { console.warn('outfits', e); }
+  clearTimeout(cap); all.forEach(show);
 }
 wearOutfits();
-addEventListener('grug:outfits', () => { GrugOutfitRig && GrugOutfitRig.load().then(l => { if (l) { GrugOutfitRig.dress(me.rig, l); setName(me, l.name); } else GrugOutfitRig.undress(me.rig); }); });
+addEventListener('grug:outfits', () => { window.GrugOutfitRig && GrugOutfitRig.load().then(l => { if (l) GrugOutfitRig.dress(me.rig, l); else GrugOutfitRig.undress(me.rig); setName(me, l && !l.starter && !l.isDefault ? l.name : me.baseName); }); });
 
 // ---------------------------------------------------------------- Grug site: Pearls and Rebirth
 const REBIRTH = { game: 'slide999-rebirth', pearls: 2, cooldown: 24 * 3600e3 };

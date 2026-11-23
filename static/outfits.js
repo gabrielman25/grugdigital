@@ -12,7 +12,12 @@
          preview: Blob   a PNG portrait
          look:    {}     GrugStudio.get() at save time (name, skin, head, hair, hairColor, eyes, brows, mouth, …)
          shirt, pants: Blob   the raw painted clothing (so the studio can open the outfit again to edit it) }
-     localStorage 'grug.outfit.active' = the id the player plays as ('' or missing = the game's own default character).
+     localStorage 'grug.outfit.active' = the id the player plays as ('' or missing = the default character, Grug).
+
+   Starter outfits: the first time a browser uses this, the looks marked "starter" in /character/looks/looks.json (Grug,
+   the default, plus a few game outfits) are saved here as ordinary outfits (ids 'starter-<id>', starter: true), and
+   Grug becomes the one they play as unless they already picked one. It happens once (localStorage 'grug.outfit.starters');
+   deleting them afterwards is fine, they don't come back.
 
    API (all async except active/setActive)
      GrugOutfits.list()            [{ id, name, created, updated, preview }]  newest first (no glb: cheap to list)
@@ -21,6 +26,7 @@
      GrugOutfits.rename(id, name)  GrugOutfits.remove(id)
      GrugOutfits.active()          the active id or ''          GrugOutfits.setActive(id | '')
      GrugOutfits.activeRecord()    the full active record or null
+     GrugOutfits.seed()            add the starter outfits if this browser hasn't had them yet (list/activeRecord call it)
    A 'grug:outfits' event goes out on window whenever something changes (also when another tab changes it). */
 (function () {
   'use strict';
@@ -45,7 +51,32 @@
   const ping = () => { try { dispatchEvent(new CustomEvent('grug:outfits')); } catch (e) {} try { localStorage.setItem('grug.outfit.ping', String(Date.now())); } catch (e) {} };
   const newId = () => 'o' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
+  // the starter outfits, once per browser (see the top of this file)
+  const SKEY = 'grug.outfit.starters';
+  let seeding = null;
+  function seed() {
+    let done = '1'; try { done = localStorage.getItem(SKEY); } catch (e) {}
+    if (done || !window.fetch) return Promise.resolve();
+    return seeding || (seeding = (async () => {
+      const r = await fetch('/character/looks/looks.json'); if (!r.ok) throw new Error('looks.json ' + r.status);
+      const L = (await r.json()).filter(k => k.starter), have = await tx('readonly', (st, set) => req(st.getAllKeys()).then(set)), now = Date.now();
+      const blob = u => fetch(u).then(x => x.ok ? x.blob() : null).catch(() => null);
+      const recs = await Promise.all(L.map(async (k, i) => {
+        const id = 'starter-' + k.id; if ((have || []).includes(id)) return null;
+        const [glb, preview, shirt, pants] = await Promise.all([`/arcade/outfits/${k.id}.glb`, `/character/looks/${k.id}/preview.png`, `/character/looks/${k.id}/shirt.png`, `/character/looks/${k.id}/pants.png`].map(blob));
+        if (!glb) throw new Error('starter ' + k.id);
+        const t = now - i * 1000;   // the default first in the list
+        return { id, name: k.name, created: t, updated: t, glb, preview, shirt, pants, look: Object.assign({}, k.look, { name: k.name }), custom: true, starter: true };
+      }));
+      await tx('readwrite', st => Promise.all(recs.filter(Boolean).map(r => req(st.put(r)))));
+      const def = L.find(k => k.default);
+      try { if (def && !localStorage.getItem(AKEY)) localStorage.setItem(AKEY, 'starter-' + def.id); localStorage.setItem(SKEY, '1'); } catch (e) {}
+      ping();
+    })().catch(e => { console.warn('starter outfits', e); }).then(() => { seeding = null; }));
+  }
+
   async function list() {
+    await seed();
     const all = await tx('readonly', (st, set) => req(st.getAll()).then(set));
     return (all || []).map(r => ({ id: r.id, name: r.name, created: r.created, updated: r.updated, preview: r.preview || null }))
       .sort((a, b) => (b.updated || 0) - (a.updated || 0));
@@ -60,8 +91,8 @@
   async function remove(id) { await tx('readwrite', st => req(st.delete(id))); if (active() === id) setActive(''); else ping(); return true; }
   function active() { try { return localStorage.getItem(AKEY) || ''; } catch (e) { return ''; } }
   function setActive(id) { try { if (id) localStorage.setItem(AKEY, id); else localStorage.removeItem(AKEY); } catch (e) {} ping(); }
-  async function activeRecord() { const id = active(); if (!id) return null; try { return await get(id); } catch (e) { return null; } }
+  async function activeRecord() { await seed(); const id = active(); if (!id) return null; try { return await get(id); } catch (e) { return null; } }
 
   addEventListener('storage', e => { if (e.key === AKEY || e.key === 'grug.outfit.ping') try { dispatchEvent(new CustomEvent('grug:outfits')); } catch (x) {} });
-  window.GrugOutfits = { list, get, put, rename, remove, active, setActive, activeRecord, DB, STORE };
+  window.GrugOutfits = { list, get, put, rename, remove, active, setActive, activeRecord, seed, DB, STORE };
 })();

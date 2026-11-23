@@ -2532,7 +2532,7 @@ function zombieOutfit(o, kind) {
       const start = pos.length / 3;
       for (const g of e.geos) {
         const a = g.attributes; if (!a.position || !a.normal || !a.uv) throw new Error('outfit part without normals/uvs');
-        pos.push(...a.position.array); nor.push(...a.normal.array); uv.push(...a.uv.array);
+        for (const [d, v] of [[pos, a.position.array], [nor, a.normal.array], [uv, a.uv.array]]) for (let q = 0; q < v.length; q++) d.push(v[q]);
       }
       groups.push([start, pos.length / 3 - start, mats.length]); mats.push([e.m, e.head]);
     }
@@ -4223,24 +4223,29 @@ function joinBattle() {   // no title screen: you spawn into a round that's been
   wearOutfits();
 }
 // ---------------------------------------------------------------- Grug site: your saved outfits (you; your other outfits, then the game's own kit, on the other players)
-const ZZ_KIT = ['ranger', 'scavenger', 'medic', 'ranger', 'scavenger', 'medic'];
 async function wearOutfits() {
   if (!window.GrugOutfitRig) return;
+  // nobody shows up blocky: each character stays hidden until its outfit is on (8 s at most)
+  const all = [player, ...bots].filter(Boolean), show = f => { f.rig.root.visible = true; };
+  all.forEach(f => { f.rig.root.visible = false; });
+  const cap = setTimeout(() => all.forEach(show), 8000);
+  const KIT = ['ranger', 'scavenger', 'medic', 'skater', 'flannel', 'grug'];   // the game's own outfits (arcade/outfits/*.glb)
+  const kitP = Promise.all(KIT.map(n => GrugOutfitRig.fromURL('/arcade/outfits/' + n + '.glb', n))).then(a => a.filter(Boolean));
   try {
-    const look = await GrugOutfitRig.load();
-    if (look && player) { GrugOutfitRig.dress(player.rig, look); dressRig(player.rig, playerLook(player.team)); player.name = player.K.name = look.name.slice(0, 20); }
+    const look = await GrugOutfitRig.load();   // you first
+    if (player) { if (look) { GrugOutfitRig.dress(player.rig, look); dressRig(player.rig, playerLook(player.team)); if (!look.starter && !look.isDefault) player.name = player.K.name = look.name.slice(0, 20); } show(player); }
     const order = bots.slice().sort((a, b) => (player && a.team === player.team ? 0 : 1) - (player && b.team === player.team ? 0 : 1));
-    const others = await GrugOutfitRig.others(8);
-    others.forEach((o, i) => { const b = order[i]; if (!b) return; GrugOutfitRig.dress(b.rig, o); dressRig(b.rig, botLook(b)); b.name = b.K.name = o.name.slice(0, 20); b.tag.nm.textContent = b.name; });
-    // about a third of everyone else wears the game's own survival kit
-    const kit = (await Promise.all(['ranger', 'scavenger', 'medic'].map(n => GrugOutfitRig.fromURL('/arcade/outfits/' + n + '.glb', n)))).filter(Boolean);
-    if (kit.length) { let k = 0; for (let i = others.length; i < order.length; i += 3) { const b = order[i]; GrugOutfitRig.dress(b.rig, kit[k++ % kit.length]); dressRig(b.rig, botLook(b)); } }
+    const [others, kit] = await Promise.all([GrugOutfitRig.others(8), kitP]);
+    others.forEach((o, i) => { const b = order[i]; if (!b) return; GrugOutfitRig.dress(b.rig, o); dressRig(b.rig, botLook(b)); if (!o.starter) { b.name = b.K.name = o.name.slice(0, 20); b.tag.nm.textContent = b.name; } show(b); });
+    // everyone else wears the game's own outfits
+    if (kit.length) for (let i = others.length, k = 0; i < order.length; i++, k++) { const b = order[i]; GrugOutfitRig.dress(b.rig, kit[(k * 5 + 1) % kit.length]); dressRig(b.rig, botLook(b)); show(b); }
     // the zombies wear them too (the survival kit and the player's other outfits), tinted green
     ZOUT.push(...kit, ...others); if (ZOUT.length) reskinZombies();
     plKey = '';
   } catch (e) { console.warn('outfits', e); }
+  clearTimeout(cap); all.forEach(show);
 }
-addEventListener('grug:outfits', () => { if (player && window.GrugOutfitRig) GrugOutfitRig.load().then(l => { if (l) { GrugOutfitRig.dress(player.rig, l); player.name = player.K.name = l.name.slice(0, 20); } else { GrugOutfitRig.undress(player.rig); player.name = player.K.name = Save.name; } dressRig(player.rig, playerLook(player.team)); plKey = ''; }); });
+addEventListener('grug:outfits', () => { if (player && window.GrugOutfitRig) GrugOutfitRig.load().then(l => { if (l) GrugOutfitRig.dress(player.rig, l); else GrugOutfitRig.undress(player.rig); player.name = player.K.name = l && !l.starter && !l.isDefault ? l.name.slice(0, 20) : Save.name; dressRig(player.rig, playerLook(player.team)); plKey = ''; }); });
 function join() {
   if (player) return;
   startRound(pickMode, {});

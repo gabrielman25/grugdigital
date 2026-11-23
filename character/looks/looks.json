@@ -1,5 +1,46 @@
 [
  {
+  "id": "grug",
+  "name": "Grug",
+  "game": "Grug Arcade",
+  "default": true,
+  "starter": true,
+  "look": {
+   "body": "classic",
+   "headSize": 1.1,
+   "browColor": "#2a1d18",
+   "name": "Grug",
+   "skin": "#eab892",
+   "head": "Heart",
+   "hair": "Crop",
+   "hairColor": "#4a2c1a",
+   "eyes": 6,
+   "brows": 2,
+   "mouth": 6,
+   "outfit": "lime green zip-up hoodie with white drawstrings and a small dark green stegosaurus dinosaur emblem on the chest, dark charcoal grey jeans, white sneakers with lime green laces"
+  }
+ },
+ {
+  "id": "skater",
+  "name": "Skater",
+  "game": "Grug Arcade",
+  "starter": true,
+  "look": {
+   "body": "classic",
+   "headSize": 1.1,
+   "browColor": "#2a1d18",
+   "name": "Skater",
+   "skin": "#a87452",
+   "head": "Bell",
+   "hair": "Curtains",
+   "hairColor": "#1b1b1f",
+   "eyes": 6,
+   "brows": 2,
+   "mouth": 6,
+   "outfit": "mustard yellow t-shirt with a retro orange sunset graphic, open light-blue denim jacket with the sleeves rolled up, black ripped skinny jeans, red canvas high-top sneakers"
+  }
+ },
+ {
   "id": "ranger",
   "name": "Ranger",
   "game": "Zombie Zones",
@@ -12,11 +53,12 @@
    "hair": "Crop",
    "hairColor": "#2a1d18",
    "eyes": 6,
-   "brows": 2,
-   "mouth": 3,
+   "brows": 3,
+   "mouth": 0,
    "browColor": "#2a1d18",
    "outfit": "olive-drab military field jacket with woodland camo pattern and rolled sleeves, tan tactical vest with ammo pouches and a radio, black web belt, olive camo cargo trousers with knee pads, black combat boots"
-  }
+  },
+  "starter": true
  },
  {
   "id": "scavenger",
@@ -30,12 +72,13 @@
    "headSize": 1.1,
    "hair": "Choppy bob",
    "hairColor": "#e8743b",
-   "eyes": 6,
-   "brows": 2,
-   "mouth": 5,
+   "eyes": 15,
+   "brows": 0,
+   "mouth": 6,
    "browColor": "#2a1d18",
    "outfit": "rugged survival gear: faded brown waxed-canvas jacket with patched elbows and duct-tape repairs over a grey hoodie, red bandana tied around the neck, backpack straps over the shoulders, dark denim jeans with knee patches and a utility belt with a flashlight, scuffed brown hiking boots"
-  }
+  },
+  "starter": true
  },
  {
   "id": "medic",
@@ -54,7 +97,8 @@
    "mouth": 6,
    "browColor": "#2a1d18",
    "outfit": "survival field medic: white long-sleeve thermal shirt under a grey tactical vest with medical pouches, a green armband with a white plus sign on the upper arm, fingerless black gloves, navy blue cargo trousers with bandage rolls strapped to one thigh, black combat boots"
-  }
+  },
+  "starter": true
  },
  {
   "id": "racer",
@@ -68,12 +112,13 @@
    "headSize": 1.1,
    "hair": "Spiky",
    "hairColor": "#f1d27a",
-   "eyes": 9,
+   "eyes": 6,
    "brows": 1,
-   "mouth": 2,
+   "mouth": 0,
    "browColor": "#2a1d18",
    "outfit": "retro racing jumpsuit in bright blue and white with bold racing stripes down the sides, a checkered-flag patch and a number 9 on the chest, white racing gloves, matching blue and white jumpsuit trousers, red and white high-top sneakers"
-  }
+  },
+  "starter": true
  },
  {
   "id": "snow-rider",
@@ -87,11 +132,33 @@
    "headSize": 1.1,
    "hair": "Twin buns",
    "hairColor": "#c59bff",
-   "eyes": 4,
-   "brows": 0,
-   "mouth": 1,
+   "eyes": 15,
+   "brows": 1,
+   "mouth": 6,
    "browColor": "#2a1d18",
    "outfit": "puffy teal winter ski jacket with white chest stripes and a fur-trimmed hood folded down, chunky orange knit scarf, black ski gloves, grey padded snow pants with reflective strips, chunky white snow boots"
-  }
+  },
+  "starter": true
+ },
+ {
+  "id": "flannel",
+  "name": "Lumberjack",
+  "game": "Grug Arcade",
+  "builtin": true,
+  "look": {
+   "body": "classic",
+   "headSize": 1.1,
+   "browColor": "#2a1d18",
+   "name": "Lumberjack",
+   "skin": "#ffcc99",
+   "head": "Chubby",
+   "hair": "Side part",
+   "hairColor": "#8a5a2b",
+   "eyes": 0,
+   "brows": 0,
+   "mouth": 0,
+   "outfit": "Flannel & jeans"
+  },
+  "starter": true
  }
 ]
