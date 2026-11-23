@@ -59,3 +59,11 @@ by default, full width, with a sticky top bar (nav, Pearls, a light/dark button 
 collections (the categories, by number in `ITCH.COLLECTIONS`). itch answers 429 to bursts: keep the requests one at a
 time and cached, never fan out. `static/itch-assets.json` is the fallback; see README.md. itch cover URLs are signed per
 size, so only the `315x250` covers itch gives us work: don't rewrite them to other sizes.
+
+## Grug Arcade (`/arcade/`)
+
+Games live in `arcade/<slug>/index.html`; follow `arcade/claude.md` (no title screens, flat classic UI, retro
+animations, the player wears their saved outfit via `GrugOutfitRig`, Pearls only through `GrugPearls.reward` /
+`GrugPearlPopup`, never a Pearl balance on screen). Saved outfits are `static/outfits.js` (IndexedDB `grug-outfits`,
+active id `grug.outfit.active`); the studio's My outfits layer is `src/character/outfits.js`, put into
+`character/index.html` by `patch_outfits.py` (also run by `patch_studio.py`/`build.py`).

@@ -1,7 +1,8 @@
 /* GrugPearls · the Pearls wallet on the new site.
    It is the SAME wallet the legacy pages use (localStorage 'grug.pearls.v1': {v, balance, code, buys, club, …}); the new site
    and the legacy pages share one address, so Pearls bought, won or spent anywhere show up everywhere. Fields this file adds to
-   the wallet: started, promo, daily (the last day the daily Pearls were claimed), spends, r6 (characters already exported).
+   the wallet: started, promo, daily (the last day the daily Pearls were claimed), spends, r6 (characters already exported),
+   rewards ({game: when it last paid out}, so clearing a game's own save can't skip its cooldown), earns (a log, like spends).
 
    GrugPearls.CFG            the numbers: starting balance, promo balances, daily Pearls (free / Grug Gold), R6 export fee
    GrugPearls.start(promo)   run once on page load: makes a new player's wallet (80 Pearls, or the promo's amount) and then
@@ -9,6 +10,9 @@
    GrugPearls.balance()      the current balance
    GrugPearls.spend(n, what) take n Pearls (throws an Error with .code 'short' if there aren't enough)
    GrugPearls.paid(id) / markPaid(id)   a character already exported (re-downloads are free)
+   GrugPearls.reward(game, n, cooldownMs, what)   a game pays out n Pearls, at most once per cooldown for that game
+                             (Promise of {balance, next}; throws an Error with .code 'cooldown' and .next if it's too soon)
+   GrugPearls.rewardStatus(game, cooldownMs)      {ready, last, next} without paying anything
    GrugPearls.gold()         Promise of the Grug Gold tier (via /assets/gold.js, the site's Gumroad check) or null
    A 'grug:pearls' event goes out on window whenever the balance changes (also when another tab changes it).
    There is no server: like everywhere on Grug, the wallet lives in this browser on this device. */
@@ -80,11 +84,28 @@
       save(w); return w.balance;
     });
   }
+  // game rewards (the arcade: /arcade/…). The cooldown is kept in the wallet, per game.
+  function rewardStatus(game, cooldown) {
+    const w = raw() || {}, last = +((w.rewards && w.rewards[game]) || 0), next = last ? last + (+cooldown || 0) : 0;
+    return { ready: Date.now() >= next, last, next };
+  }
+  function reward(game, n, cooldown, what) {
+    game = String(game || '').slice(0, 40); n = Math.max(0, Math.floor(+n || 0));
+    return locked(() => {
+      const w = wallet(); w.rewards = (w.rewards && typeof w.rewards === 'object' && !Array.isArray(w.rewards)) ? w.rewards : {};
+      const last = +w.rewards[game] || 0, next = last + (+cooldown || 0);
+      if (last && Date.now() < next) { const e = new Error('That reward is on cooldown.'); e.code = 'cooldown'; e.next = next; throw e; }
+      if (!w.started) w.started = Date.now();
+      w.balance += n; w.rewards[game] = Date.now();
+      w.earns = [{ at: Date.now(), n, what: String(what || game).slice(0, 80) }].concat(Array.isArray(w.earns) ? w.earns : []).slice(0, 50);
+      save(w); return { balance: w.balance, next: Date.now() + (+cooldown || 0) };
+    });
+  }
   const paid = id => { const w = wallet(); return Array.isArray(w.r6) && w.r6.indexOf(id) >= 0; };
   function markPaid(id) { const w = wallet(); w.r6 = [id].concat((Array.isArray(w.r6) ? w.r6 : []).filter(x => x !== id)).slice(0, 300); save(w); }
   // the next daily Pearls: local midnight
   const nextDaily = () => { const d = new Date(); d.setHours(24, 0, 0, 0); return d; };
 
   addEventListener('storage', e => { if (e.key === WKEY) try { dispatchEvent(new CustomEvent('grug:pearls', { detail: { balance: balance() } })); } catch (x) {} });
-  window.GrugPearls = { CFG, start, balance, spend, paid, markPaid, gold, loadGold, wallet, today, nextDaily, claimedToday: () => (raw() || {}).daily === today() };
+  window.GrugPearls = { CFG, start, balance, spend, reward, rewardStatus, paid, markPaid, gold, loadGold, wallet, today, nextDaily, claimedToday: () => (raw() || {}).daily === today() };
 })();

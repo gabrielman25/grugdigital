@@ -239,5 +239,9 @@ PAY = f'''<section id="payDlg" class="cg-wrap" aria-labelledby="payTitle">
 '''
 sub('</script>\n</body>\n</html>', '</script>\n' + PAY + '<script id="agent-api">\n' + agent + '</script>\n</body>\n</html>')
 
+# ---- the "My outfits" layer (save characters for the Grug games): src/character/patch_outfits.py
+sys.path.insert(0, str(here)); import patch_outfits
+s = patch_outfits.apply(s)
+
 open(out, 'w', encoding='utf-8').write(s)
 print('wrote', out, len(s))

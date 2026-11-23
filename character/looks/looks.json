@@ -1,0 +1,97 @@
+[
+ {
+  "id": "ranger",
+  "name": "Ranger",
+  "game": "Zombie Zones",
+  "look": {
+   "name": "Ranger",
+   "skin": "#cc8e69",
+   "body": "classic",
+   "head": "Jaw",
+   "headSize": 1.1,
+   "hair": "Crop",
+   "hairColor": "#2a1d18",
+   "eyes": 6,
+   "brows": 2,
+   "mouth": 3,
+   "browColor": "#2a1d18",
+   "outfit": "olive-drab military field jacket with woodland camo pattern and rolled sleeves, tan tactical vest with ammo pouches and a radio, black web belt, olive camo cargo trousers with knee pads, black combat boots"
+  }
+ },
+ {
+  "id": "scavenger",
+  "name": "Scavenger",
+  "game": "Zombie Zones",
+  "look": {
+   "name": "Scavenger",
+   "skin": "#eab892",
+   "body": "classic",
+   "head": "Chin",
+   "headSize": 1.1,
+   "hair": "Choppy bob",
+   "hairColor": "#e8743b",
+   "eyes": 6,
+   "brows": 2,
+   "mouth": 5,
+   "browColor": "#2a1d18",
+   "outfit": "rugged survival gear: faded brown waxed-canvas jacket with patched elbows and duct-tape repairs over a grey hoodie, red bandana tied around the neck, backpack straps over the shoulders, dark denim jeans with knee patches and a utility belt with a flashlight, scuffed brown hiking boots"
+  }
+ },
+ {
+  "id": "medic",
+  "name": "Medic",
+  "game": "Zombie Zones",
+  "look": {
+   "name": "Medic",
+   "skin": "#7c5c46",
+   "body": "classic",
+   "head": "Egg",
+   "headSize": 1.1,
+   "hair": "Ponytail",
+   "hairColor": "#1b1b1f",
+   "eyes": 2,
+   "brows": 0,
+   "mouth": 6,
+   "browColor": "#2a1d18",
+   "outfit": "survival field medic: white long-sleeve thermal shirt under a grey tactical vest with medical pouches, a green armband with a white plus sign on the upper arm, fingerless black gloves, navy blue cargo trousers with bandage rolls strapped to one thigh, black combat boots"
+  }
+ },
+ {
+  "id": "racer",
+  "name": "Racer",
+  "game": "Slide 999 KM",
+  "look": {
+   "name": "Racer",
+   "skin": "#ffcc99",
+   "body": "classic",
+   "head": "Square",
+   "headSize": 1.1,
+   "hair": "Spiky",
+   "hairColor": "#f1d27a",
+   "eyes": 9,
+   "brows": 1,
+   "mouth": 2,
+   "browColor": "#2a1d18",
+   "outfit": "retro racing jumpsuit in bright blue and white with bold racing stripes down the sides, a checkered-flag patch and a number 9 on the chest, white racing gloves, matching blue and white jumpsuit trousers, red and white high-top sneakers"
+  }
+ },
+ {
+  "id": "snow-rider",
+  "name": "Snow Rider",
+  "game": "Slide 999 KM",
+  "look": {
+   "name": "Snow Rider",
+   "skin": "#cc8e69",
+   "body": "classic",
+   "head": "Round",
+   "headSize": 1.1,
+   "hair": "Twin buns",
+   "hairColor": "#c59bff",
+   "eyes": 4,
+   "brows": 0,
+   "mouth": 1,
+   "browColor": "#2a1d18",
+   "outfit": "puffy teal winter ski jacket with white chest stripes and a fur-trimmed hood folded down, chunky orange knit scarf, black ski gloves, grey padded snow pants with reflective strips, chunky white snow boots"
+  }
+ }
+]

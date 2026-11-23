@@ -55,6 +55,23 @@ chat, describe a character, and Claude makes it.
   R6 exports cost Pearls; making and saving characters is free.
 - The Claude skill: `src/skill/` (served as `/character/roblox-characters.zip`).
 
+- Saved outfits ("My outfits": save, edit, rename, delete, **Play as**): `static/outfits.js` (`window.GrugOutfits`, an
+  IndexedDB store per browser) and the studio layer `src/character/outfits.js`, injected by
+  `src/character/patch_outfits.py`. Ready-made game looks: `character/looks/` (`looks.json` + the clothing PNGs).
+
+## Grug Arcade (`/arcade/`)
+
+Browser games in the classic blocky style, each one self-contained: `arcade/slide-999/`, `arcade/zombie-zones/`, and
+the list at `arcade/index.html` (with the "Playing as" outfit picker).
+
+- `static/outfit-rig.js` (`window.GrugOutfitRig`) dresses a game's blocky rig in a saved outfit; the player wears the
+  one they picked, other saved outfits become the other players (and, tinted green, Zombie Zones' zombies).
+  `arcade/outfits/*.glb` are the games' own outfits (each with its own head shape), built from `character/looks/`.
+- Pearls in games: `GrugPearls.reward(game, n, cooldown)` (Slide 999 KM's Rebirth: 2 Pearls, once per 24 hours) and
+  `static/pearl-popup.js` (`window.GrugPearlPopup`: the "You got X Pearls" pop-up and the "Buy for X Pearls?" box for
+  in-game cash). Games never show a Pearl balance on screen.
+- `arcade/claude.md` is the guide for Claude sessions building a game for the site ("push it to the site").
+
 ## Changing the legacy site
 
 Push to the `legacy` branch. It redeploys to the legacy address and the main address picks it up straight away.

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grug Arcade · Classic blocky games</title>
+<meta name="description" content="Classic blocky games from Grug: Slide 999 KM for FREE ADMIN and Zombie Zones. Play as the character you made in the Grug Avatar Studio.">
+<link rel="icon" href="/favicon.png">
+<link rel="canonical" href="https://grugdigital.com/arcade/">
+<script>try { var p = (JSON.parse(localStorage.getItem('grug.profile.v1') || 'null') || {}).prefs || {}; if (p.mode === 'dark' || localStorage.getItem('grug.home.mode') === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}</script>
+<link rel="stylesheet" href="/static/site.css">
+<script src="/static/pearls.js"></script>
+<script src="/static/outfits.js"></script>
+<style>
+main{max-width:880px}
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pearls{display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 12px;border-radius:999px;background:var(--pearl-bg);color:var(--ink);text-decoration:none;font-variant-numeric:tabular-nums}
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.game{display:grid;grid-template-rows:auto 1fr;padding:0;overflow:hidden}
+.game img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--line)}
+.game .in{padding:18px 20px 20px;display:grid;gap:10px;align-content:start}
+.game h2{margin:0}
+.game p{margin:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--page);color:var(--soft)}
+.chip.pr{background:var(--pearl-bg);color:var(--pearl)}
+.me{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+.me .pic{width:112px;height:112px;border-radius:20px;background:var(--page);display:grid;place-items:center;overflow:hidden}
+.me .pic img{width:100%;height:100%;object-fit:cover}
+.me .pic svg{width:56px;height:56px;opacity:.35}
+.me h2{margin:0 0 4px}
+.picks{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 6px;margin-top:12px}
+.pk{flex:none;width:76px;display:grid;gap:4px;justify-items:center;padding:6px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:500 12px 'Fredoka',system-ui,sans-serif;cursor:pointer}
+.pk img,.pk .none{width:58px;height:58px;border-radius:10px;object-fit:cover;background:var(--page);display:grid;place-items:center;font-size:22px}
+.pk span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pk.on{border-color:var(--accent-lo);background:color-mix(in srgb,var(--accent) 18%,var(--card))}
+@media (max-width:560px){ .me{grid-template-columns:1fr;justify-items:center;text-align:center} }
+</style>
+</head>
+<body>
+<main>
+  <div class="head">
+    <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Grug</a>
+    <a class="pearls" id="pearls" href="/character/pearls/" title="Your Pearls" hidden><svg class="pearl" viewBox="0 0 16 16" aria-hidden="true" fill="#d16be8"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></svg><span id="pearlN">0</span></a>
+  </div>
+
+  <section class="card" aria-labelledby="t">
+    <div class="tag">Grug Arcade</div>
+    <h1 id="t">Classic blocky games</h1>
+    <p style="margin-top:8px">Old-school games that play right in your browser. Every game dresses you in the character you made in the
+      Avatar Studio, and your other saved outfits show up as the other players.</p>
+  </section>
+
+  <section class="card" aria-labelledby="meT">
+    <div class="me">
+      <div class="pic" id="mePic"></div>
+      <div>
+        <div class="tag">Playing as</div>
+        <h2 id="meT">The game's own character</h2>
+        <p id="meP">Make a character in the Avatar Studio and save it for the games to play as yourself.</p>
+        <div class="row"><a class="btn btn--sm" href="/character/?outfits">Avatar Studio: my outfits</a></div>
+      </div>
+    </div>
+    <div class="picks" id="picks" hidden></div>
+  </section>
+
+  <div class="games">
+    <a class="card game" href="/arcade/slide-999/" style="text-decoration:none">
+      <img src="/arcade/slide-999/cover.jpg" alt="Slide 999 KM: a cart flying down a blocky sky slide" loading="lazy">
+      <div class="in">
+        <h2>Slide 999 KM for FREE ADMIN!!</h2>
+        <p>A slide in the sky, 999 kilometres long, with obbies on the way down. Reach the bottom for free admin commands.</p>
+        <div class="chips"><span class="chip pr">Rebirth: 2 Pearls a day</span><span class="chip">Mystery cart crates</span><span class="chip">Bots + your outfits</span></div>
+        <span class="btn" style="justify-self:start">Play</span>
+      </div>
+    </a>
+    <a class="card game" href="/arcade/zombie-zones/" style="text-decoration:none">
+      <img src="/arcade/zombie-zones/cover.jpg" alt="Zombie Zones: a blocky survivor with a blaster in a battle" loading="lazy">
+      <div class="in">
+        <h2>Zombie Zones</h2>
+        <p>Four teams, one zombie-filled middle. Supply runs, capture the flag, deathmatch and survival. You drop straight into a battle.</p>
+        <div class="chips"><span class="chip">4 modes</span><span class="chip">Skill tree</span><span class="chip">Loot guns</span></div>
+        <span class="btn" style="justify-self:start">Play</span>
+      </div>
+    </a>
+  </div>
+</main>
+<script>
+(() => {
+  const $ = id => document.getElementById(id), O = window.GrugOutfits, P = window.GrugPearls, urls = [];
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const PERSON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="8" y="2" width="8" height="7" rx="1.5"/><rect x="6" y="10" width="12" height="7" rx="1"/><rect x="6" y="18" width="5" height="4"/><rect x="13" y="18" width="5" height="4"/></svg>';
+  function pearls() { if (!P) return; $('pearls').hidden = false; $('pearlN').textContent = P.balance().toLocaleString(); }
+  if (P) { P.start().then(pearls).catch(pearls); addEventListener('grug:pearls', pearls); }
+  async function render() {
+    urls.splice(0).forEach(u => URL.revokeObjectURL(u));
+    let list = []; try { list = O ? await O.list() : []; } catch (e) {}
+    const act = O ? O.active() : '', cur = list.find(o => o.id === act);
+    const src = o => { if (!o || !o.preview) return ''; const u = URL.createObjectURL(o.preview); urls.push(u); return u; };
+    const u = src(cur);
+    $('mePic').innerHTML = u ? `<img src="${u}" alt="">` : PERSON;
+    $('meT').textContent = cur ? cur.name : "The game's own character";
+    $('meP').textContent = cur ? `${list.length > 1 ? `Your ${list.length - 1} other outfit${list.length > 2 ? 's show' : ' shows'} up as other players.` : 'Save more outfits and they show up as the other players.'}`
+      : list.length ? 'Pick one of your outfits below to play as it.' : 'Make a character in the Avatar Studio and save it for the games to play as yourself.';
+    $('picks').hidden = !list.length;
+    $('picks').innerHTML = list.map(o => { const s2 = src(o); return `<button class="pk${o.id === act ? ' on' : ''}" data-id="${o.id}">${s2 ? `<img src="${s2}" alt="">` : '<div class="none">?</div>'}<span>${esc(o.name)}</span></button>`; }).join('') +
+      `<button class="pk${act ? '' : ' on'}" data-id=""><div class="none">${PERSON.replace('<svg ', '<svg width="34" height="34" ')}</div><span>Default</span></button>`;
+  }
+  $('picks').addEventListener('click', e => { const b = e.target.closest('.pk'); if (b && O) O.setActive(b.dataset.id); });
+  addEventListener('grug:outfits', render);
+  render();
+})();
+</script>
+</body>
+</html>

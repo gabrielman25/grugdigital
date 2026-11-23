@@ -244,6 +244,7 @@ const api = window.GrugStudio = {
   paintOutfit, openPaint: () => paintOutfit(), steps: () => STEPS.map((t, i) => `${i + 1}. ${t}`),
   wear, wearIt, match, finish: () => { C.setCat('finish'); return status(); },
   downloadR6, r6Base64, downloadZip: async o => { needOutfit(o); await payFromApi(o); return ZIP_RAW(); }, r6Script: () => R6_SETUP_LUA,
+  _outfitWorn: custom => { outfit.source = custom ? 'pasted' : 'starter'; outfit.worn = !!custom; syncWarn(); },   // used by the outfits layer (src/character/outfits.js)
   status, help: () => `Grug Avatar Studio agent API v2. Guide: ${location.origin}/character/claude.md\n` +
     'A character is finished only when it wears a custom shirt and pants painted in Gemini.\n' +
     '1. await GrugStudio.set({name, skin, head, hair, hairColor, eyes, brows, mouth})   (GrugStudio.options() lists the choices)\n' +
