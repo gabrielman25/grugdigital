@@ -390,6 +390,9 @@ With noticeable lashes (a common pick for a female character): 2, 4, 5, 10, 11, 
 | `outfits()` | the saved outfits: `[{ id, name, active }]` |
 | `playAs(id)` | play the Grug games as that outfit (`null`: the games' own character) |
 | `openOutfits()` | open the **My outfits** sheet |
+| `wardrobe()` | the ready-made Wardrobe: `[{ id, name, theme, desc }]`, each one a top and a bottom |
+| `wearTop(id, { rightArm, leftArm }?)` | wear a Wardrobe top; `rightArm` / `leftArm` take the sleeve from another top |
+| `wearBottom(id)` | wear Wardrobe bottoms (trousers and shoes) |
 
 ## Playing as the character in the Grug Arcade
 
@@ -397,7 +400,7 @@ Characters can also be played in the games at https://grugdigital.com/arcade/ (S
 person wants that, call `await GrugStudio.saveForGames('<name>')` once the outfit is worn: it's free, stays in their
 browser, and the games dress their player in it (their other saved outfits show up as the other players). The
 **My outfits** button (top left) lists them, with **Play as**, **Edit**, **Rename** and **Delete**. The games' own
-outfits (Ranger, Scavenger, Medic, Racer, Snow Rider) are in Ready-made looks.
+outfits (Ranger, Scavenger, Medic, Racer, Snow Rider) are in the Wardrobe under **Grug games**.
 
 ## The Claude skill
 

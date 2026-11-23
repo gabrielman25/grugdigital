@@ -1,0 +1,320 @@
+[
+ {
+  "id": "cozy-cardigan",
+  "name": "Cozy Cardigan",
+  "theme": "Casual",
+  "desc": "oatmeal cream chunky cable-knit cardigan with wooden buttons, open over a plain white t-shirt, light-wash straight blue jeans, plain white leather sneakers with no logos and no stripes"
+ },
+ {
+  "id": "breton-stripe",
+  "name": "Breton Stripe",
+  "theme": "Casual",
+  "desc": "navy and white horizontal striped long-sleeve breton shirt, khaki cotton chino trousers, brown leather boat shoes"
+ },
+ {
+  "id": "pastel-hoodie",
+  "name": "Pastel Hoodie",
+  "theme": "Casual",
+  "desc": "pastel pink oversized hoodie with a small white cloud print on the chest and a kangaroo pocket, lavender jogger sweatpants with elastic cuffs, chunky smooth plain white sneakers with no logos, no stripes and no perforations"
+ },
+ {
+  "id": "overalls",
+  "name": "Denim Overalls",
+  "theme": "Casual",
+  "desc": "mustard yellow short-sleeve t-shirt under classic blue denim overalls with a bib pocket and brass buckles on the straps, the overall trousers rolled at the ankle, plain red leather sneakers with white soles and no logos"
+ },
+ {
+  "id": "band-tee",
+  "name": "Dino Skull Tee",
+  "theme": "Casual",
+  "desc": "faded black short-sleeve t-shirt with an original flaming dinosaur skull graphic and no text, grey ripped skinny jeans, chunky plain black leather skate shoes with grey soles and no logos"
+ },
+ {
+  "id": "varsity",
+  "name": "Varsity Jacket",
+  "theme": "Streetwear",
+  "desc": "red and cream varsity letterman jacket with cream leather sleeves, striped ribbed cuffs and a big chenille letter G patch on the chest, black cargo trousers, chunky plain white leather skate shoes with no logos and no toe caps"
+ },
+ {
+  "id": "techwear",
+  "name": "Techwear",
+  "theme": "Streetwear",
+  "desc": "glossy black puffer vest over a charcoal grey hoodie, black techwear cargo trousers with buckled straps and many zip pockets, black sneakers with neon green soles"
+ },
+ {
+  "id": "tracksuit",
+  "name": "Retro Tracksuit",
+  "theme": "Streetwear",
+  "desc": "emerald green retro zip-up tracksuit jacket with a single thin white piping line down each sleeve and a white collar, matching green track pants with a single thin white piping line down the sides, plain white sneakers"
+ },
+ {
+  "id": "camo-hoodie",
+  "name": "Orange Camo",
+  "theme": "Streetwear",
+  "desc": "orange and black camouflage pullover hoodie, black joggers with an orange stripe down each side, black and orange sneakers"
+ },
+ {
+  "id": "tie-dye",
+  "name": "Tie-Dye Summer",
+  "theme": "Streetwear",
+  "desc": "rainbow spiral tie-dye short-sleeve t-shirt, light-wash denim shorts ending above the knee with bare legs below, white crew socks and white sneakers"
+ },
+ {
+  "id": "basketball",
+  "name": "Basketball",
+  "theme": "Sports",
+  "desc": "teal and white sleeveless basketball jersey with a plain white number 12 on the chest and back (bare arms), teal basketball shorts to the knee with white side trim, bare knees, tall plain white socks and plain white high-top basketball shoes with no logos"
+ },
+ {
+  "id": "soccer",
+  "name": "Soccer Kit",
+  "theme": "Sports",
+  "desc": "bright orange short-sleeve soccer jersey with a white collar and a plain white number 9 on the back, navy soccer shorts, orange knee-high socks, plain black cleats with no logos"
+ },
+ {
+  "id": "football",
+  "name": "Gridiron",
+  "theme": "Sports",
+  "desc": "red American football jersey with white number 88 and shoulder stripes, white football pants with a red stripe down the sides, black cleats"
+ },
+ {
+  "id": "karate",
+  "name": "Karate Gi",
+  "theme": "Sports",
+  "desc": "white karate gi jacket with a black belt tied at the waist, white gi trousers, barefoot (bare skin feet, no shoes)"
+ },
+ {
+  "id": "tennis",
+  "name": "Tennis Whites",
+  "theme": "Sports",
+  "desc": "plain white short-sleeve polo shirt with a green collar trim and no logo, white tennis shorts, white ankle socks and plain white tennis shoes with green soles"
+ },
+ {
+  "id": "chef",
+  "name": "Chef",
+  "theme": "Work",
+  "desc": "white double-breasted chef jacket with black buttons and a white apron tied at the waist, black and white houndstooth chef trousers, black kitchen clogs"
+ },
+ {
+  "id": "firefighter",
+  "name": "Firefighter",
+  "theme": "Work",
+  "desc": "tan firefighter turnout coat with bright yellow and silver reflective stripes on the chest, arms and hem, matching tan turnout trousers with reflective stripes, black rubber fire boots"
+ },
+ {
+  "id": "police",
+  "name": "Police Officer",
+  "theme": "Work",
+  "desc": "navy blue police uniform shirt with a silver badge, shoulder patches and a black duty belt, navy trousers, polished black shoes"
+ },
+ {
+  "id": "scientist",
+  "name": "Scientist",
+  "theme": "Work",
+  "desc": "white lab coat with pens in the chest pocket over a light blue shirt and a dark tie, grey slacks, brown leather loafers"
+ },
+ {
+  "id": "builder",
+  "name": "Construction",
+  "theme": "Work",
+  "desc": "orange high-visibility safety vest with silver reflective stripes over a grey t-shirt, blue work jeans with a brown leather tool belt, tan steel-toe work boots"
+ },
+ {
+  "id": "pilot",
+  "name": "Pilot",
+  "theme": "Work",
+  "desc": "white short-sleeve pilot shirt with gold-striped epaulettes, a gold wings badge and a black tie, navy uniform trousers, black dress shoes"
+ },
+ {
+  "id": "mechanic",
+  "name": "Mechanic",
+  "theme": "Work",
+  "desc": "blue mechanic coveralls with grease stains, a red oval name patch and rolled sleeves, matching blue coverall trousers with a rag in the pocket, black work boots"
+ },
+ {
+  "id": "tuxedo",
+  "name": "Tuxedo",
+  "theme": "Formal",
+  "desc": "black tuxedo jacket with satin lapels over a white dress shirt with a black bow tie, black tuxedo trousers with a satin side stripe, shiny black patent leather shoes"
+ },
+ {
+  "id": "business",
+  "name": "Business Suit",
+  "theme": "Formal",
+  "desc": "charcoal grey suit jacket over a light blue dress shirt and a red tie, charcoal suit trousers, brown leather oxford shoes"
+ },
+ {
+  "id": "velvet-blazer",
+  "name": "Velvet Blazer",
+  "theme": "Formal",
+  "desc": "emerald green velvet blazer with gold buttons over a black turtleneck, slim black trousers, black leather loafers"
+ },
+ {
+  "id": "linen-suit",
+  "name": "Summer Linen",
+  "theme": "Formal",
+  "desc": "cream linen suit jacket with a pink pocket square over a white shirt, cream linen trousers, tan suede loafers"
+ },
+ {
+  "id": "knight",
+  "name": "Knight",
+  "theme": "Fantasy",
+  "desc": "polished steel plate armour chestplate under a deep red tabard with a gold lion, steel shoulder plates and chainmail sleeves, steel leg armour with knee plates, steel armoured boots"
+ },
+ {
+  "id": "wizard",
+  "name": "Wizard",
+  "theme": "Fantasy",
+  "desc": "deep blue wizard robe covered in silver stars and crescent moons with wide sleeves and a rope belt, the robe continuing down over the legs, pointed brown leather shoes"
+ },
+ {
+  "id": "elf-ranger",
+  "name": "Elf Ranger",
+  "theme": "Fantasy",
+  "desc": "forest green leather tunic with leaf embroidery and a brown quiver strap across the chest, brown leather bracers, brown leggings, tall soft brown leather boots"
+ },
+ {
+  "id": "pirate",
+  "name": "Pirate Captain",
+  "theme": "Fantasy",
+  "desc": "white puffy linen shirt under an open crimson long coat with gold trim and gold buttons, a black sash belt, black breeches, tall black boots with gold buckles"
+ },
+ {
+  "id": "viking",
+  "name": "Viking",
+  "theme": "Fantasy",
+  "desc": "grey fur-lined leather vest over a rough cream linen tunic, wide leather belt with a knotwork buckle, brown wool trousers with criss-cross leg wraps, fur-trimmed leather boots"
+ },
+ {
+  "id": "royal",
+  "name": "Royal",
+  "theme": "Fantasy",
+  "desc": "purple velvet royal robe with white ermine fur trim and a heavy gold chain over a gold embroidered tunic, purple velvet trousers, gold buckled shoes"
+ },
+ {
+  "id": "ninja",
+  "name": "Ninja",
+  "theme": "Fantasy",
+  "desc": "black ninja jacket with a dark grey wrapped sash and wrapped forearms, black trousers wrapped tight at the shins, flat black shoes painted on the bottom of each leg"
+ },
+ {
+  "id": "samurai",
+  "name": "Samurai",
+  "theme": "Fantasy",
+  "desc": "red and black lacquered samurai armour plates over the chest and shoulders with gold cords, black pleated hakama trousers, straw sandals with white socks"
+ },
+ {
+  "id": "astronaut",
+  "name": "Astronaut",
+  "theme": "Sci-Fi",
+  "desc": "white padded space suit with orange accents, an original round mission patch showing a little green dinosaur and a rocket (no agency logos, no flags), a chest control panel with small buttons, matching white padded space suit trousers, chunky white space boots"
+ },
+ {
+  "id": "cyberpunk",
+  "name": "Cyberpunk",
+  "theme": "Sci-Fi",
+  "desc": "black leather jacket with glowing neon cyan circuit lines over a hot pink top, black trousers with glowing cyan stripes, chunky black platform boots with neon soles"
+ },
+ {
+  "id": "robot",
+  "name": "Robot",
+  "theme": "Sci-Fi",
+  "desc": "brushed silver metallic robot body plating with rivets, panel lines and a small glowing green hexagon light on the chest, silver robotic legs with mechanical knee joints, heavy metal robot feet"
+ },
+ {
+  "id": "star-captain",
+  "name": "Star Captain",
+  "theme": "Sci-Fi",
+  "desc": "navy and gold starship captain uniform tunic with a gold star insignia on the chest and gold cuff stripes, black uniform trousers, black boots"
+ },
+ {
+  "id": "mech-pilot",
+  "name": "Mech Pilot",
+  "theme": "Sci-Fi",
+  "desc": "teal and charcoal grey padded mech pilot suit with yellow hazard-stripe trim and black harness straps across the chest, an original yellow dinosaur-head patch on one shoulder, grey padded trousers with black knee pads, chunky grey armoured boots"
+ },
+ {
+  "id": "vampire",
+  "name": "Vampire",
+  "theme": "Spooky",
+  "desc": "black high-collared vampire coat with blood red lining over a red brocade vest and a white cravat, black trousers, pointed black boots"
+ },
+ {
+  "id": "skeleton",
+  "name": "Skeleton",
+  "theme": "Spooky",
+  "desc": "black bodysuit printed with white skeleton bones (ribcage on the chest, arm bones on the sleeves), black trousers printed with white leg bones, black shoes"
+ },
+ {
+  "id": "zombie",
+  "name": "Zombie",
+  "theme": "Spooky",
+  "desc": "torn and stained green plaid shirt with ripped sleeves and green slime splotches, ripped dirty brown trousers with holes, worn-out muddy shoes"
+ },
+ {
+  "id": "witch",
+  "name": "Witch",
+  "theme": "Spooky",
+  "desc": "dark purple witch dress top with black lace sleeves and a silver crescent moon pendant, black and purple striped tights, black buckled boots"
+ },
+ {
+  "id": "pumpkin",
+  "name": "Pumpkin Patch",
+  "theme": "Spooky",
+  "desc": "orange knit sweater with a jack-o-lantern face on the chest, black trousers with green vine embroidery, orange sneakers"
+ },
+ {
+  "id": "mummy",
+  "name": "Mummy",
+  "theme": "Spooky",
+  "desc": "wrapped all over in old off-white linen bandages with loose ends and dusty stains on the torso and arms, bandage-wrapped legs, bandage-wrapped feet"
+ },
+ {
+  "id": "raincoat",
+  "name": "Rainy Day",
+  "theme": "Outdoors",
+  "desc": "bright yellow raincoat with toggle buttons and big flap pockets, navy rain trousers, green rubber rain boots painted flat on the bottom of each leg (no extra shapes)"
+ },
+ {
+  "id": "hiker",
+  "name": "Hiker",
+  "theme": "Outdoors",
+  "desc": "teal fleece hiking jacket with zip chest pockets and backpack straps, tan hiking trousers with side pockets, brown leather hiking boots with red laces"
+ },
+ {
+  "id": "beach",
+  "name": "Beach Day",
+  "theme": "Outdoors",
+  "desc": "open short-sleeve hawaiian shirt with red hibiscus flowers on turquoise over a white tank top, light blue board shorts to the knee with bare legs below, brown flip-flops"
+ },
+ {
+  "id": "festive",
+  "name": "Festive Sweater",
+  "theme": "Outdoors",
+  "desc": "red christmas jumper with white reindeer and snowflakes knitted across it, green and red tartan pajama trousers, fuzzy brown slippers"
+ },
+ {
+  "id": "safari",
+  "name": "Safari",
+  "theme": "Outdoors",
+  "desc": "khaki safari shirt with chest pockets and rolled sleeves, khaki shorts with bare knees, tall beige socks and brown leather boots"
+ },
+ {
+  "id": "disco",
+  "name": "Disco",
+  "theme": "Retro",
+  "desc": "shiny gold sequin shirt with a big pointed collar, white bell-bottom flared trousers, white platform shoes"
+ },
+ {
+  "id": "greaser",
+  "name": "Greaser",
+  "theme": "Retro",
+  "desc": "black leather biker jacket with silver zips over a white t-shirt, dark blue jeans with big cuffs at the ankle, black leather boots"
+ },
+ {
+  "id": "aerobics",
+  "name": "80s Aerobics",
+  "theme": "Retro",
+  "desc": "neon pink and turquoise colour-block windbreaker jacket with a purple zigzag, black leggings with neon pink leg warmers, chunky plain white high-top sneakers with no logos"
+ }
+]

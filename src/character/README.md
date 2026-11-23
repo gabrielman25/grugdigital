@@ -9,6 +9,7 @@ it. Don't hand-edit `character/index.html`: change the files here and rebuild.
 | `agent.js` | `window.GrugStudio`: options/get/set, prompt, copyTemplate, wear, downloadR6 and friends; recipe links (`/character/?hair=…&outfit=…`); the sheet's behaviour; the template **Copy** button. |
 | `labels.json` | Plain-words labels for the 45 eyes, 18 brows and 12 mouths (the studio only has pictures of them) and named hair colours. If a new studio adds face parts, add labels in the same order. |
 | `outfits.js`, `patch_outfits.py` | The **My outfits** layer (save for the Grug games, Play as, Edit, the game looks). `python3 src/character/patch_outfits.py character/index.html` re-injects it (and the agent API) without a full rebuild; `patch_studio.py` runs it too. |
+| `wardrobe.js`, `wardrobe.py` | The **Wardrobe** on the outfit page: ready-made tops and bottoms by theme, picked separately, with left/right sleeve swapping. `wardrobe.py <folder of Gemini pictures> <outfits.json>` lines each picture up in the studio (headless, needs the repo served on localhost:8765), writes `character/wardrobe/<id>/` (shirt/pants templates as WebP plus top/bottom avatar previews) and `wardrobe.json`; pictures that match below 0.75 are skipped. The outfit list it was made from is `character/wardrobe/outfits.json`. |
 | `claude.md.tmpl` | The agent guide. `build.py` fills in the option tables from the live studio. |
 | `build.py` | Runs both steps. |
 
