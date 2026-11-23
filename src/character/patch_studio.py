@@ -69,8 +69,8 @@ CSS = r"""
 </head>"""
 sub('</style>\n</head>', '</style>' + CSS)
 
-PEARL = ('<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#E9E1F7" stroke="#9C8BC0" stroke-width="1.6"/>'
-         '<circle cx="9" cy="9" r="2.6" fill="#fff"/></svg>')
+# the site's own Pearl icon (legacy assets/icons.js 'pearl', in the top bar's purple #d16be8)
+PEARL = ('<svg viewBox="0 0 16 16" fill="#d16be8" aria-hidden="true"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></svg>')
 SPARK = ('<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5c.5 4.6 2.4 6.9 7 7.5-4.6.6-6.5 2.9-7 7.5-.5-4.6-2.4-6.9-7-7.5 '
          '4.6-.6 6.5-2.9 7-7.5z"/><path d="M19 15.5c.25 2 1 2.9 3 3.2-2 .3-2.75 1.2-3 3.2-.25-2-1-2.9-3-3.2 2-.3 2.75-1.2 3-3.2z"/></svg>')
 

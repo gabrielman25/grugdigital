@@ -1,7 +1,7 @@
 /* The new site's small pages (Pearls, promo links): the same look as the home page. */
 @font-face{font-family:'Fredoka';font-style:normal;font-weight:300 700;font-display:swap;src:url(/static/fredoka.woff2) format('woff2')}
-:root{--page:#F3F3F5;--card:#FFFFFF;--ink:#1E1B16;--soft:#6B6B73;--line:#E2E2E7;--accent:#9BE338;--accent-lo:#6FB31C;--pearl:#9C8BC0;--pearl-bg:#F1ECFA;color-scheme:light}
-html.dark{--page:#17171A;--card:#232327;--ink:#F3F3F5;--soft:#A3A3AD;--line:#33333A;--pearl-bg:#2C2736;color-scheme:dark}
+:root{--page:#F3F3F5;--card:#FFFFFF;--ink:#1E1B16;--soft:#6B6B73;--line:#E2E2E7;--accent:#9BE338;--accent-lo:#6FB31C;--pearl:#A94BC2;--pearl-bg:#F8EBFB;color-scheme:light}
+html.dark{--page:#17171A;--card:#232327;--ink:#F3F3F5;--soft:#A3A3AD;--line:#33333A;--pearl-bg:#33263A;color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{font-family:'Fredoka',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--page) url(/static/pattern.png) repeat;background-size:96px;color:var(--ink);

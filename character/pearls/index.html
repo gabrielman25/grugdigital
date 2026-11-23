@@ -53,10 +53,10 @@ details summary{cursor:pointer;font-weight:600;margin-top:12px}
 
   <section class="card hero" aria-labelledby="balTitle">
     <div class="tag" id="balTitle">Your Pearls</div>
-    <div class="big"><svg class="pearl" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#E9E1F7" stroke="#9C8BC0" stroke-width="1.6"/><circle cx="9" cy="9" r="2.6" fill="#fff"/></svg><span id="bal">0</span></div>
+    <div class="big"><svg class="pearl" viewBox="0 0 16 16" aria-hidden="true" fill="#d16be8"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></svg><span id="bal">0</span></div>
     <small>Saved in this browser on this device</small>
     <div class="daily" id="daily">
-      <div class="ic"><svg class="pearl" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#E9E1F7" stroke="#9C8BC0" stroke-width="1.6"/><circle cx="9" cy="9" r="2.6" fill="#fff"/></svg></div>
+      <div class="ic"><svg class="pearl" viewBox="0 0 16 16" aria-hidden="true" fill="#d16be8"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></svg></div>
       <div><b id="dailyH">Daily Pearls</b><span id="dailyT">Checking…</span></div>
     </div>
   </section>
@@ -108,7 +108,7 @@ details summary{cursor:pointer;font-weight:600;margin-top:12px}
   'use strict';
   const $ = s => document.querySelector(s), P = window.GrugPearls, fmt = n => (+n || 0).toLocaleString();
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const PEARL = '<svg class="pearl" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#E9E1F7" stroke="#9C8BC0" stroke-width="1.6"/><circle cx="9" cy="9" r="2.6" fill="#fff"/></svg>';
+  const PEARL = '<svg class="pearl" viewBox="0 0 16 16" aria-hidden="true" fill="#d16be8"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></svg>';
   /* The site's Pearl packs: the same Stripe Payment Links as /pearls.html (PACKS there). Stripe sends the buyer back to
      /pearls.html?pack=…&cs=…, which adds the Pearls to this same wallet (and the Grug Gold bonus) and offers the way back
      here (wallet.ret, the legacy page's own "back to the app" note). Keep these in step with /pearls.html. */
