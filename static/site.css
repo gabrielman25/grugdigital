@@ -1,35 +1,51 @@
-/* The new site's small pages (Pearls, promo links): the same look as the home page. */
-@font-face{font-family:'Fredoka';font-style:normal;font-weight:300 700;font-display:swap;src:url(/static/fredoka.woff2) format('woff2')}
-:root{--page:#F3F3F5;--card:#FFFFFF;--ink:#1E1B16;--soft:#6B6B73;--line:#E2E2E7;--accent:#9BE338;--accent-lo:#6FB31C;--pearl:#A94BC2;--pearl-bg:#F8EBFB;color-scheme:light}
-html.dark{--page:#17171A;--card:#232327;--ink:#F3F3F5;--soft:#A3A3AD;--line:#33333A;--pearl-bg:#33263A;color-scheme:dark}
+/* The new site's small pages (Pearls, the promo links, 404) in the Arcade's classic look: the Grug City background
+   fading into green, the logo and a shiny green nav strip (.site-top), white boxes with dark shiny title bars, shiny buttons. */
+:root{--page:#f2f2f2;--card:#fff;--ink:#111;--soft:#555;--line:#b5b5b5;--accent:#9BE338;--accent-lo:#3f8a10;--pearl:#A94BC2;--pearl-bg:#f6e8fa;color-scheme:light}
 *{box-sizing:border-box}
+html{background:#1f4a10}
 html,body{margin:0}
-body{font-family:'Fredoka',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--page);color:var(--ink);
-  min-height:100vh;display:grid;place-items:start center;padding:24px 16px 48px;-webkit-font-smoothing:antialiased}
-main{width:100%;max-width:520px;display:grid;gap:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:24px}
-h1{font-size:30px;line-height:1.1;font-weight:600;margin:0}
-h2{font-size:21px;line-height:1.2;font-weight:600;margin:0 0 8px}
-p{font-size:16px;line-height:1.45;color:var(--soft);margin:0 0 12px}
+body{font:14px/1.45 Arial,Helvetica,sans-serif;color:var(--ink);min-height:100vh;display:grid;place-items:start center;padding:10px 12px 48px;
+  background:linear-gradient(rgba(31,74,16,0) 0,rgba(31,74,16,0) 260px,#1f4a10 760px) no-repeat,#1f4a10 url(/static/arcade/city-aerial.jpg) 50% 0/max(1500px,100%) auto no-repeat}
+main{width:100%;max-width:520px;display:grid;gap:12px}
+
+/* logo + nav strip */
+.site-top{width:100%;max-width:640px;margin:0 auto 12px;text-align:center}
+.site-top .logo{display:inline-block;margin:6px 0 8px}
+.site-top .logo img{display:block;width:min(320px,80vw);height:auto;filter:drop-shadow(0 2px 0 #0a2f72) drop-shadow(0 0 6px rgba(5,25,70,.55))}
+.site-top nav{display:flex;flex-wrap:wrap;justify-content:center;gap:0 2px;padding:5px 6px;background:linear-gradient(#8fdc4c 0,#5cb41e 45%,#3f9612 50%,#3a8c10 100%);box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.site-top nav a{padding:0 8px;font:bold 15px/20px Arial,Helvetica,sans-serif;color:#fff;text-decoration:none;text-shadow:0 1px 0 rgba(0,40,0,.35)}
+.site-top nav a:hover{text-decoration:underline}
+
+/* boxes: white with a grey fade, and a dark shiny title bar when they start with a heading */
+.card{background:#fff linear-gradient(#e9e9e9,#fff 90px) no-repeat;border:1px solid #aaa;padding:16px 18px;box-shadow:0 3px 10px rgba(0,0,0,.25)}
+.card>h2:first-child{margin:-16px -18px 12px;padding:8px 12px;color:#fff;font:bold 18px/1.1 Arial,Helvetica,sans-serif;background:linear-gradient(#5a5a5a,#2b2b2b 50%,#111 51%,#1d1d1d)}
+h1{font:bold 28px/1.1 Arial,Helvetica,sans-serif;margin:0;color:#111}
+h2{font:bold 19px/1.2 Arial,Helvetica,sans-serif;margin:0 0 8px}
+p{font-size:14px;line-height:1.45;color:var(--soft);margin:0 0 10px}
 p:last-child{margin-bottom:0}
-a{color:inherit}
-.tag{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);margin-bottom:8px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:14px;border:0;cursor:pointer;
-  background:var(--accent);color:#1E1B16;font:600 16px/1 'Fredoka',system-ui,sans-serif;text-decoration:none;transition:transform .12s,filter .12s}
-.btn:active{transform:translateY(1px);filter:brightness(.95)}
-.btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
-.btn:disabled{opacity:.55;cursor:default;transform:none}
-.btn--ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}
-.btn--ghost:active{box-shadow:inset 0 0 0 2px var(--line)}
-.btn--sm{min-height:40px;padding:0 16px;font-size:15px}
-.back{display:inline-flex;align-items:center;gap:6px;font-weight:600;text-decoration:none;color:var(--soft);padding:4px 2px}
+a{color:#1d7a0c}
+.tag{display:inline-flex;align-items:center;gap:8px;font:bold 12px Arial,Helvetica,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#c00;margin-bottom:6px}
+
+/* shiny buttons: green, or grey for the second choice */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:0 20px;border-radius:6px;cursor:pointer;white-space:nowrap;
+  font:bold 17px/1 Arial,Helvetica,sans-serif;color:#1e1b16;text-decoration:none;text-shadow:0 1px 0 rgba(255,255,255,.35);
+  background:linear-gradient(#c6f57a,#9be338 50%,#86cf27 51%,#9be338);border:1px solid #5f9a18;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(0,0,0,.18)}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{filter:brightness(.95);box-shadow:inset 0 2px 3px rgba(0,0,0,.2)}
+.btn:focus-visible{outline:2px solid #1d4ea8;outline-offset:2px}
+.btn:disabled{opacity:.55;cursor:default;filter:none}
+.btn--ghost{color:#333;background:linear-gradient(#fafafa,#e3e3e3 50%,#d6d6d6 51%,#e6e6e6);border-color:#8a8a8a}
+.btn--sm{min-height:30px;padding:0 12px;font-size:13px}
+.back{display:inline-flex;align-items:center;gap:6px;font-weight:bold;text-decoration:none;color:#fff;padding:4px 2px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
 .back svg{width:18px;height:18px}
 .pearl{width:1em;height:1em;flex:none;vertical-align:-.12em}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-input.field{width:100%;min-height:48px;padding:0 14px;border-radius:12px;border:2px solid var(--line);background:var(--page);color:var(--ink);font:500 16px 'Fredoka',system-ui,sans-serif}
-input.field:focus{outline:none;border-color:var(--accent-lo)}
-.msg{font-size:14px;margin:8px 0 0;min-height:1em}
-.msg.err{color:#C2452D}
-.msg.ok{color:var(--accent-lo)}
-.fine{font-size:13px;line-height:1.45}
-code{font-size:.9em;background:var(--page);padding:1px 6px;border-radius:6px}
+input.field{width:100%;min-height:34px;padding:0 8px;border:2px inset #767676;background:#fff;color:#000;font:14px Arial,Helvetica,sans-serif}
+input.field:focus{outline:2px solid #6fb31c}
+.msg{font-size:13px;margin:8px 0 0;min-height:1em}
+.msg.err{color:#c00}
+.msg.ok{color:#1d7a0c}
+.fine{font-size:12px;line-height:1.45}
+body>main>.fine,body>main>p.fine{color:#e6f2dc;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+body>main>.fine a{color:#fff}
+code{font-size:.92em;background:#f0f0f0;border:1px solid #ccc;padding:0 4px}

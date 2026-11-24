@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- a fixed 920px classic page, like the Arcade: phones show it zoomed out, like a desktop page -->
+<meta name="viewport" content="width=940">
 <title>Grug · Game assets and creator tools</title>
-<meta name="description" content="Low-poly game asset packs, the Grug Avatar Studio, and a new Grug gaming platform and engine on the way.">
+<meta name="description" content="Low-poly game asset packs, the Grug Avatar Studio, the Building Studio and free blocky games in the Grug Arcade.">
 <link rel="icon" href="/favicon.png">
+<link rel="canonical" href="https://grugdigital.com/">
 <link rel="preconnect" href="https://img.itch.zone">
 <script src="/static/pearls.js"></script>
 <script src="/static/social.js"></script>
@@ -21,77 +23,41 @@
     if (nav === 'navigate' && !leaving && from && document.referrer && document.referrer === from) location.replace('/legacy' + location.search + location.hash);
   } catch (e) {}
 })();
-/* light by default; the moon button in the top bar switches to dark and remembers it */
-try { if (localStorage.getItem('grug.home.mode') === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}
 </script>
+<link rel="stylesheet" href="/arcade/arcade.css">
+<link rel="stylesheet" href="/static/classic.css">
 <style>
-@font-face{font-family:'Fredoka';font-style:normal;font-weight:300 700;font-display:swap;src:url(/static/fredoka.woff2) format('woff2')}
-:root{--page:#F6F6F8;--card:#FFFFFF;--ink:#1E1B16;--soft:#5F5F68;--line:#E3E3E8;--chip:#EDEDF1;--accent:#9BE338;--accent-lo:#6FB31C;--accent-ink:#3F7A0A;
-  --claude:#D97757;--pad:clamp(16px,3.6vw,56px);--r:20px;color-scheme:light}
-/* desktop and landscape: three times the side margin, for a calmer, more premium page */
-@media (orientation:landscape){:root{--pad:clamp(48px,10.8vw,168px)}}
-html.dark{--page:#141417;--card:#1F1F23;--ink:#F3F3F5;--soft:#A6A6B0;--line:#303037;--chip:#2A2A30;--accent-ink:#9BE338;color-scheme:dark}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:84px}
-body{margin:0;font-family:'Fredoka',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--page);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45}
-a{color:inherit}
-img{display:block;max-width:100%}
-.wrap{padding-inline:var(--pad)}
-svg.i{width:18px;height:18px;flex:none}
+/* the home page in the Arcade's classic look: the same header, background, side ads and footer (arcade.css, GrugArcade.chrome),
+   with the home page's sections as tabbed boxes inside the 890px body */
+html{scroll-behavior:smooth}
+#Body h2,#Body h3{display:block}
 
-/* ---------- top bar ---------- */
-.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--page) 88%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);
-  border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
-.top .wrap{display:flex;align-items:center;gap:20px;height:64px}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:600;font-size:22px;flex:none}
-.brand svg{width:36px;height:36px}
-.nav{display:flex;gap:4px;margin-left:8px}
-.nav a{padding:8px 12px;border-radius:10px;text-decoration:none;font-weight:500;color:var(--soft);white-space:nowrap}
-.nav a:hover{background:var(--chip);color:var(--ink)}
-.top .end{margin-left:auto;display:flex;align-items:center;gap:8px}
-.pearls{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 14px;border-radius:999px;background:var(--chip);text-decoration:none;font-weight:500;font-size:15px;white-space:nowrap}
-.pearls b{font-weight:600}
-.pearls span{color:var(--accent-ink);font-weight:600}
-.pearls svg{width:17px;height:17px}
-.iconbtn{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:10px;border:0;background:transparent;color:var(--soft);cursor:pointer}
-.iconbtn:hover{background:var(--chip);color:var(--ink)}
-.iconbtn:focus-visible,.nav a:focus-visible,.chip:focus-visible,.card:focus-visible,.pearls:focus-visible{outline:3px solid var(--accent-lo);outline-offset:2px}
-.legacy{font-size:14px;font-weight:500;color:var(--soft);text-decoration:none;padding:8px 10px;border-radius:10px;white-space:nowrap}
-.legacy:hover{background:var(--chip);color:var(--ink)}
-html:not(.dark) .sun, html.dark .moon{display:none}
+/* ---------- Stop the Claude slop: before / after ---------- */
+#Slop .top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:2px 2px 12px}
+#Slop h2{margin:0 0 4px;font:bold 30px/1.05 Arial,Helvetica,sans-serif;color:#111}
+#Slop .top p{margin:0;max-width:470px;font-size:13px;color:#444}
+#Slop .ctas{display:flex;gap:8px;flex:none}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.vs .side{border:1px solid #888;overflow:hidden}
+.vs .bar{height:28px;padding:0 10px;display:flex;align-items:center;gap:7px;font:bold 14px/1 Arial,Helvetica,sans-serif}
+.vs .bar small{font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.vs .bad{background:linear-gradient(#f6f6f6,#dedede)}
+.vs .bad .bar{color:#333;background:linear-gradient(#fafafa,#e3e3e3 50%,#d6d6d6 51%,#e6e6e6);border-bottom:1px solid #aaa}
+.vs .good{background:linear-gradient(#3d93e8,#7cbcf5 58%,#c4e3fb)}
+.vs .good .bar{color:#fff;background:#0b2350;text-shadow:0 1px 0 #000}
+.vs .pics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px}
+.vs .pics div{position:relative;aspect-ratio:4/5;overflow:hidden}
+.vs .bad .pics div{background:#fff;border:1px solid #aaa}
+.vs .good .pics div{background:rgba(255,255,255,.28);border:1px solid rgba(255,255,255,.75)}
+.vs .pics img{position:absolute;left:8%;top:8%;width:84%;height:86%;object-fit:contain;object-position:50% 100%}
+.vs .chips{padding:0 8px 9px}
 
-/* ---------- buttons ---------- */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;border-radius:14px;border:0;cursor:pointer;
-  background:var(--accent);color:#1E1B16;font:600 17px/1 'Fredoka',system-ui,sans-serif;text-decoration:none;transition:transform .12s,filter .12s}
-.btn:hover{transform:translateY(-1px)}
-.btn:active{transform:translateY(1px);filter:brightness(.95)}
-.btn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
-.btn--ghost{background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}
-.btn--ghost:active{box-shadow:inset 0 0 0 2px var(--line)}
-.btn--sm{min-height:40px;padding:0 16px;font-size:15px}
-.btn--sm.btn--ghost{box-shadow:inset 0 0 0 2px var(--line)}
-.btn--lg{min-height:58px;padding:0 30px;font-size:19px;border-radius:16px}
-/* anything to do with Claude: white button, Claude-orange text and logo */
-.btn--claude{background:#fff;color:var(--claude);box-shadow:inset 0 0 0 2px var(--line)}
-.btn--claude:active{box-shadow:inset 0 0 0 2px var(--line)}
-html.dark .btn--claude{box-shadow:none}
-svg.cl{width:20px;height:20px;flex:none}
-.btn--sm svg.cl{width:18px;height:18px}
-.claude{color:var(--claude)}
-.top .make{min-height:40px;padding:0 16px;font-size:15px;border-radius:12px;white-space:nowrap}
-
-/* ---------- hero ---------- */
-.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:clamp(20px,3vw,40px);align-items:stretch;padding-block:clamp(28px,5vw,64px) clamp(20px,3vw,36px)}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);margin:0 0 12px}
-h1,.h1{font-size:clamp(34px,4.6vw,60px);line-height:1.04;font-weight:600;margin:0 0 16px;letter-spacing:-.01em;max-width:16ch}
-.lead{font-size:clamp(17px,1.5vw,20px);color:var(--soft);margin:0 0 28px;max-width:46ch}
-.ctas{display:flex;flex-wrap:wrap;gap:12px}
-.hero-main{align-self:center}
-
-.show{position:relative;overflow:hidden;border-radius:28px;background:#1E1B16;min-height:340px;aspect-ratio:16/11;isolation:isolate}
+/* ---------- the creator tools spotlight, with the showcase ---------- */
+#Tools .in{display:flex;gap:14px}
+.show{position:relative;flex:none;width:480px;height:330px;border:1px solid #888;overflow:hidden;background:#1e1b16;isolation:isolate}
 .show .s{position:absolute;inset:0;opacity:0;transition:opacity .9s ease;pointer-events:none}
 .show .s.on{opacity:1;pointer-events:auto}
-.show .bg{position:absolute;left:-10%;top:-6%;width:120%;height:112%;max-width:none;object-fit:cover;filter:blur(1.5px) saturate(1.05);transform:translateX(3%) scale(1.1)}
+.show .bg{position:absolute;left:-10%;top:-6%;width:120%;height:112%;max-width:none;object-fit:cover;filter:saturate(1.05);transform:translateX(3%) scale(1.1)}
 .show .fg{position:absolute;bottom:4%;right:7%;height:86%;width:auto;max-width:none;transform:translateX(-4%)}
 .show .s.left .fg{right:auto;left:8%}
 .show .s.go .bg{animation:drift-bg var(--dur,7s) linear forwards}
@@ -100,354 +66,333 @@ h1,.h1{font-size:clamp(34px,4.6vw,60px);line-height:1.04;font-weight:600;margin:
 @keyframes drift-fg{from{transform:translateX(-4%) scale(.98)}to{transform:translateX(4%) scale(1.02)}}
 .show .s.left.go .fg{animation-name:drift-fg-l}
 @keyframes drift-fg-l{from{transform:translateX(4%) scale(.98)}to{transform:translateX(-4%) scale(1.02)}}
-.show .who{position:absolute;top:18px;left:18px;z-index:2;display:flex;flex-direction:column;gap:2px;padding:10px 14px;border-radius:14px;background:rgba(20,18,15,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff}
-.show .s.left .who{left:auto;right:18px;text-align:right}
-.show .who b{font-size:18px;font-weight:600;line-height:1.1}
-.show .who span{font-size:13px;color:#D6D6DC}
-.show .ask{position:absolute;left:18px;right:18px;bottom:18px;z-index:2;max-width:430px;padding:12px 16px 13px;border-radius:16px;background:rgba(255,255,255,.94);color:#1E1B16;box-shadow:0 10px 30px -12px rgba(0,0,0,.45)}
-.show .s.left .ask{left:auto}
-.show .ask small{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--claude);margin-bottom:3px}
-.show .ask small svg{width:15px;height:15px}
-.show .ask p{margin:0;font-size:17px;line-height:1.35;font-weight:500;min-height:2.7em}
-.show .ask p::after{content:"";display:inline-block;width:2px;height:1.05em;margin-left:2px;vertical-align:-.15em;background:#1E1B16;animation:caret 1s steps(1) infinite}
+.show .who{position:absolute;top:8px;left:8px;z-index:2;padding:3px 8px;background:#d8281f;color:#fff;font:bold 13px Arial,Helvetica,sans-serif;border-radius:3px}
+.show .who span{font-weight:normal;opacity:.9}
+.show .s.left .who{left:auto;right:8px}
+.show .ask{position:absolute;left:10px;bottom:10px;z-index:2;width:300px;padding:7px 10px 8px;background:#fff;border:1px solid #888;border-radius:4px;box-shadow:0 3px 10px rgba(0,0,0,.35);color:#222}
+.show .s.left .ask{left:auto;right:10px}
+.show .ask small{display:flex;align-items:center;gap:5px;font:bold 11px/1 Arial,Helvetica,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#c2552f;margin-bottom:4px}
+.show .ask small svg{width:13px;height:13px}
+.show .ask p{margin:0;font:bold 14px/1.3 Arial,Helvetica,sans-serif;min-height:2.6em}
+.show .ask p::after{content:"";display:inline-block;width:2px;height:1.05em;margin-left:2px;vertical-align:-.15em;background:#222;animation:caret 1s steps(1) infinite}
 @keyframes caret{50%{opacity:0}}
-.show .nav2{position:absolute;inset:0;z-index:1;display:flex;justify-content:space-between;align-items:stretch}
+.show .nav2{position:absolute;inset:0;z-index:1;display:flex;justify-content:space-between}
 .show .nav2 button{width:22%;border:0;background:transparent;cursor:pointer;opacity:0}
-@media (max-width:600px){.show{aspect-ratio:4/5}.show .fg{bottom:27%;height:62%}.show .s .fg,.show .s.left .fg{right:auto;left:50%;translate:-50% 0}.show .ask p{font-size:15px}.show .who b{font-size:16px}}
-@media (prefers-reduced-motion:reduce){.show .s{transition:none}.show .s.go .bg,.show .s.go .fg{animation:none}.show .ask p::after{animation:none}}
+#Tools .txt{flex:1;min-width:0;display:flex;flex-direction:column}
+#Tools h2{margin:2px 0 0;font:bold 30px/1.05 Arial,Helvetica,sans-serif;color:#111}
+#Tools .tag{margin:4px 0 8px;font:bold 13px Arial,Helvetica,sans-serif;color:#c00}
+#Tools ul{margin:0 0 10px;padding-left:18px}
+#Tools li{margin:3px 0}
+#Tools .acts{margin-top:auto;display:flex;flex-wrap:wrap;gap:8px}
+#Tools .fine{margin-top:6px;font-size:11px;color:#888}
 
-/* ---------- before / after: Claude alone vs Claude + the Avatar Studio ---------- */
-.vs{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.vs .side{border-radius:24px;padding:20px 20px 22px;display:flex;flex-direction:column;gap:14px}
-.vs .bad{background:#E9E9EE;color:var(--ink)}
-.vs .good{background:#1E1B16;color:#F3F3F5}
-.vs .lab{margin:0;font-size:13px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--soft)}
-.vs .good .lab{color:#BDBDC6}
-.vs .lab b{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:22px;letter-spacing:0;text-transform:none;color:var(--ink)}
-.vs .lab b svg.cl{width:22px;height:22px}
-.slop{padding-block:clamp(28px,5vw,64px) clamp(20px,3vw,36px)}
-.slop .head{align-items:flex-end;margin-bottom:22px}
-.slop .head h1{margin:0 0 10px;max-width:none}
-.slop .head p{max-width:52ch;font-size:clamp(17px,1.5vw,20px)}
-.slop .eyebrow svg.cl{width:18px;height:18px}
-.slop-ctas{display:flex;flex-wrap:wrap;gap:12px}
-.vs .good .lab b{color:#fff}
-.vs .pics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.vs .pics div{position:relative;aspect-ratio:4/5;border-radius:14px;overflow:hidden}
-.vs .bad .pics div{background:#F6F6F8}
-.vs .good .pics div{background:#2A2621}
-.vs .pics img{position:absolute;left:8%;top:8%;width:84%;height:86%;max-width:none;object-fit:contain;object-position:50% 100%}
-.vs ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
-.vs li{font-size:14px;font-weight:500;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,.06)}
-.vs .good li{background:rgba(255,255,255,.09);color:#E6E6EA}
-html.dark .vs .bad{background:#2A2A2F}html.dark .vs .bad .pics div{background:#34343A}html.dark .vs .good{box-shadow:inset 0 0 0 1px var(--line)}
-@media (max-width:860px){.vs{grid-template-columns:1fr}}
-
-/* ---------- sections ---------- */
-section.block{padding-block:clamp(28px,4vw,48px)}
-.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:18px}
-.head h2{font-size:clamp(26px,2.4vw,34px);line-height:1.1;margin:0 0 4px;font-weight:600}
-.head p{margin:0;color:var(--soft);font-size:17px}
-.textlink{display:inline-flex;align-items:center;gap:6px;font-weight:600;text-decoration:none;color:var(--accent-ink);white-space:nowrap}
-.textlink:hover{text-decoration:underline}
-
-/* asset carousels: one row per category, four cards in view, arrows to page through */
-.rows{display:flex;flex-direction:column;gap:clamp(22px,3vw,36px)}
-.row-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
-.row-head h3{margin:0;font-size:21px;font-weight:600;display:flex;align-items:baseline;gap:8px}
-.row-head h3 small{font-size:14px;font-weight:500;color:var(--soft)}
-.arrows{display:flex;gap:8px}
-.arrows[hidden]{display:none}
-.arr{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:12px;border:0;background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 2px var(--line);cursor:pointer;transition:transform .12s}
-.arr:hover:not(:disabled){transform:translateY(-1px);box-shadow:inset 0 0 0 2px var(--soft)}
-.arr:disabled{opacity:.35;cursor:default}
-.arr:focus-visible{outline:3px solid var(--accent-lo);outline-offset:2px}
-.arr svg{width:20px;height:20px}
-.arr.prev svg{transform:scaleX(-1)}
-.track{--n:4;--g:clamp(14px,1.6vw,22px);display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - (var(--n) - 1) * var(--g)) / var(--n));gap:var(--g);
-  overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;padding:6px 0 16px;margin:-6px 0 -16px;overscroll-behavior-x:contain}
-.track::-webkit-scrollbar{display:none}
-.track>*{scroll-snap-align:start}
-.track:focus-visible{outline:3px solid var(--accent-lo);outline-offset:4px;border-radius:var(--r)}
-@media (max-width:1000px){.track{--n:3}}
-@media (max-width:600px){.track{--n:2}}
-.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;text-decoration:none;transition:transform .15s,box-shadow .15s}
-.card:hover{transform:translateY(-3px);box-shadow:0 10px 28px -14px rgba(30,27,22,.35)}
-.card .pic{position:relative;aspect-ratio:63/50;background:var(--chip)}
-.card .pic img{width:100%;height:100%;object-fit:cover}
-.badge{position:absolute;top:10px;left:10px;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:5px 9px;border-radius:8px;background:var(--accent);color:#1E1B16}
-.card .body{display:flex;flex-direction:column;gap:6px;padding:14px 16px 16px;flex:1}
-.card h3{font-size:18px;line-height:1.2;font-weight:600;margin:0}
-.card p{margin:0;color:var(--soft);font-size:15px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.card .meta{margin-top:auto;padding-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.price{font-weight:600;font-size:15px;padding:4px 10px;border-radius:8px;background:var(--chip)}
-.card .go{font-size:14px;font-weight:500;color:var(--soft);display:inline-flex;align-items:center;gap:4px}
-.card.skel .pic,.card.skel h3,.card.skel p{background:var(--chip);color:transparent;border-radius:6px}
-.card.skel .pic{border-radius:0;animation:shimmer 1.2s ease-in-out infinite}
+/* ---------- the asset pack catalog (the Arcade's games list, as a catalog) ---------- */
+#assets{overflow:hidden;padding-bottom:4px}
+#assets .StandardBox ul a{color:#00f}
+#PackTabs{float:left;height:31px;display:flex}
+.Tools a{display:flex;align-items:center;gap:7px;margin:0 0 9px;font:bold 13px/1.15 Arial,Helvetica,sans-serif}
+.Tools a img{flex:none;width:34px;height:40px;object-fit:contain;object-position:50% 100%;background:#fff;border:1px solid #ccc}
+.Tools .StandardBox{padding-top:14px}
+#Cat .Cell{height:176px}
+#Cat .GameItem{height:156px}
+#Cat .AlwaysShown .thumb,#Cat .AlwaysShown .thumb img{height:127px}
+#Cat .thumb{position:relative;overflow:hidden}
+#Cat .thumb .new{position:absolute;left:4px;top:4px;padding:2px 5px;background:#d8281f;color:#fff;font:bold 10px Arial,Helvetica,sans-serif;border-radius:2px}
+#Cat .thumb .free{background:#1d7a0c}
+#Cat .PlayerCount b{color:#1d7a0c}
+#Cat .PlayerCount span{color:#888}
+#Cat .HoverShown{padding-top:182px;color:#555}
+#Cat .HoverShown p{margin:0 0 4px;line-height:14px}
+#Cat .HoverShown .chips{margin-top:2px}
+#Cat .adt .thumb{background:#2a2621}
+#Cat .adt .thumb .bgi{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.08)}
+#Cat .adt .thumb .fgi{position:absolute;left:50%;bottom:3px;height:118px;width:auto;translate:-50% 0;transition:transform .3s}
+#Cat .adt:hover .fgi{transform:scale(1.05)}
+#Cat .skel .thumb{background:#ddd;animation:shimmer 1.2s ease-in-out infinite}
+#Cat .skel .GameName,#Cat .skel .PlayerCount{background:#e6e6e6;color:transparent;margin-top:3px}
 @keyframes shimmer{50%{opacity:.55}}
-.empty{color:var(--soft);padding:24px 0}
+#Cat .rect.kimi{background:linear-gradient(160deg,#ffd6ea,#cfe6ff);color:#3a3a6a}
+.rect.kimi .logo{position:absolute;left:50%;top:14px;width:124px;translate:-50% 0;filter:drop-shadow(0 4px 8px rgba(209,77,139,.25))}
+.rect.kimi .t{top:auto;bottom:66px;color:#3a3a6a;text-shadow:none;font-size:19px}
+.rect.kimi .t .s{color:#5a5a7a;text-shadow:none}
+.rect.kimi .figs{top:18px;bottom:auto;height:96px}
+.rect.kimi .spn{position:absolute;top:6px;right:6px;font:bold 9px/1 Arial,Helvetica,sans-serif;letter-spacing:.08em;padding:3px 5px;border-radius:3px;background:rgba(255,255,255,.75);color:#d14d8b}
+.rect.kimi .bar{background:linear-gradient(90deg,#ff9cc8,#8cc4ff)}
+.rect.kimi .go{color:#d14d8b;background:linear-gradient(#fff,#f7f7f7 50%,#ececec 51%,#f5f5f5);border-color:#d9a6c0}
+#GenreDescriptionPanel{font-size:11px;color:#333}
 
-/* the "Make a character" card that sits among the asset packs like an ad */
-.card.ad{background:#1E1B16;border-color:#1E1B16;color:#F3F3F5}
-html.dark .card.ad{border-color:#3A3A42}
-.card.ad .pic{overflow:hidden;background:#2A2621}
-.card.ad .pic .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(1px) saturate(1.05);transform:scale(1.08);transition:transform .5s}
-.card.ad .pic .fg{position:absolute;left:50%;bottom:4%;height:92%;width:auto;max-width:none;translate:-50% 0;transition:transform .35s}
-.card.ad:hover .pic .bg{transform:scale(1.14)}
-.card.ad:hover .pic .fg{transform:scale(1.04)}
-.card.ad h3{color:#fff}
-.card.ad p{color:#C9C9D1}
-.card.ad .exp{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
-.card.ad .exp i{font-style:normal;font-size:12px;font-weight:600;padding:3px 8px;border-radius:7px;background:rgba(255,255,255,.1);color:#E6E6EA}
-.card.ad .exp i.k{background:rgba(155,227,56,.18);color:#C6F28A}
-.card.ad .cta{margin-top:auto;padding-top:10px}
-.card.ad.kimi{background:linear-gradient(160deg,#ffe0ee,#d8ebff);border-color:#ffc6e0;color:#3a3a6a}
-.card.ad.kimi .pic{background:linear-gradient(160deg,#ffd6ea,#cfe6ff);display:grid;place-items:center}
-.card.ad.kimi .pic .logo{position:static;width:62%;height:auto;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(209,77,139,.25))}
-.card.ad.kimi .badge{background:#fff;color:#d14d8b}
-.card.ad.kimi h3{color:#3a3a6a}.card.ad.kimi p{color:#5a5a7a}
-.card.ad.kimi .cta span{background:linear-gradient(90deg,#ff9cc8,#8cc4ff);color:#fff}
-.closer .exp{display:flex;flex-wrap:wrap;gap:6px;margin:-8px 0 22px}
-.closer .exp i{font-style:normal;font-size:14px;font-weight:600;padding:5px 11px;border-radius:9px;background:rgba(255,255,255,.1);color:#E6E6EA}
-.closer .exp i.k{background:rgba(155,227,56,.18);color:#C6F28A}
-.card.ad .cta span{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 14px;border-radius:11px;background:var(--accent);color:#1E1B16;font-weight:600;font-size:15px}
-.card.ad .cta svg{width:16px;height:16px}
-
-.soc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,1.6vw,22px)}
-.soc a{position:relative;display:flex;flex-direction:column;gap:6px;min-height:170px;padding:22px 22px 20px;border-radius:var(--r);text-decoration:none;color:#fff;overflow:hidden;transition:transform .15s,box-shadow .15s}
-.soc a:hover{transform:translateY(-3px);box-shadow:0 10px 28px -14px rgba(30,27,22,.45)}
-.soc a:focus-visible{outline:3px solid var(--accent-lo);outline-offset:3px}
-.soc small{font-size:13px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;opacity:.85}
-.soc b{font-size:24px;font-weight:600;line-height:1.1}
-.soc span{font-size:15px;opacity:.92;max-width:28ch}
-.soc em{margin-top:auto;align-self:flex-start;font-style:normal;font-weight:600;font-size:15px;padding:8px 14px;border-radius:11px;background:#fff}
-.soc .dc{background:linear-gradient(140deg,#6d78f5,#4752c4)} .soc .dc em{color:#4752c4}
-.soc .ig{background:linear-gradient(200deg,#f9a03f,#e1306c 50%,#833ab4)} .soc .ig em{color:#c1357a}
-.soc .yt{background:#1a1a1a} .soc .yt em{color:#c4120c}
-.soc .yt .vid{position:absolute;right:16px;top:16px;width:132px;aspect-ratio:16/9;border-radius:8px;background:#333 center/cover no-repeat;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+/* ---------- community ---------- */
+.soc{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.soc a{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-height:158px;padding:12px 14px 14px;color:#fff;text-decoration:none!important;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(0,0,0,.35),0 3px 8px rgba(0,0,0,.2)}
+.soc a:hover .cta{filter:brightness(1.06)}
+.soc small{font:bold 11px/1 Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+.soc b{margin-top:5px;font:bold 22px/1.05 Arial,Helvetica,sans-serif;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+.soc span{margin-top:5px;font-size:12px;line-height:1.3;opacity:.92;max-width:230px}
+.soc .cta{margin-top:auto;padding:0 14px;height:30px;line-height:30px;border-radius:5px;background:linear-gradient(#fff,#f7f7f7 50%,#ececec 51%,#f5f5f5);font:bold 13px/30px Arial,Helvetica,sans-serif;text-shadow:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.soc .dc{background:linear-gradient(#6d78f5,#4752c4)} .soc .dc .cta{color:#4752c4}
+.soc .ig{background:linear-gradient(200deg,#f9a03f 0%,#e1306c 45%,#833ab4 100%)} .soc .ig .cta{color:#c1357a}
+.soc .yt{background:linear-gradient(#ff3d3d,#c4120c)} .soc .yt .cta{color:#c4120c}
+.soc .yt .vid{position:absolute;right:12px;top:12px;width:112px;height:63px;background:#000 center/cover no-repeat;box-shadow:0 2px 6px rgba(0,0,0,.4)}
 .soc .yt .vid:empty{display:none}
-.soc .yt span,.soc .yt b{max-width:calc(100% - 150px)}
-@media (max-width:860px){.soc{grid-template-columns:1fr}.soc a{min-height:0}}
-/* closing call to action */
-.closer{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:center;gap:24px;border-radius:28px;background:#1E1B16;color:#F3F3F5;overflow:hidden;position:relative;isolation:isolate;min-height:300px}
-html.dark .closer{box-shadow:inset 0 0 0 1px var(--line)}
-.closer .txt{padding:clamp(26px,4vw,52px)}
-.closer h2{font-size:clamp(28px,3vw,42px);line-height:1.08;margin:0 0 10px;font-weight:600}
-.closer p{margin:0 0 22px;color:#C9C9D1;font-size:18px;max-width:40ch}
-.closer .ctas .btn--ghost{background:transparent;color:#fff;box-shadow:inset 0 0 0 2px #45454D}
-.closer .art{align-self:stretch;display:flex;align-items:flex-end;justify-content:center;padding:28px 24px 0;min-height:260px}
-.closer .art img{width:40%;height:auto;margin:0 -4%}
-.closer .art img:nth-child(1),.closer .art img:nth-child(3){width:32%;opacity:.92}
-.closer .art img:nth-child(2){position:relative;z-index:1}
-@media (max-width:760px){.closer{grid-template-columns:1fr}.closer .art{min-height:0;order:-1;padding-top:22px}}
-.updated{margin:16px 0 0;font-size:13px;color:var(--soft)}
+.soc .yt .vid:not(:empty)~span,.soc .yt .vid:not(:empty)~b{max-width:140px}
+.soc .figs{position:absolute;right:-6px;bottom:-6px;height:96px;pointer-events:none}
+.soc .figs img{height:96px;width:auto}
 
-/* ---------- Avatar Studio ---------- */
-.studio{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(16px,2vw,24px)}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:clamp(22px,2.6vw,32px)}
-.panel h2{font-size:clamp(26px,2.4vw,34px);line-height:1.1;margin:0 0 10px;font-weight:600}
-.panel h3{font-size:20px;margin:0 0 8px;font-weight:600;display:flex;align-items:center;gap:8px}
-.panel h3 svg{color:var(--ink)}
-.panel p{margin:0 0 16px;color:var(--soft);font-size:17px}
-.panel .ctas{gap:10px}
-.prompt{margin:0 0 12px;padding:12px 14px;border-radius:12px;background:var(--page);border:1px solid var(--line);color:var(--ink);font-size:15px;font-weight:500;overflow-wrap:break-word;user-select:all}
-.fine{font-size:14px!important;line-height:1.45;margin:12px 0 0!important}
-details.more{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
-details.more summary{cursor:pointer;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px}
-details.more summary::-webkit-details-marker{display:none}
-details.more summary::after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin:-4px 0 0 4px;transition:transform .15s}
-details.more[open] summary::after{transform:rotate(-135deg);margin-top:4px}
-details.more .in{padding-top:12px}
-code{font-size:.88em;background:var(--page);padding:1px 6px;border-radius:6px}
-
-footer{border-top:1px solid var(--line);margin-top:clamp(24px,4vw,48px)}
-footer .wrap{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;padding-block:24px calc(24px + env(safe-area-inset-bottom));color:var(--soft);font-size:15px}
-footer a{text-decoration:none;color:var(--soft)}
-footer a:hover{color:var(--ink);text-decoration:underline}
-footer .sp{margin-left:auto}
-
-@media (max-width:1240px){.legacy,.pearls .note{display:none}}
-@media (max-width:1100px){.nav .long{display:none}}
-@media (max-width:980px){.nav a[href="#assets"],.pearls .pw{display:none}}
-@media (max-width:900px){
-  .hero,.studio{grid-template-columns:1fr}
-  .show{aspect-ratio:4/3;min-height:0}
-}
-@media (max-width:740px){
-  .nav,.legacy{display:none}
-  .top .wrap{gap:12px;height:58px}
-  .brand{font-size:20px}
-  .brand svg{width:32px;height:32px}
-  .pearls{height:36px;padding:0 12px}
-  .pearls .note{display:none}
-}
-@media (max-width:520px){
-  .top .wrap{gap:8px}
-  .brand{font-size:0;gap:0}
-  .pearls .pw{display:none}
-  .pearls{padding:0 10px}
-  .top .make{padding:0 12px;font-size:14px;min-height:38px}
-  .top .end{gap:6px}
-}
-@media (max-width:600px){
-  .card{border-radius:16px}
-  .card .body{padding:10px 12px 12px;gap:4px}
-  .card h3{font-size:16px}
-  .card p{font-size:13.5px}
-  .card .go{display:none}
-  .price{font-size:14px;padding:3px 8px}
-  .badge{top:8px;left:8px;font-size:11px;padding:4px 7px}
-}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+/* ---------- closing banner ---------- */
+#Hero{position:relative;height:236px;margin:10px 0 6px;overflow:hidden;color:#fff;background:linear-gradient(90deg,#0a1f48 0,#12408a 50%,#1a5bb8 100%);box-shadow:0 0 0 1px #071a3d}
+#Hero .txt{position:absolute;left:24px;top:22px;width:470px}
+#Hero h2{margin:0 0 6px;font:bold 30px/1.08 Arial,Helvetica,sans-serif;text-shadow:0 2px 0 #071a3d}
+#Hero p{margin:0 0 10px;font-size:13px;line-height:1.4;color:#cfe0ff}
+#Hero .chips{margin-bottom:14px}
+#Hero .ctas{display:flex;gap:8px}
+#Hero .art{position:absolute;right:16px;bottom:-8px;width:360px;height:226px}
+#Hero .art img{position:absolute;bottom:0;width:auto}
+@media (prefers-reduced-motion:reduce){.show .s{transition:none}.show .s.go .bg,.show .s.go .fg,.show .ask p::after{animation:none}}
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="grug" viewBox="0 0 64 64"><rect x="4" y="4" width="56" height="56" rx="16" fill="#9BE338"/><path d="M19.8 51C19.5 50.9 18.9 50.9 18.4 50.9C17.2 50.9 17.1 50.7 17 48.6C16.8 46.5 17 45.5 17.9 43.8C18.1 43.3 18.3 42.8 18.3 42.8C18.3 42.6 19 41.2 19.3 40.7C19.8 39.8 19.8 39.8 19.7 39.6C19.5 38.9 19.2 38.3 18.8 37.8C17.9 36.4 17.6 35.3 17.7 34C17.8 32.5 18.1 32 19.1 31.1C19.5 30.8 19.9 30.5 20 30.5C20.5 30 21.2 29.7 21.7 29.7C22.5 29.7 22.8 29.4 22.8 28.8C22.8 27.9 23.5 28.4 23.6 29.3C23.6 30 23.1 30.5 21.7 30.8C20.7 31 20.2 33 21 33.9C21.9 35 25.6 34.7 26.6 33.5C26.6 33.4 26.7 33.4 26.7 33.4C26.8 33.4 27 33.3 27.3 33.2C27.5 33.1 28 32.9 28.2 32.8C29.5 32.4 29.8 32.4 30 32.4C30 32.4 30.3 32.3 30.5 32.2C31 32.1 31.5 32 33 31.9C34.8 31.8 35.5 31.7 35.8 31.6C35.9 31.5 36.2 31.4 36.4 31.4C37.8 31 38.2 30.7 39 29.2C39.6 28.1 39.6 25.4 39 24.6C38.9 24.5 38.8 24.4 38.8 24.4C38.8 24.3 38.1 23 37.9 22.8C37.8 22.7 37.3 22.4 36.8 22.1C36.3 21.8 35.8 21.5 35.7 21.5C35.3 21.2 33.8 20.9 32.9 20.9C32.5 20.9 32 20.9 31.9 20.8C31.8 20.8 31.5 20.7 31.3 20.7C30.3 20.5 30 20.3 29.2 19.5C28 18.3 27.9 17.7 28.3 15.9C28.4 15.7 28.5 15.4 28.5 15.3C28.6 15.2 28.7 15 28.7 14.9C29.1 14.2 29.8 13.4 30.4 13.3C31.1 13.1 31.3 13.1 32.3 13C33.2 13 34.1 13.1 34.9 13.3C35.2 13.3 35.6 13.4 35.8 13.5C36.7 13.6 37.3 13.8 38.7 14.4C39.5 14.7 40.5 15.4 41.3 16.1C41.5 16.2 41.9 16.5 42.1 16.6C42.2 16.8 42.5 17 42.6 17.1C42.7 17.3 42.9 17.5 43 17.6C43.3 18 43.8 18.7 44 19.2C44.1 19.5 44.3 19.9 44.5 20.1C44.6 20.3 44.8 20.6 44.8 20.9C44.9 21.1 45.1 21.4 45.3 21.7C45.5 21.9 45.6 22.2 45.7 22.3C45.7 22.4 45.8 22.7 45.8 22.9C45.9 23.1 46 23.6 46.1 23.9C46.2 24.2 46.4 24.6 46.4 24.7C46.6 25.2 46.8 26.3 46.9 26.8C46.9 27 47 27.4 47 27.7C47.1 28.3 47.1 32.1 46.9 32.4C46.9 32.5 46.9 33.2 46.9 34C46.9 34.8 46.9 35.6 46.8 35.8C46.8 36 46.7 36.3 46.7 36.5C46.6 36.9 46.5 37.4 46.4 37.7C46.3 37.8 46.3 38.1 46.2 38.3C46.2 38.6 46.1 38.9 46.1 39C46 39.1 46 39.3 45.9 39.5C45.6 40.7 45.3 41.5 45 42.3C45 42.4 44.9 42.7 44.8 43C44.7 43.4 44.5 43.9 44.3 44.3C44.1 44.7 43.9 45.2 43.8 45.5C43.7 45.8 43.6 46.1 43.5 46.2C43.5 46.2 43.5 46.3 43.5 46.3C43.5 46.4 43.4 46.5 43.3 46.7C43.2 46.8 43.1 47.1 43 47.2C43 47.3 42.9 47.5 42.8 47.7C42.6 47.9 42.4 48.3 42.3 48.6C41.1 50.8 41.2 50.8 38.3 50.8C34.9 50.8 34.8 50.7 34.8 49.5C34.8 49 34.8 48.8 34.7 48.6C33.3 46.1 32.8 45.5 31.8 45.2C31.6 45.1 31.3 45 31.1 45C30.4 44.8 29.9 44.9 28.2 45.4C27.2 45.7 26 46.8 26 47.5C26 47.6 26 47.7 26 47.7C25.9 47.8 25.9 48 25.8 48.2C25.8 48.4 25.6 48.8 25.4 49.1C25.3 49.4 25.2 49.7 25.2 49.7C25.2 50.3 24.3 50.8 23.4 50.8C23 50.9 22.5 50.9 22.3 50.9C22 51 20.6 51 19.8 51Z" fill="#1F1A17"/></symbol>
-  <symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-  <symbol id="claude" viewBox="0 0 100 100"><path fill="#D97757" d="M26.2 0.5 23.1 4.7 24.1 10.2 33.0 25.1 39.1 36.1 39.1 36.6 38.4 37.0 15.0 19.2 10.3 18.7 7.6 21.7 8.3 25.9 10.0 27.9 18.1 33.7 38.5 47.3 39.8 48.4 39.6 49.0 37.8 49.1 28.1 48.0 2.3 46.3 0.3 47.6 0.0 49.0 2.2 52.0 4.5 52.5 39.2 53.9 39.6 54.7 39.1 55.6 19.4 66.6 11.8 71.8 10.7 72.8 10.5 75.9 12.5 77.9 17.1 77.3 43.5 60.1 43.8 60.2 43.9 60.8 40.0 65.3 22.4 88.3 22.1 91.0 25.1 92.5 26.7 91.9 34.0 84.1 48.8 64.0 49.6 63.6 47.9 74.3 43.5 94.9 44.8 98.0 47.4 99.9 50.3 98.8 51.7 97.2 54.5 67.0 55.1 66.6 63.4 80.1 71.5 91.8 74.4 92.3 76.9 91.3 77.5 90.1 77.0 85.8 65.3 68.1 65.5 67.3 66.3 67.6 79.0 78.4 86.7 84.2 88.1 84.3 89.4 82.6 88.9 80.1 65.5 58.3 65.5 57.8 66.3 57.8 94.3 64.6 99.6 62.1 99.7 59.8 97.8 57.3 94.6 55.2 83.2 54.4 72.4 54.2 66.2 53.6 65.9 53.3 79.7 49.9 90.0 47.9 98.3 45.6 99.6 42.5 99.2 41.0 95.7 39.2 81.8 41.7 69.0 44.3 68.7 43.9 72.1 37.9 85.3 20.6 86.7 15.8 83.6 11.1 79.3 11.1 77.0 12.9 70.2 20.5 59.6 34.0 58.4 35.2 57.6 35.2 61.4 15.1 62.8 5.4 60.8 2.5 58.5 1.4 55.6 3.3 53.7 7.5 51.0 38.1 50.3 38.1 48.9 33.5 40.3 16.9 33.8 2.1 32.0 0.5 28.4 0.0Z"/></symbol>
-  <symbol id="out" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="pearl" viewBox="0 0 16 16"><path fill="#d16be8" d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></symbol>
+  <symbol id="claude" viewBox="0 0 100 100"><path fill="#fff" d="M26.2 0.5 23.1 4.7 24.1 10.2 33.0 25.1 39.1 36.1 39.1 36.6 38.4 37.0 15.0 19.2 10.3 18.7 7.6 21.7 8.3 25.9 10.0 27.9 18.1 33.7 38.5 47.3 39.8 48.4 39.6 49.0 37.8 49.1 28.1 48.0 2.3 46.3 0.3 47.6 0.0 49.0 2.2 52.0 4.5 52.5 39.2 53.9 39.6 54.7 39.1 55.6 19.4 66.6 11.8 71.8 10.7 72.8 10.5 75.9 12.5 77.9 17.1 77.3 43.5 60.1 43.8 60.2 43.9 60.8 40.0 65.3 22.4 88.3 22.1 91.0 25.1 92.5 26.7 91.9 34.0 84.1 48.8 64.0 49.6 63.6 47.9 74.3 43.5 94.9 44.8 98.0 47.4 99.9 50.3 98.8 51.7 97.2 54.5 67.0 55.1 66.6 63.4 80.1 71.5 91.8 74.4 92.3 76.9 91.3 77.5 90.1 77.0 85.8 65.3 68.1 65.5 67.3 66.3 67.6 79.0 78.4 86.7 84.2 88.1 84.3 89.4 82.6 88.9 80.1 65.5 58.3 65.5 57.8 66.3 57.8 94.3 64.6 99.6 62.1 99.7 59.8 97.8 57.3 94.6 55.2 83.2 54.4 72.4 54.2 66.2 53.6 65.9 53.3 79.7 49.9 90.0 47.9 98.3 45.6 99.6 42.5 99.2 41.0 95.7 39.2 81.8 41.7 69.0 44.3 68.7 43.9 72.1 37.9 85.3 20.6 86.7 15.8 83.6 11.1 79.3 11.1 77.0 12.9 70.2 20.5 59.6 34.0 58.4 35.2 57.6 35.2 61.4 15.1 62.8 5.4 60.8 2.5 58.5 1.4 55.6 3.3 53.7 7.5 51.0 38.1 50.3 38.1 48.9 33.5 40.3 16.9 33.8 2.1 32.0 0.5 28.4 0.0Z"/></symbol>
+  <symbol id="claudeO" viewBox="0 0 100 100"><path fill="#D97757" d="M26.2 0.5 23.1 4.7 24.1 10.2 33.0 25.1 39.1 36.1 39.1 36.6 38.4 37.0 15.0 19.2 10.3 18.7 7.6 21.7 8.3 25.9 10.0 27.9 18.1 33.7 38.5 47.3 39.8 48.4 39.6 49.0 37.8 49.1 28.1 48.0 2.3 46.3 0.3 47.6 0.0 49.0 2.2 52.0 4.5 52.5 39.2 53.9 39.6 54.7 39.1 55.6 19.4 66.6 11.8 71.8 10.7 72.8 10.5 75.9 12.5 77.9 17.1 77.3 43.5 60.1 43.8 60.2 43.9 60.8 40.0 65.3 22.4 88.3 22.1 91.0 25.1 92.5 26.7 91.9 34.0 84.1 48.8 64.0 49.6 63.6 47.9 74.3 43.5 94.9 44.8 98.0 47.4 99.9 50.3 98.8 51.7 97.2 54.5 67.0 55.1 66.6 63.4 80.1 71.5 91.8 74.4 92.3 76.9 91.3 77.5 90.1 77.0 85.8 65.3 68.1 65.5 67.3 66.3 67.6 79.0 78.4 86.7 84.2 88.1 84.3 89.4 82.6 88.9 80.1 65.5 58.3 65.5 57.8 66.3 57.8 94.3 64.6 99.6 62.1 99.7 59.8 97.8 57.3 94.6 55.2 83.2 54.4 72.4 54.2 66.2 53.6 65.9 53.3 79.7 49.9 90.0 47.9 98.3 45.6 99.6 42.5 99.2 41.0 95.7 39.2 81.8 41.7 69.0 44.3 68.7 43.9 72.1 37.9 85.3 20.6 86.7 15.8 83.6 11.1 79.3 11.1 77.0 12.9 70.2 20.5 59.6 34.0 58.4 35.2 57.6 35.2 61.4 15.1 62.8 5.4 60.8 2.5 58.5 1.4 55.6 3.3 53.7 7.5 51.0 38.1 50.3 38.1 48.9 33.5 40.3 16.9 33.8 2.1 32.0 0.5 28.4 0.0Z"/></symbol>
+  <symbol id="search" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.8" fill="none" stroke="#555" stroke-width="2"/><path d="M10 10l4.5 4.5" stroke="#555" stroke-width="2.4" stroke-linecap="round"/></symbol>
 </svg>
 
-<header class="top">
-  <div class="wrap">
-    <a class="brand" href="/" aria-label="Grug home"><svg aria-hidden="true"><use href="#grug"/></svg>Grug</a>
-    <nav class="nav" aria-label="Main">
-      <a href="#assets">Assets</a>
-      <a href="/character/">Avatar<span class="long"> Studio</span></a>
-      <a href="/build/">Building<span class="long"> Studio</span></a>
-      <a href="/arcade/">Arcade</a>
-    </nav>
-    <div class="end">
-      <a class="legacy" href="/legacy">Legacy site</a>
-      <a class="pearls" id="pearls" href="/character/pearls/" hidden title="Your Pearls"><svg viewBox="0 0 16 16" aria-hidden="true" fill="#d16be8"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></svg><b id="pearlN">0</b><span class="pw"> Pearls</span><span class="note" id="pearlNote"></span></a>
-      <a class="btn make" href="/character/">Make a character</a>
-      <button class="iconbtn" id="mode" type="button" aria-label="Switch to dark mode" title="Dark mode">
-        <svg class="i moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
-        <svg class="i sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-      </button>
+<div class="bgfx" id="bgfx" aria-hidden="true"></div>
+<div class="sky l" id="skyL" aria-label="Grug on Discord, Instagram and YouTube"></div><div class="sky r" id="skyR" aria-label="Grug on YouTube, Discord and Instagram"></div>
+<div id="Container">
+  <div id="Leaderboard">
+    <a class="lb" href="/arcade/" aria-label="Play free games in the Grug Arcade">
+      <span class="bgk"></span>
+      <img class="fig" src="/static/arcade/racer.webp" alt="" style="left:14px">
+      <img class="fig" src="/static/arcade/grug.webp" alt="" style="left:78px;z-index:1">
+      <img class="fig" src="/static/arcade/medic.webp" alt="" style="left:160px">
+      <span class="t"><b>Play as the character you made.</b><span>Free blocky games in your browser, nothing to install:</span><span class="exp"><i class="k">Zone Royale</i><i class="k">Slide 999 KM</i><i>Pet Zones</i><i>Grug City RP</i></span></span>
+      <span class="go">Play the Arcade ›</span>
+    </a>
+  </div>
+
+  <div id="Header">
+    <div id="Banner">
+      <div id="Options"><a id="pearls" href="/character/pearls/" title="Your Pearls" hidden><svg aria-hidden="true"><use href="#pearl"/></svg><span id="pearlN">0</span> Pearls</a></div>
+      <img class="crowd" src="/static/arcade/medic.webp" alt="" style="left:96px">
+      <img class="crowd" src="/static/arcade/racer.webp" alt="" style="left:170px;height:98px">
+      <a id="Logo" href="/" title="Grug Digital home"><img src="/static/arcade/grug-digital-logo.png" alt="Grug Digital"></a>
+      <img class="crowd" src="/static/arcade/skater.webp" alt="" style="left:640px;height:98px">
+      <img class="crowd" src="/static/arcade/ranger.webp" alt="" style="left:712px">
+    </div>
+    <div class="Navigation">
+      <div class="dropdown" id="dropNav">
+        <div class="col gen" id="dropGenres"></div>
+        <div class="col more">
+          <a href="/arcade/"><b>Most Popular</b></a>
+          <a href="/arcade/">Newest</a>
+          <a href="/arcade/">Featured Games</a>
+          <a href="/arcade/">Search Games</a>
+        </div>
+      </div>
+      <ul>
+        <li><a href="/character/?outfits">My Grug</a></li>
+        <li><a href="/arcade/" title="Games">Games</a><button id="gamesMenuToggle" type="button" aria-label="Show game genres" aria-expanded="false"></button></li>
+        <li><a href="#assets">Catalog</a></li>
+        <li><a href="/character/">Avatar Studio</a></li>
+        <li><a href="/build/">Building Studio</a></li>
+        <li><a href="/character/pearls/">Pearls</a></li>
+        <li><a href="/legacy">Legacy</a></li>
+        <li><a href="/support.html">Help</a></li>
+      </ul>
     </div>
   </div>
-</header>
 
-<main>
-  <section class="block wrap slop" id="slop" aria-labelledby="slopTitle">
-    <div class="head">
-      <div>
-        <p class="eyebrow"><svg class="cl" aria-hidden="true"><use href="#claude"/></svg><span class="claude">Roblox characters with Claude</span></p>
-        <h1 id="slopTitle">Stop the <span class="claude">Claude</span> slop.</h1>
-        <p>Ask Claude for a Roblox character on its own and you get the left. Point it at the Grug Avatar Studio and you get the right.</p>
-      </div>
-      <div class="slop-ctas">
-        <a class="btn btn--lg" href="/character/">Make a character <svg class="i" aria-hidden="true"><use href="#arrow"/></svg></a>
-        <a class="btn btn--lg btn--claude" href="/character/?view=paint"><svg class="cl" aria-hidden="true"><use href="#claude"/></svg>Make it with Claude</a>
-      </div>
-    </div>
-    <div class="vs">
-      <div class="side bad">
-        <p class="lab">Before<b><svg class="cl" aria-hidden="true"><use href="#claude"/></svg><span><span class="claude">Claude</span> on its own</span></b></p>
-        <div class="pics">
-          <div><img src="/static/slop/before-1.webp" alt="A plain blocky figure in a red cap and blue shirt" width="314" height="480"></div>
-          <div><img src="/static/slop/before-2.webp" alt="A plain blocky figure in a pink shirt" width="333" height="480"></div>
-          <div><img src="/static/slop/before-3.webp" alt="A plain blocky figure in a top hat" width="285" height="480"></div>
-          <div><img src="/static/slop/before-4.webp" alt="A plain blocky figure with spiky red hair" width="307" height="480"></div>
-          <div><img src="/static/slop/before-5.webp" alt="A blocky wizard made of a cone and a stick" width="239" height="480"></div>
-          <div><img src="/static/slop/before-6.webp" alt="A plain blocky figure in a green number 7 shirt" width="311" height="480"></div>
+  <div id="Announcement">
+    <div class="SystemAlertText"><svg aria-hidden="true"><use href="#claude"/></svg>New: make your character with Claude! <a href="/character/?view=paint">Make it with Claude</a></div>
+  </div>
+
+  <div id="Body">
+    <h1 style="position:absolute;left:-9999px">Grug: game assets and creator tools</h1>
+
+    <section class="Sec" id="Slop" aria-labelledby="slopTitle">
+      <div class="StandardBoxHeader"><span>Roblox characters with Claude</span></div>
+      <div class="box">
+        <div class="top">
+          <div>
+            <h2 id="slopTitle">Stop the <span class="cl">Claude</span> slop.</h2>
+            <p>Ask Claude for a Roblox character on its own and you get the left. Point it at the Grug Avatar Studio and you get the right.</p>
+          </div>
+          <div class="ctas">
+            <a class="gbtn" href="/character/">Make a character ›</a>
+            <a class="gbtn claude" href="/character/?view=paint"><svg aria-hidden="true"><use href="#claudeO"/></svg>Make it with Claude</a>
+          </div>
         </div>
-        <ul><li>Flat colour blocks</li><li>Clothes glued on as shapes</li><li>No real textures</li></ul>
-      </div>
-      <div class="side good">
-        <p class="lab">After<b><svg class="cl" aria-hidden="true"><use href="#claude"/></svg><span><span class="claude">Claude</span> + Grug Avatar Studio</span></b></p>
-        <div class="pics">
-          <div><img src="/static/showcase/grug.webp" alt="Grug in a lime dino hoodie"></div>
-          <div><img src="/static/showcase/ranger.webp" alt="Ranger in woodland camo and a plate carrier"></div>
-          <div><img src="/static/showcase/skater.webp" alt="Skater in a denim jacket and checkerboard shoes"></div>
-          <div><img src="/static/showcase/medic.webp" alt="Medic in a navy vest with a green armband"></div>
-          <div><img src="/static/showcase/snow-rider.webp" alt="Snow Rider in a puffy purple ski jacket"></div>
-          <div><img src="/static/showcase/racer.webp" alt="Racer in a red and white jumpsuit"></div>
+        <div class="vs">
+          <div class="side bad">
+            <div class="bar"><small>Before</small><svg class="cl" aria-hidden="true"><use href="#claudeO"/></svg><span><span class="cl">Claude</span> on its own</span></div>
+            <div class="pics">
+              <div><img src="/static/slop/before-1.webp" alt="A plain blocky figure in a red cap and blue shirt" width="314" height="480"></div>
+              <div><img src="/static/slop/before-2.webp" alt="A plain blocky figure in a pink shirt" width="333" height="480"></div>
+              <div><img src="/static/slop/before-3.webp" alt="A plain blocky figure in a top hat" width="285" height="480"></div>
+              <div><img src="/static/slop/before-4.webp" alt="A plain blocky figure with spiky red hair" width="307" height="480"></div>
+              <div><img src="/static/slop/before-5.webp" alt="A blocky wizard made of a cone and a stick" width="239" height="480"></div>
+              <div><img src="/static/slop/before-6.webp" alt="A plain blocky figure in a green number 7 shirt" width="311" height="480"></div>
+            </div>
+            <div class="chips lt"><i>Flat colour blocks</i><i>Clothes glued on as shapes</i><i>No real textures</i></div>
+          </div>
+          <div class="side good">
+            <div class="bar"><small>After</small><svg class="cl" aria-hidden="true"><use href="#claudeO"/></svg><span>Claude + Grug Avatar Studio</span></div>
+            <div class="pics">
+              <div><img src="/static/showcase/grug.webp" alt="Grug in a lime dino hoodie"></div>
+              <div><img src="/static/showcase/ranger.webp" alt="Ranger in woodland camo and a plate carrier"></div>
+              <div><img src="/static/showcase/skater.webp" alt="Skater in a denim jacket and checkerboard shoes"></div>
+              <div><img src="/static/showcase/medic.webp" alt="Medic in a navy vest with a green armband"></div>
+              <div><img src="/static/showcase/snow-rider.webp" alt="Snow Rider in a puffy purple ski jacket"></div>
+              <div><img src="/static/showcase/racer.webp" alt="Racer in a red and white jumpsuit"></div>
+            </div>
+            <div class="chips"><i class="k">Real painted clothes</i><i class="k">Rigged Roblox R6</i><i class="k">Works with Roblox animations</i></div>
+          </div>
         </div>
-        <ul><li>Real painted clothes</li><li>Rigged Roblox R6</li><li>Works with Roblox animations</li></ul>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="hero wrap" aria-labelledby="heroTitle">
-    <div class="hero-main">
-      <p class="eyebrow">Game assets &amp; creator tools</p>
-      <h2 class="h1" id="heroTitle">Make your game look great, faster.</h2>
-      <p class="lead">Make your own Roblox characters in the free Avatar Studio, textured buildings in the Building Studio, and grab ready-to-use 3D asset packs for Roblox and other engines.</p>
-      <div class="ctas">
-        <a class="btn" href="/character/">Make a character <svg class="i" aria-hidden="true"><use href="#arrow"/></svg></a>
-        <a class="btn btn--ghost" href="/build/">Make a building</a>
-        <a class="btn btn--ghost" href="#assets">Browse asset packs</a>
-        <a class="btn btn--ghost" href="/arcade/">Play the arcade</a>
+    <section class="Sec" id="Tools" aria-labelledby="toolsTitle">
+      <div class="StandardBoxHeader"><span>Game assets &amp; creator tools</span></div>
+      <div class="box in">
+        <div class="show" id="show" role="region" aria-roledescription="carousel" aria-label="Characters made in the Avatar Studio">
+          <noscript><img class="bg" src="/static/showcase/bg-slide-1.jpg" alt=""><img class="fg" src="/static/showcase/grug.webp" alt="Grug, made in the Avatar Studio"></noscript>
+        </div>
+        <div class="txt">
+          <h2 id="toolsTitle">Make your game look great, faster.</h2>
+          <div class="tag">Free creator tools · 3D asset packs · games</div>
+          <ul>
+            <li>Make your own Roblox characters in the free <a href="/character/">Avatar Studio</a>, or let Claude make one for you.</li>
+            <li>Paint textured buildings for your game in the <a href="/build/">Building Studio</a>.</li>
+            <li>Grab ready-to-use 3D <a href="#assets">asset packs</a> for Roblox and other engines.</li>
+            <li>Then play as your character in the <a href="/arcade/">Grug Arcade</a>.</li>
+          </ul>
+          <div class="acts">
+            <a class="gbtn lg" href="/character/">Make a character ›</a>
+            <a class="gbtn gray" href="/build/">Make a building</a>
+            <a class="gbtn gray" href="#assets">Browse asset packs</a>
+            <a class="gbtn gray" href="/arcade/">Play the arcade</a>
+          </div>
+          <div class="fine">Free to make. Click either side of the picture to see the next character.</div>
+        </div>
       </div>
-    </div>
-    <div class="show" id="show" role="region" aria-roledescription="carousel" aria-label="Characters made in the Avatar Studio">
-      <noscript><img class="bg" src="/static/showcase/bg-slide-1.jpg" alt=""><img class="fg" src="/static/showcase/grug.webp" alt="Grug, made in the Avatar Studio"></noscript>
-    </div>
-  </section>
+    </section>
 
-  <section class="block wrap" id="assets" aria-labelledby="assetsTitle">
-    <div class="head">
-      <div>
-        <h2 id="assetsTitle">Asset packs</h2>
-        <p>Characters, pets, hats and props, straight from our itch.io store.</p>
+    <section id="assets" aria-labelledby="assetsTitle">
+      <div class="Column1e">
+        <div class="StandardBoxHeader"><span><h2 id="assetsTitle">Catalog</h2></span></div>
+        <div class="StandardBox">
+          <div class="GameFilter">
+            <div>Categories:</div>
+            <ul id="catList"><li><a href="#assets" class="on">All</a></li></ul>
+          </div>
+        </div>
+        <div class="Tools">
+          <div class="StandardBoxHeader"><span><h2>Free tools</h2></span></div>
+          <div class="StandardBox">
+            <a href="/character/"><img src="/static/arcade/grug.webp" alt="">Avatar Studio</a>
+            <a href="/character/?view=paint"><img src="/static/arcade/racer.webp" alt="">Make it with Claude</a>
+            <a href="/build/"><img src="/static/arcade/ranger.webp" alt="">Building Studio</a>
+            <a href="/arcade/"><img src="/static/arcade/skater.webp" alt="">Grug Arcade</a>
+          </div>
+        </div>
       </div>
-      <a class="textlink" href="https://polysw.itch.io/" target="_blank" rel="noopener">Visit the store on itch.io <svg class="i" aria-hidden="true"><use href="#out"/></svg></a>
-    </div>
-    <div class="rows" id="rows" aria-live="polite">
-      <noscript><p class="empty">See every pack at <a href="https://polysw.itch.io/">polysw.itch.io</a>.</p></noscript>
-    </div>
-  </section>
 
+      <div class="Column2e" id="Cat">
+        <div id="PackTabs" role="tablist">
+          <div class="Tab on" role="tab" data-sort="featured"><span>Featured</span></div><div class="Tab" role="tab" data-sort="newest"><span>Newest</span></div><div class="Tab" role="tab" data-sort="price"><span>Lowest price</span></div>
+        </div>
+        <div class="Search"><input id="searchbox" type="text" placeholder="Search packs" aria-label="Search asset packs"><button class="SearchIconButton" type="button" aria-label="Search"><svg width="16" height="16"><use href="#search"/></svg></button></div>
+        <div class="StandardBoxGray">
+          <div id="GamePageAdDiv">
+            <a class="rect kimi" href="https://www.roblox.com/communities/5835899/KimiLand#!/store" target="_blank" rel="noopener sponsored" aria-label="KimiLand: Roblox UGC from our official sponsor">
+              <span class="spn">SPONSOR</span>
+              <img class="logo" src="/static/sponsor/kimiland-logo.png" alt="KimiLand">
+              <span class="figs"><img src="/static/arcade/snow-rider.webp" alt="" style="left:6px;height:92px"><img src="/static/arcade/skater.webp" alt="" style="right:6px;height:96px"></span>
+              <span class="t">KimiLand on Roblox<span class="s">UGC from our official Roblox sponsor</span></span>
+              <span class="bar"><span class="go">Shop KimiLand ›</span></span>
+            </a>
+            <span class="rect-note">Our official Roblox UGC sponsor</span>
+          </div>
+          <div id="GamesContent" aria-live="polite"><noscript><div class="Empty">See every pack at <a href="https://polysw.itch.io/">polysw.itch.io</a>.</div></noscript></div>
+          <div class="Paging">
+            <button class="Arrow prev" id="prevPage" type="button" aria-label="Previous page" disabled></button>
+            <span style="margin:0 5px"><span id="pageNum">1</span> of <span id="pageCount">1</span></span>
+            <button class="Arrow next" id="nextPage" type="button" aria-label="Next page" disabled></button>
+          </div>
+          <div id="GenreDescriptionPanel">Grug's asset packs are low-poly 3D models for Roblox, Unity, Godot and other engines: characters, pets, hats and props, straight from our
+            itch.io store. New uploads show up here on their own. <a href="https://polysw.itch.io/" target="_blank" rel="noopener"><b>Visit the store on itch.io »</b></a></div>
+        </div>
+      </div>
+    </section>
 
-  <section class="block wrap" aria-labelledby="socTitle">
-    <div class="head"><div><h2 id="socTitle">Join the Grug community</h2><p>Hang out, see new characters first, watch how it's all made.</p></div></div>
-    <div class="soc">
-      <a class="dc" href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener"><small>Discord</small><b id="socDc">Join the Grug Discord</b><span id="socDcSub">Players, builders and creators. Come say hi.</span><em>Join server</em></a>
-      <a class="ig" href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener"><small>Instagram</small><b>@grugdigital</b><span>Characters, builds and behind the scenes.</span><em>Follow</em></a>
-      <a class="yt" id="socYt" href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener"><small>YouTube</small><b>PolySwitch</b><span id="socYtSub">Game dev, Roblox builds and the making of Grug.</span><i class="vid" id="socVid"></i><em>Watch</em></a>
-    </div>
-  </section>
+    <section class="Sec" aria-labelledby="socTitle" style="clear:both">
+      <div class="StandardBoxHeader"><span><h2 id="socTitle">Join the Grug community</h2></span></div>
+      <div class="box">
+        <div class="soc">
+          <a class="dc" href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener"><small>Discord</small><b id="socDc">Join the Grug Discord</b><span id="socDcSub">Players, builders and creators. Come say hi.</span>
+            <span class="figs" aria-hidden="true"><img src="/static/arcade/grug.webp" alt=""></span><span class="cta">Join server ›</span></a>
+          <a class="ig" href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener"><small>Instagram</small><b>@grugdigital</b><span>Characters, builds and behind the scenes.</span>
+            <span class="figs" aria-hidden="true"><img src="/static/arcade/snow-rider.webp" alt=""></span><span class="cta">Follow ›</span></a>
+          <a class="yt" id="socYt" href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener"><small>YouTube</small><i class="vid" id="socVid"></i><b>PolySwitch</b><span id="socYtSub">Game dev, Roblox builds and the making of Grug.</span><span class="cta">Watch ›</span></a>
+        </div>
+      </div>
+    </section>
 
-  <section class="block wrap" aria-labelledby="closerTitle">
-    <div class="closer">
+    <section id="Hero" aria-labelledby="closerTitle">
       <div class="txt">
         <h2 id="closerTitle">Your game needs a hero. Make one now.</h2>
         <p>Pick hair and a face, describe an outfit, and export a rigged character for your game in a few minutes. Free to make.</p>
-        <div class="exp" aria-label="Exports to"><i class="k">Roblox</i><i class="k">Unity</i><i class="k">itch.io</i><i>Godot</i><i>Blender</i></div>
+        <div class="chips" aria-label="Exports to"><i class="k">Roblox</i><i class="k">Unity</i><i class="k">itch.io</i><i>Godot</i><i>Blender</i></div>
         <div class="ctas">
-          <a class="btn btn--lg" href="/character/">Make a character <svg class="i" aria-hidden="true"><use href="#arrow"/></svg></a>
-          <a class="btn btn--lg btn--claude" href="/character/?view=paint"><svg class="cl" aria-hidden="true"><use href="#claude"/></svg>Make it with Claude</a>
+          <a class="gbtn lg" href="/character/">Make a character ›</a>
+          <a class="gbtn lg claude" href="/character/?view=paint"><svg aria-hidden="true"><use href="#claudeO"/></svg>Make it with Claude</a>
         </div>
       </div>
       <div class="art" aria-hidden="true">
-        <img src="/static/showcase/medic.webp" alt="" loading="lazy">
-        <img src="/static/showcase/grug.webp" alt="" loading="lazy">
-        <img src="/static/showcase/snow-rider.webp" alt="" loading="lazy">
+        <img src="/static/showcase/medic.webp" alt="" loading="lazy" style="left:0;height:190px">
+        <img src="/static/showcase/snow-rider.webp" alt="" loading="lazy" style="right:0;height:196px">
+        <img src="/static/showcase/grug.webp" alt="" loading="lazy" style="left:90px;height:226px;z-index:1">
       </div>
-    </div>
-  </section>
-</main>
-
-<footer>
-  <div class="wrap">
-    <span>© Grug Digital</span>
-    <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener">Discord</a>
-    <a href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener">Instagram</a>
-    <a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener">YouTube</a>
-    <a href="https://polysw.itch.io/" target="_blank" rel="noopener">itch.io store</a>
-    <a href="/character/">Avatar Studio</a>
-    <a href="/arcade/">Arcade</a>
-    <a href="/legacy">Legacy site</a>
-    <a href="/privacy.html">Privacy</a>
-    <a href="/terms.html">Terms</a>
-    <a class="sp" href="#top" onclick="scrollTo({top:0});return false">Back to top ↑</a>
+    </section>
   </div>
-</footer>
 
+  <div id="Footer">
+    <div class="FooterNav">
+      <a href="/privacy.html"><b>Privacy Policy</b></a>
+      &nbsp;|&nbsp;
+      <a href="/terms.html">Terms</a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Contact Us</a>
+      &nbsp;|&nbsp;
+      <a href="https://polysw.itch.io/" target="_blank" rel="noopener">itch.io Store</a>
+      &nbsp;|&nbsp;
+      <a href="/character/">Avatar Studio</a>
+      &nbsp;|&nbsp;
+      <a href="/build/">Building Studio</a>
+      &nbsp;|&nbsp;
+      <a href="/arcade/">Free Games</a>
+      &nbsp;|&nbsp;
+      <a href="/legacy">Legacy Site</a>
+    </div>
+    <div class="FooterNav">Follow Grug: <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener"><b>Discord</b></a>&nbsp;|&nbsp;<a href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener"><b>Instagram</b></a>&nbsp;|&nbsp;<a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener"><b>YouTube</b></a></div>
+    <div class="FooterNav" id="seoGenres"></div>
+    <p class="Legalese">
+      Grug, Grug Digital, Pearls, characters, logos, names, and all related indicia are trademarks of <a href="/">Grug Digital</a>, ©2026.
+      <br>
+      Grug is not sponsored, authorized or endorsed by Roblox Corporation, Anthropic or Google. Roblox is a trademark of Roblox Corporation,<br>
+      Claude of Anthropic and Gemini of Google, and no affiliation with these companies is intended.<br>Use of this site signifies your acceptance of the <a href="/terms.html">Terms and Conditions</a>.
+    </p>
+  </div>
+</div>
+
+<script src="/arcade/arcade.js"></script>
 <script>
+/* the header, background, side ads, Pearls button and footer: the same as the Arcade's (arcade/arcade.js) */
+window.GrugArcade.chrome();
+
 /* the community strip: the Discord's member count and the newest video (static/social.js) */
 (function () {
   const S = window.GrugSocial; if (!S) return;
@@ -458,35 +403,15 @@ footer .sp{margin-left:auto}
       if (v.title) document.getElementById('socYtSub').textContent = 'New: ' + v.title; }
   });
 })();
-/* Pearls: a new player's starting balance, then free Pearls once a day (static/pearls.js) */
-(function () {
-  const P = window.GrugPearls; if (!P) return;
-  const paint = r => { document.getElementById('pearlN').textContent = P.balance().toLocaleString(); document.getElementById('pearls').hidden = false;
-    if (r) document.getElementById('pearlNote').textContent = r.welcome ? ' · welcome gift' : r.daily ? ' · +' + r.daily + ' today' : ''; };
-  P.start().then(paint); addEventListener('grug:pearls', () => paint());
-})();
 
-/* light / dark */
+/* Asset packs: live from itch.io via /api/itch-assets (functions/api/itch-assets.js, src/itch/itch.js), falling back to
+   the copy in static/itch-assets.json. Laid out like the Arcade's games list: the itch collections are the categories on
+   the left (plus "Just added": packs not in a collection yet, and new ones), tabs sort, the search box filters, 16 tiles a
+   page beside the sponsor box. One "Make a character" tile sits among the packs on every page, like an ad. */
 (function () {
-  const b = document.getElementById('mode'), root = document.documentElement;
-  const label = () => { const d = root.classList.contains('dark'); b.setAttribute('aria-label', d ? 'Switch to light mode' : 'Switch to dark mode'); b.title = d ? 'Light mode' : 'Dark mode'; };
-  label();
-  b.addEventListener('click', () => { const d = root.classList.toggle('dark'); try { localStorage.setItem('grug.home.mode', d ? 'dark' : 'light'); } catch (e) {} label(); });
-})();
-
-
-/* Asset packs: live from itch.io via /api/itch-assets (functions/api/itch-assets.js, src/itch/itch.js).
-   Falls back to the copy in static/itch-assets.json if the live feed can't be reached.
-   One carousel per itch collection, four cards in view, arrows page through. "Make a character" cards sit among the
-   packs like ads: one on the first page of two rows (rows too short to fill their first page go first), then one on
-   every further page of every row, each at a random spot. */
-(function () {
-  const rows = document.getElementById('rows');
+  const $ = id => document.getElementById(id);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-  const PER = 4, FIRST_PAGE_ADS = 2;
-  const rnd = n => Math.floor(Math.random() * n);
-  const arrowSvg = '<svg aria-hidden="true"><use href="#arrow"/></svg>';
-
+  const PAGE = 16, rnd = n => Math.floor(Math.random() * n), seed = rnd(97);
   const ADS = [
     { id: 'grug', bg: 'bg-slide-1', h: 'Make your own character', p: 'Paint an outfit, then export a rigged model for your game.' },
     { id: 'ranger', bg: 'bg-zombie-1', h: 'Your game needs a hero', p: 'Make one in a few minutes and drop it into any engine.' },
@@ -495,95 +420,86 @@ footer .sp{margin-left:auto}
     { id: 'snow-rider', bg: 'bg-slide-3', h: 'Ship it in your itch.io game', p: 'Export your character and use it in games you sell.' },
     { id: 'racer', bg: 'bg-slide-4', h: 'Make a character with Claude', p: 'Paste one prompt into Claude, then export it anywhere.', claude: true }
   ];
-  const KIMI = { url: 'https://www.roblox.com/communities/5835899/KimiLand#!/store' };   // Grug's official Roblox UGC sponsor
-  function sponsor() {
-    return `<a class="card ad kimi" href="${KIMI.url}" target="_blank" rel="noopener sponsored" aria-label="KimiLand: Roblox UGC from our official sponsor">
-      <div class="pic"><img class="logo" src="/static/sponsor/kimiland-logo.png" alt="KimiLand" loading="lazy"><span class="badge">Sponsor</span></div>
-      <div class="body"><h3>KimiLand on Roblox</h3><p>UGC from our official Roblox sponsor. Shop the store.</p><div class="cta"><span>Shop KimiLand <svg aria-hidden="true"><use href="#out"/></svg></span></div></div></a>`;
-  }
-  let adN = rnd(ADS.length);
-  function ad() {
-    const a = ADS[adN++ % ADS.length];
-    return `<a class="card ad" href="${a.claude ? '/character/?view=paint' : '/character/'}" aria-label="${esc(a.h)}: make a character in the Avatar Studio">
-      <div class="pic"><img class="bg" src="/static/showcase/${a.bg}.jpg" alt="" loading="lazy" decoding="async"><img class="fg" src="/static/showcase/${a.id}.webp" alt="" loading="lazy" decoding="async"><span class="badge">Free tool</span></div>
-      <div class="body"><h3>${esc(a.h)}</h3><p>${esc(a.p)}</p><div class="exp"><i class="k">Roblox</i><i class="k">Unity</i><i class="k">itch.io</i><i>Godot</i></div><div class="cta"><span>Make a character <svg aria-hidden="true"><use href="#arrow"/></svg></span></div></div></a>`;
-  }
-  function card(it) {
-    const img = it.cover ? `<img src="${esc(it.cover)}" alt="" loading="lazy" decoding="async" width="315" height="250"${it.gif ? ` data-gif="${esc(it.gif)}"` : ''}>` : '';
-    return `<a class="card" href="${esc(it.url)}" target="_blank" rel="noopener">
-      <div class="pic">${img}${it.new ? '<span class="badge">New</span>' : ''}</div>
-      <div class="body"><h3>${esc(it.title)}</h3>${it.text ? `<p>${esc(it.text)}</p>` : ''}
-        <div class="meta"><span class="price">${esc(it.price || 'Free')}</span><span class="go">itch.io <svg class="i" aria-hidden="true" style="width:15px;height:15px"><use href="#out"/></svg></span></div></div></a>`;
-  }
-  const insertAt = (arr, i, v) => { arr.splice(i, 0, v); return arr; };
+  const state = { cat: 'all', sort: 'featured', q: '', page: 1 };
+  let data = null, cats = [];
 
-  /* items → the row's cards with ads mixed in (null marks an ad) */
-  function withAds(items, firstAd) {
-    const first = items.slice(0, firstAd ? PER - 1 : PER);
-    if (firstAd) insertAt(first, rnd(first.length + 1), null);
-    const out = first;
-    for (let i = first.length - (firstAd ? 1 : 0); i < items.length; i += PER - 1) {
-      const page = items.slice(i, i + PER - 1);
-      out.push(...insertAt(page, rnd(page.length + 1), null));
-    }
-    return out;
+  function ad(page) {
+    const a = ADS[(seed + page) % ADS.length], href = a.claude ? '/character/?view=paint' : '/character/';
+    return `<div class="Cell adt" title="${esc(a.h)}"><div class="GameItem">
+      <div class="AlwaysShown">
+        <a class="thumb" href="${href}" aria-label="${esc(a.h)}: make a character in the Avatar Studio"><img class="bgi" src="/static/showcase/${a.bg}.jpg" alt="" loading="lazy"><img class="fgi" src="/static/showcase/${a.id}.webp" alt="" loading="lazy"><span class="new free">FREE TOOL</span></a>
+        <div class="GameName"><a href="${href}">${esc(a.h)}</a></div>
+        <div class="PlayerCount"><b>Free</b> <span>· Avatar Studio</span></div>
+      </div>
+      <div class="HoverShown"><p>${esc(a.p)}</p><div class="chips lt"><i class="k">Roblox</i><i class="k">Unity</i><i>itch.io</i><i>Godot</i></div></div>
+    </div></div>`;
   }
-
-  function row(g, firstAd, k) {
-    const cards = withAds(g.items, firstAd).map(x => x ? card(x) : ad()).join('');
-    return `<div class="row" data-k="${k}">
-      <div class="row-head"><h3 id="row-${k}">${esc(g.title)} <small>${g.items.length} pack${g.items.length === 1 ? '' : 's'}</small></h3>
-        <div class="arrows"><button class="arr prev" type="button" aria-label="Previous ${esc(g.title)}">${arrowSvg}</button><button class="arr next" type="button" aria-label="More ${esc(g.title)}">${arrowSvg}</button></div></div>
-      <div class="track" role="region" aria-labelledby="row-${k}" tabindex="0">${cards}</div></div>`;
+  function tile(it) {
+    const img = it.cover ? `<img src="${esc(it.cover)}" alt="" loading="lazy" decoding="async" width="160" height="127"${it.gif ? ` data-gif="${esc(it.gif)}"` : ''}>` : '';
+    return `<div class="Cell" title="${esc(it.title)}"><div class="GameItem">
+      <div class="AlwaysShown">
+        <a class="thumb" href="${esc(it.url)}" target="_blank" rel="noopener">${img}${it.new ? '<span class="new">NEW</span>' : ''}</a>
+        <div class="GameName"><a href="${esc(it.url)}" target="_blank" rel="noopener">${esc(it.title)}</a></div>
+        <div class="PlayerCount"><b>${esc(it.price || 'Free')}</b> <span>· on itch.io</span></div>
+      </div>
+      <div class="HoverShown">${it.text ? `<p>${esc(it.text)}</p>` : ''}<p>Opens on itch.io</p></div>
+    </div></div>`;
   }
+  const price = it => parseFloat(String(it.price || '0').replace(/[^0-9.]/g, '')) || 0;
 
-  function groups(data) {
-    const g = data.collections.map(c => ({ title: c.title, items: c.items.map(id => data.items.find(i => i.id === id)).filter(Boolean) }));
-    const loose = data.items.filter(i => !i.cats || !i.cats.length);
-    if (loose.length) g.unshift({ title: 'Just added', items: loose });
-    const ok = g.filter(x => x.items.length);
-    return ok.length ? ok : [{ title: 'All packs', items: data.items }];
+  function list() {
+    const c = cats.find(x => x.id === state.cat) || cats[0];
+    let L = c ? c.items.slice() : [];
+    if (state.q) { const q = state.q.toLowerCase(); L = L.filter(i => (i.title + ' ' + (i.text || '')).toLowerCase().includes(q)); }
+    if (state.sort === 'newest') L.sort((a, b) => (b.new ? 1 : 0) - (a.new ? 1 : 0));
+    if (state.sort === 'price') L.sort((a, b) => price(a) - price(b));
+    return L;
   }
-
-  function draw(data) {
-    const g = groups(data);
-    // which rows get an ad on their first page: short rows first (it fills their gap), then random others
-    const order = g.map((x, i) => i).sort((a, b) => (g[a].items.length < PER ? 0 : 1) - (g[b].items.length < PER ? 0 : 1) || Math.random() - .5);
-    const firstAds = new Set(order.slice(0, FIRST_PAGE_ADS));
-    rows.innerHTML = g.map((x, i) => row(x, firstAds.has(i), i)).join('');
-    // the sponsor: once, in the longest row, just past its first page
-    const long = [...rows.querySelectorAll('.track')].sort((a, b) => b.children.length - a.children.length)[0];
-    if (long) { const at = long.children[Math.min(long.children.length, PER + 1)]; const t = document.createElement('div'); t.innerHTML = sponsor(); at ? long.insertBefore(t.firstElementChild, at) : long.appendChild(t.firstElementChild); }
-    rows.querySelectorAll('.row').forEach(wire);
+  function draw() {
+    const L = list(), per = PAGE - 1, pages = Math.max(1, Math.ceil(L.length / per));
+    state.page = Math.min(state.page, pages);
+    const show = L.slice((state.page - 1) * per, state.page * per).map(tile);
+    if (show.length) show.splice((seed + state.page * 5) % (Math.min(show.length, 6) + 1), 0, ad(state.page));
+    $('GamesContent').innerHTML = show.length ? show.join('') :
+      `<div class="Empty">No packs ${state.q ? 'match "' + esc(state.q) + '"' : 'here yet'}. <a href="#assets" data-cat="all">See all packs</a>, or <a href="/character/">make a character</a> for free.</div>`;
+    $('pageNum').textContent = state.page; $('pageCount').textContent = pages;
+    $('prevPage').disabled = state.page <= 1; $('nextPage').disabled = state.page >= pages;
+    document.querySelectorAll('#catList a').forEach(a => a.classList.toggle('on', a.dataset.cat === state.cat));
+    document.querySelectorAll('#PackTabs .Tab').forEach(t => t.classList.toggle('on', t.dataset.sort === state.sort));
+  }
+  function load(d) {
+    data = d;
+    const col = d.collections.map(c => ({ id: 'c' + c.id, title: c.title, items: c.items.map(id => d.items.find(i => i.id === id)).filter(Boolean) })).filter(c => c.items.length);
+    const fresh = d.items.filter(i => i.new || !i.cats || !i.cats.length);
+    cats = [{ id: 'all', title: 'All', items: d.items }].concat(fresh.length ? [{ id: 'new', title: 'Just added', items: fresh }] : [], col);
+    $('catList').innerHTML = cats.map(c => `<li><a href="#assets" data-cat="${c.id}" title="${c.items.length} pack${c.items.length === 1 ? '' : 's'}">${esc(c.title)}</a></li>`).join('');
+    draw();
   }
 
-  function wire(r) {
-    const t = r.querySelector('.track'), prev = r.querySelector('.prev'), next = r.querySelector('.next');
-    const step = () => { const gap = parseFloat(getComputedStyle(t).columnGap) || 0; return t.clientWidth + gap; };
-    const sync = () => { prev.disabled = t.scrollLeft <= 2; next.disabled = t.scrollLeft + t.clientWidth >= t.scrollWidth - 2;
-      r.querySelector('.arrows').hidden = prev.disabled && next.disabled; };
-    prev.addEventListener('click', () => t.scrollBy({ left: -step() }));
-    next.addEventListener('click', () => t.scrollBy({ left: step() }));
-    t.addEventListener('scroll', sync, { passive: true });
-    t.addEventListener('keydown', e => { if (e.key === 'ArrowRight') { e.preventDefault(); next.click(); } if (e.key === 'ArrowLeft') { e.preventDefault(); prev.click(); } });
-    addEventListener('resize', sync); sync();
-  }
-
-  rows.innerHTML += `<div class="row"><div class="row-head"><h3>Loading packs</h3></div><div class="track" aria-hidden="true">${Array.from({ length: 4 }, () =>
-    '<div class="card skel"><div class="pic"></div><div class="body"><h3>Loading pack</h3><p>Loading the description of this pack</p></div></div>').join('')}</div></div>`;
+  document.addEventListener('click', e => {
+    const c = e.target.closest('[data-cat]');
+    if (c) { e.preventDefault(); state.cat = c.dataset.cat; state.page = 1; draw(); return; }
+    const s = e.target.closest('#PackTabs [data-sort]');
+    if (s) { state.sort = s.dataset.sort; state.page = 1; draw(); }
+  });
+  $('searchbox').addEventListener('input', e => { state.q = e.target.value.trim(); state.page = 1; if (data) draw(); });
+  document.querySelector('#Cat .SearchIconButton').addEventListener('click', () => $('searchbox').focus());
+  $('prevPage').addEventListener('click', () => { state.page--; draw(); $('assets').scrollIntoView(); });
+  $('nextPage').addEventListener('click', () => { state.page++; draw(); $('assets').scrollIntoView(); });
 
   // GIF covers play on hover
-  rows.addEventListener('mouseover', e => { const img = e.target.closest('.card') && e.target.closest('.card').querySelector('img[data-gif]'); if (img && !img.dataset.still) { img.dataset.still = img.src; img.src = img.dataset.gif; } });
-  rows.addEventListener('mouseout', e => { const c = e.target.closest('.card'); if (!c || c.contains(e.relatedTarget)) return; const img = c.querySelector('img[data-still]'); if (img) { img.src = img.dataset.still; delete img.dataset.still; } });
+  const box = $('GamesContent');
+  box.addEventListener('mouseover', e => { const t = e.target.closest('.Cell'), img = t && t.querySelector('img[data-gif]'); if (img && !img.dataset.still) { img.dataset.still = img.src; img.src = img.dataset.gif; } });
+  box.addEventListener('mouseout', e => { const t = e.target.closest('.Cell'); if (!t || t.contains(e.relatedTarget)) return; const img = t.querySelector('img[data-still]'); if (img) { img.src = img.dataset.still; delete img.dataset.still; } });
 
+  box.innerHTML = Array.from({ length: 8 }, () => '<div class="Cell skel"><div class="GameItem"><div class="AlwaysShown"><span class="thumb"></span><div class="GameName">Loading pack</div><div class="PlayerCount">Loading</div></div></div></div>').join('');
   const get = u => fetch(u, { headers: { accept: 'application/json' } }).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(j => (j && Array.isArray(j.items) && j.items.length) ? j : Promise.reject('empty'));
-  get('/api/itch-assets').catch(() => get('/static/itch-assets.json')).then(draw).catch(() => {
-    rows.innerHTML = '<p class="empty">The packs couldn\'t load right now. See them all at <a href="https://polysw.itch.io/" target="_blank" rel="noopener">polysw.itch.io</a>.</p>';
+  get('/api/itch-assets').catch(() => get('/static/itch-assets.json')).then(load).catch(() => {
+    box.innerHTML = '<div class="Empty">The packs couldn\'t load right now. See them all at <a href="https://polysw.itch.io/" target="_blank" rel="noopener">polysw.itch.io</a>.</div>';
   });
 })();
-</script>
-<script>
-/* The hero showcase: characters made in the Avatar Studio (Cycles ray-traced renders with a transparent background,
+
+/* The showcase: characters made in the Avatar Studio (Cycles ray-traced renders with a transparent background,
    static/showcase/<id>.webp) over scenes from the Grug Arcade games (static/showcase/bg-*.jpg). Each slide drifts for a few
    seconds (the scene one way, the character the other) while the short prompt that made the outfit types itself out, then
    the next one fades in. Click the left or right side to step through. */
@@ -604,7 +520,7 @@ footer .sp{margin-left:auto}
     const s = document.createElement('div'); s.className = 's' + (d.left ? ' left' : ''); s.style.setProperty('--dur', (DUR + 900) / 1000 + 's');
     s.setAttribute('role', 'group'); s.setAttribute('aria-roledescription', 'slide'); s.setAttribute('aria-label', (i + 1) + ' of ' + S.length + ': ' + d.name);
     s.innerHTML = `<img class="bg" alt="" decoding="async" src="/static/showcase/${d.bg}.jpg"><img class="fg" decoding="async" alt="${esc(d.name)}, a character made in the Avatar Studio" src="/static/showcase/${d.id}.webp">` +
-      `<div class="who"><b>${esc(d.name)}</b><span>${esc(d.from)}</span></div><div class="ask"><small><svg class="cl" aria-hidden="true"><use href="#claude"/></svg>Prompt to Claude</small><p aria-label="${esc(d.ask)}"></p></div>`;
+      `<div class="who">${esc(d.name)} <span>· ${esc(d.from)}</span></div><div class="ask"><small><svg aria-hidden="true"><use href="#claudeO"/></svg>Prompt to Claude</small><p aria-label="${esc(d.ask)}"></p></div>`;
     root.appendChild(s); return s;
   });
   const nav = document.createElement('div'); nav.className = 'nav2';

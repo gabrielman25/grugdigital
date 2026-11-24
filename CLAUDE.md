@@ -63,10 +63,20 @@ and link straight to the pages that changed. A preview also falls back to the le
 
 ## The look
 
-The new pages keep a touch of the old look: Fredoka (`static/fredoka.woff2`, OFL), a plain light page (no background
-pattern any more), the lime `#9BE338` accent on flat buttons, and the Grug dino mark. No coloured dots next to text and
-no coloured accent lines or lips (the owner finds them ugly). The home page is light
-by default, full width, with a sticky top bar (nav, Pearls, a light/dark button saved as `grug.home.mode`).
+Every page outside the studios wears the Grug Arcade's classic look (a 2011-style games site): a fixed 920px column over
+slow pans of Grug City (`.bgfx`), the 728x90 house ad, the logo banner with the R6 crowd, the shiny green nav bar, the
+orange announcement strip, dark shiny box tabs (`.StandardBoxHeader`) over light gradient boxes, shiny gradient buttons,
+Arial, the social skyscrapers in the gutters, and the grey Verdana footer. No dark mode. No coloured dots next to text and
+no coloured accent lines or lips (the owner finds them ugly).
+
+- `arcade/arcade.css` + `GrugArcade.chrome()` (`arcade/arcade.js`) are the shared header, background, side ads, Pearls
+  button and footer. The home page, `privacy.html` and `terms.html` use them too, with the same header/footer markup
+  copied in (keep the nav in step across `index.html`, `arcade/index.html`, `arcade/place/index.html`, `privacy.html`, `terms.html`).
+- `static/classic.css`: the pieces those pages add on top (`.gbtn` buttons: green, `.gray`, `.claude`, `.blue`; `.Sec`
+  tabbed boxes of any width; `.chips`). `static/legal.css`: the privacy/terms document inside its box.
+- `static/site.css`: the same look for the small card pages (`character/pearls/`, `tizzy/`, `itch/`, `404.html`): the city
+  background fading into green, a `.site-top` logo + nav strip, boxes whose first `h2` becomes a dark shiny title bar.
+- Not restyled (yet): the Avatar Studio and Building Studio themselves (generated, see below).
 
 ## The itch.io asset list (home page)
 

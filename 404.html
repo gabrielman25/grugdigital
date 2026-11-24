@@ -5,20 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grug · Page not found</title>
 <link rel="icon" href="/favicon.png">
+<link rel="stylesheet" href="/static/site.css">
 <style>
-@font-face{font-family:'Fredoka';font-style:normal;font-weight:300 700;font-display:swap;src:url(/static/fredoka.woff2) format('woff2')}
-html,body{height:100%;margin:0}
-body{font-family:'Fredoka',system-ui,sans-serif;background:#F3F3F5;color:#1E1B16;display:grid;place-items:center;padding:24px;text-align:center}
-h1{font-size:28px;font-weight:600;margin:0 0 10px}
-p{color:#6B6B73;font-size:17px;margin:0 0 24px}
-a{display:inline-block;padding:14px 22px;border-radius:14px;background:#9BE338;color:#1E1B16;font-weight:600;text-decoration:none}
+main{max-width:440px}
+.card{text-align:center}
+.card p{margin:8px 0 16px}
+.figs{display:flex;justify-content:center;align-items:flex-end;gap:0;height:120px;margin:4px 0 6px}
+.figs img{height:110px;width:auto}
+.figs img:nth-child(2){height:120px}
+.row{justify-content:center}
 </style>
 </head>
 <body>
-<div>
-  <h1>That page isn't here</h1>
-  <p>It may have moved, or the site is being rebuilt.</p>
-  <a href="/">Go to the home page</a>
-</div>
+<header class="site-top">
+  <a class="logo" href="/" title="Grug Digital home"><img src="/static/arcade/grug-digital-logo.png" alt="Grug Digital"></a>
+  <nav aria-label="Main"><a href="/">Home</a><a href="/arcade/">Games</a><a href="/#assets">Catalog</a><a href="/character/">Avatar Studio</a><a href="/build/">Building Studio</a><a href="/character/pearls/">Pearls</a></nav>
+</header>
+<main>
+  <section class="card">
+    <h2>Page not found</h2>
+    <div class="figs" aria-hidden="true"><img src="/static/arcade/medic.webp" alt=""><img src="/static/arcade/grug.webp" alt=""><img src="/static/arcade/skater.webp" alt=""></div>
+    <h1>That page isn't here</h1>
+    <p>It may have moved, or the site is being rebuilt.</p>
+    <div class="row"><a class="btn" href="/">Go to the home page</a><a class="btn btn--ghost" href="/arcade/">Play the arcade</a></div>
+  </section>
+</main>
 </body>
 </html>
