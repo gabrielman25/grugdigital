@@ -532,6 +532,9 @@
   #store .stTop, #store .stBot, #store .stR, #storeTalk, #round .tb, #announce, #preview {
     background: rgba(0, 0, 0, .45) !important; border: 2px solid #000 !important; color: #fff; }
   #reel { background: rgba(0, 0, 0, .55) !important; }
+  /* the enemy turn: an old-style full-screen Message, a pale grey wash over everything and plain white words in the middle */
+  #eturn { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(200, 200, 205, .45); pointer-events: none; z-index: 38; }
+  #eturn b { font: normal 24px Arial, Helvetica, sans-serif !important; color: #fff !important; letter-spacing: 0 !important; text-shadow: -1px -1px 0 #3a3a3a, 1px -1px 0 #3a3a3a, -1px 1px 0 #3a3a3a, 1px 1px 0 #3a3a3a !important; }
   #preview { background: none !important; border: 0 !important; }
   /* no scroll bars anywhere: lists still scroll (wheel, drag, touch), the bars are just never drawn */
   html, body { overflow: hidden; } * { scrollbar-width: none !important; -ms-overflow-style: none; } *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }   /* the item preview fills the screen: no dark veil over the showcase */
@@ -643,6 +646,7 @@
 <div id="dnums"></div>
 <div id="pts"><div id="ptsList"></div></div>
 <div id="announce" class="ol"><b></b><small></small></div>
+<div id="eturn"><b>Enemy turn!</b></div>
 <div id="rmsg" class="ol"></div>
 
 <div id="hint" class="ol">Pet Zones</div>
@@ -2614,6 +2618,7 @@ const Bills = { list: [],
     }
   } };
 let annT = 0;
+function enemyTurnScreen(t) { const el = $('eturn'); el.style.display = 'flex'; clearTimeout(enemyTurnScreen.h); enemyTurnScreen.h = setTimeout(() => { el.style.display = 'none'; }, t * 1000); }
 function announce(big, small, color = '#fff', t = 2.4) { const el = $('announce'); el.querySelector('b').textContent = big; el.querySelector('b').style.color = color; el.querySelector('small').textContent = small || ''; el.style.display = 'block'; el.style.opacity = 1; annT = t; }
 function updateAnnounce(dt) { if (annT > 0) { annT -= dt; $('announce').style.opacity = 1;   /* no fades: it's there, then it isn't */ if (annT <= 0) $('announce').style.display = 'none'; } }
 let msgObj = null;
@@ -3683,7 +3688,7 @@ async function endDay() {
   B.phase = 'night'; B.busy = true; hudDirty = true; await nightfall(); B.busy = false; hudDirty = true;
 }
 async function nightfall() {
-  const Z = B.Z; Snd.play('night'); announce('ENEMY TURN', '', '#ff5a4a', 1.6); await sleep(1.1);   // (no night any more: it stays daytime, and turns take turns)
+  const Z = B.Z; Snd.play('night'); enemyTurnScreen(1.6); await sleep(1.1);   // (no night any more: it stays daytime, and turns take turns)
   // the ones about to attack hit you for a heart each (shot, or jumped on), then wind down. No hearts left: the run is over
   for (const b of B.bugs.filter(b => b.stage === 'egg' && !b.frozen)) { await strike(b); if (Run.hp <= 0) { B.phase = 'over'; announce('OUT OF HEARTS', '', '#ff5a4a', 3); Snd.ding('sad'); await sleep(1.6); endJob(false, 'hearts'); return; } }
   await growNight(); await morning();

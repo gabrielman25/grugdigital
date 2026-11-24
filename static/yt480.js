@@ -1,7 +1,8 @@
 // Grug Arcade: "480p YouTube mode", a just-for-fun setting in every arcade game.
 // Each frame the game draws (about 30 a second, like a video), a copy of the 3D view is squeezed down to 480 lines,
 // saved as a low-quality JPEG (so the blocks, ringing and smeared colour are real compression, not a filter) and
-// stretched back up over the game. The HUD stays sharp on top. One setting for every game, saved in this browser.
+// stretched back up over the game. The HUD and the rest of the on-screen UI go through a filter that does the same to them
+// (squeezed to 480 lines in blocks, softened, colours banded). One setting for every game, saved in this browser.
 //
 //   GrugYT480.attach(renderer.domElement, renderer)   // once, after making the renderer
 //   a button with id "mYT" (Game Menu: "480p YouTube mode: On/Off") or "sYT" (a settings row: "On/Off") is wired up here
@@ -15,7 +16,7 @@
   function overlay() {
     if (S.ov || !S.canvas) return;
     const ov = S.ov = document.createElement('canvas');
-    ov.setAttribute('aria-hidden', 'true');
+    ov.setAttribute('aria-hidden', 'true'); ov.className = 'grugYTov';
     // just over the game's canvas (the next thing after it), under everything else; clicks go straight through
     ov.style.cssText = 'position:fixed;left:0;top:0;pointer-events:none;display:none;image-rendering:auto;filter:saturate(.9) contrast(.95) brightness(1.02)';
     const z = getComputedStyle(S.canvas).zIndex; if (z && z !== 'auto') ov.style.zIndex = z;
@@ -28,6 +29,33 @@
     st.left = r.left + 'px'; st.top = r.top + 'px'; st.width = r.width + 'px'; st.height = r.height + 'px';
   }
   function show(v) { if (S.ov) S.ov.style.display = v ? 'block' : 'none'; S.shown = v; }
+
+  // the on-screen UI (everything on the page but the game's canvas): an SVG filter squeezes it to 480 lines (one sample per
+  // block, spread over the block), softens it a touch and bands the colours, so the HUD looks like part of the same video
+  const UI = { svg: null, style: null, B: 0 };
+  function uiFilter() {
+    const B = Math.max(2, Math.round(innerHeight / LINES));
+    if (!UI.svg) {
+      UI.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      UI.svg.setAttribute('aria-hidden', 'true'); UI.svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+      UI.style = document.createElement('style');
+      UI.style.textContent = 'body.grugYT > *:not(canvas):not(script):not(style):not(svg):not(link){filter:url(#grugYTui)}';
+      document.head.appendChild(UI.style); document.body.appendChild(UI.svg);
+    }
+    if (B === UI.B) return; UI.B = B;
+    const steps = Array.from({ length: 28 }, (_, i) => (i / 27).toFixed(3)).join(' ');
+    UI.svg.innerHTML = `<filter id="grugYTui" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="${(B * 0.3).toFixed(2)}" result="soft"/>
+      <feFlood x="0" y="0" width="1" height="1" flood-color="#000" flood-opacity="1"/>
+      <feComposite width="${B}" height="${B}"/>
+      <feTile result="grid"/>
+      <feComposite in="soft" in2="grid" operator="in"/>
+      <feConvolveMatrix order="${B}" kernelMatrix="${Array(B * B).fill(1).join(' ')}" divisor="1" targetX="${B - 1}" targetY="${B - 1}" edgeMode="none"/>
+      <feComponentTransfer><feFuncR type="discrete" tableValues="${steps}"/><feFuncG type="discrete" tableValues="${steps}"/><feFuncB type="discrete" tableValues="${steps}"/></feComponentTransfer>
+    </filter>`;
+  }
+  function uiOn(v) { if (!document.body) return; if (v) uiFilter(); document.body.classList.toggle('grugYT', v); }
+  addEventListener('resize', () => { if (on) uiFilter(); });
 
   function grab() {
     if (!on || !S.canvas || S.busy) return;
@@ -68,7 +96,7 @@
   }
   function set(v) {
     on = !!v; try { localStorage.setItem(KEY, on ? '1' : '0'); } catch (e) { }
-    if (!on) show(false); S.last = 0;
+    if (!on) show(false); S.last = 0; uiOn(on);
     for (const f of subs) try { f(on); } catch (e) { }
   }
 
@@ -83,7 +111,7 @@
       b.style.display = ''; const row = b.closest('[data-yt-row]'); if (row) row.style.display = '';
       b.addEventListener('click', e => { e.stopPropagation(); set(!on); });
     }
-    subs.add(label); label();
+    subs.add(label); label(); uiOn(on);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
 
