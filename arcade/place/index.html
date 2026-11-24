@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- a fixed 920px classic games page: phones show it zoomed out, like a desktop page -->
+<meta name="viewport" content="width=940">
+<title>Grug Arcade · Game</title>
+<meta name="description" content="A free game in the Grug Arcade: plays right in your browser, as the character you made in the Grug Avatar Studio.">
+<link rel="icon" href="/favicon.png">
+<script src="/static/pearls.js"></script>
+<script src="/static/outfits.js"></script>
+<script src="/static/social.js"></script>
+<link rel="stylesheet" href="/arcade/arcade.css">
+<style>
+/* a game's page, laid out like a classic 2010 place page: title, a big screenshot with Play under it, the description,
+   a creator and details column on the right, then Recommendations */
+#Place{overflow:hidden;padding:4px 2px 0}
+#Place .ttl{margin:4px 0 10px}
+#Place .ttl h1{display:block;font:bold 30px/1.05 Arial,Helvetica,sans-serif;color:#111}
+#Place .ttl .sub{font:12px Arial,Helvetica,sans-serif;color:#777;margin-top:3px}
+#Place .L{float:left;width:540px}
+#Place .R{float:right;width:334px}
+#Place .shot{position:relative;width:538px;height:303px;border:1px solid #888;background:#000;overflow:hidden}
+#Place .shot img{display:block;width:538px;height:303px;object-fit:cover}
+#Place .shot .new{position:absolute;left:8px;top:8px;padding:3px 8px;background:#d8281f;color:#fff;font:bold 13px Arial,Helvetica,sans-serif;border-radius:3px}
+#Place .acts{display:flex;align-items:center;gap:12px;margin:10px 0 14px}
+#Place .PlayBig{display:inline-block;width:210px;height:46px;line-height:46px;text-align:center;border-radius:6px;font:bold 22px/46px Arial,Helvetica,sans-serif;color:#1e1b16;text-decoration:none;
+  background:linear-gradient(#c6f57a,#9be338 50%,#86cf27 51%,#9be338);border:1px solid #5f9a18;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+#Place .PlayBig:hover{filter:brightness(1.06);text-decoration:none}
+#Place .fav{height:28px;padding:0 12px;border-radius:4px;border:1px solid #888;cursor:pointer;font:bold 13px Arial,Helvetica,sans-serif;color:#333;background:linear-gradient(#fafafa,#e3e3e3 50%,#d6d6d6 51%,#e6e6e6)}
+#Place .fav:hover{filter:brightness(1.04)} #Place .fav b{color:#aaa;font-size:15px} #Place .fav.on b{color:#e0a800}
+#Place .acts .free{font-size:11px;color:#888;line-height:1.35}
+#Place .StandardBoxHeader{width:auto;display:inline-block;padding-right:28px;font-size:17px;height:28px}
+#Place .StandardBoxHeader span{padding-top:5px}
+#Place .bx{clear:both;position:relative;top:-2px;margin:0 0 12px;padding:10px 12px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 90px) no-repeat;font:13px/1.45 Arial,Helvetica,sans-serif;color:#333}
+#Place .bx p{margin:0 0 8px} #Place .bx p:last-child{margin:0}
+#Place table.keys{border-collapse:collapse;width:100%}
+#Place table.keys td{padding:3px 4px;vertical-align:top;border-top:1px solid #eee} #Place table.keys tr:first-child td{border-top:0}
+#Place table.keys td:first-child{width:150px;white-space:nowrap}
+#Place kbd{display:inline-block;padding:1px 6px;border:1px solid #aaa;border-bottom-width:2px;border-radius:3px;background:#f4f4f4;font:bold 11px Arial,Helvetica,sans-serif;color:#333}
+#Place .creator{display:flex;gap:10px;align-items:center}
+#Place .creator .av{flex:none;width:64px;height:64px;border:1px solid #ccc;background:#fff;display:grid;place-items:center}
+#Place .creator .av{overflow:hidden;align-items:end}#Place .creator .av img{width:auto;height:60px}
+#Place .creator .who{font-size:12px;color:#777} #Place .creator .who a{display:block;font:bold 16px Arial,Helvetica,sans-serif}
+#Place dl{display:grid;grid-template-columns:96px 1fr;gap:4px 8px;margin:10px 0 0;font-size:12px}
+#Place dt{color:#777;font-weight:bold} #Place dd{margin:0;color:#222}
+#Place .gen{display:flex;flex-wrap:wrap;gap:6px}
+#Place .gen a{display:inline-block;padding:3px 9px;border:1px solid #9bc07a;border-radius:3px;background:#eef8e4;font-weight:bold;font-size:12px}
+#Place .me{text-align:center} #Place .me select{width:180px}
+#PlaceTabs{float:left;height:31px;display:flex}
+#Place .wide{clear:both;position:relative;top:-2px;padding:5px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 120px) no-repeat;overflow:hidden;min-height:160px}
+#Place .missing{padding:40px 10px;font-size:15px;color:#555;text-align:center}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="pearl" viewBox="0 0 16 16"><path fill="#d16be8" d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></symbol>
+  <symbol id="claude" viewBox="0 0 100 100"><path fill="#fff" d="M26.2 0.5 23.1 4.7 24.1 10.2 33.0 25.1 39.1 36.1 39.1 36.6 38.4 37.0 15.0 19.2 10.3 18.7 7.6 21.7 8.3 25.9 10.0 27.9 18.1 33.7 38.5 47.3 39.8 48.4 39.6 49.0 37.8 49.1 28.1 48.0 2.3 46.3 0.3 47.6 0.0 49.0 2.2 52.0 4.5 52.5 39.2 53.9 39.6 54.7 39.1 55.6 19.4 66.6 11.8 71.8 10.7 72.8 10.5 75.9 12.5 77.9 17.1 77.3 43.5 60.1 43.8 60.2 43.9 60.8 40.0 65.3 22.4 88.3 22.1 91.0 25.1 92.5 26.7 91.9 34.0 84.1 48.8 64.0 49.6 63.6 47.9 74.3 43.5 94.9 44.8 98.0 47.4 99.9 50.3 98.8 51.7 97.2 54.5 67.0 55.1 66.6 63.4 80.1 71.5 91.8 74.4 92.3 76.9 91.3 77.5 90.1 77.0 85.8 65.3 68.1 65.5 67.3 66.3 67.6 79.0 78.4 86.7 84.2 88.1 84.3 89.4 82.6 88.9 80.1 65.5 58.3 65.5 57.8 66.3 57.8 94.3 64.6 99.6 62.1 99.7 59.8 97.8 57.3 94.6 55.2 83.2 54.4 72.4 54.2 66.2 53.6 65.9 53.3 79.7 49.9 90.0 47.9 98.3 45.6 99.6 42.5 99.2 41.0 95.7 39.2 81.8 41.7 69.0 44.3 68.7 43.9 72.1 37.9 85.3 20.6 86.7 15.8 83.6 11.1 79.3 11.1 77.0 12.9 70.2 20.5 59.6 34.0 58.4 35.2 57.6 35.2 61.4 15.1 62.8 5.4 60.8 2.5 58.5 1.4 55.6 3.3 53.7 7.5 51.0 38.1 50.3 38.1 48.9 33.5 40.3 16.9 33.8 2.1 32.0 0.5 28.4 0.0Z"/></symbol>
+  <symbol id="search" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.8" fill="none" stroke="#555" stroke-width="2"/><path d="M10 10l4.5 4.5" stroke="#555" stroke-width="2.4" stroke-linecap="round"/></symbol>
+</svg>
+
+<div class="bgfx" id="bgfx" aria-hidden="true"></div>
+<div class="sky l" id="skyL" aria-label="Grug on Discord, Instagram and YouTube"></div><div class="sky r" id="skyR" aria-label="Grug on YouTube, Discord and Instagram"></div>
+<div id="Container">
+  <div id="Leaderboard">
+    <a class="lb" href="/character/" aria-label="Make a character in the Grug Avatar Studio">
+      <span class="bgk"></span>
+      <img class="fig" src="/static/arcade/ranger.webp" alt="" style="left:14px">
+      <img class="fig" src="/static/arcade/grug.webp" alt="" style="left:78px;z-index:1">
+      <img class="fig" src="/static/arcade/snow-rider.webp" alt="" style="left:160px">
+      <span class="t"><b>One character. Every engine.</b><span>Make it free, then export a rigged model to:</span><span class="exp"><i class="k">Roblox</i><i class="k">Unity</i><i class="k">itch.io</i><i>Godot</i><i>Blender</i></span></span>
+      <span class="go">Make a character ›</span>
+    </a>
+  </div>
+
+  <div id="Header">
+    <div id="Banner">
+      <div id="Options"><a id="pearls" href="/character/pearls/" title="Your Pearls" hidden><svg aria-hidden="true"><use href="#pearl"/></svg><span id="pearlN">0</span> Pearls</a></div>
+      <img class="crowd" src="/static/arcade/medic.webp" alt="" style="left:96px">
+      <img class="crowd" src="/static/arcade/racer.webp" alt="" style="left:170px;height:98px">
+      <a id="Logo" href="/" title="Grug Digital home"><img src="/static/arcade/grug-digital-logo.png" alt="Grug Digital"></a>
+      <img class="crowd" src="/static/arcade/skater.webp" alt="" style="left:640px;height:98px">
+      <img class="crowd" src="/static/arcade/ranger.webp" alt="" style="left:712px">
+    </div>
+    <div class="Navigation">
+      <div class="dropdown" id="dropNav">
+        <div class="col gen" id="dropGenres"></div>
+        <div class="col more">
+          <a href="/arcade/" data-sort="popular"><b>Most Popular</b></a>
+          <a href="/arcade/" data-sort="newest">Newest</a>
+          <a href="/arcade/" data-sort="featured">Featured Games</a>
+          <a href="/arcade/" data-search>Search Games</a>
+        </div>
+      </div>
+      <ul>
+        <li><a href="/character/?outfits">My Grug</a></li>
+        <li><a href="/arcade/" title="Games"><h1>Games</h1></a><button id="gamesMenuToggle" type="button" aria-label="Show game genres" aria-expanded="false"></button></li>
+        <li><a href="/#assets">Catalog</a></li>
+        <li><a href="/character/">Avatar Studio</a></li>
+        <li><a href="/character/pearls/">Pearls</a></li>
+        <li><a href="/">Home</a></li>
+        <li><a href="/legacy">Legacy</a></li>
+        <li><a href="/support.html">Help</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="Announcement">
+    <div class="SystemAlertText"><svg aria-hidden="true"><use href="#claude"/></svg>New: make your character with Claude! <a href="/character/?view=paint">Make it with Claude</a></div>
+  </div>
+
+  <div id="Body">
+    <div id="Place"><div class="missing">Loading…</div></div>
+  </div>
+
+  <div id="Footer">
+    <div class="FooterNav">
+      <a href="/privacy.html"><b>Privacy Policy</b></a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Advertise with Us</a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Press</a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Contact Us</a>
+      &nbsp;|&nbsp;
+      <a href="/">About Us</a>
+      &nbsp;|&nbsp;
+      <a href="/arcade/">Free Games</a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Jobs</a>
+    </div>
+    <div class="FooterNav">Follow Grug: <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener"><b>Discord</b></a>&nbsp;|&nbsp;<a href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener"><b>Instagram</b></a>&nbsp;|&nbsp;<a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener"><b>YouTube</b></a></div>
+    <div class="FooterNav" id="seoGenres"></div>
+    <p class="Legalese">
+      Grug, Grug Digital, Pearls, characters, logos, names, and all related indicia are trademarks of <a href="/">Grug Digital</a>, ©2026.
+      <br>
+      Grug is not sponsored, authorized or endorsed by Roblox Corporation, Anthropic or Google. Roblox is a trademark of Roblox Corporation,<br>
+      Claude of Anthropic and Gemini of Google, and no affiliation with these companies is intended.<br>Use of this site signifies your acceptance of the <a href="/terms.html">Terms and Conditions</a>.
+      <br>
+    </p>
+  </div>
+</div>
+
+<script src="/arcade/arcade.js"></script>
+<script>
+/* /arcade/place/?id=<slug>: one game's page. The data is GrugArcade.GAMES (arcade/arcade.js); Play starts arcade/<slug>/ */
+(() => {
+  const $ = id => document.getElementById(id), A = window.GrugArcade, { GAMES, gname, esc, ago, tile, place } = A;
+  const id = new URLSearchParams(location.search).get('id') || (location.hash || '').slice(1), g = GAMES.find(x => x.slug === id);
+  const day = iso => new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  if (!g) {
+    $('Place').innerHTML = `<div class="missing">That game isn't in the Grug Arcade (yet). <a href="/arcade/">See all the games »</a></div>`;
+    A.chrome(); return;
+  }
+  document.title = `${g.name} · Grug Arcade`;
+  const R = A.rec(), fresh = Date.now() - new Date(g.added) < 7 * 864e5, plays = R.plays[g.slug] || 0;
+  $('Place').innerHTML = `
+    <div class="ttl"><h1>${esc(g.name)}</h1><div class="sub">A Grug Arcade game · ${esc(g.tag)}</div></div>
+    <div class="L">
+      <div class="shot"><img src="/arcade/${g.slug}/cover.jpg" alt="${esc(g.alt)}" width="538" height="303">${fresh ? '<span class="new">NEW</span>' : ''}</div>
+      <div class="acts">
+        <a class="PlayBig" id="play" href="/arcade/${g.slug}/">Play</a>
+        <button class="fav${R.fav[g.slug] ? ' on' : ''}" id="fav" type="button" aria-pressed="${!!R.fav[g.slug]}"><b>★</b> <span>${R.fav[g.slug] ? 'Favorited' : 'Favorite'}</span></button>
+        <div class="free">Free, in your browser.<br>Nothing to install.</div>
+      </div>
+      <div class="StandardBoxHeader"><span><h2>Description</h2></span></div>
+      <div class="bx">${(g.about || [g.stats.join('. ') + '.']).map(p => `<p>${esc(p)}</p>`).join('')}
+        <p>You play as the character you made in the <a href="/character/">Grug Avatar Studio</a>, and your other saved outfits show up as the other players.</p></div>
+      ${g.controls ? `<div class="StandardBoxHeader"><span><h2>Controls</h2></span></div>
+      <div class="bx"><table class="keys">${g.controls.map(([k, v]) => `<tr><td>${k.split(' / ').map(x => `<kbd>${esc(x)}</kbd>`).join(' / ')}</td><td>${esc(v)}</td></tr>`).join('')}</table></div>` : ''}
+    </div>
+    <div class="R">
+      <div class="StandardBoxHeader"><span><h2>Game</h2></span></div>
+      <div class="bx">
+        <div class="creator"><div class="av"><img src="/static/arcade/grug.webp" alt=""></div><div class="who">Creator:<a href="/">Grug Digital</a></div></div>
+        <dl>
+          <dt>Created:</dt><dd>${day(g.added)}</dd>
+          <dt>Updated:</dt><dd>${ago(g.updated)}</dd>
+          <dt>Players:</dt><dd>${esc(g.players || '1')}</dd>
+          <dt>Access:</dt><dd>Everyone · free</dd>
+          <dt>You played:</dt><dd id="plays">${plays ? plays + ' time' + (plays > 1 ? 's' : '') + (R.last[g.slug] ? ' · last ' + ago(R.last[g.slug]) : '') : 'Not yet'}</dd>
+        </dl>
+      </div>
+      <div class="StandardBoxHeader"><span><h2>Genres</h2></span></div>
+      <div class="bx"><div class="gen">${g.genres.map(x => `<a href="/arcade/#${x}">${esc(gname(x))}</a>`).join('')}</div></div>
+      <div class="StandardBoxHeader"><span><h2>Playing as</h2></span></div>
+      <div class="bx me">
+        <div class="pic" id="mePic"></div>
+        <b id="meT">Grug</b>
+        <select id="meSel" aria-label="Play as" hidden></select>
+        <p id="meP"></p>
+        <a href="/character/?outfits">Avatar Studio »</a>
+      </div>
+    </div>
+    <div style="clear:both"></div>
+    <div id="PlaceTabs" role="tablist"><div class="Tab on" role="tab" data-t="rec"><span><h2>Recommendations</h2></span></div><div class="Tab" role="tab" data-t="new"><span><h2>Newest</h2></span></div><div class="Tab" role="tab" data-t="fav"><span><h2>My Favorites</h2></span></div></div>
+    <div class="wide"><div id="More"></div></div>`;
+
+  // Play: count it for this browser, then go
+  $('play').addEventListener('click', () => { const r = A.rec(); r.plays[g.slug] = (r.plays[g.slug] || 0) + 1; r.last[g.slug] = new Date().toISOString(); A.saveRec(r); });
+  $('fav').addEventListener('click', e => {
+    const r = A.rec(), on = !r.fav[g.slug]; if (on) r.fav[g.slug] = 1; else delete r.fav[g.slug]; A.saveRec(r);
+    const b = e.currentTarget; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); b.querySelector('span').textContent = on ? 'Favorited' : 'Favorite'; if (tab === 'fav') more();
+  });
+
+  // Recommendations: the games that share the most genres first
+  let tab = 'rec';
+  function more() {
+    const others = GAMES.filter(x => x.slug !== g.slug), share = x => x.genres.filter(y => g.genres.includes(y)).length;
+    const L = tab === 'new' ? others.slice().sort((a, b) => new Date(b.added) - new Date(a.added))
+      : tab === 'fav' ? GAMES.filter(x => A.rec().fav[x.slug])
+      : others.map((x, i) => [x, share(x) * 100 - i]).sort((a, b) => b[1] - a[1]).map(v => v[0]);
+    $('More').innerHTML = L.length ? L.map(tile).join('') : `<div class="Empty">No favorites yet. Press <b>★ Favorite</b> on a game's page to keep it here.</div>`;
+    document.querySelectorAll('#PlaceTabs .Tab').forEach(t => t.classList.toggle('on', t.dataset.t === tab));
+  }
+  document.querySelectorAll('#PlaceTabs .Tab').forEach(t => t.addEventListener('click', () => { tab = t.dataset.t; more(); }));
+  more();
+  A.chrome();
+})();
+</script>
+</body>
+</html>

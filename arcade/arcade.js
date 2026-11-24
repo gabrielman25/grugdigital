@@ -1,0 +1,187 @@
+/* The Grug Arcade's shared data and page furniture, used by the games list (/arcade/) and the game pages (/arcade/place/?id=<slug>).
+   GAMES: one entry per game in arcade/<slug>/ (with cover.jpg). added / updated are the dates in the repo's history; "tag" is the
+   red line under the name; "about" and "controls" fill the game's page. Plays and favourites are kept per browser
+   (localStorage 'grug.arcade.v1'), like the rest of Grug: there's no server, so there are no global visit counts. */
+(() => {
+  const $ = id => document.getElementById(id), O = window.GrugOutfits, P = window.GrugPearls;
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  /* the same genres as the classic page */
+  const GENRES = [
+    ['all', 'All'], ['town-and-city', 'Town and City'], ['medieval', 'Fantasy'], ['sci-fi', 'Sci-Fi'], ['ninja', 'Ninja'], ['scary', 'Scary'],
+    ['pirate', 'Pirate'], ['adventure', 'Adventure'], ['sports', 'Sports'], ['funny', 'Funny'], ['wild-west-cowboy', 'Wild West'], ['war', 'War'],
+    ['skatepark', 'Skate Park'], ['gametutorials', 'Tutorial']];
+  const gname = id => (GENRES.find(g => g[0] === id) || [, 'All'])[1];
+
+  const GAMES = [
+    { slug: 'zone-royale', name: 'Zone Royale', genres: ['war', 'adventure'], tag: '100 players · battle royale', featured: true,
+      added: '2026-11-24T22:00:00Z', updated: '2026-11-24T23:30:00Z', alt: 'A player gliding down into a blocky city on a big island',
+      stats: ['Drop, loot, outlast the storm', 'Solo or squads of four'], players: '100 (you and 99 bots)',
+      about: ['A 100-player battle royale on a huge brick island. Warm up on the spawn island, board the plane, then jump and glide down anywhere: 15 named places, from the towers of Pixel Plaza to the barns of Blox Farm.',
+        'Loot chests for guns from grey to gold, ammo, bandages, medkits and shield potions. There is no building: your pickaxe breaks through walls instead. The storm closes in every half minute, so keep moving. Be the last one standing for a Victory Royale.',
+        'Play Solo, or Squads: you drop with three teammates who follow you, loot beside you and fight for you, against 24 other squads of four. Switch modes in the Game Menu on the spawn island.'],
+      controls: [['WASD', 'Move'], ['Mouse', 'Look (click the game to lock the mouse)'], ['Left click', 'Shoot / swing'], ['Right click', 'Aim down sights'], ['Space', 'Jump · jump out of the plane · open the glider'], ['Shift', 'Sprint'], ['C / Ctrl', 'Dodge roll'], ['E', 'Open a chest, pick up'], ['F', 'Pickaxe'], ['R', 'Reload'], ['1-6 / wheel', 'Pick a slot'], ['M', 'Map'], ['Esc', 'Game Menu']] },
+    { slug: 'slide-999', name: 'Slide 999 KM for FREE ADMIN!!', genres: ['adventure', 'funny'], tag: 'Obby slide · free admin', featured: true,
+      added: '2026-11-23T10:47:46-06:00', updated: '2026-11-23T11:38:37-06:00', alt: 'A cart flying down a blocky sky slide',
+      stats: ['999 km of slide and obbies', 'Rebirth: 2 Pearls a day'], players: '1',
+      about: ['Slide all the way down: 999 KM of sky slide. There is a checkpoint every 111 KM, so if you fall off (or touch anything red) you start again from the last one. Yellow arrows boost you, cyan pads bounce you and blue strips push you sideways.',
+        'Between slides there are obbies to walk and jump across, each with a green $ ledge that needs a Speed or Gravity Coil. Reach the bottom and walk through the golden door for FREE ADMIN.'],
+      controls: [['A / D or ← / →', 'Steer'], ['W / S', 'Push / brake'], ['Space', 'Jump'], ['On foot: WASD', 'Walk'], ['Shift', 'Dodge roll'], ['Right-drag', 'Turn the camera'], ['E', 'Fire the Rocket Booster'], ['1-3', 'Equip gear'], ['Esc', 'Game Menu']] },
+    { slug: 'zombie-zones', name: 'Zombie Zones', genres: ['scary', 'war'], tag: '4 teams · 4 modes',
+      added: '2026-11-23T10:47:46-06:00', updated: '2026-11-23T11:38:37-06:00', alt: 'A blocky survivor with a blaster in a battle',
+      stats: ['Supply runs, flags, deathmatch', 'Dodge roll and loot guns'], players: '4 teams',
+      about: ['Four teams fight it out in a blocky town, round after round. Play supply runs, capture the flag or deathmatch, change mode or team from the Game Menu, loot better guns and dodge roll out of trouble.'] },
+    { slug: 'grug-city', name: 'Grug City RP', genres: ['town-and-city'], tag: '16 jobs · cops and robbers', featured: true,
+      added: '2026-11-23T13:48:26-06:00', updated: '2026-11-23T14:19:58-06:00', alt: 'A police cruiser at a crossroads in a blocky city',
+      stats: ['Cars and free mansions', 'Get caught wanted: jail'], players: 'A city full of roleplayers',
+      about: ['A sandbox city to roleplay in. Pick one of 16 jobs, from shopkeeper to police officer, drive the cars, move into a free mansion and shop at the two-floor mall. Play cops and robbers: get caught while wanted and it is off to jail.'] },
+    { slug: 'brickbound', name: 'Brickbound', genres: ['medieval', 'adventure'], tag: 'Side-scrolling brawler · 4 zones', featured: true,
+      added: '2026-11-24T12:00:00-06:00', updated: '2026-11-24T12:00:00-06:00', alt: 'A hero and a friend fight goblins and an ogre in a blocky meadow',
+      stats: ['Combos, juggles and a companion', 'Rolling HP like EarthBound'], players: '1 (and a companion)',
+      about: ['An action RPG brawler across four zones. Fight goblins, archers and ogres with combos and juggles, a magic bubble and a four-spell magic ring, with a companion at your side. Your HP rolls down like in EarthBound, so finish the fight before it hits zero.'] },
+    { slug: 'grug-kingdom', name: 'Grug Kingdom', genres: ['medieval', 'adventure'], tag: '5 zones · 5 bosses', featured: true,
+      added: '2026-11-23T23:52:31Z', updated: '2026-11-23T23:52:31Z', alt: 'A hero with a sword faces the giant Goblin King',
+      stats: ['12 swords and loot chests', 'Level up at the forge'], players: '1',
+      about: ['A blocky sword RPG. Fight through five zones and five bosses, all the way to the giant Goblin King. Find 12 swords in loot chests, keep them in your backpack and level up at the forge back in town.'] },
+    { slug: 'pet-zones', name: 'Pet Zones', genres: ['sci-fi', 'adventure'], tag: 'Catch pets on a grid · endless zones', featured: true,
+      added: '2026-11-24T16:06:59Z', updated: '2026-11-24T17:38:06Z', alt: 'A player zapping cube pets on a grassy grid with a deck of move cards',
+      stats: ['Drive a car or boat between huge zones', 'Build a 15-card deck, grab provisions'], players: '1 (and your pets)',
+      about: ['Turn-based pet catching on a grid. Build a 15-card deck of moves, grab provisions, and zap wild cube pets until they join you. Drive a car or a boat between huge zones and towns full of shops, side quests, loot crates and trades.'] }
+  ];
+
+  const ago = iso => {
+    const s = Math.max(0, (Date.now() - new Date(iso)) / 1000), u = [[31536e3, 'year'], [2592e3, 'month'], [604800, 'week'], [86400, 'day'], [3600, 'hour'], [60, 'minute']];
+    for (const [n, w] of u) if (s >= n) { const k = Math.floor(s / n); return k + ' ' + w + (k > 1 ? 's' : '') + ' ago'; }
+    return 'just now';
+  };
+  const place = slug => `/arcade/place/?id=${encodeURIComponent(slug)}`;   // the game's own page (its Play button starts it)
+
+  function tile(g) {
+    const href = place(g.slug);
+    return `<div class="Cell" title="${esc(g.name)}"><div class="GameItem">
+      <div class="AlwaysShown">
+        <a class="thumb" href="${href}"><img src="/arcade/${g.slug}/cover.jpg" alt="${esc(g.alt)}" loading="lazy" width="160" height="100"></a>
+        <div class="GameName"><a href="${href}">${esc(g.name)}</a></div>
+        <div class="PlayerCount">${esc(g.tag)}</div>
+      </div>
+      <div class="HoverShown">${g.stats.map(s => `<div>${esc(s)}</div>`).join('')}<div>Updated ${ago(g.updated)}</div></div>
+    </div></div>`;
+  }
+
+  /* this browser's plays and favourites */
+  const KEY = 'grug.arcade.v1';
+  const rec = () => { let r = null; try { r = JSON.parse(localStorage.getItem(KEY)); } catch (e) {} r = r && typeof r === 'object' ? r : {}; r.plays = r.plays || {}; r.fav = r.fav || {}; r.last = r.last || {}; return r; };
+  const saveRec = r => { try { localStorage.setItem(KEY, JSON.stringify(r)); } catch (e) {} };
+
+  /* the header, background, side ads, Pearls button, footer and "Playing as" box, the same on every Arcade page */
+  function chrome() {
+    const onList = !!$('PlayTabs');
+    $('dropGenres').innerHTML = GENRES.map(([id, t]) => `<a href="/arcade/#${id}" data-genre="${id}">${esc(t)}</a>`).join('');
+    if (!onList) document.querySelectorAll('.dropdown [data-sort],.dropdown [data-search]').forEach(a => { a.removeAttribute('data-sort'); a.removeAttribute('data-search'); a.href = '/arcade/'; });
+    $('seoGenres').innerHTML = GENRES.slice(1).map(([id, t]) => `<a href="/arcade/#${id}" data-genre="${id}" title="${esc(t)} Games">${esc(t)}</a>`).join('&nbsp;|&nbsp;');
+    const drop = $('dropNav'), tog = $('gamesMenuToggle');
+    const setDrop = on => { drop.classList.toggle('open', on); tog.setAttribute('aria-expanded', on); };
+    tog.addEventListener('click', e => { e.stopPropagation(); setDrop(!drop.classList.contains('open')); });
+    document.addEventListener('click', e => { if (!drop.contains(e.target) || e.target.closest('a')) setDrop(false); });
+
+    /* the background: each shot pans one way, then crossfades into the next, panning the other way */
+    (() => {
+      const box = $('bgfx'), SHOTS = ['aerial', 'icecream', 'salon', 'pizza'], LIFT = [0, -300, -360, -420], HOLD = 11000, PAN = 14000;   // LIFT: raise the street shots so their buildings sit behind the header, not their sky
+      const els = SHOTS.map((n, i) => { const d = document.createElement('div'); d.className = 'sh'; if (i === 0) d.style.backgroundImage = `url(/static/arcade/city-${n}.jpg)`; box.appendChild(d); return d; });
+      const load = i => { const d = els[i]; if (!d.style.backgroundImage) d.style.backgroundImage = `url(/static/arcade/city-${SHOTS[i]}.jpg)`; };
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) { els[0].classList.add('on'); return; }
+      let cur = -1;
+      function show(i) {
+        const d = els[i], dir = i % 2 ? 1 : -1; load(i); load((i + 1) % els.length);
+        if (d.animate) d.animate([{ transform: `translateY(${LIFT[i]}px) scale(1.14) translateX(${dir * -5}%)` }, { transform: `translateY(${LIFT[i]}px) scale(1.14) translateX(${dir * 5}%)` }], { duration: PAN, easing: 'linear', fill: 'forwards' });
+        d.classList.add('on'); if (cur >= 0) els[cur].classList.remove('on'); cur = i;
+        setTimeout(() => show((i + 1) % els.length), HOLD);
+      }
+      show(0);
+    })();
+    /* side skyscrapers: three different ads a side, crossfading; the two sides never show the same site at once */
+    (() => {
+      const S = window.GrugSocial; if (!S) return;
+      const L = $('skyL'), R = $('skyR');
+      const pick = a => a[Math.floor(Math.random() * a.length)];
+      const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(v => v[1]);
+      const ad = (cls, href, html, label) => `<a class="ad ${cls}" href="${href}" target="_blank" rel="noopener" aria-label="${esc(label)}">${html}</a>`;
+      const R6 = n => `/static/arcade/${n}.webp`;
+      function build(d) {
+        const D = d.discord, V = d.youtube.videos, k = S.links || S.LINKS, LK = d.links;
+        const vids = shuffle(V.slice()), v0 = V[0], live = '<span class="live">COME SAY HI</span>';
+        const avs = D.avatars.slice(0, 12);
+        const ads = {
+          discordLive: ad('dc', LK.discord, `<div class="k">Join the</div><div class="h">Grug Discord</div>
+            ${D.members ? `<div class="big">${S.n(D.members)}</div><div class="sub">members: players, builders and creators</div>` : '<div class="sub" style="margin-top:14px">Players, builders and creators</div>'}
+            <div class="figs"><img src="${R6('grug')}" alt="" style="left:-8px;z-index:1"><img src="${R6('medic')}" alt="" style="right:-10px;height:126px"></div>
+            <div class="cta">Join server ›</div>`, 'Join the Grug Discord'),
+          discordWho: ad('dk', LK.discord, `<div class="k" style="color:#b9bbbe">Discord</div><div class="h" style="font-size:21px">Who's hanging out</div>${live}
+            <div class="av">${avs.length ? avs.map(a => `<img src="${esc(a.avatar)}" alt="" loading="lazy" referrerpolicy="no-referrer">`).join('') : ['G', 'R', 'U', 'G', '+', '+'].map(c => `<i>${c}</i>`).join('')}</div>
+            ${avs.length ? `<div class="names">${avs.slice(0, 6).map(a => `<b>${esc(a.name)}</b>${a.game ? ` · ${esc(a.game)}` : ''}`).join('<br>')}</div>` : `<div class="names">Trade outfits, show off your characters, find people to play the Arcade with.</div>`}
+            <div class="cta">Hop in ›</div>`, 'Hang out on the Grug Discord'),
+          ytLatest: ad('yt', v0 ? S.watch(v0.id) : LK.youtube, `<div class="k">New on YouTube</div><div class="h">PolySwitch</div>
+            ${v0 ? `<div class="thumb" style="background-image:url('${S.thumbDirect(v0.id)}')"></div><div class="tt">${esc(v0.title || 'Watch the newest video')}</div>` : `<div class="figs" style="bottom:180px"><img src="${R6('racer')}" alt="" style="left:10px"></div>`}
+            <div class="figs" style="height:120px"><img src="${R6('skater')}" alt="" style="left:6px;height:118px"><img src="${R6('ranger')}" alt="" style="right:4px;height:110px"></div>
+            <div class="cta">Watch now ›</div>`, 'Watch PolySwitch on YouTube'),
+          ytStack: ad('yk', LK.youtube, `<div class="k" style="color:#aaa">YouTube</div><div class="h">Watch PolySwitch</div>
+            <div class="stack">${(vids.length ? vids.slice(0, 3) : []).map(v => `<div class="thumb" style="background-image:url('${S.thumbDirect(v.id)}')"></div>`).join('') || `<div class="sub" style="margin-top:30px">Game dev, Roblox builds and the making of Grug.</div>`}</div>
+            <div class="sub" style="margin-top:10px">${vids.length ? 'Game dev, builds and more' : ''}</div>
+            <div class="cta">Subscribe ›</div>`, 'Subscribe to PolySwitch on YouTube'),
+          igGrid: ad('ig', LK.instagram, `<div class="k">Instagram</div><div class="h">@grugdigital</div>
+            <div class="grid">${['city-aerial.jpg', 'grug.webp', 'city-icecream.jpg', 'skater.webp', 'city-salon.jpg', 'snow-rider.webp'].map(n => `<span style="background-image:url('/static/arcade/${n}');${n.endsWith('webp') ? 'background-size:contain;background-color:#fff3' : ''}"></span>`).join('')}</div>
+            <div class="sub" style="margin-top:12px">Characters, builds and behind the scenes</div>
+            <div class="cta">Follow ›</div>`, 'Follow @grugdigital on Instagram'),
+          igChars: ad('cr', LK.instagram, `<div class="k" style="color:#c1357a">Follow along</div><div class="h" style="color:#3a2a4a;text-shadow:none">See what we make next</div>
+            <div class="sub" style="margin-top:8px"><b>@grugdigital</b> on Instagram</div>
+            <div class="figs" style="height:300px;bottom:60px"><img src="${R6('snow-rider')}" alt="" style="left:-14px;bottom:130px;height:130px"><img src="${R6('racer')}" alt="" style="right:-16px;bottom:120px;height:130px"><img src="${R6('grug')}" alt="" style="left:12px;height:150px;z-index:1"></div>
+            <div class="cta">Follow ›</div>`, 'Follow @grugdigital on Instagram'),
+        };
+        const KIMI = 'https://www.roblox.com/communities/5835899/KimiLand#!/store';   // Grug's official Roblox UGC sponsor
+        const sp = (cls, html, label) => `<a class="ad sp ${cls}" href="${KIMI}" target="_blank" rel="noopener sponsored" aria-label="${esc(label)}"><span class="spn">SPONSOR</span>${html}</a>`;
+        const kimiA = sp('kl', `<img src="/static/sponsor/kimiland-logo.png" alt="KimiLand" style="width:136px;margin-top:22px">
+            <div class="k" style="color:#d14d8b;margin-top:8px">Official Roblox</div><div class="h" style="color:#3a3a6a;text-shadow:none;font-size:22px">UGC sponsor</div>
+            <div class="sub" style="margin-top:8px">Shop the KimiLand store on Roblox</div>
+            <div class="figs" style="height:150px"><img src="${R6('snow-rider')}" alt="" style="left:-6px;height:128px"><img src="${R6('skater')}" alt="" style="right:-8px;height:136px"></div>
+            <div class="cta">Shop KimiLand ›</div>`, 'Shop KimiLand UGC on Roblox (sponsor)');
+        const kimiB = sp('kb', `<div class="k" style="margin-top:24px">Our sponsor</div><div class="h" style="font-size:28px">KIMILAND</div>
+            <img src="/static/sponsor/kimiland-kl.png" alt="" style="width:118px;margin-top:14px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))">
+            <div class="sub" style="margin-top:10px;color:#3a3a6a">Roblox UGC for your avatar</div>
+            <div class="figs" style="height:120px"><img src="${R6('grug')}" alt="" style="left:50%;translate:-50% 0;height:116px"></div>
+            <div class="cta">Shop on Roblox ›</div>`, 'KimiLand on Roblox (sponsor)');
+        return { L: [ads.discordLive, ads.igGrid, kimiA, ads.ytLatest], R: [ads.ytStack, ads.discordWho, ads.igChars, kimiB] };
+      }
+      function run(box, list, delay) {
+        box.innerHTML = list.join(''); const els = [...box.children]; let i = 0; els[0].classList.add('on');
+        if (els.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        setTimeout(() => setInterval(() => { if (document.hidden) return; els[i].classList.remove('on'); i = (i + 1) % els.length; els[i].classList.add('on'); }, 9000), delay);
+      }
+      S.get().then(d => { const b = build(d); run(L, b.L, 0); run(R, b.R, 4500); });
+      // "Users online" over the games list: the Grug Discord's live count (hidden until there is one), a link to join
+      const uo = $('UsersOnline'), online = d => { const n = d && d.discord && d.discord.online; if (!uo) return; uo.href = (d.links && d.links.discord) || uo.href; if (n) { uo.querySelector('b').textContent = S.n(n); uo.hidden = false; } };
+      S.get().then(online); setInterval(() => S.get().then(online), 90000);
+      for (const box of [L, R]) box.addEventListener('click', e => { if (!e.target.closest('a.ad') || e.target.closest('a.sp') || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return; e.preventDefault(); S.popup(); });   // a banner opens every social, side by side
+    })();
+    /* Pearls (the small green button where the classic page had Login) */
+    function pearls() { if (!P) return; $('pearls').hidden = false; $('pearlN').textContent = P.balance().toLocaleString(); }
+    if (P) { P.start().then(pearls).catch(pearls); addEventListener('grug:pearls', pearls); }
+    /* Playing as: the saved outfit every game dresses you in (static/outfits.js) */
+    const urls = [];
+    async function me() {
+      urls.splice(0).forEach(u => URL.revokeObjectURL(u));
+      let L = []; try { L = O ? await O.list() : []; } catch (e) {}
+      const act = O ? O.active() : '', cur = L.find(o => o.id === act);
+      const src = o => { if (!o || !o.preview) return ''; const u = URL.createObjectURL(o.preview); urls.push(u); return u; };
+      $('mePic').innerHTML = `<img src="${src(cur) || '/character/looks/grug/preview.png'}" alt="">`;
+      $('meT').textContent = cur ? cur.name : 'Grug (the default)';
+      $('meP').textContent = cur ? (L.length > 1 ? `Your ${L.length - 1} other outfit${L.length > 2 ? 's show' : ' shows'} up as other players.` : 'Save more outfits and they show up as the other players.')
+        : L.length ? 'Pick one of your outfits to play as it.' : 'Make a character and save it for the games to play as yourself.';
+      const sel = $('meSel'); sel.hidden = !L.length;
+      sel.innerHTML = (L.some(o => o.id === 'starter-grug') ? '' : `<option value=""${act ? '' : ' selected'}>Grug</option>`) +
+        L.map(o => `<option value="${esc(o.id)}"${o.id === act ? ' selected' : ''}>${esc(o.name)}</option>`).join('');
+    }
+    if ($('mePic')) { $('meSel').addEventListener('change', e => { if (O) O.setActive(e.target.value); }); addEventListener('grug:outfits', me); me(); }
+  }
+
+  window.GrugArcade = { GENRES, GAMES, gname, esc, ago, tile, place, rec, saveRec, chrome };
+})();

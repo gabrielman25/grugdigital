@@ -138,8 +138,10 @@ When the owner says "push it to the site":
 
 1. Clone `gabrielman25/grugdigital` (shallow is fine) and read its `CLAUDE.md`. Work on a **branch**, never `main`
    unless the owner says so.
-2. Add `arcade/<slug>/index.html` and `arcade/<slug>/cover.jpg`. Add a card for it to `arcade/index.html` (copy one of
-   the `<a class="card game">` blocks: cover, name, one-line pitch, a few chips, Play).
+2. Add `arcade/<slug>/index.html` and `arcade/<slug>/cover.jpg` (16:9). Add an entry for it to `GAMES` in
+   `arcade/arcade.js` (name, genres, the red tag line, two hover stats, dates, players, an `about` description and, if
+   you can, `controls`). That puts a tile in the list at `/arcade/` and gives the game its own page at
+   `/arcade/place/?id=<slug>`, whose Play button starts it.
 3. Don't use the old site's top-level names (README.md lists them); everything lives under `/arcade/`.
 4. Test headless (Playwright + Chrome, `--use-angle=swiftshader`) from a local server at the repo root
    (`python3 -m http.server`, so `/static/…` resolves): no page errors; it starts straight in play; the Game Menu

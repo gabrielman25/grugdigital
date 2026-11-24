@@ -381,6 +381,14 @@
   #gm .help { font-size: 12px; font-weight: normal; color: #ddd; line-height: 1.45; } #gm .help b { color: #fff; }
   #results .rb { background: #1b1b1b; border: 2px solid #d0d0d0; color: #fff; } #results .rb:hover { background: #4a1010; border-color: #d8281f; } #results #resAgain { background: #2f7a22; }
 
+  #squad { position: fixed; top: 44px; left: 10px; z-index: 5; display: none; font: bold 12px Arial, sans-serif; color: #fff; }
+  body.squads #squad { display: block; }
+  #squad .m { width: 150px; margin-bottom: 5px; padding: 3px 6px 4px; background: rgba(0, 0, 0, .45); border: 1px solid rgba(0, 0, 0, .6); border-radius: 3px; }
+  #squad .m.out { opacity: .45; } #squad .m .n { color: #7dff6a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #squad .m .b { height: 4px; margin-top: 2px; background: rgba(0, 0, 0, .6); } #squad .m .b i { display: block; height: 100%; }
+  #squad .m .b.s i { background: #6ad0ff; } #squad .m .b.h i { background: #6ae04a; }
+  .tag.mate .nm { display: block; color: #7dff6a; } .tag.mate .hb2 { display: block; }
+
 </style>
 </head>
 <body>
@@ -417,12 +425,14 @@
 </div>
 
 <button id="menuBtn" class="ol">Menu</button>
+<div id="squad"></div>
 <div id="veil"></div>
 <div id="gm">
   <div class="page on" id="pgMain">
     <div class="mt ol">Game Menu</div>
     <button id="gResume" class="focus ol">Resume Game</button>
     <button id="gReset" class="ol">Reset Character</button>
+    <button id="gMode" class="ol">Mode: Solo</button>
     <button id="gSettings" class="ol">Game Settings</button>
     <button id="gHelp" class="ol">Help</button>
     <button id="gLeave" class="ol">Leave Game</button>
@@ -1810,29 +1820,24 @@ const RAR = [
 ];
 const SKINS = { std: {}, green: { hue: 0.31 }, blue: { hue: 0.6 }, purple: { hue: 0.79 }, gold: { gold: true } };
 const rarDmg = r => 1 + 0.06 * r, rarReload = r => 1 - 0.05 * r;
-// ammo: four kinds, like Fortnite. box: how many in one stack on the floor
-const AMMO = {
-  light: { name: 'Light Bullets', short: 'Light', css: '#cfe0f0', hex: 0x9fb6cc, box: [18, 30] },
-  medium: { name: 'Medium Bullets', short: 'Medium', css: '#86e06e', hex: 0x5f9e4a, box: [10, 20] },
-  heavy: { name: 'Heavy Bullets', short: 'Heavy', css: '#ffab6e', hex: 0xd0763a, box: [3, 6] },
-  shells: { name: 'Shells', short: 'Shells', css: '#ff7a7a', hex: 0xc23a3a, box: [4, 8] },
-};
+// ammo: one kind for every gun (a box on the floor holds box[0]-box[1] rounds)
+const AMMO = { bullets: { name: 'Ammo', short: 'Ammo', css: '#ffd36e', hex: 0xc9a23a, box: [16, 32] } };
 const AMMO_K = Object.keys(AMMO);
 // the guns (models: the Kenney Blaster Kit). body/head: damage per bullet (per pellet for shotguns) before rarity.
 // cd: seconds between shots. spread: hip-fire cone; ads: how much of it is left aiming down sights. fall: [full damage up to,
 // lowest damage from, lowest multiplier]. block: damage to walls. r: [lowest, highest] rarity it comes in. w: how common it is.
 const GUNS = {
-  ar: { name: 'Assault Rifle', model: 'rifle', scale: 3.6, grip: 0.12, ammo: 'medium', body: 30, head: 45, mag: 30, reload: 2.3, cd: 0.18, auto: true, spread: 0.014, bloom: 0.006, ads: 0.4, fall: [110, 320, 0.6], block: 30, range: 420, r: [0, 4], w: 10 },
-  burst: { name: 'Burst Rifle', model: 'carbine', scale: 3.5, grip: 0.1, ammo: 'medium', body: 27, head: 41, mag: 30, reload: 2.6, cd: 0.55, burst: 3, burstGap: 0.07, spread: 0.01, bloom: 0.004, ads: 0.45, fall: [120, 330, 0.6], block: 27, range: 420, r: [0, 3], w: 5 },
-  smg: { name: 'SMG', model: 'smg', scale: 3.8, grip: 0.07, ammo: 'light', body: 17, head: 24, mag: 30, reload: 2.2, cd: 0.075, auto: true, spread: 0.024, bloom: 0.004, ads: 0.7, fall: [50, 180, 0.45], block: 17, range: 260, r: [0, 3], w: 7 },
-  pistol: { name: 'Pistol', model: 'pistol', scale: 3.8, grip: 0.06, ammo: 'light', body: 24, head: 36, mag: 16, reload: 1.4, cd: 0.16, spread: 0.01, bloom: 0.008, ads: 0.5, fall: [60, 220, 0.5], block: 24, range: 320, r: [0, 2], w: 6 },
-  pump: { name: 'Pump Shotgun', model: 'shotgun', scale: 3.9, grip: 0.07, ammo: 'shells', body: 9.5, head: 19, pellets: 10, mag: 5, reload: 4.0, cd: 0.9, spread: 0.055, bloom: 0, ads: 0.8, fall: [14, 48, 0.15], block: 9, range: 90, r: [1, 4], w: 7 },
-  tac: { name: 'Tactical Shotgun', model: 'double', scale: 3.8, grip: 0.07, ammo: 'shells', body: 7.4, head: 14, pellets: 10, mag: 8, reload: 5.0, cd: 0.6, spread: 0.07, bloom: 0, ads: 0.85, fall: [14, 48, 0.15], block: 7, range: 80, r: [0, 3], w: 6 },
-  hc: { name: 'Hand Cannon', model: 'cannon', scale: 3.9, grip: 0.07, ammo: 'heavy', body: 75, head: 150, mag: 7, reload: 2.0, cd: 0.6, spread: 0.006, bloom: 0.012, ads: 0.5, fall: [90, 260, 0.5], block: 75, range: 320, r: [3, 4], w: 2 },
-  sniper: { name: 'Bolt-Action Sniper', model: 'sniper', scale: 3.1, grip: 0.1, ammo: 'heavy', body: 105, head: 263, mag: 1, reload: 2.8, cd: 1.5, spread: 0.035, bloom: 0, ads: 0, scope: true, fall: [400, 900, 0.9], block: 105, range: 1000, r: [2, 4], w: 3, tracer: 0xffffff },
-  lmg: { name: 'Light Machine Gun', model: 'lmg', scale: 3.5, grip: 0.1, ammo: 'medium', body: 25, head: 37, mag: 100, reload: 5, cd: 0.12, auto: true, spread: 0.02, bloom: 0.003, ads: 0.6, fall: [110, 300, 0.6], block: 25, range: 400, r: [2, 3], w: 2 },
-  pulse: { name: 'Pulse Rifle', model: 'plasma', scale: 3.6, grip: 0.1, ammo: 'medium', body: 24, head: 36, mag: 25, reload: 2.4, cd: 0.1, auto: true, spread: 0.012, bloom: 0.003, ads: 0.5, fall: [140, 360, 0.6], block: 24, range: 440, r: [3, 4], w: 1.5, tracer: 0x5ae8ff },
-  rail: { name: 'Railgun', model: 'rail', scale: 3.2, grip: 0.1, ammo: 'heavy', body: 100, head: 150, mag: 3, reload: 2.6, cd: 1.3, spread: 0, bloom: 0, ads: 0, scope: true, pierce: 99, fall: [300, 700, 0.9], block: 100, range: 900, r: [4, 4], w: 0.8, tracer: 0xc77dff },
+  ar: { name: 'Assault Rifle', model: 'rifle', scale: 3.6, grip: 0.12, ammo: 'bullets', body: 30, head: 45, mag: 30, reload: 2.3, cd: 0.18, auto: true, spread: 0.014, bloom: 0.006, ads: 0.4, fall: [110, 320, 0.6], block: 30, range: 420, r: [0, 4], w: 10 },
+  burst: { name: 'Burst Rifle', model: 'carbine', scale: 3.5, grip: 0.1, ammo: 'bullets', body: 27, head: 41, mag: 30, reload: 2.6, cd: 0.55, burst: 3, burstGap: 0.07, spread: 0.01, bloom: 0.004, ads: 0.45, fall: [120, 330, 0.6], block: 27, range: 420, r: [0, 3], w: 5 },
+  smg: { name: 'SMG', model: 'smg', scale: 3.8, grip: 0.07, ammo: 'bullets', body: 17, head: 24, mag: 30, reload: 2.2, cd: 0.075, auto: true, spread: 0.024, bloom: 0.004, ads: 0.7, fall: [50, 180, 0.45], block: 17, range: 260, r: [0, 3], w: 7 },
+  pistol: { name: 'Pistol', model: 'pistol', scale: 3.8, grip: 0.06, ammo: 'bullets', body: 24, head: 36, mag: 16, reload: 1.4, cd: 0.16, spread: 0.01, bloom: 0.008, ads: 0.5, fall: [60, 220, 0.5], block: 24, range: 320, r: [0, 2], w: 6 },
+  pump: { name: 'Pump Shotgun', model: 'shotgun', scale: 3.9, grip: 0.07, ammo: 'bullets', body: 9.5, head: 19, pellets: 10, mag: 5, reload: 4.0, cd: 0.9, spread: 0.055, bloom: 0, ads: 0.8, fall: [14, 48, 0.15], block: 9, range: 90, r: [1, 4], w: 7 },
+  tac: { name: 'Tactical Shotgun', model: 'double', scale: 3.8, grip: 0.07, ammo: 'bullets', body: 7.4, head: 14, pellets: 10, mag: 8, reload: 5.0, cd: 0.6, spread: 0.07, bloom: 0, ads: 0.85, fall: [14, 48, 0.15], block: 7, range: 80, r: [0, 3], w: 6 },
+  hc: { name: 'Hand Cannon', model: 'cannon', scale: 3.9, grip: 0.07, ammo: 'bullets', body: 75, head: 150, mag: 7, reload: 2.0, cd: 0.6, spread: 0.006, bloom: 0.012, ads: 0.5, fall: [90, 260, 0.5], block: 75, range: 320, r: [3, 4], w: 2 },
+  sniper: { name: 'Bolt-Action Sniper', model: 'sniper', scale: 3.1, grip: 0.1, ammo: 'bullets', body: 105, head: 263, mag: 1, reload: 2.8, cd: 1.5, spread: 0.035, bloom: 0, ads: 0, scope: true, fall: [400, 900, 0.9], block: 105, range: 1000, r: [2, 4], w: 3, tracer: 0xffffff },
+  lmg: { name: 'Light Machine Gun', model: 'lmg', scale: 3.5, grip: 0.1, ammo: 'bullets', body: 25, head: 37, mag: 100, reload: 5, cd: 0.12, auto: true, spread: 0.02, bloom: 0.003, ads: 0.6, fall: [110, 300, 0.6], block: 25, range: 400, r: [2, 3], w: 2 },
+  pulse: { name: 'Pulse Rifle', model: 'plasma', scale: 3.6, grip: 0.1, ammo: 'bullets', body: 24, head: 36, mag: 25, reload: 2.4, cd: 0.1, auto: true, spread: 0.012, bloom: 0.003, ads: 0.5, fall: [140, 360, 0.6], block: 24, range: 440, r: [3, 4], w: 1.5, tracer: 0x5ae8ff },
+  rail: { name: 'Railgun', model: 'rail', scale: 3.2, grip: 0.1, ammo: 'bullets', body: 100, head: 150, mag: 3, reload: 2.6, cd: 1.3, spread: 0, bloom: 0, ads: 0, scope: true, pierce: 99, fall: [300, 700, 0.9], block: 100, range: 900, r: [4, 4], w: 0.8, tracer: 0xc77dff },
 };
 const GUN_K = Object.keys(GUNS);
 // healing: Fortnite's numbers (Fortnite Wiki). t: seconds to use; cap: can't heal past this; drop: how many come in one stack
@@ -1866,13 +1871,15 @@ const STORM = [
 const ALIVE_CURVE = [[0, 100], [45, 100], [70, 90], [110, 80], [170, 68], [240, 56], [310, 44], [370, 34], [430, 25], [480, 17], [530, 11], [570, 7], [610, 4], [650, 2]];
 
 // ---------------------------------------------------------------- saved between sessions
-const Save = { name: '', wins: 0, matches: 0, kills: 0, top10: 0, best: 0, sound: true, shadows: true, sens: 1, key: 'grug.zone-royale.v1',
-  load() { try { const s = JSON.parse(localStorage.getItem(this.key) || 'null'); if (s) for (const k of ['name', 'wins', 'matches', 'kills', 'top10', 'best', 'sound', 'shadows', 'sens']) if (s[k] !== undefined) this[k] = s[k]; } catch (_) { } },
-  save() { try { const o = {}; for (const k of ['name', 'wins', 'matches', 'kills', 'top10', 'best', 'sound', 'shadows', 'sens']) o[k] = this[k]; localStorage.setItem(this.key, JSON.stringify(o)); } catch (_) { } },
+const Save = { name: '', wins: 0, matches: 0, kills: 0, top10: 0, best: 0, sound: true, shadows: true, sens: 1, mode: 'solo', key: 'grug.zone-royale.v1',
+  load() { try { const s = JSON.parse(localStorage.getItem(this.key) || 'null'); if (s) for (const k of ['name', 'wins', 'matches', 'kills', 'top10', 'best', 'sound', 'shadows', 'sens', 'mode']) if (s[k] !== undefined) this[k] = s[k]; } catch (_) { } },
+  save() { try { const o = {}; for (const k of ['name', 'wins', 'matches', 'kills', 'top10', 'best', 'sound', 'shadows', 'sens', 'mode']) o[k] = this[k]; localStorage.setItem(this.key, JSON.stringify(o)); } catch (_) { } },
   wipe() { try { localStorage.removeItem(this.key); } catch (_) { } },
 };
 Save.load();
 let seed = 20261124; const srnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;   // the island is the same every match (the loot isn't)
+// teams: you are team 0. Solo: everyone else is a team of one. Squads: you and three others against 24 more squads of four
+const ally = (a, b) => !!a && !!b && a !== b && a.team === b.team;
 const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 const dist2 = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
@@ -1934,6 +1941,8 @@ function boxGeo(sx, sy, sz) {
   for (let f = 0; f < 6; f++) for (let v = 0; v < 4; v++) { const i = f * 4 + v; uv.setXY(i, uv.getX(i) * dims[f][0] / STUD, uv.getY(i) * dims[f][1] / STUD); }
   return (GEOC[key] = g);
 }
+// Zone Royale draws a much bigger world than the other games, so it renders at 75% of their resolution (the retro look survives it)
+const RES_K = 0.75; renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5) * RES * RES_K);
 camera.far = 9000; camera.updateProjectionMatrix();
 sky.scale.setScalar(2.4);   // the sky dome has to stay outside everything you can see from the plane
 const FOG = { c: new THREE.Color(0xf3d2bc), near: 500, far: 2200 };
@@ -2795,7 +2804,7 @@ const makeGun = (k, r) => ({ t: 'gun', k, r, mag: GUNS[k].mag });
 const makeHeal = (k, n) => ({ t: 'heal', k, n: n || HEALS[k].drop });
 const makeAmmo = (k, n) => ({ t: 'ammo', k, n: n || Math.round(rnd(AMMO[k].box[0], AMMO[k].box[1])) });
 const newInv = () => [{ t: 'pick' }, null, null, null, null, null];
-const newAmmo = () => ({ light: 0, medium: 0, heavy: 0, shells: 0 });
+const newAmmo = () => ({ bullets: 0 });
 const RAR_FLOOR = [40, 32, 18, 8, 2], RAR_CHEST = [14, 32, 32, 17, 5];
 function rollRar(w) { let t = w.reduce((a, b) => a + b, 0), r = Math.random() * t; for (let i = 0; i < w.length; i++) if ((r -= w[i]) <= 0) return i; return 0; }
 function rollGun(chest) {
@@ -2814,26 +2823,44 @@ function lootNear(x, z, r, out = []) { out.length = 0; for (let i = Math.floor((
 const lootBeamGeo = new THREE.CylinderGeometry(0.9, 0.9, 40, 10, 1, true);
 const HALO_MAT = {}, haloMat = c => HALO_MAT[c] || (HALO_MAT[c] = new THREE.SpriteMaterial({ map: haloTex, color: c, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.55 }));
 const BEAM_MAT = {}, beamMat = c => BEAM_MAT[c] || (BEAM_MAT[c] = new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.22, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
-// put something on the floor. With o.from (x, y, z it flies from), it pops out in a little arc and lands nearby
+// put something on the floor. With o.from (x, y, z it flies from), it pops out in a little arc. Anything dropped within MERGE_R of
+// another drop joins it: one drop (a pile) holds everything there, ammo and healing of a kind counted together
+const MERGE_R = 3.4, mergeQ = [];
+const itemRank = it => it.t === 'gun' ? 100 + it.r * 10 : it.t === 'heal' ? 50 + HEALS[it.k].r : 1;
+const topItem = items => items.reduce((b, it) => (!b || itemRank(it) > itemRank(b) ? it : b), null);
+function addToPile(L, it) {
+  if (it.t !== 'gun') { const same = L.items.find(q => q.t === it.t && q.k === it.k); if (same) { same.n += it.n; return; } }
+  L.items.push(it);
+}
+function pileChanged(L) { L.it = topItem(L.items); if (L.g) { scene.remove(L.g); L.g = null; } if (!L.items.length) removeLoot(L); }
 function dropLoot(it, x, y, z, o = {}) {
   let tx = x, tz = z, ty = y;
   if (o.spread) { const a = rnd(0, 6.28), r = rnd(1.5, o.spread); tx += Math.cos(a) * r; tz += Math.sin(a) * r; }
   if (o.spread || o.from) { const r = W.raycast(tx, y + 2, tz, 0, -1, 0, 60, p => p.canCollide && !p.tree); ty = y + 2 - r.t + 0.05; }
-  const L = { it, x: tx, y: ty, z: tz, g: null, gone: false, t: 0, spin: rnd(0, 6.28), nb: o.nb || null, nbT: Game.clock + (o.nbT || 1.2), fly: o.from ? { x: o.from.x, y: o.from.y, z: o.from.z, t: 0 } : null };
-  LOOT.push(L); lgAdd(L); return L;
+  for (const P of lootNear(tx, tz, MERGE_R, mergeQ)) if (!P.gone && Math.abs(P.y - ty) < 2.5 && Math.hypot(P.x - tx, P.z - tz) < MERGE_R) {
+    addToPile(P, it); if (o.nb) { P.nb = o.nb; P.nbT = Game.clock + (o.nbT || 1.2); } pileChanged(P); return P;
+  }
+  const L = { items: [], it: null, x: tx, y: ty, z: tz, g: null, gone: false, t: 0, spin: rnd(0, 6.28), nb: o.nb || null, nbT: Game.clock + (o.nbT || 1.2), fly: o.from ? { x: o.from.x, y: o.from.y, z: o.from.z, t: 0 } : null };
+  addToPile(L, it); L.it = topItem(L.items); LOOT.push(L); lgAdd(L); return L;
 }
-function lootMesh(L) {
-  const it = L.it, g = new THREE.Group(), r = itemRar(it), col = RAR[r].hex;
-  let m;
-  if (it.t === 'gun') { m = gunMesh(it.k, { skin: RAR[r].skin, shiny: false }); const w = new THREE.Group(); m.position.set(0, 0, 0); w.add(m); w.rotation.set(-Math.PI / 2, 0, 0); w.position.y = 0.9; w.scale.setScalar(0.9); m = w; }
-  else if (it.t === 'heal') { m = healMesh(it.k); m.position.set(0, 0.9, 0); m.scale.setScalar(1.5); }
-  else { m = ammoMesh(it.k); m.position.y = 0.5; }
-  const spin = new THREE.Group(); spin.add(m); g.add(spin); L.spinG = spin;
+// several things at one spot (a chest, a player who went down): one pile
+function dropPile(items, x, y, z, o = {}) { let L = null; const a = rnd(0, 6.28), r = o.spread ? rnd(1.2, o.spread) : 0; for (const it of items) L = dropLoot(it, x + Math.cos(a) * r, y, z + Math.sin(a) * r, Object.assign({}, o, { spread: 0, from: o.from })); return L; }
+function itemMesh(it) {
+  const r = itemRar(it);
+  if (it.t === 'gun') { const m = gunMesh(it.k, { skin: RAR[r].skin, shiny: false }), w = new THREE.Group(); w.add(m); w.rotation.set(-Math.PI / 2, 0, 0); w.position.y = 0.9; w.scale.setScalar(0.9); return w; }
+  if (it.t === 'heal') { const m = healMesh(it.k); m.position.set(0, 0.9, 0); m.scale.setScalar(1.5); return m; }
+  const m = ammoMesh(it.k); m.position.y = 0.5; return m;
+}
+function lootMesh(L) {   // the best thing in the pile in the middle, up to two more beside it
+  const g = new THREE.Group(), it = L.it, r = itemRar(it), col = RAR[r].hex, spin = new THREE.Group(); g.add(spin); L.spinG = spin;
+  const rest = L.items.filter(q => q !== it).sort((a, b) => itemRank(b) - itemRank(a)).slice(0, 2);
+  spin.add(itemMesh(it)); rest.forEach((q, i) => { const m = itemMesh(q); m.position.x += (i ? -1 : 1) * 1.6; m.position.z += 0.6; m.scale.multiplyScalar(0.8); spin.add(m); });
   const h = new THREE.Sprite(haloMat(it.t === 'ammo' ? AMMO[it.k].hex : col)); h.scale.set(5, 5, 1); h.position.y = 0.8; g.add(h);
   if (r >= 3 && it.t === 'gun') { const b = new THREE.Mesh(lootBeamGeo, beamMat(col)); b.position.y = 20; g.add(b); }
   g.traverse(q => { if (q.isMesh) q.castShadow = false; });
   g.position.set(L.x, L.y, L.z); scene.add(g); return g;
 }
+const pileText = L => L.items.length === 1 ? null : L.items.slice().sort((a, b) => itemRank(b) - itemRank(a)).map(q => q.t === 'gun' ? `<b style="color:${RAR[q.r].css}">${GUNS[q.k].name}</b>` : `${itemName(q)} ×${q.n}`).join(' · ');
 function removeLoot(L) { if (L.gone) return; L.gone = true; if (L.g) scene.remove(L.g); L.g = null; lgDel(L); const i = LOOT.indexOf(L); if (i >= 0) LOOT.splice(i, 1); }
 function clearLoot() { for (const L of [...LOOT]) removeLoot(L); }
 
@@ -2858,13 +2885,10 @@ function resetBoxes() {
 }
 function openBox(B, by) {
   if (B.open) return; B.open = true; const from = { x: B.x, y: B.y + 2, z: B.z };
-  if (B.ammo) { const ks = [pick(AMMO_K), pick(AMMO_K)]; for (const k of ks) dropLoot(makeAmmo(k), B.x, B.y, B.z, { from, spread: 3 }); if (Math.random() < 0.3) dropLoot(makeHeal(Math.random() < 0.6 ? 'mini' : 'bandage'), B.x, B.y, B.z, { from, spread: 3 }); }
-  else {
-    const g = rollGun(true); dropLoot(g, B.x, B.y, B.z, { from, spread: 3 });
-    dropLoot(makeAmmo(GUNS[g.k].ammo), B.x, B.y, B.z, { from, spread: 3 });
-    dropLoot(rollHeal(true), B.x, B.y, B.z, { from, spread: 3 });
-    if (Math.random() < 0.5) dropLoot(makeAmmo(pick(AMMO_K)), B.x, B.y, B.z, { from, spread: 3 });
-  }
+  const items = [];
+  if (B.ammo) { items.push(makeAmmo('bullets'), makeAmmo('bullets')); if (Math.random() < 0.3) items.push(makeHeal(Math.random() < 0.6 ? 'mini' : 'bandage')); }
+  else { const g = rollGun(true); items.push(g, makeAmmo(GUNS[g.k].ammo), rollHeal(true)); if (Math.random() < 0.5) items.push(makeAmmo('bullets')); }
+  dropPile(items, B.x, B.y, B.z, { from, spread: 3.2 });
   if (nearCam(B, 140)) { Snd.ui('open'); FX.ring(B.x, B.y + 1.5, B.z, B.ammo ? 0x8aff6a : 0xffd24a); }
   if (B.g) { B.g.userData.lid.rotation.x = -1.9; if (B.glow) B.glow.visible = false; }
   if (by && by.isBot) by.stats.opened = (by.stats.opened || 0) + 1;
@@ -2874,10 +2898,10 @@ function spawnFloorLoot(spots, island) {
   for (const s of spots) {
     if (Math.random() > (island ? 0.9 : 0.66)) continue;
     const r = Math.random();
-    if (island) { dropLoot(r < 0.7 ? makeGun(pick(['ar', 'pump', 'smg', 'pistol', 'tac', 'burst']), Math.floor(rnd(0, 3))) : makeAmmo(pick(AMMO_K), 60), s.x, s.y, s.z); continue; }
-    if (r < 0.46) { const g = rollGun(false); dropLoot(g, s.x + rnd(-0.5, 0.5), s.y, s.z + rnd(-0.5, 0.5)); dropLoot(makeAmmo(GUNS[g.k].ammo), s.x + rnd(-1.6, 1.6), s.y, s.z + rnd(-1.6, 1.6)); }
+    if (island) { dropLoot(r < 0.7 ? makeGun(pick(['ar', 'pump', 'smg', 'pistol', 'tac', 'burst']), Math.floor(rnd(0, 3))) : makeAmmo('bullets', 60), s.x, s.y, s.z); continue; }
+    if (r < 0.46) { const g = rollGun(false); dropLoot(g, s.x, s.y, s.z); dropLoot(makeAmmo(GUNS[g.k].ammo), s.x, s.y, s.z); }
     else if (r < 0.72) dropLoot(rollHeal(false), s.x, s.y, s.z);
-    else dropLoot(makeAmmo(pick(AMMO_K)), s.x, s.y, s.z);
+    else dropLoot(makeAmmo('bullets'), s.x, s.y, s.z);
   }
 }
 let lootVisT = 0;
@@ -2919,7 +2943,7 @@ function takeItem(f, it, swap) {
   if (i < 0) {
     if (!swap) return false;
     i = f.sel > 0 ? f.sel : f.lastSel || 1; const old = f.inv[i];
-    if (old) { dropLoot(old, f.ch.x, f.ch.y - 3, f.ch.z, { from: { x: f.ch.x, y: f.ch.y - 1, z: f.ch.z }, spread: 2.2, nb: f, nbT: 1.5 }); }
+    if (old) { dropLoot(old, f.ch.x, f.ch.y - 3, f.ch.z, { from: { x: f.ch.x, y: f.ch.y - 1, z: f.ch.z }, spread: 1.2, nb: f, nbT: 1.5 }); }
     if (f.reload && f.reload.it === old) f.reload = null; if (f.use && f.use.it === old) f.use = null;
   }
   const copy = it.t === 'heal' ? makeHeal(it.k, Math.min(it.n, HEALS[it.k].stack)) : it;
@@ -2934,18 +2958,24 @@ function setSlot(f, i) {
   if (f.isPlayer) { Snd.tone('triangle', 400, 520, 0.05, 0.05); f.ads = false; }
 }
 function cycleSlot(f, d) { let i = f.sel; for (let n = 0; n < 6; n++) { i = (i + d + 6) % 6; if (i === 0 || f.inv[i]) { setSlot(f, i); return; } } }
-// pick up a floor item (E, or walking over it when it fits)
+// pick up a pile (E, or walking over it): everything that fits. With swap (E) and a full inventory, its best gun takes the place of what you hold
 function pickup(f, L, swap) {
   if (L.gone || L.fly) return false;
-  const it = L.it, all = takeItem(f, it, swap);
-  if (f.isPlayer) { Snd.ui(it.t === 'ammo' ? 'ammo' : 'pickup'); if (it.t !== 'ammo') toast(itemName(it), RAR[itemRar(it)].css); }
-  if (all) removeLoot(L);
-  return all;
+  const got = []; let swapped = false;
+  for (const it of L.items.slice().sort((a, b) => itemRank(b) - itemRank(a))) {
+    if (it.t === 'gun' && emptySlot(f) < 0) { if (!swap || swapped) continue; swapped = true; }
+    const n0 = it.n, all = takeItem(f, it, it.t === 'gun');
+    if (all) { L.items.splice(L.items.indexOf(it), 1); got.push(it); } else if (it.n !== n0) got.push(it);
+  }
+  if (!got.length) return false;
+  if (f.isPlayer) { const show = got.filter(q => q.t !== 'ammo'); Snd.ui(show.length ? 'pickup' : 'ammo'); if (show.length) toast(show.map(itemName).join(' + '), RAR[itemRar(show[0])].css); }
+  pileChanged(L); return true;
 }
-function dropAll(f) {   // a player's loot, all over the floor where they went down
-  const at = { x: f.ch.x, y: f.ch.y - 3, z: f.ch.z }, from = { x: at.x, y: at.y + 2, z: at.z };
-  for (let i = 1; i < 6; i++) if (f.inv[i]) { dropLoot(f.inv[i], at.x, at.y, at.z, { from, spread: 4 }); f.inv[i] = null; }
-  for (const k of AMMO_K) { let n = f.ammoR[k]; while (n > 0) { const q = Math.min(n, 60); dropLoot(makeAmmo(k, q), at.x, at.y, at.z, { from, spread: 4 }); n -= q; } f.ammoR[k] = 0; }
+function dropAll(f) {   // a player's loot, in one pile where they went down
+  const at = { x: f.ch.x, y: f.ch.y - 3, z: f.ch.z }, from = { x: at.x, y: at.y + 2, z: at.z }, items = [];
+  for (let i = 1; i < 6; i++) if (f.inv[i]) { items.push(f.inv[i]); f.inv[i] = null; }
+  for (const k of AMMO_K) { if (f.ammoR[k] > 0) items.push(makeAmmo(k, f.ammoR[k])); f.ammoR[k] = 0; }
+  if (items.length) dropPile(items, at.x, at.y, at.z, { from, spread: 1 });
 }
 // healing: hold fire with the item selected; you walk slowly while you use it. The cap (75 for Bandages, 50 for Small Shields) is checked first
 function canUse(f, k) { const H = HEALS[k]; return H.hp ? f.hp < H.cap : f.sh < H.cap; }
@@ -3040,6 +3070,7 @@ const headOf = f => f.ch.y + 1.0;   // anything above this on a body is a headsh
 // ---------------------------------------------------------------- damage: shield first, then health. The storm and falls skip the shield
 function hurt(s, amt, by, o = {}) {
   if (!alive(s) || s.inPlane || (s.protect > 0 && !o.storm)) return 0;
+  if (by && !o.storm && !o.fall && ally(by, s)) return 0;   // no friendly fire
   amt = Math.max(0, amt); let shD = 0;
   if (!o.storm && !o.fall && s.sh > 0) { shD = Math.min(s.sh, amt); s.sh -= shD; amt -= shD; if (s.sh <= 0 && shD > 0 && (s.isPlayer || (by && by.isPlayer))) Snd.ui('shieldBreak'); }
   const hpD = Math.min(s.hp, amt); s.hp -= amt; const total = shD + hpD;
@@ -3053,19 +3084,21 @@ function hurt(s, amt, by, o = {}) {
   if (s.hp <= 0) eliminate(s, o.storm || o.fall ? (s.lastHitBy && Game.clock - s.lastHitT < 10 ? s.lastHitBy : null) : by, o.storm ? 'storm' : o.fall ? 'fall' : o.weapon || 'elim');
   return total;
 }
-const feedName = f => f.isPlayer ? `<b style="color:#ffe36b">${f.name}</b>` : `<b>${f.name}</b>`;
+const feedName = f => f.isPlayer ? `<b style="color:#ffe36b">${f.name}</b>` : f.team === 0 && Match.mode === 'squads' ? `<b style="color:#7dff6a">${f.name}</b>` : `<b>${f.name}</b>`;
 function eliminate(s, K, how) {
   if (s.dead) return; s.dead = true; s.hp = 0; s.use = s.reload = s.whip = s.burst = null; s.air = null;
   if (K && (K === s || K.dead && false)) K = null;
   if (nearCam(s.ch, 260)) { breakApart(s.rig); Snd.play('oof', s.ch.x, s.ch.y, s.ch.z); }
   s.rig.g.visible = false; if (s.glider) s.glider.visible = false; if (s.tag) { s.tag.el.style.display = 'none'; s.tag.on = false; }
   if (Match.state === 'island') { s.respawnT = 2.2; if (s.isPlayer) { $('dead').style.display = 'block'; $('dead').innerHTML = `${K ? 'Taken out by ' + K.name : 'Down'}<br><small>Respawning (it's only the warm-up)</small>`; } if (K && K.isPlayer) Pts.add(null, `KNOCKED ${s.name}`, 'bank'); return; }
-  const place = aliveCount() + 1;
+  if (s.V) s.V.alive = false;
+  const wiped = !teamAlive(s.team), place = Match.mode === 'squads' ? (wiped ? teamsLeft().size + 1 : 0) : aliveCount() + 1;
   if (K) { K.kills++; if (K.V) K.V.kills++; }
   Feed.add(K ? `${feedName(K)} <span class="fx">${how === 'storm' ? 'pushed' : 'eliminated'}</span> ${feedName(s)}${how !== 'storm' && how !== 'fall' && how !== 'elim' ? ` <span class="fx">· ${how}</span>` : ''}` : `${feedName(s)} <span class="fx">${how === 'storm' ? 'was lost in the Storm' : how === 'fall' ? 'fell to their death' : how === 'reset' ? 'reset' : 'was eliminated'}</span>`);
   dropAll(s);
   if (K && K.isPlayer) { Save.kills++; Pts.add(null, `ELIMINATED ${s.name}`, 'gate'); Snd.ui('elim'); announceElim(s.name, K.kills); }
-  if (s.isPlayer) playerOut(place, K, how); else botGone(s, place);
+  if (s.isPlayer) { if (wiped) playerOut(place, K, how); else playerDown(K, how); }
+  else { botGone(s, place); if (s.team === 0 && wiped && player && player.dead) playerOut(place, K, how); }
   checkEnd();
 }
 
@@ -3110,7 +3143,7 @@ function updateBurst(f, dt) {
 // one bullet (or pellet): the wall it would stop at, every body in front of that, and through as many as the gun pierces
 function fireRay(f, G, ox, oy, oz, dx, dy, dz, maxT, mul, seen) {
   const wr = W.raycast(ox, oy, oz, dx, dy, dz, maxT, shotFilter), wallT = G.pierce ? Math.min(maxT, wr.part && wr.part.ground ? wr.t : maxT) : wr.t, hits = [];
-  for (const s of FIGHTERS()) { if (s === f || s.dead) continue; const t = rayBody(ox, oy, oz, dx, dy, dz, s.ch, wallT, 1); if (t >= 0 && t < wallT) hits.push([t, s]); }
+  for (const s of FIGHTERS()) { if (s === f || s.dead || ally(f, s)) continue; const t = rayBody(ox, oy, oz, dx, dy, dz, s.ch, wallT, 1); if (t >= 0 && t < wallT) hits.push([t, s]); }
   hits.sort((a, b) => a[0] - b[0]);
   const cap = 1 + (G.pierce || 0), n = Math.min(hits.length, cap), stop = n === cap, endT = stop ? hits[n - 1][0] : wallT;
   if (seen) tracer(ox + dx * 2, oy + dy * 2 - 0.3, oz + dz * 2, ox + dx * endT, oy + dy * endT, oz + dz * endT, G.tracer || (f.isPlayer ? 0xffe9a0 : 0xfff6d8));
@@ -3135,7 +3168,7 @@ function swingStrike(f) {
   const ch = f.ch, d = f.isPlayer && Aim.dir ? Aim.dir(f) : f.whip.dir; f.whip.done = true;
   const hl = Math.hypot(d[0], d[2]) || 1, yaw = Math.atan2(-d[0], -d[2]); let best = null, bd = 1e9;
   for (const s of FIGHTERS()) {
-    if (s === f || s.dead) continue; const dx = s.ch.x - ch.x, dz = s.ch.z - ch.z, dd = Math.hypot(dx, dz);
+    if (s === f || s.dead || ally(f, s)) continue; const dx = s.ch.x - ch.x, dz = s.ch.z - ch.z, dd = Math.hypot(dx, dz);
     if (dd > RULES.pickReach - 1.5 || Math.abs(s.ch.y - ch.y) > 5 || (dd > 1.5 && Math.abs(angDiff(yaw, Math.atan2(-dx, -dz))) > 0.9)) continue;
     if (dd < bd) { bd = dd; best = s; }
   }
@@ -3276,6 +3309,7 @@ function fallCheck(f) {
   const ch = f.ch, feet = ch.y - 3;
   if (!ch.grounded) { if (feet > f.peak) f.peak = feet; return; }
   const h = f.peak - feet; f.peak = feet;
+  if (f.softT && Game.clock < f.softT) return;   // a bot jumping off a roof to get down (they'd only do it to stop getting stuck)
   if (h > RULES.fallSafe && Match.state !== 'menu') { hurt(f, (h - RULES.fallSafe) * RULES.fallMul, null, { fall: true }); if (f.isPlayer) camShake = 0.25; }
 }
 function dodgeRoll(f, dir) {
@@ -3298,9 +3332,13 @@ function makeRoster() {
 function resetRoster() {
   for (const V of ROSTER) {
     if (V.act) dropBot(V.act, true);
-    Object.assign(V, { alive: true, state: 'lobby', act: null, inv: newInv(), ammoR: newAmmo(), hp: RULES.hp, sh: 0, kills: 0, place: 0, poi: null, x: 0, y: 0, z: 0, land: null, lootT: 0, skill: rnd(0.55, 1.45), fails: 0, wanderT: 0, goal: null });
+    Object.assign(V, { team: V.id + 1, follow: false, alive: true, state: 'lobby', act: null, inv: newInv(), ammoR: newAmmo(), hp: RULES.hp, sh: 0, kills: 0, place: 0, poi: null, x: 0, y: 0, z: 0, land: null, lootT: 0, skill: rnd(0.55, 1.45), fails: 0, wanderT: 0, goal: null });
   }
 }
+function teamAlive(t) { return (t === 0 && player && !player.dead && Match.state !== 'menu') || ROSTER.some(V => V.alive && V.team === t); }
+function teamsLeft() { const T = new Set(); if (player && !player.dead) T.add(0); for (const V of ROSTER) if (V.alive) T.add(V.team); return T; }
+function setTeams(squads) { for (const V of ROSTER) V.team = squads ? (V.id < 3 ? 0 : 1 + Math.floor((V.id - 3) / 4)) : V.id + 1; if (player) player.team = 0; }
+const squadMates = () => ROSTER.filter(V => V.team === 0);
 const aliveCount = () => (player && !player.dead && Match.state !== 'menu' ? 1 : 0) + ROSTER.reduce((n, V) => n + (V.alive ? 1 : 0), 0);
 function makeTag(V) {
   const el = document.createElement('div'); el.className = 'tag'; el.style.display = 'none';
@@ -3313,7 +3351,7 @@ function activate(V, x, y, z, air) {
   if (!V.tag) V.tag = makeTag(V);
   const b = makeFighter(V.name, V.look, { x, y: y + 3.2, z, yaw: rnd(0, 6.28), rig: V.rig });
   resetFighter(b, x, y + 3.2, z);
-  Object.assign(b, { V, inv: V.inv, ammoR: V.ammoR, hp: V.hp, sh: V.sh, kills: V.kills, tag: V.tag, gliderCol: V.gliderCol || (V.gliderCol = pick(GLIDER_COLS)),
+  Object.assign(b, { V, team: V.team, inv: V.inv, ammoR: V.ammoR, hp: V.hp, sh: V.sh, kills: V.kills, tag: V.tag, gliderCol: V.gliderCol || (V.gliderCol = pick(GLIDER_COLS)),
     cam: { yaw: b.ch.faceYaw, pitch: 0.32, dist: 12.5, tdist: 12.5, fp: false, shift: false, cu: rnd(-0.1, 0.1), cv: rnd(-0.08, 0.04) }, motor: Hands.fresh(), wish: { mx: 0, mz: 0, jump: false }, afk: false,
     P: { keep: rnd(14, 26), aim: V.skill, rate: rnd(1.25, 2.2), react: rnd(0.35, 0.75) / Math.max(0.6, V.skill), chat: rnd(0.4, 1.4) },
     goal: null, goalT: 0, item: null, itemT: 0, openT: 0, stuck: { x, z, t: 0, n: 0 }, strafe: 1, strafeT: 0, stair: null, door: null, seenT: 0, wpT: 0, tgtT: rnd(0, 0.3), idleT: 0, chatT: rnd(30, 120), bubble: 0, deployH: rnd(110, 260) });
@@ -3342,16 +3380,21 @@ function planDrops() {
   const P = PLANE, nx = -P.uz, nz = P.ux;
   const along = (x, z) => (x - P.a.x) * P.ux + (z - P.a.z) * P.uz, off = (x, z) => Math.abs((x - P.a.x) * nx + (z - P.a.z) * nz);
   const lone = HOUSES.filter(H => !H.poi && !H.spawn);
+  const teamSpot = new Map();
   for (const V of ROSTER) {
+    if (V.team === 0 && Match.mode === 'squads') { Object.assign(V, { state: 'plane', jumpAt: Infinity, land: null, poi: null }); continue; }
+    const ts = teamSpot.get(V.team);
+    if (ts && Match.mode === 'squads') { Object.assign(V, { state: 'plane', poi: ts.poi, land: { x: ts.land.x + rnd(-12, 12), y: 0, z: ts.land.z + rnd(-12, 12) }, jumpAt: ts.jumpAt + rnd(0, 0.8), jx: 0, jz: 0, dropT: 0, dropDur: ts.dropDur + rnd(-1, 1) }); continue; }
     let land = null, poi = null;
     if (Math.random() < 0.82) {
       poi = wpick(POIS.map(Q => [Q, Q.hot * Math.exp(-off(Q.x, Q.z) / 650) + 0.05]));
-      const an = anchorsNear(poi.x, poi.z, poi.r).filter(a => a.f === 0 || a.door); const a = an.length ? pick(an) : null;
+      const an = anchorsNear(poi.x, poi.z, poi.r).filter(a => a.door || !a.H); const a = an.length ? pick(an) : null;
       land = a ? { x: a.x + rnd(-3, 3), y: 0, z: a.z + rnd(-3, 3) } : { x: poi.x + rnd(-40, 40), y: 0, z: poi.z + rnd(-40, 40) };
     } else { const H = pick(lone); land = { x: H.doors[0].ox + rnd(-4, 4), y: 0, z: H.doors[0].oz + rnd(-4, 4) }; }
     const s = clamp(along(land.x, land.z) - rnd(80, 420), P.open * RULES.planeSpeed, P.close * RULES.planeSpeed);
     Object.assign(V, { state: 'plane', poi, land, jumpAt: s / RULES.planeSpeed + rnd(0, 1.5), jx: 0, jz: 0, dropT: 0 });
     V.dropDur = Math.max(16, Math.hypot(land.x - (P.a.x + P.ux * s), land.z - (P.a.z + P.uz * s)) / 40 + 12);
+    teamSpot.set(V.team, V);
   }
 }
 const lerp = (a, b, k) => a + (b - a) * k;
@@ -3367,7 +3410,7 @@ function virtualLoot(V, big) {
 }
 const vPower = V => V.inv.reduce((s, it) => s + (it && it.t === 'gun' ? gunScore(it) : 0), 0) + V.hp * 0.3 + V.sh * 0.4 + rnd(0, 30);
 function virtualKill(V, K, how) {   // a record goes down off-screen
-  V.alive = false; V.place = aliveCount() + 1; V.hp = 0;
+  V.alive = false; V.place = Match.mode === 'squads' ? teamsLeft().size + 1 : aliveCount() + 1; V.hp = 0;
   if (K) { K.kills++; virtualLoot(K, true); K.hp = Math.max(8, K.hp - rnd(0, 60)); K.sh = Math.max(0, K.sh - rnd(20, 100)); }
   const w = K ? (K.inv.find(s => s && s.t === 'gun') || null) : null;
   Feed.add(K ? `<b>${K.name}</b> <span class="fx">eliminated</span> <b>${V.name}</b>${w ? ` <span class="fx">· ${GUNS[w.k].name}</span>` : ''}` : `<b>${V.name}</b> <span class="fx">${how === 'storm' ? 'was lost in the Storm' : 'was eliminated'}</span>`);
@@ -3396,7 +3439,7 @@ function npcTick(dt) {
     if (V.state !== 'ground') continue;
     if ((V.lootT -= st) <= 0) { V.lootT = rnd(12, 28); virtualLoot(V, Math.random() < 0.35); }
     const g = virtualGoal(V) || (V.goal && (V.wanderT -= st) > 0 ? V.goal : null);
-    if (!g && (V.wanderT -= st) <= 0) { V.wanderT = rnd(8, 20); const an = anchorsNear(V.x, V.z, 120); const a = an.length ? pick(an) : null; V.goal = a ? { x: a.x, z: a.z } : null; }
+    if (!g && (V.wanderT -= st) <= 0) { V.wanderT = rnd(8, 20); const an = anchorsNear(V.x, V.z, 120).filter(a => a.f === 0); const a = an.length ? pick(an) : null; V.goal = a ? { x: a.x, z: a.z } : null; }
     const G = g || V.goal; if (G) { const dx = G.x - V.x, dz = G.z - V.z, d = Math.hypot(dx, dz); if (d > 2) { const sp = Math.min(d, (g ? 13 : 6) * st); V.x += dx / d * sp; V.z += dz / d * sp; V.y = 0; } }
     if (Storm.dmg && Math.hypot(V.x - Storm.cx, V.z - Storm.cz) > Storm.r) {
       V.hp -= Storm.dmg * st; const h = V.inv.findIndex(s => s && s.t === 'heal' && HEALS[s.k].hp);
@@ -3410,7 +3453,7 @@ function npcTick(dt) {
     if (excess > 0 && Math.random() < Math.min(0.95, excess * 0.06)) {
       const far = ROSTER.filter(V => V.alive && !V.act && V.state === 'ground' && (!F || Math.hypot(V.x - F.x, V.z - F.z) > RULES.actR + 120));
       if (far.length >= 2) {
-        const A1 = pick(far); let B1 = null, bd = 1e9; for (const V of far) { if (V === A1) continue; const d = Math.hypot(V.x - A1.x, V.z - A1.z) + rnd(0, 200); if (d < bd) { bd = d; B1 = V; } }
+        const A1 = pick(far); let B1 = null, bd = 1e9; for (const V of far) { if (V === A1 || V.team === A1.team) continue; const d = Math.hypot(V.x - A1.x, V.z - A1.z) + rnd(0, 200); if (d < bd) { bd = d; B1 = V; } }
         if (B1) { const [w, l] = vPower(A1) >= vPower(B1) ? [A1, B1] : [B1, A1]; virtualKill(l, bd < 700 ? w : null, 'elim'); }
       } else if (far.length === 1 && excess > 3 && Storm.phase >= 5) virtualKill(far[0], null, 'storm');
     }
@@ -3439,16 +3482,17 @@ function actTick(dt) {
   if (Match.state !== 'live') return;
   const F = focusPoint(); if (!F) return;
   for (const b of [...BOTS]) {
+    if (b.team === 0 && Match.mode === 'squads') continue;
     const d = Math.hypot(b.ch.x - F.x, b.ch.z - F.z);
     if (d > RULES.deactR && !(b.tgt === F.p && d < 650) && !inView(b.ch.x, b.ch.y, b.ch.z)) dropBot(b);
   }
   let n = 0;
-  const cand = ROSTER.filter(V => V.alive && !V.act && (V.state === 'ground' || V.state === 'drop')).map(V => [V, Math.hypot(V.x - F.x, V.z - F.z)]).filter(q => q[1] < RULES.actR).sort((a, b) => a[1] - b[1]);
+  const cand = ROSTER.filter(V => V.alive && !V.act && (V.state === 'ground' || V.state === 'drop') && !(V.team === 0 && Match.mode === 'squads')).map(V => [V, Math.hypot(V.x - F.x, V.z - F.z)]).filter(q => q[1] < RULES.actR).sort((a, b) => a[1] - b[1]);
   for (const [V, d] of cand) {
     if (BOTS.length >= RULES.actMax || n >= 3) break;
     if (V.state === 'drop') { activate(V, V.x, V.y, V.z, V.y > 160 ? 'fall' : 'glide'); n++; continue; }
     // somewhere near their spot that you can't see right now
-    const an = anchorsNear(V.x, V.z, 80).sort(() => Math.random() - 0.5); let at = null;
+    const an = anchorsNear(V.x, V.z, 80).filter(a => a.f === 0).sort(() => Math.random() - 0.5); let at = null;
     for (const a of an) { if (Math.hypot(a.x - F.x, a.z - F.z) < 40) continue; if (!inView(a.x, a.y + 3, a.z)) { at = a; break; } }
     if (!at && !inView(V.x, 3, V.z) && Math.hypot(V.x - F.x, V.z - F.z) > 40) at = { x: V.x, y: groundH(V.x, V.z) < 0 ? 0 : 0, z: V.z };
     if (!at && (++V.fails > 6 || d > 230)) { at = an.length ? an.sort((p, q) => Math.hypot(q.x - F.x, q.z - F.z) - Math.hypot(p.x - F.x, p.z - F.z))[0] : { x: V.x, y: 0, z: V.z }; }
@@ -3503,22 +3547,24 @@ function botWants(b, it) {
   if (it.t === 'gun') { if (b.inv.some(s => s && s.t === 'gun' && s.k === it.k && s.r >= it.r)) return false; if (emptySlot(b) > 0) return true; const w = worstGun(b); return w > 0 && gunScore(it) > gunScore(b.inv[w]) + 4; }
   return false;
 }
+const pileWanted = (b, L) => L.items.some(it => botWants(b, it));
 function botPickup(b, L) {
-  const it = L.it;
-  if (it.t === 'gun' && emptySlot(b) < 0) { const w = worstGun(b); if (w > 0) { b.sel = w; } }
-  const good = it.t === 'gun' && it.r >= 3; pickup(b, L, true); if (good && Math.random() < 0.4) botSay(b, 'loot');
+  const best = L.items.filter(q => q.t === 'gun' && botWants(b, q)).sort((a, c) => gunScore(c) - gunScore(a))[0];
+  if (best && emptySlot(b) < 0) { const w = worstGun(b); if (w > 0) b.sel = w; }
+  const good = best && best.r >= 3; pickup(b, L, !!best); if (good && Math.random() < 0.4) botSay(b, 'loot');
   const gi = botWeapon(b, 60); if (gi > 0 && gi !== b.sel) setSlot(b, gi);
 }
 let lootQ = [];
 function pickLootTarget(b) {
   const ch = b.ch, fy = ch.y - 3; let best = null, bs = 1e9;
+  const P = b.follow && player && !player.dead ? player.ch : null, far = (x, z) => P && Math.hypot(x - P.x, z - P.z) > 70;   // squadmates loot near you
   for (const B of BOXES) {
-    if (B.open || Math.abs(B.x - ch.x) > 140 || Math.abs(B.z - ch.z) > 140) continue;
+    if (B.open || B.f > 0 || far(B.x, B.z) || Math.abs(B.x - ch.x) > 140 || Math.abs(B.z - ch.z) > 140) continue;
     if (B.claim && B.claim !== b && alive(B.claim) && B.claim.item === B) continue;
     const s = (Math.hypot(B.x - ch.x, B.z - ch.z) + Math.abs(B.y - fy) * 3) * (B.ammo ? 1.8 : 0.7); if (s < bs) { bs = s; best = B; }
   }
   for (const L of lootNear(ch.x, ch.z, 90, lootQ)) {
-    if (L.fly || (L.nb === b && Game.clock < L.nbT) || !botWants(b, L.it)) continue;
+    if (L.fly || far(L.x, L.z) || (L.nb === b && Game.clock < L.nbT) || L.y > hAt(L.x, L.z) + 2 || !pileWanted(b, L)) continue;
     if (L.claim && L.claim !== b && alive(L.claim) && L.claim.item === L) continue;
     const s = (Math.hypot(L.x - ch.x, L.z - ch.z) + Math.abs(L.y - fy) * 3) * (L.it.t === 'gun' ? 0.6 : 1); if (s < bs) { bs = s; best = L; }
   }
@@ -3533,7 +3579,7 @@ function botTryHeal(b) {
 }
 // a way to (tx, ty, tz) that goes through doors and up and down stairs. Returns the next point to walk to
 function route(b, tx, ty, tz) {
-  const ch = b.ch, Hb = houseAt(ch.x, ch.z), Ht = houseAt(tx, tz), fb = floorOf(Hb, ch.y), ft = Ht ? floorOf(Ht, ty + 3) : 0;
+  const ch = b.ch, Hb = houseAt(ch.x, ch.z), Ht = houseAt(tx, tz), fb = floorOf(Hb, ch.y), ft = 0;   // the others only ever use ground floors: never up the stairs
   const viaStairs = (H, from, to) => {
     const up = from < to, fl = H.stairs[up ? from : from - 1]; if (!fl) return null;
     const s = up ? fl.bot : fl.top, e = up ? fl.top : fl.bot;
@@ -3571,11 +3617,43 @@ function stormGoal(b) {
 function pickFoe(b) {
   const ch = b.ch; let best = null, bd = 1e9; const it = b.inv[b.sel], range = it && it.t === 'gun' ? Math.min(220, GUNS[it.k].range) : 120;
   for (const s of FIGHTERS()) {
-    if (s === b || s.dead || s.air) continue; const d = Math.hypot(s.ch.x - ch.x, s.ch.z - ch.z); if (d > range || Math.abs(s.ch.y - ch.y) > 40) continue;
+    if (s === b || s.dead || s.air || ally(b, s)) continue; const d = Math.hypot(s.ch.x - ch.x, s.ch.z - ch.z); if (d > range || Math.abs(s.ch.y - ch.y) > 40) continue;
     const sc = d - (s === b.tgt ? 25 : 0) + (s.isPlayer && Match.state === 'island' ? 30 : 0);
     if (sc < bd && clear(ch.x, ch.y + 1.5, ch.z, s.ch.x, s.ch.y + 1, s.ch.z, seeFilter)) { bd = sc; best = s; }
   }
   return best;
+}
+// standing on something high (a roof, a container, a rock, an upper floor they fell onto): get back to the ground as soon as possible.
+// Off a roof: run for the nearest edge and jump. On an upper floor: down the stairs. Returns true while it's doing that
+function getDown(b, dt) {
+  const ch = b.ch, fy = ch.y - 3; if (!ch.grounded || fy < hAt(ch.x, ch.z) + 2.5) { b.down = null; return false; }
+  const H = houseAt(ch.x, ch.z) || [...housesNear(ch.x, ch.z, 4)].find(h => ch.x > h.bb[0] - 2 && ch.x < h.bb[2] + 2 && ch.z > h.bb[1] - 2 && ch.z < h.bb[3] + 2);
+  const w = b.wish;
+  if (H && fy < H.top - 1 && floorOf(H, ch.y) > 0) { const via = route(b, H.cx, 0, H.cz); const dx = via.x - ch.x, dz = via.z - ch.z, d = Math.hypot(dx, dz) || 1; botMove(b, dx / d, dz / d); w.precise = true; w.noHop = true; return true; }
+  if (!b.down || (b.down.t -= dt) <= 0) {
+    let tx = ch.x + rnd(-1, 1), tz = ch.z + rnd(-1, 1);
+    if (H) { const e = [[H.bb[0] - 4, ch.z, ch.x - H.bb[0]], [H.bb[2] + 4, ch.z, H.bb[2] - ch.x], [ch.x, H.bb[1] - 4, ch.z - H.bb[1]], [ch.x, H.bb[3] + 4, H.bb[3] - ch.z]].sort((a, c) => a[2] - c[2])[0]; tx = e[0]; tz = e[1]; }
+    else { const a = rnd(0, 6.28); tx = ch.x + Math.cos(a) * 12; tz = ch.z + Math.sin(a) * 12; }
+    b.down = { x: tx, z: tz, t: 2.5 };
+  }
+  const dx = b.down.x - ch.x, dz = b.down.z - ch.z, d = Math.hypot(dx, dz) || 1; botMove(b, dx / d, dz / d); w.jump = true; w.noHop = false; b.softT = Game.clock + 4;
+  return true;
+}
+// your squadmates: keep close to you (fighting, they won't go more than 70 studs off; otherwise they stay within about 25, looting
+// only what's near you). Returns true when it has decided where they go this frame
+function followLead(b, L, dt) {
+  const ch = b.ch, d = Math.hypot(L.ch.x - ch.x, L.ch.z - ch.z);
+  ch.speedMul = d > 34 && !b.tgt ? RULES.sprint + 0.08 : 1;   // catch-up (a little faster than you sprint) so they don't trail behind
+  // properly lost (stuck behind something, or you outran them by far): out of your sight, they pop back in near you
+  if (d > 160 && !b.tgt && (b.lostT = (b.lostT || 0) + dt) > 3) { const a = rnd(0, 6.28), x = L.ch.x + Math.cos(a) * 22, z = L.ch.z + Math.sin(a) * 22, y = hAt(x, z) + 3.2;
+    if (!inView(ch.x, ch.y, ch.z) && !inView(x, y, z) && !W.raycast(x, y + 6, z, 0, -1, 0, 6, p => p.canCollide && !p.ground && !p.terrain).part) { ch.x = x; ch.y = y; ch.z = z; ch.vx = ch.vz = ch.vy = 0; b.lostT = 0; } } else if (d <= 160) b.lostT = 0;
+  if (!b.fOff) { const a = (b.V.id + 1) * 2.1; b.fOff = { x: Math.cos(a) * 7, z: Math.sin(a) * 7 }; }
+  const go = () => { botSteer(b, L.ch.x + b.fOff.x, 0, L.ch.z + b.fOff.z, dt); if (b.tgt) b.wish.look = { x: b.tgt.ch.x, y: b.tgt.ch.y, z: b.tgt.ch.z }; return true; };
+  if (b.tgt && !b.tgt.dead) return d > 70 ? go() : false;
+  const still = Math.hypot(L.ch.vx || 0, L.ch.vz || 0) < 4;   // while you stand about (looting, healing) they can wander further to loot
+  if (d > (still ? 75 : 26)) { if (b.item && b.item.claim === b) b.item.claim = null; b.item = null; return go(); }
+  if (b.item && Math.hypot(b.item.x - L.ch.x, b.item.z - L.ch.z) > 70) { if (b.item.claim === b) b.item.claim = null; b.item = null; b.itemT = 0.6; }
+  return false;
 }
 function botThink(b, dt) {
   const ch = b.ch, w = b.wish, P = b.P; w.mx = w.mz = 0; w.jump = false; w.look = null; w.face = null; w.precise = false; w.noHop = false; w.lookName = null;
@@ -3583,6 +3661,9 @@ function botThink(b, dt) {
   if ((b.chatT -= dt) <= 0) { b.chatT = rnd(60, 180) / P.chat; botSay(b, b.tgt ? 'fight' : 'idle'); }
   if (b.bubble > 0 && (b.bubble -= dt) <= 0) b.tag.bub.style.display = 'none';
   if (Match.state === 'over') return;
+  if (getDown(b, dt)) return;
+  const lead = b.follow && player && !player.dead && !player.inPlane && !player.air ? player : null; if (!lead) b.ch.speedMul = 1;
+  if (lead && followLead(b, lead, dt)) return;
   const T = b.tgt && alive(b.tgt) && !b.tgt.air ? b.tgt : null, Z = stormGoal(b);
   if (b.use) { if (T && dist2(T.ch, ch) < 30) b.use = null; else { if (T) w.look = { x: T.ch.x, y: T.ch.y, z: T.ch.z }; return; } }
   if (T) {
@@ -3603,15 +3684,16 @@ function botThink(b, dt) {
   const L = b.item;
   if (L && !L.gone && !L.open) {
     const dy = Math.abs(L.y - (ch.y - 3)), dd = Math.hypot(L.x - ch.x, L.z - ch.z);
-    if (dd < (L.it ? 2.6 : 3.8) && dy < 3) {
+    if (dd < (L.items ? 2.6 : 3.8) && dy < 3) {
       w.face = { x: L.x, z: L.z }; w.look = { x: L.x, y: L.y, z: L.z };
-      if (L.it) { botPickup(b, L); b.item = null; } else if ((b.openT += dt) > 0.45) { openBox(L, b); b.openT = 0; b.item = null; b.itemT = 0.3; }
+      if (L.items) { botPickup(b, L); b.item = null; } else if ((b.openT += dt) > 0.45) { openBox(L, b); b.openT = 0; b.item = null; b.itemT = 0.3; }
       return;
     }
     b.openT = 0; botSteer(b, L.x, L.y, L.z, dt); return;
   }
   if (Z) { botSteer(b, Z.x, 0, Z.z, dt); return; }
-  if (!b.goal || (b.goalT -= dt) <= 0) { b.goalT = rnd(5, 12); const an = anchorsNear(ch.x, ch.z, 140); const a = an.length ? pick(an) : null; b.goal = a ? { x: a.x, y: a.y, z: a.z } : { x: ch.x + rnd(-60, 60), y: 0, z: ch.z + rnd(-60, 60) }; }
+  if (b.follow && b.fOff && player && !player.dead && !player.inPlane && !player.air) { if (Math.hypot(player.ch.x - ch.x, player.ch.z - ch.z) > 12) botSteer(b, player.ch.x + b.fOff.x, 0, player.ch.z + b.fOff.z, dt); return; }   // nothing to loot: stay by you
+  if (!b.goal || (b.goalT -= dt) <= 0) { b.goalT = rnd(5, 12); const an = anchorsNear(ch.x, ch.z, 140).filter(a => a.f === 0); const a = an.length ? pick(an) : null; b.goal = a ? { x: a.x, y: a.y, z: a.z } : { x: ch.x + rnd(-60, 60), y: 0, z: ch.z + rnd(-60, 60) }; }
   if (b.idleT > 0) { b.idleT -= dt; return; }
   if (botSteer(b, b.goal.x, b.goal.y, b.goal.z, dt)) { b.goal = null; b.idleT = rnd(0.5, 3); }
 }
@@ -3635,7 +3717,14 @@ function botCombat(b, dt) {
   shoot(b, px / pl, py / pl, pz / pl, 600);
 }
 function updateBotAir(b, dt) {
-  const L = b.air.land || b.V.land, ch = b.ch; let mx = 0, mz = 0;
+  const ch = b.ch; let mx = 0, mz = 0;
+  if (b.follow && player && !player.dead && !player.inPlane) {
+    const P = player.ch, a = (b.V.id + 1) * 2.1, tx = P.x + Math.cos(a) * 15, tz = P.z + Math.sin(a) * 15, dx = tx - ch.x, dz = tz - ch.z, d = Math.hypot(dx, dz);
+    if (d > 2) { mx = dx / Math.max(d, 12); mz = dz / Math.max(d, 12); }
+    const pa = player.air, h = ch.y - 3; updateAir(b, dt, mx, mz, !!pa && pa.mode === 'fall' && ch.y > P.y + 4, !pa || pa.mode === 'glide');
+    return;
+  }
+  const L = b.air.land || b.V.land;
   if (L) { const dx = L.x - ch.x, dz = L.z - ch.z, d = Math.hypot(dx, dz); if (d > 6) { mx = dx / d; mz = dz / d; } }
   const h = ch.y - 3; updateAir(b, dt, mx, mz, b.air.mode === 'fall' && h > 300, h < b.deployH);
 }
@@ -3656,12 +3745,12 @@ function startIsland() {
   hideOverlays(); document.body.classList.add('joined');
   for (const b of [...BOTS]) dropBot(b, true); resetRoster(); clearLoot(); restoreWalls(); resetBoxes(); FakeJump.list.forEach(J => scene.remove(J.m.g)); FakeJump.list.length = 0;
   spawnFloorLoot(SPAWN.spots, true); Storm.state = 'none'; Storm.mesh.visible = false; Storm.dmg = 0;
-  if (!player) player = makeFighter(Save.name, playerLook(), { player: true });
+  if (!player) player = makeFighter(Save.name, playerLook(), { player: true }); player.team = 0; setTeams(false);
   const s = islandSpot(); resetFighter(player, s.x, 3.2, s.z); player.protect = 3; player.inv = newInv(); player.ammoR = newAmmo(); player.sel = 0; player.kills = 0; player.dmg = 0; player.name = Save.name;
-  Object.assign(Match, { state: 'island', botErr: 2.4, t: 0, warm: RULES.warmup, place: 0, joinT: 0, start: Game.clock, pois: new Set(), lastPoi: null }); spec.t = null;
+  Object.assign(Match, { state: 'island', mode: Save.mode === 'squads' ? 'squads' : 'solo', botErr: 2.4, t: 0, warm: RULES.warmup, place: 0, joinT: 0, start: Game.clock, pois: new Set(), lastPoi: null }); spec.t = null;
   for (let i = 0; i < RULES.warmupBots; i++) { const V = ROSTER[i], p = islandSpot(); V.state = 'ground'; const b = activate(V, p.x, 0, p.z, null); islandKit(b); b.sel = 1; }
   cam.yaw = player.ch.faceYaw = Math.atan2(-(SPX - s.x), -(SPZ - s.z)); cam.pitch = 0.25; Feed.clear();
-  announce('SPAWN ISLAND', 'Warm up: guns are on the floor, and you respawn here. The plane leaves soon.', '#ffd24a'); Snd.ding('gate');
+  announce(Match.mode === 'squads' ? 'SPAWN ISLAND · SQUADS' : 'SPAWN ISLAND · SOLO', `Warm up: guns are on the floor and you respawn here. ${Match.mode === 'squads' ? 'You drop with a squad of four.' : 'Every player for themselves.'} (Change mode in the Menu)`, '#ffd24a'); Snd.ding('gate');
   if (!touchMode && document.hasFocus() && navigator.userActivation && navigator.userActivation.isActive) tryLock();
 }
 // everyone boards: the plane flies straight over the island on a random line. Jump when you like (Space); at the far coast you're thrown out
@@ -3670,7 +3759,7 @@ function startPlane() {
   const a = rnd(0, 6.28), ux = Math.cos(a), uz = Math.sin(a), off = rnd(-520, 520), cx = -uz * off, cz = ux * off, L = ISL + RULES.planeLead;
   Object.assign(PLANE, { a: { x: cx - ux * L, z: cz - uz * L }, b: { x: cx + ux * L, z: cz + uz * L }, ux, uz, len: 2 * L, t: 0, y: RULES.planeAlt, open: (RULES.planeLead - 120) / RULES.planeSpeed, close: (2 * L - RULES.planeLead + 60) / RULES.planeSpeed, end: 2 * L / RULES.planeSpeed + 4 });
   if (!PLANE.mesh) PLANE.mesh = planeMesh(); PLANE.mesh.visible = true; PLANE.mesh.rotation.y = Math.atan2(-ux, -uz);
-  planDrops();
+  setTeams(Match.mode === 'squads'); planDrops();
   resetFighter(player, PLANE.a.x, RULES.planeAlt, PLANE.a.z); player.inPlane = true; player.rig.g.visible = false; player.inv = newInv(); player.ammoR = newAmmo(); player.sel = 0; player.kills = 0; player.dmg = 0;
   Object.assign(Match, { state: 'live', t: 0, botErr: 1.4, outT: 0, winner: null }); Storm.state = 'none'; Storm.mesh.visible = false; $('dead').style.display = 'none';
   cam.pitch = 0.35; Feed.clear(); Save.matches++; Save.save();
@@ -3679,6 +3768,7 @@ function startPlane() {
 function jumpOut(f) {
   if (!f.inPlane) return; f.inPlane = false; const ch = f.ch; ch.x = PLANE.x - PLANE.uz * 3; ch.z = PLANE.z + PLANE.ux * 3; ch.y = PLANE.y - 10; f.peak = ch.y - 3;
   startAir(f, 'fall'); f.air.vx = PLANE.ux * 30; f.air.vz = PLANE.uz * 30; f.rig.g.visible = true; ch.faceYaw = Math.atan2(-PLANE.ux, -PLANE.uz);
+  if (f.isPlayer && Match.mode === 'squads') for (const V of squadMates()) if (V.alive && !V.act) { const a = (V.id + 1) * 2.1, b = activate(V, ch.x + Math.cos(a) * 15, ch.y - 3, ch.z + Math.sin(a) * 15, 'fall'); b.follow = true; V.follow = true; b.air.vx = f.air.vx; b.air.vz = f.air.vz; }
   if (f.isPlayer) { cam.tdist = 10; Snd.play('swing'); announce('', 'Steer with WASD · hold W to dive · Space opens the glider', '#fff'); }
 }
 function updatePlane(dt) {
@@ -3727,16 +3817,21 @@ function updateStorm(dt) {
 const inStorm = f => Storm.state !== 'none' && Math.hypot(f.ch.x - Storm.cx, f.ch.z - Storm.cz) > Storm.r;
 
 // ---------------------------------------------------------------- the end: you're out, or you're the last one standing
-function playerOut(place, K, how) {
-  Match.place = place; Match.outT = Match.t; Save.best = Save.best ? Math.min(Save.best, place) : place; if (place <= 10) Save.top10++; Save.save();
-  spec.t = K && !K.isPlayer && alive(K) ? K : null;
-  $('dead').style.display = 'block'; $('dead').innerHTML = `${K ? `Eliminated by <span style="color:#ff6a5a">${K.name}</span>` : how === 'storm' ? 'Lost in the Storm' : how === 'fall' ? 'You fell to your death' : how === 'reset' ? 'You reset your character' : 'Eliminated'}<br><small>#${place}</small>`;
+function playerOut(place, K, how) {   // you're out, and so is your squad (or you were solo)
+  Match.place = place; Match.outT = Match.outT || Match.t; Save.best = Save.best ? Math.min(Save.best, place) : place; if (place <= 10) Save.top10++; Save.save();
+  if (!spec.t || spec.t.dead) spec.t = K && !K.isPlayer && alive(K) ? K : null;
+  $('dead').style.display = 'block'; $('dead').innerHTML = Match.mode === 'squads' ? `Your squad is out<br><small>#${place} of 25 squads</small>` : `${K ? `Eliminated by <span style="color:#ff6a5a">${K.name}</span>` : how === 'storm' ? 'Lost in the Storm' : how === 'fall' ? 'You fell to your death' : how === 'reset' ? 'You reset your character' : 'Eliminated'}<br><small>#${place}</small>`;
   setTimeout(() => { if (player && player.dead && Match.state === 'live') showResults(false); }, 1600);
 }
+function playerDown(K, how) {   // squads: you're out but your squad isn't. Watch them (they can still win it for you)
+  Match.outT = Match.t; const mates = BOTS.filter(b => ally(player, b) && !b.dead); spec.t = mates[0] || null;
+  $('dead').style.display = 'block'; $('dead').innerHTML = `${K ? `Eliminated by <span style="color:#ff6a5a">${K.name}</span>` : how === 'storm' ? 'Lost in the Storm' : 'Eliminated'}<br><small>Your squad is still in it: spectating ${spec.t ? spec.t.name : ''}</small>`;
+  setTimeout(() => { if (Match.state === 'live') $('dead').style.display = 'none'; }, 4000);
+}
 function checkEnd() {
-  if (Match.state !== 'live') return; const n = aliveCount();
-  if (player && !player.dead && !player.inPlane && n === 1) { Match.state = 'over'; Match.place = 1; Save.wins++; Save.top10++; Save.best = 1; Save.save(); Snd.ding('gate'); setTimeout(() => Snd.ding('bank'), 400); bigWin(); setTimeout(() => showResults(true), 3200); }
-  else if (player && player.dead && n <= 1) { const W1 = ROSTER.find(V => V.alive); Match.state = 'over'; Match.winner = W1 ? W1.name : null; showResults(false); }
+  if (Match.state !== 'live' || (player && player.inPlane)) return; const T = teamsLeft();
+  if (T.size === 1 && T.has(0)) { Match.state = 'over'; Match.place = 1; Save.wins++; Save.top10++; Save.best = 1; Save.save(); Snd.ding('gate'); setTimeout(() => Snd.ding('bank'), 400); bigWin(); setTimeout(() => showResults(true), 3200); }
+  else if (!T.has(0) && T.size <= 1) { const W1 = ROSTER.find(V => V.alive); Match.state = 'over'; Match.winner = W1 ? (Match.mode === 'squads' ? W1.name + "'s squad" : W1.name) : null; showResults(false); }
 }
 function updateMatch(dt) {
   if (Match.state === 'island') {
@@ -3798,13 +3893,13 @@ function computeAim() {
   const p = player; if (!p || p.dead || p.inPlane) return;
   ray.setFromCamera(ndc.set(0, 0), camera); const o = ray.ray.origin, d = ray.ray.direction;
   const wr = W.raycast(o.x, o.y, o.z, d.x, d.y, d.z, 1200, shotFilter); let best = wr.t, hit = null;
-  for (const s of BOTS) { if (s.dead) continue; const t = rayBody(o.x, o.y, o.z, d.x, d.y, d.z, s.ch, best, 1); if (t >= 0 && t < best) { best = t; hit = s; } }
+  for (const s of BOTS) { if (s.dead || ally(p, s)) continue; const t = rayBody(o.x, o.y, o.z, d.x, d.y, d.z, s.ch, best, 1); if (t >= 0 && t < best) { best = t; hit = s; } }
   Aim.point = { x: o.x + d.x * best, y: o.y + d.y * best, z: o.z + d.z * best };
   if (hit) { Aim.target = hit; Aim.head = Aim.point.y > headOf(hit); return; }
   // a little help: a body right next to the crosshair (and in the clear) counts
   let bd = RULES.aimAssistPx * (touchMode ? 2.2 : 1);
   for (const s of BOTS) {
-    if (s.dead) continue; tv.set(s.ch.x, s.ch.y - 0.4, s.ch.z).project(camera); if (tv.z > 1) continue;
+    if (s.dead || ally(p, s)) continue; tv.set(s.ch.x, s.ch.y - 0.4, s.ch.z).project(camera); if (tv.z > 1) continue;
     const dd = Math.hypot(tv.x * innerWidth / 2, tv.y * innerHeight / 2); if (dd < bd && clear(p.ch.x, p.ch.y + 1.5, p.ch.z, s.ch.x, s.ch.y, s.ch.z)) { bd = dd; Aim.target = s; }
   }
 }
@@ -3828,11 +3923,11 @@ function computeInteract() {
   for (const L of lootNear(ch.x, ch.z, RULES.interactR, intQ)) if (!L.fly) consider(L, L.x, L.y, L.z, 'loot', 1);
   if (best) { INT.o = best[0]; INT.kind = best[1]; }
 }
-function autoPickup() {
+function autoPickup() {   // walking over a pile takes what fits without a swap (ammo, healing that stacks or has a free slot, guns into free slots)
   const p = player; if (!p || p.dead || p.air || p.inPlane) return;
   for (const L of lootNear(p.ch.x, p.ch.z, RULES.pickupR, intQ)) {
-    if (L.fly || (L.nb === p && Game.clock < L.nbT) || Math.abs(L.y - (p.ch.y - 3)) > 3) continue; const it = L.it;
-    if (it.t === 'ammo' || (it.t === 'heal' && (emptySlot(p) > 0 || p.inv.some(s => s && s.t === 'heal' && s.k === it.k && s.n < HEALS[it.k].stack))) || (it.t === 'gun' && emptySlot(p) > 0)) pickup(p, L, false);
+    if (L.fly || (L.nb === p && Game.clock < L.nbT) || Math.abs(L.y - (p.ch.y - 3)) > 3) continue;
+    if (L.items.some(it => it.t === 'ammo' || (it.t === 'heal' && (emptySlot(p) > 0 || p.inv.some(s => s && s.t === 'heal' && s.k === it.k && s.n < HEALS[it.k].stack))) || (it.t === 'gun' && emptySlot(p) > 0))) pickup(p, L, false);
   }
 }
 function interact() {
@@ -3937,7 +4032,7 @@ touchButton('tMap', () => toggleMap());
 
 // ---------------------------------------------------------------- the Game Menu (as in every Grug game) and the overlays
 function toggleMenu(on) {
-  const want = on === undefined ? !document.body.classList.contains('menu') : on; document.body.classList.toggle('menu', want); page('pgMain');
+  const want = on === undefined ? !document.body.classList.contains('menu') : on; document.body.classList.toggle('menu', want); page('pgMain'); if (want) renderMode();
   if (want) { keys.clear(); lmb = rmb = false; if (document.pointerLockElement) document.exitPointerLock(); Snd.play('tick'); } else if (playing()) tryLock();
 }
 function page(id) { for (const p of document.querySelectorAll('#gm .page')) p.classList.toggle('on', p.id === id); }
@@ -3949,6 +4044,12 @@ $('gReset').addEventListener('click', () => {   // as in Roblox: on the spawn is
   if (Match.state === 'island') { const s = islandSpot(); resetFighter(player, s.x, 3.2, s.z); player.protect = 1.5; return; }
   if (player.inPlane) return; eliminate(player, null, 'reset');
 });
+function renderMode() { $('gMode').textContent = 'Mode: ' + (Save.mode === 'squads' ? 'Squads' : 'Solo'); }
+$('gMode').addEventListener('click', () => {
+  Save.mode = Save.mode === 'squads' ? 'solo' : 'squads'; Save.save(); renderMode(); Snd.play('tick');
+  if (Match.state === 'island') { toggleMenu(false); startIsland(); } else toast(`${Save.mode === 'squads' ? 'Squads' : 'Solo'} from the next match`);
+});
+renderMode();
 $('gSettings').addEventListener('click', () => { renderSet(); page('pgSet'); });
 $('gHelp').addEventListener('click', () => page('pgHelp'));
 for (const b of document.querySelectorAll('#gm .back')) b.addEventListener('click', () => page('pgMain'));
@@ -3968,9 +4069,9 @@ $('sWipe').addEventListener('click', () => { if (!wipeArm) { wipeArm = 1; setTim
 function hideOverlays() { $('results').style.display = 'none'; $('win').style.display = 'none'; $('dead').style.display = 'none'; document.body.classList.remove('menu'); $('bigmap').classList.remove('on'); }
 function showResults(won) {
   $('win').style.display = 'none';
-  if (document.pointerLockElement) document.exitPointerLock(); const p = player, place = Match.place || aliveCount() + 1;
+  if (document.pointerLockElement) document.exitPointerLock(); const p = player, place = Match.place || (Match.mode === 'squads' ? teamsLeft().size + 1 : aliveCount() + 1);
   $('resTitle').innerHTML = won ? '<b class="vr">#1 VICTORY ROYALE</b>' : Match.winner && p.dead ? `<b>#${place}</b><small>${Match.winner} won the match</small>` : `<b>#${place}</b><small>${p.dead ? 'Eliminated' : ''}</small>`;
-  $('resStats').innerHTML = `<div><b>${p.kills}</b><small>Eliminations</small></div><div><b>${Math.round(p.dmg || 0)}</b><small>Damage dealt</small></div><div><b>${mmss(p.dead && Match.outT ? Match.outT : Match.t)}</b><small>Time survived</small></div><div><b>${place}/100</b><small>Placement</small></div>`;
+  $('resStats').innerHTML = `<div><b>${p.kills}</b><small>Eliminations</small></div><div><b>${Math.round(p.dmg || 0)}</b><small>Damage dealt</small></div><div><b>${mmss(p.dead && Match.outT ? Match.outT : Match.t)}</b><small>Time survived</small></div><div><b>${place}/${Match.mode === 'squads' ? 25 : 100}</b><small>${Match.mode === 'squads' ? 'Squad placement' : 'Placement'}</small></div>`;
   $('resSpec').style.display = !won && Match.state === 'live' && BOTS.some(b => !b.dead) ? '' : 'none';
   $('results').style.display = 'block';
 }
@@ -3995,6 +4096,7 @@ function drawStorm(x, P, s) {   // purple outside the eye, the eye's edge, and t
   x.restore();
 }
 function drawPlanePath(x, P) { if (!PLANE.a || !PLANE.mesh || !PLANE.mesh.visible) return; const [a, b] = P(PLANE.a.x, PLANE.a.z), [c, d] = P(PLANE.b.x, PLANE.b.z); x.save(); x.strokeStyle = 'rgba(255,255,255,.9)'; x.lineWidth = 2; x.setLineDash([6, 5]); x.beginPath(); x.moveTo(a, b); x.lineTo(c, d); x.stroke(); x.setLineDash([]); const [px, py] = P(PLANE.x, PLANE.z); x.fillStyle = '#ffd24a'; x.beginPath(); x.arc(px, py, 5, 0, 7); x.fill(); x.restore(); }
+function drawMates(x, P, r) { if (Match.mode !== 'squads' || Match.state !== 'live') return; x.save(); x.fillStyle = '#7dff6a'; x.strokeStyle = '#000'; x.lineWidth = 1.5; for (const b of BOTS) if (!b.dead && ally(player, b) && b !== spec.t) { const [a, c] = P(b.ch.x, b.ch.z); x.beginPath(); x.arc(a, c, r, 0, 7); x.fill(); x.stroke(); } x.restore(); }
 function drawMe(x, P, yaw, sz) { const f = player; if (!f) return; const at = f.dead && spec.t ? spec.t.ch : f.inPlane ? { x: PLANE.x, z: PLANE.z } : f.ch, [a, b] = P(at.x, at.z); x.save(); x.translate(a, b); x.rotate(-yaw); x.fillStyle = '#ffe36b'; x.strokeStyle = '#000'; x.lineWidth = 1.5; x.beginPath(); x.moveTo(0, -sz); x.lineTo(sz * 0.7, sz * 0.7); x.lineTo(0, sz * 0.3); x.lineTo(-sz * 0.7, sz * 0.7); x.closePath(); x.fill(); x.stroke(); x.restore(); }
 let MARK = null;
 function updateMinimap() {
@@ -4007,7 +4109,7 @@ function updateMinimap() {
   else { const [a, b] = P(SPX - SPH, SPZ - SPH); x.fillStyle = '#4b974b'; x.fillRect(a, b, 2 * SPH * s, 2 * SPH * s); }
   drawStorm(x, P, s); drawPlanePath(x, P);
   if (MARK) { const [a, b] = P(MARK.x, MARK.z); x.fillStyle = '#ff5ad0'; x.strokeStyle = '#000'; x.beginPath(); x.arc(a, b, 4 * dpr, 0, 7); x.fill(); x.stroke(); }
-  drawMe(x, P, cam.yaw, 6 * dpr);
+  drawMates(x, P, 3.5 * dpr); drawMe(x, P, cam.yaw, 6 * dpr);
   // a line to the eye when you're outside it
   if (Storm.state !== 'none' && Storm.state !== 'forming' && !f.inPlane) { const tx = Storm.state === 'done' ? Storm.cx : Storm.nx, tz = Storm.state === 'done' ? Storm.cz : Storm.nz, d = Math.hypot(at.x - tx, at.z - tz), r = Storm.state === 'done' ? Storm.r : Storm.nr; if (d > r) { const [a, b] = P(at.x, at.z), [cx, cy] = P(at.x + (tx - at.x) * (d - r) / d, at.z + (tz - at.z) * (d - r) / d); x.strokeStyle = 'rgba(255,255,255,.85)'; x.setLineDash([4, 4]); x.lineWidth = 1.5 * dpr; x.beginPath(); x.moveTo(a, b); x.lineTo(cx, cy); x.stroke(); x.setLineDash([]); } }
 }
@@ -4022,13 +4124,14 @@ function drawBigMap() {
   x.textAlign = 'center'; x.textBaseline = 'middle';
   for (const Q of POIS) { const [a, b] = P(Q.x, Q.z); x.font = `bold ${Math.round(12 * dpr)}px Arial`; x.lineWidth = 3 * dpr; x.strokeStyle = '#000'; x.strokeText(Q.name.toUpperCase(), a, b); x.fillStyle = '#fff'; x.fillText(Q.name.toUpperCase(), a, b); }
   if (MARK) { const [a, b] = P(MARK.x, MARK.z); x.fillStyle = '#ff5ad0'; x.strokeStyle = '#000'; x.lineWidth = 2; x.beginPath(); x.arc(a, b, 7 * dpr, 0, 7); x.fill(); x.stroke(); }
-  drawMe(x, P, cam.yaw, 9 * dpr);
+  drawMates(x, P, 5 * dpr); drawMe(x, P, cam.yaw, 9 * dpr);
   c.onclick = e => { const r = c.getBoundingClientRect(), wx = (e.clientX - r.left) / r.width * 2 * MAPE - MAPE, wz = (e.clientY - r.top) / r.height * 2 * MAPE - MAPE; MARK = MARK && Math.hypot(MARK.x - wx, MARK.z - wz) < 60 ? null : { x: wx, z: wz }; drawBigMap(); };
 }
 $('bmClose').addEventListener('click', () => toggleMap(false));
 
 // ---------------------------------------------------------------- HUD
-let hudKey = '', slotKey = '';
+let hudKey = '', slotKey = '', sqT = 0, sqKey = '';
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const ICON = {
   pick: '<svg viewBox="0 0 40 40"><path d="M8 34 26 16" stroke="#8a5a2c" stroke-width="5" stroke-linecap="round"/><path d="M12 9c8-4 18-2 24 6-6-3-12-4-17-2z" fill="#c8d2dc" stroke="#222" stroke-width="2"/><path d="M19 13l8 8" stroke="#555" stroke-width="5"/></svg>',
   bandage: '<svg viewBox="0 0 40 40"><rect x="6" y="14" width="28" height="12" rx="6" fill="#f2ecdc" stroke="#222" stroke-width="2"/><rect x="16" y="14" width="8" height="12" fill="#e5d8b8"/></svg>',
@@ -4046,11 +4149,12 @@ function renderSlots() {
 function updateTags(dt) {
   const Wd = innerWidth, Hd = innerHeight;
   for (const b of BOTS) {
-    const g = b.tag; if (!g) continue; const ch = b.ch; let show = !b.dead && (g.showT > 0 || b.bubble > 0);
+    const g = b.tag; if (!g) continue; const ch = b.ch, mate = ally(player, b); let show = !b.dead && (mate || g.showT > 0 || b.bubble > 0);
     if (g.showT > 0) g.showT -= dt;
-    if (show) { tv.set(ch.x, ch.y + 3.3, ch.z); show = tv.distanceTo(camera.position) < 140; if (show) { tv.project(camera); show = tv.z < 1 && Math.abs(tv.x) < 1.1 && Math.abs(tv.y) < 1.1; } }
-    if (show && (g.losT -= dt) <= 0) { g.losT = 0.3; g.los = clear(camera.position.x, camera.position.y, camera.position.z, ch.x, ch.y + 2, ch.z); }
-    if (show && !g.los) show = false;
+    if (g.mate !== mate) { g.mate = mate; g.el.classList.toggle('mate', mate); }
+    if (show) { tv.set(ch.x, ch.y + 3.3, ch.z); show = tv.distanceTo(camera.position) < (mate ? 900 : 140); if (show) { tv.project(camera); show = tv.z < 1 && Math.abs(tv.x) < 1.1 && Math.abs(tv.y) < 1.1; } }
+    if (show && !mate && (g.losT -= dt) <= 0) { g.losT = 0.3; g.los = clear(camera.position.x, camera.position.y, camera.position.z, ch.x, ch.y + 2, ch.z); }
+    if (show && !mate && !g.los) show = false;
     if (!show) { if (g.on) { g.el.style.display = 'none'; g.on = false; } continue; }
     if (!g.on) { g.el.style.display = ''; g.on = true; }
     g.el.style.transform = `translate(${((tv.x * 0.5 + 0.5) * Wd).toFixed(1)}px,${((-tv.y * 0.5 + 0.5) * Hd).toFixed(1)}px) translate(-50%,-100%)`;
@@ -4066,19 +4170,21 @@ function updateHud(dt) {
   if (msgO && (msgO.t -= dt) > 0) { $('rmsg').style.display = 'block'; $('rmsg').textContent = msgO.text; } else $('rmsg').style.display = 'none';
   if (!p || Match.state === 'menu') return;
   const live = !p.dead && !p.inPlane;
+  { const sq = Match.mode === 'squads' && Match.state === 'live'; document.body.classList.toggle('squads', sq);
+    if (sq && ((sqT -= dt) <= 0)) { sqT = 0.2; const rows = squadMates().map(V => { const b = V.act, hp = b ? b.hp : V.hp, sh = b ? b.sh : V.sh; return `<div class="m${V.alive ? '' : ' out'}"><div class="n ol">${esc(V.name)}</div><div class="b s"><i style="width:${V.alive ? sh : 0}%"></i></div><div class="b h"><i style="width:${V.alive ? Math.max(0, hp) : 0}%"></i></div></div>`; }).join(''); if (rows !== sqKey) { sqKey = rows; $('squad').innerHTML = rows; } } }
   document.body.classList.toggle('inplane', !!p.inPlane); document.body.classList.toggle('isdead', !!p.dead); document.body.classList.toggle('inair', !!p.air);
   // health and shield
   $('shI').style.width = p.sh + '%'; $('hpI').style.width = Math.max(0, p.hp) + '%'; $('shN').textContent = Math.ceil(p.sh); $('hpN').textContent = Math.max(0, Math.ceil(p.hp));
   renderSlots();
   const it = curItem(p), G = it && it.t === 'gun' ? GUNS[it.k] : null;
   $('ammoNow').innerHTML = G ? `<b>${it.mag}</b><span>${p.ammoR[G.ammo]}</span><small style="color:${RAR[it.r].css}">${RAR[it.r].name} ${G.name}</small>` : it && it.t === 'heal' ? `<small>${HEALS[it.k].name} · ${HEALS[it.k].t}s · hold fire to use</small>` : it && it.t === 'pick' ? '<small>Pickaxe · breaks walls</small>' : '';
-  $('ammoRes').innerHTML = AMMO_K.map(k => `<span style="color:${AMMO[k].css}"${G && G.ammo === k ? ' class="cur"' : ''}>${AMMO[k].short} <b>${p.ammoR[k]}</b></span>`).join('');
+  $('ammoRes').innerHTML = `<span style="color:${AMMO.bullets.css}" class="cur">Ammo <b>${p.ammoR.bullets}</b></span>`;
   // top right: storm timer, players left, eliminations
   const st = Storm.state, sl = Math.ceil(Storm.left());
   $('mmStorm').innerHTML = Match.state === 'island' ? `<i class="ic st"></i>Plane leaves in <b>${mmss(Math.max(0, Math.ceil(Match.warm)))}</b>` : st === 'none' ? (p.inPlane ? `<i class="ic st"></i>${PLANE.t < PLANE.open ? 'Doors open in ' + Math.ceil(PLANE.open - PLANE.t) : 'Jump!'}` : '<i class="ic st"></i>Storm forming soon') : st === 'forming' ? `<i class="ic st"></i>Eye forms in <b>${mmss(sl)}</b>` : st === 'wait' ? `<i class="ic st"></i>Shrinks in <b>${mmss(sl)}</b>` : st === 'shrink' ? `<i class="ic st sh"></i>Closing <b>${mmss(sl)}</b>` : '<i class="ic st sh"></i>Final circle';
   const n = Match.state === 'island' ? Math.min(100, Math.round(40 + Match.joinT * 6)) : aliveCount();
   $('mmAlive').innerHTML = `<i class="ic al"></i><b>${n}</b>`; $('mmKills').innerHTML = `<i class="ic kl"></i><b>${p.kills}</b>`;
-  $('mmPhase').textContent = Match.state === 'island' ? 'SPAWN ISLAND' : Storm.phase ? `PHASE ${Storm.phase}${Storm.dmg ? ' · ' + Storm.dmg + ' DMG/S' : ''}` : '';
+  $('mmPhase').textContent = Match.state === 'island' ? (Match.mode === 'squads' ? 'SPAWN ISLAND · SQUADS' : 'SPAWN ISLAND · SOLO') : Storm.phase ? `PHASE ${Storm.phase}${Storm.dmg ? ' · ' + Storm.dmg + ' DMG/S' : ''}` : '';
   // storm: purple at the edges of the screen when you're in it
   const ins = live && inStorm(p); $('stormVig').style.opacity = ins ? 1 : 0;
   // crosshair: spreads with your gun's bloom
@@ -4089,7 +4195,8 @@ function updateHud(dt) {
   { const U = p.use || (p.opening && { t: p.opening.t, dur: p.opening.B.ammo ? 0.3 : 0.45 }) || (p.reload && { t: p.reload.t, dur: p.reload.dur }); const r = $('ring');
     if (U && live) { r.style.display = 'block'; r.querySelector('.fg').style.strokeDashoffset = (157 * (1 - clamp(U.t / U.dur, 0, 1))).toFixed(1); r.querySelector('span').textContent = p.use ? `${(U.dur - U.t).toFixed(1)}` : p.opening ? 'Searching' : 'Reloading'; } else r.style.display = 'none'; }
   // the interaction prompt
-  { const el = $('prompt'), o = INT.o; if (o && live && !p.opening) { const it2 = o.it; el.style.display = 'block'; el.innerHTML = INT.kind === 'loot' ? `<kbd>${touchMode ? 'USE' : 'E'}</kbd> ${it2.t === 'ammo' ? 'Pick up' : emptySlot(p) < 0 && it2.t !== 'heal' ? 'Swap for' : 'Pick up'} <b style="color:${it2.t === 'ammo' ? AMMO[it2.k].css : RAR[itemRar(it2)].css}">${itemName(it2)}</b>${it2.t !== 'gun' ? ' ×' + it2.n : ` <small>${RAR[it2.r].name}</small>`}` : `<kbd>${touchMode ? 'USE' : 'E'}</kbd> ${INT.kind === 'chest' ? 'Open Chest' : 'Search Ammo Box'}`; } else el.style.display = 'none'; }
+  { const el = $('prompt'), o = INT.o; if (o && live && !p.opening) { const it2 = o.it; el.style.display = 'block'; const pt = INT.kind === 'loot' ? pileText(o) : null;
+      el.innerHTML = INT.kind === 'loot' ? (pt ? `<kbd>${touchMode ? 'USE' : 'E'}</kbd> Pick up ${o.items.length} things: ${pt}` : `<kbd>${touchMode ? 'USE' : 'E'}</kbd> ${it2.t === 'ammo' ? 'Pick up' : emptySlot(p) < 0 && it2.t !== 'heal' ? 'Swap for' : 'Pick up'} <b style="color:${it2.t === 'ammo' ? AMMO[it2.k].css : RAR[itemRar(it2)].css}">${itemName(it2)}</b>${it2.t !== 'gun' ? ' ×' + it2.n : ` <small>${RAR[it2.r].name}</small>`}`) : `<kbd>${touchMode ? 'USE' : 'E'}</kbd> ${INT.kind === 'chest' ? 'Open Chest' : 'Search Ammo Box'}`; } else el.style.display = 'none'; }
   // a wall you're hitting
   { const el = $('struct'); if (STRUCT.t > 0 && STRUCT.rec && !STRUCT.rec.broken) { STRUCT.t -= dt; el.style.display = 'block'; el.querySelector('i').style.width = clamp(STRUCT.rec.hp / STRUCT.rec.maxHp * 100, 0, 100) + '%'; el.querySelector('span').textContent = `${Math.max(0, Math.ceil(STRUCT.rec.hp))} / ${STRUCT.rec.maxHp}`; } else el.style.display = 'none'; }
   if (WEAK.rec && (WEAK.t -= dt) <= 0) hideWeak();
@@ -4154,7 +4261,7 @@ function sim(dt) {
 const t0 = performance.now();
 buildWorld(); drawMapImage(); makeRoster(); resetRoster();
 if (!Save.name) { Save.name = AK.makeName(new Set()); Save.save(); }
-player = makeFighter(Save.name, playerLook(), { player: true }); player.dead = true; player.rig.g.visible = false;
+player = makeFighter(Save.name, playerLook(), { player: true }); player.team = 0; player.dead = true; player.rig.g.visible = false;
 console.log(`Zone Royale: ${HOUSES.length} buildings, ${CHESTS.length} chest spots, ${W.parts.length} parts, built in ${(performance.now() - t0).toFixed(0)} ms`);
 applySettings(); startIsland();   // no title screen: straight onto the spawn island (Fortnite's pre-game lobby)
 const wake = () => { Snd.init(); Snd.initLoops(); applySettings(); if (Snd.ctx && Snd.ctx.state === 'suspended') Snd.ctx.resume(); canvas.focus(); removeEventListener('keydown', wake, true); removeEventListener('pointerdown', wake, true); };
@@ -4215,7 +4322,7 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 // for testing from the console
-window.ZR = { perf(n = 60) { const t = performance.now(); for (let i = 0; i < n; i++) sim(1 / 60); return ((performance.now() - t) / n).toFixed(2) + ' ms/step, bots ' + BOTS.length; }, ff(sec, dt = 0.1) { for (let i = 0; i < sec / dt; i++) { if (player && !player.dead && !player.inPlane && !player.air) { player.ch.input.mx = player.ch.input.mz = 0; } sim(dt); } return { t: Match.t.toFixed(0), alive: aliveCount(), bots: BOTS.length, phase: Storm.phase, state: Storm.state, r: Storm.r | 0, hp: player.hp | 0, dead: player.dead, ms: Match.state }; }, get player() { return player; }, BOTS, ROSTER, Match, Storm, PLANE, HOUSES, POIS, LOOT, BOXES, W, RULES, startIsland, startPlane, jumpOut, OUTFITS, aliveCount, hurt, cam, keys, sim, activate, stormNext, openBox, setSlot, takeItem, makeGun, makeHeal, makeAmmo, eliminate, spec };
+window.ZR = { perf(n = 60) { const t = performance.now(); for (let i = 0; i < n; i++) sim(1 / 60); return ((performance.now() - t) / n).toFixed(2) + ' ms/step, bots ' + BOTS.length; }, ff(sec, dt = 0.1) { for (let i = 0; i < sec / dt; i++) { if (player && !player.dead && !player.inPlane && !player.air) { player.ch.input.mx = player.ch.input.mz = 0; } sim(dt); } return { t: Match.t.toFixed(0), alive: aliveCount(), bots: BOTS.length, phase: Storm.phase, state: Storm.state, r: Storm.r | 0, hp: player.hp | 0, dead: player.dead, ms: Match.state }; }, get player() { return player; }, BOTS, ROSTER, Match, Storm, PLANE, HOUSES, POIS, LOOT, BOXES, W, RULES, startIsland, startPlane, jumpOut, OUTFITS, aliveCount, hurt, cam, keys, sim, activate, stormNext, openBox, setSlot, takeItem, makeGun, makeHeal, makeAmmo, eliminate, spec, Save, teamsLeft, squadMates, dropLoot, hAt, getDown };
 
 </script>
 </body>

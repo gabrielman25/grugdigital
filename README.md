@@ -85,7 +85,10 @@ chat, describe a character, and Claude makes it.
 ## Grug Arcade (`/arcade/`)
 
 Browser games in the classic blocky style, each one self-contained: `arcade/slide-999/`, `arcade/zombie-zones/`, and
-the list at `arcade/index.html` (with the "Playing as" outfit picker).
+the list at `arcade/index.html` (with the "Playing as" outfit picker). Every game also has its own page,
+`/arcade/place/?id=<slug>` (laid out like a classic place page: screenshot, Play, description, controls, details,
+Recommendations); the list's tiles open it. The game data for both is `GAMES` in `arcade/arcade.js`, and their shared look
+is `arcade/arcade.css`.
 
 - `static/outfit-rig.js` (`window.GrugOutfitRig`) dresses a game's blocky rig in a saved outfit; the player wears the
   one they picked, other saved outfits become the other players (and, tinted green, Zombie Zones' zombies).

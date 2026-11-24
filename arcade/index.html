@@ -11,212 +11,7 @@
 <script src="/static/pearls.js"></script>
 <script src="/static/outfits.js"></script>
 <script src="/static/social.js"></script>
-<style>
-/* Laid out like a classic 2011 games page: a 920px column on a sky background, a 130px header (banner + blue nav),
-   a 140px genre column, 160x130 game tiles in a 738px box, a 300x300 box beside the first rows, a Verdana footer. */
-*{box-sizing:content-box}
-html,body{margin:0;padding:0}
-body{position:relative;font:12px Arial,Helvetica,sans-serif;color:#000;background:#1f4a10;min-width:920px}
-/* the background: slow pans across ray-traced shots of Grug City, crossfading, fading down into solid green */
-.bgfx{position:absolute;left:0;top:0;width:100%;height:1250px;overflow:hidden;z-index:0;pointer-events:none;
-  -webkit-mask-image:linear-gradient(#000 0,#000 480px,transparent 1150px);mask-image:linear-gradient(#000 0,#000 480px,transparent 1150px)}
-.bgfx .sh{position:absolute;inset:0;opacity:0;background:#1f4a10 50% 30%/cover no-repeat;transition:opacity 2.6s ease;will-change:transform,opacity;transform:scale(1.14)}
-.bgfx .sh.on{opacity:1}
-#Container{position:relative;z-index:1}
-/* side skyscrapers (160x600) in the gutters beside the column: Grug's socials, cycling, with live Discord and YouTube data */
-.sky{position:absolute;top:270px;width:160px;height:600px;z-index:2;display:none}
-.sky.l{left:calc(50% - 460px - 178px)} .sky.r{left:calc(50% + 460px + 18px)}
-@media (min-width:1300px){.sky{display:block}}
-.sky .ad{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;overflow:hidden;color:#fff;text-decoration:none!important;opacity:0;visibility:hidden;transition:opacity 1.2s,visibility 0s 1.2s;
-  font-family:Arial,Helvetica,sans-serif;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.35);text-align:center}
-.sky .ad.on{opacity:1;visibility:visible;transition:opacity 1.2s}
-.sky .ad:hover .cta{filter:brightness(1.08)}
-.sky .k{font:bold 11px/1 Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;margin-top:16px;opacity:.85}
-.sky .h{font:bold 24px/1.05 Arial,sans-serif;margin:6px 10px 0;text-shadow:0 2px 0 rgba(0,0,0,.25)}
-.sky .big{font:bold 52px/1 Arial,sans-serif;margin-top:14px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
-.sky .sub{font-size:12px;margin:4px 12px 0;opacity:.9;line-height:1.3}
-.sky .cta{position:absolute;left:12px;right:12px;bottom:14px;height:36px;line-height:36px;border-radius:6px;font:bold 15px/36px Arial,sans-serif;background:#fff;color:#222}
-.sky .figs{position:absolute;left:0;right:0;bottom:56px;height:150px}
-.sky .figs img{position:absolute;bottom:0;height:140px;width:auto}
-.sky .live{display:inline-block;margin-top:10px;padding:3px 8px;border-radius:10px;background:rgba(0,0,0,.25);font:bold 11px/1.2 Arial,sans-serif;letter-spacing:.05em}
-.sky .av{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin:12px 10px 0}
-.sky .av img,.sky .av i{width:34px;height:34px;border-radius:50%;background:#5865f2;box-shadow:0 0 0 2px #23272a,0 0 0 4px #3ba55c}
-.sky .av i{display:inline-grid;place-items:center;font:bold 14px/1 Arial,sans-serif;font-style:normal;color:#fff}
-.sky .names{margin:10px 12px 0;font-size:12px;line-height:1.5;color:#b9bbbe;text-align:left;width:136px}
-.sky .names b{color:#fff;font-weight:bold}
-.sky .thumb{position:relative;width:144px;height:81px;margin-top:12px;background:#000 center/cover no-repeat;box-shadow:0 2px 6px rgba(0,0,0,.4)}
-.sky .thumb::after{content:"";position:absolute;left:50%;top:50%;margin:-11px 0 0 -8px;border:11px solid transparent;border-left:17px solid rgba(255,255,255,.92);border-right:0}
-.sky .tt{margin:8px 10px 0;font:bold 13px/1.25 Arial,sans-serif;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;width:140px}
-.sky .stack{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-.sky .stack .thumb{margin-top:0;height:72px;width:128px}
-.sky .grid{display:grid;grid-template-columns:repeat(2,64px);gap:6px;margin-top:14px}
-.sky .grid span{width:64px;height:64px;background:#ddd center/cover no-repeat;border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.3)}
-.sky .kl{background:linear-gradient(#ffd6ea,#cfe6ff);color:#3a3a6a} .sky .kl .cta{background:linear-gradient(90deg,#ff9cc8,#8cc4ff);color:#fff}
-.sky .kb{background:linear-gradient(160deg,#9cc9ff,#ffb3d6);color:#fff} .sky .kb .cta{color:#d14d8b}
-.sky .spn{position:absolute;top:6px;right:6px;font:bold 9px/1 Arial,sans-serif;letter-spacing:.08em;padding:3px 5px;border-radius:3px;background:rgba(255,255,255,.75);color:#d14d8b}
-.sky .ig{background:linear-gradient(200deg,#f9a03f 0%,#e1306c 45%,#833ab4 100%)}
-.sky .dc{background:linear-gradient(#6d78f5,#4752c4)}
-.sky .dk{background:#23272a}
-.sky .yt{background:linear-gradient(#ff3d3d,#c4120c)}
-.sky .yk{background:#0f0f0f}
-.sky .cr{background:linear-gradient(#fff7e8,#ffd9e8);color:#3a2a4a}
-.sky .cr .cta{background:linear-gradient(200deg,#f9a03f,#e1306c 55%,#833ab4);color:#fff}
-.sky .yk .cta,.sky .yt .cta{color:#c4120c}
-.sky .dc .cta,.sky .dk .cta{color:#4752c4}
-.sky .ig .cta{color:#c1357a}
-
-a{color:#1d7a0c;text-decoration:none}
-a:hover{text-decoration:underline}
-h1,h2,h3{margin:0;font-size:inherit;font-weight:inherit;display:inline}
-img{border:0}
-#Container{width:900px;padding:0 10px;margin:0 auto}
-
-/* house ad in the leaderboard slot (728x90) */
-#Leaderboard{width:898px;height:102px;margin:0 1px 5px;display:flex;align-items:flex-end;justify-content:center}
-.lb{position:relative;display:block;width:728px;height:90px;overflow:hidden;background:#0b2350;color:#fff;text-decoration:none!important}
-.lb .bgk{position:absolute;inset:0;background:linear-gradient(90deg,#0a1f48 0,#12408a 55%,#1a5bb8 100%)}
-.lb .fig{position:absolute;bottom:-14px;height:104px;width:auto}
-.lb .t{position:absolute;left:232px;top:12px;width:320px}
-.lb .t b{display:block;font:bold 21px/1.1 Arial,Helvetica,sans-serif;text-shadow:0 2px 0 #071a3d}
-.exp{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
-.exp i{font:bold 11px/1 Arial,Helvetica,sans-serif;font-style:normal;text-shadow:none;padding:3px 6px;border-radius:3px;background:rgba(255,255,255,.16);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
-.exp i.k{background:#fff;color:#0b3d8f}
-.lb .t>span{display:block;margin-top:4px;font-size:12px;color:#cfe0ff}
-.lb .go{position:absolute;right:18px;top:26px;padding:0 16px;height:36px;line-height:36px;border-radius:6px;font:bold 15px/36px Arial,Helvetica,sans-serif;color:#1e1b16;
-  background:linear-gradient(#c6f57a,#9be338 50%,#86cf27 51%,#9be338);border:1px solid #5f9a18;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
-.lb:hover .go{filter:brightness(1.06)}
-
-/* header: banner (100) + nav (30) */
-#Header{width:900px;height:130px;position:relative;font-weight:bold;color:#fff}
-#Banner{position:relative;height:100px}
-#Banner .crowd{position:absolute;bottom:0;height:92px;width:auto}
-#Logo{position:absolute;left:275px;top:12px;width:350px;height:70px;display:flex;align-items:center;justify-content:center;z-index:2}
-#Logo img{width:350px;height:auto;filter:drop-shadow(0 2px 0 #0a2f72) drop-shadow(0 0 6px rgba(5,25,70,.55))}
-#Options{position:absolute;left:0;top:0;width:200px;z-index:3}
-#Options a{display:inline-block;margin:6px 5px 0 12px;padding:4px 9px;font:bold 14px/16px Arial,Helvetica,sans-serif;color:#fff;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.3);
-  background:linear-gradient(#7fcf43,#45a116 50%,#38900e 51%,#44a015);border:1px solid #2a6c08;text-decoration:none}
-#Options a svg{width:14px;height:14px;vertical-align:-2px;margin-right:5px}
-
-.Navigation{position:relative;height:30px;font-size:16px;line-height:20px;background:linear-gradient(#8fdc4c 0,#5cb41e 45%,#3f9612 50%,#3a8c10 100%);z-index:5}
-.Navigation ul{list-style:none;margin:0 5px;padding:0;display:flex}
-.Navigation li{padding:6px 0 4px}
-.Navigation li>a{display:inline-block;padding:0 8px;font-weight:bold;color:#fff;text-decoration:none;text-shadow:0 1px 0 rgba(0,40,0,.35)}
-.Navigation li>a:hover{text-decoration:underline}
-#gamesMenuToggle{display:inline-block;width:10px;height:6px;margin:0 0 3px -6px;padding:0 6px 0 0;cursor:pointer;vertical-align:middle;border:0;background:none}
-#gamesMenuToggle::after{content:"";display:block;width:0;height:0;border:5px solid transparent;border-top:6px solid #fff;border-bottom:0}
-.dropdown{display:none;position:absolute;left:121px;top:30px;z-index:20;font-weight:normal;box-shadow:0 4px 10px rgba(0,0,30,.4)}
-.dropdown.open{display:flex}
-.dropdown .col{background:#3a8c10;border:1px solid #275f09;padding:6px 8px}
-.dropdown .gen{width:300px;display:flex;flex-wrap:wrap}
-.dropdown .gen a,.dropdown .more a{display:flex;align-items:center;gap:5px;padding-left:6px!important;width:50%;box-sizing:border-box;padding:3px 2px;font-size:15px;color:#fff}
-.dropdown .more{width:145px;border-left:0}
-.dropdown .more a{width:auto}
-
-#Announcement{margin:3px}
-.SystemAlertText{position:relative;height:18px;padding:2px;background:#ffa500;color:#fff;font:bold 16px/18px Arial,Helvetica,sans-serif;text-align:center}
-.SystemAlertText a{color:#fff;text-decoration:underline}
-.SystemAlertText svg{width:16px;height:16px;vertical-align:-2px;margin-right:5px}
-
-/* body */
-#Body{width:890px;padding:5px;background:#f2f2f2;overflow:hidden}
-#UsersOnline{display:block;margin:0 0 6px 2px;font:bold 13px/1.2 Arial,Helvetica,sans-serif;color:#333;text-decoration:none}
-#UsersOnline b{color:#1f8a1f}
-#UsersOnline:hover{text-decoration:underline}
-#UsersOnline[hidden]{display:none}
-.Column1e{float:left;width:140px;margin-top:10px}
-.Column2e{float:left;width:740px;margin:10px 0 0 10px;position:relative}
-.StandardBoxHeader{height:33px;padding:0 7px 0 5px;width:126px;color:#fff;font:bold 20px/1 Arial,Helvetica,sans-serif;position:relative;
-  background:linear-gradient(#5a5a5a,#2b2b2b 50%,#111 51%,#1d1d1d);clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%);border-radius:4px 0 0 0}
-.StandardBoxHeader span{display:block;padding:6px 5px 0 2px}
-.StandardBox{width:126px;padding:20px 5px;margin:0 0 8px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 90px) no-repeat}
-.GameFilter>div{font-size:14px;color:#555;padding-left:12px}
-.GameFilter ul{list-style:none;margin:5px 0 0;padding:0;font-size:14px}
-.GameFilter li{margin:0 0 1px}
-.GameFilter li a{display:inline-block;padding:0 0 0 28px;line-height:16px;color:#00f}
-.GameFilter li a.on{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='14'%3E%3Cpath d='M8 1l7 6-7 6z' fill='%23d20000'/%3E%3C/svg%3E") no-repeat 4px 1px}
-#Genres{margin-top:20px}
-.me{text-align:center}
-.me .pic{width:120px;height:120px;margin:0 auto 6px;background:#fff;border:1px solid #ddd}
-.me .pic img{width:120px;height:120px;object-fit:contain}
-.me b{display:block;font-size:13px;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.me select{width:124px;font:12px Arial,Helvetica,sans-serif;margin-bottom:8px}
-.me p{margin:0 0 6px;font-size:11px;color:#555;line-height:1.3}
-
-#PlayTabs{float:left;height:31px;display:flex}
-.Tab{position:relative;height:31px;margin-left:4px;cursor:pointer;font:bold 16px Arial,Helvetica,sans-serif;color:#333;
-  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);border-radius:4px 0 0 0;
-  background:linear-gradient(#e3e3e3,#c9c9c9);box-shadow:inset 1px 1px 0 #aaa,inset -1px 0 0 #aaa}
-.Tab:first-child{margin-left:4px}
-.Tab span{display:block;padding:6px 20px 0 8px;height:25px;white-space:nowrap}
-.Tab.on{background:linear-gradient(#fff,#f7f7f7);z-index:2;box-shadow:inset 1px 1px 0 #aaa,inset -1px 0 0 #aaa}
-.Tab:not(.on):hover{background:linear-gradient(#ececec,#d4d4d4)}
-.Search{position:relative;float:right}
-#searchbox{width:171px;height:20px;padding:1px 2px;border:2px inset #767676;font:13.3px Arial,sans-serif;color:#000;background:#fff}
-#searchbox::placeholder{color:#888}
-.SearchIconButton{position:absolute;right:5px;top:5px;width:16px;height:16px;cursor:pointer;border:0;padding:0;background:none}
-.StandardBoxGray{clear:both;position:relative;top:-2px;float:left;width:726px;padding:5px;margin:0 0 10px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 120px) no-repeat}
-#GamesContent{min-height:300px}
-#GamePageAdDiv{float:right;width:300px;height:300px;display:inline}
-.rect{position:relative;display:block;width:300px;height:250px;overflow:hidden;color:#fff;text-decoration:none!important;background:linear-gradient(#3d93e8,#7cbcf5 58%,#c4e3fb)}
-.rect .figs{position:absolute;left:0;right:0;bottom:56px;height:104px}
-.rect .figs img{position:absolute;bottom:0;height:100px;width:auto}
-.rect .exp{justify-content:center;margin-top:7px}
-.rect .t{position:absolute;left:0;right:0;top:10px;text-align:center;font:bold 21px/1.1 Arial,Helvetica,sans-serif;text-shadow:0 2px 0 #0b3b7c}
-.rect .s{display:block;margin-top:4px;font-size:12px;font-weight:normal;text-shadow:none;color:#eef6ff;text-shadow:0 1px 0 rgba(11,59,124,.5)}
-.rect .bar{position:absolute;left:0;right:0;bottom:0;height:56px;background:#0b2350;display:flex;align-items:center;justify-content:center}
-.rect .go{padding:0 16px;height:34px;line-height:34px;border-radius:6px;font:bold 15px/34px Arial,Helvetica,sans-serif;color:#1e1b16;
-  background:linear-gradient(#c6f57a,#9be338 50%,#86cf27 51%,#9be338);border:1px solid #5f9a18;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
-.rect:hover .go{filter:brightness(1.06)}
-.rect-note{display:block;margin-top:4px;text-align:center;font-size:11px;color:#888}
-.rect-note a{color:#888}
-
-/* the spotlight: one game at the top of the page (now Zone Royale) */
-#Spotlight{margin:10px 0 2px;overflow:hidden}
-#Spotlight .StandardBoxHeader{width:auto;display:inline-block;padding-right:28px}
-#Spotlight .box{clear:both;position:relative;top:-2px;display:flex;gap:14px;padding:8px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 120px) no-repeat}
-#Spotlight .shot{position:relative;flex:none;display:block;width:480px;height:270px;border:1px solid #888;overflow:hidden;background:#000}
-#Spotlight .shot img{display:block;width:480px;height:270px}
-#Spotlight .shot .new{position:absolute;left:8px;top:8px;padding:3px 8px;background:#d8281f;color:#fff;font:bold 13px Arial,Helvetica,sans-serif;border-radius:3px}
-#Spotlight .txt{flex:1;min-width:0;font:13px/1.4 Arial,Helvetica,sans-serif;color:#333;display:flex;flex-direction:column}
-#Spotlight .txt h2{margin:2px 0 0;font:bold 30px/1.05 Arial,Helvetica,sans-serif;color:#111}
-#Spotlight .txt h2 a{color:inherit;text-decoration:none}
-#Spotlight .tag{margin:3px 0 8px;font:bold 13px Arial,Helvetica,sans-serif;color:#c00}
-#Spotlight ul{margin:0 0 10px;padding-left:18px}
-#Spotlight li{margin:2px 0}
-#Spotlight .play{margin-top:auto;align-self:flex-start;display:inline-block;padding:0 28px;height:42px;line-height:42px;border-radius:6px;font:bold 20px/42px Arial,Helvetica,sans-serif;color:#1e1b16;text-decoration:none;
-  background:linear-gradient(#c6f57a,#9be338 50%,#86cf27 51%,#9be338);border:1px solid #5f9a18;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
-#Spotlight .play:hover{filter:brightness(1.06)}
-#Spotlight .fine{margin-top:6px;font-size:11px;color:#888}
-@media (max-width:920px){#Spotlight .box{flex-direction:column}#Spotlight .shot,#Spotlight .shot img{width:100%;height:auto}}
-
-/* the game tiles: 180x150 cells, 160x130 tiles with 6px padding */
-.Cell{float:left;width:180px;height:150px}
-.GameItem{position:relative;width:160px;height:130px;padding:6px;margin:0 0 8px 8px}
-.AlwaysShown{position:relative;z-index:2}
-.AlwaysShown .thumb{display:block;width:160px;height:100px;background:#ccc}
-.AlwaysShown .thumb img{display:block;width:160px;height:100px;object-fit:cover}
-.GameName{font-weight:bold;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;height:14px;line-height:14px}
-.PlayerCount{color:red;line-height:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.HoverShown{display:none;position:absolute;top:-10px;left:-10px;z-index:1;width:160px;padding:158px 15px 15px;font-size:11px;color:#888;background:#fff;border:1px solid #888;border-radius:5px;box-shadow:0 3px 10px rgba(0,0,0,.18)}
-.HoverShown div{line-height:14px}
-.GameItem:hover{z-index:10}
-.GameItem:hover .HoverShown{display:block}
-.Empty{float:left;width:400px;padding:30px 10px 10px 16px;font-size:14px;color:#555;line-height:1.45}
-.Paging{clear:both;text-align:center;padding-bottom:20px;color:#888;font-size:14px}
-.Arrow{display:inline-block;position:relative;top:12px;width:36px;height:36px;border:0;padding:0;cursor:pointer;border-radius:50%;
-  background:radial-gradient(circle at 50% 35%,#9be358,#4fa81a 60%,#3a8c10);box-shadow:inset 0 0 0 2px rgba(255,255,255,.5)}
-.Arrow::after{content:"";position:absolute;top:11px;left:13px;border:7px solid transparent;border-left:10px solid #fff;border-right:0}
-.Arrow.prev::after{left:11px;border-left:0;border-right:10px solid #fff}
-.Arrow[disabled]{visibility:hidden}
-#GenreDescriptionPanel{clear:both;width:715px;padding:10px;font-size:10.8px}
-
-/* footer */
-#Footer{width:860px;padding:39px 20px;background:#e6e6e6;font:13px Verdana,sans-serif;color:#aaa;text-align:center}
-.FooterNav{color:#bbb;margin-bottom:12px}
-.FooterNav a{color:#1d7a0c}
-.Legalese{margin:10px 0;font-size:10px;color:#555;line-height:1.35}
-.Legalese a{color:#1d7a0c}
-</style>
+<link rel="stylesheet" href="/arcade/arcade.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -252,10 +47,10 @@ img{border:0}
       <div class="dropdown" id="dropNav">
         <div class="col gen" id="dropGenres"></div>
         <div class="col more">
-          <a href="#" data-sort="popular"><b>Most Popular</b></a>
-          <a href="#" data-sort="newest">Newest</a>
-          <a href="#" data-sort="featured">Featured Games</a>
-          <a href="#searchbox" data-search>Search Games</a>
+          <a href="/arcade/" data-sort="popular"><b>Most Popular</b></a>
+          <a href="/arcade/" data-sort="newest">Newest</a>
+          <a href="/arcade/" data-sort="featured">Featured Games</a>
+          <a href="/arcade/" data-search>Search Games</a>
         </div>
       </div>
       <ul>
@@ -279,18 +74,19 @@ img{border:0}
     <section id="Spotlight" aria-labelledby="spotTitle">
       <div class="StandardBoxHeader"><span><h2>Spotlight</h2></span></div>
       <div class="box">
-        <a class="shot" href="/arcade/zone-royale/"><img src="/arcade/zone-royale/cover.jpg" alt="A player gliding down into a blocky city on a big island" width="480" height="270"><span class="new">NEW</span></a>
+        <a class="shot" href="/arcade/place/?id=zone-royale"><img src="/arcade/zone-royale/cover.jpg" alt="A player gliding down into a blocky city on a big island" width="480" height="270"><span class="new">NEW</span></a>
         <div class="txt">
-          <h2 id="spotTitle"><a href="/arcade/zone-royale/">Zone Royale</a></h2>
+          <h2 id="spotTitle"><a href="/arcade/place/?id=zone-royale">Zone Royale</a></h2>
           <div class="tag">100-player battle royale · one island · one winner</div>
           <ul>
             <li>Warm up on the spawn island, then jump from the plane and glide anywhere on a huge brick island.</li>
             <li>Loot chests for guns from grey to gold, ammo, bandages, medkits and shield potions.</li>
             <li>No building: break through walls with your pickaxe.</li>
             <li>The storm closes in every half minute. Be the last one standing for a Victory Royale.</li>
+            <li>Solo, or Squads with three teammates who follow you.</li>
             <li>You play as your own Grug character, and your other saved outfits drop in with you.</li>
           </ul>
-          <a class="play" href="/arcade/zone-royale/">Play</a>
+          <a class="play" href="/arcade/place/?id=zone-royale">Play</a>
           <div class="fine">Free, in your browser. Mouse and keyboard recommended.</div>
         </div>
       </div>
@@ -383,48 +179,10 @@ img{border:0}
   </div>
 </div>
 
+<script src="/arcade/arcade.js"></script>
 <script>
 (() => {
-  const $ = id => document.getElementById(id), O = window.GrugOutfits, P = window.GrugPearls;
-  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-
-  /* the same genres as the classic page */
-  const GENRES = [
-    ['all', 'All'], ['town-and-city', 'Town and City'], ['medieval', 'Fantasy'], ['sci-fi', 'Sci-Fi'], ['ninja', 'Ninja'], ['scary', 'Scary'],
-    ['pirate', 'Pirate'], ['adventure', 'Adventure'], ['sports', 'Sports'], ['funny', 'Funny'], ['wild-west-cowboy', 'Wild West'], ['war', 'War'],
-    ['skatepark', 'Skate Park'], ['gametutorials', 'Tutorial']];
-  const gname = id => (GENRES.find(g => g[0] === id) || [, 'All'])[1];
-
-  /* the games: added / updated are the dates in the repo's history; "tag" is the red line under the name */
-  const GAMES = [
-    { slug: 'zone-royale', name: 'Zone Royale', genres: ['war', 'adventure'], tag: '100 players · battle royale', featured: true,
-      added: '2026-11-24T22:00:00Z', updated: '2026-11-24T22:00:00Z', alt: 'A player gliding down into a blocky city on a big island',
-      stats: ['Drop, loot, outlast the storm', 'Pickaxe through walls'] },
-    { slug: 'slide-999', name: 'Slide 999 KM for FREE ADMIN!!', genres: ['adventure', 'funny'], tag: 'Obby slide · free admin', featured: true,
-      added: '2026-11-23T10:47:46-06:00', updated: '2026-11-23T11:38:37-06:00', alt: 'A cart flying down a blocky sky slide',
-      stats: ['999 km of slide and obbies', 'Rebirth: 2 Pearls a day'] },
-    { slug: 'zombie-zones', name: 'Zombie Zones', genres: ['scary', 'war'], tag: '4 teams · 4 modes',
-      added: '2026-11-23T10:47:46-06:00', updated: '2026-11-23T11:38:37-06:00', alt: 'A blocky survivor with a blaster in a battle',
-      stats: ['Supply runs, flags, deathmatch', 'Dodge roll and loot guns'] },
-    { slug: 'grug-city', name: 'Grug City RP', genres: ['town-and-city'], tag: '16 jobs · cops and robbers', featured: true,
-      added: '2026-11-23T13:48:26-06:00', updated: '2026-11-23T14:19:58-06:00', alt: 'A police cruiser at a crossroads in a blocky city',
-      stats: ['Cars and free mansions', 'Get caught wanted: jail'] },
-    { slug: 'brickbound', name: 'Brickbound', genres: ['medieval', 'adventure'], tag: 'Side-scrolling brawler · 4 zones', featured: true,
-      added: '2026-11-24T12:00:00-06:00', updated: '2026-11-24T12:00:00-06:00', alt: 'A hero and a friend fight goblins and an ogre in a blocky meadow',
-      stats: ['Combos, juggles and a companion', 'Rolling HP like EarthBound'] },
-    { slug: 'grug-kingdom', name: 'Grug Kingdom', genres: ['medieval', 'adventure'], tag: '5 zones · 5 bosses', featured: true,
-      added: '2026-11-23T23:52:31Z', updated: '2026-11-23T23:52:31Z', alt: 'A hero with a sword faces the giant Goblin King',
-      stats: ['12 swords and loot chests', 'Level up at the forge'] },
-    { slug: 'pet-zones', name: 'Pet Zones', genres: ['sci-fi', 'adventure'], tag: 'Catch pets on a grid · endless zones', featured: true,
-      added: '2026-11-24T16:06:59Z', updated: '2026-11-24T17:38:06Z', alt: 'A player zapping cube pets on a grassy grid with a deck of move cards',
-      stats: ['Drive a car or boat between huge zones', 'Build a 15-card deck, grab provisions'] }
-  ];
-
-  const ago = iso => {
-    const s = Math.max(0, (Date.now() - new Date(iso)) / 1000), u = [[31536e3, 'year'], [2592e3, 'month'], [604800, 'week'], [86400, 'day'], [3600, 'hour'], [60, 'minute']];
-    for (const [n, w] of u) if (s >= n) { const k = Math.floor(s / n); return k + ' ' + w + (k > 1 ? 's' : '') + ' ago'; }
-    return 'just now';
-  };
+  const $ = id => document.getElementById(id), A = window.GrugArcade, { GENRES, GAMES, gname, esc, tile } = A;
 
   const state = { genre: 'all', time: 'now', sort: 'popular', q: '', page: 1 };
   const PAGE = 16;
@@ -440,18 +198,6 @@ img{border:0}
     if (state.sort === 'newest') L.sort((a, b) => new Date(b.added) - new Date(a.added));
     if (state.sort === 'featured') L = L.filter(g => g.featured);
     return L;
-  }
-
-  function tile(g) {
-    const href = `/arcade/${g.slug}/`;
-    return `<div class="Cell" title="${esc(g.name)}"><div class="GameItem">
-      <div class="AlwaysShown">
-        <a class="thumb" href="${href}"><img src="/arcade/${g.slug}/cover.jpg" alt="${esc(g.alt)}" loading="lazy" width="160" height="100"></a>
-        <div class="GameName"><a href="${href}">${esc(g.name)}</a></div>
-        <div class="PlayerCount">${esc(g.tag)}</div>
-      </div>
-      <div class="HoverShown">${g.stats.map(s => `<div>${esc(s)}</div>`).join('')}<div>Updated ${ago(g.updated)}</div></div>
-    </div></div>`;
   }
 
   function draw() {
@@ -473,25 +219,18 @@ img{border:0}
       `Earn Pearls as you play, and check back often: new Grug games are on the way.`;
   }
 
-  // genre lists: the left column, the Games dropdown and the footer
+  // the genre list in the left column (the dropdown and the footer are A.chrome's)
   $('genreList').innerHTML = GENRES.map(([id, t]) => `<li><a href="#${id}" data-genre="${id}" title="${esc(t)} Games"><h3>${esc(t)}</h3></a></li>`).join('');
-  $('dropGenres').innerHTML = GENRES.map(([id, t]) => `<a href="#${id}" data-genre="${id}">${esc(t)}</a>`).join('');
-  $('seoGenres').innerHTML = GENRES.slice(1).map(([id, t]) => `<a href="/arcade/#${id}" data-genre="${id}" title="${esc(t)} Games">${esc(t)}</a>`).join('&nbsp;|&nbsp;');
-
-  const drop = $('dropNav'), tog = $('gamesMenuToggle');
-  const setDrop = on => { drop.classList.toggle('open', on); tog.setAttribute('aria-expanded', on); };
-  tog.addEventListener('click', e => { e.stopPropagation(); setDrop(!drop.classList.contains('open')); });
-  document.addEventListener('click', e => { if (!drop.contains(e.target)) setDrop(false); });
 
   document.addEventListener('click', e => {
     const g = e.target.closest('[data-genre]');
-    if (g) { e.preventDefault(); state.genre = g.dataset.genre; state.page = 1; history.replaceState(null, '', g.dataset.genre === 'all' ? location.pathname : '#' + g.dataset.genre); setDrop(false); draw();
+    if (g) { e.preventDefault(); state.genre = g.dataset.genre; state.page = 1; history.replaceState(null, '', g.dataset.genre === 'all' ? location.pathname : '#' + g.dataset.genre); draw();
       if (g.closest('#Footer,.dropdown')) document.getElementById('Body').scrollIntoView(); return; }
     const t = e.target.closest('#Timespan [data-t]');
     if (t) { e.preventDefault(); state.time = t.dataset.t; state.page = 1; draw(); return; }
     const s = e.target.closest('[data-sort]');
-    if (s) { e.preventDefault(); state.sort = s.dataset.sort; state.page = 1; setDrop(false); draw(); return; }
-    if (e.target.closest('[data-search]')) { e.preventDefault(); setDrop(false); $('searchbox').focus(); }
+    if (s) { e.preventDefault(); state.sort = s.dataset.sort; state.page = 1; draw(); return; }
+    if (e.target.closest('[data-search]')) { e.preventDefault(); $('searchbox').focus(); }
   });
   $('searchbox').addEventListener('input', e => { state.q = e.target.value.trim(); state.page = 1; draw(); });
   document.querySelector('.SearchIconButton').addEventListener('click', () => { state.q = $('searchbox').value.trim(); draw(); $('searchbox').focus(); });
@@ -500,109 +239,7 @@ img{border:0}
   addEventListener('hashchange', () => { fromHash(); if (!location.hash) state.genre = 'all'; draw(); });
   draw();
 
-  /* the background: each shot pans one way, then crossfades into the next, panning the other way */
-  (() => {
-    const box = $('bgfx'), SHOTS = ['aerial', 'icecream', 'salon', 'pizza'], LIFT = [0, -300, -360, -420], HOLD = 11000, PAN = 14000;   // LIFT: raise the street shots so their buildings sit behind the header, not their sky
-    const els = SHOTS.map((n, i) => { const d = document.createElement('div'); d.className = 'sh'; if (i === 0) d.style.backgroundImage = `url(/static/arcade/city-${n}.jpg)`; box.appendChild(d); return d; });
-    const load = i => { const d = els[i]; if (!d.style.backgroundImage) d.style.backgroundImage = `url(/static/arcade/city-${SHOTS[i]}.jpg)`; };
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { els[0].classList.add('on'); return; }
-    let cur = -1;
-    function show(i) {
-      const d = els[i], dir = i % 2 ? 1 : -1; load(i); load((i + 1) % els.length);
-      if (d.animate) d.animate([{ transform: `translateY(${LIFT[i]}px) scale(1.14) translateX(${dir * -5}%)` }, { transform: `translateY(${LIFT[i]}px) scale(1.14) translateX(${dir * 5}%)` }], { duration: PAN, easing: 'linear', fill: 'forwards' });
-      d.classList.add('on'); if (cur >= 0) els[cur].classList.remove('on'); cur = i;
-      setTimeout(() => show((i + 1) % els.length), HOLD);
-    }
-    show(0);
-  })();
-
-
-  /* side skyscrapers: three different ads a side, crossfading; the two sides never show the same site at once */
-  (() => {
-    const S = window.GrugSocial; if (!S) return;
-    const L = $('skyL'), R = $('skyR');
-    const pick = a => a[Math.floor(Math.random() * a.length)];
-    const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(v => v[1]);
-    const ad = (cls, href, html, label) => `<a class="ad ${cls}" href="${href}" target="_blank" rel="noopener" aria-label="${esc(label)}">${html}</a>`;
-    const R6 = n => `/static/arcade/${n}.webp`;
-    function build(d) {
-      const D = d.discord, V = d.youtube.videos, k = S.links || S.LINKS, LK = d.links;
-      const vids = shuffle(V.slice()), v0 = V[0], live = '<span class="live">COME SAY HI</span>';
-      const avs = D.avatars.slice(0, 12);
-      const ads = {
-        discordLive: ad('dc', LK.discord, `<div class="k">Join the</div><div class="h">Grug Discord</div>
-          ${D.members ? `<div class="big">${S.n(D.members)}</div><div class="sub">members: players, builders and creators</div>` : '<div class="sub" style="margin-top:14px">Players, builders and creators</div>'}
-          <div class="figs"><img src="${R6('grug')}" alt="" style="left:-8px;z-index:1"><img src="${R6('medic')}" alt="" style="right:-10px;height:126px"></div>
-          <div class="cta">Join server ›</div>`, 'Join the Grug Discord'),
-        discordWho: ad('dk', LK.discord, `<div class="k" style="color:#b9bbbe">Discord</div><div class="h" style="font-size:21px">Who's hanging out</div>${live}
-          <div class="av">${avs.length ? avs.map(a => `<img src="${esc(a.avatar)}" alt="" loading="lazy" referrerpolicy="no-referrer">`).join('') : ['G', 'R', 'U', 'G', '+', '+'].map(c => `<i>${c}</i>`).join('')}</div>
-          ${avs.length ? `<div class="names">${avs.slice(0, 6).map(a => `<b>${esc(a.name)}</b>${a.game ? ` · ${esc(a.game)}` : ''}`).join('<br>')}</div>` : `<div class="names">Trade outfits, show off your characters, find people to play the Arcade with.</div>`}
-          <div class="cta">Hop in ›</div>`, 'Hang out on the Grug Discord'),
-        ytLatest: ad('yt', v0 ? S.watch(v0.id) : LK.youtube, `<div class="k">New on YouTube</div><div class="h">PolySwitch</div>
-          ${v0 ? `<div class="thumb" style="background-image:url('${S.thumbDirect(v0.id)}')"></div><div class="tt">${esc(v0.title || 'Watch the newest video')}</div>` : `<div class="figs" style="bottom:180px"><img src="${R6('racer')}" alt="" style="left:10px"></div>`}
-          <div class="figs" style="height:120px"><img src="${R6('skater')}" alt="" style="left:6px;height:118px"><img src="${R6('ranger')}" alt="" style="right:4px;height:110px"></div>
-          <div class="cta">Watch now ›</div>`, 'Watch PolySwitch on YouTube'),
-        ytStack: ad('yk', LK.youtube, `<div class="k" style="color:#aaa">YouTube</div><div class="h">Watch PolySwitch</div>
-          <div class="stack">${(vids.length ? vids.slice(0, 3) : []).map(v => `<div class="thumb" style="background-image:url('${S.thumbDirect(v.id)}')"></div>`).join('') || `<div class="sub" style="margin-top:30px">Game dev, Roblox builds and the making of Grug.</div>`}</div>
-          <div class="sub" style="margin-top:10px">${vids.length ? 'Game dev, builds and more' : ''}</div>
-          <div class="cta">Subscribe ›</div>`, 'Subscribe to PolySwitch on YouTube'),
-        igGrid: ad('ig', LK.instagram, `<div class="k">Instagram</div><div class="h">@grugdigital</div>
-          <div class="grid">${['city-aerial.jpg', 'grug.webp', 'city-icecream.jpg', 'skater.webp', 'city-salon.jpg', 'snow-rider.webp'].map(n => `<span style="background-image:url('/static/arcade/${n}');${n.endsWith('webp') ? 'background-size:contain;background-color:#fff3' : ''}"></span>`).join('')}</div>
-          <div class="sub" style="margin-top:12px">Characters, builds and behind the scenes</div>
-          <div class="cta">Follow ›</div>`, 'Follow @grugdigital on Instagram'),
-        igChars: ad('cr', LK.instagram, `<div class="k" style="color:#c1357a">Follow along</div><div class="h" style="color:#3a2a4a;text-shadow:none">See what we make next</div>
-          <div class="sub" style="margin-top:8px"><b>@grugdigital</b> on Instagram</div>
-          <div class="figs" style="height:300px;bottom:60px"><img src="${R6('snow-rider')}" alt="" style="left:-14px;bottom:130px;height:130px"><img src="${R6('racer')}" alt="" style="right:-16px;bottom:120px;height:130px"><img src="${R6('grug')}" alt="" style="left:12px;height:150px;z-index:1"></div>
-          <div class="cta">Follow ›</div>`, 'Follow @grugdigital on Instagram'),
-      };
-      const KIMI = 'https://www.roblox.com/communities/5835899/KimiLand#!/store';   // Grug's official Roblox UGC sponsor
-      const sp = (cls, html, label) => `<a class="ad sp ${cls}" href="${KIMI}" target="_blank" rel="noopener sponsored" aria-label="${esc(label)}"><span class="spn">SPONSOR</span>${html}</a>`;
-      const kimiA = sp('kl', `<img src="/static/sponsor/kimiland-logo.png" alt="KimiLand" style="width:136px;margin-top:22px">
-          <div class="k" style="color:#d14d8b;margin-top:8px">Official Roblox</div><div class="h" style="color:#3a3a6a;text-shadow:none;font-size:22px">UGC sponsor</div>
-          <div class="sub" style="margin-top:8px">Shop the KimiLand store on Roblox</div>
-          <div class="figs" style="height:150px"><img src="${R6('snow-rider')}" alt="" style="left:-6px;height:128px"><img src="${R6('skater')}" alt="" style="right:-8px;height:136px"></div>
-          <div class="cta">Shop KimiLand ›</div>`, 'Shop KimiLand UGC on Roblox (sponsor)');
-      const kimiB = sp('kb', `<div class="k" style="margin-top:24px">Our sponsor</div><div class="h" style="font-size:28px">KIMILAND</div>
-          <img src="/static/sponsor/kimiland-kl.png" alt="" style="width:118px;margin-top:14px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))">
-          <div class="sub" style="margin-top:10px;color:#3a3a6a">Roblox UGC for your avatar</div>
-          <div class="figs" style="height:120px"><img src="${R6('grug')}" alt="" style="left:50%;translate:-50% 0;height:116px"></div>
-          <div class="cta">Shop on Roblox ›</div>`, 'KimiLand on Roblox (sponsor)');
-      return { L: [ads.discordLive, ads.igGrid, kimiA, ads.ytLatest], R: [ads.ytStack, ads.discordWho, ads.igChars, kimiB] };
-    }
-    function run(box, list, delay) {
-      box.innerHTML = list.join(''); const els = [...box.children]; let i = 0; els[0].classList.add('on');
-      if (els.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      setTimeout(() => setInterval(() => { if (document.hidden) return; els[i].classList.remove('on'); i = (i + 1) % els.length; els[i].classList.add('on'); }, 9000), delay);
-    }
-    S.get().then(d => { const b = build(d); run(L, b.L, 0); run(R, b.R, 4500); });
-    // "Users online" over the games list: the Grug Discord's live count (hidden until there is one), a link to join
-    const uo = $('UsersOnline'), online = d => { const n = d && d.discord && d.discord.online; if (!uo) return; uo.href = (d.links && d.links.discord) || uo.href; if (n) { uo.querySelector('b').textContent = S.n(n); uo.hidden = false; } };
-    S.get().then(online); setInterval(() => S.get().then(online), 90000);
-    for (const box of [L, R]) box.addEventListener('click', e => { if (!e.target.closest('a.ad') || e.target.closest('a.sp') || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return; e.preventDefault(); S.popup(); });   // a banner opens every social, side by side
-  })();
-
-  /* Pearls (the small green button where the classic page had Login) */
-  function pearls() { if (!P) return; $('pearls').hidden = false; $('pearlN').textContent = P.balance().toLocaleString(); }
-  if (P) { P.start().then(pearls).catch(pearls); addEventListener('grug:pearls', pearls); }
-
-  /* Playing as: the saved outfit every game dresses you in (static/outfits.js) */
-  const urls = [];
-  async function me() {
-    urls.splice(0).forEach(u => URL.revokeObjectURL(u));
-    let L = []; try { L = O ? await O.list() : []; } catch (e) {}
-    const act = O ? O.active() : '', cur = L.find(o => o.id === act);
-    const src = o => { if (!o || !o.preview) return ''; const u = URL.createObjectURL(o.preview); urls.push(u); return u; };
-    $('mePic').innerHTML = `<img src="${src(cur) || '/character/looks/grug/preview.png'}" alt="">`;
-    $('meT').textContent = cur ? cur.name : 'Grug (the default)';
-    $('meP').textContent = cur ? (L.length > 1 ? `Your ${L.length - 1} other outfit${L.length > 2 ? 's show' : ' shows'} up as other players.` : 'Save more outfits and they show up as the other players.')
-      : L.length ? 'Pick one of your outfits to play as it.' : 'Make a character and save it for the games to play as yourself.';
-    const sel = $('meSel'); sel.hidden = !L.length;
-    sel.innerHTML = (L.some(o => o.id === 'starter-grug') ? '' : `<option value=""${act ? '' : ' selected'}>Grug</option>`) +
-      L.map(o => `<option value="${esc(o.id)}"${o.id === act ? ' selected' : ''}>${esc(o.name)}</option>`).join('');
-  }
-  $('meSel').addEventListener('change', e => { if (O) O.setActive(e.target.value); });
-  addEventListener('grug:outfits', me);
-  me();
+  A.chrome();
 })();
 </script>
 </body>
