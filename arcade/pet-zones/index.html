@@ -551,6 +551,7 @@
   .cashL { font-size: 14px !important; } .cashL b, .cashT, .cashC { color: #00ff00 !important; }
   .hearts .ht { font-size: 18px !important; color: #555 !important; } .hearts .ht.on { color: #ff0000 !important; }
   .cc { border: 1px solid #7d7d7d !important; background: #000 !important; width: 18px !important; height: 18px !important; } .cc::after { display: none !important; }
+  .cc.on.h { background: #ff0000 !important; } .jl.h { color: #ff0000 !important; }   /* health: red squares, like the other rows */
   .cc.on.k { background: #ff0000 !important; } .cc.on.e { background: #ffff00 !important; } .cc.on.d { background: #00ffff !important; } .cc.on.z { background: #00ff00 !important; }
   .cc.cur.d { background: #ffffff !important; }
   /* Pearls (centre left): two black buttons, not quite matching */
@@ -5406,19 +5407,20 @@ function renderRound() {
 const energyCells = n => cellRow(RULES.wallet, n, 'e') + (n > RULES.wallet ? cellRow(n - RULES.wallet, n - RULES.wallet, 'e x') : '');
 // cube cells, like the original's panel: one per bug of the quota, per energy, per day
 const cellRow = (n, filled, cls, cur = -1, per = 10) => { let h = '<div class="cells">'; for (let k = 0; k < n; k++) { if (k && k % per === 0) h += '</div><div class="cells">'; h += `<i class="cc ${cls}${k < filled ? ' on' : ''}${k === cur ? ' cur' : ''}"></i>`; } return h + '</div>'; };
+const healthRow = () => `<div class="jl h">HEALTH</div>${cellRow(maxHearts(), Run.hp, 'h')}`;   // your hearts, as red squares
 const hearts = () => Array.from({ length: maxHearts() }, (_, k) => `<i class="ht${k < Run.hp ? ' on' : ''}">♥</i>`).join('');
 function renderQuests() {
   let h;
   if (B.on) {
     const Z = B.Z;
     h = `<div class="jt" style="color:${Z.css}">${Z.short.toUpperCase()}</div>`;
-    h += `<div class="hearts">${hearts()}</div><div class="jl k">DEFEATED</div>${cellRow(Z.quota, B.kills, 'k')}`;
+    h += `${healthRow()}<div class="jl k">DEFEATED</div>${cellRow(Z.quota, B.kills, 'k')}`;
     h += `<div class="jl e">ENERGY</div>${energyCells(B.energy)}`;
     h += `<div class="jl d">TURN</div>${cellRow(B.days, B.day - 1, 'd', B.day - 1, 12)}`;
     h += `<div class="cashL">CASH <b>$${Save.cash}</b></div>`;
   } else {
     h = `<div class="jt"${placeCss() ? ` style="color:${placeCss()}"` : ''}>${placeName()}</div>`;
-    h += `<div class="hearts">${hearts()}</div><div class="jl z">ZONES CLEARED</div>${cellRow(Math.max(6, Math.ceil((Run.zone + 1) / 6) * 6), Run.zone, 'z', -1, 12)}`;
+    h += `${healthRow()}<div class="jl z">ZONES CLEARED</div>${cellRow(Math.max(6, Math.ceil((Run.zone + 1) / 6) * 6), Run.zone, 'z', -1, 12)}`;
     h += `<div class="jl e">ENERGY</div>${energyCells(SHOP.hub ? B.energy : Run.energy)}`;
     h += `<div class="cashL">CASH <b>$${Save.cash}</b></div>`;
     h += `<div class="qq"><small>BEST ${Save.bestRun} · ${Object.values(Save.pets).reduce((a, b) => a + b, 0)} PETS</small></div>`;
