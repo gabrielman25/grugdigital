@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="/favicon.png">
+<title>Grug Building Studio</title>
+<meta name="description" content="Block out a chunky building, paint it in Gemini (Nano Banana) and get a textured, retro 3D model (.glb). AI agents: read the guide at the top of this page, or call GrugBuild.help() in the page.">
+<style>
+@font-face{font-family:'Fredoka';font-style:normal;font-weight:300 700;font-display:swap;src:url(data:font/woff2;base64,/*FONT*/) format('woff2')}
+:root{--page:#F3F3F5;--card:#FFFFFF;--ink:#1E1B16;--soft:#6B6B73;--line:#E2E2E7;--accent:#9BE338;--accent-lo:#6FB31C;--field:#F3F3F5;--bad:#C2452D;
+  --mark:url("/*MARK*/");color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:'Fredoka',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--page);color:var(--ink);-webkit-font-smoothing:antialiased;
+  display:grid;grid-template-rows:60px 1fr;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+[hidden]{display:none!important}
+/* top bar */
+.bar{display:flex;align-items:center;gap:16px;padding:0 16px;background:var(--card);border-bottom:1px solid var(--line);min-width:0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:18px;white-space:nowrap;text-decoration:none;color:inherit}
+.brand i{width:30px;height:38px;background:var(--ink);-webkit-mask:var(--mark) center/contain no-repeat;mask:var(--mark) center/contain no-repeat}
+.brand span{color:var(--soft);font-weight:500}
+.steps{display:flex;gap:6px;margin:0 auto;overflow-x:auto}
+.steps button{display:flex;align-items:center;gap:8px;border:0;background:transparent;border-radius:12px;padding:8px 14px;font-weight:600;font-size:15px;color:var(--soft);cursor:pointer;white-space:nowrap}
+.steps button b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--field);font-size:13px}
+.steps button.on{background:var(--accent);color:var(--ink)}
+.steps button.on b{background:rgba(255,255,255,.55)}
+.steps button:disabled{opacity:.45;cursor:default}
+.bar-r{display:flex;gap:4px}
+.ib{width:40px;height:40px;border:0;border-radius:12px;background:transparent;cursor:pointer;display:grid;place-items:center;color:var(--ink)}
+.ib:hover{background:var(--field)}
+.ib.on{background:var(--accent)}
+.ib:disabled{opacity:.35;cursor:default;background:transparent}
+.ib svg{width:22px;height:22px}
+/* layout */
+main{display:grid;grid-template-columns:1fr 360px;min-height:0}
+#stage{position:relative;min-width:0;min-height:0;overflow:hidden;background:radial-gradient(120% 90% at 50% 35%,#F7F7F9 0%,#E6E6EB 100%)}
+#view{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+#view.pix{image-rendering:pixelated}
+#sheetWrap{position:absolute;inset:0;display:grid;place-items:center;padding:20px}
+#sheet{max-width:100%;max-height:100%;background:#000;border-radius:14px;box-shadow:0 1px 0 var(--line),0 10px 30px rgba(30,27,22,.08);touch-action:none}
+#sheet.drag{cursor:grab}
+#side{background:var(--card);border-left:1px solid var(--line);overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.panel{display:flex;flex-direction:column;gap:14px}
+.card{border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.card h3{margin:0;font-size:16px;font-weight:600}
+.card-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.fine{font-size:13px;line-height:1.45;color:var(--soft);margin:0}
+.fine b{color:var(--ink);font-weight:600}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:14px;border:0;cursor:pointer;
+  background:var(--accent);color:var(--ink);font-weight:600;font-size:15px;text-decoration:none;transition:transform .12s,filter .12s}
+.btn:hover{filter:brightness(1.04)}
+.btn:active{transform:translateY(1px);filter:brightness(.95)}
+.btn:disabled{opacity:.5;cursor:default;transform:none;filter:none}
+.btn--ghost{background:transparent;box-shadow:inset 0 0 0 2px var(--line)}
+.btn--sm{min-height:36px;padding:0 12px;font-size:14px;border-radius:11px}
+.btn--wide{width:100%}
+.btn svg{width:18px;height:18px}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--soft)}
+input.t,textarea.t,select.t{width:100%;padding:9px 11px;border-radius:11px;border:2px solid var(--line);background:var(--field);font-size:15px;font-weight:500;color:var(--ink);resize:vertical}
+input.t:focus,textarea.t:focus,select.t:focus{outline:none;border-color:var(--accent-lo)}
+textarea.code{font:500 12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;min-height:180px;white-space:pre;overflow:auto}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer}
+.chk input{width:18px;height:18px;margin:1px 0 0;accent-color:var(--accent-lo)}
+.ctls{display:flex;flex-direction:column;gap:9px}
+.key{display:grid;grid-template-columns:1fr 1fr;gap:7px 12px}
+.key span{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
+.key i{width:18px;height:18px;border-radius:5px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+/* steppers */
+.dims{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stp{display:flex;flex-direction:column;align-items:center;gap:4px}
+.stp span{font-size:12px;font-weight:600;color:var(--soft)}
+.stp div{display:flex;align-items:center;border-radius:11px;background:var(--field);overflow:hidden}
+.stp button{width:30px;height:34px;border:0;background:transparent;cursor:pointer;font-size:18px;font-weight:600}
+.stp button:hover{background:var(--line)}
+.stp output{min-width:26px;text-align:center;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:7px;border:0;border-radius:999px;padding:6px 11px;background:var(--field);cursor:pointer;font-size:13.5px;font-weight:600}
+.chip i{width:14px;height:14px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.chip.on{background:var(--accent)}
+.seg{display:flex;background:var(--field);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;border-radius:9px;padding:7px 6px;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--soft)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.sl{display:flex;flex-direction:column;gap:3px}
+.sl label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--soft)}
+.sl output{color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--accent-lo)}
+.badge{display:flex;align-items:center;justify-content:center;border-radius:12px;padding:10px;font-weight:600;background:var(--field)}
+.badge.good{background:#E3F6CC}.badge.ok{background:#FFF1CC}.badge.bad{background:#FBE1DB;color:var(--bad)}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:16px;text-align:center;font-size:14px;color:var(--soft);cursor:pointer}
+.drop.over,.drop:hover{border-color:var(--accent-lo);color:var(--ink)}
+.num{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;font-size:12px;font-weight:600;flex:none}
+.stepline{display:flex;gap:10px;align-items:flex-start}
+.stepline > div{display:flex;flex-direction:column;gap:8px;flex:1}
+.stepline p{margin:0;font-size:14px;line-height:1.4}
+.warn{background:#FFF4DA;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.4}
+.warn.bad{background:#FBE1DB}
+/* palette */
+#palette-x{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:2px;padding:6px;background:var(--card);border-radius:18px;
+  box-shadow:0 1px 0 var(--line),0 8px 24px rgba(30,27,22,.12);max-width:calc(100% - 24px);overflow-x:auto}
+#palette .sep{width:1px;background:var(--line);margin:6px 4px;flex:none}
+.tool{flex:none;width:58px;height:60px;border:0;border-radius:12px;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10.5px;font-weight:600;color:var(--soft);padding:0}
+.tool svg{width:28px;height:28px;color:var(--ink)}
+.tool:hover{background:var(--field)}
+.tool.on{background:var(--accent);color:var(--ink)}
+#hint{position:absolute;left:14px;top:12px;font-size:13px;color:var(--soft);background:rgba(255,255,255,.8);border-radius:10px;padding:6px 10px;pointer-events:none;max-width:60%}
+#frontTag{position:absolute;transform:translate(-50%,-50%);font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ink);background:var(--accent);border-radius:8px;padding:3px 7px;pointer-events:none}
+#viewBtns{position:absolute;right:12px;top:12px;display:flex;gap:4px;background:rgba(255,255,255,.85);border-radius:14px;padding:3px}
+#busy{position:absolute;inset:0;display:grid;place-items:center;background:rgba(243,243,245,.7);font-weight:600;font-size:18px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:#fff;border-radius:12px;padding:10px 16px;font-weight:500;opacity:0;pointer-events:none;transition:.2s;z-index:9;max-width:90vw}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+dialog{border:0;border-radius:22px;padding:0;max-width:560px;width:calc(100% - 32px);box-shadow:0 20px 60px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(30,27,22,.35)}
+.dlg{padding:22px;display:flex;flex-direction:column;gap:12px;max-height:85vh;overflow:auto}
+.dlg h2{margin:0;font-size:21px;font-weight:600}
+.dlg p,.dlg li{font-size:14.5px;line-height:1.5;margin:0;color:var(--soft)}
+.dlg ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.dlg b{color:var(--ink);font-weight:600}
+kbd{font:600 12px ui-monospace,Menlo,monospace;background:var(--field);border-radius:6px;padding:1px 6px;color:var(--ink)}
+@media (max-width:860px){
+  body{overflow:auto;grid-template-rows:auto auto}
+  .bar{flex-wrap:wrap;padding:8px 12px;gap:8px}.steps{order:3;width:100%;margin:0}
+  main{grid-template-columns:1fr;grid-template-rows:62vh auto}
+  #side{border-left:0;border-top:1px solid var(--line);overflow:visible}
+  .tool{width:50px}
+}
+</style>
+</head>
+<body>
+<article id="agent-guide" hidden>
+/*GUIDE*/
+</article>
+<header class="bar">
+  <a class="brand" href="https://grugdigital.com/"><i></i>Grug <span>Building Studio</span></a>
+  <nav class="steps" id="steps">
+    <button data-step="1" class="on"><b>1</b>Build</button>
+    <button data-step="2"><b>2</b>Paint</button>
+    <button data-step="3"><b>3</b>Line up</button>
+    <button data-step="4"><b>4</b>Finish</button>
+  </nav>
+  <div class="bar-r">
+    <button class="ib" id="helpBtn" title="How it works"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.3 9.2a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.4-2.7 4"/><path d="M12 17.6h.01"/></svg></button>
+  </div>
+</header>
+<main>
+  <section id="stage">
+    <canvas id="view"></canvas>
+    <div id="sheetWrap" hidden><canvas id="sheet" width="1536" height="1024"></canvas></div>
+    <div id="frontTag" hidden>FRONT</div>
+    <div id="hint"></div>
+    <div id="viewBtns">
+      <button class="ib" id="personBtn" title="Show a 1.8 m person for scale"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="5" rx="1"/><path d="M8 8.5h8v6H8zM5 8.5h3v6H5zM16 8.5h3v6h-3zM8.5 14.5h3.5v7H8.5zM12 14.5h3.5v7H12z"/></svg></button>
+      <button class="ib" id="frameBtn" title="Fit the building in view (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button class="ib" id="frontBtn" title="Look from the front camera"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3 21 8v8l-9 5-9-5V8z"/><path d="M12 13v8M12 13l9-5M12 13 3 8"/></svg></button>
+    </div>
+    <div id="busy" hidden>Baking textures…</div>
+  </section>
+  <aside id="side">
+    <!-- step 1 -->
+    <div class="panel" data-for="1">
+      <div class="card">
+        <h3>Starters</h3>
+        <div class="chips" id="presetChips"></div>
+      </div>
+      <div class="card">
+        <h3>Building</h3>
+        <div class="ctls" id="bldCtls"></div>
+      </div>
+      <div class="card">
+        <h3>Roof</h3>
+        <div class="seg" id="roofSeg"></div>
+        <div class="ctls" id="roofCtls"></div>
+        <div id="ridgeRow" class="ctls"><span class="fine" id="ridgeLbl">Ridge runs</span><div class="seg" id="ridgeSeg"><button data-v="x">Left to right</button><button data-v="z">Front to back</button></div></div>
+      </div>
+      <div class="card">
+        <h3>Doors and windows</h3>
+        <span class="fine">Front door</span>
+        <div class="seg" id="doorSeg"></div>
+        <div class="row"><label class="chk"><input type="checkbox" id="door2"><span>Double door</span></label><label class="chk"><input type="checkbox" id="backDoor"><span>Back door</span></label></div>
+        <div class="ctls" id="dwCtls"></div>
+      </div>
+      <div class="card">
+        <h3>Colour key</h3>
+        <div class="key" id="key"></div>
+        <p class="fine">The reference sheet uses these colours so Gemini knows what every surface is.</p>
+      </div>
+      <button class="btn btn--wide" id="toPaint">Next: paint it in Gemini</button>
+    </div>
+    <!-- step 2 -->
+    <div class="panel" data-for="2" hidden>
+      <div class="card">
+        <label class="f">Describe the building<textarea class="t" id="desc" rows="7" placeholder="A cosy storybook bakery: cream plaster walls with dark timber beams, a mossy thatched roof, a stone foundation, a round green door and little leaded windows with flower boxes."></textarea></label>
+        <p class="fine">Say what it is and what the walls, roof, trim, door and windows look like. Gemini designs the rest.</p>
+        <label class="f">Look<select class="t" id="look"></select></label>
+      </div>
+      <div class="card">
+        <div class="stepline"><span class="num">1</span><div><p>Copy the picture and paste it into Gemini.</p>
+          <div class="row"><button class="btn btn--sm" id="copyPic">Copy picture</button><button class="btn btn--ghost btn--sm" id="dlPic">Download</button><a class="btn btn--ghost btn--sm" href="https://gemini.google.com/app" target="_blank" rel="noopener">Open Gemini ↗</a></div></div></div>
+        <div class="stepline"><span class="num">2</span><div><p>Copy the prompt, paste it after the picture and send.</p>
+          <div class="row"><button class="btn btn--sm" id="copyPrompt">Copy prompt</button></div>
+          <details><summary class="fine" style="cursor:pointer">See or edit the prompt</summary><textarea class="t" id="prompt" rows="12" style="margin-top:8px;font-size:13px"></textarea><button class="btn btn--ghost btn--sm" id="resetPrompt" style="margin-top:6px">Reset prompt</button></details></div></div>
+        <div class="stepline"><span class="num">3</span><div><p>Copy Gemini's picture and paste it here (<kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>V</kbd>), or drop it in.</p>
+          <div class="drop" id="drop">Paste, drop or click to upload Gemini's picture</div></div></div>
+      </div>
+      <div id="covWarn"></div>
+    </div>
+    <!-- step 3 -->
+    <div class="panel" data-for="3" hidden>
+      <div id="geoWarn" class="warn bad" hidden>The building changed after this picture was made, so it won't line up. Go back to Paint and make a new one.</div>
+      <div class="badge" id="match">Silhouette match –</div>
+      <div class="card">
+        <div class="row"><button class="btn btn--sm" id="autoAlign">Auto-align</button><button class="btn btn--ghost btn--sm" id="resetAlign">Reset</button></div>
+        <span class="fine">Adjust</span>
+        <div class="seg" id="target"><button data-t="both" class="on">Both</button><button data-t="0">Back view</button><button data-t="1">Front view</button></div>
+        <div id="alignCtls" style="display:flex;flex-direction:column;gap:8px"></div>
+        <p class="fine">Drag the picture to move it, scroll to scale it. The blue outlines should sit on the painted edges.</p>
+      </div>
+      <div class="card">
+        <div class="seg" id="overlay"><button data-m="outline" class="on">Outline</button><button data-m="ghost">Ghost</button><button data-m="diff">Difference</button></div>
+        <div class="sl"><label>Overlay strength<output id="ovOut"></output></label><input type="range" id="ovA" min="0" max="1" step="0.01"></div>
+      </div>
+      <button class="btn btn--wide" id="toFinish">Bake the textures</button>
+      <button class="btn btn--ghost btn--wide" id="newPic">Use a different picture</button>
+    </div>
+    <!-- step 4 -->
+    <div class="panel" data-for="4" hidden>
+      <div id="bakeWarn" class="warn" hidden></div>
+      <div class="card">
+        <h3>Look</h3>
+        <div class="chips" id="lookChips"></div>
+        <label class="chk"><input type="checkbox" id="bevel" checked><span>Bevelled edges (normal map)</span></label>
+        <div class="sl"><label>Even out the painted lighting<output id="dsOut"></output></label><input type="range" id="deshade" min="0" max="1" step="0.05"></div>
+        <label class="f">Texture size<select class="t" id="texSize"><option value="1024">1024 × 1024 (Roblox)</option><option value="2048">2048 × 2048</option><option value="4096">4096 × 4096</option></select></label>
+      </div>
+      <div class="card">
+        <h3>Download</h3>
+        <button class="btn btn--wide" id="dlGlb">3D model (.glb)</button>
+        <div class="row"><button class="btn btn--ghost btn--sm" id="dlTex">Colour texture</button><button class="btn btn--ghost btn--sm" id="dlNrm">Normal map</button><button class="btn btn--ghost btn--sm" id="dlCode">Settings</button></div>
+        <p class="fine">In Roblox Studio, import the .glb with the <b>3D Importer</b>. Roblox shrinks textures over 1024 pixels. One grid square is one metre (about 3.5 studs).</p>
+      </div>
+      <button class="btn btn--ghost btn--wide" id="backBuild">Back to building</button>
+    </div>
+  </aside>
+</main>
+<div id="toast"></div>
+<input type="file" id="file" accept="image/*" hidden>
+<dialog id="help"><div class="dlg">
+  <h2>How it works</h2>
+  <ul>
+    <li><b>Build</b>: set the building's width, depth and height, then pick a roof (flat, gable, hip or shed), its height and direction. Roofs sit flush with the walls so nothing hides them. Everything stays chunky, because thin geometry smudges in the painted texture.</li>
+    <li><b>Doors and windows</b>: pick how many floors, where the door goes and how many windows each wall gets. They're drawn as blue and cyan rectangles for Gemini to paint over.</li>
+    <li><b>Paint</b>: describe the building in one box. The studio draws a colour-coded reference sheet (back view left, front view right, both at 45° and tilted down) and writes the prompt. Paste both into Gemini.</li>
+    <li><b>Line up</b>: paste Gemini's picture back. The studio fits it to the silhouette, one view at a time.</li>
+    <li><b>Finish</b>: every surface is projected back onto the model and baked into a retro texture with bevelled edges. Download the .glb.</li>
+  </ul>
+  <h2>Camera</h2>
+  <ul><li>Drag to orbit, right-drag or <kbd>Shift</kbd>-drag to pan, scroll to zoom, <kbd>F</kbd> to fit.</li></ul>
+  <h2>With Claude</h2>
+  <p>Paste this page's link into Claude and describe the building. Claude can set it up through <b>GrugBuild</b> in the page, or send you a link with the settings in it.</p>
+  <div class="row"><button class="btn" id="helpClose">Got it</button></div>
+</div></dialog>
+/*HEADSCRIPTS*/<script>
+/*JS*/
+</script>
+</body>
+</html>

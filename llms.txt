@@ -9,6 +9,17 @@
 - [The list as JSON](https://grugdigital.com/api/itch-assets): every pack with its price, description, cover and itch link,
   grouped into categories.
 
+## Building Studio (textured buildings)
+
+- [Building Studio](https://grugdigital.com/build/): a browser app (WebGL) that makes a chunky building (width, depth,
+  wall height, foundation, a flat/gable/hip/shed roof, floors, a door and windows per wall), has Gemini (Nano Banana)
+  paint a colour-coded two-view reference sheet of it, lines the painting back up and bakes it into a retro-textured
+  `.glb` with a bevel normal map. One unit is one metre; doors are sized for a 1.8 m figure.
+- [Guide for Claude and other AI agents](https://grugdigital.com/build/claude.md): the settings, the
+  `window.GrugBuild` JavaScript API and settings links (`/build/?w=8&d=6&roof=gable&desc=…`).
+- [Example buildings](https://grugdigital.com/build/examples/): six finished buildings (medieval, modern, future) with
+  their reference sheets, Gemini paintings and `.glb` files, each openable as a template.
+
 ## Avatar Studio (Roblox characters)
 
 - [Avatar Studio](https://grugdigital.com/character/): a browser app (WebGL) that makes a blocky Roblox R6

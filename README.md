@@ -39,6 +39,18 @@ The home page lists the asset packs on https://polysw.itch.io/, live, so a new u
 - `static/itch-assets.json` is the fallback copy the page uses if the live feed can't be reached. Refresh it with
   `NODE_USE_ENV_PROXY=1 node src/itch/snapshot.mjs` (Node 18+; drop the variable if you're not behind a proxy).
 
+## Building Studio (`/build/`)
+
+Textured buildings for games: set a building's size and roof, paint its colour-coded reference sheet in Gemini (Nano
+Banana), paste the painting back and download a retro-textured `.glb`. Built for Claude too (paste
+https://grugdigital.com/build/ into a chat and describe a building).
+
+- `build/index.html` (the studio), `build/examples/index.html` (the example gallery) and `build/claude.md` (the guide for
+  Claude and other agents) are generated: edit `src/build/` and run `python3 src/build/build.py`.
+- `build/examples/`: the examples' `.glb` files, thumbnails, Gemini paintings and reference sheets
+  (`src/build/designs.json` + `stats.json` describe them).
+- The scale figure wears the visitor's active saved outfit (`static/outfits.js`), else Grug (`/arcade/outfits/grug.glb`).
+
 ## Avatar Studio (`/character/`)
 
 The Roblox character maker: hair, face, a custom shirt and pants painted with Gemini (Nano Banana), and a rigged R6

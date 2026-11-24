@@ -1,0 +1,134 @@
+[
+ {
+  "id": "forge",
+  "era": "Medieval",
+  "title": "Blacksmith's forge",
+  "p": {
+   "w": 8,
+   "d": 6,
+   "h": 4,
+   "base": 1,
+   "roof": "gable",
+   "rh": 3,
+   "ridge": "x",
+   "floors": 1,
+   "door": "center",
+   "door2": true,
+   "backDoor": false,
+   "wf": 2,
+   "ws": 1,
+   "wb": 1
+  },
+  "desc": "A medieval blacksmith's forge: rough grey fieldstone walls with dark oak timber beams, a sooty dark slate roof, a heavy stone foundation, a wide double plank door with iron straps, small shuttered windows, a horseshoe sign and soot stains around the openings."
+ },
+ {
+  "id": "inn",
+  "era": "Medieval",
+  "title": "Tudor inn",
+  "p": {
+   "w": 10,
+   "d": 7,
+   "h": 7,
+   "base": 0.5,
+   "roof": "hip",
+   "rh": 3.5,
+   "ridge": "x",
+   "floors": 2,
+   "door": "center",
+   "door2": true,
+   "backDoor": true,
+   "wf": 4,
+   "ws": 2,
+   "wb": 3
+  },
+  "desc": "A two-storey medieval Tudor inn: whitewashed plaster walls with a dense pattern of dark oak timber framing, weathered terracotta roof tiles, a grey stone foundation, an arched double oak door with a hanging inn sign painted beside it, small diamond-paned leaded windows with wooden shutters, and lanterns by the door."
+ },
+ {
+  "id": "tower",
+  "era": "Medieval",
+  "title": "Castle watchtower",
+  "p": {
+   "w": 6,
+   "d": 6,
+   "h": 12,
+   "base": 1.5,
+   "roof": "flat",
+   "rh": 1,
+   "ridge": "x",
+   "floors": 3,
+   "door": "center",
+   "door2": false,
+   "backDoor": false,
+   "wf": 1,
+   "ws": 1,
+   "wb": 1
+  },
+  "desc": "A medieval castle watchtower: big weathered grey castle stone blocks with moss in the joints, a flat roof of worn grey stone slabs, dark grey stone for the roof edge and the rough stone plinth, an iron-banded arched oak door, narrow arrow-slit windows, and a faded red heraldic banner painted on the front wall."
+ },
+ {
+  "id": "cafe",
+  "era": "Modern",
+  "title": "Corner caf\u00e9",
+  "p": {
+   "w": 10,
+   "d": 8,
+   "h": 7,
+   "base": 0.5,
+   "roof": "flat",
+   "rh": 0.5,
+   "ridge": "x",
+   "floors": 2,
+   "door": "left",
+   "door2": true,
+   "backDoor": true,
+   "wf": 3,
+   "ws": 2,
+   "wb": 2
+  },
+  "desc": "A modern two-storey corner caf\u00e9: smooth white render walls with warm vertical cedar wood panels, a flat roof with a thin dark grey metal edge, a polished concrete base, big black-framed glass doors, floor-to-ceiling black-framed windows, a minimalist caf\u00e9 sign and small potted plants painted by the entrance."
+ },
+ {
+  "id": "house",
+  "era": "Modern",
+  "title": "Modern house",
+  "p": {
+   "w": 11,
+   "d": 7,
+   "h": 6,
+   "base": 0.5,
+   "roof": "shed",
+   "rh": 2,
+   "ridge": "x",
+   "floors": 2,
+   "door": "right",
+   "door2": false,
+   "backDoor": true,
+   "wf": 3,
+   "ws": 2,
+   "wb": 3
+  },
+  "desc": "A contemporary family house: charcoal fibre-cement walls mixed with light horizontal timber cladding, a standing-seam dark metal roof, a smooth concrete plinth, a tall wooden front door, large dark aluminium windows, and wall lights beside the door."
+ },
+ {
+  "id": "hab",
+  "era": "Future",
+  "title": "Sci-fi habitat",
+  "p": {
+   "w": 9,
+   "d": 9,
+   "h": 6,
+   "base": 1,
+   "roof": "hip",
+   "rh": 2.5,
+   "ridge": "x",
+   "floors": 2,
+   "door": "center",
+   "door2": true,
+   "backDoor": false,
+   "wf": 2,
+   "ws": 2,
+   "wb": 2
+  },
+  "desc": "A futuristic sci-fi habitat module: clean white composite hull panels with fine panel seams, cyan glowing light strips and small warning decals, a dark solar-panel roof, a graphite metal base with vents, a sliding airlock door with a glowing frame, and rounded tinted viewport windows."
+ }
+]

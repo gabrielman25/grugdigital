@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="/favicon.png">
+<title>Grug Building Studio · Examples</title>
+<meta name="description" content="Example buildings made with the Grug Building Studio: a chunky grey box painted in Gemini (Nano Banana) and baked into a retro 3D model. Open any of them as a template.">
+<style>
+@font-face{font-family:'Fredoka';font-style:normal;font-weight:300 700;font-display:swap;src:url(data:font/woff2;base64,/*FONT*/) format('woff2')}
+:root{--page:#F3F3F5;--card:#FFFFFF;--ink:#1E1B16;--soft:#6B6B73;--line:#E2E2E7;--accent:#9BE338;--accent-lo:#6FB31C;--field:#F3F3F5;--mark:url("/*MARK*/");color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Fredoka',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--page);color:var(--ink);-webkit-font-smoothing:antialiased}
+button,a{font:inherit;color:inherit}
+.bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:16px;padding:0 20px;height:60px;background:var(--card);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:18px;white-space:nowrap;text-decoration:none}
+.brand i{width:30px;height:38px;background:var(--ink);-webkit-mask:var(--mark) center/contain no-repeat;mask:var(--mark) center/contain no-repeat}
+.brand span{color:var(--soft);font-weight:500}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:14px;border:0;cursor:pointer;background:var(--accent);color:var(--ink);font-weight:600;font-size:15px;text-decoration:none;transition:transform .12s,filter .12s;white-space:nowrap}
+.btn:hover{filter:brightness(1.04)}.btn:active{transform:translateY(1px)}
+.btn--ghost{background:transparent;box-shadow:inset 0 0 0 2px var(--line)}
+.btn--sm{min-height:36px;padding:0 13px;font-size:14px;border-radius:11px}
+.bar .btn{margin-left:auto}
+.wrap{max-width:1240px;margin:0 auto;padding:22px 20px 60px;display:flex;flex-direction:column;gap:18px}
+.intro h1{margin:0 0 6px;font-size:30px;font-weight:600;line-height:1.1}
+.intro p{margin:0;color:var(--soft);font-size:16px;line-height:1.45;max-width:760px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:0;border-radius:999px;padding:7px 14px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line);cursor:pointer;font-size:14px;font-weight:600}
+.chip.on{background:var(--accent);box-shadow:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px}
+.hero{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);overflow:hidden}
+.stage{position:relative;min-height:460px;background:radial-gradient(120% 90% at 50% 35%,#F9F9FB 0%,#E6E6EB 100%)}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.stage canvas.pix{image-rendering:pixelated}
+.hint{position:absolute;left:14px;top:12px;font-size:13px;color:var(--soft);background:rgba(255,255,255,.85);border-radius:10px;padding:5px 10px;pointer-events:none}
+.info{padding:22px;display:flex;flex-direction:column;gap:14px;border-left:1px solid var(--line)}
+.era{display:inline-flex;align-self:flex-start;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--field);border-radius:8px;padding:4px 9px}
+.info h2{margin:0;font-size:26px;font-weight:600;line-height:1.1}
+.desc{margin:0;color:var(--soft);font-size:15px;line-height:1.5}
+.specs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.specs div{background:var(--field);border-radius:12px;padding:8px 11px}
+.specs b{display:block;font-size:12px;color:var(--soft);font-weight:600}
+.specs span{font-size:15px;font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fine{font-size:13px;color:var(--soft);line-height:1.45;margin:0}
+.how{padding:18px 20px 20px;display:flex;flex-direction:column;gap:12px}
+.how h3{margin:0;font-size:17px;font-weight:600}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.step{display:flex;flex-direction:column;gap:8px}
+.step figure{margin:0;border-radius:14px;overflow:hidden;background:#fff;border:1px solid var(--line);aspect-ratio:3/2;cursor:zoom-in}
+.step img{width:100%;height:100%;object-fit:cover;display:block}
+.step p{margin:0;font-size:14px;line-height:1.4}
+.step p b{font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.tile{overflow:hidden;cursor:pointer;text-align:left;padding:0;border:1px solid var(--line);background:var(--card);border-radius:20px;transition:transform .15s,box-shadow .15s}
+.tile:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(30,27,22,.08)}
+.tile.on{box-shadow:0 0 0 3px var(--accent)}
+.tile img{display:block;width:100%;aspect-ratio:900/640;object-fit:cover;background:#ECECF0}
+.tile div{padding:11px 14px 13px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tile b{font-weight:600;font-size:16px}
+.tile span{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--soft)}
+dialog{border:0;border-radius:18px;padding:0;max-width:min(1100px,94vw);background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(30,27,22,.5)}
+dialog img{display:block;max-width:100%;max-height:86vh}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:#fff;border-radius:12px;padding:10px 16px;opacity:0;pointer-events:none;transition:.2s;z-index:9}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:900px){.hero{grid-template-columns:1fr}.info{border-left:0;border-top:1px solid var(--line)}.stage{min-height:340px}.steps{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="https://grugdigital.com/"><i></i>Grug <span>Building Studio · Examples</span></a>
+  <a class="btn btn--sm" id="studioLink" href="#">Open the Building Studio</a>
+</header>
+<div class="wrap">
+  <div class="intro">
+    <h1>Example buildings</h1>
+    <p>Each one started as a chunky grey box with a roof and colour-coded doors and windows. Gemini painted it from a single reference sheet, and the studio baked the painting onto the model as a retro texture with bevelled edges. Open any of them as a template and make it your own.</p>
+  </div>
+  <div class="chips" id="filters"></div>
+  <section class="card hero">
+    <div class="stage"><canvas id="view"></canvas><div class="hint">Drag to turn · scroll to zoom · the figure is 1.8 m tall</div></div>
+    <div class="info">
+      <span class="era" id="era"></span>
+      <h2 id="title"></h2>
+      <p class="desc" id="desc"></p>
+      <div class="specs" id="specs"></div>
+      <div class="row">
+        <a class="btn" id="useBtn" href="#">Use as template</a>
+        <button class="btn btn--ghost" id="glbBtn">Download .glb</button>
+        <button class="btn btn--ghost btn--sm" id="copyBtn">Copy settings</button>
+      </div>
+      <p class="fine" id="stat"></p>
+    </div>
+  </section>
+  <section class="card how">
+    <h3>How it was made</h3>
+    <div class="steps">
+      <div class="step"><figure><img id="imgRef" alt="Colour-coded reference sheet"></figure><p><b>1. Reference sheet.</b> Back view left, front view right. Grey walls, red roof, yellow trim, blue doors, cyan windows.</p></div>
+      <div class="step"><figure><img id="imgGem" alt="Gemini's painting of the reference sheet"></figure><p><b>2. Painted in Gemini.</b> The sheet plus the studio's prompt, pasted into Gemini (Nano Banana). No editing.</p></div>
+      <div class="step"><figure><img id="imgShot" alt="The baked 3D model"></figure><p><b>3. Baked.</b> Lined up by silhouette, projected onto the model and finished with the Grug PS1 look.</p></div>
+    </div>
+  </section>
+  <div class="grid" id="grid"></div>
+</div>
+<dialog id="zoom"><img id="zoomImg" alt=""></dialog>
+<div id="toast"></div>
+/*HEADSCRIPTS*/<script>
+/*MATH*/
+/*GL*/
+const STUDIO_URL = /*STUDIO*/'grug-building-studio.html';
+const EX = /*DATA*/;
+const $ = s => document.querySelector(s);
+let toastT = 0; function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 2200); }
+const ROOF = { flat:'Flat', gable:'Gable', hip:'Hip', shed:'Shed' }, DOOR = { none:'No door', left:'Left', center:'Centre', right:'Right' };
+const b64bytes = b => { const s = atob(b), u = new Uint8Array(s.length); for (let i=0;i<s.length;i++) u[i] = s.charCodeAt(i); return u; };
+const studioLink = e => STUDIO_URL + '?' + new URLSearchParams({ ...Object.fromEntries(Object.entries(e.p).map(([k, v]) => [k, String(v)])), desc: e.desc }).toString();
+$('#studioLink').href = STUDIO_URL;
+
+/* ---------- viewer ---------- */
+const viewC = $('#view'), R3 = new GLR(viewC, { aa:false }), gl = R3.gl;
+const V = { person: null, yaw: 40*D2R, pitch: 22*D2R, dist: 20, tgt:[0,3,0], spin: true, idle: 0, model: null, dirty: true };
+const FOV = 38*D2R;
+function grid(){
+  const L = G(), N = 24; for (let i=-N;i<=N;i++){ const c = c01(i % 4 === 0 ? [196,196,206] : [216,216,224]); pushLine(L, [i,0.001,-N], [i,0.001,N], c); pushLine(L, [-N,0.001,i], [N,0.001,i], c); }
+  const g = G(); pushPoly(g, [[-N,0,-N],[-N,0,N],[N,0,N],[N,0,-N]], [0,1,0], c01([246,246,249]));
+  return { lines: R3.mesh(L, true), floor: R3.mesh(g) };
+}
+const FLOOR = grid();
+function loadImg(bytes, type){ return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = URL.createObjectURL(new Blob([bytes], { type })); }); }
+async function parseGLB(u8){
+  const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength), jl = dv.getUint32(12, true);
+  const json = JSON.parse(new TextDecoder().decode(u8.subarray(20, 20 + jl))), bin = u8.subarray(28 + jl);
+  const view = i => { const v = json.bufferViews[i]; return bin.subarray(v.byteOffset, v.byteOffset + v.byteLength); };
+  const acc = i => { const a = json.accessors[i], b = view(a.bufferView), C = a.componentType === 5126 ? Float32Array : a.componentType === 5125 ? Uint32Array : Uint16Array;
+    return new C(b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength)); };
+  const pr = json.meshes[0].primitives[0], P = acc(pr.attributes.POSITION), N = acc(pr.attributes.NORMAL), T = acc(pr.attributes.TEXCOORD_0), U = acc(pr.attributes.TANGENT), I = acc(pr.indices);
+  const g = { P:[], N:[], C:[], T:[], U:[] };
+  let lo = [1e9,1e9,1e9], hi = [-1e9,-1e9,-1e9];
+  for (const i of I){ g.P.push(P[i*3], P[i*3+1], P[i*3+2]); g.N.push(N[i*3], N[i*3+1], N[i*3+2]); g.C.push(1,1,1); g.T.push(T[i*2], T[i*2+1]); g.U.push(U[i*4], U[i*4+1], U[i*4+2]);
+    for (let a=0;a<3;a++){ lo[a] = Math.min(lo[a], P[i*3+a]); hi[a] = Math.max(hi[a], P[i*3+a]); } }
+  const imgs = await Promise.all(json.images.map(im => loadImg(view(im.bufferView), im.mimeType)));
+  const nearest = json.samplers[0].magFilter === 9728;
+  return { mesh: R3.mesh(g), col: R3.tex(imgs[0], { nearest, mip:true }), nrm: imgs[1] ? R3.tex(imgs[1], { mip:true }) : null, lo, hi };
+}
+function render(){
+  const bw = viewC.clientWidth, bh = viewC.clientHeight, sc = Math.max(2, Math.min(3, window.devicePixelRatio || 1)), cw = Math.round(bw*sc), ch = Math.round(bh*sc);
+  if (viewC.width !== cw || viewC.height !== ch){ viewC.width = cw; viewC.height = ch; }
+  gl.viewport(0, 0, cw, ch); gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL);
+  const d = [Math.sin(V.yaw)*Math.cos(V.pitch), Math.sin(V.pitch), Math.cos(V.yaw)*Math.cos(V.pitch)], eye = add(V.tgt, mul(d, V.dist));
+  const Vm = m4look(eye, V.tgt, [0,1,0]), M = m4mul(m4persp(FOV, cw/Math.max(1,ch), 1, 600), Vm), R = m3of(Vm);
+  R3.draw(FLOOR.floor, { M, mode:1 }); R3.draw(FLOOR.lines, { M, mode:1 });
+  if (V.person){ if (V.fig) drawFigure(R3, V.fig, M, R, V.figAt); else R3.draw(V.person, { M, R, mode:0, amb:0.62, dif:0.48 }); }
+  if (V.model) R3.draw(V.model.mesh, { M, R, mode:2, tex:V.model.col, nmap:V.model.nrm, nstr: V.model.nrm ? 1 : 0, spec: V.model.nrm ? 0.35 : 0, amb:0.62, dif:0.48, L:norm([-0.35,0.55,0.76]) });
+}
+let last = performance.now();
+function loop(t){ const dt = Math.min(0.05, (t - last)/1000); last = t;
+  if (V.spin && t - V.idle > 2500){ V.yaw += dt*0.35; V.dirty = true; }
+  if (V.dirty){ V.dirty = false; render(); } requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+let drag = null;
+viewC.addEventListener('pointerdown', e => { viewC.setPointerCapture(e.pointerId); drag = { x:e.clientX, y:e.clientY, yaw:V.yaw, pitch:V.pitch }; V.idle = performance.now(); viewC.style.cursor = 'grabbing'; });
+viewC.addEventListener('pointermove', e => { if (!drag) return; V.yaw = drag.yaw - (e.clientX - drag.x)*0.008; V.pitch = clamp(drag.pitch + (e.clientY - drag.y)*0.006, 3*D2R, 85*D2R); V.idle = performance.now(); V.dirty = true; });
+const up = () => { drag = null; viewC.style.cursor = ''; }; viewC.addEventListener('pointerup', up); viewC.addEventListener('pointercancel', up);
+viewC.addEventListener('wheel', e => { e.preventDefault(); V.dist = clamp(V.dist*Math.exp(e.deltaY*0.0012), 6, 120); V.idle = performance.now(); V.dirty = true; }, { passive:false });
+window.addEventListener('resize', () => V.dirty = true);
+
+/* ---------- page ---------- */
+const cache = {};
+let cur = null;
+async function show(id){
+  const e = EX.find(x => x.id === id); cur = e;
+  document.querySelectorAll('.tile').forEach(t => t.classList.toggle('on', t.dataset.id === id));
+  $('#era').textContent = e.era; $('#title').textContent = e.title; $('#desc').textContent = e.desc;
+  const p = e.p, specs = [['Footprint', `${p.w} × ${p.d} m`], ['Wall height', `${p.h} m`], ['Roof', `${ROOF[p.roof]}, ${p.rh} m`], ['Floors', p.floors],
+    ['Front door', DOOR[p.door] + (p.door2 ? ', double' : '')], ['Windows per floor', `${p.wf} front · ${p.ws} sides · ${p.wb} back`]];
+  $('#specs').innerHTML = ''; specs.forEach(([k, v]) => { const d = document.createElement('div'), b = document.createElement('b'), s = document.createElement('span'); b.textContent = k; s.textContent = v; d.append(b, s); $('#specs').appendChild(d); });
+  $('#stat').textContent = `Silhouette match ${(e.match*100).toFixed(1)}% · ${e.kb} KB .glb with colour and normal textures`;
+  $('#useBtn').href = studioLink(e);
+  $('#imgRef').src = e.ref; $('#imgGem').src = e.gemini; $('#imgShot').src = e.thumb;
+  if (!cache[id]) cache[id] = e.glbUrl ? fetch(e.glbUrl).then(r => r.arrayBuffer()).then(b => parseGLB(new Uint8Array(b))) : parseGLB(b64bytes(e.glb));
+  const m = await cache[id]; if (cur !== e) return;
+  V.model = m; V.figAt = [m.lo[0] - 1.1, 0, m.hi[2] + 0.9]; R3.free(V.person); V.person = R3.mesh(avatarGeo(V.figAt[0], V.figAt[2])); const c = mul(add(m.lo, m.hi), .5), r = Math.max(3, vlen(sub(m.hi, m.lo))/2);
+  V.tgt = [c[0], c[1]*0.9, c[2]]; V.dist = r/Math.sin(FOV/2)*1.05; V.dirty = true;
+}
+const eras = ['All', ...new Set(EX.map(e => e.era))];
+eras.forEach((er, i) => { const b = document.createElement('button'); b.className = 'chip' + (i ? '' : ' on'); b.textContent = er;
+  b.onclick = () => { document.querySelectorAll('#filters .chip').forEach(c => c.classList.toggle('on', c === b));
+    document.querySelectorAll('.tile').forEach(t => t.hidden = er !== 'All' && t.dataset.era !== er);
+    const first = EX.find(x => er === 'All' || x.era === er); if (first && (!cur || (er !== 'All' && cur.era !== er))) show(first.id); };
+  $('#filters').appendChild(b); });
+EX.forEach(e => { const t = document.createElement('button'); t.className = 'tile'; t.dataset.id = e.id; t.dataset.era = e.era;
+  const im = document.createElement('img'); im.src = e.thumb; im.alt = e.title; im.loading = 'lazy';
+  const d = document.createElement('div'), b = document.createElement('b'), s = document.createElement('span'); b.textContent = e.title; s.textContent = e.era; d.append(b, s);
+  t.append(im, d); t.onclick = () => { show(e.id); window.scrollTo({ top:0, behavior:'smooth' }); }; $('#grid').appendChild(t); });
+$('#glbBtn').onclick = () => { if (!cur) return; const a = document.createElement('a'); a.href = cur.glbUrl || URL.createObjectURL(new Blob([b64bytes(cur.glb)], { type:'model/gltf-binary' }));
+  a.download = cur.title.replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-') + '.glb'; document.body.appendChild(a); a.click(); a.remove(); };
+$('#copyBtn').onclick = async () => { if (!cur) return; const t = `GrugBuild.set(${JSON.stringify({ ...cur.p, desc: cur.desc })})`;
+  try { await navigator.clipboard.writeText(t); toast('Settings copied'); } catch (e) { toast("Couldn't copy here"); } };
+document.querySelectorAll('.step figure').forEach(f => f.onclick = () => { $('#zoomImg').src = f.querySelector('img').src; $('#zoom').showModal(); });
+$('#zoom').onclick = () => $('#zoom').close();
+show(EX[0].id);
+figureGLB().then(b => b && loadFigure(R3, b)).then(f => { if (f){ V.fig = f; V.dirty = true; } }).catch(() => {});
+</script>
+</body>
+</html>

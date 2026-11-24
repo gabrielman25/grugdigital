@@ -26,6 +26,18 @@ printed QR code (`managers/`), NFC tag and installed app working, and keeps peop
 other Claude sessions follow when someone pastes the studio's link into a chat, so keep it accurate when the studio or
 the API changes, and test the whole flow headless (set → wear an image → downloadR6) before pushing.
 
+## Building Studio (`/build/`)
+
+`build/index.html`, `build/examples/index.html` and `build/claude.md` are generated from `src/build/` by
+`python3 src/build/build.py` (add `--standalone DIR` for single-file copies with everything embedded). Read the
+docstring there first. The pipeline: one building mass + one roof, flush (no overhangs, so nothing hides a wall),
+doors and windows as colour-coded guides; a black two-view reference sheet (back view left, front view right, 45°,
+25° down); Gemini's painting is lined up by silhouette (border flood fill, one fit per view) and projected back
+through a face-id buffer, with a wider margin at the silhouette that the inpaint bleeds over; then the Avatar Studio's
+retro looks (Grug PS1 by default, with vibrance) and a bevel normal map. Keep `build/claude.md` accurate when the
+settings or `window.GrugBuild` change, and test headless (set → wear an image → bake → glbBase64) before pushing.
+New examples: paint them, put the files in `build/examples/`, add them to `designs.json` + `stats.json`, rebuild.
+
 ## Pearls on the new site (`static/pearls.js`)
 
 The new pages share the legacy site's Pearls wallet (`localStorage 'grug.pearls.v1'`, same address, so the same data):
