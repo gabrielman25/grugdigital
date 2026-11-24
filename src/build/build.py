@@ -62,7 +62,11 @@ def main():
     (out / 'index.html').write_text(studio(True))
     (out / 'examples' / 'index.html').write_text(gallery(True))
     (out / 'claude.md').write_text((HERE / 'guide.md').read_text())
-    (out / 'core.js').write_text('/* generated from src/build/core.js by src/build/build.py: the Building Studio\'s building, used by the Grug Studio game (/arcade/grug-studio/) */\n' + (HERE / 'core.js').read_text())
+    # the Building Studio's building, for the Grug Studio game (/arcade/grug-studio/): wrapped so its names stay its own
+    (out / 'core.js').write_text('/* generated from src/build/core.js by src/build/build.py: the Building Studio\'s building, used by the\n'
+        '   Grug Studio game (/arcade/grug-studio/) as window.GrugBuildCore. App.onChange runs after every change. */\n'
+        'window.GrugBuildCore = (() => {\nconst App = {}, LOOKS = { realistic: 1 };\n' + (HERE / 'core.js').read_text() +
+        '\nreturn { App, S, LIM, PRESETS, ROOFS, DOORS, ROLES, MARKS, AV, fixParams, setParams, world, meshFaces, markQuads, save };\n})();\n')
     print('site:', out / 'index.html', out / 'examples' / 'index.html', out / 'claude.md')
     if '--standalone' in sys.argv:
         d = pathlib.Path(sys.argv[sys.argv.index('--standalone') + 1]); d.mkdir(parents=True, exist_ok=True)

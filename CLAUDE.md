@@ -83,6 +83,16 @@ house ad zoomed to fit); each page adds its own phone rules next to its styles. 
   after changing either.
 - Keep the nav in step on the small pages too (`.site-top` in `404.html`, `tizzy/`, `itch/`, `character/pearls/`).
 
+## Partners, sponsors and the stamps
+
+- **Warpdrive** (https://warpdrive.team/, an indie console family; our partner): `WDAD` in `arcade/arcade.js` builds their ads
+  (styles: the Warpdrive block in `arcade/arcade.css`): a skyscraper on each side (in the rotation), the 728x90 banner and the
+  300x250 box (each Warpdrive about half the time, the page's own ad otherwise), a tile on the home catalog's first page.
+  Pre-orders aren't open: the ads send people to see it, never "buy". Every link: `target=_blank rel="noopener sponsored"`.
+- **KimiLand** (Roblox UGC sponsor): a skyscraper each side, the home catalog's 300x250 box.
+- **The 88x31 stamps** (`static/stamps/`: Warpdrive → their site, YouTube and Discord → ours): `GrugArcade.chrome()` puts them
+  top right of the banner and in the footer of every classic page; the small card pages have them as `.site-stamps`.
+
 ## The itch.io asset list (home page)
 
 `/api/itch-assets` (`functions/api/itch-assets.js` + `src/itch/itch.js`) reads https://polysw.itch.io/ and four itch
@@ -92,12 +102,13 @@ size, so only the `315x250` covers itch gives us work: don't rewrite them to oth
 
 ## Grug Studio (`/arcade/grug-studio/`): both studios on one baseplate
 
-An Arcade game. You walk around a studded baseplate as your saved outfit. **Create an Avatar** (the green pad, or the top
+An Arcade game built from the Grug Baseplate template (same engine, light, plastic, camera, controls, GUI and NPC players;
+the zoo stations swapped for two pads and a plot). You walk around a studded baseplate as your saved outfit. **Create an Avatar** (the green pad, or the top
 button) zooms the camera in on you and opens the real Avatar Studio over the baseplate in a frame (`/character/?embed`,
 `src/character/embed.js`): it opens the outfit you play as, and its **Wear it** button saves it
 (`GrugStudio.saveAndPlay`, the same save as the arcade card) and messages the game, which dresses you and zooms out.
 **Make a Building** (the blue pad) spawns the Building Studio's own building (`build/core.js`, generated from
-`src/build/core.js` by `build.py`), scaled by the studio's figure (1.8 m = 5.2 studs) so it's true to size next to you;
+`src/build/core.js` by `build.py`, wrapped as `window.GrugBuildCore` so its names don't clash with the game's), scaled by the studio's figure (1.8 m = 5.2 studs) so it's true to size next to you;
 the sliders change it live, and its settings are the studio's own (`grug.build.v2`), so "Paint it in the Building
 Studio" carries straight on. The game's sky and baseplate match the Avatar Studio's, so the hand-over looks seamless.
 

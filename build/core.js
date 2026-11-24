@@ -1,4 +1,7 @@
-/* generated from src/build/core.js by src/build/build.py: the Building Studio's building, used by the Grug Studio game (/arcade/grug-studio/) */
+/* generated from src/build/core.js by src/build/build.py: the Building Studio's building, used by the
+   Grug Studio game (/arcade/grug-studio/) as window.GrugBuildCore. App.onChange runs after every change. */
+window.GrugBuildCore = (() => {
+const App = {}, LOOKS = { realistic: 1 };
 'use strict';
 /* =====================================================================
    Grug Building Studio
@@ -229,3 +232,6 @@ const PRESETS = {
   tavern: { label:'Tavern', p:{ w:11, d:7, h:6, base:1, roof:'hip', rh:3, ridge:'x', floors:2, door:'center', door2:true, backDoor:false, wf:4, ws:2, wb:3 },
     desc:'A big old timber-framed tavern: whitewashed plaster with dark timber beams, weathered terracotta roof tiles, a grey stone foundation, a heavy double door with a hanging sign painted beside it, and small diamond-paned windows.' },
 };
+
+return { App, S, LIM, PRESETS, ROOFS, DOORS, ROLES, MARKS, AV, fixParams, setParams, world, meshFaces, markQuads, save };
+})();

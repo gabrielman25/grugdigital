@@ -79,12 +79,48 @@
   const rec = () => { let r = null; try { r = JSON.parse(localStorage.getItem(KEY)); } catch (e) {} r = r && typeof r === 'object' ? r : {}; r.plays = r.plays || {}; r.fav = r.fav || {}; r.last = r.last || {}; return r; };
   const saveRec = r => { try { localStorage.setItem(KEY, JSON.stringify(r)); } catch (e) {} };
 
+  /* Warpdrive (https://warpdrive.team/): our partner, an indie console family. Their ads, in every sponsor slot, all going to
+     their site: the side skyscrapers (in the rotation below), the 728x90 banner and the 300x250 box (each shows Warpdrive
+     about half the time), a tile in the home page's catalog, and their 88x31 stamp. Pre-orders aren't open yet, so the ads
+     never say "buy": they send people to see it. */
+  const WD = 'https://warpdrive.team/';
+  const wdStamp = w => `<img class="wdst" src="/static/stamps/warpdrive.gif" alt="Release your dream game on Warpdrive" width="${w}" height="${Math.round(w * 31 / 88)}">`;
+  const wdA = (cls, html, label) => `<a class="${cls}" href="${WD}" target="_blank" rel="noopener sponsored" aria-label="${esc(label)}"><span class="stars"></span><span class="spn">SPONSOR</span>${html}</a>`;
+  const wdWord = '<b class="wdw">WARPDRIVE</b>';
+  const WDAD = {
+    leader: () => wdA('lb wd', `${wdStamp(132)}<span class="t">${wdWord}<span>A console family built for indie culture</span>
+      <span class="exp"><i class="k">90% to devs</i><i>Web + native engines</i><i>Buy once, play everywhere</i></span></span><span class="go">See Warpdrive ›</span>`, 'Warpdrive: a console family built for indie culture (sponsor)'),
+    rect: () => wdA('rect wd', `<span class="t">${wdStamp(176)}${wdWord}<span class="s">the indie console family · web and native games are equals · devs keep 90%</span></span>
+      <span class="bar"><span class="go">See the hardware ›</span></span>`, 'Warpdrive: release your dream game on it (sponsor)'),
+    skyA: () => wdA('ad sp wd', `${wdWord}<div class="k">◆ 2026 ◆</div><div class="h">A console family built for indie culture.</div>
+      ${wdStamp(140)}<ul><li>Web games and native games, equal on the shelf</li><li>One handheld, one home console, one library</li><li>Buy once, play everywhere</li></ul>
+      <div class="cta">See Warpdrive ›</div>`, 'Warpdrive: a console family built for indie culture (sponsor)'),
+    skyB: () => wdA('ad sp wd', `<div class="h" style="margin-top:30px">Your game.<br>Your cut.</div><div class="big">90%</div><div class="sub">of every sale goes to the developer</div>
+      <div class="sub" style="margin-top:14px">Made a browser game? Warpdrive puts it on a real console.</div>${wdStamp(140)}${wdWord}
+      <div class="cta">Visit Warpdrive ›</div>`, 'Warpdrive: your game, your cut (sponsor)'),
+    tile: () => `<div class="Cell wdt" title="Warpdrive"><div class="GameItem"><div class="AlwaysShown">
+        <a class="thumb wd" href="${WD}" target="_blank" rel="noopener sponsored" aria-label="Warpdrive, an indie console family (sponsor)"><span class="stars"></span>${wdStamp(120)}${wdWord}<span class="new spn">SPONSOR</span></a>
+        <div class="GameName"><a href="${WD}" target="_blank" rel="noopener sponsored">Warpdrive: an indie console</a></div>
+        <div class="PlayerCount"><b>90% to devs</b> <span>· warpdrive.team</span></div></div>
+      <div class="HoverShown"><p>A console family built for indie culture: web and native engines are equals, and you buy once and play everywhere.</p></div></div></div>`,
+  };
+
   /* the header, background, side ads, Pearls button, footer and "Playing as" box, the same on every Arcade page */
   function chrome() {
     const onList = !!$('PlayTabs');
     $('dropGenres').innerHTML = GENRES.map(([id, t]) => `<a href="/arcade/#${id}" data-genre="${id}">${esc(t)}</a>`).join('');
     if (!onList) document.querySelectorAll('.dropdown [data-sort],.dropdown [data-search]').forEach(a => { a.removeAttribute('data-sort'); a.removeAttribute('data-search'); a.href = '/arcade/'; });
     $('seoGenres').innerHTML = GENRES.slice(1).map(([id, t]) => `<a href="/arcade/#${id}" data-genre="${id}" title="${esc(t)} Games">${esc(t)}</a>`).join('&nbsp;|&nbsp;');
+    /* the 88x31 stamps: top right of the banner, and in the footer */
+    const STAMPS = [[WD, 'warpdrive', 'Warpdrive: release your dream game on it (our partner)', 'noopener sponsored'],
+      ['https://www.youtube.com/@PolySwitchOfficial', 'youtube', 'Grug on YouTube (PolySwitch): subscribe', 'noopener'],
+      ['https://discord.gg/3ENePvNGJy', 'discord', 'Join the Grug Discord', 'noopener']];
+    const stamps = STAMPS.map(([h, n, t, r]) => `<a href="${h}" target="_blank" rel="${r}" title="${esc(t)}"><img src="/static/stamps/${n}.gif" alt="${esc(t)}" width="88" height="31"></a>`).join('');
+    if ($('Banner') && !$('Stamps')) $('Banner').insertAdjacentHTML('beforeend', `<div id="Stamps">${stamps}</div>`);
+    const lg = document.querySelector('#Footer .Legalese'); if (lg && !document.querySelector('#Footer .Stamps')) lg.insertAdjacentHTML('beforebegin', `<div class="FooterNav Stamps">${stamps}</div>`);
+    /* our partner in the 728x90 banner and the 300x250 box about half the time (the page's own ad the rest) */
+    const lbBox = $('Leaderboard'); if (lbBox && Math.random() < 0.5) lbBox.innerHTML = WDAD.leader();
+    const rect = document.querySelector('#GamePageAdDiv .rect'); if (rect && Math.random() < 0.5) { rect.outerHTML = WDAD.rect(); const n = document.querySelector('#GamePageAdDiv .rect-note'); if (n) n.textContent = 'Our partner: an indie console family'; }
     const drop = $('dropNav'), tog = $('gamesMenuToggle');
     const setDrop = on => { drop.classList.toggle('open', on); tog.setAttribute('aria-expanded', on); };
     tog.addEventListener('click', e => { e.stopPropagation(); setDrop(!drop.classList.contains('open')); });
@@ -155,7 +191,7 @@
             <div class="sub" style="margin-top:10px;color:#3a3a6a">Roblox UGC for your avatar</div>
             <div class="figs" style="height:120px"><img src="${R6('grug')}" alt="" style="left:50%;translate:-50% 0;height:116px"></div>
             <div class="cta">Shop on Roblox ›</div>`, 'KimiLand on Roblox (sponsor)');
-        return { L: [ads.discordLive, ads.igGrid, kimiA, ads.ytLatest], R: [ads.ytStack, ads.discordWho, ads.igChars, kimiB] };
+        return { L: [ads.discordLive, WDAD.skyA(), ads.igGrid, kimiA, ads.ytLatest], R: [ads.ytStack, ads.discordWho, WDAD.skyB(), ads.igChars, kimiB] };
       }
       function run(box, list, delay) {
         box.innerHTML = list.join(''); const els = [...box.children]; let i = 0; els[0].classList.add('on');
@@ -189,5 +225,5 @@
     if ($('mePic')) { $('meSel').addEventListener('change', e => { if (O) O.setActive(e.target.value); }); addEventListener('grug:outfits', me); me(); }
   }
 
-  window.GrugArcade = { GENRES, GAMES, gname, esc, ago, tile, place, rec, saveRec, chrome };
+  window.GrugArcade = { GENRES, GAMES, gname, esc, ago, tile, place, rec, saveRec, chrome, WDAD };
 })();

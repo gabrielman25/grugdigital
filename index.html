@@ -487,6 +487,7 @@ window.GrugArcade.chrome();
     state.page = Math.min(state.page, pages);
     const show = L.slice((state.page - 1) * per, state.page * per).map(tile);
     if (show.length) show.splice((seed + state.page * 5) % (Math.min(show.length, 6) + 1), 0, ad(state.page));
+    const A = window.GrugArcade; if (A && A.WDAD && state.page === 1 && !state.q && show.length > 3) show.splice(Math.min(show.length, 7), 0, A.WDAD.tile());   // our partner, Warpdrive
     $('GamesContent').innerHTML = show.length ? show.join('') :
       `<div class="Empty">No packs ${state.q ? 'match "' + esc(state.q) + '"' : 'here yet'}. <a href="#assets" data-cat="all">See all packs</a>, or <a href="/character/">make a character</a> for free.</div>`;
     $('pageNum').textContent = state.page; $('pageCount').textContent = pages;
