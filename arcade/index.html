@@ -10,6 +10,7 @@
 <link rel="canonical" href="https://grugdigital.com/arcade/">
 <script src="/static/pearls.js"></script>
 <script src="/static/outfits.js"></script>
+<script src="/static/social.js"></script>
 <style>
 /* Laid out like a classic 2011 games page: a 920px column on a sky background, a 130px header (banner + blue nav),
    a 140px genre column, 160x130 game tiles in a 738px box, a 300x300 box beside the first rows, a Verdana footer. */
@@ -22,6 +23,48 @@ body{position:relative;font:12px Arial,Helvetica,sans-serif;color:#000;backgroun
 .bgfx .sh{position:absolute;inset:0;opacity:0;background:#1f4a10 50% 30%/cover no-repeat;transition:opacity 2.6s ease;will-change:transform,opacity;transform:scale(1.14)}
 .bgfx .sh.on{opacity:1}
 #Container{position:relative;z-index:1}
+/* side skyscrapers (160x600) in the gutters beside the column: Grug's socials, cycling, with live Discord and YouTube data */
+.sky{position:absolute;top:270px;width:160px;height:600px;z-index:2;display:none}
+.sky.l{left:calc(50% - 460px - 178px)} .sky.r{left:calc(50% + 460px + 18px)}
+@media (min-width:1300px){.sky{display:block}}
+.sky .ad{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;overflow:hidden;color:#fff;text-decoration:none!important;opacity:0;visibility:hidden;transition:opacity 1.2s,visibility 0s 1.2s;
+  font-family:Arial,Helvetica,sans-serif;box-shadow:0 0 0 1px rgba(0,0,0,.35),0 6px 18px rgba(0,0,0,.35);text-align:center}
+.sky .ad.on{opacity:1;visibility:visible;transition:opacity 1.2s}
+.sky .ad:hover .cta{filter:brightness(1.08)}
+.sky .k{font:bold 11px/1 Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;margin-top:16px;opacity:.85}
+.sky .h{font:bold 24px/1.05 Arial,sans-serif;margin:6px 10px 0;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+.sky .big{font:bold 52px/1 Arial,sans-serif;margin-top:14px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
+.sky .sub{font-size:12px;margin:4px 12px 0;opacity:.9;line-height:1.3}
+.sky .cta{position:absolute;left:12px;right:12px;bottom:14px;height:36px;line-height:36px;border-radius:6px;font:bold 15px/36px Arial,sans-serif;background:#fff;color:#222}
+.sky .figs{position:absolute;left:0;right:0;bottom:56px;height:150px}
+.sky .figs img{position:absolute;bottom:0;height:140px;width:auto}
+.sky .live{display:inline-block;margin-top:10px;padding:3px 8px;border-radius:10px;background:rgba(0,0,0,.25);font:bold 11px/1.2 Arial,sans-serif;letter-spacing:.05em}
+.sky .av{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin:12px 10px 0}
+.sky .av img,.sky .av i{width:34px;height:34px;border-radius:50%;background:#5865f2;box-shadow:0 0 0 2px #23272a,0 0 0 4px #3ba55c}
+.sky .av i{display:inline-grid;place-items:center;font:bold 14px/1 Arial,sans-serif;font-style:normal;color:#fff}
+.sky .names{margin:10px 12px 0;font-size:12px;line-height:1.5;color:#b9bbbe;text-align:left;width:136px}
+.sky .names b{color:#fff;font-weight:bold}
+.sky .thumb{position:relative;width:144px;height:81px;margin-top:12px;background:#000 center/cover no-repeat;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.sky .thumb::after{content:"";position:absolute;left:50%;top:50%;margin:-11px 0 0 -8px;border:11px solid transparent;border-left:17px solid rgba(255,255,255,.92);border-right:0}
+.sky .tt{margin:8px 10px 0;font:bold 13px/1.25 Arial,sans-serif;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;width:140px}
+.sky .stack{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.sky .stack .thumb{margin-top:0;height:72px;width:128px}
+.sky .grid{display:grid;grid-template-columns:repeat(2,64px);gap:6px;margin-top:14px}
+.sky .grid span{width:64px;height:64px;background:#ddd center/cover no-repeat;border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.sky .kl{background:linear-gradient(#ffd6ea,#cfe6ff);color:#3a3a6a} .sky .kl .cta{background:linear-gradient(90deg,#ff9cc8,#8cc4ff);color:#fff}
+.sky .kb{background:linear-gradient(160deg,#9cc9ff,#ffb3d6);color:#fff} .sky .kb .cta{color:#d14d8b}
+.sky .spn{position:absolute;top:6px;right:6px;font:bold 9px/1 Arial,sans-serif;letter-spacing:.08em;padding:3px 5px;border-radius:3px;background:rgba(255,255,255,.75);color:#d14d8b}
+.sky .ig{background:linear-gradient(200deg,#f9a03f 0%,#e1306c 45%,#833ab4 100%)}
+.sky .dc{background:linear-gradient(#6d78f5,#4752c4)}
+.sky .dk{background:#23272a}
+.sky .yt{background:linear-gradient(#ff3d3d,#c4120c)}
+.sky .yk{background:#0f0f0f}
+.sky .cr{background:linear-gradient(#fff7e8,#ffd9e8);color:#3a2a4a}
+.sky .cr .cta{background:linear-gradient(200deg,#f9a03f,#e1306c 55%,#833ab4);color:#fff}
+.sky .yk .cta,.sky .yt .cta{color:#c4120c}
+.sky .dc .cta,.sky .dk .cta{color:#4752c4}
+.sky .ig .cta{color:#c1357a}
+
 a{color:#1d7a0c;text-decoration:none}
 a:hover{text-decoration:underline}
 h1,h2,h3{margin:0;font-size:inherit;font-weight:inherit;display:inline}
@@ -160,6 +203,7 @@ img{border:0}
 </svg>
 
 <div class="bgfx" id="bgfx" aria-hidden="true"></div>
+<div class="sky l" id="skyL" aria-label="Grug on Discord, Instagram and YouTube"></div><div class="sky r" id="skyR" aria-label="Grug on YouTube, Discord and Instagram"></div>
 <div id="Container">
   <div id="Leaderboard">
     <a class="lb" href="/character/" aria-label="Make a character in the Grug Avatar Studio">
@@ -284,6 +328,7 @@ img{border:0}
       &nbsp;|&nbsp;
       <a href="/support.html">Jobs</a>
     </div>
+    <div class="FooterNav">Follow Grug: <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener"><b>Discord</b></a>&nbsp;|&nbsp;<a href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener"><b>Instagram</b></a>&nbsp;|&nbsp;<a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener"><b>YouTube</b></a></div>
     <div class="FooterNav" id="seoGenres"></div>
     <p class="Legalese">
       Grug, Grug Digital, Pearls, characters, logos, names, and all related indicia are trademarks of <a href="/">Grug Digital</a>, ©2026.
@@ -417,6 +462,69 @@ img{border:0}
       setTimeout(() => show((i + 1) % els.length), HOLD);
     }
     show(0);
+  })();
+
+
+  /* side skyscrapers: three different ads a side, crossfading; the two sides never show the same site at once */
+  (() => {
+    const S = window.GrugSocial; if (!S) return;
+    const L = $('skyL'), R = $('skyR');
+    const pick = a => a[Math.floor(Math.random() * a.length)];
+    const shuffle = a => a.map(v => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map(v => v[1]);
+    const ad = (cls, href, html, label) => `<a class="ad ${cls}" href="${href}" target="_blank" rel="noopener" aria-label="${esc(label)}">${html}</a>`;
+    const R6 = n => `/static/arcade/${n}.webp`;
+    function build(d) {
+      const D = d.discord, V = d.youtube.videos, k = S.links || S.LINKS, LK = d.links;
+      const vids = shuffle(V.slice()), v0 = V[0], live = D.online ? `<span class="live">${S.n(D.online)} ONLINE NOW</span>` : '<span class="live">COME SAY HI</span>';
+      const avs = D.avatars.slice(0, 12);
+      const ads = {
+        discordLive: ad('dc', LK.discord, `<div class="k">Join the</div><div class="h">Grug Discord</div>
+          <div class="big">${D.online ? S.n(D.online) : '•'}</div><div class="sub">${D.online ? 'players online right now' : 'players, builders and creators'}</div>
+          ${D.members ? `<div class="sub" style="margin-top:8px"><b>${S.n(D.members)}</b> members</div>` : ''}
+          <div class="figs"><img src="${R6('grug')}" alt="" style="left:-8px;z-index:1"><img src="${R6('medic')}" alt="" style="right:-10px;height:126px"></div>
+          <div class="cta">Join server ›</div>`, 'Join the Grug Discord'),
+        discordWho: ad('dk', LK.discord, `<div class="k" style="color:#b9bbbe">Discord</div><div class="h" style="font-size:21px">Who's on right now</div>${live}
+          <div class="av">${avs.length ? avs.map(a => `<img src="${esc(a.avatar)}" alt="" loading="lazy" referrerpolicy="no-referrer">`).join('') : ['G', 'R', 'U', 'G', '+', '+'].map(c => `<i>${c}</i>`).join('')}</div>
+          ${avs.length ? `<div class="names">${avs.slice(0, 6).map(a => `<b>${esc(a.name)}</b>${a.game ? ` · ${esc(a.game)}` : ''}`).join('<br>')}</div>` : `<div class="names">Trade outfits, show off your characters, find people to play the Arcade with.</div>`}
+          <div class="cta">Hop in ›</div>`, 'See who is online on the Grug Discord'),
+        ytLatest: ad('yt', v0 ? S.watch(v0.id) : LK.youtube, `<div class="k">New on YouTube</div><div class="h">PolySwitch</div>
+          ${v0 ? `<div class="thumb" style="background-image:url('${S.thumbDirect(v0.id)}')"></div><div class="tt">${esc(v0.title || 'Watch the newest video')}</div>` : `<div class="figs" style="bottom:180px"><img src="${R6('racer')}" alt="" style="left:10px"></div>`}
+          <div class="figs" style="height:120px"><img src="${R6('skater')}" alt="" style="left:6px;height:118px"><img src="${R6('ranger')}" alt="" style="right:4px;height:110px"></div>
+          <div class="cta">Watch now ›</div>`, 'Watch PolySwitch on YouTube'),
+        ytStack: ad('yk', LK.youtube, `<div class="k" style="color:#aaa">YouTube</div><div class="h">Watch PolySwitch</div>
+          <div class="stack">${(vids.length ? vids.slice(0, 3) : []).map(v => `<div class="thumb" style="background-image:url('${S.thumbDirect(v.id)}')"></div>`).join('') || `<div class="sub" style="margin-top:30px">Game dev, Roblox builds and the making of Grug.</div>`}</div>
+          <div class="sub" style="margin-top:10px">${vids.length ? 'Game dev, builds and more' : ''}</div>
+          <div class="cta">Subscribe ›</div>`, 'Subscribe to PolySwitch on YouTube'),
+        igGrid: ad('ig', LK.instagram, `<div class="k">Instagram</div><div class="h">@grugdigital</div>
+          <div class="grid">${['city-aerial.jpg', 'grug.webp', 'city-icecream.jpg', 'skater.webp', 'city-salon.jpg', 'snow-rider.webp'].map(n => `<span style="background-image:url('/static/arcade/${n}');${n.endsWith('webp') ? 'background-size:contain;background-color:#fff3' : ''}"></span>`).join('')}</div>
+          <div class="sub" style="margin-top:12px">Characters, builds and behind the scenes</div>
+          <div class="cta">Follow ›</div>`, 'Follow @grugdigital on Instagram'),
+        igChars: ad('cr', LK.instagram, `<div class="k" style="color:#c1357a">Follow along</div><div class="h" style="color:#3a2a4a;text-shadow:none">See what we make next</div>
+          <div class="sub" style="margin-top:8px"><b>@grugdigital</b> on Instagram</div>
+          <div class="figs" style="height:300px;bottom:60px"><img src="${R6('snow-rider')}" alt="" style="left:-14px;bottom:130px;height:130px"><img src="${R6('racer')}" alt="" style="right:-16px;bottom:120px;height:130px"><img src="${R6('grug')}" alt="" style="left:12px;height:150px;z-index:1"></div>
+          <div class="cta">Follow ›</div>`, 'Follow @grugdigital on Instagram'),
+      };
+      const KIMI = 'https://www.roblox.com/communities/5835899/KimiLand#!/store';   // Grug's official Roblox UGC sponsor
+      const sp = (cls, html, label) => `<a class="ad sp ${cls}" href="${KIMI}" target="_blank" rel="noopener sponsored" aria-label="${esc(label)}"><span class="spn">SPONSOR</span>${html}</a>`;
+      const kimiA = sp('kl', `<img src="/static/sponsor/kimiland-logo.png" alt="KimiLand" style="width:136px;margin-top:22px">
+          <div class="k" style="color:#d14d8b;margin-top:8px">Official Roblox</div><div class="h" style="color:#3a3a6a;text-shadow:none;font-size:22px">UGC sponsor</div>
+          <div class="sub" style="margin-top:8px">Shop the KimiLand store on Roblox</div>
+          <div class="figs" style="height:150px"><img src="${R6('snow-rider')}" alt="" style="left:-6px;height:128px"><img src="${R6('skater')}" alt="" style="right:-8px;height:136px"></div>
+          <div class="cta">Shop KimiLand ›</div>`, 'Shop KimiLand UGC on Roblox (sponsor)');
+      const kimiB = sp('kb', `<div class="k" style="margin-top:24px">Our sponsor</div><div class="h" style="font-size:28px">KIMILAND</div>
+          <img src="/static/sponsor/kimiland-kl.png" alt="" style="width:118px;margin-top:14px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))">
+          <div class="sub" style="margin-top:10px;color:#3a3a6a">Roblox UGC for your avatar</div>
+          <div class="figs" style="height:120px"><img src="${R6('grug')}" alt="" style="left:50%;translate:-50% 0;height:116px"></div>
+          <div class="cta">Shop on Roblox ›</div>`, 'KimiLand on Roblox (sponsor)');
+      return { L: [ads.discordLive, ads.igGrid, kimiA, ads.ytLatest], R: [ads.ytStack, ads.discordWho, ads.igChars, kimiB] };
+    }
+    function run(box, list, delay) {
+      box.innerHTML = list.join(''); const els = [...box.children]; let i = 0; els[0].classList.add('on');
+      if (els.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      setTimeout(() => setInterval(() => { if (document.hidden) return; els[i].classList.remove('on'); i = (i + 1) % els.length; els[i].classList.add('on'); }, 9000), delay);
+    }
+    S.get().then(d => { const b = build(d); run(L, b.L, 0); run(R, b.R, 4500); });
+    for (const box of [L, R]) box.addEventListener('click', e => { if (!e.target.closest('a.ad') || e.target.closest('a.sp') || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return; e.preventDefault(); S.popup(); });   // a banner opens every social, side by side
   })();
 
   /* Pearls (the small green button where the classic page had Login) */

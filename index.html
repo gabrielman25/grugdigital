@@ -8,6 +8,7 @@
 <link rel="icon" href="/favicon.png">
 <link rel="preconnect" href="https://img.itch.zone">
 <script src="/static/pearls.js"></script>
+<script src="/static/social.js"></script>
 <script>
 /* Someone browsing the legacy site who taps its Home button or logo lands here (the legacy pages all point at "/").
    Send them back to the legacy home instead, unless they chose "Go to the new site" in the legacy banner.
@@ -200,12 +201,33 @@ html.dark .card.ad{border-color:#3A3A42}
 .card.ad .exp i{font-style:normal;font-size:12px;font-weight:600;padding:3px 8px;border-radius:7px;background:rgba(255,255,255,.1);color:#E6E6EA}
 .card.ad .exp i.k{background:rgba(155,227,56,.18);color:#C6F28A}
 .card.ad .cta{margin-top:auto;padding-top:10px}
+.card.ad.kimi{background:linear-gradient(160deg,#ffe0ee,#d8ebff);border-color:#ffc6e0;color:#3a3a6a}
+.card.ad.kimi .pic{background:linear-gradient(160deg,#ffd6ea,#cfe6ff);display:grid;place-items:center}
+.card.ad.kimi .pic .logo{position:static;width:62%;height:auto;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(209,77,139,.25))}
+.card.ad.kimi .badge{background:#fff;color:#d14d8b}
+.card.ad.kimi h3{color:#3a3a6a}.card.ad.kimi p{color:#5a5a7a}
+.card.ad.kimi .cta span{background:linear-gradient(90deg,#ff9cc8,#8cc4ff);color:#fff}
 .closer .exp{display:flex;flex-wrap:wrap;gap:6px;margin:-8px 0 22px}
 .closer .exp i{font-style:normal;font-size:14px;font-weight:600;padding:5px 11px;border-radius:9px;background:rgba(255,255,255,.1);color:#E6E6EA}
 .closer .exp i.k{background:rgba(155,227,56,.18);color:#C6F28A}
 .card.ad .cta span{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 14px;border-radius:11px;background:var(--accent);color:#1E1B16;font-weight:600;font-size:15px}
 .card.ad .cta svg{width:16px;height:16px}
 
+.soc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,1.6vw,22px)}
+.soc a{position:relative;display:flex;flex-direction:column;gap:6px;min-height:170px;padding:22px 22px 20px;border-radius:var(--r);text-decoration:none;color:#fff;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.soc a:hover{transform:translateY(-3px);box-shadow:0 10px 28px -14px rgba(30,27,22,.45)}
+.soc a:focus-visible{outline:3px solid var(--accent-lo);outline-offset:3px}
+.soc small{font-size:13px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;opacity:.85}
+.soc b{font-size:24px;font-weight:600;line-height:1.1}
+.soc span{font-size:15px;opacity:.92;max-width:28ch}
+.soc em{margin-top:auto;align-self:flex-start;font-style:normal;font-weight:600;font-size:15px;padding:8px 14px;border-radius:11px;background:#fff}
+.soc .dc{background:linear-gradient(140deg,#6d78f5,#4752c4)} .soc .dc em{color:#4752c4}
+.soc .ig{background:linear-gradient(200deg,#f9a03f,#e1306c 50%,#833ab4)} .soc .ig em{color:#c1357a}
+.soc .yt{background:#1a1a1a} .soc .yt em{color:#c4120c}
+.soc .yt .vid{position:absolute;right:16px;top:16px;width:132px;aspect-ratio:16/9;border-radius:8px;background:#333 center/cover no-repeat;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.soc .yt .vid:empty{display:none}
+.soc .yt span,.soc .yt b{max-width:calc(100% - 150px)}
+@media (max-width:860px){.soc{grid-template-columns:1fr}.soc a{min-height:0}}
 /* closing call to action */
 .closer{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:center;gap:24px;border-radius:28px;background:#1E1B16;color:#F3F3F5;overflow:hidden;position:relative;isolation:isolate;min-height:300px}
 html.dark .closer{box-shadow:inset 0 0 0 1px var(--line)}
@@ -375,6 +397,15 @@ footer .sp{margin-left:auto}
   </section>
 
 
+  <section class="block wrap" aria-labelledby="socTitle">
+    <div class="head"><div><h2 id="socTitle">Join the Grug community</h2><p>Hang out, see new characters first, watch how it's all made.</p></div></div>
+    <div class="soc">
+      <a class="dc" href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener"><small>Discord</small><b id="socDc">Join the Grug Discord</b><span id="socDcSub">Players, builders and creators. Come say hi.</span><em>Join server</em></a>
+      <a class="ig" href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener"><small>Instagram</small><b>@grugdigital</b><span>Characters, builds and behind the scenes.</span><em>Follow</em></a>
+      <a class="yt" id="socYt" href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener"><small>YouTube</small><b>PolySwitch</b><span id="socYtSub">Game dev, Roblox builds and the making of Grug.</span><i class="vid" id="socVid"></i><em>Watch</em></a>
+    </div>
+  </section>
+
   <section class="block wrap" aria-labelledby="closerTitle">
     <div class="closer">
       <div class="txt">
@@ -398,6 +429,9 @@ footer .sp{margin-left:auto}
 <footer>
   <div class="wrap">
     <span>© Grug Digital</span>
+    <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener">Discord</a>
+    <a href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener">Instagram</a>
+    <a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener">YouTube</a>
     <a href="https://polysw.itch.io/" target="_blank" rel="noopener">itch.io store</a>
     <a href="/character/">Avatar Studio</a>
     <a href="/arcade/">Arcade</a>
@@ -409,6 +443,16 @@ footer .sp{margin-left:auto}
 </footer>
 
 <script>
+/* the community strip: live Discord count and the newest video (static/social.js) */
+(function () {
+  const S = window.GrugSocial; if (!S) return;
+  S.get().then(d => {
+    const D = d.discord, v = d.youtube.videos[0];
+    if (D.online) { document.getElementById('socDc').textContent = S.n(D.online) + ' online now'; document.getElementById('socDcSub').textContent = `Join ${S.n(D.members)} players, builders and creators on the Grug Discord.`; }
+    if (v) { const a = document.getElementById('socYt'); a.href = S.watch(v.id); document.getElementById('socVid').style.backgroundImage = `url('${S.thumbDirect(v.id)}')`; document.getElementById('socVid').textContent = ' ';
+      if (v.title) document.getElementById('socYtSub').textContent = 'New: ' + v.title; }
+  });
+})();
 /* Pearls: a new player's starting balance, then free Pearls once a day (static/pearls.js) */
 (function () {
   const P = window.GrugPearls; if (!P) return;
@@ -446,6 +490,12 @@ footer .sp{margin-left:auto}
     { id: 'snow-rider', bg: 'bg-slide-3', h: 'Ship it in your itch.io game', p: 'Export your character and use it in games you sell.' },
     { id: 'racer', bg: 'bg-slide-4', h: 'Make a character with Claude', p: 'Paste one prompt into Claude, then export it anywhere.', claude: true }
   ];
+  const KIMI = { url: 'https://www.roblox.com/communities/5835899/KimiLand#!/store' };   // Grug's official Roblox UGC sponsor
+  function sponsor() {
+    return `<a class="card ad kimi" href="${KIMI.url}" target="_blank" rel="noopener sponsored" aria-label="KimiLand: Roblox UGC from our official sponsor">
+      <div class="pic"><img class="logo" src="/static/sponsor/kimiland-logo.png" alt="KimiLand" loading="lazy"><span class="badge">Sponsor</span></div>
+      <div class="body"><h3>KimiLand on Roblox</h3><p>UGC from our official Roblox sponsor. Shop the store.</p><div class="cta"><span>Shop KimiLand <svg aria-hidden="true"><use href="#out"/></svg></span></div></div></a>`;
+  }
   let adN = rnd(ADS.length);
   function ad() {
     const a = ADS[adN++ % ADS.length];
@@ -496,6 +546,9 @@ footer .sp{margin-left:auto}
     const order = g.map((x, i) => i).sort((a, b) => (g[a].items.length < PER ? 0 : 1) - (g[b].items.length < PER ? 0 : 1) || Math.random() - .5);
     const firstAds = new Set(order.slice(0, FIRST_PAGE_ADS));
     rows.innerHTML = g.map((x, i) => row(x, firstAds.has(i), i)).join('');
+    // the sponsor: once, in the longest row, just past its first page
+    const long = [...rows.querySelectorAll('.track')].sort((a, b) => b.children.length - a.children.length)[0];
+    if (long) { const at = long.children[Math.min(long.children.length, PER + 1)]; const t = document.createElement('div'); t.innerHTML = sponsor(); at ? long.insertBefore(t.firstElementChild, at) : long.appendChild(t.firstElementChild); }
     rows.querySelectorAll('.row').forEach(wire);
   }
 
