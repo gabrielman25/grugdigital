@@ -1,0 +1,39 @@
+/* The privacy policy and terms of service (privacy.html, terms.html): the new site's light look, easy to read. */
+@font-face{font-family:'Fredoka';font-style:normal;font-weight:300 700;font-display:swap;src:url(/static/fredoka.woff2) format('woff2')}
+:root{--page:#F6F6F8;--card:#FFFFFF;--ink:#1E1B16;--ink2:#3A3833;--soft:#5F5F68;--line:#E3E3E8;--accent:#9BE338;color-scheme:light}
+html.dark{--page:#141417;--card:#1F1F23;--ink:#F3F3F5;--ink2:#D9D9DE;--soft:#A6A6B0;--line:#303037;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Fredoka',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--page);color:var(--ink);-webkit-font-smoothing:antialiased}
+.top{border-bottom:1px solid var(--line);background:var(--page)}
+.top .in,.doc,footer .in{max-width:780px;margin:0 auto;padding-inline:20px}
+.top .in{display:flex;align-items:center;gap:16px;height:60px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:600;font-size:21px;text-decoration:none;color:var(--ink)}
+.brand svg{width:32px;height:32px}
+.top nav{margin-left:auto;display:flex;gap:4px}
+.top nav a{padding:7px 10px;border-radius:10px;text-decoration:none;color:var(--soft);font-weight:500}
+.top nav a:hover{background:var(--line);color:var(--ink)}
+.doc{padding-top:34px;padding-bottom:20px}
+.doc h1{font-size:clamp(32px,5vw,44px);line-height:1.08;font-weight:600;margin:0 0 10px}
+.doc .lede{color:var(--ink2);font-size:18px;line-height:1.5;margin:0;max-width:58ch}
+.doc .date{color:var(--soft);font-size:14px;margin:8px 0 0}
+.doc h2{font-size:23px;font-weight:600;margin:34px 0 10px;line-height:1.2}
+.doc h3{font-size:18px;font-weight:600;margin:22px 0 6px}
+.doc p,.doc li{color:var(--ink2);font-size:16px;line-height:1.62}
+.doc p{margin:0 0 10px}
+.doc ul{padding-left:22px;margin:6px 0 12px}
+.doc li{margin:5px 0}
+.doc a{color:var(--ink);font-weight:600}
+.doc b{color:var(--ink);font-weight:600}
+.short{margin-top:22px;padding:20px 22px;background:var(--card);border:1px solid var(--line);border-radius:20px}
+.short b{display:block;font-size:18px;margin-bottom:6px}
+.short ul{margin-bottom:0}
+.doc .toc{columns:2;column-gap:28px;margin-top:22px;padding:0;list-style:none}
+.toc li{margin:0 0 4px;font-size:15px;break-inside:avoid}
+.toc a{font-weight:500!important;color:var(--soft)!important;text-decoration:none}
+.toc a:hover{color:var(--ink)!important;text-decoration:underline}
+footer{border-top:1px solid var(--line);margin-top:30px}
+footer .in{display:flex;flex-wrap:wrap;gap:8px 18px;padding-top:22px;padding-bottom:calc(30px + env(safe-area-inset-bottom));color:var(--soft);font-size:14px}
+footer a{color:var(--ink2);font-weight:600;text-decoration:none}
+footer a:hover{text-decoration:underline}
+@media (max-width:560px){.toc{columns:1}.top nav a:nth-child(n+3){display:none}}

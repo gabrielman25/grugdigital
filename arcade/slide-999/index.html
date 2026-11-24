@@ -126,7 +126,7 @@
   .tb { position: fixed; width: 66px; height: 60px; background: rgba(40, 40, 40, .5); border: 2px solid rgba(255, 255, 255, .6); border-radius: 10px; font-size: 22px; z-index: 7; }
   .tb.on { background: rgba(120, 120, 120, .7); }
   #tL { left: 10px; bottom: calc(118px + env(safe-area-inset-bottom)); } #tR { left: 84px; bottom: calc(118px + env(safe-area-inset-bottom)); } #tU { left: 47px; bottom: calc(184px + env(safe-area-inset-bottom)); }
-  #tJ { right: 12px; bottom: calc(80px + env(safe-area-inset-bottom)); width: 84px; height: 76px; border-radius: 50%; font-size: 16px; } #tE { right: 104px; bottom: calc(80px + env(safe-area-inset-bottom)); font-size: 13px; }
+  #tJ { right: 12px; bottom: calc(80px + env(safe-area-inset-bottom)); width: 84px; height: 76px; border-radius: 50%; font-size: 16px; } #tE { right: 104px; bottom: calc(80px + env(safe-area-inset-bottom)); font-size: 13px; } #tRo { right: 24px; bottom: calc(166px + env(safe-area-inset-bottom)); font-size: 15px; }
   body.touch #bar { bottom: calc(8px + env(safe-area-inset-bottom)); } body.touch .slot { width: 48px; height: 46px; } body.touch .slot img { width: 24px; height: 24px; } body.touch .slot small { font-size: 8px; }
   #err { position: fixed; inset: 0; display: none; place-items: center; background: #14161a; text-align: center; font-size: 15px; z-index: 99; }
 
@@ -157,7 +157,7 @@
 
 <div id="touch">
   <button class="tb ol" id="tL">◀</button><button class="tb ol" id="tR">▶</button><button class="tb ol" id="tU">▲</button>
-  <button class="tb ol" id="tJ">JUMP</button><button class="tb ol hide" id="tE">ROCKET</button>
+  <button class="tb ol" id="tJ">JUMP</button><button class="tb ol hide" id="tRo">ROLL</button><button class="tb ol hide" id="tE">ROCKET</button>
 </div>
 
 <div id="shop" class="pan ol"><div class="pt"><span>Gear Shop</span><button class="x" data-close="shop">X</button></div><div class="sub">You earn $1 for every KM (more with rarer carts). Everything here is yours forever.</div><div id="shopList"></div></div>
@@ -195,6 +195,7 @@
     <div class="mt ol">Help</div>
     <div class="help">
       <b>A / D</b> or <b>← / →</b> steer · <b>Space</b> jump · <b>W / S</b> push / brake<br>
+      On foot: <b>WASD</b> walk · <b>Space</b> jump · <b>Shift</b> dodge roll<br>
       <b>Right-drag</b> turn the camera · <b>Mouse wheel</b> zoom<br>
       <b>E</b> fire the Rocket Booster · <b>1-3</b> equip gear · <b>Esc</b> this menu<br><br>
       Slide all the way down. 999 KM. There's a checkpoint every 111 KM, so if you fall off (or touch anything <span style="color:#ff6a5a">red</span>) you start again from the last one.<br>
@@ -702,7 +703,7 @@ function makeRig(look) {
   const coil = coilMesh(0xc4281c); coil.position.set(0, -1.6, -0.5); coil.visible = false; rs.add(coil);
   scene.add(g);
   const parts = [torso, head, rs.children[0], ls.children[0], rh.children[0], lh.children[0]];
-  return { g, body, root, torso, head, rs, ls, rh, lh, sled, sledKind: null, ff, coil, parts, walkT: rnd(0, 6) };
+  return { g, body, root, torso, head, rs, ls, rh, lh, sled, sledKind: null, ff, coil, parts, walkT: 0, j: { rs: 0, ls: 0, rh: 0, lh: 0 } };
 }
 function setSled(rig, kind) { if (rig.sledKind === kind) return; rig.sledKind = kind; rig.sled.clear(); if (kind) { const [id, rk] = kind.split('|'); rig.sled.add(cartMesh(id, rk === 'r')); } }
 
@@ -754,7 +755,8 @@ const Snd = {
 };
 
 // ---------------------------------------------------------------- racers (you and the bots share all of this)
-const G = 170, JP = 50, SLOPE_G = 76, DRAG = 0.00205, WALK = 16;
+const G = 170, JP = 50, SLOPE_G = 76, DRAG = 0.00205, WALK = 20;
+const ROLL = { speed: 42, time: 0.3, cd: 0.75 };   // the dodge roll: the same as Zombie Zones, Grug City and Grug Kingdom
 const racers = [];
 const SKINS = [0xf5cd30, 0xf5cd30, 0xcc8e69, 0xa05f35, 0xeac4a0, 0x7c5c46], SHIRTS = [0xc4281c, 0x0d69ac, 0x4b974b, 0xf2f3f3, 0x1b2a35, 0xda8541, 0x6b327c, 0xa3a2a5, 0xff66cc], PANTS = [0x0d69ac, 0x4b974b, 0x1b2a35, 0x635f62, 0x6b4a2c, 0xa3a2a5];
 const randLook = () => ({ skin: pick(SKINS), shirt: pick(SHIRTS), pants: pick(PANTS), hat: pick(['none', 'cap', 'cap', 'tophat', 'beanie', 'hair', 'hair']), hatColor: pick([0x111111, 0x6b4a2c, 0xc4281c, 0x0d69ac, 0xf2f3f3, 0xf5cd30]), face: pick(['smile', 'smile', 'grin', 'cool', 'wow']) });
@@ -798,11 +800,17 @@ function stepRacer(r, inp, dt) {
     const sp = 60 * fx.speed; r.vs = lerp(r.vs, inp.fy * sp, 1 - Math.exp(-4 * dt)); r.vu = lerp(r.vu, inp.fx * sp, 1 - Math.exp(-4 * dt)); r.vy = lerp(r.vy, ((inp.jump ? 1 : 0) - (inp.down ? 1 : 0)) * sp * 0.7, 1 - Math.exp(-4 * dt));
     r.s += r.vs * dt; r.u += r.vu * dt; r.y += r.vy * dt; const f = floorAt(r.s, r.u, r.y); if (f !== null && r.y < f) { r.y = f; r.vy = Math.max(0, r.vy); } r.grounded = false; return;
   }
-  if (walk) {
+  if (walk && inp.roll && !r.rollHeld && !r.roll && r.grounded && clock - (r.rollAt || -9) >= ROLL.cd) {   // Shift: dodge roll the way you're walking (forward when standing still)
+    let ds = inp.fy, du = inp.fx, l = Math.hypot(ds, du); if (l < 0.1) { ds = Math.cos(r.yaw); du = -Math.sin(r.yaw); l = 1; }
+    r.roll = { t: 0, ds: ds / l, du: du / l, trail: 0 }; r.rollAt = clock; if (r === me) Snd.play('walk', 0.5, 1.7);
+  }
+  r.rollHeld = !!inp.roll;
+  if (r.roll) { r.roll.t += dt; if (!walk || r.roll.t >= ROLL.time) r.roll = null; else { r.vs = r.roll.ds * ROLL.speed; r.vu = r.roll.du * ROLL.speed; } }
+  if (walk && !r.roll) {
     const ws = WALK * fx.speed * (gearOn(r, 'speed') ? 1.6 : 1), ts = inp.fy * ws, tu = inp.fx * ws, cur = Math.hypot(r.vs, r.vu);
     const acc = (r.grounded ? (cur > ws * 1.05 ? (ob ? 230 : 45) : 140) : 30) * dt;
     const ds = ts - r.vs, du = tu - r.vu, dl = Math.hypot(ds, du); if (dl > 0) { const k = Math.min(1, acc / dl); r.vs += ds * k; r.vu += du * k; }
-  } else {
+  } else if (!walk) {
     const ice = st.ice, air = !r.grounded;
     r.vu += inp.x * (ice ? 26 : 85) * (air ? 0.55 : 1) * dt; r.vu *= Math.exp(-(ice ? 0.35 : air ? 1.2 : 4.2) * dt); r.vu = clamp(r.vu, -34, 34);
     if (r.grounded) { tf(r.s, TF); r.vs += (SLOPE_G * TF.slope * (gearOn(r, 'speed') ? 1.3 : 1) * fx.speed + inp.y * (inp.y > 0 ? 9 : 34)) * dt; }
@@ -1148,7 +1156,7 @@ addEventListener('mousemove', e => { if (!rmb) return; turnCam(e.clientX - lastX
 function turnCam(dx, dy) { const k = [0.0035, 0.006, 0.01][Save.set.sens]; camOff -= dx * k; camPitch = clamp(camPitch + dy * k, -0.5, 1.35); dragT = 0; }
 canvas.addEventListener('wheel', e => { e.preventDefault(); camDist = clamp(camDist * (e.deltaY > 0 ? 1.15 : 1 / 1.15), 6, 60); }, { passive: false });
 // touch: buttons, and drag anywhere else to turn the camera
-const TB = { tL: false, tR: false, tU: false, tJ: false };
+const TB = { tL: false, tR: false, tU: false, tJ: false, tRo: false };
 let isTouch = false;
 function setTouch() { if (isTouch) return; isTouch = true; document.body.classList.add('touch'); }
 for (const id of Object.keys(TB).concat(['tE'])) {
@@ -1165,7 +1173,7 @@ function playerInput() {
   if (state !== 'play' || document.body.classList.contains('menu')) return inp;
   const K = c => keys.has(c);
   const sx = (K('KeyD') || K('ArrowRight') || TB.tR ? 1 : 0) - (K('KeyA') || K('ArrowLeft') || TB.tL ? 1 : 0), sy = (K('KeyW') || K('ArrowUp') || TB.tU ? 1 : 0) - (K('KeyS') || K('ArrowDown') ? 1 : 0);
-  inp.jump = K('Space') || TB.tJ; inp.down = K('ShiftLeft') || K('ShiftRight');
+  inp.jump = K('Space') || TB.tJ; inp.down = K('ShiftLeft') || K('ShiftRight'); inp.roll = inp.down || TB.tRo;
   inp.x = sx; inp.y = sy;
   // walking / flying: camera-relative, mapped onto (s, u)
   const yaw = camYaw + camOff, fwdS = Math.cos(yaw - me.yawPath), fwdU = -Math.sin(yaw - me.yawPath);
@@ -1190,16 +1198,28 @@ function poseRacer(r, dt) {
   if (walk) {
     const sp = Math.hypot(r.vs, r.vu); if (sp > 1) r.yaw = Math.atan2(-r.vu * TF.rx, r.vs) * 0 + Math.atan2(-(r.vu), r.vs);
     rig.g.rotation.set(0, r.yaw + (r.fx.spin ? clock * 12 : 0), 0);
-    rig.walkT += dt * sp * 0.45; const sw = r.grounded ? Math.sin(rig.walkT) * Math.min(1, sp / 10) * 0.9 : 0.5;
-    rig.root.position.y = 3; rig.rh.rotation.x = sw; rig.lh.rotation.x = -sw; rig.rs.rotation.x = r.grounded ? -sw : 2.6; rig.ls.rotation.x = r.grounded ? sw : 2.6;
-    if (rig.coil.visible) rig.rs.rotation.x = 1.4;
+    // the classic poses every Grug game uses: limbs ease toward the pose (walk swing, both arms up in the air, still when idle)
+    const P = Math.PI, j = rig.j; let t, rate = 12;
+    if (!r.grounded) { t = { rs: P, ls: P, rh: 0, lh: 0 }; rate = 30; rig.walkT = 0; }
+    else if (sp > 0.5) { rig.walkT += dt; const w = Math.sin(rig.walkT * 9); t = { rs: w, ls: -w, rh: -w, lh: w }; }
+    else { t = { rs: 0, ls: 0, rh: 0, lh: 0 }; rate = 9; rig.walkT = 0; }
+    if (rig.coil.visible) t.rs = 1.4;   // holding the coil up
+    for (const k in j) j[k] += clamp(t[k] - j[k], -rate * dt, rate * dt);
+    rig.root.position.y = 3; rig.root.rotation.set(0, 0, 0);
+    if (r.roll) {   // dodge roll: a forward flip, tucked
+      const k = r.roll.t / ROLL.time, e = k * k * (3 - 2 * k); rig.root.rotation.x = -P * 2 * e; rig.root.position.y = 3 - 1.3 * Math.sin(P * k); j.rh = j.lh = -1.2; j.rs = j.ls = 2.2;
+      if ((r.roll.trail -= dt) <= 0) { r.roll.trail = 0.045; const p = rig.g.position; emit(p.x + rnd(-.6, .6), p.y + 0.3, p.z + rnd(-.6, .6), rnd(-2, 2), rnd(1, 3), rnd(-2, 2), col(0xe8e8e8), 0.4); }
+    }
+    rig.rs.rotation.x = j.rs; rig.ls.rotation.x = j.ls; rig.rh.rotation.x = j.rh; rig.lh.rotation.x = j.lh;
   } else {
     r.yaw = TF.yaw;
     rig.g.rotation.order = 'YXZ'; const tp = r.grounded ? TF.pitch : lerp(rig.g.rotation.x, 0.25, 1 - Math.exp(-2 * dt));
     rig.g.rotation.set(tp, TF.yaw + (r.fx.spin ? clock * 12 : 0), -r.vu * 0.012);
-    rig.root.position.y = 2.5; rig.rh.rotation.x = rig.lh.rotation.x = Math.PI / 2; const arm = r.grounded ? 1.25 : 2.7; rig.rs.rotation.x = rig.ls.rotation.x = arm;
+    rig.root.position.y = 2.5; rig.root.rotation.set(0, 0, 0); rig.rh.rotation.x = rig.lh.rotation.x = Math.PI / 2; const arm = r.grounded ? 1.25 : 2.7; rig.rs.rotation.x = rig.ls.rotation.x = arm;
+    Object.assign(rig.j, { rs: arm, ls: arm, rh: Math.PI / 2, lh: Math.PI / 2 });   // stepping off the cart eases from here
   }
   rig.body.rotation.z = 0;
+  if (r === me && isTouch) $('tRo').classList.toggle('hide', !walk);
   // effects
   const p = rig.g.position;
   if (r.fx.fire && Math.random() < 0.9) for (let i = 0; i < 2; i++) emit(p.x + rnd(-1, 1), p.y + rnd(2, 4) * r.fx.scale, p.z + rnd(-1, 1), rnd(-1, 1), rnd(6, 12), rnd(-1, 1), pick([col(0xff7a1a), col(0xffd24a), col(0xff3a1a)]), 0.6);

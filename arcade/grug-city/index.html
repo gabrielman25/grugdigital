@@ -3887,8 +3887,15 @@ window.addEventListener('mouseup', e => {
 document.addEventListener('mousedown', e => { if (e.isTrusted && !pointerLocked && e.target !== canvas && player && !touchMode) tryLock(); }, true);
 document.addEventListener('pointerlockchange', () => {
   pointerLocked = document.pointerLockElement === canvas; if (!pointerLocked) { rmb = lmb = false; downOnUI = null; for (const e of hovSet) e.classList.remove('hov'); hovSet = new Set(); }
-  $('paused').style.display = pointerLocked || !player || touchMode ? 'none' : 'flex'; updateHover(); drawCursor();
+  $('paused').style.display = 'none'; updateHover(); drawCursor();
+  // Esc (or leaving the tab) drops the mouse lock: instead of a "Paused" screen, do what the Esc key does in game:
+  // close an open shop or picker, otherwise open the Game Menu (Resume, Settings, Leave Game). Any click locks it again.
+  if (!pointerLocked && player && !touchMode) setTimeout(() => {
+    if (pointerLocked || performance.now() - escAt < 400 || $('menu').classList.contains('on')) return;
+    dispatchEvent(new KeyboardEvent('keydown', { code: 'Escape', key: 'Escape' })); dispatchEvent(new KeyboardEvent('keyup', { code: 'Escape', key: 'Escape' }));
+  }, 150);
 });
+let escAt = -1e9; addEventListener('keydown', e => { if (e.code === 'Escape' && e.isTrusted) escAt = performance.now(); }, true);
 function setMouseLock(on) { shiftLock = on; $('mLock').textContent = 'Mouse lock: ' + (on ? 'On' : 'Off'); $('mLock').classList.toggle('on', on); updateHover(); drawCursor(); }
 $('mLock').addEventListener('click', () => setMouseLock(!shiftLock));
 function onMove(e) {
