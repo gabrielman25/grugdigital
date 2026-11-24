@@ -34,6 +34,34 @@ CSS = r"""<!--go:css--><style id="go-css">
   .go-finish{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .8rem;margin:0 0 .9rem}
   .go-finish span{font-size:.88rem;color:var(--g-muted,#6E6B66)}
   @media (max-width:820px){ #toOutfits{display:none} }
+  /* Try this avatar out in the arcade: bottom left, a slideshow of Grug renders in Grug City */
+  .go-arc{position:fixed;z-index:5;left:1.25rem;bottom:1.25rem;width:19.5rem;height:11.75rem;padding:0;border:0;border-radius:1.25rem;overflow:hidden;cursor:pointer;
+    background:#2a4a1a;color:#fff;font:inherit;text-align:left;box-shadow:0 8px 26px rgba(0,0,0,.28);transition:transform .18s,box-shadow .18s}
+  .go-arc:hover{transform:translateY(-3px) scale(1.015);box-shadow:0 12px 32px rgba(0,0,0,.34)} .go-arc:disabled{cursor:progress}
+  .go-arc .sl{position:absolute;inset:0;opacity:0;transition:opacity 1.1s ease}
+  .go-arc .sl.on{opacity:1}
+  .go-arc .bg{position:absolute;inset:-8%;background-size:cover;background-position:center;transform:scale(1.04)}
+  .go-arc .sl.on .bg{animation:goPan 7s ease-in-out both}
+  .go-arc .sl img{position:absolute;bottom:-6%;height:92%;filter:drop-shadow(0 4px 6px rgba(0,0,0,.35))}
+  .go-arc .sl.on img{animation:goHop .9s cubic-bezier(.3,1.5,.6,1) both}
+  .go-arc .sl.on img + img{animation-delay:.12s} .go-arc .sl.on img + img + img{animation-delay:.24s}
+  .go-arc .sh{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.78) 0,rgba(0,0,0,.25) 42%,rgba(0,0,0,0) 62%)}
+  .go-arc .tx{position:absolute;left:1rem;right:.85rem;bottom:.85rem;display:flex;align-items:center;justify-content:space-between;gap:.7rem;
+    font-weight:700;font-size:1.08rem;line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,.55)}
+  .go-arc .tx i{flex:none;width:2.4rem;height:2.4rem;border-radius:999px;background:#9BE338;color:#1a1a1a;display:grid;place-items:center;text-shadow:none;transition:transform .18s}
+  .go-arc .tx i svg{width:1.2rem;height:1.2rem}
+  .go-arc:hover .tx i{transform:translateX(3px)}
+  .go-arc.busy .tx i{animation:goSpin .9s linear infinite}
+  @keyframes goPan{from{transform:scale(1.04) translateX(-2.5%)}to{transform:scale(1.12) translateX(2.5%)}}
+  @keyframes goHop{from{transform:translateY(28%);opacity:0}to{transform:none;opacity:1}}
+  @keyframes goSpin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.go-arc .sl.on .bg,.go-arc .sl.on img,.go-arc.busy .tx i{animation:none}}
+  @media (max-width:820px){   /* portrait: a smaller card at the left, just above the editor panel (outfits.js sets --arc-top) */
+    .go-arc{left:.75rem;bottom:auto;top:var(--arc-top,58vh);width:11.5rem;height:6.9rem;border-radius:1rem}
+    .go-arc .tx{left:.6rem;right:.5rem;bottom:.5rem;gap:.4rem;font-size:.82rem}
+    .go-arc .tx i{width:1.8rem;height:1.8rem} .go-arc .tx i svg{width:.95rem;height:.95rem}
+  }
+  @media (max-height:560px) and (min-width:821px){ .go-arc{width:14rem;height:8.4rem;left:.9rem;bottom:.9rem} .go-arc .tx{font-size:.9rem} }
   /* wardrobe (src/character/wardrobe.js) */
   .g-card:has(> #exGrid){display:none}
   .wd-head{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem}
@@ -99,6 +127,9 @@ def apply(s, agent_js=None, labels=None):
         '<script>document.getElementById("goBack").addEventListener("click", e => { let same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin && new URL(document.referrer).pathname !== location.pathname; } catch (x) {} if (same && history.length > 1) { e.preventDefault(); history.back(); } });</script>\n  <!--/go:back--><span class="g-brandmark"')
     sub('<div class="cg-fabs">', f'<!--go:btn--><button id="toOutfits" class="g-btn go-float" title="Save characters for the Grug games and pick who you play as">{SHIRT}My outfits<span id="goCount"></span></button><!--/go:btn--><div class="cg-fabs">')
     sub('<div class="cg-fabs">', f'<div class="cg-fabs"><!--go:fab--><button id="toOutfitsM" class="g-btn cg-fab" title="My outfits">{SHIRT}Outfits</button><!--/go:fab-->')
+    # Try this avatar out in the arcade: saves it, plays as it, opens the Arcade (the slides are filled in by outfits.js)
+    sub('<!--go:btn-->', '<!--go:arc--><button id="toArcade" class="go-arc" type="button" title="Save this character, play as it, and open the Grug Arcade">'
+        '<span class="sh"></span><span class="tx"><span>Try this avatar out in the arcade</span><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></i></span></button><!--/go:arc--><!--go:btn-->')
     i = s.index('<div id="noOutfit"'); j = s.index('</div>', i) + len('</div>')
     s = s[:j] + ('<!--go:finish-->\n    <div class="go-finish"><button id="goSaveF" class="g-btn g-btn--primary"><i data-g-icon="floppy_disk"></i>Save for the Grug games</button>'
                  '<span>Free. Play as this character in the Grug games.</span></div><!--/go:finish-->') + s[j:]
