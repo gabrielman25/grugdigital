@@ -1915,25 +1915,29 @@ function part(cx, cy, cz, sx, sy, sz, color, o = {}) {
   let m = null;
   if (color !== null) {
     if (o.material || o.solo) { m = new THREE.Mesh(boxGeo(sx, sy, sz), o.material || mat(color, o.studs !== false)); m.position.set(cx, cy, cz); m.receiveShadow = true; m.castShadow = !!o.shadow; scene.add(m); }
-    else { const studs = o.studs !== false, key = color + '|' + studs; let B = STATIC.get(key); if (!B) STATIC.set(key, B = { color, studs, boxes: [] }); B.boxes.push([cx, cy, cz, sx, sy, sz]); }
+    else { const studs = o.studs !== false, key = color + '|' + studs; let B = STATIC.get(key); if (!B) STATIC.set(key, B = { color, studs, boxes: [] });
+      // a house wall (o.fade = its house) remembers where it ends up in the batch, so it can turn see-through (as in Zombie Zones)
+      const rec = o.fade ? { cx, cy, cz, sx, sy, sz, color, minX: cx - sx / 2, maxX: cx + sx / 2, minY: cy - sy / 2, maxY: cy + sy / 2, minZ: cz - sz / 2, maxZ: cz + sz / 2, ranges: [], tmp: [] } : null; if (rec) o.fade.walls.push(rec);
+      B.boxes.push([cx, cy, cz, sx, sy, sz, rec]); }
   }
   if (p) p.mesh = m; return p || m;
 }
 function flushStatic() {   // merge each batch into one mesh, keeping the studs-on-top / plain sides / inlets-under material groups
   for (const B of STATIC.values()) {
     const per = [0, 1, 2, 3, 4, 5].map(() => ({ p: [], n: [], u: [] }));
-    for (const [cx, cy, cz, sx, sy, sz] of B.boxes) {
+    for (const [cx, cy, cz, sx, sy, sz, rec] of B.boxes) {
       const g = boxGeo(sx, sy, sz), P = g.attributes.position, Nn = g.attributes.normal, U = g.attributes.uv, I = g.index.array;
-      for (const gr of g.groups) { if (gr.materialIndex === 3) continue; const q = per[B.studs && gr.materialIndex === 2 ? 2 : 0]; for (let i = gr.start; i < gr.start + gr.count; i++) { const v = I[i]; q.p.push(P.getX(v) + cx, P.getY(v) + cy, P.getZ(v) + cz); q.n.push(Nn.getX(v), Nn.getY(v), Nn.getZ(v)); q.u.push(U.getX(v), U.getY(v)); } }
+      for (const gr of g.groups) { if (gr.materialIndex === 3) continue; const qi = B.studs && gr.materialIndex === 2 ? 2 : 0, q = per[qi], st = q.p.length / 3; for (let i = gr.start; i < gr.start + gr.count; i++) { const v = I[i]; q.p.push(P.getX(v) + cx, P.getY(v) + cy, P.getZ(v) + cz); q.n.push(Nn.getX(v), Nn.getY(v), Nn.getZ(v)); q.u.push(U.getX(v), U.getY(v)); } if (rec) rec.tmp.push([qi, st, gr.count]); }
     }
-    const pos = [], nor = [], uv = [], geo = new THREE.BufferGeometry(); let at = 0;
-    per.forEach((q, mi) => { if (!q.p.length) return; pos.push(...q.p); nor.push(...q.n); uv.push(...q.u); const c = q.p.length / 3; if (B.studs) geo.addGroup(at, c, mi); at += c; });
+    const pos = [], nor = [], uv = [], geo = new THREE.BufferGeometry(), gs = []; let at = 0;
+    per.forEach((q, mi) => { gs[mi] = at; if (!q.p.length) return; pos.push(...q.p); nor.push(...q.n); uv.push(...q.u); const c = q.p.length / 3; if (B.studs) geo.addGroup(at, c, mi); at += c; });
     geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
     const m = new THREE.Mesh(geo, mat(B.color, B.studs)); m.receiveShadow = true; m.castShadow = true; scene.add(m);
+    for (const bx of B.boxes) { const rec = bx[6]; if (rec) { rec.ranges = rec.tmp.map(([qi, st, n]) => ({ m, s: gs[qi] + st, n, save: null })); rec.tmp = null; } }
   }
   STATIC.clear();
 }
-const camFilter = p => !p.noCam;
+const camFilter = p => !p.noCam && !p.hwall && !p.hfurn;   // the camera passes through house walls (they turn see-through instead) and furniture
 
 // signs (canvas text on a plane) and billboards
 function textCanvas(lines, w, h, bg, fg, size) {
@@ -2290,7 +2294,7 @@ function buildMap() {
   W.add({ minX: -4000, maxX: 4000, minY: -20, maxY: 0, minZ: -4000, maxZ: 4000, noCam: true });   // the baseplate
   // the Depot: the same tiled floor (concrete), walled in, a hangar at the back, raised tiles to stand on, benches, lamps
   const dark = 0x5e5c5a, trim = 0xf5cd30, dw = 0x8e9096, occ = new Map();
-  const raised = [[-76, 12, 1], [-76, 20, 1], [-68, 12, 1], [76, 12, 1], [76, 20, 2], [68, 20, 1], [-44, -20, 1], [44, -20, 1], [-92, 52, 2], [92, 52, 2]];
+  const raised = [[76, 12, 1], [76, 20, 2], [68, 20, 1], [-92, 52, 2], [92, 52, 2]];
   for (const [x, z, n] of raised) { occ.set(tkey(x, z), 'hill'); hillTile(x, z, n, n > 1 ? 0x6a6c72 : 0x8a898c); }
   floorTiles(PLAZA.minX, PLAZA.maxX, PLAZA.minZ, PLAZA.maxZ, [0xa3a2a5, 0x97969a], occ);
   part(PLAZA.minX - 2, WALL_H / 2, (PLAZA.minZ + PLAZA.maxZ) / 2, 4, WALL_H, PLAZA.maxZ - PLAZA.minZ, dw); part(PLAZA.maxX + 2, WALL_H / 2, (PLAZA.minZ + PLAZA.maxZ) / 2, 4, WALL_H, PLAZA.maxZ - PLAZA.minZ, dw);
@@ -2304,11 +2308,11 @@ function buildMap() {
   const bench = (x, z) => { part(x, 1.8, z, 9, 0.6, 2.4, 0x8a5428, { p: { kind: 'seat' } }); part(x - 3.5, 1.25, z, 1, 0.5, 1, dark); part(x + 3.5, 1.25, z, 1, 0.5, 1, dark); };
   for (const x of [-60, -44, 44, 60]) bench(x, 44);
   for (const [x, z] of [[-92, -28], [92, -28], [-92, 36], [92, 36], [-20, -28], [20, -28]]) { part(x, 7, z, 1.2, 12, 1.2, dark); part(x, 13.5, z, 2.4, 1, 2.4, trim, { material: new THREE.MeshLambertMaterial({ color: 0xffe9a8, emissive: 0x6a5a20 }) }); }
-  for (const [x, z, h] of [[-60, -4, 1], [-60, 4, 2], [60, -4, 1]]) for (let k = 0; k < h; k++) part(x, 3 + 4 * k, z, 4, 4, 4, 0xa87a4a);
+  for (const [x, z, h] of [[-36, -6, 1], [-36, 2, 2], [36, -4, 1]]) for (let k = 0; k < h; k++) part(x, 3 + 4 * k, z, 4, 4, 4, 0xa87a4a);
   gateWall(PLAZA.minZ, dw, 0x5e5c5a, null);   // the way out to Zone 1: always open
   gateSign(PLAZA.minZ, zoneDef(0), 0x5e5c5a);
   // the Depot's booths: cards (energy), loot crates (Pearls), the quest board
-  booth('cards', 68, -20); booth('crates', -68, -20); booth('quests', -28, -12);
+  booth('cards', -60, -28, 's'); booth('crates', 60, -28, 's'); booth('quests', -80, 20, 'e');
   for (let i = 0; i < 90; i++) { const x = pick([-1, 1]) * rnd(118, 260), z = rnd(80, -1400); TREES.push({ x, z, s: rnd(1.1, 1.9) }); }
   for (let i = 0; i < 20; i++) TREES.push({ x: rnd(-200, 200), z: rnd(80, 200), s: rnd(1.1, 1.8) });
   plantTrees();
@@ -2320,6 +2324,93 @@ function gateSign(z, Z, col, town) {
   if (town) sign([Z.town.toUpperCase(), 'TOWN · SHOPS · QUESTS'], 0, WALL_H + 3.6, z + 1.85, 48, 6.6, 0, 1, '#2a1d10', ['#ffe9a0', '#ddd']);
   else sign([`${Z.short.toUpperCase()} · ${Z.name.toUpperCase()}`, ''], 0, WALL_H + 3.6, z + 1.85, 48, 6.6, 0, 1, '#1d1d21', [Z.css, '#ddd']);
 }
+// ---------------------------------------------------------------- houses, as in Zombie Zones: 1-stud walls 9 high, a full-height door gap, windows cut between a sill
+// and a lintel, floorboards, a flat roof slab. Step inside and the roof goes; a wall between you and the camera turns see-through
+const HOUSES = [];
+const HSE = { T: 1, H: 9, DW: 7, WW: 4, SILL: 3.2, WTOP: 6.8 };
+function wallLine(a, b, door, col, outer, H) {
+  const alongX = Math.abs(a[1] - b[1]) < 1e-6, lo = alongX ? Math.min(a[0], b[0]) : Math.min(a[1], b[1]), hi = alongX ? Math.max(a[0], b[0]) : Math.max(a[1], b[1]), c = alongX ? a[1] : a[0];
+  const ext = outer && alongX ? HSE.T / 2 : -HSE.T / 2, m = (lo + hi) / 2, holes = [];
+  if (door) holes.push([m - HSE.DW / 2, m + HSE.DW / 2, false]);
+  if (outer) for (const [s0, s1] of door ? [[lo, m - HSE.DW / 2], [m + HSE.DW / 2, hi]] : [[lo, hi]]) {
+    const L = s1 - s0; if (L >= 24) holes.push([s0 + L / 4 - HSE.WW / 2, s0 + L / 4 + HSE.WW / 2, true], [s1 - L / 4 - HSE.WW / 2, s1 - L / 4 + HSE.WW / 2, true]); else if (L >= 9) holes.push([(s0 + s1) / 2 - HSE.WW / 2, (s0 + s1) / 2 + HSE.WW / 2, true]);
+  }
+  holes.sort((p, q) => p[0] - q[0]);
+  const o = { p: { hwall: true }, fade: H };
+  const put = (s0, s1, y0, y1) => { if (s1 - s0 > 0.05) alongX ? part((s0 + s1) / 2, GY + (y0 + y1) / 2, c, s1 - s0, y1 - y0, HSE.T, col, o) : part(c, GY + (y0 + y1) / 2, (s0 + s1) / 2, HSE.T, y1 - y0, s1 - s0, col, o); };
+  let at = lo - ext;
+  for (const [h0, h1, win] of holes) { put(at, h0, 0, HSE.H); if (win) { put(h0, h1, 0, HSE.SILL); put(h0, h1, HSE.WTOP, HSE.H); } at = h1; }
+  put(at, hi + ext, 0, HSE.H);
+}
+// a box house. Its insides are laid out in its own frame: u across, v from the back wall (-) to the front door (+).
+// face: which way the door looks ('s' +z, 'n' -z, 'e' +x, 'w' -x). Returns the house, with at(u, v) and put(...) for furnishing it
+const FACE = { s: [0, 1], n: [0, -1], e: [1, 0], w: [-1, 0] };
+function buildHouse(hx, hz, wu, dv, face, col, roofCol) {
+  const [fx, fz] = FACE[face], at = (u, v) => [hx + u * -fz + v * fx, hz + u * fx + v * fz];   // u runs along the front wall, v toward the door
+  const sx = fx ? dv : wu, sz = fx ? wu : dv, x0 = hx - sx / 2, x1 = hx + sx / 2, z0 = hz - sz / 2, z1 = hz + sz / 2;
+  const H = { rects: [[x0, z0, x1, z1]], bb: [x0, z0, x1, z1], walls: [], roofs: [], face, at, yaw: Math.atan2(-fx, -fz), box: { minX: x0 - 1.5, maxX: x1 + 1.5, minY: 0, maxY: GY + HSE.H + 2, minZ: z0 - 1.5, maxZ: z1 + 1.5 } };
+  H.put = (u, v, y, su, sy, sv, color, o) => { const [x, z] = at(u, v); return part(x, y, z, fx ? sv : su, sy, fx ? su : sv, color, o); };
+  part(hx, GY + 0.14, hz, sx, 0.28, sz, 0x8a6a4a);   // floorboards, lifted off the ground a hair
+  const edges = [['n', [x0, z0], [x1, z0]], ['e', [x1, z0], [x1, z1]], ['s', [x0, z1], [x1, z1]], ['w', [x0, z0], [x0, z1]]];
+  for (const [side, a, b] of edges) wallLine(a, b, side === face, col, true, H);
+  const RE = HSE.T / 2 + 0.6, roof = new THREE.Mesh(boxGeo(sx + RE * 2, 1, sz + RE * 2), mat(roofCol)); roof.position.set(hx, GY + HSE.H + 0.5, hz); roof.castShadow = true; roof.receiveShadow = true; scene.add(roof);
+  H.roofs.push(roof); H.roofBox = { minX: x0 - RE, maxX: x1 + RE, minY: GY + HSE.H, maxY: GY + HSE.H + 1, minZ: z0 - RE, maxZ: z1 + RE };
+  const [dx, dz] = at(0, dv / 2); H.door = { ox: dx + fx * 4, oz: dz + fz * 4 };
+  HOUSES.push(H); return H;
+}
+// a sign over the door, standing on the front edge of the roof
+function houseSign(H, lines, wu, dv, bg, fg) {
+  const [x, z] = H.at(0, dv / 2 + 0.8), [fx, fz] = FACE[H.face];
+  const [bx, bz] = H.at(0, dv / 2 + 0.3), w = Math.min(wu - 2, 18), board = new THREE.Mesh(boxGeo(fx ? 0.6 : w, 4.4, fx ? w : 0.6), mat(0x2a2a2e)); board.position.set(bx, GY + HSE.H + 3.2, bz); board.castShadow = true; scene.add(board);
+  const sg = sign(lines, x + fx * 0.05, GY + HSE.H + 3.2, z + fz * 0.05, Math.min(wu - 3, 17), 3.8, fx, fz, bg, fg);
+  H.roofs.push(board, sg);   // it goes with the roof when you're inside, so it doesn't block the view
+}
+// a plain home: a table, a bed, a shelf
+function homeHouse(hx, hz, wu, dv, face, k) {
+  const H = buildHouse(hx, hz, wu, dv, face, [0xc9b38a, 0xa34b4b, 0xd8d8d8, 0x8a9fb5, 0x9a6b45, 0xb5a27a][k % 6], [0x4a4a4f, 0x6b3a2a, 0x5a5048, 0x3e4a5a, 0x7a4a3a, 0x2f4a3a][(k + 2) % 6]);
+  const f = { p: { hfurn: true } };
+  H.put(0, -1, GY + 1.8, 6, 3, 4, 0x6b4a2c, f); H.put(-4.2, -1, GY + 1.1, 1.6, 1.6, 1.6, 0x8a5428, f); H.put(4.2, -1, GY + 1.1, 1.6, 1.6, 1.6, 0x8a5428, f);
+  H.put(wu / 2 - 3.4, -dv / 2 + 3.4, GY + 1, 4.4, 1.4, 6.4, 0xd8d8d8, f); H.put(wu / 2 - 3.4, -dv / 2 + 1.3, GY + 1.5, 4.4, 1.2, 2.2, 0xc4281c, f);
+  H.put(-wu / 2 + 2.2, -dv / 2 + 1.4, GY + 3, 3.2, 6, 1.6, 0x7a5636, f);
+  return H;
+}
+const houseAt = (x, z) => HOUSES.find(H => H.rects.some(q => x > q[0] && x < q[2] && z > q[1] && z < q[3])) || null;
+function segBox(a, b, Bx, pad) {
+  let t0 = 0, t1 = 1;
+  for (const [o, d, lo, hi] of [[a.x, b.x - a.x, Bx.minX - pad, Bx.maxX + pad], [a.y, b.y - a.y, Bx.minY - pad, Bx.maxY + pad], [a.z, b.z - a.z, Bx.minZ - pad, Bx.maxZ + pad]]) {
+    if (Math.abs(d) < 1e-9) { if (o < lo || o > hi) return false; continue; }
+    let u = (lo - o) / d, v = (hi - o) / d; if (u > v) { const w = u; u = v; v = w; } if (u > t0) t0 = u; if (v < t1) t1 = v; if (t0 > t1) return false;
+  }
+  return true;
+}
+const FADED = new Set(), ROOFOFF = new Set(), GHM = {};
+const ghostMat = c => GHM[c] || (GHM[c] = new THREE.MeshLambertMaterial({ color: c, transparent: true, opacity: 0.22, depthWrite: false }));
+function fadeWall(w, on) {
+  for (const r of w.ranges) {
+    const P = r.m.geometry.attributes.position, Ar = P.array, a = r.s * 3, b = (r.s + r.n) * 3;
+    if (on) { if (!r.save) r.save = Ar.slice(a, b); for (let i = a; i < b; i += 3) { Ar[i] = w.cx; Ar[i + 1] = w.cy; Ar[i + 2] = w.cz; } } else if (r.save) Ar.set(r.save, a);
+    P.needsUpdate = true;
+  }
+  if (on) { if (!w.ghost) { w.ghost = new THREE.Mesh(boxGeo(w.sx, w.sy, w.sz), ghostMat(w.color)); w.ghost.position.set(w.cx, w.cy, w.cz); w.ghost.renderOrder = 3; } scene.add(w.ghost); FADED.add(w); }
+  else { if (w.ghost) scene.remove(w.ghost); FADED.delete(w); }
+}
+function setRoof(H, show) { for (const m of H.roofs) m.visible = show; if (show) ROOFOFF.delete(H); else ROOFOFF.add(H); }
+function updateHouseView() {
+  const want = new Set(), roofs = new Set();
+  if (player && !B.on && !SC.on) {
+    const a = { x: cam.fx, y: cam.fy, z: cam.fz }, b = camera.position, H0 = houseAt(player.ch.x, player.ch.z); if (H0) roofs.add(H0);
+    for (const H of HOUSES) {
+      if (Math.abs(H.box.minX - a.x) > 160 || Math.abs(H.box.minZ - a.z) > 160 || !segBox(a, b, H.box, 1)) continue;
+      for (const w of H.walls) if (segBox(a, b, w, 0.6)) want.add(w);
+      if (segBox(a, b, H.roofBox, 0.6)) roofs.add(H);
+    }
+  }
+  for (const w of [...FADED]) if (!want.has(w)) fadeWall(w, false);
+  for (const w of want) if (!FADED.has(w) && w.ranges.length) fadeWall(w, true);
+  for (const H of [...ROOFOFF]) if (!roofs.has(H)) setRoof(H, true);
+  for (const H of roofs) if (!ROOFOFF.has(H)) setRoof(H, false);
+}
+
 // a wall right across the map at z, with a gate in the middle (an arch over it). Returns the field that shuts it
 function gateWall(z, col, trimCol, Z) {
   const half = AREA_W / 2, gw = GATE_W / 2;
@@ -2430,19 +2521,14 @@ function buildTown(k) {
   // a path up the middle, cobbles either side
   for (let x = -12; x <= 12; x += TS) for (let z = z1 + TS / 2; z < z0; z += TS) occ.set(tkey(x, z), 'skip');
   floorTiles(-16, 16, z1, z0, [0xe3d3ad, 0xd9c79d], pocc);
-  const bz = z0 - 46;
-  booth('cards', -34, bz, k); booth('crates', 34, bz, k); booth('quests', -78, z0 - 28, k);
-  // houses by the walls
-  const house = (x, z, w, d, wall, roof) => { part(x, 1 + 7, z, w, 14, d, wall); part(x, 15.5, z, w + 2, 1, d + 2, roof); part(x, 17.5, z, w - 4, 3, d - 4, roof); part(x, 20, z, w - 10, 2, d - 8, roof);
-    part(x, 4.5, z + d / 2 + 0.1, 4, 7, 0.4, 0x5a3a24, { deco: true }); part(x - w / 4, 9, z + d / 2 + 0.1, 3, 3, 0.4, 0x9fd8ff, { deco: true }); part(x + w / 4, 9, z + d / 2 + 0.1, 3, 3, 0.4, 0x9fd8ff, { deco: true });
-    for (let xx = x - w / 2; xx < x + w / 2; xx += TS) for (let zz = z - d / 2; zz < z + d / 2; zz += TS) occ.set(tkey(xx + 0.1, zz + 0.1), 'prop'); };
-  const hc = [0xe8dcc0, 0xd8b08a, 0xc8d8e8, 0xe0c8d8], rc = [0xb04a2a, 0x3a6a9a, 0x5a8a3a, 0x7a4a9a];
-  house(80, z0 - 24, 20, 16, hc[k % 4], rc[k % 4]); house(80, z0 - 66, 20, 18, hc[(k + 1) % 4], rc[(k + 2) % 4]); house(-80, z0 - 72, 20, 18, hc[(k + 2) % 4], rc[(k + 1) % 4]);
+  // the shops are houses either side of the path (doors onto it), and a few homes
+  booth('cards', -40, z0 - 30, 'e', k); booth('crates', 40, z0 - 30, 'w', k); booth('quests', -40, z0 - 70, 'e', k);
+  homeHouse(40, z0 - 70, 22, 16, 'w', k); homeHouse(84, z0 - 30, 18, 14, 'w', k + 1); homeHouse(-84, z0 - 74, 18, 14, 'e', k + 3);
   // lamps and benches along the path, a well
   for (const z of [z0 - 16, z0 - 80]) for (const sx of [-1, 1]) { const x = sx * 18; part(x, 7, z, 1.2, 12, 1.2, 0x3a3a3e); part(x, 13.5, z, 2.4, 1, 2.4, 0, { material: new THREE.MeshLambertMaterial({ color: 0xffe9a8, emissive: 0x6a5a20 }) }); }
   for (const sx of [-1, 1]) { const x = sx * 22, z = z0 - 62; part(x, 1.8, z, 2.4, 0.6, 9, 0x8a5428, { p: { kind: 'seat' } }); part(x, 1.25, z - 3.5, 1, 0.5, 1, 0x3a3a3e); part(x, 1.25, z + 3.5, 1, 0.5, 1, 0x3a3a3e); }
-  { const x = -40, z = z0 - 80; part(x, 2.5, z, 10, 3, 10, 0x8a8c92); part(x, 3.9, z, 7, 0.2, 7, 0, { deco: true, material: new THREE.MeshLambertMaterial({ color: 0x4aa8ff, emissive: 0x103a6a }) }); part(x - 4, 8, z, 1, 9, 1, 0x6a4a2a); part(x + 4, 8, z, 1, 9, 1, 0x6a4a2a); part(x, 13, z, 10, 1.4, 4, 0xb04a2a); occ.set(tkey(x, z), 'prop'); occ.set(tkey(x - 4.1, z), 'prop'); occ.set(tkey(x + 4.1, z), 'prop'); }
-  for (const [x, z] of [[-60, z0 - 10], [60, z0 - 10], [-56, z0 - 88], [56, z0 - 88], [96, z0 - 46], [-96, z0 - 48]]) { part(x, 2.6, z, 5, 3.2, 5, 0x3f8a3a); part(x, 4.6, z, 3, 1.4, 3, 0x4f9a46, { deco: true }); occ.set(tkey(x, z), 'prop'); }
+  { const x = -64, z = z0 - 90; part(x, 2.5, z, 10, 3, 10, 0x8a8c92); part(x, 3.9, z, 7, 0.2, 7, 0, { deco: true, material: new THREE.MeshLambertMaterial({ color: 0x4aa8ff, emissive: 0x103a6a }) }); part(x - 4, 8, z, 1, 9, 1, 0x6a4a2a); part(x + 4, 8, z, 1, 9, 1, 0x6a4a2a); part(x, 13, z, 10, 1.4, 4, 0xb04a2a); occ.set(tkey(x, z), 'prop'); occ.set(tkey(x - 4.1, z), 'prop'); occ.set(tkey(x + 4.1, z), 'prop'); }
+  for (const [x, z] of [[-60, z0 - 10], [60, z0 - 10], [-20, z0 - 90], [56, z0 - 88], [96, z0 - 50], [-96, z0 - 46]]) { part(x, 2.6, z, 5, 3.2, 5, 0x3f8a3a); part(x, 4.6, z, 3, 1.4, 3, 0x4f9a46, { deco: true }); occ.set(tkey(x, z), 'prop'); }
   floorTiles(x0, x1, z1, z0, cols, occ);
   TOWNSITE[k] = { k, z0, z1 };
   spawnTownfolk(k);
@@ -3684,40 +3770,57 @@ const BOOTH_LOOK = {
 };
 const crateBoxMat = (() => { let m = null; return () => m || (m = new THREE.MeshLambertMaterial({ map: spriteTex('crate') })); })();
 function randomLook() { return { skin: pick([0xf5cd30, 0xe0b48a, 0xa8744a, 0x6a4a32, 0xffd8b8]), shirt: new THREE.Color().setHSL(Math.random(), 0.6, 0.5).getHex(), arms: null, pants: pick([0x3a3a40, 0x2a4a8a, 0x5a3a2a, 0x2a2a2a]), hat: pick(['cap', 'beanie', 'hair', 'none', 'headphones']), hatColor: new THREE.Color().setHSL(Math.random(), 0.6, 0.45).getHex(), face: pick(['smile', 'grin', 'happy', 'cool']) }; }
-function booth(kind, x, z, k = -1) {
-  const L = BOOTH_LOOK[kind], shows = [];
-  if (kind === 'quests') {   // a notice board on two posts, papers pinned to it
-    part(x - 7, 6, z, 1.4, 10, 1.4, L.col); part(x + 7, 6, z, 1.4, 10, 1.4, L.col);
-    part(x, 7, z, 13, 7, 0.8, 0x6a4020);
-    for (const [dx, dy, w, h] of [[-4, 8.5, 3, 3.4], [0, 8, 3.4, 4], [4, 8.6, 2.6, 3], [-3, 5.2, 3.4, 2.4], [3.4, 5, 3, 2.6]]) part(x + dx, dy, z + 0.5, w, h, 0.15, pick([0xf8f4e8, 0xfff2b0, 0xe8f4ff]), { deco: true });
-    sign([L.title, ''], x, 12.6, z + 0.45, 13, 2.6, 0, 1, L.bg, L.fg);
-    const bk = new THREE.Sprite(new THREE.SpriteMaterial({ map: spriteTex('book'), transparent: true })); bk.scale.set(4, 4, 1); bk.position.set(x, 17, z); scene.add(bk); shows.push(bk);
-  } else {   // two posts with a header, a counter with the goods on show, the keeper behind it
-    part(x - 7.5, 7, z, 1.6, 12, 1.6, L.col); part(x + 7.5, 7, z, 1.6, 12, 1.6, L.col);
-    part(x, 13.75, z, 16.6, 1.5, 2, L.col);
-    part(x, 2.5, z + 6, 14, 3, 3, new THREE.Color(L.col).multiplyScalar(0.7).getHex()); part(x, 4.15, z + 6, 15, 0.3, 4, L.trim);
-    part(x - 5, 16.25, z, 1, 3.5, 1, L.col); part(x + 5, 16.25, z, 1, 3.5, 1, L.col);
-    sign([L.title, ''], x, 17, z + 0.05, 14, 4.4, 0, 1, L.bg, L.fg);
-    if (kind === 'cards') for (const [q, id] of [[-4.5, 'hop'], [0, 'zap'], [4.5, 'raise']]) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: artTex(id), transparent: true })); sp.scale.set(3.4, 3.4, 1); sp.position.set(x + q, 6.6, z + 6); sp.userData.y0 = 6.6; scene.add(sp); shows.push(sp); }
-    else {
-      const cr = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 3), crateBoxMat()); cr.position.set(x - 3.5, 6, z + 6); cr.castShadow = true; scene.add(cr); shows.push(cr);
-      const gh = new THREE.Group(), gun = builtGun('ray', ''); gun.position.set(0, 0, 0); gh.add(gun); gh.position.set(x + 3.5, 6.4, z + 6); gh.scale.setScalar(1.2); scene.add(gh); shows.push(gh);
+// each booth is a house (as in Zombie Zones): the roof goes when you step in. Inside: a counter with the keeper behind it, the goods,
+// shelves, and a glowing ring in front of the counter. Stand on the ring to shop
+const SHOP_HOUSE = {
+  cards: { walls: 0xd8e8c8, roof: 0x2f6a2a, counter: 0x2f8f2a, sub: 'CARDS FOR ENERGY' },
+  crates: { walls: 0xe0d0e8, roof: 0x5a2a6e, counter: 0x6a2a88, sub: 'BLASTERS · SKINS' },
+  quests: { walls: 0xc9b38a, roof: 0x6b3a2a, counter: 0x8a5428, sub: 'SIDE QUESTS' },
+};
+function booth(kind, x, z, face = 's', k = -1) {
+  const L = BOOTH_LOOK[kind], S = SHOP_HOUSE[kind], WU = 24, DV = 18, f = { p: { hfurn: true } }, shows = [];
+  const H = buildHouse(x, z, WU, DV, face, S.walls, S.roof), put = H.put, Y = GY;
+  houseSign(H, [L.title, S.sub], WU, DV, L.bg, L.fg);
+  const sprite = (tex, u, v, y, sc) => { const [sx, sz] = H.at(u, v), sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true })); sp.scale.set(sc, sc, 1); sp.position.set(sx, y, sz); sp.userData.y0 = y; scene.add(sp); shows.push(sp); return sp; };
+  // shelves on the back wall, with things on them
+  for (const u of [-8, 8]) { put(u, -DV / 2 + 1.3, Y + 3.5, 6, 0.4, 1.8, 0x7a5636, f); put(u, -DV / 2 + 1.3, Y + 6.2, 6, 0.4, 1.8, 0x7a5636, f); for (const q of [-2, 0, 2]) put(u + q, -DV / 2 + 1.3, Y + 4.4, 1.2, 1.4, 1.2, pick([0xc4281c, 0x2a5aa8, 0xf5cd30, 0x4b974b]), { deco: true }); }
+  if (kind === 'quests') {
+    // a notice board on the back wall, a desk to the side with the quest giver
+    put(0, -DV / 2 + 1, Y + 5, 10, 5.4, 0.6, 0x6a4020, { deco: true });
+    for (const [du, dy, w, h] of [[-3, 6.2, 2.4, 2.6], [0, 6, 2.6, 3], [3, 6.4, 2, 2.2], [-2.4, 3.6, 2.6, 1.8], [2.6, 3.5, 2.2, 2]]) put(du, -DV / 2 + 1.38, Y + dy, w, h, 0.15, pick([0xf8f4e8, 0xfff2b0, 0xe8f4ff]), { deco: true });
+    put(6, -2, Y + 1.5, 7, 3, 3, S.counter, f); put(6, -2, Y + 3.15, 7.6, 0.3, 3.4, L.trim);
+    sprite(spriteTex('book'), 6, -2, Y + 5, 2.6);
+    put(-7, 3, Y + 1.8, 5, 3, 4, 0x6b4a2c, f); put(-7, 0.4, Y + 1.1, 1.6, 1.6, 1.6, 0x8a5428, f);
+    const kp = { rig: makeRig(randomLook()), ch: { x: 0, y: Y + 3, z: 0, faceYaw: H.yaw, vx: 0, vz: 0, grounded: true } }; [kp.ch.x, kp.ch.z] = H.at(6, -5); animateRig(kp, 0.016, 'idle'); KEEPERS.push(kp); dressExtra(kp.rig);
+  } else {
+    // the counter right across the room, the keeper behind it, the goods on it
+    put(0, -3, Y + 1.5, 14, 3, 2.4, S.counter, f); put(0, -3, Y + 3.15, 15, 0.3, 3, L.trim);
+    const kp = { rig: makeRig(randomLook()), ch: { x: 0, y: Y + 3, z: 0, faceYaw: H.yaw, vx: 0, vz: 0, grounded: true } }; [kp.ch.x, kp.ch.z] = H.at(0, -6); animateRig(kp, 0.016, 'idle'); KEEPERS.push(kp); dressExtra(kp.rig);
+    if (kind === 'cards') {
+      for (const [u, id] of [[-4.5, 'hop'], [0, 'zap'], [4.5, 'raise']]) sprite(artTex(id), u, -3, Y + 6, 3);
+      for (const [u, id] of [[-9.5, 'warp'], [9.5, 'laser']]) sprite(artTex(id), u, -6.5, Y + 8.2, 2.4);
+      put(-9.5, 5.5, Y + 1.5, 3, 3, 3, 0x2a5aa8, f); put(9.5, 5.5, Y + 1.5, 3, 3, 3, 0xc4281c, f);   // card boxes by the door
+    } else {
+      const [cx, cz] = H.at(-3.8, -3), cr = new THREE.Mesh(new THREE.BoxGeometry(2.6, 2.6, 2.6), crateBoxMat()); cr.position.set(cx, Y + 4.6, cz); cr.castShadow = true; scene.add(cr); shows.push(cr);
+      const [gx, gz] = H.at(3.8, -3), gh = new THREE.Group(), gun = builtGun('ray', ''); gun.position.set(0, 0, 0); gh.add(gun); gh.position.set(gx, Y + 4.4, gz); gh.scale.setScalar(1.1); scene.add(gh); shows.push(gh);
+      for (const [u, v, n] of [[-9.5, 6, 2], [9.5, 6, 1], [-6.2, 6.4, 1]]) for (let q = 0; q < n; q++) { const [bx, bz] = H.at(u, v), b = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 3), crateBoxMat()); b.position.set(bx, Y + 1.5 + q * 3, bz); b.rotation.y = rnd(-0.3, 0.3); b.castShadow = true; scene.add(b); }
+      put(-9.5, 6, Y + 3, 3, 6, 3, null); put(9.5, 6, Y + 1.5, 3, 3, 3, null); put(-6.2, 6.4, Y + 1.5, 3, 3, 3, null);   // the crates by the door are solid
     }
-    const kp = { rig: makeRig(randomLook()), ch: { x, y: 4, z: z + 2.6, faceYaw: Math.PI, vx: 0, vz: 0, grounded: true } }; animateRig(kp, 0.016, 'idle'); KEEPERS.push(kp); dressExtra(kp.rig);
   }
-  const pad = new THREE.Mesh(new THREE.TorusGeometry(4, 0.35, 8, 36), new THREE.MeshBasicMaterial({ color: L.pad })); pad.rotation.x = Math.PI / 2; pad.position.set(x, 1.3, z + 14); scene.add(pad);
-  const bill = Bills.add(`<b style="color:${L.css}">${L.title}</b>`, x, kind === 'quests' ? 20 : 21, z, 150);
-  BOOTHS.push({ kind, x, z: z + 14, k, pad, shows, bill, armed: true, offers: null, swaps: 1 });
+  const [px, pz] = H.at(kind === 'quests' ? 0 : 0, kind === 'quests' ? 1 : 1.2);
+  const pad = new THREE.Mesh(new THREE.TorusGeometry(2.8, 0.3, 8, 32), new THREE.MeshBasicMaterial({ color: L.pad })); pad.rotation.x = Math.PI / 2; pad.position.set(px, Y + 0.5, pz); scene.add(pad);
+  const bill = Bills.add(`<b style="color:${L.css}">${L.title}</b>`, x, Y + HSE.H + 9, z, 170);
+  BOOTHS.push({ kind, x: px, z: pz, k, pad, shows, bill, armed: true, offers: null, swaps: 1, house: H });
 }
 function updateBooths(dt) {
   const ch = player && player.ch;
   for (const b of BOOTHS) {
-    b.pad.rotation.z += dt; b.pad.position.y = 1.3 + Math.sin(Game.clock * 2 + b.x) * 0.15;
+    b.pad.rotation.z += dt; b.pad.position.y = GY + 0.5 + Math.sin(Game.clock * 2 + b.x) * 0.12;
     for (const s of b.shows) { if (s.isSprite) s.position.y = (s.userData.y0 || 17) + Math.sin(Game.clock * 2.4 + s.position.x) * 0.4; else s.rotation.y += dt * 0.9; }
     if (!ch || B.on) continue;
     const d = Math.hypot(ch.x - b.x, ch.z - b.z);
-    if (d > 6) b.armed = true;
-    if (d < 3.6 && b.armed && !menuOpen()) { b.armed = false; Snd.wake(); if (b.kind === 'cards') openCardShop(b); else if (b.kind === 'crates') toggleCosmo(true); else openBoard(b); }
+    if (d > 4.5) b.armed = true;
+    if (d < 2.6 && b.armed && !menuOpen()) { b.armed = false; Snd.wake(); if (b.kind === 'cards') openCardShop(b); else if (b.kind === 'crates') toggleCosmo(true); else openBoard(b); }
   }
 }
 // the card shop in the Depot and the towns: the same shop as in a job, paid in energy; your kit opens up to pick the card it replaces
@@ -3751,8 +3854,9 @@ function updateTownfolk(dt) {
     if (!n.chat && Math.random() < dt * 0.02) sayNpc(n, pick(NPC_LINES));
     if (TRADE.n === n) { n.path.length = 0; faceTo2(ch, player.ch.x, player.ch.z); ch.vx = ch.vz = 0; animateRig(n, dt, 'idle'); continue; }
     if (!n.path.length && (n.wait -= dt) <= 0) {   // somewhere else in town; across the row of booths, go by the path up the middle
-      const spots = [[0, -20], [0, -64], [-34, -30], [34, -30], [-14, -58], [14, -58], [-30, -72], [10, -86], [-60, -22], [56, -26], [-20, -90]], [sx, sz] = pick(spots), tz = S.z0 + sz;
-      const band = z => z > S.z0 - 40 ? 0 : 1; if (band(ch.z) !== band(tz)) n.path.push({ x: 0, z: ch.z }, { x: 0, z: tz }); n.path.push({ x: sx + rnd(-3, 3), z: tz + rnd(-3, 3) }); n.wait = rnd(3, 9);
+      // somewhere along the street: in front of the shops' doors, by the benches, by the gates (never through a house)
+      const spots = [[0, -14], [0, -50], [-24, -30], [24, -30], [-24, -70], [24, -70], [-12, -58], [12, -58], [-8, -86], [8, -20]], [sx, sz] = pick(spots);
+      n.path.push({ x: sx + rnd(-2, 2), z: S.z0 + sz + rnd(-3, 3) }); n.wait = rnd(3, 9);
     }
     const p = n.path[0];
     if (p) { const dx = p.x - ch.x, dz = p.z - ch.z, d = Math.hypot(dx, dz); if (d < 0.6) n.path.shift(); else { const v = Math.min(9, d * 4); ch.vx = dx / d * v; ch.vz = dz / d * v; ch.x += ch.vx * dt; ch.z += ch.vz * dt; ch.faceYaw += angDiff(ch.faceYaw, Math.atan2(-dx, -dz)) * Math.min(1, dt * 8); } }
@@ -4425,7 +4529,7 @@ function frame(now) {
   FX.update(dt); updateDebris(dt); updateBeams(dt); Pts.update(dt); DmgNum.update(dt); updateAnnounce(dt);
   for (const R of ARENA) { R.pad.rotation.z += dt * 1.2; R.pad.position.y = 2 + Math.sin(Game.clock * 2) * 0.25; R.pad.visible = !B.on && R.Z.id === Run.zone; R.bill.hide = B.on || R.Z.id !== Run.zone; }
   barrierTex.offset.x = (Game.clock * 0.15) % 1;
-  placeCamera(dt); updateLight(dt);
+  placeCamera(dt); updateHouseView(); updateLight(dt);
   const fx = cam.fx, fy = player ? cam.fy : 0, fz = cam.fz; sky.position.copy(camera.position); sun.position.set(fx + SUN_DIR.x * 260, fy + SUN_DIR.y * 260, fz + SUN_DIR.z * 260); sun.target.position.set(fx, fy, fz);
   Bills.update(); updateBugTags(); updateNpcTags(); updateHud(dt); Snd.listen();
   if (SC.on && SC.built) renderShowcase(); else renderer.render(scene, camera);
@@ -4433,7 +4537,7 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 // for testing from the console
-window.BZ = { PETS, ITEMS, buyContinue, HINT, SHOP, openShop, showItem, SC, Run, BOOTHS, TOWNFOLK, TOWNSITE, Q, QT, PW, openCrate, openTrade, offerTrade, TRADE, openCardShop, closeHubShop, addCrate, takeCrate, toggleCosmo, toggleFollow, addEnergy, itemIcon, applyGear, npcs: null, zoneDef, ensureAreas, refreshGates, endJob, B, CARDS, BUGS, ZONES, ARENA, Save, startJob, leaveJob, endDay, selectCard, clickTile, buyOffer, swapInto, addBug, addCell, T, bugAt, cellAt, join, cam, camera, get player() { return player; }, Game, setStage, hurtBug, scene, renderer };
+window.BZ = { KEEPERS, HOUSES, PETS, ITEMS, buyContinue, HINT, SHOP, openShop, showItem, SC, Run, BOOTHS, TOWNFOLK, TOWNSITE, Q, QT, PW, openCrate, openTrade, offerTrade, TRADE, openCardShop, closeHubShop, addCrate, takeCrate, toggleCosmo, toggleFollow, addEnergy, itemIcon, applyGear, npcs: null, zoneDef, ensureAreas, refreshGates, endJob, B, CARDS, BUGS, ZONES, ARENA, Save, startJob, leaveJob, endDay, selectCard, clickTile, buyOffer, swapInto, addBug, addCell, T, bugAt, cellAt, join, cam, camera, get player() { return player; }, Game, setStage, hurtBug, scene, renderer };
 window.BZ.npcs = npcs;
 
 </script>
