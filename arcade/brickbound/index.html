@@ -337,8 +337,8 @@
   <div class="touchOnly"><b>Touch:</b> left thumb anywhere on the lower left moves (up/down walks into and out of the level) · the buttons on the right attack, jump, shoot, dodge and guard · flick the stick twice to dash · hold <b>Guard</b> and tap an attack for magic</div>
   <div class="mouseOnly"><b>Move:</b> ← → left and right · ↑ ↓ into and out of the level · <b>tap an arrow twice quickly</b> to dash that way, and keep holding it to run</div>
   <div class="mouseOnly"><b>Jump:</b> C or Space · press again in the air to double jump · <b>hold</b> after the double jump to sword-spin glide · tap for a short hop</div>
-  <div class="mouseOnly"><b>Light attack:</b> X or left click (chain 4) · <b>Heavy:</b> Z: a launcher · <b>Slingshot:</b> D or V (juggles!) · <b>Dodge roll:</b> S (press again mid-roll to chain)</div>
-  <div class="mouseOnly"><b>Bubble:</b> hold A (or right-click) · <b>Magic ring:</b> while the bubble is up, four spells sit around you: ↑ Magic Leap, → Bolt, ↓ Potion, ← Splash. Press that arrow, or click one. X, Z and C still cast bolt, splash and leap with the bubble up</div>
+  <div class="mouseOnly"><b>Light attack:</b> X or left click (chain 4) · <b>Heavy:</b> Z: a launcher · <b>Slingshot:</b> D or V (juggles!)</div>
+  <div class="mouseOnly"><b>Bubble:</b> hold Z and X together (or right-click) · <b>Magic ring:</b> while the bubble is up, four spells sit around you: ↑ Magic Leap, → Bolt, ↓ Potion, ← Splash. Press that arrow, or click one</div>
   <div><b>Combos:</b> light ×4 · light, heavy (launch) · light ×2, heavy: pop-up · light ×3, heavy: elemental slam · in the air: light ×3, heavy for a meteor spike · after a hit lands, jump to cancel into the air and keep juggling</div>
   <div class="mouseOnly"><b>Other:</b> F talk / open / shop · 2 or R drink a potion · T or 3 switch spell · Tab character · M menu · mouse wheel zoom</div>
   <div><b>The world:</b> keep going right. Arenas lock until every foe is down; once cleared they stay clear. Walk back any time for the shops, and for things you couldn't reach the first time.</div>
@@ -378,7 +378,7 @@
         </div>
         <div class="bxh"><span><h2>Controls</h2></span></div>
         <div class="bx keys">
-          <ul><li>Move<b>Arrows</b></li><li>Dash<b>Tap twice</b></li><li>Attack<b>X</b></li><li>Heavy<b>Z</b></li><li>Jump<b>C</b></li><li>Bubble<b>Hold A</b></li><li>Magic<b>A + arrow</b></li><li>Dodge<b>S</b></li><li>Slingshot<b>D</b></li><li>Potion<b>2</b></li><li>Talk<b>F</b></li></ul>
+          <ul><li>Move<b>Arrows</b></li><li>Dash<b>Tap twice</b></li><li>Attack<b>X</b></li><li>Heavy<b>Z</b></li><li>Jump<b>C</b></li><li>Bubble<b>Z + X</b></li><li>Magic<b>Z + X, arrow</b></li><li>Slingshot<b>D</b></li><li>Potion<b>2</b></li><li>Talk<b>F</b></li></ul>
           <p style="margin-top:8px">Controller works too: press <b>A</b> to play your latest file.</p>
         </div>
       </div>
@@ -1302,7 +1302,7 @@ class Actor {
 
 // ---------------------------------------------------------------- the moves (Bramble Crown)
 const MOVES = [
-  { id: 'roll', lvl: 1, name: 'Dodge Roll (chainable)', input: 'S' },
+  { id: 'roll', lvl: 1, name: 'Dodge Roll (chainable)', input: 'LT / Dodge button' },
   { id: 'dash', lvl: 1, name: 'Dash, then run', input: 'Tap an arrow twice' },
   { id: 'djump', lvl: 1, name: 'Double Jump', input: 'Jump again in the air' },
   { id: 'glidem', lvl: 1, name: 'Sword-Spin Glide', input: 'Hold jump after the double jump' },
@@ -1310,12 +1310,12 @@ const MOVES = [
   { id: 'launch', lvl: 1, name: 'Launcher', input: 'Heavy (or light, heavy)' },
   { id: 'air', lvl: 1, name: 'Air Combo / Juggle', input: 'Jump, light ×3' },
   { id: 'jcancel', lvl: 1, name: 'Jump Cancel', input: 'Jump after a hit lands' },
-  { id: 'proj', lvl: 1, name: 'Magic Bolt', input: 'Hold A + X, or A + →' },
-  { id: 'mjump', lvl: 1, name: 'Magic Jump', input: 'Hold A + C, or A + ↑' },
-  { id: 'splash', lvl: 1, name: 'Magic Splash', input: 'Hold A + Z, or A + ←' },
+  { id: 'proj', lvl: 1, name: 'Magic Bolt', input: 'Hold Z + X, then →' },
+  { id: 'mjump', lvl: 1, name: 'Magic Jump', input: 'Hold Z + X, then ↑ or C' },
+  { id: 'splash', lvl: 1, name: 'Magic Splash', input: 'Hold Z + X, then ←' },
   { id: 'bow', lvl: 1, name: 'Slingshot (juggles!)', input: 'L / V / 1, ground or air' },
   { id: 'popup', lvl: 2, name: 'Pop-Up', input: 'Light, light, heavy' },
-  { id: 'aproj', lvl: 3, name: 'Air Bolt', input: 'In the air: A + X' },
+  { id: 'aproj', lvl: 3, name: 'Air Bolt', input: 'In the air: Z + X, then →' },
   { id: 'spike', lvl: 3, name: 'Meteor Spike', input: 'In the air: heavy' },
   { id: 'infuse', lvl: 4, name: 'Elemental Slam', input: 'Light ×3, heavy' },
 ];
@@ -1408,7 +1408,7 @@ class Player extends Actor {
       if (this.gr && this.state !== 'knock') { this.alive = false; this.setState('dead'); Game.onPlayerDead(); } else if (this.state !== 'knock') { this.setState('knock'); this.vy = 4 * K; this.gr = false; }
     }
     if (!this.controlLocked) for (const a of ['light', 'heavy', 'jump', 'bow']) if (Input.pressed(a)) this.buf = { a, t: 14, blk: Input.down('block') };
-    // S is the dodge roll: kept for a few frames, so a press just before landing or as an attack ends still goes
+    // the dodge roll (LT, or the Dodge button): kept for a few frames, so a press just before landing or as an attack ends still goes
     if (!this.controlLocked && Input.pressed('dodge')) this.dashQ = 10; else if (this.dashQ > 0) this.dashQ--;
     this.tapCheck();
     if (this.buf && --this.buf.t <= 0) this.buf = null;
@@ -2737,22 +2737,24 @@ function gainXP(n) {
 // ---------------------------------------------------------------- input: keyboard + mouse + gamepad + touch (Bramble Crown's Input, with the mouse added)
 const KEYMAP = {
   // played on the arrow keys: ← → move, ↑ ↓ walk into and out of the level, tap an arrow twice quickly to dash that way.
-  // Left hand: X light, Z heavy, C jump, A bubble + magic ring, S dodge, D / V slingshot. No Shift anywhere (sticky keys).
+  // Left hand: X light, Z heavy, C jump, Z + X together = bubble + magic ring, D / V slingshot. No Shift anywhere (sticky keys).
   left: ['ArrowLeft'], right: ['ArrowRight'], up: ['ArrowUp'], down: ['ArrowDown'],
   light: ['KeyX', 'KeyJ', 'Mouse0'], heavy: ['KeyZ', 'KeyK'], jump: ['KeyC', 'Space'], bow: ['KeyD', 'KeyV', 'KeyL', 'Digit1'],
-  block: ['KeyA', 'Mouse2', 'KeyU'], dodge: ['KeyS'], use: ['KeyF', 'Enter'], potion: ['Digit2', 'KeyR'], spell: ['KeyT', 'Digit3'],
+  block: ['Mouse2'], dodge: [], use: ['KeyF', 'Enter'], potion: ['Digit2', 'KeyR'], spell: ['KeyT', 'Digit3'],
 };
 // a standard controller: A jump, X attack, Y heavy, B slingshot, LB bubble (and the magic ring), LT dodge (double-tap a direction to dash), RB talk/open, RT potion, View switch spell, Start menu
 const PADMAP = { 0: ['jump'], 1: ['bow'], 2: ['light'], 3: ['heavy'], 4: ['block'], 5: ['use'], 6: ['dodge'], 7: ['potion'], 8: ['spell'], 9: ['menu'], 12: ['up'], 13: ['down'], 14: ['left'], 15: ['right'] };
 const MENU_PAD = new Set(['up', 'down', 'left', 'right']);   // while the magic ring is up the d-pad picks from it (the face buttons still cast)
+const CHORD = new Set(['KeyZ', 'KeyX']), CHORD_WAIT = 4;   // ticks (60 a second): about a 15th of a second to land both keys
 let touchMode = window.matchMedia && matchMedia('(pointer: coarse)').matches;
 const Input = {
-  held: new Set(), latched: new Set(), mx: innerWidth / 2, my: innerHeight / 2, mouseGuard: false, mouseSeen: false, padHeld: new Set(), padPrev: new Set(), padLatched: new Set(), touchHeld: new Set(), touchLatched: new Set(), ax: 0, az: 0, tx: 0, tz: 0, raw: [], rawPrev: [], rawHit: new Set(), dev: touchMode ? 'touch' : 'kb',
+  held: new Set(), latched: new Set(), pend: {}, chordOn: false, mx: innerWidth / 2, my: innerHeight / 2, mouseGuard: false, mouseSeen: false, padHeld: new Set(), padPrev: new Set(), padLatched: new Set(), touchHeld: new Set(), touchLatched: new Set(), ax: 0, az: 0, tx: 0, tz: 0, raw: [], rawPrev: [], rawHit: new Set(), dev: touchMode ? 'touch' : 'kb',
   init() {
     addEventListener('keydown', e => {
       this.setDev('kb');
       if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.code)) e.preventDefault();
-      if (!e.repeat) { this.latched.add(e.code); onKey(e.code); }
+      // X and Z wait a few frames before attacking, in case the other one comes too: both together is the bubble
+      if (!e.repeat) { if (CHORD.has(e.code)) this.pend[e.code] = 0; else this.latched.add(e.code); onKey(e.code); }
       this.held.add(e.code); Snd.init(); if (touchMode) setTouch(false);
     });
     addEventListener('keyup', e => this.held.delete(e.code));
@@ -2783,7 +2785,14 @@ const Input = {
     if (this.rawHit.has(1) && anyPanel()) { if ($('menu').classList.contains('on')) toggleMenu(); else closePanels(); }
     if (!G.started && this.rawHit.has(0)) { const F = Save.files(); let best = -1, t = -1; F.forEach((f, i) => { if (f && (f.saved || 0) > t) { t = f.saved || 0; best = i; } }); Files.play(best >= 0 ? best : F.findIndex(f => !f)); }
   },
-  down(a) { if (this.touchHeld.has(a)) return true; for (const c of KEYMAP[a] || []) if (this.held.has(c)) return true; return this.padHeld.has(a); },
+  // once per tick: Z + X held together = the bubble; a lone X or Z attacks once its short wait is up (or as soon as it's let go)
+  chord() {
+    const both = this.held.has('KeyZ') && this.held.has('KeyX');
+    if (both && !this.chordOn) { this.chordOn = true; this.pend = {}; }
+    if (!both) this.chordOn = false;
+    for (const c in this.pend) if (++this.pend[c] >= CHORD_WAIT || !this.held.has(c)) { delete this.pend[c]; this.latched.add(c); }
+  },
+  down(a) { if (a === 'block' && this.chordOn) return true; if (this.touchHeld.has(a)) return true; for (const c of KEYMAP[a] || []) if (this.held.has(c)) return true; return this.padHeld.has(a); },
   pressed(a) { if (this.touchLatched.has(a)) return true; for (const c of KEYMAP[a] || []) if (this.latched.has(c)) return true; return this.padLatched.has(a); },
   moveX() { let v = (this.down('right') ? 1 : 0) - (this.down('left') ? 1 : 0); if (!v && this.ax) v = clamp(this.ax * 1.3, -1, 1); if (!v && this.tx) v = this.tx; return v; },
   moveZ() { let v = (this.down('down') ? 1 : 0) - (this.down('up') ? 1 : 0); if (!v && this.az) v = clamp(this.az * 1.3, -1, 1); if (!v && this.tz) v = this.tz; return v; },
@@ -3076,18 +3085,18 @@ const UI = {
     const A = Arena.active, pad = Input.dev === 'pad'; let hint;
     if (!p.alive) hint = 'Knocked out!';
     else if (p.mortal) hint = 'MORTAL DAMAGE! Drink a potion before your HP rolls down to 0!';
-    else if (A && A.boss) hint = pad ? 'LT dodges through his attacks · A jumps the shockwave rings' : 'S dodges through his attacks · C jumps the shockwave rings';
+    else if (A && A.boss) hint = pad ? 'LT dodges through his attacks · A jumps the shockwave rings' : 'Double-tap an arrow to dash clear of his charge · C jumps the shockwave rings';
     else if (A) hint = `Clear the arena · wave ${Math.min(Arena.wave + 1, A.waves.length)} of ${A.waves.length} · ${G.enemies.filter(e => e.alive && e.home && e.home.arena === A).length} foes left`;
     else if (Use.near) hint = (pad ? 'RB' : touchMode ? 'Tap' : 'F') + ': ' + (Use.near.kind === 'npc' ? (Use.near.n.id === 'pip' && !Save.pip ? 'ask Pip to join you' : (Use.near.n.shop ? 'shop with ' : 'talk to ') + Use.near.n.name) : Use.near.kind === 'chest' ? 'open the chest' : 'unlock the door');
     else if (touchMode && !pad) hint = 'Hold Guard for the bubble and magic · Attack ×3 then Heavy launches';
     else if (pad) hint = 'A jump · X attack · Y heavy · B slingshot · hold LB for the bubble and magic · RT potion · RB talk';
-    else hint = 'Arrows move (tap twice to dash) · X attack · Z heavy · C jump · S dodge · hold A: bubble + magic ring · Tab character';
+    else hint = 'Arrows move (tap twice to dash) · X attack · Z heavy · C jump · hold Z + X: bubble + magic ring · Tab character';
     if ($('hint').textContent !== hint) $('hint').textContent = hint;
     PadKeys.update();
   },
 };
 
-// ---------------------------------------------------------------- the magic ring: hold the bubble (A, right-click, LB or the Guard button) and four
+// ---------------------------------------------------------------- the magic ring: hold the bubble (Z + X together, right-click, LB or the Guard button) and four
 // spells sit in a ring around you, one per arrow: ↑ Magic Leap, → Bolt, ↓ Potion, ← Splash. Press that arrow (or d-pad / flick the stick) to use it.
 // The cards can be clicked or tapped too, and letting go of right-click over one uses it.
 const Magic = {
@@ -3124,10 +3133,10 @@ const Magic = {
   flash(id) { if (!this.open) return; const i = this.list.findIndex(it => it.id === id); if (i < 0) return; const b = $('mRow').children[i]; if (b) { b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash'); } this.paint(); },
   use(i) { const it = this.list[i]; if (!it) return; const p = G.player; if (it.run) { it.run(); this.flash(it.id); } else if (p && !p.controlLocked) { p.buf = { a: it.act, t: 14, blk: true }; this.flash(it.id); } Snd.play('select'); },
   useDir(d) { this.use(this.list.findIndex(it => it.dir === d)); },
-  key(code) {   // keyboard while it's open: the arrows pick from the ring; X / Z / C still cast as normal (with the bubble up) and light up their card
+  key(code) {   // keyboard while it's open: the arrows pick from the ring; C still casts Magic Leap (with the bubble up) and lights up its card
     const dir = { ArrowUp: 'up', ArrowRight: 'right', ArrowDown: 'down', ArrowLeft: 'left' }[code];
     if (dir) { this.useDir(dir); Input.latched.delete(code); return true; }
-    const map = { KeyX: 'bolt', KeyJ: 'bolt', Mouse0: 'bolt', KeyZ: 'splash', KeyK: 'splash', KeyC: 'leap', Space: 'leap' };
+    const map = { KeyJ: 'bolt', KeyK: 'splash', KeyC: 'leap', Space: 'leap' };
     if (map[code]) this.flash(map[code]); return false;
   },
   // keep the ring centred on you (on your chest), sized to how big you are on screen
@@ -3285,6 +3294,7 @@ const Game = {
   },
 };
 function tick() {
+  Input.chord();
   G.time++; Save.time += STEP;
   const p = G.player;
   p.update();
