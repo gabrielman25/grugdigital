@@ -2505,7 +2505,7 @@ function zombieGeo(look, kind) {
 }
 function makeZombieMesh(look, kind, scale) {
   const o = ZOUT.length ? ZOUT[Math.floor(Math.random() * ZOUT.length)] : null, zo = o && zombieOutfit(o, kind);
-  if (zo) { const m = new THREE.Mesh(zo.geo, zo.mats.base); m.scale.setScalar(scale); m.castShadow = true; scene.add(m); return { g: m, look, mats: zo.mats, outfit: o.name, flash: false, glow: false }; }
+  if (zo) { const m = new THREE.Mesh(zo.geo, zo.mats.base); m.scale.setScalar(scale); m.castShadow = true; scene.add(m); if (zo.face && zo.headGroup) GrugOutfitRig.addEyes(m, zo.geo, zo.face, zo.headMat, zo.headGroup); return { g: m, look, mats: zo.mats, outfit: o.name, flash: false, glow: false }; }
   const m = new THREE.Mesh(zombieGeo(look, kind), zMat); m.scale.setScalar(scale); m.castShadow = true; scene.add(m);
   return { g: m, look, flash: false, glow: false };
 }
@@ -2540,7 +2540,11 @@ function zombieOutfit(o, kind) {
     for (const [s0, c, i] of groups) geo.addGroup(s0, c, i);
     geo.computeBoundingSphere();
     const T = ZTINT[kind] || ZTINT.walker, make = (emissive, ice) => mats.map(([m, head]) => new THREE.MeshLambertMaterial({ map: m.map, color: ice ? 0xa8e4ff : head ? T[0] : T[1], emissive: emissive || 0, transparent: m.transparent, alphaTest: m.alphaTest }));
-    return (ZOGEO[key] = { geo, mats: { base: make(), glow: make(0x3a8a10), fire: make(0x803000), ice: make(0x1a3a60, true) } });
+    const all = { base: make(), glow: make(0x3a8a10), fire: make(0x803000), ice: make(0x1a3a60, true) };
+    // zombies blink too: the head wears its face without the eyes, and each zombie gets eye planes that squash shut (static/outfit-rig.js)
+    const hi = mats.findIndex(([, head]) => head), R = window.GrugOutfitRig, face = hi >= 0 && R && R.faceParts ? R.faceParts(mats[hi][0].map) : null, hg = groups.find(g => g[2] === hi);
+    if (face) for (const k in all) all[k][hi].map = face.eyeless;
+    return (ZOGEO[key] = { geo, mats: all, face, headMat: hi >= 0 ? all.base[hi] : null, headGroup: hg ? { start: hg[0], count: hg[1] } : null });
   } catch (e) { console.warn('zombie outfit', o.name, e); return (ZOGEO[key] = null); }
 }
 function reskinZombies() {   // the outfits finished loading after the battle began: dress the zombies already up
