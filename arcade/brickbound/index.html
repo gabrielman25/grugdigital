@@ -1117,7 +1117,7 @@ function buildWorld() {
   P_(32, 3, -8, 1, 1, 1, BC.red, { deco: true }); P_(34, 3, -8, 1, 1, 1, BC.lime, { deco: true }); P_(36, 3, -8, 2, 1, 1, BC.yellow, { deco: true });
   npc('mira', 'Mira', 35, -11, { skin: 0xf5cd30, shirt: 0x6b327c, pants: 0x1b2a35, face: 'happy', hat: 'hair', hatColor: 0x7a3a1a }, ['Potions, tomes, manuals! Press F!', 'Gold from goblins spends just as well.', 'The Ice Tome freezes foes solid. Juggle heaven!'], { shop: 'mira', oi: 1, kit: 'medic' });
   npc('rowan', 'Elder Rowan', 14, -6, { skin: 0xf5cd30, shirt: 0x5a6a7a, pants: 0x3a3a3a, face: 'meh', hat: 'wizard', hatColor: 0x2a3a8a }, ['Grimgut the Ogre King took the old keep.', 'Keep going right, past the meadows and the wood.', 'There\'s an old locked cellar in the meadow cliffs...', 'Practise on the dummies! Light, light, heavy!'], { talk: true, oi: 2, kit: 'flannel' });
-  npc('pip', 'Pip', 92, 4, { skin: 0xf5cd30, shirt: 0xda8541, pants: 0x0d69ac, face: 'grin', hat: 'cap', hatColor: 0xc4281c }, ['Can I come with you? Press F!', 'I know a healing spell! Take me along!', 'I saw a key up in a tree in Whisperwood!'], { talk: true, oi: 0, kit: 'skater' });
+  npc('pip', 'Pip', 92, 4, { skin: 0xf5cd30, shirt: 0xda8541, pants: 0x0d69ac, face: 'grin', hat: 'cap', hatColor: 0xc4281c }, ['Can I come with you? Press F!', 'I know a healing spell! Take me along!', 'I saw a key on a hilltop in Whisperwood!'], { talk: true, oi: 0, kit: 'skater' });
   SHOPS.mira = { name: 'Mira\'s Market', items: ['potion', 'pouch', 'manual', 'ice'] };
   checkpoint('start', 'Willowbrook Square', 6, 0, 0);
   sign(['WILLOWBROOK', 'pop. 23'], -2, 0, -12, 8, 4);
@@ -1146,7 +1146,6 @@ function buildWorld() {
   ground(384, 404, -3, M, { bgH: 0 });
   P_(384, -3, -12, 20, 2, 24, BC.water, { material: new THREE.MeshPhongMaterial({ color: 0x4c8cd2, transparent: true, opacity: 0.55, shininess: 90 }), p: { canCollide: false }, tag: 'water' });
   ground(404, 490, 0, M);
-  P_(447, 5, -6, 14, 1, 10, BC.reddishBrown, { cast: true, tag: 'plat' });   // a floating platform in Archer Ridge
   ground(490, 560, 2, M);
   for (const [x, z, s] of [[214, -30, 1.1], [236, -42, 1.3], [262, -26, 1], [288, -40, 1.2], [372, -28, 1], [410, -40, 1.3], [436, -26, 1], [470, -44, 1.2], [520, -30, 1.1], [546, -42, 1]]) tree(x, z, bgAt(x), s, BC.camo, BC.lime);
   for (const x of [206, 232, 270, 318, 330, 412, 452, 500, 540]) for (let i = 0; i < 2; i++) flower(x + i * 4, 18 + i * 3, foreAt(x + i * 4), [BC.yellow, BC.white, BC.pink][(i + x) % 3]);
@@ -1163,8 +1162,7 @@ function buildWorld() {
   for (const [x, w] of [[704, 7], [716, 7], [729, 7]]) P_(x, -2, -7, w, 2, 14, BC.reddishBrown, { cast: true, tag: 'log' });
   ground(740, 800, 0, F);
   ground(800, 812, 3, F); ground(812, 830, 6, F);
-  P_(804, 12, -12, 14, 1, 10, BC.reddishBrown, { cast: true, tag: 'ledge' });   // the high ledge: double jump from the 6-high ground
-  chest('key', 810, -7, 13, { gold: 40, key: true });
+  chest('key', 821, -7, 6, { gold: 40, key: true });   // on the hilltop
   ground(830, 850, 3, F); ground(850, 960, 0, F);
   for (const [x, z, s] of [[566, -30, 1.6], [590, -42, 1.9], [618, -26, 1.5], [646, -40, 2], [676, -28, 1.7], [748, -40, 1.8], [778, -26, 1.5], [840, -36, 1.9], [872, -26, 1.6], [902, -42, 2], [934, -28, 1.7]]) pine(x, z, bgAt(x), s);
   for (const [x, z] of [[584, -9], [662, 6], [898, -8]]) { P_(x, 0, z, 3, 22, 3, BC.pine, { cast: true, fade: z > 0 }); P_(x - 3, 22, z - 3, 9, 6, 9, 0x1f4a2a, { cast: true, fade: z > 0 }); }   // big trunks in the band (you can stand on their canopies)
@@ -1268,12 +1266,16 @@ const ELEM_ORDER = ['fire', 'ice', 'lightning', 'poison'];
 const G = { time: 0, player: null, enemies: [], projectiles: [], pickups: [], crates: [], npcs: [], combo: { n: 0, t: 0, juggle: 0 }, stats: { kills: 0, maxCombo: 0 }, slowT: 0, arena: null, boss: null, paused: false, started: false };
 
 // the token system (Bramble Crown): only a couple of foes swing at you at once, the rest circle
+// attack turns: only two foes (swords and bows alike) may be going for you at once; everyone else circles, waiting their turn
 const Tokens = {
-  melee: new Set(), ranged: new Set(), maxMelee: 2, maxRanged: 1,
-  req(e, k) { const s = this[k]; if (s.has(e)) return true; if (s.size >= (k === 'melee' ? this.maxMelee : this.maxRanged)) return false; s.add(e); return true; },
-  rel(e) { this.melee.delete(e); this.ranged.delete(e); },
-  sanitize() { for (const s of [this.melee, this.ranged]) for (const e of s) if (!e.alive || e.removed || !e.hasToken) s.delete(e); },
+  all: new Set(), max: 2,
+  req(e) { if (this.all.has(e)) return true; if (this.all.size >= this.max) return false; this.all.add(e); return true; },
+  free(e) { return this.all.has(e) || this.all.size < this.max; },
+  rel(e) { this.all.delete(e); },
+  sanitize() { for (const e of this.all) if (!e.alive || e.removed || !e.hasToken) this.all.delete(e); },
 };
+// archers hold their shots while you're busy fighting someone (mid-combo, casting or slinging, and a moment after)
+function playerBusy() { const p = G.player; return !!p && (p.state === 'attack' || p.state === 'cast' || p.state === 'bow' || G.time - (p.atkAt ?? -1e9) < 30); }
 // an attack's box, in front of the attacker (lengths in BC metres, scaled by K here)
 function overlapBox(att, A, t) {
   const sc = att.sc || 1, rel = (t.x - att.x) * att.facing;
@@ -1555,6 +1557,7 @@ class Player extends Actor {
     }
   }
   startAtk(name) {
+    this.atkAt = G.time;
     const A = PATK[name]; this.infused = false;
     if (A.infuse && this.mana >= 6) { this.mana -= 6; this.infused = true; }
     this.atk = A; this.atkName = name; this.af = 0; this.hitSet = new Set(); this.atkLanded = false; this.setState('attack');
@@ -1684,6 +1687,11 @@ class Player extends Actor {
       Snd.play('block'); Bubble.ping(); FX.spark(this.x + this.facing * 3, this.y + 3, this.z + 0.6, 0x9fe8ff, 5); return 'blocked';
     }
     const dmg = Math.max(1, Math.round(h.dmg));
+    if (h.kind === 'arrow') {   // arrows sting but never stun you: no flinch, no knockback, your combo keeps going
+      this.hp -= dmg; this.flash = 8; this.shake = 0.5; DmgNum.add(this.x, this.y + 5, this.z, dmg, 'hurt'); UI.hurtBox(0); Snd.play('hurt'); FX.hit(this.x, this.y + 3, this.z + 0.6, false, 0xff6a5a);
+      if (this.hp <= 0) { this.hp = 0; if (!this.mortal) { this.mortal = true; DmgNum.add(this.x, this.y + 6.5, this.z, 'MORTAL DAMAGE!', 'hurt word', false); } }
+      return 'hit';
+    }
     this.hp -= dmg; this.flash = 8; this.hitstop = 5; this.shake = 1;
     DmgNum.add(this.x, this.y + 5, this.z, dmg, 'hurt'); UI.hurtBox(0);
     Snd.play('hurt'); FX.shake(0.35); FX.hit(this.x, this.y + 3, this.z + 0.6, false, 0xff6a5a);
@@ -1983,7 +1991,7 @@ class Enemy extends Actor {
       }
       case 'windup': {
         this.vx = 0; this.vz = 0;
-        if (c.ranged) { if (this.st >= c.draw) { this.setState('attack'); this.fireArrow(); } }
+        if (c.ranged) { if (this.st >= c.draw) { if (!playerBusy()) { this.setState('attack'); this.fireArrow(); } else if (this.st > c.draw + 45) { this.release(); this.atkCd = 40; this.setState('approach'); } } }   // you started fighting mid-draw: it waits, then gives up
         else if (this.st >= c.atk.wind) { this.setState('attack'); this.atkHit = false; Snd.play(this.type === 'ogre' ? 'swingH' : 'swing'); FX.slash(this.x + this.facing * 2.4 * this.sc, this.y + 2.6 * this.sc, this.z + 0.5, this.facing, this.type === 'ogre' ? 'big' : 'down', 0xffc0a0); }
         break;
       }
@@ -2005,26 +2013,36 @@ class Enemy extends Actor {
   }
   aiMelee(p, dx, dz) {
     const c = this.cfg, reach = c.reach * K * Math.max(1, this.sc * 0.8);
-    if (!this.hasToken && this.atkCd <= 0 && Math.abs(dx) < 8 * K && Math.abs(p.y - this.y) < 6 && this.playerTargetable()) this.hasToken = Tokens.req(this, 'melee');
+    if (!this.hasToken && this.atkCd <= 0 && Math.abs(dx) < 8 * K && Math.abs(p.y - this.y) < 6 && this.playerTargetable()) this.hasToken = Tokens.req(this);
     let tx, tz;
     if (this.hasToken) {
       this.tokenT++; if (this.tokenT > 300 || !this.playerTargetable()) { this.release(); this.atkCd = 60; }
       tx = p.x + this.side * reach; tz = p.z;
       if (tx < this.lo + 1 || tx > this.hi - 1) { this.side = -this.side; tx = p.x + this.side * reach; }
-    } else {
-      const ring = (3.2 + (this.slot % 3) * 0.9) * K;
-      tx = clamp(p.x + this.side * ring, this.lo + 2, this.hi - 2); tz = clamp(p.z + ((this.slot % 3) - 1) * 1.3 * K, -10, 10);
+    } else {   // waiting for a turn: circle around you at a distance, facing you
+      const o = this.orbit(p), rx = (4.4 + (this.slot % 3) * 0.8) * K;
+      tx = clamp(p.x + Math.cos(o) * rx, this.lo + 2, this.hi - 2); tz = clamp(p.z + Math.sin(o) * 2.6 * K, -10, 10);
+      if (Math.abs(dx) > 1) this.facing = sgn(dx);
     }
-    this.moveTo(tx, tz, c.spd);
+    this.moveTo(tx, tz, this.hasToken ? c.spd : c.spd * 0.6);
     if (this.hasToken && Math.abs(Math.abs(dx) - reach) < 0.45 * K && Math.abs(dz) < 0.5 * K && Math.abs(p.y - this.y) < 3 && this.playerTargetable()) { this.facing = sgn(dx) || this.facing; this.vx = this.vz = 0; this.setState('windup'); }
   }
   aiRanged(p, dx, dz) {
     const c = this.cfg; let tx = p.x + this.side * c.keep * K;
     if (tx < this.lo + 2 || tx > this.hi - 2) { this.side = -this.side; tx = p.x + this.side * c.keep * K; }
     tx = clamp(tx, this.lo + 2, this.hi - 2);
-    const close = Math.abs(dx) < 2.5 * K; this.moveTo(tx, p.z, c.spd * (close ? 1.2 : 1));
+    // only lines up a shot when it's its turn and you aren't busy fighting; otherwise drifts around at range
+    const ready = this.atkCd <= 0 && !playerBusy() && Tokens.free(this), o = this.orbit(p, 0.015);
+    const tz = ready ? p.z : clamp(p.z + Math.sin(o) * 2.6 * K, -10, 10);
+    const close = Math.abs(dx) < 2.5 * K; this.moveTo(tx, tz, c.spd * (close ? 1.2 : ready ? 1 : 0.6));
     if (Math.abs(dx) > 0.8) this.facing = sgn(dx);
-    if (this.atkCd <= 0 && Math.abs(dz) < 0.5 * K && Math.abs(dx) > 3 * K && Math.abs(p.y - this.y) < 8 && this.playerTargetable() && Tokens.req(this, 'ranged')) { this.hasToken = true; this.facing = sgn(dx); this.setState('windup'); }
+    if (ready && Math.abs(dz) < 0.5 * K && Math.abs(dx) > 3 * K && Math.abs(p.y - this.y) < 8 && this.playerTargetable() && Tokens.req(this)) { this.hasToken = true; this.facing = sgn(dx); this.setState('windup'); }
+  }
+  // the angle this one circles you at: starts where it stands, drifts round, now and then turns back
+  orbit(p, rate = 0.012) {
+    if (this.orbA === undefined) { this.orbA = Math.atan2((this.z - p.z) / 2.6, (this.x - p.x) / 4.4); this.orbDir = this.slot % 2 ? 1 : -1; }
+    if (Math.random() < 0.004) this.orbDir = -this.orbDir;
+    return (this.orbA += this.orbDir * rate);
   }
   fireArrow() { G.projectiles.push(new Projectile({ x: this.x + this.facing * 1.6, y: this.y + 3.6 * this.sc, z: this.z, vx: this.facing * 15 * K, vy: 0, kind: 'earrow', team: 'e', dmg: Math.round(this.cfg.dmg * this.dmgMul), life: 2.2, r: 0.7, src: this })); Snd.play('bow'); }
   meleeCheck(A) {
@@ -2567,7 +2585,7 @@ const OBJECTIVES = [
   { id: 'm2', text: 'Clear the archers off Archer Ridge.', done: () => Save.cleared.m2, arena: 'm2', model: 'gArcher' },
   { id: 'm3', text: 'Knock out the ogre and his camp.', done: () => Save.cleared.m3, arena: 'm3', model: 'ogre' },
   { id: 'f1', text: 'Beat the skeletons in Whisperwood.', done: () => Save.cleared.f1, arena: 'f1', model: 'skeleton' },
-  { id: 'key', text: 'Find the rusty key high in the Whisperwood trees.', done: () => Save.key, at: () => ({ x: 810, y: 13, z: -7 }), chest: 'key' },
+  { id: 'key', text: 'Find the rusty key on the Whisperwood hilltop.', done: () => Save.key, at: () => ({ x: 821, y: 6, z: -7 }), chest: 'key' },
   { id: 'cellar', text: 'Take the key back to the cellar door in Mossy Meadows.', done: () => Save.door, at: () => ({ x: 343, y: 4, z: -13 }) },
   { id: 'f2', text: 'Clear the bandits off Bandit Road.', done: () => Save.cleared.f2, arena: 'f2', model: 'bandit' },
   { id: 'k1', text: 'Break through the guards at the keep gate.', done: () => Save.cleared.k1, arena: 'k1', model: 'knight' },
@@ -2671,7 +2689,7 @@ const Files = {
     const D = [
       { id: 'grug', name: 'Willowbrook', from: 'A quiet village, for now', zone: 'village', cap: 'Mira sells potions and spell books. The dummies don\'t hit back.' },
       { id: 'ranger', name: 'Mossy Meadows', from: 'Goblin country', zone: 'meadow', left: true, cap: 'Light, light, heavy: launch them, jump, and keep slashing.' },
-      { id: 'skater', name: 'Whisperwood', from: 'The deep forest', zone: 'forest', cap: 'Something shiny sits high in the trees. Double jump to reach it.' },
+      { id: 'skater', name: 'Whisperwood', from: 'The deep forest', zone: 'forest', cap: 'Something shiny sits on the hilltop. Mind the gap on the way.' },
       { id: 'medic', name: 'Crumbling Keep', from: 'The Ogre King\'s hold', zone: 'keep', left: true, cap: 'Roll through his charge. Jump his shockwaves.' },
     ];
     const root = $('fshow'), esc = this.esc; root.textContent = '';
@@ -2845,7 +2863,7 @@ const Arena = {
     for (const r of ROAMERS) if (r.e && r.e.x > A.x0 - 4 && r.e.x < A.x1 + 4) { r.e.home = Object.assign({}, r.e.home, { lo: A.x0 + 1.5, hi: A.x1 - 1.5 }); }
   },
   spawnWave() {
-    const A = this.active, list = A.waves[this.wave]; Tokens.maxMelee = list.length >= 4 ? 3 : 2;
+    const A = this.active, list = A.waves[this.wave];
     list.forEach((t, i) => this.spawn(t, A, i % 2 ? -1 : 1, false, i));
   },
   spawn(type, A, side, summon, i = 0) {
