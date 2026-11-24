@@ -532,6 +532,9 @@
   #store .stTop, #store .stBot, #store .stR, #storeTalk, #round .tb, #announce, #preview {
     background: rgba(0, 0, 0, .45) !important; border: 2px solid #000 !important; color: #fff; }
   #reel { background: rgba(0, 0, 0, .55) !important; }
+  #preview { background: none !important; border: 0 !important; }
+  /* no scroll bars anywhere: lists still scroll (wheel, drag, touch), the bars are just never drawn */
+  html, body { overflow: hidden; } * { scrollbar-width: none !important; -ms-overflow-style: none; } *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }   /* the item preview fills the screen: no dark veil over the showcase */
   /* the hint bar along the top: plain black, Arial 14 */
   #hint { top: 0; height: 20px; line-height: 20px; background: #000 !important; font: 14px Arial, Helvetica, sans-serif !important; }
   /* top left: the gear, and the one label left in Studio's default grey */
@@ -660,6 +663,7 @@
   <button id="mHints">Hints: On</button>
   <button id="mFast">Fast animations: Off</button>
   <button id="mPlastic">Shiny plastic: On</button>
+  <button id="mYT" style="display:none">480p YouTube mode: Off</button>
   <button id="mWipe" class="warn">Reset all progress</button>
   <button id="mLeave">Leave Game</button>
   <div class="brand"><img src="data:image/png;base64,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" alt="Grug Digital"><small>a Grug Digital game</small></div>
@@ -694,7 +698,7 @@
 <div id="touch">
   <div id="stick"><i></i></div>
   <button id="jumpBtn" class="ol">Jump</button>
-  <button id="dashBtn" class="ol">Dash</button>
+  <button id="dashBtn" class="ol">Roll</button>
 </div>
 
 <button id="petsBtn" class="ol"><img src="data:image/png;base64,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" alt=""><b>PETS</b></button>
@@ -711,7 +715,7 @@
 
 <div id="help" class="panel">
   <div class="touchOnly"><b>Touch:</b> in the Depot, your left thumb moves and the Jump button jumps · drag anywhere to turn the camera, pinch to zoom · in a zone, tap a card, then tap a lit tile</div>
-  <div><b>The Depot:</b> <b>WASD</b> move · <b>Space</b> jump · <b>Shift</b> dash · <b>Q / E</b> or <b>right-drag</b> turn the camera · <b>wheel</b> zoom. Walk onto a zone's grid to take the job. The first zones you play on foot; from Zone 4 (and on the water) you play in your car or boat, and so do the enemies</div>
+  <div><b>The Depot:</b> <b>WASD</b> move · <b>Space</b> jump · <b>Shift</b> dodge roll · <b>Q / E</b> or <b>right-drag</b> turn the camera · <b>wheel</b> zoom. Walk onto a zone's grid to take the job. The first zones you play on foot; from Zone 4 (and on the water) you play in your car or boat, and so do the enemies</div>
   <div><b>A run:</b> head north from the Depot. Each zone is its own walled-in location with a grid in the middle; clear its job and the gate at the far end opens onto a town. Your kit (your deck) and energy come with you. Lose a job and the run is over</div>
   <div><b>Rides:</b> the first three zones you play on foot. From Zone 4 your car is your piece on the grid (your boat, in a water zone), its turret does the zapping, and what you catch piles into the back. Out of a job you're on foot, except on open water: walk in and you're in your boat. The Garage (cars) and the Dock (boats) in the Depot sell rides and turrets for cash</div>
   <div><b>Cards:</b> you own a collection and take a deck of up to 15 (MY DECK). Each zone deals you 7 from it. In a zone, PROVISIONS shows 5 more from your deck: energy grabs one into your hand. Card Shops sell new cards for cash or Pearls. The Card Library lists every card</div>
@@ -723,7 +727,7 @@
   <div><b>Cards:</b> <span class="mvC">Movement</span>, <span class="atC">Attack</span> and <span class="utC">Utility</span>. Walk and run moves pass over tiles (and pick up energy on the way) but can't climb a hill. Hops, jumps and leaps can, and landing on a pet from a hill catches it outright. Teleports go anywhere in range</div>
   <div><b>Height:</b> hills are 8 studs up. Only <b>lobbed</b> zaps reach a pet above you, and a hill blocks a beam fired from the ground. From a hill, beams and swipes hit bugs below</div>
   <div><b>Energy:</b> cells drop onto the field in ones and twos every turn. Walk over one to pick it up (your wallet holds 10). Spend it in the Module Shop: the new card replaces one in your deck, used or not, and is ready right away. A lobbed shot on a cell blows it up and zaps every pet next to it</div>
-  <div><b>Drop spots:</b> dirt marks show where enemies will turn up on the enemy turn. Stand on one and nobody comes</div>
+  <div><b>Hills:</b> dig down one of a zone's own hills and there's a 40% chance of energy inside</div>
 </div>
 
 <div id="err"><div><b>Couldn't load the 3D library.</b><br>This page loads Three.js from cdnjs, so it needs an internet connection.</div></div>
@@ -736,6 +740,7 @@
 <script src="/static/outfits.js"></script>
 <script src="/static/outfit-rig.js"></script>
 <script src="/static/pearl-popup.js"></script>
+<script src="/static/yt480.js"></script>     <!-- window.GrugYT480: the "480p YouTube mode" setting -->
 <script id="ambient-npc">
 /* =====================================================================
    Ambient NPCs  ·  general-purpose wandering "players" for any game
@@ -2156,10 +2161,11 @@ const Run = { active: false, zone: 0, deck: null, energy: 0, kills: 0, pets: [],
 
 // ---------------------------------------------------------------- renderer, sky, light (as in Zombie Zones)
 const canvas = $('c');
-// retro (2010): no anti-aliasing, drawn a little under screen resolution and blown up with hard pixel edges, hard-edged shadows
+// retro (2010): no anti-aliasing, drawn a little under screen resolution and blown up with hard pixel edges; soft-edged shadows
+// (filtered and finer, so the shadows on the characters' faces don't come out jagged)
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
 const RES = Math.min(innerWidth, innerHeight) < 700 ? 1 : 0.85; renderer.setPixelRatio(RES);   // (phones: one game pixel per screen point)
-renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.BasicShadowMap;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(70, 1, 0.3, 2500);
 scene.fog = new THREE.Fog(0xf3d2bc, 500, 2200);
@@ -2168,9 +2174,11 @@ const sky = new THREE.Mesh(new THREE.SphereGeometry(2300, 48, 24), new THREE.Mes
 sky.renderOrder = -1; scene.add(sky);
 const hemi = new THREE.HemisphereLight(0xfff0e2, 0x8a7a6a, 0.64); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xffe9d2, 0.85);
-sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+const SHADOW_RES = renderer.capabilities.maxTextureSize >= 4096 && RES < 1 ? 4096 : 2048;   // (phones keep 2048)
+sun.castShadow = true; sun.shadow.mapSize.set(SHADOW_RES, SHADOW_RES);
 Object.assign(sun.shadow.camera, { left: -80, right: 80, top: 80, bottom: -80, near: 100, far: 460 });
 sun.shadow.bias = -0.00006; sun.shadow.normalBias = 0.025; scene.add(sun, sun.target);
+if (window.GrugYT480) GrugYT480.attach(renderer.domElement, renderer);
 const SUN_DIR = (() => { const phi = 2 * Math.PI * (1 - 0.92), el = 0.88; return new THREE.Vector3(-Math.cos(phi) * Math.cos(el), Math.sin(el), Math.sin(phi) * Math.cos(el)).normalize(); })();
 // day and night: night falls over the whole map while the bugs grow
 const LIGHT = { k: 0, want: 0 };
@@ -2527,6 +2535,7 @@ function rigMat(r, mode) {
 }
 function flashRig(r, on) { rigMat(r, on ? 'hit' : null); }
 // pose: 'walk' | 'run' | 'air' | 'idle' | 'sit' (worked out from the character when not given)
+const rollAx = new THREE.Vector3();
 function animateRig(f, dt, poseIn) {
   const r = f.rig, ch = f.ch, j = r.j, P = Math.PI;
   r.g.position.set(ch.x, ch.y - 3, ch.z); r.g.rotation.y = ch.faceYaw;
@@ -2535,9 +2544,16 @@ function animateRig(f, dt, poseIn) {
   else if (pose === 'walk' || pose === 'run') { r.walkT += dt * (pose === 'run' ? 1.5 : 1); const s = Math.sin(r.walkT * 9); t = { rs: s, ls: -s, rh: -s, lh: s, rz: 0 }; rate = pose === 'run' ? 18 : 12; }
   else if (pose === 'sit') { t = { rs: 0, ls: 0, rh: P / 2, lh: P / 2, rz: 0 }; r.walkT = 0; }
   else { t = { rs: 0, ls: 0, rh: 0, lh: 0, rz: 0 }; rate = 9; r.walkT = 0; }
-  if (r.gun) t.rs = P / 2 + clamp(f.aimPitch || 0, -1.2, 1.2);   // the blaster is always held out in front, as in Zombie Zones
+  const armed = !!r.gun && (f !== player || B.on); if (r.gun) r.gun.visible = armed;   // you only carry the blaster in a battle: unarmed everywhere else
+  if (armed) t.rs = P / 2 + clamp(f.aimPitch || 0, -1.2, 1.2);   // the blaster is held out in front, as in Zombie Zones
   for (const k in j) j[k] += clamp(t[k] - j[k], -rate * dt, rate * dt);
-  if (r.gun) j.rs += clamp(t.rs - j.rs, -40 * dt, 40 * dt);
+  if (armed) j.rs += clamp(t.rs - j.rs, -40 * dt, 40 * dt);
+  if (f.roll) {   // the dodge roll (as in Zombie Zones): a tucked somersault the way you're rolling, a dust trail, a puff when you land
+    f.roll.t += dt; const k = f.roll.t / f.roll.dur;
+    if ((f.roll.trail -= dt) <= 0 && k < 1) { f.roll.trail = 0.045; FX.trail(ch.x, ch.y - 3, ch.z); }
+    if (k >= 1) { FX.dust(ch.x, ch.y - 3, ch.z, 4, 1); f.roll = null; r.root.rotation.set(0, 0, 0); r.root.position.y = 3; }
+    else { const yw = r.g.rotation.y, c = Math.cos(yw), sn = Math.sin(yw), lx = f.roll.fx * c - f.roll.fz * sn, lz = f.roll.fx * sn + f.roll.fz * c; rollAx.set(lz, 0, -lx).normalize(); r.root.quaternion.setFromAxisAngle(rollAx, Math.PI * 2 * (k * k * (3 - 2 * k))); r.root.position.y = 3 - 1.3 * Math.sin(Math.PI * k); j.rh = j.lh = -1.2; j.rs = j.ls = 2.2; }
+  }
   r.rs.rotation.x = j.rs; r.ls.rotation.x = j.ls; r.rh.rotation.x = j.rh; r.lh.rotation.x = j.lh; r.rs.rotation.z = j.rz;
   if (f.hitFx > 0) { f.hitFx -= dt; } flashRig(r, f.hitFx > 0.08);
 }
@@ -2866,7 +2882,7 @@ function setTileH(t, h) {
   t.m.geometry = boxGeo(Z.ts, ht, Z.ts); t.m.material = tileMat(Z, h, t.i, t.j); t.m.position.y = ht / 2;
   t.p.maxY = ht; W.version++;
 }
-function layTerrain(R, H) { for (const t of R.tiles) setTileH(t, H.has(t.i + ',' + t.j) ? 1 : 0); }
+function layTerrain(R, H) { for (const t of R.tiles) { const up = H.has(t.i + ',' + t.j); setTileH(t, up ? 1 : 0); t.pre = up; } }   // (pre: one of the level's own hills: digging it can turn up energy)
 // which location you're standing in (-1: the Depot; the town after zone k counts as zone k there: townAt says which)
 function placeOf(z) { if (z > DEPOT_N) return [-1, -1]; for (let k = 0; k < 400; k++) { const Z = zoneDef(k); if (z > Z.zTop) return [k, -1]; if (z > Z.tz1) return [k, k]; } return [0, -1]; }
 const areaAt = z => placeOf(z)[0], townAt = z => placeOf(z)[1];   // zones vary in size (on foot small, in a ride big): walk the list
@@ -2917,7 +2933,7 @@ function updateNpcTags() {
     const on = !B.on && d < 260 && tv.z < 1 && Math.abs(tv.x) < 1.1 && Math.abs(tv.y) < 1.1;
     if (on !== n.tag.on) { n.tag.on = on; n.tag.el.style.display = on ? 'block' : 'none'; }
     if (!on) continue;
-    n.tag.bub.style.display = n.chat ? 'block' : 'none';
+    n.tag.bub.style.display = n.chat ? 'block' : 'none'; n.tag.el.style.zIndex = n.chat ? '5' : '';   // someone talking: their bubble goes over every sign and name tag (still under the HUD)
     n.tag.el.style.transform = `translate(${((tv.x * 0.5 + 0.5) * innerWidth).toFixed(1)}px,${((-tv.y * 0.5 + 0.5) * innerHeight).toFixed(1)}px) translate(-50%,-100%)`;
   }
 }
@@ -3239,6 +3255,17 @@ function enemyRide(b, A, g, rig, Z) {
   A.ring.geometry.dispose(); A.ring.geometry = new THREE.TorusGeometry(len * 0.62, 0.5 * k, 6, 36);
   if (A.shell) { A.shell.geometry.dispose(); A.shell.geometry = new THREE.SphereGeometry(len * 0.62, 16, 12); A.shell.position.y = A.top * 0.35; }
 }
+// the enemies wear full outfits, like everyone else: each one a random pick from the Avatar Studio's ready-made characters (every
+// outfit in /arcade/outfits/) and your other saved characters. One that turns up before they've loaded stays hidden until it's dressed
+const ENEMY_KIT = ['grug', 'skater', 'ranger', 'scavenger', 'medic', 'flannel', 'racer', 'snow-rider'];
+let ENEMY_LOOKS = null; const ENEMY_WAIT = new Set();
+function dressEnemy(rig, b) {
+  if (!window.GrugOutfitRig) return;   // not on grugdigital.com
+  if (b.lk == null) b.lk = Math.random() * 1e6 | 0;   // its look: kept when it grows (setStage builds it again)
+  if (!ENEMY_LOOKS) { rig.root.visible = false; ENEMY_WAIT.add(rig); rig.enemyB = b; return; }
+  if (ENEMY_LOOKS.length) try { GrugOutfitRig.dress(rig, ENEMY_LOOKS[b.lk % ENEMY_LOOKS.length]); rig.matMode = undefined; } catch (_) { }
+}
+function enemyLooksReady(list) { ENEMY_LOOKS = list || []; for (const r of ENEMY_WAIT) { dressEnemy(r, r.enemyB); r.root.visible = true; } ENEMY_WAIT.clear(); }
 function bugModel(b, small) {
   const K = BUGS[b.type], [hatK, col] = ENEMY_LOOK[b.type] || ENEMY_LOOK.grub, sc = ENEMY_SCALE[b.stage][!small && (b.Z ? b.Z.ts : TS) >= 48 ? 1 : 0];
   const look = { skin: b.stage === 'egg' ? 0xd86a5a : 0x9aa0a8, shirt: col, arms: new THREE.Color(col).multiplyScalar(0.7).getHex(), pants: 0x2a2a30, hat: hatK, hatColor: K.dark, face: b.stage === 'larva' ? 'meh' : 'grin' };
@@ -3248,7 +3275,7 @@ function bugModel(b, small) {
   // a ring at its feet in its trait's colour (gold-rimmed once it's strong); enraged ones burn red
   const r = new THREE.Mesh(new THREE.TorusGeometry(2.2 * sc, 0.18 * sc, 6, 28), new THREE.MeshBasicMaterial({ color: b.stage === 'larva' ? K.color : 0xffd24a })); r.rotation.x = Math.PI / 2; r.position.y = 0.3; g.add(r); A.ring = r;
   if (b.type === 'shellback' && b.stage === 'adult') { const sh = new THREE.Mesh(new THREE.SphereGeometry(A.top * 0.62, 16, 12), new THREE.MeshPhongMaterial({ color: 0xb48aff, transparent: true, opacity: 0.28, shininess: 90, specular: 0xffffff, depthWrite: false })); sh.position.y = A.top * 0.5; g.add(sh); A.shell = sh; }
-  if (window.GrugOutfitRig && KIT_LOOKS && KIT_LOOKS.length) try { GrugOutfitRig.dress(rig, KIT_LOOKS[(BUG_ID + b.type.length) % KIT_LOOKS.length]); } catch (_) { }   // in the arcade's outfits (the ring and the size say what they are)
+  dressEnemy(rig, b);   // a full outfit (the ring and the size say what they are)
   const BZ0 = b.Z || B.Z; if (!small && BZ0 && BZ0.ride && typeof VEH_DATA !== 'undefined') enemyRide(b, A, g, rig, BZ0);   // you're in your car (or boat): so are they
   scene.add(g);
   return { g, A };
@@ -3322,9 +3349,7 @@ function updateCells(dt) {
   for (const m of B.mounds) { const t = T(m.i, m.j); m.g.position.set(t.x, visTop(t), t.z); const k = Math.sin(Game.clock * 9 + m.t0); m.g.rotation.y = k * 0.06 * (Math.sin(Game.clock * 1.3 + m.t0) > 0.6 ? 1 : 0); }
 }
 function addMound(i, j) {
-  const g = new THREE.Group(), cols = [0x6b4a2e, 0x7a5636, 0x5a3c24];
-  for (let k = 0; k < 5; k++) { const s = rnd(1.4, 2.6), q = new THREE.Mesh(new THREE.BoxGeometry(s, rnd(0.5, 1.1), s), lam(cols[k % 3])); q.position.set(rnd(-1.6, 1.6), 0.3, rnd(-1.6, 1.6)); q.rotation.y = rnd(0, 3); q.castShadow = true; g.add(q); }
-  const hole = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 0.1, 12), lam(0x1a120a)); hole.position.y = 0.62; g.add(hole); g.scale.setScalar(CKf());
+  const g = new THREE.Group();   // (no dirt pile drawn: where the next enemy turns up is a surprise)
   scene.add(g); const type = wpick(Object.entries(B.Z.mix)), m = { i, j, g, t0: rnd(0, 6), type, species: pickSpecies(type) }; B.mounds.push(m); return m;
 }
 function dropMound(m) { scene.remove(m.g); const k = B.mounds.indexOf(m); if (k >= 0) B.mounds.splice(k, 1); }
@@ -3437,6 +3462,10 @@ async function reshape(t, h, byBug) {
   await tween(byBug ? 0.5 : 0.45, k => { const y = y0 + (y1 - y0) * easeOut(k); tile.m.scale.y = y / y1; tile.m.position.y = y / 2; if (onMe) player.ch.y = y + 3; });
   tile.m.scale.y = 1; tile.m.position.y = y1 / 2; if (onMe) { player.ch.y = y1 + 3; player.moving = false; }
   FX.dust(tile.x, y1, tile.z, 5);
+  if (h < h0 && tile.pre) {   // dug out one of the level's own hills: 40% of the time there's energy inside
+    tile.pre = false;
+    if (Math.random() < 0.4 && !cellAt(t.i, t.j) && !bugAt(t.i, t.j)) { addCell(t.i, t.j); FX.ring(tile.x, y1 + 2, tile.z, 0xffe34a); for (let k = 0; k < 5; k++) FX.sparkle(tile.x, y1 + 3, tile.z, 0xffe34a); DmgNum.add(tile.x, y1 + 6, tile.z, 'ENERGY!', 'kill', y1); Snd.ding('gem'); if (onMe) collectAt(t.i, t.j); }
+  }
   if (h < h0) { const b = bugAt(t.i, t.j); if (b) { DmgNum.add(tile.x, y1 + 3, tile.z, 'DROP', 'hurt', y1); hurtBug(b, 1); } }
   await sleep(0.2);
 }
@@ -3518,7 +3547,7 @@ function killBug(b, how) {
   Q.ev('catch_' + b.stage); if (how === 'crush') Q.ev('crush'); B.dayCatch = (B.dayCatch || 0) + 1; Q.set('daycatch', B.dayCatch);
   b.dead = true; b.tag.el.remove(); const k = B.bugs.indexOf(b); if (k >= 0) B.bugs.splice(k, 1);
   // it tumbles over and fades; the drop pops up and flies to you
-  const sp = drop ? new THREE.Sprite(new THREE.SpriteMaterial({ map: drop.kind === 'card' ? artTex(drop.id) : eggSpriteTex(drop.rar), transparent: true })) : null;
+  const sp = drop && drop.kind === 'card' ? new THREE.Sprite(new THREE.SpriteMaterial({ map: artTex(drop.id), transparent: true })) : null;   // (an egg still goes in your bag, with no egg popping out)
   if (sp) { sp.scale.set(0.1, 0.1, 1); sp.position.copy(c); scene.add(sp); }
   const C = { g, cap: sp }; CAPS.push(C); const p0 = g.position.clone(), s0 = g.scale.x;
   tween(0.45, q => { g.rotation.x = -q * 1.5; g.scale.setScalar(s0 * (1 - q * 0.9)); g.position.y = p0.y + Math.sin(q * Math.PI) * 6; if (sp) { const cs = q * 4 * FXK(); sp.scale.set(cs, cs, 1); sp.position.y = c.y + q * 3.3 * FXK(); } })
@@ -3952,7 +3981,6 @@ const scTile = (i, j) => i >= 0 && j >= 0 && i < SC.n && j < SC.n ? SC.tiles[j *
 const scTop = t => t.m.position.y * 2;
 function buildShowcase() {
   if (SC.built) return; SC.built = true;
-  const base = new THREE.Mesh(boxGeo(SC.n * SCT + 8, 2, SC.n * SCT + 8), mat(0x3a2a4e)); base.position.set(SC.x0, -1, SC.z0); scene.add(base);
   for (let j = 0; j < SC.n; j++) for (let i = 0; i < SC.n; i++) {
     const [x, z] = scXZ(i, j), m = new THREE.Mesh(boxGeo(SCT, GY, SCT), mat((i + j) & 1 ? 0xccaa6c : 0xd8b77c)); m.position.set(x, GY / 2, z); m.receiveShadow = true; scene.add(m);
     const ov = new THREE.Mesh(ovGeo, new THREE.MeshBasicMaterial({ map: ovTex, transparent: true, depthWrite: false, opacity: 0 })); ov.renderOrder = 3; ov.visible = false; scene.add(ov);
@@ -4429,7 +4457,6 @@ const QT = {
   buy: { ev: 'buy', icon: 'bag', txt: n => `Buy ${n} card${n > 1 ? 's' : ''}`, n: [1, 2], r: 3 },
   zone: { ev: 'zone', icon: 'clover', txt: n => `Clear ${n} zone${n > 1 ? 's' : ''}`, n: [1, 2], r: 'skin' },
   night: { ev: 'night', icon: 'hourglass', txt: n => `Get through ${n} enemy turns`, n: [4, 8], r: 2 },
-  block: { ev: 'block', icon: 'shield', txt: () => 'Stand on a drop spot on the enemy turn', n: [1, 1], r: 3 },
   daycatch: { ev: 'daycatch', set: true, icon: 'capsule', txt: n => `Beat ${n} enemies in one turn`, n: [2, 3], r: 'skin' },
 };
 let qDirty = true;
@@ -5031,13 +5058,18 @@ function walkDir() {
   return l > 0.01 ? (l > 1 ? [mx / l, mz / l] : [mx, mz]) : null;
 }
 let jumpHeld = false;
-// Shift: a quick dash on foot in the overworld (not in a job, not in the boat)
-const DASH = { t: 0, cd: 0, want: false, T: 0.2, V: 64, CD: 0.7 };
+// Shift: a dodge roll on foot in the overworld (not in a job, not in the boat), as in Zombie Zones (its speed, time and wait)
+const DASH = { t: 0, cd: 0, want: false, T: 0.3, V: 42, CD: 0.75 };
 function tryDash() {
   const ch = player && player.ch; if (!ch || B.on || VEH.on || menuOpen() || ch.dead || ch.sit || DASH.cd > 0) return;
   const w = walkDir(); let dx, dz; if (w && (w[0] || w[1])) { const L = Math.hypot(w[0], w[1]); dx = w[0] / L; dz = w[1] / L; } else { dx = -Math.sin(ch.faceYaw); dz = -Math.cos(ch.faceYaw); }
   ch.dashT = DASH.T; ch.dashVx = dx * DASH.V; ch.dashVz = dz * DASH.V; DASH.cd = DASH.CD; ch.faceYaw = Math.atan2(-dx, -dz);
-  FX.dust(ch.x, ch.y - 3, ch.z, 4, 0.7); Snd.play('jump', ch.x, ch.y, ch.z);
+  player.roll = { t: 0, fx: dx, fz: dz, trail: 0, dur: DASH.T };
+  const x = ch.x, y = ch.y - 3, z = ch.z, DUST = 0xe9d6b8;   // a puff behind you, a swirl, a few clouds kicked back
+  FX.spawn('impact', x - dx * 1.2, y + 0.6, z - dz * 1.2, { from: 5, to: 9, fps: 26, size: 5.5, color: DUST, rot: rnd(0, 6.28) });
+  FX.spawn('spiral', x, y + 1.2, z, { fps: 26, size: 5.5, color: DUST, opacity: 0.75 });
+  for (let i = 0; i < 3; i++) FX.spawn('smoke', x - dx * 1.5 + rnd(-1, 1), y + 0.5, z - dz * 1.5 + rnd(-1, 1), { fps: 14, size: rnd(3.2, 4.4), color: DUST, vx: -dx * rnd(3, 6) + rnd(-3, 3), vy: rnd(1.5, 4), vz: -dz * rnd(3, 6) + rnd(-3, 3), drag: 4, grow: 0.7, fade: 0.55 });
+  Snd.play('swing', ch.x, ch.y, ch.z);
 }
 function hubUpdate(dt) {
   const ch = player.ch;
@@ -5045,7 +5077,7 @@ function hubUpdate(dt) {
   else {
     const inp = ch.input, w = menuOpen() ? null : walkDir();
     inp.mx = w ? w[0] : 0; inp.mz = w ? w[1] : 0; inp.jump = !menuOpen() && (keys.has('Space') || jumpHeld);
-    DASH.cd = Math.max(0, DASH.cd - dt); if (ch.dashT > 0 && Math.random() < dt * 30) FX.dust(ch.x, ch.y - 3, ch.z, 1.5, 0.4);
+    DASH.cd = Math.max(0, DASH.cd - dt);
     stepChars([ch], dt);
     { const db = $('dashBtn'); const c = DASH.cd > 0; if (db && db.classList.contains('cd') !== c) db.classList.toggle('cd', c); }
     for (const e of ch.events) { if (e === 'jump') Snd.play('jump', ch.x, ch.y, ch.z); if (e === 'landHard') FX.dust(ch.x, ch.y - 3, ch.z, 3, 0.6); }
@@ -5062,7 +5094,7 @@ function hubUpdate(dt) {
 
 // ---------------------------------------------------------------- the camera: the Roblox orbit cam in the Depot; over a zone, the same cam orbiting the grid
 const cam = { yaw: 0, pitch: 0.32, wantPitch: null, dist: 34, tdist: 34, manual: -9, fx: 0, fy: 4, fz: 0, init: false, soft: 0 };
-const PITCH = () => B.on ? [0.1, 1.42] : [-1.2, 1.396], ZOOM = () => B.on ? [40, 560] : VEH.on ? [16, 160] : [5, 90];
+const PITCH = () => B.on ? [0.1, 1.42] : [-1.2, 1.396], ZOOM = () => B.on ? [2, 560] : VEH.on ? [16, 160] : [5, 90];
 function placeCamera(dt) {
   let ax, ay, az, collide = false;
   if (player && storeCamera(dt)) return;   // a shop's open: in close on the keeper
@@ -5352,7 +5384,7 @@ function tipText() {
   if (B.hover && B.sel < 0 && B.swap < 0) {
     const b = bugAt(B.hover.i, B.hover.j), m = moundAt(B.hover.i, B.hover.j), c = cellAt(B.hover.i, B.hover.j), t = T(B.hover.i, B.hover.j);
     if (b) { const K = BUGS[b.type]; return `<b style="color:${K.css}">${K.name}</b> · ${stageWord(b)} ${b.hp}/${RULES.hp[b.stage]}${b.shell ? ' + shell' : ''}${t.h ? ' · up on a hill' : ''} · ${b.stage === 'larva' ? 'gets its act together tonight' : b.stage === 'adult' ? 'winds up tonight' : RANGED[b.type] ? 'SHOOTS YOU TONIGHT: beat it first!' : 'JUMPS YOU TONIGHT: beat it first!'} · ${K.what}`; }
-    if (m) return '<b style="color:#c9965a">Drop spot</b> · an enemy turns up here on the enemy turn. Stand on it and nobody comes';
+    if (m && false) return '';
     if (c) return '<b style="color:#ffe34a">Energy cell</b> · walk onto it (or over it) to pick it up. A lobbed shot sets it off: 1 damage to every bug round it';
     if (t.h) return '<b>Hill</b> · 8 studs up. Hop, leap or teleport to get up here; walking can\'t. Only lobbed attacks reach a bug up here from below';
   }
@@ -5393,7 +5425,7 @@ function updateCursorMsg(dt) {
 
 // ---------------------------------------------------------------- what you caught this round (eggs crack open into a random pet), and your collection
 function showCaught(list) {   // the eggs you won this round crack open, one by one
-  const el = $('caught'); el.innerHTML = '<b>EGGS</b><div class="cl"></div>'; const row = el.querySelector('.cl');
+  const el = $('caught'); el.innerHTML = '<b>FOUND</b><div class="cl"></div>'; const row = el.querySelector('.cl');
   list.forEach((c, k) => {
     const d = document.createElement('div'); d.className = 'pc ' + c.r; d.style.animationDelay = (k * 0.08) + 's';
     d.innerHTML = `<div class="egg ${c.r}"></div><small>${c.r.toUpperCase()}</small>`; row.appendChild(d);
@@ -5420,9 +5452,20 @@ $('mDeck').addEventListener('click', () => { toggleMenu(); openDeck(); });
 $('mCodex').addEventListener('click', () => { toggleMenu(); openCodex(); });
 // ---------------------------------------------------------------- the trail: glowing arrows on the floor from you to the next job, through the gates
 const Trail = (() => {
-  const sh = new THREE.Shape(); [[0, 1.7], [1.6, 0], [0.6, 0], [0.6, -1.5], [-0.6, -1.5], [-0.6, 0], [-1.6, 0]].forEach(([x, y], i) => i ? sh.lineTo(x, y) : sh.moveTo(x, y));
+  const AR = [[0, 1.7], [1.6, 0], [0.6, 0], [0.6, -1.5], [-0.6, -1.5], [-0.6, 0], [-1.6, 0]];
+  const sh = new THREE.Shape(); AR.forEach(([x, y], i) => i ? sh.lineTo(x, y) : sh.moveTo(x, y));
   const geo = new THREE.ShapeGeometry(sh); geo.rotateX(-Math.PI / 2); geo.scale(2.6, 1, 2.6);
   const mat = new THREE.MeshBasicMaterial({ color: 0xffe34a, transparent: true, opacity: 0.92, depthWrite: false, side: THREE.DoubleSide });
+  // a black outline round each arrow: the arrow's shape pushed out a little (mitred corners), with the arrow cut out of it
+  const edgeGeo = (() => {
+    const n = AR.length, D = 0.24; let area = 0; for (let i = 0; i < n; i++) { const [x0, y0] = AR[i], [x1, y1] = AR[(i + 1) % n]; area += x0 * y1 - x1 * y0; }
+    const s = area > 0 ? 1 : -1, nrm = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy); return [s * dy / l, -s * dx / l]; };
+    const out = AR.map((p, i) => { const a = nrm(AR[(i + n - 1) % n], p), b = nrm(p, AR[(i + 1) % n]), k = D / (1 + a[0] * b[0] + a[1] * b[1]); return [p[0] + (a[0] + b[0]) * k, p[1] + (a[1] + b[1]) * k]; });
+    const o = new THREE.Shape(); out.forEach(([x, y], i) => i ? o.lineTo(x, y) : o.moveTo(x, y));
+    const hole = new THREE.Path(); AR.forEach(([x, y], i) => i ? hole.lineTo(x, y) : hole.moveTo(x, y)); o.holes.push(hole);
+    const g = new THREE.ShapeGeometry(o); g.rotateX(-Math.PI / 2); g.scale(2.6, 1, 2.6); return g;
+  })();
+  const edgeMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.92, depthWrite: false, side: THREE.DoubleSide });
   const list = []; let t = 0, used = 0;
   const floorY = (x, z) => { const r = W.raycast(x, 60, z, 0, -1, 0, 80, p => !p.noCam); return 60 - r.t + 0.2; };
   function lay() {
@@ -5431,11 +5474,11 @@ const Trail = (() => {
     for (let k = a; k < Run.zone; k++) { const gz = k < 0 ? DEPOT_N : zoneDef(k).zTop; pts.push({ x: 0, z: gz + 10 }, { x: 0, z: gz - 10 }); }
     if (a === Run.zone && ch.z < R.cz + R.half + 4) { const sx = ch.x >= 0 ? 1 : -1; pts.push({ x: sx * (R.half + 40), z: ch.z }, { x: sx * (R.half + 40), z: R.cz + R.half + 30 }); }
     pts.push({ x: R.padX, z: R.cz + R.half + 20 }, { x: R.padX, z: R.padZ });
-    used = 0; let carry = 6;
+    used = 0; let carry = 15;   // (the first arrow a little way ahead of you, not under your feet)
     for (let s = 0; s < pts.length - 1 && used < 120; s++) {
       const A = pts[s], Bp = pts[s + 1], dx = Bp.x - A.x, dz = Bp.z - A.z, L = Math.hypot(dx, dz); if (L < 0.01) continue;
       for (let d = carry; d < L && used < 120; d += 16) {
-        const x = A.x + dx / L * d, z = A.z + dz / L * d; let m = list[used]; if (!m) { m = new THREE.Mesh(geo, mat); m.renderOrder = 2; scene.add(m); list.push(m); }
+        const x = A.x + dx / L * d, z = A.z + dz / L * d; let m = list[used]; if (!m) { m = new THREE.Mesh(geo, mat); m.renderOrder = 2; const e = new THREE.Mesh(edgeGeo, edgeMat); e.renderOrder = 2; m.add(e); scene.add(m); list.push(m); }
         m.position.set(x, floorY(x, z), z); m.rotation.y = Math.atan2(-dx, -dz); m.visible = true; used++;
       }
       carry = 16 - ((L - carry) % 16);
@@ -5455,7 +5498,7 @@ async function wearOutfits() {
   if (!window.GrugOutfitRig || !player) return;   // not on grugdigital.com: keep the game's own look
   const all = [player, ...npcs].filter(c => c.rig);
   all.forEach(c => { c.rig.root.visible = false; });
-  const cap = setTimeout(() => all.forEach(c => { c.rig.root.visible = true; }), 8000);
+  const cap = setTimeout(() => { all.forEach(c => { c.rig.root.visible = true; }); for (const r of ENEMY_WAIT) r.root.visible = true; }, 8000);
   try {
     const me = MY_LOOK = await GrugOutfitRig.load();
     if (me) { GrugOutfitRig.dress(player.rig, me); applyGear(); if (!me.starter && !me.isDefault) player.name = me.name.slice(0, 20); if (SC.built) GrugOutfitRig.dress(SC.f.rig, me); }
@@ -5463,10 +5506,12 @@ async function wearOutfits() {
     const KIT = ['ranger', 'scavenger', 'medic', 'skater', 'flannel', 'grug'];
     const [others, kit] = await Promise.all([GrugOutfitRig.others(npcs.length), Promise.all(KIT.map(n => GrugOutfitRig.fromURL('/arcade/outfits/' + n + '.glb', n).then(l => (KIT_NAMED[n] = l)).catch(() => null))).then(a => a.filter(Boolean))]);
     kitReady(kit);
+    const extra = await Promise.all(ENEMY_KIT.filter(n => !KIT.includes(n)).map(n => GrugOutfitRig.fromURL('/arcade/outfits/' + n + '.glb', n).catch(() => null)));
+    enemyLooksReady([...kit, ...extra, ...(others || [])].filter(l => l && l !== me));   // (never you)
     (others || []).forEach((o, i) => { const n = npcs[i]; if (!n || !n.rig) return; GrugOutfitRig.dress(n.rig, o); if (!o.starter) { n.name = o.name.slice(0, 20); if (n.tag) n.tag.nm.textContent = n.name; } });
     for (let i = (others || []).length, k = 0; i < npcs.length && kit.length; i++, k++) if (npcs[i].rig) GrugOutfitRig.dress(npcs[i].rig, kit[(k * 5 + 1) % kit.length]);
   } catch (e) { console.warn('outfits', e); }
-  if (!KIT_LOOKS) kitReady([]);
+  if (!KIT_LOOKS) kitReady([]); if (!ENEMY_LOOKS) enemyLooksReady([]);
   clearTimeout(cap); all.forEach(c => { c.rig.root.visible = true; });
 }
 addEventListener('grug:outfits', () => { if (player && window.GrugOutfitRig) GrugOutfitRig.load().then(l => { MY_LOOK = l; for (const r of [player.rig, SC.built && SC.f.rig].filter(Boolean)) { if (l) GrugOutfitRig.dress(r, l); else GrugOutfitRig.undress(r); } }); });

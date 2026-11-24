@@ -27,6 +27,13 @@ https://grugdigital.com/arcade/claude.md.
   <script>window.THREE || document.write('<script src="/static/vendor/three-r128.min.js"><\/script>');</script>
   ```
 
+**The look of the light (every arcade game, from Pet Zones):** a `HemisphereLight(0xfff0e2, 0x8a7a6a, 0.64)` and a sun
+`DirectionalLight(0xffe9d2, 0.85)` from Pet Zones' `SUN_DIR`, 260 studs out; `PCFSoftShadowMap` shadows, 4096 on a big screen and
+2048 on phones, the shadow camera ±80, near 100, far 460, bias -0.00006, normalBias 0.025; and shiny plastic (specular 0x6a6a6a,
+shininess 40 on every matte brick and character; see `PLASTIC` in any game). **480p YouTube mode:** after making the renderer,
+`if (window.GrugYT480) GrugYT480.attach(renderer.domElement, renderer);` and put `<button id="mYT" style="display:none">480p YouTube mode: Off</button>`
+in the Game Menu's settings (the script shows and wires it).
+
 ## 2. The site scripts (outfits and Pearls)
 
 Add these right after three.js. On grugdigital.com they give you the player's saved characters and the Pearls wallet.
@@ -39,6 +46,7 @@ without them.
 <script src="/static/outfits.js"></script>     <!-- window.GrugOutfits: saved characters -->
 <script src="/static/outfit-rig.js"></script>  <!-- window.GrugOutfitRig: puts a saved character on your rig -->
 <script src="/static/pearl-popup.js"></script> <!-- window.GrugPearlPopup: "You got X Pearls" and "Buy for X Pearls?" -->
+<script src="/static/yt480.js"></script>       <!-- window.GrugYT480: the "480p YouTube mode" setting -->
 ```
 
 ## 3. Play as your own character (required)
