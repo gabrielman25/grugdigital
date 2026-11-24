@@ -443,12 +443,12 @@ footer .sp{margin-left:auto}
 </footer>
 
 <script>
-/* the community strip: live Discord count and the newest video (static/social.js) */
+/* the community strip: the Discord's member count and the newest video (static/social.js) */
 (function () {
   const S = window.GrugSocial; if (!S) return;
   S.get().then(d => {
     const D = d.discord, v = d.youtube.videos[0];
-    if (D.online) { document.getElementById('socDc').textContent = S.n(D.online) + ' online now'; document.getElementById('socDcSub').textContent = `Join ${S.n(D.members)} players, builders and creators on the Grug Discord.`; }
+    if (D.members) document.getElementById('socDcSub').textContent = `Join ${S.n(D.members)} players, builders and creators on the Grug Discord.`;
     if (v) { const a = document.getElementById('socYt'); a.href = S.watch(v.id); document.getElementById('socVid').style.backgroundImage = `url('${S.thumbDirect(v.id)}')`; document.getElementById('socVid').textContent = ' ';
       if (v.title) document.getElementById('socYtSub').textContent = 'New: ' + v.title; }
   });

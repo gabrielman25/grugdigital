@@ -69,7 +69,7 @@
     const draw = d => {
       if (!el) return; const D = d.discord, v = d.youtube.videos[0], L = d.links;
       el.innerHTML = `<div class="box"><button class="x" type="button" aria-label="Close">×</button><h2 id="grugSocT">Follow Grug</h2><p class="s">Pick any: new characters, games and builds show up on all three.</p><div class="row">
-        <a class="c dc" href="${esc(L.discord)}" target="_blank" rel="noopener"><small>Discord</small><b class="t">Grug Discord</b><span class="l">${D.online ? `<b>${n(D.online)}</b> online now${D.members ? ` · ${n(D.members)} members` : ''}` : 'Players, builders and creators. Come say hi.'}</span><em>Join server</em></a>
+        <a class="c dc" href="${esc(L.discord)}" target="_blank" rel="noopener"><small>Discord</small><b class="t">Grug Discord</b><span class="l">${D.members ? `<b>${n(D.members)}</b> players, builders and creators. Come say hi.` : 'Players, builders and creators. Come say hi.'}</span><em>Join server</em></a>
         <a class="c ig" href="${esc(L.instagram)}" target="_blank" rel="noopener"><small>Instagram</small><b class="t">@grugdigital</b><span class="l">Characters, builds and behind the scenes.</span><em>Follow</em></a>
         <a class="c yt" href="${esc(L.youtube)}" target="_blank" rel="noopener"><small>YouTube</small><b class="t">PolySwitch</b>${v ? `<i class="v" style="background-image:url('https://i.ytimg.com/vi/${esc(v.id)}/mqdefault.jpg')"></i><span class="l">New: ${esc(v.title || 'the latest video')}</span>` : '<span class="l">Game dev, Roblox builds and the making of Grug.</span>'}<em>Subscribe</em></a>
       </div></div>`;

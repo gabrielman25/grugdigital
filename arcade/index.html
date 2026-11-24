@@ -119,6 +119,10 @@ img{border:0}
 
 /* body */
 #Body{width:890px;padding:5px;background:#f2f2f2;overflow:hidden}
+#UsersOnline{display:block;margin:0 0 6px 2px;font:bold 13px/1.2 Arial,Helvetica,sans-serif;color:#333;text-decoration:none}
+#UsersOnline b{color:#1f8a1f}
+#UsersOnline:hover{text-decoration:underline}
+#UsersOnline[hidden]{display:none}
 .Column1e{float:left;width:140px;margin-top:10px}
 .Column2e{float:left;width:740px;margin:10px 0 0 10px;position:relative}
 .StandardBoxHeader{height:33px;padding:0 7px 0 5px;width:126px;color:#fff;font:bold 20px/1 Arial,Helvetica,sans-serif;position:relative;
@@ -254,6 +258,7 @@ img{border:0}
 
   <div id="Body">
     <div class="Column1e">
+      <a id="UsersOnline" href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener" title="Join them on the Grug Discord" hidden>Users online: <b></b></a>
       <div class="StandardBoxHeader"><span><h2>Games</h2></span></div>
       <div class="StandardBox" id="GamesLeftColumn">
         <div class="GameFilter" id="Timespan">
@@ -475,18 +480,17 @@ img{border:0}
     const R6 = n => `/static/arcade/${n}.webp`;
     function build(d) {
       const D = d.discord, V = d.youtube.videos, k = S.links || S.LINKS, LK = d.links;
-      const vids = shuffle(V.slice()), v0 = V[0], live = D.online ? `<span class="live">${S.n(D.online)} ONLINE NOW</span>` : '<span class="live">COME SAY HI</span>';
+      const vids = shuffle(V.slice()), v0 = V[0], live = '<span class="live">COME SAY HI</span>';
       const avs = D.avatars.slice(0, 12);
       const ads = {
         discordLive: ad('dc', LK.discord, `<div class="k">Join the</div><div class="h">Grug Discord</div>
-          <div class="big">${D.online ? S.n(D.online) : '•'}</div><div class="sub">${D.online ? 'players online right now' : 'players, builders and creators'}</div>
-          ${D.members ? `<div class="sub" style="margin-top:8px"><b>${S.n(D.members)}</b> members</div>` : ''}
+          ${D.members ? `<div class="big">${S.n(D.members)}</div><div class="sub">members: players, builders and creators</div>` : '<div class="sub" style="margin-top:14px">Players, builders and creators</div>'}
           <div class="figs"><img src="${R6('grug')}" alt="" style="left:-8px;z-index:1"><img src="${R6('medic')}" alt="" style="right:-10px;height:126px"></div>
           <div class="cta">Join server ›</div>`, 'Join the Grug Discord'),
-        discordWho: ad('dk', LK.discord, `<div class="k" style="color:#b9bbbe">Discord</div><div class="h" style="font-size:21px">Who's on right now</div>${live}
+        discordWho: ad('dk', LK.discord, `<div class="k" style="color:#b9bbbe">Discord</div><div class="h" style="font-size:21px">Who's hanging out</div>${live}
           <div class="av">${avs.length ? avs.map(a => `<img src="${esc(a.avatar)}" alt="" loading="lazy" referrerpolicy="no-referrer">`).join('') : ['G', 'R', 'U', 'G', '+', '+'].map(c => `<i>${c}</i>`).join('')}</div>
           ${avs.length ? `<div class="names">${avs.slice(0, 6).map(a => `<b>${esc(a.name)}</b>${a.game ? ` · ${esc(a.game)}` : ''}`).join('<br>')}</div>` : `<div class="names">Trade outfits, show off your characters, find people to play the Arcade with.</div>`}
-          <div class="cta">Hop in ›</div>`, 'See who is online on the Grug Discord'),
+          <div class="cta">Hop in ›</div>`, 'Hang out on the Grug Discord'),
         ytLatest: ad('yt', v0 ? S.watch(v0.id) : LK.youtube, `<div class="k">New on YouTube</div><div class="h">PolySwitch</div>
           ${v0 ? `<div class="thumb" style="background-image:url('${S.thumbDirect(v0.id)}')"></div><div class="tt">${esc(v0.title || 'Watch the newest video')}</div>` : `<div class="figs" style="bottom:180px"><img src="${R6('racer')}" alt="" style="left:10px"></div>`}
           <div class="figs" style="height:120px"><img src="${R6('skater')}" alt="" style="left:6px;height:118px"><img src="${R6('ranger')}" alt="" style="right:4px;height:110px"></div>
@@ -524,6 +528,9 @@ img{border:0}
       setTimeout(() => setInterval(() => { if (document.hidden) return; els[i].classList.remove('on'); i = (i + 1) % els.length; els[i].classList.add('on'); }, 9000), delay);
     }
     S.get().then(d => { const b = build(d); run(L, b.L, 0); run(R, b.R, 4500); });
+    // "Users online" over the games list: the Grug Discord's live count (hidden until there is one), a link to join
+    const uo = $('UsersOnline'), online = d => { const n = d && d.discord && d.discord.online; if (!uo) return; uo.href = (d.links && d.links.discord) || uo.href; if (n) { uo.querySelector('b').textContent = S.n(n); uo.hidden = false; } };
+    S.get().then(online); setInterval(() => S.get().then(online), 90000);
     for (const box of [L, R]) box.addEventListener('click', e => { if (!e.target.closest('a.ad') || e.target.closest('a.sp') || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return; e.preventDefault(); S.popup(); });   // a banner opens every social, side by side
   })();
 

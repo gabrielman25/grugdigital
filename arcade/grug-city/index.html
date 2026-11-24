@@ -4715,7 +4715,7 @@ const Social = (() => {
       grad(x, W, H, [[0, '#6d78f5'], [1, '#4752c4']]);
       txt(x, 'JOIN THE', H * 0.08, H * 0.2, H * 0.09, 'rgba(255,255,255,.8)');
       txt(x, 'GRUG DISCORD', H * 0.08, H * 0.39, H * 0.2, '#fff', W * 0.56);
-      const on = data.discord.online, s = on ? `${nf(on)} ONLINE NOW` : 'COME SAY HI';
+      const s = 'COME SAY HI';
       x.font = `bold ${H * 0.1}px Arial`; const pw = x.measureText(s).width + H * 0.12; x.fillStyle = '#3ba55c'; rr(x, H * 0.08, H * 0.48, pw, H * 0.15, H * 0.075); x.fill(); txt(x, s, H * 0.14, H * 0.592, H * 0.1, '#fff');
       txt(x, data.discord.members ? `${nf(data.discord.members)} members · discord.gg/3ENePvNGJy` : 'discord.gg/3ENePvNGJy', H * 0.08, H * 0.78, H * 0.075, 'rgba(255,255,255,.9)', W * 0.58);
       fig(x, I.medic, W * 0.74, H * 1.02, H * 0.86); fig(x, I.grug, W * 0.88, H * 1.04, H * 0.98); hint(x, W, H, 'Aim here + E to join');
@@ -4724,8 +4724,8 @@ const Social = (() => {
       txt(x, "WHO'S ON THE GRUG DISCORD", H * 0.08, H * 0.24, H * 0.1, '#fff', W * 0.6);
       const av = data.discord.avatars.slice(0, 9), r = H * 0.12;
       if (av.length) av.forEach((a, i) => { const cx = H * 0.08 + r + i * r * 2.5, cy = H * 0.45; x.fillStyle = '#3ba55c'; x.beginPath(); x.arc(cx, cy, r + 6, 0, 7); x.fill(); const im = I['av' + i]; x.save(); x.beginPath(); x.arc(cx, cy, r, 0, 7); x.clip(); if (im) x.drawImage(im, cx - r, cy - r, r * 2, r * 2); else { x.fillStyle = '#5865f2'; x.fillRect(cx - r, cy - r, r * 2, r * 2); } x.restore(); txt(x, a.name.slice(0, 10), cx, cy + r + H * 0.1, H * 0.055, '#b9bbbe', r * 2.4, 'center'); });
-      else { txt(x, data.discord.online ? nf(data.discord.online) : 'Players, builders', H * 0.08, H * 0.56, H * 0.24, '#fff', W * 0.6); txt(x, data.discord.online ? 'players online right now' : 'and creators hang out here', H * 0.08, H * 0.68, H * 0.08, '#b9bbbe'); fig(x, I.skater, W * 0.86, H * 1.03, H * 0.9); }
-      txt(x, `${data.discord.online ? nf(data.discord.online) + ' online · ' : ''}discord.gg/3ENePvNGJy`, H * 0.08, H * 0.92, H * 0.07, '#fff', W * 0.7); hint(x, W, H, 'Aim here + E to join');
+      else { txt(x, 'Players, builders', H * 0.08, H * 0.56, H * 0.24, '#fff', W * 0.6); txt(x, 'and creators hang out here', H * 0.08, H * 0.68, H * 0.08, '#b9bbbe'); fig(x, I.skater, W * 0.86, H * 1.03, H * 0.9); }
+      txt(x, 'discord.gg/3ENePvNGJy', H * 0.08, H * 0.92, H * 0.07, '#fff', W * 0.7); hint(x, W, H, 'Aim here + E to join');
     }],
     youtube: [(x, W, H) => {
       x.fillStyle = '#0f0f0f'; x.fillRect(0, 0, W, H); const v = data.youtube.videos[0];
@@ -4883,7 +4883,7 @@ const Social = (() => {
     }
     return null;
   }
-  const label = b => b.kind === 'kimiland' ? 'Shop KimiLand UGC on Roblox <span class="dim">(sponsor)</span>' : b.kind === 'discord' ? `Join the Grug Discord${data.discord.online ? ` (${nf(data.discord.online)} online)` : ''}` : b.kind === 'youtube' ? 'Watch PolySwitch on YouTube' : 'Follow @grugdigital on Instagram';
+  const label = b => b.kind === 'kimiland' ? 'Shop KimiLand UGC on Roblox <span class="dim">(sponsor)</span>' : b.kind === 'discord' ? 'Join the Grug Discord' : b.kind === 'youtube' ? 'Watch PolySwitch on YouTube' : 'Follow @grugdigital on Instagram';
   function useText(u, k) { return u.kind === 'tv' ? `${k} Watch PolySwitch on TV, with sound${u.T.vid && u.T.vid.title ? ` · <span class="dim">${esc(u.T.vid.title.slice(0, 48))}</span>` : ''}` : `${k} ${label(u.b)}`; }
   function openLink(url) { if (pointerLocked) document.exitPointerLock(); const w = window.open(url, '_blank', 'noopener'); if (w === null) location.href = url; else msg('Opened in a new tab', 2); }
   function use(u) {
