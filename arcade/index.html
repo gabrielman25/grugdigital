@@ -170,6 +170,25 @@ img{border:0}
 .rect-note{display:block;margin-top:4px;text-align:center;font-size:11px;color:#888}
 .rect-note a{color:#888}
 
+/* the spotlight: one game at the top of the page (now Zone Royale) */
+#Spotlight{margin:10px 0 2px;overflow:hidden}
+#Spotlight .StandardBoxHeader{width:auto;display:inline-block;padding-right:28px}
+#Spotlight .box{clear:both;position:relative;top:-2px;display:flex;gap:14px;padding:8px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 120px) no-repeat}
+#Spotlight .shot{position:relative;flex:none;display:block;width:480px;height:270px;border:1px solid #888;overflow:hidden;background:#000}
+#Spotlight .shot img{display:block;width:480px;height:270px}
+#Spotlight .shot .new{position:absolute;left:8px;top:8px;padding:3px 8px;background:#d8281f;color:#fff;font:bold 13px Arial,Helvetica,sans-serif;border-radius:3px}
+#Spotlight .txt{flex:1;min-width:0;font:13px/1.4 Arial,Helvetica,sans-serif;color:#333;display:flex;flex-direction:column}
+#Spotlight .txt h2{margin:2px 0 0;font:bold 30px/1.05 Arial,Helvetica,sans-serif;color:#111}
+#Spotlight .txt h2 a{color:inherit;text-decoration:none}
+#Spotlight .tag{margin:3px 0 8px;font:bold 13px Arial,Helvetica,sans-serif;color:#c00}
+#Spotlight ul{margin:0 0 10px;padding-left:18px}
+#Spotlight li{margin:2px 0}
+#Spotlight .play{margin-top:auto;align-self:flex-start;display:inline-block;padding:0 28px;height:42px;line-height:42px;border-radius:6px;font:bold 20px/42px Arial,Helvetica,sans-serif;color:#1e1b16;text-decoration:none;
+  background:linear-gradient(#c6f57a,#9be338 50%,#86cf27 51%,#9be338);border:1px solid #5f9a18;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+#Spotlight .play:hover{filter:brightness(1.06)}
+#Spotlight .fine{margin-top:6px;font-size:11px;color:#888}
+@media (max-width:920px){#Spotlight .box{flex-direction:column}#Spotlight .shot,#Spotlight .shot img{width:100%;height:auto}}
+
 /* the game tiles: 180x150 cells, 160x130 tiles with 6px padding */
 .Cell{float:left;width:180px;height:150px}
 .GameItem{position:relative;width:160px;height:130px;padding:6px;margin:0 0 8px 8px}
@@ -257,6 +276,25 @@ img{border:0}
   </div>
 
   <div id="Body">
+    <section id="Spotlight" aria-labelledby="spotTitle">
+      <div class="StandardBoxHeader"><span><h2>Spotlight</h2></span></div>
+      <div class="box">
+        <a class="shot" href="/arcade/zone-royale/"><img src="/arcade/zone-royale/cover.jpg" alt="A player gliding down into a blocky city on a big island" width="480" height="270"><span class="new">NEW</span></a>
+        <div class="txt">
+          <h2 id="spotTitle"><a href="/arcade/zone-royale/">Zone Royale</a></h2>
+          <div class="tag">100-player battle royale · one island · one winner</div>
+          <ul>
+            <li>Warm up on the spawn island, then jump from the plane and glide anywhere on a huge brick island.</li>
+            <li>Loot chests for guns from grey to gold, ammo, bandages, medkits and shield potions.</li>
+            <li>No building: break through walls with your pickaxe.</li>
+            <li>The storm closes in every half minute. Be the last one standing for a Victory Royale.</li>
+            <li>You play as your own Grug character, and your other saved outfits drop in with you.</li>
+          </ul>
+          <a class="play" href="/arcade/zone-royale/">Play</a>
+          <div class="fine">Free, in your browser. Mouse and keyboard recommended.</div>
+        </div>
+      </div>
+    </section>
     <div class="Column1e">
       <a id="UsersOnline" href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener" title="Join them on the Grug Discord" hidden>Users online: <b></b></a>
       <div class="StandardBoxHeader"><span><h2>Games</h2></span></div>
@@ -359,6 +397,9 @@ img{border:0}
 
   /* the games: added / updated are the dates in the repo's history; "tag" is the red line under the name */
   const GAMES = [
+    { slug: 'zone-royale', name: 'Zone Royale', genres: ['war', 'adventure'], tag: '100 players · battle royale', featured: true,
+      added: '2026-11-24T22:00:00Z', updated: '2026-11-24T22:00:00Z', alt: 'A player gliding down into a blocky city on a big island',
+      stats: ['Drop, loot, outlast the storm', 'Pickaxe through walls'] },
     { slug: 'slide-999', name: 'Slide 999 KM for FREE ADMIN!!', genres: ['adventure', 'funny'], tag: 'Obby slide · free admin', featured: true,
       added: '2026-11-23T10:47:46-06:00', updated: '2026-11-23T11:38:37-06:00', alt: 'A cart flying down a blocky sky slide',
       stats: ['999 km of slide and obbies', 'Rebirth: 2 Pearls a day'] },
