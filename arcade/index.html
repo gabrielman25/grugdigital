@@ -15,22 +15,30 @@
    a 140px genre column, 160x130 game tiles in a 738px box, a 300x300 box beside the first rows, a Verdana footer. */
 *{box-sizing:content-box}
 html,body{margin:0;padding:0}
-body{font:12px Arial,Helvetica,sans-serif;color:#000;background:#000444 url(/static/arcade/sky.jpg) repeat-x 50% 0;min-width:920px}
-a{color:#00f;text-decoration:none}
+body{position:relative;font:12px Arial,Helvetica,sans-serif;color:#000;background:#1f4a10;min-width:920px}
+/* the background: slow pans across ray-traced shots of Grug City, crossfading, fading down into solid green */
+.bgfx{position:absolute;left:0;top:0;width:100%;height:1250px;overflow:hidden;z-index:0;pointer-events:none;
+  -webkit-mask-image:linear-gradient(#000 0,#000 480px,transparent 1150px);mask-image:linear-gradient(#000 0,#000 480px,transparent 1150px)}
+.bgfx .sh{position:absolute;inset:0;opacity:0;background:#1f4a10 50% 30%/cover no-repeat;transition:opacity 2.6s ease;will-change:transform,opacity;transform:scale(1.14)}
+.bgfx .sh.on{opacity:1}
+#Container{position:relative;z-index:1}
+a{color:#1d7a0c;text-decoration:none}
 a:hover{text-decoration:underline}
 h1,h2,h3{margin:0;font-size:inherit;font-weight:inherit;display:inline}
 img{border:0}
-svg.gi{width:16px;height:16px;display:inline-block;vertical-align:top;fill:#333}
 #Container{width:900px;padding:0 10px;margin:0 auto}
 
 /* house ad in the leaderboard slot (728x90) */
 #Leaderboard{width:898px;height:102px;margin:0 1px 5px;display:flex;align-items:flex-end;justify-content:center}
-.lb{position:relative;display:block;width:728px;height:90px;overflow:hidden;background:#0c2a5c;color:#fff;text-decoration:none!important}
-.lb .bgk{position:absolute;inset:0;background:linear-gradient(90deg,#0b2350 0,#12408a 55%,#1a5bb8 100%)}
+.lb{position:relative;display:block;width:728px;height:90px;overflow:hidden;background:#0b2350;color:#fff;text-decoration:none!important}
+.lb .bgk{position:absolute;inset:0;background:linear-gradient(90deg,#0a1f48 0,#12408a 55%,#1a5bb8 100%)}
 .lb .fig{position:absolute;bottom:-14px;height:104px;width:auto}
-.lb .t{position:absolute;left:250px;top:14px;width:300px}
-.lb .t b{display:block;font:bold 22px/1.1 Arial,Helvetica,sans-serif;text-shadow:0 2px 0 #071a3d}
-.lb .t span{display:block;margin-top:6px;font-size:13px;color:#cfe0ff}
+.lb .t{position:absolute;left:232px;top:12px;width:320px}
+.lb .t b{display:block;font:bold 21px/1.1 Arial,Helvetica,sans-serif;text-shadow:0 2px 0 #071a3d}
+.exp{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.exp i{font:bold 11px/1 Arial,Helvetica,sans-serif;font-style:normal;text-shadow:none;padding:3px 6px;border-radius:3px;background:rgba(255,255,255,.16);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+.exp i.k{background:#fff;color:#0b3d8f}
+.lb .t>span{display:block;margin-top:4px;font-size:12px;color:#cfe0ff}
 .lb .go{position:absolute;right:18px;top:26px;padding:0 16px;height:36px;line-height:36px;border-radius:6px;font:bold 15px/36px Arial,Helvetica,sans-serif;color:#1e1b16;
   background:linear-gradient(#c6f57a,#9be338 50%,#86cf27 51%,#9be338);border:1px solid #5f9a18;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
 .lb:hover .go{filter:brightness(1.06)}
@@ -43,34 +51,32 @@ svg.gi{width:16px;height:16px;display:inline-block;vertical-align:top;fill:#333}
 #Logo img{width:350px;height:auto;filter:drop-shadow(0 2px 0 #0a2f72) drop-shadow(0 0 6px rgba(5,25,70,.55))}
 #Options{position:absolute;left:0;top:0;width:200px;z-index:3}
 #Options a{display:inline-block;margin:4px 5px 0 17px;padding:2px 5px;font:bold 10px/11px Arial,Helvetica,sans-serif;color:#fff;border-radius:3px;
-  background:linear-gradient(#5aa9f2,#1d72d8 50%,#0f62c8 51%,#1c6fd3);border:1px solid #0b4fa6;text-decoration:none}
+  background:linear-gradient(#7fcf43,#45a116 50%,#38900e 51%,#44a015);border:1px solid #2a6c08;text-decoration:none}
 #Options a svg{width:9px;height:9px;vertical-align:-1px;margin-right:3px}
 .SignUpAndPlay{position:absolute;right:0;top:0;width:210px;height:40px;z-index:3;display:flex;align-items:center;justify-content:center;border-radius:0 0 8px 8px;
   font:bold 17px/40px Arial,Helvetica,sans-serif;color:#1e1b16!important;text-decoration:none!important;text-shadow:0 1px 0 rgba(255,255,255,.5);
   background:linear-gradient(#d4fa90,#a8ec45 48%,#8ed42a 52%,#9be338);border:1px solid #5f9a18;border-top:0;box-shadow:0 2px 4px rgba(0,0,30,.35),inset 0 1px 0 rgba(255,255,255,.6)}
 .SignUpAndPlay:hover{filter:brightness(1.06)}
 
-.Navigation{position:relative;height:30px;font-size:16px;line-height:20px;background:linear-gradient(#57aaf2 0,#2a88e6 45%,#0f6fd6 50%,#0d66cc 100%);z-index:5}
+.Navigation{position:relative;height:30px;font-size:16px;line-height:20px;background:linear-gradient(#8fdc4c 0,#5cb41e 45%,#3f9612 50%,#3a8c10 100%);z-index:5}
 .Navigation ul{list-style:none;margin:0 5px;padding:0;display:flex}
 .Navigation li{padding:6px 0 4px}
-.Navigation li>a{display:inline-block;padding:0 8px;font-weight:bold;color:#fff;text-decoration:none}
+.Navigation li>a{display:inline-block;padding:0 8px;font-weight:bold;color:#fff;text-decoration:none;text-shadow:0 1px 0 rgba(0,40,0,.35)}
 .Navigation li>a:hover{text-decoration:underline}
 #gamesMenuToggle{display:inline-block;width:10px;height:6px;margin:0 0 3px -6px;padding:0 6px 0 0;cursor:pointer;vertical-align:middle;border:0;background:none}
 #gamesMenuToggle::after{content:"";display:block;width:0;height:0;border:5px solid transparent;border-top:6px solid #fff;border-bottom:0}
 .dropdown{display:none;position:absolute;left:121px;top:30px;z-index:20;font-weight:normal;box-shadow:0 4px 10px rgba(0,0,30,.4)}
 .dropdown.open{display:flex}
-.dropdown .col{background:#1462bf;border:1px solid #0a3f86;padding:6px 8px}
+.dropdown .col{background:#3a8c10;border:1px solid #275f09;padding:6px 8px}
 .dropdown .gen{width:300px;display:flex;flex-wrap:wrap}
-.dropdown .gen a,.dropdown .more a{display:flex;align-items:center;gap:5px;width:50%;box-sizing:border-box;padding:3px 2px;font-size:15px;color:#fff}
-.dropdown .gen svg{fill:#fff}
+.dropdown .gen a,.dropdown .more a{display:flex;align-items:center;gap:5px;padding-left:6px!important;width:50%;box-sizing:border-box;padding:3px 2px;font-size:15px;color:#fff}
 .dropdown .more{width:145px;border-left:0}
 .dropdown .more a{width:auto}
 
 #Announcement{margin:3px}
 .SystemAlertText{position:relative;height:18px;padding:2px;background:#ffa500;color:#fff;font:bold 16px/18px Arial,Helvetica,sans-serif;text-align:center}
 .SystemAlertText a{color:#fff;text-decoration:underline}
-.Exclamation{position:absolute;left:2px;top:3px;width:16px;height:16px;border-radius:50%;background:#e2532d;color:#fff;font:bold 12px/16px Arial,sans-serif;text-align:center}
-.SystemAlertText svg{width:16px;height:16px;vertical-align:-2px;margin-right:4px}
+.SystemAlertText svg{width:16px;height:16px;vertical-align:-2px;margin-right:5px}
 
 /* body */
 #Body{width:890px;padding:5px;background:#f2f2f2;overflow:hidden}
@@ -79,7 +85,6 @@ svg.gi{width:16px;height:16px;display:inline-block;vertical-align:top;fill:#333}
 .StandardBoxHeader{height:33px;padding:0 7px 0 5px;width:126px;color:#fff;font:bold 20px/1 Arial,Helvetica,sans-serif;position:relative;
   background:linear-gradient(#5a5a5a,#2b2b2b 50%,#111 51%,#1d1d1d);clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%);border-radius:4px 0 0 0}
 .StandardBoxHeader span{display:block;padding:6px 5px 0 2px}
-.StandardBoxHeader svg{width:13px;height:13px;vertical-align:1px;margin-left:4px}
 .StandardBox{width:126px;padding:20px 5px;margin:0 0 8px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 90px) no-repeat}
 .GameFilter>div{font-size:14px;color:#555;padding-left:12px}
 .GameFilter ul{list-style:none;margin:5px 0 0;padding:0;font-size:14px}
@@ -109,12 +114,13 @@ svg.gi{width:16px;height:16px;display:inline-block;vertical-align:top;fill:#333}
 .StandardBoxGray{clear:both;position:relative;top:-2px;float:left;width:726px;padding:5px;margin:0 0 10px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 120px) no-repeat}
 #GamesContent{min-height:300px}
 #GamePageAdDiv{float:right;width:300px;height:300px;display:inline}
-.rect{position:relative;display:block;width:300px;height:250px;overflow:hidden;color:#fff;text-decoration:none!important;background:linear-gradient(#1a6fd8,#5aa8ef 60%,#a9d4f6)}
-.rect .figs{position:absolute;left:0;right:0;bottom:56px;height:120px}
-.rect .figs img{position:absolute;bottom:0;height:116px;width:auto}
-.rect .t{position:absolute;left:0;right:0;top:12px;text-align:center;font:bold 21px/1.1 Arial,Helvetica,sans-serif;text-shadow:0 2px 0 #0b3b7c}
-.rect .s{display:block;margin-top:4px;font-size:12px;font-weight:normal;text-shadow:none;color:#eaf3ff}
-.rect .bar{position:absolute;left:0;right:0;bottom:0;height:56px;background:#1e1b16;display:flex;align-items:center;justify-content:center}
+.rect{position:relative;display:block;width:300px;height:250px;overflow:hidden;color:#fff;text-decoration:none!important;background:linear-gradient(#3d93e8,#7cbcf5 58%,#c4e3fb)}
+.rect .figs{position:absolute;left:0;right:0;bottom:56px;height:104px}
+.rect .figs img{position:absolute;bottom:0;height:100px;width:auto}
+.rect .exp{justify-content:center;margin-top:7px}
+.rect .t{position:absolute;left:0;right:0;top:10px;text-align:center;font:bold 21px/1.1 Arial,Helvetica,sans-serif;text-shadow:0 2px 0 #0b3b7c}
+.rect .s{display:block;margin-top:4px;font-size:12px;font-weight:normal;text-shadow:none;color:#eef6ff;text-shadow:0 1px 0 rgba(11,59,124,.5)}
+.rect .bar{position:absolute;left:0;right:0;bottom:0;height:56px;background:#0b2350;display:flex;align-items:center;justify-content:center}
 .rect .go{padding:0 16px;height:34px;line-height:34px;border-radius:6px;font:bold 15px/34px Arial,Helvetica,sans-serif;color:#1e1b16;
   background:linear-gradient(#c6f57a,#9be338 50%,#86cf27 51%,#9be338);border:1px solid #5f9a18;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
 .rect:hover .go{filter:brightness(1.06)}
@@ -128,9 +134,7 @@ svg.gi{width:16px;height:16px;display:inline-block;vertical-align:top;fill:#333}
 .AlwaysShown .thumb{display:block;width:160px;height:100px;background:#ccc}
 .AlwaysShown .thumb img{display:block;width:160px;height:100px;object-fit:cover}
 .GameName{font-weight:bold;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;height:14px;line-height:14px}
-.PlayerCount{float:left;color:red;line-height:14px;max-width:118px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.GenreIcons{float:right;margin-top:0;line-height:0}
-.GenreIcons svg{margin-left:3px}
+.PlayerCount{color:red;line-height:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .HoverShown{display:none;position:absolute;top:-10px;left:-10px;z-index:1;width:160px;padding:158px 15px 15px;font-size:11px;color:#888;background:#fff;border:1px solid #888;border-radius:5px;box-shadow:0 3px 10px rgba(0,0,0,.18)}
 .HoverShown div{line-height:14px}
 .GameItem:hover{z-index:10}
@@ -138,7 +142,7 @@ svg.gi{width:16px;height:16px;display:inline-block;vertical-align:top;fill:#333}
 .Empty{float:left;width:400px;padding:30px 10px 10px 16px;font-size:14px;color:#555;line-height:1.45}
 .Paging{clear:both;text-align:center;padding-bottom:20px;color:#888;font-size:14px}
 .Arrow{display:inline-block;position:relative;top:12px;width:36px;height:36px;border:0;padding:0;cursor:pointer;border-radius:50%;
-  background:radial-gradient(circle at 50% 35%,#5fb0f5,#1a6fd8 60%,#0e57b5);box-shadow:inset 0 0 0 2px rgba(255,255,255,.5)}
+  background:radial-gradient(circle at 50% 35%,#9be358,#4fa81a 60%,#3a8c10);box-shadow:inset 0 0 0 2px rgba(255,255,255,.5)}
 .Arrow::after{content:"";position:absolute;top:11px;left:13px;border:7px solid transparent;border-left:10px solid #fff;border-right:0}
 .Arrow.prev::after{left:11px;border-left:0;border-right:10px solid #fff}
 .Arrow[disabled]{visibility:hidden}
@@ -147,36 +151,19 @@ svg.gi{width:16px;height:16px;display:inline-block;vertical-align:top;fill:#333}
 /* footer */
 #Footer{width:860px;padding:39px 20px;background:#e6e6e6;font:13px Verdana,sans-serif;color:#aaa;text-align:center}
 .FooterNav{color:#bbb;margin-bottom:12px}
-.FooterNav a{color:#00f}
+.FooterNav a{color:#1d7a0c}
 .Legalese{margin:10px 0;font-size:10px;color:#555;line-height:1.35}
-.Legalese a{color:#00f}
+.Legalese a{color:#1d7a0c}
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <!-- Grug's own 16px genre icons -->
-  <symbol id="g-all" viewBox="0 0 16 16"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></symbol>
-  <symbol id="g-town-and-city" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 8.5L4.5 4 9 8.5V15H0zM3.5 11h2v4h-2zM10 2h6v13h-6zM11.5 4h1.2v1.6h-1.2zM13.5 4h1.2v1.6h-1.2zM11.5 7h1.2v1.6h-1.2zM13.5 7h1.2v1.6h-1.2zM11.5 10h1.2v1.6h-1.2zM13.5 10h1.2v1.6h-1.2z"/></symbol>
-  <symbol id="g-medieval" viewBox="0 0 16 16"><path d="M13 0h3v3L7.5 11.5 4.5 8.5zM2.5 7.5l6 6-1.2 1.2-6-6zM4.3 11.7l1.4 1.4L2 16.6 0.6 15.2z"/></symbol>
-  <symbol id="g-sci-fi" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 0c3.2 2 3.6 7 2.6 11H5.4C4.4 7 4.8 2 8 0zM8 4.2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM5.2 7.5L2 12.5l3.6-1zM10.8 7.5l3.2 5-3.6-1zM6.6 12h2.8L8 16z"/></symbol>
-  <symbol id="g-ninja" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 0l1.7 6.3L16 8l-6.3 1.7L8 16l-1.7-6.3L0 8l6.3-1.7zM8 6.8a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></symbol>
-  <symbol id="g-scary" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 16V7a5.5 5.5 0 0 1 11 0v9l-1.8-1.8L9.8 16 8 14.2 6.2 16l-1.9-1.8zM5.3 6h1.8v2.4H5.3zM8.9 6h1.8v2.4H8.9z"/></symbol>
-  <symbol id="g-pirate" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 0a2.2 2.2 0 1 1 0 4.4A2.2 2.2 0 0 1 8 0zm0 1.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2zM7.2 4.4h1.6v9.6H7.2zM4.5 5.6h7v1.4h-7zM1 9.5L2.9 7.6 4.6 9.5H3.5c.4 2.6 2 3.8 4.5 3.8s4.1-1.2 4.5-3.8h-1.1l1.7-1.9L15 9.5h-1.1C13.4 13.3 11.2 15.5 8 15.5S2.6 13.3 2.1 9.5z"/></symbol>
-  <symbol id="g-adventure" viewBox="0 0 16 16"><path d="M0 16L6 6l3 4 2.2-2.6L16 16zM6 0.5h1v5H6zM7 0.5l4 1.6-4 1.6z"/></symbol>
-  <symbol id="g-sports" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 .5a7.5 7.5 0 1 1 0 15 7.5 7.5 0 0 1 0-15zM8 5L10.9 7.1 9.8 10.5H6.2L5.1 7.1z"/></symbol>
-  <symbol id="g-funny" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 .5a7.5 7.5 0 1 1 0 15 7.5 7.5 0 0 1 0-15zM5 5h1.8v2.6H5zM9.2 5H11v2.6H9.2zM3.8 9.2c2.2 3.6 6.2 3.6 8.4 0-2.8 1.3-5.6 1.3-8.4 0z"/></symbol>
-  <symbol id="g-wild-west-cowboy" viewBox="0 0 16 16"><path d="M6.3 1.5a1.7 1.7 0 0 1 3.4 0V14H6.3zM2 4.5a1 1 0 0 1 2 0V8h2.3v2H2zM12 2.5a1 1 0 0 1 2 0V9H9.7V7H12zM2 14h12v2H2z"/></symbol>
-  <symbol id="g-war" viewBox="0 0 16 16"><path d="M1.5 11C1.5 5.5 4.3 3 8 3s6.5 2.5 6.5 8zM0 11h16v2.2H0zM4 13.2h1.4L6 16H4.6z"/></symbol>
-  <symbol id="g-skatepark" viewBox="0 0 16 16"><path d="M0 7.4C0 6.3.6 6 1.6 6.4c.6.3 1 .6 1.9.6h9c.9 0 1.3-.3 1.9-.6 1-.4 1.6-.1 1.6 1V9H0zM4 9.6a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM12 9.6a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></symbol>
-  <symbol id="g-gametutorials" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 2.5c3-1 5.6-.6 8 1.2 2.4-1.8 5-2.2 8-1.2V14c-3-1-5.6-.6-8 1.2C5.6 13.4 3 13 0 14zM7.4 4.6v9.2h1.2V4.6z"/></symbol>
-  <!-- second icon on a tile: plays as your saved outfit -->
-  <symbol id="g-outfit" viewBox="0 0 16 16"><path d="M5 1L0.8 3.5 2.4 7.2 4 6.4V15h8V6.4l1.6.8 1.6-3.7L11 1C10.2 2.4 9.2 3 8 3S5.8 2.4 5 1z"/></symbol>
-  <symbol id="rss" viewBox="0 0 16 16"><rect width="16" height="16" rx="3" fill="#f78422"/><circle cx="4" cy="12" r="1.7" fill="#fff"/><path d="M2.5 7.2a6.3 6.3 0 0 1 6.3 6.3H7a4.5 4.5 0 0 0-4.5-4.5zM2.5 3.2a10.3 10.3 0 0 1 10.3 10.3H11a8.5 8.5 0 0 0-8.5-8.5z" fill="#fff"/></symbol>
   <symbol id="pearl" viewBox="0 0 16 16"><path fill="#d16be8" d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></symbol>
   <symbol id="claude" viewBox="0 0 100 100"><path fill="#fff" d="M26.2 0.5 23.1 4.7 24.1 10.2 33.0 25.1 39.1 36.1 39.1 36.6 38.4 37.0 15.0 19.2 10.3 18.7 7.6 21.7 8.3 25.9 10.0 27.9 18.1 33.7 38.5 47.3 39.8 48.4 39.6 49.0 37.8 49.1 28.1 48.0 2.3 46.3 0.3 47.6 0.0 49.0 2.2 52.0 4.5 52.5 39.2 53.9 39.6 54.7 39.1 55.6 19.4 66.6 11.8 71.8 10.7 72.8 10.5 75.9 12.5 77.9 17.1 77.3 43.5 60.1 43.8 60.2 43.9 60.8 40.0 65.3 22.4 88.3 22.1 91.0 25.1 92.5 26.7 91.9 34.0 84.1 48.8 64.0 49.6 63.6 47.9 74.3 43.5 94.9 44.8 98.0 47.4 99.9 50.3 98.8 51.7 97.2 54.5 67.0 55.1 66.6 63.4 80.1 71.5 91.8 74.4 92.3 76.9 91.3 77.5 90.1 77.0 85.8 65.3 68.1 65.5 67.3 66.3 67.6 79.0 78.4 86.7 84.2 88.1 84.3 89.4 82.6 88.9 80.1 65.5 58.3 65.5 57.8 66.3 57.8 94.3 64.6 99.6 62.1 99.7 59.8 97.8 57.3 94.6 55.2 83.2 54.4 72.4 54.2 66.2 53.6 65.9 53.3 79.7 49.9 90.0 47.9 98.3 45.6 99.6 42.5 99.2 41.0 95.7 39.2 81.8 41.7 69.0 44.3 68.7 43.9 72.1 37.9 85.3 20.6 86.7 15.8 83.6 11.1 79.3 11.1 77.0 12.9 70.2 20.5 59.6 34.0 58.4 35.2 57.6 35.2 61.4 15.1 62.8 5.4 60.8 2.5 58.5 1.4 55.6 3.3 53.7 7.5 51.0 38.1 50.3 38.1 48.9 33.5 40.3 16.9 33.8 2.1 32.0 0.5 28.4 0.0Z"/></symbol>
   <symbol id="search" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.8" fill="none" stroke="#555" stroke-width="2"/><path d="M10 10l4.5 4.5" stroke="#555" stroke-width="2.4" stroke-linecap="round"/></symbol>
 </svg>
 
+<div class="bgfx" id="bgfx" aria-hidden="true"></div>
 <div id="Container">
   <div id="Leaderboard">
     <a class="lb" href="/character/" aria-label="Make a character in the Grug Avatar Studio">
@@ -184,7 +171,7 @@ svg.gi{width:16px;height:16px;display:inline-block;vertical-align:top;fill:#333}
       <img class="fig" src="/static/arcade/ranger.webp" alt="" style="left:14px">
       <img class="fig" src="/static/arcade/grug.webp" alt="" style="left:78px;z-index:1">
       <img class="fig" src="/static/arcade/snow-rider.webp" alt="" style="left:160px">
-      <span class="t"><b>Play as your own character</b><span>Make one free in the Avatar Studio. It shows up in every game here.</span></span>
+      <span class="t"><b>One character. Every engine.</b><span>Make it free, then export a rigged model to:</span><span class="exp"><i class="k">Roblox</i><i class="k">Unity</i><i class="k">itch.io</i><i>Godot</i><i>Blender</i></span></span>
       <span class="go">Make a character ›</span>
     </a>
   </div>
@@ -223,12 +210,12 @@ svg.gi{width:16px;height:16px;display:inline-block;vertical-align:top;fill:#333}
   </div>
 
   <div id="Announcement">
-    <div class="SystemAlertText"><div class="Exclamation">!</div><svg aria-hidden="true"><use href="#claude"/></svg>New: make your character with Claude! <a href="/#studio">Copy the prompt</a></div>
+    <div class="SystemAlertText"><svg aria-hidden="true"><use href="#claude"/></svg>New: make your character with Claude! <a href="/#studio">Copy the prompt</a></div>
   </div>
 
   <div id="Body">
     <div class="Column1e">
-      <div class="StandardBoxHeader"><span><h2>Games</h2><svg aria-hidden="true"><use href="#rss"/></svg></span></div>
+      <div class="StandardBoxHeader"><span><h2>Games</h2></span></div>
       <div class="StandardBox" id="GamesLeftColumn">
         <div class="GameFilter" id="Timespan">
           <div>Time:</div>
@@ -264,11 +251,11 @@ svg.gi{width:16px;height:16px;display:inline-block;vertical-align:top;fill:#333}
         <div id="Games">
           <div id="GamePageAdDiv">
             <a class="rect" href="/character/" aria-label="Make a character in the Grug Avatar Studio">
-              <span class="t">Your game needs a hero<span class="s">Make your own character, then play as it here.</span></span>
+              <span class="t">Your game needs a hero<span class="s">Make a character, then export it to</span><span class="exp"><i class="k">Roblox</i><i class="k">Unity</i><i class="k">itch.io</i><i>Godot</i></span></span>
               <span class="figs">
-                <img src="/static/arcade/medic.webp" alt="" style="left:22px">
-                <img src="/static/arcade/grug.webp" alt="" style="left:88px;height:124px;z-index:1">
-                <img src="/static/arcade/skater.webp" alt="" style="left:190px">
+                <img src="/static/arcade/medic.webp" alt="" style="left:30px">
+                <img src="/static/arcade/grug.webp" alt="" style="left:92px;height:106px;z-index:1">
+                <img src="/static/arcade/skater.webp" alt="" style="left:184px">
               </span>
               <span class="bar"><span class="go">Make a character ›</span></span>
             </a>
@@ -370,7 +357,6 @@ svg.gi{width:16px;height:16px;display:inline-block;vertical-align:top;fill:#333}
         <a class="thumb" href="${href}"><img src="/arcade/${g.slug}/cover.jpg" alt="${esc(g.alt)}" loading="lazy" width="160" height="100"></a>
         <div class="GameName"><a href="${href}">${esc(g.name)}</a></div>
         <div class="PlayerCount">${esc(g.tag)}</div>
-        <div class="GenreIcons"><svg class="gi" role="img" aria-label="${esc(gname(g.genres[0]))}"><title>${esc(gname(g.genres[0]))}</title><use href="#g-${g.genres[0]}"/></svg><svg class="gi" role="img" aria-label="Plays as your saved outfit"><title>Plays as your saved outfit</title><use href="#g-outfit"/></svg></div>
       </div>
       <div class="HoverShown">${g.stats.map(s => `<div>${esc(s)}</div>`).join('')}<div>Updated ${ago(g.updated)}</div></div>
     </div></div>`;
@@ -397,7 +383,7 @@ svg.gi{width:16px;height:16px;display:inline-block;vertical-align:top;fill:#333}
 
   // genre lists: the left column, the Games dropdown and the footer
   $('genreList').innerHTML = GENRES.map(([id, t]) => `<li><a href="#${id}" data-genre="${id}" title="${esc(t)} Games"><h3>${esc(t)}</h3></a></li>`).join('');
-  $('dropGenres').innerHTML = GENRES.map(([id, t]) => `<a href="#${id}" data-genre="${id}"><svg class="gi" aria-hidden="true"><use href="#g-${id}"/></svg>${esc(t)}</a>`).join('');
+  $('dropGenres').innerHTML = GENRES.map(([id, t]) => `<a href="#${id}" data-genre="${id}">${esc(t)}</a>`).join('');
   $('seoGenres').innerHTML = GENRES.slice(1).map(([id, t]) => `<a href="/arcade/#${id}" data-genre="${id}" title="${esc(t)} Games">${esc(t)}</a>`).join('&nbsp;|&nbsp;');
 
   const drop = $('dropNav'), tog = $('gamesMenuToggle');
@@ -422,7 +408,23 @@ svg.gi{width:16px;height:16px;display:inline-block;vertical-align:top;fill:#333}
   addEventListener('hashchange', () => { fromHash(); if (!location.hash) state.genre = 'all'; draw(); });
   draw();
 
-  /* Pearls (the small blue button where the classic page had Login) */
+  /* the background: each shot pans one way, then crossfades into the next, panning the other way */
+  (() => {
+    const box = $('bgfx'), SHOTS = ['aerial', 'icecream', 'salon', 'pizza'], LIFT = [0, -300, -360, -420], HOLD = 11000, PAN = 14000;   // LIFT: raise the street shots so their buildings sit behind the header, not their sky
+    const els = SHOTS.map((n, i) => { const d = document.createElement('div'); d.className = 'sh'; if (i === 0) d.style.backgroundImage = `url(/static/arcade/city-${n}.jpg)`; box.appendChild(d); return d; });
+    const load = i => { const d = els[i]; if (!d.style.backgroundImage) d.style.backgroundImage = `url(/static/arcade/city-${SHOTS[i]}.jpg)`; };
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { els[0].classList.add('on'); return; }
+    let cur = -1;
+    function show(i) {
+      const d = els[i], dir = i % 2 ? 1 : -1; load(i); load((i + 1) % els.length);
+      if (d.animate) d.animate([{ transform: `translateY(${LIFT[i]}px) scale(1.14) translateX(${dir * -5}%)` }, { transform: `translateY(${LIFT[i]}px) scale(1.14) translateX(${dir * 5}%)` }], { duration: PAN, easing: 'linear', fill: 'forwards' });
+      d.classList.add('on'); if (cur >= 0) els[cur].classList.remove('on'); cur = i;
+      setTimeout(() => show((i + 1) % els.length), HOLD);
+    }
+    show(0);
+  })();
+
+  /* Pearls (the small green button where the classic page had Login) */
   function pearls() { if (!P) return; $('pearls').hidden = false; $('pearlN').textContent = P.balance().toLocaleString(); }
   if (P) { P.start().then(pearls).catch(pearls); addEventListener('grug:pearls', pearls); }
 

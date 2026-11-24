@@ -196,7 +196,13 @@ html.dark .card.ad{border-color:#3A3A42}
 .card.ad:hover .pic .fg{transform:scale(1.04)}
 .card.ad h3{color:#fff}
 .card.ad p{color:#C9C9D1}
-.card.ad .cta{margin-top:auto;padding-top:8px}
+.card.ad .exp{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.card.ad .exp i{font-style:normal;font-size:12px;font-weight:600;padding:3px 8px;border-radius:7px;background:rgba(255,255,255,.1);color:#E6E6EA}
+.card.ad .exp i.k{background:rgba(155,227,56,.18);color:#C6F28A}
+.card.ad .cta{margin-top:auto;padding-top:10px}
+.closer .exp{display:flex;flex-wrap:wrap;gap:6px;margin:-8px 0 22px}
+.closer .exp i{font-style:normal;font-size:14px;font-weight:600;padding:5px 11px;border-radius:9px;background:rgba(255,255,255,.1);color:#E6E6EA}
+.closer .exp i.k{background:rgba(155,227,56,.18);color:#C6F28A}
 .card.ad .cta span{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:0 14px;border-radius:11px;background:var(--accent);color:#1E1B16;font-weight:600;font-size:15px}
 .card.ad .cta svg{width:16px;height:16px}
 
@@ -402,7 +408,8 @@ footer .sp{margin-left:auto}
     <div class="closer">
       <div class="txt">
         <h2 id="closerTitle">Your game needs a hero. Make one now.</h2>
-        <p>Pick hair and a face, describe an outfit, and wear it on a rigged Roblox R6 in a few minutes. Free to make.</p>
+        <p>Pick hair and a face, describe an outfit, and export a rigged character for your game in a few minutes. Free to make.</p>
+        <div class="exp" aria-label="Exports to"><i class="k">Roblox</i><i class="k">Unity</i><i class="k">itch.io</i><i>Godot</i><i>Blender</i></div>
         <div class="ctas">
           <a class="btn btn--lg" href="/character/">Make a character <svg class="i" aria-hidden="true"><use href="#arrow"/></svg></a>
           <a class="btn btn--lg btn--claude" href="#studio"><svg class="cl" aria-hidden="true"><use href="#claude"/></svg>Make it with Claude</a>
@@ -467,19 +474,19 @@ document.getElementById('copyClaude').addEventListener('click', async e => {
   const arrowSvg = '<svg aria-hidden="true"><use href="#arrow"/></svg>';
 
   const ADS = [
-    { id: 'grug', bg: 'bg-slide-1', h: 'Make your own character', p: 'Pick hair and a face, paint an outfit, download a rigged Roblox R6.' },
-    { id: 'ranger', bg: 'bg-zombie-1', h: 'Your game needs a hero', p: 'Make one in the free Avatar Studio in a few minutes.' },
-    { id: 'skater', bg: 'bg-slide-2', h: 'Dress them any way you like', p: 'Describe an outfit and paint it on with AI. Free to make.' },
-    { id: 'medic', bg: 'bg-zombie-2', h: 'NPCs that look the part', p: 'Real painted clothes on a rigged R6 that plays Roblox animations.' },
-    { id: 'snow-rider', bg: 'bg-slide-3', h: 'Skip the blocky slop', p: 'Make a character with real textures, not flat colour blocks.' },
-    { id: 'racer', bg: 'bg-slide-4', h: 'Make a character with Claude', p: 'Paste one prompt into Claude and it makes the character for you.' }
+    { id: 'grug', bg: 'bg-slide-1', h: 'Make your own character', p: 'Paint an outfit, then export a rigged model for your game.' },
+    { id: 'ranger', bg: 'bg-zombie-1', h: 'Your game needs a hero', p: 'Make one in a few minutes and drop it into any engine.' },
+    { id: 'skater', bg: 'bg-slide-2', h: 'One character, every engine', p: 'A rigged .glb that works in Roblox, Unity, Godot and Blender.' },
+    { id: 'medic', bg: 'bg-zombie-2', h: 'NPCs that look the part', p: 'Real painted clothes on a rigged model, ready to export.' },
+    { id: 'snow-rider', bg: 'bg-slide-3', h: 'Ship it in your itch.io game', p: 'Export your character and use it in games you sell.' },
+    { id: 'racer', bg: 'bg-slide-4', h: 'Make a character with Claude', p: 'Paste one prompt into Claude, then export it anywhere.' }
   ];
   let adN = rnd(ADS.length);
   function ad() {
     const a = ADS[adN++ % ADS.length];
     return `<a class="card ad" href="/character/" aria-label="${esc(a.h)}: make a character in the Avatar Studio">
       <div class="pic"><img class="bg" src="/static/showcase/${a.bg}.jpg" alt="" loading="lazy" decoding="async"><img class="fg" src="/static/showcase/${a.id}.webp" alt="" loading="lazy" decoding="async"><span class="badge">Free tool</span></div>
-      <div class="body"><h3>${esc(a.h)}</h3><p>${esc(a.p)}</p><div class="cta"><span>Make a character <svg aria-hidden="true"><use href="#arrow"/></svg></span></div></div></a>`;
+      <div class="body"><h3>${esc(a.h)}</h3><p>${esc(a.p)}</p><div class="exp"><i class="k">Roblox</i><i class="k">Unity</i><i class="k">itch.io</i><i>Godot</i></div><div class="cta"><span>Make a character <svg aria-hidden="true"><use href="#arrow"/></svg></span></div></div></a>`;
   }
   function card(it) {
     const img = it.cover ? `<img src="${esc(it.cover)}" alt="" loading="lazy" decoding="async" width="315" height="250"${it.gif ? ` data-gif="${esc(it.gif)}"` : ''}>` : '';
