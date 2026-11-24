@@ -26,7 +26,7 @@
   .gza-pearl{flex:none;border-radius:50%;background:radial-gradient(circle at 34% 30%,#fff 0 9%,#f3c4ff 16%,#d16be8 42%,#9b36b8 78%,#6d1f86 100%)}
   .gza-pill .gza-pearl{width:20px;height:20px}
   @keyframes gza-nudge{0%,82%,100%{transform:none}86%{transform:scale(1.08) rotate(-3deg)}90%{transform:scale(1.08) rotate(3deg)}94%{transform:none}}
-  #top .lock{pointer-events:auto;cursor:pointer}
+  #top .lock,#top img{pointer-events:auto;cursor:pointer}
   .gza{position:fixed;inset:0;z-index:1;display:grid;place-items:center;padding:70px 70px 64px;background:rgba(23,23,26,.78);
     backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .25s}
   .gza.on{opacity:1;pointer-events:auto}
@@ -71,7 +71,7 @@
   pill.innerHTML = '<span class="gza-pearl"></span>275 free Pearls';
   pill.title = 'Make an avatar and export it to any engine: 275 free Pearls (a $5 pack) for itch.io devs';
   document.body.appendChild(pill);
-  const lock = document.querySelector('#top .lock');
+  const lock = document.querySelector('#top .lock') || document.querySelector('#top img');
   if (lock) { lock.title = 'Grug Digital: make an avatar, export it to any engine'; lock.addEventListener('click', () => open(LINK, '_blank', 'noopener')); }
 
   // the ad card
@@ -114,12 +114,14 @@
     if (steps % AD_EVERY === 0) { show(); return true; }
     return false;
   }
-  const prev = document.getElementById('prev'), next = document.getElementById('next');
+  // two kinds of zoo: the asset previews (#prev/#next, set tabs) and the walk-around zoos (#btnPrev/#btnNext)
+  const prev = document.getElementById('prev') || document.getElementById('btnPrev'), next = document.getElementById('next') || document.getElementById('btnNext');
   [[prev, -1], [next, 1]].forEach(([b, d]) => b && b.addEventListener('click', e => { if (onStep(d)) { e.stopImmediatePropagation(); e.preventDefault(); } }, true));
   // the zoo's own handlers sit on the buttons (onclick) and on window (keydown): capture at window first
   addEventListener('keydown', e => {
     if (e.key === 'Escape' && shown) { hide(); return; }
-    if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && onStep(e.key === 'ArrowRight' ? 1 : -1)) e.stopImmediatePropagation();
+    const d = { ArrowRight: 1, PageDown: 1, ArrowLeft: -1, PageUp: -1 }[e.key];
+    if (d && onStep(d)) { e.stopImmediatePropagation(); e.preventDefault(); }
   }, true);
   // a set's tab: the card shows up once when someone switches sets the first time
   let setSwitches = 0;
