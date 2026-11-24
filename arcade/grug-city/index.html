@@ -1792,6 +1792,8 @@ const TEAMS = [
   { id: 'mus', name: 'Music Clerk', shirt: 0x2d2d6b, pants: 0x1a1a1a, css: '#5a5ad8', ink: '#fff', pay: 5, guns: [], bld: 'music', desc: 'Tune guitars at Tune Town Music in the mall.' },
   { id: 'life', name: 'Lifeguard', shirt: 0xe02020, pants: 0xf5cd30, css: '#ff3a3a', ink: '#111', pay: 5, guns: [], bld: 'lifeguard', desc: 'Watch the beach from the tower.' },
   { id: 'crew', name: 'Cruise Crew', shirt: 0xffffff, pants: 0x1a2a4a, css: '#ffffff', ink: '#111', pay: 5, guns: [], bld: 'ship', desc: 'Keep the S.S. Grug Princess shipshape.' },
+  { id: 'fash', name: 'Fashion Clerk', shirt: 0x9be338, pants: 0x1f2a1a, css: '#9be338', ink: '#111', pay: 5, guns: [], bld: 'threads', desc: 'Style shoppers at Grug Threads in the mall. The racks carry outfits from the Grug Avatar Studio.' },
+  { id: 'kimi', name: 'KimiLand Staff', shirt: 0xff9ecf, pants: 0x9cc9ff, css: '#ff8ac4', ink: '#111', pay: 5, guns: [], bld: 'kimiland', desc: 'Host the KimiLand flagship upstairs in the mall (our official Roblox UGC sponsor) and keep the event atrium buzzing.' },
 ];
 const T = Object.fromEntries(TEAMS.map((t, i) => [t.id.toUpperCase(), i]));   // T.CIT, T.POL, T.CRIM, T.PRIS, ...
 const chip = t => `<i class="tc" style="background:${TEAMS[t].css}"></i>`;
@@ -1987,14 +1989,16 @@ function flushGround() {
 const BLDS = [], BLD = {}, DOOR_H = 8, SILL = 3, WTOP = 7;
 const glassMat = new THREE.MeshPhongMaterial({ color: 0xa8dcff, transparent: true, opacity: 0.28, shininess: 90, specular: 0xffffff, depthWrite: false });
 function building(d) {
-  const B = Object.assign({ H: 10, y: 0, wall: 0xc9b38a, roof: 0x4a4a4f, floor: 0xb8a07a, doors: [], inner: [], win: true, store: null, walls: [], spots: { work: [], shop: [], idle: [], seat: [] }, counters: [], approach: null, label: true }, d);
+  const B = Object.assign({ H: 10, y: 0, wall: 0xc9b38a, roof: 0x4a4a4f, floor: 0xb8a07a, doors: [], inner: [], win: true, store: null, walls: [], spots: { work: [], shop: [], idle: [], seat: [] }, counters: [], approach: null, label: true, storeys: [0] }, d);
   const { x0, z0, x1, z1, H, y } = B;
   B.rects = [[x0, z0, x1, z1]]; B.bb = [x0, z0, x1, z1]; BLDS.push(B); BLD[B.id] = B;
   B.box = { minX: x0 - 1.5, maxX: x1 + 1.5, minY: y, maxY: y + H + 7, minZ: z0 - 1.5, maxZ: z1 + 1.5 };
   if (y === 0 && B.floor !== null) paint(x0, z0, x1, z1, floorTile(B.floor));
   const holes = { n: [], s: [], w: [], e: [] }; B.doorPts = [];
-  for (const [side, c, w] of B.doors) {
-    holes[side].push([c - w / 2, c + w / 2, 'door']);
+  // a door: [side, centre, width, storey] (storey = how far up its floor is; upstairs doors, onto a balcony say, aren't ways in from the street)
+  for (const [side, c, w, up] of B.doors) {
+    holes[side].push([c - w / 2, c + w / 2, 'door', y + (up || 0)]);
+    if (up) continue;
     const P = side === 'n' ? [c, z0 - 4, c, z0 + 4] : side === 's' ? [c, z1 + 4, c, z1 - 4] : side === 'w' ? [x0 - 4, c, x0 + 4, c] : [x1 + 4, c, x1 - 4, c];
     B.doorPts.push({ side, ox: P[0], oz: P[1], ix: P[2], iz: P[3], y });
   }
@@ -2002,7 +2006,8 @@ function building(d) {
   wallRun(B, 'x', z1 - 1, z1, x0, x1, holes.s, true, B.store === 's');
   wallRun(B, 'z', x0, x0 + 1, z0 + 1, z1 - 1, holes.w, true, B.store === 'w');
   wallRun(B, 'z', x1 - 1, x1, z0 + 1, z1 - 1, holes.e, true, B.store === 'e');
-  for (const w of B.inner) wallRun(B, w.axis, w.at, w.at + 1, w.from, w.to, (w.doors || []).map(([c, wd]) => [c - wd / 2, c + wd / 2, 'door']), false, false);
+  // inner walls: { axis, at, from, to, doors: [[centre, width]], y0, y1 (one storey of a taller building), store (a glass shop front) }
+  for (const w of B.inner) { const ya = y + (w.y0 || 0), yb = y + (w.y1 === undefined ? H : w.y1); wallRun(B, w.axis, w.at, w.at + 1, w.from, w.to, (w.doors || []).map(([c, wd]) => [c - wd / 2, c + wd / 2, 'door', ya]), false, !!w.store, ya, yb); }
   // the roof (and everything that sits on it) is one group, hidden while you're inside
   B.roofG = new THREE.Group(); scene.add(B.roofG);
   const rm = new THREE.Mesh(boxGeo(x1 - x0 + 2, 1, z1 - z0 + 2), mat(B.roof)); rm.position.set((x0 + x1) / 2, y + H + 0.5, (z0 + z1) / 2); rm.castShadow = true; rm.receiveShadow = true; B.roofG.add(rm);
@@ -2011,31 +2016,39 @@ function building(d) {
   if (B.sign) signBoard(B, B.sign);
   return B;
 }
-// one wall line. holes: [from, to, 'door'] along it. Outside walls get windows (sill and lintel round a pane of glass); a store front gets wide ones
-function wallRun(B, axis, lo, hi, s0, s1, holes, outer, store) {
-  const y = B.y, H = B.H, all = holes.slice().sort((p, q) => p[0] - q[0]);
-  if (outer && B.win) {
-    const segs = []; let at = s0 + (axis === 'x' ? 1 : 0);
-    for (const h of all) { segs.push([at, h[0]]); at = h[1]; } segs.push([at, s1 - (axis === 'x' ? 1 : 0)]);
+// one wall line, from ya up to yb (the whole building by default). holes: [from, to, 'door', floor y] along it. Outside walls get windows on
+// every storey (sill and lintel round a pane of glass); a shop front gets wide ones. Cut into upright strips where anything changes,
+// and each strip is solid wall round its doors and panes.
+function wallRun(B, axis, lo, hi, s0, s1, holes, outer, store, ya = B.y, yb = B.y + B.H) {
+  const cut = holes.map(h => [h[0], h[1], h[3] === undefined ? ya : h[3], Math.min((h[3] === undefined ? ya : h[3]) + DOOR_H, yb), false]);
+  if (outer && B.win || store) {
+    const ds = holes.slice().sort((p, q) => p[0] - q[0]), segs = []; let at = s0 + (outer && axis === 'x' ? 1 : 0);
+    for (const h of ds) { segs.push([at, h[0]]); at = Math.max(at, h[1]); } segs.push([at, s1 - (outer && axis === 'x' ? 1 : 0)]);
+    const wins = [];
     for (const [a, b] of segs) {
       const L = b - a;
-      if (store && L >= 8) all.push([a + 2, b - 2, 'win']);
-      else if (L >= 18) { const q = Math.round(L / 4); all.push([a + q - 2, a + q + 2, 'win'], [b - q - 2, b - q + 2, 'win']); }
-      else if (L >= 9) { const m = Math.floor((a + b) / 2); all.push([m - 2, m + 2, 'win']); }
+      if (store && L >= 8) wins.push([a + 2, b - 2]);
+      else if (L >= 18) { const q = Math.round(L / 4); wins.push([a + q - 2, a + q + 2], [b - q - 2, b - q + 2]); }
+      else if (L >= 9) { const m = Math.floor((a + b) / 2); wins.push([m - 2, m + 2]); }
     }
-    all.sort((p, q) => p[0] - q[0]);
+    const floors = (B.storeys || [0]).map(s => B.y + s).filter(f => f >= ya - 0.01 && f + WTOP <= yb + 0.01);
+    for (const [a, b] of wins) for (const f of floors) cut.push([a, b, f + SILL, f + WTOP, true]);
   }
   const o = { p: { hwall: true }, fade: B };
-  const put = (a, b, ya, yb) => { if (b - a > 0 && yb - ya > 0) axis === 'x' ? box(a, ya, lo, b, yb, hi, B.wall, o) : box(lo, ya, a, hi, yb, b, B.wall, o); };
-  const pane = (a, b, ya, yb) => { const m = axis === 'x' ? box(a, ya, lo, b, yb, hi, null, { material: glassMat, p: { glass: true } }) : box(lo, ya, a, hi, yb, b, null, { material: glassMat, p: { glass: true } }); };
-  let at = s0;
-  for (const [h0, h1, kind] of all) {
-    put(at, h0, y, y + H);
-    if (kind === 'door') put(h0, h1, y + Math.min(DOOR_H, H), y + H);
-    else { put(h0, h1, y, y + SILL); put(h0, h1, y + WTOP, y + H); glassPane(axis, lo, hi, h0, h1, y + SILL, y + WTOP); }
-    at = h1;
+  const put = (a, b, y0, y1) => { if (b - a > 0 && y1 - y0 > 0) axis === 'x' ? box(a, y0, lo, b, y1, hi, B.wall, o) : box(lo, y0, a, hi, y1, b, B.wall, o); };
+  const xs = [...new Set([s0, s1, ...cut.flatMap(c => [Math.max(s0, Math.min(s1, c[0])), Math.max(s0, Math.min(s1, c[1]))])])].sort((p, q) => p - q);
+  let run = null;
+  const flush = () => {
+    if (!run) return; let y0 = ya;
+    for (const [h0, h1, g] of run.prof) { put(run.a, run.b, y0, h0); if (g) glassPane(axis, lo, hi, run.a, run.b, h0, h1); y0 = Math.max(y0, h1); }
+    put(run.a, run.b, y0, yb); run = null;
+  };
+  for (let i = 0; i < xs.length - 1; i++) {
+    const a = xs[i], b = xs[i + 1]; if (b - a <= 0) continue;
+    const prof = cut.filter(c => c[0] <= a && c[1] >= b).map(c => [Math.max(ya, c[2]), Math.min(yb, c[3]), c[4]]).filter(c => c[1] > c[0]).sort((p, q) => p[0] - q[0]), key = JSON.stringify(prof);
+    if (run && run.key === key) run.b = b; else { flush(); run = { a, b, key, prof }; }
   }
-  put(at, s1, y, y + H);
+  flush();
 }
 // window glass: a see-through mesh (a part you can't walk through, but shots and the camera pass)
 function glassPane(axis, lo, hi, a, b, ya, yb) {
@@ -2183,6 +2196,10 @@ const SHOPS = {
   bbq: { title: 'Smokestack BBQ', items: [['Brisket plate', 12, { heal: 40 }], ['Ribs', 15, { heal: 45 }], ['Sweet tea', 3, { heal: 10 }]], rob: 180 },
   pizza: { title: 'Leaning Tower Pizza', items: [['Pepperoni slice', 4, { heal: 20 }], ['Whole pizza', 14, { heal: 60 }], ['Garlic knots', 5, { heal: 15 }]], rob: 140 },
   icecream: { title: 'Sundae Funday', items: [['Cone (2 scoops)', 3, { heal: 10 }], ['Milkshake', 5, { heal: 15 }], ['Banana split', 7, { heal: 20 }]], rob: 90 },
+  threads: { title: 'Grug Threads', items: [], rob: 160, clothes: 1 },
+  fits: { title: 'Studio Fits', items: [], rob: 140, clothes: 1 },
+  thrift: { title: 'Thrift Rex', items: [], rob: 120, clothes: 1 },
+  kimiland: { title: 'KimiLand', items: [['Shop KimiLand UGC on Roblox', 0, { kimi: 1 }], ['KimiLand plushie', 20, {}], ['Sparkle balloon', 6, {}], ['Cotton candy', 4, { heal: 15 }], ['Bubble tea', 5, { heal: 15 }]], rob: 0 },
   ship: { title: 'Ship bar', items: [['Tropical drink', 6, { heal: 15 }], ['Buffet plate', 10, { heal: 35 }], ['Souvenir T-shirt (new outfit)', 15, { outfit: 1 }]], rob: 200 },
 };
 
@@ -2337,40 +2354,122 @@ function buildCityHall() {
   for (const [x, z] of [[-126, -78], [-34, -78], [-126, -24], [-34, -24]]) TREES.push({ x, z, s: 1.1 });
   pub(-80, -70); pub(-95, -40); pub(-65, -40);
 }
+// the mall: two floors round an open atrium. Downstairs: Byte Phones, Bling Bling and Tune Town along the back, Grug Threads and Studio Fits
+// either side of the entrance, the event stage in the atrium. Upstairs: Thrift Rex, the KimiLand flagship, and three empty units for the next
+// creators to move in. Stairs up each side, a bridge across the middle.
+const MALL = { y2: 14, hub: { x: 60, z: -55 }, up1: [{ x: 13.5, z: -53 }, { x: 13.5, z: -64, y: 4 }, { x: 13.5, z: -84, y: 14 }], up2: [{ x: 95, z: -83 }, { x: 106.5, z: -83 }, { x: 106.5, z: -72, y: 6 }, { x: 106.5, z: -55, y: 14 }], stage: { x0: 72, x1: 100, z0: -78, z1: -60 }, units: [], mannequins: [], kiosks: [], lights: [], balloons: [] };
 function buildMall() {
   paint(6, -124, 114, -16, TILE.plaza);
-  const B = building({ id: 'mall', name: 'Grug City Mall', sub: 'Byte Phones · Bling Bling · Tune Town', label: false, x0: 10, z0: -118, x1: 110, z1: -28, H: 14, wall: 0xdcd6c8, roof: 0x55555c, floor: 0xe9e4da,
-    doors: [['w', -73, 10], ['s', 60, 10]], store: 's',
-    inner: [{ axis: 'x', at: -88, from: 11, to: 109, doors: [[27, 8], [60, 8], [93, 8]] }, { axis: 'z', at: 43, from: -117, to: -88 }, { axis: 'z', at: 77, from: -117, to: -88 }],
-    sign: { side: 's', text: ['GRUG CITY MALL', 'tech · jewelry · music'], bg: '#7a3a9a', fg: '#ffffff', w: 44, board: 0x7a3a9a } });
+  const U = MALL.y2, HUB = MALL.hub;
+  const B = building({ id: 'mall', name: 'Grug City Mall', sub: 'fashion · KimiLand · tech · events', label: false, x0: 10, z0: -118, x1: 110, z1: -22, H: 27, storeys: [0, U], wall: 0xdcd6c8, roof: 0x55555c, floor: 0xe9e4da,
+    doors: [['s', 60, 10], ['w', -83, 6], ['e', -83, 6], ['w', -55, 6], ['e', -55, 6]], store: 's',
+    inner: [
+      // downstairs: the shops along the back, and the two either side of the entrance
+      { axis: 'x', at: -88, from: 11, to: 109, doors: [[27, 8], [60, 8], [93, 8]], store: true, y1: U - 1 },
+      { axis: 'z', at: 43, from: -117, to: -88, y1: U - 1 }, { axis: 'z', at: 77, from: -117, to: -88, y1: U - 1 },
+      { axis: 'x', at: -51, from: 11, to: 44, doors: [[27, 8]], store: true, y1: U - 1 }, { axis: 'x', at: -51, from: 76, to: 109, doors: [[93, 8]], store: true, y1: U - 1 },
+      { axis: 'z', at: 43, from: -50, to: -23, y1: U - 1 }, { axis: 'z', at: 76, from: -50, to: -23, y1: U - 1 },
+      // upstairs: Thrift Rex and KimiLand at the back, three units at the front
+      { axis: 'x', at: -88, from: 11, to: 109, doors: [[27, 8], [77, 10]], store: true, y0: U },
+      { axis: 'z', at: 43, from: -117, to: -88, y0: U },
+      { axis: 'x', at: -51, from: 11, to: 109, doors: [[27, 8], [60, 8], [93, 8]], store: true, y0: U },
+      { axis: 'z', at: 43, from: -50, to: -23, y0: U }, { axis: 'z', at: 76, from: -50, to: -23, y0: U },
+    ],
+    sign: { side: 's', text: ['GRUG CITY MALL', 'fashion · KimiLand · events'], bg: '#7a3a9a', fg: '#ffffff', w: 56, board: 0x7a3a9a } });
+  const fo = { p: { hwall: true }, fade: B };
+  // the upstairs floor: the back half, the front half and a bridge across the atrium
+  box(11, U - 1, -117, 44, U, -80, 0xe9e4da, fo); box(44, U - 1, -117, 109, U, -88, 0xffe3f1, fo); box(44, U - 1, -88, 109, U, -80, 0xe9e4da, fo);   // KimiLand's floor is pastel pink
+  box(11, U - 1, -58, 109, U, -23, 0xe9e4da, fo); box(56, U - 1, -80, 64, U, -58, 0xe9e4da, fo);
+  // stairs: up the west side to the back, up the east side to the front (1 up per 1.5 along), glass down their open sides
+  for (let k = 1; k <= U; k++) {
+    const za = -59 - 1.5 * k, zb = za + 1.5; box(11, 0, za, 16, k, zb, 0xa8a090, { p: { hfurn: true } }); glassPane('z', 16, 16.5, za, zb, k, k + 3);
+    const ea = -79 + 1.5 * (k - 1), eb = ea + 1.5; box(104, 0, ea, 109, k, eb, 0xa8a090, { p: { hfurn: true } }); glassPane('z', 103.5, 104, ea, eb, k, k + 3);
+  }
+  // glass railings round the atrium, and along the bridge
+  for (const [x0, x1] of [[16, 56], [64, 109]]) { glassPane('x', -81, -80.5, x0, x1, U, U + 3); deco(x0, U + 3, -81, x1, U + 3.4, -80.5, 0xc9c9cf); }
+  for (const [x0, x1] of [[11, 56], [64, 104]]) { glassPane('x', -58, -57.5, x0, x1, U, U + 3); deco(x0, U + 3, -58, x1, U + 3.4, -57.5, 0xc9c9cf); }
+  for (const x of [56, 63.5]) { glassPane('z', x, x + 0.5, -80, -58, U, U + 3); deco(x, U + 3, -80, x + 0.5, U + 3.4, -58, 0xc9c9cf); }
+  // the walkways people use (stairs, landings): see the routes below
+  const up1 = [HUB, ...MALL.up1];   // west stairs: to the back upstairs
+  const up2 = [HUB, ...MALL.up2];   // east stairs: to the front upstairs
+  // ---- downstairs, the back: as before, now all reached from the middle of the mall (HUB) so nobody walks into the stairs
   const shops = [
     { id: 'tech', x0: 11, x1: 43, door: 27, name: 'BYTE PHONES', sub: 'phones · tech', bg: '#3aa0d8', team: T.TECH, color: 0x2a2a2e },
     { id: 'jewelry', x0: 44, x1: 77, door: 60, name: 'BLING BLING', sub: 'jewelers', bg: '#9b59d0', team: T.JEW, color: 0x9fd4ff },
     { id: 'music', x0: 78, x1: 109, door: 93, name: 'TUNE TOWN', sub: 'music', bg: '#2d2d6b', team: T.MUS, color: 0x5a3a2a },
   ];
+  const unit = (id, name, x0, x1, z0, z1, y, door, doorZ, inZ, via) => {   // a pretend building record per shop: its own name, counter and pad (the mall's walls and roof)
+    const R = { id, name, y, spots: { work: [], shop: [], idle: [], seat: [] }, sub: '', parent: B, x0, x1, z0, z1 }; BLD[id] = R;
+    R.doorIn = spot(door, inZ, { y, B, via: via.slice(0, -1) }); R.doorOut = spot(door, doorZ, { y, B, via: via.slice(0, -2) }); MALL.units.push(R); return R;
+  };
   for (const sh of shops) {
-    const via = [{ x: sh.door, z: -83 }, { x: sh.door, z: -93 }], c = sh.door;
-    // a pretend building record per shop so the shop has its own name, counter and pad (it shares the mall's walls and roof)
-    const R = { id: sh.id, name: sh.name.replace(/\b\w/g, m => m) , y: 0, spots: { work: [], shop: [], idle: [], seat: [] }, sub: sh.sub, parent: B };
-    R.name = { tech: 'Byte Phones', jewelry: 'Bling Bling Jewelers', music: 'Tune Town Music' }[sh.id]; BLD[sh.id] = R;
-    const C = counter(R, c - 11, -108, c + 11, -105, 's', { color: sh.color, via, shop: SHOPS[sh.id] });
-    C.spot.B = C.work.B = B;
+    const c = sh.door, via = [HUB, { x: c, z: -83 }, { x: c, z: -93 }];
+    const R = unit(sh.id, { tech: 'Byte Phones', jewelry: 'Bling Bling Jewelers', music: 'Tune Town Music' }[sh.id], sh.x0, sh.x1, -117, -88, 0, c, via[1].z, -93, via);
+    const C = counter(R, c - 11, -108, c + 11, -105, 's', { color: sh.color, via, shop: SHOPS[sh.id] }); C.spot.B = C.work.B = B;
+    const back = C.work.via = [...via, { x: c, z: -101.5 }, { x: c - 13, z: -101.5 }, { x: c - 13, z: -111 }];
     jobPad(B, sh.team, sh.x1 - 4, -114, via); TEAMS[sh.team].spawn.B = B;
-    const s = sign([sh.name, sh.sub], c, 11, -86.94, 18, 4.4, 0, 1, sh.bg, '#fff'); s.userData.keep = true;
+    const s = sign([sh.name, sh.sub], c, 10.2, -86.94, 18, 4.4, 0, 1, sh.bg, '#fff'); s.userData.keep = true;
+    R.spots.idle.push(spot(c - 8, -96, { B, via }), spot(c + 8, -96, { B, via }), spot(c - 13, -113, { B, via: back }));
     B.spots.idle.push(spot(c - 8, -96, { B, via }), spot(c + 8, -96, { B, via }));
-    R.spots.idle.push(spot(c - 8, -96, { B, via }), spot(c + 8, -96, { B, via }), spot(sh.x0 + 4, -112, { B, via }));
-    R.x0 = sh.x0; R.x1 = sh.x1; R.z0 = -117; R.z1 = -88;
-    R.doorIn = spot(c, -93, { B, via: [via[0]] }); R.doorOut = spot(c, -80, { B }); R.parent = B;
   }
   furn(14, 0, -100, 18, 3, -92, 0x2a2a2e); furn(38, 0, -100, 42, 3, -92, 0x2a2a2e);
   furn(46, 0, -100, 49, 3, -92, 0x9fd4ff); furn(72, 0, -100, 75, 3, -92, 0x9fd4ff);
   furn(80, 0, -100, 86, 4, -95, 0x111111); furn(102, 0, -100, 106, 3, -94, 0x8a4a2a);
-  for (const [x, z] of [[30, -60], [90, -60]]) { furn(x - 2, 0, z - 2, x + 2, 2, z + 2, 0x8a6a4a); TREES.push({ x, z, s: 0.45, y: 2 }); }
-  for (const [x, z] of [[50, -66], [64, -66], [50, -46], [64, -46]]) B.spots.seat.push(seat(x, z, x + 6, z + 2, 0, 0x6a4a8a, 0, z < -56 ? 1 : -1, { B }));
-  for (const [x, z] of [[25, -45], [95, -45], [60, -74], [20, -75], [100, -75]]) B.spots.idle.push(spot(x, z, { B }));
-  furn(106, 0, -42, 109, 6, -38, 0x2a6a3a); ATMS.push({ x: 103, z: -40, y: 0, B, name: 'ATM' });
-  putIcon(B, 'mall', 60, -60, 1.6);
-  const lab = Bills.add('<b>Grug City Mall</b><small>Byte Phones · Bling Bling Jewelers · Tune Town Music</small>', 60, 26, -20, 300);
+  // ---- clothing stores: racks of outfits from the Avatar Studio on mannequins (dressed by Mall, once the outfits load)
+  const clothes = (id, title, sub, bg, x0, x1, z0, z1, y, door, doorZ, inZ, via, cnt, mq, pad) => {
+    const R = unit(id, title, x0, x1, z0, z1, y, door, doorZ, inZ, via);
+    const C = counter(R, ...cnt.slice(0, 5), { color: 0x2a2a2e, via, shop: SHOPS[id] }); C.spot.B = C.work.B = B; R.counter = C; C.work.via = [...via, ...cnt[5]];
+    const s = sign([title.toUpperCase(), sub], door, y + 10.2, doorZ < inZ ? -51.06 : -86.94, 20, 4.4, 0, doorZ < inZ ? -1 : 1, bg, '#fff'); s.userData.keep = true;
+    for (const [x, z, yaw] of mq) { furn(x - 1, y, z - 1, x + 1, y + 1, z + 1, 0xf2f2f2); MALL.mannequins.push({ x, z, y: y + 1, yaw, R, shop: id }); }
+    R.spots.idle.push(...mq.slice(0, 3).map(([x, z]) => spot(x + (x < (x0 + x1) / 2 ? 3 : -3), z, { y, B, via })));
+    B.spots.idle.push(spot(door, (doorZ + inZ) / 2 + (inZ - doorZ) * 1.2, { y, B, via }));
+    if (pad !== null) { jobPad(B, pad[0], pad[1], pad[2], via); TEAMS[pad[0]].spawn.B = B; }
+    return R;
+  };
+  const F = Math.PI;   // yaw: 0 faces north (-z), PI faces south
+  clothes('threads', 'Grug Threads', 'outfits from the Avatar Studio', '#3f8f1f', 11, 43, -50, -23, 0, 27, -55, -46, [HUB, { x: 27, z: -55 }, { x: 27, z: -46 }],
+    [15, -43, 18, -30, 'e', [{ x: 13, z: -47 }]], [[40, -45, -F / 2], [40, -38.5, -F / 2], [40, -32, -F / 2], [34, -27, F], [27, -27, F], [20, -27, F]].map(([x, z, r]) => [x, z, r === F ? 0 : F / 2]), [T.FASH, 14, -26]);
+  const fits = clothes('fits', 'Studio Fits', 'your saved outfits · design more', '#1f6fae', 77, 109, -50, -23, 0, 93, -55, -46, [HUB, { x: 93, z: -55 }, { x: 93, z: -46 }],
+    [102, -43, 105, -30, 'w', [{ x: 107, z: -47 }]], [[80, -45], [80, -38.5], [80, -32], [86, -27], [93, -27], [100, -27]].map(([x, z]) => [x, z, x === 80 ? -F / 2 : 0]), null);
+  const thrift = clothes('thrift', 'Thrift Rex', 'vintage · costumes · workwear', '#8a5a2a', 11, 43, -117, -88, U, 27, -84, -93, [...up1, { x: 27, z: -84, y: U }, { x: 27, z: -93, y: U }],
+    [18, -108, 36, -105, 's', [{ x: 37.5, z: -103, y: U }, { x: 37.5, z: -110, y: U }]], [[14, -106], [14, -99], [14, -92], [40, -106], [40, -99], [40, -92]].map(([x, z]) => [x, z, x < 27 ? -F / 2 : F / 2]), null);
+  // the Avatar Studio kiosk in Studio Fits: design an outfit, it turns up on these racks
+  const ks = sign(['DESIGN YOUR OWN', 'Grug Avatar Studio · E'], 77.06, 6, -38.5, 12, 5, 1, 0, '#9BE338', '#111'); ks.userData.keep = true;
+  deco(77, 0, -42, 78, 3, -35, 0x2a2a2e);
+  MALL.kiosks.push({ kind: 'studio', x: 80, z: -38.5, y: 0, r: 4.5 });
+  // ---- upstairs at the back: the KimiLand flagship (our official Roblox UGC sponsor)
+  const kvia = [...up1, { x: 77, z: -84, y: U }, { x: 77, z: -93, y: U }];
+  const K = unit('kimiland', 'KimiLand', 44, 109, -117, -88, U, 77, -84, -93, kvia); MALL.kimi = K;
+  const KC = counter(K, 64, -110, 90, -107, 's', { color: 0xff9ecf, via: kvia, shop: SHOPS.kimiland }); KC.spot.B = KC.work.B = B; KC.work.via = [...kvia, { x: 92.5, z: -100, y: U }, { x: 92.5, z: -113, y: U }];
+  jobPad(K, T.KIMI, 105, -114, kvia); TEAMS[T.KIMI].spawn.B = B;
+  for (const [x0, z0, x1, z1] of [[44, -117, 82, -116.6], [86, -117, 109, -116.6], [108.6, -116.6, 109, -88], [44, -116.6, 44.4, -88]]) deco(x0, U + 0.2, z0, x1, U + 12.8, z1, 0xffd6ea);   // pink walls inside
+  for (const [x, z, c] of [[50, -100, 0xffb3d6], [56, -94, 0x9cc9ff], [98, -100, 0xc9b3ff], [104, -94, 0xffe08a]]) { furn(x - 2, U, z - 2, x + 2, U + 2, z + 2, 0xffffff); MALL.balloons.push({ x, y: U + 3.2, z, c, s: 1.4, plush: true }); }
+  for (const [x, z] of [[50, -110], [98, -110]]) { furn(x - 3, U, z - 1, x + 3, U + 5, z + 1, 0xffffff); deco(x - 3, U + 5, z - 1, x + 3, U + 5.4, z + 1, 0xff9ecf); }
+  K.spots.idle.push(spot(52, -96, { y: U, B, via: kvia }), spot(100, -96, { y: U, B, via: kvia }), spot(60, -101, { y: U, B, via: kvia }));
+  for (const [x, z] of [[60, -98], [94, -98], [77, -95]]) PUBLIC.push(spot(x, z, { y: U, B, via: kvia }));
+  const kS = sign(['KIMILAND', 'official Roblox UGC sponsor'], 77, U + 10.2, -86.94, 30, 4.4, 0, 1, '#ff7ab8', '#fff'); kS.userData.keep = true;
+  // ---- upstairs at the front: empty units for the next creators
+  for (const [c, x0, x1] of [[27, 11, 43], [60, 44, 76], [93, 77, 109]]) {
+    const s = sign(['YOUR STORE HERE', 'creators: E to talk to us'], c, U + 10.2, -51.06, 20, 4.4, 0, -1, '#2a2a2e', '#9BE338'); s.userData.keep = true;
+    MALL.kiosks.push({ kind: 'creator', x: c, z: -55, y: U, r: 4.5 });
+    PUBLIC.push(spot(c, -55, { y: U, B, via: up2 }));
+  }
+  // ---- the event atrium: a stage under a big screen, lights, balloons and confetti (Mall runs them)
+  const S = MALL.stage;
+  box(S.x0, 0, S.z0, S.x1, 1, S.z1, 0x3a2a4a, { p: { hfurn: true } });
+  for (const [x0, x1, z0, z1] of [[S.x0 - 0.2, S.x0, S.z0, S.z1]]) deco(x0, 0.2, z0, x1, 0.8, z1, 0xff7ab8, { studs: false });
+  box(S.x1 + 1, 0, S.z0, 103.5, U - 1, S.z1, 0x2a2a34, fo);   // the back wall the screen hangs on
+  for (const z of [S.z0 + 0.5, S.z1 - 0.5]) { deco(S.x0 + 0.5, 1, z - 0.4, S.x0 + 1.3, 12, z + 0.4, 0x2a2a2e); deco(S.x0 + 2, 1, z - 1.6, S.x0 + 5, 6, z + 1.6, 0x111114); }
+  deco(S.x0 + 0.5, 12, S.z0, S.x0 + 1.3, 12.8, S.z1, 0x2a2a2e);
+  for (let i = 0; i < 5; i++) MALL.lights.push({ x: S.x0 + 0.9, y: 11.8, z: S.z0 + 2 + i * (S.z1 - S.z0 - 4) / 4, c: [0xff7ab8, 0x9cc9ff, 0x9be338, 0xffe08a, 0xc9b3ff][i] });
+  MALL.crowd = []; for (let i = 0; i < 12; i++) { const x = 50 + (i % 4) * 5, z = -76 + Math.floor(i / 4) * 6 + (i % 2) * 2, s = spot(x, z, { B, via: [HUB], look: { x: 90, z: -69 }, crowd: true }); MALL.crowd.push(s); if (i % 2) PUBLIC.push(s); }
+  for (const [x, z] of [[47, -44], [73, -44], [47, -34], [73, -34]]) B.spots.seat.push(seat(x - 1, z - 3, x + 1, z + 3, 0, 0x6a4a8a, x < 60 ? 1 : -1, 0, { B }));
+  for (const [x, z] of [[53, -27], [68, -27]]) { furn(x - 2, 0, z - 2, x + 2, 2, z + 2, 0x8a6a4a); TREES.push({ x, z, s: 0.45, y: 2 }); }
+  for (let i = 0; i < 22; i++) MALL.balloons.push({ x: 20 + (i * 37) % 80, y: U + 5 + (i % 4) * 1.6, z: -78 + (i * 13) % 19, c: [0xff7ab8, 0x9cc9ff, 0x9be338, 0xffe08a, 0xc9b3ff, 0xffffff][i % 6], s: 1 + (i % 3) * 0.2 });
+  furn(44, 0, -27, 47, 6, -24, 0x2a6a3a); ATMS.push({ x: 49, z: -25.5, y: 0, B, name: 'ATM' });
+  for (const [x, z] of [[60, -40], [30, -55], [90, -55], [25, -83], [95, -83]]) B.spots.idle.push(spot(x, z, { B, via: z < -50 ? [HUB] : null }));
+  putIcon(B, 'mall', 30, -40, 1.6);
+  Bills.add('<b>Grug City Mall</b><small>fashion · KimiLand · tech · events</small>', 60, 40, -20, 300);
   pub(3, -73); pub(60, -20);
 }
 function buildEats() {
@@ -2473,31 +2572,59 @@ function buildShip() {
   for (const p of [[314, -110], [346, -40], [330, 18], [314, -20], [346, -130]]) pub(p[0], p[1], { y: 8, ship: true });
   Bills.add('<b>Pier</b><small>the stairs at the end go up to the cruise ship</small>', 232, 7, -62, 160);
 }
+// the mansions across the river: two floors, a portico with a balcony over the front door, a grand staircase, a hipped roof with chimneys
 function buildMansions() {
   const lots = [[-306, -236], [-236, -166], [-134, -52], [-52, 30], [30, 114]];
-  const WALLS = [0xf2ead8, 0xd8e2ea, 0xeadad0, 0xe2e8d4, 0xf0e0e8], ROOFS = [0x5a2a2a, 0x2a3a5a, 0x3a4a3a, 0x4a3a2a, 0x5a5a5a];
+  const WALLS = [0xf2ead8, 0xd8e2ea, 0xeadad0, 0xe2e8d4, 0xf0e0e8], ROOFS = [0x5a2a2a, 0x2a3a5a, 0x3a4a3a, 0x4a3a2a, 0x5a5a5a], TRIM = 0xf8f6f0;
+  const U = 10, z0 = 224, z1 = 262;   // upstairs floor height; the house runs z0..z1, the portico out to z1 + 8
   lots.forEach(([lx0, lx1], i) => {
-    const cx = Math.round((lx0 + lx1) / 2), bx0 = cx - 22, bx1 = cx + 22, z0 = 234, z1 = 264;
+    const cx = Math.round((lx0 + lx1) / 2), bx0 = cx - 29, bx1 = cx + 29, wl = cx - 12, wr = cx + 12;   // west room | hall | east room
     // gardens: a path to the door, flower beds, hedges round the lot (3 high: too tall to step over)
-    paint(cx - 3, z1, cx + 3, 284, TILE.plaza); paint(cx - 3, 220, cx + 3, z0, TILE.plaza);
-    for (const [a, b] of [[lx0 + 4, cx - 7], [cx + 7, lx1 - 4]]) { paint(a, 268, b, 274, TILE.dirt); paint(a, 222, b, 228, TILE.dirt); FLOWERS.push([a, 268, b, 274], [a, 222, b, 228]); }
+    paint(cx - 3, z1, cx + 3, 284, TILE.plaza); paint(cx - 3, 216, cx + 3, z0, TILE.plaza);
+    for (const [a, b] of [[lx0 + 3, cx - 15], [cx + 15, lx1 - 3]]) { paint(a, 272, b, 277, TILE.dirt); FLOWERS.push([a, 272, b, 277]); }
+    for (const [a, b] of [[lx0 + 3, cx - 6], [cx + 6, lx1 - 3]]) { paint(a, 216, b, 221, TILE.dirt); FLOWERS.push([a, 216, b, 221]); }
     box(lx0 + 1, 0, 280, cx - 3, 3, 282, 0x2f6a2a); box(cx + 3, 0, 280, lx1 - 1, 3, 282, 0x2f6a2a);
-    if (i !== 2) box(lx0, 0, 218, lx0 + 1, 3, 282, 0x2f6a2a);
-    const B = building({ id: 'mansion' + i, name: 'Mansion ' + (i + 1), sub: 'free to claim · E at the mailbox', x0: bx0, z0, x1: bx1, z1, H: 12, wall: WALLS[i], roof: ROOFS[i], floor: 0xc8b090,
-      doors: [['s', cx, 8], ['n', cx, 6]], inner: [{ axis: 'z', at: cx - 8, from: z0 + 1, to: z1 - 1, doors: [[249, 6]] }, { axis: 'z', at: cx + 8, from: z0 + 1, to: z1 - 1, doors: [[249, 6]] }],
+    if (i !== 2) box(lx0, 0, 216, lx0 + 1, 3, 282, 0x2f6a2a);
+    const B = building({ id: 'mansion' + i, name: 'Mansion ' + (i + 1), sub: 'free to claim · E at the mailbox', x0: bx0, z0, x1: bx1, z1, H: 2 * U, storeys: [0, U], wall: WALLS[i], roof: ROOFS[i], floor: 0xc8b090,
+      doors: [['s', cx, 8], ['n', cx, 6], ['s', cx, 6, U]],
+      inner: [
+        { axis: 'z', at: wl - 1, from: z0 + 1, to: z1 - 1, doors: [[258, 6]], y1: U }, { axis: 'z', at: wr, from: z0 + 1, to: z1 - 1, doors: [[250, 6]], y1: U },
+        { axis: 'z', at: wl - 1, from: z0 + 1, to: z1 - 1, doors: [[258, 6]], y0: U }, { axis: 'z', at: wr, from: z0 + 1, to: z1 - 1, doors: [[245, 6]], y0: U },
+      ],
       sign: { side: 's', text: ['MANSION ' + (i + 1), 'free to claim'], bg: '#3a3a3a', fg: '#ffe36b', w: 26, board: 0x3a3a3a } });
-    // kitchen (west), living room (middle), bedroom (east)
-    furn(bx0 + 1, 0, z0 + 1, bx0 + 13, 3, z0 + 4, 0x8a8a8a); furn(bx0 + 1, 0, z0 + 6, bx0 + 4, 7, z0 + 10, 0xeeeeee);
-    B.spots.seat.push(...tableSet(bx0 + 7, z0 + 18, 0, { B, via: [{ x: cx - 4, z: 249 }, { x: cx - 12, z: 249 }] }));
-    B.spots.seat.push(seat(cx + 2, 238, cx + 7, 240, 0, 0x6a4a8a, 0, 1, { B })); deco(cx + 3, 0, 258, cx + 7, 5, 259, 0x111111);
-    furn(bx1 - 9, 0, z0 + 2, bx1 - 3, 2, z0 + 10, 0x2a64c4); deco(bx1 - 9, 2, z0 + 2, bx1 - 3, 3, z0 + 4, 0xffffff); furn(bx1 - 4, 0, z1 - 8, bx1 - 1, 5, z1 - 2, 0x6b4a2c);
+    const fo = { p: { hwall: true }, fade: B };
+    // upstairs floor, with the stairwell open over the stairs (west side of the hall, climbing north to a landing)
+    box(bx0 + 1, U - 1, z0 + 1, wl - 1, U, z1 - 1, 0xc8b090, fo); box(wr + 1, U - 1, z0 + 1, bx1 - 1, U, z1 - 1, 0xc8b090, fo);
+    box(wl, U - 1, z0 + 1, wr, U, 232, 0xc8b090, fo); box(cx - 6, U - 1, 232, wr, U, z1 - 1, 0xc8b090, fo); box(wl, U - 1, 254, cx - 6, U, z1 - 1, 0xc8b090, fo);
+    for (let k = 1; k <= U; k++) { const za = 252 - 2 * k; box(wl, 0, za, cx - 6, k, za + 2, 0x8a6a4a, { p: { hfurn: true } }); }
+    glassPane('z', cx - 6, cx - 5.5, 232, 254, U, U + 3); deco(cx - 6, U + 3, 232, cx - 5.5, U + 3.4, 254, 0x6b4a2c);   // banister round the stairwell
+    glassPane('x', 254, 254.5, wl, cx - 6, U, U + 3); deco(wl, U + 3, 254, cx - 6, U + 3.4, 254.5, 0x6b4a2c);
+    // the portico: four columns, a balcony on top (door from the upstairs hall), a parapet round it
+    for (const x of [cx - 12, cx - 5, cx + 4, cx + 11]) box(x, 0, z1 + 6, x + 1.5, U - 1, z1 + 7.5, TRIM);
+    box(cx - 14, U - 1, z1, cx + 14, U, z1 + 8, TRIM); box(cx - 14, U, z1 + 7, cx + 14, U + 3, z1 + 8, TRIM); for (const x of [cx - 14, cx + 13]) box(x, U, z1, x + 1, U + 3, z1 + 7, TRIM);
+    for (const x of [cx - 13.5, cx + 12.5]) deco(x, U + 3, z1 + 7, x + 1, U + 4.5, z1 + 8, 0xd8d2c4);
+    // trim: a band between the floors and a cornice under the roof, on the front
+    for (const [a, b] of [[bx0 - 0.4, cx - 14], [cx + 14, bx1 + 0.4]]) deco(a, U - 1, z1, b, U, z1 + 0.4, TRIM); deco(bx0 - 0.6, 2 * U - 1, z1, bx1 + 0.6, 2 * U, z1 + 0.6, TRIM);
+    // a hipped roof (stepped, as bricks do) and two chimneys: on the roof group, so they go with the roof when you walk in
+    const roof = (x0, y, zA, x1, y1, zB, c) => { const m = new THREE.Mesh(boxGeo(x1 - x0, y1 - y, zB - zA), mat(c)); m.position.set((x0 + x1) / 2, (y + y1) / 2, (zA + zB) / 2); m.castShadow = true; B.roofG.add(m); };
+    const top = B.roofTop; for (let k = 0; k < 4; k++) roof(bx0 + 3 + k * 4, top + k * 1.5, z0 + 3 + k * 3, bx1 - 3 - k * 4, top + (k + 1) * 1.5, z1 - 3 - k * 3, ROOFS[i]);
+    for (const x of [bx0 + 9, bx1 - 11]) roof(x, top, 232, x + 3, top + 9, 235, 0x8a4a3a);
+    // west: kitchen and dining. east: the living room (TV on the front wall). upstairs: bedrooms, and the hall to the balcony
+    furn(bx0 + 1, 0, z0 + 1, bx0 + 15, 3, z0 + 4, 0x8a8a8a); furn(bx0 + 1, 0, z0 + 6, bx0 + 4, 7, z0 + 10, 0xeeeeee); deco(bx0 + 4, 3, z0 + 1, bx0 + 12, 4, z0 + 2, 0x2a2a2e);
+    const wvia = [{ x: cx - 1, z: 258 }, { x: wl - 6, z: 258 }], evia = [{ x: cx + 4, z: 250 }, { x: wr + 6, z: 250 }];
+    B.spots.seat.push(...tableSet(bx0 + 9, 242, 0, { B, via: wvia }), ...tableSet(bx0 + 9, 254, 0, { B, via: wvia }));
+    B.spots.seat.push(seat(wr + 6, 239, wr + 8, 247, 0, 0x6a4a8a, 1, 0, { B, via: evia }));
+    furn(wr + 11, 0, 241, wr + 14, 1.5, 245, 0x6b4a2c); deco(bx1 - 2, 0, 239, bx1 - 1, 1.6, 247, 0x2a2a2e);
+    furn(bx0 + 2, U, z0 + 2, bx0 + 9, U + 2, z0 + 11, 0x2a64c4); deco(bx0 + 2, U + 2, z0 + 2, bx0 + 9, U + 3, z0 + 4, 0xffffff); furn(bx0 + 10, U, z0 + 2, bx0 + 12, U + 2, z0 + 4, 0x6b4a2c);
+    furn(bx1 - 11, U, z0 + 2, bx1 - 2, U + 2, z0 + 12, 0x9b2a4a); deco(bx1 - 11, U + 2, z0 + 2, bx1 - 2, U + 3, z0 + 4, 0xffffff); furn(bx1 - 4, U, z1 - 9, bx1 - 1, U + 6, z1 - 2, 0x6b4a2c);
+    furn(cx + 6, U, 238, cx + 10, U + 1.5, 242, 0x6b4a2c);
     // the mailbox: E here to claim it
     furn(cx + 5, 0, 278, cx + 6, 4, 279, 0x3a3a3a); deco(cx + 4, 4, 277, cx + 7, 6, 280, 0x2a64c4);
-    const M = { i, B, x: cx + 5.5, z: 276, cx, owner: null, ownerName: '' };
-    B.home = spot(cx, 249, { B }); M.spawn = { x: cx, y: 3.2, z: 256, B }; MANSIONS.push(M);
-    B.spots.idle.push(B.home);
-    for (const [x, z] of [[lx0 + 6, 245], [lx1 - 6, 245], [lx0 + 8, 276], [lx1 - 8, 276]]) TREES.push({ x, z, s: 0.9 });
-    pub(cx + 10, 225, {});
+    const M = { i, B, x: cx + 5.5, z: 276, cx, owner: null, ownerName: '', tv: { x: bx1 - 1.42, y: 4.6, z: 243, nx: -1, nz: 0, w: 9, room: { x0: wr, x1: bx1, z0, z1, y: 0 } } };
+    B.home = spot(cx + 3, 249, { B }); M.spawn = { x: cx + 3, y: 3.2, z: 256, B }; MANSIONS.push(M);
+    B.spots.idle.push(B.home, spot(cx + 2, 266, { y: U, B, via: [{ x: wl + 2.5, z: 257 }, { x: wl + 2.5, z: 229 }, { x: cx + 2, z: 229 }, { x: cx + 2, z: 258 }] }));
+    for (const [x, z] of [[lx0 + 6, 274], [lx1 - 6, 274]]) TREES.push({ x, z, s: 0.9 });
+    pub(cx + 18, 268, {});
   });
 }
 
@@ -3142,6 +3269,8 @@ const RP = {
     jewelry: ['*polishes a diamond*', '*locks the display case*', '*inspects a ring with a loupe*', '*shines the gold chains*'],
     chicken: ['*drops a basket of fries*', '*breads the chicken*', 'my pleasure!', '*squeezes fresh lemonade*'],
     music: ['*tunes a guitar*', '*plays a quick riff*', '*dusts the vinyl records*', '*restrings a bass*'],
+    threads: ['*dresses a mannequin*', '*steams a shirt*', 'that fit is SO you', '*refolds the denim*', 'fitting rooms are open!', 'fresh drop from the Avatar Studio today'],
+    kimiland: ['welcome to KimiLand!', '*fluffs the plushies*', '*ties a balloon*', 'the new UGC drop is on Roblox!', '*restocks the cotton candy*', 'stay for the show downstairs!'],
     lifeguard: ['*blows the whistle*', '*scans the water*', '*puts on sunscreen*', 'no running on the beach!', '*adjusts the umbrella*'],
     ship: ['*mops the deck*', '*checks the lifeboats*', '*greets the passengers*', 'all aboard!', '*polishes the railing*', '*mixes a tropical drink*'],
   },
@@ -3219,7 +3348,11 @@ function planPath(b, to) {
   const ch = b.ch, feet = ch.y - 3, pts = [], onShip = feet > 5 && ch.x > 300, toShip = !!(to.ship || (to.B && to.B.ship));
   const inYard = x => x.x > YARD.x0 - 1 && x.x < YARD.x1 + 1 && x.z > YARD.z0 - 1 && x.z < YARD.z1 + 1;
   if (inYard(ch) && !inYard(to)) { pts.push({ x: -360, z: -54 }, { x: -360, z: -66 }, { x: -346, z: -85 }, { x: -334, z: -85 }, { x: -326, z: -85 }, { x: JAIL_OUT.x, z: JAIL_OUT.z }); if (to.B !== BLD.jail) { const r = planPath({ ch: { x: JAIL_OUT.x, y: 3.2, z: JAIL_OUT.z }, at: null }, to); return pts.concat(r); } }
-  const Bf = bldAt(ch.x, feet, ch.z), Bt = to.B || null, viaNow = b.at && b.at.B === Bf ? b.at.via : null;
+  const Bf = bldAt(ch.x, feet, ch.z), Bt = to.B || null;
+  let viaNow = b.at && b.at.B === Bf ? b.at.via : null;
+  // in the mall and not where you last stopped (ran off, got pushed, a chase), or heading somewhere there without a route: work one out
+  if (Bf === BLD.mall && (!b.at || b.at.B !== Bf || dist2(ch, b.at) > 6 || Math.abs((b.at.y || 0) - feet) > 3)) viaNow = mallRoute(ch.x, ch.z, feet);
+  if (Bt === BLD.mall && !to.via) to = Object.assign({}, to, { via: mallRoute(to.x, to.z, to.y || 0) });
   if (Bf && Bf !== Bt) { if (viaNow) pts.push(...viaNow.slice().reverse()); const D = nearDoor(Bf, to.x, to.z); pts.push({ x: D.ix, z: D.iz }, { x: D.ox, z: D.oz }); }
   else if (Bf && Bf === Bt && viaNow !== to.via && viaNow) pts.push(...viaNow.slice().reverse());
   const last = () => pts.length ? pts[pts.length - 1] : ch;
@@ -3234,6 +3367,15 @@ function planPath(b, to) {
   pts.push(to); return pts;
 }
 function go(b, to) { b.goal = to; b.path = planPath(b, to); b.arrived = false; b.stuck.n = 0; }
+// from the middle of the mall (downstairs) up to a point upstairs: the west stairs for the back, the east stairs for the front, then in through a shop's door
+function mallRoute(x, z, y) {
+  const up = y > MALL.y2 - 4, north = z < -69, r = [MALL.hub];
+  if (up) r.push(...(north ? MALL.up1 : MALL.up2));
+  const R = MALL.units.find(u => Math.abs((u.y || 0) - (up ? MALL.y2 : 0)) < 1 && x > u.x0 && x < u.x1 && z > u.z0 && z < u.z1);
+  if (R) r.push({ x: R.doorOut.x, z: R.doorOut.z, y: R.y }, { x: R.doorIn.x, z: R.doorIn.z, y: R.y });
+  else if (up && !north && z > -51) { const c = x < 43.5 ? 27 : x < 76.5 ? 60 : 93; r.push({ x: c, z: -55, y: MALL.y2 }, { x: c, z: -46, y: MALL.y2 }); }   // an empty unit upstairs
+  return r;
+}
 // steer round things in the way (Zombie Zones' feelers), keep a little personal space
 const zProbe = p => !p.zOnly && !p.ground && p.maxY > 1;
 function zFree(ch, dx, dz, L, probe = zProbe) { const r = W.raycast(ch.x, ch.y - 1.3, ch.z, dx, 0, dz, L, probe); return !r.part || r.t >= L; }
@@ -3280,6 +3422,7 @@ function pickSpot(list) { return list.length ? list[Math.floor(Math.random() * l
 const freeSeat = s => !s.seat || !s.seat.occupant;
 function citizenTarget(b) {
   const r = Math.random();
+  if (b.fan && r < 0.6) return pickSpot(MALL.crowd);
   if (b.home && r < 0.15) return b.home.B.home;
   const Wp = player && workplace(player); if (Wp && Wp.B && Math.random() < 0.4) { const S = Wp.B.parent ? Wp.B.spots : Wp.B.spots, l = [...S.idle, ...S.shop, ...S.seat.filter(freeSeat)]; if (l.length) return pickSpot(l); }
   if (r < 0.55) { const C = pickSpot(COUNTERS.filter(c => c.shop && c.shop.items.length && c.shop.rob)); return C ? C.spot : pickSpot(PUBLIC); }
@@ -3353,7 +3496,7 @@ function botBrain(b, dt) {
   if (b.customer && b.arrived && player) { w.face = w.look = { x: player.ch.x, y: player.ch.y, z: player.ch.z }; return; }
   if (b.robbing && b.arrived) { w.look = b.robC ? { x: b.robC.wx, y: 3, z: b.robC.wz } : null; return; }
   if (b.path && b.path.length) { if (follow(b, dt)) { b.arrived = true; } }
-  else if (b.goal && b.goal.look && b.arrived) w.face = w.look = { x: b.goal.look.x, y: 3, z: b.goal.look.z };
+  else if (b.goal && b.goal.look && b.arrived) { w.face = w.look = { x: b.goal.look.x, y: 3, z: b.goal.look.z }; if (b.goal.crowd && ch.grounded && Math.random() < dt * 0.45) w.jump = true; }   // the crowd at the stage hops along
   if (b.arrived && b.goal && b.goal.seat && !ch.sit && dist2(ch, b.goal) < 2.5) { ch.wantSit = true; w.mx = (b.goal.x - ch.x) * 0.5; w.mz = (b.goal.z - ch.z) * 0.5; }
   if (b.arrived && ch.sit && b.idleT < 0.4) { w.jump = true; ch.wantSit = false; }
 }
@@ -3756,6 +3899,7 @@ function findUse() {
   for (const C of COUNTERS) { if (Math.abs(feet - C.y) > 2) continue; const d = Math.hypot(C.x - p.ch.x, C.z - p.ch.z); if (d < bd) { bd = d; best = { kind: 'counter', C }; } }
   for (const M of ATMS) { if (Math.abs(feet - M.y) > 2) continue; const d = Math.hypot(M.x - p.ch.x, M.z - p.ch.z); if (d < bd) { bd = d; best = { kind: 'atm', M }; } }
   for (const M of MANSIONS) { const d = Math.hypot(M.x - p.ch.x, M.z - p.ch.z); if (d < bd && feet < 2) { bd = d; best = { kind: 'mansion', M }; } }
+  { const m = Mall.nearest(best ? bd : 6); if (m) best = m; }
   if (!best) best = Social.near();
   return best;
 }
@@ -3765,6 +3909,7 @@ function useText(u) {
   if (!u) return '';
   const k = touchMode ? 'Tap USE' : '[E]';
   if (u.kind === 'tv' || u.kind === 'social') return Social.useText(u, k);
+  if (u.kind === 'mall') return Mall.useText(u, k);
   if (u.kind === 'counter') { const C = u.C, R = canRob(player, C) ? (Game.clock - C.robbedT < RULES.robCooldown ? ' · <span class="dim">till is empty</span>' : ` · <span style="color:${WANTED_CSS}">${touchMode ? 'hold ROB' : '[hold G]'} rob the till</span>`) : ''; return `${k} ${C.shop.title}${R}`; }
   if (u.kind === 'atm') return `${k} ATM: get $500 for 3 Pearls`;
   const M = u.M; return M.owner === player ? `${k} Give up Mansion ${M.i + 1}` : M.owner ? `Mansion ${M.i + 1} belongs to <b>${M.ownerName}</b>` : `${k} Claim Mansion ${M.i + 1} (free!)`;
@@ -3772,6 +3917,7 @@ function useText(u) {
 function useIt() {
   const u = useNow; if (!u || !player || player.ch.dead) return;
   if (u.kind === 'tv' || u.kind === 'social') Social.use(u);
+  else if (u.kind === 'mall') Mall.use(u);
   else if (u.kind === 'counter') openShop(u.C);
   else if (u.kind === 'atm') atm();
   else if (u.kind === 'mansion') { const M = u.M; if (M.owner === player) unclaim(player); else if (!M.owner) { claimHome(player, M); announce(`MANSION ${M.i + 1} IS YOURS`, player.team === T.CIT ? 'You\'ll respawn here while you\'re a Citizen' : 'Your home is marked on the map', '#ffe36b'); Snd.ding('gate'); } }
@@ -3803,13 +3949,17 @@ const shopOpen = () => $('shop').style.display === 'block';
 function openShop(C) {
   shopC = C; const S = C.shop;
   $('shopT').textContent = S.title; $('shopC').textContent = `$${Save.cash.toLocaleString()}`;
-  $('shopL').innerHTML = S.items.map((it, i) => `<button class="si" data-i="${i}"><b>${it[0]}</b><span>${it[1] ? '$' + it[1] : 'free'}</span></button>`).join('');
+  if (S.clothes && !S.items.length) Mall.stock();
+  $('shopL').innerHTML = S.items.length ? S.items.map((it, i) => `<button class="si" data-i="${i}"><b>${it[0]}</b><span>${it[2] && it[2].wear && Save.kit === it[2].wear.kit ? 'wearing' : it[1] ? '$' + it[1] : 'free'}</span></button>`).join('') : '<div class="dim" style="padding:8px">Unpacking the new stock…</div>';
   for (const el of $('shopL').querySelectorAll('button')) el.style.cursor = cssCur('hand');
   $('shop').style.display = 'block'; uiFree();
 }
 function closeShop() { $('shop').style.display = 'none'; shopC = null; uiFree(); }
 function buy(i) {
   const C = shopC; if (!C || !player) return; const [name, price, fx] = C.shop.items[i];
+  if (fx.wear) { Mall.buyWear(fx.wear); return; }
+  if (fx.mine) { Save.kit = ''; Save.save(); player.outfit = player.myLook || player.outfit; applyLook(player); msg('Wearing your own Grug outfit', 2); openShop(C); return; }
+  if (fx.kimi) { closeShop(); Mall.openLink(Mall.KIMI); return; }
   if (Save.cash < price) { msg(`Not enough cash ($${price})`, 1.6); Snd.play('hit'); return; }
   Save.cash -= price;
   if (fx.heal) player.hp = Math.min(RULES.hp, player.hp + fx.heal);
@@ -4290,7 +4440,7 @@ function workplace(p) {
   const Tm = TEAMS[t], key = Tm.bld, ch = p.ch;
   if (t === T.LIFE) return Math.hypot(ch.x - 251, ch.z - 55) < 45 ? { key, spot: spot(258, 62) } : null;
   const B = BLD[key]; if (!B) return null;
-  const H = B.parent ? B : B, inside = B.parent ? ch.x > B.x0 && ch.x < B.x1 && ch.z > B.z0 && ch.z < B.z1 && ch.y < 10 : bldAt(ch.x, ch.y - 3, ch.z) === B;
+  const H = B.parent ? B : B, inside = B.parent ? ch.x > B.x0 && ch.x < B.x1 && ch.z > B.z0 && ch.z < B.z1 && Math.abs(ch.y - 3 - (B.y || 0)) < 6 : bldAt(ch.x, ch.y - 3, ch.z) === B;
   if (!inside) return null;
   const cs = COUNTERS.filter(c => c.B === B); if (!cs.length) return null;
   const C = cs.reduce((a, c) => dist2(c.spot, ch) < dist2(a.spot, ch) ? c : a);
@@ -4360,17 +4510,18 @@ function updatePlayerBubble() {
 //  Saved with the game. Lower settings = less for the GPU to draw.
 // =====================================================================
 const GFX_OPT = {
-  res: [0.35, 0.5, 0.75, 1],                     // share of the screen's real pixels the 3D view renders at
+  res: [0.35, 0.45, 0.6, 0.75, 1],              // share of the screen's real pixels the 3D view renders at (75% to start; drops on its own, to 45% at most, when frames get slow)
   draw: { Near: 380, Medium: 750, Far: 1500 },   // how far you can see (fog closes in, everything past it isn't drawn)
   shadows: ['Off', 'Low', 'High'],
   lod: { Low: { anim: 70, vis: 170, car: 220, tags: 0.6 }, Medium: { anim: 170, vis: 320, car: 420, tags: 1 }, High: { anim: 300, vis: 480, car: 600, tags: 1.2 } },
 };
-const GFX = Object.assign({ res: 0.5, draw: 'Medium', shadows: 'Low', lod: 'Medium', fps: false }, (() => { try { return JSON.parse(localStorage.getItem('grug.grug-city.gfx') || 'null') || {}; } catch (_) { return {}; } })());
-if (!GFX_OPT.res.includes(GFX.res)) GFX.res = 0.5; if (!GFX_OPT.draw[GFX.draw]) GFX.draw = 'Medium'; if (!GFX_OPT.shadows.includes(GFX.shadows)) GFX.shadows = 'Low'; if (!GFX_OPT.lod[GFX.lod]) GFX.lod = 'Medium';
+const GFX = Object.assign({ res: 0.75, draw: 'Medium', shadows: 'Low', lod: 'Medium', fps: false }, (() => { try { return JSON.parse(localStorage.getItem('grug.grug-city.gfx') || 'null') || {}; } catch (_) { return {}; } })());
+if (GFX.v !== 2) { GFX.v = 2; GFX.res = 0.75; }   // settings saved before 75% became the default start at 75%
+if (!GFX_OPT.res.includes(GFX.res)) GFX.res = 0.75; if (!GFX_OPT.draw[GFX.draw]) GFX.draw = 'Medium'; if (!GFX_OPT.shadows.includes(GFX.shadows)) GFX.shadows = 'Low'; if (!GFX_OPT.lod[GFX.lod]) GFX.lod = 'Medium';
 let LOD = GFX_OPT.lod[GFX.lod];
 function applyGfx() {
   try { localStorage.setItem('grug.grug-city.gfx', JSON.stringify(GFX)); } catch (_) { }
-  renderer.setPixelRatio(Math.max(0.25, (window.devicePixelRatio || 1) * GFX.res)); resize();
+  setRes(GFX.res);
   const D = GFX_OPT.draw[GFX.draw]; scene.fog.near = D * 0.3; scene.fog.far = D; camera.far = D + 60; camera.updateProjectionMatrix();
   sky.scale.setScalar(Math.min(1, (camera.far * 0.92) / 2300));   // the sky sits just inside the far plane
   const sh = GFX.shadows; sun.castShadow = sh !== 'Off'; const n = sh === 'High' ? 2048 : 1024;
@@ -4378,7 +4529,7 @@ function applyGfx() {
   Object.assign(sun.shadow.camera, sh === 'High' ? { left: -110, right: 110, top: 110, bottom: -110 } : { left: -70, right: 70, top: 70, bottom: -70 }); sun.shadow.camera.updateProjectionMatrix();
   { const L = GFX_OPT.lod[GFX.lod]; LOD = { tags: L.tags, vis: Math.min(L.vis, D * 0.45), car: Math.min(L.car, D * 0.6) }; LOD.anim = Math.min(L.anim, LOD.vis); }   // nobody drawn past the fog
   for (const b of Bills.list) b.max = Math.min(b.max0 || (b.max0 = b.max), D * 0.5);
-  $('gRes').textContent = `Resolution: ${Math.round(GFX.res * 100)}%`; $('gDraw').textContent = `Draw distance: ${GFX.draw}`;
+  resLabel(); $('gDraw').textContent = `Draw distance: ${GFX.draw}`;
   $('gShadow').textContent = `Shadows: ${GFX.shadows}`; $('gLod').textContent = `Detail (LOD): ${GFX.lod}`; $('gFps').textContent = `Show FPS: ${GFX.fps ? 'On' : 'Off'}`;
   $('fps').style.display = GFX.fps ? 'block' : 'none';
 }
@@ -4388,6 +4539,18 @@ $('gDraw').addEventListener('click', () => { GFX.draw = cycle(Object.keys(GFX_OP
 $('gShadow').addEventListener('click', () => { GFX.shadows = cycle(GFX_OPT.shadows, GFX.shadows); applyGfx(); });
 $('gLod').addEventListener('click', () => { GFX.lod = cycle(Object.keys(GFX_OPT.lod), GFX.lod); applyGfx(); });
 $('gFps').addEventListener('click', () => { GFX.fps = !GFX.fps; applyGfx(); });
+// the 3D view's resolution: what you picked, unless frames are slow; then it steps down (never under 45%) and creeps back up when there's room
+let resNow = 0, resSlow = 0, resFast = 0, resDrop = -1e9, resLast = 0, fpsAvg = 60;
+function setRes(r) { resNow = r; renderer.setPixelRatio(Math.max(0.25, (window.devicePixelRatio || 1) * r)); resize(); resLabel(); }
+function resLabel() { $('gRes').textContent = `Resolution: ${Math.round(GFX.res * 100)}%` + (resNow < GFX.res - 0.001 ? ` (${Math.round(resNow * 100)}% for now: frames were slow)` : ''); }
+function autoRes() {
+  const now = performance.now(), dt = (now - (resLast || now)) / 1000; resLast = now;
+  if (!dt || dt > 0.3 || document.hidden) return;   // a stall or a hidden tab says nothing about the frame rate
+  fpsAvg += (1 / dt - fpsAvg) * Math.min(1, dt * 1.5);
+  if (fpsAvg < 40) { resSlow += dt; resFast = 0; } else if (fpsAvg > 56) { resFast += dt; resSlow = Math.max(0, resSlow - dt); } else { resSlow = Math.max(0, resSlow - dt * 0.5); resFast = 0; }
+  if (resSlow > 2.5 && resNow > 0.451 && GFX.res > 0.451) { resSlow = 0; resDrop = now; setRes(Math.max(0.45, Math.round((resNow - 0.1) * 100) / 100)); }
+  else if (resFast > 10 && resNow < GFX.res - 0.001 && now - resDrop > 30000) { resFast = 0; setRes(Math.min(GFX.res, Math.round((resNow + 0.05) * 100) / 100)); }
+}
 let fpsN = 0, fpsT = 0;
 function updateFps(dt) { if (!GFX.fps) return; fpsN++; if ((fpsT += dt) >= 0.5) { $('fps').textContent = `${Math.round(fpsN / fpsT)} FPS · ${renderer.info.render.calls} draws`; fpsN = 0; fpsT = 0; } }
 
@@ -4402,11 +4565,12 @@ function populate() {
   const at = s => ({ x: s.x + rnd(-1, 1), y: s.y || 0, z: s.z + rnd(-1, 1) });
   for (let i = 0; i < RULES.maxPolice; i++) { const b = makeBot(T.POL, { at: at(pick(STREET)) }); b.copSlot = true; }
   for (let i = 0; i < 4; i++) makeBot(T.CRIM, { at: at(i < 2 ? BLD.hideout.spots.idle[i] : pick(PUBLIC)) });
-  for (const t of [T.STYL, T.ICE, T.TAR, T.TAR, T.BUR, T.GRILL, T.TECH, T.PIZ, T.JEW, T.CHK, T.BAR, T.MUS, T.LIFE, T.CREW, T.CREW]) {
+  for (const t of [T.STYL, T.ICE, T.TAR, T.TAR, T.BUR, T.GRILL, T.TECH, T.PIZ, T.JEW, T.CHK, T.BAR, T.MUS, T.LIFE, T.CREW, T.CREW, T.FASH, T.KIMI, T.KIMI]) {
     const B = BLD[TEAMS[t].bld], w = B && B.spots && B.spots.work.length ? B.spots.work[bots.filter(b => b.team === t).length % B.spots.work.length] : TEAMS[t].posts ? TEAMS[t].posts[0] : TEAMS[t].padSpot;
     const b = makeBot(t, { at: at(w) }); b.goal = w; b.at = w; b.arrived = true;
   }
   for (let i = 0; i < 12; i++) { const s = pick(PUBLIC); const b = makeBot(T.CIT, { at: at(s) }); b.at = s; }
+  for (let i = 0; i < 5; i++) { const s = MALL.crowd[i * 2]; const b = makeBot(T.CIT, { at: at(s) }); b.at = b.goal = s; b.arrived = true; b.fan = true; }   // event fans: they hang about the stage
   for (let i = 0; i < 2; i++) { const b = makeBot(T.PRIS, { at: { x: rnd(-370, -330), y: 0, z: rnd(-50, -30) } }); }
   // two of the citizens already own a mansion
   const cits = bots.filter(b => b.team === T.CIT);
@@ -4427,6 +4591,7 @@ async function wearOutfits() {
     await kitP;
     if (player) {
       player.myLook = look; player.outfit = Save.kit && KIT[Save.kit] ? KIT[Save.kit] : look;
+      if (Save.kit && !KIT[Save.kit]) Mall.lookFor(Save.kit, look).then(L => { if (L && player) { player.outfit = L; applyLook(player); } });
       if (look && !look.starter && !look.isDefault) { player.name = player.K.name = look.name.slice(0, 20); }
       applyLook(player); show(player);
     }
@@ -4437,10 +4602,11 @@ async function wearOutfits() {
       b.outfit = t.kit ? KIT[t.kit] : b.team === T.CIT && oi < others.length ? others[oi++] : KIT[CIVVY_KITS[ci++ % CIVVY_KITS.length]] || null;
       applyLook(b); show(b);
     }
+    Mall.dressCrowd().catch(() => { });
   } catch (e) { console.warn('outfits', e); }
   clearTimeout(cap); all.forEach(show);
 }
-addEventListener('grug:outfits', () => { if (player && window.GrugOutfitRig) GrugOutfitRig.load().then(l => { if (!l) return; player.myLook = l; if (!Save.kit) { player.outfit = l; applyLook(player); } }); });
+addEventListener('grug:outfits', () => { if (player && window.GrugOutfitRig) GrugOutfitRig.load().then(l => { if (!l) return; player.myLook = l; if (!Save.kit) { player.outfit = l; applyLook(player); } else if (Save.kit.startsWith('w:')) Mall.lookFor(Save.kit, l).then(L => { if (L) { player.outfit = L; applyLook(player); } }); }); });
 
 function join() {
   if (player) return;
@@ -4487,7 +4653,7 @@ function frame(now) {
   const dt = Math.min((now - last) / 1000, 0.1); last = now;
   if (player) { touchHold(); playerInput(dt); }
   sim(dt);
-  updateFps(dt); updateDebris(dt); updateTracers(dt); FX.update(dt); Pts.update(dt); DmgNum.update(dt); Feed.update(dt); updateAnnounce(dt);
+  updateFps(dt); autoRes(); updateDebris(dt); updateTracers(dt); FX.update(dt); Pts.update(dt); DmgNum.update(dt); Feed.update(dt); updateAnnounce(dt);
   for (const b of bots) if (!b.ch.dead) { const v = nearCam(b.ch, LOD.vis); b.rig.g.visible = v; if (!v) continue; if (nearCam(b.ch, LOD.anim)) animatePlayer(b, dt); else { b.rig.g.position.set(b.ch.x, b.ch.y - 3, b.ch.z); b.rig.g.rotation.y = b.ch.faceYaw; } }
   if ((smokeT -= dt) <= 0) { smokeT = 0.35; const S = BLD.bbq && BLD.bbq.smoke; if (S && nearCam(S, 300)) FX.spawn('smoke', S.x + rnd(-1, 1), S.y, S.z + rnd(-1, 1), { fps: 6, size: rnd(5, 8), color: 0x8a8a8a, vy: rnd(5, 8), grow: 1.2, fade: 0.6, opacity: 0.7 }); }
   let fx = 0, fy = 0, fz = 0;
@@ -4511,7 +4677,7 @@ function frame(now) {
   if (!touchMode) { updateHover(); drawCursor(); }
   if ((hudSaveT -= dt) <= 0) { hudSaveT = 10; if (player) Save.save(); }
   document.body.classList.toggle('hasRoll', true);
-  updateHouseView(); updateTags(dt); Bills.update(dt); Social.update(dt); Waypoints.update(); updateHud(dt); updateMinimap(); Snd.listen(); DmgInd.update(dt);
+  updateHouseView(); updateTags(dt); Bills.update(dt); Social.update(dt); Mall.update(dt); Waypoints.update(); updateHud(dt); updateMinimap(); Snd.listen(); DmgInd.update(dt);
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
@@ -4645,13 +4811,15 @@ const Social = (() => {
   function build() {
     board('cityhall', ['discord'], -80, -104, 0, 1, 30, 13);
     board('mall', ['youtube'], 60, -62, 0, 1, 34, 15);
+    board('mall', ['kimiland'], 95, -100, 0, 1, 24, 10.5);
     board('burlingtown', ['instagram'], -80, -198, 0, 1, 34, 15);
     board('tarjay', ['discord', 'kimiland', 'instagram', 'youtube'], -220, -242, 0, 1, 34, 15);
     board('icecream', ['kimiland'], 160, -85, 1, 0, 24, 10.5);   // Sundae Funday, facing the boardwalk
-    for (const M of MANSIONS) tvSet(M.cx + 5, 3.4, 257.58, 0, -1, 7, { x0: M.cx - 8, x1: M.cx + 8, z0: 235, z1: 263, y: 0 });
+    for (const M of MANSIONS) { const t = M.tv; tvSet(t.x, t.y, t.z, t.nx, t.nz, t.w, t.room); }
     tvSet(27, 8.6, -116.56, 0, 1, 14, { x0: 11, x1: 43, z0: -117, z1: -88, y: 0 });
-    tvSet(43.5, 7.8, -86.56, 0, 1, 16, { x0: 11, x1: 109, z0: -87, z1: -28, y: 0 });
-    tvSet(76.5, 7.8, -86.56, 0, 1, 16, { x0: 11, x1: 109, z0: -87, z1: -28, y: 0 });
+    tvSet(43.5, 10, -86.56, 0, 1, 10, { x0: 11, x1: 109, z0: -87, z1: -51, y: 0 });
+    tvSet(76.5, 10, -86.56, 0, 1, 10, { x0: 11, x1: 109, z0: -87, z1: -51, y: 0 });
+    const S = MALL.stage; MALL.screen = tvSet(S.x1 + 0.58, 6.2, (S.z0 + S.z1) / 2, -1, 0, 16, { x0: 50, x1: S.x1, z0: S.z0 - 2, z1: S.z1 + 2, y: 0 });
     initCss();
     loadPics().then(() => boards.forEach(redraw));
     if (GS) GS.get().then(d => { data = d; giveVideos(); loadPics().then(() => boards.forEach(redraw)); });
@@ -4741,9 +4909,200 @@ const Social = (() => {
 $('tvX').addEventListener('click', () => Social.closeTV());
 $('tvN').addEventListener('click', () => Social.next());
 
+// ---------------------------------------------------------------- the mall, alive: racks of outfits from the Grug Avatar Studio (the Wardrobe,
+// the starter looks, and the outfits you saved yourself) on mannequins you can buy and wear, the KimiLand flagship, the event atrium
+// (balloons, stage lights, confetti, a crowd), and the empty units waiting for the next creators.
+const Mall = (() => {
+  const U = MALL.y2, KIMI = 'https://www.roblox.com/communities/5835899/KimiLand#!/store';
+  let WARD = null, wardP = null, stocking = null, near = false, confT = 6, spin = 0;
+  const IMGS = {}, MATS = new Map(), items = { threads: [], fits: [], thrift: [] }, esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const THEMES = { threads: ['Casual', 'Streetwear', 'Sports', 'Retro', 'Outdoors'], thrift: ['Work', 'Formal', 'Fantasy', 'Sci-Fi', 'Spooky', 'Grug games'] };
+  const NAMES = { grug: 'Grug', skater: 'Skater', ranger: 'Ranger', scavenger: 'Scavenger', medic: 'Medic', racer: 'Racer', 'snow-rider': 'Snow Rider', flannel: 'Flannel' };
+  const img = src => IMGS[src] || (IMGS[src] = new Promise(res => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => res(i); i.onerror = () => res(null); i.src = src; }));
+  const wardrobe = () => wardP || (wardP = fetch(GRUG + '/character/wardrobe/wardrobe.json').then(r => r.ok ? r.json() : null).then(j => (WARD = j && Array.isArray(j.items) ? j.items : [])).catch(() => (WARD = [])));
+  const WP = id => GRUG + '/character/wardrobe/' + encodeURIComponent(id) + '/';
+  const hash = s => { let h = 7; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return Math.abs(h); };
+  const shuffle = a => a.map(v => [Math.random(), v]).sort((p, q) => p[0] - q[0]).map(p => p[1]);
+  const headless = L => L && { id: L.id, name: L.name, parts: Object.fromEntries(Object.entries(L.parts).filter(([n]) => n !== 'Head')) };
+  // a look's skin: the background of its shirt picture
+  function skinOf(L) {
+    const im = L && L.parts.Torso && L.parts.Torso.material.map && L.parts.Torso.material.map.image; if (!im) return '#e8c4a0';
+    try { const c = document.createElement('canvas'); c.width = c.height = 1; const x = c.getContext('2d'); x.drawImage(im, 2, 2, 1, 1, 0, 0, 1, 1); const d = x.getImageData(0, 0, 1, 1).data; return `rgb(${d[0]},${d[1]},${d[2]})`; } catch (e) { return '#e8c4a0'; }
+  }
+  // a Roblox shirt or pants picture on a body: skin underneath, and the round caps on the shoulders/hips (the strip under the
+  // picture in a Studio character) cut from the limbs' top squares
+  function clothTex(base, tpl, skin, scale) {
+    const bi = base && base.image, W = bi ? bi.width : 585, H = bi ? bi.height : 623, c = document.createElement('canvas');
+    c.width = Math.round(W * scale); c.height = Math.round(H * scale); const x = c.getContext('2d'); x.scale(scale, scale);
+    x.fillStyle = skin; x.fillRect(0, 0, W, H); x.drawImage(tpl, 0, 0, 585, 559);
+    if (H > 559) { x.drawImage(tpl, 217, 289, 64, 64, 0, 559, 64, H - 559); x.drawImage(tpl, 308, 289, 64, 64, 64, 559, 64, H - 559); }
+    const t = new THREE.CanvasTexture(c); t.flipY = false; t.encoding = THREE.LinearEncoding; t.anisotropy = 4; return t;
+  }
+  // a Wardrobe item worn by a look: its head and skin, the item's shirt and pants
+  async function wear(base, it, o = {}) {
+    if (!base || !it) return null;
+    const [sh, pa] = await Promise.all([img(WP(it.id) + 'shirt.webp'), img(WP(it.id) + 'pants.webp')]); if (!sh && !pa) return null;
+    const skin = o.skin || skinOf(base), scale = o.scale || 1, parts = {};
+    for (const [n, p] of Object.entries(base.parts)) {
+      if (n === 'Head') { if (!o.headless) parts[n] = p; continue; }
+      const leg = /Leg/.test(n), tpl = leg ? pa : sh; if (!tpl) { parts[n] = p; continue; }
+      const k = it.id + (leg ? '|p|' : '|s|') + skin + '|' + scale + '|' + base.id; let m = MATS.get(k);
+      if (!m) { m = new THREE.MeshPhongMaterial({ color: 0xffffff, map: clothTex(p.material.map, tpl, skin, scale), shininess: 10, specular: 0x111111 }); MATS.set(k, m); }
+      parts[n] = { geometry: p.geometry, rel: p.rel, material: m };
+    }
+    return { id: 'w:' + it.id, name: it.name, parts };
+  }
+  // what a saved Save.kit means: one of the Grug crew, 'w:<Wardrobe item>' on your own body, or 'o:<an outfit you saved>'
+  async function lookFor(kit, me) {
+    if (!kit) return null; if (KIT[kit]) return KIT[kit];
+    if (kit.startsWith('w:')) { await wardrobe(); return wear(me, WARD.find(i => i.id === kit.slice(2))); }
+    if (kit.startsWith('o:') && window.GrugOutfits) { try { return await GrugOutfitRig.loadRecord(await GrugOutfits.get(kit.slice(2))); } catch (e) { return null; } }
+    return null;
+  }
+  async function putOn(it) {
+    const L = await lookFor(it.kit, player.myLook); if (!L || !player) { msg('That outfit didn\'t load, try another', 2); return false; }
+    Save.kit = it.kit; Save.save(); player.outfit = L; applyLook(player); return true;
+  }
+  const wearing = it => Save.kit === it.kit;
+  function buyWear(it) {
+    if (!player || wearing(it)) return;
+    if (Save.cash < it.price) { msg(`Not enough cash ($${it.price})`, 1.6); Snd.play('hit'); return; }
+    Save.cash -= it.price; Save.save();
+    putOn(it).then(ok => { if (!ok) { Save.cash += it.price; Save.save(); return; } Pts.add(null, `Now wearing ${esc(it.name)}${it.price ? ` <span class="dim">-$${it.price}</span>` : ''}`, 'bank'); Snd.ding('gem'); if (shopOpen() && shopC && shopC.shop.clothes) openShop(shopC); });
+  }
+  // ---- stocking the racks (once you come near the mall)
+  function mannequin(m) {
+    if (m.r) return m.r;
+    const r = makeRig({ skin: 0xece6da, shirt: 0xece6da, pants: 0xece6da, face: 'smile' }); r.head.children.forEach(c => { c.visible = false; });
+    r.g.position.set(m.x, m.y, m.z); r.g.rotation.y = m.yaw; r.ls.rotation.z = -0.18; r.rs.rotation.x = -0.25; r.rh.rotation.z = 0.05; r.lh.rotation.z = -0.05;
+    r.g.traverse(o => { o.matrixAutoUpdate = true; }); m.r = r; return r;
+  }
+  function dressM(m, it, L) { const r = mannequin(m); m.it = it; if (L) GrugOutfitRig.dress(r, L); r.g.updateMatrixWorld(true); }
+  async function restockFits() {
+    let mine = []; try { mine = window.GrugOutfits ? (await GrugOutfits.list()).filter(o => !String(o.id).startsWith('starter-')).slice(0, 12) : []; } catch (e) { }
+    items.fits = [...mine.map(o => ({ kit: 'o:' + o.id, name: o.name || 'My outfit', price: 0, mine: true })), ...KITS.filter(k => KIT[k]).map(k => ({ kit: k, name: NAMES[k] || k, price: 30 }))];
+    SHOPS.fits.items = [...items.fits.map(it => [it.name + (it.mine ? ' (yours)' : ''), it.price, { wear: it }]), ['Wear my own outfit', 0, { mine: 1 }]];
+    const Ms = MALL.mannequins.filter(m => m.shop === 'fits');
+    await Promise.all(Ms.map(async (m, i) => {
+      const it = items.fits[i % Math.max(1, items.fits.length)]; if (!it) return;
+      let L = KIT[it.kit] || null; if (!L && it.kit.startsWith('o:')) L = await lookFor(it.kit);
+      dressM(m, it, headless(L));
+    }));
+  }
+  function stock() {
+    if (stocking) return stocking;
+    return (stocking = (async () => {
+      await wardrobe();
+      for (const id of ['threads', 'thrift']) {
+        items[id] = shuffle(WARD.filter(i => THEMES[id].includes(i.theme))).slice(0, 10).map(i => ({ kit: 'w:' + i.id, name: i.name, price: 20 + (hash(i.id) % 6) * 5, item: i }));
+        SHOPS[id].items = [...items[id].map(it => [it.name, it.price, { wear: it }]), ['Wear my own outfit', 0, { mine: 1 }]];
+        const Ms = MALL.mannequins.filter(m => m.shop === id);
+        await Promise.all(Ms.map(async (m, i) => { const it = items[id][i]; if (!it) return; dressM(m, it, await wear(KIT.grug, it.item, { skin: '#ece6da', scale: 0.5, headless: true })); }));
+      }
+      await restockFits();
+    })().catch(e => console.warn('mall stock', e)));
+  }
+  // some townsfolk wear Wardrobe outfits too (on the Grug crew's heads)
+  async function dressCrowd() {
+    await wardrobe(); if (!WARD.length) return;
+    const cits = bots.filter(b => b.team === T.CIT && b.outfit && CIVVY_KITS.some(k => KIT[k] === b.outfit)).slice(0, 6);
+    for (const b of cits) { const L = await wear(b.outfit, pick(WARD), { scale: 0.5 }); if (L) { b.outfit = L; applyLook(b); } }
+  }
+  // ---- the atrium: balloons, the stage lights, string lights, confetti, the KimiLand banner and logos
+  let bal = null, conf = null; const CONF = [], beams = [];
+  const M4 = new THREE.Matrix4(), Q = new THREE.Quaternion(), E3 = new THREE.Euler(), V = new THREE.Vector3(), SC = new THREE.Vector3(), COL = new THREE.Color();
+  function banner(lines, w, h, x, y, z, ry, bg, fg, logo) {
+    const cv = document.createElement('canvas'); cv.width = 1024; cv.height = Math.round(1024 * h / w); const c = cv.getContext('2d'), H = cv.height;
+    const g = c.createLinearGradient(0, 0, 1024, H); g.addColorStop(0, bg[0]); g.addColorStop(1, bg[1]); c.fillStyle = g; c.fillRect(0, 0, 1024, H);
+    const tex = new THREE.CanvasTexture(cv), m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }));
+    const draw = im => {
+      c.fillStyle = g; c.fillRect(0, 0, 1024, H); let x0 = H * 0.12;
+      if (im) { const s = H * 0.8; c.drawImage(im, x0, (H - s) / 2, s, s); x0 += s + H * 0.12; }
+      c.fillStyle = fg; c.textBaseline = 'middle'; lines.forEach((t, i) => { const fs = i ? H * 0.2 : H * 0.36; c.font = `bold ${fs}px Fredoka, Arial, sans-serif`; c.fillText(t, x0, H * (lines.length === 1 ? 0.5 : i ? 0.72 : 0.38), 1024 - x0 - H * 0.12); });
+      tex.needsUpdate = true;
+    };
+    draw(null); if (logo) img(logo).then(draw);
+    m.position.set(x, y, z); m.rotation.y = ry; scene.add(m); return m;
+  }
+  function logo(src, x, y, z, ry, s) { const t = new THREE.TextureLoader().load(src); const m = new THREE.Mesh(new THREE.PlaneGeometry(s, s), new THREE.MeshBasicMaterial({ map: t, transparent: true })); m.position.set(x, y, z); m.rotation.y = ry; scene.add(m); return m; }
+  function build() {
+    const S = MALL.stage, KL = '/static/sponsor/kimiland-kl.png', KLOGO = '/static/sponsor/kimiland-logo.png';
+    banner(['KIMILAND × GRUG CITY', 'events · collabs · UGC drops'], 30, 7.5, 34, U + 7, -69, 0, ['#ffd6ea', '#cfe6ff'], '#3a3a6a', KL);
+    banner(['KIMILAND EVENTS STAGE'], 26, 2, S.x1 + 0.4, 11.8, (S.z0 + S.z1) / 2, -Math.PI / 2, ['#ff7ab8', '#9cc9ff'], '#ffffff');
+    logo(KLOGO, 77, U + 7.5, -116.5, 0, 9); logo(KL, 44.5, U + 6.5, -102, Math.PI / 2, 7); logo(KL, 108.5, U + 6.5, -102, -Math.PI / 2, 7);
+    logo(KL, 77, U + 3.6, -106.9, 0, 2.6);
+    for (const [c] of [[27], [60], [93]]) { const s = sign(['THIS COULD BE', 'YOUR STORE'], c, U + 6, -36, 16, 5, 0, -1, '#f2f2f2', '#2a2a2e'); s.userData.keep = true; }
+    // balloons: instanced, bobbing; the plushies on KimiLand's podiums are balloons that don't bob
+    const B = MALL.balloons; bal = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 14, 10), new THREE.MeshLambertMaterial({ color: 0xffffff }), B.length);
+    B.forEach((b, i) => { bal.setColorAt(i, COL.setHex(b.c)); b.ph = Math.random() * 6.28; }); bal.castShadow = false; scene.add(bal); placeBalloons(0);
+    const str = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.04, 0.04, 1, 4), new THREE.MeshBasicMaterial({ color: 0xffffff }), B.length);
+    B.forEach((b, i) => { const L = b.plush ? 0.01 : b.y - U - 1.5; M4.compose(V.set(b.x, b.y - b.s - L / 2, b.z), Q.identity(), SC.set(1, L, 1)); str.setMatrixAt(i, M4); }); scene.add(str);
+    // string lights along the upstairs railings
+    const pts = []; for (const [x0, x1, z] of [[16, 56, -80.75], [64, 109, -80.75], [11, 56, -57.75], [64, 104, -57.75]]) for (let x = x0 + 1; x < x1; x += 2.5) pts.push([x, U + 3.7, z]);
+    const sl = new THREE.InstancedMesh(new THREE.SphereGeometry(0.22, 6, 4), new THREE.MeshBasicMaterial({ color: 0xffffff }), pts.length), LC = [0xff7ab8, 0xffe08a, 0x9cc9ff, 0x9be338];
+    pts.forEach((p, i) => { M4.makeTranslation(...p); sl.setMatrixAt(i, M4); sl.setColorAt(i, COL.setHex(LC[i % 4])); }); scene.add(sl);
+    // stage lights: a can on the truss and a soft beam that sweeps over the stage
+    for (const L of MALL.lights) {
+      const can = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 1.2, 10), lamb(0x1a1a1e)); can.position.set(L.x, L.y, L.z); scene.add(can);
+      const g = new THREE.Group(); g.position.set(L.x, L.y - 0.4, L.z);
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(2.6, 11, 18, 1, true), new THREE.MeshBasicMaterial({ color: L.c, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+      cone.position.y = -5.5; g.add(cone); scene.add(g); beams.push({ g, ph: Math.random() * 6.28 });
+    }
+    // confetti: one instanced mesh, bursts over the stage while you're about
+    conf = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.45, 0.28), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide }), 260);
+    for (let i = 0; i < 260; i++) { CONF.push({ on: false }); conf.setMatrixAt(i, M4.makeScale(0, 0, 0)); conf.setColorAt(i, COL.setHex([0xff7ab8, 0xffe08a, 0x9cc9ff, 0x9be338, 0xc9b3ff, 0xffffff][i % 6])); }
+    conf.frustumCulled = false; scene.add(conf);
+  }
+  function placeBalloons(t) {
+    MALL.balloons.forEach((b, i) => { const y = b.plush ? b.y : b.y + Math.sin(t * 0.9 + b.ph) * 0.35; M4.compose(V.set(b.x + (b.plush ? 0 : Math.sin(t * 0.5 + b.ph) * 0.2), y, b.z), Q.identity(), SC.set(b.s * 0.9, b.s * (b.plush ? 0.9 : 1.1), b.s * 0.9)); bal.setMatrixAt(i, M4); });
+    bal.instanceMatrix.needsUpdate = true;
+  }
+  function burst() {
+    const S = MALL.stage; let n = 0;
+    for (const p of CONF) { if (p.on || n > 110) continue; n++; Object.assign(p, { on: true, t: 0, x: rnd(S.x0 - 24, S.x1), y: rnd(U + 6, U + 11), z: rnd(S.z0 - 1, S.z1 + 1), vx: rnd(-1.5, 1.5), vz: rnd(-1.5, 1.5), rx: rnd(0, 6), ry: rnd(0, 6), w: rnd(3, 7) }); }
+  }
+  function update(dt) {
+    const c = camera.position, was = near; near = Math.hypot(c.x - 60, c.z + 70) < 130 && Math.abs(c.y) < 80;
+    if (near && !stocking && KIT.grug) stock();
+    if (was !== near) { for (const m of MALL.mannequins) if (m.r) m.r.g.visible = near; for (const b of beams) b.g.visible = near; if (bal) bal.visible = near; }
+    if (!near) return;
+    spin += dt; placeBalloons(spin);
+    for (const b of beams) b.g.rotation.set(Math.sin(spin * 0.7 + b.ph) * 0.5, 0, -0.55 + Math.cos(spin * 0.5 + b.ph) * 0.35);
+    if ((confT -= dt) <= 0) { confT = rnd(10, 18); burst(); }
+    let any = false;
+    CONF.forEach((p, i) => {
+      if (!p.on) return; any = true; p.t += dt; p.y -= dt * 2.6; p.x += (p.vx + Math.sin(p.t * p.w) * 0.8) * dt; p.z += p.vz * dt; p.rx += dt * p.w; p.ry += dt * p.w * 0.7;
+      if (p.y < 1.2 || p.t > 9) { p.on = false; conf.setMatrixAt(i, M4.makeScale(0, 0, 0)); return; }
+      M4.compose(V.set(p.x, p.y, p.z), Q.setFromEuler(E3.set(p.rx, p.ry, 0)), SC.set(1, 1, 1)); conf.setMatrixAt(i, M4);
+    });
+    if (any) conf.instanceMatrix.needsUpdate = true;
+  }
+  // ---- using things: E at a mannequin (buy and wear), the Avatar Studio kiosk, an empty unit (talk to us)
+  function nearest(bd) {
+    const p = player; if (!p || p.ch.dead) return null; const feet = p.ch.y - 3; let best = null;
+    for (const m of MALL.mannequins) { if (!m.it || Math.abs(feet - (m.y - 1)) > 2) continue; const d = Math.hypot(m.x - p.ch.x, m.z - p.ch.z); if (d < 4.2 && d < bd) { bd = d; best = { kind: 'mall', m, d }; } }
+    for (const k of MALL.kiosks) { if (Math.abs(feet - k.y) > 2) continue; const d = Math.hypot(k.x - p.ch.x, k.z - p.ch.z); if (d < k.r && d < bd) { bd = d; best = { kind: 'mall', k, d }; } }
+    return best;
+  }
+  function useText(u, k) {
+    if (u.m) { const it = u.m.it; return wearing(it) ? `<b>${esc(it.name)}</b> · <span class="dim">you're wearing it</span>` : `${k} Buy &amp; wear <b>${esc(it.name)}</b> · ${it.price ? '$' + it.price : 'free (yours)'}`; }
+    if (u.k.kind === 'studio') return `${k} Design your own outfit in the Grug Avatar Studio`;
+    return `${k} Want your store here? Talk to us`;
+  }
+  function openLink(url) { if (pointerLocked) document.exitPointerLock(); const w = window.open(url, '_blank', 'noopener'); if (w === null) location.href = url; else msg('Opened in a new tab', 2); }
+  function use(u) {
+    if (u.m) { buyWear(u.m.it); return; }
+    if (u.k.kind === 'studio') { openLink(GRUG + '/character/?view=paint'); return; }
+    if (window.GrugSocial) { if (pointerLocked) document.exitPointerLock(); GrugSocial.popup({ onClose: () => uiFree() }); uiFree(); }
+  }
+  addEventListener('grug:outfits', () => { if (stocking) stocking.then(restockFits); });
+  return { build, update, nearest, useText, use, lookFor, putOn, buyWear, stock, dressCrowd, KIMI, openLink, get items() { return items; } };
+})();
+
 // ---------------------------------------------------------------- start
 buildCity();
 Social.build();
+Mall.build();
 applyGfx();
 { const zf = zfightCheck(); if (zf.length) console.warn(`zfightCheck: ${zf.length} pairs of parts share a face`, zf.slice(0, 8)); window.ZF = zf; }
 for (const [k, x, z, yaw] of CAR_SPOTS) makeCar(k, x, z, yaw);

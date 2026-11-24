@@ -3882,17 +3882,18 @@ for (const id of ['shop', 'pack', 'chestOpen']) $(id).addEventListener('mousedow
 //  Saved with the game. Lower settings = less for the GPU to draw.
 // =====================================================================
 const GFX_OPT = {
-  res: [0.35, 0.5, 0.75, 1],                     // share of the screen's real pixels the 3D view renders at
+  res: [0.35, 0.45, 0.6, 0.75, 1],              // share of the screen's real pixels the 3D view renders at (75% to start; drops on its own, to 45% at most, when frames get slow)
   draw: { Near: 380, Medium: 750, Far: 1500 },   // how far you can see (fog closes in, everything past it isn't drawn)
   shadows: ['Off', 'Low', 'High'],
   lod: { Low: { anim: 70, vis: 170, car: 220, tags: 0.6 }, Medium: { anim: 170, vis: 320, car: 420, tags: 1 }, High: { anim: 300, vis: 480, car: 600, tags: 1.2 } },
 };
-const GFX = Object.assign({ res: 0.5, draw: 'Medium', shadows: 'Low', lod: 'Medium', fps: false }, (() => { try { return JSON.parse(localStorage.getItem('grug.grug-kingdom.gfx') || 'null') || {}; } catch (_) { return {}; } })());
-if (!GFX_OPT.res.includes(GFX.res)) GFX.res = 0.5; if (!GFX_OPT.draw[GFX.draw]) GFX.draw = 'Medium'; if (!GFX_OPT.shadows.includes(GFX.shadows)) GFX.shadows = 'Low'; if (!GFX_OPT.lod[GFX.lod]) GFX.lod = 'Medium';
+const GFX = Object.assign({ res: 0.75, draw: 'Medium', shadows: 'Low', lod: 'Medium', fps: false }, (() => { try { return JSON.parse(localStorage.getItem('grug.grug-kingdom.gfx') || 'null') || {}; } catch (_) { return {}; } })());
+if (GFX.v !== 2) { GFX.v = 2; GFX.res = 0.75; }   // settings saved before 75% became the default start at 75%
+if (!GFX_OPT.res.includes(GFX.res)) GFX.res = 0.75; if (!GFX_OPT.draw[GFX.draw]) GFX.draw = 'Medium'; if (!GFX_OPT.shadows.includes(GFX.shadows)) GFX.shadows = 'Low'; if (!GFX_OPT.lod[GFX.lod]) GFX.lod = 'Medium';
 let LOD = GFX_OPT.lod[GFX.lod];
 function applyGfx() {
   try { localStorage.setItem('grug.grug-kingdom.gfx', JSON.stringify(GFX)); } catch (_) { }
-  renderer.setPixelRatio(Math.max(0.25, (window.devicePixelRatio || 1) * GFX.res)); resize();
+  setRes(GFX.res);
   const D = GFX_OPT.draw[GFX.draw]; scene.fog.near = D * 0.3; scene.fog.far = D; camera.far = D + 60; camera.updateProjectionMatrix();
   sky.scale.setScalar(Math.min(1, (camera.far * 0.92) / 2300));   // the sky sits just inside the far plane
   const sh = GFX.shadows; sun.castShadow = sh !== 'Off'; const n = sh === 'High' ? 2048 : 1024;
@@ -3900,7 +3901,7 @@ function applyGfx() {
   Object.assign(sun.shadow.camera, sh === 'High' ? { left: -110, right: 110, top: 110, bottom: -110 } : { left: -70, right: 70, top: 70, bottom: -70 }); sun.shadow.camera.updateProjectionMatrix();
   { const L = GFX_OPT.lod[GFX.lod]; LOD = { tags: L.tags, vis: Math.min(L.vis, D * 0.45), car: Math.min(L.car, D * 0.6) }; LOD.anim = Math.min(L.anim, LOD.vis); }   // nobody drawn past the fog
   for (const b of Bills.list) b.max = Math.min(b.max0 || (b.max0 = b.max), D * 0.5);
-  $('gRes').textContent = `Resolution: ${Math.round(GFX.res * 100)}%`; $('gDraw').textContent = `Draw distance: ${GFX.draw}`;
+  resLabel(); $('gDraw').textContent = `Draw distance: ${GFX.draw}`;
   $('gShadow').textContent = `Shadows: ${GFX.shadows}`; $('gLod').textContent = `Detail (LOD): ${GFX.lod}`; $('gFps').textContent = `Show FPS: ${GFX.fps ? 'On' : 'Off'}`;
   $('fps').style.display = GFX.fps ? 'block' : 'none';
 }
@@ -3910,6 +3911,18 @@ $('gDraw').addEventListener('click', () => { GFX.draw = cycle(Object.keys(GFX_OP
 $('gShadow').addEventListener('click', () => { GFX.shadows = cycle(GFX_OPT.shadows, GFX.shadows); applyGfx(); });
 $('gLod').addEventListener('click', () => { GFX.lod = cycle(Object.keys(GFX_OPT.lod), GFX.lod); applyGfx(); });
 $('gFps').addEventListener('click', () => { GFX.fps = !GFX.fps; applyGfx(); });
+// the 3D view's resolution: what you picked, unless frames are slow; then it steps down (never under 45%) and creeps back up when there's room
+let resNow = 0, resSlow = 0, resFast = 0, resDrop = -1e9, resLast = 0, fpsAvg = 60;
+function setRes(r) { resNow = r; renderer.setPixelRatio(Math.max(0.25, (window.devicePixelRatio || 1) * r)); resize(); resLabel(); }
+function resLabel() { $('gRes').textContent = `Resolution: ${Math.round(GFX.res * 100)}%` + (resNow < GFX.res - 0.001 ? ` (${Math.round(resNow * 100)}% for now: frames were slow)` : ''); }
+function autoRes() {
+  const now = performance.now(), dt = (now - (resLast || now)) / 1000; resLast = now;
+  if (!dt || dt > 0.3 || document.hidden) return;   // a stall or a hidden tab says nothing about the frame rate
+  fpsAvg += (1 / dt - fpsAvg) * Math.min(1, dt * 1.5);
+  if (fpsAvg < 40) { resSlow += dt; resFast = 0; } else if (fpsAvg > 56) { resFast += dt; resSlow = Math.max(0, resSlow - dt); } else { resSlow = Math.max(0, resSlow - dt * 0.5); resFast = 0; }
+  if (resSlow > 2.5 && resNow > 0.451 && GFX.res > 0.451) { resSlow = 0; resDrop = now; setRes(Math.max(0.45, Math.round((resNow - 0.1) * 100) / 100)); }
+  else if (resFast > 10 && resNow < GFX.res - 0.001 && now - resDrop > 30000) { resFast = 0; setRes(Math.min(GFX.res, Math.round((resNow + 0.05) * 100) / 100)); }
+}
 let fpsN = 0, fpsT = 0;
 function updateFps(dt) { if (!GFX.fps) return; fpsN++; if ((fpsT += dt) >= 0.5) { $('fps').textContent = `${Math.round(fpsN / fpsT)} FPS · ${renderer.info.render.calls} draws`; fpsN = 0; fpsT = 0; } }
 
@@ -3985,7 +3998,7 @@ function frame(now) {
   const dt = Math.min((now - last) / 1000, 0.1); last = now;
   if (player) { touchHold(); playerInput(dt); }
   sim(dt);
-  updateFps(dt); updateDebris(dt); updateTracers(dt); FX.update(dt); Pts.update(dt); DmgNum.update(dt); Feed.update(dt); updateAnnounce(dt); updateGates(dt); updateChest(dt);
+  updateFps(dt); autoRes(); updateDebris(dt); updateTracers(dt); FX.update(dt); Pts.update(dt); DmgNum.update(dt); Feed.update(dt); updateAnnounce(dt); updateGates(dt); updateChest(dt);
   for (const b of bots) { const v = nearCam(b.ch, LOD.vis); b.rig.g.visible = v; if (!v) continue; if (nearCam(b.ch, LOD.anim)) animateRig(b, dt); else { b.rig.g.position.set(b.ch.x, b.ch.y - 3, b.ch.z); b.rig.g.rotation.y = b.ch.faceYaw; } }
   drawMobs(dt);
   if ((smokeT -= dt) <= 0) {
