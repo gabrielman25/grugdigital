@@ -82,23 +82,20 @@
   #obj .op { width: 300px; height: 112px; padding: 4px; box-sizing: border-box; margin: 0 auto; } #obj .op img { display: block; width: 100%; height: 100%; object-fit: cover; image-rendering: auto; }
   #obj .os { font-size: 17px; margin-top: 5px; max-width: 520px; white-space: normal; letter-spacing: .3px; } #obj.pop .op { animation: bump .35s ease-out; }
   #obj.small .op { display: none; }
-  /* the magic menu (hold the bubble): an action select like Block Tales' battle menu, top left for controllers and touch */
-  #magic { position: fixed; left: 8px; top: 66px; z-index: 6; display: none; } #magic.on { display: block; }
-  #magic .mh { font-size: 12px; color: #d8c8ff; margin: 0 0 4px 2px; } #magic .mh b { color: #9fd8ff; } #magic .mh i { font-style: normal; color: #ffe36b; }
-  #magic .mrow { display: flex; gap: 6px; padding: 6px; }
-  .mc { width: 70px; text-align: center; cursor: pointer; padding: 0; background: none; border: 0; color: #fff; font: bold 11px Arial, sans-serif; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
-  .mc .ml { display: block; height: 14px; white-space: nowrap; overflow: hidden; }
-  .mc .mi { display: grid; place-items: center; width: 62px; height: 62px; margin: 2px auto; border: 2px solid rgba(160, 160, 160, .55); background: rgba(60, 60, 60, .55); box-sizing: border-box; }
-  .mc .mk { display: block; font-size: 10px; color: #ffe36b; } .mc.sel .mi, .mc:hover .mi { border-color: #fff; background: rgba(110, 110, 110, .7); }
+  /* the magic ring (hold the bubble): four spells around you, one per arrow */
+  #magic { position: fixed; left: 0; top: 0; width: 0; height: 0; z-index: 6; display: none; pointer-events: none; --r: 100px; } #magic.on { display: block; }
+  #magic::before { content: ''; position: absolute; left: calc(-1 * var(--r)); top: calc(-1 * var(--r)); width: calc(2 * var(--r)); height: calc(2 * var(--r)); border-radius: 50%; border: 2px dashed rgba(255, 255, 255, .4); box-sizing: border-box; animation: ringIn .14s ease-out; }
+  #magic > .bt { background: none; border: 0; } #magic .mrow { position: relative; } #magic .md { display: none; }
+  @keyframes ringIn { from { opacity: 0; transform: scale(.6); } }
+  .mc { width: 76px; text-align: center; cursor: pointer; padding: 0; background: none; border: 0; color: #fff; font: bold 11px Arial, sans-serif; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+  #magic .mc { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); pointer-events: auto; animation: cardIn .14s ease-out; }
+  @keyframes cardIn { from { opacity: 0; transform: translate(-50%, -50%) scale(.5); } }
+  #magic .mc.d-up { top: calc(-1 * var(--r)); } #magic .mc.d-down { top: var(--r); } #magic .mc.d-left { left: calc(-1 * var(--r)); } #magic .mc.d-right { left: var(--r); }
+  .mc .ml { display: block; height: 14px; white-space: nowrap; overflow: visible; }
+  .mc .mi { display: grid; place-items: center; width: 52px; height: 52px; margin: 2px auto; border: 2px solid rgba(160, 160, 160, .55); background: rgba(60, 60, 60, .75); box-sizing: border-box; }
+  .mc .mk { display: block; font-size: 11px; color: #ffe36b; white-space: nowrap; } .mc.sel .mi, .mc:hover .mi { border-color: #fff; background: rgba(110, 110, 110, .8); }
   .mc.no { opacity: .45; } .mc.flash .mi { animation: bump .25s ease-out; }
-  #magic .md { margin-top: 6px; padding: 6px 10px; max-width: 470px; } #magic .md b { display: block; font-size: 15px; margin-bottom: 2px; } #magic .md span { font-size: 12px; color: #ddd; }
   body.magic #quests { display: none; }
-  /* mouse: the same bar, condensed and pinned just under the cursor while the bubble is up */
-  #magic.cur { z-index: 9; } #magic.cur .mrow { gap: 3px; padding: 4px; } #magic.cur .mc { width: 44px; } #magic.cur .mc .ml { display: none; }
-  #magic.cur .mc .mi { width: 42px; height: 42px; margin: 0 auto; } #magic.cur .mc .mi .ico { width: 30px !important; height: 30px !important; }
-  #magic.cur .mc .mk { font-size: 10px; margin-top: 1px; } #magic.cur .md { margin-top: 3px; padding: 3px 7px; max-width: none; text-align: center; white-space: nowrap; }
-  #magic.cur .md b { font-size: 12px; margin: 0; } #magic.cur .md span { display: none; }
-  #magic.cur::before { content: ''; position: absolute; left: var(--ax, 50%); top: -9px; margin-left: -8px; border: 8px solid transparent; border-top: 0; border-bottom-color: rgba(160, 160, 160, .75); }
   /* combo counter (right) */
   #combo { position: fixed; right: 26px; top: 38%; text-align: right; pointer-events: none; display: none; z-index: 2; }
   #combo b { display: block; font-size: 46px; line-height: 44px; color: #ffe36b; } #combo span { font-size: 15px; letter-spacing: 2px; } #combo small { display: block; font-size: 12px; color: #9fd8ff; }
@@ -295,7 +292,7 @@
     #announce { top: 34%; white-space: normal; width: 92vw; } #announce b { font-size: 22px; } #announce small { font-size: 12px; }
     #pts { left: 50%; top: 22%; transform: translateX(-50%); text-align: center; } #ptsList .pr { transform-origin: center; }
     #combo { right: 10px; top: 30%; } #combo b { font-size: 32px; line-height: 32px; }
-    #boss { top: 64px; } #obj .op { width: 200px; height: 74px; } #obj .os { font-size: 13px; max-width: 70vw; } #magic { top: 46px; } .mc { width: 56px; } .mc .mi { width: 50px; height: 50px; } .mc .mi .ico { width: 32px !important; height: 32px !important; } #wallet { width: 170px; }
+    #boss { top: 64px; } #obj .op { width: 200px; height: 74px; } #obj .os { font-size: 13px; max-width: 70vw; }  .mc .mi { width: 46px; height: 46px; } .mc .mi .ico { width: 32px !important; height: 32px !important; } #wallet { width: 170px; }
   }
 </style>
 </head>
@@ -337,12 +334,11 @@
 <div id="shop" class="panel ol"><div class="hd"><b id="shopT">Shop</b><span id="shopG"></span><button id="shopX">Close</button></div><div class="sub" id="shopS"></div><div id="shopL"></div></div>
 <div id="char" class="panel ol"><div class="hd"><b>Character</b><span id="charP"></span><button id="charX">Close</button></div><div class="sub" id="charS"></div><div class="st4" id="charStats"></div><div class="mv" id="charMoves"></div></div>
 <div id="help" class="panel ol"><div class="hd"><b>Help</b><button id="helpX">Close</button></div>
-  <div class="touchOnly"><b>Touch:</b> left thumb anywhere on the lower left moves (up/down walks into and out of the level) · the buttons on the right attack, jump, shoot, dash and guard · hold <b>Guard</b> and tap an attack for magic</div>
-  <div class="mouseOnly"><b>Move:</b> A / D (or ← →) left and right · W / S (or ↑ ↓) into and out of the level</div>
-  <div class="mouseOnly"><b>Jump:</b> Space or C · press again in the air to double jump · <b>hold</b> after the double jump to sword-spin glide · tap for a short hop</div>
-  <div class="mouseOnly"><b>Light attack:</b> left click, Q, Z or J (chain 4) · <b>Heavy:</b> E, X or K: a launcher · <b>Slingshot:</b> 1, V or L (juggles!)</div>
-  <div class="mouseOnly"><b>Dash:</b> Shift (standing still dashes the way you face; press again mid-dash to chain) · <b>Bubble:</b> hold right-click (or U), standing or walking</div>
-  <div class="mouseOnly"><b>Magic:</b> holding the bubble opens the magic bar under your cursor: slide down onto a card and let go, or keep holding and left-click or press Q (bolt), E (splash) or Space (magic jump)</div>
+  <div class="touchOnly"><b>Touch:</b> left thumb anywhere on the lower left moves (up/down walks into and out of the level) · the buttons on the right attack, jump, shoot, dodge and guard · flick the stick twice to dash · hold <b>Guard</b> and tap an attack for magic</div>
+  <div class="mouseOnly"><b>Move:</b> ← → left and right · ↑ ↓ into and out of the level · <b>tap an arrow twice quickly</b> to dash that way, and keep holding it to run</div>
+  <div class="mouseOnly"><b>Jump:</b> C or Space · press again in the air to double jump · <b>hold</b> after the double jump to sword-spin glide · tap for a short hop</div>
+  <div class="mouseOnly"><b>Light attack:</b> X or left click (chain 4) · <b>Heavy:</b> Z: a launcher · <b>Slingshot:</b> D or V (juggles!) · <b>Dodge roll:</b> S (press again mid-roll to chain)</div>
+  <div class="mouseOnly"><b>Bubble:</b> hold A (or right-click) · <b>Magic ring:</b> while the bubble is up, four spells sit around you: ↑ Magic Leap, → Bolt, ↓ Potion, ← Splash. Press that arrow, or click one. X, Z and C still cast bolt, splash and leap with the bubble up</div>
   <div><b>Combos:</b> light ×4 · light, heavy (launch) · light ×2, heavy: pop-up · light ×3, heavy: elemental slam · in the air: light ×3, heavy for a meteor spike · after a hit lands, jump to cancel into the air and keep juggling</div>
   <div class="mouseOnly"><b>Other:</b> F talk / open / shop · 2 or R drink a potion · T or 3 switch spell · Tab character · M menu · mouse wheel zoom</div>
   <div><b>The world:</b> keep going right. Arenas lock until every foe is down; once cleared they stay clear. Walk back any time for the shops, and for things you couldn't reach the first time.</div>
@@ -382,7 +378,7 @@
         </div>
         <div class="bxh"><span><h2>Controls</h2></span></div>
         <div class="bx keys">
-          <ul><li>Move<b>WASD</b></li><li>Jump<b>Space / C</b></li><li>Attack<b>Click / Q</b></li><li>Heavy<b>E / X</b></li><li>Dash<b>Shift</b></li><li>Bubble<b>Right-click</b></li><li>Magic<b>Hold R-click</b></li><li>Slingshot<b>1</b></li><li>Potion<b>2</b></li><li>Talk<b>F</b></li></ul>
+          <ul><li>Move<b>Arrows</b></li><li>Dash<b>Tap twice</b></li><li>Attack<b>X</b></li><li>Heavy<b>Z</b></li><li>Jump<b>C</b></li><li>Bubble<b>Hold A</b></li><li>Magic<b>A + arrow</b></li><li>Dodge<b>S</b></li><li>Slingshot<b>D</b></li><li>Potion<b>2</b></li><li>Talk<b>F</b></li></ul>
           <p style="margin-top:8px">Controller works too: press <b>A</b> to play your latest file.</p>
         </div>
       </div>
@@ -421,7 +417,7 @@
   <button class="tb" id="tHeavy">Heavy</button>
   <button class="tb" id="tBow">Bow</button>
   <button class="tb" id="tGuard">Guard</button>
-  <button class="tb" id="tDash">Dash</button>
+  <button class="tb" id="tDodge">Dodge</button>
   <button class="tb" id="tUse" style="display:none">Talk</button>
   <button class="tb" id="tPot">Potion</button>
 </div>
@@ -477,7 +473,7 @@ const TUNE = {
   jumpV: 12.2 * K, magicJumpV: 14 * K,
   hangT: 35, shortHopCut: 0.7, airHops: 1, hopMul: 0.85,
   glideFall: -1.9 * K, glideSpeed: 7.6 * K, glideAccel: 16 * K,
-  rollSpeed: 9.6 * K, rollLen: 36, rollChainAt: 18, rollChainLen: 30, rollCancelAt: 24, rollIFrames: 20,
+  dashSpeed: 12 * K, dashLen: 14, tapWindow: 14, runMul: 1.55, rollSpeed: 9.6 * K, rollLen: 36, rollChainAt: 18, rollChainLen: 30, rollCancelAt: 24, rollIFrames: 20,
   depthMul: 0.85,      // walking in and out of the level is a little slower than left/right
   fallKill: -70,       // below this you've fallen out of the world
 };
@@ -1306,19 +1302,20 @@ class Actor {
 
 // ---------------------------------------------------------------- the moves (Bramble Crown)
 const MOVES = [
-  { id: 'roll', lvl: 1, name: 'Dash (chainable)', input: 'Shift' },
+  { id: 'roll', lvl: 1, name: 'Dodge Roll (chainable)', input: 'S' },
+  { id: 'dash', lvl: 1, name: 'Dash, then run', input: 'Tap an arrow twice' },
   { id: 'djump', lvl: 1, name: 'Double Jump', input: 'Jump again in the air' },
   { id: 'glidem', lvl: 1, name: 'Sword-Spin Glide', input: 'Hold jump after the double jump' },
   { id: 'basic', lvl: 1, name: 'Basic Combo', input: 'Light ×4' },
   { id: 'launch', lvl: 1, name: 'Launcher', input: 'Heavy (or light, heavy)' },
   { id: 'air', lvl: 1, name: 'Air Combo / Juggle', input: 'Jump, light ×3' },
   { id: 'jcancel', lvl: 1, name: 'Jump Cancel', input: 'Jump after a hit lands' },
-  { id: 'proj', lvl: 1, name: 'Magic Bolt', input: 'Hold right-click + click' },
-  { id: 'mjump', lvl: 1, name: 'Magic Jump', input: 'Hold right-click + Space' },
-  { id: 'splash', lvl: 1, name: 'Magic Splash', input: 'Hold right-click + E' },
+  { id: 'proj', lvl: 1, name: 'Magic Bolt', input: 'Hold A + X, or A + →' },
+  { id: 'mjump', lvl: 1, name: 'Magic Jump', input: 'Hold A + C, or A + ↑' },
+  { id: 'splash', lvl: 1, name: 'Magic Splash', input: 'Hold A + Z, or A + ←' },
   { id: 'bow', lvl: 1, name: 'Slingshot (juggles!)', input: 'L / V / 1, ground or air' },
   { id: 'popup', lvl: 2, name: 'Pop-Up', input: 'Light, light, heavy' },
-  { id: 'aproj', lvl: 3, name: 'Air Bolt', input: 'In the air: right-click + click' },
+  { id: 'aproj', lvl: 3, name: 'Air Bolt', input: 'In the air: A + X' },
   { id: 'spike', lvl: 3, name: 'Meteor Spike', input: 'In the air: heavy' },
   { id: 'infuse', lvl: 4, name: 'Elemental Slam', input: 'Light ×3, heavy' },
 ];
@@ -1411,8 +1408,9 @@ class Player extends Actor {
       if (this.gr && this.state !== 'knock') { this.alive = false; this.setState('dead'); Game.onPlayerDead(); } else if (this.state !== 'knock') { this.setState('knock'); this.vy = 4 * K; this.gr = false; }
     }
     if (!this.controlLocked) for (const a of ['light', 'heavy', 'jump', 'bow']) if (Input.pressed(a)) this.buf = { a, t: 14, blk: Input.down('block') };
-    // Shift is only the dash: kept for a few frames, so a press just before landing or as an attack ends still goes
-    if (!this.controlLocked && Input.pressed('dash')) this.dashQ = 10; else if (this.dashQ > 0) this.dashQ--;
+    // S is the dodge roll: kept for a few frames, so a press just before landing or as an attack ends still goes
+    if (!this.controlLocked && Input.pressed('dodge')) this.dashQ = 10; else if (this.dashQ > 0) this.dashQ--;
+    this.tapCheck();
     if (this.buf && --this.buf.t <= 0) this.buf = null;
     if (this.hitstop > 0) { this.hitstop--; return; }
     this.st++; this.flipT++;
@@ -1430,6 +1428,7 @@ class Player extends Actor {
       case 'jump': this.airFree(); break;
       case 'glide': this.glideLogic(); break;
       case 'roll': this.rollLogic(); break;
+      case 'dash': this.dashLogic(); break;
       case 'attack': this.attackLogic(gr); break;
       case 'cast': this.castLogic(gr); break;
       case 'bow': this.bowLogic(gr); break;
@@ -1445,7 +1444,8 @@ class Player extends Actor {
   groundFree() {
     if (this.controlLocked) { this.vx = this.vz = 0; return; }
     if (this.dashQ > 0) return this.startRoll();
-    if (Input.down('block')) { this.setState('block'); this.vx = this.vz = 0; this.blockLogic(); return; }
+    if (this.dashReq) { const d = this.dashReq; this.dashReq = null; return this.startDash(d.dx, d.dz); }
+    if (Input.down('block')) { this.setState('block'); this.vx = this.vz = 0; this.run = 0; this.blockLogic(); return; }
     const b = this.buf;
     if (b) {
       this.buf = null;
@@ -1454,14 +1454,15 @@ class Player extends Actor {
       if (b.a === 'jump') return b.blk ? this.tryMagicJump() : this.jump();
       if (b.a === 'bow') return this.startBow();
     }
-    const mv = moveVec(), sp = this.speed * (this.inWater ? 0.7 : 1);
+    const mv = moveVec(); if (this.run && sgn(mv.x) !== this.run) this.run = 0;   // after a dash you keep running while you hold that way
+    const sp = this.speed * (this.inWater ? 0.7 : 1) * (this.run ? TUNE.runMul : 1);
     this.vx = mv.x * sp; this.vz = mv.z * sp * TUNE.depthMul;
     if (mv.x) this.facing = sgn(mv.x);
     const moving = Math.abs(mv.x) + Math.abs(mv.z) > 0.05;
     if (moving && this.state !== 'walk') this.setState('walk'); else if (!moving && this.state !== 'idle') this.setState('idle');
   }
   blockLogic() {
-    this.vx = this.vz = 0; const mx = Input.moveX(); if (mx) this.facing = sgn(mx);
+    this.vx = this.vz = 0; const mx = Magic.open ? 0 : Input.moveX(); if (mx) this.facing = sgn(mx);   // with the ring up the arrows pick spells, not facing
     if (this.dashQ > 0) return this.startRoll();
     const b = this.buf;
     if (b) { this.buf = null; if (b.a === 'light') return this.tryCast('proj'); if (b.a === 'heavy') return this.tryCast('splash'); if (b.a === 'jump') return this.tryMagicJump(); if (b.a === 'bow') return this.startBow(); }
@@ -1500,6 +1501,32 @@ class Player extends Actor {
     if (Math.abs(this.rollDx) > 0.3) this.facing = sgn(this.rollDx);
     this.setState('roll'); this.invuln = Math.max(this.invuln, TUNE.rollIFrames); this.buf = null; this.dashQ = 0;
     Snd.play('swing'); FX.dust(this.x, this.y, this.z, 5);
+  }
+  // double-tap an arrow (or the d-pad / stick) to dash that way: counted from letting go of the first tap
+  tapCheck() {
+    if (this.dashReq && --this.dashReq.t <= 0) this.dashReq = null;
+    if (this.tapT > 0) this.tapT--;
+    if (this.controlLocked || Magic.open) { this.tapX = this.tapZ = 0; this.tapT = 0; return; }
+    const mx = Input.moveX(), mz = Input.moveZ(), sx = mx > 0.6 ? 1 : mx < -0.6 ? -1 : 0, sz = mz > 0.6 ? 1 : mz < -0.6 ? -1 : 0;
+    const edge = (axis, v, prev) => {
+      if (v === prev) return;
+      if (v) { if (this.tapDir === axis + v && this.tapT > 0) { this.dashReq = { dx: axis === 'x' ? v : 0, dz: axis === 'z' ? v : 0, t: 8 }; this.tapT = 0; } }
+      else { this.tapDir = axis + prev; this.tapT = TUNE.tapWindow; }
+    };
+    edge('x', sx, this.tapX || 0); edge('z', sz, this.tapZ || 0); this.tapX = sx; this.tapZ = sz;
+  }
+  startDash(dx, dz) {
+    this.dashDx = dx; this.dashDz = dz; if (dx) this.facing = sgn(dx); this.run = 0;
+    this.setState('dash'); Snd.play('swing'); FX.dust(this.x, this.y, this.z, 4, 0.9);
+  }
+  dashLogic() {
+    const t = this.st, sp = TUNE.dashSpeed * (t < 8 ? 1 : Math.max(0.55, 1 - (t - 8) / 10));
+    this.vx = this.dashDx * sp; this.vz = this.dashDz * sp * TUNE.depthMul;
+    if (t % 3 === 0) FX.dust(this.x, this.y, this.z, 1, 0.6);
+    if (!this.gr && t > 3) { this.setState('jump'); this.jumpT = 99; this.hangQ = false; return; }
+    if (this.dashQ > 0) return this.startRoll();
+    if (t >= 4 && (this.buf || Input.down('block'))) { this.setState('idle'); return this.groundFree(); }   // attack, jump or guard straight out of it
+    if (t >= TUNE.dashLen) { this.run = this.dashDx; this.setState(this.dashDx || this.dashDz ? 'walk' : 'idle'); }
   }
   rollLogic() {
     const t = this.st, end = this.rollChained ? TUNE.rollChainLen : TUNE.rollLen;
@@ -1714,8 +1741,8 @@ class Player extends Actor {
   animate(dt) {
     const R = this.R, j = { rs: REST_ARM, ls: 0, rh: 0, lh: 0, rz: 0, lz: 0, lean: 0, spin: 0, roll: 0, drop: 0, yaw: 0, squash: 1 }; let k = 1 - Math.exp(-18 * dt);
     const st = this.state, spd = Math.hypot(this.vx, this.vz);
-    this.walkTurn = st === 'walk' || st === 'jump' || st === 'glide' || st === 'land' || st === 'roll';
-    this.yawDir = st === 'roll' ? [this.rollDx, this.rollDz] : null;
+    this.walkTurn = st === 'walk' || st === 'jump' || st === 'glide' || st === 'land' || st === 'roll' || st === 'dash';
+    this.yawDir = st === 'roll' ? [this.rollDx, this.rollDz] : st === 'dash' ? [this.dashDx, this.dashDz] : null;
     let swordSpin = 0, trail = false, wcol = 0xffffff;
     switch (st) {
       case 'idle': case 'talk': { const b = Math.sin(G.time * 0.05) * 0.04; j.ls = b; j.rs = REST_ARM + b; break; }
@@ -1726,6 +1753,7 @@ class Player extends Actor {
         break;
       }
       case 'glide': j.rs = P; j.ls = P * 0.55; j.lz = -0.5; j.rh = 0.25; j.lh = -0.2; swordSpin = this.glideSpin; trail = true; break;
+      case 'dash': { j.lean = 0.32; j.rs = j.ls = -0.95; j.rz = 0.15; j.lz = -0.15; j.rh = 0.5; j.lh = -0.6; k = 1 - Math.exp(-22 * dt); break; }
       case 'roll': { const end = this.rollChained ? TUNE.rollChainLen : TUNE.rollLen, q = clamp(this.st / (end * 0.8), 0, 1); j.spin = -P * 2 * smooth(q); j.drop = -1.3 * Math.sin(P * q); j.rs = j.ls = 2.4; j.rh = j.lh = -1.3; k = 1; break; }
       case 'land': j.squash = 0.86; j.rh = -0.3; j.lh = 0.3; j.ls = -0.2; k = 1 - Math.exp(-30 * dt); break;
       case 'block': case 'blockstun': j.ls = P * 0.62; j.lz = -0.35; j.rs = REST_ARM + 0.3; j.rz = 0.2; j.lean = st === 'blockstun' ? -0.3 : -0.05; j.rh = -0.2; j.lh = 0.2; break;
@@ -1758,7 +1786,7 @@ class Player extends Actor {
     poseRig(R, j, k);
     this.sword.rotation.y = swordSpin;
     this.bow.visible = st === 'bow';
-    this.faceYaw(st === 'roll' ? 30 : 14); this.place();
+    this.faceYaw(st === 'roll' || st === 'dash' ? 30 : 14); this.place();
     flashRig(R, this.flash > 0);
     R.g.visible = !(this.mercy > 0 && Math.floor(this.mercy / 4) % 2 === 0);
     // the sword trail
@@ -2708,14 +2736,15 @@ function gainXP(n) {
 
 // ---------------------------------------------------------------- input: keyboard + mouse + gamepad + touch (Bramble Crown's Input, with the mouse added)
 const KEYMAP = {
-  left: ['ArrowLeft', 'KeyA'], right: ['ArrowRight', 'KeyD'], up: ['ArrowUp', 'KeyW'], down: ['ArrowDown', 'KeyS'],
-  // Q / E sit under WASD fingers; Z / X / C and J / K stay for the classic layouts
-  light: ['Mouse0', 'KeyQ', 'KeyJ', 'KeyZ'], heavy: ['KeyE', 'KeyK', 'KeyX'], jump: ['Space', 'KeyC'], bow: ['KeyL', 'KeyV', 'Digit1'],
-  dash: ['ShiftLeft', 'ShiftRight'], block: ['Mouse2', 'KeyU'], use: ['KeyF', 'Enter'], potion: ['Digit2', 'KeyR'], spell: ['KeyT', 'Digit3'],
+  // played on the arrow keys: ← → move, ↑ ↓ walk into and out of the level, tap an arrow twice quickly to dash that way.
+  // Left hand: X light, Z heavy, C jump, A bubble + magic ring, S dodge, D / V slingshot. No Shift anywhere (sticky keys).
+  left: ['ArrowLeft'], right: ['ArrowRight'], up: ['ArrowUp'], down: ['ArrowDown'],
+  light: ['KeyX', 'KeyJ', 'Mouse0'], heavy: ['KeyZ', 'KeyK'], jump: ['KeyC', 'Space'], bow: ['KeyD', 'KeyV', 'KeyL', 'Digit1'],
+  block: ['KeyA', 'Mouse2', 'KeyU'], dodge: ['KeyS'], use: ['KeyF', 'Enter'], potion: ['Digit2', 'KeyR'], spell: ['KeyT', 'Digit3'],
 };
-// a standard controller: A jump, X attack, Y heavy, B slingshot, LB bubble (and the magic menu), LT dash, RB talk/open, RT potion, View switch spell, Start menu
-const PADMAP = { 0: ['jump'], 1: ['bow'], 2: ['light'], 3: ['heavy'], 4: ['block'], 5: ['use'], 6: ['dash'], 7: ['potion'], 8: ['spell'], 9: ['menu'], 12: ['up'], 13: ['down'], 14: ['left'], 15: ['right'] };
-const MENU_PAD = new Set(['jump', 'bow', 'light', 'heavy', 'potion', 'spell', 'up', 'down', 'left', 'right']);   // while the magic menu is up, Magic reads these buttons itself
+// a standard controller: A jump, X attack, Y heavy, B slingshot, LB bubble (and the magic ring), LT dodge (double-tap a direction to dash), RB talk/open, RT potion, View switch spell, Start menu
+const PADMAP = { 0: ['jump'], 1: ['bow'], 2: ['light'], 3: ['heavy'], 4: ['block'], 5: ['use'], 6: ['dodge'], 7: ['potion'], 8: ['spell'], 9: ['menu'], 12: ['up'], 13: ['down'], 14: ['left'], 15: ['right'] };
+const MENU_PAD = new Set(['up', 'down', 'left', 'right']);   // while the magic ring is up the d-pad picks from it (the face buttons still cast)
 let touchMode = window.matchMedia && matchMedia('(pointer: coarse)').matches;
 const Input = {
   held: new Set(), latched: new Set(), mx: innerWidth / 2, my: innerHeight / 2, mouseGuard: false, mouseSeen: false, padHeld: new Set(), padPrev: new Set(), padLatched: new Set(), touchHeld: new Set(), touchLatched: new Set(), ax: 0, az: 0, tx: 0, tz: 0, raw: [], rawPrev: [], rawHit: new Set(), dev: touchMode ? 'touch' : 'kb',
@@ -3047,90 +3076,79 @@ const UI = {
     const A = Arena.active, pad = Input.dev === 'pad'; let hint;
     if (!p.alive) hint = 'Knocked out!';
     else if (p.mortal) hint = 'MORTAL DAMAGE! Drink a potion before your HP rolls down to 0!';
-    else if (A && A.boss) hint = pad ? 'LT dashes through his attacks · A jumps the shockwave rings' : 'Shift dashes through his attacks · jump the shockwave rings';
+    else if (A && A.boss) hint = pad ? 'LT dodges through his attacks · A jumps the shockwave rings' : 'S dodges through his attacks · C jumps the shockwave rings';
     else if (A) hint = `Clear the arena · wave ${Math.min(Arena.wave + 1, A.waves.length)} of ${A.waves.length} · ${G.enemies.filter(e => e.alive && e.home && e.home.arena === A).length} foes left`;
     else if (Use.near) hint = (pad ? 'RB' : touchMode ? 'Tap' : 'F') + ': ' + (Use.near.kind === 'npc' ? (Use.near.n.id === 'pip' && !Save.pip ? 'ask Pip to join you' : (Use.near.n.shop ? 'shop with ' : 'talk to ') + Use.near.n.name) : Use.near.kind === 'chest' ? 'open the chest' : 'unlock the door');
     else if (touchMode && !pad) hint = 'Hold Guard for the bubble and magic · Attack ×3 then Heavy launches';
     else if (pad) hint = 'A jump · X attack · Y heavy · B slingshot · hold LB for the bubble and magic · RT potion · RB talk';
-    else hint = 'A/D move · W/S in and out · Space jump · click or Q attack · E heavy · Shift dash · hold right-click: bubble + magic · Tab character';
+    else hint = 'Arrows move (tap twice to dash) · X attack · Z heavy · C jump · S dodge · hold A: bubble + magic ring · Tab character';
     if ($('hint').textContent !== hint) $('hint').textContent = hint;
     PadKeys.update();
   },
 };
 
-// ---------------------------------------------------------------- the magic bar: hold the bubble (right-click, U, LB or the Guard button) and it opens.
-// With the mouse it opens condensed, just under the cursor, and stays put while the bubble is up: slide down onto a card and let go (or left-click it) to use it.
-// With a controller or touch it opens top left like Block Tales' action select.
-// Click a card, or use its key. With a controller the buttons change while it's open: X bolt, Y splash, A uses the picked card,
-// B arrows, d-pad up potion, d-pad down switch spell, d-pad left/right pick a card.
+// ---------------------------------------------------------------- the magic ring: hold the bubble (A, right-click, LB or the Guard button) and four
+// spells sit in a ring around you, one per arrow: ↑ Magic Leap, → Bolt, ↓ Potion, ← Splash. Press that arrow (or d-pad / flick the stick) to use it.
+// The cards can be clicked or tapped too, and letting go of right-click over one uses it.
 const Magic = {
-  open: false, sel: 0, built: false, list: [],
+  open: false, sel: -1, built: false, list: [], stick: '',
   items() {
-    const E = ELEM[Save.elem], p = G.player, ni = (Save.elems.indexOf(Save.elem) + 1) % Save.elems.length, next = ELEM[Save.elems[ni]];
+    const E = ELEM[Save.elem], p = G.player;
     return [
-      { id: 'bolt', key: 'Q', pad: 'X', act: 'light', name: E.name + ' Bolt', icon: Save.elem, cost: '12 SP', ok: p.mana >= 12, desc: `Throw a bolt of ${E.name.toLowerCase()} straight ahead. ${E.blurb}.` },
-      { id: 'splash', key: 'E', pad: 'Y', act: 'heavy', name: 'Splash', icon: 'splash', cost: '35 SP', ok: p.mana >= 35, desc: `A burst of ${E.name.toLowerCase()} all around you that launches every foe it touches. Stronger with more Magic.` },
-      { id: 'leap', key: 'Space', pad: 'A', act: 'jump', name: 'Magic Leap', icon: 'leap', cost: '15 SP', ok: p.mana >= 15, desc: 'A big magic jump that knocks the foes around you up into the air. Follow them up!' },
-      { id: 'arrows', key: '1', pad: 'B', act: 'bow', name: 'Slingshot', icon: 'bow', cost: 'free', ok: p.bowT <= 0, desc: 'Fling a rock. Rocks keep a launched foe hanging in the air.' },
-      { id: 'potion', key: '2', pad: '↑', run: drinkPotion, name: 'Potion', icon: 'potion', cost: Save.potions + ' left', ok: Save.potions > 0, desc: `Drink a potion: +60 HP and full SP. You have ${Save.potions} of ${Save.potCap}. You have ${Save.gold} gold: Mira and Thorne sell more.` },
-      { id: 'spell', key: 'T', pad: '↓', run: cycleElem, name: 'Switch Spell', icon: 'book', cost: Save.elems.length > 1 ? next.name : 'only one', ok: Save.elems.length > 1, desc: Save.elems.length > 1 ? `Your spells: ${Save.elems.map(e => ELEM[e].name).join(', ')}. Switch to ${next.name}.` : 'You only know Fire for now. Spell books are sold in the shops, and one is hidden in a cellar.' },
+      { id: 'leap', dir: 'up', key: '↑', act: 'jump', name: 'Magic Leap', icon: 'leap', cost: '15 SP', ok: p.mana >= 15 },
+      { id: 'bolt', dir: 'right', key: '→', act: 'light', name: E.name + ' Bolt', icon: Save.elem, cost: '12 SP', ok: p.mana >= 12 },
+      { id: 'potion', dir: 'down', key: '↓', run: drinkPotion, name: 'Potion', icon: 'potion', cost: Save.potions + ' left', ok: Save.potions > 0 },
+      { id: 'splash', dir: 'left', key: '←', act: 'heavy', name: 'Splash', icon: 'splash', cost: '35 SP', ok: p.mana >= 35 },
     ];
   },
   build() {
     const row = $('mRow'); row.innerHTML = ''; this.list = this.items();
     this.list.forEach((it, i) => {
-      const b = document.createElement('button'); b.className = 'mc'; b.type = 'button';
+      const b = document.createElement('button'); b.className = 'mc d-' + it.dir; b.type = 'button';
       b.innerHTML = `<span class="ml"></span><span class="mi"></span><span class="mk"></span>`; b.querySelector('.mi').appendChild(icon(it.icon, 40));
-      b.onmouseenter = () => { this.sel = i; this.paint(); }; b.onmouseleave = () => { if (this.cur) $('magic').classList.remove('hov'); };
-      b.onmousedown = e => { e.stopPropagation(); e.preventDefault(); if (e.button === 2) this.use(i); }; b.onclick = () => this.use(i); b.oncontextmenu = e => e.preventDefault();
+      b.onmouseenter = () => { this.sel = i; this.paint(); }; b.onmouseleave = () => { this.sel = -1; this.paint(); };
+      b.onmousedown = e => { e.stopPropagation(); e.preventDefault(); }; b.onclick = () => this.use(i); b.oncontextmenu = e => e.preventDefault();
       b.addEventListener('touchstart', e => { e.preventDefault(); this.use(i); }, { passive: false });
       row.appendChild(b);
     });
-    this.built = true; this.sig = this.list.map(it => it.icon).join() + Input.dev; this.paint();
+    this.built = true; this.sig = this.list.map(it => it.icon).join(); this.paint();
   },
   paint() {
-    const pad = Input.dev === 'pad', L = this.list = this.items();
-    if (!this.built || L.map(it => it.icon).join() + Input.dev !== this.sig) return this.build();
+    const L = this.list = this.items();
+    if (!this.built || L.map(it => it.icon).join() !== this.sig) return this.build();
     [...$('mRow').children].forEach((b, i) => {
-      const it = L[i]; b.querySelector('.ml').textContent = it.name; b.querySelector('.mk').innerHTML = this.cur ? it.key : `${pad ? `<i class="pg p${it.pad}">${it.pad}</i>` : touchMode ? '' : '[' + it.key + ']'} ${it.cost}`;
+      const it = L[i]; b.querySelector('.ml').textContent = it.name; b.querySelector('.mk').textContent = `${it.key} ${it.cost}`;
       b.classList.toggle('sel', i === this.sel); b.classList.toggle('no', !it.ok);
     });
-    const it = L[this.sel] || { name: 'Slide onto one and let go', cost: '', desc: '' }; $('mName').textContent = this.cur && it.cost ? `${it.name} · ${it.cost}` : it.name; $('mDesc').textContent = it.desc;
   },
-  pin() {
-    const m = $('magic'); m.style.left = m.style.top = '0px'; m.classList.add('on');
-    const w = m.offsetWidth, h = m.offsetHeight, x = clamp(Input.mx - w / 2, 6, innerWidth - w - 6), y = clamp(Input.my + 26, 6, innerHeight - h - 6);
-    m.style.left = x + 'px'; m.style.top = y + 'px'; m.style.setProperty('--ax', clamp(Input.mx - x, 12, w - 12) + 'px');
-  },
-  flash(id) { if (!this.open) return; const i = this.list.findIndex(it => it.id === id); if (i < 0) return; this.sel = i; const b = $('mRow').children[i]; if (b) { b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash'); } this.paint(); },
-  use(i) { const it = this.list[i]; if (!it) return; this.sel = i; const p = G.player; if (it.run) it.run(); else if (p && !p.controlLocked) { p.buf = { a: it.act, t: 14, blk: true }; this.flash(it.id); } Snd.play('select'); },
-  key(code) {   // keyboard while it's open: ←/→ pick, Enter uses; the cast keys go through as normal (with guard held they cast) and light up their card
-    if (code === 'Enter') { this.use(this.sel); Input.latched.delete(code); return true; }
-    const map = { KeyQ: 'bolt', KeyJ: 'bolt', KeyZ: 'bolt', KeyE: 'splash', KeyK: 'splash', KeyX: 'splash', Space: 'leap', KeyC: 'leap', KeyL: 'arrows', KeyV: 'arrows', Digit1: 'arrows' };
+  flash(id) { if (!this.open) return; const i = this.list.findIndex(it => it.id === id); if (i < 0) return; const b = $('mRow').children[i]; if (b) { b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash'); } this.paint(); },
+  use(i) { const it = this.list[i]; if (!it) return; const p = G.player; if (it.run) { it.run(); this.flash(it.id); } else if (p && !p.controlLocked) { p.buf = { a: it.act, t: 14, blk: true }; this.flash(it.id); } Snd.play('select'); },
+  useDir(d) { this.use(this.list.findIndex(it => it.dir === d)); },
+  key(code) {   // keyboard while it's open: the arrows pick from the ring; X / Z / C still cast as normal (with the bubble up) and light up their card
+    const dir = { ArrowUp: 'up', ArrowRight: 'right', ArrowDown: 'down', ArrowLeft: 'left' }[code];
+    if (dir) { this.useDir(dir); Input.latched.delete(code); return true; }
+    const map = { KeyX: 'bolt', KeyJ: 'bolt', Mouse0: 'bolt', KeyZ: 'splash', KeyK: 'splash', KeyC: 'leap', Space: 'leap' };
     if (map[code]) this.flash(map[code]); return false;
+  },
+  // keep the ring centred on you (on your chest), sized to how big you are on screen
+  place() {
+    const p = G.player, v = new THREE.Vector3(p.x, p.y + 2.6, p.z).project(camera), x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight;
+    v.set(p.x, p.y + 5.6, p.z).project(camera); const h = Math.abs((1 - v.y) / 2 * innerHeight - y);
+    const m = $('magic'); m.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`; m.style.setProperty('--r', clamp(h * 1.9, 78, 150).toFixed(0) + 'px');
   },
   update() {
     const p = G.player, want = !!(G.started && p && p.alive && Input.down('block') && !anyPanel());
     if (want !== this.open) {
-      this.open = want; const m = $('magic');
-      // mouse players get the condensed bar right under the cursor, pinned there until the bubble drops
-      this.cur = want && Input.dev === 'kb' && !touchMode && Input.mouseSeen;
-      m.classList.toggle('cur', !!this.cur);
-      if (want) { this.sel = this.cur ? -1 : Math.max(0, this.sel); this.build(); if (this.cur) this.pin(); Snd.play('select'); }
-      m.classList.toggle('on', want); document.body.classList.toggle('magic', want);
+      this.open = want; this.sel = -1; this.stick = '';
+      if (want) { this.build(); this.place(); Snd.play('select'); }
+      $('magic').classList.toggle('on', want); document.body.classList.toggle('magic', want);
     }
     if (!this.open) return;
-    if (G.time % 6 === 0) this.paint();
-    const R = Input.rawHit;   // the controller's menu layout
-    if (R.size) {
-      const n = this.list.length;
-      if (this.sel < 0) this.sel = 0; if (R.has(14)) { this.sel = (this.sel + n - 1) % n; this.paint(); Snd.play('select'); }
-      if (R.has(15)) { this.sel = (this.sel + 1) % n; this.paint(); Snd.play('select'); }
-      if (R.has(0)) this.use(this.sel);
-      if (R.has(2)) this.use(0); if (R.has(3)) this.use(1); if (R.has(1)) this.use(3);
-      if (R.has(12) || R.has(7)) this.use(4); if (R.has(13) || R.has(8)) this.use(5);
-      R.clear();
-    }
+    this.place(); if (G.time % 6 === 0) this.paint();
+    const R = Input.rawHit;   // the controller: the d-pad picks from the ring, or flick the stick
+    if (R.has(12)) this.useDir('up'); if (R.has(13)) this.useDir('down'); if (R.has(14)) this.useDir('left'); if (R.has(15)) this.useDir('right');
+    const ax = Input.ax, az = Input.az, sd = Math.max(Math.abs(ax), Math.abs(az)) > 0.65 ? (Math.abs(ax) > Math.abs(az) ? (ax > 0 ? 'right' : 'left') : (az > 0 ? 'down' : 'up')) : '';
+    if (sd && sd !== this.stick) this.useDir(sd); this.stick = sd;
   } };
 
 // ---------------------------------------------------------------- the cursor changes shape with what's under it
@@ -3155,7 +3173,7 @@ const Cursor = {
   update() {
     if (!G.started || touchMode || (this.n = (this.n || 0) + 1) % 3) return;
     const p = G.player;
-    if (Magic.open && Magic.cur) return this.set('shield');
+    if (Magic.open) return this.set('shield');
     if (anyPanel()) return this.set('default');
     for (const e of G.enemies) if (e.alive && !e.removed && this.over(e.x, e.y, e.z, e.h || 5)) return this.set('attack');
     for (const n of G.npcs) if (this.over(n.x, n.y, n.z, 6)) return this.set('talk');
@@ -3168,8 +3186,8 @@ const PadKeys = {
   update() {
     const show = Input.dev === 'pad' && G.started, el = $('padkeys'); el.style.display = show ? 'block' : 'none'; if (!show) return;
     const g = k => `<i class="pg p${k}">${k}</i>`, rows = Magic.open
-      ? [['X', 'Bolt'], ['Y', 'Splash'], ['A', 'Use picked'], ['B', 'Slingshot'], ['↑', 'Potion'], ['↓', 'Switch spell'], ['←→', 'Pick']]
-      : [['A', 'Jump'], ['X', 'Attack'], ['Y', 'Heavy'], ['B', 'Slingshot'], ['LB', 'Bubble + magic'], ['LT', 'Dash'], ['RT', 'Potion'], ['RB', Use.near ? 'Talk / open' : 'Talk'], ['☰', 'Menu']];
+      ? [['↑', 'Magic Leap'], ['→', 'Bolt'], ['↓', 'Potion'], ['←', 'Splash'], ['B', 'Slingshot']]
+      : [['A', 'Jump'], ['X', 'Attack'], ['Y', 'Heavy'], ['B', 'Slingshot'], ['LB', 'Bubble + magic'], ['LT', 'Dodge'], ['RT', 'Potion'], ['RB', Use.near ? 'Talk / open' : 'Talk'], ['☰', 'Menu']];
     const h = rows.map(([k, t]) => `<div>${g(k)}<span>${t}</span></div>`).join('');
     if (h !== this.key) { this.key = h; el.innerHTML = h; }
   } };
@@ -3212,10 +3230,10 @@ const TT = { stick: null, home: [90, 0] };
 function setTouch(on) { touchMode = on; document.body.classList.toggle('touch', on); placeTouch(); }
 function placeTouch() {
   const w = innerWidth, h = innerHeight, B = (id, r, b) => { const e = $(id); e.style.right = r + 'px'; e.style.bottom = b + 'px'; };
-  B('tLight', 96, 30); B('tJump', 16, 30); B('tHeavy', 104, 104); B('tBow', 24, 104); B('tGuard', 176, 34); B('tUse', 176, 104); B('tPot', 24, 168); B('tDash', 104, 168);
+  B('tLight', 96, 30); B('tJump', 16, 30); B('tHeavy', 104, 104); B('tBow', 24, 104); B('tGuard', 176, 34); B('tUse', 176, 104); B('tPot', 24, 168); B('tDodge', 104, 168);
   TT.home = [96, h - 120]; if (!TT.stick) { $('stick').style.left = TT.home[0] + 'px'; $('stick').style.top = TT.home[1] + 'px'; }
 }
-for (const [id, a] of [['tLight', 'light'], ['tJump', 'jump'], ['tHeavy', 'heavy'], ['tBow', 'bow'], ['tGuard', 'block'], ['tDash', 'dash'], ['tUse', 'use'], ['tPot', 'potion']]) {
+for (const [id, a] of [['tLight', 'light'], ['tJump', 'jump'], ['tHeavy', 'heavy'], ['tBow', 'bow'], ['tGuard', 'block'], ['tDodge', 'dodge'], ['tUse', 'use'], ['tPot', 'potion']]) {
   const el = $(id);
   el.addEventListener('touchstart', e => { e.preventDefault(); Snd.init(); Input.touchHeld.add(a); Input.touchLatched.add(a); el.classList.add('on'); if (a === 'potion') drinkPotion(); }, { passive: false });
   const up = e => { e.preventDefault(); Input.touchHeld.delete(a); el.classList.remove('on'); }; el.addEventListener('touchend', up, { passive: false }); el.addEventListener('touchcancel', up, { passive: false });
