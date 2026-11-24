@@ -317,7 +317,84 @@
   .cb { min-width: 74px; padding: 9px 10px; color: #fff; background: #1b1b1b; border: 2px solid #c8c8c8; font-size: 15px; } .cb.on { background: #2f8f2a; border-color: #8aff8a; } .cb.buy { background: #5a2a6e; border-color: #f0c4ff; justify-content: center; }
   .cos .na { font-size: 10px; color: #999; font-weight: normal; }
   .bud { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 4px; } .bud img { width: 34px; height: 34px; border: 2px solid transparent; cursor: pointer; } .bud img.on { border-color: #ffe34a; background: rgba(255, 227, 74, .2); }
+</style><style>
+  /* round 6: the Pearl panel (centre left), side quests (top right), power-ups, your kit while walking, trading, the locker, crates */
+  #pearlBar { position: fixed; left: 6px; top: 50%; transform: translateY(-50%); display: none; flex-direction: column; gap: 7px; z-index: 7; }
+  body.joined #pearlBar { display: flex; } #pearlBar:empty { display: none !important; }
+  .pb { width: 92px; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 4px 6px; color: #fff; background: rgba(88, 30, 112, .9); border: 3px solid #f0c4ff; box-shadow: 0 4px 0 rgba(0, 0, 0, .45); position: relative; }
+  .pb:hover { filter: brightness(1.15); } .pb:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0, 0, 0, .45); } .pb.off { filter: grayscale(.8); opacity: .6; }
+  .pb img { width: 34px; height: 34px; image-rendering: pixelated; } .pb b { font-size: 14px; letter-spacing: 1px; } .pb .pp { font-size: 15px; gap: 4px; } .pb .pp i { width: 14px; height: 14px; }
+  .pb .pe { display: flex; flex-wrap: wrap; width: 38px; gap: 2px; justify-content: center; margin: 2px 0; }
+  .pb.crate { animation: crateP 1.6s infinite; } @keyframes crateP { 0%, 80%, 100% { transform: none; } 86% { transform: rotate(-5deg); } 92% { transform: rotate(5deg); } }
+  .pfree { font-size: 12px; color: #1d1d1d; background: #ffe34a; padding: 1px 5px; border: 2px solid #000; }
+  #sq { position: fixed; right: 8px; top: 110px; width: 232px; display: none; pointer-events: none; background: rgba(14, 15, 20, .8); border: 3px solid #ffe9a0; padding: 5px 7px 6px; z-index: 4; box-sizing: border-box; }
+  body.joined #sq { display: block; } body.battle #sq { top: 28px; }
+  .sqh { font-size: 13px; color: #ffe9a0; letter-spacing: 2px; margin-bottom: 1px; }
+  .sqr, .qbr { display: grid; grid-template-columns: 26px 1fr auto; gap: 6px; align-items: center; margin-top: 4px; transition: background .3s; }
+  .sqr img, .qbr img { width: 26px; height: 26px; image-rendering: pixelated; } .sqt span { font-size: 12px; line-height: 1.1; display: block; }
+  .sqb { height: 6px; margin-top: 3px; background: rgba(255, 255, 255, .15); border: 1px solid rgba(0, 0, 0, .6); } .sqb i { display: block; height: 100%; background: #9be36b; }
+  .sqr.done, .qbr.done { background: rgba(155, 227, 107, .3); animation: qDone .5s 3 alternate; } @keyframes qDone { to { background: rgba(255, 227, 74, .55); } }
+  .sqr .ok { color: #9be36b; font-size: 20px; } .qr { display: inline-flex; align-items: center; gap: 2px; font-size: 12px; color: #ffe34a; } .qr .cc { width: 12px; height: 12px; } .qr.crate img { width: 22px; height: 22px; }
+  .qegg { display: block; width: 18px; height: 24px; margin: 0 auto; border-radius: 50% 50% 46% 46% / 60% 60% 40% 40%; background: radial-gradient(circle at 35% 30%, #fff, #e8dcc8 60%, #b8a888); border: 2px solid #333; }
+  .qcell { width: 20px !important; height: 20px !important; margin: 0 auto; }
+  #powers { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; pointer-events: none; z-index: 7; }
+  .pw { position: relative; display: flex; align-items: center; gap: 5px; padding: 4px 8px 7px; background: rgba(14, 15, 20, .88); border: 3px solid #fff; overflow: hidden; animation: pcIn .4s ease-out; }
+  .pw img { width: 26px; height: 26px; image-rendering: pixelated; } .pw b { font-size: 14px; letter-spacing: 1px; } .pw span { font-size: 14px; min-width: 26px; text-align: right; }
+  .pw i { position: absolute; left: 0; bottom: 0; height: 4px; } .pw.low { animation: lowP .4s infinite alternate; } @keyframes lowP { to { opacity: .55; } }
+  #kit { position: fixed; left: 50%; bottom: calc(10px + env(safe-area-inset-bottom)); transform: translateX(-50%); display: none; gap: 4px; align-items: center; padding: 4px 6px; background: rgba(14, 15, 20, .7); border: 2px solid rgba(255, 255, 255, .5); pointer-events: none; z-index: 5; }
+  body.battle #kit { display: none !important; }
+  #kit .kh { font-size: 11px; letter-spacing: 1px; color: #ddd; writing-mode: vertical-rl; transform: rotate(180deg); }
+  .kc { width: 42px; height: 42px; position: relative; background: rgba(38, 38, 42, .9); border: 2px solid #888; } .kc.mv { border-color: #4da3ff; } .kc.at { border-color: #ff5a4a; } .kc.ut { border-color: #ffd24a; }
+  .kc img { width: 34px; height: 34px; margin: 2px; image-rendering: pixelated; } .kc img.pat { position: absolute; right: -2px; top: -2px; width: 14px; height: 14px; margin: 0; }
+  body.touch #kit { bottom: calc(196px + env(safe-area-inset-bottom)); }
+  #tradeBtn { position: fixed; left: 50%; bottom: calc(68px + env(safe-area-inset-bottom)); transform: translateX(-50%); display: none; flex-direction: column; align-items: center; padding: 6px 18px; color: #fff; background: #2f8f2a; border: 3px solid #fff; box-shadow: 0 4px 0 rgba(0, 0, 0, .45); z-index: 8; animation: wantP .9s infinite alternate; }
+  #tradeBtn b { font-size: 20px; letter-spacing: 2px; } #tradeBtn small { font-size: 11px; color: #e6ffd8; } body.touch #tradeBtn { bottom: calc(254px + env(safe-area-inset-bottom)); }
+  #trade, #qboard { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(600px, 96vw); max-height: 88vh; overflow-y: auto; background: rgba(16, 17, 24, .96); border: 3px solid #9be36b; padding: 8px 10px; display: none; z-index: 45; box-sizing: border-box; }
+  #qboard { border-color: #ffe9a0; } .qbr { grid-template-columns: 34px 1fr auto auto; padding: 6px; background: rgba(255, 255, 255, .06); border: 2px solid #6a5030; } .qbr img { width: 32px; height: 32px; } .qbr .sqt span { font-size: 14px; } .qbr small { font-size: 10px; color: #ccc; font-weight: normal; }
+  .qbr button { color: #fff; background: #8a5428; border: 2px solid #ffe9a0; padding: 7px 10px; font-size: 13px; } .qbr button:disabled { filter: grayscale(1); opacity: .5; }
+  .trsay { margin: 6px 0 2px; font-size: 15px; color: #e6ffd8; }
+  .lkh { margin-top: 9px; font-size: 13px; letter-spacing: 2px; color: #ccc; }
+  .lk { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; margin-top: 4px; } .lk > small { color: #aaa; font-weight: normal; grid-column: 1 / -1; }
+  .it { position: relative; text-align: center; background: rgba(255, 255, 255, .06); border: 3px solid #555; padding: 3px 2px 4px; cursor: pointer; } .it img { width: 72px; height: 72px; display: block; margin: 0 auto; }
+  .it b { display: block; font-size: 11px; line-height: 1.1; } .it.r1 { border-color: #2a5a8a; } .it.r2 { border-color: #6a3a8a; } .it.r3 { border-color: #8a6a10; box-shadow: 0 0 10px rgba(255, 210, 74, .45); }
+  .it.on { border-color: #9be36b !important; background: rgba(155, 227, 107, .2); } .it em { position: absolute; top: 2px; right: 4px; font-style: normal; font-size: 12px; color: #ffe34a; }
+  .it.rbw img { animation: hueR 2s linear infinite; }
+  .crts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .crt { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 6px; background: rgba(255, 255, 255, .06); border: 3px solid; text-align: center; }
+  .crt b { font-size: 16px; letter-spacing: 1px; } .crt > small { font-size: 11px; color: #ccc; font-weight: normal; }
+  .crtI { width: 64px; height: 64px; background-size: contain; image-rendering: pixelated; animation: crateP 1.6s infinite; } .crtI.b { filter: drop-shadow(0 0 6px #ffb04a); } .crtI.s { filter: drop-shadow(0 0 6px #f0c4ff); }
+  .odds { display: flex; width: 100%; height: 7px; border: 1px solid #000; margin-top: 3px; } .oddt { display: flex; justify-content: space-between; width: 100%; font-size: 10px; }
+  .crt .cb { margin-top: 4px; min-width: 110px; } .cb.free { background: #c8a010; border-color: #fff3a0; color: #fff; animation: wantP .8s infinite alternate; }
+  #reel { position: fixed; inset: 0; display: none; z-index: 60; background: rgba(6, 6, 12, .86); text-align: center; padding-top: 12vh; box-sizing: border-box; }
+  .rlh { font-size: 30px; letter-spacing: 3px; } .rlw { position: relative; width: min(720px, 96vw); height: 120px; margin: 18px auto 0; overflow: hidden; border: 4px solid #fff; background: rgba(255, 255, 255, .05); transition: opacity .4s; }
+  .rlw.dim { opacity: .35; } .rls { display: flex; gap: 0; padding: 8px 0; } .rls .it { flex: none; width: 96px; margin: 0 4px; box-sizing: border-box; pointer-events: none; }
+  .rls .it img { width: 64px; height: 64px; } .rlm { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; margin-left: -2px; background: #ffe34a; box-shadow: 0 0 10px #ffe34a; }
+  .won { display: inline-flex; flex-direction: column; align-items: center; margin-top: -96px; position: relative; padding: 10px 26px; background: rgba(16, 17, 24, .97); border: 4px solid #ccc; animation: pcIn .5s ease-out; }
+  .won.r1 { border-color: #5ab4ff; } .won.r2 { border-color: #c77dff; box-shadow: 0 0 30px rgba(199, 125, 255, .8); } .won.r3 { border-color: #ffd24a; box-shadow: 0 0 40px rgba(255, 210, 74, .9); }
+  .won img { width: 150px; height: 150px; } .won b { font-size: 26px; letter-spacing: 2px; } .won small { font-size: 13px; letter-spacing: 1px; }
+  .rlb { margin-top: 14px; display: flex; gap: 10px; justify-content: center; } .rlb button { min-width: 130px; padding: 12px 18px; font-size: 20px; color: #fff; background: #2f8f2a; border: 3px solid #fff; box-shadow: 0 4px 0 rgba(0, 0, 0, .45); } .rlb button + button { background: #444; }
+  .card .x2 { position: absolute; left: 3px; bottom: 3px; font-size: calc(var(--cw) * 0.16); color: #9fd8ff; background: rgba(20, 60, 120, .9); padding: 0 4px; border: 2px solid #4da3ff; animation: wantP .6s infinite alternate; }
+  body.kitopen #bottom { display: flex; } body.kitopen #endBtn { display: none; }
+  .pg { position: relative; } .pg[data-sp] { cursor: pointer; } .pg.fol { border-color: #ffe34a; background: rgba(255, 227, 74, .15); } .pg .fs { position: absolute; top: 1px; right: 4px; color: #ffe34a; font-size: 16px; }
+  body.pv #pearlBar, body.pv #sq, body.pv #powers, body.pv #kit, body.pv #tradeBtn, body.pv #petsBtn { display: none !important; }
+  #mod { left: auto; right: 6px; }
+  @media (max-height: 560px) {
+    #pearlBar { top: 186px; transform: none; flex-direction: row; gap: 5px; } .pb { width: 62px; padding: 3px 2px 4px; } .pb img { width: 24px; height: 24px; } .pb b { font-size: 10px; } .pb .pp { font-size: 12px; } .pb .pe { width: 28px; } .pb .pe .cc { width: 10px; height: 10px; }
+    body.battle #pearlBar { top: 150px; }
+    #sq { width: 200px; transform: scale(.78); transform-origin: top right; }
+    #powers { top: 74px; } .pw b { font-size: 11px; } .pw img { width: 20px; height: 20px; }
+  }
+  @media (max-width: 520px) {
+    #pearlBar { gap: 6px; } .pb { width: 70px; padding: 3px 2px 5px; } .pb img { width: 26px; height: 26px; } .pb b { font-size: 11px; } .pb .pp { font-size: 13px; } .pb .pe { width: 30px; } .pb .pe .cc { width: 11px; height: 11px; }
+    #sq { top: 106px; width: 158px; padding: 4px 5px; } body.hub #quests { width: 186px; box-sizing: border-box; } .sqt span { font-size: 10.5px; } .sqr { grid-template-columns: 20px 1fr auto; gap: 4px; } .sqr img { width: 20px; height: 20px; } .sqh { font-size: 11px; }
+    body.battle #sq { top: 6px; right: 4px; width: 128px; } body.battle .sqt span { font-size: 9.5px; } body.battle .sqr { grid-template-columns: 16px 1fr auto; } body.battle .sqr img { width: 16px; height: 16px; } body.battle .qr { font-size: 10px; } body.battle .qr .cc { width: 9px; height: 9px; } body.battle .sqh { display: none; }
+    #powers { top: auto; bottom: auto; top: 150px; left: auto; right: 4px; transform: none; flex-direction: column; align-items: flex-end; } .pw { padding: 3px 6px 6px; } .pw b { font-size: 11px; } .pw img { width: 20px; height: 20px; } .pw span { font-size: 12px; }
+    .kc { width: 34px; height: 34px; } .kc img { width: 28px; height: 28px; margin: 1px; } .kc img.pat { width: 11px; height: 11px; }
+    .lk { grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); } .it img { width: 58px; height: 58px; } .crt b { font-size: 13px; }
+    .rls .it { width: 96px; } .won img { width: 110px; height: 110px; } .won b { font-size: 20px; }
+  }
 </style>
+
 </head>
 <body>
 <canvas id="c" tabindex="0"></canvas>
@@ -347,6 +424,11 @@
   <div class="brand"><img src="data:image/png;base64,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" alt="Grug Digital"><small>a Grug Digital game</small></div>
 </div>
 <div id="quests" class="ol"></div>
+<div id="pearlBar" class="ol"></div>
+<div id="sq" class="ol"></div>
+<div id="powers" class="ol"></div>
+<div id="kit" class="ol"></div>
+<button id="tradeBtn" class="ol"></button>
 <div id="mod" class="ol"></div>
 
 <button id="shopBtn" class="ol"></button>
@@ -370,12 +452,18 @@
 <div id="caught" class="ol"></div>
 <div id="pets" class="ol"><div id="petsBody"></div></div>
 <div id="cosmo" class="ol"><div id="cosmoBody"></div></div>
+<div id="trade" class="ol"><div id="tradeBody"></div></div>
+<div id="qboard" class="ol"><div id="qboardBody"></div></div>
+<div id="reel" class="ol"></div>
 <div id="results" class="ol"><div id="resBody"></div><div id="resBtns"></div></div>
 
 <div id="help" class="panel">
   <div class="touchOnly"><b>Touch:</b> in the Depot, your left thumb moves and the Jump button jumps · drag anywhere to turn the camera, pinch to zoom · in a zone, tap a card, then tap a lit tile</div>
   <div><b>The Depot:</b> <b>WASD</b> move · <b>Space</b> jump · <b>Q / E</b> or <b>right-drag</b> turn the camera · <b>wheel</b> zoom. Walk onto a zone's grid to take the job</div>
-  <div><b>A run:</b> head north from the Depot. Each zone is its own walled-in location with a grid in the middle; clear its job and the gate at the far end opens. Your deck and energy come with you, and you get a free card (or energy) for every zone you clear. Lose a job and the run is over</div>
+  <div><b>A run:</b> head north from the Depot. Each zone is its own walled-in location with a grid in the middle; clear its job and the gate at the far end opens onto a town. Your kit (your deck) and energy come with you. Lose a job and the run is over</div>
+  <div><b>Towns and the Depot:</b> walk onto a booth's pad. The <b>Card Shop</b> swaps a card in your kit for energy, <b>Loot Crates</b> hold blasters and skins, the <b>Quest Board</b> lets you swap a quest. Walk up to another player and press <b>TRADE</b> to swap blasters and skins</div>
+  <div><b>Quests</b> (top right): done just by playing. They pay energy, or a free loot crate</div>
+  <div><b>Power-up crates:</b> two drop into every job. Walk onto one for 30 seconds of ×2 moves, +1 zap or ×2 energy (the clock only runs on your turn)</div>
   <div><b>A job:</b> catch the quota of pets before the shift ends. Each day you get to play every card in your deck once, in any order: <b>1-7</b> or click a card, then click a lit tile. <b>Esc</b> or right-click cancels. <b>Enter / Space</b> ends the day</div>
   <div><b>Night:</b> every pet grows one stage. <span class="stg l">BABY</span> → <span class="stg a">GROWN</span> → <span class="stg e">EGG</span>. If an egg is still there when night falls, it hatches into a stampede and the run is over. Catch a baby for a Rare, a grown one for an Epic, an egg for a Common (it hatches into a random pet)</div>
   <div><b>Cards:</b> <span class="mvC">Movement</span>, <span class="atC">Attack</span> and <span class="utC">Utility</span>. Walk and run moves pass over tiles (and pick up energy on the way) but can't climb a hill. Hops, jumps and leaps can, and landing on a pet from a hill catches it outright. Teleports go anywhere in range</div>
@@ -1698,7 +1786,7 @@ const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.f
 
 // ---------------------------------------------------------------- tuning
 // Pearl prices (the site's premium currency; every buy goes through GrugPearlPopup.buy, which asks first)
-const PRICE = { revive: 15, overtime: 10, energy: 5 };
+const PRICE = { revive: 15, overtime: 10, energy: 5, crate: 20 };
 const RULES = {
   hand: 7,          // cards in your deck (buying replaces, never adds)
   wallet: 10,       // most energy you can hold
@@ -1718,17 +1806,18 @@ const THEMES = [
   { name: 'The Hive Pits', ground: [0x9a86b0, 0x8e7aa4], hill: 0x634e80, rim: 0x3a2a4e, floor: 0x7e6a96, wall: 0x54406e, css: '#c49aff', fog: 0xd8c8ec, decor: 'hive' },
 ];
 const ROMAN = ['', '', ' II', ' III', ' IV', ' V', ' VI', ' VII', ' VIII', ' IX', ' X'];
-const AREA_W = 208, AREA_D = 200, DEPOT_N = -40;   // every location is 26 x 25 tiles (208 x 200 studs); the Depot's north edge is z = -40. Everything sits on the same 8-stud tile grid
+const AREA_W = 208, AREA_D = 200, TOWN_D = 96, SEG = AREA_D + TOWN_D, DEPOT_N = -40;   // every location is 26 x 25 tiles (208 x 200 studs), and after each one a little town (12 tiles deep); the Depot's north edge is z = -40. Everything sits on the same 8-stud tile grid
+const TOWNS = ['Pebble Rest', 'Moonbase Inn', 'Mossy Market', 'Frostpost', 'Ember Stop', 'Hive Haven'];
 const ZONES = [];
 function zoneDef(k) {
   if (ZONES[k]) return ZONES[k];
   const T = THEMES[k % THEMES.length], lap = Math.floor(k / THEMES.length) + 1;
   const mix = { grub: 6 }; if (k >= 0) mix.mounder = 3; if (k >= 1) mix.skitter = 2.5; if (k >= 2) mix.spitter = 2.5; if (k >= 3) mix.shellback = 2.5;
-  const zBot = DEPOT_N - k * AREA_D, zTop = zBot - AREA_D;
+  const zBot = DEPOT_N - k * SEG, zTop = zBot - AREA_D;
   return (ZONES[k] = Object.assign({}, T, { id: k, theme: T, name: T.name + (lap > 1 ? ROMAN[lap] || ' ' + lap : ''), short: 'Zone ' + (k + 1),
     quota: Math.min(30, 8 + 3 * k), days: k < 4 ? 10 : k < 8 ? 11 : 12, hills: [Math.min(16, 6 + k), Math.min(20, 9 + k)],
     start: Math.min(4, 2 + Math.floor(k / 2)), night: [Math.min(3, 1 + Math.floor(k / 3)), Math.min(4, 2 + Math.floor(k / 2))], mix,
-    cx: 0, cz: zBot - 104, zBot, zTop }));
+    cx: 0, cz: zBot - 104, zBot, zTop, town: TOWNS[k % TOWNS.length] + (lap > 1 ? ROMAN[lap] || ' ' + lap : ''), tz0: zTop, tz1: zTop - TOWN_D }));
 }
 // the wild pets. Every one goes baby -> grown -> egg -> (hatches). What makes each kind different (its trait) kicks in once it's grown.
 // (The trait keys are the old bug names: grub plain, mounder digs up hills, skitter hops about, spitter sprays goo, shellback is tough.)
@@ -1756,9 +1845,15 @@ const CATCH = { larva: ['RARE', '#5ab4ff', 'rare'], adult: ['EPIC', '#c77dff', '
 const STAGE_NAME = { larva: 'BABY', adult: 'GROWN', egg: 'EGG' };
 
 // ---------------------------------------------------------------- saved between sessions
-const Save = { bestRun: 0, runs: 0, jobs: 0, squashed: 0, hatched: 0, fast: false, hints: true, pets: {}, cos: { own: {}, eq: {}, buddy: '' }, name: '', key: 'grug.pet-zones.v1',
-  load() { try { const s = JSON.parse(localStorage.getItem(this.key) || 'null'); if (s) Object.assign(this, { bestRun: s.bestRun | 0, runs: s.runs | 0, jobs: s.jobs | 0, squashed: s.squashed | 0, hatched: s.hatched | 0, fast: !!s.fast, hints: s.hints !== false, pets: s.pets && typeof s.pets === 'object' ? s.pets : {}, cos: s.cos && s.cos.own ? Object.assign({ own: {}, eq: {}, buddy: '' }, s.cos) : { own: {}, eq: {}, buddy: '' }, name: typeof s.name === 'string' ? s.name.slice(0, 20) : '' }); } catch (_) { } },
-  save() { try { localStorage.setItem(this.key, JSON.stringify({ bestRun: this.bestRun, runs: this.runs, jobs: this.jobs, squashed: this.squashed, hatched: this.hatched, fast: this.fast, hints: this.hints, pets: this.pets, cos: this.cos, name: this.name })); } catch (_) { } },
+const Save = { bestRun: 0, runs: 0, jobs: 0, squashed: 0, hatched: 0, fast: false, hints: true, pets: {}, name: '', key: 'grug.pet-zones.v1',
+  inv: {}, eq: { blaster: 'b:rifle', skin: '' }, follow: null, quests: [], qdone: 0, freeCrates: 0, cos: null,
+  load() { try { const s = JSON.parse(localStorage.getItem(this.key) || 'null'); if (s) {
+    Object.assign(this, { bestRun: s.bestRun | 0, runs: s.runs | 0, jobs: s.jobs | 0, squashed: s.squashed | 0, hatched: s.hatched | 0, fast: !!s.fast, hints: s.hints !== false, pets: s.pets && typeof s.pets === 'object' ? s.pets : {}, name: typeof s.name === 'string' ? s.name.slice(0, 20) : '',
+      inv: s.inv && typeof s.inv === 'object' ? s.inv : {}, eq: s.eq && s.eq.blaster ? s.eq : { blaster: 'b:rifle', skin: '' }, follow: Array.isArray(s.follow) ? s.follow.slice(0, 3) : null, quests: Array.isArray(s.quests) ? s.quests : [], qdone: s.qdone | 0, freeCrates: s.freeCrates | 0 });
+    // the first Pearl Shop (Golden Blaster, Rainbow Zaps) became skins in your locker
+    if (s.cos && s.cos.own) { if (s.cos.own.goldgun && !this.inv['s:gold']) this.inv['s:gold'] = 1; if (s.cos.own.rainbow && !this.inv['s:rainbow']) this.inv['s:rainbow'] = 1; if (s.cos.eq && s.cos.eq.goldgun && !this.eq.skin) this.eq.skin = 's:gold'; }
+  } } catch (_) { } },
+  save() { try { localStorage.setItem(this.key, JSON.stringify({ bestRun: this.bestRun, runs: this.runs, jobs: this.jobs, squashed: this.squashed, hatched: this.hatched, fast: this.fast, hints: this.hints, pets: this.pets, name: this.name, inv: this.inv, eq: this.eq, follow: this.follow, quests: this.quests, qdone: this.qdone, freeCrates: this.freeCrates })); } catch (_) { } },
   wipe() { try { localStorage.removeItem(this.key); } catch (_) { } },
 };
 Save.load();
@@ -1951,7 +2046,7 @@ function updateDebris(dt) {
 const BEAMS = [];
 const beamGeo = new THREE.BoxGeometry(1, 1, 1);
 function beam(a, b, color, w = 0.5, life = 0.28) {
-  if (Save.cos.eq.rainbow) color = new THREE.Color().setHSL((Game.clock * 0.6 + Math.random() * 0.2) % 1, 1, 0.6).getHex();
+  color = skinBeam(color);
   const m = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
   const d = new THREE.Vector3().subVectors(b, a), L = d.length(); m.position.copy(a).addScaledVector(d, 0.5); m.scale.set(w, w, Math.max(0.1, L)); m.lookAt(b); scene.add(m);
   const core = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1, depthWrite: false })); core.scale.set(0.4, 0.4, 1); m.add(core);
@@ -2211,11 +2306,19 @@ function buildMap() {
   for (const [x, z] of [[-92, -28], [92, -28], [-92, 36], [92, 36], [-20, -28], [20, -28]]) { part(x, 7, z, 1.2, 12, 1.2, dark); part(x, 13.5, z, 2.4, 1, 2.4, trim, { material: new THREE.MeshLambertMaterial({ color: 0xffe9a8, emissive: 0x6a5a20 }) }); }
   for (const [x, z, h] of [[-60, -4, 1], [-60, 4, 2], [60, -4, 1]]) for (let k = 0; k < h; k++) part(x, 3 + 4 * k, z, 4, 4, 4, 0xa87a4a);
   gateWall(PLAZA.minZ, dw, 0x5e5c5a, null);   // the way out to Zone 1: always open
-  sign(['ZONE 1 →', ''], 0, 22.5, PLAZA.minZ + 2.05, 22, 4.6, 0, 1, '#1d2a3a', ['#ffe36b', '#ddd']);
+  gateSign(PLAZA.minZ, zoneDef(0), 0x5e5c5a);
+  // the Depot's booths: cards (energy), loot crates (Pearls), the quest board
+  booth('cards', 68, -20); booth('crates', -68, -20); booth('quests', -28, -12);
   for (let i = 0; i < 90; i++) { const x = pick([-1, 1]) * rnd(118, 260), z = rnd(80, -1400); TREES.push({ x, z, s: rnd(1.1, 1.9) }); }
   for (let i = 0; i < 20; i++) TREES.push({ x: rnd(-200, 200), z: rnd(80, 200), s: rnd(1.1, 1.8) });
   plantTrees();
   ensureAreas(1);
+}
+// the name of what's through a gate, on a board sitting on top of it (facing whoever walks up to it from the south)
+function gateSign(z, Z, col, town) {
+  part(0, WALL_H + 3.6, z, 50, 7.2, 3.6, col);
+  if (town) sign([Z.town.toUpperCase(), 'TOWN · SHOPS · QUESTS'], 0, WALL_H + 3.6, z + 1.85, 48, 6.6, 0, 1, '#2a1d10', ['#ffe9a0', '#ddd']);
+  else sign([`${Z.short.toUpperCase()} · ${Z.name.toUpperCase()}`, ''], 0, WALL_H + 3.6, z + 1.85, 48, 6.6, 0, 1, '#1d1d21', [Z.css, '#ddd']);
 }
 // a wall right across the map at z, with a gate in the middle (an arch over it). Returns the field that shuts it
 function gateWall(z, col, trimCol, Z) {
@@ -2255,7 +2358,7 @@ const DECOR = {
 };
 const SPECIAL_FLOOR = { lava: new THREE.MeshBasicMaterial({ color: 0xff6a1a }), goo: new THREE.MeshLambertMaterial({ color: 0x8ae04a, emissive: 0x2a6a10 }) };
 // build every location up to zone k (the next one stays visible through the gate ahead of you)
-function ensureAreas(k) { for (let i = 0; i <= k; i++) if (!ARENA[i]) buildArea(i); flushStatic(); refreshGates(); }
+function ensureAreas(k) { for (let i = 0; i <= k; i++) if (!ARENA[i]) { buildArea(i); buildTown(i); } flushStatic(); refreshGates(); }
 function buildArea(k) {
   const Z = zoneDef(k), half = N * TS / 2, R = { Z, tiles: [], gate: null, cx: Z.cx, cz: Z.cz, half, peds: [] };
   ARENA[k] = R;
@@ -2263,8 +2366,7 @@ function buildArea(k) {
   part(x0 - 2, WALL_H / 2, zMid, 4, WALL_H, AREA_D, Z.wall); part(x1 + 2, WALL_H / 2, zMid, 4, WALL_H, AREA_D, Z.wall);   // the side walls
   for (const sx of [-1, 1]) for (let z = Z.zBot - 16; z > Z.zTop + 10; z -= 32) part(sx * (x1 - 1), WALL_H + 1.5, z, 6, 3, 10, Z.rim);   // battlements
   R.gate = gateWall(Z.zTop, Z.wall, Z.rim, Z);
-  const N2 = zoneDef(k + 1);
-  R.nextSign = sign([`${N2.short.toUpperCase()} · ${N2.name.toUpperCase()}`, ''], 0, WALL_H + 5, Z.zTop + 2.05, 46, 7, 0, 1, '#1d1d21', [N2.css, '#ddd']);
+  gateSign(Z.zTop, Z, Z.rim, true);   // through this gate: the town
   // the combat grid, and the ring of raised rim tiles round it
   for (let j = -1; j <= N; j++) for (let i = -1; i <= N; i++) {
     const x = Z.cx + (i - N / 2 + 0.5) * TS, z = Z.cz + (j - N / 2 + 0.5) * TS; occ.set(tkey(x, z), 'skip');
@@ -2274,9 +2376,6 @@ function buildArea(k) {
     const t = { i, j, h: 0, x, z, p, m, Z, ov: null }; m.userData.tile = t; R.tiles.push(t);
   }
   for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const x = Z.cx + sx * (half + 4), z = Z.cz + sz * (half + 4); part(x, 4.6, z, 2.4, 6, 2.4, Z.rim); part(x, 8.2, z, 1.6, 1.2, 1.6, 0, { deco: true, material: new THREE.MeshLambertMaterial({ color: Z.hill, emissive: new THREE.Color(Z.css).multiplyScalar(0.6) }) }); }
-  R.sign = sign([`${Z.short.toUpperCase()} · ${Z.name.toUpperCase()}`, ''], Z.cx, 17, Z.cz - half - 16, 40, 7, 0, 1, '#1d1d21', [Z.css, '#ddd']);
-  part(Z.cx - 18, 7, Z.cz - half - 16.6, 1.2, 12, 1.2, 0x5e5c5a); part(Z.cx + 18, 7, Z.cz - half - 16.6, 1.2, 12, 1.2, 0x5e5c5a);
-  occ.set(tkey(Z.cx - 18, Z.cz - half - 16.6), 'prop'); occ.set(tkey(Z.cx + 18, Z.cz - half - 16.6), 'prop');
   const pad = new THREE.Mesh(new THREE.TorusGeometry(5, 0.4, 8, 40), new THREE.MeshBasicMaterial({ color: new THREE.Color(Z.css) })); pad.rotation.x = Math.PI / 2; pad.position.set(Z.cx, 2, Z.cz + half + 12); scene.add(pad); R.pad = pad;
   R.bill = Bills.add('', Z.cx, 10, Z.cz + half + 10, 170);
   // hills and props out in the open: not on the path up the middle, not in front of the gate
@@ -2316,8 +2415,38 @@ function setTileH(t, h) {
   t.p.maxY = ht; W.version++;
 }
 function layTerrain(R, H) { for (const t of R.tiles) setTileH(t, H.has(t.i + ',' + t.j) ? 1 : 0); }
-// which location you're standing in (-1: the Depot)
-const areaAt = z => z > DEPOT_N ? -1 : Math.floor((DEPOT_N - z) / AREA_D);
+// which location you're standing in (-1: the Depot; the town after zone k counts as zone k there: townAt says which)
+const areaAt = z => z > DEPOT_N ? -1 : Math.floor((DEPOT_N - z) / SEG);
+const townAt = z => { if (z > DEPOT_N) return -1; const d = DEPOT_N - z, k = Math.floor(d / SEG); return d - k * SEG >= AREA_D ? k : -1; };
+
+// ---------------------------------------------------------------- the towns: a rest stop after every zone, with a card shop, a loot crate booth,
+// a quest board, a few houses and a couple of players hanging about (you can trade with them)
+const TOWN_COL = { quarry: [0xc9b48c, 0xbea880], moon: [0xb9bcc4, 0xadb0b8], shroom: [0x9cc486, 0x90b87a], frost: [0xdfe8f2, 0xd2dce8], magma: [0x8a7060, 0x7e6456], hive: [0xb4a2c8, 0xa898bc] };
+const TOWNSITE = [];
+function buildTown(k) {
+  const Z = zoneDef(k), z0 = Z.tz0, z1 = Z.tz1, x0 = -AREA_W / 2, x1 = AREA_W / 2, zm = (z0 + z1) / 2, occ = new Map(), pocc = new Map(), cols = TOWN_COL[Z.decor];
+  part(x0 - 2, WALL_H / 2, zm, 4, WALL_H, TOWN_D, Z.wall); part(x1 + 2, WALL_H / 2, zm, 4, WALL_H, TOWN_D, Z.wall);
+  gateWall(z1, Z.wall, Z.rim, null); gateSign(z1, zoneDef(k + 1), Z.rim);   // the way on: always open
+  // a path up the middle, cobbles either side
+  for (let x = -12; x <= 12; x += TS) for (let z = z1 + TS / 2; z < z0; z += TS) occ.set(tkey(x, z), 'skip');
+  floorTiles(-16, 16, z1, z0, [0xe3d3ad, 0xd9c79d], pocc);
+  const bz = z0 - 46;
+  booth('cards', -34, bz, k); booth('crates', 34, bz, k); booth('quests', -78, z0 - 28, k);
+  // houses by the walls
+  const house = (x, z, w, d, wall, roof) => { part(x, 1 + 7, z, w, 14, d, wall); part(x, 15.5, z, w + 2, 1, d + 2, roof); part(x, 17.5, z, w - 4, 3, d - 4, roof); part(x, 20, z, w - 10, 2, d - 8, roof);
+    part(x, 4.5, z + d / 2 + 0.1, 4, 7, 0.4, 0x5a3a24, { deco: true }); part(x - w / 4, 9, z + d / 2 + 0.1, 3, 3, 0.4, 0x9fd8ff, { deco: true }); part(x + w / 4, 9, z + d / 2 + 0.1, 3, 3, 0.4, 0x9fd8ff, { deco: true });
+    for (let xx = x - w / 2; xx < x + w / 2; xx += TS) for (let zz = z - d / 2; zz < z + d / 2; zz += TS) occ.set(tkey(xx + 0.1, zz + 0.1), 'prop'); };
+  const hc = [0xe8dcc0, 0xd8b08a, 0xc8d8e8, 0xe0c8d8], rc = [0xb04a2a, 0x3a6a9a, 0x5a8a3a, 0x7a4a9a];
+  house(80, z0 - 24, 20, 16, hc[k % 4], rc[k % 4]); house(80, z0 - 66, 20, 18, hc[(k + 1) % 4], rc[(k + 2) % 4]); house(-80, z0 - 72, 20, 18, hc[(k + 2) % 4], rc[(k + 1) % 4]);
+  // lamps and benches along the path, a well
+  for (const z of [z0 - 16, z0 - 80]) for (const sx of [-1, 1]) { const x = sx * 18; part(x, 7, z, 1.2, 12, 1.2, 0x3a3a3e); part(x, 13.5, z, 2.4, 1, 2.4, 0, { material: new THREE.MeshLambertMaterial({ color: 0xffe9a8, emissive: 0x6a5a20 }) }); }
+  for (const sx of [-1, 1]) { const x = sx * 22, z = z0 - 62; part(x, 1.8, z, 2.4, 0.6, 9, 0x8a5428, { p: { kind: 'seat' } }); part(x, 1.25, z - 3.5, 1, 0.5, 1, 0x3a3a3e); part(x, 1.25, z + 3.5, 1, 0.5, 1, 0x3a3a3e); }
+  { const x = -40, z = z0 - 80; part(x, 2.5, z, 10, 3, 10, 0x8a8c92); part(x, 3.9, z, 7, 0.2, 7, 0, { deco: true, material: new THREE.MeshLambertMaterial({ color: 0x4aa8ff, emissive: 0x103a6a }) }); part(x - 4, 8, z, 1, 9, 1, 0x6a4a2a); part(x + 4, 8, z, 1, 9, 1, 0x6a4a2a); part(x, 13, z, 10, 1.4, 4, 0xb04a2a); occ.set(tkey(x, z), 'prop'); occ.set(tkey(x - 4.1, z), 'prop'); occ.set(tkey(x + 4.1, z), 'prop'); }
+  for (const [x, z] of [[-60, z0 - 10], [60, z0 - 10], [-56, z0 - 88], [56, z0 - 88], [96, z0 - 46], [-96, z0 - 48]]) { part(x, 2.6, z, 5, 3.2, 5, 0x3f8a3a); part(x, 4.6, z, 3, 1.4, 3, 0x4f9a46, { deco: true }); occ.set(tkey(x, z), 'prop'); }
+  floorTiles(x0, x1, z1, z0, cols, occ);
+  TOWNSITE[k] = { k, z0, z1 };
+  spawnTownfolk(k);
+}
 
 // ---------------------------------------------------------------- the other players in the Depot: the Ambient kit's crowd (names, looks, hands)
 let crowd = null; const npcs = [];
@@ -2330,7 +2459,7 @@ function makeCrowd() {
     crowd.setCount(5);
   } catch (e) { console.warn('crowd', e); crowd = null; }
 }
-const NPC_LINES = ['zone 3 is impossible', 'anyone cleared the hive pits?', 'buy recharge, trust me', 'mortar is so good', 'i let an egg hatch lol', 'lob the ones on hills', 'got an epic lion!!', 'catch them as babies for rares', 'trade panda?', 'landing on them from a hill >>>', 'brb', 'how do u get up hills', 'hop onto it', 'warp gate op', 'gg', 'those spitters tho', 'never leave an egg overnight', 'stand on the dirt piles!'];
+const NPC_LINES = ['trading blasters, anyone?', 'got a ray gun from a crate!!', 'quest board says catch 3 eggs lol', 'tesla zapper is so clean', 'who wants my camo skin', 'x2 moves crate is op', 'grab the power-up crates', 'zone 3 is impossible', 'anyone cleared the hive pits?', 'buy recharge, trust me', 'mortar is so good', 'i let an egg hatch lol', 'lob the ones on hills', 'got an epic lion!!', 'catch them as babies for rares', 'trade panda?', 'landing on them from a hill >>>', 'brb', 'how do u get up hills', 'hop onto it', 'warp gate op', 'gg', 'those spitters tho', 'never leave an egg overnight', 'stand on the dirt piles!'];
 function updateNpcs(dt) {
   if (!crowd) return;
   try { crowd.update(dt, []); } catch (e) { console.warn('crowd', e); crowd = null; return; }
@@ -2340,7 +2469,7 @@ function updateNpcs(dt) {
   }
 }
 function updateNpcTags() {
-  for (const n of npcs) {
+  for (const n of traders()) {
     if (!n.tag) continue; const ch = n.ch; tv.set(ch.x, ch.y + 3.4, ch.z); const d = tv.distanceTo(camera.position); tv.project(camera);
     const on = !B.on && d < 140 && tv.z < 1 && Math.abs(tv.x) < 1.1 && Math.abs(tv.y) < 1.1;
     if (on !== n.tag.on) { n.tag.on = on; n.tag.el.style.display = on ? 'block' : 'none'; }
@@ -2490,19 +2619,14 @@ function artTex(id) { if (ART_TEX[id]) return ART_TEX[id]; const t = new THREE.T
 const STARTER = { mv: Object.keys(CARDS).filter(k => CARDS[k].st && CARDS[k].type === 'mv'), at: Object.keys(CARDS).filter(k => CARDS[k].st && CARDS[k].type === 'at'), ut: Object.keys(CARDS).filter(k => CARDS[k].st && CARDS[k].type === 'ut') };
 // a fresh deck is all basics, so the controls make sense before anything fancy turns up: two plain moves (Step, Run) and
 // Hop to get up hills, two plain attacks (Zap, Swipe) and Lob to reach pets on hills, and one simple utility.
-// The diagonal and long-range cards only come from the shop and the rewards.
+// The diagonal and long-range cards only come from the card shops (in a job, and in the Depot and the towns).
 function dealDeck() { return ['step', 'run', 'hop', 'zap', 'swipe', 'lob', pick(['magnet', 'raise', 'shove'])].map(id => ({ id, used: false })); }
 // the shop's stock for the day: three common, two rare, one epic (sometimes a legendary instead)
-function rollOffers() {
+function rollOffersArr() {
   const by = r => Object.keys(CARDS).filter(k => CARDS[k].rar === r), used = new Set();
-  B.offers = [0, 0, 0, 1, 1, Math.random() < 0.3 ? 3 : 2].map(r => { const pool = by(r).filter(k => !used.has(k)); const id = pick(pool.length ? pool : by(r)); used.add(id); return { id, sold: false }; });
+  return [0, 0, 0, 1, 1, Math.random() < 0.3 ? 3 : 2].map(r => { const pool = by(r).filter(k => !used.has(k)); const id = pick(pool.length ? pool : by(r)); used.add(id); return { id, sold: false }; });
 }
-// after a zone: three cards to pick from for free, better ones the further you get
-function rollReward(k) {
-  const by = r => Object.keys(CARDS).filter(id => CARDS[id].rar === r), out = [];
-  while (out.length < 3) { const r = wpick([[0, Math.max(0.5, 3 - k * 0.4)], [1, 2.5], [2, 1 + k * 0.35], [3, 0.2 + k * 0.15]]); const id = pick(by(r)); if (!out.includes(id)) out.push(id); }
-  return out;
-}
+function rollOffers() { B.offers = rollOffersArr(); }
 // the pattern on a card: a 7 x 7 grid, you in the middle
 const ICON = {};
 function cardIcon(id) {
@@ -2725,7 +2849,7 @@ function addMound(i, j) {
   scene.add(g); const type = wpick(Object.entries(B.Z.mix)), m = { i, j, g, t0: rnd(0, 6), type, species: pickSpecies(type) }; B.mounds.push(m); return m;
 }
 function dropMound(m) { scene.remove(m.g); const k = B.mounds.indexOf(m); if (k >= 0) B.mounds.splice(k, 1); }
-const freeTile = (t, o = {}) => !isP(t.i, t.j) && !bugAt(t.i, t.j) && !cellAt(t.i, t.j) && !moundAt(t.i, t.j) && (!o.far || Math.abs(t.i - B.P.i) + Math.abs(t.j - B.P.j) >= o.far);
+const freeTile = (t, o = {}) => !isP(t.i, t.j) && !bugAt(t.i, t.j) && !cellAt(t.i, t.j) && !moundAt(t.i, t.j) && !crateAt(t.i, t.j) && (!o.far || Math.abs(t.i - B.P.i) + Math.abs(t.j - B.P.j) >= o.far);
 function placeMounds() {
   const n = rndi(B.Z.night[0], B.Z.night[1]);
   for (let k = 0; k < n; k++) { const c = B.R.tiles.filter(t => freeTile(t, { far: 2 })); if (!c.length) break; const t = wpick(c.map(t => [t, t.h ? 0.45 : 1])); addMound(t.i, t.j); }
@@ -2740,9 +2864,10 @@ async function dropCells(n) {
 function placePlayerOn(t) { player.ch.x = t.x; player.ch.y = visTop(t) + 3; player.ch.z = t.z; }
 function faceTo(x, z) { const ch = player.ch, dx = x - ch.x, dz = z - ch.z; if (Math.hypot(dx, dz) > 0.01) ch.faceYaw = Math.atan2(-dx, -dz); }
 function collectAt(i, j) {
+  const cr = crateAt(i, j); if (cr) takeCrate(cr);
   const c = cellAt(i, j); if (!c) return;
   if (B.energy >= RULES.wallet) { msg('Wallet full (10 energy): spend some in the shop', 2); return; }
-  B.energy++; B.got++; dropCell(c); Snd.ding('gem'); Pts.add(1, 'energy'); bump($('wallet')); $('wallet').classList.add('bump'); setTimeout(() => $('wallet').classList.remove('bump'), 400);
+  const n = Math.min(cellGain(), RULES.wallet - B.energy); B.energy += n; B.got += n; dropCell(c); Snd.ding('gem'); Pts.add(n, 'energy'); Q.ev('energy', n); bump($('wallet')); $('wallet').classList.add('bump'); setTimeout(() => $('wallet').classList.remove('bump'), 400);
   const t = T(i, j); FX.ring(t.x, visTop(t) + 2, t.z, 0xffe34a); for (let k = 0; k < 5; k++) FX.sparkle(t.x, visTop(t) + 3, t.z, 0xffe34a);
 }
 async function walkPath(path) {
@@ -2751,7 +2876,7 @@ async function walkPath(path) {
     const ch = player.ch, f = { x: ch.x, y: ch.y, z: ch.z }, to = { x: t.x, y: visTop(t) + 3, z: t.z }, drop = to.y < f.y - 0.5;
     faceTo(to.x, to.z); if (drop) player.pose = 'air';
     await tween(drop ? 0.34 : 0.2, k => { ch.x = f.x + (to.x - f.x) * k; ch.z = f.z + (to.z - f.z) * k; ch.y = drop ? f.y + (to.y - f.y) * k * k + Math.sin(k * Math.PI) * 1.6 : f.y; });
-    B.P = { i: t.i, j: t.j }; if (drop) { FX.dust(t.x, visTop(t), t.z, 4, 0.8); Snd.play('dig', t.x, visTop(t), t.z); player.pose = 'run'; } else FX.trail(t.x, visTop(t), t.z);
+    B.P = { i: t.i, j: t.j }; Q.ev('walk'); if (drop) { FX.dust(t.x, visTop(t), t.z, 4, 0.8); Snd.play('dig', t.x, visTop(t), t.z); player.pose = 'run'; } else FX.trail(t.x, visTop(t), t.z);
     collectAt(t.i, t.j);
   }
   Snd.walking(false); player.pose = 'idle'; player.moving = false;
@@ -2761,7 +2886,7 @@ async function jumpTo(t) {
   faceTo(to.x, to.z); player.pose = 'air'; player.moving = true; Snd.play('jump', f.x, f.y, f.z); FX.dust(f.x, f.y - 3, f.z, 3, 0.7);
   const dist = Math.hypot(to.x - f.x, to.z - f.z) / TS;
   await tween(0.4 + 0.07 * dist, k => { ch.x = f.x + (to.x - f.x) * k; ch.z = f.z + (to.z - f.z) * k; ch.y = (1 - k) * (1 - k) * f.y + 2 * (1 - k) * k * c + k * k * to.y; });
-  B.P = { i: t.i, j: t.j };
+  const up = tile.h > T(B.P.i, B.P.j).h; B.P = { i: t.i, j: t.j }; if (up) Q.ev('climb');
   if (t.crush && !t.crush.dead) { const b = t.crush; B.crushed++; DmgNum.add(tile.x, to.y, tile.z, 'CRUSH!', 'crush', visTop(tile)); FX.dirtBreak(tile.x, visTop(tile), tile.z, 0.7); Snd.play('bass', tile.x, to.y, tile.z, 0.8); killBug(b, 'crush'); }
   FX.dust(to.x, to.y - 3, to.z, 5); Snd.play('dig', to.x, to.y, to.z); player.pose = 'idle'; player.moving = false;
   collectAt(t.i, t.j);
@@ -2787,11 +2912,11 @@ async function fireBeam(tr, dmg, color, pierce) {
   FX.spawn('sparkBig', a.x, a.y, a.z, { fps: 30, size: 3, add: true, color });
   if (tr.blocked) { FX.shotHit(b.x, b.y, b.z, false); msg('A hill is in the way', 1.4); }
   if (!tr.hits.length && !tr.blocked) FX.shotHit(b.x, b.y, b.z, false);
-  for (const h of tr.hits) { const c = bugCenter(h); FX.shotHit(c.x, c.y, c.z, true); hurtBug(h, dmg); }
+  for (const h of tr.hits) { const c = bugCenter(h); FX.shotHit(c.x, c.y, c.z, true); hurtBug(h, dmg + atkBonus()); }
   await sleep(0.4);
 }
 function projectile(a, b, dur, color = 0xffa040) {
-  if (Save.cos.eq.rainbow) color = new THREE.Color().setHSL((Game.clock * 0.6) % 1, 1, 0.6).getHex();
+  color = skinBeam(color);
   const m = new THREE.Mesh(new THREE.SphereGeometry(0.75, 12, 10), new THREE.MeshBasicMaterial({ color })), h = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, color, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); h.scale.setScalar(4); m.add(h); scene.add(m);
   const peak = Math.max(a.y, b.y) + 14, c = 2 * peak - (a.y + b.y) / 2; let tr = 0;
   return tween(dur, k => { m.position.set(a.x + (b.x - a.x) * k, (1 - k) * (1 - k) * a.y + 2 * (1 - k) * k * c + k * k * b.y, a.z + (b.z - a.z) * k); if ((tr += 1) % 2 === 0) FX.trail(m.position.x, m.position.y - 0.4, m.position.z); }).then(() => { scene.remove(m); m.geometry.dispose(); m.material.dispose(); h.material.dispose(); });
@@ -2804,7 +2929,7 @@ async function fireArc(t, dmg, splash) {
   const tiles = splash ? [[0, 0]].concat(D4).map(([dx, dy]) => T(t.i + dx, t.j + dy)).filter(Boolean) : [tile];
   const hits = tiles.map(tt => bugAt(tt.i, tt.j)).filter(Boolean);
   if (splash) for (const tt of tiles.slice(1)) FX.spawn('impact', tt.x, visTop(tt) + 1, tt.z, { from: 4, to: 9, fps: 24, size: 7, color: 0xffa040, add: true });
-  for (const h of hits) hurtBug(h, dmg);
+  for (const h of hits) hurtBug(h, dmg + atkBonus());
   const c = cellAt(t.i, t.j); if (c && !bugAt(t.i, t.j)) await detonate(c);
   await sleep(0.3);
 }
@@ -2815,13 +2940,13 @@ async function lunge(tile, back = true) {
 }
 async function swipeAt(t) {
   const b = t.bug && !t.bug.dead ? t.bug : null, tile = T(t.i, t.j); Snd.play('swing', tile.x, visTop(tile), tile.z); await lunge(tile);
-  if (b) { const c = bugCenter(b); FX.slash(c.x, c.y, c.z); hurtBug(b, 2); } else FX.slash(tile.x, Math.max(visTop(tile), player.ch.y - 3) + 2, tile.z);
+  if (b) { const c = bugCenter(b); FX.slash(c.x, c.y, c.z); hurtBug(b, 2 + atkBonus()); } else FX.slash(tile.x, Math.max(visTop(tile), player.ch.y - 3) + 2, tile.z);
   await sleep(0.32);
 }
 async function pulseBurst() {
   const ch = player.ch; FX.spawn('ring', ch.x, ch.y - 1.5, ch.z, { rev: true, fps: 26, size: 30, color: 0xff7a5a, add: true }); FX.spawn('impactBig', ch.x, ch.y - 1, ch.z, { fps: 24, size: 16, color: 0xff9a6a, add: true }); Snd.play('boom', ch.x, ch.y, ch.z); camShake = Math.max(camShake, 0.15);
   await sleep(0.12);
-  for (const tt of near(B.P.i, B.P.j, 1)) { const b = bugAt(tt.i, tt.j); if (b && bugH(b) <= pH()) { const c = bugCenter(b); FX.shotHit(c.x, c.y, c.z, true); hurtBug(b, 1); } }
+  for (const tt of near(B.P.i, B.P.j, 1)) { const b = bugAt(tt.i, tt.j); if (b && bugH(b) <= pH()) { const c = bugCenter(b); FX.shotHit(c.x, c.y, c.z, true); hurtBug(b, 1 + atkBonus()); } }
   await sleep(0.35);
 }
 // raise or sink a tile, with whatever is standing on it
@@ -2860,7 +2985,7 @@ async function shoveBug(t) {
 async function magnetPull() {
   const ch = player.ch, list = B.cells.filter(c => Math.max(Math.abs(c.i - B.P.i), Math.abs(c.j - B.P.j)) <= 2), take = list.slice(0, Math.max(0, RULES.wallet - B.energy));
   FX.spawn('spiral', ch.x, ch.y, ch.z, { fps: 22, size: 12, color: 0xffe34a, add: true }); Snd.play('tele', ch.x, ch.y, ch.z);
-  await Promise.all(take.map(c => { const t = T(c.i, c.j), p0 = { x: t.x, y: visTop(t) + 2.2, z: t.z }; c.pos = { ...p0 }; return tween(0.4, k => { c.pos.x = p0.x + (ch.x - p0.x) * k * k; c.pos.y = p0.y + (ch.y - p0.y) * k * k + Math.sin(k * Math.PI) * 3; c.pos.z = p0.z + (ch.z - p0.z) * k * k; }).then(() => { c.pos = null; if (B.energy < RULES.wallet) { B.energy++; B.got++; dropCell(c); Snd.ding('gem'); Pts.add(1, 'energy'); bump($('wallet')); } }); }));
+  await Promise.all(take.map(c => { const t = T(c.i, c.j), p0 = { x: t.x, y: visTop(t) + 2.2, z: t.z }; c.pos = { ...p0 }; return tween(0.4, k => { c.pos.x = p0.x + (ch.x - p0.x) * k * k; c.pos.y = p0.y + (ch.y - p0.y) * k * k + Math.sin(k * Math.PI) * 3; c.pos.z = p0.z + (ch.z - p0.z) * k * k; }).then(() => { c.pos = null; if (B.energy < RULES.wallet) { const n = Math.min(cellGain(), RULES.wallet - B.energy); B.energy += n; B.got += n; dropCell(c); Snd.ding('gem'); Pts.add(n, 'energy'); Q.ev('energy', n); bump($('wallet')); } }); }));
   if (list.length > take.length) msg('Wallet full: some cells stayed where they were', 2);
   await sleep(0.2);
 }
@@ -2902,6 +3027,7 @@ function killBug(b, how) {
   FX.ring(c.x, c.y, c.z, new THREE.Color(R[1]).getHex()); Snd.play('freeze', c.x, c.y, c.z); Snd.ding('kill');
   const wasAdultSpitter = b.type === 'spitter' && b.stage === 'adult', i = b.i, j = b.j, g = b.g;
   B.caught.push({ species: b.species, stage: b.stage });
+  Q.ev('catch_' + b.stage); if (how === 'crush') Q.ev('crush'); B.dayCatch = (B.dayCatch || 0) + 1; Q.set('daycatch', B.dayCatch);
   // keep the model a moment: it spins, shrinks into a capsule and flies to you
   b.dead = true; b.tag.el.remove(); const k = B.bugs.indexOf(b); if (k >= 0) B.bugs.splice(k, 1);
   const cap = new THREE.Sprite(new THREE.SpriteMaterial({ map: spriteTex('capsule'), transparent: true })); cap.scale.set(0.1, 0.1, 1); cap.position.copy(c); scene.add(cap);
@@ -2925,7 +3051,7 @@ function acidBurst(i, j) {
 // ---------------------------------------------------------------- playing a card
 function canAct() { return B.on && B.phase === 'player' && !B.busy; }
 function selectCard(k) {
-  if (B.reward && B.reward.pick && !B.reward.taken && B.hand[k]) { takeRewardSwap(k); return; }
+  if (!B.on) { if (SHOP.hub && B.swap >= 0 && B.hand[k]) swapInto(k); return; }
   if (!canAct()) return; const c = B.hand[k]; if (!c) return;
   if (B.swap >= 0) { swapInto(k); return; }
   if (B.sel === k) { if (CARDS[c.id].self && B.tgts.length) { play(k, B.tgts[0]); return; } clearSel(); return; }
@@ -2939,6 +3065,8 @@ async function play(k, t) {
   const c = B.hand[k], D = CARDS[c.id]; if (!canAct()) return;
   B.busy = true; clearSel(); c.used = true; hudDirty = true;
   try { await D.run(t); } catch (e) { console.error(e); }
+  Q.ev('card_' + D.type);
+  if (D.type === 'mv' && power('move2') && !c.x2 && B.hand[k] === c) { c.used = false; c.x2 = true; c.fresh = true; }   // x2 moves: every move card goes twice
   player.pose = 'idle'; player.moving = false; player.aimPitch = 0;
   B.busy = false; hudDirty = true;
   if (B.phase === 'player' && B.kills >= B.Z.quota) { B.phase = 'won'; await sleep(0.6); endJob(true); }
@@ -2953,7 +3081,7 @@ function clickTile(i, j) {
 }
 // the shop: pick an offer, then the card it replaces
 function buyOffer(k) {
-  if (!canAct()) return; const o = B.offers[k]; if (!o || o.sold) return;
+  if (!canShop()) return; const o = B.offers[k]; if (!o || o.sold) return;
   const D = CARDS[o.id];
   if (B.energy < D.cost) { msg(`${D.name} costs ${D.cost} energy: you have ${B.energy}`, 1.8); Snd.play('deny'); return; }
   clearSel(); B.swap = B.swap === k ? -1 : k; Snd.play('tick'); hudDirty = true;
@@ -2962,18 +3090,19 @@ function swapInto(slot) {
   const o = B.offers[B.swap], D = CARDS[o.id], old = B.hand[slot];
   B.energy -= D.cost; B.spent += D.cost; B.bought++; o.sold = true;
   B.hand[slot] = { id: o.id, used: false, fresh: true };
-  B.swap = -1; collectAt(B.P.i, B.P.j); Snd.ding('buy'); Pts.add(null, `${D.name} in, ${CARDS[old.id].name} out`); FX.ring(player.ch.x, player.ch.y - 2, player.ch.z, D.type === 'mv' ? 0x4da3ff : D.type === 'at' ? 0xff5a4a : 0xffd24a);
-  hudDirty = true;
+  B.swap = -1; if (B.on) collectAt(B.P.i, B.P.j); else { Run.energy = B.energy; Run.deck = B.hand; } Q.ev('buy'); Snd.ding('buy'); Pts.add(null, `${D.name} in, ${CARDS[old.id].name} out`); FX.ring(player.ch.x, player.ch.y - 2, player.ch.z, D.type === 'mv' ? 0x4da3ff : D.type === 'at' ? 0xff5a4a : 0xffd24a);
+  hudDirty = true; keyHand = '';
+  if (SHOP.hub) openShop(true);   // in a town: back to the shop's list
 }
-function cancelSwap() { if (B.swap >= 0) { B.swap = -1; hudDirty = true; } }
+function cancelSwap() { if (B.swap >= 0) { B.swap = -1; hudDirty = true; keyHand = ''; if (SHOP.hub) openShop(true); } }
 
 // ---------------------------------------------------------------- a job, start to finish
 function startJob(zid) {
   const Z = zoneDef(zid), R = ARENA[zid];
   clearBattle();
-  if (!Run.active) { Object.assign(Run, { active: true, zone: zid, deck: dealDeck(), energy: 0, kills: 0 }); Save.runs++; refreshGates(); }
-  for (const c of Run.deck) { c.used = false; c.gum = false; }
-  Object.assign(B, { on: true, R, Z, day: 1, kills: 0, energy: Run.energy, got: 0, spent: 0, bought: 0, crushed: 0, eggsSmashed: 0, bugs: [], cells: [], mounds: [], sel: -1, swap: -1, busy: false, phase: 'player', tgts: [], hover: null, endArm: 0, reward: null, caught: [], days: Z.days });
+  if (!Run.active) { Object.assign(Run, { active: true, zone: zid, kills: 0 }); if (!Run.deck) Run.deck = dealDeck(); Save.runs++; refreshGates(); }
+  for (const c of Run.deck) { c.used = false; c.gum = false; c.x2 = false; }
+  Object.assign(B, { on: true, R, Z, day: 1, kills: 0, energy: Run.energy, got: 0, spent: 0, bought: 0, crushed: 0, eggsSmashed: 0, bugs: [], cells: [], mounds: [], sel: -1, swap: -1, busy: false, phase: 'player', tgts: [], hover: null, endArm: 0, reward: null, caught: [], days: Z.days, crates: [], pw: {}, dayCatch: 0, crateDays: [1, rndi(3, 5)] });
   layTerrain(R, makeHills(Z));
   // you start on the ground tile nearest to where you walked in
   const ch = player.ch; let best = null, bd = 1e9; for (const t of R.tiles) { if (t.h) continue; const d = Math.hypot(t.x - ch.x, t.z - ch.z); if (d < bd) { bd = d; best = t; } }
@@ -2981,7 +3110,7 @@ function startJob(zid) {
   // larvae already up, a couple of energy cells, tonight's burrows
   for (let k = 0; k < Z.start; k++) { const c = R.tiles.filter(t => freeTile(t, { far: 3 })); if (!c.length) break; const t = pick(c); addBug(wpick(Object.entries(Z.mix)), t.i, t.j, 'larva'); }
   for (let k = 0; k < 2; k++) { const c = R.tiles.filter(t => freeTile(t)); const t = pick(c); addCell(t.i, t.j); }
-  placeMounds();
+  placeMounds(); spawnCrate(true);
   B.hand = Run.deck; rollOffers();
   document.body.classList.add('battle'); document.body.classList.remove('hub');
   cam.tdist = innerWidth < innerHeight ? 34 : 28; cam.wantPitch = 0.62; cam.yaw = 0; cam.soft = 0.8;
@@ -2989,7 +3118,7 @@ function startJob(zid) {
   Snd.ding('tele'); hudDirty = true; Save.jobs++; Save.save();
 }
 function clearBattle() {
-  clearPeds(); for (const C of CAPS) { scene.remove(C.g); scene.remove(C.cap); } CAPS.length = 0;
+  clearCrates(); B.pw = {}; for (const C of CAPS) { scene.remove(C.g); scene.remove(C.cap); } CAPS.length = 0;
   for (const b of B.bugs.slice()) dropBug(b); for (const c of B.cells.slice()) dropCell(c); for (const m of B.mounds.slice()) dropMound(m);
   for (const R of ARENA) for (const t of R.tiles) if (t.ov) t.ov.visible = false;
   for (const s of SWARM) scene.remove(s.g); SWARM.length = 0;
@@ -3009,7 +3138,7 @@ function leaveJob(how = 'onward') {
   }
   cam.tdist = 18; cam.wantPitch = 0.32; cam.soft = 1.2; Snd.walking(false); hudDirty = true;
 }
-function endRun() { Object.assign(Run, { active: false, zone: 0, deck: null, energy: 0, kills: 0 }); refreshGates(); }
+function endRun() { Object.assign(Run, { active: false, zone: 0, deck: dealDeck(), energy: 0, kills: 0 }); for (const b of BOOTHS) { b.offers = null; b.swaps = 1; } refreshGates(); }
 // End Day: the night comes, the bugs grow, a new day starts
 async function endDay() {
   if (!canAct()) return;
@@ -3036,9 +3165,9 @@ async function growNight() {
 }
 async function morning() {
   const Z = B.Z;
-  B.day++; placeMounds(); LIGHT.want = 0;
-  for (const c of B.hand) { c.used = false; c.gum = false; } rollOffers();
-  await sleep(0.4); await dropCells(rndi(1, 2));
+  B.day++; placeMounds(); LIGHT.want = 0; B.dayCatch = 0; Q.ev('night');
+  for (const c of B.hand) { c.used = false; c.gum = false; c.x2 = false; } rollOffers();
+  await sleep(0.4); await dropCells(rndi(1, 2)); await spawnCrate();
   const need = Z.quota - B.kills, eggs = B.bugs.filter(b => b.stage === 'egg').length;
   announce(`DAY ${B.day}`, '', eggs ? '#ff8a6a' : '#ffe36b', 2);
   B.phase = 'player'; Snd.ding('tele');
@@ -3059,7 +3188,7 @@ async function skitter(b) {
 }
 async function surface(m) {
   const t = T(m.i, m.j); dropMound(m);
-  if (isP(m.i, m.j) || bugAt(m.i, m.j)) { FX.dust(t.x, visTop(t), t.z, 5); Snd.play('dig', t.x, visTop(t), t.z); if (isP(m.i, m.j)) { Pts.add(null, 'Burrow blocked!', 'kill'); DmgNum.add(t.x, visTop(t) + 6, t.z, 'BLOCKED', 'crush', visTop(t)); } await sleep(0.2); return; }
+  if (isP(m.i, m.j) || bugAt(m.i, m.j)) { FX.dust(t.x, visTop(t), t.z, 5); Snd.play('dig', t.x, visTop(t), t.z); if (isP(m.i, m.j)) { Q.ev('block'); Pts.add(null, 'Burrow blocked!', 'kill'); DmgNum.add(t.x, visTop(t) + 6, t.z, 'BLOCKED', 'crush', visTop(t)); } await sleep(0.2); return; }
   const b = addBug(m.type, m.i, m.j, 'larva', m.species), y = visTop(t); b.pos = { x: t.x, y: y - 3, z: t.z };
   FX.rise(t.x, y, t.z); Snd.play('dig', t.x, y, t.z); Snd.play('chitter', t.x, y, t.z);
   await tween(0.4, k => { b.pos.y = y - 3 + 3 * easeOut(k); }); b.pos = null; await sleep(0.08);
@@ -3095,7 +3224,7 @@ function endJob(win, why) {
   if (win) {
     Run.zone = Z.id + 1; Save.bestRun = Math.max(Save.bestRun, Run.zone); ensureAreas(Z.id + 2);
     Snd.ding('gate'); const ch = player.ch; for (let k = 0; k < 6; k++) setTimeout(() => FX.ring(ch.x + rnd(-14, 14), ch.y + rnd(0, 8), ch.z + rnd(-14, 14), pick([0xffe34a, 0x9be36b, 0x7cc0ff, 0xff9a4a])), k * 150);
-    announce('ZONE CLEARED!', '', '#9be36b', 3);
+    announce('ZONE CLEARED!', '', '#9be36b', 3); Q.ev('zone');
     Save.save(); refreshGates();
     setTimeout(() => finishWin(), 1400);
   } else { Save.bestRun = Math.max(Save.bestRun, Z.id); Save.save(); refreshGates(); setTimeout(() => showResults(true, false, why), 300); }
@@ -3105,7 +3234,7 @@ function bankCatches() {
   const pool = petPool(B.Z ? B.Z.id : 0), list = (B.caught || []).map(c => { const r = CATCH[c.stage][2], sp = c.stage === 'egg' ? pick(pool) : c.species, key = sp + '|' + r; Save.pets[key] = (Save.pets[key] || 0) + 1; return { sp, r, egg: c.stage === 'egg' }; });
   B.caught = []; Save.save(); if (list.length) showCaught(list);
 }
-// the job's done: the bugs left over pop, you're free to walk, and the rewards wait by the gate
+// the job's done: the pets left over scamper off and you're free to walk on through the open gate to the next town
 function finishWin() {
   const R = B.R; if (!R || B.phase !== 'over') return;
   for (const b of B.bugs.slice()) { const c = bugCenter(b); FX.dust(c.x, c.y - 1, c.z, 6, 1); FX.spawn('smoke', c.x, c.y, c.z, { fps: 12, size: 8, color: 0xffffff, grow: 0.6 }); dropBug(b); }   // the pets left over scamper off
@@ -3115,44 +3244,6 @@ function finishWin() {
   B.on = false; B.phase = 'idle'; document.body.classList.remove('battle'); document.body.classList.add('hub');
   const ch = player.ch; Object.assign(ch, { vx: 0, vy: 0, vz: 0, grounded: false });
   cam.tdist = 18; cam.wantPitch = 0.32; cam.soft = 1; hudDirty = true;
-  spawnPedestals(R);
-}
-// rewards: three cards and a stack of energy on pedestals in front of the open gate. Walk into one to take it (just the one)
-const PEDS = [];
-function spawnPedestals(R) {
-  clearPeds(); const z = R.Z.zTop + 28, xs = [-28, -12, 12, 28], opts = [...rollReward(R.Z.id), 'energy'];
-  opts.forEach((id, k) => {
-    const g = new THREE.Group(), col = id === 'energy' ? 0xffe34a : COL[CARDS[id].type];
-    const base = new THREE.Mesh(boxGeo(6, 1.4, 6), mat(col)); base.position.y = 1.7; base.castShadow = true; g.add(base);
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(3.4, 0.25, 8, 32), new THREE.MeshBasicMaterial({ color: col })); ring.rotation.x = Math.PI / 2; ring.position.y = 2.6; g.add(ring);
-    const beamM = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 30, 12, 1, true), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.15, depthWrite: false, side: THREE.DoubleSide })); beamM.position.y = 17; g.add(beamM);
-    let icon;
-    if (id === 'energy') { icon = new THREE.Group(); for (let q = 0; q < 3; q++) { const c = new THREE.Mesh(cellGeo, cellMat); c.position.set((q - 1) * 2.2, 0, 0); c.rotation.set(0.6, q, 0.6); icon.add(c); } }
-    else { icon = new THREE.Sprite(new THREE.SpriteMaterial({ map: artTex(id), transparent: true })); icon.scale.set(5.5, 5.5, 1); }
-    icon.position.y = 7; g.add(icon);
-    g.position.set(xs[k], 0, z); scene.add(g); PEDS.push({ id, g, icon, ring, x: xs[k], z, armed: true });
-  });
-}
-function clearPeds() { for (const P of PEDS) scene.remove(P.g); PEDS.length = 0; B.reward = null; document.body.classList.remove('swapping'); }
-function updatePeds(dt) {
-  if (!PEDS.length || !player) return;
-  const ch = player.ch;
-  for (const P of PEDS) {
-    P.icon.position.y = 7 + Math.sin(Game.clock * 2.5 + P.x) * 0.5; P.ring.rotation.z += dt; if (P.id === 'energy') P.icon.rotation.y += dt;
-    const d = Math.hypot(ch.x - P.x, ch.z - P.z);
-    if (d > 6) P.armed = true;
-    if (d < 4 && P.armed && !B.on) {
-      P.armed = false;
-      if (P.id === 'energy') { const n = Math.max(0, Math.min(3, RULES.wallet - Run.energy)); Run.energy += n; Snd.ding('gem'); setTimeout(() => Snd.ding('gem'), 100); Pts.add(n, '⚡', ''); takeReward(P); }
-      else { B.hand = Run.deck; B.reward = { pick: P.id, ped: P, taken: null }; document.body.classList.add('swapping'); Snd.play('tick'); hudDirty = true; keyHand = ''; }
-    }
-    if (B.reward && B.reward.ped === P && d > 7) { B.reward = null; document.body.classList.remove('swapping'); hudDirty = true; keyHand = ''; }
-  }
-}
-function takeReward(P) {
-  FX.ring(P.x, 4, P.z, 0xffe34a); FX.spawn('spiral', P.x, 6, P.z, { fps: 22, size: 12, color: 0xffffff, add: true });
-  for (const Q of PEDS) if (Q !== P) FX.dust(Q.x, 1, Q.z, 5, 1);
-  clearPeds(); hudDirty = true; keyHand = '';
 }
 let RESULT = null;
 function showResults(on, win, why) {
@@ -3182,10 +3273,6 @@ async function buyContinue(why) {
   } else { B.days += 3; announce('OVERTIME!', '', '#f0c4ff', 2); Snd.ding('gate'); await sleep(1); await nightfall(); }
   B.busy = false; hudDirty = true;
 }
-function takeRewardSwap(slot) {
-  const R = B.reward; Run.deck[slot] = { id: R.pick, used: false, fresh: true }; B.hand = Run.deck; Snd.ding('buy');
-  if (R.ped) takeReward(R.ped); else { R.taken = CARDS[R.pick].name; R.pick = null; }
-}
 
 
 // ---------------------------------------------------------------- hints (on unless you turn them off in the menu): like a casual game, the card worth
@@ -3201,7 +3288,7 @@ function hitValue(b, dmg, crush) {
 // how good one play is, and which eggs it gets rid of (smashed or frozen)
 function judge(D, t, eggs) {
   let v = 0; const hits = [];
-  const add = (b, d, crush) => { const x = hitValue(b, d, crush); v += x; if (b && b.stage === 'egg' && x >= 100) hits.push(b); };
+  const add = (b, d, crush) => { const x = hitValue(b, crush ? d : d + atkBonus(), crush); v += x; if (b && b.stage === 'egg' && x >= 100) hits.push(b); };
   if (t.kind === 'beam') for (const b of t.tr.hits) add(b, D.dmg);
   else if (t.kind === 'arc') {
     const tiles = D.id === 'mortar' ? [[0, 0]].concat(D4) : [[0, 0]];
@@ -3209,9 +3296,9 @@ function judge(D, t, eggs) {
     if (!any && cellAt(t.i, t.j)) for (const tt of near(t.i, t.j, 1)) { const b = bugAt(tt.i, tt.j); if (b) add(b, 1); }
   }
   else if (t.kind === 'melee') { if (D.id === 'swipe') add(t.bug, 2); else if (t.bug) { const dx = Math.sign(t.bug.i - B.P.i), dy = Math.sign(t.bug.j - B.P.j), n = T(t.bug.i + dx, t.bug.j + dy); if (!n || bugAt(n.i, n.j) || n.h !== bugH(t.bug)) add(t.bug, 1); } }
-  else if (t.kind === 'jump') { if (t.crush) add(t.crush, 0, true); else if (cellAt(t.i, t.j)) v += 6; }
-  else if (t.kind === 'walk') v += 6 * t.path.filter(p => cellAt(p.i, p.j)).length;
-  else if (t.kind === 'tele') v += cellAt(t.i, t.j) ? 6 : 0;
+  else if (t.kind === 'jump') { if (t.crush) add(t.crush, 0, true); else if (cellAt(t.i, t.j)) v += 6; if (crateAt(t.i, t.j)) v += 12; }
+  else if (t.kind === 'walk') v += 6 * t.path.filter(p => cellAt(p.i, p.j)).length + 12 * t.path.filter(p => crateAt(p.i, p.j)).length;
+  else if (t.kind === 'tele') v += (cellAt(t.i, t.j) ? 6 : 0) + (crateAt(t.i, t.j) ? 12 : 0);
   else if (t.kind === 'util' && D.id === 'cryo') { if (t.bug) { if (t.bug.stage === 'egg') { v += 90; hits.push(t.bug); } else v += t.bug.stage === 'adult' ? 16 : 4; } }
   else if (t.kind === 'self') {
     if (D.id === 'burst') { for (const tt of near(B.P.i, B.P.j, 1)) { const b = bugAt(tt.i, tt.j); if (b && bugH(b) <= pH()) add(b, 1); } }
@@ -3243,7 +3330,7 @@ function bestFrom(cards, skip, eggs, depth) {
 }
 function computeHints() {
   if (!B.on || B.phase !== 'player' || B.busy) { HINT.card = -1; HINT.danger = false; HINT.offer = -1; return; }
-  const key = B.hand.map(c => c.id + c.used).join() + B.P.i + ',' + B.P.j + '|' + B.bugs.map(b => b.id + b.stage + b.hp + b.i + b.j + b.frozen + b.shell).join() + '|' + B.cells.map(c => c.i + ',' + c.j).join() + '|' + B.energy + '|' + B.offers.map(o => o.sold).join() + '|' + B.R.tiles.map(t => t.h).join('');
+  const key = B.hand.map(c => c.id + c.used).join() + B.P.i + ',' + B.P.j + '|' + B.bugs.map(b => b.id + b.stage + b.hp + b.i + b.j + b.frozen + b.shell).join() + '|' + B.cells.map(c => c.i + ',' + c.j).join() + '|' + (B.crates || []).map(c => c.i + ',' + c.j).join() + atkBonus() + '|' + B.energy + '|' + B.offers.map(o => o.sold).join() + '|' + B.R.tiles.map(t => t.h).join('');
   if (key === HINT.key) return; HINT.key = key;
   const eggs = B.bugs.filter(b => b.stage === 'egg' && !b.frozen), ready = B.hand.map((c, k) => k).filter(k => !B.hand[k].used);
   const best = bestFrom(ready, -1, eggs, 1);
@@ -3292,7 +3379,7 @@ function buildShowcase() {
   }
   SC.f = { ch: { x: SC.x0, y: GY + 3, z: SC.z0, vx: 0, vy: 0, vz: 0, faceYaw: 0, grounded: true }, rig: makeRig(LOOK, { gun: true }), aimPitch: 0, hitFx: 0, pose: 'idle' };
   if (window.GrugOutfitRig && MY_LOOK) try { GrugOutfitRig.dress(SC.f.rig, MY_LOOK); } catch (_) { }
-  if (Save.cos.eq.goldgun && Save.cos.own.goldgun) SC.f.rig.gun.children[0].material = goldGunMat;
+  wearGear(SC.f.rig);
 }
 function scSetH(t, h) { t.h = h; const ht = topY(h); t.m.geometry = boxGeo(TS, ht, TS); t.m.material = mat(h ? 0xa8834f : (t.i + t.j) & 1 ? 0xccaa6c : 0xd8b77c); t.m.scale.y = 1; t.m.position.y = ht / 2; }
 function scClear() {
@@ -3404,85 +3491,496 @@ function renderShowcase() {
 }
 
 
-// ---------------------------------------------------------------- cosmetics, for Pearls: a stall in the Depot (walk onto its pad). Every buy goes through
-// GrugPearlPopup.buy (it asks first, shows the balance, and handles "not enough"). What you own is saved with the game.
-const COSMO = [
-  { id: 'goldgun', name: 'Golden Blaster', pearls: 25, desc: 'Your blaster in solid gold. It glints.' },
-  { id: 'buddy', name: 'Pet Buddy', pearls: 20, desc: 'One of the pets you\'ve caught follows you round the Depot and the zones. Pick which one below.' },
-  { id: 'rainbow', name: 'Rainbow Zaps', pearls: 15, desc: 'Your beams and lobs come out in every colour.' },
-];
+// =====================================================================
+//  Everything round the jobs: the booths (cards for energy, loot crates for Pearls, the quest board), the towns' players
+//  (you can trade with them), side quests, blasters and skins, power-up crates in a job, pets that follow you, and the
+//  Pearl panel (centre left). Pearls only ever go through GrugPearlPopup.buy (it asks first); no balance is shown.
+// =====================================================================
+
+// ---------------------------------------------------------------- blasters and skins (looks only: nothing here changes how a job plays)
+const ITEMS = {
+  'b:rifle': { kind: 'b', name: 'Blaster', rar: 0, free: true, model: 'rifle' },
+  'b:pistol': { kind: 'b', name: 'Pocket Pistol', rar: 0, model: 'pistol' },
+  'b:water': { kind: 'b', name: 'Water Blaster', rar: 0, build: 'water' },
+  'b:sniper': { kind: 'b', name: 'Long Blaster', rar: 1, model: 'sniper' },
+  'b:ray': { kind: 'b', name: 'Ray Gun', rar: 1, build: 'ray' },
+  'b:bubble': { kind: 'b', name: 'Bubble Blaster', rar: 2, build: 'bubble' },
+  'b:tesla': { kind: 'b', name: 'Tesla Zapper', rar: 2, build: 'tesla' },
+  'b:cannon': { kind: 'b', name: 'Mega Cannon', rar: 3, build: 'cannon' },
+  's:camo': { kind: 's', name: 'Camo', rar: 0 },
+  's:candy': { kind: 's', name: 'Candy Stripe', rar: 0 },
+  's:chrome': { kind: 's', name: 'Chrome', rar: 1 },
+  's:neon': { kind: 's', name: 'Neon', rar: 1, beam: 0x39ffe0 },
+  's:gold': { kind: 's', name: 'Gold', rar: 2, beam: 0xffd24a },
+  's:galaxy': { kind: 's', name: 'Galaxy', rar: 2, beam: 0xc77dff },
+  's:rainbow': { kind: 's', name: 'Rainbow', rar: 3, beam: 'rainbow' },
+  's:lava': { kind: 's', name: 'Lava', rar: 3, beam: 0xff6a1a },
+};
+const ITEM_IDS = Object.keys(ITEMS).filter(id => !ITEMS[id].free);
+const RAR_VAL = [1, 3, 8, 20], CRATE_ODDS = [[0, 58], [1, 28], [2, 11], [3, 3]];
+const rollItem = kind => { const r = wpick(CRATE_ODDS), pool = ITEM_IDS.filter(id => ITEMS[id].kind === kind && ITEMS[id].rar === r); return pick(pool.length ? pool : ITEM_IDS.filter(id => ITEMS[id].kind === kind)); };
+const ownsItem = id => !id || ITEMS[id] && ITEMS[id].free || (Save.inv[id] | 0) > 0;
+// the Golden Blaster from the first Pearl Shop is the Gold skin now
 const goldGunMat = new THREE.MeshPhongMaterial({ color: 0xffc83a, emissive: 0x4a3000, shininess: 90, specular: 0xffffff });
-const owns = id => !!Save.cos.own[id];
-function applyCosmetics() {
-  const gold = owns('goldgun') && Save.cos.eq.goldgun;
-  for (const r of [player && player.rig, SC.built && SC.f.rig].filter(Boolean)) if (r.gun) r.gun.children[0].material = gold ? goldGunMat : gunMat;
-  ensureBuddy();
+const canvasTex = (w, h, f) => { const c = document.createElement('canvas'); c.width = w; c.height = h; f(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.magFilter = THREE.NearestFilter; t.wrapS = t.wrapT = THREE.RepeatWrapping; return t; };
+const SKIN_MAT = {};
+function skinMat(id) {
+  if (SKIN_MAT[id]) return SKIN_MAT[id];
+  let m;
+  if (id === 's:camo') m = new THREE.MeshLambertMaterial({ map: canvasTex(32, 32, (x, w, h) => { x.fillStyle = '#5a6a3a'; x.fillRect(0, 0, w, h); for (const c of ['#3a4a2a', '#8a7a4a', '#2a3020']) { x.fillStyle = c; for (let i = 0; i < 7; i++) { x.beginPath(); x.ellipse(rnd(0, w), rnd(0, h), rnd(2, 6), rnd(2, 5), rnd(0, 3), 0, 7); x.fill(); } } }) });
+  else if (id === 's:candy') m = new THREE.MeshPhongMaterial({ shininess: 60, map: canvasTex(16, 16, (x, w, h) => { x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.fillStyle = '#ff5aa8'; for (let i = -16; i < 32; i += 8) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i + 4, 0); x.lineTo(i + 20, 16); x.lineTo(i + 16, 16); x.fill(); } }) });
+  else if (id === 's:chrome') m = new THREE.MeshPhongMaterial({ color: 0xd4dae2, specular: 0xffffff, shininess: 140, emissive: 0x202428 });
+  else if (id === 's:neon') m = new THREE.MeshBasicMaterial({ color: 0x39ffe0 });
+  else if (id === 's:gold') m = goldGunMat;
+  else if (id === 's:galaxy') m = new THREE.MeshPhongMaterial({ shininess: 80, emissive: 0x1a0830, map: canvasTex(32, 32, (x, w, h) => { const g = x.createLinearGradient(0, 0, w, h); g.addColorStop(0, '#1a0a3a'); g.addColorStop(1, '#4a1a7a'); x.fillStyle = g; x.fillRect(0, 0, w, h); for (let i = 0; i < 26; i++) { x.fillStyle = pick(['#fff', '#c8b0ff', '#9fd8ff']); x.fillRect(rndi(0, w - 1), rndi(0, h - 1), 1, 1); } }) });
+  else if (id === 's:rainbow') m = new THREE.MeshPhongMaterial({ color: 0xff4a4a, shininess: 70, emissive: 0x202020 });
+  else if (id === 's:lava') m = new THREE.MeshLambertMaterial({ map: canvasTex(32, 32, (x, w, h) => { x.fillStyle = '#2a1a16'; x.fillRect(0, 0, w, h); x.strokeStyle = '#ff7a1a'; x.lineWidth = 2; for (let i = 0; i < 6; i++) { x.beginPath(); x.moveTo(rnd(0, w), rnd(0, h)); for (let k = 0; k < 3; k++) x.lineTo(rnd(0, w), rnd(0, h)); x.stroke(); } }), emissive: 0xff4a10, emissiveMap: canvasTex(32, 32, (x, w, h) => { x.fillStyle = '#000'; x.fillRect(0, 0, w, h); x.strokeStyle = '#fff'; x.lineWidth = 2; for (let i = 0; i < 6; i++) { x.beginPath(); x.moveTo(rnd(0, w), rnd(0, h)); for (let k = 0; k < 3; k++) x.lineTo(rnd(0, w), rnd(0, h)); x.stroke(); } }) });
+  return (SKIN_MAT[id] = m);
 }
-// the buddy: a small pet that trots after you
-let BUDDY = null;
-function buddySpecies() { const have = PET_IDS.filter(sp => ['common', 'rare', 'epic'].some(r => Save.pets[sp + '|' + r])); return have.includes(Save.cos.buddy) ? Save.cos.buddy : have[0] || 'dog'; }
-function ensureBuddy() {
-  const want = owns('buddy') && Save.cos.eq.buddy && player ? buddySpecies() : null;
-  if (BUDDY && BUDDY.sp === want) return;
-  if (BUDDY) { scene.remove(BUDDY.g); BUDDY = null; }
-  if (!want) return;
-  const m = petMesh(want, 1.5); scene.add(m.g); BUDDY = { sp: want, g: m.g, A: m.A, x: player.ch.x + 3, z: player.ch.z + 3, y: player.ch.y - 3, t: 0 };
-}
-function updateBuddy(dt) {
-  if (!BUDDY || !player) return; const ch = player.ch, B2 = BUDDY;
-  B2.g.visible = !SC.on;
-  const back = B.on ? 5 : 6, tx = ch.x + Math.sin(ch.faceYaw) * back + Math.cos(ch.faceYaw) * 2.5, tz = ch.z + Math.cos(ch.faceYaw) * back - Math.sin(ch.faceYaw) * 2.5;
-  const dx = tx - B2.x, dz = tz - B2.z, d = Math.hypot(dx, dz), sp = d > 30 ? d : Math.min(d * 3, 26);
-  if (d > 0.3) { B2.x += dx / d * sp * dt; B2.z += dz / d * sp * dt; B2.g.rotation.y += angDiff(B2.g.rotation.y, Math.atan2(-dx, -dz)) * Math.min(1, dt * 8); B2.t += dt * Math.min(1, sp / 6); }
-  const r = W.raycast(B2.x, 60, B2.z, 0, -1, 0, 80, p => !p.noCam), fy = 60 - r.t; B2.y += (fy - B2.y) * Math.min(1, dt * 10);
-  B2.g.position.set(B2.x, B2.y + Math.abs(Math.sin(B2.t * 9)) * (d > 0.5 ? 0.9 : 0.15), B2.z);
-  for (const L of B2.A.legs) L.rotation.x = Math.sin(B2.t * 12 + L.userData.ph) * (d > 0.5 ? 0.5 : 0.05); for (const w of B2.A.wings) w.rotation.z = Math.sin(Game.clock * 16) * 0.5 * w.userData.s; if (B2.A.tail) B2.A.tail.rotation.y = Math.sin(Game.clock * 6) * 0.5;
-}
-// the stall: two posts with a header on them, a counter with the goods on show, a pad in front
-const STALL = { x: -68, z: -20, pad: null, armed: true, shows: [] };
-function buildStall() {
-  const { x, z } = STALL, pur = 0x8a3aa8, trim = 0xf0c4ff;
-  part(x - 7.5, 7, z, 1.6, 12, 1.6, pur); part(x + 7.5, 7, z, 1.6, 12, 1.6, pur);
-  part(x, 13.75, z, 16.6, 1.5, 2, pur);   // the header, sitting on the posts
-  part(x, 2.5, z + 6, 14, 3, 3, 0x5a2a6e); part(x, 4.15, z + 6, 15, 0.3, 4, trim);
-  sign(['PEARL SHOP', ''], x, 17, z + 0.05, 14, 4.4, 0, 1, '#3a1450', ['#f0c4ff', '#ddd']);
-  part(x - 5, 16.25, z, 1, 3.5, 1, pur); part(x + 5, 16.25, z, 1, 3.5, 1, pur);   // the sign stands on posts
-  // on show: a gold blaster, a pet, a rainbow orb
-  const gun = gunMesh(); gun.children[0].material = goldGunMat; const gh = new THREE.Group(); gh.add(gun); gh.position.set(x - 4.5, 6.5, z + 6); gh.rotation.x = Math.PI / 2; scene.add(gh);
-  const pet = petMesh('cat', 1.4); pet.g.position.set(x, 4.3, z + 6); scene.add(pet.g);
-  const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2, 1), new THREE.MeshPhongMaterial({ color: 0xff4ad8, emissive: 0x501040, flatShading: true, shininess: 80 })); orb.position.set(x + 4.5, 6, z + 6); scene.add(orb);
-  STALL.shows = [gh, pet, orb];
-  const pad = new THREE.Mesh(new THREE.TorusGeometry(4, 0.35, 8, 36), new THREE.MeshBasicMaterial({ color: 0xd16be8 })); pad.rotation.x = Math.PI / 2; pad.position.set(x, 1.3, z + 14); scene.add(pad); STALL.pad = pad;
-  STALL.bill = Bills.add('<b style="color:#f0c4ff">PEARL SHOP</b>', x, 21, z, 160);
-}
-function updateStall(dt) {
-  if (!STALL.pad) return; const [gh, pet, orb] = STALL.shows;
-  gh.rotation.z += dt * 1.2; pet.g.rotation.y += dt * 0.8; orb.rotation.y += dt; orb.material.color.setHSL((Game.clock * 0.3) % 1, 1, 0.55); STALL.pad.rotation.z += dt;
+function updateSkins() {
+  if (SKIN_MAT['s:rainbow']) SKIN_MAT['s:rainbow'].color.setHSL((Game.clock * 0.4) % 1, 1, 0.55);
+  if (SKIN_MAT['s:neon']) SKIN_MAT['s:neon'].color.setHSL(0.47, 1, 0.5 + 0.12 * Math.sin(Game.clock * 5));
+  if (SKIN_MAT['s:lava']) SKIN_MAT['s:lava'].emissiveIntensity = 0.7 + 0.3 * Math.sin(Game.clock * 3);
   goldGunMat.emissive.setHSL(0.12, 1, 0.12 + 0.08 * Math.sin(Game.clock * 6));
-  if (!player || B.on) return; const d = Math.hypot(player.ch.x - STALL.x, player.ch.z - (STALL.z + 14));
-  if (d > 6) STALL.armed = true;
-  if (d < 3.5 && STALL.armed) { STALL.armed = false; toggleCosmo(true); }
 }
-function renderCosmo() {
-  const can = !!window.GrugPearlPopup;
-  const icon = { goldgun: `<img class="gold" src="${ASSETS.gunIcons.rifle}" alt="">`, buddy: `<img src="${PET_DATA.icon[buddySpecies()]}" alt="">`, rainbow: `<img class="rainbow" src="${SPRITES.light_cross}" alt="">` };
-  let h = `<div class="pth"><b style="color:#f0c4ff">PEARL SHOP</b><small>looks only: nothing here changes how a job plays</small><button id="cosClose">✕</button></div>`;
-  for (const c of COSMO) {
-    const own = owns(c.id), on = !!Save.cos.eq[c.id];
-    h += `<div class="cos"><div class="ci">${icon[c.id]}</div><div class="cd"><b>${c.name}</b><p>${c.desc}</p>`;
-    if (c.id === 'buddy' && own) { const have = PET_IDS.filter(sp => ['common', 'rare', 'epic'].some(r => Save.pets[sp + '|' + r])); h += have.length ? `<div class="bud">${have.map(sp => `<img data-sp="${sp}" class="${sp === buddySpecies() ? 'on' : ''}" src="${PET_DATA.icon[sp]}" alt="">`).join('')}</div>` : '<p><small>Catch a pet first: until then a dog keeps you company</small></p>'; }
-    h += `</div>${own ? `<button class="cb${on ? ' on' : ''}" data-eq="${c.id}">${on ? 'ON ✓' : 'OFF'}</button>` : can ? `<button class="cb buy" data-buy="${c.id}">${c.pearls}<i></i></button>` : '<small class="na">on grugdigital.com</small>'}</div>`;
+// beams and lobs take the skin's colour (the legendary and epic ones)
+function skinBeam(color) {
+  const S = ITEMS[Save.eq.skin]; if (!S || !S.beam) return color;
+  return S.beam === 'rainbow' ? new THREE.Color().setHSL((Game.clock * 0.6 + Math.random() * 0.2) % 1, 1, 0.6).getHex() : S.beam;
+}
+// the models: three from Kenney's Blaster Kit (CC0), the rest built out of parts
+const KGEO = {};
+function kenneyGeo(model) {
+  if (KGEO[model]) return KGEO[model];
+  const g = ASSETS.guns[model], f32 = s => { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u.buffer; };
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(f32(g.p)), 3)); geo.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(f32(g.n)), 3));
+  geo.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(f32(g.t)), 2)); geo.setIndex(new THREE.BufferAttribute(new Uint16Array(f32(g.i)), 1));
+  return (KGEO[model] = geo);
+}
+// built ones are made pointing along -z with the grip at the origin, then turned the way a held blaster points (down the arm)
+function builtGun(kind, skin) {
+  const inner = new THREE.Group(), sm = skin ? skinMat(skin) : null;
+  const add = (geo, col, x, y, z, rx = 0, o = {}) => { const m = new THREE.Mesh(geo, sm && !o.keep ? sm : o.mat || lam(col)); m.position.set(x, y, z); m.rotation.x = rx; m.castShadow = true; inner.add(m); return m; };
+  const box = (w, h, d) => new THREE.BoxGeometry(w, h, d), cyl = (r1, r2, l, n = 12) => new THREE.CylinderGeometry(r1, r2, l, n), H = Math.PI / 2;
+  if (kind === 'ray') {
+    add(box(0.5, 1.3, 0.6), 0x2a2a3a, 0, -0.55, 0.1, 0.25); add(box(0.9, 0.9, 1.8), 0x2fb8a0, 0, 0.35, -0.7);
+    add(new THREE.SphereGeometry(0.55, 14, 10), 0xf5cd30, 0, 0.35, 0.25); add(cyl(0.22, 0.32, 1.8), 0xd8d8d8, 0, 0.35, -2.4, H);
+    for (const z of [-1.8, -2.4, -3.0]) add(new THREE.TorusGeometry(0.42, 0.1, 6, 16), 0xf5cd30, 0, 0.35, z);
+    add(new THREE.SphereGeometry(0.28, 10, 8), 0, 0, 0.35, -3.35, 0, { keep: true, mat: new THREE.MeshBasicMaterial({ color: 0x7affb0 }) });
+  } else if (kind === 'water') {
+    add(box(0.5, 1.2, 0.6), 0xf5cd30, 0, -0.5, 0.1, 0.25); add(box(0.8, 0.8, 2.2), 0x3a8aff, 0, 0.3, -0.8);
+    add(cyl(0.6, 0.6, 1.0, 14), 0x9fd8ff, 0, 1.15, -0.6, 0, { keep: !sm, mat: new THREE.MeshPhongMaterial({ color: 0x9fd8ff, transparent: true, opacity: 0.7, shininess: 90 }) }); add(cyl(0.16, 0.2, 1.4), 0xf5cd30, 0, 0.3, -2.5, H);
+  } else if (kind === 'bubble') {
+    add(box(0.5, 1.2, 0.6), 0x8a3aa8, 0, -0.5, 0.1, 0.25); add(box(0.8, 0.8, 1.6), 0xff7ac8, 0, 0.3, -0.5);
+    add(new THREE.SphereGeometry(0.85, 16, 12), 0, 0, 1.25, -0.4, 0, { keep: !sm, mat: new THREE.MeshPhongMaterial({ color: 0xffb8e8, transparent: true, opacity: 0.55, shininess: 100, specular: 0xffffff }) });
+    add(new THREE.ConeGeometry(0.55, 1.4, 14), 0xff7ac8, 0, 0.3, -2.0, -H); add(new THREE.TorusGeometry(0.55, 0.12, 6, 18), 0xffffff, 0, 0.3, -2.7);
+  } else if (kind === 'tesla') {
+    add(box(0.5, 1.3, 0.6), 0x2a2a2e, 0, -0.55, 0.1, 0.25); add(box(0.9, 0.9, 1.6), 0x4a4a58, 0, 0.35, -0.5);
+    add(cyl(0.38, 0.38, 1.2, 10), 0xc87a2a, 0, 0.35, -1.7, H); for (const z of [-1.3, -1.6, -1.9, -2.2]) add(new THREE.TorusGeometry(0.42, 0.07, 6, 14), 0xffb04a, 0, 0.35, z);
+    for (const sx of [-1, 1]) { add(box(0.18, 0.18, 1.3), 0x9a9aa8, sx * 0.32, 0.35, -2.9); add(new THREE.SphereGeometry(0.22, 10, 8), 0, sx * 0.32, 0.35, -3.6, 0, { keep: true, mat: new THREE.MeshBasicMaterial({ color: 0xc77dff }) }); }
+  } else if (kind === 'cannon') {
+    add(box(0.55, 1.3, 0.65), 0x2a2a2e, 0, -0.55, 0.3, 0.25); add(box(1.2, 1.2, 1.4), 0x5a5a62, 0, 0.45, 0.2);
+    add(cyl(0.62, 0.7, 3.4, 16), 0x3a3a42, 0, 0.45, -1.9, H); add(new THREE.TorusGeometry(0.72, 0.16, 8, 20), 0xff8a1a, 0, 0.45, -3.6); add(new THREE.TorusGeometry(0.72, 0.12, 8, 20), 0xff8a1a, 0, 0.45, -0.8);
   }
+  const w = new THREE.Group(); w.add(inner); w.rotation.x = -Math.PI / 2; w.position.set(0, -1.75, 0); w.scale.setScalar(0.95); return w;
+}
+function buildGun(id, skin) {
+  const it = ITEMS[id] || ITEMS['b:rifle'];
+  if (it.build) return builtGun(it.build, skin || '');
+  const g = new THREE.Group(), m = new THREE.Mesh(kenneyGeo(it.model), skin ? skinMat(skin) : gunMat); m.castShadow = true; g.add(m);
+  const s = GUN.scale; m.scale.setScalar(s); m.rotation.set(-Math.PI / 2, Math.PI, 0); g.rotation.z = Math.PI; g.position.set(0, -1.5 - GUN.grip * s, 0);
+  return g;
+}
+// put the equipped blaster (and skin) in a rig's hand
+function wearGear(rig) {
+  if (!rig || !rig.gun) return;
+  if (!ownsItem(Save.eq.blaster)) Save.eq.blaster = 'b:rifle'; if (Save.eq.skin && !ownsItem(Save.eq.skin)) Save.eq.skin = '';
+  rig.rs.remove(rig.gun); rig.gun = buildGun(Save.eq.blaster, Save.eq.skin); rig.rs.add(rig.gun);
+}
+function applyGear() { if (player) wearGear(player.rig); if (SC.built) wearGear(SC.f.rig); }
+// item pictures: the model drawn once into a small picture (with the main renderer, into a texture)
+const ICON_RT = new THREE.WebGLRenderTarget(128, 128), ICON_SC = new THREE.Scene(), ICON_CAM = new THREE.PerspectiveCamera(28, 1, 0.1, 200), ITEM_ICON = {};
+ICON_SC.add(new THREE.HemisphereLight(0xffffff, 0x606070, 0.9)); { const d = new THREE.DirectionalLight(0xffffff, 0.8); d.position.set(3, 5, 8); ICON_SC.add(d); }
+function itemIcon(id) {
+  if (!id) id = 's:none';
+  if (ITEM_ICON[id]) return ITEM_ICON[id];
+  const it = ITEMS[id], gun = buildGun(it && it.kind === 'b' ? id : 'b:rifle', it && it.kind === 's' ? id : '');
+  const hold = new THREE.Group(), turn = new THREE.Group(); gun.position.set(0, 0, 0); hold.add(gun); hold.rotation.set(Math.PI / 2, 0, Math.PI / 2); turn.add(hold); turn.rotation.set(0.25, -0.55, 0); ICON_SC.add(turn);
+  turn.updateMatrixWorld(true); const bb = new THREE.Box3().setFromObject(turn), c = bb.getCenter(new THREE.Vector3()), sz = bb.getSize(new THREE.Vector3()).length();
+  turn.position.sub(c); ICON_CAM.position.set(0, 0, sz * 1.9); ICON_CAM.lookAt(0, 0, 0);
+  const prevRT = renderer.getRenderTarget(), prevC = renderer.getClearColor(new THREE.Color()), prevA = renderer.getClearAlpha(), px = new Uint8Array(128 * 128 * 4);
+  renderer.setRenderTarget(ICON_RT); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(ICON_SC, ICON_CAM); renderer.readRenderTargetPixels(ICON_RT, 0, 0, 128, 128, px);
+  renderer.setRenderTarget(prevRT); renderer.setClearColor(prevC, prevA); ICON_SC.remove(turn);
+  const cv = document.createElement('canvas'); cv.width = cv.height = 128; const x = cv.getContext('2d'), im = x.createImageData(128, 128);
+  for (let r = 0; r < 128; r++) im.data.set(px.subarray((127 - r) * 512, (128 - r) * 512), r * 512);
+  x.putImageData(im, 0, 0); return (ITEM_ICON[id] = cv.toDataURL());
+}
+const rarCss = r => RARITY[r][1];
+const itemTile = (id, extra = '') => { const it = ITEMS[id]; return `<div class="it r${it.rar}${it.kind === 's' && id === 's:rainbow' ? ' rbw' : ''}" data-id="${id}" ${extra}><img src="${itemIcon(id)}" alt=""><b style="color:${rarCss(it.rar)}">${it.name}</b></div>`; };
+
+// ---------------------------------------------------------------- loot crates: a Blaster Crate and a Skin Crate (Pearls, or free from quests)
+const CRATES = { b: { name: 'Blaster Crate', what: 'a new blaster to hold', col: '#ffb04a' }, s: { name: 'Skin Crate', what: 'a new look for your blaster', col: '#f0c4ff' } };
+async function openCrate(kind) {
+  if (REEL.on) return;
+  if (Save.freeCrates > 0) { Save.freeCrates--; }
+  else {
+    if (!window.GrugPearlPopup) return;
+    const ok = await GrugPearlPopup.buy({ pearls: PRICE.crate, label: CRATES[kind].name, what: 'Pet Zones: ' + CRATES[kind].name });
+    if (!ok) return;
+  }
+  const id = rollItem(kind); Save.inv[id] = (Save.inv[id] | 0) + 1; Save.save();
+  showReel(kind, id); hudDirty = true;
+}
+const REEL = { on: false };
+function showReel(kind, win) {
+  const el = $('reel'), TW = 104, at = 34, strip = []; REEL.on = true;
+  for (let i = 0; i < 40; i++) strip.push(i === at ? win : rollItem(kind));
+  el.innerHTML = `<div class="rlh" style="color:${CRATES[kind].col}">${CRATES[kind].name.toUpperCase()}</div><div class="rlw"><div class="rls">${strip.map(id => itemTile(id)).join('')}</div><i class="rlm"></i></div><div class="rlr"></div>`;
+  el.style.display = 'block'; Snd.play('tick');
+  const s = el.querySelector('.rls'), w = el.querySelector('.rlw').clientWidth, to = -(at * TW + TW / 2 - w / 2) + rnd(-34, 34);
+  s.style.transform = 'translateX(0px)'; void s.offsetWidth; s.style.transition = 'transform 4.4s cubic-bezier(.08,.7,.16,1)'; s.style.transform = `translateX(${to}px)`;
+  let last = -1, done = false;
+  const tick = () => { if (done || !REEL.on) return; const m = new DOMMatrixReadOnly(getComputedStyle(s).transform), idx = Math.floor((-m.m41 + w / 2) / TW); if (idx !== last) { last = idx; Snd.play('tick'); } requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+  setTimeout(() => {
+    done = true; if (!REEL.on) return; const it = ITEMS[win], n = Save.inv[win] | 0;
+    Snd.ding(it.rar >= 2 ? 'gate' : 'buy'); if (it.rar >= 2 && player) for (let k = 0; k < 5; k++) setTimeout(() => FX.ring(player.ch.x, player.ch.y, player.ch.z, new THREE.Color(rarCss(it.rar)).getHex()), k * 120);
+    el.querySelector('.rlw').classList.add('dim');
+    el.querySelector('.rlr').innerHTML = `<div class="won r${it.rar}"><img src="${itemIcon(win)}" alt=""><b style="color:${rarCss(it.rar)}">${it.name.toUpperCase()}</b><small style="color:${rarCss(it.rar)}">${RARITY[it.rar][0].toUpperCase()} ${it.kind === 'b' ? 'BLASTER' : 'SKIN'}${n > 1 ? ` · YOU HAVE ${n}` : ' · NEW!'}</small></div><div class="rlb"><button id="rlEq">EQUIP</button><button id="rlOk">OK</button></div>`;
+    $('rlEq').onclick = e => { e.stopPropagation(); if (it.kind === 'b') Save.eq.blaster = win; else Save.eq.skin = win; Save.save(); applyGear(); closeReel(); };
+    $('rlOk').onclick = e => { e.stopPropagation(); closeReel(); };
+  }, 4600);
+}
+function closeReel() { REEL.on = false; $('reel').style.display = 'none'; if ($('cosmo').style.display === 'block') renderCosmo(); hudDirty = true; }
+// the locker: buy crates, wear what you've got
+function renderCosmo() {
+  const can = !!window.GrugPearlPopup, free = Save.freeCrates;
+  let h = `<div class="pth"><b style="color:#f0c4ff">LOOT CRATES</b><small>looks only: nothing here changes how a job plays</small><button id="cosClose">✕</button></div><div class="crts">`;
+  for (const k of ['b', 's']) {
+    const C = CRATES[k];
+    h += `<div class="crt" style="border-color:${C.col}"><div class="crtI ${k}" style="background-image:url(${SPRITES.crate})"></div><b style="color:${C.col}">${C.name.toUpperCase()}</b><small>${C.what}</small><div class="odds">${CRATE_ODDS.map(([r, p]) => `<span style="background:${rarCss(r)};flex:${p}" title="${RARITY[r][0]} ${p}%"></span>`).join('')}</div><div class="oddt">${CRATE_ODDS.map(([r, p]) => `<span style="color:${rarCss(r)}">${p}%</span>`).join('')}</div>`;
+    h += free > 0 ? `<button class="cb free" data-crate="${k}">OPEN FREE${free > 1 ? ' ×' + free : ''}</button>` : can ? `<button class="cb buy" data-crate="${k}">${PRICE.crate}<i></i></button>` : '<small class="na">on grugdigital.com</small>';
+    h += '</div>';
+  }
+  h += '</div>';
+  const mine = kind => Object.keys(ITEMS).filter(id => ITEMS[id].kind === kind && ownsItem(id));
+  h += `<div class="lkh">MY BLASTERS</div><div class="lk">${mine('b').map(id => itemTile(id, `data-eq="${id}"`).replace('class="it', `class="it${Save.eq.blaster === id ? ' on' : ''}`).replace('</div>', `${(Save.inv[id] | 0) > 1 ? `<em>×${Save.inv[id]}</em>` : ''}</div>`)).join('')}</div>`;
+  h += `<div class="lkh">MY SKINS</div><div class="lk"><div class="it${!Save.eq.skin ? ' on' : ''}" data-eq=""><img src="${itemIcon('')}" alt=""><b>No skin</b></div>${mine('s').map(id => itemTile(id, `data-eq="${id}"`).replace('class="it', `class="it${Save.eq.skin === id ? ' on' : ''}`).replace('</div>', `${(Save.inv[id] | 0) > 1 ? `<em>×${Save.inv[id]}</em>` : ''}</div>`)).join('')}</div>`;
+  h += `<div class="plg"><small>Got doubles? Walk up to another player and press TRADE to swap with them. Quests sometimes give a free crate.</small></div>`;
   $('cosmoBody').innerHTML = h;
   $('cosClose').addEventListener('click', e => { e.stopPropagation(); toggleCosmo(false); });
-  for (const b of $('cosmoBody').querySelectorAll('[data-eq]')) b.addEventListener('click', e => { e.stopPropagation(); const id = b.dataset.eq; Save.cos.eq[id] = !Save.cos.eq[id]; Save.save(); applyCosmetics(); renderCosmo(); Snd.play('tick'); });
-  for (const b of $('cosmoBody').querySelectorAll('[data-buy]')) b.addEventListener('click', async e => {
-    e.stopPropagation(); const c = COSMO.find(q => q.id === b.dataset.buy);
-    if (await GrugPearlPopup.buy({ pearls: c.pearls, label: c.name, what: 'Pet Zones: ' + c.name })) { Save.cos.own[c.id] = true; Save.cos.eq[c.id] = true; Save.save(); applyCosmetics(); renderCosmo(); Snd.ding('gate'); FX.ring(player.ch.x, player.ch.y, player.ch.z, 0xd16be8); }
-  });
-  for (const im of $('cosmoBody').querySelectorAll('.bud img')) im.addEventListener('click', e => { e.stopPropagation(); Save.cos.buddy = im.dataset.sp; Save.save(); applyCosmetics(); renderCosmo(); Snd.play('tick'); });
+  for (const b of $('cosmoBody').querySelectorAll('[data-crate]')) b.addEventListener('click', e => { e.stopPropagation(); openCrate(b.dataset.crate).then(() => { if ($('cosmo').style.display === 'block') renderCosmo(); }); });
+  for (const b of $('cosmoBody').querySelectorAll('[data-eq]')) b.addEventListener('click', e => { e.stopPropagation(); const id = b.dataset.eq; if (!id || ITEMS[id].kind === 's') Save.eq.skin = id; else Save.eq.blaster = id; Save.save(); applyGear(); renderCosmo(); Snd.play('tick'); });
 }
-function toggleCosmo(on) { const el = $('cosmo'); on = on === undefined ? el.style.display !== 'block' : on; if (on) renderCosmo(); el.style.display = on ? 'block' : 'none'; }
+function toggleCosmo(on) { const el = $('cosmo'); on = on === undefined ? el.style.display !== 'block' : on; if (on) renderCosmo(); el.style.display = on ? 'block' : 'none'; hudDirty = true; }
+
+// ---------------------------------------------------------------- booths: the card shop (energy), loot crates (Pearls), the quest board. Walk onto the pad in front
+const BOOTHS = [], KEEPERS = [];
+const BOOTH_LOOK = {
+  cards: { title: 'CARD SHOP', col: 0x2f8f2a, trim: 0x9be36b, bg: '#14381a', fg: ['#c8ff9a', '#ddd'], pad: 0x9be36b, css: '#9be36b' },
+  crates: { title: 'LOOT CRATES', col: 0x8a3aa8, trim: 0xf0c4ff, bg: '#3a1450', fg: ['#f0c4ff', '#ddd'], pad: 0xd16be8, css: '#f0c4ff' },
+  quests: { title: 'QUEST BOARD', col: 0x8a5428, trim: 0xffe9a0, bg: '#3a2410', fg: ['#ffe9a0', '#ddd'], pad: 0xffd24a, css: '#ffe9a0' },
+};
+const crateBoxMat = (() => { let m = null; return () => m || (m = new THREE.MeshLambertMaterial({ map: spriteTex('crate') })); })();
+function randomLook() { return { skin: pick([0xf5cd30, 0xe0b48a, 0xa8744a, 0x6a4a32, 0xffd8b8]), shirt: new THREE.Color().setHSL(Math.random(), 0.6, 0.5).getHex(), arms: null, pants: pick([0x3a3a40, 0x2a4a8a, 0x5a3a2a, 0x2a2a2a]), hat: pick(['cap', 'beanie', 'hair', 'none', 'headphones']), hatColor: new THREE.Color().setHSL(Math.random(), 0.6, 0.45).getHex(), face: pick(['smile', 'grin', 'happy', 'cool']) }; }
+function booth(kind, x, z, k = -1) {
+  const L = BOOTH_LOOK[kind], shows = [];
+  if (kind === 'quests') {   // a notice board on two posts, papers pinned to it
+    part(x - 7, 6, z, 1.4, 10, 1.4, L.col); part(x + 7, 6, z, 1.4, 10, 1.4, L.col);
+    part(x, 7, z, 13, 7, 0.8, 0x6a4020);
+    for (const [dx, dy, w, h] of [[-4, 8.5, 3, 3.4], [0, 8, 3.4, 4], [4, 8.6, 2.6, 3], [-3, 5.2, 3.4, 2.4], [3.4, 5, 3, 2.6]]) part(x + dx, dy, z + 0.5, w, h, 0.15, pick([0xf8f4e8, 0xfff2b0, 0xe8f4ff]), { deco: true });
+    sign([L.title, ''], x, 12.6, z + 0.45, 13, 2.6, 0, 1, L.bg, L.fg);
+    const bk = new THREE.Sprite(new THREE.SpriteMaterial({ map: spriteTex('book'), transparent: true })); bk.scale.set(4, 4, 1); bk.position.set(x, 17, z); scene.add(bk); shows.push(bk);
+  } else {   // two posts with a header, a counter with the goods on show, the keeper behind it
+    part(x - 7.5, 7, z, 1.6, 12, 1.6, L.col); part(x + 7.5, 7, z, 1.6, 12, 1.6, L.col);
+    part(x, 13.75, z, 16.6, 1.5, 2, L.col);
+    part(x, 2.5, z + 6, 14, 3, 3, new THREE.Color(L.col).multiplyScalar(0.7).getHex()); part(x, 4.15, z + 6, 15, 0.3, 4, L.trim);
+    part(x - 5, 16.25, z, 1, 3.5, 1, L.col); part(x + 5, 16.25, z, 1, 3.5, 1, L.col);
+    sign([L.title, ''], x, 17, z + 0.05, 14, 4.4, 0, 1, L.bg, L.fg);
+    if (kind === 'cards') for (const [q, id] of [[-4.5, 'hop'], [0, 'zap'], [4.5, 'raise']]) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: artTex(id), transparent: true })); sp.scale.set(3.4, 3.4, 1); sp.position.set(x + q, 6.6, z + 6); sp.userData.y0 = 6.6; scene.add(sp); shows.push(sp); }
+    else {
+      const cr = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 3), crateBoxMat()); cr.position.set(x - 3.5, 6, z + 6); cr.castShadow = true; scene.add(cr); shows.push(cr);
+      const gh = new THREE.Group(), gun = builtGun('ray', ''); gun.position.set(0, 0, 0); gh.add(gun); gh.position.set(x + 3.5, 6.4, z + 6); gh.scale.setScalar(1.2); scene.add(gh); shows.push(gh);
+    }
+    const kp = { rig: makeRig(randomLook()), ch: { x, y: 4, z: z + 2.6, faceYaw: Math.PI, vx: 0, vz: 0, grounded: true } }; animateRig(kp, 0.016, 'idle'); KEEPERS.push(kp); dressExtra(kp.rig);
+  }
+  const pad = new THREE.Mesh(new THREE.TorusGeometry(4, 0.35, 8, 36), new THREE.MeshBasicMaterial({ color: L.pad })); pad.rotation.x = Math.PI / 2; pad.position.set(x, 1.3, z + 14); scene.add(pad);
+  const bill = Bills.add(`<b style="color:${L.css}">${L.title}</b>`, x, kind === 'quests' ? 20 : 21, z, 150);
+  BOOTHS.push({ kind, x, z: z + 14, k, pad, shows, bill, armed: true, offers: null, swaps: 1 });
+}
+function updateBooths(dt) {
+  const ch = player && player.ch;
+  for (const b of BOOTHS) {
+    b.pad.rotation.z += dt; b.pad.position.y = 1.3 + Math.sin(Game.clock * 2 + b.x) * 0.15;
+    for (const s of b.shows) { if (s.isSprite) s.position.y = (s.userData.y0 || 17) + Math.sin(Game.clock * 2.4 + s.position.x) * 0.4; else s.rotation.y += dt * 0.9; }
+    if (!ch || B.on) continue;
+    const d = Math.hypot(ch.x - b.x, ch.z - b.z);
+    if (d > 6) b.armed = true;
+    if (d < 3.6 && b.armed && !menuOpen()) { b.armed = false; Snd.wake(); if (b.kind === 'cards') openCardShop(b); else if (b.kind === 'crates') toggleCosmo(true); else openBoard(b); }
+  }
+}
+// the card shop in the Depot and the towns: the same shop as in a job, paid in energy; your kit opens up to pick the card it replaces
+function openCardShop(bo) {
+  if (!bo.offers) bo.offers = rollOffersArr();
+  SHOP.hub = bo; B.offers = bo.offers; B.hand = Run.deck; B.energy = Run.energy; B.swap = -1; B.sel = -1;
+  document.body.classList.add('kitopen'); keyHand = ''; openShop(true);
+}
+function closeHubShop() {
+  if (!SHOP.hub) return; Run.energy = B.energy; SHOP.hub = null; B.swap = -1; SHOP.open = false; showItem(-1);
+  document.body.classList.remove('kitopen', 'pv'); hudDirty = true; keyHand = ''; keyShop = '';
+  $('shopList').style.display = 'none'; $('preview').style.display = 'none'; $('tip').dataset.k = 'x'; $('tip').innerHTML = ''; $('tip').className = 'ol';
+}
+const canShop = () => canAct() || (!B.on && !!SHOP.hub);
+
+// ---------------------------------------------------------------- the towns' players: a couple hang about each town. You can trade with them (and with the Depot crowd)
+const TOWNFOLK = [];
+function spawnTownfolk(k) {
+  const S = TOWNSITE[k];
+  for (let q = 0; q < 2; q++) {
+    const n = { name: AK.makeName(new Set()), rig: makeRig(randomLook()), ch: { x: rnd(-10, 10), y: 4, z: S.z0 - rnd(16, 30), faceYaw: rnd(0, 6), vx: 0, vz: 0, grounded: true }, chat: null, town: k, path: [], wait: rnd(1, 4) };
+    const el = document.createElement('div'); el.className = 'tag'; el.innerHTML = '<div class="bub"></div><div class="nm ol"></div>'; el.style.display = 'none'; $('tags').appendChild(el);
+    n.tag = { el, bub: el.querySelector('.bub'), nm: el.querySelector('.nm'), on: false }; n.tag.nm.textContent = n.name;
+    dressExtra(n.rig); TOWNFOLK.push(n);
+  }
+}
+function updateTownfolk(dt) {
+  for (const n of TOWNFOLK) {
+    const S = TOWNSITE[n.town], ch = n.ch;
+    if (n.chat && (n.chat.t -= dt) <= 0) n.chat = null;
+    if (!n.chat && Math.random() < dt * 0.02) sayNpc(n, pick(NPC_LINES));
+    if (TRADE.n === n) { n.path.length = 0; faceTo2(ch, player.ch.x, player.ch.z); ch.vx = ch.vz = 0; animateRig(n, dt, 'idle'); continue; }
+    if (!n.path.length && (n.wait -= dt) <= 0) {   // somewhere else in town; across the row of booths, go by the path up the middle
+      const spots = [[0, -20], [0, -64], [-34, -30], [34, -30], [-14, -58], [14, -58], [-30, -72], [10, -86], [-60, -22], [56, -26], [-20, -90]], [sx, sz] = pick(spots), tz = S.z0 + sz;
+      const band = z => z > S.z0 - 40 ? 0 : 1; if (band(ch.z) !== band(tz)) n.path.push({ x: 0, z: ch.z }, { x: 0, z: tz }); n.path.push({ x: sx + rnd(-3, 3), z: tz + rnd(-3, 3) }); n.wait = rnd(3, 9);
+    }
+    const p = n.path[0];
+    if (p) { const dx = p.x - ch.x, dz = p.z - ch.z, d = Math.hypot(dx, dz); if (d < 0.6) n.path.shift(); else { const v = Math.min(9, d * 4); ch.vx = dx / d * v; ch.vz = dz / d * v; ch.x += ch.vx * dt; ch.z += ch.vz * dt; ch.faceYaw += angDiff(ch.faceYaw, Math.atan2(-dx, -dz)) * Math.min(1, dt * 8); } }
+    else { ch.vx = ch.vz = 0; }
+    animateRig(n, dt);
+  }
+}
+function faceTo2(ch, x, z) { const dx = x - ch.x, dz = z - ch.z; if (Math.hypot(dx, dz) > 0.1) ch.faceYaw += angDiff(ch.faceYaw, Math.atan2(-dx, -dz)) * 0.2; }
+function sayNpc(n, text) { n.chat = { text, t: 4 + text.length * 0.06 }; if (n.tag) n.tag.bub.textContent = text; }
+// dressing the keepers and the towns' players in the arcade's outfits (they wait, hidden, until theirs is on: 8 s at most)
+let KIT_LOOKS = null, DRESS_I = 0; const DRESS_WAIT = [];
+function dressExtra(rig) {
+  if (!window.GrugOutfitRig) return;
+  if (KIT_LOOKS) { if (KIT_LOOKS.length) try { GrugOutfitRig.dress(rig, KIT_LOOKS[DRESS_I++ % KIT_LOOKS.length]); } catch (_) { } return; }
+  rig.root.visible = false; DRESS_WAIT.push(rig); setTimeout(() => { rig.root.visible = true; }, 8000);
+}
+function kitReady(list) { KIT_LOOKS = list || []; for (const r of DRESS_WAIT.splice(0)) { if (KIT_LOOKS.length) try { GrugOutfitRig.dress(r, KIT_LOOKS[DRESS_I++ % KIT_LOOKS.length]); } catch (_) { } r.root.visible = true; } }
+
+// ---------------------------------------------------------------- trading: walk up to another player, press TRADE, pick one of theirs and one of yours
+const TRADE = { n: null, mine: null, theirs: null, said: '' };
+const traders = () => npcs.concat(TOWNFOLK);
+function traderInv(n) {
+  if (!n.inv) { n.inv = {}; n.greed = rnd(0.8, 1.45); for (let k = rndi(2, 4); k > 0; k--) { const r = wpick([[0, 6], [1, 3], [2, 1.2], [3, 0.35]]), pool = ITEM_IDS.filter(id => ITEMS[id].rar === r), id = pick(pool); n.inv[id] = (n.inv[id] | 0) + 1; } }
+  return n.inv;
+}
+function nearTrader() {
+  if (!player || B.on || menuOpen()) return null; let best = null, bd = 11;
+  for (const n of traders()) { if (!n.ch || !n.rig) continue; const d = Math.hypot(n.ch.x - player.ch.x, n.ch.z - player.ch.z); if (d < bd && Math.abs(n.ch.y - player.ch.y) < 8) { bd = d; best = n; } }
+  return best;
+}
+function openTrade(n) { TRADE.n = n; TRADE.mine = null; TRADE.theirs = null; TRADE.said = pick(['hey!', 'wanna trade?', 'whatcha got', 'yo']); traderInv(n); renderTrade(); $('trade').style.display = 'block'; hudDirty = true; }
+function closeTrade() { TRADE.n = null; $('trade').style.display = 'none'; hudDirty = true; }
+const tradeWant = (n, id) => RAR_VAL[ITEMS[id].rar] * n.greed;
+function renderTrade() {
+  const n = TRADE.n; if (!n) return; const inv = traderInv(n);
+  const theirs = Object.keys(inv).filter(id => inv[id] > 0), mine = ITEM_IDS.filter(id => (Save.inv[id] | 0) > 0);
+  let need = '';
+  if (TRADE.theirs) { const w = tradeWant(n, TRADE.theirs), r = [0, 1, 2, 3].find(q => RAR_VAL[q] * ((TRADE.mine && inv[TRADE.mine]) ? 0.8 : 1) >= w); need = r === undefined ? '<span style="color:#ff8a6a">they really like that one</span>' : `they'd take <b style="color:${rarCss(r)}">${RARITY[r][0]}</b> or better`; }
+  let h = `<div class="pth"><b style="color:#9be36b">TRADE</b><small>with ${n.name}</small><button id="trClose">✕</button></div><div class="trsay ol">“${TRADE.said}”</div>`;
+  h += `<div class="lkh">THEIRS · pick one</div><div class="lk">${theirs.map(id => itemTile(id, 'data-t="1"').replace('class="it', `class="it${TRADE.theirs === id ? ' on' : ''}`)).join('') || '<small>nothing left</small>'}</div>`;
+  h += `<div class="lkh">YOURS · pick one</div><div class="lk">${mine.map(id => itemTile(id, 'data-m="1"').replace('class="it', `class="it${TRADE.mine === id ? ' on' : ''}`).replace('</div>', `${(Save.inv[id] | 0) > 1 ? `<em>×${Save.inv[id]}</em>` : ''}</div>`)).join('') || '<small>Nothing to trade yet: open a Loot Crate first</small>'}</div>`;
+  h += `<div class="trf"><span class="trn">${need}</span><button id="trGo" ${TRADE.mine && TRADE.theirs ? '' : 'disabled'}>OFFER ⇄</button></div>`;
+  $('tradeBody').innerHTML = h;
+  $('trClose').onclick = e => { e.stopPropagation(); closeTrade(); };
+  for (const t of $('tradeBody').querySelectorAll('[data-t]')) t.onclick = e => { e.stopPropagation(); TRADE.theirs = t.dataset.id; Snd.play('tick'); renderTrade(); };
+  for (const t of $('tradeBody').querySelectorAll('[data-m]')) t.onclick = e => { e.stopPropagation(); TRADE.mine = t.dataset.id; Snd.play('tick'); renderTrade(); };
+  $('trGo').onclick = e => { e.stopPropagation(); offerTrade(); };
+}
+function offerTrade() {
+  const n = TRADE.n, inv = traderInv(n), a = TRADE.mine, b = TRADE.theirs; if (!n || !a || !b || !(inv[b] > 0) || !((Save.inv[a] | 0) > 0)) return;
+  const give = RAR_VAL[ITEMS[a].rar] * (inv[a] ? 0.8 : 1);   // something they've already got is worth a bit less to them
+  if (give + 1e-6 < tradeWant(n, b)) { TRADE.said = pick(['nah', 'too low lol', 'add more', 'i want something rarer', 'no thx']); sayNpc(n, TRADE.said); Snd.play('deny'); renderTrade(); return; }
+  Save.inv[a]--; if (!Save.inv[a]) delete Save.inv[a]; Save.inv[b] = (Save.inv[b] | 0) + 1;
+  inv[b]--; if (!inv[b]) delete inv[b]; inv[a] = (inv[a] | 0) + 1;
+  Save.save(); applyGear(); Q.ev('trade');
+  TRADE.said = pick(['deal!', 'ez trade', 'ty!!', 'pleasure doing business', 'nice']); sayNpc(n, TRADE.said); Snd.ding('buy');
+  if (player) FX.ring(player.ch.x, player.ch.y, player.ch.z, new THREE.Color(rarCss(ITEMS[b].rar)).getHex());
+  TRADE.mine = TRADE.theirs = null; renderTrade();
+}
+
+// ---------------------------------------------------------------- side quests (top right): three at a time, done just by playing. Rewards: energy, or a free loot crate
+const QT = {
+  mv: { ev: 'card_mv', icon: 'arrow_up', txt: n => `Use ${n} Move cards`, n: [6, 12], r: 2 },
+  at: { ev: 'card_at', icon: 'sword', txt: n => `Use ${n} Attack cards`, n: [5, 10], r: 2 },
+  ut: { ev: 'card_ut', icon: 'shield', txt: n => `Use ${n} Utility cards`, n: [2, 4], r: 2 },
+  larva: { ev: 'catch_larva', icon: 'capsule', txt: n => `Catch ${n} babies`, n: [3, 6], r: 3 },
+  adult: { ev: 'catch_adult', icon: 'potion', txt: n => `Catch ${n} grown pets`, n: [2, 4], r: 3 },
+  egg: { ev: 'catch_egg', icon: 'egg', txt: n => `Catch ${n} egg${n > 1 ? 's' : ''}`, n: [1, 2], r: 'crate' },
+  crush: { ev: 'crush', icon: 'arrow_down', txt: n => `Land on ${n} pet${n > 1 ? 's' : ''} from above`, n: [1, 2], r: 3 },
+  energy: { ev: 'energy', icon: 'cell', txt: n => `Pick up ${n} energy`, n: [5, 10], r: 2 },
+  walk: { ev: 'walk', icon: 'tornado', txt: n => `Walk ${n} tiles`, n: [15, 30], r: 2 },
+  climb: { ev: 'climb', icon: 'rock', txt: n => `Jump up onto ${n} hills`, n: [2, 4], r: 2 },
+  buy: { ev: 'buy', icon: 'bag', txt: n => `Buy ${n} card${n > 1 ? 's' : ''}`, n: [1, 2], r: 3 },
+  zone: { ev: 'zone', icon: 'clover', txt: n => `Clear ${n} zone${n > 1 ? 's' : ''}`, n: [1, 2], r: 'crate' },
+  crate: { ev: 'crate', icon: 'crate', txt: n => `Grab ${n} power-up${n > 1 ? 's' : ''}`, n: [1, 2], r: 2 },
+  night: { ev: 'night', icon: 'hourglass', txt: n => `Get through ${n} nights`, n: [4, 8], r: 2 },
+  block: { ev: 'block', icon: 'shield', txt: () => 'Stand on a burrow at night', n: [1, 1], r: 3 },
+  daycatch: { ev: 'daycatch', set: true, icon: 'capsule', txt: n => `Catch ${n} pets in one day`, n: [2, 3], r: 'crate' },
+};
+let qDirty = true;
+const Q = {
+  init() { Save.quests = Save.quests.filter(q => QT[q.t] && !q.done); while (Save.quests.length < 3) Save.quests.push(this.make()); Save.save(); },
+  make(avoid) {
+    const have = new Set(Save.quests.map(q => q.t)), opts = Object.keys(QT).filter(t => !have.has(t) && t !== avoid), t = pick(opts), D = QT[t];
+    return { t, n: Save.qdone < 3 ? D.n[0] : rndi(D.n[0], D.n[1]), have: 0 };
+  },
+  ev(name, amt = 1) { for (const q of Save.quests) { const D = QT[q.t]; if (q.done || !D || D.set || D.ev !== name) continue; q.have = Math.min(q.n, q.have + amt); qDirty = true; if (q.have >= q.n) this.finish(q); } if (qDirty) Save.save(); },
+  set(name, v) { for (const q of Save.quests) { const D = QT[q.t]; if (q.done || !D || !D.set || D.ev !== name || v <= q.have) continue; q.have = Math.min(q.n, v); qDirty = true; if (q.have >= q.n) this.finish(q); } },
+  finish(q) {
+    q.done = true; Save.qdone++; const D = QT[q.t];
+    if (D.r === 'crate') { Save.freeCrates++; Pts.add(null, '<span style="color:#f0c4ff">FREE CRATE!</span>', 'kill'); } else addEnergy(D.r);
+    Snd.ding('gate'); Save.save(); qDirty = true; hudDirty = true;
+    setTimeout(() => { const i = Save.quests.indexOf(q); if (i >= 0) Save.quests[i] = this.make(q.t); Save.save(); qDirty = true; }, 2400);
+  },
+};
+function addEnergy(n) { if (B.on) B.energy += n; else { Run.energy += n; if (SHOP.hub) B.energy = Run.energy; } Pts.add(n, '⚡'); hudDirty = true; keyShop = ''; }
+const qIcon = ic => ic === 'egg' ? '<i class="qegg"></i>' : ic === 'cell' ? '<i class="cc e on qcell"></i>' : `<img src="${SPRITES[ic]}" alt="">`;
+const qReward = D => D.r === 'crate' ? '<span class="qr crate"><img src="' + SPRITES.crate + '" alt=""></span>' : `<span class="qr">+${D.r}<i class="cc e on"></i></span>`;
+let keySQ = '';
+function renderSide() {
+  const key = Save.quests.map(q => q.t + q.have + '/' + q.n + (q.done ? 'd' : '')).join() + '|' + Save.freeCrates;
+  if (key === keySQ && !qDirty) return; keySQ = key; qDirty = false;
+  $('sq').innerHTML = `<div class="sqh">QUESTS</div>` + Save.quests.map(q => { const D = QT[q.t]; return `<div class="sqr${q.done ? ' done' : ''}">${qIcon(D.icon)}<div class="sqt"><span>${D.txt(q.n)}</span><div class="sqb"><i style="width:${(q.have / q.n * 100).toFixed(0)}%"></i></div></div>${q.done ? '<b class="ok">✓</b>' : qReward(D)}</div>`; }).join('');
+}
+// the quest board: your quests, big, and one free swap per board per run
+function openBoard(bo) { BOARD.bo = bo; renderBoard(); $('qboard').style.display = 'block'; hudDirty = true; }
+const BOARD = { bo: null };
+function closeBoard() { BOARD.bo = null; $('qboard').style.display = 'none'; hudDirty = true; }
+function renderBoard() {
+  const bo = BOARD.bo; if (!bo) return;
+  let h = `<div class="pth"><b style="color:#ffe9a0">QUEST BOARD</b><small>${Save.qdone} done so far · quests carry on between runs</small><button id="qbClose">✕</button></div>`;
+  h += Save.quests.map((q, k) => { const D = QT[q.t]; return `<div class="qbr${q.done ? ' done' : ''}">${qIcon(D.icon)}<div class="sqt"><span>${D.txt(q.n)}</span><div class="sqb"><i style="width:${(q.have / q.n * 100).toFixed(0)}%"></i></div><small>${q.have} / ${q.n}</small></div>${qReward(D)}<button data-sw="${k}" ${bo.swaps > 0 && !q.done ? '' : 'disabled'}>SWAP</button></div>`; }).join('');
+  h += `<div class="plg"><small>${bo.swaps > 0 ? 'Don\'t fancy one? Swap it for a new one (1 swap at this board).' : 'You\'ve used this board\'s swap. Every town has its own board.'}</small></div>`;
+  $('qboardBody').innerHTML = h;
+  $('qbClose').onclick = e => { e.stopPropagation(); closeBoard(); };
+  for (const b of $('qboardBody').querySelectorAll('[data-sw]')) b.onclick = e => { e.stopPropagation(); if (bo.swaps <= 0) return; const k = +b.dataset.sw; Save.quests[k] = Q.make(Save.quests[k].t); bo.swaps--; Save.save(); qDirty = true; Snd.play('tick'); renderBoard(); };
+}
+
+// ---------------------------------------------------------------- power-up crates: two drop into every job. Walk onto one: 30 seconds of a power-up
+const PW = {
+  move2: { name: '×2 MOVES', small: 'every Move card goes twice', icon: 'arrow_up', col: 0x4da3ff, css: '#4da3ff' },
+  dmg: { name: '+1 ZAP', small: 'every attack zaps 1 more', icon: 'sword', col: 0xff5a4a, css: '#ff5a4a' },
+  energy2: { name: '×2 ENERGY', small: 'every cell is worth 2', icon: 'light_cross', col: 0xffd24a, css: '#ffd24a' },
+};
+const PW_TIME = 30;
+const power = k => B.on && B.pw && B.pw[k] > 0;
+const atkBonus = () => power('dmg') ? 1 : 0, cellGain = () => power('energy2') ? 2 : 1;
+const crateAt = (i, j) => B.crates && B.crates.find(c => c.i === i && c.j === j) || null;
+function addCrate(i, j, type) {
+  const P = PW[type], g = new THREE.Group(), box = new THREE.Mesh(new THREE.BoxGeometry(3.2, 3.2, 3.2), crateBoxMat()); box.castShadow = true; box.position.y = 1.6; g.add(box);
+  const h = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, color: P.col, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.85 })); h.scale.setScalar(8); h.position.y = 1.6; g.add(h);
+  const ic = new THREE.Sprite(new THREE.SpriteMaterial({ map: spriteTex(P.icon), transparent: true, depthTest: false })); ic.scale.set(3, 3, 1); ic.position.y = 5.6; ic.renderOrder = 7; g.add(ic);
+  scene.add(g); const c = { i, j, g, box, ic, type, pos: null, t0: rnd(0, 6) }; B.crates.push(c); return c;
+}
+function dropCrateObj(c) { scene.remove(c.g); const k = B.crates.indexOf(c); if (k >= 0) B.crates.splice(k, 1); }
+function clearCrates() { for (const c of (B.crates || []).slice()) dropCrateObj(c); }
+async function spawnCrate(first) {
+  if (!B.on || !B.crateDays || !B.crateDays.includes(B.day)) return;
+  B.crateDays = B.crateDays.filter(d => d !== B.day);
+  const c = B.R.tiles.filter(t => freeTile(t, { far: 2 }) && Math.abs(t.i - B.P.i) + Math.abs(t.j - B.P.j) <= 5); if (!c.length) return;
+  const t = pick(c), type = pick(Object.keys(PW)), cr = addCrate(t.i, t.j, type);
+  if (first) return;
+  cr.pos = { x: t.x, y: visTop(t) + 60, z: t.z };
+  await tween(0.55, q => { cr.pos.y = visTop(t) + 58 * (1 - q * q); }); cr.pos = null; FX.dust(t.x, visTop(t), t.z, 6, 1); Snd.play('dig', t.x, visTop(t), t.z); camShake = Math.max(camShake, 0.1);
+}
+function takeCrate(c) {
+  const P = PW[c.type], t = T(c.i, c.j); dropCrateObj(c);
+  B.pw[c.type] = PW_TIME; Q.ev('crate'); keyHand = ''; hudDirty = true;
+  FX.boom(t.x, visTop(t) + 2, t.z, P.col); for (let k = 0; k < 8; k++) FX.sparkle(t.x, visTop(t) + 3, t.z, P.col); Snd.ding('gate');
+  announce(P.name, `${PW_TIME} SECONDS · ${P.small}`, P.css, 2.2);
+}
+function updateCrates(dt) {
+  if (!B.on || !B.crates) return;
+  for (const c of B.crates) { const t = T(c.i, c.j), p = c.pos || { x: t.x, y: visTop(t), z: t.z }; c.g.position.set(p.x, p.y, p.z); c.box.rotation.y += dt * 0.8; c.ic.position.y = 5.6 + Math.sin(Game.clock * 3 + c.t0) * 0.5; }
+  // the clock only runs while it's your turn and nothing is open
+  if (B.pw && B.phase === 'player' && !B.busy && !menuOpen() && !SHOP.open) for (const k in B.pw) { B.pw[k] -= dt; if (B.pw[k] <= 0) { delete B.pw[k]; keyHand = ''; hudDirty = true; } }
+}
+let keyPw = '';
+function renderPowers() {
+  const list = B.on && B.pw ? Object.keys(B.pw) : [], key = list.map(k => k + Math.ceil(B.pw[k])).join();
+  if (key === keyPw) return; keyPw = key;
+  $('powers').innerHTML = list.map(k => { const P = PW[k], s = Math.ceil(B.pw[k]); return `<div class="pw${s <= 5 ? ' low' : ''}" style="border-color:${P.css}"><img src="${SPRITES[P.icon]}" alt=""><b style="color:${P.css}">${P.name}</b><span>${s}s</span><i style="width:${(B.pw[k] / PW_TIME * 100).toFixed(0)}%;background:${P.css}"></i></div>`; }).join('');
+}
+
+// ---------------------------------------------------------------- pets that follow you (free): up to three of the ones you've caught. Pick them in My Pets
+let FOL = [];
+const ownsPet = sp => ['common', 'rare', 'epic'].some(r => Save.pets[sp + '|' + r]);
+function followSpecies() { const have = PET_IDS.filter(ownsPet); return Save.follow === null ? have.slice(0, 1) : Save.follow.filter(sp => have.includes(sp)); }
+function toggleFollow(sp) {
+  const cur = followSpecies(), i = cur.indexOf(sp);
+  if (i >= 0) cur.splice(i, 1); else { cur.push(sp); while (cur.length > 3) cur.shift(); }
+  Save.follow = cur; Save.save();
+}
+function ensureFollowers() {
+  const want = player ? followSpecies() : []; if (FOL.map(f => f.sp).join() === want.join()) return;
+  for (const f of FOL) scene.remove(f.g);
+  FOL = want.map((sp, k) => { const m = petMesh(sp, 1.5); scene.add(m.g); return { sp, g: m.g, A: m.A, x: player.ch.x + 3 + k * 2, z: player.ch.z + 4, y: player.ch.y - 3, t: 0 }; });
+}
+function updateFollowers(dt) {
+  if (!player) return; ensureFollowers(); const ch = player.ch;
+  FOL.forEach((F, k) => {
+    F.g.visible = !SC.on; let tx, tz, look = null;
+    if (B.on && B.R) { tx = B.R.cx + (k - (FOL.length - 1) / 2) * 7; tz = B.R.cz + B.R.half + 7.5; look = { x: ch.x, z: ch.z }; }   // in a job they sit at the edge of the grid and watch
+    else { const lead = k ? FOL[k - 1] : { x: ch.x, z: ch.z }, dx = F.x - lead.x, dz = F.z - lead.z, d = Math.hypot(dx, dz) || 1, gap = k ? 4.6 : 5.6; tx = lead.x + dx / d * gap; tz = lead.z + dz / d * gap; }
+    const dx = tx - F.x, dz = tz - F.z, d = Math.hypot(dx, dz);
+    if (d > 70) { F.x = tx; F.z = tz; } else if (d > 0.3) { const sp = Math.min(d * 3.2, 28); F.x += dx / d * sp * dt; F.z += dz / d * sp * dt; F.g.rotation.y += angDiff(F.g.rotation.y, Math.atan2(-dx, -dz)) * Math.min(1, dt * 8); F.t += dt * Math.min(1, sp / 6); }
+    else if (look) F.g.rotation.y += angDiff(F.g.rotation.y, Math.atan2(-(look.x - F.x), -(look.z - F.z))) * Math.min(1, dt * 4);
+    const r = W.raycast(F.x, 60, F.z, 0, -1, 0, 80, p => !p.noCam), fy = 60 - r.t; F.y += (fy - F.y) * Math.min(1, dt * 10);
+    const moving = d > 0.5; F.g.position.set(F.x, F.y + Math.abs(Math.sin(F.t * 9)) * (moving ? 0.9 : 0.12), F.z);
+    for (const L of F.A.legs) L.rotation.x = Math.sin(F.t * 12 + L.userData.ph) * (moving ? 0.5 : 0.05); for (const w of F.A.wings) w.rotation.z = Math.sin(Game.clock * 16) * 0.5 * w.userData.s; if (F.A.tail) F.A.tail.rotation.y = Math.sin(Game.clock * 6) * 0.5;
+  });
+}
+
+// ---------------------------------------------------------------- the Pearl panel (centre left, always there): loot crates, +10 energy, and in a job +3 days
+let keyPB = '';
+function renderPearlBar() {
+  const site = !!window.GrugPearlPopup, free = Save.freeCrates, inJob = B.on && B.phase !== 'over';
+  const key = [site, free, inJob, canAct()].join();
+  if (key === keyPB) return; keyPB = key;
+  const pp = n => `<span class="pp">${n}<i></i></span>`;
+  let h = '';
+  if (site || free) h += `<button id="pbCrate" class="pb crate"><img src="${SPRITES.crate}" alt=""><b>CRATES</b>${free ? `<span class="pfree">${free} FREE</span>` : pp(PRICE.crate)}</button>`;
+  if (site) h += `<button id="pbEnergy" class="pb en"><span class="cells pe">${'<i class="cc s e on x"></i>'.repeat(4)}</span><b>+10</b>${pp(PRICE.energy)}</button>`;
+  if (site && inJob) h += `<button id="pbDays" class="pb days${canAct() ? '' : ' off'}"><img src="${SPRITES.hourglass}" alt=""><b>+3 DAYS</b>${pp(PRICE.overtime)}</button>`;
+  const el = $('pearlBar'); el.innerHTML = h;
+  if ($('pbCrate')) $('pbCrate').onclick = e => { e.stopPropagation(); Snd.wake(); toggleCosmo(true); };
+  if ($('pbEnergy')) $('pbEnergy').onclick = async e => { e.stopPropagation(); Snd.wake(); const ok = await GrugPearlPopup.buy({ pearls: PRICE.energy, label: '+10 energy', what: 'Pet Zones: +10 energy' }); if (ok) { addEnergy(10); Snd.ding('bank'); } };
+  if ($('pbDays')) $('pbDays').onclick = async e => {
+    e.stopPropagation(); Snd.wake(); if (!canAct()) { Snd.play('deny'); return; }
+    const ok = await GrugPearlPopup.buy({ pearls: PRICE.overtime, label: '+3 days', what: 'Pet Zones: +3 days' }); if (ok && B.on) { B.days += 3; announce('+3 DAYS', '', '#f0c4ff', 2); Snd.ding('gate'); hudDirty = true; }
+  };
+}
+// your kit, small, while you walk about (it opens up in a card shop)
+let keyKit = '';
+function renderKit() {
+  const show = !!player && !B.on && !SHOP.hub && !!Run.deck, key = show ? Run.deck.map(c => c.id).join() : '';
+  if (key === keyKit) return; keyKit = key; const el = $('kit');
+  el.style.display = show ? 'flex' : 'none'; if (!show) return;
+  el.innerHTML = '<b class="kh">KIT</b>' + Run.deck.map(c => { const D = CARDS[c.id]; return `<div class="kc ${D.type}"><img src="${cardArt(c.id)}" alt=""><img class="pat" src="${cardIcon(c.id)}" alt=""></div>`; }).join('');
+}
+let tradeN = null;
+function updateTradeBtn() {
+  const n = TRADE.n ? null : nearTrader(), el = $('tradeBtn');
+  if (n !== tradeN) { tradeN = n; el.style.display = n ? 'flex' : 'none'; if (n) el.innerHTML = `<b>⇄ TRADE</b><small>${n.name}</small>`; }
+}
+$('tradeBtn').addEventListener('click', e => { e.stopPropagation(); Snd.wake(); if (tradeN) openTrade(tradeN); });
+
+function updateMeta(dt) { updateBooths(dt); updateTownfolk(dt); updateFollowers(dt); updateCrates(dt); updateSkins(); updateTradeBtn(); }
 
 
 // ---------------------------------------------------------------- you: an R6 exterminator with a blaster, stepped by AmbientCore in the Depot
@@ -3516,7 +4014,7 @@ function hubUpdate(dt) {
   Snd.walking(ch.grounded && !ch.sit && Math.hypot(ch.vx, ch.vz) > 1);
   // step onto a zone's grid and the job starts
   const R = ARENA[Run.zone]; if (R && ch.grounded && !ch.dead && Math.abs(ch.x - R.cx) < R.half - 0.8 && Math.abs(ch.z - R.cz) < R.half - 0.8) { Snd.walking(false); cam.soft = 1.4; startJob(R.Z.id); }
-  const a = areaAt(ch.z); DAYC.fogWant.setHex(a < 0 ? 0xf3d2bc : zoneDef(a).fog);
+  const a = areaAt(ch.z); DAYC.fogWant.setHex(a < 0 || townAt(ch.z) >= 0 ? 0xf3d2bc : zoneDef(a).fog);
 }
 
 // ---------------------------------------------------------------- the camera: the Roblox orbit cam in the Depot; over a zone, the same cam orbiting the grid
@@ -3554,16 +4052,17 @@ function computeHover() {
 
 // ---------------------------------------------------------------- input: keyboard, mouse (drag turns the camera), touch
 const keys = new Set();
-const menuOpen = () => document.body.classList.contains('menuopen') || pickOpen() || $('results').style.display === 'block' || $('pets').style.display === 'block' || $('cosmo').style.display === 'block';
+const isOn = id => $(id).style.display === 'block';
+const menuOpen = () => document.body.classList.contains('menuopen') || pickOpen() || isOn('results') || isOn('pets') || isOn('cosmo') || isOn('trade') || isOn('reel') || isOn('qboard') || (!B.on && !!SHOP.hub);
 const pickOpen = () => false;   // no title screen: you start in the Depot
 window.addEventListener('keydown', e => {
   if (e.code === 'Space' || e.code.startsWith('Arrow') || e.code === 'Tab') e.preventDefault();
   keys.add(e.code); if (e.repeat) return; Snd.wake();
   if (pickOpen()) { if (e.code === 'Enter' || e.code === 'Space') join(); return; }
   if (e.code === 'KeyM') { toggleMenu(); return; }
-  if (e.code === 'Escape') { if ($('cosmo').style.display === 'block') toggleCosmo(false); else if ($('pets').style.display === 'block') togglePets(false); else if (SHOP.open) openShop(false); else if ($('help').classList.contains('on')) toggleHelp(); else if (B.swap >= 0) cancelSwap(); else if (B.sel >= 0) clearSel(); else toggleMenu(); return; }
+  if (e.code === 'Escape') { if (REEL.on) closeReel(); else if (isOn('trade')) closeTrade(); else if (isOn('qboard')) closeBoard(); else if (SHOP.hub && B.swap >= 0) cancelSwap(); else if (SHOP.hub && SHOP.item >= 0) showItem(-1); else if (SHOP.hub) closeHubShop(); else if ($('cosmo').style.display === 'block') toggleCosmo(false); else if ($('pets').style.display === 'block') togglePets(false); else if (SHOP.open) openShop(false); else if ($('help').classList.contains('on')) toggleHelp(); else if (B.swap >= 0) cancelSwap(); else if (B.sel >= 0) clearSel(); else toggleMenu(); return; }
   if (e.code === 'KeyH') toggleHelp();
-  if (B.reward && B.reward.pick && /^(Digit|Numpad)[1-7]$/.test(e.code)) { selectCard(+e.code.slice(-1) - 1); return; }
+  if (SHOP.hub && B.swap >= 0 && /^(Digit|Numpad)[1-7]$/.test(e.code)) { selectCard(+e.code.slice(-1) - 1); return; }
   if (!player || menuOpen()) return;
   if (e.code === 'KeyI') zoomStep(-1); if (e.code === 'KeyO') zoomStep(1);
   if (B.on) {
@@ -3656,11 +4155,12 @@ $('endBtn').addEventListener('click', e => { e.stopPropagation(); Snd.wake(); en
 $('shopBtn').addEventListener('click', e => { e.stopPropagation(); Snd.wake(); if (!canAct() && !SHOP.open) { Snd.play('deny'); return; } openShop(!SHOP.open); });
 $('slClose').addEventListener('click', e => { e.stopPropagation(); openShop(false); });
 $('pvBack').addEventListener('click', e => { e.stopPropagation(); showItem(-1); });
-$('pvBuy').addEventListener('click', e => { e.stopPropagation(); const k = SHOP.item; if (k < 0 || !canAct() || B.energy < CARDS[B.offers[k].id].cost) { Snd.play('deny'); return; } openShop(false); buyOffer(k); });
+$('pvBuy').addEventListener('click', e => { e.stopPropagation(); const k = SHOP.item; if (k < 0 || !canShop() || B.energy < CARDS[B.offers[k].id].cost) { Snd.play('deny'); return; } buyOffer(k); openShop(false); });
 function join() {
   if (player) return; Snd.wake();
   makePlayer(); if (!Save.name) { Save.name = AK.makeName(new Set()); Save.save(); } player.name = Save.name;
   document.body.classList.add('joined', 'hub'); cam.yaw = 0; cam.pitch = 0.32; cam.tdist = cam.dist = innerWidth < innerHeight ? 24 : 18; canvas.focus();
+  if (!Run.deck) Run.deck = dealDeck();
   wearOutfits(); hudDirty = true;
 }
 
@@ -3670,25 +4170,25 @@ function playable() { return B.hand.filter(c => !c.used && CARDS[c.id].targets()
 function renderHand() {
   if (!B.hand) return;
   const hk = hintsOn() ? (B.swap >= 0 ? (B.swap === HINT.offer ? 's' + HINT.slot : '') : B.sel < 0 && canAct() ? 'c' + HINT.card : '') : '';
-  const key = B.hand.map(c => c.id + (c.used ? 'u' : '') + (c.gum ? 'g' : '') + (c.fresh ? 'f' : '')).join() + '|' + B.sel + '|' + B.swap + '|' + canAct() + '|' + (B.reward ? B.reward.pick + B.reward.taken : '') + '|' + hk;
+  const x2 = power('move2'), key = B.hand.map(c => c.id + (c.used ? 'u' : '') + (c.gum ? 'g' : '') + (c.fresh ? 'f' : '') + (c.x2 ? 'x' : '')).join() + '|' + B.sel + '|' + B.swap + '|' + canAct() + '|' + x2 + '|' + hk;
   if (key === keyHand) return; keyHand = key;
   const h = $('hand'); h.innerHTML = '';
   B.hand.forEach((c, k) => {
     const D = CARDS[c.id], el = document.createElement('div');
     const wig = hk === 'c' + k || hk === 's' + k;
-    el.className = `card ${D.type}${c.used ? ' used' : ''}${B.sel === k ? ' sel' : ''}${B.swap >= 0 || (B.reward && B.reward.pick && !B.reward.taken) ? ' swap' : ''}${c.fresh ? ' new' : ''}${wig ? ' hint' : ''}`;
-    el.innerHTML = `<div class="band">${TYPE[D.type][0]}</div><em class="ol">${k + 1}</em><img class="art" src="${cardArt(c.id)}" alt=""><b class="ol">${D.name}</b><img class="pat" src="${cardIcon(c.id)}" alt="">`;
+    el.className = `card ${D.type}${c.used ? ' used' : ''}${B.sel === k ? ' sel' : ''}${B.swap >= 0 ? ' swap' : ''}${c.fresh ? ' new' : ''}${wig ? ' hint' : ''}`;
+    el.innerHTML = `<div class="band">${TYPE[D.type][0]}</div><em class="ol">${k + 1}</em><img class="art" src="${cardArt(c.id)}" alt=""><b class="ol">${D.name}</b><img class="pat" src="${cardIcon(c.id)}" alt="">${x2 && D.type === 'mv' && !c.x2 && !c.used ? '<span class="x2 ol">×2</span>' : ''}`;
     el.addEventListener('click', e => { e.stopPropagation(); Snd.wake(); selectCard(k); });
     el.addEventListener('mouseenter', () => { if (touchMode) return; hoverCard = k; hudDirty = true; }); el.addEventListener('mouseleave', () => { if (hoverCard === k) hoverCard = -1; hudDirty = true; });
     h.appendChild(el); c.fresh = false;
   });
 }
 const SHOP = { open: false, item: -1 };
-function openShop(on) { SHOP.open = on; if (on) clearSel(); showItem(-1); Snd.play('tick'); keyShop = ''; hudDirty = true; }
+function openShop(on) { if (!on && SHOP.hub && B.swap < 0) { closeHubShop(); Snd.play('tick'); return; } SHOP.open = on; if (on) clearSel(); showItem(-1); Snd.play('tick'); keyShop = ''; hudDirty = true; }
 function showItem(k) { SHOP.item = k; if (k >= 0) openShowcase(B.offers[k].id); else closeShowcase(); keyShop = ''; hudDirty = true; }
 const costCells = (n, can) => `<span class="cells cost">${Array.from({ length: n }, () => `<i class="cc s e${can ? ' on' : ''}"></i>`).join('')}</span>`;
 function renderShop() {
-  const sb = $('shopBtn'), can = canAct(), afford = B.offers.some(o => !o.sold && CARDS[o.id].cost <= B.energy), alert = hintsOn() && can && HINT.danger && HINT.offer >= 0;
+  const sb = $('shopBtn'), can = canShop(), afford = B.offers.some(o => !o.sold && CARDS[o.id].cost <= B.energy), alert = hintsOn() && can && HINT.danger && HINT.offer >= 0;
   const sh = `<b>SHOP</b><small>YOU HAVE <span>${B.energy}</span></small>${alert ? '<i>!</i>' : ''}`; if (sb.dataset.h !== sh) { sb.dataset.h = sh; sb.innerHTML = sh; }
   sb.classList.toggle('off', !can && !SHOP.open); sb.classList.toggle('can', can && afford && !SHOP.open && !alert); sb.classList.toggle('alert', alert && !SHOP.open);
   document.body.classList.toggle('pv', SHOP.open && SHOP.item >= 0);
@@ -3712,14 +4212,14 @@ function renderShop() {
     if (window.GrugPearlPopup) {   // Pearls: +10 energy, and it can go past the 10 cap
       const b = document.createElement('button'); b.className = 'si pearlbuy';
       b.innerHTML = `<span class="cells pe">${'<i class="cc s e on x"></i>'.repeat(4)}</span><div><b>+10 ENERGY</b><p>Ten energy straight into your wallet. It can go past the usual 10.</p></div><span class="pp">${PRICE.energy}<i></i></span>`;
-      b.addEventListener('click', async e => { e.stopPropagation(); if (!canAct()) return; const ok = await GrugPearlPopup.buy({ pearls: PRICE.energy, label: '+10 energy', what: 'Pet Zones: +10 energy' }); if (ok && B.on) { B.energy += 10; Run.energy = B.energy; Snd.ding('bank'); Pts.add(10, '⚡', ''); keyShop = ''; hudDirty = true; } });
+      b.addEventListener('click', async e => { e.stopPropagation(); if (!canShop()) return; const ok = await GrugPearlPopup.buy({ pearls: PRICE.energy, label: '+10 energy', what: 'Pet Zones: +10 energy' }); if (ok) { addEnergy(10); Snd.ding('bank'); } });
       box.prepend(b);
     }
   }
   if (SHOP.open && SHOP.item >= 0) {
     const D = CARDS[B.offers[SHOP.item].id], ok = B.energy >= D.cost;
     $('pvIcon').src = cardArt(D.id); $('pvName').textContent = D.name.toUpperCase(); $('preview').className = 'ol ' + D.type;
-    $('pvDesc').textContent = D.desc; $('pvBuy').innerHTML = `<span>BUY</span>${costCells(D.cost, ok)}`; $('pvBuy').disabled = !ok || !canAct(); $('pvBuy').classList.toggle('fix', SHOP.item === fix);
+    $('pvDesc').textContent = D.desc; $('pvBuy').innerHTML = `<span>BUY</span>${costCells(D.cost, ok)}`; $('pvBuy').disabled = !ok || !canShop(); $('pvBuy').classList.toggle('fix', SHOP.item === fix);
   }
 }
 function renderRound() {
@@ -3739,10 +4239,9 @@ function renderQuests() {
     h += `<div class="jl e">ENERGY</div>${energyCells(B.energy)}`;
     h += `<div class="jl d">DAY</div>${cellRow(B.days, B.day - 1, 'd', B.day - 1, 12)}`;
   } else {
-    const a = player ? areaAt(player.ch.z) : -1, Z = a >= 0 ? zoneDef(a) : null;
-    h = `<div class="jt"${Z ? ` style="color:${Z.css}"` : ''}>${Z ? Z.short.toUpperCase() + ' · ' + Z.name.toUpperCase() : 'THE DEPOT'}</div>`;
+    h = `<div class="jt"${placeCss() ? ` style="color:${placeCss()}"` : ''}>${placeName()}</div>`;
     h += `<div class="jl z">ZONES CLEARED</div>${cellRow(Math.max(6, Math.ceil((Run.zone + 1) / 6) * 6), Run.zone, 'z', -1, 12)}`;
-    if (Run.active) h += `<div class="jl e">ENERGY</div>${energyCells(Run.energy)}`;
+    h += `<div class="jl e">ENERGY</div>${energyCells(SHOP.hub ? B.energy : Run.energy)}`;
     h += `<div class="qq"><small>BEST ${Save.bestRun} · ${Object.values(Save.pets).reduce((a, b) => a + b, 0)} PETS</small></div>`;
   }
   if (h !== keyQ) { keyQ = h; $('quests').innerHTML = h; }
@@ -3757,8 +4256,11 @@ function renderMod() {
   const D = CARDS[id]; el.style.display = 'block'; el.className = 'ol ' + D.type;
   el.innerHTML = `<div class="mh"><img src="${cardArt(id)}" alt=""><b>${D.name.toUpperCase()}</b></div><img class="pat" src="${cardIcon(id)}" alt=""><small>${TYPE[D.type][1]} · ${D.sub}</small>`;
 }
+// where you are, out of a job: the Depot, a zone, or the town after one
+function placeName() { if (!player) return 'THE DEPOT'; const a = areaAt(player.ch.z), t = townAt(player.ch.z); return a < 0 ? 'THE DEPOT' : t >= 0 ? zoneDef(t).town.toUpperCase() : zoneDef(a).short.toUpperCase() + ' · ' + zoneDef(a).name.toUpperCase(); }
+function placeCss() { if (!player) return ''; const a = areaAt(player.ch.z), t = townAt(player.ch.z); return a < 0 ? '' : t >= 0 ? '#ffe9a0' : zoneDef(a).css; }
 function hintText() {
-  if (!B.on) { const t = touchMode ? 'Left thumb moves · Jump button · drag to look' : 'WASD move · Space jump · right-drag or Q/E turn the camera · H help'; const a = areaAt(player.ch.z); return `${a < 0 ? 'The Depot' : zoneDef(a).short + ' · ' + zoneDef(a).name} · ${a < Run.zone ? 'head north through the gates' : 'walk onto the grid to take the job'} · ${t}`; }
+  if (!B.on) { const t = touchMode ? 'Left thumb moves · Jump button · drag to look' : 'WASD move · Space jump · right-drag or Q/E turn the camera · H help'; const a = areaAt(player.ch.z), tw = townAt(player.ch.z); return `${placeName()} · ${a < 0 || tw >= 0 ? 'shops, crates and quests · the next zone is north' : a < Run.zone ? 'head north through the gate' : 'walk onto the grid to take the job'} · ${t}`; }
   return '';
   if (B.phase === 'over' || B.phase === 'won') return B.Z.name;
   if (B.busy) return '…';
@@ -3768,11 +4270,11 @@ function hintText() {
   return `${eggs ? '⚠ Smash the eggs before night! · ' : ''}${p ? `Pick a card${touchMode ? '' : ' (1-7)'}, then a lit tile · ${p} playable` : 'No moves left today'} · ${touchMode ? 'END DAY' : 'Enter'} when you're done · drag to turn the camera`;
 }
 function renderTip() {
-  const id = B.on && B.swap >= 0 && B.offers[B.swap] ? B.offers[B.swap].id : B.reward && B.reward.pick && !B.reward.taken ? B.reward.pick : null, el = $('tip');
+  const id = (B.on || SHOP.hub) && B.swap >= 0 && B.offers[B.swap] ? B.offers[B.swap].id : null, el = $('tip');
   const key = id || ''; if (el.dataset.k === key) return; el.dataset.k = key;
   if (!id) { el.innerHTML = ''; el.className = 'ol'; return; }
   el.className = 'ol on ' + CARDS[id].type; el.innerHTML = `<img src="${cardArt(id)}" alt=""><span class="arr">⇄ ?</span><button id="swCancel">✕</button>`;
-  $('swCancel').addEventListener('click', e => { e.stopPropagation(); if (B.swap >= 0) cancelSwap(); else { B.reward = null; document.body.classList.remove('swapping'); } el.dataset.k = 'x'; hudDirty = true; keyHand = ''; });
+  $('swCancel').addEventListener('click', e => { e.stopPropagation(); if (B.swap >= 0) cancelSwap(); el.dataset.k = 'x'; hudDirty = true; keyHand = ''; });
 }
 function tipText() {
   if (!B.on) return '';
@@ -3795,9 +4297,9 @@ function updateHud(dt) {
   if (player) {
     const zb = $('zoneBadge'); let key, cls, html, bg = '';
     if (B.on) { key = 'z' + B.Z.id; cls = 'ol hot'; bg = 'rgba(30,30,34,.85)'; html = `<b style="color:${B.Z.css}">${B.Z.short.toUpperCase()}</b><small>${B.Z.name} · on the job</small>`; }
-    else { const a = areaAt(player.ch.z); key = 'a' + a + Run.zone; if (a < 0) { cls = 'ol safe'; html = '<b>THE DEPOT</b><small>every run starts here</small>'; } else { const Z = zoneDef(a); cls = 'ol'; bg = 'rgba(30,30,34,.85)'; html = `<b style="color:${Z.css}">${Z.short.toUpperCase()}</b><small>${Z.name}${a < Run.zone ? ' · cleared' : ''}</small>`; } }
+    else { const a = areaAt(player.ch.z), tw = townAt(player.ch.z); key = 'a' + a + Run.zone + 't' + tw; if (a < 0) { cls = 'ol safe'; html = '<b>THE DEPOT</b><small>every run starts here</small>'; } else if (tw >= 0) { cls = 'ol safe'; html = `<b>${zoneDef(tw).town.toUpperCase()}</b><small>town · shops · quests</small>`; } else { const Z = zoneDef(a); cls = 'ol'; bg = 'rgba(30,30,34,.85)'; html = `<b style="color:${Z.css}">${Z.short.toUpperCase()}</b><small>${Z.name}${a < Run.zone ? ' · cleared' : ''}</small>`; } }
     if (zb.dataset.k !== key) { zb.dataset.k = key; zb.className = cls; zb.style.background = bg; zb.innerHTML = html; }
-    renderQuests();
+    renderQuests(); renderSide(); renderPearlBar(); renderKit(); renderPowers();
   }
   if (B.on) {
     computeHints(); renderHand(); renderShop(); renderRound();
@@ -3805,7 +4307,7 @@ function updateHud(dt) {
     eb.disabled = !can; eb.classList.toggle('want', can && (p === 0 || (hintsOn() && HINT.card < 0 && !HINT.danger)));
     const armed = Game.clock - B.endArm < 2.5 && B.endArm, eh = `<img src="${SPRITES.hourglass}" alt=""><span>${armed ? 'SURE?' : 'END'}</span>`; if (eb.dataset.h !== eh) { eb.dataset.h = eh; eb.innerHTML = eh; } eb.classList.toggle('armed', !!armed); eb.classList.toggle('last', B.day >= B.days);
   }
-  if (!B.on && document.body.classList.contains('swapping')) renderHand();
+  if (!B.on && SHOP.hub) { renderHand(); renderShop(); }
   renderTip(); renderMod(); updateCursorMsg(0);
 }
 function updateCursorMsg(dt) {
@@ -3836,9 +4338,11 @@ $('caught').addEventListener('click', () => { $('caught').style.display = 'none'
 function renderPets() {
   const rar = [['common', '#d8d8d8'], ['rare', '#5ab4ff'], ['epic', '#c77dff']];
   let total = 0; const cells = PET_IDS.map(sp => { const n = rar.map(([r]) => Save.pets[sp + '|' + r] || 0), have = n.some(x => x); total += n.reduce((a, b) => a + b, 0);
-    return `<div class="pg${have ? '' : ' none'}"><img src="${PET_DATA.icon[sp]}" alt=""><b>${have ? PETS[sp][0] : '???'}</b><div class="pr3">${rar.map(([r, c], k) => `<span style="border-color:${c};color:${n[k] ? c : '#555'}">${n[k]}</span>`).join('')}</div></div>`; }).join('');
-  $('petsBody').innerHTML = `<div class="pth"><b>MY PETS</b><small>${total} caught · ${PET_IDS.filter(sp => rar.some(([r]) => Save.pets[sp + '|' + r])).length} of ${PET_IDS.length} kinds</small><button id="petsClose">✕</button></div><div class="pgrid">${cells}</div><div class="plg">${rar.map(([r, c]) => `<span style="color:${c}">■ ${r.toUpperCase()}</span>`).join(' ')} <small>baby = rare · grown = epic · egg = common (hatches into a random pet)</small></div>`;
+    const fol = have && followSpecies().includes(sp);
+    return `<div class="pg${have ? '' : ' none'}${fol ? ' fol' : ''}"${have ? ` data-sp="${sp}"` : ''}>${fol ? '<span class="fs">★</span>' : ''}<img src="${PET_DATA.icon[sp]}" alt=""><b>${have ? PETS[sp][0] : '???'}</b><div class="pr3">${rar.map(([r, c], k) => `<span style="border-color:${c};color:${n[k] ? c : '#555'}">${n[k]}</span>`).join('')}</div></div>`; }).join('');
+  $('petsBody').innerHTML = `<div class="pth"><b>MY PETS</b><small>${total} caught · ${PET_IDS.filter(sp => rar.some(([r]) => Save.pets[sp + '|' + r])).length} of ${PET_IDS.length} kinds</small><button id="petsClose">✕</button></div><div class="pgrid">${cells}</div><div class="plg">${rar.map(([r, c]) => `<span style="color:${c}">■ ${r.toUpperCase()}</span>`).join(' ')} <small>baby = rare · grown = epic · egg = common (hatches into a random pet)</small><small style="color:#ffe34a">★ Tap a pet to have it follow you (up to 3, free)</small></div>`;
   $('petsClose').addEventListener('click', e => { e.stopPropagation(); togglePets(false); });
+  for (const t of $('petsBody').querySelectorAll('[data-sp]')) t.addEventListener('click', e => { e.stopPropagation(); toggleFollow(t.dataset.sp); Snd.play('tick'); renderPets(); });
 }
 function togglePets(on) { const el = $('pets'); on = on === undefined ? el.style.display !== 'block' : on; if (on) renderPets(); el.style.display = on ? 'block' : 'none'; }
 $('petsBtn').addEventListener('click', e => { e.stopPropagation(); Snd.wake(); togglePets(); });
@@ -3868,7 +4372,7 @@ const Trail = (() => {
   }
   return {
     update(dt) {
-      const on = !!player && !B.on && !SC.on && !!ARENA[Run.zone] && document.body.classList.contains('joined');
+      const on = !!player && !B.on && !SC.on && Run.zone === 0 && !!ARENA[Run.zone] && document.body.classList.contains('joined');   // only on the way to Zone 1
       if (on && (t -= dt) <= 0) { t = 0.2; lay(); }
       for (let i = 0; i < list.length; i++) { const m = list[i]; m.visible = on && i < used; if (m.visible) m.scale.setScalar(1 + 0.35 * Math.max(0, Math.sin(Game.clock * 6 - i * 0.7))); }
     },
@@ -3883,20 +4387,22 @@ async function wearOutfits() {
   const cap = setTimeout(() => all.forEach(c => { c.rig.root.visible = true; }), 8000);
   try {
     const me = MY_LOOK = await GrugOutfitRig.load();
-    if (me) { GrugOutfitRig.dress(player.rig, me); applyCosmetics(); if (!me.starter && !me.isDefault) player.name = me.name.slice(0, 20); if (SC.built) GrugOutfitRig.dress(SC.f.rig, me); }
+    if (me) { GrugOutfitRig.dress(player.rig, me); applyGear(); if (!me.starter && !me.isDefault) player.name = me.name.slice(0, 20); if (SC.built) GrugOutfitRig.dress(SC.f.rig, me); }
     player.rig.root.visible = true;
     const KIT = ['ranger', 'scavenger', 'medic', 'skater', 'flannel', 'grug'];
-    const [others, kit] = await Promise.all([GrugOutfitRig.others(npcs.length), Promise.all(KIT.map(n => GrugOutfitRig.fromURL('/arcade/outfits/' + n + '.glb', n))).then(a => a.filter(Boolean))]);
+    const [others, kit] = await Promise.all([GrugOutfitRig.others(npcs.length), Promise.all(KIT.map(n => GrugOutfitRig.fromURL('/arcade/outfits/' + n + '.glb', n).catch(() => null))).then(a => a.filter(Boolean))]);
+    kitReady(kit);
     (others || []).forEach((o, i) => { const n = npcs[i]; if (!n || !n.rig) return; GrugOutfitRig.dress(n.rig, o); if (!o.starter) { n.name = o.name.slice(0, 20); if (n.tag) n.tag.nm.textContent = n.name; } });
     for (let i = (others || []).length, k = 0; i < npcs.length && kit.length; i++, k++) if (npcs[i].rig) GrugOutfitRig.dress(npcs[i].rig, kit[(k * 5 + 1) % kit.length]);
   } catch (e) { console.warn('outfits', e); }
+  if (!KIT_LOOKS) kitReady([]);
   clearTimeout(cap); all.forEach(c => { c.rig.root.visible = true; });
 }
 addEventListener('grug:outfits', () => { if (player && window.GrugOutfitRig) GrugOutfitRig.load().then(l => { MY_LOOK = l; for (const r of [player.rig, SC.built && SC.f.rig].filter(Boolean)) { if (l) GrugOutfitRig.dress(r, l); else GrugOutfitRig.undress(r); } }); });
 if (window.GrugPearls) GrugPearls.start().then(r => { if (!window.GrugPearlPopup) return; if (r.welcome) GrugPearlPopup.show(r.welcome, { title: 'Welcome to Grug!' }); else if (r.daily) GrugPearlPopup.show(r.daily, { title: 'Daily Pearls' }); }).catch(() => { });
 
 // ---------------------------------------------------------------- start
-buildMap(); buildStall(); flushStatic(); makeCrowd(); join(); applyCosmetics();
+Q.init(); buildMap(); flushStatic(); makeCrowd(); join(); applyGear();
 function resize() {
   const w = innerWidth, h = innerHeight, a = w / h; renderer.setSize(w, h, false); camera.aspect = a;
   camera.fov = a >= 1 ? 70 : clamp(2 * Math.atan(Math.tan(35 * Math.PI / 180) * 0.75 / Math.max(a, 0.4)) * 180 / Math.PI, 70, 95);
@@ -3914,7 +4420,7 @@ function frame(now) {
     animateRig(player, dt, B.on ? player.pose : undefined);
   }
   if (B.on) { updateBugs(dt); updateCells(dt); updateSwarm(dt); computeHover(); }
-  updatePeds(dt); updateShowcase(dt); Trail.update(dt); updateStall(dt); updateBuddy(dt);
+  updateMeta(dt); updateShowcase(dt); Trail.update(dt);
   updateOverlays(); updateHintArrow();
   FX.update(dt); updateDebris(dt); updateBeams(dt); Pts.update(dt); DmgNum.update(dt); updateAnnounce(dt);
   for (const R of ARENA) { R.pad.rotation.z += dt * 1.2; R.pad.position.y = 2 + Math.sin(Game.clock * 2) * 0.25; R.pad.visible = !B.on && R.Z.id === Run.zone; R.bill.hide = B.on || R.Z.id !== Run.zone; }
@@ -3927,7 +4433,8 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 // for testing from the console
-window.BZ = { PETS, COSMO, buyContinue, HINT, SHOP, openShop, showItem, SC, PEDS, Run, zoneDef, ensureAreas, refreshGates, endJob, B, CARDS, BUGS, ZONES, ARENA, Save, startJob, leaveJob, endDay, selectCard, clickTile, buyOffer, swapInto, addBug, addCell, T, bugAt, cellAt, join, cam, camera, get player() { return player; }, Game, setStage, hurtBug, scene, renderer, npcs };
+window.BZ = { PETS, ITEMS, buyContinue, HINT, SHOP, openShop, showItem, SC, Run, BOOTHS, TOWNFOLK, TOWNSITE, Q, QT, PW, openCrate, openTrade, offerTrade, TRADE, openCardShop, closeHubShop, addCrate, takeCrate, toggleCosmo, toggleFollow, addEnergy, itemIcon, applyGear, npcs: null, zoneDef, ensureAreas, refreshGates, endJob, B, CARDS, BUGS, ZONES, ARENA, Save, startJob, leaveJob, endDay, selectCard, clickTile, buyOffer, swapInto, addBug, addCell, T, bugAt, cellAt, join, cam, camera, get player() { return player; }, Game, setStage, hurtBug, scene, renderer };
+window.BZ.npcs = npcs;
 
 </script>
 </body>
