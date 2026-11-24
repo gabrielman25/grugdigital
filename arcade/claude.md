@@ -5,6 +5,19 @@ this is how the game goes into the **Grug Arcade** at `https://grugdigital.com/a
 building, so the game is ready for the site from the beginning. The live copy of this guide is
 https://grugdigital.com/arcade/claude.md.
 
+## 0. Start from the Grug Baseplate
+
+**Every new game starts as a copy of `arcade/baseplate/index.html`** (live: https://grugdigital.com/arcade/baseplate/).
+It's a walk-around zoo of everything Grug games share, already built the Grug way: the renderer and the Grug light,
+shiny plastic, studded parts and the physics world (AmbientCore: a classic R6 Humanoid at 240 Hz, with kill bricks, jump
+pads, seats, buttons, ladders and moving platforms), the classic rig and its hand-made animations (walk, jump, sit, climb,
+the dodge roll, holding a tool, falling apart on death), outfits on everyone, NPC players (the Ambient crowd: they
+wander, explore, follow you, sit, run the obby, ride the lift, chat), a companion that mirrors your moves, the Roblox orbit
+camera (into first person), touch controls, sound, VFX, the 2009-2010 GUI (Game Menu, hint bar, name tags, chat bubbles,
+BillboardGuis, damage numbers, the full-screen Message, a player list, a hotbar, chat, HEALTH squares), Pearls and saving.
+The comment at the top of that file lists where everything is. Copy it to `arcade/<slug>/index.html`, change the save
+key and the title, delete the stations you don't need in `buildWorld`, and build your game on top.
+
 ## 1. What a Grug Arcade game is
 
 - **One self-contained HTML file**: `arcade/<slug>/index.html` in the repo `gabrielman25/grugdigital` (static files on
