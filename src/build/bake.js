@@ -19,11 +19,15 @@ function prepMask(){
   // background = everything connected to the border that stays close to the border colour (so pale walls inside
   // the building's outline still count as building, whatever the background colour)
   const near = new Uint8Array(sw*sh), bgd = i => { const j = i*4; return Math.max(Math.abs(d[j]-bg[0]), Math.abs(d[j+1]-bg[1]), Math.abs(d[j+2]-bg[2])); };
-  for (let i=0;i<sw*sh;i++) near[i] = bgd(i) <= 70 ? 1 : 0;
+  // how noisy the background is (a vignette on white, almost nothing on black) sets how far from it a pixel may be and
+  // still count as background: tight on a clean black background, so a dark building isn't eaten by the fill
+  let bn = 0; for (let X=0;X<sw;X++){ bn = Math.max(bn, bgd(X), bgd((sh-1)*sw+X)); } for (let Y=0;Y<sh;Y++){ bn = Math.max(bn, bgd(Y*sw), bgd(Y*sw+sw-1)); }
+  const tol = clamp(2*bn + 8, 12, 70), seedTol = Math.max(12, bn + 2);
+  for (let i=0;i<sw*sh;i++) near[i] = bgd(i) <= tol ? 1 : 0;
   const step = (i, k) => { const a = i*4, b = k*4; return Math.max(Math.abs(d[a]-d[b]), Math.abs(d[a+1]-d[b+1]), Math.abs(d[a+2]-d[b+2])) <= 5; };
   const seen = new Uint8Array(sw*sh), st = [];
   const go = (i, k) => { if (near[k] && !seen[k] && step(i, k)){ seen[k] = 1; st.push(k); } };
-  for (let i=0;i<sw*sh;i++){ const x = i % sw, y = (i/sw)|0; if ((x === 0 || y === 0 || x === sw-1 || y === sh-1) && bgd(i) <= 12){ seen[i] = 1; st.push(i); } }
+  for (let i=0;i<sw*sh;i++){ const x = i % sw, y = (i/sw)|0; if ((x === 0 || y === 0 || x === sw-1 || y === sh-1) && bgd(i) <= seedTol){ seen[i] = 1; st.push(i); } }
   while (st.length){ const i = st.pop(), x = i % sw, y = (i/sw)|0; if (x > 0) go(i, i-1); if (x < sw-1) go(i, i+1); if (y > 0) go(i, i-sw); if (y < sh-1) go(i, i+sw); }
   for (let i=0;i<sw*sh;i++) m[i] = seen[i] ? 0 : 1;
   const p = place({dx:0,dy:0,s:1,k:1}), yCut = Math.ceil((TOP - 12 - p.y0)/p.sy*sh/AL.ih);   // ignore the view labels

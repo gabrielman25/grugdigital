@@ -144,11 +144,16 @@ function buildPrompt(){
   roles.forEach(k => L.push(`- ${ROLES[k].hint} = ${ROLES[k].word}`));
   if (kinds.includes('door')) L.push('- blue rectangles = doors: paint a door exactly inside each one');
   if (kinds.includes('window')) L.push('- cyan rectangles = windows: paint a window with its frame and sill exactly inside each one');
+  const RS = { flat:'The roof is FLAT: keep it a flat roof seen from above (paint roofing membrane, gravel, tar, metal sheet or a roof terrace on it), never a pitched, sloped or tiled roof.',
+    gable:'The roof is a gable roof: keep exactly that shape.', hip:'The roof is a hip roof: keep exactly that shape.', shed:'The roof is a single sloped shed roof: keep exactly that shape.' }[S.p.roof];
+  L.push(RS + ' The yellow band at the bottom is the base of the walls (stone, concrete, brick or tiles), and the yellow strips along the roof are its edge boards or cornice. Signs, letters and logos are painted flat on the walls: nothing stands up above the roof or sticks out from a wall.');
   L.push('The code colours say nothing about the real colours: paint the door, windows, roof and trim in the materials described above, never in flat blue, cyan, red or yellow.');
   L.push('');
   L.push(`Paint every detail flat onto the surfaces, as if printed on (frames, shutters, beams, planks, bricks, stones, roof tiles, gutters, lamps, signs, cracks, moss), so nothing sticks out and the outline of the building does not change at all. ${kinds.length ? 'Don\'t add doors or windows anywhere else.' : 'Put the main entrance door on the front wall and add windows where they make sense.'}`);
   L.push('');
   L.push(`${(LOOKS[S.look] || LOOKS.realistic).say} Keep the lighting soft and even, with no strong shadows.`);
+  L.push('');
+  L.push('Before you finish, check the whole picture: no flat code colour may be left anywhere. No flat red on the roof, no yellow on the base or roof edges, no blue doors, no cyan windows: every one of them must be a real material in the colours described above.');
   L.push('');
   L.push('Keep everything else exactly the same: the same camera angles, the same size and position of both buildings, the same blocky shapes and silhouette, and the plain black background. Don\'t add ground, grass, plants, people, sky, shadows on the ground, text labels or anything outside the building.');
   return L.join('\n');

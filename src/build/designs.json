@@ -1,5 +1,137 @@
 [
  {
+  "id": "espresso",
+  "era": "Shops & food",
+  "title": "Espresso bar",
+  "p": {
+   "w": 8,
+   "d": 6,
+   "h": 4,
+   "base": 0.5,
+   "roof": "flat",
+   "rh": 0.5,
+   "ridge": "x",
+   "floors": 1,
+   "door": "left",
+   "door2": false,
+   "backDoor": false,
+   "wf": 2,
+   "ws": 1,
+   "wb": 1
+  },
+  "desc": "A modern Scandinavian espresso bar: pale oak slat cladding and white tiles, a big black-framed glass shopfront with a marble counter and coffee machine visible inside, a neon coffee-cup sign, a thin black metal roof edge, a polished concrete base, and a chalkboard menu painted by the door."
+ },
+ {
+  "id": "pizzeria",
+  "era": "Shops & food",
+  "title": "Pizzeria",
+  "p": {
+   "w": 9,
+   "d": 7,
+   "h": 7,
+   "base": 0.5,
+   "roof": "hip",
+   "rh": 2,
+   "ridge": "x",
+   "floors": 2,
+   "door": "center",
+   "door2": false,
+   "backDoor": true,
+   "wf": 3,
+   "ws": 2,
+   "wb": 2
+  },
+  "desc": "An Italian neighbourhood pizzeria: warm red brick walls, a green-white-red striped awning painted flat above the big ground-floor shop window, gold PIZZERIA lettering, the glow of a wood-fired oven seen through the glass, black-framed upstairs windows with flower boxes, a cream stone cornice and base, and a terracotta tile roof."
+ },
+ {
+  "id": "diner",
+  "era": "Shops & food",
+  "title": "Retro diner",
+  "p": {
+   "w": 12,
+   "d": 7,
+   "h": 4,
+   "base": 0.5,
+   "roof": "flat",
+   "rh": 1,
+   "ridge": "x",
+   "floors": 1,
+   "door": "center",
+   "door2": true,
+   "backDoor": false,
+   "wf": 4,
+   "ws": 2,
+   "wb": 2
+  },
+  "desc": "A 1950s American roadside diner: polished stainless-steel ribbed walls with a red stripe band, a big red-and-chrome DINER sign over the double glass door, wide windows showing red booths and a counter inside, a black-and-white checkerboard base, and a red roof edge."
+ },
+ {
+  "id": "mart",
+  "era": "Shops & food",
+  "title": "24/7 convenience store",
+  "p": {
+   "w": 12,
+   "d": 8,
+   "h": 5,
+   "base": 0.5,
+   "roof": "flat",
+   "rh": 1,
+   "ridge": "x",
+   "floors": 1,
+   "door": "right",
+   "door2": true,
+   "backDoor": true,
+   "wf": 3,
+   "ws": 1,
+   "wb": 1
+  },
+  "desc": "A modern 24/7 convenience store: white and light-grey composite wall panels, a bright green and orange sign band reading 24/7 MART along the roof edge, a full glass storefront with shelves of snacks and drinks visible inside, offer posters in the windows, an ice freezer and a newspaper rack painted beside the sliding glass doors, and a grey concrete base."
+ },
+ {
+  "id": "ramen",
+  "era": "Shops & food",
+  "title": "Ramen shop",
+  "p": {
+   "w": 7,
+   "d": 7,
+   "h": 5,
+   "base": 0.5,
+   "roof": "shed",
+   "rh": 2,
+   "ridge": "x",
+   "floors": 1,
+   "door": "center",
+   "door2": false,
+   "backDoor": false,
+   "wf": 2,
+   "ws": 2,
+   "wb": 1
+  },
+  "desc": "A modern Japanese ramen shop: dark charred-wood walls with light cedar accents, a dark standing-seam metal roof, red paper lanterns and an indigo noren curtain painted over the sliding wooden door, a small sign with a steaming ramen bowl, and warm glowing windows with paper screens."
+ },
+ {
+  "id": "icecream",
+  "era": "Shops & food",
+  "title": "Ice cream parlour",
+  "p": {
+   "w": 8,
+   "d": 6,
+   "h": 5,
+   "base": 0.5,
+   "roof": "gable",
+   "rh": 2.5,
+   "ridge": "x",
+   "floors": 1,
+   "door": "center",
+   "door2": false,
+   "backDoor": false,
+   "wf": 2,
+   "ws": 1,
+   "wb": 1
+  },
+  "desc": "A cheerful modern ice cream parlour: pastel mint and pink painted wood panelling, a pink-and-white candy-striped awning painted flat above the windows, a big waffle-cone sign, crisp white trim, soft pink roof tiles, and a cream stone base."
+ },
+ {
   "id": "forge",
   "era": "Medieval",
   "title": "Blacksmith's forge",
