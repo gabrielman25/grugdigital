@@ -63,11 +63,13 @@ and link straight to the pages that changed. A preview also falls back to the le
 
 ## The look
 
-Every page outside the studios wears the Grug Arcade's classic look (a 2011-style games site): a fixed 920px column over
-slow pans of Grug City (`.bgfx`), the 728x90 house ad, the logo banner with the R6 crowd, the shiny green nav bar, the
-orange announcement strip, dark shiny box tabs (`.StandardBoxHeader`) over light gradient boxes, shiny gradient buttons,
-Arial, the social skyscrapers in the gutters, and the grey Verdana footer. No dark mode. No coloured dots next to text and
-no coloured accent lines or lips (the owner finds them ugly).
+Every page wears the Grug Arcade's classic look (a 2011-style games site): a 920px column over slow pans of Grug City
+(`.bgfx`), the 728x90 house ad, the logo banner with the R6 crowd, the shiny green nav bar, the orange announcement strip,
+dark shiny box tabs (`.StandardBoxHeader`) over light gradient boxes, shiny gradient buttons, Arial, the social
+skyscrapers in the gutters, and the grey Verdana footer. No dark mode. No coloured dots next to text and no coloured
+accent lines or lips (the owner finds them ugly). **Phones matter:** the pages use `width=device-width`, and under 940px
+`arcade/arcade.css` (bottom block) reflows the column into one (scrolling nav, stacked columns, a 2-up tile grid, the
+house ad zoomed to fit); each page adds its own phone rules next to its styles. Check new pages at 390px wide.
 
 - `arcade/arcade.css` + `GrugArcade.chrome()` (`arcade/arcade.js`) are the shared header, background, side ads, Pearls
   button and footer. The home page, `privacy.html` and `terms.html` use them too, with the same header/footer markup
@@ -76,7 +78,10 @@ no coloured accent lines or lips (the owner finds them ugly).
   tabbed boxes of any width; `.chips`). `static/legal.css`: the privacy/terms document inside its box.
 - `static/site.css`: the same look for the small card pages (`character/pearls/`, `tizzy/`, `itch/`, `404.html`): the city
   background fading into green, a `.site-top` logo + nav strip, boxes whose first `h2` becomes a dark shiny title bar.
-- Not restyled (yet): the Avatar Studio and Building Studio themselves (generated, see below).
+- The Avatar Studio's theme is `src/character/classic.css` (the green nav as its top bar, with the logo; two rows on
+  phones), put in by `patch_outfits.py`; the Building Studio's is `src/build/classic.css`, put in by `build.py`. Rebuild
+  after changing either.
+- Keep the nav in step on the small pages too (`.site-top` in `404.html`, `tizzy/`, `itch/`, `character/pearls/`).
 
 ## The itch.io asset list (home page)
 
@@ -85,10 +90,23 @@ collections (the categories, by number in `ITCH.COLLECTIONS`). itch answers 429 
 time and cached, never fan out. `static/itch-assets.json` is the fallback; see README.md. itch cover URLs are signed per
 size, so only the `315x250` covers itch gives us work: don't rewrite them to other sizes.
 
+## Grug Studio (`/arcade/grug-studio/`): both studios on one baseplate
+
+An Arcade game. You walk around a studded baseplate as your saved outfit. **Create an Avatar** (the green pad, or the top
+button) zooms the camera in on you and opens the real Avatar Studio over the baseplate in a frame (`/character/?embed`,
+`src/character/embed.js`): it opens the outfit you play as, and its **Wear it** button saves it
+(`GrugStudio.saveAndPlay`, the same save as the arcade card) and messages the game, which dresses you and zooms out.
+**Make a Building** (the blue pad) spawns the Building Studio's own building (`build/core.js`, generated from
+`src/build/core.js` by `build.py`), scaled by the studio's figure (1.8 m = 5.2 studs) so it's true to size next to you;
+the sliders change it live, and its settings are the studio's own (`grug.build.v2`), so "Paint it in the Building
+Studio" carries straight on. The game's sky and baseplate match the Avatar Studio's, so the hand-over looks seamless.
+
 ## Grug Arcade (`/arcade/`)
 
 Games live in `arcade/<slug>/index.html`; follow `arcade/claude.md` (no title screens, flat classic UI, retro
 animations, the player wears their saved outfit via `GrugOutfitRig`, Pearls only through `GrugPearls.reward` /
-`GrugPearlPopup`, never a Pearl balance on screen). Saved outfits are `static/outfits.js` (IndexedDB `grug-outfits`,
+`GrugPearlPopup`, never a Pearl balance on screen). Every game's frame loop asks for the next frame first and catches a
+frame's errors (`frameStep`/`loopStep` + a small wrapper, errors counted in `window.GrugLoopErrors`): a loop that scheduled
+itself on its last line froze for good on any error while the Game Menu kept working. Keep it that way in new games. Saved outfits are `static/outfits.js` (IndexedDB `grug-outfits`,
 active id `grug.outfit.active`); the studio's My outfits layer is `src/character/outfits.js`, put into
 `character/index.html` by `patch_outfits.py` (also run by `patch_studio.py`/`build.py`).

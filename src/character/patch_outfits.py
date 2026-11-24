@@ -120,7 +120,7 @@ def apply(s, agent_js=None, labels=None):
         s = s.replace(old, new)
     sub('<link rel="help" href="/character/claude.md">',
         '<link rel="help" href="/character/claude.md"><!--go:head-->\n<script src="/static/outfits.js"></script><!--/go:head-->')
-    sub('</head>', CSS + '</head>')
+    sub('</head>', CSS + '<!--go:classic--><style id="grug-classic">\n' + (HERE / 'classic.css').read_text(encoding='utf-8') + '</style><!--/go:classic--></head>')
     # a Back button at the start of the top bar: to the page they came from on this site, or the home page
     sub('<header class="topbar box">\n  <span class="g-brandmark"', '<header class="topbar box">\n  <!--go:back--><a id="goBack" class="g-btn go-back" href="/" title="Back" aria-label="Back to the previous page">'
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>'
@@ -138,7 +138,7 @@ def apply(s, agent_js=None, labels=None):
         s = s[:a] + agent_js.replace('__LABELS__', json.dumps(labels, ensure_ascii=False)) + s[b:]
     js = (HERE / 'outfits.js').read_text(encoding='utf-8')
     wd = (HERE / 'wardrobe.js').read_text(encoding='utf-8')
-    sub('</script>\n</body>\n</html>', '</script>\n<!--go:js-->' + SHEET + '\n<script id="game-outfits">\n' + js + '</script>\n<script id="wardrobe">\n' + wd + '</script>\n<!--/go:js--></body>\n</html>')
+    sub('</script>\n</body>\n</html>', '</script>\n<!--go:js-->' + SHEET + '\n<script id="game-outfits">\n' + js + '</script>\n<script id="wardrobe">\n' + wd + '</script>\n<script id="grug-embed">\n' + (HERE / 'embed.js').read_text(encoding='utf-8') + '</script>\n<!--/go:js--></body>\n</html>')
     return s
 
 if __name__ == '__main__':

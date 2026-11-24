@@ -14,6 +14,12 @@
   const gname = id => (GENRES.find(g => g[0] === id) || [, 'All'])[1];
 
   const GAMES = [
+    { slug: 'grug-studio', name: 'Grug Studio', genres: ['gametutorials', 'town-and-city'], tag: 'Make your avatar · build at true scale', featured: true,
+      added: '2026-11-25T02:00:00Z', updated: '2026-11-25T02:00:00Z', alt: 'A player beside a two-storey building on a studded baseplate, with the Avatar and Building pads',
+      stats: ['Create your avatar, then walk around', 'Change a building live, at real size'], players: '1',
+      about: ['A baseplate for making things for your game. Walk onto the green pad (or press Create an Avatar) and the camera zooms in on you while the Avatar Studio opens: change your hair, face and outfit, press Wear it, and you are back on the baseplate wearing your new look.',
+        'Walk onto the blue pad (or press Make a Building) and a building spawns on the plot. Change its size, roof, doors, floors and windows with the sliders while you walk around it. You are the real size of a Roblox character, so you see exactly how big it will be in a game. When it looks right, paint it in the Building Studio and download it.'],
+      controls: [['WASD / arrows', 'Walk'], ['Space', 'Jump'], ['Drag', 'Turn the camera'], ['Mouse wheel', 'Zoom'], ['Phone', 'Left side walks, right side turns, pinch to zoom'], ['Esc', 'Game Menu']] },
     { slug: 'zone-royale', name: 'Zone Royale', genres: ['war', 'adventure'], tag: '100 players · battle royale', featured: true,
       added: '2026-11-24T22:00:00Z', updated: '2026-11-24T23:30:00Z', alt: 'A player gliding down into a blocky city on a big island',
       stats: ['Drop, loot, outlast the storm', 'Solo or squads of four'], players: '100 (you and 99 bots)',

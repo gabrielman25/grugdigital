@@ -98,6 +98,12 @@ is `arcade/arcade.css`.
   in-game cash). Games never show a Pearl balance on screen.
 - `arcade/claude.md` is the guide for Claude sessions building a game for the site ("push it to the site").
 
+## Grug Studio (`/arcade/grug-studio/`)
+
+A baseplate game that bundles both studios: create your avatar (the Avatar Studio opens over the baseplate, `/character/?embed`)
+and make a building (the Building Studio's building, `build/core.js`, changed live with sliders while you walk around it at
+true scale). See CLAUDE.md.
+
 ## Changing the legacy site
 
 Push to the `legacy` branch. It redeploys to the legacy address and the main address picks it up straight away.

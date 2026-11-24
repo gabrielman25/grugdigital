@@ -107,6 +107,31 @@ fetch('/character/looks/looks.json').then(r => r.ok ? r.json() : []).then(kit =>
   grid.parentElement.hidden = false;
 }).catch(() => {});
 
+// ---- save this character (or find it already saved, or update the one being edited) and play as it: the arcade card and the
+//      Grug Studio game (embed.js) both use this
+const same = async (a, b) => { if (!a || !b) return !a && !b; if (a.size !== b.size) return false; const [x, y] = await Promise.all([a.arrayBuffer(), b.arrayBuffer()]); const u = new Uint8Array(x), v = new Uint8Array(y); for (let i = 0; i < u.length; i++) if (u[i] !== v[i]) return false; return true; };
+async function saved(snap) {   // an outfit already saved exactly like this one (so trying it twice doesn't fill My outfits with copies)
+  const L = JSON.stringify(snap.look);
+  for (const o of await O.list()) { const r = await O.get(o.id); if (r && JSON.stringify(r.look) === L && await same(r.shirt, snap.shirt) && await same(r.pants, snap.pants)) return r.id; }
+  return null;
+}
+async function saveAndPlay(){
+  try {
+    const snap = await snapshot(); let id = null;
+    const keep = editing && !/^starter-/.test(editing.id) ? await O.get(editing.id) : null;
+    if (keep) id = await O.put(Object.assign({ id: keep.id, created: keep.created }, snap));   // the outfit you're editing: saved with your changes
+    else id = (await saved(snap)) || await O.put(snap);
+    O.setActive(id); editing = { id, name: snap.name };
+    return id;
+  } catch (e) { console.error(e); say("Couldn't save the outfit here"); throw e; }
+}
+// open the outfit they play as, to carry on changing it (a starter look is loaded as a new character, so it's never overwritten)
+async function openActive(){
+  const a = O.active() || ((await O.get('starter-grug')) ? 'starter-grug' : ''); if (!a) return false;   // nobody picked: Grug, the default
+  await edit(a); if (/^starter-/.test(a)) editing = null;
+  return true;
+}
+
 // ---- Try this avatar out in the arcade (bottom left): save it (or find it already saved), play as it, off to the Arcade
 const arc = $q('#toArcade');
 if (arc) {
@@ -119,22 +144,10 @@ if (arc) {
   place(); addEventListener('resize', place); if (panel && window.ResizeObserver) new ResizeObserver(place).observe(panel);
   const sl = [...arc.querySelectorAll('.sl')]; let at = 0;
   setInterval(() => { if (document.hidden || arc.disabled) return; sl[at].classList.remove('on'); at = (at + 1) % sl.length; sl[at].classList.add('on'); }, 3800);
-  const same = async (a, b) => { if (!a || !b) return !a && !b; if (a.size !== b.size) return false; const [x, y] = await Promise.all([a.arrayBuffer(), b.arrayBuffer()]); const u = new Uint8Array(x), v = new Uint8Array(y); for (let i = 0; i < u.length; i++) if (u[i] !== v[i]) return false; return true; };
-  async function saved(snap) {   // an outfit already saved exactly like this one (so trying it twice doesn't fill My outfits with copies)
-    const L = JSON.stringify(snap.look);
-    for (const o of await O.list()) { const r = await O.get(o.id); if (r && JSON.stringify(r.look) === L && await same(r.shirt, snap.shirt) && await same(r.pants, snap.pants)) return r.id; }
-    return null;
-  }
   arc.addEventListener('click', async () => {
     if (arc.disabled) return; arc.disabled = true; arc.classList.add('busy');
-    try {
-      const snap = await snapshot(); let id = null;
-      const keep = editing ? await O.get(editing.id) : null;
-      if (keep) id = await O.put(Object.assign({ id: keep.id, created: keep.created }, snap));   // the outfit you're editing: saved with your changes
-      else id = (await saved(snap)) || await O.put(snap);
-      O.setActive(id); editing = { id, name: snap.name };
-      location.href = '/arcade/';
-    } catch (e) { console.error(e); say("Couldn't save the outfit here"); arc.disabled = false; arc.classList.remove('busy'); }
+    try { await saveAndPlay(); location.href = '/arcade/'; }
+    catch (e) { arc.disabled = false; arc.classList.remove('busy'); }
   });
 }
 
@@ -144,5 +157,6 @@ if (window.GrugStudio) Object.assign(window.GrugStudio, {
   outfits: async () => (await O.list()).map(o => ({ id: o.id, name: o.name, playingAs: o.id === O.active() })),
   playAs: id => { O.setActive(id || ''); return { playingAs: O.active() }; },
   openOutfits: open,
+  saveAndPlay, openActive,
 });
 })();

@@ -27,7 +27,8 @@ def studio(site):
     assert '</script' not in js
     return fill((HERE / 'page.html').read_text(), [
         ('/*FONT*/', (HERE / 'font.b64').read_text().strip()), ('/*MARK*/', (HERE / 'mark.txt').read_text().strip()),
-        ('/*GUIDE*/', html.escape((HERE / 'guide.md').read_text())), ('/*HEADSCRIPTS*/', OUTFITS if site else ''), ('/*JS*/', js)])
+        ('/*GUIDE*/', html.escape((HERE / 'guide.md').read_text())), ('/*HEADSCRIPTS*/', OUTFITS if site else ''), ('/*JS*/', js),
+        ('/*CLASSIC*/', (HERE / 'classic.css').read_text())])
 
 
 def gallery(site):
@@ -52,7 +53,8 @@ def gallery(site):
     return fill((HERE / 'gallery.html').read_text(), [
         ('/*FONT*/', (HERE / 'font.b64').read_text().strip()), ('/*MARK*/', (HERE / 'mark.txt').read_text().strip()),
         ('/*HEADSCRIPTS*/', OUTFITS if site else ''), ('/*MATH*/', math), ('/*GL*/', gljs),
-        ('/*STUDIO*/', "'/build/' || " if site else ''), ('/*DATA*/', json.dumps(data).replace('<', '\\u003c'))])
+        ('/*STUDIO*/', "'/build/' || " if site else ''), ('/*DATA*/', json.dumps(data).replace('<', '\\u003c')),
+        ('/*CLASSIC*/', (HERE / 'classic.css').read_text())])
 
 
 def main():
@@ -60,6 +62,7 @@ def main():
     (out / 'index.html').write_text(studio(True))
     (out / 'examples' / 'index.html').write_text(gallery(True))
     (out / 'claude.md').write_text((HERE / 'guide.md').read_text())
+    (out / 'core.js').write_text('/* generated from src/build/core.js by src/build/build.py: the Building Studio\'s building, used by the Grug Studio game (/arcade/grug-studio/) */\n' + (HERE / 'core.js').read_text())
     print('site:', out / 'index.html', out / 'examples' / 'index.html', out / 'claude.md')
     if '--standalone' in sys.argv:
         d = pathlib.Path(sys.argv[sys.argv.index('--standalone') + 1]); d.mkdir(parents=True, exist_ok=True)

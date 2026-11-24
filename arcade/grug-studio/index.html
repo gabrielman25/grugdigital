@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Grug Studio · Make your avatar and a building on the baseplate</title>
+<meta name="description" content="A baseplate where you make things for your game: create your avatar in the Avatar Studio, then spawn a building and change it with sliders while you walk around it, at true scale next to your character.">
+<link rel="icon" href="/favicon.png">
+<style>
+/* Grug Studio: the Avatar Studio and the Building Studio on one baseplate (see the script below for how it fits together).
+   The look follows arcade/claude.md: Arial bold with a black outline, flat translucent grey panels, the classic Game Menu. */
+html,body{margin:0;height:100%;overflow:hidden;background:#e6f4ff}
+body{font:bold 14px Arial,Helvetica,sans-serif;color:#fff;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.ol{text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
+.pnl{background:rgba(25,25,25,.74);border:1px solid #8a8a8a;border-radius:3px}
+.fbtn{border:2px solid #d0d0d0;background:rgba(27,27,27,.82);border-radius:3px;padding:7px 12px;font-size:14px;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
+.fbtn:hover{border-color:#fff;background:rgba(60,60,60,.88)}
+
+/* top: the Menu button, the two modes */
+#menuBtn{position:fixed;left:10px;top:10px;z-index:12}
+#modes{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:12;display:flex;gap:6px}
+#modes button{display:flex;align-items:center;gap:8px;font-size:15px;padding:7px 14px;white-space:nowrap}
+#modes button svg{width:20px;height:20px;flex:none;filter:drop-shadow(0 1px 0 #000)}
+#modes button.on{border-color:#9be338;background:rgba(36,84,12,.9)}
+#hint{position:fixed;left:50%;top:58px;transform:translateX(-50%);z-index:11;padding:6px 12px;font-size:13px;white-space:nowrap;pointer-events:none;transition:opacity .4s}
+#hint.off{opacity:0}
+
+/* the building panel (right; a bottom sheet on phones) */
+#bp{position:fixed;right:10px;top:10px;bottom:10px;width:292px;z-index:10;display:none;flex-direction:column}
+body.build #bp{display:flex}
+#bp .hd{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;font-size:17px;border-bottom:1px solid #555}
+#bp .hd button{padding:3px 9px;font-size:12px}
+#bp .bd{flex:1;min-height:0;overflow:auto;padding:4px 10px 12px;scrollbar-width:thin;touch-action:pan-y}
+.t{margin:10px 0 5px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#cfcfcf}
+.sz{padding:6px 8px;font-size:12px;line-height:1.45;font-weight:normal;color:#eee;background:rgba(0,0,0,.35);border-radius:3px}
+.sz b{color:#fff}
+.sl{margin:5px 0}
+.sl label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:1px}
+.sl output{color:#c6f57a}
+input[type=range]{width:100%;margin:2px 0;accent-color:#9be338;touch-action:pan-y}
+.seg{display:flex;flex-wrap:wrap;gap:4px}
+.seg button{flex:1 1 auto;padding:5px 6px;font-size:12px;border:2px solid #9a9a9a;background:#1b1b1b;border-radius:3px;text-shadow:-1px -1px 0 #000,1px 1px 0 #000}
+.seg button:hover{border-color:#fff}
+.seg button.on{border-color:#9be338;background:#2b5a10}
+.ck{display:inline-flex;align-items:center;gap:6px;margin:6px 12px 0 0;font-size:13px;cursor:pointer}
+.ck input{width:16px;height:16px;margin:0;accent-color:#9be338}
+.wide{display:block;width:100%;margin:8px 0 0;text-align:center;text-decoration:none;color:#fff;box-sizing:border-box}
+.wide.go{border-color:#9be338;background:rgba(36,84,12,.92)}
+
+/* the Avatar Studio, in a frame over the baseplate */
+#av{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:30;opacity:0;pointer-events:none;transition:opacity .35s;background:transparent;display:none}
+body.avatar #av{display:block}
+body.avatar.avshow #av{opacity:1;pointer-events:auto}
+#avLoad{position:fixed;left:50%;bottom:16%;transform:translateX(-50%);z-index:29;padding:8px 14px;font-size:15px;display:none}
+body.avatar:not(.avshow) #avLoad{display:block}
+body.avatar #modes,body.avatar #menuBtn,body.avatar #hint{display:none}
+
+/* notes */
+#note{position:fixed;left:50%;top:22%;transform:translate(-50%,-6px);z-index:20;padding:9px 16px;font-size:17px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;text-align:center;max-width:86vw}
+#note.on{opacity:1;transform:translate(-50%,0)}
+
+/* touch: a stick on the left, jump on the right */
+#joy{position:fixed;z-index:9;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;background:rgba(25,25,25,.35);border:2px solid rgba(255,255,255,.55);display:none;pointer-events:none}
+#joy i{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(255,255,255,.75)}
+#jump{position:fixed;right:22px;bottom:calc(26px + env(safe-area-inset-bottom));z-index:9;width:74px;height:74px;border-radius:50%;display:none;font-size:14px;padding:0}
+body.touch #jump{display:block}
+#stickHelp{position:fixed;left:20px;bottom:calc(30px + env(safe-area-inset-bottom));z-index:8;padding:6px 10px;font-size:12px;display:none;pointer-events:none}
+body.touch #stickHelp{display:block}
+
+/* the classic Game Menu (as in arcade/slide-999) */
+#veil{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;z-index:39}
+#gm{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:290px;max-height:94vh;overflow-y:auto;box-sizing:border-box;padding:8px 16px 12px;background:rgba(25,25,25,.88);border:1px solid #8a8a8a;border-radius:3px;z-index:40;display:none}
+body.menu #gm,body.menu #veil{display:block}
+#gm .mt{text-align:center;font-size:20px;padding:2px 0 8px;margin-bottom:6px;border-bottom:1px solid #555}
+#gm button{display:block;width:100%;text-align:center;margin:7px 0;padding:7px 6px;font-size:14px;border-radius:3px;background:#1b1b1b;border:2px solid #d0d0d0;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
+#gm button:hover{background:#4a1010;border-color:#d8281f}
+#gm button.focus{background:#3a0c0c;border-color:#d8281f}
+#gm .page{display:none} #gm .page.on{display:block}
+#gm .brand{margin-top:10px;padding-top:9px;border-top:1px solid #555;text-align:center}
+#gm .brand img{width:150px;height:auto;display:block;margin:0 auto;opacity:.92}
+#gm .row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0;font-size:13px}
+#gm .row button{width:112px;margin:0;padding:5px;font-size:12px}
+#gm .help{font-size:12px;font-weight:normal;color:#ddd;line-height:1.45} #gm .help b{color:#fff}
+#err{position:fixed;inset:0;display:none;place-items:center;background:#e6f4ff;color:#222;font-weight:normal;text-align:center;padding:20px}
+
+/* phones and narrow windows: the panel becomes a sheet at the bottom; the modes shrink to icons + short words */
+@media (max-width:760px){
+  #modes{top:8px;gap:4px;left:auto;right:8px;transform:none}
+  #modes button{font-size:13px;padding:6px 9px}
+  #modes button .long{display:none}
+  #menuBtn{left:8px;top:8px}
+  #hint{top:auto;bottom:calc(118px + env(safe-area-inset-bottom));white-space:normal;text-align:center;width:max-content;max-width:88vw}
+  #bp{left:6px;right:6px;top:auto;bottom:calc(6px + env(safe-area-inset-bottom));width:auto;height:46vh}
+  body.build.bpmin #bp{height:auto}
+  body.build.bpmin #bp .bd{display:none}
+  body.build:not(.bpmin) #jump{bottom:calc(46vh + 18px)}
+  body.build:not(.bpmin) #stickHelp{display:none}
+  body.build:not(.bpmin) #hint{bottom:calc(46vh + 14px)}
+}
+body.cover #modes,body.cover #menuBtn,body.cover #hint,body.cover #bp,body.cover #jump,body.cover #stickHelp{display:none!important}
+</style>
+</head>
+<body>
+<canvas id="c" tabindex="0" aria-label="The baseplate: WASD or the arrow keys to walk, Space to jump, drag to turn the camera"></canvas>
+
+<button id="menuBtn" class="fbtn" type="button">Menu</button>
+<div id="modes">
+  <button id="mAvatar" class="fbtn" type="button" title="Zoom in on your character and change it in the Avatar Studio"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="8" rx="1.5"/><path d="M4.5 21v-6.5a2.5 2.5 0 0 1 2.5-2.5h10a2.5 2.5 0 0 1 2.5 2.5V21"/></svg><span>Create<span class="long"> an</span> Avatar</span></button>
+  <button id="mBuild" class="fbtn" type="button" title="Spawn a building and change it while you walk around it"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"><path d="M3 11 12 4l9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/></svg><span>Make a Building</span></button>
+</div>
+<div id="hint" class="pnl ol">Walk onto a pad, or pick a mode at the top</div>
+
+<aside id="bp" class="pnl" aria-label="Your building">
+  <div class="hd ol"><span>Your building</span><span><button class="fbtn" id="bpMin" type="button">Hide</button> <button class="fbtn" id="bpDone" type="button">Done</button></span></div>
+  <div class="bd">
+    <div class="sz ol" id="bSize"></div>
+    <div class="t ol">Starters</div><div class="seg" id="bPresets"></div>
+    <div class="t ol">Size</div><div id="bSize1"></div>
+    <div class="t ol">Roof</div><div class="seg" id="bRoof"></div><div id="bRoof1"></div>
+    <div id="bRidgeW"><div class="t ol">Ridge runs</div><div class="seg" id="bRidge"><button data-v="x" type="button">Left to right</button><button data-v="z" type="button">Front to back</button></div></div>
+    <div class="t ol">Front door</div><div class="seg" id="bDoor"></div>
+    <label class="ck ol"><input type="checkbox" id="bDoor2">Double door</label><label class="ck ol"><input type="checkbox" id="bBack">Back door</label>
+    <div class="t ol">Floors and windows</div><div id="bWin"></div>
+    <button class="fbtn wide" id="bDoorGo" type="button">Stand at the front door</button>
+    <a class="fbtn wide go" id="bPaint" href="/build/">Paint it in the Building Studio ›</a>
+  </div>
+</aside>
+
+<iframe id="av" title="Grug Avatar Studio" allow="clipboard-read; clipboard-write"></iframe>
+<div id="avLoad" class="pnl ol">Opening the Avatar Studio…</div>
+<div id="note" class="pnl ol" role="status"></div>
+<div id="joy"><i></i></div>
+<button id="jump" class="fbtn" type="button" aria-label="Jump">Jump</button>
+<div id="stickHelp" class="pnl ol">Touch the left side to walk</div>
+
+<div id="veil"></div>
+<div id="gm">
+  <div class="page on" id="pgMain">
+    <div class="mt ol">Game Menu</div>
+    <button id="gResume" class="focus" type="button">Resume Game</button>
+    <button id="gReset" type="button">Reset Character</button>
+    <button id="gSettings" type="button">Game Settings</button>
+    <button id="gHelp" type="button">Help</button>
+    <button id="gLeave" type="button">Leave Game</button>
+    <div class="brand"><img src="/static/arcade/grug-digital-logo.png" alt="Grug Digital"></div>
+  </div>
+  <div class="page" id="pgSet">
+    <div class="mt ol">Game Settings</div>
+    <div class="row ol">Shadows <button id="sShadow" type="button"></button></div>
+    <div class="row ol">Camera speed <button id="sSens" type="button"></button></div>
+    <div class="row ol" data-yt-row style="display:none">480p YouTube mode <button id="mYT" type="button">480p YouTube mode: Off</button></div>
+    <button class="back" type="button">Back</button>
+  </div>
+  <div class="page" id="pgHelp">
+    <div class="mt ol">Help</div>
+    <div class="help">
+      <b>WASD</b> or the <b>arrow keys</b> walk · <b>Space</b> jump<br>
+      <b>Drag</b> to turn the camera · <b>Mouse wheel</b> zoom · <b>Esc</b> this menu<br>
+      On a phone: the <b>left side</b> of the screen walks, the <b>right side</b> turns the camera, pinch to zoom.<br><br>
+      <b>Create an Avatar</b> zooms in on you and opens the Avatar Studio. Press <b>Wear it</b> there to come back wearing your new look.<br><br>
+      <b>Make a Building</b> spawns a building on the baseplate. Change it with the sliders while you walk around it: you're the real size
+      of a Roblox character (1.8 m), so you see exactly how big it is in a game. When it's right, paint it in the Building Studio.
+    </div>
+    <button class="back" type="button">Back</button>
+  </div>
+</div>
+<div id="err"><div><b>Couldn't load the 3D library.</b><br>This page loads Three.js from cdnjs, so it needs an internet connection.</div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>window.THREE || document.write('<script src="/static/vendor/three-r128.min.js"><\/script>');</script>
+<script src="/static/vendor/three-r128-GLTFLoader.js"></script>
+<script src="/static/pearls.js"></script>
+<script src="/static/outfits.js"></script>
+<script src="/static/outfit-rig.js"></script>
+<script src="/static/pearl-popup.js"></script>
+<script src="/static/yt480.js"></script>
+<!-- the Building Studio's own building (build/core.js, generated from src/build/core.js): the same walls, roofs, doors and
+     windows, in metres; these two names are the only parts of the studio it needs -->
+<script>window.App = {}; var LOOKS = { realistic: 1 };</script>
+<script src="/build/core.js"></script>
+<script>
+/* Grug Studio: one baseplate for making things for your game.
+   - You walk around as the outfit you play as (GrugOutfitRig), at the classic scale: 1 unit = 1 stud, a 5.2-stud character.
+   - Create an Avatar: the camera zooms in on you and the Avatar Studio opens over the baseplate (/character/?embed, see
+     src/character/embed.js). "Wear it" saves the character as the one you play as; you come back wearing it.
+   - Make a Building: a building spawns on the plot in front of the spawn. It's the Building Studio's building (build/core.js), in
+     metres, scaled by the studio's own scale figure (1.8 m = 5.2 studs), so a 4 m wall is as tall next to you here as it is in the
+     studio and in a Roblox game. The sliders change it live while you walk around it. The settings are the Building Studio's own
+     saved settings (localStorage 'grug.build.v2'), so "Paint it in the Building Studio" carries straight on there. */
+(() => {
+'use strict';
+if (!window.THREE) { document.getElementById('err').style.display = 'grid'; return; }
+const $ = id => document.getElementById(id);
+const Q = new URLSearchParams(location.search), COVER = Q.has('cover');
+if (COVER) document.body.classList.add('cover');
+const TOUCH = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+if (TOUCH) document.body.classList.add('touch');
+const MS = 5.2 / 1.8;                                    // studs per metre: the Building Studio's 1.8 m figure is a 5.2-stud character
+const PLASTIC = { specular: 0x6a6a6a, shininess: 40 };
+const SPAWN = new THREE.Vector3(0, 0, 34), FRONT_Z = 2;   // the plot's front edge; the building grows back from it
+const AV_PAD = new THREE.Vector3(-30, 0, 30), BD_PAD = new THREE.Vector3(30, 0, 30);
+const SAVE = 'grug.grug-studio.v1';
+let opts = { shadows: true, sens: 1 };
+try { Object.assign(opts, JSON.parse(localStorage.getItem(SAVE) || '{}')); } catch (e) {}
+const saveOpts = () => { try { localStorage.setItem(SAVE, JSON.stringify(opts)); } catch (e) {} };
+
+/* ---------- renderer, sky, light (arcade/claude.md: the arcade's light) ---------- */
+const canvas = $('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: COVER });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = opts.shadows; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+if (window.GrugYT480) GrugYT480.attach(renderer.domElement, renderer);
+const scene = new THREE.Scene();
+const SKY = 0xe6f4ff;                                    // the Avatar Studio's sky, so its view and this one meet seamlessly
+scene.background = (() => { const c = document.createElement('canvas'); c.width = 2; c.height = 256; const g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 256);
+  gr.addColorStop(0, '#8fc6ff'); gr.addColorStop(.62, '#e6f4ff'); gr.addColorStop(1, '#e6f4ff'); g.fillStyle = gr; g.fillRect(0, 0, 2, 256); return new THREE.CanvasTexture(c); })();
+scene.fog = new THREE.Fog(SKY, 320, 900);
+const camera = new THREE.PerspectiveCamera(60, 1, 0.5, 2500);
+scene.add(new THREE.HemisphereLight(0xfff0e2, 0x8a7a6a, 0.64));
+const SUN_DIR = new THREE.Vector3(-0.42, 0.78, 0.46).normalize();
+const sun = new THREE.DirectionalLight(0xffe9d2, 0.85);
+sun.castShadow = true;
+const SMAP = TOUCH || innerWidth < 900 ? 2048 : 4096;
+sun.shadow.mapSize.set(SMAP, SMAP);
+Object.assign(sun.shadow.camera, { left: -80, right: 80, top: 80, bottom: -80, near: 100, far: 460 });
+sun.shadow.bias = -0.00006; sun.shadow.normalBias = 0.025;
+scene.add(sun, sun.target);
+const placeSun = p => { sun.position.copy(p).addScaledVector(SUN_DIR, 260); sun.target.position.copy(p); };
+
+/* ---------- studs: one texture tile = 2 studs, on everything ---------- */
+function studTex(base) {
+  const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+  g.fillStyle = base; g.fillRect(0, 0, 128, 128);
+  for (const [x, y] of [[32, 32], [96, 32], [32, 96], [96, 96]]) {
+    g.fillStyle = 'rgba(0,0,0,.16)'; g.beginPath(); g.arc(x + 1.5, y + 2.5, 19, 0, 7); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.22)'; g.beginPath(); g.arc(x - 1, y - 1, 19, 0, 7); g.fill();
+    g.fillStyle = base; g.beginPath(); g.arc(x, y, 17, 0, 7); g.fill();
+  }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); return t;
+}
+const studded = (base, w, d) => { const t = studTex(base); t.repeat.set(w / 2, d / 2); return new THREE.MeshPhongMaterial(Object.assign({ map: t }, PLASTIC)); };
+function plate(w, d, h, base, x, y, z) {   // a studded slab: studs on top, plain sides
+  const side = new THREE.MeshPhongMaterial(Object.assign({ color: new THREE.Color(base) }, PLASTIC)), top = studded(base, w, d);
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), [side, side, top, side, side, side]);
+  m.position.set(x, y - h / 2, z); m.receiveShadow = true; scene.add(m); return m;
+}
+
+/* ---------- the baseplate, the spawn, the two pads with their signs ---------- */
+plate(1024, 1024, 4, '#b4b6bd', 0, 0, 0);
+plate(12, 12, 0.4, '#8a8a8e', SPAWN.x, 0.4, SPAWN.z);
+function sign(text, sub, x, z, col) {
+  const g = new THREE.Group(); g.position.set(x, 0, z);
+  const post = new THREE.MeshPhongMaterial(Object.assign({ color: 0x6b6b70 }, PLASTIC));
+  for (const sx of [-6, 6]) { const p = new THREE.Mesh(new THREE.BoxGeometry(1, 9, 1), post); p.position.set(sx, 4.5, -6.5); p.castShadow = true; g.add(p); }
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 352; const k = c.getContext('2d');
+  k.fillStyle = col; k.fillRect(0, 0, 1024, 352);
+  k.textAlign = 'center'; k.lineJoin = 'round'; k.font = 'bold 132px Arial'; k.lineWidth = 16; k.strokeStyle = '#000';
+  k.strokeText(text, 512, 170); k.fillStyle = '#fff'; k.fillText(text, 512, 170);
+  k.font = 'bold 64px Arial'; k.lineWidth = 10; k.strokeText(sub, 512, 280); k.fillText(sub, 512, 280);
+  const face = new THREE.MeshPhongMaterial(Object.assign({ map: new THREE.CanvasTexture(c) }, PLASTIC)), edge = new THREE.MeshPhongMaterial(Object.assign({ color: new THREE.Color(col) }, PLASTIC));
+  const b = new THREE.Mesh(new THREE.BoxGeometry(14, 4.8, 0.8), [edge, edge, edge, edge, face, edge]); b.position.set(0, 9.4, -6.5); b.castShadow = true; g.add(b);
+  scene.add(g);
+}
+plate(12, 12, 0.4, '#4fa81a', AV_PAD.x, 0.4, AV_PAD.z); sign('AVATAR', 'Step on to create', AV_PAD.x, AV_PAD.z, '#3d8f14');
+plate(12, 12, 0.4, '#2a72d2', BD_PAD.x, 0.4, BD_PAD.z); sign('BUILDING', 'Step on to build', BD_PAD.x, BD_PAD.z, '#2463b8');
+
+/* ---------- you: the classic Grug rig (arcade/claude.md), dressed in the outfit you play as ---------- */
+function makeRig() {
+  const g = new THREE.Group(), root = new THREE.Group(); root.position.y = 3; g.add(root);
+  const box = (w, h, d, c) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshPhongMaterial(Object.assign({ color: c }, PLASTIC))); m.castShadow = true; return m; };
+  const torso = box(2, 2, 1, 0x9be338); root.add(torso);
+  const head = box(1.2, 1.2, 1.2, 0xf2c49b); head.position.y = 1.6; root.add(head);
+  const limb = (x, y, c, ly) => { const p = new THREE.Group(); p.position.set(x, y, 0); const m = box(1, 2, 1, c); m.position.y = ly; p.add(m); root.add(p); return p; };
+  return { g, root, torso, head, rs: limb(1.5, .5, 0xf2c49b, -.5), ls: limb(-1.5, .5, 0xf2c49b, -.5), rh: limb(.5, -1, 0x2a5ab8, -1), lh: limb(-.5, -1, 0x2a5ab8, -1) };
+}
+const rig = makeRig(); scene.add(rig.g);
+const me = { pos: SPAWN.clone(), vy: 0, ground: true, face: 0, speed: 0, phase: 0, name: 'Grug', wave: 0 };
+let dressTok = 0;
+async function dress(announce) {
+  if (!window.GrugOutfitRig) return;
+  const tok = ++dressTok;
+  if (!announce) rig.root.visible = false;
+  const cap = setTimeout(() => { rig.root.visible = true; }, 8000);
+  try {
+    const look = await GrugOutfitRig.load();
+    if (tok !== dressTok) return;
+    if (look) { GrugOutfitRig.undress(rig); GrugOutfitRig.dress(rig, look).forEach(m => { m.castShadow = true; }); me.name = look.isDefault ? 'Grug' : look.name; }
+    if (announce) note(`You're wearing ${me.name}`);
+  } catch (e) { console.warn(e); }
+  finally { clearTimeout(cap); if (tok === dressTok) rig.root.visible = true; }
+}
+dress();
+addEventListener('grug:outfits', () => { if (mode !== 'avatar') dress(); });
+
+/* ---------- the building (the Building Studio's, see build/core.js) ---------- */
+const bld = { g: new THREE.Group(), mesh: null, edges: null, marks: null, plot: null, shown: false, anim: 1, cx: 0, cz: 0, hx: 0, hz: 0, top: 0 };
+bld.g.visible = false; scene.add(bld.g);
+const bMat = new THREE.MeshPhongMaterial(Object.assign({ vertexColors: true, side: THREE.DoubleSide, flatShading: true }, PLASTIC));
+const mMat = new THREE.MeshPhongMaterial(Object.assign({ vertexColors: true, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }, PLASTIC));
+const eMat = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: .28 });
+const plotMat = studded('#7e7e83', 8, 8);
+function rebuild() {
+  const W = world(), F = meshFaces(), pos = [], col = [];
+  const put = (v, c) => { pos.push(v[0] * MS, v[1] * MS, v[2] * MS); col.push(c[0] / 255, c[1] / 255, c[2] / 255); };
+  F.forEach(f => { const c = ROLES[f.role].col; for (let i = 1; i < f.verts.length - 1; i++) { put(f.verts[0], c); put(f.verts[i], c); put(f.verts[i + 1], c); } });
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); geo.computeVertexNormals();
+  const mp = [], mc = [];
+  S.marks.forEach(m => { const q = markQuads(m), c = MARKS[m.kind].col; [[0, 1, 2], [0, 2, 3]].forEach(t => t.forEach(i => { mp.push(q[i][0] * MS, q[i][1] * MS, q[i][2] * MS); mc.push(c[0] / 255, c[1] / 255, c[2] / 255); })); });
+  const mg = new THREE.BufferGeometry(); mg.setAttribute('position', new THREE.Float32BufferAttribute(mp, 3)); mg.setAttribute('color', new THREE.Float32BufferAttribute(mc, 3)); mg.computeVertexNormals();
+  [bld.mesh, bld.marks, bld.edges, bld.plot].forEach(o => { if (o) { bld.g.remove(o); o.geometry.dispose(); } });
+  bld.mesh = new THREE.Mesh(geo, bMat); bld.mesh.castShadow = bld.mesh.receiveShadow = true;
+  bld.marks = new THREE.Mesh(mg, mMat);
+  bld.edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25), eMat);
+  const p = S.p, pw = Math.ceil(p.w * MS / 2) * 2 + 8, pd = Math.ceil(p.d * MS / 2) * 2 + 8;
+  plotMat.map.repeat.set(pw / 2, pd / 2);
+  bld.plot = new THREE.Mesh(new THREE.BoxGeometry(pw, .4, pd), plotMat); bld.plot.position.y = .2; bld.plot.receiveShadow = true;
+  bld.g.add(bld.plot, bld.mesh, bld.marks, bld.edges);
+  bld.hx = p.w * MS / 2; bld.hz = p.d * MS / 2; bld.top = W.hi[1] * MS;
+  bld.cx = 0; bld.cz = FRONT_Z - bld.hz; bld.g.position.set(bld.cx, 0, bld.cz);
+  sizeText();
+}
+App.onChange = () => { if (bld.shown) rebuild(); syncUI(); };
+try { const s = JSON.parse(localStorage.getItem('grug.build.v2') || 'null'); if (s) { S.p = fixParams(s); if (s.desc) S.desc = String(s.desc); if (s.look) S.look = s.look; S.geoVer++; } } catch (e) {}
+
+// a building "spawns": it grows up out of the plot with a bounce and a puff of dust
+const bits = [];
+const dustMat = new THREE.MeshPhongMaterial({ color: 0xbdbdbd, transparent: true });
+function spawnBuilding() {
+  if (!bld.mesh || !bld.shown) { bld.shown = true; rebuild(); }
+  bld.g.visible = true; bld.anim = 0;
+  for (let i = 0; i < 26; i++) {
+    const a = Math.random() * Math.PI * 2, r = Math.max(bld.hx, bld.hz) * (.7 + Math.random() * .5);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.4, 1.4), dustMat.clone()); m.position.set(bld.cx + Math.cos(a) * r, 1, bld.cz + Math.sin(a) * r);
+    m.userData = { v: new THREE.Vector3(Math.cos(a) * (6 + Math.random() * 8), 8 + Math.random() * 10, Math.sin(a) * (6 + Math.random() * 8)), life: .9 + Math.random() * .5, t: 0, spin: Math.random() * 6 };
+    scene.add(m); bits.push(m);
+  }
+}
+function sparkle(at) {
+  for (let i = 0; i < 22; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const m = new THREE.Mesh(new THREE.BoxGeometry(.6, .6, .6), new THREE.MeshPhongMaterial({ color: [0x9be338, 0xffd24a, 0xffffff, 0x5ff2ff][i % 4], transparent: true }));
+    m.position.set(at.x, at.y + 3 + Math.random() * 2, at.z);
+    m.userData = { v: new THREE.Vector3(Math.cos(a) * (5 + Math.random() * 6), 10 + Math.random() * 10, Math.sin(a) * (5 + Math.random() * 6)), life: 1 + Math.random() * .4, t: 0, spin: 8 };
+    scene.add(m); bits.push(m);
+  }
+}
+
+/* ---------- the building panel: the Building Studio's settings ---------- */
+const SLIDERS = { bSize1: [['w', 'Width'], ['d', 'Depth'], ['h', 'Wall height'], ['base', 'Foundation']], bRoof1: [['rh', 'Roof height']],
+  bWin: [['floors', 'Floors'], ['wf', 'Front windows (per floor)'], ['ws', 'Side windows (per floor)'], ['wb', 'Back windows (per floor)']] };
+const UNIT = { w: ' m', d: ' m', h: ' m', base: ' m', rh: ' m' };
+for (const [box, list] of Object.entries(SLIDERS)) $(box).innerHTML = list.map(([k, t]) => { const [a, b, st] = LIM[k];
+  return `<div class="sl ol"><label for="r_${k}">${t}<output id="o_${k}"></output></label><input type="range" id="r_${k}" data-k="${k}" min="${a}" max="${b}" step="${st}"></div>`; }).join('');
+$('bPresets').innerHTML = Object.entries(PRESETS).map(([k, v]) => `<button type="button" data-p="${k}">${v.label}</button>`).join('');
+$('bRoof').innerHTML = Object.entries(ROOFS).map(([k, v]) => `<button type="button" data-v="${k}">${v}</button>`).join('');
+$('bDoor').innerHTML = Object.entries(DOORS).map(([k, v]) => `<button type="button" data-v="${k}">${v}</button>`).join('');
+const fmt = (k, v) => (k in UNIT ? (+v).toFixed(v % 1 ? 1 : 0) : v) + (UNIT[k] || '');
+function syncUI() {
+  const p = S.p;
+  document.querySelectorAll('#bp input[type=range]').forEach(r => { const k = r.dataset.k; if (document.activeElement !== r) r.value = p[k]; $('o_' + k).textContent = fmt(k, p[k]); });
+  $('bRoof').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === p.roof));
+  $('bRidge').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === p.ridge));
+  $('bRidgeW').hidden = !(p.roof === 'gable' || p.roof === 'shed');
+  $('bDoor').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === p.door));
+  $('bDoor2').checked = p.door2; $('bBack').checked = p.backDoor;
+  $('bPresets').querySelectorAll('button').forEach(b => { const q = PRESETS[b.dataset.p].p; b.classList.toggle('on', Object.keys(q).every(k => q[k] === p[k])); });
+}
+function sizeText() {
+  const p = S.p, H = world().hi[1], st = m => Math.round(m * MS);
+  $('bSize').innerHTML = `Footprint <b>${fmt('w', p.w)} × ${fmt('d', p.d)}</b> (${st(p.w)} × ${st(p.d)} studs)<br>Height to the top <b>${H.toFixed(1)} m</b> (${st(H)} studs) · you're <b>1.8 m</b> (5.2 studs)`;
+}
+$('bp').addEventListener('input', e => { const r = e.target; if (r.dataset.k) { setParams({ [r.dataset.k]: +r.value }); } });
+$('bp').addEventListener('change', e => { const t = e.target;
+  if (t.id === 'bDoor2') setParams({ door2: t.checked }); if (t.id === 'bBack') setParams({ backDoor: t.checked });
+  if (t.type === 'range' || t.type === 'checkbox') t.blur(); });   // give the keys back to walking
+$('bp').addEventListener('pointerup', e => { if (e.target.type === 'range') setTimeout(() => e.target.blur(), 0); });
+$('bp').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.p) { const pr = PRESETS[b.dataset.p]; setParams(Object.assign({}, pr.p, { desc: pr.desc })); spawnBuilding(); }
+  else if (b.closest('#bRoof')) setParams({ roof: b.dataset.v });
+  else if (b.closest('#bRidge')) setParams({ ridge: b.dataset.v });
+  else if (b.closest('#bDoor')) setParams({ door: b.dataset.v });
+  b.blur();
+});
+$('bDoorGo').addEventListener('click', () => { me.pos.set(bld.cx, 0, FRONT_Z + 9); me.vy = 0; me.face = 0; cam.yaw = 0; cam.dist = Math.max(cam.dist, 26); note('Walk up to the door: is it big enough?'); });
+$('bPaint').addEventListener('click', () => { try { save(); } catch (e) {} });
+$('bpDone').addEventListener('click', () => setMode('walk'));
+$('bpMin').addEventListener('click', () => { const m = document.body.classList.toggle('bpmin'); $('bpMin').textContent = m ? 'Show' : 'Hide'; });
+
+/* ---------- the Avatar Studio, over the baseplate ---------- */
+const av = { frame: $('av'), loaded: false, ready: false };
+function openStudio() {
+  if (!av.loaded) { av.loaded = true; av.frame.src = '/character/?embed'; }
+  else if (av.ready) { av.frame.contentWindow.postMessage({ grug: 'studio', type: 'open' }, location.origin); }
+}
+addEventListener('message', e => {
+  if (e.origin !== location.origin || !e.data || e.data.grug !== 'studio') return;
+  if (e.data.type === 'ready') { av.ready = true; if (mode === 'avatar' && cam.arrived) document.body.classList.add('avshow'); }
+  if (e.data.type === 'wear') { leaveAvatar(true); }
+  if (e.data.type === 'close') { leaveAvatar(false); }
+});
+function leaveAvatar(worn) {
+  document.body.classList.remove('avshow');
+  setTimeout(() => { setMode('walk'); if (worn) { dress(true).then(() => { sparkle(me.pos); me.vy = 46; me.ground = false; }); } }, 250);
+}
+
+/* ---------- modes ---------- */
+let mode = 'walk';
+function setMode(m) {
+  if (m === mode) m = 'walk';
+  const was = mode; mode = m;
+  document.body.classList.toggle('build', m === 'build'); document.body.classList.toggle('avatar', m === 'avatar');
+  $('mAvatar').classList.toggle('on', m === 'avatar'); $('mBuild').classList.toggle('on', m === 'build');
+  if (m === 'build') { if (!bld.shown || !bld.g.visible) spawnBuilding(); syncUI(); sizeText(); cam.dist = Math.max(cam.dist, 34); hint('Walk around your building while you change it'); }
+  if (m === 'avatar') {
+    cam.save = { yaw: cam.yaw, pitch: cam.pitch, dist: cam.dist }; cam.arrived = false; cam.zoomT = 0;
+    me.speed = 0; openStudio(); hint('');
+  }
+  if (was === 'avatar' && cam.save) { Object.assign(cam, { tYaw: cam.save.yaw, tPitch: cam.save.pitch, tDist: cam.save.dist }); cam.back = 0; document.body.classList.remove('avshow'); }
+  if (m === 'walk') hint(bld.shown ? '' : 'Walk onto a pad, or pick a mode at the top');
+}
+$('mAvatar').addEventListener('click', () => setMode('avatar'));
+$('mBuild').addEventListener('click', () => setMode('build'));
+
+/* ---------- notes ---------- */
+let noteT = 0, hintT = 0;
+function note(t) { const n = $('note'); n.textContent = t; n.classList.add('on'); clearTimeout(noteT); noteT = setTimeout(() => n.classList.remove('on'), 2600); }
+function hint(t) { const h = $('hint'); clearTimeout(hintT); if (!t) { h.classList.add('off'); return; } h.textContent = t; h.classList.remove('off'); hintT = setTimeout(() => h.classList.add('off'), 6000); }
+
+/* ---------- input: keys, mouse, touch ---------- */
+const keys = {};
+const typing = e => /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== 'range' && e.target.type !== 'checkbox';
+addEventListener('keydown', e => {
+  if (typing(e)) return;
+  if (e.key === 'Escape') { e.preventDefault(); if (mode === 'avatar') { leaveAvatar(false); return; } toggleMenu(); return; }
+  if (document.body.classList.contains('menu')) return;
+  if (e.target.type === 'range' && /^Arrow/.test(e.key)) return;   // a focused slider keeps its arrows
+  keys[e.code] = true;
+  if (/^(Space|Arrow)/.test(e.code)) e.preventDefault();
+});
+addEventListener('keyup', e => { keys[e.code] = false; });
+addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+
+const cam = { yaw: 0, pitch: .32, dist: 26, tYaw: null, tPitch: null, tDist: null, save: null, arrived: false, zoomT: 0, target: new THREE.Vector3() };
+const ptrs = new Map(); let joy = null, pinch = 0;
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+canvas.addEventListener('pointerdown', e => {
+  canvas.focus(); canvas.setPointerCapture(e.pointerId);
+  const p = { x: e.clientX, y: e.clientY, kind: 'cam' };
+  if (e.pointerType !== 'mouse' && !joy && e.clientX < innerWidth * .45) { p.kind = 'joy'; joy = { id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, dy: 0 };
+    const j = $('joy'); j.style.left = e.clientX + 'px'; j.style.top = e.clientY + 'px'; j.style.display = 'block'; j.firstChild.style.transform = ''; }
+  ptrs.set(e.pointerId, p);
+  const cams = [...ptrs.values()].filter(q => q.kind === 'cam'); if (cams.length === 2) pinch = Math.hypot(cams[0].x - cams[1].x, cams[0].y - cams[1].y);
+});
+canvas.addEventListener('pointermove', e => {
+  const p = ptrs.get(e.pointerId); if (!p) return;
+  if (p.kind === 'joy') { let dx = e.clientX - joy.x0, dy = e.clientY - joy.y0; const L = Math.hypot(dx, dy), R = 46; if (L > R) { dx *= R / L; dy *= R / L; }
+    joy.dx = dx / R; joy.dy = dy / R; $('joy').firstChild.style.transform = `translate(${dx}px,${dy}px)`; return; }
+  const cams = [...ptrs.values()].filter(q => q.kind === 'cam');
+  if (cams.length === 2) { p.x = e.clientX; p.y = e.clientY; const d = Math.hypot(cams[0].x - cams[1].x, cams[0].y - cams[1].y); if (pinch) zoomBy(pinch / d); pinch = d; return; }
+  if (mode === 'avatar') return;
+  const s = 0.0055 * opts.sens; cam.yaw -= (e.clientX - p.x) * s; cam.pitch = Math.min(1.35, Math.max(-0.15, cam.pitch + (e.clientY - p.y) * s));
+  cam.tYaw = cam.tPitch = null; p.x = e.clientX; p.y = e.clientY;
+});
+const up = e => { const p = ptrs.get(e.pointerId); if (!p) return; ptrs.delete(e.pointerId); pinch = 0;
+  if (p.kind === 'joy') { joy = null; $('joy').style.display = 'none'; } };
+canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
+function zoomBy(f) { if (mode === 'avatar') return; cam.dist = Math.min(160, Math.max(8, cam.dist * f)); cam.tDist = null; }
+canvas.addEventListener('wheel', e => { e.preventDefault(); zoomBy(Math.pow(1.0015, e.deltaY)); }, { passive: false });
+$('jump').addEventListener('pointerdown', e => { e.preventDefault(); keys.Space = true; });
+['pointerup', 'pointercancel', 'pointerleave'].forEach(t => $('jump').addEventListener(t, () => { keys.Space = false; }));
+
+/* ---------- the Game Menu ---------- */
+function toggleMenu(on) {
+  on = on == null ? !document.body.classList.contains('menu') : on;
+  document.body.classList.toggle('menu', on); for (const k in keys) keys[k] = false;
+  document.querySelectorAll('#gm .page').forEach(p => p.classList.toggle('on', p.id === 'pgMain'));
+}
+const page = id => document.querySelectorAll('#gm .page').forEach(p => p.classList.toggle('on', p.id === id));
+$('menuBtn').addEventListener('click', () => toggleMenu(true));
+$('veil').addEventListener('click', () => toggleMenu(false));
+$('gResume').addEventListener('click', () => toggleMenu(false));
+$('gReset').addEventListener('click', () => { me.pos.copy(SPAWN); me.vy = 0; me.face = 0; cam.yaw = 0; toggleMenu(false); });
+$('gSettings').addEventListener('click', () => { paintSet(); page('pgSet'); });
+$('gHelp').addEventListener('click', () => page('pgHelp'));
+$('gLeave').addEventListener('click', () => { location.href = '/arcade/'; });
+document.querySelectorAll('#gm .back').forEach(b => b.addEventListener('click', () => page('pgMain')));
+const SENS = [[1, 'Normal'], [1.6, 'Fast'], [0.6, 'Slow']];
+function paintSet() { $('sShadow').textContent = opts.shadows ? 'On' : 'Off'; $('sSens').textContent = (SENS.find(s => s[0] === opts.sens) || SENS[0])[1]; }
+$('sShadow').addEventListener('click', () => { opts.shadows = !opts.shadows; renderer.shadowMap.enabled = opts.shadows; scene.traverse(o => { if (o.material) [].concat(o.material).forEach(m => { m.needsUpdate = true; }); }); saveOpts(); paintSet(); });
+$('sSens').addEventListener('click', () => { const i = SENS.findIndex(s => s[0] === opts.sens); opts.sens = SENS[(i + 1) % SENS.length][0]; saveOpts(); paintSet(); });
+
+/* ---------- moving about ---------- */
+const GRAV = 196.2, WALK = 16, JUMP = 50, RAD = 1.1;
+let onPad = '';
+function step(dt) {
+  // input, relative to the camera
+  let ix = 0, iz = 0;
+  if (mode !== 'avatar' && !document.body.classList.contains('menu')) {
+    ix = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0);
+    iz = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
+    if (joy) { ix = joy.dx; iz = -joy.dy; }
+  }
+  const L = Math.min(1, Math.hypot(ix, iz)), fx = -Math.sin(cam.yaw), fz = -Math.cos(cam.yaw), rx = Math.cos(cam.yaw), rz = -Math.sin(cam.yaw);
+  let mx = fx * iz + rx * ix, mz = fz * iz + rz * ix; const ml = Math.hypot(mx, mz);
+  if (ml > 0.05) { mx /= ml; mz /= ml; const want = Math.atan2(-mx, -mz); let d = want - me.face; d = Math.atan2(Math.sin(d), Math.cos(d)); me.face += d * Math.min(1, dt * 14); }
+  else { mx = mz = 0; }
+  me.speed = ml > 0.05 ? WALK * L : 0;
+  me.pos.x += mx * me.speed * dt; me.pos.z += mz * me.speed * dt;
+  if ((keys.Space) && me.ground && mode !== 'avatar') { me.vy = JUMP; me.ground = false; }
+  me.vy -= GRAV * dt; me.pos.y += me.vy * dt;
+  // the building is solid; its top (the roof line) can be stood on
+  let floor = 0;
+  if (bld.g.visible && bld.mesh) {
+    const s = bld.anim < 1 ? 0 : 1, dx = me.pos.x - bld.cx, dz = me.pos.z - bld.cz, hx = bld.hx + RAD, hz = bld.hz + RAD;
+    if (s && Math.abs(dx) < hx && Math.abs(dz) < hz) {
+      if (me.pos.y >= bld.top - 1) floor = bld.top;
+      else { const px = hx - Math.abs(dx), pz = hz - Math.abs(dz); if (px < pz) me.pos.x = bld.cx + Math.sign(dx || 1) * hx; else me.pos.z = bld.cz + Math.sign(dz || 1) * hz; }
+    }
+  }
+  if (me.pos.y <= floor) { me.pos.y = floor; me.vy = 0; me.ground = true; } else me.ground = false;
+  const lim = 500; me.pos.x = Math.max(-lim, Math.min(lim, me.pos.x)); me.pos.z = Math.max(-lim, Math.min(lim, me.pos.z));
+  // the pads
+  const pad = Math.abs(me.pos.x - AV_PAD.x) < 6 && Math.abs(me.pos.z - AV_PAD.z) < 6 && me.pos.y < 1 ? 'avatar' : Math.abs(me.pos.x - BD_PAD.x) < 6 && Math.abs(me.pos.z - BD_PAD.z) < 6 && me.pos.y < 1 ? 'build' : '';
+  if (pad && pad !== onPad && mode !== pad) setMode(pad);
+  onPad = pad;
+}
+function animate(dt, t) {
+  rig.g.position.copy(me.pos); rig.g.rotation.y = me.face;
+  const walk = me.speed / WALK; me.phase += dt * 10 * walk;
+  const sw = Math.sin(me.phase) * 0.95 * walk;
+  if (!me.ground) { rig.rs.rotation.x = rig.ls.rotation.x = Math.PI * .92; rig.rh.rotation.x = .35; rig.lh.rotation.x = -.35; rig.rs.rotation.z = rig.ls.rotation.z = 0; }
+  else if (mode === 'avatar') {   // posing for the camera: a little wave
+    rig.rs.rotation.x = Math.PI * .85; rig.rs.rotation.z = -.25 + Math.sin(t * 7) * .25; rig.ls.rotation.x = .05; rig.ls.rotation.z = 0; rig.rh.rotation.x = rig.lh.rotation.x = 0;
+  } else {
+    const idle = Math.sin(t * 2) * .04;
+    rig.rs.rotation.x = sw + idle; rig.ls.rotation.x = -sw + idle; rig.rh.rotation.x = -sw; rig.lh.rotation.x = sw; rig.rs.rotation.z = rig.ls.rotation.z = 0;
+  }
+}
+const lerpA = (a, b, k) => { let d = b - a; d = Math.atan2(Math.sin(d), Math.cos(d)); return a + d * k; };
+function camUpdate(dt) {
+  const head = new THREE.Vector3(me.pos.x, me.pos.y + 4.5, me.pos.z);
+  if (mode === 'avatar') {   // zoom in on your character, face on, as the Avatar Studio frames it
+    cam.zoomT = Math.min(1, cam.zoomT + dt / .8);
+    const k = 1 - Math.pow(.0008, dt);
+    cam.yaw = lerpA(cam.yaw, me.face + Math.PI - .3, k); cam.pitch += (.1 - cam.pitch) * k; cam.dist += (10 - cam.dist) * k;
+    if (!cam.arrived && Math.abs(cam.dist - 10) < .6) { cam.arrived = true; if (av.ready) document.body.classList.add('avshow'); }
+    cam.target.lerp(new THREE.Vector3(me.pos.x, me.pos.y + 4.4, me.pos.z), k);
+  } else {
+    const k = 1 - Math.pow(.004, dt);
+    if (cam.tYaw != null) { cam.yaw = lerpA(cam.yaw, cam.tYaw, k); if (Math.abs(Math.atan2(Math.sin(cam.tYaw - cam.yaw), Math.cos(cam.tYaw - cam.yaw))) < .01) cam.tYaw = null; }
+    if (cam.tPitch != null) { cam.pitch += (cam.tPitch - cam.pitch) * k; if (Math.abs(cam.tPitch - cam.pitch) < .005) cam.tPitch = null; }
+    if (cam.tDist != null) { cam.dist += (cam.tDist - cam.dist) * k; if (Math.abs(cam.tDist - cam.dist) < .05) cam.tDist = null; }
+    cam.target.lerp(head, 1 - Math.pow(.00002, dt));
+  }
+  const cp = Math.cos(cam.pitch);
+  camera.position.set(cam.target.x + Math.sin(cam.yaw) * cp * cam.dist, cam.target.y + Math.sin(cam.pitch) * cam.dist, cam.target.z + Math.cos(cam.yaw) * cp * cam.dist);
+  if (camera.position.y < 1) camera.position.y = 1;
+  camera.lookAt(cam.target);
+  placeSun(new THREE.Vector3(me.pos.x * .5 + (bld.g.visible ? bld.cx * .5 : me.pos.x * .5), 0, me.pos.z * .5 + (bld.g.visible ? bld.cz * .5 : me.pos.z * .5)));
+}
+function fx(dt) {
+  if (bld.anim < 1) { bld.anim = Math.min(1, bld.anim + dt / .65); const x = bld.anim, c1 = 1.70158, c3 = c1 + 1, e = 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+    bld.mesh.scale.y = bld.marks.scale.y = bld.edges.scale.y = Math.max(.02, e); bld.mesh.scale.x = bld.mesh.scale.z = bld.marks.scale.x = bld.marks.scale.z = bld.edges.scale.x = bld.edges.scale.z = .9 + .1 * Math.min(1, x * 1.4); }
+  for (let i = bits.length - 1; i >= 0; i--) { const m = bits[i], u = m.userData; u.t += dt; u.v.y -= 40 * dt; m.position.addScaledVector(u.v, dt);
+    m.rotation.x += u.spin * dt; m.rotation.y += u.spin * dt; m.material.opacity = Math.max(0, 1 - u.t / u.life);
+    if (u.t >= u.life) { scene.remove(m); m.geometry.dispose(); m.material.dispose(); bits.splice(i, 1); } }
+}
+
+/* ---------- go ---------- */
+function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < h ? 72 : 60; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+let last = performance.now();
+const loopErrs = new Map();
+function frame(now) {   // the next frame first, and a frame's error caught: one bad frame can never freeze the game
+  requestAnimationFrame(frame);
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  if (document.hidden) return;
+  try { step(dt); animate(dt, now / 1000); camUpdate(dt); fx(dt); }
+  catch (e) { const k = String((e && e.stack) || e).slice(0, 300), n = (loopErrs.get(k) || 0) + 1; loopErrs.set(k, n); if (n === 1 || n % 600 === 0) console.error('Frame error (the game keeps running):', e); }
+  try { renderer.render(scene, camera); } catch (e) {}
+}
+cam.target.set(SPAWN.x, 4.5, SPAWN.z);
+requestAnimationFrame(frame);
+hint(TOUCH ? 'Walk onto a pad, or pick a mode at the top' : 'WASD to walk · drag to look · walk onto a pad, or pick a mode at the top');
+
+// Pearls: welcome / daily (arcade/claude.md)
+if (window.GrugPearls) GrugPearls.start().then(r => { if (!window.GrugPearlPopup || !r) return;
+  if (r.welcome) GrugPearlPopup.show(r.welcome, { title: 'Welcome to Grug!' }); else if (r.daily) GrugPearlPopup.show(r.daily, { title: 'Daily Pearls' }); }).catch(() => {});
+
+// /arcade/grug-studio/#build or #avatar starts in that mode; ?cover frames the cover picture
+const startMode = location.hash.slice(1);
+if (startMode === 'build' || COVER) setTimeout(() => setMode('build'), 300);
+if (startMode === 'avatar') setTimeout(() => setMode('avatar'), 600);
+if (COVER) { me.pos.set(-12, 0, FRONT_Z + 14); me.face = -0.6; cam.yaw = -0.55; cam.pitch = 0.3; cam.dist = 44; }
+window.GrugStudioGame = { setMode, me, cam, bld, spawnBuilding, get mode() { return mode; } };   // for headless tests
+})();
+</script>
+</body>
+</html>

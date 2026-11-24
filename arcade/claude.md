@@ -21,6 +21,17 @@ https://grugdigital.com/arcade/claude.md.
   Settings, Help, **Leave Game** (goes to `/arcade/`), and the Grug Digital logo at the bottom. Copy it from
   `arcade/slide-999/index.html` (`#gm`).
 - **Red means danger** wherever it can kill you; keep floors and safe parts in cool colours so the red stands out.
+- **The frame loop asks for the next frame first and catches errors**, so nothing that goes wrong in one frame can stop
+  the game (an error in a loop that schedules itself on its last line freezes the game on its last picture for good,
+  while the Game Menu, plain page buttons, keeps working):
+  ```js
+  function frame(now) {
+    requestAnimationFrame(frame);
+    try { frameStep(now); } catch (e) { console.error('Frame error (the game keeps running):', e); }
+    try { renderer.render(scene, camera); } catch (e) {}   // or render at the end of frameStep and again here only after an error
+  }
+  ```
+  Every game on the site does this (with each error logged once, `window.GrugLoopErrors` counts them).
 - **Three.js r128** (the version both games use):
   ```html
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

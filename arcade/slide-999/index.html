@@ -1417,14 +1417,27 @@ me.rebirths = Save.rebirths || 0;
 setInterval(() => { $('rebirthBtn').classList.toggle('hide', !me.admin); if ($('rebirth').classList.contains('on')) renderRebirth(); }, 1000);
 setDay(true); applyGfx();
 let last = performance.now(), saveT = 0;
-function loop(now) {
+function loopStep(now) {
   const dt = clamp((now - last) / 1000, 0, 0.05); last = now;
   simStep(dt, playerInput());
   for (const r of racers) poseRacer(r, dt);
   frameRest(dt);
   plasticSweep(); renderer.render(scene, camera);
-  requestAnimationFrame(loop);
 }
+/* The frame loop. The next frame is asked for first, and one frame's error is caught and logged, so nothing that goes
+   wrong in a single frame can stop the game: before, an error anywhere in a frame stopped the loop for good and the game
+   froze on its last picture while the Game Menu (plain page buttons) still worked. The frame is still drawn after an error. */
+const loopErrs = new Map();
+function loop(now) {
+  requestAnimationFrame(loop);
+  try { loopStep(now); }
+  catch (e) {
+    const k = String((e && e.stack) || e).slice(0, 300), n = (loopErrs.get(k) || 0) + 1; loopErrs.set(k, n);
+    if (n === 1 || n % 600 === 0) console.error('Frame error (the game keeps running' + (n > 1 ? ', seen ' + n + ' times' : '') + '):', e);
+    try { renderer.render(scene, camera); } catch (x) {}
+  }
+}
+window.GrugLoopErrors = loopErrs;
 function simStep(dt, pin) {
   clock += dt;
   for (const r of racers) {

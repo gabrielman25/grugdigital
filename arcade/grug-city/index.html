@@ -4671,7 +4671,7 @@ function sim(dt) {
   for (const b of bots) updateBot(b, dt);
 }
 let last = performance.now(), orbit = 0;
-function frame(now) {
+function frameStep(now) {
   const dt = Math.min((now - last) / 1000, 0.1); last = now;
   if (player) { touchHold(); playerInput(dt); }
   sim(dt);
@@ -4701,8 +4701,21 @@ function frame(now) {
   document.body.classList.toggle('hasRoll', true);
   updateHouseView(); updateTags(dt); Bills.update(dt); Social.update(dt); Mall.update(dt); Waypoints.update(); updateHud(dt); updateMinimap(); Snd.listen(); DmgInd.update(dt);
   plasticSweep(); renderer.render(scene, camera);
-  requestAnimationFrame(frame);
 }
+/* The frame loop. The next frame is asked for first, and one frame's error is caught and logged, so nothing that goes
+   wrong in a single frame can stop the game: before, an error anywhere in a frame stopped the loop for good and the game
+   froze on its last picture while the Game Menu (plain page buttons) still worked. The frame is still drawn after an error. */
+const loopErrs = new Map();
+function frame(now) {
+  requestAnimationFrame(frame);
+  try { frameStep(now); }
+  catch (e) {
+    const k = String((e && e.stack) || e).slice(0, 300), n = (loopErrs.get(k) || 0) + 1; loopErrs.set(k, n);
+    if (n === 1 || n % 600 === 0) console.error('Frame error (the game keeps running' + (n > 1 ? ', seen ' + n + ' times' : '') + '):', e);
+    try { renderer.render(scene, camera); } catch (x) {}
+  }
+}
+window.GrugLoopErrors = loopErrs;
 
 // ---------------------------------------------------------------- Grug's socials in town: rooftop billboards (aim at one, press E) and TVs playing PolySwitch videos
 // Billboards: City Hall (Discord), the Mall (YouTube), Burlingtown (Instagram), Tarjay (all three, taking turns). Each has two

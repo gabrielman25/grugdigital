@@ -5616,7 +5616,7 @@ function resize() {
 }
 window.addEventListener('resize', resize); resize();
 let last = performance.now();
-function frame(now) {
+function frameStep(now) {
   const dt = Math.min((now - last) / 1000, 0.1); last = now; Game.clock += dt;
   tickTweens(dt);
   if (player && !B.on) hubUpdate(dt);
@@ -5635,8 +5635,21 @@ function frame(now) {
   const fx = cam.fx, fy = player ? cam.fy : 0, fz = cam.fz; sky.position.copy(camera.position); sun.position.set(fx + SUN_DIR.x * 260, fy + SUN_DIR.y * 260, fz + SUN_DIR.z * 260); sun.target.position.set(fx, fy, fz);
   Bills.update(); updateBugTags(); updateNpcTags(); updateHud(dt); Snd.listen();
   if (SC.on && SC.built) renderShowcase(); else renderer.render(scene, camera);
-  requestAnimationFrame(frame);
 }
+/* The frame loop. The next frame is asked for first, and one frame's error is caught and logged, so nothing that goes
+   wrong in a single frame can stop the game: before, an error anywhere in a frame stopped the loop for good and the game
+   froze on its last picture while the Game Menu (plain page buttons) still worked. The frame is still drawn after an error. */
+const loopErrs = new Map();
+function frame(now) {
+  requestAnimationFrame(frame);
+  try { frameStep(now); }
+  catch (e) {
+    const k = String((e && e.stack) || e).slice(0, 300), n = (loopErrs.get(k) || 0) + 1; loopErrs.set(k, n);
+    if (n === 1 || n % 600 === 0) console.error('Frame error (the game keeps running' + (n > 1 ? ', seen ' + n + ' times' : '') + '):', e);
+    try { renderer.render(scene, camera); } catch (x) {}
+  }
+}
+window.GrugLoopErrors = loopErrs;
 requestAnimationFrame(frame);
 // for testing from the console
 window.BZ = { planZone, callIn, ALLBOX, W, STORE, openStore, closeStore, storeMenu, renderStore, areaAt, townAt, TS: () => TS, DASH, tryDash, VEH, RIDES, MOUNTS, parkRide, enterRide, exitRide, openGarage, buildRide, WATERS, openDeck, openCodex, buyCard, dealHand, KEEPERS, HOUSES, PETS, ITEMS, buyContinue, HINT, SHOP, openShop, showItem, SC, Run, BOOTHS, TOWNFOLK, TOWNSITE, Q, QT, openCrate, openTrade, offerTrade, TRADE, openCardShop, closeHubShop, toggleCosmo, equipPet, addEnergy, maxHearts, itemIcon, applyGear, npcs: null, zoneDef, ensureAreas, refreshGates, endJob, B, CARDS, BUGS, ZONES, ARENA, Save, startJob, leaveJob, endDay, selectCard, clickTile, buyOffer, swapInto, addBug, addCell, T, bugAt, cellAt, join, cam, camera, get player() { return player; }, Game, setStage, hurtBug, scene, renderer };

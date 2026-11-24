@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<!-- a fixed 920px classic games page: phones show it zoomed out, like a desktop page -->
-<meta name="viewport" content="width=940">
+<!-- the classic 920px games page; on phones arcade.css reflows it into one column -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grug Arcade · Game</title>
 <meta name="description" content="A free game in the Grug Arcade: plays right in your browser, as the character you made in the Grug Avatar Studio.">
 <link rel="icon" href="/favicon.png">
@@ -50,6 +50,17 @@
 #PlaceTabs{float:left;height:31px;display:flex}
 #Place .wide{clear:both;position:relative;top:-2px;padding:5px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 120px) no-repeat;overflow:hidden;min-height:160px}
 #Place .missing{padding:40px 10px;font-size:15px;color:#555;text-align:center}
+@media (max-width:939px){
+  #Place .L,#Place .R{float:none;width:auto}
+  #Place .ttl h1{font-size:24px}
+  #Place .shot,#Place .shot img{width:100%;height:auto;aspect-ratio:16/9}
+  #Place .acts{flex-wrap:wrap}
+  #Place .PlayBig{width:100%}
+  #Place table.keys td:first-child{width:auto;white-space:normal}
+  #Place .me select{width:100%;max-width:240px}
+  #More{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px 8px;padding:4px}
+  #More>.missing,#More>.Empty{grid-column:1/-1}
+}
 </style>
 </head>
 <body>
@@ -98,6 +109,7 @@
         <li><a href="/#assets">Catalog</a></li>
         <li><a href="/character/">Avatar Studio</a></li>
         <li><a href="/build/">Building Studio</a></li>
+        <li><a href="/arcade/grug-studio/">Grug Studio</a></li>
         <li><a href="/character/pearls/">Pearls</a></li>
         <li><a href="/">Home</a></li>
         <li><a href="/legacy">Legacy</a></li>

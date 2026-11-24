@@ -4300,7 +4300,7 @@ function resize() {
 }
 addEventListener('resize', resize); resize();
 let last = performance.now(); const fogC = new THREE.Color();
-function frame(now) {
+function frameStep(now) {
   const dt = Math.min((now - last) / 1000, 0.1); last = now;
   if (player && Match.state !== 'menu' && playing()) playerInput(dt); else if (player) { player.ch.input.mx = player.ch.input.mz = 0; player.ch.input.jump = false; lmbTap = false; }
   sim(dt); edge.clear();
@@ -4318,8 +4318,21 @@ function frame(now) {
   if (Snd.ctx) { Snd.setLoop('storm', inS ? 0.5 : 0); Snd.setLoop('wind', player && !player.dead && player.air ? (player.air.mode === 'fall' ? 0.35 : 0.15) : 0); Snd.setLoop('plane', player && player.inPlane ? 0.12 : 0); }
   updateHouseView(focusPoint()); updateTags(dt); Bills.update(dt); Waypoints.update(); updateHud(dt); updateMinimap(); Snd.listen(); DmgInd.update(dt);
   plasticSweep(); renderer.render(scene, camera);
-  requestAnimationFrame(frame);
 }
+/* The frame loop. The next frame is asked for first, and one frame's error is caught and logged, so nothing that goes
+   wrong in a single frame can stop the game: before, an error anywhere in a frame stopped the loop for good and the game
+   froze on its last picture while the Game Menu (plain page buttons) still worked. The frame is still drawn after an error. */
+const loopErrs = new Map();
+function frame(now) {
+  requestAnimationFrame(frame);
+  try { frameStep(now); }
+  catch (e) {
+    const k = String((e && e.stack) || e).slice(0, 300), n = (loopErrs.get(k) || 0) + 1; loopErrs.set(k, n);
+    if (n === 1 || n % 600 === 0) console.error('Frame error (the game keeps running' + (n > 1 ? ', seen ' + n + ' times' : '') + '):', e);
+    try { renderer.render(scene, camera); } catch (x) {}
+  }
+}
+window.GrugLoopErrors = loopErrs;
 requestAnimationFrame(frame);
 // for testing from the console
 window.ZR = { perf(n = 60) { const t = performance.now(); for (let i = 0; i < n; i++) sim(1 / 60); return ((performance.now() - t) / n).toFixed(2) + ' ms/step, bots ' + BOTS.length; }, ff(sec, dt = 0.1) { for (let i = 0; i < sec / dt; i++) { if (player && !player.dead && !player.inPlane && !player.air) { player.ch.input.mx = player.ch.input.mz = 0; } sim(dt); } return { t: Match.t.toFixed(0), alive: aliveCount(), bots: BOTS.length, phase: Storm.phase, state: Storm.state, r: Storm.r | 0, hp: player.hp | 0, dead: player.dead, ms: Match.state }; }, get player() { return player; }, BOTS, ROSTER, Match, Storm, PLANE, HOUSES, POIS, LOOT, BOXES, W, RULES, startIsland, startPlane, jumpOut, OUTFITS, aliveCount, hurt, cam, keys, sim, activate, stormNext, openBox, setSlot, takeItem, makeGun, makeHeal, makeAmmo, eliminate, spec, Save, teamsLeft, squadMates, dropLoot, hAt, getDown };

@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<!-- a fixed 920px classic page, like the Arcade: phones show it zoomed out, like a desktop page -->
-<meta name="viewport" content="width=940">
+<!-- the classic 920px page, like the Arcade; on phones arcade.css reflows it into one column -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grug · Game assets and creator tools</title>
 <meta name="description" content="Low-poly game asset packs, the Grug Avatar Studio, the Building Studio and free blocky games in the Grug Arcade.">
 <link rel="icon" href="/favicon.png">
@@ -148,6 +148,30 @@ html{scroll-behavior:smooth}
 #Hero .ctas{display:flex;gap:8px}
 #Hero .art{position:absolute;right:16px;bottom:-8px;width:360px;height:226px}
 #Hero .art img{position:absolute;bottom:0;width:auto}
+/* ---------- phones (arcade.css reflows the header, columns and footer; these are the home page's own sections) ---------- */
+@media (max-width:939px){
+  #Slop .top{flex-direction:column;align-items:stretch;gap:10px}
+  #Slop h2,#Tools h2{font-size:24px}
+  #Slop .ctas{flex-wrap:wrap}
+  .vs{grid-template-columns:1fr}
+  #Tools .in{flex-direction:column}
+  .show{width:100%;height:auto;aspect-ratio:16/11}
+  .show .ask{width:auto;right:10px}
+  .show .s.left .ask{left:10px}
+  #Tools .acts{margin-top:10px}
+  #Cat .Cell,#Cat .GameItem{height:auto}
+  #Cat .AlwaysShown .thumb,#Cat .AlwaysShown .thumb img{height:auto;aspect-ratio:315/250}
+  #Cat .adt .thumb .fgi{height:92%}
+  .Tools .StandardBox{display:flex;flex-wrap:wrap;gap:8px 16px}
+  .Tools a{margin:0}
+  .soc{grid-template-columns:1fr}
+  .soc a{min-height:130px}
+  #Hero{height:auto;padding:18px 14px 0}
+  #Hero .txt{position:static;width:auto}
+  #Hero h2{font-size:24px}
+  #Hero .ctas{flex-wrap:wrap}
+  #Hero .art{position:relative;right:auto;bottom:-8px;width:360px;height:226px;margin:-24px auto 0;transform:scale(.78);transform-origin:50% 100%}
+}
 @media (prefers-reduced-motion:reduce){.show .s{transition:none}.show .s.go .bg,.show .s.go .fg,.show .ask p::after{animation:none}}
 </style>
 </head>
@@ -198,6 +222,7 @@ html{scroll-behavior:smooth}
         <li><a href="#assets">Catalog</a></li>
         <li><a href="/character/">Avatar Studio</a></li>
         <li><a href="/build/">Building Studio</a></li>
+        <li><a href="/arcade/grug-studio/">Grug Studio</a></li>
         <li><a href="/character/pearls/">Pearls</a></li>
         <li><a href="/legacy">Legacy</a></li>
         <li><a href="/support.html">Help</a></li>
@@ -267,6 +292,7 @@ html{scroll-behavior:smooth}
             <li>Make your own Roblox characters in the free <a href="/character/">Avatar Studio</a>, or let Claude make one for you.</li>
             <li>Paint textured buildings for your game in the <a href="/build/">Building Studio</a>.</li>
             <li>Grab ready-to-use 3D <a href="#assets">asset packs</a> for Roblox and other engines.</li>
+            <li>Try both at true scale in <a href="/arcade/grug-studio/">Grug Studio</a>: walk around your building as your own character.</li>
             <li>Then play as your character in the <a href="/arcade/">Grug Arcade</a>.</li>
           </ul>
           <div class="acts">
@@ -295,6 +321,7 @@ html{scroll-behavior:smooth}
             <a href="/character/"><img src="/static/arcade/grug.webp" alt="">Avatar Studio</a>
             <a href="/character/?view=paint"><img src="/static/arcade/racer.webp" alt="">Make it with Claude</a>
             <a href="/build/"><img src="/static/arcade/ranger.webp" alt="">Building Studio</a>
+            <a href="/arcade/grug-studio/"><img src="/static/arcade/medic.webp" alt="">Grug Studio (both, on a baseplate)</a>
             <a href="/arcade/"><img src="/static/arcade/skater.webp" alt="">Grug Arcade</a>
           </div>
         </div>

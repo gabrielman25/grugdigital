@@ -66,11 +66,85 @@ dialog img{display:block;max-width:100%;max-height:86vh}
 #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:#fff;border-radius:12px;padding:10px 16px;opacity:0;pointer-events:none;transition:.2s;z-index:9}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 @media (max-width:900px){.hero{grid-template-columns:1fr}.info{border-left:0;border-top:1px solid var(--line)}.stage{min-height:340px}.steps{grid-template-columns:1fr}}
+/* ===== the site's classic look (src/build/classic.css, put into both pages by build.py) =====
+   Arial; the shiny green nav bar with the Grug Digital logo; dark shiny title bars over light gradient boxes on the
+   site's grey body; shiny gradient buttons (green for the main action, grey for the rest); the baseplate's sky behind the 3D. */
+:root{--page:#f2f2f2;--card:#fff;--ink:#111;--soft:#555;--line:#aaa;--field:#f4f4f4;--accent:#9BE338;--accent-lo:#3f8a10;
+  --cl-green:linear-gradient(#c6f57a,#9be338 50%,#86cf27 51%,#9be338);--cl-gray:linear-gradient(#fafafa,#e3e3e3 50%,#d6d6d6 51%,#e6e6e6);
+  --cl-dark:linear-gradient(#5a5a5a,#2b2b2b 50%,#111 51%,#1d1d1d);--cl-nav:linear-gradient(#8fdc4c 0,#5cb41e 45%,#3f9612 50%,#3a8c10 100%)}
+body,button,input,select,textarea{font-family:Arial,Helvetica,sans-serif}
+body{-webkit-font-smoothing:auto}
+.bar{background:var(--cl-nav);border-bottom:1px solid #2a6c08;box-shadow:0 2px 6px rgba(0,0,0,.25);color:#fff}
+.brand{gap:8px;color:#fff!important;font-weight:bold;text-shadow:0 1px 0 rgba(0,40,0,.45)}
+.brand i{width:150px;height:34px;-webkit-mask:none;mask:none;background:url(/static/arcade/grug-digital-logo.png) left center/contain no-repeat;filter:drop-shadow(0 1px 0 #0a2f72) drop-shadow(0 0 3px rgba(5,25,70,.5))}
+.brand span{color:#fff;font-weight:bold}
+.steps button{color:#fff;border-radius:5px;font-weight:bold;text-shadow:0 1px 0 rgba(0,40,0,.45)}
+.steps button b{background:rgba(0,40,0,.25);color:#fff}
+.steps button:hover:not(:disabled){background:rgba(255,255,255,.18)}
+.steps button.on{background:linear-gradient(#fff,#eef9e2);color:#2a6c08;text-shadow:none;box-shadow:inset 0 0 0 1px #2a6c08,0 1px 2px rgba(0,0,0,.25)}
+.steps button.on b{background:#2a6c08;color:#fff}
+.ib{color:#fff;border-radius:5px}
+.ib:hover{background:rgba(255,255,255,.2)}
+.ib.on{background:linear-gradient(#fff,#eef9e2);color:#2a6c08}
+#stage,.stage{background:linear-gradient(#bfe0ff 0,#e6f4ff 55%,#f4f9ff 100%)}
+#side{background:#f2f2f2;border-left:1px solid #aaa}
+.card{background:#fff linear-gradient(#e9e9e9,#fff 90px) no-repeat;border:1px solid #aaa;border-radius:0}
+.card>h3:first-child,.card>.card-h:first-child{margin:-14px -14px 2px;padding:7px 11px;background:var(--cl-dark)}
+.card>h3:first-child,.card>.card-h:first-child h3{color:#fff;font-size:16px;font-weight:bold}
+.card>.card-h:first-child .fine,.card>.card-h:first-child output{color:#ddd}
+.btn{border-radius:6px;background:var(--cl-green);color:#1e1b16;border:1px solid #5f9a18;font-weight:bold;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 1px 2px rgba(0,0,0,.18);text-shadow:0 1px 0 rgba(255,255,255,.35)}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:none;filter:brightness(.95);box-shadow:inset 0 2px 3px rgba(0,0,0,.2)}
+.btn--ghost{background:var(--cl-gray);color:#333;border-color:#8a8a8a;box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(0,0,0,.15)}
+.btn--sm{border-radius:5px}
+.bar .btn--ghost{border-color:#1f5206}
+input.t,textarea.t,select.t{border-radius:2px;border:1px solid #888;background:#fff;box-shadow:inset 0 1px 2px rgba(0,0,0,.12)}
+input.t:focus,textarea.t:focus,select.t:focus{border-color:#3a8c10;box-shadow:0 0 0 1px #7fcf43}
+.chip,.seg button,.stp button{background:var(--cl-gray);border:1px solid #8a8a8a;border-radius:4px;color:#333;box-shadow:inset 0 1px 0 #fff;font-weight:bold}
+.chip:hover,.seg button:hover,.stp button:hover{filter:brightness(1.04);background:var(--cl-gray)}
+.chip.on,.seg button.on{background:var(--cl-green);border-color:#5f9a18;color:#1e1b16;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+.seg{background:none;padding:0;gap:4px}
+.stp div{background:#fff;border:1px solid #aaa;border-radius:3px}
+.stp button{border:0;border-radius:0}
+.badge{border-radius:3px;border:1px solid #aaa}
+.badge.good{background:#e8f8d6;border-color:#9bc07a}.badge.ok{background:#ffffd6;border-color:#e0cf6a}.badge.bad{background:#fde3dc;border-color:#e3a291}
+.warn{border-radius:3px;background:#ffffd6;border:1px solid #e0cf6a}
+.warn.bad{background:#fde3dc;border-color:#e3a291}
+.drop{border-radius:3px;border-color:#999;background:#f8f8f8}
+.num{background:var(--cl-dark);border-radius:3px}
+.tool{border-radius:5px;color:#333;font-weight:bold}
+.tool.on{background:var(--cl-green);box-shadow:inset 0 0 0 1px #5f9a18}
+#hint,.hint{border-radius:3px;background:rgba(255,255,255,.9);border:1px solid #aaa;color:#333}
+#frontTag{border-radius:3px;background:#d8281f;color:#fff}
+#viewBtns{border-radius:5px;background:var(--cl-nav);border:1px solid #2a6c08;padding:2px}
+#viewBtns .ib.on{color:#2a6c08}
+#toast{background:#ffffd6;color:#3d3100;border:1px solid #d9c55a;border-radius:3px;font-weight:bold;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+dialog{border-radius:4px;border:1px solid #888}
+.dlg h2{font-weight:bold}
+kbd{border:1px solid #aaa;border-bottom-width:2px;border-radius:3px;background:#f4f4f4}
+/* the examples gallery */
+.intro h1,.info h2{font-weight:bold}
+.tile{border-radius:0;border:1px solid #aaa;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.tile:hover{transform:none;box-shadow:0 3px 10px rgba(0,0,0,.2)}
+.tile.on{box-shadow:0 0 0 3px #7fcf43}
+.tile span,.era{color:#c00}
+.era{background:none;padding:0;border-radius:0}
+.specs div{background:#f4f4f4;border:1px solid #ccc;border-radius:2px}
+.step figure{border-radius:0;border-color:#aaa}
+.how h3{margin:-18px -20px 2px;padding:7px 12px;background:var(--cl-dark);color:#fff;font-weight:bold}
+.hero .info{border-left-color:#aaa}
+@media (max-width:860px){
+  .brand i{width:120px}
+  .brand span{font-size:15px}
+  #side{border-left:0;border-top:1px solid #aaa}
+}
+@media (max-width:420px){ .brand span{display:none} }
+
 </style>
 </head>
 <body>
 <header class="bar">
-  <a class="brand" href="https://grugdigital.com/"><i></i>Grug <span>Building Studio · Examples</span></a>
+  <a class="brand" href="https://grugdigital.com/" title="Grug Digital home"><i></i><span>Building Studio · Examples</span></a>
   <a class="btn btn--sm" id="studioLink" href="#">Open the Building Studio</a>
 </header>
 <div class="wrap">
