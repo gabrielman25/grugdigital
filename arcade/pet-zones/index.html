@@ -510,17 +510,17 @@
      =================================================================================================================== */
   body, button, input, select, textarea { font-family: Arial, Helvetica, sans-serif !important; }
   body *:not(canvas) { text-shadow: none !important; animation: none !important; transition: none !important; }
-  body *:not(canvas):not(.egg):not(.qegg):not(#stick):not(#stick i) { border-radius: 0 !important; box-shadow: none !important; }
+  :where(body *:not(canvas, .egg, .qegg, #stick, #stick i)) { border-radius: 0 !important; box-shadow: none !important; }   /* (zero specificity: the buttons below keep their rounding) */
   .pp i, .cb.buy i { border-radius: 50% !important; }
   button:hover, .card:hover, #kit:hover { filter: none !important; }
   /* the two button styles */
   button, .rb, .cb, .pb, #endBtn, #shopBtn, #petsBtn, #tradeBtn, #jumpBtn, #dashBtn, #gear, .stBuy, #store .stDeck, #menu button, #pvBuy, #pvBuyP, .si.pearlbuy {
-    background: #000 !important; color: #fff !important; border: 2px solid #8f1f20 !important; border-radius: 3px !important; font-weight: bold !important;
-    box-shadow: inset 0 0 0 1px #3d0202, inset 0 0 4px 2px #1c0000, 0 0 1px rgba(140, 40, 30, .55) !important; cursor: pointer; }
+    background: #000 !important; color: #fff !important; border: 3px solid #8f1f20 !important; border-radius: 4px !important; font-weight: bold !important;
+    box-shadow: inset 0 0 0 1px #3d0202, inset 0 0 5px 2px #1c0000, 0 0 1px rgba(140, 40, 30, .55) !important; cursor: pointer; }
   button:disabled, .cb.off, .stBuy.off { color: #7d7d7d !important; }
   #menu button.warn, #mAbandon, #mWipe { color: #dc1616 !important; }
   .stRow, .stTabs button, #store .stDeck, #gear, #petsBtn, .pth button.sec, .gi button, .lk .it, .si {
-    border-color: #7d7d7d !important; box-shadow: inset 0 0 0 1px #2a2a2a, inset 0 0 4px 1px #111 !important; }
+    border-color: #7d7d7d !important; border-radius: 4px !important; box-shadow: inset 0 0 0 1px #2a2a2a, inset 0 0 4px 1px #111 !important; }
   /* close buttons: a small pure-red square with a white X, hanging a few px off the corner, the X sitting a touch low */
   .pth button, .stClose, #slClose, #pvBack, #cosClose, #gaClose {
     background: #ff0000 !important; border: 1px solid #000 !important; border-radius: 0 !important; box-shadow: none !important; color: #fff !important;
@@ -548,7 +548,7 @@
   .cc.on.k { background: #ff0000 !important; } .cc.on.e { background: #ffff00 !important; } .cc.on.d { background: #00ffff !important; } .cc.on.z { background: #00ff00 !important; }
   .cc.cur.d { background: #ffffff !important; }
   /* Pearls (centre left): two black buttons, not quite matching */
-  #pearlBar { left: 3px; gap: 5px; } .pb { width: 96px; border-width: 2px !important; padding: 4px 2px 5px !important; } .pb + .pb { width: 98px; margin-top: -1px; }
+  #pearlBar { left: 3px; gap: 5px; } .pb { width: 96px; padding: 4px 2px 5px !important; } .pb + .pb { width: 98px; margin-top: -1px; }
   .pb b { font-size: 14px !important; letter-spacing: 0 !important; } .pb .pp { font-size: 14px !important; color: #fff !important; }
   /* side quests (top right) */
   #sq { right: 5px; padding: 4px 6px 6px; } #sq .sqh, .sqh { font-size: 18px !important; color: #ffff00 !important; letter-spacing: 0 !important; }
