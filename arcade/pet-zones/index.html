@@ -500,6 +500,137 @@
   @media (max-width: 520px) { #cardInfo.on { padding: 6px 10px; gap: 8px; } #cardInfo img { width: 34px; height: 34px; } #cardInfo b { font-size: 15px; } #cardInfo p { font-size: 12px; } }
   #shopBtn { width: 210px; padding: 0 10px; box-sizing: border-box; } #shopBtn b { font-size: 26px; letter-spacing: 2px; white-space: nowrap; }
   @media (max-width: 520px) { #shopBtn { width: 170px; } #shopBtn b { font-size: 21px; letter-spacing: 1px; } }
+
+  /* ===================================================================================================================
+     2009-2010 Roblox game GUI, hobbyist-built (the owner's reference sheet, "amateur" view). Engine limits: Arial / Arial
+     Bold only, text sizes 8 9 10 11 12 14 18 24 36 48, no gradients, shadows, glows, blur or animation, no hover on the
+     black buttons, only the built-in button keeps its slight rounding. Main buttons: black, 2px dark red border fading in.
+     Secondary: grey border. Panels: black at 45% or Studio's default grey. Pure bright colours. The careless bits are
+     deliberate (odd offsets, uneven gaps, a title off centre, a close X hanging off a corner): don't tidy them up.
+     =================================================================================================================== */
+  body, button, input, select, textarea { font-family: Arial, Helvetica, sans-serif !important; }
+  body *:not(canvas) { text-shadow: none !important; animation: none !important; transition: none !important; }
+  body *:not(canvas):not(.egg):not(.qegg):not(#stick):not(#stick i) { border-radius: 0 !important; box-shadow: none !important; }
+  .pp i, .cb.buy i { border-radius: 50% !important; }
+  button:hover, .card:hover, #kit:hover { filter: none !important; }
+  /* the two button styles */
+  button, .rb, .cb, .pb, #endBtn, #shopBtn, #petsBtn, #tradeBtn, #jumpBtn, #dashBtn, #gear, .stBuy, #store .stDeck, #menu button, #pvBuy, #pvBuyP, .si.pearlbuy {
+    background: #000 !important; color: #fff !important; border: 2px solid #8f1f20 !important; border-radius: 3px !important; font-weight: bold !important;
+    box-shadow: inset 0 0 0 1px #3d0202, inset 0 0 4px 2px #1c0000, 0 0 1px rgba(140, 40, 30, .55) !important; cursor: pointer; }
+  button:disabled, .cb.off, .stBuy.off { color: #7d7d7d !important; }
+  #menu button.warn, #mAbandon, #mWipe { color: #dc1616 !important; }
+  .stRow, .stTabs button, #store .stDeck, #gear, #petsBtn, .pth button.sec, .gi button, .lk .it, .si {
+    border-color: #7d7d7d !important; box-shadow: inset 0 0 0 1px #2a2a2a, inset 0 0 4px 1px #111 !important; }
+  /* close buttons: a small pure-red square with a white X, hanging a few px off the corner, the X sitting a touch low */
+  .pth button, .stClose, #slClose, #pvBack, #cosClose, #gaClose {
+    background: #ff0000 !important; border: 1px solid #000 !important; border-radius: 0 !important; box-shadow: none !important; color: #fff !important;
+    font: bold 18px Arial, Helvetica, sans-serif !important; width: 22px !important; height: 21px !important; min-width: 0 !important; min-height: 0 !important;
+    padding: 0 0 0 1px !important; line-height: 24px !important; overflow: visible; }
+  .pth { position: relative; } .pth button { position: absolute !important; top: -12px; right: -14px; }
+  /* panels: black at 45%, a 2px black edge */
+  #quests, #sq, #kit, #menu, #results, #pets, #cosmo, #trade, #qboard, #deckp, #codex, #garage, #caught, #help, #cardInfo, #tip.on, #shopList, #mod,
+  #store .stTop, #store .stBot, #store .stR, #storeTalk, #round .tb, #announce, #preview {
+    background: rgba(0, 0, 0, .45) !important; border: 2px solid #000 !important; color: #fff; }
+  #reel { background: rgba(0, 0, 0, .55) !important; }
+  /* the hint bar along the top: plain black, Arial 14 */
+  #hint { top: 0; height: 20px; line-height: 20px; background: #000 !important; font: 14px Arial, Helvetica, sans-serif !important; }
+  /* top left: the gear, and the one label left in Studio's default grey */
+  #gear { top: 24px; left: 3px; width: 30px; height: 31px; }
+  #zoneBadge { top: 25px; left: 37px; height: 27px; padding: 0 !important; gap: 4px; background: #a3a2a5 !important; border: 1px solid #1b2a35 !important; color: #000 !important; }
+  #zoneBadge b { font-size: 18px !important; letter-spacing: 0 !important; color: #000 !important; } #zoneBadge small { font-size: 12px !important; color: #000 !important; font-weight: normal; }
+  /* the job sheet (left) */
+  #quests { top: 59px; left: 3px; width: 251px; padding: 4px 6px 6px; }
+  .jt { font-size: 18px !important; color: #ffff00 !important; letter-spacing: 0 !important; border-bottom: 1px solid #7d7d7d !important; }
+  .jl { font-size: 14px !important; letter-spacing: 0 !important; } .jl.k { color: #ff0000 !important; } .jl.e { color: #ffff00 !important; } .jl.d { color: #00ffff !important; } .jl.z { color: #00ff00 !important; }
+  .cashL { font-size: 14px !important; } .cashL b, .cashT, .cashC { color: #00ff00 !important; }
+  .hearts .ht { font-size: 18px !important; color: #555 !important; } .hearts .ht.on { color: #ff0000 !important; }
+  .cc { border: 1px solid #7d7d7d !important; background: #000 !important; width: 18px !important; height: 18px !important; } .cc::after { display: none !important; }
+  .cc.on.k { background: #ff0000 !important; } .cc.on.e { background: #ffff00 !important; } .cc.on.d { background: #00ffff !important; } .cc.on.z { background: #00ff00 !important; }
+  .cc.cur.d { background: #ffffff !important; }
+  /* Pearls (centre left): two black buttons, not quite matching */
+  #pearlBar { left: 3px; gap: 5px; } .pb { width: 96px; border-width: 2px !important; padding: 4px 2px 5px !important; } .pb + .pb { width: 98px; margin-top: -1px; }
+  .pb b { font-size: 14px !important; letter-spacing: 0 !important; } .pb .pp { font-size: 14px !important; color: #fff !important; }
+  /* side quests (top right) */
+  #sq { right: 5px; padding: 4px 6px 6px; } #sq .sqh, .sqh { font-size: 18px !important; color: #ffff00 !important; letter-spacing: 0 !important; }
+  .sqt span, .sqr span { font-size: 12px !important; } .sqb, .qq .qb { background: #000 !important; border: 1px solid #7d7d7d !important; } .sqb i, .qq .qb i { background: #00ff00 !important; }
+  /* the battle: PROVISIONS (the shop button), the hand, End */
+  #shopBtn { width: 200px !important; height: 50px !important; top: 5px !important; gap: 0 !important; }
+  #shopBtn b { font-size: 24px !important; letter-spacing: 0 !important; color: #fff !important; } #shopBtn small { font-size: 12px !important; color: #fff !important; letter-spacing: 0 !important; } #shopBtn small span { color: #ffff00 !important; font-size: 14px !important; }
+  #shopBtn i { background: #ff0000 !important; border: 1px solid #000 !important; font-size: 18px !important; width: 22px !important; height: 22px !important; line-height: 22px !important; top: -6px !important; right: -7px !important; }
+  .card { background: rgba(0, 0, 0, .45) !important; border: 2px solid #7d7d7d !important; }
+  .card .band { font-size: 10px !important; letter-spacing: 0 !important; color: #000 !important; font-weight: bold; }
+  .card.mv { border-color: #0000ff !important; } .card.mv .band { background: #0000ff !important; color: #fff !important; }
+  .card.at { border-color: #ff0000 !important; } .card.at .band { background: #ff0000 !important; color: #fff !important; }
+  .card.ut { border-color: #ffff00 !important; } .card.ut .band { background: #ffff00 !important; }
+  .card b { font-size: 12px !important; } .card em { font-size: 12px !important; } .card img { filter: none !important; }
+  .card.sel { border-color: #fff !important; } .card.used { filter: grayscale(1) brightness(.55) !important; } .card.used::after { font-size: 14px !important; }
+  .mvC { color: #0000ff !important; } .atC { color: #ff0000 !important; } .utC { color: #ffff00 !important; }
+  #cardInfo .mvC { color: #6f6fff !important; }
+  #endBtn b, #endBtn span { font-size: 24px !important; color: #fff !important; }
+  #cardInfo b { font-size: 18px !important; } #cardInfo p { font-size: 14px !important; color: #fff !important; } #cardInfo small { font-size: 11px !important; letter-spacing: 0 !important; } #cardInfo em { font-size: 12px !important; color: #00ff00 !important; }
+  #cardInfo.mv, #cardInfo.at, #cardInfo.ut { border-color: #000 !important; }
+  #tip, #tip b { font-size: 12px !important; }
+  /* announcements: a box, Arial Bold 36 */
+  #announce { padding: 4px 14px 6px; } #announce b { font-size: 36px !important; letter-spacing: 0 !important; } #announce small { font-size: 18px !important; color: #fff !important; }
+  #round .tb b { font-size: 18px !important; } #round .tb span { font-size: 10px !important; }
+  #ptsList .pr { font-size: 14px !important; } .dn { font-size: 24px !important; }
+  /* over people and places: plain text on a see-through black strip */
+  .bill b { font-size: 18px !important; background: rgba(0, 0, 0, .45); padding: 0 4px; } .bill small { font-size: 11px !important; }
+  .tag .nm { font-size: 12px !important; background: rgba(0, 0, 0, .45); padding: 0 3px; }
+  .tag .bub { border-radius: 0 !important; border: 1px solid #000 !important; font: bold 12px Arial, Helvetica, sans-serif !important; } .tag .bub::after { display: none; }
+  .stg { font-size: 10px !important; border: 1px solid #000 !important; color: #000 !important; } .stg.l { background: #00ff00 !important; } .stg.a { background: #ffff00 !important; } .stg.e { background: #ff0000 !important; color: #fff !important; } .stg.f { background: #00ffff !important; }
+  /* the game menu */
+  #menu { padding: 6px 12px 10px !important; } #menu .mt { font-size: 24px !important; border-bottom: 0 !important; text-align: left !important; padding-left: 41px !important; }
+  #menu button { font-size: 18px !important; margin: 5px 0 !important; padding: 5px 4px !important; } #menu button:nth-of-type(3) { margin-top: 7px !important; } #menu button:nth-of-type(5) { width: calc(100% + 2px) !important; }
+  #menu .lbl { font-size: 11px !important; color: #fff !important; letter-spacing: 0 !important; text-transform: none !important; } #menu button.on::after { color: #00ff00 !important; }
+  /* panel headings: a yellow label sitting a little right of where it should */
+  .pth b { font-size: 24px !important; color: #ffff00 !important; letter-spacing: 0 !important; padding-left: 5px; } .pth small { font-size: 11px !important; color: #fff !important; }
+  .lkh, .mh { font-size: 14px !important; color: #fff !important; letter-spacing: 0 !important; }
+  #results .rh { font-size: 36px !important; letter-spacing: 0 !important; } #results .rs { font-size: 14px !important; } #results table { font-size: 14px !important; } #results td:nth-child(2) { color: #ffff00 !important; }
+  .rb { font-size: 18px !important; padding: 6px 12px !important; }
+  #caught > b { font-size: 24px !important; color: #ffff00 !important; letter-spacing: 0 !important; }
+  #petsBtn b { font-size: 12px !important; } #tradeBtn b { font-size: 24px !important; letter-spacing: 0 !important; } #tradeBtn small { font-size: 11px !important; color: #fff !important; }
+  #jumpBtn, #dashBtn { font-size: 18px !important; } #jumpBtn { width: 72px !important; height: 70px !important; } #dashBtn { width: 58px !important; height: 59px !important; }
+  #kit .kh { font-size: 11px !important; letter-spacing: 0 !important; color: #fff !important; }
+  /* the shops: grey-bordered black rows, a yellow ~*title*~, the red X off the corner */
+  #store .stR { padding: 6px 8px 8px 7px !important; }
+  #store .stMoney { font-size: 24px !important; } #store .stMoney b { font-size: 24px !important; color: #ffff00 !important; letter-spacing: 0 !important; margin-right: 6px; } #store .stMoney .cashT { font-size: 24px !important; }
+  #store .stList { border: 0 !important; display: flex; flex-direction: column; gap: 4px; padding-top: 2px; } #store .stList .stRow:nth-child(3) { margin-top: 1px; } #store .stList .stRow:nth-child(5) { width: calc(100% + 2px); }
+  #store .stRow { height: 40px !important; min-height: 0 !important; font-size: 18px !important; padding: 0 !important; gap: 6px !important; }
+  #store .stRow img { width: 34px !important; height: 34px !important; min-width: 0 !important; min-height: 0 !important; margin-left: 2px; }
+  #store .stRow.on { border-color: #fff !important; } #store .stRow em { color: #fff !important; font-size: 18px !important; } #store .stRow .cashT { font-size: 18px !important; }
+  #store .stRow span { padding-right: 6px; }
+  #store .stTabs button { font-size: 14px !important; padding: 3px 8px !important; }
+  #store .stKind { font-size: 12px !important; color: #fff !important; } #store .stKind span { color: #fff !important; }
+  #store .stName { font-size: 14px !important; } #store .stFx { font-size: 18px !important; color: #00ffff !important; }
+  #store .stBar { background: #000 !important; font-size: 18px !important; border-bottom: 2px solid #fff !important; } #store .stDesc { font-size: 14px !important; color: #fff !important; }
+  #store .stBuy { font-size: 18px !important; } #store .stBuy .cashT { font-size: 18px !important; } #store .stHave { font-size: 14px !important; color: #00ff00 !important; }
+  #store .stClose { top: calc(8.6vh - 12px) !important; right: calc(2.3vw - 4px) !important; font-size: 18px !important; }
+  #storeTalk .stWho { font-size: 18px !important; letter-spacing: 0 !important; color: #ffff00 !important; } #storeTalk .stWho small { font-size: 12px !important; color: #fff !important; letter-spacing: 0 !important; }
+  #storeTalk p { font-size: 18px !important; font-weight: bold; } #storeTalk > small { font-size: 11px !important; color: #fff !important; }
+  .pb .pe .cc { width: 11px !important; height: 11px !important; }
+  @media (max-aspect-ratio: 1/1) { #store .stR { top: 46vh !important; } #store .stTop { top: 22vh !important; } #store .stFx { font-size: 14px !important; } #store .stBuy, #store .stBuy .cashT { font-size: 14px !important; } #store .stClose { top: calc(46vh - 12px) !important; right: calc(3vw - 4px) !important; } #store .stRow { height: 36px !important; font-size: 14px !important; } #store .stRow em, #store .stRow .cashT { font-size: 14px !important; } #store .stMoney, #store .stMoney b, #store .stMoney .cashT { font-size: 18px !important; } }
+  @media (max-width: 520px) { #shopBtn { width: 170px !important; height: 44px !important; } #shopBtn b { font-size: 18px !important; } #announce b { font-size: 24px !important; } #announce small { font-size: 14px !important; } }
+
+  /* retro: hard pixel edges on the 3D view, no smoothing on the text */
+  canvas#c { image-rendering: pixelated; image-rendering: crisp-edges; }
+  body { -webkit-font-smoothing: none; -moz-osx-font-smoothing: unset; font-smooth: never; }
+  /* phones held upright: readability first (the careless offsets are dropped here, text kept at 12 and up, nothing runs off) */
+  @media (max-aspect-ratio: 1/1) {
+    #hint { height: auto !important; min-height: 20px; line-height: 16px !important; white-space: normal !important; font-size: 12px !important; padding: 2px 4px; box-sizing: border-box; }
+    #quests .jl, .cashL, #quests small { font-size: 12px !important; } .jt { font-size: 14px !important; }
+    .pb + .pb { width: auto; margin-top: 0; } .pth button { top: -4px; right: -4px; }
+    #store .stClose { right: 3vw !important; }
+    .sqt span, .sqr span { font-size: 12px !important; } .tag .nm, .bill small { font-size: 12px !important; } .stg { font-size: 11px !important; }
+    #cardInfo p { font-size: 14px !important; } #cardInfo b { font-size: 18px !important; } .card b { font-size: 12px !important; }
+    #menu .mt { text-align: center !important; padding-left: 0 !important; } #menu button:nth-of-type(5) { width: 100% !important; }
+    #storeTalk p { font-size: 18px !important; }
+    body.battle #quests { transform: none !important; width: 170px !important; top: 60px !important; padding: 3px 5px 4px !important; }
+    body.battle #quests .cc { width: 11px !important; height: 11px !important; } body.battle #quests .cells { gap: 2px; flex-wrap: wrap; }
+    body.battle #quests .jl { margin-top: 3px !important; }
+    body.battle #sq { display: none !important; }
+    body.battle #pearlBar { top: 236px !important; transform: none !important; }
+  }
 </style>
 
 </head>
@@ -542,14 +673,14 @@
   <div class="stTop"><small class="stKind"></small><div class="stIcB"><img class="stIc" alt=""></div><b class="stName ol"></b><p class="stFx"></p><div class="stBtns"></div></div>
   <div class="stBot"><div class="stBar"></div><p class="stDesc"></p></div>
   <div class="stR"><div class="stMoney ol"></div><div class="stTabs"></div><div class="stList"></div></div>
-  <button class="stClose" title="Leave">&#x2190;</button>
+  <button class="stClose" title="Leave">X</button>
 </div>
 <button id="tradeBtn" class="ol"></button>
 <div id="mod" class="ol"></div>
 
 <button id="shopBtn" class="ol"></button>
-<div id="shopList" class="ol"><div class="slh"><b id="slTitle">PROVISIONS</b><div id="wallet" class="cells"></div><button id="slClose">✕</button></div><div id="slItems"></div></div>
-<div id="preview" class="ol"><div class="pvh"><img id="pvIcon" alt=""><b id="pvName"></b><button id="pvBack">✕</button></div><div id="pvView"></div><div id="pvDesc"></div><div id="pvBtns"><button id="pvBuy"></button><button id="pvBuyP"></button></div></div>
+<div id="shopList" class="ol"><div class="slh"><b id="slTitle">PROVISIONS</b><div id="wallet" class="cells"></div><button id="slClose">X</button></div><div id="slItems"></div></div>
+<div id="preview" class="ol"><div class="pvh"><img id="pvIcon" alt=""><b id="pvName"></b><button id="pvBack">X</button></div><div id="pvView"></div><div id="pvDesc"></div><div id="pvBtns"><button id="pvBuy"></button><button id="pvBuyP"></button></div></div>
 
 <div id="bottom">
   <div id="cardInfo"></div>
@@ -586,13 +717,13 @@
   <div><b>Cards:</b> you own a collection and take a deck of up to 15 (MY DECK). Each zone deals you 7 from it. In a zone, PROVISIONS shows 5 more from your deck: energy grabs one into your hand. Card Shops sell new cards for cash or Pearls. The Card Library lists every card</div>
   <div><b>Towns and the Depot:</b> walk onto a booth's pad. The <b>Card Shop</b> swaps a card in your kit for energy, <b>Loot Crates</b> hold blasters and skins, the <b>Quest Board</b> lets you swap a quest. Walk up to another player and press <b>TRADE</b> to swap blasters and skins</div>
   <div><b>Quests</b> (top right): done just by playing. They pay energy, or a free loot crate</div>
-  <div><b>A job:</b> beat the quota of enemies before the shift ends. Each day you get to play every card in your deck once, in any order: <b>1-7</b> or click a card, then click a lit tile. <b>Esc</b> or right-click cancels. <b>Enter / Space</b> ends the day</div>
-  <div><b>Night:</b> every enemy grows one stage: <span class="stg l">CONFUSED?</span> → <span class="stg a">STRONG</span> → <span class="stg e">AIMING!</span> (or WOUND UP!). One that's about to attack when night falls takes a heart: shooters shoot you from where they stand, the rest jump over, hit you and jump back. Then it calms down to STRONG for a night. You have 2 hearts (they come back when you finish a battle). Out of hearts: the run is over</div>
+  <div><b>A job:</b> beat the quota of enemies before you run out of turns. Each turn you get to play every card in your hand once, in any order: <b>1-7</b> or click a card, then click a lit tile. <b>Esc</b> or right-click cancels. <b>Enter / Space</b> ends your turn</div>
+  <div><b>Enemy turn:</b> every enemy grows one stage: <span class="stg l">CONFUSED?</span> → <span class="stg a">STRONG</span> → <span class="stg e">AIMING!</span> (or WOUND UP!). One that's about to attack takes a heart: shooters shoot you from where they stand, the rest jump over, hit you and jump back. Then it calms down to STRONG for a turn. If anyone's still standing they whistle, and more turn up: they walk on from beside their spot or parachute down. You have 2 hearts (they come back when you finish a battle). Out of hearts: the run is over</div>
   <div><b>Drops:</b> a beaten enemy drops nothing, an egg or a card. Eggs are rarer the sooner you beat it (confused = rare, strong = epic, about to attack = common) and hatch into pets when the round ends. Eggs go straight into your collection. Equip one pet or companion in My Pets: it follows you and gives you its power (one more heart, energy every morning...)</div>
   <div><b>Cards:</b> <span class="mvC">Movement</span>, <span class="atC">Attack</span> and <span class="utC">Utility</span>. Walk and run moves pass over tiles (and pick up energy on the way) but can't climb a hill. Hops, jumps and leaps can, and landing on a pet from a hill catches it outright. Teleports go anywhere in range</div>
   <div><b>Height:</b> hills are 8 studs up. Only <b>lobbed</b> zaps reach a pet above you, and a hill blocks a beam fired from the ground. From a hill, beams and swipes hit bugs below</div>
-  <div><b>Energy:</b> cells drop onto the field in ones and twos every day. Walk over one to pick it up (your wallet holds 10). Spend it in the Module Shop: the new card replaces one in your deck, used or not, and is ready right away. A lobbed shot on a cell blows it up and zaps every pet next to it</div>
-  <div><b>Burrows:</b> dirt mounds show where pets will pop up tonight. Stand on one and nothing comes up</div>
+  <div><b>Energy:</b> cells drop onto the field in ones and twos every turn. Walk over one to pick it up (your wallet holds 10). Spend it in the Module Shop: the new card replaces one in your deck, used or not, and is ready right away. A lobbed shot on a cell blows it up and zaps every pet next to it</div>
+  <div><b>Drop spots:</b> dirt marks show where enemies will turn up on the enemy turn. Stand on one and nobody comes</div>
 </div>
 
 <div id="err"><div><b>Couldn't load the 3D library.</b><br>This page loads Three.js from cdnjs, so it needs an internet connection.</div></div>
@@ -1958,7 +2089,7 @@ function zoneDef(k) {
 const BUGS = {   // the enemies' traits (the keys are the old names: grub plain, mounder digs up hills, skitter hops about, spitter sprays goo, shellback is tough)
   grub: { name: 'Grunt', color: 0x9be36b, dark: 0x4a8a2a, css: '#9be36b', what: 'a plain one' },
   mounder: { name: 'Digger', color: 0xc9965a, dark: 0x6b4a2e, css: '#e0b25a', what: 'once strong, it heaps its tile into a hill' },
-  skitter: { name: 'Hopper', color: 0xffe04a, dark: 0x9a7408, css: '#ffe04a', what: 'once strong, it hops to a new tile every night' },
+  skitter: { name: 'Hopper', color: 0xffe04a, dark: 0x9a7408, css: '#ffe04a', what: 'once strong, it hops to a new tile every enemy turn' },
   spitter: { name: 'Sprayer', color: 0xff9a4a, dark: 0x9a3a06, css: '#ff9a4a', what: 'once strong, it sprays goo when beaten: 1 zap to the enemies round it, and a gummed card if you\'re there' },
   shellback: { name: 'Brute', color: 0xb48aff, dark: 0x4a2478, css: '#c49aff', what: 'once strong, it shrugs off the first zap (landing on it ignores that)' },
 };
@@ -1974,16 +2105,16 @@ const PET_IDS = Object.keys(PETS);
 // equip one pet (My Pets) and it gives you its power. Two species share each
 const PET_ABIL = {
   heart: ['+1 HEART', 'one more heart (the only way to get more)', ['polar', 'elephant']],
-  energy: ['MORNING ENERGY', '+1 energy every morning', ['bee', 'chick']],
+  energy: ['TURN ENERGY', '+1 energy every turn', ['bee', 'chick']],
   head: ['HEAD START', 'start every zone with +3 energy', ['pig', 'cow']],
-  days: ['MORE DAYS', '+2 days in every zone', ['koala', 'panda']],
+  days: ['MORE TURNS', '+2 turns in every zone', ['koala', 'panda']],
   luck: ['LUCKY', 'every enemy you beat drops something', ['dog', 'cat']],
   rare: ['FANCY EGGS', 'eggs come one rarity better', ['fox', 'deer']],
   cards: ['CARD SNIFFER', 'card drops twice as often', ['monkey', 'parrot']],
   hand: ['EXTRA HAND', 'an 8th card in your hand', ['crab', 'fish']],
   cash: ['BIG EARNER', '+50% cash for clearing a zone', ['tiger', 'lion']],
   shield: ['GUARDIAN', 'blocks the first heart you\'d lose in each zone', ['penguin', 'hog']],
-  calm: ['LULLABY', 'nobody grows on the first night of a zone', ['caterpillar', 'beaver']],
+  calm: ['LULLABY', 'nobody grows on the first enemy turn of a zone', ['caterpillar', 'beaver']],
   cheap: ['BARGAIN', 'provisions cost 1 less energy', ['bunny', 'giraffe']],
 };
 const PET_POWER = {}; for (const [k, v] of Object.entries(PET_ABIL)) for (const sp of v[2]) PET_POWER[sp] = k;
@@ -2025,9 +2156,10 @@ const Run = { active: false, zone: 0, deck: null, energy: 0, kills: 0, pets: [],
 
 // ---------------------------------------------------------------- renderer, sky, light (as in Zombie Zones)
 const canvas = $('c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-const RES = 0.8; renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5) * RES);
-renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+// retro (2010): no anti-aliasing, drawn a little under screen resolution and blown up with hard pixel edges, hard-edged shadows
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+const RES = Math.min(innerWidth, innerHeight) < 700 ? 1 : 0.85; renderer.setPixelRatio(RES);   // (phones: one game pixel per screen point)
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.BasicShadowMap;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(70, 1, 0.3, 2500);
 scene.fog = new THREE.Fog(0xf3d2bc, 500, 2200);
@@ -2051,7 +2183,7 @@ function updateLight(dt) {
 
 // studded parts: studs on top, smooth sides, inlets underneath
 const texLoader = new THREE.TextureLoader();
-function studTex(uri) { const t = texLoader.load(uri); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t; }
+function studTex(uri) { const t = texLoader.load(uri); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 1; return t; }   // (no anisotropic filtering: the far-off studs blur, as they used to)
 const STUD_N = studTex(ASSETS.studNormal), STUD_A = studTex(ASSETS.studAlbedo), STUD_I = studTex(ASSETS.studInlet);
 const MATC = {}, PH = { shininess: 10, specular: 0x101010 };
 const studTop = o => new THREE.MeshPhongMaterial(Object.assign({ map: STUD_A, normalMap: STUD_N, normalScale: new THREE.Vector2(0.8, 0.8) }, PH, o));
@@ -2283,6 +2415,7 @@ const Snd = {
     else if (kind === 'crumble') hiss(500, 120, 0.35, 0.7, 0.8);
     else if (kind === 'hit') tone('square', 260, 120, 0.09, 0.22);
     else if (kind === 'chime') tone('square', 523, 1046, 0.3, 0.18);
+    else if (kind === 'whistle') { tone('sine', 1500, 2700, 0.16, 0.14); tone('sine', 2700, 1900, 0.32, 0.14, 0.2); }
     else if (kind === 'splat') { hiss(700, 140, 0.25, 0.7, 1.2); tone('sine', 220, 60, 0.18, 0.3); }
     else if (kind === 'tele') tone('sine', 300, 1400, 0.4, 0.25);
     else if (kind === 'lob') { tone('sine', 700, 240, 0.35, 0.16); hiss(1800, 600, 0.2, 0.2, 2); }
@@ -2466,7 +2599,7 @@ const Bills = { list: [],
   } };
 let annT = 0;
 function announce(big, small, color = '#fff', t = 2.4) { const el = $('announce'); el.querySelector('b').textContent = big; el.querySelector('b').style.color = color; el.querySelector('small').textContent = small || ''; el.style.display = 'block'; el.style.opacity = 1; annT = t; }
-function updateAnnounce(dt) { if (annT > 0) { annT -= dt; $('announce').style.opacity = Math.min(1, annT / 0.6); if (annT <= 0) $('announce').style.display = 'none'; } }
+function updateAnnounce(dt) { if (annT > 0) { annT -= dt; $('announce').style.opacity = 1;   /* no fades: it's there, then it isn't */ if (annT <= 0) $('announce').style.display = 'none'; } }
 let msgObj = null;
 function msg(text, t = 1.8) { if (B.on) return; msgObj = { text, t }; }   // no words in a job: it all shows on the grid
 
@@ -2911,11 +3044,11 @@ const CARDS = {
     pat: line(D4, 1, 1, 'u').concat(line(D4, 2, 2, 'p')), targets: () => meleeTargets(D4), run: t => shoveBug(t) },
   siphon: { name: 'Siphon', type: 'ut', rar: 1, sub: '+2 energy', desc: 'Gain 2 energy, straight into your wallet.',
     pat: [[0, 0, 'u']], self: true, targets: () => selfTarget(), run: () => siphon() },
-  cryo: { name: 'Cryo Net', type: 'ut', rar: 2, sub: 'skips a night', desc: 'Freeze a pet up to 3 steps away, at any height: it doesn\'t grow tonight. An egg in a net doesn\'t hatch.',
+  cryo: { name: 'Cryo Net', type: 'ut', rar: 2, sub: 'skips a turn', desc: 'Freeze an enemy up to 3 steps away, at any height: it doesn\'t grow on the enemy turn.',
     pat: mk(ring(1, 3, 'man'), 'u'), targets: () => tilesAround(ring(1, 3, 'man')).map(t => ({ i: t.i, j: t.j, kind: 'util', bug: bugAt(t.i, t.j) })), run: t => cryoNet(t) },
-  recharge: { name: 'Recharge', type: 'ut', rar: 2, sub: 'moves ready again', desc: 'Every Movement card you\'ve used today is ready again.',
+  recharge: { name: 'Recharge', type: 'ut', rar: 2, sub: 'moves ready again', desc: 'Every Movement card you\'ve used this turn is ready again.',
     pat: [[0, 0, 'u']], self: true, targets: () => selfTarget(), run: () => refreshType('mv') },
-  reload: { name: 'Reload', type: 'ut', rar: 2, sub: 'attacks ready again', desc: 'Every Attack card you\'ve used today is ready again.',
+  reload: { name: 'Reload', type: 'ut', rar: 2, sub: 'attacks ready again', desc: 'Every Attack card you\'ve used this turn is ready again.',
     pat: [[0, 0, 'u']], self: true, targets: () => selfTarget(), run: () => refreshType('at') },
 };
 // the sprite on each card (IconMix item_32 pixel art). A card's border and highlights take its type's colour
@@ -3043,7 +3176,7 @@ function noteFor(D, t) {
   if (t.kind === 'arc') { const b = bugAt(t.i, t.j), c = cellAt(t.i, t.j); if (D.id === 'mortar') { const n = [[0, 0]].concat(D4).map(([dx, dy]) => bugAt(t.i + dx, t.j + dy)).filter(Boolean).length; return `Mortar: hits ${n} bug${n === 1 ? '' : 's'}${c ? ' · and sets off the energy cell' : ''}`; } return b ? dmgNote(b, D.dmg) : c ? 'Sets off the energy cell: 1 damage to every bug round it' : `${D.name}: nothing there`; }
   if (D.id === 'swipe') return dmgNote(t.bug, 2);
   if (D.id === 'shove') return `Shove the ${bugName(t.bug)}`;
-  if (D.id === 'cryo') return `Freeze the ${bugName(t.bug)}: it won't ${t.bug.stage === 'egg' ? 'hatch' : 'grow'} tonight`;
+  if (D.id === 'cryo') return `Freeze the ${bugName(t.bug)}: it won't grow on the enemy turn`;
   if (D.id === 'raise') return isP(t.i, t.j) ? 'Raise your own tile (you go up with it)' : 'Raise this tile into a hill';
   if (D.id === 'dig') return isP(t.i, t.j) ? 'Sink your own tile' : 'Sink this hill' + (bugAt(t.i, t.j) ? ' (the bug drops: 1 damage)' : '');
   return `${D.name}: click again to use it`;
@@ -3094,8 +3227,8 @@ const auraMat = () => new THREE.MeshBasicMaterial({ color: 0xff2a1a, transparent
 // enemies in the ride zones drive too: a car on land, a boat on the water, bigger the angrier they are; the driver sits in the seat
 const ENEMY_RIDE = { car: { larva: 'truck', adult: 'truck-flat', egg: 'delivery' }, boat: { larva: 'boat-row-large', adult: 'boat-fishing-small', egg: 'boat-tow-a' } };
 const ENEMY_RIDE_K = { larva: 1, adult: 1.15, egg: 1.3 };
-function enemyRide(b, A, g, rig) {
-  const kind = B.Z.water ? 'boat' : 'car', name = ENEMY_RIDE[kind][b.stage], R = RIDES[name], k = ENEMY_RIDE_K[b.stage];
+function enemyRide(b, A, g, rig, Z) {
+  const kind = Z.water ? 'boat' : 'car', name = ENEMY_RIDE[kind][b.stage], R = RIDES[name], k = ENEMY_RIDE_K[b.stage];
   const vm = vehModel(name, R.s * k); vm.g.rotation.y = Math.PI; A.body.add(vm.g); A.wheels = vm.wheels; A.ride = R;
   const tint = b.stage === 'egg' ? 0xff8a7a : b.stage === 'adult' ? 0xfff0b0 : null;   // enraged ones run hot
   A.vmats = []; if (tint) vm.g.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.color.set(tint); A.vmats.push(o.material); } });   // (about to attack: it flashes red)
@@ -3107,7 +3240,7 @@ function enemyRide(b, A, g, rig) {
   if (A.shell) { A.shell.geometry.dispose(); A.shell.geometry = new THREE.SphereGeometry(len * 0.62, 16, 12); A.shell.position.y = A.top * 0.35; }
 }
 function bugModel(b, small) {
-  const K = BUGS[b.type], [hatK, col] = ENEMY_LOOK[b.type] || ENEMY_LOOK.grub, sc = ENEMY_SCALE[b.stage][!small && TS >= 48 ? 1 : 0];
+  const K = BUGS[b.type], [hatK, col] = ENEMY_LOOK[b.type] || ENEMY_LOOK.grub, sc = ENEMY_SCALE[b.stage][!small && (b.Z ? b.Z.ts : TS) >= 48 ? 1 : 0];
   const look = { skin: b.stage === 'egg' ? 0xd86a5a : 0x9aa0a8, shirt: col, arms: new THREE.Color(col).multiplyScalar(0.7).getHex(), pants: 0x2a2a30, hat: hatK, hatColor: K.dark, face: b.stage === 'larva' ? 'meh' : 'grin' };
   const rig = makeRig(look, { gun: !!RANGED[b.type] && b.stage !== 'larva' }); scene.remove(rig.g);
   const g = new THREE.Group(), body = new THREE.Group(); g.add(body); body.add(rig.g); rig.g.scale.setScalar(sc);
@@ -3116,7 +3249,7 @@ function bugModel(b, small) {
   const r = new THREE.Mesh(new THREE.TorusGeometry(2.2 * sc, 0.18 * sc, 6, 28), new THREE.MeshBasicMaterial({ color: b.stage === 'larva' ? K.color : 0xffd24a })); r.rotation.x = Math.PI / 2; r.position.y = 0.3; g.add(r); A.ring = r;
   if (b.type === 'shellback' && b.stage === 'adult') { const sh = new THREE.Mesh(new THREE.SphereGeometry(A.top * 0.62, 16, 12), new THREE.MeshPhongMaterial({ color: 0xb48aff, transparent: true, opacity: 0.28, shininess: 90, specular: 0xffffff, depthWrite: false })); sh.position.y = A.top * 0.5; g.add(sh); A.shell = sh; }
   if (window.GrugOutfitRig && KIT_LOOKS && KIT_LOOKS.length) try { GrugOutfitRig.dress(rig, KIT_LOOKS[(BUG_ID + b.type.length) % KIT_LOOKS.length]); } catch (_) { }   // in the arcade's outfits (the ring and the size say what they are)
-  if (!small && B.Z && B.Z.ride && typeof VEH_DATA !== 'undefined') enemyRide(b, A, g, rig);   // you're in your car (or boat): so are they
+  const BZ0 = b.Z || B.Z; if (!small && BZ0 && BZ0.ride && typeof VEH_DATA !== 'undefined') enemyRide(b, A, g, rig, BZ0);   // you're in your car (or boat): so are they
   scene.add(g);
   return { g, A };
 }
@@ -3136,10 +3269,10 @@ function setStage(b, stage) {
   scene.remove(b.g); const m = bugModel(b); b.g = m.g; b.A = m.A; b.g.traverse(o => { o.userData.bug = b; }); if (ice) b.g.add(ice);
 }
 function dropBug(b) { b.dead = true; scene.remove(b.g); b.tag.el.remove(); const k = B.bugs.indexOf(b); if (k >= 0) B.bugs.splice(k, 1); }
-function updateBugs(dt) {
-  if (!B.on) return;
-  for (const b of B.bugs) {
-    const t = T(b.i, b.j), p = b.pos || { x: t.x, y: visTop(t), z: t.z };
+function updateBugs(dt, list = B.bugs) {
+  if (!B.on && list === B.bugs) return;
+  for (const b of list) {
+    let p = b.pos; if (!p) { const t = T(b.i, b.j); p = { x: t.x, y: visTop(t), z: t.z }; }
     b.g.position.set(p.x, p.y, p.z);
     const dx = player.ch.x - p.x, dz = player.ch.z - p.z, yaw = b.walking ? b.walkYaw : Math.atan2(-dx, -dz); b.g.rotation.y += angDiff(b.g.rotation.y, yaw) * Math.min(1, dt * 4);
     const tt = Game.clock + b.t0, A = b.A;
@@ -3148,8 +3281,11 @@ function updateBugs(dt) {
     if (b.frozen) continue;
     const r = A.rig, sw = Math.sin(tt * 3);   // idle: a sway, fists up (a gun aimed at you, if it has one)
     r.j.rs = r.gun ? Math.PI / 2 : sw * 0.3; r.ls.rotation.x = -sw * 0.3 - 0.3; r.rs.rotation.x = r.gun ? Math.PI / 2 + sw * 0.05 : sw * 0.3; r.rh.rotation.x = r.lh.rotation.x = 0;
+    if (b.whistle > 0) { b.whistle -= dt; r.rs.rotation.x = 2.7; r.rs.rotation.z = 0.5; r.ls.rotation.x = 0.2; }   // fingers to mouth: FWEEET
+    else if (r.rs.rotation.z) r.rs.rotation.z = 0;
     if (b.walking && !A.seated) { const w = Math.sin(tt * 14); r.rh.rotation.x = w * 0.8; r.lh.rotation.x = -w * 0.8; r.ls.rotation.x = w * 0.7; if (!r.gun) r.rs.rotation.x = -w * 0.7; }
-    if (A.seated) { r.rh.rotation.x = r.lh.rotation.x = Math.PI / 2; A.body.position.y = B.Z && B.Z.water ? Math.sin(tt * 2) * 0.3 : Math.abs(Math.sin(tt * 5)) * 0.15; A.body.rotation.z = B.Z && B.Z.water ? Math.sin(tt * 1.6) * 0.03 : 0; }   // in the seat; a boat bobs, a car idles
+    const wet = (b.Z || B.Z || {}).water;
+    if (A.seated) { r.rh.rotation.x = r.lh.rotation.x = Math.PI / 2; A.body.position.y = wet ? Math.sin(tt * 2) * 0.3 : Math.abs(Math.sin(tt * 5)) * 0.15; A.body.rotation.z = wet ? Math.sin(tt * 1.6) * 0.03 : 0; }   // in the seat; a boat bobs, a car idles
     else A.body.position.y = Math.abs(Math.sin(tt * 2.2)) * 0.3 * A.sc; if (A.ring) A.ring.rotation.z += dt;
     if (A.wheels && b.pos) for (const wh of A.wheels) wh.rotation.x += 8 * dt;
     if (b.hp < RULES.hp[b.stage] && Math.random() < dt * 3) { const q = b.g.position; FX.spawn('star', q.x + rnd(-3, 3), q.y + A.top + 1, q.z + rnd(-3, 3), { fps: 14, size: 4, add: true, color: 0xffe34a, vy: 2 }); }
@@ -3418,7 +3554,7 @@ function selectCard(k) {
   if (!canAct()) return; const c = B.hand[k]; if (!c) return;
   if (B.swap >= 0) { swapInto(k); return; }
   if (B.sel === k) { if (CARDS[c.id].self && B.tgts.length) { play(k, B.tgts[0]); return; } clearSel(); return; }
-  if (c.used) { msg(c.gum ? 'Gummed up with acid: it\'s back tomorrow' : 'Already used today: it\'s ready again tomorrow', 1.6); Snd.play('deny'); return; }
+  if (c.used) { msg(c.gum ? 'Gummed up with acid: it\'s back next turn' : 'Already used this turn: it\'s ready again next turn', 1.6); Snd.play('deny'); return; }
   const tg = CARDS[c.id].targets();
   if (!tg.length) { msg(CARDS[c.id].why || 'Nowhere to use that from here', 1.8); Snd.play('deny'); return; }
   B.sel = k; B.tgts = tg; Snd.play('tick'); hudDirty = true;
@@ -3465,20 +3601,23 @@ function startJob(zid) {
   Run.hp = Math.min(Run.hp, maxHearts());
   Run.deck = dealHand();   // a fresh hand of 7 from your deck
   Object.assign(B, { on: true, R, Z, day: 1, kills: 0, energy: Run.energy + (petHas('head') ? 3 : 0), got: 0, spent: 0, bought: 0, crushed: 0, eggsSmashed: 0, bugs: [], cells: [], mounds: [], sel: -1, swap: -1, busy: false, phase: 'player', tgts: [], hover: null, endArm: 0, reward: null, caught: [], days: Z.days + (petHas('days') ? 2 : 0), dayCatch: 0, shield: petHas('shield'), calm: petHas('calm'), cardsWon: 0 });
-  layTerrain(R, makeHills(Z));
+  if (!R.plan) planZone(R);   // (normally laid out already: the wave that was wandering about becomes the first wave)
   // you start on the ground tile nearest to where you walked in
   const ch = player.ch; let best = null, bd = 1e9; for (const t of R.tiles) { if (t.h) continue; const d = Math.hypot(t.x - ch.x, t.z - ch.z); if (d < bd) { bd = d; best = t; } }
   if (VEH.on) exitRide(); ch.sit = null; if (Z.ride) rideForJob(Z); else rideOffJob();   // the first few zones you're on foot; later your car (or boat) is your piece   // later zones: your car (or boat) is your piece; the first few, you're on foot
   B.P = { i: best.i, j: best.j }; placePlayerOn(best); ch.vx = ch.vy = ch.vz = 0; ch.faceYaw = 0; ch.sit = null; player.pose = 'idle'; player.moving = false;
   // larvae already up, a couple of energy cells, tonight's burrows
-  const arrivals = []; for (let k = 0; k < Z.start; k++) { const c = R.tiles.filter(t => freeTile(t, { far: 3 })); if (!c.length) break; const t = pick(c); arrivals.push(addBug(wpick(Object.entries(Z.mix)), t.i, t.j, 'larva')); }
-  B.busy = true; Promise.all(arrivals.map((b, k) => sleep(0.5 + k * 0.25).then(() => walkIn(b)))).then(() => { B.busy = false; hudDirty = true; });   // they walk in from the zone ahead
+  // the enemies were already wandering about the zone, each round its own tile: now they go and stand in the middle of it
+  const wave = (R.patrol || []).filter(b => !isP(b.i, b.j)); for (const b of R.patrol || []) if (!wave.includes(b)) { scene.remove(b.g); b.tag.el.remove(); }
+  R.patrol = null; R.plan = null;
+  for (const b of wave) { b.Z = null; B.bugs.push(b); }
+  B.busy = true; Promise.all(wave.map(b => toCentre(b))).then(() => { B.busy = false; hudDirty = true; });
   for (let k = 0; k < 2; k++) { const c = R.tiles.filter(t => freeTile(t)); const t = pick(c); addCell(t.i, t.j); }
   placeMounds();
   B.hand = Run.deck; rollOffers();
   document.body.classList.add('battle'); document.body.classList.remove('hub');
   cam.tdist = TS >= 48 ? (innerWidth < innerHeight ? 300 : 250) : (innerWidth < innerHeight ? 34 : 28); cam.wantPitch = TS >= 48 ? 0.72 : 0.62; cam.yaw = 0; cam.soft = 0.8;
-  announce(`${Z.short.toUpperCase()} · DAY 1`, '', Z.css, 2.4);
+  announce(`${Z.short.toUpperCase()} · TURN 1`, '', Z.css, 2.4);
   Snd.ding('tele'); hudDirty = true; Save.jobs++; Save.save();
 }
 function clearBattle() {
@@ -3511,32 +3650,32 @@ async function endDay() {
   const left = B.hand.filter(c => !c.used && CARDS[c.id].targets().length).length;
   if (left && Game.clock - B.endArm > 2.5) { B.endArm = Game.clock; Snd.play('tick'); hudDirty = true; return; }
   B.endArm = 0; clearSel();
-  if (B.day >= B.days) { B.phase = 'over'; announce('OUT OF DAYS', '', '#ff8a6a', 3); Snd.ding('sad'); await sleep(1.6); endJob(false, 'shift'); return; }
+  if (B.day >= B.days) { B.phase = 'over'; announce('OUT OF TURNS', '', '#ff8a6a', 3); Snd.ding('sad'); await sleep(1.6); endJob(false, 'shift'); return; }
   B.phase = 'night'; B.busy = true; hudDirty = true; await nightfall(); B.busy = false; hudDirty = true;
 }
 async function nightfall() {
-  const Z = B.Z; LIGHT.want = 1; Snd.play('night'); announce(`NIGHT ${B.day}`, '', '#b9a8ff', 1.8); await sleep(1.1);
+  const Z = B.Z; Snd.play('night'); announce('ENEMY TURN', '', '#ff5a4a', 1.6); await sleep(1.1);   // (no night any more: it stays daytime, and turns take turns)
   // the ones about to attack hit you for a heart each (shot, or jumped on), then wind down. No hearts left: the run is over
   for (const b of B.bugs.filter(b => b.stage === 'egg' && !b.frozen)) { await strike(b); if (Run.hp <= 0) { B.phase = 'over'; announce('OUT OF HEARTS', '', '#ff5a4a', 3); Snd.ding('sad'); await sleep(1.6); endJob(false, 'hearts'); return; } }
   await growNight(); await morning();
 }
 async function growNight() {
-  if (B.calm) { B.calm = false; announce('A CALM NIGHT', 'your pet kept them quiet', '#9be36b', 1.6); await sleep(0.6); for (const m of B.mounds.slice()) await surface(m); return; }   // the calm pet: nobody grows the first night
+  if (B.calm) { B.calm = false; announce('ALL QUIET', 'your pet kept them calm', '#9be36b', 1.6); await sleep(0.6); await callIn(); return; }   // the calm pet: nobody grows the first night
   for (const b of B.bugs.filter(b => b.stage === 'adult' && !b.frozen && !b.rested)) await morph(b, 'egg');
   for (const b of B.bugs) b.rested = false;
   for (const b of B.bugs.filter(b => b.stage === 'larva' && !b.frozen)) { await morph(b, 'adult'); if (b.type === 'mounder' && bugH(b) === 0) await reshape(b, 1, true); }
   for (const b of B.bugs.filter(b => b.type === 'skitter' && b.stage === 'adult' && !b.frozen)) await skitter(b);
-  await Promise.all(B.mounds.slice().map((m, k) => sleep(k * 0.2).then(() => surface(m))));
+  await callIn();
   for (const b of B.bugs) if (b.frozen) { b.frozen = false; if (b.ice) { b.g.remove(b.ice); b.ice = null; } const c = bugCenter(b); FX.frost(c.x, c.y, c.z); }
 }
 async function morning() {
   const Z = B.Z;
-  B.day++; placeMounds(); LIGHT.want = 0; B.dayCatch = 0; Q.ev('night');
+  B.day++; placeMounds(); B.dayCatch = 0; Q.ev('night');
   if (petHas('energy')) { B.energy++; Pts.add(1, '⚡ from your pet', ''); }
   for (const c of B.hand) { c.used = false; c.gum = false; } rollOffers();
   await sleep(0.4); await dropCells(rndi(1, 2));
   const need = Z.quota - B.kills, eggs = B.bugs.filter(b => b.stage === 'egg').length;
-  announce(`DAY ${B.day}`, '', eggs ? '#ff8a6a' : '#ffe36b', 2);
+  announce(`TURN ${B.day}`, '', eggs ? '#ff8a6a' : '#ffe36b', 2);
   B.phase = 'player'; Snd.ding('tele');
 }
 async function morph(b, stage) {
@@ -3556,7 +3695,61 @@ async function skitter(b) {
 async function surface(m) {
   const t = T(m.i, m.j); dropMound(m);
   if (isP(m.i, m.j) || bugAt(m.i, m.j)) { FX.dust(t.x, visTop(t), t.z, 5); Snd.play('dig', t.x, visTop(t), t.z); if (isP(m.i, m.j)) { Q.ev('block'); Pts.add(null, 'Burrow blocked!', 'kill'); DmgNum.add(t.x, visTop(t) + 6, t.z, 'BLOCKED', 'crush', visTop(t)); } await sleep(0.2); return; }
-  const b = addBug(m.type, m.i, m.j, 'larva', m.species); await walkIn(b);
+  const b = addBug(m.type, m.i, m.j, 'larva', m.species); await (Math.random() < 0.5 ? parachute(b) : walkOn(b));
+}
+// ---------------------------------------------------------------- before the battle: the zone's first wave is already there, each one wandering
+// round its own tile (the hills are laid out too). Step onto the grid and they go and stand in the middle of their tiles
+function planZone(R) {
+  const Z = R.Z, sv = [B.Z, TS]; layTerrain(R, makeHills(Z)); R.plan = true; R.patrol = [];
+  const taken = new Set(), ok = R.tiles.filter(t => t.j <= N - 4);   // well away from the side you walk in on
+  B.Z = Z; TS = Z.ts;
+  for (let k = 0; k < Z.start; k++) { const c = ok.filter(t => !taken.has(t.i + ',' + t.j)); if (!c.length) break; const t = pick(c); taken.add(t.i + ',' + t.j);
+    const type = wpick(Object.entries(Z.mix)), b = { id: ++BUG_ID, type, species: pickSpecies(type), stage: 'larva', w1: pick(WORDS1), w3: pick(WORDS3[RANGED[type] ? 'ranged' : 'melee']), i: t.i, j: t.j, hp: RULES.hp.larva, shell: false, frozen: false, dead: false, pos: null, sq: 0, t0: rnd(0, 6), ice: null, Z };
+    const m = bugModel(b); b.g = m.g; b.A = m.A; b.tag = bugTag(); b.g.traverse(o => { o.userData.bug = b; });
+    b.home = { x: t.x, z: t.z, y: visTop(t) }; b.pos = { x: t.x + rnd(-0.3, 0.3) * Z.ts, y: b.home.y, z: t.z + rnd(-0.3, 0.3) * Z.ts }; b.wait = rnd(0, 2); b.goal = null; b.walkYaw = rnd(0, 6); R.patrol.push(b); }
+  [B.Z, TS] = sv;
+}
+function updatePatrol(dt) {
+  if (B.on) return; const R = ARENA[Run.zone];
+  if (R && !R.patrol && !R.plan && player) planZone(R);
+  for (const A0 of ARENA) if (A0 && A0.patrol && A0 !== R) { for (const b of A0.patrol) { scene.remove(b.g); b.tag.el.remove(); } A0.patrol = null; A0.plan = null; }   // only the zone you're on has a wave waiting
+  if (!R || !R.patrol) return; const ts = R.Z.ts, sp = ts * 0.55;
+  for (const b of R.patrol) {
+    if (!b.goal) { if ((b.wait -= dt) <= 0) b.goal = { x: b.home.x + rnd(-0.34, 0.34) * ts, z: b.home.z + rnd(-0.34, 0.34) * ts }; b.walking = false; }
+    else { const dx = b.goal.x - b.pos.x, dz = b.goal.z - b.pos.z, d = Math.hypot(dx, dz); if (d < 0.2) { b.goal = null; b.wait = rnd(0.8, 2.6); b.walking = false; } else { const st = Math.min(d, sp * dt); b.pos.x += dx / d * st; b.pos.z += dz / d * st; b.walking = true; b.walkYaw = Math.atan2(-dx, -dz); } }
+  }
+  updateBugs(dt, R.patrol);
+  for (const b of R.patrol) if (!b.goal) b.g.rotation.y = b.walkYaw;   // (no staring at you till the fight starts)
+}
+async function toCentre(b) {
+  const t = T(b.i, b.j), p0 = { ...(b.pos || { x: t.x, y: visTop(t), z: t.z }) }, d = Math.hypot(t.x - p0.x, t.z - p0.z);
+  if (d > 0.1) { b.walking = true; b.walkYaw = Math.atan2(-(t.x - p0.x), -(t.z - p0.z)); b.pos = p0; await tween(clamp(d / (TS * 1.2), 0.25, 0.8), k => { b.pos.x = p0.x + (t.x - p0.x) * k; b.pos.z = p0.z + (t.z - p0.z) * k; b.pos.y = visTop(t); }); }
+  b.walking = false; b.pos = null;
+}
+// at night, someone whistles and the reinforcements turn up: each one either walks on from just beside its tile, or parachutes down onto it
+async function callIn() {
+  const ms = B.mounds.slice(); if (!ms.length) return;
+  const caller = pick(B.bugs.filter(b => !b.frozen && !b.dead));
+  if (caller) { const c = bugCenter(caller); caller.whistle = 1.1; Snd.play('whistle', c.x, c.y, c.z); DmgNum.add(c.x, c.y + caller.A.top * 0.6, c.z, '♪ FWEET!', 'kill', c.y); await sleep(0.9); }
+  await Promise.all(ms.map((m, k) => sleep(k * 0.18).then(() => surface(m))));
+}
+async function walkOn(b) {
+  const t = T(b.i, b.j), y = visTop(t), [dx, dz] = pick([[1, 0], [-1, 0], [0, 1], [0, -1]]), x0 = t.x + dx * TS * 0.85, z0 = t.z + dz * TS * 0.85;
+  b.walking = true; b.walkYaw = Math.atan2(dx, dz); b.pos = { x: x0, y, z: z0 }; b.g.position.set(x0, y, z0);
+  FX.spawn('smoke', x0, y + 2 * FXK(), z0, { fps: 12, size: 6 * FXK(), color: 0xffffff, grow: 0.6 });
+  await tween(0.55, k => { b.pos.x = x0 + (t.x - x0) * k; b.pos.z = z0 + (t.z - z0) * k; b.pos.y = y; });
+  b.walking = false; b.pos = null; FX.dust(t.x, y, t.z, 3, 0.6 * FXK());
+}
+const CHUTE = (() => { let g = null; return () => g || (g = new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2)); })();
+async function parachute(b) {
+  const t = T(b.i, b.j), y = visTop(t), h = b.A.top, H = h * 3 + 10 * FXK();
+  const ch = new THREE.Group(), canopy = new THREE.Mesh(CHUTE(), new THREE.MeshLambertMaterial({ color: pick([0xff5a4a, 0xffd24a, 0x4da3ff, 0x9be36b]), side: THREE.DoubleSide }));
+  canopy.scale.set(h * 0.75, h * 0.4, h * 0.75); canopy.position.y = h * 1.45; ch.add(canopy);
+  for (const [sx, sz] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) { const L = new THREE.Mesh(new THREE.CylinderGeometry(0.04 * h / 5, 0.04 * h / 5, h * 0.75, 4), lam(0xeeeeee)); L.position.set(sx * h * 0.26, h * 1.08, sz * h * 0.26); L.rotation.z = -sx * 0.45; L.rotation.x = sz * 0.45; ch.add(L); }
+  b.g.add(ch); b.pos = { x: t.x, y: y + H, z: t.z }; Snd.play('lob', t.x, y + H, t.z, 0.5);
+  await tween(1.3, k => { b.pos.y = y + H * (1 - k); b.pos.x = t.x + Math.sin(k * 7) * 0.08 * h * (1 - k); b.g.rotation.z = Math.sin(k * 7) * 0.12 * (1 - k); });
+  b.g.rotation.z = 0; b.pos = null; FX.dust(t.x, y, t.z, 3, 0.6 * FXK());
+  await tween(0.25, k => { ch.scale.set(1 + k * 0.4, 1 - k, 1 + k * 0.4); }); b.g.remove(ch);
 }
 // a new enemy walks (or drives, or sails) in from the zone ahead, through the far side, onto its tile
 async function walkIn(b) {
@@ -3638,25 +3831,25 @@ function showResults(on, win, why) {
   const el = $('results'); el.style.display = on ? 'block' : 'none'; if (!on) { RESULT = null; return; }
   if (win !== undefined) RESULT = { win, why }; ({ why } = RESULT);
   const Z = B.Z;
-  let h = `<div class="rh" style="color:#ff5a4a">${why === 'hearts' ? 'OUT OF HEARTS' : 'OUT OF DAYS'}</div><div class="rs">RUN OVER</div>`;
+  let h = `<div class="rh" style="color:#ff5a4a">${why === 'hearts' ? 'OUT OF HEARTS' : 'OUT OF TURNS'}</div><div class="rs">RUN OVER</div>`;
   h += `<div class="runline"><div class="jl k" style="color:#9be36b">ZONES CLEARED</div>${cellsHtml(Math.max(Z.id, 1), Z.id, 'z', 12)}<div class="jl k">CAUGHT</div>${cellsHtml(Z.quota, B.kills, 'k', 10)}<small>Best run: ${Save.bestRun}</small></div>`;
   $('resBody').innerHTML = h;
   const btn = (txt, f, alt) => { const b = document.createElement('button'); b.className = 'rb' + (alt ? ' alt' : ''); b.textContent = txt; b.onclick = e => { e.stopPropagation(); f(); }; return b; };
   const box = $('resBtns'); box.innerHTML = '';
-  if (window.GrugPearlPopup && why !== 'hearts') { const b2 = btn(`⏱ OVERTIME · +3 days · ${PRICE.overtime} Pearls`, () => buyContinue(why)); b2.className = 'rb pearl'; box.appendChild(b2); box.appendChild(document.createElement('br')); }   // (no buying hearts back)
+  if (window.GrugPearlPopup && why !== 'hearts') { const b2 = btn(`⏱ OVERTIME · +3 turns · ${PRICE.overtime} Pearls`, () => buyContinue(why)); b2.className = 'rb pearl'; box.appendChild(b2); box.appendChild(document.createElement('br')); }   // (no buying hearts back)
   box.appendChild(btn('▶ New run', () => leaveJob('again'))); box.appendChild(btn('⌂ Depot', () => leaveJob('depot'), true));
   hudDirty = true;
 }
 // Pearls: an extra life. After a stampede every egg is cleared and the night carries on; out of days, three more
 async function buyContinue(why) {
   if (!window.GrugPearlPopup) return;
-  const hatch = why === 'hatch', ok = await GrugPearlPopup.buy({ pearls: hatch ? PRICE.revive : PRICE.overtime, label: hatch ? 'Keep going (clear every egg)' : 'Overtime: +3 days', what: hatch ? 'Pet Zones: keep going' : 'Pet Zones: overtime' });
+  const hatch = why === 'hatch', ok = await GrugPearlPopup.buy({ pearls: hatch ? PRICE.revive : PRICE.overtime, label: hatch ? 'Keep going (clear every egg)' : 'Overtime: +3 turns', what: hatch ? 'Pet Zones: keep going' : 'Pet Zones: overtime' });
   if (!ok || !B.on) return;
   showResults(false); B.phase = 'night'; B.busy = true; hudDirty = true;
   if (hatch) {
     for (const s of SWARM) { FX.dust(s.g.position.x, s.g.position.y, s.g.position.z, 3, 0.6); scene.remove(s.g); } SWARM.length = 0;
     for (const b of B.bugs.filter(b => b.stage === 'egg')) { const c = bugCenter(b); FX.ring(c.x, c.y, c.z, 0xd16be8); FX.splat(c.x, c.y, c.z, 0xf0c4ff); dropBug(b); }
-    announce('SAVED!', '', '#f0c4ff', 2); Snd.ding('gate'); LIGHT.want = 1; await sleep(1);
+    announce('SAVED!', '', '#f0c4ff', 2); Snd.ding('gate'); LIGHT.want = 0; await sleep(1);
     await growNight(); await morning();
   } else { B.days += 3; announce('OVERTIME!', '', '#f0c4ff', 2); Snd.ding('gate'); await sleep(1); await nightfall(); }
   B.busy = false; hudDirty = true;
@@ -4040,7 +4233,7 @@ function showReel(kind, win) {
 function closeReel() { REEL.on = false; $('reel').style.display = 'none'; if ($('cosmo').style.display === 'block') renderCosmo(); if (STORE.on) renderStore(); hudDirty = true; }
 // the locker: buy crates, wear what you've got
 function renderCosmo() {
-  let h = `<div class="pth"><b style="color:#f0c4ff">LOOT CRATES</b><small>you have <b class="cashC">$${Save.cash}</b> · cash comes from clearing zones · looks only</small><button id="cosClose">✕</button></div><div class="crts">`;
+  let h = `<div class="pth"><b style="color:#f0c4ff">LOOT CRATES</b><small>you have <b class="cashC">$${Save.cash}</b> · cash comes from clearing zones · looks only</small><button id="cosClose">X</button></div><div class="crts">`;
   for (const k of ['b', 's']) {
     const C = CRATES[k];
     h += `<div class="crt" style="border-color:${C.col}"><div class="crtI ${k}" style="background-image:url(${SPRITES.crate})"></div><b style="color:${C.col}">${C.name.toUpperCase()}</b><small>${C.what}</small><div class="odds">${CRATE_ODDS.map(([r, p]) => `<span style="background:${rarCss(r)};flex:${p}" title="${RARITY[r][0]} ${p}%"></span>`).join('')}</div><div class="oddt">${CRATE_ODDS.map(([r, p]) => `<span style="color:${rarCss(r)}">${p}%</span>`).join('')}</div>`;
@@ -4199,7 +4392,7 @@ function renderTrade() {
   const theirs = Object.keys(inv).filter(id => inv[id] > 0), mine = ITEM_IDS.filter(id => (Save.inv[id] | 0) > 0);
   let need = '';
   if (TRADE.theirs) { const w = tradeWant(n, TRADE.theirs), r = [0, 1, 2, 3].find(q => RAR_VAL[q] * ((TRADE.mine && inv[TRADE.mine]) ? 0.8 : 1) >= w); need = r === undefined ? '<span style="color:#ff8a6a">they really like that one</span>' : `they'd take <b style="color:${rarCss(r)}">${RARITY[r][0]}</b> or better`; }
-  let h = `<div class="pth"><b style="color:#9be36b">TRADE</b><small>with ${n.name}</small><button id="trClose">✕</button></div><div class="trsay ol">“${TRADE.said}”</div>`;
+  let h = `<div class="pth"><b style="color:#9be36b">TRADE</b><small>with ${n.name}</small><button id="trClose">X</button></div><div class="trsay ol">“${TRADE.said}”</div>`;
   h += `<div class="lkh">THEIRS · pick one</div><div class="lk">${theirs.map(id => itemTile(id, 'data-t="1"').replace('class="it', `class="it${TRADE.theirs === id ? ' on' : ''}`)).join('') || '<small>nothing left</small>'}</div>`;
   h += `<div class="lkh">YOURS · pick one</div><div class="lk">${mine.map(id => itemTile(id, 'data-m="1"').replace('class="it', `class="it${TRADE.mine === id ? ' on' : ''}`).replace('</div>', `${(Save.inv[id] | 0) > 1 ? `<em>×${Save.inv[id]}</em>` : ''}</div>`)).join('') || '<small>Nothing to trade yet: open a Loot Crate first</small>'}</div>`;
   h += `<div class="trf"><span class="trn">${need}</span><button id="trGo" ${TRADE.mine && TRADE.theirs ? '' : 'disabled'}>OFFER ⇄</button></div>`;
@@ -4235,9 +4428,9 @@ const QT = {
   climb: { ev: 'climb', icon: 'rock', txt: n => `Jump up onto ${n} hills`, n: [2, 4], r: 2 },
   buy: { ev: 'buy', icon: 'bag', txt: n => `Buy ${n} card${n > 1 ? 's' : ''}`, n: [1, 2], r: 3 },
   zone: { ev: 'zone', icon: 'clover', txt: n => `Clear ${n} zone${n > 1 ? 's' : ''}`, n: [1, 2], r: 'skin' },
-  night: { ev: 'night', icon: 'hourglass', txt: n => `Get through ${n} nights`, n: [4, 8], r: 2 },
-  block: { ev: 'block', icon: 'shield', txt: () => 'Stand on a burrow at night', n: [1, 1], r: 3 },
-  daycatch: { ev: 'daycatch', set: true, icon: 'capsule', txt: n => `Beat ${n} enemies in one day`, n: [2, 3], r: 'skin' },
+  night: { ev: 'night', icon: 'hourglass', txt: n => `Get through ${n} enemy turns`, n: [4, 8], r: 2 },
+  block: { ev: 'block', icon: 'shield', txt: () => 'Stand on a drop spot on the enemy turn', n: [1, 1], r: 3 },
+  daycatch: { ev: 'daycatch', set: true, icon: 'capsule', txt: n => `Beat ${n} enemies in one turn`, n: [2, 3], r: 'skin' },
 };
 let qDirty = true;
 const Q = {
@@ -4272,7 +4465,7 @@ const BOARD = { bo: null };
 function closeBoard() { BOARD.bo = null; $('qboard').style.display = 'none'; hudDirty = true; }
 function renderBoard() {
   const bo = BOARD.bo; if (!bo) return;
-  let h = `<div class="pth"><b style="color:#ffe9a0">QUEST BOARD</b><small>${Save.qdone} done so far · quests carry on between runs</small><button id="qbClose">✕</button></div>`;
+  let h = `<div class="pth"><b style="color:#ffe9a0">QUEST BOARD</b><small>${Save.qdone} done so far · quests carry on between runs</small><button id="qbClose">X</button></div>`;
   h += Save.quests.map((q, k) => { const D = QT[q.t]; return `<div class="qbr${q.done ? ' done' : ''}">${qIcon(D.icon)}<div class="sqt"><span>${D.txt(q.n)}</span><div class="sqb"><i style="width:${(q.have / q.n * 100).toFixed(0)}%"></i></div><small>${q.have} / ${q.n}${D.r === 'skin' ? ` · prize: ${ITEMS[q.skin].name} skin` : ''}</small></div>${qReward(D, q)}<button data-sw="${k}" ${bo.swaps > 0 && !q.done ? '' : 'disabled'}>SWAP</button></div>`; }).join('');
   h += `<div class="plg"><small>${bo.swaps > 0 ? 'Don\'t fancy one? Swap it for a new one (1 swap at this board).' : 'You\'ve used this board\'s swap. Every town has its own board.'}</small></div>`;
   $('qboardBody').innerHTML = h;
@@ -4350,11 +4543,11 @@ function renderPearlBar() {
   if (key === keyPB) return; keyPB = key;
   const el = $('pearlBar'), pp = n => `<span class="pp">${n}<i></i></span>`;
   if (!site || !inJob) { el.innerHTML = ''; return; }
-  el.innerHTML = `<button id="pbEnergy" class="pb en"><span class="cells pe">${'<i class="cc s e on x"></i>'.repeat(4)}</span><b>+10</b>${pp(PRICE.energy)}</button><button id="pbDays" class="pb days${canAct() ? '' : ' off'}"><img src="${SPRITES.hourglass}" alt=""><b>+3 DAYS</b>${pp(PRICE.overtime)}</button>`;
+  el.innerHTML = `<button id="pbEnergy" class="pb en"><span class="cells pe">${'<i class="cc s e on x"></i>'.repeat(4)}</span><b>+10</b>${pp(PRICE.energy)}</button><button id="pbDays" class="pb days${canAct() ? '' : ' off'}"><img src="${SPRITES.hourglass}" alt=""><b>+3 TURNS</b>${pp(PRICE.overtime)}</button>`;
   $('pbEnergy').onclick = async e => { e.stopPropagation(); Snd.wake(); const ok = await GrugPearlPopup.buy({ pearls: PRICE.energy, label: '+10 energy', what: 'Pet Zones: +10 energy' }); if (ok) { addEnergy(10); Snd.ding('bank'); } };
   $('pbDays').onclick = async e => {
     e.stopPropagation(); Snd.wake(); if (!canAct()) { Snd.play('deny'); return; }
-    const ok = await GrugPearlPopup.buy({ pearls: PRICE.overtime, label: '+3 days', what: 'Pet Zones: +3 days' }); if (ok && B.on) { B.days += 3; announce('+3 DAYS', '', '#f0c4ff', 2); Snd.ding('gate'); hudDirty = true; }
+    const ok = await GrugPearlPopup.buy({ pearls: PRICE.overtime, label: '+3 turns', what: 'Pet Zones: +3 turns' }); if (ok && B.on) { B.days += 3; announce('+3 TURNS', '', '#f0c4ff', 2); Snd.ding('gate'); hudDirty = true; }
   };
 }
 // your kit, small, while you walk about (it opens up in a card shop)
@@ -4414,7 +4607,7 @@ function renderDeck() {
   const ord = { mv: 0, at: 1, ut: 2 }, sorted = Save.deck.map((id, i) => [id, i]).sort((a, b) => ord[CARDS[a[0]].type] - ord[CARDS[b[0]].type] || CARDS[a[0]].rar - CARDS[b[0]].rar);
   const count = t => Save.deck.filter(id => CARDS[id].type === t).length;
   const spares = Object.keys(CARDS).filter(id => spare(id) > 0);
-  let h = `<div class="pth"><b style="color:#9be36b">MY DECK</b><small>${Save.deck.length} / ${DECK_MAX} · <span class="mvC">${count('mv')} move</span> · <span class="atC">${count('at')} attack</span> · <span class="utC">${count('ut')} utility</span> · each zone deals you 7 of these</small><button id="dkClose">✕</button></div>`;
+  let h = `<div class="pth"><b style="color:#9be36b">MY DECK</b><small>${Save.deck.length} / ${DECK_MAX} · <span class="mvC">${count('mv')} move</span> · <span class="atC">${count('at')} attack</span> · <span class="utC">${count('ut')} utility</span> · each zone deals you 7 of these</small><button id="dkClose">X</button></div>`;
   h += `<div class="lkh">IN YOUR DECK · tap to take out${Save.deck.length <= RULES.hand ? ' (7 is the least)' : ''}</div><div class="mcs">${sorted.map(([id, i]) => miniCard(id, `data-i="${i}"`)).join('')}</div>`;
   h += `<div class="lkh">YOUR OTHER CARDS · tap to put in${Save.deck.length >= DECK_MAX ? ' (the deck is full: take one out first)' : ''}</div><div class="mcs">${spares.map(id => miniCard(id, `data-add="1"`).replace('</div>', spare(id) > 1 ? `<em>×${spare(id)}</em></div>` : '</div>')).join('') || '<small>Buy more cards in a Card Shop (the Depot and every town have one)</small>'}</div>`;
   $('deckBody').innerHTML = h;
@@ -4427,7 +4620,7 @@ function openCodex() { renderCodex(); $('codex').style.display = 'block'; hudDir
 function closeCodex() { $('codex').style.display = 'none'; hudDirty = true; }
 function renderCodex() {
   const ids = Object.keys(CARDS);
-  let h = `<div class="pth"><b style="color:#9fd8ff">CARD LIBRARY</b><small>all ${ids.length} cards · you own ${ids.filter(id => Save.cards[id]).length}</small><button id="cxClose">✕</button></div>`;
+  let h = `<div class="pth"><b style="color:#9fd8ff">CARD LIBRARY</b><small>all ${ids.length} cards · you own ${ids.filter(id => Save.cards[id]).length}</small><button id="cxClose">X</button></div>`;
   for (const t of ['mv', 'at', 'ut']) {
     h += `<div class="lkh ${t}C">${TYPE[t][1].toUpperCase()}</div><div class="cxg">`;
     for (const id of ids.filter(id => CARDS[id].type === t).sort((a, b) => CARDS[a].rar - CARDS[b].rar)) {
@@ -4647,7 +4840,7 @@ function mountIcon(id) {
 }
 function renderGarage() {
   const mode = GAR.mode, Rd = Save.ride, boat = mode === 'boat';
-  let h = `<div class="pth"><b style="color:${boat ? '#9fd8ff' : '#ffb04a'}">${boat ? 'DOCK' : 'GARAGE'}</b><small>you have <b class="cashC">$${Save.cash}</b> · cash comes from clearing zones</small><button id="gaClose">✕</button></div>`;
+  let h = `<div class="pth"><b style="color:${boat ? '#9fd8ff' : '#ffb04a'}">${boat ? 'DOCK' : 'GARAGE'}</b><small>you have <b class="cashC">$${Save.cash}</b> · cash comes from clearing zones</small><button id="gaClose">X</button></div>`;
   h += `<div class="lkh">${boat ? 'BOATS' : 'CARS'} · ${boat ? 'you swap into your boat on the water' : 'open ones carry your pets where you can see them'}</div><div class="gl">`;
   for (const [id, R] of Object.entries(RIDES)) {
     if (R.kind !== mode) continue; const own = Rd.own[id], on = Rd[mode] === id;
@@ -4679,7 +4872,7 @@ const KEEPER_LINES = {
   garage: ['Wheels and guns. What else does anyone need?', 'Every turret fits every ride. I made sure of that.', 'Pickups show off your eggs. Vans keep them cosy.', 'From Zone 4 your ride is your piece on the grid. Pick a good one.'],
   dock: ['Ahoy. Mind the splinters on the pier.', 'A boat is just a car that learned to swim.', 'The Tug hauls the most eggs. Just saying.', 'Out on the water the enemies sail too. Bring a big gun.'],
 };
-const STORE_LOOK = { cards: ['CARD SHOP', '#9be36b'], crates: ['LOOT CRATES', '#f0c4ff'], garage: ['GARAGE', '#ffb04a'], dock: ['DOCK', '#9fd8ff'], quests: ['QUEST BOARD', '#ffe9a0'], library: ['CARD LIBRARY', '#9fd8ff'] };
+const STORE_LOOK = { cards: ['~*Card Shop*~', '#ffff00'], crates: ['~*Loot Crates*~', '#ffff00'], garage: ['Garage', '#ffff00'], dock: ['The Dock!!', '#ffff00'], quests: ['Quest Board', '#ffff00'], library: ['Card Library', '#ffff00'] };   // (hobbyist titles, on purpose)
 KEEPER_LINES.quests = ['Folks round here always need a hand. Have a look at the board.', 'Finish a quest and I\'ll make it worth your while.', 'Some of these pay out in skins. Just saying.', 'You can swap a quest you don\'t fancy. Once.'];
 KEEPER_LINES.library = ['Every card there is, all on these shelves. Have a browse.', 'Shh. This is a library. The cards don\'t like loud noises.', 'Looking for something new? It\'s all in here.', 'Read up before you buy. Knowledge is power. And so is Laser.'];
 // where the keeper's head sits on screen: [x, y, height] as fractions of the screen. The shop screen: big, top left (as in the reference);
@@ -5086,7 +5279,7 @@ function renderShop() {
   }
 }
 function renderRound() {
-  const h = B.phase === 'night' ? '<div class="tb night"><b>NIGHT</b></div>' : '';
+  const h = B.phase === 'night' ? '<div class="tb night"><b>ENEMY TURN</b></div>' : '';
   if (h !== keyRound) { keyRound = h; $('round').innerHTML = h; }
 }
 // energy: 10 sockets, and gold cubes past them for energy bought with Pearls
@@ -5101,7 +5294,7 @@ function renderQuests() {
     h = `<div class="jt" style="color:${Z.css}">${Z.short.toUpperCase()}</div>`;
     h += `<div class="hearts">${hearts()}</div><div class="jl k">DEFEATED</div>${cellRow(Z.quota, B.kills, 'k')}`;
     h += `<div class="jl e">ENERGY</div>${energyCells(B.energy)}`;
-    h += `<div class="jl d">DAY</div>${cellRow(B.days, B.day - 1, 'd', B.day - 1, 12)}`;
+    h += `<div class="jl d">TURN</div>${cellRow(B.days, B.day - 1, 'd', B.day - 1, 12)}`;
     h += `<div class="cashL">CASH <b>$${Save.cash}</b></div>`;
   } else {
     h = `<div class="jt"${placeCss() ? ` style="color:${placeCss()}"` : ''}>${placeName()}</div>`;
@@ -5133,7 +5326,7 @@ function hintText() {
   if (B.swap >= 0) return `Buying ${CARDS[B.offers[B.swap].id].name}: click the card in your deck it replaces (used or not) · Esc cancels`;
   if (B.sel >= 0) { const D = CARDS[B.hand[B.sel].id]; return `${D.name}: ${touchMode ? 'tap' : 'click'} a lit tile${D.self ? ` (or ${touchMode ? 'tap the card' : 'press ' + (B.sel + 1)} again)` : ''} · ${touchMode ? 'tap the card again' : 'right-click / Esc'} to cancel`; }
   const p = playable(), eggs = B.bugs.some(b => b.stage === 'egg');
-  return `${eggs ? '⚠ Beat the ones about to attack before night! · ' : ''}${p ? `Pick a card${touchMode ? '' : ' (1-7)'}, then a lit tile · ${p} playable` : 'No moves left today'} · ${touchMode ? 'END DAY' : 'Enter'} when you're done · drag to turn the camera`;
+  return `${eggs ? '⚠ Beat the ones about to attack before the enemy turn! · ' : ''}${p ? `Pick a card${touchMode ? '' : ' (1-7)'}, then a lit tile · ${p} playable` : 'No moves left this turn'} · ${touchMode ? 'END TURN' : 'Enter'} when you're done · drag to turn the camera`;
 }
 // the picked card (or the one under the mouse): what it does, over your hand
 function renderCardInfo() {
@@ -5142,24 +5335,24 @@ function renderCardInfo() {
   if (!c) { el.className = ''; el.innerHTML = ''; return; }
   const D = CARDS[c.id], R = RARITY[D.rar];
   el.className = 'on ' + D.type;
-  el.innerHTML = `<img src="${cardArt(c.id)}" alt=""><div><small><span class="${D.type}C">${TYPE[D.type][1].toUpperCase()}</span> · <span style="color:${R[1]}">${R[0].toUpperCase()}</span></small><b>${D.name}</b><p>${D.desc}</p>${c.used ? '<em>Used today: ready again tomorrow</em>' : k === B.sel ? `<em>${D.self && B.tgts.length ? 'Tap the card again (or a lit tile) to use it' : 'Now pick a lit tile'}</em>` : ''}</div>`;
+  el.innerHTML = `<img src="${cardArt(c.id)}" alt=""><div><small><span class="${D.type}C">${TYPE[D.type][1].toUpperCase()}</span> · <span style="color:${R[1]}">${R[0].toUpperCase()}</span></small><b>${D.name}</b><p>${D.desc}</p>${c.used ? '<em>Used this turn: ready again next turn</em>' : k === B.sel ? `<em>${D.self && B.tgts.length ? 'Tap the card again (or a lit tile) to use it' : 'Now pick a lit tile'}</em>` : ''}</div>`;
 }
 function renderTip() {
   const id = B.on && B.swap >= 0 && B.offers[B.swap] ? B.offers[B.swap].id : null, el = $('tip');
   const key = id || ''; if (el.dataset.k === key) return; el.dataset.k = key;
   if (!id) { el.innerHTML = ''; el.className = 'ol'; return; }
-  el.className = 'ol on ' + CARDS[id].type; el.innerHTML = `<img src="${cardArt(id)}" alt=""><span class="arr">⇄ ?</span><button id="swCancel">✕</button>`;
+  el.className = 'ol on ' + CARDS[id].type; el.innerHTML = `<img src="${cardArt(id)}" alt=""><span class="arr">⇄ ?</span><button id="swCancel">X</button>`;
   $('swCancel').addEventListener('click', e => { e.stopPropagation(); if (B.swap >= 0) cancelSwap(); el.dataset.k = 'x'; hudDirty = true; keyHand = ''; });
 }
 function tipText() {
   if (!B.on) return '';
   if (hoverCard >= 100 && B.offers[hoverCard - 100]) { const D = CARDS[B.offers[hoverCard - 100].id]; return `<b class="${D.type}C">${D.name}</b> · ${RARITY[D.rar][0]} ${TYPE[D.type][1]} · ${D.cost} energy · ${D.desc}`; }
   const k = hoverCard >= 0 && hoverCard < 100 ? hoverCard : B.sel;
-  if (k >= 0 && B.hand[k]) { const c = B.hand[k], D = CARDS[c.id]; return `<b class="${D.type}C">${D.name}</b> · ${TYPE[D.type][1]} · ${D.desc}${c.used ? ' <span style="color:#aaa">(used today)</span>' : ''}`; }
+  if (k >= 0 && B.hand[k]) { const c = B.hand[k], D = CARDS[c.id]; return `<b class="${D.type}C">${D.name}</b> · ${TYPE[D.type][1]} · ${D.desc}${c.used ? ' <span style="color:#aaa">(used this turn)</span>' : ''}`; }
   if (B.hover && B.sel < 0 && B.swap < 0) {
     const b = bugAt(B.hover.i, B.hover.j), m = moundAt(B.hover.i, B.hover.j), c = cellAt(B.hover.i, B.hover.j), t = T(B.hover.i, B.hover.j);
     if (b) { const K = BUGS[b.type]; return `<b style="color:${K.css}">${K.name}</b> · ${stageWord(b)} ${b.hp}/${RULES.hp[b.stage]}${b.shell ? ' + shell' : ''}${t.h ? ' · up on a hill' : ''} · ${b.stage === 'larva' ? 'gets its act together tonight' : b.stage === 'adult' ? 'winds up tonight' : RANGED[b.type] ? 'SHOOTS YOU TONIGHT: beat it first!' : 'JUMPS YOU TONIGHT: beat it first!'} · ${K.what}`; }
-    if (m) return '<b style="color:#c9965a">Burrow</b> · a bug surfaces here tonight. Stand on it and nothing comes up';
+    if (m) return '<b style="color:#c9965a">Drop spot</b> · an enemy turns up here on the enemy turn. Stand on it and nobody comes';
     if (c) return '<b style="color:#ffe34a">Energy cell</b> · walk onto it (or over it) to pick it up. A lobbed shot sets it off: 1 damage to every bug round it';
     if (t.h) return '<b>Hill</b> · 8 studs up. Hop, leap or teleport to get up here; walking can\'t. Only lobbed attacks reach a bug up here from below';
   }
@@ -5214,7 +5407,7 @@ function renderPets() {
   let total = 0; const cells = ROSTER.map(sp => { const n = rar.map(([r]) => Save.pets[sp + '|' + r] || 0), have = n.some(x => x), P = PET_ABIL[PET_POWER[sp]]; total += n.reduce((a, b) => a + b, 0);
     return `<div class="pg${have ? '' : ' none'}${sp === eq ? ' fol' : ''}"${have ? ` data-sp="${sp}"` : ''}>${sp === eq ? '<span class="fs">★</span>' : ''}<img src="${rosterIcon(sp)}" alt=""><b>${have ? rosterName(sp) : '???'}</b><small class="pw2">${P[0]}</small><div class="pr3">${rar.map(([r, c], k) => `<span style="border-color:${c};color:${n[k] ? c : '#555'}">${n[k]}</span>`).join('')}</div></div>`; }).join('');
   const E = eq ? PET_ABIL[PET_POWER[eq]] : null;
-  $('petsBody').innerHTML = `<div class="pth"><b>PETS &amp; COMPANIONS</b><small>${total} hatched · ${ROSTER.filter(ownsPet).length} of ${ROSTER.length} pets and companions</small><button id="petsClose">✕</button></div>
+  $('petsBody').innerHTML = `<div class="pth"><b>PETS &amp; COMPANIONS</b><small>${total} hatched · ${ROSTER.filter(ownsPet).length} of ${ROSTER.length} pets and companions</small><button id="petsClose">X</button></div>
     <div class="peq">${eq ? `<img src="${rosterIcon(eq)}" alt=""><div><b>${rosterName(eq)}</b> · <span style="color:#ffe34a">${E[0]}</span><small>${E[1]}</small></div>` : '<div><b>Nobody equipped</b><small>Tap a pet or companion you\'ve hatched to equip them: they follow you and give you their power. One at a time</small></div>'}</div>
     <div class="pgrid">${cells}</div><div class="plg">${rar.map(([r, c]) => `<span style="color:${c}">■ ${r.toUpperCase()}</span>`).join(' ')} <small>Pets (and companions, 1 egg in 5) hatch from the eggs enemies drop: beaten while confused = rare egg, strong = epic, about to attack = common</small></div>`;
   $('petsClose').addEventListener('click', e => { e.stopPropagation(); togglePets(false); });
@@ -5297,7 +5490,7 @@ function frame(now) {
     if (B.on && !B.busy && !player.moving && B.phase !== 'won') placePlayerOn(T(B.P.i, B.P.j));
     animateRig(player, dt, B.on ? (VEH.battle ? 'sit' : player.pose) : undefined);
   }
-  if (B.on) { updateBugs(dt); updateCells(dt); updateSwarm(dt); computeHover(); }
+  if (B.on) { updateBugs(dt); updateCells(dt); updateSwarm(dt); computeHover(); } else updatePatrol(dt);
   updateMeta(dt); updateRide(dt); updateShowcase(dt); Trail.update(dt);
   updateOverlays(); updateHintArrow();
   FX.update(dt); updateDebris(dt); updateBeams(dt); Pts.update(dt); DmgNum.update(dt); updateAnnounce(dt);
@@ -5311,7 +5504,7 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 // for testing from the console
-window.BZ = { ALLBOX, W, STORE, openStore, closeStore, storeMenu, renderStore, areaAt, townAt, TS: () => TS, DASH, tryDash, VEH, RIDES, MOUNTS, parkRide, enterRide, exitRide, openGarage, buildRide, WATERS, openDeck, openCodex, buyCard, dealHand, KEEPERS, HOUSES, PETS, ITEMS, buyContinue, HINT, SHOP, openShop, showItem, SC, Run, BOOTHS, TOWNFOLK, TOWNSITE, Q, QT, openCrate, openTrade, offerTrade, TRADE, openCardShop, closeHubShop, toggleCosmo, equipPet, addEnergy, maxHearts, itemIcon, applyGear, npcs: null, zoneDef, ensureAreas, refreshGates, endJob, B, CARDS, BUGS, ZONES, ARENA, Save, startJob, leaveJob, endDay, selectCard, clickTile, buyOffer, swapInto, addBug, addCell, T, bugAt, cellAt, join, cam, camera, get player() { return player; }, Game, setStage, hurtBug, scene, renderer };
+window.BZ = { planZone, callIn, ALLBOX, W, STORE, openStore, closeStore, storeMenu, renderStore, areaAt, townAt, TS: () => TS, DASH, tryDash, VEH, RIDES, MOUNTS, parkRide, enterRide, exitRide, openGarage, buildRide, WATERS, openDeck, openCodex, buyCard, dealHand, KEEPERS, HOUSES, PETS, ITEMS, buyContinue, HINT, SHOP, openShop, showItem, SC, Run, BOOTHS, TOWNFOLK, TOWNSITE, Q, QT, openCrate, openTrade, offerTrade, TRADE, openCardShop, closeHubShop, toggleCosmo, equipPet, addEnergy, maxHearts, itemIcon, applyGear, npcs: null, zoneDef, ensureAreas, refreshGates, endJob, B, CARDS, BUGS, ZONES, ARENA, Save, startJob, leaveJob, endDay, selectCard, clickTile, buyOffer, swapInto, addBug, addCell, T, bugAt, cellAt, join, cam, camera, get player() { return player; }, Game, setStage, hurtBug, scene, renderer };
 window.BZ.npcs = npcs;
 
 </script>
