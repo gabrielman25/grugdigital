@@ -2538,7 +2538,7 @@ function resize() {
 }
 window.addEventListener('resize', resize); resize();
 let last = performance.now();
-function frame(now) {
+function frameStep(now) {
   const dt = Math.min((now - last) / 1000, 0.1); last = now; Game.clock += dt;
   stepWorld(dt); syncLift(); updateDoor(dt);
   playerUpdate(dt); animateRig(player, dt, player.ch.dead ? 'idle' : undefined);
@@ -2551,8 +2551,21 @@ function frame(now) {
   Bills.update(); for (const n of npcs) placeTag(n); placeTag(player); if (COMP) placeTag(COMP); for (const d of DUMMIES) { d.hidden = d.hp <= 0; placeTag(d, 3.6, 160); }
   renderHud(dt); Snd.listen();
   renderer.render(scene, camera);
-  requestAnimationFrame(frame);
 }
+/* The frame loop. The next frame is asked for first, and one frame's error is caught and logged, so nothing that goes
+   wrong in a single frame can stop the game: an error in a loop that schedules itself on its last line freezes the game on
+   its last picture for good, while the Game Menu (plain page buttons) still works. The frame is still drawn after an error. */
+const loopErrs = new Map();
+function frame(now) {
+  requestAnimationFrame(frame);
+  try { frameStep(now); }
+  catch (e) {
+    const k = String((e && e.stack) || e).slice(0, 300), n = (loopErrs.get(k) || 0) + 1; loopErrs.set(k, n);
+    if (n === 1 || n % 600 === 0) console.error('Frame error (the game keeps running' + (n > 1 ? ', seen ' + n + ' times' : '') + '):', e);
+    try { renderer.render(scene, camera); } catch (x) {}
+  }
+}
+window.GrugLoopErrors = loopErrs;
 requestAnimationFrame(frame);
 // for testing from the console (and headless tests)
 window.BP = { W, ST, Save, cam, camera, scene, renderer, npcs, DUMMIES, COINS, STATIONS, TOOL, setTool, shootAt, tryDash, showMessage, showHint, announce, say, setComp, MIRROR, get player() { return player; }, get crowd() { return crowd; }, get COMP() { return COMP; } };
