@@ -289,7 +289,7 @@ footer .sp{margin-left:auto}
     <a class="brand" href="/" aria-label="Grug home"><svg aria-hidden="true"><use href="#grug"/></svg>Grug</a>
     <nav class="nav" aria-label="Main">
       <a href="#assets">Assets</a>
-      <a href="#studio">Avatar Studio</a>
+      <a href="/character/">Avatar Studio</a>
       <a href="/arcade/">Arcade</a>
     </nav>
     <div class="end">
@@ -314,7 +314,7 @@ footer .sp{margin-left:auto}
       </div>
       <div class="slop-ctas">
         <a class="btn btn--lg" href="/character/">Make a character <svg class="i" aria-hidden="true"><use href="#arrow"/></svg></a>
-        <a class="btn btn--lg btn--claude" href="#studio"><svg class="cl" aria-hidden="true"><use href="#claude"/></svg>Make it with Claude</a>
+        <a class="btn btn--lg btn--claude" href="/character/?view=paint"><svg class="cl" aria-hidden="true"><use href="#claude"/></svg>Make it with Claude</a>
       </div>
     </div>
     <div class="vs">
@@ -374,35 +374,6 @@ footer .sp{margin-left:auto}
     </div>
   </section>
 
-  <section class="block wrap" id="studio" aria-labelledby="studioTitle">
-    <div class="studio">
-      <div class="panel">
-        <p class="eyebrow">Free tool</p>
-        <h2 id="studioTitle">Avatar Studio</h2>
-        <p>Make a blocky Roblox character: pick hair and a face, paint a custom outfit, and download a rigged R6 file.</p>
-        <div class="ctas"><a class="btn btn--lg" href="/character/">Make a character <svg class="i" aria-hidden="true"><use href="#arrow"/></svg></a></div>
-      </div>
-      <div class="panel">
-        <h3><svg class="cl" aria-hidden="true" style="width:24px;height:24px"><use href="#claude"/></svg>Make it with <span class="claude">Claude</span></h3>
-        <p>Paste this into a Claude chat, swapping in the character you want:</p>
-        <blockquote class="prompt" id="claudePrompt">Use https://grugdigital.com/<wbr>character/ to make a female character wearing a warm fall outfit. Paint the outfit in Gemini, then download the Roblox R6 file for me.</blockquote>
-        <button class="btn btn--sm btn--claude" id="copyClaude" type="button"><svg class="cl" aria-hidden="true"><use href="#claude"/></svg><span>Copy prompt</span></button>
-        <p class="fine">Needs Claude in Chrome turned on, and you signed in to Gemini in that Chrome.</p>
-        <details class="more">
-          <summary>Building a Roblox game? Get the <span class="claude">Claude</span> skill</summary>
-          <div class="in">
-            <p>Add the skill and Claude will make your NPCs and characters here whenever your game needs them, then help you put them in your place.</p>
-            <div class="ctas">
-              <a class="btn btn--sm btn--claude" href="/character/roblox-characters.zip" download><svg class="cl" aria-hidden="true"><use href="#claude"/></svg>Download the skill</a>
-              <a class="btn btn--sm btn--ghost" href="/character/#skill">How to install</a>
-            </div>
-            <p class="fine">In Claude, open Customize › Skills, click +, then Create skill › Upload a skill, and choose the zip.
-              For Claude Code, unzip it into <code>~/.claude/skills/</code>.</p>
-          </div>
-        </details>
-      </div>
-    </div>
-  </section>
 
   <section class="block wrap" aria-labelledby="closerTitle">
     <div class="closer">
@@ -412,7 +383,7 @@ footer .sp{margin-left:auto}
         <div class="exp" aria-label="Exports to"><i class="k">Roblox</i><i class="k">Unity</i><i class="k">itch.io</i><i>Godot</i><i>Blender</i></div>
         <div class="ctas">
           <a class="btn btn--lg" href="/character/">Make a character <svg class="i" aria-hidden="true"><use href="#arrow"/></svg></a>
-          <a class="btn btn--lg btn--claude" href="#studio"><svg class="cl" aria-hidden="true"><use href="#claude"/></svg>Make it with Claude</a>
+          <a class="btn btn--lg btn--claude" href="/character/?view=paint"><svg class="cl" aria-hidden="true"><use href="#claude"/></svg>Make it with Claude</a>
         </div>
       </div>
       <div class="art" aria-hidden="true">
@@ -454,12 +425,6 @@ footer .sp{margin-left:auto}
   b.addEventListener('click', () => { const d = root.classList.toggle('dark'); try { localStorage.setItem('grug.home.mode', d ? 'dark' : 'light'); } catch (e) {} label(); });
 })();
 
-document.getElementById('copyClaude').addEventListener('click', async e => {
-  const b = e.currentTarget, t = document.getElementById('claudePrompt').textContent.trim();
-  try { await navigator.clipboard.writeText(t); b.lastChild.textContent = 'Copied!'; }
-  catch (_) { const r = document.createRange(); r.selectNodeContents(document.getElementById('claudePrompt')); getSelection().removeAllRanges(); getSelection().addRange(r); b.lastChild.textContent = 'Press Ctrl+C to copy'; }
-  setTimeout(() => { b.lastChild.textContent = 'Copy prompt'; }, 2000);
-});
 
 /* Asset packs: live from itch.io via /api/itch-assets (functions/api/itch-assets.js, src/itch/itch.js).
    Falls back to the copy in static/itch-assets.json if the live feed can't be reached.
@@ -479,12 +444,12 @@ document.getElementById('copyClaude').addEventListener('click', async e => {
     { id: 'skater', bg: 'bg-slide-2', h: 'One character, every engine', p: 'A rigged .glb that works in Roblox, Unity, Godot and Blender.' },
     { id: 'medic', bg: 'bg-zombie-2', h: 'NPCs that look the part', p: 'Real painted clothes on a rigged model, ready to export.' },
     { id: 'snow-rider', bg: 'bg-slide-3', h: 'Ship it in your itch.io game', p: 'Export your character and use it in games you sell.' },
-    { id: 'racer', bg: 'bg-slide-4', h: 'Make a character with Claude', p: 'Paste one prompt into Claude, then export it anywhere.' }
+    { id: 'racer', bg: 'bg-slide-4', h: 'Make a character with Claude', p: 'Paste one prompt into Claude, then export it anywhere.', claude: true }
   ];
   let adN = rnd(ADS.length);
   function ad() {
     const a = ADS[adN++ % ADS.length];
-    return `<a class="card ad" href="/character/" aria-label="${esc(a.h)}: make a character in the Avatar Studio">
+    return `<a class="card ad" href="${a.claude ? '/character/?view=paint' : '/character/'}" aria-label="${esc(a.h)}: make a character in the Avatar Studio">
       <div class="pic"><img class="bg" src="/static/showcase/${a.bg}.jpg" alt="" loading="lazy" decoding="async"><img class="fg" src="/static/showcase/${a.id}.webp" alt="" loading="lazy" decoding="async"><span class="badge">Free tool</span></div>
       <div class="body"><h3>${esc(a.h)}</h3><p>${esc(a.p)}</p><div class="exp"><i class="k">Roblox</i><i class="k">Unity</i><i class="k">itch.io</i><i>Godot</i></div><div class="cta"><span>Make a character <svg aria-hidden="true"><use href="#arrow"/></svg></span></div></div></a>`;
   }
