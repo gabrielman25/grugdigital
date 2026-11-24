@@ -2,131 +2,448 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Grug Arcade · Classic blocky games</title>
-<meta name="description" content="Classic blocky games from Grug: Slide 999 KM for FREE ADMIN, Zombie Zones and Grug City RP. Play as the character you made in the Grug Avatar Studio.">
+<!-- a fixed 920px classic games page: phones show it zoomed out, like a desktop page -->
+<meta name="viewport" content="width=940">
+<title>Grug Arcade · Free blocky games</title>
+<meta name="description" content="Free classic blocky games from Grug: Slide 999 KM for FREE ADMIN, Zombie Zones, Grug City RP and Grug Kingdom. Play as the character you made in the Grug Avatar Studio.">
 <link rel="icon" href="/favicon.png">
 <link rel="canonical" href="https://grugdigital.com/arcade/">
-<script>try { var p = (JSON.parse(localStorage.getItem('grug.profile.v1') || 'null') || {}).prefs || {}; if (p.mode === 'dark' || localStorage.getItem('grug.home.mode') === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}</script>
-<link rel="stylesheet" href="/static/site.css">
 <script src="/static/pearls.js"></script>
 <script src="/static/outfits.js"></script>
 <style>
-main{max-width:880px}
-.head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.pearls{display:inline-flex;align-items:center;gap:6px;font-weight:600;padding:6px 12px;border-radius:999px;background:var(--pearl-bg);color:var(--ink);text-decoration:none;font-variant-numeric:tabular-nums}
-.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
-.game{display:grid;grid-template-rows:auto 1fr;padding:0;overflow:hidden}
-.game img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--line)}
-.game .in{padding:18px 20px 20px;display:grid;gap:10px;align-content:start}
-.game h2{margin:0}
-.game p{margin:0}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--page);color:var(--soft)}
-.chip.pr{background:var(--pearl-bg);color:var(--pearl)}
-.me{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
-.me .pic{width:112px;height:112px;border-radius:20px;background:var(--page);display:grid;place-items:center;overflow:hidden}
-.me .pic img{width:100%;height:100%;object-fit:cover}
-.me .pic svg{width:56px;height:56px;opacity:.35}
-.me h2{margin:0 0 4px}
-.picks{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 6px;margin-top:12px}
-.pk{flex:none;width:76px;display:grid;gap:4px;justify-items:center;padding:6px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:500 12px 'Fredoka',system-ui,sans-serif;cursor:pointer}
-.pk img,.pk .none{width:58px;height:58px;border-radius:10px;object-fit:cover;background:var(--page);display:grid;place-items:center;font-size:22px}
-.pk span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pk.on{border-color:var(--accent-lo);background:color-mix(in srgb,var(--accent) 18%,var(--card))}
-@media (max-width:560px){ .me{grid-template-columns:1fr;justify-items:center;text-align:center} }
+/* Laid out like a classic 2011 games page: a 920px column on a sky background, a 130px header (banner + blue nav),
+   a 140px genre column, 160x130 game tiles in a 738px box, a 300x300 box beside the first rows, a Verdana footer. */
+*{box-sizing:content-box}
+html,body{margin:0;padding:0}
+body{font:12px Arial,Helvetica,sans-serif;color:#000;background:#000444 url(/static/arcade/sky.jpg) repeat-x 50% 0;min-width:920px}
+a{color:#00f;text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3{margin:0;font-size:inherit;font-weight:inherit;display:inline}
+img{border:0}
+svg.gi{width:16px;height:16px;display:inline-block;vertical-align:top;fill:#333}
+#Container{width:900px;padding:0 10px;margin:0 auto}
+
+/* house ad in the leaderboard slot (728x90) */
+#Leaderboard{width:898px;height:102px;margin:0 1px 5px;display:flex;align-items:flex-end;justify-content:center}
+.lb{position:relative;display:block;width:728px;height:90px;overflow:hidden;background:#0c2a5c;color:#fff;text-decoration:none!important}
+.lb .bgk{position:absolute;inset:0;background:linear-gradient(90deg,#0b2350 0,#12408a 55%,#1a5bb8 100%)}
+.lb .fig{position:absolute;bottom:-14px;height:104px;width:auto}
+.lb .t{position:absolute;left:250px;top:14px;width:300px}
+.lb .t b{display:block;font:bold 22px/1.1 Arial,Helvetica,sans-serif;text-shadow:0 2px 0 #071a3d}
+.lb .t span{display:block;margin-top:6px;font-size:13px;color:#cfe0ff}
+.lb .go{position:absolute;right:18px;top:26px;padding:0 16px;height:36px;line-height:36px;border-radius:6px;font:bold 15px/36px Arial,Helvetica,sans-serif;color:#1e1b16;
+  background:linear-gradient(#c6f57a,#9be338 50%,#86cf27 51%,#9be338);border:1px solid #5f9a18;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+.lb:hover .go{filter:brightness(1.06)}
+
+/* header: banner (100) + nav (30) */
+#Header{width:900px;height:130px;position:relative;font-weight:bold;color:#fff}
+#Banner{position:relative;height:100px}
+#Banner .crowd{position:absolute;bottom:0;height:92px;width:auto}
+#Logo{position:absolute;left:275px;top:12px;width:350px;height:70px;display:flex;align-items:center;justify-content:center;z-index:2}
+#Logo img{width:350px;height:auto;filter:drop-shadow(0 2px 0 #0a2f72) drop-shadow(0 0 6px rgba(5,25,70,.55))}
+#Options{position:absolute;left:0;top:0;width:200px;z-index:3}
+#Options a{display:inline-block;margin:4px 5px 0 17px;padding:2px 5px;font:bold 10px/11px Arial,Helvetica,sans-serif;color:#fff;border-radius:3px;
+  background:linear-gradient(#5aa9f2,#1d72d8 50%,#0f62c8 51%,#1c6fd3);border:1px solid #0b4fa6;text-decoration:none}
+#Options a svg{width:9px;height:9px;vertical-align:-1px;margin-right:3px}
+.SignUpAndPlay{position:absolute;right:0;top:0;width:210px;height:40px;z-index:3;display:flex;align-items:center;justify-content:center;border-radius:0 0 8px 8px;
+  font:bold 17px/40px Arial,Helvetica,sans-serif;color:#1e1b16!important;text-decoration:none!important;text-shadow:0 1px 0 rgba(255,255,255,.5);
+  background:linear-gradient(#d4fa90,#a8ec45 48%,#8ed42a 52%,#9be338);border:1px solid #5f9a18;border-top:0;box-shadow:0 2px 4px rgba(0,0,30,.35),inset 0 1px 0 rgba(255,255,255,.6)}
+.SignUpAndPlay:hover{filter:brightness(1.06)}
+
+.Navigation{position:relative;height:30px;font-size:16px;line-height:20px;background:linear-gradient(#57aaf2 0,#2a88e6 45%,#0f6fd6 50%,#0d66cc 100%);z-index:5}
+.Navigation ul{list-style:none;margin:0 5px;padding:0;display:flex}
+.Navigation li{padding:6px 0 4px}
+.Navigation li>a{display:inline-block;padding:0 8px;font-weight:bold;color:#fff;text-decoration:none}
+.Navigation li>a:hover{text-decoration:underline}
+#gamesMenuToggle{display:inline-block;width:10px;height:6px;margin:0 0 3px -6px;padding:0 6px 0 0;cursor:pointer;vertical-align:middle;border:0;background:none}
+#gamesMenuToggle::after{content:"";display:block;width:0;height:0;border:5px solid transparent;border-top:6px solid #fff;border-bottom:0}
+.dropdown{display:none;position:absolute;left:121px;top:30px;z-index:20;font-weight:normal;box-shadow:0 4px 10px rgba(0,0,30,.4)}
+.dropdown.open{display:flex}
+.dropdown .col{background:#1462bf;border:1px solid #0a3f86;padding:6px 8px}
+.dropdown .gen{width:300px;display:flex;flex-wrap:wrap}
+.dropdown .gen a,.dropdown .more a{display:flex;align-items:center;gap:5px;width:50%;box-sizing:border-box;padding:3px 2px;font-size:15px;color:#fff}
+.dropdown .gen svg{fill:#fff}
+.dropdown .more{width:145px;border-left:0}
+.dropdown .more a{width:auto}
+
+#Announcement{margin:3px}
+.SystemAlertText{position:relative;height:18px;padding:2px;background:#ffa500;color:#fff;font:bold 16px/18px Arial,Helvetica,sans-serif;text-align:center}
+.SystemAlertText a{color:#fff;text-decoration:underline}
+.Exclamation{position:absolute;left:2px;top:3px;width:16px;height:16px;border-radius:50%;background:#e2532d;color:#fff;font:bold 12px/16px Arial,sans-serif;text-align:center}
+.SystemAlertText svg{width:16px;height:16px;vertical-align:-2px;margin-right:4px}
+
+/* body */
+#Body{width:890px;padding:5px;background:#f2f2f2;overflow:hidden}
+.Column1e{float:left;width:140px;margin-top:10px}
+.Column2e{float:left;width:740px;margin:10px 0 0 10px;position:relative}
+.StandardBoxHeader{height:33px;padding:0 7px 0 5px;width:126px;color:#fff;font:bold 20px/1 Arial,Helvetica,sans-serif;position:relative;
+  background:linear-gradient(#5a5a5a,#2b2b2b 50%,#111 51%,#1d1d1d);clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%);border-radius:4px 0 0 0}
+.StandardBoxHeader span{display:block;padding:6px 5px 0 2px}
+.StandardBoxHeader svg{width:13px;height:13px;vertical-align:1px;margin-left:4px}
+.StandardBox{width:126px;padding:20px 5px;margin:0 0 8px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 90px) no-repeat}
+.GameFilter>div{font-size:14px;color:#555;padding-left:12px}
+.GameFilter ul{list-style:none;margin:5px 0 0;padding:0;font-size:14px}
+.GameFilter li{margin:0 0 1px}
+.GameFilter li a{display:inline-block;padding:0 0 0 28px;line-height:16px;color:#00f}
+.GameFilter li a.on{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='14'%3E%3Cpath d='M8 1l7 6-7 6z' fill='%23d20000'/%3E%3C/svg%3E") no-repeat 4px 1px}
+#Genres{margin-top:20px}
+.me{text-align:center}
+.me .pic{width:120px;height:120px;margin:0 auto 6px;background:#fff;border:1px solid #ddd}
+.me .pic img{width:120px;height:120px;object-fit:contain}
+.me b{display:block;font-size:13px;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.me select{width:124px;font:12px Arial,Helvetica,sans-serif;margin-bottom:8px}
+.me p{margin:0 0 6px;font-size:11px;color:#555;line-height:1.3}
+
+#PlayTabs{float:left;height:31px;display:flex}
+.Tab{position:relative;height:31px;margin-left:4px;cursor:pointer;font:bold 16px Arial,Helvetica,sans-serif;color:#333;
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);border-radius:4px 0 0 0;
+  background:linear-gradient(#e3e3e3,#c9c9c9);box-shadow:inset 1px 1px 0 #aaa,inset -1px 0 0 #aaa}
+.Tab:first-child{margin-left:4px}
+.Tab span{display:block;padding:6px 20px 0 8px;height:25px;white-space:nowrap}
+.Tab.on{background:linear-gradient(#fff,#f7f7f7);z-index:2;box-shadow:inset 1px 1px 0 #aaa,inset -1px 0 0 #aaa}
+.Tab:not(.on):hover{background:linear-gradient(#ececec,#d4d4d4)}
+.Search{position:relative;float:right}
+#searchbox{width:171px;height:20px;padding:1px 2px;border:2px inset #767676;font:13.3px Arial,sans-serif;color:#000;background:#fff}
+#searchbox::placeholder{color:#888}
+.SearchIconButton{position:absolute;right:5px;top:5px;width:16px;height:16px;cursor:pointer;border:0;padding:0;background:none}
+.StandardBoxGray{clear:both;position:relative;top:-2px;float:left;width:726px;padding:5px;margin:0 0 10px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 120px) no-repeat}
+#GamesContent{min-height:300px}
+#GamePageAdDiv{float:right;width:300px;height:300px;display:inline}
+.rect{position:relative;display:block;width:300px;height:250px;overflow:hidden;color:#fff;text-decoration:none!important;background:linear-gradient(#1a6fd8,#5aa8ef 60%,#a9d4f6)}
+.rect .figs{position:absolute;left:0;right:0;bottom:56px;height:120px}
+.rect .figs img{position:absolute;bottom:0;height:116px;width:auto}
+.rect .t{position:absolute;left:0;right:0;top:12px;text-align:center;font:bold 21px/1.1 Arial,Helvetica,sans-serif;text-shadow:0 2px 0 #0b3b7c}
+.rect .s{display:block;margin-top:4px;font-size:12px;font-weight:normal;text-shadow:none;color:#eaf3ff}
+.rect .bar{position:absolute;left:0;right:0;bottom:0;height:56px;background:#1e1b16;display:flex;align-items:center;justify-content:center}
+.rect .go{padding:0 16px;height:34px;line-height:34px;border-radius:6px;font:bold 15px/34px Arial,Helvetica,sans-serif;color:#1e1b16;
+  background:linear-gradient(#c6f57a,#9be338 50%,#86cf27 51%,#9be338);border:1px solid #5f9a18;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+.rect:hover .go{filter:brightness(1.06)}
+.rect-note{display:block;margin-top:4px;text-align:center;font-size:11px;color:#888}
+.rect-note a{color:#888}
+
+/* the game tiles: 180x150 cells, 160x130 tiles with 6px padding */
+.Cell{float:left;width:180px;height:150px}
+.GameItem{position:relative;width:160px;height:130px;padding:6px;margin:0 0 8px 8px}
+.AlwaysShown{position:relative;z-index:2}
+.AlwaysShown .thumb{display:block;width:160px;height:100px;background:#ccc}
+.AlwaysShown .thumb img{display:block;width:160px;height:100px;object-fit:cover}
+.GameName{font-weight:bold;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;height:14px;line-height:14px}
+.PlayerCount{float:left;color:red;line-height:14px;max-width:118px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.GenreIcons{float:right;margin-top:0;line-height:0}
+.GenreIcons svg{margin-left:3px}
+.HoverShown{display:none;position:absolute;top:-10px;left:-10px;z-index:1;width:160px;padding:158px 15px 15px;font-size:11px;color:#888;background:#fff;border:1px solid #888;border-radius:5px;box-shadow:0 3px 10px rgba(0,0,0,.18)}
+.HoverShown div{line-height:14px}
+.GameItem:hover{z-index:10}
+.GameItem:hover .HoverShown{display:block}
+.Empty{float:left;width:400px;padding:30px 10px 10px 16px;font-size:14px;color:#555;line-height:1.45}
+.Paging{clear:both;text-align:center;padding-bottom:20px;color:#888;font-size:14px}
+.Arrow{display:inline-block;position:relative;top:12px;width:36px;height:36px;border:0;padding:0;cursor:pointer;border-radius:50%;
+  background:radial-gradient(circle at 50% 35%,#5fb0f5,#1a6fd8 60%,#0e57b5);box-shadow:inset 0 0 0 2px rgba(255,255,255,.5)}
+.Arrow::after{content:"";position:absolute;top:11px;left:13px;border:7px solid transparent;border-left:10px solid #fff;border-right:0}
+.Arrow.prev::after{left:11px;border-left:0;border-right:10px solid #fff}
+.Arrow[disabled]{visibility:hidden}
+#GenreDescriptionPanel{clear:both;width:715px;padding:10px;font-size:10.8px}
+
+/* footer */
+#Footer{width:860px;padding:39px 20px;background:#e6e6e6;font:13px Verdana,sans-serif;color:#aaa;text-align:center}
+.FooterNav{color:#bbb;margin-bottom:12px}
+.FooterNav a{color:#00f}
+.Legalese{margin:10px 0;font-size:10px;color:#555;line-height:1.35}
+.Legalese a{color:#00f}
 </style>
 </head>
 <body>
-<main>
-  <div class="head">
-    <a class="back" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Grug</a>
-    <a class="pearls" id="pearls" href="/character/pearls/" title="Your Pearls" hidden><svg class="pearl" viewBox="0 0 16 16" aria-hidden="true" fill="#d16be8"><path d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></svg><span id="pearlN">0</span></a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- Grug's own 16px genre icons -->
+  <symbol id="g-all" viewBox="0 0 16 16"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></symbol>
+  <symbol id="g-town-and-city" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 8.5L4.5 4 9 8.5V15H0zM3.5 11h2v4h-2zM10 2h6v13h-6zM11.5 4h1.2v1.6h-1.2zM13.5 4h1.2v1.6h-1.2zM11.5 7h1.2v1.6h-1.2zM13.5 7h1.2v1.6h-1.2zM11.5 10h1.2v1.6h-1.2zM13.5 10h1.2v1.6h-1.2z"/></symbol>
+  <symbol id="g-medieval" viewBox="0 0 16 16"><path d="M13 0h3v3L7.5 11.5 4.5 8.5zM2.5 7.5l6 6-1.2 1.2-6-6zM4.3 11.7l1.4 1.4L2 16.6 0.6 15.2z"/></symbol>
+  <symbol id="g-sci-fi" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 0c3.2 2 3.6 7 2.6 11H5.4C4.4 7 4.8 2 8 0zM8 4.2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM5.2 7.5L2 12.5l3.6-1zM10.8 7.5l3.2 5-3.6-1zM6.6 12h2.8L8 16z"/></symbol>
+  <symbol id="g-ninja" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 0l1.7 6.3L16 8l-6.3 1.7L8 16l-1.7-6.3L0 8l6.3-1.7zM8 6.8a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></symbol>
+  <symbol id="g-scary" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 16V7a5.5 5.5 0 0 1 11 0v9l-1.8-1.8L9.8 16 8 14.2 6.2 16l-1.9-1.8zM5.3 6h1.8v2.4H5.3zM8.9 6h1.8v2.4H8.9z"/></symbol>
+  <symbol id="g-pirate" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 0a2.2 2.2 0 1 1 0 4.4A2.2 2.2 0 0 1 8 0zm0 1.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2zM7.2 4.4h1.6v9.6H7.2zM4.5 5.6h7v1.4h-7zM1 9.5L2.9 7.6 4.6 9.5H3.5c.4 2.6 2 3.8 4.5 3.8s4.1-1.2 4.5-3.8h-1.1l1.7-1.9L15 9.5h-1.1C13.4 13.3 11.2 15.5 8 15.5S2.6 13.3 2.1 9.5z"/></symbol>
+  <symbol id="g-adventure" viewBox="0 0 16 16"><path d="M0 16L6 6l3 4 2.2-2.6L16 16zM6 0.5h1v5H6zM7 0.5l4 1.6-4 1.6z"/></symbol>
+  <symbol id="g-sports" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 .5a7.5 7.5 0 1 1 0 15 7.5 7.5 0 0 1 0-15zM8 5L10.9 7.1 9.8 10.5H6.2L5.1 7.1z"/></symbol>
+  <symbol id="g-funny" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 .5a7.5 7.5 0 1 1 0 15 7.5 7.5 0 0 1 0-15zM5 5h1.8v2.6H5zM9.2 5H11v2.6H9.2zM3.8 9.2c2.2 3.6 6.2 3.6 8.4 0-2.8 1.3-5.6 1.3-8.4 0z"/></symbol>
+  <symbol id="g-wild-west-cowboy" viewBox="0 0 16 16"><path d="M6.3 1.5a1.7 1.7 0 0 1 3.4 0V14H6.3zM2 4.5a1 1 0 0 1 2 0V8h2.3v2H2zM12 2.5a1 1 0 0 1 2 0V9H9.7V7H12zM2 14h12v2H2z"/></symbol>
+  <symbol id="g-war" viewBox="0 0 16 16"><path d="M1.5 11C1.5 5.5 4.3 3 8 3s6.5 2.5 6.5 8zM0 11h16v2.2H0zM4 13.2h1.4L6 16H4.6z"/></symbol>
+  <symbol id="g-skatepark" viewBox="0 0 16 16"><path d="M0 7.4C0 6.3.6 6 1.6 6.4c.6.3 1 .6 1.9.6h9c.9 0 1.3-.3 1.9-.6 1-.4 1.6-.1 1.6 1V9H0zM4 9.6a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM12 9.6a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></symbol>
+  <symbol id="g-gametutorials" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 2.5c3-1 5.6-.6 8 1.2 2.4-1.8 5-2.2 8-1.2V14c-3-1-5.6-.6-8 1.2C5.6 13.4 3 13 0 14zM7.4 4.6v9.2h1.2V4.6z"/></symbol>
+  <!-- second icon on a tile: plays as your saved outfit -->
+  <symbol id="g-outfit" viewBox="0 0 16 16"><path d="M5 1L0.8 3.5 2.4 7.2 4 6.4V15h8V6.4l1.6.8 1.6-3.7L11 1C10.2 2.4 9.2 3 8 3S5.8 2.4 5 1z"/></symbol>
+  <symbol id="rss" viewBox="0 0 16 16"><rect width="16" height="16" rx="3" fill="#f78422"/><circle cx="4" cy="12" r="1.7" fill="#fff"/><path d="M2.5 7.2a6.3 6.3 0 0 1 6.3 6.3H7a4.5 4.5 0 0 0-4.5-4.5zM2.5 3.2a10.3 10.3 0 0 1 10.3 10.3H11a8.5 8.5 0 0 0-8.5-8.5z" fill="#fff"/></symbol>
+  <symbol id="pearl" viewBox="0 0 16 16"><path fill="#d16be8" d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></symbol>
+  <symbol id="claude" viewBox="0 0 100 100"><path fill="#fff" d="M26.2 0.5 23.1 4.7 24.1 10.2 33.0 25.1 39.1 36.1 39.1 36.6 38.4 37.0 15.0 19.2 10.3 18.7 7.6 21.7 8.3 25.9 10.0 27.9 18.1 33.7 38.5 47.3 39.8 48.4 39.6 49.0 37.8 49.1 28.1 48.0 2.3 46.3 0.3 47.6 0.0 49.0 2.2 52.0 4.5 52.5 39.2 53.9 39.6 54.7 39.1 55.6 19.4 66.6 11.8 71.8 10.7 72.8 10.5 75.9 12.5 77.9 17.1 77.3 43.5 60.1 43.8 60.2 43.9 60.8 40.0 65.3 22.4 88.3 22.1 91.0 25.1 92.5 26.7 91.9 34.0 84.1 48.8 64.0 49.6 63.6 47.9 74.3 43.5 94.9 44.8 98.0 47.4 99.9 50.3 98.8 51.7 97.2 54.5 67.0 55.1 66.6 63.4 80.1 71.5 91.8 74.4 92.3 76.9 91.3 77.5 90.1 77.0 85.8 65.3 68.1 65.5 67.3 66.3 67.6 79.0 78.4 86.7 84.2 88.1 84.3 89.4 82.6 88.9 80.1 65.5 58.3 65.5 57.8 66.3 57.8 94.3 64.6 99.6 62.1 99.7 59.8 97.8 57.3 94.6 55.2 83.2 54.4 72.4 54.2 66.2 53.6 65.9 53.3 79.7 49.9 90.0 47.9 98.3 45.6 99.6 42.5 99.2 41.0 95.7 39.2 81.8 41.7 69.0 44.3 68.7 43.9 72.1 37.9 85.3 20.6 86.7 15.8 83.6 11.1 79.3 11.1 77.0 12.9 70.2 20.5 59.6 34.0 58.4 35.2 57.6 35.2 61.4 15.1 62.8 5.4 60.8 2.5 58.5 1.4 55.6 3.3 53.7 7.5 51.0 38.1 50.3 38.1 48.9 33.5 40.3 16.9 33.8 2.1 32.0 0.5 28.4 0.0Z"/></symbol>
+  <symbol id="search" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.8" fill="none" stroke="#555" stroke-width="2"/><path d="M10 10l4.5 4.5" stroke="#555" stroke-width="2.4" stroke-linecap="round"/></symbol>
+</svg>
+
+<div id="Container">
+  <div id="Leaderboard">
+    <a class="lb" href="/character/" aria-label="Make a character in the Grug Avatar Studio">
+      <span class="bgk"></span>
+      <img class="fig" src="/static/arcade/ranger.webp" alt="" style="left:14px">
+      <img class="fig" src="/static/arcade/grug.webp" alt="" style="left:78px;z-index:1">
+      <img class="fig" src="/static/arcade/snow-rider.webp" alt="" style="left:160px">
+      <span class="t"><b>Play as your own character</b><span>Make one free in the Avatar Studio. It shows up in every game here.</span></span>
+      <span class="go">Make a character ›</span>
+    </a>
   </div>
 
-  <section class="card" aria-labelledby="t">
-    <div class="tag">Grug Arcade</div>
-    <h1 id="t">Classic blocky games</h1>
-    <p style="margin-top:8px">Old-school games that play right in your browser. Every game dresses you in the character you made in the
-      Avatar Studio, and your other saved outfits show up as the other players.</p>
-  </section>
+  <div id="Header">
+    <div id="Banner">
+      <div id="Options"><a id="pearls" href="/character/pearls/" title="Your Pearls" hidden><svg aria-hidden="true"><use href="#pearl"/></svg><span id="pearlN">0</span> Pearls</a></div>
+      <img class="crowd" src="/static/arcade/medic.webp" alt="" style="left:96px">
+      <img class="crowd" src="/static/arcade/racer.webp" alt="" style="left:170px;height:98px">
+      <a id="Logo" href="/" title="Grug Digital home"><img src="/static/arcade/grug-digital-logo.png" alt="Grug Digital"></a>
+      <img class="crowd" src="/static/arcade/skater.webp" alt="" style="left:640px;height:98px">
+      <img class="crowd" src="/static/arcade/ranger.webp" alt="" style="left:712px">
+      <a class="SignUpAndPlay" href="/character/">Make a Character!</a>
+    </div>
+    <div class="Navigation">
+      <div class="dropdown" id="dropNav">
+        <div class="col gen" id="dropGenres"></div>
+        <div class="col more">
+          <a href="#" data-sort="popular"><b>Most Popular</b></a>
+          <a href="#" data-sort="newest">Newest</a>
+          <a href="#" data-sort="featured">Featured Games</a>
+          <a href="#searchbox" data-search>Search Games</a>
+        </div>
+      </div>
+      <ul>
+        <li><a href="/character/?outfits">My Grug</a></li>
+        <li><a href="/arcade/" title="Games"><h1>Games</h1></a><button id="gamesMenuToggle" type="button" aria-label="Show game genres" aria-expanded="false"></button></li>
+        <li><a href="/#assets">Catalog</a></li>
+        <li><a href="/character/">Avatar Studio</a></li>
+        <li><a href="/character/pearls/">Pearls</a></li>
+        <li><a href="/">Home</a></li>
+        <li><a href="/legacy">Legacy</a></li>
+        <li><a href="/support.html">Help</a></li>
+      </ul>
+    </div>
+  </div>
 
-  <section class="card" aria-labelledby="meT">
-    <div class="me">
-      <div class="pic" id="mePic"></div>
-      <div>
-        <div class="tag">Playing as</div>
-        <h2 id="meT">The game's own character</h2>
-        <p id="meP">Make a character in the Avatar Studio and save it for the games to play as yourself.</p>
-        <div class="row"><a class="btn btn--sm" href="/character/?outfits">Avatar Studio: my outfits</a></div>
+  <div id="Announcement">
+    <div class="SystemAlertText"><div class="Exclamation">!</div><svg aria-hidden="true"><use href="#claude"/></svg>New: make your character with Claude! <a href="/#studio">Copy the prompt</a></div>
+  </div>
+
+  <div id="Body">
+    <div class="Column1e">
+      <div class="StandardBoxHeader"><span><h2>Games</h2><svg aria-hidden="true"><use href="#rss"/></svg></span></div>
+      <div class="StandardBox" id="GamesLeftColumn">
+        <div class="GameFilter" id="Timespan">
+          <div>Time:</div>
+          <ul>
+            <li><a href="#" data-t="now" class="on">Now</a></li>
+            <li><a href="#" data-t="day">Past Day</a></li>
+            <li><a href="#" data-t="week">Past Week</a></li>
+            <li><a href="#" data-t="all">All Time</a></li>
+          </ul>
+        </div>
+        <div class="GameFilter" id="Genres">
+          <div>Genres:</div>
+          <ul id="genreList"></ul>
+        </div>
+      </div>
+
+      <div class="StandardBoxHeader"><span><h2>Playing as</h2></span></div>
+      <div class="StandardBox me">
+        <div class="pic" id="mePic"></div>
+        <b id="meT">Grug</b>
+        <select id="meSel" aria-label="Play as" hidden></select>
+        <p id="meP">Make a character and save it for the games to play as yourself.</p>
+        <a href="/character/?outfits">Avatar Studio »</a>
       </div>
     </div>
-    <div class="picks" id="picks" hidden></div>
-  </section>
 
-  <div class="games">
-    <a class="card game" href="/arcade/slide-999/" style="text-decoration:none">
-      <img src="/arcade/slide-999/cover.jpg" alt="Slide 999 KM: a cart flying down a blocky sky slide" loading="lazy">
-      <div class="in">
-        <h2>Slide 999 KM for FREE ADMIN!!</h2>
-        <p>A slide in the sky, 999 kilometres long, with obbies on the way down. Reach the bottom for free admin commands.</p>
-        <div class="chips"><span class="chip pr">Rebirth: 2 Pearls a day</span><span class="chip">Mystery cart crates</span><span class="chip">Bots + your outfits</span></div>
-        <span class="btn" style="justify-self:start">Play</span>
+    <div class="Column2e">
+      <div id="PlayTabs" role="tablist">
+        <div class="Tab on" role="tab" data-sort="popular"><span><h2>Popular</h2></span></div><div class="Tab" role="tab" data-sort="newest"><span><h2>Newest</h2></span></div><div class="Tab" role="tab" data-sort="featured"><span><h2>Featured</h2></span></div>
       </div>
-    </a>
-    <a class="card game" href="/arcade/zombie-zones/" style="text-decoration:none">
-      <img src="/arcade/zombie-zones/cover.jpg" alt="Zombie Zones: a blocky survivor with a blaster in a battle" loading="lazy">
-      <div class="in">
-        <h2>Zombie Zones</h2>
-        <p>Four teams, one zombie-filled middle. Supply runs, capture the flag, deathmatch and survival. You drop straight into a battle.</p>
-        <div class="chips"><span class="chip">4 modes</span><span class="chip">Dodge roll</span><span class="chip">Loot guns</span></div>
-        <span class="btn" style="justify-self:start">Play</span>
+      <div class="Search"><input id="searchbox" type="text" placeholder="Search" aria-label="Search games"><button class="SearchIconButton" type="button" aria-label="Search"><svg width="16" height="16"><use href="#search"/></svg></button></div>
+      <div class="StandardBoxGray">
+        <div id="Games">
+          <div id="GamePageAdDiv">
+            <a class="rect" href="/character/" aria-label="Make a character in the Grug Avatar Studio">
+              <span class="t">Your game needs a hero<span class="s">Make your own character, then play as it here.</span></span>
+              <span class="figs">
+                <img src="/static/arcade/medic.webp" alt="" style="left:22px">
+                <img src="/static/arcade/grug.webp" alt="" style="left:88px;height:124px;z-index:1">
+                <img src="/static/arcade/skater.webp" alt="" style="left:190px">
+              </span>
+              <span class="bar"><span class="go">Make a character ›</span></span>
+            </a>
+            <span class="rect-note">Free tool from Grug · <a href="/#studio">Make it with Claude</a></span>
+          </div>
+          <div id="GamesContent"></div>
+          <div class="Paging">
+            <button class="Arrow prev" id="prevPage" type="button" aria-label="Previous page" disabled></button>
+            <span style="margin:0 5px"><span id="pageNum">1</span> of <span id="pageCount">1</span></span>
+            <button class="Arrow next" id="nextPage" type="button" aria-label="Next page" disabled></button>
+          </div>
+        </div>
+        <div id="GenreDescriptionPanel"><span id="genreText"></span></div>
       </div>
-    </a>
-    <a class="card game" href="/arcade/grug-city/" style="text-decoration:none">
-      <img src="/arcade/grug-city/cover.jpg" alt="Grug City RP: a police cruiser with its siren on, at a crossroads in a blocky city" loading="lazy">
-      <div class="in">
-        <h2>Grug City RP</h2>
-        <p>A sandbox city to roleplay in: take a job at any shop, join the police or rob the jewelers, drive cars, claim a free mansion. Get caught while wanted and you wake up in jail.</p>
-        <div class="chips"><span class="chip">16 jobs</span><span class="chip">Cops and robbers</span><span class="chip">Cars</span><span class="chip">Free mansions</span></div>
-        <span class="btn" style="justify-self:start">Play</span>
-      </div>
-    </a>
-    <a class="card game" href="/arcade/grug-kingdom/" style="text-decoration:none">
-      <img src="/arcade/grug-kingdom/cover.jpg" alt="Grug Kingdom: a hero with a sword faces the giant Goblin King in a forest clearing ringed by standing stones" loading="lazy">
-      <div class="in">
-        <h2>Grug Kingdom</h2>
-        <p>A classic blocky sword RPG. Grugvale is safe; past each gate lies a zone of monsters, each tougher than the last. Level up, buy a better sword at the forge, beat the boss, open loot chests for a blade from the next zone up.</p>
-        <div class="chips"><span class="chip">5 zones</span><span class="chip">5 bosses</span><span class="chip">12 swords</span><span class="chip">Loot chests</span></div>
-        <span class="btn" style="justify-self:start">Play</span>
-      </div>
-    </a>
+    </div>
   </div>
-</main>
+
+  <div id="Footer">
+    <div class="FooterNav">
+      <a href="/privacy.html"><b>Privacy Policy</b></a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Advertise with Us</a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Press</a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Contact Us</a>
+      &nbsp;|&nbsp;
+      <a href="/">About Us</a>
+      &nbsp;|&nbsp;
+      <a href="/arcade/">Free Games</a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Jobs</a>
+    </div>
+    <div class="FooterNav" id="seoGenres"></div>
+    <p class="Legalese">
+      Grug, Grug Digital, Pearls, characters, logos, names, and all related indicia are trademarks of <a href="/">Grug Digital</a>, ©2026.
+      <br>
+      Grug is not sponsored, authorized or endorsed by Roblox Corporation, Anthropic or Google. Roblox is a trademark of Roblox Corporation,<br>
+      Claude of Anthropic and Gemini of Google, and no affiliation with these companies is intended.<br>Use of this site signifies your acceptance of the <a href="/terms.html">Terms and Conditions</a>.
+      <br>
+    </p>
+  </div>
+</div>
+
 <script>
 (() => {
-  const $ = id => document.getElementById(id), O = window.GrugOutfits, P = window.GrugPearls, urls = [];
+  const $ = id => document.getElementById(id), O = window.GrugOutfits, P = window.GrugPearls;
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const PERSON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="8" y="2" width="8" height="7" rx="1.5"/><rect x="6" y="10" width="12" height="7" rx="1"/><rect x="6" y="18" width="5" height="4"/><rect x="13" y="18" width="5" height="4"/></svg>';
+
+  /* the same genres as the classic page */
+  const GENRES = [
+    ['all', 'All'], ['town-and-city', 'Town and City'], ['medieval', 'Fantasy'], ['sci-fi', 'Sci-Fi'], ['ninja', 'Ninja'], ['scary', 'Scary'],
+    ['pirate', 'Pirate'], ['adventure', 'Adventure'], ['sports', 'Sports'], ['funny', 'Funny'], ['wild-west-cowboy', 'Wild West'], ['war', 'War'],
+    ['skatepark', 'Skate Park'], ['gametutorials', 'Tutorial']];
+  const gname = id => (GENRES.find(g => g[0] === id) || [, 'All'])[1];
+
+  /* the games: added / updated are the dates in the repo's history; "tag" is the red line under the name */
+  const GAMES = [
+    { slug: 'slide-999', name: 'Slide 999 KM for FREE ADMIN!!', genres: ['adventure', 'funny'], tag: 'Obby slide · free admin', featured: true,
+      added: '2026-11-23T10:47:46-06:00', updated: '2026-11-23T11:38:37-06:00', alt: 'A cart flying down a blocky sky slide',
+      stats: ['999 km of slide and obbies', 'Rebirth: 2 Pearls a day'] },
+    { slug: 'zombie-zones', name: 'Zombie Zones', genres: ['scary', 'war'], tag: '4 teams · 4 modes',
+      added: '2026-11-23T10:47:46-06:00', updated: '2026-11-23T11:38:37-06:00', alt: 'A blocky survivor with a blaster in a battle',
+      stats: ['Supply runs, flags, deathmatch', 'Dodge roll and loot guns'] },
+    { slug: 'grug-city', name: 'Grug City RP', genres: ['town-and-city'], tag: '16 jobs · cops and robbers', featured: true,
+      added: '2026-11-23T13:48:26-06:00', updated: '2026-11-23T14:19:58-06:00', alt: 'A police cruiser at a crossroads in a blocky city',
+      stats: ['Cars and free mansions', 'Get caught wanted: jail'] },
+    { slug: 'grug-kingdom', name: 'Grug Kingdom', genres: ['medieval', 'adventure'], tag: '5 zones · 5 bosses', featured: true,
+      added: '2026-11-23T23:52:31Z', updated: '2026-11-23T23:52:31Z', alt: 'A hero with a sword faces the giant Goblin King',
+      stats: ['12 swords and loot chests', 'Level up at the forge'] }
+  ];
+
+  const ago = iso => {
+    const s = Math.max(0, (Date.now() - new Date(iso)) / 1000), u = [[31536e3, 'year'], [2592e3, 'month'], [604800, 'week'], [86400, 'day'], [3600, 'hour'], [60, 'minute']];
+    for (const [n, w] of u) if (s >= n) { const k = Math.floor(s / n); return k + ' ' + w + (k > 1 ? 's' : '') + ' ago'; }
+    return 'just now';
+  };
+
+  const state = { genre: 'all', time: 'now', sort: 'popular', q: '', page: 1 };
+  const PAGE = 16;
+  const fromHash = () => { const h = decodeURIComponent(location.hash.slice(1)); if (GENRES.some(g => g[0] === h)) state.genre = h; };
+  fromHash();
+
+  function list() {
+    let L = GAMES.slice();
+    if (state.genre !== 'all') L = L.filter(g => g.genres.includes(state.genre));
+    const win = { day: 864e5, week: 6048e5 }[state.time];
+    if (win) L = L.filter(g => Date.now() - new Date(g.updated) <= win);
+    if (state.q) { const q = state.q.toLowerCase(); L = L.filter(g => g.name.toLowerCase().includes(q) || g.genres.some(x => gname(x).toLowerCase().includes(q))); }
+    if (state.sort === 'newest') L.sort((a, b) => new Date(b.added) - new Date(a.added));
+    if (state.sort === 'featured') L = L.filter(g => g.featured);
+    return L;
+  }
+
+  function tile(g) {
+    const href = `/arcade/${g.slug}/`;
+    return `<div class="Cell" title="${esc(g.name)}"><div class="GameItem">
+      <div class="AlwaysShown">
+        <a class="thumb" href="${href}"><img src="/arcade/${g.slug}/cover.jpg" alt="${esc(g.alt)}" loading="lazy" width="160" height="100"></a>
+        <div class="GameName"><a href="${href}">${esc(g.name)}</a></div>
+        <div class="PlayerCount">${esc(g.tag)}</div>
+        <div class="GenreIcons"><svg class="gi" role="img" aria-label="${esc(gname(g.genres[0]))}"><title>${esc(gname(g.genres[0]))}</title><use href="#g-${g.genres[0]}"/></svg><svg class="gi" role="img" aria-label="Plays as your saved outfit"><title>Plays as your saved outfit</title><use href="#g-outfit"/></svg></div>
+      </div>
+      <div class="HoverShown">${g.stats.map(s => `<div>${esc(s)}</div>`).join('')}<div>Updated ${ago(g.updated)}</div></div>
+    </div></div>`;
+  }
+
+  function draw() {
+    const L = list(), pages = Math.max(1, Math.ceil(L.length / PAGE));
+    state.page = Math.min(state.page, pages);
+    const show = L.slice((state.page - 1) * PAGE, state.page * PAGE);
+    $('GamesContent').innerHTML = show.length ? show.map(tile).join('') :
+      `<div class="Empty">No ${state.genre === 'all' ? '' : esc(gname(state.genre)) + ' '}games ${state.q ? 'match "' + esc(state.q) + '"' : state.time === 'day' || state.time === 'week' ? 'were updated in that time' : 'yet'}.
+        More are on the way. <a href="#all" data-genre="all">See all games</a>, or <a href="/character/">make a character</a> to play as.</div>`;
+    $('pageNum').textContent = state.page; $('pageCount').textContent = pages;
+    $('prevPage').disabled = state.page <= 1; $('nextPage').disabled = state.page >= pages;
+    document.querySelectorAll('#genreList a').forEach(a => a.classList.toggle('on', a.dataset.genre === state.genre));
+    document.querySelectorAll('#Timespan a').forEach(a => a.classList.toggle('on', a.dataset.t === state.time));
+    document.querySelectorAll('#PlayTabs .Tab').forEach(t => t.classList.toggle('on', t.dataset.sort === state.sort));
+    const n = state.genre === 'all' ? '' : gname(state.genre) + ' ';
+    $('genreText').textContent = `Grug Arcade is proud to offer free ${n.toLowerCase()}games that play right in your browser, with nothing to install. ` +
+      `Every game dresses you in the character you made in the Grug Avatar Studio, and your other saved outfits show up as the other players. ` +
+      `Whether you like Town and City games, Fantasy games, Adventure games, Scary games or War games, there is a blocky game here for you. ` +
+      `Earn Pearls as you play, and check back often: new Grug games are on the way.`;
+  }
+
+  // genre lists: the left column, the Games dropdown and the footer
+  $('genreList').innerHTML = GENRES.map(([id, t]) => `<li><a href="#${id}" data-genre="${id}" title="${esc(t)} Games"><h3>${esc(t)}</h3></a></li>`).join('');
+  $('dropGenres').innerHTML = GENRES.map(([id, t]) => `<a href="#${id}" data-genre="${id}"><svg class="gi" aria-hidden="true"><use href="#g-${id}"/></svg>${esc(t)}</a>`).join('');
+  $('seoGenres').innerHTML = GENRES.slice(1).map(([id, t]) => `<a href="/arcade/#${id}" data-genre="${id}" title="${esc(t)} Games">${esc(t)}</a>`).join('&nbsp;|&nbsp;');
+
+  const drop = $('dropNav'), tog = $('gamesMenuToggle');
+  const setDrop = on => { drop.classList.toggle('open', on); tog.setAttribute('aria-expanded', on); };
+  tog.addEventListener('click', e => { e.stopPropagation(); setDrop(!drop.classList.contains('open')); });
+  document.addEventListener('click', e => { if (!drop.contains(e.target)) setDrop(false); });
+
+  document.addEventListener('click', e => {
+    const g = e.target.closest('[data-genre]');
+    if (g) { e.preventDefault(); state.genre = g.dataset.genre; state.page = 1; history.replaceState(null, '', g.dataset.genre === 'all' ? location.pathname : '#' + g.dataset.genre); setDrop(false); draw();
+      if (g.closest('#Footer,.dropdown')) document.getElementById('Body').scrollIntoView(); return; }
+    const t = e.target.closest('#Timespan [data-t]');
+    if (t) { e.preventDefault(); state.time = t.dataset.t; state.page = 1; draw(); return; }
+    const s = e.target.closest('[data-sort]');
+    if (s) { e.preventDefault(); state.sort = s.dataset.sort; state.page = 1; setDrop(false); draw(); return; }
+    if (e.target.closest('[data-search]')) { e.preventDefault(); setDrop(false); $('searchbox').focus(); }
+  });
+  $('searchbox').addEventListener('input', e => { state.q = e.target.value.trim(); state.page = 1; draw(); });
+  document.querySelector('.SearchIconButton').addEventListener('click', () => { state.q = $('searchbox').value.trim(); draw(); $('searchbox').focus(); });
+  $('prevPage').addEventListener('click', () => { state.page--; draw(); });
+  $('nextPage').addEventListener('click', () => { state.page++; draw(); });
+  addEventListener('hashchange', () => { fromHash(); if (!location.hash) state.genre = 'all'; draw(); });
+  draw();
+
+  /* Pearls (the small blue button where the classic page had Login) */
   function pearls() { if (!P) return; $('pearls').hidden = false; $('pearlN').textContent = P.balance().toLocaleString(); }
   if (P) { P.start().then(pearls).catch(pearls); addEventListener('grug:pearls', pearls); }
-  async function render() {
+
+  /* Playing as: the saved outfit every game dresses you in (static/outfits.js) */
+  const urls = [];
+  async function me() {
     urls.splice(0).forEach(u => URL.revokeObjectURL(u));
-    let list = []; try { list = O ? await O.list() : []; } catch (e) {}
-    const act = O ? O.active() : '', cur = list.find(o => o.id === act);
+    let L = []; try { L = O ? await O.list() : []; } catch (e) {}
+    const act = O ? O.active() : '', cur = L.find(o => o.id === act);
     const src = o => { if (!o || !o.preview) return ''; const u = URL.createObjectURL(o.preview); urls.push(u); return u; };
-    const u = src(cur);
-    $('mePic').innerHTML = `<img src="${u || '/character/looks/grug/preview.png'}" alt="">`;
+    $('mePic').innerHTML = `<img src="${src(cur) || '/character/looks/grug/preview.png'}" alt="">`;
     $('meT').textContent = cur ? cur.name : 'Grug (the default)';
-    $('meP').textContent = cur ? `${list.length > 1 ? `Your ${list.length - 1} other outfit${list.length > 2 ? 's show' : ' shows'} up as other players.` : 'Save more outfits and they show up as the other players.'}`
-      : list.length ? 'Pick one of your outfits below to play as it.' : 'Make a character in the Avatar Studio and save it for the games to play as yourself.';
-    $('picks').hidden = !list.length;
-    $('picks').innerHTML = list.map(o => { const s2 = src(o); return `<button class="pk${o.id === act ? ' on' : ''}" data-id="${o.id}">${s2 ? `<img src="${s2}" alt="">` : '<div class="none">?</div>'}<span>${esc(o.name)}</span></button>`; }).join('') +
-      (list.some(o => o.id === 'starter-grug') ? '' : `<button class="pk${act ? '' : ' on'}" data-id=""><img src="/character/looks/grug/preview.png" alt=""><span>Grug</span></button>`);
+    $('meP').textContent = cur ? (L.length > 1 ? `Your ${L.length - 1} other outfit${L.length > 2 ? 's show' : ' shows'} up as other players.` : 'Save more outfits and they show up as the other players.')
+      : L.length ? 'Pick one of your outfits to play as it.' : 'Make a character and save it for the games to play as yourself.';
+    const sel = $('meSel'); sel.hidden = !L.length;
+    sel.innerHTML = (L.some(o => o.id === 'starter-grug') ? '' : `<option value=""${act ? '' : ' selected'}>Grug</option>`) +
+      L.map(o => `<option value="${esc(o.id)}"${o.id === act ? ' selected' : ''}>${esc(o.name)}</option>`).join('');
   }
-  $('picks').addEventListener('click', e => { const b = e.target.closest('.pk'); if (b && O) O.setActive(b.dataset.id); });
-  addEventListener('grug:outfits', render);
-  render();
+  $('meSel').addEventListener('change', e => { if (O) O.setActive(e.target.value); });
+  addEventListener('grug:outfits', me);
+  me();
 })();
 </script>
 </body>
