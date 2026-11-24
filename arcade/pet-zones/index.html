@@ -2476,8 +2476,9 @@ function plasticOf(m) {
     if (m.userData.lam) return PLASTIC.on ? m : m.userData.lam;
     if (m.userData.sp0 === undefined) { m.userData.sp0 = m.specular.getHex(); m.userData.sh0 = m.shininess; }
     if (m.flatShading || m.transparent) return m;
-    const want = PLASTIC.on ? Math.max(0x6a, m.userData.sp0 & 0xff) : m.userData.sp0 & 0xff;
-    m.specular.setRGB(want / 255, want / 255, want / 255); m.shininess = PLASTIC.on ? Math.max(40, m.userData.sh0) : m.userData.sh0;
+    const fl = m.map === STUD_A;   // the studded tops (floors): a softer sheen, so they aren't blinding; walls and characters keep the full shine
+    const want = PLASTIC.on ? Math.max(fl ? 0x28 : 0x6a, m.userData.sp0 & 0xff) : m.userData.sp0 & 0xff;
+    m.specular.setRGB(want / 255, want / 255, want / 255); m.shininess = PLASTIC.on ? Math.max(fl ? 20 : 40, m.userData.sh0) : m.userData.sh0;
   }
   return m;
 }
@@ -2553,7 +2554,7 @@ function animateRig(f, dt, poseIn) {
   for (const k in j) j[k] += clamp(t[k] - j[k], -rate * dt, rate * dt);
   if (armed) j.rs += clamp(t.rs - j.rs, -40 * dt, 40 * dt);
   if (f.roll) {   // the dodge roll (as in Zombie Zones): a tucked somersault the way you're rolling, a dust trail, a puff when you land
-    f.roll.t += dt; const k = f.roll.t / f.roll.dur;
+    if (!f.roll.ext) f.roll.t += dt; const k = f.roll.t / f.roll.dur;   // (ext: a follower's roll, driven by the recording)
     if ((f.roll.trail -= dt) <= 0 && k < 1) { f.roll.trail = 0.045; FX.trail(ch.x, ch.y - 3, ch.z); }
     if (k >= 1) { FX.dust(ch.x, ch.y - 3, ch.z, 4, 1); f.roll = null; r.root.rotation.set(0, 0, 0); r.root.position.y = 3; }
     else { const yw = r.g.rotation.y, c = Math.cos(yw), sn = Math.sin(yw), lx = f.roll.fx * c - f.roll.fz * sn, lz = f.roll.fx * sn + f.roll.fz * c; rollAx.set(lz, 0, -lx).normalize(); r.root.quaternion.setFromAxisAngle(rollAx, Math.PI * 2 * (k * k * (3 - 2 * k))); r.root.position.y = 3 - 1.3 * Math.sin(Math.PI * k); j.rh = j.lh = -1.2; j.rs = j.ls = 2.2; }
@@ -4403,7 +4404,7 @@ function dressExtra(rig) {
   if (KIT_LOOKS) { if (KIT_LOOKS.length) try { GrugOutfitRig.dress(rig, KIT_LOOKS[DRESS_I++ % KIT_LOOKS.length]); } catch (_) { } return; }
   rig.root.visible = false; DRESS_WAIT.push(rig); setTimeout(() => { rig.root.visible = true; }, 8000);
 }
-function kitReady(list) { KIT_LOOKS = list || []; for (const r of DRESS_WAIT.splice(0)) { if (KIT_LOOKS.length) try { GrugOutfitRig.dress(r, KIT_LOOKS[DRESS_I++ % KIT_LOOKS.length]); } catch (_) { } r.root.visible = true; } }
+function kitReady(list) { KIT_LOOKS = list || []; for (const r of COMP_WAIT) { const l = KIT_NAMED[r.compKit]; if (l) try { GrugOutfitRig.dress(r, l); } catch (_) { } r.root.visible = true; } COMP_WAIT.clear(); for (const r of DRESS_WAIT.splice(0)) { if (KIT_LOOKS.length) try { GrugOutfitRig.dress(r, KIT_LOOKS[DRESS_I++ % KIT_LOOKS.length]); } catch (_) { } r.root.visible = true; } }
 
 // ---------------------------------------------------------------- trading: walk up to another player, press TRADE, pick one of theirs and one of yours
 const TRADE = { n: null, mine: null, theirs: null, said: '' };
@@ -4516,7 +4517,13 @@ function equipPet(sp) { Save.pet = Save.pet === sp ? '' : sp; Save.save(); if (!
 // following you on foot: your pet, and on a job the eggs you've won so far, bouncing along behind (in a ride they're in the back instead)
 // companions: the arcade's kit outfits (KIT_NAMED, loaded with the others); a picture of each, drawn once it's dressed
 const KIT_NAMED = {}, COMP_ICON = {};
-function compRig(id) { const C = COMPANIONS[id], r = makeRig(randomLook()); const look = KIT_NAMED[C.kit]; if (window.GrugOutfitRig && look) try { GrugOutfitRig.dress(r, look); } catch (_) { } return r; }
+const COMP_WAIT = new Set();   // companions made before their outfits had loaded: hidden till they're dressed (never blocky)
+function compRig(id) {
+  const C = COMPANIONS[id], r = makeRig(randomLook()); const look = KIT_NAMED[C.kit];
+  if (window.GrugOutfitRig && look) try { GrugOutfitRig.dress(r, look); } catch (_) { }
+  else if (window.GrugOutfitRig && !KIT_LOOKS) { r.root.visible = false; r.compKit = C.kit; COMP_WAIT.add(r); setTimeout(() => { r.root.visible = true; }, 8000); }
+  return r;
+}
 function rosterIcon(id) {
   if (!COMPANIONS[id]) return PET_DATA.icon[id];
   if (COMP_ICON[id]) return COMP_ICON[id];
@@ -4546,23 +4553,67 @@ function ensureFollowers() {
   for (const f of keep.values()) scene.remove(f.g);
   FOL = next;
 }
+// followers mirror you: a short recording of where you went and how (position, facing, jumps, rolls, the walk cycle), played
+// back a moment behind you, so each one steps exactly where you stepped and does what you did there. The recording only runs
+// while you're moving, so when you stop they stop a few studs behind you, and when you set off they set off along your path
+const MIRROR = { hist: [], T: 0, last: null, fresh: true, LAG: 0.32, hops: [], y0: 0 };   // LAG: seconds of your walking between you and the first follower; hops: jumps on the spot
+function mirrorSample(T) {   // where you were at move-time T (smoothly between the recorded frames)
+  const h = MIRROR.hist; if (!h.length) return null; if (T <= h[0].T) return h[0]; if (T >= h[h.length - 1].T) return h[h.length - 1];
+  let lo = 0, hi = h.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (h[m].T <= T) lo = m; else hi = m; }
+  const A = h[lo], B2 = h[hi], k = (T - A.T) / Math.max(1e-6, B2.T - A.T), L = (p, q) => p + (q - p) * k;
+  return { x: L(A.x, B2.x), y: L(A.y, B2.y), z: L(A.z, B2.z), yaw: A.yaw + angDiff(A.yaw, B2.yaw) * k, air: k < 0.5 ? A.air : B2.air, roll: k < 0.5 ? A.roll : B2.roll, walkT: L(A.walkT, B2.walkT), run: A.run };
+}
+function mirrorRecord(dt) {
+  const ch = player.ch, h = MIRROR.hist, pr = player.roll, r = player.rig;
+  const s = { x: ch.x, y: ch.y, z: ch.z, yaw: ch.faceYaw, air: !ch.grounded && !B.on ? true : B.on && player.pose === 'air', roll: pr ? { k: pr.t / pr.dur, fx: pr.fx, fz: pr.fz } : null, walkT: r.walkT, run: B.on && player.pose === 'run' };
+  const L = MIRROR.last;
+  if (MIRROR.fresh || !L || Math.hypot(s.x - L.x, s.z - L.z) > 40) {   // first time (or you jumped across the map): lay a path straight out behind you
+    MIRROR.fresh = false; h.length = 0; const bx = Math.sin(ch.faceYaw), bz = Math.cos(ch.faceYaw), n = 40, sp = CFG.walkSpeed * 0.05;
+    for (let i = n; i >= 1; i--) h.push({ T: MIRROR.T - i * 0.05, x: ch.x + bx * sp * i, y: ch.y, z: ch.z + bz * sp * i, yaw: ch.faceYaw, air: false, roll: null, walkT: r.walkT, run: false });
+    h.push(Object.assign({ T: MIRROR.T }, s)); MIRROR.last = s; return;
+  }
+  // only going somewhere moves the recording on (turning or jumping on the spot doesn't, or they'd catch you up and stand in you);
+  // a jump on the spot is kept on the side, by the clock, and they each do it a moment later where they stand
+  const walked = Math.hypot(s.x - L.x, s.z - L.z) > 0.002 || !!s.roll;
+  if (ch.grounded || B.on) MIRROR.y0 = ch.y;
+  MIRROR.hops.push({ c: Game.clock, up: !walked && !B.on && !ch.grounded ? Math.max(0, ch.y - MIRROR.y0) : 0 }); while (MIRROR.hops.length > 2 && MIRROR.hops[0].c < Game.clock - 3) MIRROR.hops.shift();
+  if (!walked) { L.yaw = s.yaw; return; }
+  MIRROR.T += dt; h.push(Object.assign({ T: MIRROR.T }, s)); MIRROR.last = s;
+  const keep = MIRROR.LAG * (FOL.length + 1) + 1; while (h.length > 2 && h[1].T < MIRROR.T - keep) h.shift();
+}
 function updateFollowers(dt) {
   if (!player) return; ensureFollowers(); const ch = player.ch, hide = SC.on || VEH.on || VEH.battle;
+  if (hide || !FOL.length) MIRROR.fresh = true; else mirrorRecord(dt);
   FOL.forEach((F, k) => {
     F.g.visible = !hide; if (hide) { F.x = ch.x; F.z = ch.z; return; }
-    const big = 1;
-    const lead = k ? FOL[k - 1] : { x: ch.x, z: ch.z }, ddx = F.x - lead.x, ddz = F.z - lead.z, dl = Math.hypot(ddx, ddz) || 1, gap = (k ? 3.6 : 5) * big;
-    const tx = lead.x + ddx / dl * gap, tz = lead.z + ddz / dl * gap, dx = tx - F.x, dz = tz - F.z, d = Math.hypot(dx, dz);
-    if (d > 80) { F.x = tx; F.z = tz; } else if (d > 0.3) { const sp = Math.min(d * 3.4, 40); F.x += dx / d * sp * dt; F.z += dz / d * sp * dt; F.g.rotation.y += angDiff(F.g.rotation.y, Math.atan2(-dx, -dz)) * Math.min(1, dt * 8); F.t += dt * Math.min(1, sp / 6); }
-    const r = W.raycast(F.x, F.y + 20, F.z, 0, -1, 0, 60, p => !p.noCam && p.kind !== 'seat'), fy = F.y + 20 - r.t; F.y += (fy - F.y) * Math.min(1, dt * 10);
-    const moving = d > 0.5;
-    if (F.A.rig) { F.g.position.set(F.x, F.y, F.z); F.A.f.ch.vx = moving ? 10 : 0; F.A.f.ch.vz = 0; F.A.rig.walkT += 0; animateRig(F.A.f, dt, moving ? 'walk' : 'idle'); F.A.rig.g.position.set(0, 0, 0); F.A.rig.g.rotation.y = 0; }
-    else if (F.A.egg) {   // eggs hop along, squashing as they land
+    const tgt = MIRROR.T - MIRROR.LAG * (k + 1), s = mirrorSample(tgt); if (!s) return;
+    // you've stopped: whatever they were in the middle of (a roll, a jump) plays out where they stand, then they wait
+    const held = F.tgt !== undefined && tgt <= F.tgt + 1e-6; F.tgt = tgt; let roll = s.roll, sAir = s.air, sy = s.y;
+    if (held) {
+      if (roll) { F.rk = Math.min(1, (F.rk == null ? roll.k : F.rk) + dt / DASH.T); roll = F.rk < 1 ? { k: F.rk, fx: roll.fx, fz: roll.fz } : null; }
+      if (sAir || F.fy != null) {
+        if (F.fy == null) { F.fy = sy; F.vy = 0; F.down = false; }
+        if (!F.down) { F.vy -= CFG.gravity * dt; F.fy += F.vy * dt; const r0 = W.raycast(s.x, sy + 2, s.z, 0, -1, 0, 80, p => !p.noCam && p.kind !== 'seat'), gy = r0.part ? sy + 2 - r0.t + 3 : sy; if (F.fy <= gy) { F.fy = gy; F.down = true; } }
+        sy = F.fy; sAir = !F.down;
+      }
+    } else { F.rk = null; F.fy = null; }
+    const moving = Math.hypot(s.x - F.x, s.z - F.z) > 0.004;
+    if (moving) F.t += dt;
+    let up = 0; { const c = Game.clock - MIRROR.LAG * (k + 1); for (let i = MIRROR.hops.length - 1; i >= 0; i--) if (MIRROR.hops[i].c <= c) { up = MIRROR.hops[i].up; break; } }   // your jump on the spot, a moment later
+    F.x = s.x; F.z = s.z; F.y = sy - 3 + up; const air = sAir || up > 0.05;
+    if (F.A.rig) {   // a companion: your exact moves, pose for pose
+      const f = F.A.f, r = F.A.rig; F.g.position.set(0, 0, 0); F.g.rotation.y = 0;
+      Object.assign(f.ch, { x: F.x, y: F.y + 3, z: F.z, faceYaw: s.yaw, vx: moving ? 10 : 0, vz: 0, grounded: !air });
+      if (roll) f.roll = { t: roll.k * DASH.T, fx: roll.fx, fz: roll.fz, trail: f.roll ? f.roll.trail : 0, dur: DASH.T, ext: true };
+      else if (f.roll) { f.roll = null; r.root.rotation.set(0, 0, 0); r.root.position.y = 3; }
+      if (moving && !air) r.walkT = s.walkT - dt * (s.run ? 1.5 : 1);   // (in step with your walk cycle)
+      animateRig(f, dt, air ? 'air' : moving ? (s.run ? 'run' : 'walk') : 'idle');
+    } else if (F.A.egg) {   // eggs hop along your path, squashing as they land
       const hop = Math.abs(Math.sin(F.t * 7 + k)), sq = 1 - Math.max(0, 0.25 - hop) * 1.2;
-      F.g.position.set(F.x, F.y + hop * (moving ? 2.2 : 0.8), F.z); F.A.egg.scale.set(1.3 / sq, 1.7 * sq, 1.3 / sq); F.A.egg.rotation.z = Math.sin(F.t * 7 + k) * 0.25;
+      F.g.position.set(F.x, F.y + hop * (moving ? 2.2 : 0.8), F.z); F.g.rotation.y = s.yaw; F.A.egg.scale.set(1.3 / sq, 1.7 * sq, 1.3 / sq); F.A.egg.rotation.z = Math.sin(F.t * 7 + k) * 0.25;
       if (!moving) F.t += dt * 0.6;
-    } else {
-      F.g.position.set(F.x, F.y + Math.abs(Math.sin(F.t * 9)) * (moving ? 0.9 : 0.12), F.z);
+    } else {   // a pet: on your path, facing where you faced, little legs going
+      F.g.position.set(F.x, F.y + Math.abs(Math.sin(F.t * 9)) * (moving && !air ? 0.9 : 0.12), F.z); F.g.rotation.y = s.yaw;
       for (const L of F.A.legs) L.rotation.x = Math.sin(F.t * 12 + L.userData.ph) * (moving ? 0.5 : 0.05); for (const w of F.A.wings) w.rotation.z = Math.sin(Game.clock * 16) * 0.5 * w.userData.s; if (F.A.tail) F.A.tail.rotation.y = Math.sin(Game.clock * 6) * 0.5;
     }
   });

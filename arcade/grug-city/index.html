@@ -1849,7 +1849,8 @@ function plasticSweep() {   // twice a second: any new shiny (Phong) material ge
   if ((PLASTIC.t -= 1) > 0) return; PLASTIC.t = 30;
   scene.traverse(o => { if (!o.isMesh || !o.material) return; for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
     if (!m || !m.isMeshPhongMaterial || m.userData.plastic || m.flatShading || m.transparent || m.userData.noPlastic) continue;
-    m.userData.plastic = true; const s = Math.max(0x6a / 255, m.specular.r, m.specular.g, m.specular.b); m.specular.setRGB(s, s, s); m.shininess = Math.max(PLASTIC.shin, m.shininess); } });
+    const fl = m.map === STUD_A;   // the studded tops (floors): a softer sheen, so they aren't blinding; walls and characters keep the full shine
+    m.userData.plastic = true; const s = Math.max((fl ? 0x28 : 0x6a) / 255, m.specular.r, m.specular.g, m.specular.b); m.specular.setRGB(s, s, s); m.shininess = Math.max(fl ? 20 : PLASTIC.shin, m.shininess); } });
 }
 if (window.GrugYT480) GrugYT480.attach(renderer.domElement, renderer);
 const SUN_DIR = (() => { const phi = 2 * Math.PI * (1 - 0.92), el = 0.88; return new THREE.Vector3(-Math.cos(phi) * Math.cos(el), Math.sin(el), Math.sin(phi) * Math.cos(el)).normalize(); })();
