@@ -340,9 +340,9 @@
   <div class="touchOnly"><b>Touch:</b> left thumb anywhere on the lower left moves (up/down walks into and out of the level) · the buttons on the right attack, jump, shoot, dash and guard · hold <b>Guard</b> and tap an attack for magic</div>
   <div class="mouseOnly"><b>Move:</b> A / D (or ← →) left and right · W / S (or ↑ ↓) into and out of the level</div>
   <div class="mouseOnly"><b>Jump:</b> Space or C · press again in the air to double jump · <b>hold</b> after the double jump to sword-spin glide · tap for a short hop</div>
-  <div class="mouseOnly"><b>Light attack:</b> Q, Z or J (chain 4) · <b>Heavy:</b> E, X or K: a launcher · <b>Slingshot:</b> 1, V or L (juggles!)</div>
-  <div class="mouseOnly"><b>Dash:</b> Shift (standing still dashes the way you face; press again mid-dash to chain) · <b>Bubble:</b> hold left click (or U), standing or walking</div>
-  <div class="mouseOnly"><b>Magic:</b> holding the bubble opens the magic bar under your cursor: slide down onto a card and let go, or keep holding and press Q (bolt), E (splash) or Space (magic jump)</div>
+  <div class="mouseOnly"><b>Light attack:</b> left click, Q, Z or J (chain 4) · <b>Heavy:</b> E, X or K: a launcher · <b>Slingshot:</b> 1, V or L (juggles!)</div>
+  <div class="mouseOnly"><b>Dash:</b> Shift (standing still dashes the way you face; press again mid-dash to chain) · <b>Bubble:</b> hold right-click (or U), standing or walking</div>
+  <div class="mouseOnly"><b>Magic:</b> holding the bubble opens the magic bar under your cursor: slide down onto a card and let go, or keep holding and left-click or press Q (bolt), E (splash) or Space (magic jump)</div>
   <div><b>Combos:</b> light ×4 · light, heavy (launch) · light ×2, heavy: pop-up · light ×3, heavy: elemental slam · in the air: light ×3, heavy for a meteor spike · after a hit lands, jump to cancel into the air and keep juggling</div>
   <div class="mouseOnly"><b>Other:</b> F talk / open / shop · 2 or R drink a potion · T or 3 switch spell · Tab character · M menu · mouse wheel zoom</div>
   <div><b>The world:</b> keep going right. Arenas lock until every foe is down; once cleared they stay clear. Walk back any time for the shops, and for things you couldn't reach the first time.</div>
@@ -382,7 +382,7 @@
         </div>
         <div class="bxh"><span><h2>Controls</h2></span></div>
         <div class="bx keys">
-          <ul><li>Move<b>WASD</b></li><li>Jump<b>Space / C</b></li><li>Attack<b>Q / Z</b></li><li>Heavy<b>E / X</b></li><li>Dash<b>Shift</b></li><li>Bubble<b>Left click</b></li><li>Magic<b>Hold click</b></li><li>Slingshot<b>1</b></li><li>Potion<b>2</b></li><li>Talk<b>F</b></li></ul>
+          <ul><li>Move<b>WASD</b></li><li>Jump<b>Space / C</b></li><li>Attack<b>Click / Q</b></li><li>Heavy<b>E / X</b></li><li>Dash<b>Shift</b></li><li>Bubble<b>Right-click</b></li><li>Magic<b>Hold R-click</b></li><li>Slingshot<b>1</b></li><li>Potion<b>2</b></li><li>Talk<b>F</b></li></ul>
           <p style="margin-top:8px">Controller works too: press <b>A</b> to play your latest file.</p>
         </div>
       </div>
@@ -1313,12 +1313,12 @@ const MOVES = [
   { id: 'launch', lvl: 1, name: 'Launcher', input: 'Heavy (or light, heavy)' },
   { id: 'air', lvl: 1, name: 'Air Combo / Juggle', input: 'Jump, light ×3' },
   { id: 'jcancel', lvl: 1, name: 'Jump Cancel', input: 'Jump after a hit lands' },
-  { id: 'proj', lvl: 1, name: 'Magic Bolt', input: 'Hold left click + Q' },
-  { id: 'mjump', lvl: 1, name: 'Magic Jump', input: 'Hold left click + Space' },
-  { id: 'splash', lvl: 1, name: 'Magic Splash', input: 'Hold left click + E' },
+  { id: 'proj', lvl: 1, name: 'Magic Bolt', input: 'Hold right-click + click' },
+  { id: 'mjump', lvl: 1, name: 'Magic Jump', input: 'Hold right-click + Space' },
+  { id: 'splash', lvl: 1, name: 'Magic Splash', input: 'Hold right-click + E' },
   { id: 'bow', lvl: 1, name: 'Slingshot (juggles!)', input: 'L / V / 1, ground or air' },
   { id: 'popup', lvl: 2, name: 'Pop-Up', input: 'Light, light, heavy' },
-  { id: 'aproj', lvl: 3, name: 'Air Bolt', input: 'In the air: left click + Q' },
+  { id: 'aproj', lvl: 3, name: 'Air Bolt', input: 'In the air: right-click + click' },
   { id: 'spike', lvl: 3, name: 'Meteor Spike', input: 'In the air: heavy' },
   { id: 'infuse', lvl: 4, name: 'Elemental Slam', input: 'Light ×3, heavy' },
 ];
@@ -2710,8 +2710,8 @@ function gainXP(n) {
 const KEYMAP = {
   left: ['ArrowLeft', 'KeyA'], right: ['ArrowRight', 'KeyD'], up: ['ArrowUp', 'KeyW'], down: ['ArrowDown', 'KeyS'],
   // Q / E sit under WASD fingers; Z / X / C and J / K stay for the classic layouts
-  light: ['KeyQ', 'KeyJ', 'KeyZ'], heavy: ['KeyE', 'KeyK', 'KeyX'], jump: ['Space', 'KeyC'], bow: ['KeyL', 'KeyV', 'Digit1'],
-  dash: ['ShiftLeft', 'ShiftRight'], block: ['Mouse0', 'KeyU'], use: ['KeyF', 'Enter'], potion: ['Digit2', 'KeyR'], spell: ['KeyT', 'Digit3'],
+  light: ['Mouse0', 'KeyQ', 'KeyJ', 'KeyZ'], heavy: ['KeyE', 'KeyK', 'KeyX'], jump: ['Space', 'KeyC'], bow: ['KeyL', 'KeyV', 'Digit1'],
+  dash: ['ShiftLeft', 'ShiftRight'], block: ['Mouse2', 'KeyU'], use: ['KeyF', 'Enter'], potion: ['Digit2', 'KeyR'], spell: ['KeyT', 'Digit3'],
 };
 // a standard controller: A jump, X attack, Y heavy, B slingshot, LB bubble (and the magic menu), LT dash, RB talk/open, RT potion, View switch spell, Start menu
 const PADMAP = { 0: ['jump'], 1: ['bow'], 2: ['light'], 3: ['heavy'], 4: ['block'], 5: ['use'], 6: ['dash'], 7: ['potion'], 8: ['spell'], 9: ['menu'], 12: ['up'], 13: ['down'], 14: ['left'], 15: ['right'] };
@@ -2728,14 +2728,15 @@ const Input = {
     });
     addEventListener('keyup', e => this.held.delete(e.code));
     addEventListener('blur', () => { this.held.clear(); this.touchHeld.clear(); this.tx = this.tz = 0; });
-    canvas.addEventListener('mousedown', e => { if (touchMode) return; this.setDev('kb'); Snd.init(); canvas.focus(); const c = 'Mouse' + e.button; this.held.add(c); this.latched.add(c); this.mx = e.clientX; this.my = e.clientY; if (e.button === 0) this.mouseGuard = true; e.preventDefault(); });
+    canvas.addEventListener('mousedown', e => { if (touchMode) return; this.setDev('kb'); Snd.init(); canvas.focus(); const c = 'Mouse' + e.button; this.held.add(c); this.latched.add(c); this.mx = e.clientX; this.my = e.clientY; if (e.button === 2) this.mouseGuard = true; e.preventDefault(); });
     addEventListener('mousemove', e => { this.mx = e.clientX; this.my = e.clientY; this.mouseSeen = true; });
     addEventListener('mouseup', e => {
       // let go of the bubble over a card in the magic bar: that's the pick
-      if (e.button === 0 && this.mouseGuard && Magic.open) { const c = document.elementFromPoint(e.clientX, e.clientY), b = c && c.closest && c.closest('#mRow .mc'); if (b) Magic.use([...b.parentNode.children].indexOf(b)); }
-      if (e.button === 0) this.mouseGuard = false; this.held.delete('Mouse' + e.button);
+      if (e.button === 2 && this.mouseGuard && Magic.open) { const c = document.elementFromPoint(e.clientX, e.clientY), b = c && c.closest && c.closest('#mRow .mc'); if (b) Magic.use([...b.parentNode.children].indexOf(b)); }
+      if (e.button === 2) this.mouseGuard = false; this.held.delete('Mouse' + e.button);
     });
     canvas.addEventListener('contextmenu', e => e.preventDefault());
+    addEventListener('contextmenu', e => { if (G.started) e.preventDefault(); });   // letting go of right-click over the HUD mustn't pop the browser menu
   },
   setDev(d) { if (this.dev !== d) { this.dev = d; document.body.classList.toggle('pad', d === 'pad'); UI.dirty = true; Magic.built = false; } },
   pollPad() {
@@ -3051,14 +3052,14 @@ const UI = {
     else if (Use.near) hint = (pad ? 'RB' : touchMode ? 'Tap' : 'F') + ': ' + (Use.near.kind === 'npc' ? (Use.near.n.id === 'pip' && !Save.pip ? 'ask Pip to join you' : (Use.near.n.shop ? 'shop with ' : 'talk to ') + Use.near.n.name) : Use.near.kind === 'chest' ? 'open the chest' : 'unlock the door');
     else if (touchMode && !pad) hint = 'Hold Guard for the bubble and magic · Attack ×3 then Heavy launches';
     else if (pad) hint = 'A jump · X attack · Y heavy · B slingshot · hold LB for the bubble and magic · RT potion · RB talk';
-    else hint = 'A/D move · W/S in and out · Space jump · Q attack · E heavy · Shift dash · hold left click: bubble + magic · Tab character';
+    else hint = 'A/D move · W/S in and out · Space jump · click or Q attack · E heavy · Shift dash · hold right-click: bubble + magic · Tab character';
     if ($('hint').textContent !== hint) $('hint').textContent = hint;
     PadKeys.update();
   },
 };
 
-// ---------------------------------------------------------------- the magic bar: hold the bubble (left click, U, LB or the Guard button) and it opens.
-// With the mouse it opens condensed, just under the cursor, and stays put while the bubble is up: slide down onto a card and let go (or click it) to use it.
+// ---------------------------------------------------------------- the magic bar: hold the bubble (right-click, U, LB or the Guard button) and it opens.
+// With the mouse it opens condensed, just under the cursor, and stays put while the bubble is up: slide down onto a card and let go (or left-click it) to use it.
 // With a controller or touch it opens top left like Block Tales' action select.
 // Click a card, or use its key. With a controller the buttons change while it's open: X bolt, Y splash, A uses the picked card,
 // B arrows, d-pad up potion, d-pad down switch spell, d-pad left/right pick a card.
