@@ -451,43 +451,55 @@
   #storeTalk { display: none; position: fixed; left: 50%; bottom: calc(26px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(640px, 92vw); background: rgba(16, 17, 24, .94); border: 3px solid #fff; padding: 12px 18px 10px; z-index: 47; box-sizing: border-box; cursor: pointer; color: #fff; }
   #storeTalk .stWho { display: block; font-size: 20px; letter-spacing: .5px; } #storeTalk .stWho small { font-size: 13px; margin-left: 8px; letter-spacing: 1px; }
   #storeTalk p { margin: 6px 0 4px; font-size: 18px; line-height: 1.35; } #storeTalk > small { display: block; text-align: right; font-size: 11px; color: #aaa; }
-  #store { display: none; position: fixed; inset: 0; z-index: 46; pointer-events: none; padding: calc(56px + env(safe-area-inset-top)) calc(3vw + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(3vw + env(safe-area-inset-left)); box-sizing: border-box; justify-content: space-between; gap: 24px; color: #fff; }
-  #store > div { pointer-events: auto; }
-  #store .stL { width: min(36vw, 420px); display: flex; flex-direction: column; gap: 12px; align-self: center; }
-  #store .stTop, #store .stBot, #store .stR { background: rgba(16, 17, 24, .93); border: 3px solid var(--sc, #fff); box-sizing: border-box; }
-  #store .stTop { display: flex; gap: 12px; padding: 12px; align-items: center; }
-  #store .stIcB { width: 104px; height: 104px; flex: none; background: rgba(255, 255, 255, .07); display: flex; align-items: center; justify-content: center; }
-  #store .stIc { width: 96px; height: 96px; object-fit: contain; } #store img.px { image-rendering: pixelated; }
-  #store .stKind { display: block; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; } #store .stName { display: block; font-size: 24px; line-height: 1.1; margin: 2px 0 4px; }
-  #store .stFx { margin: 0; font-size: 14px; color: #ddd; line-height: 1.3; }
-  #store .stBot { padding: 0 0 12px; }
-  #store .stBar { background: rgba(255, 255, 255, .1); padding: 8px 12px; font-size: 17px; } #store .stBar span { color: #ccc; }
-  #store .stDesc { margin: 10px 12px; font-size: 14px; line-height: 1.4; color: #e8e8e8; }
-  #store .stBtns { display: flex; gap: 8px; padding: 0 12px; flex-wrap: wrap; }
-  #store .stBuy { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; font-size: 17px; color: #fff; background: #1b1b1b; border: 2px solid #c8c8c8; }
+  /* laid out like the reference: the list takes the right half and a bit (money on top), the keeper's head and shoulders fill the top left,
+     the picked item in a box under them (icon, kind, name, what it does) and its "Name – price" bar and story at the bottom */
+  #store { display: none; position: fixed; inset: 0; z-index: 46; pointer-events: none; color: #fff; }
+  #store > div, #store > button { pointer-events: auto; position: absolute; box-sizing: border-box; }
+  #store .stR { left: 42.7vw; right: 2.3vw; top: 8.6vh; bottom: 4vh; display: flex; flex-direction: column; background: rgba(16, 17, 24, .95); border: 3px solid var(--sc, #fff); padding: 1.2vh 1vw 1.4vh; gap: 1vh; }
+  #store .stTop, #store .stBot { background: rgba(16, 17, 24, .95); border: 3px solid var(--sc, #fff); }
+  #store .stTop { left: 2.3vw; width: 38.2vw; top: 48.8vh; height: 31vh; padding: 1.4vh 1.4vw; display: flex; flex-direction: column; align-items: center; }
+  #store .stKind { position: absolute; top: 1.2vh; right: 1.2vw; font-size: clamp(11px, 1.9vh, 16px); }
+  #store .stIcB { width: 8.6vh; height: 8.6vh; flex: none; display: flex; align-items: center; justify-content: center; }
+  #store .stIc { width: 8.6vh; height: 8.6vh; object-fit: contain; } #store img.px { image-rendering: pixelated; }
+  #store .stName { font-size: clamp(13px, 2.2vh, 20px); margin: .6vh 0 0; text-align: center; }
+  #store .stFx { align-self: stretch; margin: 2vh 1.4vw 0; font-size: clamp(14px, 3.1vh, 26px); line-height: 1.25; color: #9fd8ff; }
+  #store .stBtns { align-self: stretch; margin-top: auto; display: flex; justify-content: flex-end; gap: .6vw; }
+  #store .stBuy { display: inline-flex; align-items: center; gap: 8px; padding: .8vh 1vw; font-size: clamp(13px, 2.1vh, 18px); color: #fff; background: #1b1b1b; border: 2px solid #c8c8c8; }
   #store .stBuy.cash { background: #1f5a1f; border-color: #7dff7a; } #store .stBuy.pearl { background: #5a2a6e; border-color: #f0c4ff; } #store .stBuy.use { background: #2a4a7a; border-color: #9fd8ff; }
-  #store .stBuy.off { filter: grayscale(.7); opacity: .6; } #store .stBuy .cashT { font-size: 17px; }
-  #store .stHave { color: #9be36b; font-size: 16px; letter-spacing: 1px; }
-  #store .stR { width: min(36vw, 420px); display: flex; flex-direction: column; padding: 10px; gap: 8px; }
-  #store .stMoney { display: flex; align-items: center; gap: 10px; font-size: 20px; } #store .stMoney b { flex: 1; letter-spacing: 1px; } #store .stMoney .cashT { font-size: 22px; }
-  #store .stDeck { font-size: 12px; padding: 6px 8px; color: #fff; background: #1b1b1b; border: 2px solid #c8c8c8; }
-  #store .stTabs { display: flex; gap: 6px; } #store .stTabs:empty { display: none; }
-  #store .stTabs button { flex: 1; padding: 7px 4px; font-size: 13px; color: #ccc; background: #1b1b1b; border: 2px solid #555; } #store .stTabs button.on { color: #fff; border-color: var(--sc, #fff); background: #2b2c36; }
-  #store .stList { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
-  #store .stRow { display: flex; align-items: center; gap: 10px; padding: 6px 8px; text-align: left; color: #fff; background: rgba(255, 255, 255, .05); border: 2px solid transparent; font-size: 16px; }
-  #store .stRow.on { border-color: var(--sc, #fff); background: rgba(255, 255, 255, .13); }
-  #store .stRow img { width: 40px; height: 40px; object-fit: contain; flex: none; } #store .stRow b { flex: 1; font-weight: normal; }
-  #store .stRow em { font-style: normal; font-size: 12px; color: #9be36b; letter-spacing: .5px; } #store .stRow .cashT { font-size: 16px; }
+  #store .stBuy.off { filter: grayscale(.7); opacity: .6; } #store .stBuy .cashT { font-size: inherit; }
+  #store .stHave { color: #9be36b; font-size: clamp(13px, 2.1vh, 18px); letter-spacing: 1px; }
+  #store .stBot { left: 2.3vw; width: 38.2vw; top: 80.8vh; bottom: 4vh; overflow: hidden; }
+  #store .stBar { background: #000; padding: .6vh 1vw; font-size: clamp(14px, 2.9vh, 24px); border-bottom: 2px solid var(--sc, #fff); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } #store .stBar span { color: #fff; }
+  #store .stDesc { margin: .7vh 1.2vw; font-size: clamp(11px, 1.8vh, 15px); line-height: 1.3; color: #e8e8e8; }
+  #store .stMoney { display: flex; align-items: center; gap: .8vw; font-size: clamp(16px, 3.4vh, 30px); flex: none; }
+  #store .stMoney b { letter-spacing: 1px; } #store .stMoney .cashT { font-size: inherit; } #store .stMoney .sp { flex: 1; }
+  #store .stDeck { font-size: clamp(11px, 1.8vh, 15px); padding: .5vh .6vw; color: #fff; background: #1b1b1b; border: 2px solid #c8c8c8; }
+  #store .stTabs { display: flex; gap: .4vw; } #store .stTabs:empty { display: none; }
+  #store .stTabs button { padding: .6vh .8vw; font-size: clamp(11px, 1.8vh, 15px); color: #ccc; background: #1b1b1b; border: 2px solid #555; } #store .stTabs button.on { color: #fff; border-color: var(--sc, #fff); background: #2b2c36; }
+  #store .stList { flex: 1; overflow-y: auto; min-height: 0; border: 2px solid rgba(255, 255, 255, .25); }
+  #store .stRow { display: flex; align-items: center; gap: 1.6vw; width: 100%; height: 7.6vh; min-height: 34px; padding: 0 1vw; text-align: left; color: #fff; background: transparent; border: 2px solid transparent; font-size: clamp(14px, 3.4vh, 30px); box-sizing: border-box; }
+  #store .stRow.on { border-color: #fff; background: rgba(255, 255, 255, .08); }
+  #store .stRow img { width: 6vh; height: 6vh; min-width: 26px; min-height: 26px; object-fit: contain; flex: none; } #store .stRow b { flex: 1; font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #store .stRow span { flex: none; } #store .stRow em { font-style: normal; color: #ccc; } #store .stRow .cashT { font-size: inherit; }
   #store .stNone { color: #aaa; padding: 10px; }
-  #store .stClose { padding: 9px; font-size: 15px; color: #fff; background: #6a1a1a; border: 2px solid #ff8a8a; letter-spacing: 1px; }
-  @media (max-width: 760px) {
-    #store { flex-direction: column; padding-top: calc(10px + env(safe-area-inset-top)); gap: 8px; }
-    #store .stL, #store .stR { width: 100%; } #store .stL { align-self: stretch; gap: 6px; } #store .stR { max-height: 44vh; min-height: 0; padding: 8px; gap: 6px; }
-    #store .stRow { padding: 4px 8px; font-size: 14px; } #store .stRow img { width: 30px; height: 30px; } #store .stMoney { font-size: 16px; } #store .stClose { padding: 6px; }
-    #store .stIcB { width: 64px; height: 64px; } #store .stIc { width: 58px; height: 58px; } #store .stName { font-size: 18px; } #store .stTop { padding: 8px; }
-    #store .stDesc { margin: 6px 10px; font-size: 12px; } #store .stBar { font-size: 14px; padding: 5px 10px; } #store .stBot { padding-bottom: 8px; }
-    #storeTalk p { font-size: 15px; }
+  #store .stClose { top: 1.6vh; right: 2.3vw; width: 6vh; height: 5.4vh; min-width: 40px; min-height: 36px; font-size: clamp(18px, 3.6vh, 30px); line-height: 1; color: #fff; background: #6a1a1a; border: 3px solid #ff8a8a; }
+  @media (max-aspect-ratio: 1/1) {   /* phones held upright: the head at the top, the picked item under it, the list below */
+    #store .stR { left: 3vw; right: 3vw; top: 39vh; bottom: calc(1.5vh + env(safe-area-inset-bottom)); padding: 8px; gap: 6px; }
+    #store .stTop { left: 3vw; width: 94vw; top: 24vh; height: auto; bottom: auto; padding: 8px 10px; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 2px 10px; }
+    #store .stIcB, #store .stIc { width: 44px; height: 44px; } #store .stName { font-size: 16px; margin: 0; text-align: left; } #store .stFx { margin: 0; font-size: 13px; flex-basis: 100%; }
+    #store .stKind { top: 6px; right: 8px; font-size: 10px; } #store .stBtns { flex-basis: 100%; margin-top: 4px; } #store .stBuy { font-size: 14px; padding: 5px 10px; }
+    #store .stBot { display: none; }
+    #store .stRow { height: 44px; font-size: 16px; } #store .stRow img { width: 32px; height: 32px; } #store .stMoney { font-size: 18px; }
+    #store .stClose { top: calc(1.5vh + env(safe-area-inset-top)); right: 3vw; }
   }
+  /* the picked card: what it does */
+  #cardInfo { display: none; } #cardInfo.on { display: flex; gap: 12px; align-items: center; max-width: min(620px, 94vw); padding: 8px 14px; background: rgba(14, 15, 20, .92); border: 3px solid #fff; color: #fff; box-sizing: border-box; pointer-events: none; }
+  #cardInfo.mv { border-color: #4da3ff; } #cardInfo.at { border-color: #ff5a4a; } #cardInfo.ut { border-color: #ffd24a; }
+  #cardInfo img { width: 48px; height: 48px; image-rendering: pixelated; flex: none; }
+  #cardInfo small { font-size: 11px; letter-spacing: 1px; } #cardInfo b { display: block; font-size: 19px; line-height: 1.15; } #cardInfo p { margin: 2px 0 0; font-size: 14px; line-height: 1.3; color: #e8e8e8; } #cardInfo em { display: block; margin-top: 3px; font-style: normal; font-size: 12px; color: #9be36b; }
+  @media (max-width: 520px) { #cardInfo.on { padding: 6px 10px; gap: 8px; } #cardInfo img { width: 34px; height: 34px; } #cardInfo b { font-size: 15px; } #cardInfo p { font-size: 12px; } }
+  #shopBtn { width: 210px; padding: 0 10px; box-sizing: border-box; } #shopBtn b { font-size: 26px; letter-spacing: 2px; white-space: nowrap; }
+  @media (max-width: 520px) { #shopBtn { width: 170px; } #shopBtn b { font-size: 21px; letter-spacing: 1px; } }
 </style>
 
 </head>
@@ -516,6 +528,7 @@
   <div class="lbl">Game Settings</div>
   <button id="mHints">Hints: On</button>
   <button id="mFast">Fast animations: Off</button>
+  <button id="mPlastic">Shiny plastic: On</button>
   <button id="mWipe" class="warn">Reset all progress</button>
   <button id="mLeave">Leave Game</button>
   <div class="brand"><img src="data:image/png;base64,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" alt="Grug Digital"><small>a Grug Digital game</small></div>
@@ -526,16 +539,10 @@
 <div id="kit" class="ol"></div>
 <div id="storeTalk"><b class="stWho ol"></b><p></p><small>Click, tap or press Enter</small></div>
 <div id="store">
-  <div class="stL">
-    <div class="stTop"><div class="stIcB"><img class="stIc" alt=""></div><div class="stTx"><small class="stKind"></small><b class="stName ol"></b><p class="stFx"></p></div></div>
-    <div class="stBot"><div class="stBar"></div><p class="stDesc"></p><div class="stBtns"></div></div>
-  </div>
-  <div class="stR">
-    <div class="stMoney ol"></div>
-    <div class="stTabs"></div>
-    <div class="stList"></div>
-    <button class="stClose">LEAVE</button>
-  </div>
+  <div class="stTop"><small class="stKind"></small><div class="stIcB"><img class="stIc" alt=""></div><b class="stName ol"></b><p class="stFx"></p><div class="stBtns"></div></div>
+  <div class="stBot"><div class="stBar"></div><p class="stDesc"></p></div>
+  <div class="stR"><div class="stMoney ol"></div><div class="stTabs"></div><div class="stList"></div></div>
+  <button class="stClose" title="Leave">&#x2190;</button>
 </div>
 <button id="tradeBtn" class="ol"></button>
 <div id="mod" class="ol"></div>
@@ -545,6 +552,7 @@
 <div id="preview" class="ol"><div class="pvh"><img id="pvIcon" alt=""><b id="pvName"></b><button id="pvBack">✕</button></div><div id="pvView"></div><div id="pvDesc"></div><div id="pvBtns"><button id="pvBuy"></button><button id="pvBuyP"></button></div></div>
 
 <div id="bottom">
+  <div id="cardInfo"></div>
   <div id="tip" class="ol"></div>
   <div id="handRow">
     <div id="hand"></div>
@@ -579,8 +587,8 @@
   <div><b>Towns and the Depot:</b> walk onto a booth's pad. The <b>Card Shop</b> swaps a card in your kit for energy, <b>Loot Crates</b> hold blasters and skins, the <b>Quest Board</b> lets you swap a quest. Walk up to another player and press <b>TRADE</b> to swap blasters and skins</div>
   <div><b>Quests</b> (top right): done just by playing. They pay energy, or a free loot crate</div>
   <div><b>A job:</b> beat the quota of enemies before the shift ends. Each day you get to play every card in your deck once, in any order: <b>1-7</b> or click a card, then click a lit tile. <b>Esc</b> or right-click cancels. <b>Enter / Space</b> ends the day</div>
-  <div><b>Night:</b> every enemy grows one stage: <span class="stg l">WEAK</span> → <span class="stg a">STRONG</span> → <span class="stg e">ENRAGED</span>. An enraged one still standing when night falls hits you for a heart and runs off. You have 2 hearts (they come back when you finish a battle). Out of hearts: the run is over</div>
-  <div><b>Drops:</b> a beaten enemy drops nothing, an egg or a card. Eggs are rarer the sooner you beat it (weak = rare, strong = epic, enraged = common) and hatch into pets when the round ends. Equip one pet in My Pets: it follows you and gives you its power (one more heart, energy every morning...)</div>
+  <div><b>Night:</b> every enemy grows one stage: <span class="stg l">CONFUSED?</span> → <span class="stg a">STRONG</span> → <span class="stg e">AIMING!</span> (or WOUND UP!). One that's about to attack when night falls takes a heart: shooters shoot you from where they stand, the rest jump over, hit you and jump back. Then it calms down to STRONG for a night. You have 2 hearts (they come back when you finish a battle). Out of hearts: the run is over</div>
+  <div><b>Drops:</b> a beaten enemy drops nothing, an egg or a card. Eggs are rarer the sooner you beat it (confused = rare, strong = epic, about to attack = common) and hatch into pets when the round ends. Eggs go straight into your collection. Equip one pet or companion in My Pets: it follows you and gives you its power (one more heart, energy every morning...)</div>
   <div><b>Cards:</b> <span class="mvC">Movement</span>, <span class="atC">Attack</span> and <span class="utC">Utility</span>. Walk and run moves pass over tiles (and pick up energy on the way) but can't climb a hill. Hops, jumps and leaps can, and landing on a pet from a hill catches it outright. Teleports go anywhere in range</div>
   <div><b>Height:</b> hills are 8 studs up. Only <b>lobbed</b> zaps reach a pet above you, and a hill blocks a beam fired from the ground. From a hill, beams and swipes hit bugs below</div>
   <div><b>Energy:</b> cells drop onto the field in ones and twos every day. Walk over one to pick it up (your wallet holds 10). Spend it in the Module Shop: the new card replaces one in your deck, used or not, and is ready right away. A lobbed shot on a cell blows it up and zaps every pet next to it</div>
@@ -1992,18 +2000,22 @@ const ZONE_PETS = [['dog', 'cat', 'beaver'], ['chick', 'bunny', 'pig', 'fox'], [
 const petPool = k => ZONE_PETS.slice(0, Math.min(k, ZONE_PETS.length - 1) + 1).flat();
 // what you get depends on when you catch it: a baby is a Rare, a grown one an Epic; an egg is a Common that hatches into a random pet when the round ends
 const CATCH = { larva: ['RARE', '#5ab4ff', 'rare'], adult: ['EPIC', '#c77dff', 'epic'], egg: ['COMMON', '#d8d8d8', 'common'] };
-const STAGE_NAME = { larva: 'WEAK', adult: 'STRONG', egg: 'ENRAGED' };
+const STAGE_NAME = { larva: 'CONFUSED', adult: 'STRONG', egg: 'ABOUT TO ATTACK' };
+// ranged enemies shoot you from where they stand; the rest jump over, hit you and jump back
+const RANGED = { grub: true, spitter: true };
+const WORDS1 = ['SURPRISED', 'CONFUSED', 'PUZZLED', 'BAFFLED', 'DAZED'], WORDS3 = { ranged: ['AIMING', 'TAKING AIM', 'LOCKED ON'], melee: ['WOUND UP', 'WINDING UP', 'READY TO POUNCE'] };
+const stageWord = b => b.stage === 'larva' ? b.w1 : b.stage === 'adult' ? 'STRONG' : b.w3;
 
 // ---------------------------------------------------------------- saved between sessions
-const Save = { bestRun: 0, runs: 0, jobs: 0, squashed: 0, hatched: 0, fast: false, hints: true, pets: {}, name: '', key: 'grug.pet-zones.v1',
+const Save = { bestRun: 0, runs: 0, jobs: 0, squashed: 0, hatched: 0, fast: false, hints: true, plastic: true, pets: {}, name: '', key: 'grug.pet-zones.v1',
   inv: {}, eq: { blaster: 'b:rifle', skin: '' }, follow: null, pet: '', quests: [], qdone: 0, cash: 0, ride: null, cards: null, deck: null, cos: null,
   load() { try { const s = JSON.parse(localStorage.getItem(this.key) || 'null'); if (s) {
-    Object.assign(this, { bestRun: s.bestRun | 0, runs: s.runs | 0, jobs: s.jobs | 0, squashed: s.squashed | 0, hatched: s.hatched | 0, fast: !!s.fast, hints: s.hints !== false, pets: s.pets && typeof s.pets === 'object' ? s.pets : {}, name: typeof s.name === 'string' ? s.name.slice(0, 20) : '',
+    Object.assign(this, { bestRun: s.bestRun | 0, runs: s.runs | 0, jobs: s.jobs | 0, squashed: s.squashed | 0, hatched: s.hatched | 0, fast: !!s.fast, hints: s.hints !== false, plastic: s.plastic !== false, pets: s.pets && typeof s.pets === 'object' ? s.pets : {}, name: typeof s.name === 'string' ? s.name.slice(0, 20) : '',
       inv: s.inv && typeof s.inv === 'object' ? s.inv : {}, eq: s.eq && s.eq.blaster ? s.eq : { blaster: 'b:rifle', skin: '' }, follow: Array.isArray(s.follow) ? s.follow.slice(0, 3) : null, pet: typeof s.pet === 'string' ? s.pet : '', quests: Array.isArray(s.quests) ? s.quests : [], qdone: s.qdone | 0, cash: (s.cash | 0) + (s.freeCrates | 0) * 100, ride: s.ride && typeof s.ride === 'object' ? s.ride : null, cards: s.cards && typeof s.cards === 'object' ? s.cards : null, deck: Array.isArray(s.deck) ? s.deck : null });   // free crates from the last version became cash
     // the first Pearl Shop (Golden Blaster, Rainbow Zaps) became skins in your locker
     if (s.cos && s.cos.own) { if (s.cos.own.goldgun && !this.inv['s:gold']) this.inv['s:gold'] = 1; if (s.cos.own.rainbow && !this.inv['s:rainbow']) this.inv['s:rainbow'] = 1; if (s.cos.eq && s.cos.eq.goldgun && !this.eq.skin) this.eq.skin = 's:gold'; }
   } } catch (_) { } },
-  save() { try { localStorage.setItem(this.key, JSON.stringify({ bestRun: this.bestRun, runs: this.runs, jobs: this.jobs, squashed: this.squashed, hatched: this.hatched, fast: this.fast, hints: this.hints, pets: this.pets, name: this.name, inv: this.inv, eq: this.eq, follow: this.follow, pet: this.pet, quests: this.quests, qdone: this.qdone, cash: this.cash, ride: this.ride, cards: this.cards, deck: this.deck })); } catch (_) { } },
+  save() { try { localStorage.setItem(this.key, JSON.stringify({ bestRun: this.bestRun, runs: this.runs, jobs: this.jobs, squashed: this.squashed, hatched: this.hatched, fast: this.fast, plastic: this.plastic, hints: this.hints, pets: this.pets, name: this.name, inv: this.inv, eq: this.eq, follow: this.follow, pet: this.pet, quests: this.quests, qdone: this.qdone, cash: this.cash, ride: this.ride, cards: this.cards, deck: this.deck })); } catch (_) { } },
   wipe() { try { localStorage.removeItem(this.key); } catch (_) { } },
 };
 Save.load();
@@ -2052,7 +2064,9 @@ const STUD = 2, GEOC = {};
 function boxGeo(sx, sy, sz) {
   const key = [sx, sy, sz].join(','); if (GEOC[key]) return GEOC[key];
   const g = new THREE.BoxGeometry(sx, sy, sz), uv = g.attributes.uv, dims = [[sz, sy], [sz, sy], [sx, sz], [sx, sz], [sx, sy], [sx, sy]];
-  for (let f = 0; f < 6; f++) for (let v = 0; v < 4; v++) { const i = f * 4 + v; uv.setXY(i, uv.getX(i) * dims[f][0] / STUD, uv.getY(i) * dims[f][1] / STUD); }
+  // studs centred on every face: whole studs edge to edge when the size is whole, otherwise the same part-stud at both edges (never a half stud on one side only)
+  const off = n => (Math.round(n) % 2 ? 0.5 : 0) - n / 2;
+  for (let f = 0; f < 6; f++) { const nu = dims[f][0] / STUD, nv = dims[f][1] / STUD, ou = off(nu), ov = off(nv); for (let v = 0; v < 4; v++) { const i = f * 4 + v; uv.setXY(i, uv.getX(i) * nu + ou, uv.getY(i) * nv + ov); } }
   return (GEOC[key] = g);
 }
 
@@ -2060,7 +2074,9 @@ function boxGeo(sx, sy, sz) {
 // Static parts are batched into one mesh per colour (as in Zombie Zones). Two visible parts never share a face plane.
 const W = new A.World({ cell: 16 });
 const STATIC = new Map();
+const ALLBOX = /[?&]zdbg/.test(location.search) ? [] : null;   // (debug: ?zdbg keeps every box, to look for faces that fight)
 function part(cx, cy, cz, sx, sy, sz, color, o = {}) {
+  if (ALLBOX && color !== null) ALLBOX.push({ c: color || 0, a: [cx - sx / 2, cy - sy / 2, cz - sz / 2], b: [cx + sx / 2, cy + sy / 2, cz + sz / 2] });
   const p = o.deco ? null : W.add(Object.assign({ minX: cx - sx / 2, maxX: cx + sx / 2, minY: cy - sy / 2, maxY: cy + sy / 2, minZ: cz - sz / 2, maxZ: cz + sz / 2 }, o.p || {}));
   let m = null;
   if (color !== null) {
@@ -2300,6 +2316,30 @@ function gunMesh() {
 
 // ---------------------------------------------------------------- R6 rigs (as in Zombie Zones)
 const RG = { torso: new THREE.BoxGeometry(2, 2, 1), limb: new THREE.BoxGeometry(1, 2, 1), head: new THREE.BoxGeometry(1.2, 1.2, 1.2), face: new THREE.PlaneGeometry(1.2, 1.2) };
+// shiny plastic (classic Roblox): every brick and character gets a highlight. A setting turns it off.
+// Matte (Lambert) materials get a shiny (Phong) twin; Phong ones get their highlight raised. A sweep twice a second catches new meshes
+const PLASTIC = { on: true, twins: new Map(), t: 0 };
+function plasticOf(m) {
+  if (!m || m.isMeshBasicMaterial || m.userData.noPlastic) return m;
+  if (m.isMeshLambertMaterial) {
+    if (!PLASTIC.on || m.transparent || (m.map && m.map.isCanvasTexture)) return m;
+    let t = PLASTIC.twins.get(m); if (!t) { t = new THREE.MeshPhongMaterial({ color: m.color.clone(), map: m.map, emissive: m.emissive.clone(), side: m.side, alphaTest: m.alphaTest, vertexColors: m.vertexColors, shininess: 40, specular: 0x6a6a6a }); t.userData.lam = m; PLASTIC.twins.set(m, t); }
+    return t;
+  }
+  if (m.isMeshPhongMaterial) {
+    if (m.userData.lam) return PLASTIC.on ? m : m.userData.lam;
+    if (m.userData.sp0 === undefined) { m.userData.sp0 = m.specular.getHex(); m.userData.sh0 = m.shininess; }
+    if (m.flatShading || m.transparent) return m;
+    const want = PLASTIC.on ? Math.max(0x6a, m.userData.sp0 & 0xff) : m.userData.sp0 & 0xff;
+    m.specular.setRGB(want / 255, want / 255, want / 255); m.shininess = PLASTIC.on ? Math.max(40, m.userData.sh0) : m.userData.sh0;
+  }
+  return m;
+}
+function plasticSweep(force) {
+  PLASTIC.t -= 1; if (PLASTIC.t > 0 && !force) return; PLASTIC.t = 30;
+  scene.traverse(o => { if (!o.isMesh || o.isInstancedMesh) return; if (Array.isArray(o.material)) { for (let i = 0; i < o.material.length; i++) o.material[i] = plasticOf(o.material[i]); } else if (o.material) o.material = plasticOf(o.material); });
+}
+function setPlastic(on) { PLASTIC.on = on; plasticSweep(true); }
 const LMC = {}, lam = c => LMC[c] || (LMC[c] = new THREE.MeshLambertMaterial({ color: c }));
 const FACES = {};
 function faceMat(kind) {
@@ -2344,7 +2384,14 @@ function makeRig(look, opt = {}) {
   const skin = [torso, head, rs.children[0], ls.children[0], rh.children[0], lh.children[0]].map(m => [m, m.material]);
   return { g, root, torso, head, rs, ls, rh, lh, gun, skin, flash: false, j: { rs: 0, ls: 0, rh: 0, lh: 0, rz: 0 }, walkT: rnd(0, 6) };
 }
-function flashRig(r, on) { if (on !== r.flash) { r.flash = on; for (const [m, orig] of r.skin) m.material = on ? hitMat : orig; } }
+// flash a character: white when hit, red when it's about to attack (on the outfit's meshes when it's dressed, else on its blocks)
+const redMat = new THREE.MeshBasicMaterial({ color: 0xff2a1a });
+function rigMat(r, mode) {
+  if (mode === r.matMode) return; r.matMode = mode; r.flash = mode === 'hit';
+  const list = r.outfit && r.outfit.meshes && r.outfit.meshes.length ? r.outfit.meshes : r.skin.map(x => x[0]);
+  for (const m of list) { if (!m.userData.mat0) m.userData.mat0 = m.material; m.material = mode === 'hit' ? hitMat : mode === 'red' ? redMat : plasticOf(m.userData.mat0); }
+}
+function flashRig(r, on) { rigMat(r, on ? 'hit' : null); }
 // pose: 'walk' | 'run' | 'air' | 'idle' | 'sit' (worked out from the character when not given)
 function animateRig(f, dt, poseIn) {
   const r = f.rig, ch = f.ch, j = r.j, P = Math.PI;
@@ -2527,7 +2574,7 @@ function homeHouse(hx, hz, wu, dv, face, k) {
   const H = buildHouse(hx, hz, wu, dv, face, [0xc9b38a, 0xa34b4b, 0xd8d8d8, 0x8a9fb5, 0x9a6b45, 0xb5a27a][k % 6], [0x4a4a4f, 0x6b3a2a, 0x5a5048, 0x3e4a5a, 0x7a4a3a, 0x2f4a3a][(k + 2) % 6]);
   const f = { p: { hfurn: true } };
   H.put(0, -2, GY + 1.8, 8, 3, 5, 0x6b4a2c, f); for (const u of [-5.4, 5.4]) H.put(u, -2, GY + 1.1, 1.8, 1.8, 1.8, 0x8a5428, f);
-  H.put(wu / 2 - 4.5, -dv / 2 + 4.5, GY + 1, 6, 1.4, 8.4, 0xd8d8d8, f); H.put(wu / 2 - 4.5, -dv / 2 + 1.8, GY + 1.6, 6, 1.2, 3, 0xc4281c, f);
+  H.put(wu / 2 - 4.5, -dv / 2 + 4.5, GY + 1, 6, 1.4, 8.4, 0xd8d8d8, f); H.put(wu / 2 - 4.5, -dv / 2 + 2.1, GY + 1.95, 5, 0.5, 2.4, 0xc4281c, f);   // the pillow sits on top, inside the bed's edges (no shared faces)
   H.put(-wu / 2 + 3, -dv / 2 + 1.6, GY + 3, 4.4, 6, 2, 0x7a5636, f); H.put(-wu / 2 + 3, dv / 2 - 4, GY + 1.6, 3, 3, 3, 0x4b974b, f);
   H.put(0, -dv / 2 + 1, GY + 4.6, 6, 3, 0.3, pick([0x2a5aa8, 0xc4281c, 0xf5cd30]), { deco: true });   // a picture on the wall
   return H;
@@ -2619,7 +2666,7 @@ function buildArea(k) {
   const Z = zoneDef(k), TS = Z.ts, half = N * TS / 2, R = { Z, tiles: [], gate: null, cx: Z.cx, cz: Z.cz, half, peds: [] };   // (this zone's own tile size)
   ARENA[k] = R;
   const zMid = (Z.zBot + Z.zTop) / 2, x0 = -Z.w / 2, x1 = Z.w / 2, occ = new Map(), ride = Z.ride;
-  part(x0 - 2, WALL_H / 2, zMid, 4, WALL_H, Z.d, Z.wall); part(x1 + 2, WALL_H / 2, zMid, 4, WALL_H, Z.d, Z.wall);   // the side walls
+  part(x0 - 2, WALL_H / 2, zMid, 4, WALL_H, Z.d - 4, Z.wall); part(x1 + 2, WALL_H / 2, zMid, 4, WALL_H, Z.d - 4, Z.wall);   // the side walls (stopping at the gate walls: no shared faces)
   for (const sx of [-1, 1]) for (let z = Z.zBot - 24; z > Z.zTop + 16; z -= 48) part(sx * (x1 - 1.5), WALL_H + 2, z, 7, 4, 14, Z.rim);   // battlements
   R.gate = gateWall(Z.zTop, Z.wall, Z.rim, Z, Math.max(Z.w, TOWN_W) / 2);
   gateSign(Z.zTop, Z, Z.rim, true);   // through this gate: the town
@@ -2698,8 +2745,8 @@ function buildTown(k) {
   const Z = zoneDef(k), z0 = Z.tz0, z1 = Z.tz1, x0 = -TOWN_W / 2, x1 = TOWN_W / 2, zm = (z0 + z1) / 2, occ = new Map(), pocc = new Map(), cols = TOWN_COL[Z.decor];
   part(x0 - 2, WALL_H / 2, zm, 4, WALL_H, TOWN_D, Z.wall); part(x1 + 2, WALL_H / 2, zm, 4, WALL_H, TOWN_D, Z.wall);
   gateWall(z1, Z.wall, Z.rim, null, Math.max(zoneDef(k + 1).w, TOWN_W) / 2); gateSign(z1, zoneDef(k + 1), Z.rim);   // the way on: always open
-  for (let x = -12; x <= 12; x += WT) for (let z = z1 + WT / 2; z < z0; z += WT) occ.set(tkey(x, z), 'skip');
-  floorTiles(-24, 24, z1, z0, [0xe3d3ad, 0xd9c79d], pocc);   // the street up the middle
+  for (let x = -24; x <= 24; x += WT) for (let z = z1 + WT / 2; z < z0; z += WT) occ.set(tkey(x, z), 'skip');
+  floorTiles(-36, 36, z1, z0, [0xe3d3ad, 0xd9c79d], pocc);   // the street up the middle (on the same 24-stud grid as the rest, so nothing overlaps)
   booth('cards', -64, z0 - 38, 'e', k); booth('crates', 64, z0 - 38, 'w', k); booth('quests', -64, z0 - 104, 'e', k); homeHouse(64, z0 - 104, 40, 30, 'w', k);
   for (let z = z0 - 20; z > z1 + 10; z -= 44) { lamp(-30, z, 10); lamp(30, z, 10); }
   bench(-34, z0 - 72, 'z'); bench(34, z0 - 72, 'z');
@@ -3049,24 +3096,22 @@ function enemyRide(b, A, g, rig) {
   const kind = B.Z.water ? 'boat' : 'car', name = ENEMY_RIDE[kind][b.stage], R = RIDES[name], k = ENEMY_RIDE_K[b.stage];
   const vm = vehModel(name, R.s * k); vm.g.rotation.y = Math.PI; A.body.add(vm.g); A.wheels = vm.wheels; A.ride = R;
   const tint = b.stage === 'egg' ? 0xff8a7a : b.stage === 'adult' ? 0xfff0b0 : null;   // enraged ones run hot
-  if (tint) vm.g.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.color.set(tint); } });
+  A.vmats = []; if (tint) vm.g.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.color.set(tint); A.vmats.push(o.material); } });   // (about to attack: it flashes red)
   rig.g.scale.setScalar(k); const st = mpos(R, R.seat).multiplyScalar(k); rig.g.position.copy(st); A.seated = true;
-  if (b.stage !== 'larva') { const mt = mountModel(b.stage === 'egg' ? 'g:o' : 'g:h') || mountModel('g:d'); if (mt) { mt.position.copy(mpos(R, R.roof).multiplyScalar(k)); mt.scale.setScalar(k); A.body.add(mt); A.mount = mt; } }
+  if (b.stage !== 'larva' && RANGED[b.type]) { const mt = mountModel(b.stage === 'egg' ? 'g:o' : 'g:h') || mountModel('g:d'); if (mt) { mt.position.copy(mpos(R, R.roof).multiplyScalar(k)); mt.scale.setScalar(k); A.body.add(mt); A.mount = mt; } }
   const bb = VEH_DATA.geo[name].parts.map(p => p.box).reduce((q, x) => (x[3] - x[0]) * (x[5] - x[2]) > (q[3] - q[0]) * (q[5] - q[2]) ? x : q), len = (bb[5] - bb[2]) * R.s * k;
   A.top = (R.roof[1] * R.s + 4) * k + (A.mount ? 3 * k : 0); A.sc = k * 3;
   A.ring.geometry.dispose(); A.ring.geometry = new THREE.TorusGeometry(len * 0.62, 0.5 * k, 6, 36);
-  if (A.aura) { A.aura.geometry.dispose(); A.aura.geometry = new THREE.CylinderGeometry(len * 0.6, len * 0.66, A.top, 18, 1, true); A.aura.position.y = A.top / 2; }
   if (A.shell) { A.shell.geometry.dispose(); A.shell.geometry = new THREE.SphereGeometry(len * 0.62, 16, 12); A.shell.position.y = A.top * 0.35; }
 }
 function bugModel(b, small) {
   const K = BUGS[b.type], [hatK, col] = ENEMY_LOOK[b.type] || ENEMY_LOOK.grub, sc = ENEMY_SCALE[b.stage][!small && TS >= 48 ? 1 : 0];
   const look = { skin: b.stage === 'egg' ? 0xd86a5a : 0x9aa0a8, shirt: col, arms: new THREE.Color(col).multiplyScalar(0.7).getHex(), pants: 0x2a2a30, hat: hatK, hatColor: K.dark, face: b.stage === 'larva' ? 'meh' : 'grin' };
-  const rig = makeRig(look, { gun: b.stage !== 'larva' }); scene.remove(rig.g);
+  const rig = makeRig(look, { gun: !!RANGED[b.type] && b.stage !== 'larva' }); scene.remove(rig.g);
   const g = new THREE.Group(), body = new THREE.Group(); g.add(body); body.add(rig.g); rig.g.scale.setScalar(sc);
   const A = { body, rig, legs: [], wings: [], tail: null, segs: [], top: 5.4 * sc, sc };
   // a ring at its feet in its trait's colour (gold-rimmed once it's strong); enraged ones burn red
   const r = new THREE.Mesh(new THREE.TorusGeometry(2.2 * sc, 0.18 * sc, 6, 28), new THREE.MeshBasicMaterial({ color: b.stage === 'larva' ? K.color : 0xffd24a })); r.rotation.x = Math.PI / 2; r.position.y = 0.3; g.add(r); A.ring = r;
-  if (b.stage === 'egg') { const au = new THREE.Mesh(new THREE.CylinderGeometry(2.4 * sc, 2.8 * sc, 6 * sc, 16, 1, true), auraMat()); au.position.y = 3 * sc; g.add(au); A.aura = au; }
   if (b.type === 'shellback' && b.stage === 'adult') { const sh = new THREE.Mesh(new THREE.SphereGeometry(A.top * 0.62, 16, 12), new THREE.MeshPhongMaterial({ color: 0xb48aff, transparent: true, opacity: 0.28, shininess: 90, specular: 0xffffff, depthWrite: false })); sh.position.y = A.top * 0.5; g.add(sh); A.shell = sh; }
   if (window.GrugOutfitRig && KIT_LOOKS && KIT_LOOKS.length) try { GrugOutfitRig.dress(rig, KIT_LOOKS[(BUG_ID + b.type.length) % KIT_LOOKS.length]); } catch (_) { }   // in the arcade's outfits (the ring and the size say what they are)
   if (!small && B.Z && B.Z.ride && typeof VEH_DATA !== 'undefined') enemyRide(b, A, g, rig);   // you're in your car (or boat): so are they
@@ -3079,7 +3124,7 @@ function spriteTex(name) { if (SPRITE_TEX[name]) return SPRITE_TEX[name]; const 
 function bugTag() { const el = document.createElement('div'); el.className = 'tag'; el.innerHTML = '<div class="nm ol"></div><div class="hp"></div><div class="st ol"></div>'; el.style.display = 'none'; $('tags').appendChild(el); return { el, nm: el.querySelector('.nm'), hp: el.querySelector('.hp'), st: el.querySelector('.st'), key: '', on: false }; }
 let BUG_ID = 0;
 function addBug(type, i, j, stage, species) {
-  const b = { id: ++BUG_ID, type, species: species || pickSpecies(type), stage, i, j, hp: RULES.hp[stage], shell: type === 'shellback' && stage === 'adult', frozen: false, dead: false, pos: null, sq: 0, t0: rnd(0, 6), ice: null };
+  const b = { id: ++BUG_ID, type, species: species || pickSpecies(type), stage, w1: pick(WORDS1), w3: pick(WORDS3[RANGED[type] ? 'ranged' : 'melee']), i, j, hp: RULES.hp[stage], shell: type === 'shellback' && stage === 'adult', frozen: false, dead: false, pos: null, sq: 0, t0: rnd(0, 6), ice: null };
   const m = bugModel(b); b.g = m.g; b.A = m.A; b.tag = bugTag(); b.g.traverse(o => { o.userData.bug = b; });
   B.bugs.push(b); return b;
 }
@@ -3094,19 +3139,21 @@ function updateBugs(dt) {
   for (const b of B.bugs) {
     const t = T(b.i, b.j), p = b.pos || { x: t.x, y: visTop(t), z: t.z };
     b.g.position.set(p.x, p.y, p.z);
-    const dx = player.ch.x - p.x, dz = player.ch.z - p.z, yaw = Math.atan2(-dx, -dz); b.g.rotation.y += angDiff(b.g.rotation.y, yaw) * Math.min(1, dt * 4);
+    const dx = player.ch.x - p.x, dz = player.ch.z - p.z, yaw = b.walking ? b.walkYaw : Math.atan2(-dx, -dz); b.g.rotation.y += angDiff(b.g.rotation.y, yaw) * Math.min(1, dt * 4);
     const tt = Game.clock + b.t0, A = b.A;
     if (b.sq > 0) b.sq = Math.max(0, b.sq - dt * 4);
     const sq = b.sq; b.g.scale.set(1 + sq * 0.35, 1 - sq * 0.45, 1 + sq * 0.35);
     if (b.frozen) continue;
-    const r = A.rig, sw = Math.sin(tt * (b.stage === 'egg' ? 9 : 3));   // idle: a sway, fists up; enraged: shaking, the aura flaring
-    r.j.rs = r.gun ? Math.PI / 2 : sw * 0.3; r.ls.rotation.x = -sw * 0.3 - (b.stage === 'egg' ? 1.2 : 0.3); r.rs.rotation.x = r.gun ? Math.PI / 2 + sw * 0.05 : sw * 0.3; r.rh.rotation.x = r.lh.rotation.x = 0;
+    const r = A.rig, sw = Math.sin(tt * 3);   // idle: a sway, fists up (a gun aimed at you, if it has one)
+    r.j.rs = r.gun ? Math.PI / 2 : sw * 0.3; r.ls.rotation.x = -sw * 0.3 - 0.3; r.rs.rotation.x = r.gun ? Math.PI / 2 + sw * 0.05 : sw * 0.3; r.rh.rotation.x = r.lh.rotation.x = 0;
+    if (b.walking && !A.seated) { const w = Math.sin(tt * 14); r.rh.rotation.x = w * 0.8; r.lh.rotation.x = -w * 0.8; r.ls.rotation.x = w * 0.7; if (!r.gun) r.rs.rotation.x = -w * 0.7; }
     if (A.seated) { r.rh.rotation.x = r.lh.rotation.x = Math.PI / 2; A.body.position.y = B.Z && B.Z.water ? Math.sin(tt * 2) * 0.3 : Math.abs(Math.sin(tt * 5)) * 0.15; A.body.rotation.z = B.Z && B.Z.water ? Math.sin(tt * 1.6) * 0.03 : 0; }   // in the seat; a boat bobs, a car idles
     else A.body.position.y = Math.abs(Math.sin(tt * 2.2)) * 0.3 * A.sc; if (A.ring) A.ring.rotation.z += dt;
     if (A.wheels && b.pos) for (const wh of A.wheels) wh.rotation.x += 8 * dt;
-    if (A.aura) { const k = 0.5 + 0.5 * Math.sin(tt * 6); A.aura.material.opacity = 0.25 + 0.3 * k; A.aura.scale.set(1 + k * 0.06, 1, 1 + k * 0.06); A.body.position.x = Math.sin(tt * 40) * 0.15 * A.sc; }
     if (b.hp < RULES.hp[b.stage] && Math.random() < dt * 3) { const q = b.g.position; FX.spawn('star', q.x + rnd(-3, 3), q.y + A.top + 1, q.z + rnd(-3, 3), { fps: 14, size: 4, add: true, color: 0xffe34a, vy: 2 }); }
-    if (b.flash > 0) { b.flash -= dt; flashRig(r, b.flash > 0.05); }
+    const red = b.stage === 'egg' && (Game.clock * 4 | 0) % 2 === 0;   // about to attack: flashing red
+    if (b.flash > 0) b.flash -= dt; rigMat(r, b.flash > 0.05 ? 'hit' : red ? 'red' : null);
+    if (A.vmats) for (const m of A.vmats) m.color.setHex(b.stage === 'egg' ? (red ? 0xff3a2a : 0xff8a7a) : m.color.getHex());
   }
 }
 function updateBugTags() {
@@ -3116,7 +3163,7 @@ function updateBugTags() {
     const on = tv.z < 1 && Math.abs(tv.x) < 1.1 && Math.abs(tv.y) < 1.1 && B.phase !== 'over';
     if (on !== tg.on) { tg.on = on; tg.el.style.display = on ? 'block' : 'none'; }
     if (!on) continue;
-    const st = b.frozen ? '<span class="stg f">FROZEN</span>' : b.stage === 'larva' ? '<span class="stg l">WEAK</span>' : b.stage === 'adult' ? '<span class="stg a">STRONG</span>' : `<span class="stg e${(Game.clock * 3 | 0) % 2 ? ' hot' : ''}">ENRAGED!</span>`;
+    const st = b.frozen ? '<span class="stg f">FROZEN</span>' : b.stage === 'larva' ? `<span class="stg l">${b.w1}?</span>` : b.stage === 'adult' ? '<span class="stg a">STRONG</span>' : `<span class="stg e${(Game.clock * 3 | 0) % 2 ? ' hot' : ''}">${b.w3}!</span>`;
     const key = b.type + b.stage + b.hp + b.shell + st;
     if (key !== tg.key) { tg.key = key; tg.nm.style.display = 'none'; tg.st.innerHTML = st; tg.hp.innerHTML = (b.shell ? '<i class="sh"></i>' : '') + Array.from({ length: RULES.hp[b.stage] }, (_, k) => `<i class="${k < b.hp ? '' : 'off'}"></i>`).join(''); }
     const sc = clamp((TS >= 48 ? 260 : 90) / d, 0.7, 1.15);
@@ -3422,7 +3469,8 @@ function startJob(zid) {
   if (VEH.on) exitRide(); ch.sit = null; if (Z.ride) rideForJob(Z); else rideOffJob();   // the first few zones you're on foot; later your car (or boat) is your piece   // later zones: your car (or boat) is your piece; the first few, you're on foot
   B.P = { i: best.i, j: best.j }; placePlayerOn(best); ch.vx = ch.vy = ch.vz = 0; ch.faceYaw = 0; ch.sit = null; player.pose = 'idle'; player.moving = false;
   // larvae already up, a couple of energy cells, tonight's burrows
-  for (let k = 0; k < Z.start; k++) { const c = R.tiles.filter(t => freeTile(t, { far: 3 })); if (!c.length) break; const t = pick(c); addBug(wpick(Object.entries(Z.mix)), t.i, t.j, 'larva'); }
+  const arrivals = []; for (let k = 0; k < Z.start; k++) { const c = R.tiles.filter(t => freeTile(t, { far: 3 })); if (!c.length) break; const t = pick(c); arrivals.push(addBug(wpick(Object.entries(Z.mix)), t.i, t.j, 'larva')); }
+  B.busy = true; Promise.all(arrivals.map((b, k) => sleep(0.5 + k * 0.25).then(() => walkIn(b)))).then(() => { B.busy = false; hudDirty = true; });   // they walk in from the zone ahead
   for (let k = 0; k < 2; k++) { const c = R.tiles.filter(t => freeTile(t)); const t = pick(c); addCell(t.i, t.j); }
   placeMounds();
   B.hand = Run.deck; rollOffers();
@@ -3466,16 +3514,17 @@ async function endDay() {
 }
 async function nightfall() {
   const Z = B.Z; LIGHT.want = 1; Snd.play('night'); announce(`NIGHT ${B.day}`, '', '#b9a8ff', 1.8); await sleep(1.1);
-  // enraged ones still standing hit you for a heart each, then run off. No hearts left: the run is over
+  // the ones about to attack hit you for a heart each (shot, or jumped on), then wind down. No hearts left: the run is over
   for (const b of B.bugs.filter(b => b.stage === 'egg' && !b.frozen)) { await strike(b); if (Run.hp <= 0) { B.phase = 'over'; announce('OUT OF HEARTS', '', '#ff5a4a', 3); Snd.ding('sad'); await sleep(1.6); endJob(false, 'hearts'); return; } }
   await growNight(); await morning();
 }
 async function growNight() {
   if (B.calm) { B.calm = false; announce('A CALM NIGHT', 'your pet kept them quiet', '#9be36b', 1.6); await sleep(0.6); for (const m of B.mounds.slice()) await surface(m); return; }   // the calm pet: nobody grows the first night
-  for (const b of B.bugs.filter(b => b.stage === 'adult' && !b.frozen)) await morph(b, 'egg');
+  for (const b of B.bugs.filter(b => b.stage === 'adult' && !b.frozen && !b.rested)) await morph(b, 'egg');
+  for (const b of B.bugs) b.rested = false;
   for (const b of B.bugs.filter(b => b.stage === 'larva' && !b.frozen)) { await morph(b, 'adult'); if (b.type === 'mounder' && bugH(b) === 0) await reshape(b, 1, true); }
   for (const b of B.bugs.filter(b => b.type === 'skitter' && b.stage === 'adult' && !b.frozen)) await skitter(b);
-  for (const m of B.mounds.slice()) await surface(m);
+  await Promise.all(B.mounds.slice().map((m, k) => sleep(k * 0.2).then(() => surface(m))));
   for (const b of B.bugs) if (b.frozen) { b.frozen = false; if (b.ice) { b.g.remove(b.ice); b.ice = null; } const c = bugCenter(b); FX.frost(c.x, c.y, c.z); }
 }
 async function morning() {
@@ -3505,23 +3554,45 @@ async function skitter(b) {
 async function surface(m) {
   const t = T(m.i, m.j); dropMound(m);
   if (isP(m.i, m.j) || bugAt(m.i, m.j)) { FX.dust(t.x, visTop(t), t.z, 5); Snd.play('dig', t.x, visTop(t), t.z); if (isP(m.i, m.j)) { Q.ev('block'); Pts.add(null, 'Burrow blocked!', 'kill'); DmgNum.add(t.x, visTop(t) + 6, t.z, 'BLOCKED', 'crush', visTop(t)); } await sleep(0.2); return; }
-  const b = addBug(m.type, m.i, m.j, 'larva', m.species), y = visTop(t); b.pos = { x: t.x, y: y - 3, z: t.z };
-  FX.rise(t.x, y, t.z); Snd.play('dig', t.x, y, t.z); Snd.play('chitter', t.x, y, t.z);
-  await tween(0.4, k => { b.pos.y = y - 3 + 3 * easeOut(k); }); b.pos = null; await sleep(0.08);
+  const b = addBug(m.type, m.i, m.j, 'larva', m.species); await walkIn(b);
 }
-// an egg hatches: bugs everywhere
-const SWARM = [];
+// a new enemy walks (or drives, or sails) in from the zone ahead, through the far side, onto its tile
+async function walkIn(b) {
+  const R = B.R, t = T(b.i, b.j), x0 = t.x + rnd(-0.3, 0.3) * TS, z0 = R.cz - R.half - TS * 1.6, dist = Math.hypot(t.x - x0, t.z - z0);
+  b.walking = true; b.walkYaw = Math.atan2(-(t.x - x0), -(t.z - z0)); b.pos = { x: x0, y: GY, z: z0 };
+  const ground = (x, z) => { if (Math.abs(x - R.cx) >= R.half || Math.abs(z - R.cz) >= R.half) return GY; const tt = tileAt(R, clamp(Math.floor((x - R.cx) / TS + N / 2), 0, N - 1), clamp(Math.floor((z - R.cz) / TS + N / 2), 0, N - 1)); return visTop(tt); };
+  await tween(clamp(dist / (TS * 3.4), 0.9, 2.6), k => { b.pos.x = x0 + (t.x - x0) * k; b.pos.z = z0 + (t.z - z0) * k; b.pos.y = ground(b.pos.x, b.pos.z); });
+  b.walking = false; b.pos = null; const y = visTop(t); FX.dust(t.x, y, t.z, 3, 0.6 * FXK()); Snd.play('chitter', t.x, y, t.z);
+}
+// about to attack, at nightfall: a ranged one shoots you from where it stands; the rest jump over, hit you and jump back. Then it winds down (STRONG again) for a night
 async function strike(b) {
-  const t = T(b.i, b.j), me = T(B.P.i, B.P.j), p0 = { x: t.x, y: visTop(t), z: t.z }, c = bugCenter(b); b.pos = { ...p0 };
-  announce('!!', '', '#ff5a4a', 1); Snd.play('chitter', c.x, c.y, c.z, 0.7);
-  await tween(0.35, k => { b.pos.x = p0.x + (me.x - p0.x) * k * 0.7; b.pos.z = p0.z + (me.z - p0.z) * k * 0.7; b.pos.y = p0.y + Math.sin(k * Math.PI) * 3.4 * FXK(); });
+  const t = T(b.i, b.j), p0 = { x: t.x, y: visTop(t), z: t.z }, ch = player.ch, c = bugCenter(b);
+  b.g.rotation.y = Math.atan2(-(ch.x - p0.x), -(ch.z - p0.z));
+  if (RANGED[b.type]) {
+    Snd.play('chitter', c.x, c.y, c.z, 0.7); await sleep(0.35);
+    let a; if (b.A.mount) { b.g.updateMatrixWorld(true); a = new THREE.Vector3(); b.A.mount.getWorldPosition(a); a.y += 2.4 * (b.A.sc / 3); } else { a = c.clone(); a.y += b.A.top * 0.1; }
+    const to = new THREE.Vector3(ch.x, ch.y, ch.z);
+    for (let k = 0; k < 3; k++) { beam(a, to, 0xff5a4a, 0.45 * FXK(), 0.22); Snd.play('zap', a.x, a.y, a.z); FX.spawn('impact', ch.x + rnd(-1, 1), ch.y, ch.z + rnd(-1, 1), { fps: 24, size: 4 * FXK(), color: 0xff7a5a, add: true }); await sleep(0.14); }
+    hurtPlayer();
+    await sleep(0.4);
+  } else {
+    const me = new THREE.Vector3(ch.x, ch.y - 3, ch.z), dx = me.x - p0.x, dz = me.z - p0.z, L = Math.hypot(dx, dz) || 1, stop = Math.max(0, L - TS * 0.55), hx = p0.x + dx / L * stop, hz = p0.z + dz / L * stop, hy = Math.max(p0.y, me.y), H = TS * 0.9 + 2;
+    Snd.play('jump', c.x, c.y, c.z); b.pos = { ...p0 };
+    await tween(0.42, k => { b.pos.x = p0.x + (hx - p0.x) * k; b.pos.z = p0.z + (hz - p0.z) * k; b.pos.y = p0.y + (hy - p0.y) * k + Math.sin(k * Math.PI) * H; });
+    FX.dust(hx, hy, hz, 4, 0.8 * FXK()); hurtPlayer(); await sleep(0.45);
+    await tween(0.42, k => { b.pos.x = hx + (p0.x - hx) * k; b.pos.z = hz + (p0.z - hz) * k; b.pos.y = hy + (p0.y - hy) * k + Math.sin(k * Math.PI) * H; });
+    b.pos = null; FX.dust(p0.x, p0.y, p0.z, 3, 0.6 * FXK());
+  }
+  await morph(b, 'adult'); b.rested = true; await sleep(0.15);
+}
+function hurtPlayer() {
   const ch = player.ch; camShake = 0.5; FX.boom(ch.x, ch.y, ch.z, 0xff5a4a); Snd.play('bass', ch.x, ch.y, ch.z); Snd.play('oof', ch.x, ch.y, ch.z);
   if (B.shield) { B.shield = false; DmgNum.add(ch.x, ch.y + 8, ch.z, 'BLOCKED', 'crush', ch.y - 3); announce('BLOCKED!', 'your pet took that one', '#9fd8ff', 1.6); }
   else { Run.hp--; player.hitFx = 0.6; DmgNum.add(ch.x, ch.y + 8, ch.z, '-1 ♥', 'hurt', ch.y - 3); announce('-1 ♥', Run.hp > 0 ? `${Run.hp} left` : '', '#ff5a4a', 1.6); }
-  hudDirty = true; await sleep(0.5);
-  await tween(0.5, k => { b.pos.x = p0.x + (me.x - p0.x) * 0.7 * (1 - k); b.pos.z = p0.z + (me.z - p0.z) * 0.7 * (1 - k); b.g.scale.setScalar(1 - k * 0.9); });
-  FX.spawn('smoke', b.pos.x, b.pos.y + 4, b.pos.z, { fps: 12, size: 16, color: 0xdddddd, grow: 0.8 }); dropBug(b); await sleep(0.2);
+  hudDirty = true;
 }
+// an egg hatches: bugs everywhere
+const SWARM = [];
 function updateSwarm(dt) {
   for (const s of SWARM) {
     const p = s.g.position; s.vy -= 70 * dt; p.x += s.vx * dt; p.y += s.vy * dt; p.z += s.vz * dt; s.t += dt;
@@ -3993,7 +4064,7 @@ const BOOTH_LOOK = {
   crates: { title: 'LOOT CRATES', col: 0x8a3aa8, trim: 0xf0c4ff, bg: '#3a1450', fg: ['#f0c4ff', '#ddd'], pad: 0xd16be8, css: '#f0c4ff' },
   quests: { title: 'QUEST BOARD', col: 0x8a5428, trim: 0xffe9a0, bg: '#3a2410', fg: ['#ffe9a0', '#ddd'], pad: 0xffd24a, css: '#ffe9a0' },
 };
-const crateBoxMat = (() => { let m = null; return () => m || (m = new THREE.MeshLambertMaterial({ map: spriteTex('crate') })); })();
+const crateBoxMat = () => mat(0x8a5a2e);   // brown studded cubes
 function randomLook() { return { skin: pick([0xf5cd30, 0xe0b48a, 0xa8744a, 0x6a4a32, 0xffd8b8]), shirt: new THREE.Color().setHSL(Math.random(), 0.6, 0.5).getHex(), arms: null, pants: pick([0x3a3a40, 0x2a4a8a, 0x5a3a2a, 0x2a2a2a]), hat: pick(['cap', 'beanie', 'hair', 'none', 'headphones']), hatColor: new THREE.Color().setHSL(Math.random(), 0.6, 0.45).getHex(), face: pick(['smile', 'grin', 'happy', 'cool']) }; }
 // each booth is a house (as in Zombie Zones): the roof goes when you step in. Inside: a counter with the keeper behind it, the goods,
 // shelves, and a glowing ring in front of the counter. Stand on the ring to shop
@@ -4034,9 +4105,9 @@ function booth(kind, x, z, face = 's', k = -1) {
       for (const [u, id] of [[-14, 'warp'], [14, 'laser']]) sprite(artTex(id), u, back + 1.5, Y + 8, 2.6);
       put(-17, 8, Y + 2, 4, 4, 4, 0x2a5aa8, f); put(17, 8, Y + 2, 4, 4, 4, 0xc4281c, f);
     } else {
-      const [cx, cz] = H.at(-6, -6), cr = new THREE.Mesh(new THREE.BoxGeometry(3.2, 3.2, 3.2), crateBoxMat()); cr.position.set(cx, Y + 5.3, cz); cr.castShadow = true; scene.add(cr); shows.push(cr);
+      const [cx, cz] = H.at(-6, -6), cr = new THREE.Mesh(boxGeo(3.2, 3.2, 3.2), crateBoxMat()); cr.position.set(cx, Y + 5.3, cz); cr.castShadow = true; scene.add(cr); shows.push(cr);
       const [gx, gz] = H.at(6, -6), gh = new THREE.Group(), gun = builtGun('ray', ''); gun.position.set(0, 0, 0); gh.add(gun); gh.position.set(gx, Y + 5, gz); gh.scale.setScalar(1.3); scene.add(gh); shows.push(gh);
-      for (const [u, v, n] of [[-17, 9, 2], [17, 9, 1], [-13, 10, 1]]) { for (let q = 0; q < n; q++) { const [bx, bz] = H.at(u, v), b = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4), crateBoxMat()); b.position.set(bx, Y + 2 + q * 4, bz); b.rotation.y = rnd(-0.3, 0.3); b.castShadow = true; scene.add(b); } put(u, v, Y + n * 2, 4, n * 4, 4, null); }
+      for (const [u, v, n] of [[-17, 9, 2], [17, 9, 1], [-13, 10, 1]]) { for (let q = 0; q < n; q++) { const [bx, bz] = H.at(u, v), b = new THREE.Mesh(boxGeo(4, 4, 4), crateBoxMat()); b.position.set(bx, Y + 2 + q * 4, bz); b.rotation.y = rnd(-0.3, 0.3); b.castShadow = true; scene.add(b); } put(u, v, Y + n * 2, 4, n * 4, 4, null); }
     }
   }
   const [px, pz] = H.at(0, kind === 'quests' || kind === 'library' ? 2 : 0);
@@ -4052,7 +4123,7 @@ function updateBooths(dt) {
     if (!ch || B.on) continue;
     const d = Math.hypot((VEH.on ? VEH.x : ch.x) - b.x, (VEH.on ? VEH.z : ch.z) - b.z), r = b.r || 2.6;
     if (d > r + 2.5) b.armed = true;
-    if (d < r && b.armed && !menuOpen()) { b.armed = false; Snd.wake(); if (b.kind === 'cards' || b.kind === 'crates' || b.kind === 'garage' || b.kind === 'dock') openStore(b.kind, b); else if (b.kind === 'library') openCodex(); else openBoard(b); }   // the shops: the keeper says hello, then the shop screen
+    if (d < r && b.armed && !menuOpen()) { b.armed = false; Snd.wake(); openStore(b.kind, b); }   // the shops: the keeper says hello, then the shop screen
   }
 }
 // the card shop in the Depot and the towns: the same shop as in a job, paid in energy; your kit opens up to pick the card it replaces
@@ -4086,7 +4157,7 @@ function updateTownfolk(dt) {
     if (TRADE.n === n) { n.path.length = 0; faceTo2(ch, player.ch.x, player.ch.z); ch.vx = ch.vz = 0; animateRig(n, dt, 'idle'); continue; }
     if (!n.path.length && (n.wait -= dt) <= 0) {   // somewhere else in town; across the row of booths, go by the path up the middle
       // somewhere along the street: in front of the shops' doors, by the benches, by the gates (never through a house)
-      const spots = [[0, -30], [0, -150], [-60, -70], [60, -70], [-60, -190], [60, -190], [-40, -130], [40, -130], [-20, -260], [20, -40]], [sx, sz] = pick(spots);
+      const spots = [[0, -16], [0, -72], [0, -128], [-24, -70], [24, -70], [-110, -40], [110, -40], [-110, -110], [110, -110], [20, -20]], [sx, sz] = pick(spots);
       n.path.push({ x: sx + rnd(-2, 2), z: S.z0 + sz + rnd(-3, 3) }); n.wait = rnd(3, 9);
     }
     const p = n.path[0];
@@ -4153,9 +4224,9 @@ const QT = {
   mv: { ev: 'card_mv', icon: 'arrow_up', txt: n => `Use ${n} Move cards`, n: [6, 12], r: 2 },
   at: { ev: 'card_at', icon: 'sword', txt: n => `Use ${n} Attack cards`, n: [5, 10], r: 2 },
   ut: { ev: 'card_ut', icon: 'shield', txt: n => `Use ${n} Utility cards`, n: [2, 4], r: 2 },
-  larva: { ev: 'catch_larva', icon: 'capsule', txt: n => `Beat ${n} weak enemies`, n: [3, 6], r: 3 },
+  larva: { ev: 'catch_larva', icon: 'capsule', txt: n => `Beat ${n} confused enemies`, n: [3, 6], r: 3 },
   adult: { ev: 'catch_adult', icon: 'potion', txt: n => `Beat ${n} strong enemies`, n: [2, 4], r: 3 },
-  egg: { ev: 'catch_egg', icon: 'egg', txt: n => `Beat ${n} enraged enem${n > 1 ? 'ies' : 'y'}`, n: [1, 2], r: 'skin' },
+  egg: { ev: 'catch_egg', icon: 'egg', txt: n => `Beat ${n} enem${n > 1 ? 'ies' : 'y'} about to attack`, n: [1, 2], r: 'skin' },
   crush: { ev: 'crush', icon: 'arrow_down', txt: n => `Land on ${n} enem${n > 1 ? 'ies' : 'y'} from above`, n: [1, 2], r: 'skin' },
   energy: { ev: 'energy', icon: 'cell', txt: n => `Pick up ${n} energy`, n: [5, 10], r: 2 },
   walk: { ev: 'walk', icon: 'tornado', txt: n => `Walk ${n} tiles`, n: [15, 30], r: 2 },
@@ -4229,7 +4300,7 @@ function rosterIcon(id) {
   const cv = document.createElement('canvas'); cv.width = cv.height = 128; const x = cv.getContext('2d'), im = x.createImageData(128, 128); for (let q = 0; q < 128; q++) im.data.set(px.subarray((127 - q) * 512, (128 - q) * 512), q * 512); x.putImageData(im, 0, 0);
   const url = cv.toDataURL(); if (KIT_NAMED[COMPANIONS[id].kit] || !window.GrugOutfitRig) COMP_ICON[id] = url; return url;
 }
-function followList() { const l = [], sp = equippedPet(); if (sp) l.push(sp); if (B.on && !VEH.battle) for (const c of B.caught || []) l.push('egg:' + c.rar); return l.slice(0, 8); }
+function followList() { const sp = equippedPet(); return sp ? [sp] : []; }   // only your equipped pet (or companion) follows you
 function ensureFollowers() {
   const want = player ? followList() : []; if (FOL.map(f => f.sp).join() === want.join()) return;
   const keep = new Map(FOL.map(f => [f.sp + '#' + FOL.filter(q => q.sp === f.sp).indexOf(f), f])), next = [];
@@ -4300,7 +4371,15 @@ function updateTradeBtn() {
 }
 $('tradeBtn').addEventListener('click', e => { e.stopPropagation(); Snd.wake(); if (tradeN) openTrade(tradeN); });
 
-function updateMeta(dt) { updateBooths(dt); updateTownfolk(dt); updateFollowers(dt); updateSkins(); updateTradeBtn(); }
+// in a battle nobody else is drawn (or moved): the crowd, the town players, the shopkeepers. Saves the frame for the fight
+let npcShown = true;
+function npcVisibility() {
+  const v = !B.on; if (v === npcShown) return; npcShown = v;
+  for (const n of npcs) if (n.rig) n.rig.g.visible = v;
+  for (const n of TOWNFOLK) n.rig.g.visible = v;
+  for (const k of KEEPERS) k.rig.g.visible = v;
+}
+function updateMeta(dt) { npcVisibility(); updateBooths(dt); if (!B.on) updateTownfolk(dt); updateFollowers(dt); updateSkins(); updateTradeBtn(); }
 
 
 // =====================================================================
@@ -4433,7 +4512,7 @@ function placeRide() { if (!VEH.root) return; VEH.root.position.set(VEH.x, VEH.y
 const eggMini = (() => { let g = null; return () => g || (g = new THREE.SphereGeometry(1, 14, 10)); })();
 function updateRidePets() {
   const R = VEH.R; if (!R) return;
-  const all = VEH.battle ? (B.caught || []).map(c => c.stage === 'egg' ? 'egg' : c.species) : Run.pets, list = R.bed ? all.slice(-R.bed.length) : [], key = VEH.name + '|' + list.join();
+  const sp = equippedPet(), list = R.bed && sp && PETS[sp] ? [sp] : [], key = VEH.name + '|' + list.join();   // only your equipped pet rides in the back (a companion rides along on foot)
   if (key === VEH.petKey) return; VEH.petKey = key;
   for (const p of VEH.pets) VEH.root.remove(p.g); VEH.pets = [];
   list.forEach((sp, k) => {
@@ -4598,7 +4677,19 @@ const KEEPER_LINES = {
   garage: ['Wheels and guns. What else does anyone need?', 'Every turret fits every ride. I made sure of that.', 'Pickups show off your eggs. Vans keep them cosy.', 'From Zone 4 your ride is your piece on the grid. Pick a good one.'],
   dock: ['Ahoy. Mind the splinters on the pier.', 'A boat is just a car that learned to swim.', 'The Tug hauls the most eggs. Just saying.', 'Out on the water the enemies sail too. Bring a big gun.'],
 };
-const STORE_LOOK = { cards: ['CARD SHOP', '#9be36b'], crates: ['LOOT CRATES', '#f0c4ff'], garage: ['GARAGE', '#ffb04a'], dock: ['DOCK', '#9fd8ff'] };
+const STORE_LOOK = { cards: ['CARD SHOP', '#9be36b'], crates: ['LOOT CRATES', '#f0c4ff'], garage: ['GARAGE', '#ffb04a'], dock: ['DOCK', '#9fd8ff'], quests: ['QUEST BOARD', '#ffe9a0'], library: ['CARD LIBRARY', '#9fd8ff'] };
+KEEPER_LINES.quests = ['Folks round here always need a hand. Have a look at the board.', 'Finish a quest and I\'ll make it worth your while.', 'Some of these pay out in skins. Just saying.', 'You can swap a quest you don\'t fancy. Once.'];
+KEEPER_LINES.library = ['Every card there is, all on these shelves. Have a browse.', 'Shh. This is a library. The cards don\'t like loud noises.', 'Looking for something new? It\'s all in here.', 'Read up before you buy. Knowledge is power. And so is Laser.'];
+// where the keeper's head sits on screen: [x, y, height] as fractions of the screen. The shop screen: big, top left (as in the reference);
+// upright phones: small, at the top. Talking: in the middle
+function keeperCam(kp, phase) {
+  const r = kp.rig; r.g.updateMatrixWorld(true); const bb = new THREE.Box3().setFromObject(r.head), c = bb.getCenter(new THREE.Vector3()), h = Math.max(1.2, bb.max.y - bb.min.y);
+  const tall = innerWidth < innerHeight, [sx, sy, sh] = phase === 'menu' ? (tall ? [0.5, 0.11, 0.13] : [0.215, 0.27, 0.34]) : (tall ? [0.5, 0.3, 0.2] : [0.5, 0.36, 0.3]);
+  const t2 = Math.tan(camera.fov * Math.PI / 360) * 2, d = h / (sh * t2), visH = d * t2, visW = visH * camera.aspect;
+  const y = kp.ch.faceYaw, f = new THREE.Vector3(-Math.sin(y), 0, -Math.cos(y)), up = new THREE.Vector3(0, 1, 0), right = f.clone().negate().cross(up).normalize();
+  const at = c.clone().addScaledVector(right, (0.5 - sx) * visW).addScaledVector(up, -(0.5 - sy) * visH);
+  return { pos: at.clone().addScaledVector(f, d), at };
+}
 // a keeper for the garage and the dock (the shops in houses get theirs from booth())
 function standKeeper(x, y, z, fx, fz) {
   const kp = { rig: makeRig(randomLook()), ch: { x, y: y + 3, z, faceYaw: Math.atan2(-(fx - x), -(fz - z)), vx: 0, vz: 0, grounded: true } };
@@ -4657,19 +4748,20 @@ function openStore(kind, bo) {
   if (!bo.kname) bo.kname = pick(KEEPER_NAMES);
   if (VEH.on) VEH.v = 0;
   S.look.set(cam.fx, cam.fy, cam.fz); S.cam = null;
-  if (S.kp) {   // in front of their face, a little above, looking at it
-    const r = S.kp.rig; r.g.updateMatrixWorld(true); const h = new THREE.Vector3(); r.head.getWorldPosition(h); const y = S.kp.ch.faceYaw, f = new THREE.Vector3(-Math.sin(y), 0, -Math.cos(y));
-    const phone = innerWidth < 760; S.cam = { pos: h.clone().addScaledVector(f, phone ? 8 : 6.6).add(new THREE.Vector3(0, 1.6, 0)), at: h.clone().add(new THREE.Vector3(0, phone ? -0.6 : -0.2, 0)) };
-  }
+  if (S.kp) S.cam = keeperCam(S.kp, 'talk');   // in close on their face
   for (const o of bo.shows || []) o.visible = false;   // the goods on the counter would sit in front of their face
   document.body.classList.add('storeon'); Snd.wake(); Snd.play('tick');
   const [title, col] = STORE_LOOK[kind], t = $('storeTalk');
   t.querySelector('.stWho').innerHTML = `${bo.kname} <small style="color:${col}">${title}</small>`; t.querySelector('p').textContent = pick(KEEPER_LINES[kind]);
   t.style.display = 'block'; $('store').style.display = 'none'; S.phase = 'talk'; S.lineAt = Game.clock; hudDirty = true;
 }
-function storeMenu() { const S = STORE; if (!S.on || S.phase !== 'talk' || Game.clock - S.lineAt < 0.25) return; S.phase = 'menu'; $('storeTalk').style.display = 'none'; $('store').style.display = 'flex'; renderStore(); Snd.play('tick'); }
+function storeMenu() {
+  const S = STORE; if (!S.on || S.phase !== 'talk' || Game.clock - S.lineAt < 0.25) return; $('storeTalk').style.display = 'none'; Snd.play('tick');
+  if (S.kind === 'quests' || S.kind === 'library') { S.phase = 'ext'; if (S.kind === 'quests') openBoard(S.bo); else openCodex(); return; }   // their own screens (the camera stays on the keeper till you close them)
+  S.phase = 'menu'; if (S.kp) S.cam = keeperCam(S.kp, 'menu'); $('store').style.display = 'block'; renderStore();
+}
 function closeStore() {
-  const S = STORE; if (!S.on) return; S.on = false; for (const o of (S.bo && S.bo.shows) || []) o.visible = true; S.phase = ''; $('store').style.display = 'none'; $('storeTalk').style.display = 'none';
+  const S = STORE; if (!S.on) return; S.on = false; if (S.kp) S.kp.rig.g.rotation.y = S.kp.ch.faceYaw; for (const o of (S.bo && S.bo.shows) || []) o.visible = true; S.phase = ''; $('store').style.display = 'none'; $('storeTalk').style.display = 'none';
   document.body.classList.remove('storeon'); cam.init = false; hudDirty = true; keyKit = '';
 }
 function renderStore() {
@@ -4677,11 +4769,11 @@ function renderStore() {
   const D = storeData(), [title, col] = STORE_LOOK[S.kind], el = $('store');
   S.tab = clamp(S.tab, 0, D.tabs.length - 1); S.sel = clamp(S.sel, 0, Math.max(0, D.list.length - 1));
   el.style.setProperty('--sc', col);
-  el.querySelector('.stMoney').innerHTML = `<b style="color:${col}">${title}</b>${D.money}`;
+  el.querySelector('.stMoney').innerHTML = `${D.money}<span class="sp"></span><b style="color:${col}">${title}</b>`;
   el.querySelector('.stTabs').innerHTML = D.tabs.length > 1 ? D.tabs.map((t, i) => `<button data-tab="${i}" class="${i === S.tab ? 'on' : ''}">${t}</button>`).join('') : '';
   el.querySelector('.stList').innerHTML = D.list.length ? D.list.map((it, i) => `<button class="stRow${i === S.sel ? ' on' : ''}" data-i="${i}"><img src="${it.icon}" alt=""${it.pix ? ' class="px"' : ''}><b>${it.name}</b><span>${it.status ? `<em>${it.status}</em>` : it.price}</span></button>`).join('') : '<div class="stNone">Nothing here yet</div>';
   const it = D.list[S.sel];
-  el.querySelector('.stL').style.visibility = it ? 'visible' : 'hidden';
+  el.querySelector('.stTop').style.visibility = el.querySelector('.stBot').style.visibility = it ? 'visible' : 'hidden';
   if (it) {
     const ic = el.querySelector('.stIc'); ic.src = it.icon; ic.classList.toggle('px', !!it.pix);
     el.querySelector('.stKind').innerHTML = `<span style="color:${it.kcol || col}">${it.kind}</span>`;
@@ -4697,12 +4789,17 @@ function renderStore() {
 }
 // the camera, while a shop's open: in close on the keeper (placeCamera hands over to this)
 function storeCamera(dt) {
-  const S = STORE; if (!S.on || !S.cam) return false;
-  const k = 1 - Math.exp(-6 * dt); camera.position.lerp(S.cam.pos, k); S.look.lerp(S.cam.at, k); camera.lookAt(S.look); camera.updateMatrixWorld(true); return true;
+  const S = STORE; if (!S.on) return false;
+  if (S.phase === 'ext' && !isOn('qboard') && !isOn('codex')) { closeStore(); return false; }   // the board (or the library) was closed: done
+  if (S.kp && S.phase !== 'ext') S.cam = keeperCam(S.kp, S.phase === 'menu' ? 'menu' : 'talk');   // (worked out each frame: the window can change shape)
+  if (!S.cam) return false;
+  const k = 1 - Math.exp(-6 * dt);
+  if (S.kp) { const g = S.kp.rig.g, want = Math.atan2(-(S.cam.pos.x - g.position.x), -(S.cam.pos.z - g.position.z)); g.rotation.y += angDiff(g.rotation.y, want) * k; }   // they turn to face you
+  camera.position.lerp(S.cam.pos, k); S.look.lerp(S.cam.at, k); camera.lookAt(S.look); camera.updateMatrixWorld(true); return true;
 }
 // keys: Enter/Space/click past the line; arrows pick; Esc leaves
 window.addEventListener('keydown', e => {
-  const S = STORE; if (!S.on || isOn('reel') || isOn('deckp')) return;
+  const S = STORE; if (!S.on || S.phase === 'ext' || isOn('reel') || isOn('deckp')) return;
   e.stopImmediatePropagation(); if (e.repeat && e.code !== 'ArrowUp' && e.code !== 'ArrowDown') return;
   if (e.code === 'Escape') { e.preventDefault(); closeStore(); return; }
   if (S.phase === 'talk') { if (e.code === 'Enter' || e.code === 'Space' || e.code === 'NumpadEnter') { e.preventDefault(); storeMenu(); } return; }
@@ -4903,6 +5000,8 @@ function setHints(on, init) { Save.hints = on; Save.save(); $('mHints').textCont
 $('mHints').addEventListener('click', () => setHints(!hintsOn())); setHints(hintsOn(), true);
 function setFast(on) { Save.fast = on; Save.save(); $('mFast').textContent = 'Fast animations: ' + (on ? 'On' : 'Off'); $('mFast').classList.toggle('on', on); }
 $('mFast').addEventListener('click', () => setFast(!Save.fast)); setFast(Save.fast);
+function setPlasticOpt(on) { Save.plastic = on; Save.save(); $('mPlastic').textContent = 'Shiny plastic: ' + (on ? 'On' : 'Off'); $('mPlastic').classList.toggle('on', on); setPlastic(on); }
+$('mPlastic').addEventListener('click', () => setPlasticOpt(!Save.plastic)); setPlasticOpt(Save.plastic);
 let wipeArm = -9;
 $('mWipe').addEventListener('click', () => { if (Game.clock - wipeArm > 3) { wipeArm = Game.clock; $('mWipe').textContent = 'Click again to wipe your save'; setTimeout(() => { $('mWipe').textContent = 'Reset all progress'; }, 3000); return; } Save.wipe(); location.reload(); });
 $('mLeave').addEventListener('click', () => { Save.save(); if (/^\/arcade\//.test(location.pathname)) location.href = '/arcade/'; else location.reload(); });
@@ -5032,7 +5131,16 @@ function hintText() {
   if (B.swap >= 0) return `Buying ${CARDS[B.offers[B.swap].id].name}: click the card in your deck it replaces (used or not) · Esc cancels`;
   if (B.sel >= 0) { const D = CARDS[B.hand[B.sel].id]; return `${D.name}: ${touchMode ? 'tap' : 'click'} a lit tile${D.self ? ` (or ${touchMode ? 'tap the card' : 'press ' + (B.sel + 1)} again)` : ''} · ${touchMode ? 'tap the card again' : 'right-click / Esc'} to cancel`; }
   const p = playable(), eggs = B.bugs.some(b => b.stage === 'egg');
-  return `${eggs ? '⚠ Smash the eggs before night! · ' : ''}${p ? `Pick a card${touchMode ? '' : ' (1-7)'}, then a lit tile · ${p} playable` : 'No moves left today'} · ${touchMode ? 'END DAY' : 'Enter'} when you're done · drag to turn the camera`;
+  return `${eggs ? '⚠ Beat the ones about to attack before night! · ' : ''}${p ? `Pick a card${touchMode ? '' : ' (1-7)'}, then a lit tile · ${p} playable` : 'No moves left today'} · ${touchMode ? 'END DAY' : 'Enter'} when you're done · drag to turn the camera`;
+}
+// the picked card (or the one under the mouse): what it does, over your hand
+function renderCardInfo() {
+  const el = $('cardInfo'), k = B.on && B.swap < 0 ? (B.sel >= 0 ? B.sel : !touchMode && hoverCard >= 0 && hoverCard < 100 ? hoverCard : -1) : -1, c = k >= 0 ? B.hand[k] : null;
+  const key = c ? c.id + '|' + c.used + '|' + (k === B.sel) + '|' + B.tgts.length : ''; if (el.dataset.k === key) return; el.dataset.k = key;
+  if (!c) { el.className = ''; el.innerHTML = ''; return; }
+  const D = CARDS[c.id], R = RARITY[D.rar];
+  el.className = 'on ' + D.type;
+  el.innerHTML = `<img src="${cardArt(c.id)}" alt=""><div><small><span class="${D.type}C">${TYPE[D.type][1].toUpperCase()}</span> · <span style="color:${R[1]}">${R[0].toUpperCase()}</span></small><b>${D.name}</b><p>${D.desc}</p>${c.used ? '<em>Used today: ready again tomorrow</em>' : k === B.sel ? `<em>${D.self && B.tgts.length ? 'Tap the card again (or a lit tile) to use it' : 'Now pick a lit tile'}</em>` : ''}</div>`;
 }
 function renderTip() {
   const id = B.on && B.swap >= 0 && B.offers[B.swap] ? B.offers[B.swap].id : null, el = $('tip');
@@ -5048,7 +5156,7 @@ function tipText() {
   if (k >= 0 && B.hand[k]) { const c = B.hand[k], D = CARDS[c.id]; return `<b class="${D.type}C">${D.name}</b> · ${TYPE[D.type][1]} · ${D.desc}${c.used ? ' <span style="color:#aaa">(used today)</span>' : ''}`; }
   if (B.hover && B.sel < 0 && B.swap < 0) {
     const b = bugAt(B.hover.i, B.hover.j), m = moundAt(B.hover.i, B.hover.j), c = cellAt(B.hover.i, B.hover.j), t = T(B.hover.i, B.hover.j);
-    if (b) { const K = BUGS[b.type]; return `<b style="color:${K.css}">${K.name}</b> · ${STAGE_NAME[b.stage]} ${b.hp}/${RULES.hp[b.stage]}${b.shell ? ' + shell' : ''}${t.h ? ' · up on a hill' : ''} · ${b.stage === 'larva' ? 'grows up tonight' : b.stage === 'adult' ? 'lays an egg tonight' : 'HATCHES TONIGHT: smash it!'} · ${K.what}`; }
+    if (b) { const K = BUGS[b.type]; return `<b style="color:${K.css}">${K.name}</b> · ${stageWord(b)} ${b.hp}/${RULES.hp[b.stage]}${b.shell ? ' + shell' : ''}${t.h ? ' · up on a hill' : ''} · ${b.stage === 'larva' ? 'gets its act together tonight' : b.stage === 'adult' ? 'winds up tonight' : RANGED[b.type] ? 'SHOOTS YOU TONIGHT: beat it first!' : 'JUMPS YOU TONIGHT: beat it first!'} · ${K.what}`; }
     if (m) return '<b style="color:#c9965a">Burrow</b> · a bug surfaces here tonight. Stand on it and nothing comes up';
     if (c) return '<b style="color:#ffe34a">Energy cell</b> · walk onto it (or over it) to pick it up. A lobbed shot sets it off: 1 damage to every bug round it';
     if (t.h) return '<b>Hill</b> · 8 studs up. Hop, leap or teleport to get up here; walking can\'t. Only lobbed attacks reach a bug up here from below';
@@ -5073,7 +5181,7 @@ function updateHud(dt) {
     const armed = Game.clock - B.endArm < 2.5 && B.endArm, eh = `<img src="${SPRITES.hourglass}" alt=""><span>${armed ? 'SURE?' : 'END'}</span>`; if (eb.dataset.h !== eh) { eb.dataset.h = eh; eb.innerHTML = eh; } eb.classList.toggle('armed', !!armed); eb.classList.toggle('last', B.day >= B.days);
   }
   if (!B.on && SHOP.hub) renderShop();
-  renderTip(); renderMod(); updateCursorMsg(0);
+  renderTip(); renderCardInfo(); renderMod(); updateCursorMsg(0);
 }
 function updateCursorMsg(dt) {
   const el = $('rmsg'); let text = null;
@@ -5106,7 +5214,7 @@ function renderPets() {
   const E = eq ? PET_ABIL[PET_POWER[eq]] : null;
   $('petsBody').innerHTML = `<div class="pth"><b>PETS &amp; COMPANIONS</b><small>${total} hatched · ${ROSTER.filter(ownsPet).length} of ${ROSTER.length} pets and companions</small><button id="petsClose">✕</button></div>
     <div class="peq">${eq ? `<img src="${rosterIcon(eq)}" alt=""><div><b>${rosterName(eq)}</b> · <span style="color:#ffe34a">${E[0]}</span><small>${E[1]}</small></div>` : '<div><b>Nobody equipped</b><small>Tap a pet or companion you\'ve hatched to equip them: they follow you and give you their power. One at a time</small></div>'}</div>
-    <div class="pgrid">${cells}</div><div class="plg">${rar.map(([r, c]) => `<span style="color:${c}">■ ${r.toUpperCase()}</span>`).join(' ')} <small>Pets (and companions, 1 egg in 5) hatch from the eggs enemies drop: beaten weak = rare egg, strong = epic, enraged = common</small></div>`;
+    <div class="pgrid">${cells}</div><div class="plg">${rar.map(([r, c]) => `<span style="color:${c}">■ ${r.toUpperCase()}</span>`).join(' ')} <small>Pets (and companions, 1 egg in 5) hatch from the eggs enemies drop: beaten while confused = rare egg, strong = epic, about to attack = common</small></div>`;
   $('petsClose').addEventListener('click', e => { e.stopPropagation(); togglePets(false); });
   for (const t of $('petsBody').querySelectorAll('[data-sp]')) t.addEventListener('click', e => { e.stopPropagation(); equipPet(t.dataset.sp); Snd.play('tick'); renderPets(); });
 }
@@ -5182,7 +5290,7 @@ function frame(now) {
   const dt = Math.min((now - last) / 1000, 0.1); last = now; Game.clock += dt;
   tickTweens(dt);
   if (player && !B.on) hubUpdate(dt);
-  updateNpcs(dt);
+  if (!B.on) updateNpcs(dt);   // (nobody else moves, or is drawn, in a battle)
   if (player) {
     if (B.on && !B.busy && !player.moving && B.phase !== 'won') placePlayerOn(T(B.P.i, B.P.j));
     animateRig(player, dt, B.on ? (VEH.battle ? 'sit' : player.pose) : undefined);
@@ -5193,7 +5301,7 @@ function frame(now) {
   FX.update(dt); updateDebris(dt); updateBeams(dt); Pts.update(dt); DmgNum.update(dt); updateAnnounce(dt);
   for (const R of ARENA) { R.pad.rotation.z += dt * 1.2; R.pad.position.y = 2 + Math.sin(Game.clock * 2) * 0.25; R.pad.visible = !B.on && R.Z.id === Run.zone; R.bill.hide = B.on || R.Z.id !== Run.zone; }
   barrierTex.offset.x = (Game.clock * 0.15) % 1;
-  placeCamera(dt); updateHouseView(); updateLight(dt);
+  placeCamera(dt); updateHouseView(); updateLight(dt); plasticSweep();
   const fx = cam.fx, fy = player ? cam.fy : 0, fz = cam.fz; sky.position.copy(camera.position); sun.position.set(fx + SUN_DIR.x * 260, fy + SUN_DIR.y * 260, fz + SUN_DIR.z * 260); sun.target.position.set(fx, fy, fz);
   Bills.update(); updateBugTags(); updateNpcTags(); updateHud(dt); Snd.listen();
   if (SC.on && SC.built) renderShowcase(); else renderer.render(scene, camera);
@@ -5201,7 +5309,7 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 // for testing from the console
-window.BZ = { STORE, openStore, closeStore, storeMenu, renderStore, areaAt, townAt, TS: () => TS, DASH, tryDash, VEH, RIDES, MOUNTS, parkRide, enterRide, exitRide, openGarage, buildRide, WATERS, openDeck, openCodex, buyCard, dealHand, KEEPERS, HOUSES, PETS, ITEMS, buyContinue, HINT, SHOP, openShop, showItem, SC, Run, BOOTHS, TOWNFOLK, TOWNSITE, Q, QT, openCrate, openTrade, offerTrade, TRADE, openCardShop, closeHubShop, toggleCosmo, equipPet, addEnergy, maxHearts, itemIcon, applyGear, npcs: null, zoneDef, ensureAreas, refreshGates, endJob, B, CARDS, BUGS, ZONES, ARENA, Save, startJob, leaveJob, endDay, selectCard, clickTile, buyOffer, swapInto, addBug, addCell, T, bugAt, cellAt, join, cam, camera, get player() { return player; }, Game, setStage, hurtBug, scene, renderer };
+window.BZ = { ALLBOX, W, STORE, openStore, closeStore, storeMenu, renderStore, areaAt, townAt, TS: () => TS, DASH, tryDash, VEH, RIDES, MOUNTS, parkRide, enterRide, exitRide, openGarage, buildRide, WATERS, openDeck, openCodex, buyCard, dealHand, KEEPERS, HOUSES, PETS, ITEMS, buyContinue, HINT, SHOP, openShop, showItem, SC, Run, BOOTHS, TOWNFOLK, TOWNSITE, Q, QT, openCrate, openTrade, offerTrade, TRADE, openCardShop, closeHubShop, toggleCosmo, equipPet, addEnergy, maxHearts, itemIcon, applyGear, npcs: null, zoneDef, ensureAreas, refreshGates, endJob, B, CARDS, BUGS, ZONES, ARENA, Save, startJob, leaveJob, endDay, selectCard, clickTile, buyOffer, swapInto, addBug, addCell, T, bugAt, cellAt, join, cam, camera, get player() { return player; }, Game, setStage, hurtBug, scene, renderer };
 window.BZ.npcs = npcs;
 
 </script>
