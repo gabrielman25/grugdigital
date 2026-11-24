@@ -31,8 +31,9 @@ the API changes, and test the whole flow headless (set → wear an image → dow
 The new pages share the legacy site's Pearls wallet (`localStorage 'grug.pearls.v1'`, same address, so the same data):
 never rename it or drop fields you don't know (the legacy pages keep `buys`, `code`, `club`, `ret` there). The numbers
 live in `CFG` at the top of `static/pearls.js`: new players start with 80, `/tizzy` (any capitalisation, see the middleware)
-gives 600 bonus Pearls (the $9.99 pack) on top: new players start at 680, existing wallets get +600, once per wallet
-(`promosUsed`), everyone gets 5 Pearls once per calendar day they visit (20 for Grug Gold members,
+gives 600 bonus Pearls (the $9.99 pack) on top: new players start at 680, existing wallets get +600; `/itch` (the
+landing page for the ads on the polysw.itch.io pages and asset zoos, `static/ads/`) gives 275 (the $4.99 pack) the same
+way. Each promo works once per wallet (`promosUsed`); everyone gets 5 Pearls once per calendar day they visit (20 for Grug Gold members,
 checked with the legacy `/assets/gold.js`), no cap. In the Avatar Studio, making and saving characters is free and an R6
 export (`.glb` or the zip) costs 25 Pearls once per character (re-downloads are free); the shirt/pants/face PNGs stay
 free. `character/pearls/` sells the same Stripe packs as the legacy `/pearls.html`; Stripe returns buyers to

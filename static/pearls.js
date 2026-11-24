@@ -20,8 +20,9 @@
   'use strict';
   const CFG = {
     start: 80,                      // a new player's first balance
-    promos: { tizzy: 600 },         // grugdigital.com/<promo>: bonus Pearls (600 = the $9.99 pack), for new players on top of
+    promos: { tizzy: 600, itch: 275 }, // grugdigital.com/<promo>: bonus Pearls (600 = the $9.99 pack, 275 = the $4.99 one), for new players on top of
                                     // the starting 80, for existing wallets added to the balance. Once per wallet (w.promosUsed).
+                                    // itch = the ads on the polysw.itch.io pages (grugdigital.com/itch).
     daily: 5,                       // Pearls once per calendar day for everyone
     dailyGold: 20,                  // … and for Grug Gold members (instead of 5)
     exportFee: 25                   // exporting a character as a Roblox R6 file (.glb / the whole set)

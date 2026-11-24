@@ -28,8 +28,9 @@ export async function onRequest(ctx) {
   // installed apps (Grug, Daypart, Bubble Tea, Café) start at /?pwa=…: keep them on the old home page
   if ((path === '/' || path === '/index.html') && url.searchParams.has('pwa')) return fromLegacy(ctx, legacy, '/', url, null);
 
-  // promo links get typed by hand: /Tizzy, /TIZZY/… all land on /tizzy/
-  if (/^\/tizzy\/?$/i.test(path) && !/^\/tizzy\/?$/.test(path)) return Response.redirect(url.origin + '/tizzy/' + url.search, 302);
+  // promo links get typed by hand: /Tizzy, /TIZZY/, /ITCH… all land on /tizzy/ or /itch/
+  const promo = /^\/(tizzy|itch)\/?$/i.exec(path);
+  if (promo && path !== '/' + promo[1].toLowerCase() + '/' && path !== '/' + promo[1].toLowerCase()) return Response.redirect(url.origin + '/' + promo[1].toLowerCase() + '/' + url.search, 302);
 
   const res = await next();
   if (res.status !== 404) return res;

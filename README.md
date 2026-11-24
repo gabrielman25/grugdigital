@@ -51,7 +51,8 @@ chat, describe a character, and Claude makes it.
   studio with a character already set up.
 - A new studio version: `python3 src/character/build.py path/to/studio.html`.
 - Pearls: `static/pearls.js` (the shared wallet, daily Pearls, the starting balance and the `/tizzy` promo),
-  `character/pearls/` (the studio's Pearls page: packs, Grug Gold, daily Pearls), `tizzy/` (the promo landing page).
+  `character/pearls/` (the studio's Pearls page: packs, Grug Gold, daily Pearls), `tizzy/` and `itch/` (the promo landing pages; `itch/` is where the ads on the itch.io pages and zoos land,
+  see `static/ads/`).
   R6 exports cost Pearls; making and saving characters is free.
 - The Claude skill: `src/skill/` (served as `/character/roblox-characters.zip`).
 

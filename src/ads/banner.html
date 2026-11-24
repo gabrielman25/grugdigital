@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:F;src:url(fredoka.woff2) format('woff2');font-weight:300 700}
+*{box-sizing:border-box;margin:0}
+#ad{position:relative;width:960px;height:200px;overflow:hidden;background:#9BE338;font-family:F,sans-serif;color:#1E1B16;-webkit-font-smoothing:antialiased}
+.a{position:absolute}
+#logo{left:36px;top:66px;display:flex;align-items:center;gap:14px;font-weight:600;font-size:40px;letter-spacing:-.5px}
+#logo svg{width:66px;height:66px}
+.ch{bottom:-34px;height:190px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.25))}
+.t1{white-space:nowrap;font-weight:700;font-size:27px;letter-spacing:-.4px;line-height:1.05}
+.t2{white-space:nowrap;font-size:17px;font-weight:500;color:#2f4a12}
+.chip{display:inline-block;background:#1E1B16;color:#9BE338;font-weight:600;font-size:15px;padding:3px 10px;border-radius:8px;margin-right:6px}
+.pearl{border-radius:50%;background:radial-gradient(circle at 34% 30%,#fff 0 9%,#f3c4ff 16%,#d16be8 42%,#9b36b8 78%,#6d1f86 100%)}
+#bp{left:392px;top:46px;width:104px;height:104px}
+#url{display:inline-flex;align-items:center;gap:8px;background:#1E1B16;color:#9BE338;font-weight:700;font-size:20px;padding:8px 16px;border-radius:12px}
+#url svg{width:18px;height:18px}
+</style></head><body>
+<div id="ad">
+  <div class="a" id="logo">TILE<span>Grug Digital</span></div>
+  <img class="a ch" id="c0" src="ranger.png" style="height:172px"><img class="a ch" id="c1" src="skater.png" style="height:180px"><img class="a ch" id="c2" src="racer.png" style="height:172px">
+  <img class="a ch" id="c3" src="medic.png"><img class="a ch" id="c4" src="snow-rider.png"><img class="a ch" id="c5" src="grug.png">
+  <div class="a t1" id="a1" style="left:626px;top:48px">Make a game-ready avatar</div>
+  <div class="a t2" id="a2" style="left:627px;top:86px">Free to make. Export a rigged .glb to:</div>
+  <div class="a" id="a3" style="left:626px;top:118px"><span class="chip">Roblox</span><span class="chip">Unity</span><span class="chip">Godot</span><span class="chip">Blender</span></div>
+  <div class="a pearl" id="bp"></div>
+  <div class="a t1" id="b1" style="left:516px;top:38px;font-size:40px">275 FREE PEARLS</div>
+  <div class="a t2" id="b2" style="left:518px;top:88px">for itch.io devs: a $5 Pearl pack, on us</div>
+  <div class="a" id="b3" style="left:516px;top:124px"><span id="url">grugdigital.com/itch <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+</div>
+<script>
+const TILEP='M19.8 51C19.5 50.9 18.9 50.9 18.4 50.9C17.2 50.9 17.1 50.7 17 48.6C16.8 46.5 17 45.5 17.9 43.8C18.3 42.8 19 41.2 19.3 40.7C19.8 39.8 19.8 39.8 19.7 39.6C19.5 38.9 19.2 38.3 18.8 37.8C17.9 36.4 17.6 35.3 17.7 34C17.8 32.5 18.1 32 19.1 31.1C19.5 30.8 20 30.5 20 30.5C20.5 30 21.2 29.7 21.7 29.7C22.5 29.7 22.8 29.4 22.8 28.8C22.8 27.9 23.5 28.4 23.6 29.3C23.6 30 23.1 30.5 21.7 30.8C20.7 31 20.2 33 21 33.9C21.9 35 25.6 34.7 26.6 33.5C27 33.3 28 32.9 28.2 32.8C29.5 32.4 30 32.4 30.5 32.2C31 32.1 31.5 32 33 31.9C34.8 31.8 35.5 31.7 35.8 31.6C37.8 31 38.2 30.7 39 29.2C39.6 28.1 39.6 25.4 39 24.6C38.8 24.3 38.1 23 37.9 22.8C37.8 22.7 37.3 22.4 36.8 22.1C35.8 21.5 35.3 21.2 33.8 20.9C32.9 20.9 32 20.9 31.3 20.7C30.3 20.5 30 20.3 29.2 19.5C28 18.3 27.9 17.7 28.3 15.9C28.5 15.3 28.7 14.9 28.7 14.9C29.1 14.2 29.8 13.4 30.4 13.3C31.1 13.1 31.3 13.1 32.3 13C33.2 13 34.1 13.1 34.9 13.3C35.6 13.4 36.7 13.6 38.7 14.4C39.5 14.7 40.5 15.4 41.3 16.1C41.9 16.5 42.5 17 43 17.6C43.3 18 43.8 18.7 44 19.2C44.3 19.9 44.8 20.6 45.3 21.7C45.7 22.3 46 23.6 46.4 24.7C46.6 25.2 46.8 26.3 47 27.7C47.1 28.3 47.1 32.1 46.9 32.4C46.9 33.2 46.9 34.8 46.8 35.8C46.7 36.5 46.5 37.4 46.2 38.3C46.1 39 45.9 39.5 45.6 40.7C45.3 41.5 45 42.3 44.8 43C44.5 43.9 44.1 44.7 43.8 45.5C43.5 46.2 43.3 46.7 43 47.2C42.8 47.7 42.4 48.3 42.3 48.6C41.1 50.8 41.2 50.8 38.3 50.8C34.9 50.8 34.8 50.7 34.8 49.5C34.8 49 34.8 48.8 34.7 48.6C33.3 46.1 32.8 45.5 31.8 45.2C31.3 45 30.4 44.8 28.2 45.4C27.2 45.7 26 46.8 26 47.5C25.9 47.8 25.8 48.4 25.4 49.1C25.2 49.7 25.2 49.7 25.2 49.7C25.2 50.3 24.3 50.8 23.4 50.8C22.5 50.9 20.6 51 19.8 51Z';
+document.getElementById('logo').innerHTML=document.getElementById('logo').innerHTML.replace('TILE',`<svg viewBox="0 0 64 64"><rect x="4" y="4" width="56" height="56" rx="16" fill="#1F1A17"/><path fill="#9BE338" d="${TILEP}"/></svg>`);
+const $=id=>document.getElementById(id);
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)), p=(t,a,b)=>cl((t-a)/(b-a)), eo=x=>1-Math.pow(1-x,3), eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const back=x=>{const c=1.9;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2);};
+function set(id,{x=0,y=0,s=1,r=0,o=1}={}){const e=$(id);e.style.transform=`translate(${x}px,${y}px) scale(${s}) rotate(${r}deg)`;e.style.opacity=o;}
+function io(id,t,a,b,{dx=0,dy=0,din=.35,dout=.25}={}){const i=eo(p(t,a,a+din)),o=p(t,b-dout,b);set(id,{x:dx*(1-i),y:dy*(1-i)-eio(o)*12,o:t<a||t>b?0:Math.min(i,1-o)});}
+const T=8;
+window.render=function(t){
+  // characters: two trios, one per phase, standing at 360..560 (phase A) or right edge (phase B)
+  const A=[0,4], B=[4,8];
+  const posA=[[340,0],[410,-10],[480,0]], posB=[[842,0],[900,-8]];
+  [0,1,2].forEach(i=>{const d=A[0]+.1+i*.12,q=p(t,d,d+.45),o=p(t,A[1]-.3,A[1]);const e=$('c'+i);e.style.left=posA[i][0]+'px';
+    set('c'+i,{y:(1-back(q))*200+eio(o)*200+Math.sin(t*4+i)*3+posA[i][1],o:t>d&&t<A[1]?1:0});});
+  [3].forEach((c,i)=>{const d=B[0]+.35+i*.12,q=p(t,d,d+.45),o=p(t,B[1]-.3,B[1]);const e=$('c'+c);e.style.left=posB[i][0]+'px';
+    set('c'+c,{y:(1-back(q))*200+eio(o)*200+Math.sin(t*4+i)*3+posB[i][1],o:t>d&&t<B[1]?1:0});});
+  set('c5',{o:0}); set('c4',{o:0});
+  io('a1',t,A[0]+.2,A[1],{dx:30}); io('a2',t,A[0]+.35,A[1],{dx:30}); io('a3',t,A[0]+.5,A[1],{dx:30});
+  {const q=p(t,B[0]+.05,B[0]+.45),o=p(t,B[1]-.3,B[1]); set('bp',{s:Math.max(.01,back(q))*(1+.04*Math.sin(t*6))*(1-eio(o)),y:Math.sin(t*3)*4,o:t>B[0]&&t<B[1]?1:0});}
+  io('b1',t,B[0]+.15,B[1],{dx:30}); io('b2',t,B[0]+.3,B[1],{dx:30}); io('b3',t,B[0]+.45,B[1],{dx:30});
+  if(t>B[0]+.9){ $('url').style.transform=`scale(${1+.04*Math.sin((t-B[0])*7)})`; }
+};
+window.READY=Promise.all([document.fonts.ready,...[...document.images].map(i=>i.decode().catch(()=>{}))]); render(0);
+</script></body></html>

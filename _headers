@@ -1,0 +1,4 @@
+# Cloudflare Pages response headers. The ads embedded on itch.io (static/ads/) are loaded from itch's own pages and zoos.
+/static/ads/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=600

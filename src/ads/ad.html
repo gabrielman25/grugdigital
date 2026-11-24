@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:F;src:url(fredoka.woff2) format('woff2');font-weight:300 700}
+*{box-sizing:border-box;margin:0}
+html,body{background:#000}
+#ad{position:relative;width:800px;height:400px;overflow:hidden;background:#17171A;font-family:F,sans-serif;color:#F4F4F6;-webkit-font-smoothing:antialiased}
+.a{position:absolute;will-change:transform}
+.lime{color:#9BE338}
+.k{font-weight:700;letter-spacing:.08em;font-size:15px;text-transform:uppercase}
+.pearl{border-radius:50%;background:radial-gradient(circle at 34% 30%,#fff 0 9%,#f3c4ff 16%,#d16be8 42%,#9b36b8 78%,#6d1f86 100%)}
+/* persistent */
+#pill{right:16px;top:14px;display:flex;align-items:center;gap:8px;background:#9BE338;color:#1E1B16;font-weight:700;font-size:15px;padding:7px 14px 7px 8px;border-radius:999px;z-index:20}
+#pill .pearl{width:22px;height:22px}
+#logo{left:18px;bottom:12px;background:#17171A;padding:3px 10px 3px 3px;border-radius:9px;display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;z-index:20}
+#logo svg{width:26px;height:26px}
+#url{right:14px;bottom:12px;font-weight:600;font-size:15px;color:#9a9aa3;z-index:20;background:rgba(23,23,26,.92);padding:5px 10px;border-radius:9px}
+#url b{color:#F4F4F6}
+/* S1 */
+#s1k{left:40px;top:96px}
+.hl{font-weight:700;font-size:54px;line-height:1.02;letter-spacing:-.5px}
+#s1a{left:38px;top:124px}#s1b{left:38px;top:182px}
+#s1c{left:40px;top:262px;font-size:19px;color:#b9b9c2;font-weight:500}
+.ch{bottom:-30px;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5))}
+#disc{left:478px;top:52px;width:300px;height:300px;border-radius:50%;background:#9BE338}
+/* S2 */
+#win{left:26px;top:52px;width:458px;height:310px;border-radius:14px;background:#2c2c31;overflow:hidden;box-shadow:0 14px 30px rgba(0,0,0,.45)}
+#win .bar{height:24px;display:flex;align-items:center;gap:6px;padding:0 10px;background:#2c2c31}
+#win .bar i{width:9px;height:9px;border-radius:50%;background:#55555d}
+#win .bar span{margin-left:10px;font-size:11.5px;color:#a3a3ad;background:#1d1d21;border-radius:6px;padding:2px 10px}
+#win .scr{position:relative;width:458px;height:286px;overflow:hidden;background:#cfe6ff}
+#win .scr img{position:absolute;left:0;top:0;width:458px;height:286px}
+#cur{width:22px;height:22px;z-index:30}
+#rip{width:40px;height:40px;border-radius:50%;border:3px solid #9BE338;z-index:29}
+.step{display:flex;align-items:center;gap:10px}
+.num{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:#9BE338;color:#1E1B16;font-weight:700;font-size:17px}
+#s2t{left:512px;top:84px}
+#s2h{left:510px;top:124px;font-weight:700;font-size:36px;line-height:1.05}
+.li{left:512px;display:flex;align-items:center;gap:9px;font-size:17px;font-weight:500;color:#d8d8de}
+.li svg{width:20px;height:20px;flex:none}
+/* S3 */
+#s3t{left:0;right:0;top:58px;display:flex;justify-content:center}
+#s3h{left:0;right:0;top:94px;text-align:center;font-weight:700;font-size:44px;letter-spacing:-.4px}
+#file{left:60px;top:176px;width:170px;height:170px;border-radius:20px;background:#2c2c31;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:12px;overflow:visible}
+#file img{position:absolute;left:12px;top:-34px;width:146px}
+#file b{font-size:19px;position:relative}
+#file span{font-size:13px;color:#a3a3ad;position:relative}
+.eng{width:132px;height:50px;border-radius:14px;background:#2c2c31;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:19px;color:#a3a3ad}
+.eng.on{background:#9BE338;color:#1E1B16}
+.eng svg{width:18px;height:18px}
+.pk{width:30px;height:20px;border-radius:6px;background:#9BE338;color:#1E1B16;font-size:10px;font-weight:700;display:grid;place-items:center;z-index:5}
+#s3f{left:0;right:0;top:350px;text-align:center;font-size:15px;color:#a3a3ad}
+/* S4 */
+#s4t{left:40px;top:70px}
+#s4h{left:38px;top:106px;font-weight:700;font-size:33px;line-height:1.05}
+#s4p{left:40px;top:192px;font-size:17px;color:#b9b9c2;width:240px;line-height:1.35}
+.cov{width:212px;height:120px;border-radius:12px;overflow:hidden;box-shadow:0 10px 22px rgba(0,0,0,.45);border:3px solid #2c2c31}
+.cov img{width:100%;height:100%;object-fit:cover;display:block}
+.cov span{position:absolute;left:8px;bottom:7px;background:rgba(23,23,26,.85);border-radius:7px;padding:2px 8px;font-size:13px;font-weight:600}
+/* S5 */
+#lime{left:0;top:0;width:800px;height:400px;background:#9BE338;z-index:10}
+#s5{left:0;top:0;width:800px;height:400px;z-index:11;color:#1E1B16}
+#bigp{left:66px;top:96px;width:170px;height:170px}
+#bsh{left:86px;top:282px;width:130px;height:18px;border-radius:50%;background:#86c92c}
+.sp{width:16px;height:16px;z-index:12}
+#s5k{left:290px;top:62px;font-weight:700;font-size:16px;letter-spacing:.08em;background:#1E1B16;color:#9BE338;padding:5px 12px;border-radius:8px}
+#s5n{left:286px;top:96px;font-weight:700;font-size:96px;line-height:.95;letter-spacing:-2px}
+#s5w{left:290px;top:190px;font-weight:700;font-size:40px;letter-spacing:-.5px}
+#s5s{left:291px;top:240px;font-size:18px;font-weight:500;color:#2f4a12}
+#btn{left:290px;top:282px;display:flex;align-items:center;gap:10px;background:#1E1B16;color:#9BE338;font-weight:700;font-size:23px;padding:14px 24px;border-radius:16px;box-shadow:0 5px 0 #0b0a08}
+#btn svg{width:22px;height:22px}
+#btnu{left:572px;top:299px;font-weight:600;font-size:18px;color:#1E1B16}
+#s5l{left:18px;bottom:14px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px}
+#s5l svg{width:26px;height:26px}
+</style></head><body>
+<div id="ad">
+  <!-- S1 -->
+  <div class="a" id="disc"></div>
+  <img class="a ch" id="c1" src="ranger.png" style="left:448px;height:250px;bottom:20px">
+  <img class="a ch" id="c3" src="racer.png" style="left:640px;height:250px;bottom:20px">
+  <img class="a ch" id="c2" src="skater.png" style="left:530px;height:290px;bottom:8px">
+  <div class="a k lime" id="s1k">Hey game devs</div>
+  <div class="a hl" id="s1a">Need a hero</div>
+  <div class="a hl" id="s1b">for your game?</div>
+  <div class="a" id="s1c">Make one in minutes. Free.</div>
+
+  <!-- S2 -->
+  <div class="a" id="win"><div class="bar"><i></i><i></i><i></i><span>grugdigital.com/character</span></div><div class="scr" id="scr"></div></div>
+  <div class="a step" id="s2t"><span class="num">1</span><span class="k lime">Make it</span></div>
+  <div class="a" id="s2h">Build your<br>avatar</div>
+  <div class="a li" id="l1" style="top:220px">CHK Hair, faces &amp; 39 outfits</div>
+  <div class="a li" id="l2" style="top:252px">CHK Paint any outfit with AI</div>
+  <div class="a li" id="l3" style="top:284px">CHK Free to make and save</div>
+
+  <!-- S3 -->
+  <div class="a step" id="s3t"><span class="num">2</span><span class="k lime">Export it</span></div>
+  <div class="a" id="s3h">Drop it into <span class="lime">any engine</span></div>
+  <div class="a" id="file"><img src="racer.png"><b>Hero.glb</b><span>rigged · animated</span></div>
+  <div class="a eng" id="e0">Roblox</div>
+  <div class="a eng" id="e1">Unity</div>
+  <div class="a eng" id="e2">Godot</div>
+  <div class="a eng" id="e3">Blender</div>
+  <div class="a eng" id="e4">Three.js</div>
+  <div class="a eng" id="e5">+ any .glb</div>
+  <div class="a pk" id="p0">.glb</div><div class="a pk" id="p1">.glb</div><div class="a pk" id="p2">.glb</div><div class="a pk" id="p3">.glb</div><div class="a pk" id="p4">.glb</div><div class="a pk" id="p5">.glb</div>
+
+  <!-- S4 -->
+  <div class="a step" id="s4t"><span class="num">3</span><span class="k lime">Play it</span></div>
+  <div class="a" id="s4h">Free games in<br>the Grug Arcade</div>
+  <div class="a" id="s4p">Play as the avatar you made, right in your browser.</div>
+  <div class="a cov" id="v0" style="left:322px;top:62px"><img src="grug-city.jpg"><span>Grug City</span></div>
+  <div class="a cov" id="v1" style="left:552px;top:62px"><img src="zombie-zones.jpg"><span>Zombie Zones</span></div>
+  <div class="a cov" id="v2" style="left:322px;top:198px"><img src="slide-999.jpg"><span>Slide 999</span></div>
+  <div class="a cov" id="v3" style="left:552px;top:198px"><img src="grug-kingdom.jpg"><span>Grug Kingdom</span></div>
+  <img class="a ch" id="c4" src="snow-rider.png" style="left:470px;height:215px;bottom:-14px">
+
+  <!-- S5 -->
+  <div class="a" id="lime"></div>
+  <div class="a" id="s5">
+    <div class="a" id="bsh"></div><div class="a pearl" id="bigp"></div>
+    <svg class="a sp" id="k0" viewBox="0 0 16 16"><path d="M8 0l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#fff"/></svg>
+    <svg class="a sp" id="k1" viewBox="0 0 16 16"><path d="M8 0l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#fff"/></svg>
+    <svg class="a sp" id="k2" viewBox="0 0 16 16"><path d="M8 0l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#1E1B16"/></svg>
+    <div class="a" id="s5k">ITCH.IO EXCLUSIVE</div>
+    <div class="a" id="s5n">275</div>
+    <div class="a" id="s5w">FREE PEARLS</div>
+    <div class="a" id="s5s">A $5 Pearl pack, on us. Spend it on avatar exports.</div>
+    <div class="a" id="btn">Claim them now <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+    <div class="a" id="btnu">grugdigital.com/itch</div>
+    <img class="a" id="c5" src="medic.png" style="left:632px;top:14px;height:228px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.25))">
+    <div class="a" id="s5l">TILE_DARK Grug Digital</div>
+  </div>
+
+  <!-- persistent -->
+  <div class="a" id="pill"><span class="pearl"></span>275 FREE PEARLS</div>
+  <div class="a" id="logo">TILE Grug Digital</div>
+  <div class="a" id="url">Click to claim · <b>grugdigital.com/itch</b></div>
+  <div class="a" id="rip"></div>
+  <svg class="a" id="cur" viewBox="0 0 24 24"><path d="M4 2l15 9-6.5 1.5L16 20l-3 1.5-3.5-7.5L4 18z" fill="#fff" stroke="#1E1B16" stroke-width="1.6" stroke-linejoin="round"/></svg>
+</div>
+<script>
+const TILEP='M19.8 51C19.5 50.9 18.9 50.9 18.4 50.9C17.2 50.9 17.1 50.7 17 48.6C16.8 46.5 17 45.5 17.9 43.8C18.3 42.8 19 41.2 19.3 40.7C19.8 39.8 19.8 39.8 19.7 39.6C19.5 38.9 19.2 38.3 18.8 37.8C17.9 36.4 17.6 35.3 17.7 34C17.8 32.5 18.1 32 19.1 31.1C19.5 30.8 20 30.5 20 30.5C20.5 30 21.2 29.7 21.7 29.7C22.5 29.7 22.8 29.4 22.8 28.8C22.8 27.9 23.5 28.4 23.6 29.3C23.6 30 23.1 30.5 21.7 30.8C20.7 31 20.2 33 21 33.9C21.9 35 25.6 34.7 26.6 33.5C27 33.3 28 32.9 28.2 32.8C29.5 32.4 30 32.4 30.5 32.2C31 32.1 31.5 32 33 31.9C34.8 31.8 35.5 31.7 35.8 31.6C37.8 31 38.2 30.7 39 29.2C39.6 28.1 39.6 25.4 39 24.6C38.8 24.3 38.1 23 37.9 22.8C37.8 22.7 37.3 22.4 36.8 22.1C35.8 21.5 35.3 21.2 33.8 20.9C32.9 20.9 32 20.9 31.3 20.7C30.3 20.5 30 20.3 29.2 19.5C28 18.3 27.9 17.7 28.3 15.9C28.5 15.3 28.7 14.9 28.7 14.9C29.1 14.2 29.8 13.4 30.4 13.3C31.1 13.1 31.3 13.1 32.3 13C33.2 13 34.1 13.1 34.9 13.3C35.6 13.4 36.7 13.6 38.7 14.4C39.5 14.7 40.5 15.4 41.3 16.1C41.9 16.5 42.5 17 43 17.6C43.3 18 43.8 18.7 44 19.2C44.3 19.9 44.8 20.6 45.3 21.7C45.7 22.3 46 23.6 46.4 24.7C46.6 25.2 46.8 26.3 47 27.7C47.1 28.3 47.1 32.1 46.9 32.4C46.9 33.2 46.9 34.8 46.8 35.8C46.7 36.5 46.5 37.4 46.2 38.3C46.1 39 45.9 39.5 45.6 40.7C45.3 41.5 45 42.3 44.8 43C44.5 43.9 44.1 44.7 43.8 45.5C43.5 46.2 43.3 46.7 43 47.2C42.8 47.7 42.4 48.3 42.3 48.6C41.1 50.8 41.2 50.8 38.3 50.8C34.9 50.8 34.8 50.7 34.8 49.5C34.8 49 34.8 48.8 34.7 48.6C33.3 46.1 32.8 45.5 31.8 45.2C31.3 45 30.4 44.8 28.2 45.4C27.2 45.7 26 46.8 26 47.5C25.9 47.8 25.8 48.4 25.4 49.1C25.2 49.7 25.2 49.7 25.2 49.7C25.2 50.3 24.3 50.8 23.4 50.8C22.5 50.9 20.6 51 19.8 51Z';
+const tile=(bg,fg)=>`<svg viewBox="0 0 64 64"><rect x="4" y="4" width="56" height="56" rx="16" fill="${bg}"/><path fill="${fg}" d="${TILEP}"/></svg>`;
+const CHK='<svg viewBox="0 0 24 24" fill="none" stroke="#9BE338" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>';
+for (const el of document.querySelectorAll('.li')) el.innerHTML=el.innerHTML.replace('CHK',CHK);
+document.getElementById('logo').innerHTML=document.getElementById('logo').innerHTML.replace('TILE',tile('#9BE338','#1F1A17'));
+document.getElementById('s5l').innerHTML=document.getElementById('s5l').innerHTML.replace('TILE_DARK',tile('#1F1A17','#9BE338'));
+const scr=document.getElementById('scr'); const SHOTS=['s01','s02','s03','s04','s05','s06','s07','s08','s09','s10','s12'];
+for (const s of SHOTS){const i=document.createElement('img');i.src=s+'.jpg';i.id='i'+s;i.style.opacity=0;scr.append(i);}
+const $=id=>document.getElementById(id);
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const p=(t,a,b)=>cl((t-a)/(b-a));                 // progress 0..1
+const eo=x=>1-Math.pow(1-x,3);                    // ease out
+const eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const back=x=>{const c=1.9;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2);};
+const lerp=(a,b,x)=>a+(b-a)*x;
+function set(id,{x=0,y=0,s=1,r=0,o=1}={}){const e=typeof id==='string'?$(id):id;e.style.transform=`translate(${x}px,${y}px) scale(${s}) rotate(${r}deg)`;e.style.opacity=o;e.style.visibility=o<=0.001?'hidden':'visible';}
+// in/out helper: element visible in [a,b], enters over din from (dx,dy), leaves over dout
+function io(id,t,a,b,{dx=0,dy=0,din=.35,dout=.25,ex=-40,ey=0,sc=false}={}){
+  const i=eo(p(t,a,a+din)), o=p(t,b-dout,b); const k=sc?back(p(t,a,a+din)):1;
+  set(id,{x:dx*(1-i)+ex*eio(o),y:dy*(1-i)+ey*eio(o),s:sc?Math.max(0.01,k):1,o:t<a||t>b?0:Math.min(i*1.0,1-o)});
+}
+const T=15; // loop seconds
+const S1=[0,2.5],S2=[2.5,6.7],S3=[6.7,9.9],S4=[9.9,11.7],S5=[11.7,15];
+const ENG=[[300,186],[452,186],[604,186],[300,252],[452,252],[604,252]];
+window.render=function(t){
+  // S1
+  io('s1k',t,0.05,S1[1],{dx:-30}); io('s1a',t,0.15,S1[1],{dy:30}); io('s1b',t,0.3,S1[1],{dy:30}); io('s1c',t,0.75,S1[1],{dy:16});
+  {const a=p(t,0,.45),o=p(t,S1[1]-.3,S1[1]); set('disc',{s:Math.max(.01,back(a))*(1-eio(o)) ,o:t<S1[1]?1:0});}
+  [['c1',.25],['c2',.4],['c3',.55]].forEach(([id,d],n)=>{const a=p(t,d,d+.45),o=p(t,S1[1]-.3,S1[1]);const bob=Math.sin((t-d)*4+n)*4;set(id,{y:(1-back(a))*260+bob+eio(o)*300,o:t>d&&t<S1[1]?1:0});});
+  // S2
+  {const a=S2[0]; io('win',t,a,S2[1],{dy:20,din:.4,ex:-60}); io('s2t',t,a+.2,S2[1],{dx:30}); io('s2h',t,a+.3,S2[1],{dx:30}); io('l1',t,a+.6,S2[1],{dx:20}); io('l2',t,a+.85,S2[1],{dx:20}); io('l3',t,a+1.1,S2[1],{dx:20});
+   // screenshots: one every .34s from a+.55
+   const st=a+.55, dt=.34; let k=Math.floor((t-st)/dt); k=cl(k,0,SHOTS.length-1);
+   SHOTS.forEach((s,i)=>{$('i'+s).style.opacity=(i===k)?1:0;});
+   // cursor: travels to a spot then clicks at each change
+   const spots=[[360,140],[420,150],[400,130],[440,240],[360,250],[400,250],[440,250],[360,300],[400,300],[440,300],[440,82]];
+   if(t>a+.3&&t<S2[1]-.1){ const kk=cl(Math.floor((t-st+.17)/dt),0,SHOTS.length-1); const from=spots[Math.max(0,kk-1)], to=spots[kk];
+     const m=eio(p(t,st+(kk-1)*dt+.17- .17, st+kk*dt-.04)); const cx=lerp(from[0],to[0],m)+26, cy=lerp(from[1],to[1],m)+60+24;
+     set('cur',{x:cx,y:cy,o:1}); const since=t-(st+kk*dt); if(since>=0&&since<.22){const q=since/.22; set('rip',{x:cx-19,y:cy-19,s:.4+q*.9,o:1-q});} else set('rip',{o:0});
+   } else if(!(t>S5[0])) {set('cur',{o:0});set('rip',{o:0});}
+  }
+  // S3
+  {const a=S3[0]; io('s3t',t,a,S3[1],{dy:-14}); io('s3h',t,a+.1,S3[1],{dy:-14}); io('file',t,a+.25,S3[1],{sc:true});
+   const fly0=a+.75, gap=.28;
+   ENG.forEach(([x,y],i)=>{ const e=$('e'+i); io(e,t,a+.3+i*.05,S3[1],{dx:40}); e.style.left=x+'px'; e.style.top=y+'px';
+     const s0=fly0+i*gap, arr=s0+.3; e.classList.toggle('on',t>=arr);
+     if(t>=arr&&t<arr+.18){ const q=(t-arr)/.18; e.style.transform=`scale(${1+.12*Math.sin(q*Math.PI)})`; }
+     const pk=$('p'+i); if(t>=s0&&t<arr&&t<S3[1]){const q=eio((t-s0)/.3); const sx=210,sy=250, tx=x+104, ty=y-12; set(pk,{x:lerp(sx,tx,q),y:lerp(sy,ty,q)-Math.sin(q*Math.PI)*40,o:1});} else set(pk,{o:0}); });
+   const fb=$('file'); if(t>a+.25&&t<S3[1]) { fb.querySelector('img').style.transform=`translateY(${Math.sin(t*5)*3}px)`; }
+  }
+  // S4
+  {const a=S4[0]; io('s4t',t,a,S4[1],{dx:-30}); io('s4h',t,a+.1,S4[1],{dx:-30}); io('s4p',t,a+.3,S4[1],{dx:-20});
+   ['v0','v1','v2','v3'].forEach((v,i)=>io(v,t,a+.15+i*.12,S4[1],{dx:120,dy:0,din:.4,ex:-30}));
+   {const d=a+.7,q=p(t,d,d+.4),o=p(t,S4[1]-.25,S4[1]); set('c4',{y:(1-back(q))*240+eio(o)*240,o:t>d&&t<S4[1]?1:0});}
+  }
+  // S5: lime wipe in from right, out to left at the end
+  {const a=S5[0]; const wi=eio(p(t,a,a+.35)), wo=eio(p(t,T-.3,T)); const on=t>=a;
+   set('lime',{x:on?(1-wi)*800-wo*800:800,o:on?1:0});
+   const inS=t>=a+.15&&t<T-.05; const fade=1-p(t,T-.3,T-.1);
+   $('s5').style.opacity=inS?fade:0;
+   const pp=back(p(t,a+.2,a+.65)); set('bigp',{s:Math.max(.01,pp)*(1+.04*Math.sin((t-a)*6)),y:Math.sin((t-a)*3)*6}); set('bsh',{s:Math.max(.01,pp)*(1-.06*Math.sin((t-a)*3)),o:pp>0.02?1:0});
+   [[60,92,0],[214,118,.5],[90,250,1.0]].forEach(([x,y,d],i)=>{const ph=((t-a-d)%1.2+1.2)%1.2/1.2; const s=Math.sin(ph*Math.PI); set('k'+i,{x,y,s:Math.max(.01,s*1.4),r:ph*90,o:t>a+.5?s:0});});
+   io('s5k',t,a+.25,T,{dx:40,ex:0});
+   {const q=p(t,a+.35,a+.75); const n=Math.round(275*eo(q)); $('s5n').textContent=n; set('s5n',{s:Math.max(.01,back(q)),o:q>0?1:0});}
+   io('s5w',t,a+.55,T,{dy:20,ex:0}); {const q=p(t,a+.5,a+.95); set('c5',{y:(1-back(q))*-260+Math.sin((t-a)*3.4)*5,r:Math.sin((t-a)*2.2)*3,o:q>0?1:0});} io('s5s',t,a+.8,T,{dy:14,ex:0}); io('btnu',t,a+1.15,T,{dx:20,ex:0}); io('s5l',t,a+.4,T,{ex:0});
+   {const q=p(t,a+1.0,a+1.4); const press=t>a+2.35&&t<a+2.55?.94:1; const pulse=t>a+1.4?1+.035*Math.sin((t-a)*7):1; set('btn',{s:Math.max(.01,back(q))*pulse*press,o:q>0?1:0});}
+   // cursor glides to the button and clicks
+   if(t>a+1.6&&t<T-.15){const q=eio(p(t,a+1.6,a+2.3)); const cx=lerp(700,420,q), cy=lerp(390,318,q); set('cur',{x:cx,y:cy,o:1}); const since=t-(a+2.35); if(since>=0&&since<.3){const r=since/.3;set('rip',{x:cx-19,y:cy-19,s:.5+r*1.4,o:1-r});} else set('rip',{o:0});}
+   else if(t>=a){set('cur',{o:0});set('rip',{o:0});}
+  }
+  // persistent chrome (hidden on the offer card, which repeats it)
+  const hide=t>S5[0]+.15&&t<T-.1; const pulse=1+.05*Math.max(0,Math.sin(t*2*Math.PI/1.5))**8;
+  set('pill',{s:pulse,o:hide?0:1}); set('logo',{o:hide?0:1}); set('url',{o:hide?0:1});
+};
+window.READY=Promise.all([document.fonts.ready,...[...document.images].map(i=>i.decode().catch(()=>{}))]);
+render(0);
+</script>
+</body></html>
