@@ -163,67 +163,113 @@
   #rotate { position: fixed; inset: 0; z-index: 70; display: none; place-items: center; background: #14161a; text-align: center; padding: 20px; }
   body.touch.portrait.joined #rotate { display: grid; } #rotate b { display: block; font-size: 22px; margin: 14px 0 6px; } #rotate span { color: #ccc; font-size: 14px; }
   #rotate .ph { width: 56px; height: 96px; border: 4px solid #fff; border-radius: 10px; margin: 0 auto; animation: rot 1.8s ease-in-out infinite; } @keyframes rot { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
-  /* ---- the file select: the Grug homepage (Fredoka, light page, top bar, the drifting pre-render hero, cards) ---- */
-  @font-face { font-family: 'Fredoka'; font-style: normal; font-weight: 300 700; font-display: swap; src: url(/static/fredoka.woff2) format('woff2'); }
-  #files { --page: #F6F6F8; --card: #fff; --ink: #1E1B16; --soft: #5F5F68; --line: #E3E3E8; --chip: #EDEDF1; --accent: #9BE338; --accent-ink: #3F7A0A; --pad: clamp(16px, 3.6vw, 56px);
-    position: fixed; inset: 0; z-index: 25; overflow-y: auto; background: var(--page); color: var(--ink); font: 400 16px/1.45 'Fredoka', system-ui, -apple-system, 'Segoe UI', sans-serif; text-shadow: none; -webkit-font-smoothing: antialiased; user-select: none; touch-action: pan-y; transition: opacity .5s; }
-  html.dark #files { --page: #141417; --card: #1F1F23; --ink: #F3F3F5; --soft: #A6A6B0; --line: #303037; --chip: #2A2A30; --accent-ink: #9BE338; }
-  @media (orientation: landscape) { #files { --pad: clamp(32px, 7vw, 120px); } }
+  /* ---- the file select: laid out like the Grug Arcade page (a classic 2011 games page): a 900px column on green,
+     panning zone shots behind it, a banner with the logo and a crowd, the green nav bar, an orange alert strip,
+     a grey 140px left column and boxed file tiles, a Verdana footer ---- */
+  #files { position: fixed; inset: 0; z-index: 25; overflow-x: hidden; overflow-y: auto; background: #1f4a10; color: #000; font: 12px Arial, Helvetica, sans-serif; text-shadow: none; user-select: none; -webkit-user-select: none; touch-action: pan-y; transition: opacity .5s; }
   #files.gone { opacity: 0; pointer-events: none; }
-  #files .fw { padding-inline: var(--pad); }
-  #files .ftop { position: sticky; top: 0; z-index: 3; background: color-mix(in srgb, var(--page) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
-  #files .ftop .fw { display: flex; align-items: center; gap: 18px; height: 64px; }
-  #files .fbrand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; font-weight: 600; font-size: 22px; } #files .fbrand svg { width: 36px; height: 36px; }
-  #files .fnav { display: flex; gap: 4px; } #files .fnav a { padding: 8px 12px; border-radius: 10px; text-decoration: none; font-weight: 500; color: var(--soft); white-space: nowrap; } #files .fnav a:hover { background: var(--chip); color: var(--ink); }
-  #files .fend { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-  #files .fbtn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 22px; border-radius: 14px; border: 0; cursor: pointer; background: var(--accent); color: #1E1B16; font: 600 16px/1 'Fredoka', system-ui, sans-serif; text-decoration: none; transition: transform .12s; text-shadow: none; }
-  #files .fbtn:hover { transform: translateY(-1px); } #files .fbtn:active { transform: translateY(1px); }
-  #files .fbtn.ghost { background: var(--card); color: var(--ink); box-shadow: inset 0 0 0 2px var(--line); } #files .fbtn.sm { min-height: 38px; padding: 0 14px; font-size: 14px; border-radius: 11px; }
-  #files .fbtn.danger { background: #E5484D; color: #fff; } #files .fbtn.on { box-shadow: inset 0 0 0 2px var(--ink); }
-  #files .fhero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: clamp(20px, 3vw, 40px); align-items: center; padding-block: clamp(22px, 4vw, 48px) clamp(16px, 2.6vw, 28px); }
-  #files .feye { font-size: 13px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--soft); margin: 0 0 10px; }
-  #files h1 { font-size: clamp(34px, 4.6vw, 60px); line-height: 1.04; font-weight: 600; margin: 0 0 14px; letter-spacing: -.01em; }
-  #files .flead { font-size: clamp(16px, 1.4vw, 19px); color: var(--soft); margin: 0 0 22px; max-width: 46ch; }
-  #files .fctas { display: flex; flex-wrap: wrap; gap: 10px; }
-  #files .fshow { position: relative; overflow: hidden; border-radius: 28px; background: #1E1B16; aspect-ratio: 16 / 9; isolation: isolate; }
-  #files .fshow .s { position: absolute; inset: 0; opacity: 0; transition: opacity .9s ease; }
-  #files .fshow .s.on { opacity: 1; }
-  #files .fshow .bg { position: absolute; left: -10%; top: -6%; width: 120%; height: 112%; max-width: none; object-fit: cover; filter: blur(1.5px) saturate(1.05); transform: translateX(3%) scale(1.1); }
-  #files .fshow .fg { position: absolute; bottom: 3%; right: 7%; height: 88%; width: auto; max-width: none; }
-  #files .fshow .s.left .fg { right: auto; left: 8%; }
-  #files .fshow .s.go .bg { animation: fdriftBg 8s linear forwards; } #files .fshow .s.go .fg { animation: fdriftFg 8s cubic-bezier(.3, .1, .3, 1) forwards; } #files .fshow .s.left.go .fg { animation-name: fdriftFgL; }
-  @keyframes fdriftBg { from { transform: translateX(3%) scale(1.1); } to { transform: translateX(-3%) scale(1.14); } }
-  @keyframes fdriftFg { from { transform: translateX(-4%) scale(.98); } to { transform: translateX(4%) scale(1.02); } }
-  @keyframes fdriftFgL { from { transform: translateX(4%) scale(.98); } to { transform: translateX(-4%) scale(1.02); } }
-  #files .who { position: absolute; top: 16px; left: 16px; z-index: 2; display: flex; flex-direction: column; gap: 2px; padding: 9px 13px; border-radius: 14px; background: rgba(20, 18, 15, .62); backdrop-filter: blur(8px); color: #fff; }
-  #files .s.left .who { left: auto; right: 16px; text-align: right; } #files .who b { font-size: 17px; font-weight: 600; line-height: 1.1; } #files .who span { font-size: 13px; color: #D6D6DC; }
-  #files .cap { position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 2; max-width: 400px; padding: 10px 14px; border-radius: 16px; background: rgba(255, 255, 255, .94); color: #1E1B16; box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .45); }
-  #files .s.left .cap { left: auto; } #files .cap small { display: block; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #3F7A0A; } #files .cap p { margin: 2px 0 0; font-size: 16px; font-weight: 500; line-height: 1.3; }
-  #files .fhead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 20px; margin: 8px 0 14px; }
-  #files .fhead h2 { font-size: clamp(24px, 2.2vw, 32px); line-height: 1.1; margin: 0; font-weight: 600; } #files .fhead p { margin: 2px 0 0; color: var(--soft); }
-  #files .fnote { background: var(--chip); border-radius: 14px; padding: 10px 14px; font-size: 15px; color: var(--soft); margin-bottom: 16px; } #files .fnote b { color: var(--ink); font-weight: 600; }
-  #files .fgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 1.6vw, 22px); padding-bottom: 40px; }
-  @media (max-width: 900px) { #files .fgrid { grid-template-columns: 1fr; } #files .fhero { grid-template-columns: 1fr; } #files .fnav { display: none; } }
-  #files .card { display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; transition: transform .15s, box-shadow .15s; }
-  #files .card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px -14px rgba(30, 27, 22, .35); }
-  #files .card .pic { position: relative; aspect-ratio: 63 / 44; background: #1E1B16; overflow: hidden; }
-  #files .card .pic .bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(1px) saturate(1.05); transform: scale(1.08); transition: transform .5s; }
-  #files .card .pic .fg { position: absolute; left: 50%; bottom: 2%; height: 94%; width: auto; max-width: none; translate: -50% 0; transition: transform .35s; }
-  #files .card:hover .pic .bg { transform: scale(1.14); } #files .card:hover .pic .fg { transform: scale(1.04); }
-  #files .card.empty .pic .fg { filter: grayscale(.85) brightness(.9); opacity: .7; }
-  #files .badge { position: absolute; top: 10px; left: 10px; font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; padding: 5px 9px; border-radius: 8px; background: var(--accent); color: #1E1B16; }
-  #files .lvl { position: absolute; top: 10px; right: 10px; font-size: 14px; font-weight: 600; padding: 4px 10px; border-radius: 8px; background: rgba(20, 18, 15, .62); color: #fff; }
-  #files .card .body { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px 16px; flex: 1; }
-  #files .card h3 { font-size: 19px; line-height: 1.2; font-weight: 600; margin: 0; } #files .card p { margin: 0; color: var(--soft); font-size: 14px; }
-  #files .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; margin: 6px 0 4px; padding: 0; list-style: none; }
-  #files .stats li { display: flex; align-items: center; gap: 7px; font-size: 14px; color: var(--soft); } #files .stats li b { margin-left: auto; color: var(--ink); font-weight: 600; }
-  #files .stats canvas { width: 18px; height: 18px; image-rendering: pixelated; }
-  #files .card .go { margin-top: auto; padding-top: 8px; display: flex; gap: 8px; } #files .card .go .fbtn { flex: 1; }
-  #files .card.del { box-shadow: inset 0 0 0 2px #E5484D; }
-  #files .tiny { font-size: 13px; color: var(--soft); text-decoration: none; } #files .tiny:hover { color: var(--ink); text-decoration: underline; }
-  #files .modal { position: fixed; inset: 0; display: none; place-items: center; background: rgba(20, 18, 15, .45); z-index: 4; } #files .modal.on { display: grid; }
-  #files .modal .box { background: var(--card); border-radius: 22px; padding: 22px 24px; width: min(480px, 92vw); max-height: 84vh; overflow: auto; box-shadow: 0 20px 50px -20px rgba(0, 0, 0, .5); }
-  #files .modal h3 { margin: 0 0 10px; font-size: 22px; font-weight: 600; } #files .modal ul { margin: 0 0 16px; padding-left: 18px; color: var(--soft); } #files .modal li { margin: 4px 0; } #files .modal li b { color: var(--ink); font-weight: 600; }
+  #files *, #files *::before, #files *::after { box-sizing: content-box; }
+  #files a { color: #1d7a0c; text-decoration: none; } #files a:hover { text-decoration: underline; }
+  #files h1, #files h2, #files h3 { margin: 0; font-size: inherit; font-weight: inherit; display: inline; }
+  #files .fbg { position: absolute; left: 0; top: 0; width: 100%; height: 1150px; overflow: hidden; z-index: 0; pointer-events: none; -webkit-mask-image: linear-gradient(#000 0, #000 420px, transparent 1050px); mask-image: linear-gradient(#000 0, #000 420px, transparent 1050px); }
+  #files .fbg .sh { position: absolute; inset: 0; opacity: 0; background: #1f4a10 50% 40% / cover no-repeat; transition: opacity 2.6s ease; transform: scale(1.14); will-change: transform, opacity; }
+  #files .fbg .sh.on { opacity: 1; } #files .fbg .sh.go { animation: fpan 16s linear forwards; }
+  @keyframes fpan { from { transform: scale(1.14) translateX(3%); } to { transform: scale(1.14) translateX(-3%); } }
+  #files .fwrap { position: relative; z-index: 1; width: 920px; margin: 0 auto; transform-origin: top center; }
+  #FContainer { width: 900px; padding: 12px 10px 0; }
+  /* header: banner (100) + nav (30) */
+  #FHeader { width: 900px; height: 130px; position: relative; font-weight: bold; color: #fff; }
+  #FBanner { position: relative; height: 100px; }
+  #FBanner .crowd { position: absolute; bottom: 0; height: 92px; width: auto; }
+  #FBanner .crowd.me { height: 96px; }
+  #FLogo { position: absolute; left: 275px; top: 6px; width: 350px; display: flex; flex-direction: column; align-items: center; z-index: 2; }
+  #FLogo img { width: 330px; height: auto; filter: drop-shadow(0 2px 0 #0a2f72) drop-shadow(0 0 6px rgba(5, 25, 70, .55)); }
+  #FLogo span { margin-top: -2px; font: bold 15px/1 Arial, Helvetica, sans-serif; letter-spacing: .32em; text-transform: uppercase; color: #fff; text-shadow: 0 2px 0 #0a2f72, 0 0 6px rgba(5, 25, 70, .8); }
+  #FOptions { position: absolute; left: 0; top: 0; z-index: 3; }
+  #FOptions a { display: inline-block; margin: 6px 5px 0 12px; padding: 4px 9px; font: bold 14px/16px Arial, Helvetica, sans-serif; color: #fff; border-radius: 4px; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); background: linear-gradient(#7fcf43, #45a116 50%, #38900e 51%, #44a015); border: 1px solid #2a6c08; text-decoration: none; cursor: pointer; }
+  #FOptions a:hover { filter: brightness(1.07); text-decoration: none; }
+  #files .fnav { position: relative; height: 30px; font-size: 16px; line-height: 20px; background: linear-gradient(#8fdc4c 0, #5cb41e 45%, #3f9612 50%, #3a8c10 100%); }
+  #files .fnav ul { list-style: none; margin: 0 5px; padding: 0; display: flex; }
+  #files .fnav li { padding: 6px 0 4px; }
+  #files .fnav li > a, #files .fnav li > button { display: inline-block; padding: 0 8px; font: bold 16px/20px Arial, Helvetica, sans-serif; color: #fff; text-decoration: none; text-shadow: 0 1px 0 rgba(0, 40, 0, .35); background: none; border: 0; cursor: pointer; }
+  #files .fnav li > a:hover, #files .fnav li > button:hover { text-decoration: underline; }
+  #files .fnav li.r { margin-left: auto; }
+  #FAnnouncement { margin: 3px; }
+  #files .alert { position: relative; height: 18px; padding: 2px; background: #ffa500; color: #fff; font: bold 16px/18px Arial, Helvetica, sans-serif; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* body */
+  #FBody { width: 890px; padding: 5px; background: #f2f2f2; overflow: hidden; }
+  #files .col1 { float: left; width: 140px; margin-top: 10px; }
+  #files .col2 { float: left; width: 740px; margin: 10px 0 0 10px; position: relative; }
+  #files .bxh { height: 33px; padding: 0 7px 0 5px; width: 126px; color: #fff; font: bold 20px/1 Arial, Helvetica, sans-serif; background: linear-gradient(#5a5a5a, #2b2b2b 50%, #111 51%, #1d1d1d); clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%); border-radius: 4px 0 0 0; }
+  #files .bxh span { display: block; padding: 6px 5px 0 2px; white-space: nowrap; }
+  #files .bx { width: 126px; padding: 14px 5px; margin: 0 0 8px; border: 1px solid #aaa; background: #fff linear-gradient(#e9e9e9, #fff 90px) no-repeat; }
+  #files .me { text-align: center; }
+  #files .me .pic { width: 120px; height: 140px; margin: 0 auto 6px; background: #fff; border: 1px solid #ddd; overflow: hidden; }
+  #files .me .pic img { width: 120px; height: 140px; object-fit: contain; }
+  #files .me b { display: block; font-size: 13px; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #files .me p, #files .keys p { margin: 0 0 6px; font-size: 11px; color: #555; line-height: 1.3; }
+  #files .keys ul { list-style: none; margin: 0; padding: 0; font-size: 11px; color: #555; }
+  #files .keys li { display: flex; justify-content: space-between; gap: 4px; margin: 0 0 3px; } #files .keys li b { color: #000; }
+  /* tabs over the grey box */
+  #files .tabs { height: 31px; display: flex; }
+  #files .tab { position: relative; height: 31px; margin-left: 4px; cursor: pointer; font: bold 16px Arial, Helvetica, sans-serif; color: #333; border: 0; padding: 0; clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%); border-radius: 4px 0 0 0; background: linear-gradient(#e3e3e3, #c9c9c9); box-shadow: inset 1px 1px 0 #aaa, inset -1px 0 0 #aaa; }
+  #files .tab span { display: block; padding: 6px 20px 0 8px; height: 25px; white-space: nowrap; }
+  #files .tab.on { background: linear-gradient(#fff, #f7f7f7); z-index: 2; }
+  #files .tab:not(.on):hover { background: linear-gradient(#ececec, #d4d4d4); }
+  #files .tab.warn.on { color: #c4120c; }
+  #files .gray { clear: both; position: relative; top: -2px; width: 726px; padding: 5px; margin: 0 0 10px; border: 1px solid #aaa; background: #fff linear-gradient(#e9e9e9, #fff 120px) no-repeat; overflow: hidden; }
+  /* the showcase: zone shots taken in the game, the arcade's character renders drifting over them */
+  #fshow { position: relative; width: 726px; height: 250px; overflow: hidden; background: #0b2350; cursor: pointer; }
+  #fshow .s { position: absolute; inset: 0; opacity: 0; transition: opacity .9s ease; }
+  #fshow .s.on { opacity: 1; }
+  #fshow .bg { position: absolute; left: -6%; top: -6%; width: 112%; height: 112%; max-width: none; object-fit: cover; }
+  #fshow .fg { position: absolute; bottom: 44px; right: 40px; height: 196px; width: auto; max-width: none; }
+  #fshow .s.left .fg { right: auto; left: 40px; }
+  #fshow .s.go .bg { animation: fdriftBg 8s linear forwards; } #fshow .s.go .fg { animation: fdriftFg 8s cubic-bezier(.3, .1, .3, 1) forwards; } #fshow .s.left.go .fg { animation-name: fdriftFgL; }
+  @keyframes fdriftBg { from { transform: translateX(2.5%); } to { transform: translateX(-2.5%); } }
+  @keyframes fdriftFg { from { transform: translateX(26px); } to { transform: translateX(-8px); } }
+  @keyframes fdriftFgL { from { transform: translateX(-26px); } to { transform: translateX(8px); } }
+  #fshow .who { position: absolute; top: 12px; left: 16px; color: #fff; font: bold 24px/1.1 Arial, Helvetica, sans-serif; text-shadow: 0 2px 0 #0b3b7c, 0 0 8px rgba(5, 25, 70, .6); }
+  #fshow .s.left .who { left: auto; right: 16px; text-align: right; }
+  #fshow .who span { display: block; margin-top: 3px; font-size: 13px; font-weight: normal; color: #eef6ff; }
+  #fshow .cap { position: absolute; left: 0; right: 0; bottom: 0; height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 14px; background: #0b2350; color: #fff; font: bold 14px/1.2 Arial, Helvetica, sans-serif; box-sizing: border-box; width: 100%; }
+  #fshow .cap small { flex: none; padding: 3px 6px; border-radius: 3px; background: #fff; color: #0b3d8f; font-size: 11px; }
+  #fshow .dots { position: absolute; right: 14px; bottom: 16px; display: flex; gap: 5px; z-index: 2; }
+  #fshow .dots i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, .35); }
+  #fshow .dots i.on { background: #9BE338; }
+  #files .fhead { padding: 12px 4px 2px; font: bold 18px Arial, Helvetica, sans-serif; color: #333; } #files .fhead small { margin-left: 8px; font-size: 12px; font-weight: normal; color: #888; }
+  /* the three files, as classic game tiles */
+  #fgrid { overflow: hidden; padding: 4px 0 2px; }
+  #files .tile { float: left; width: 220px; margin: 4px 0 6px 6px; padding: 6px; border: 1px solid transparent; border-radius: 5px; }
+  #files .tile:hover { border-color: #888; background: #fff; box-shadow: 0 3px 10px rgba(0, 0, 0, .18); }
+  #files .tile .thumb { position: relative; display: block; width: 220px; height: 138px; background: #ccc; overflow: hidden; cursor: pointer; }
+  #files .tile .thumb .bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  #files .tile .thumb .fg { position: absolute; left: 50%; bottom: 0; height: 128px; width: auto; max-width: none; translate: -50% 0; }
+  #files .tile.empty .thumb .fg { filter: grayscale(.9); opacity: .6; }
+  #files .tile .num { position: absolute; top: 0; left: 0; padding: 3px 7px; background: #ffa500; color: #fff; font: bold 12px Arial, Helvetica, sans-serif; }
+  #files .tile .lv { position: absolute; top: 0; right: 0; padding: 3px 7px; background: rgba(0, 0, 0, .6); color: #fff; font: bold 12px Arial, Helvetica, sans-serif; }
+  #files .tile .nm { margin-top: 4px; font-weight: bold; font-size: 13px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  #files .tile .pc { color: red; line-height: 14px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  #files .tile .st { list-style: none; margin: 5px 0 6px; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1px 10px; font-size: 11px; color: #888; }
+  #files .tile .st li { display: flex; align-items: center; gap: 4px; } #files .tile .st li b { margin-left: auto; color: #333; }
+  #files .tile .st img { width: 16px; height: 16px; image-rendering: pixelated; }
+  #files .tile .blurb { margin: 5px 0 8px; font-size: 11px; color: #888; line-height: 14px; min-height: 48px; }
+  #files .pbtn { display: block; box-sizing: border-box; width: 100%; padding: 0; height: 32px; border-radius: 6px; font: bold 15px/30px Arial, Helvetica, sans-serif; color: #1e1b16; text-align: center; cursor: pointer; background: linear-gradient(#c6f57a, #9be338 50%, #86cf27 51%, #9be338); border: 1px solid #5f9a18; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6); }
+  #files .pbtn:hover { filter: brightness(1.06); }
+  #files .pbtn.del { color: #fff; background: linear-gradient(#ff8a7a, #e5483d 50%, #c4281c 51%, #d63a2e); border-color: #8a1a10; text-shadow: 0 1px 0 rgba(0, 0, 0, .3); }
+  #files .tiny { display: block; margin-top: 5px; text-align: center; font-size: 11px; }
+  #files .note { clear: both; padding: 8px 6px 4px; font-size: 10.8px; color: #555; line-height: 1.4; }
+  #files .note b { color: #000; }
+  /* credits, in the same grey box */
+  #fcredits { display: none; padding: 10px 12px 14px; font-size: 13px; line-height: 1.5; }
+  #fcredits.on { display: block; } #fcredits h3 { display: block; font: bold 18px Arial, Helvetica, sans-serif; margin-bottom: 6px; }
+  #fcredits ul { margin: 0 0 12px; padding-left: 18px; color: #555; } #fcredits li b { color: #000; }
+  #fcredits .pbtn { width: 160px; }
+  #files .gray.cred #fmain { display: none; }
+  /* footer */
+  #FFooter { width: 860px; padding: 28px 20px 30px; background: #e6e6e6; font: 13px Verdana, sans-serif; color: #aaa; text-align: center; }
+  #FFooter .fn { color: #bbb; margin-bottom: 10px; }
+  #FFooter .lg { margin: 8px 0 0; font-size: 10px; color: #555; line-height: 1.35; }
   #err { position: fixed; inset: 0; display: none; place-items: center; background: #14161a; text-align: center; font-size: 15px; z-index: 60; }
   #paused { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0, 0, 0, .35); font-size: 22px; z-index: 50; }
 
@@ -295,31 +341,70 @@
   <div><b>The world:</b> keep going right. Arenas lock until every foe is down; once cleared they stay clear. Walk back any time for the shops, and for things you couldn't reach the first time.</div>
 </div>
 
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="grugmark" viewBox="0 0 64 64"><rect x="4" y="4" width="56" height="56" rx="16" fill="#9BE338"/><path d="M19.8 51C19.5 50.9 18.9 50.9 18.4 50.9C17.2 50.9 17.1 50.7 17 48.6C16.8 46.5 17 45.5 17.9 43.8C18.1 43.3 18.3 42.8 18.3 42.8C18.3 42.6 19 41.2 19.3 40.7C19.8 39.8 19.8 39.8 19.7 39.6C19.5 38.9 19.2 38.3 18.8 37.8C17.9 36.4 17.6 35.3 17.7 34C17.8 32.5 18.1 32 19.1 31.1C19.5 30.8 19.9 30.5 20 30.5C20.5 30 21.2 29.7 21.7 29.7C22.5 29.7 22.8 29.4 22.8 28.8C22.8 27.9 23.5 28.4 23.6 29.3C23.6 30 23.1 30.5 21.7 30.8C20.7 31 20.2 33 21 33.9C21.9 35 25.6 34.7 26.6 33.5C26.6 33.4 26.7 33.4 26.7 33.4C26.8 33.4 27 33.3 27.3 33.2C27.5 33.1 28 32.9 28.2 32.8C29.5 32.4 29.8 32.4 30 32.4C30 32.4 30.3 32.3 30.5 32.2C31 32.1 31.5 32 33 31.9C34.8 31.8 35.5 31.7 35.8 31.6C35.9 31.5 36.2 31.4 36.4 31.4C37.8 31 38.2 30.7 39 29.2C39.6 28.1 39.6 25.4 39 24.6C38.9 24.5 38.8 24.4 38.8 24.4C38.8 24.3 38.1 23 37.9 22.8C37.8 22.7 37.3 22.4 36.8 22.1C36.3 21.8 35.8 21.5 35.7 21.5C35.3 21.2 33.8 20.9 32.9 20.9C32.5 20.9 32 20.9 31.9 20.8C31.8 20.8 31.5 20.7 31.3 20.7C30.3 20.5 30 20.3 29.2 19.5C28 18.3 27.9 17.7 28.3 15.9C28.4 15.7 28.5 15.4 28.5 15.3C28.6 15.2 28.7 15 28.7 14.9C29.1 14.2 29.8 13.4 30.4 13.3C31.1 13.1 31.3 13.1 32.3 13C33.2 13 34.1 13.1 34.9 13.3C35.2 13.3 35.6 13.4 35.8 13.5C36.7 13.6 37.3 13.8 38.7 14.4C39.5 14.7 40.5 15.4 41.3 16.1C41.5 16.2 41.9 16.5 42.1 16.6C42.2 16.8 42.5 17 42.6 17.1C42.7 17.3 42.9 17.5 43 17.6C43.3 18 43.8 18.7 44 19.2C44.1 19.5 44.3 19.9 44.5 20.1C44.6 20.3 44.8 20.6 44.8 20.9C44.9 21.1 45.1 21.4 45.3 21.7C45.5 21.9 45.6 22.2 45.7 22.3C45.7 22.4 45.8 22.7 45.8 22.9C45.9 23.1 46 23.6 46.1 23.9C46.2 24.2 46.4 24.6 46.4 24.7C46.6 25.2 46.8 26.3 46.9 26.8C46.9 27 47 27.4 47 27.7C47.1 28.3 47.1 32.1 46.9 32.4C46.9 32.5 46.9 33.2 46.9 34C46.9 34.8 46.9 35.6 46.8 35.8C46.8 36 46.7 36.3 46.7 36.5C46.6 36.9 46.5 37.4 46.4 37.7C46.3 37.8 46.3 38.1 46.2 38.3C46.2 38.6 46.1 38.9 46.1 39C46 39.1 46 39.3 45.9 39.5C45.6 40.7 45.3 41.5 45 42.3C45 42.4 44.9 42.7 44.8 43C44.7 43.4 44.5 43.9 44.3 44.3C44.1 44.7 43.9 45.2 43.8 45.5C43.7 45.8 43.6 46.1 43.5 46.2C43.5 46.2 43.5 46.3 43.5 46.3C43.5 46.4 43.4 46.5 43.3 46.7C43.2 46.8 43.1 47.1 43 47.2C43 47.3 42.9 47.5 42.8 47.7C42.6 47.9 42.4 48.3 42.3 48.6C41.1 50.8 41.2 50.8 38.3 50.8C34.9 50.8 34.8 50.7 34.8 49.5C34.8 49 34.8 48.8 34.7 48.6C33.3 46.1 32.8 45.5 31.8 45.2C31.6 45.1 31.3 45 31.1 45C30.4 44.8 29.9 44.9 28.2 45.4C27.2 45.7 26 46.8 26 47.5C26 47.6 26 47.7 26 47.7C25.9 47.8 25.9 48 25.8 48.2C25.8 48.4 25.6 48.8 25.4 49.1C25.3 49.4 25.2 49.7 25.2 49.7C25.2 50.3 24.3 50.8 23.4 50.8C23 50.9 22.5 50.9 22.3 50.9C22 51 20.6 51 19.8 51Z" fill="#1F1A17"/></symbol></svg>
+
 <div id="files">
-  <header class="ftop"><div class="fw">
-    <a class="fbrand" href="/" aria-label="Grug home"><svg aria-hidden="true"><use href="#grugmark"/></svg>Grug</a>
-    <nav class="fnav"><a href="/arcade/">Arcade</a><a href="/character/">Avatar Studio</a><a href="/build/">Building Studio</a></nav>
-    <div class="fend"><a class="fbtn sm ghost" href="/arcade/">All games</a><a class="fbtn sm" href="/character/">Change how you look</a></div>
-  </div></header>
-  <main class="fw">
-    <section class="fhero">
-      <div><p class="feye">Brickbound · an action RPG brawler</p><h1>Select a file</h1>
-        <p class="flead">The Ogre King Grimgut has taken the old keep. Grab your sword, bring a friend, and keep heading right. You play as your own character from the Avatar Studio.</p>
-        <div class="fctas"><button class="fbtn ghost sm" id="fMine" type="button">My character</button><button class="fbtn ghost sm" id="fDel" type="button">Delete a file</button><button class="fbtn ghost sm" id="fCred" type="button">Credits</button></div></div>
-      <div class="fshow" id="fshow"></div>
-    </section>
-    <div class="fhead"><div><h2>Your files</h2><p id="fsub">Three save files, kept in this browser.</p></div></div>
-    <div class="fnote"><b>Build 2:</b> your own character, a companion who fights beside you, rolling HP and SP like EarthBound, a magic menu on Shift, and a guard bubble that faces where you face.</div>
-    <div class="fgrid" id="fgrid"></div>
-  </main>
-  <div class="modal" id="fcredits"><div class="box"><h3>Credits</h3><ul>
-    <li><b>Made for Grug Digital</b> · grugdigital.com</li>
-    <li><b>Engine, parts and the classic look</b> from Zombie Zones</li>
-    <li><b>Combat and movement</b> from Bramble Crown (the Paper Blade kit)</li>
-    <li><b>Characters</b> from the Grug Avatar Studio: yours, and the arcade's own outfits</li>
-    <li><b>Effects</b> VfxMix sprite strips · <b>cursors and sounds</b> Kenney (CC0)</li>
-    <li><b>Inspired by</b> the RPGs we grew up on</li></ul><button class="fbtn" id="fCredX" type="button">Close</button></div></div>
+  <div class="fbg" id="fbg" aria-hidden="true"></div>
+  <div class="fwrap" id="fwrap"><div id="FContainer">
+    <div id="FHeader">
+      <div id="FBanner">
+        <div id="FOptions"><a href="/arcade/">« Back to Games</a></div>
+        <img class="crowd" src="/static/arcade/medic.webp" alt="" style="left:96px">
+        <img class="crowd" src="/static/arcade/racer.webp" alt="" style="left:170px;height:98px">
+        <a id="FLogo" href="/arcade/" title="Grug Arcade"><img src="/static/arcade/grug-digital-logo.png" alt="Grug Digital"><span>Brickbound</span></a>
+        <img class="crowd me" id="fCrowdMe" src="/static/arcade/grug.webp" alt="" style="left:636px">
+        <img class="crowd" src="/static/arcade/ranger.webp" alt="" style="left:724px">
+      </div>
+      <div class="fnav"><ul>
+        <li><a href="/character/?outfits">My Grug</a></li>
+        <li><a href="/arcade/">Games</a></li>
+        <li><a href="/character/">Avatar Studio</a></li>
+        <li><a href="/">Home</a></li>
+        <li><a href="/support.html">Help</a></li>
+        <li class="r"><button id="fMine" type="button">My character</button></li>
+      </ul></div>
+    </div>
+    <div id="FAnnouncement"><div class="alert">New in Brickbound: a companion, rolling HP and SP, a magic menu and a guard bubble!</div></div>
+    <div id="FBody">
+      <div class="col1">
+        <div class="bxh"><span><h2>Playing as</h2></span></div>
+        <div class="bx me">
+          <div class="pic"><img id="fMePic" src="/static/arcade/grug.webp" alt=""></div>
+          <b id="fMeName">Grug</b>
+          <p>You play as the character you saved in the Avatar Studio.</p>
+          <a href="/character/?outfits">Avatar Studio »</a>
+        </div>
+        <div class="bxh"><span><h2>Controls</h2></span></div>
+        <div class="bx keys">
+          <ul><li>Move<b>A D</b></li><li>Jump<b>Space</b></li><li>Attack<b>Click / J</b></li><li>Heavy<b>K</b></li><li>Bubble<b>Right-click</b></li><li>Magic<b>Shift</b></li><li>Slingshot<b>1</b></li><li>Potion<b>2</b></li><li>Talk<b>E</b></li></ul>
+          <p style="margin-top:8px">Controller works too: press <b>A</b> to play your latest file.</p>
+        </div>
+      </div>
+      <div class="col2">
+        <div class="tabs" role="tablist">
+          <button class="tab on" id="fTabFiles" role="tab" type="button"><span><h2>Select a File</h2></span></button><button class="tab warn" id="fDel" role="tab" type="button"><span>Delete a File</span></button><button class="tab" id="fCred" role="tab" type="button"><span>Credits</span></button>
+        </div>
+        <div class="gray" id="fgray">
+          <div id="fmain">
+            <div id="fshow"></div>
+            <div class="fhead"><h1>Brickbound</h1><small id="fsub">Three save files, kept in this browser.</small></div>
+            <div id="fgrid"></div>
+            <div class="note"><b>About:</b> The Ogre King Grimgut has taken the old keep. Grab your sword, bring a friend, and keep heading right through Willowbrook, Mossy Meadows, Whisperwood and the Crumbling Keep. Combo, launch and juggle goblins, cast magic, and shop for upgrades on the way.</div>
+          </div>
+          <div id="fcredits"><h3>Credits</h3><ul>
+            <li><b>Made for Grug Digital</b> · grugdigital.com</li>
+            <li><b>Engine, parts and the classic look</b> from Zombie Zones</li>
+            <li><b>Combat and movement</b> from Bramble Crown (the Paper Blade kit)</li>
+            <li><b>Characters</b> from the Grug Avatar Studio: yours, and the arcade's own outfits</li>
+            <li><b>Icons</b> IconMix · <b>effects</b> VfxMix sprite strips · <b>cursors and sounds</b> Kenney (CC0)</li>
+            <li><b>Inspired by</b> the RPGs we grew up on</li></ul><button class="pbtn" id="fCredX" type="button">Back to files</button></div>
+        </div>
+      </div>
+    </div>
+    <div id="FFooter">
+      <div class="fn"><a href="/privacy.html"><b>Privacy Policy</b></a> &nbsp;|&nbsp; <a href="/support.html">Contact Us</a> &nbsp;|&nbsp; <a href="/">About Us</a> &nbsp;|&nbsp; <a href="/arcade/">Free Games</a></div>
+      <p class="lg">Grug, Grug Digital, Pearls, characters, logos, names, and all related indicia are trademarks of <a href="/">Grug Digital</a>, ©2026.<br>Grug is not sponsored, authorized or endorsed by Roblox Corporation. Roblox is a trademark of Roblox Corporation, and no affiliation is intended.</p>
+    </div>
+  </div></div>
 </div>
 <div id="paused" class="ol"><div>Paused · click to play</div></div>
 <div id="touch">
@@ -2476,7 +2561,7 @@ const Objective = {
 };
 
 // =====================================================================
-//  FILE SELECT, themed on the Grug homepage: the drifting hero (character pre-renders over game scenes), three file cards
+//  FILE SELECT, laid out like the Grug Arcade page: panning zone shots behind a 900px column, a showcase, three file tiles
 // =====================================================================
 const ZONE_SHOTS = { village: { x: 40, y: 0, z: -2 }, meadow: { x: 318, y: 4, z: -2 }, forest: { x: 772, y: 0, z: -2 }, keep: { x: 1150, y: 8, z: -2 } };
 const Files = {
@@ -2504,26 +2589,45 @@ const Files = {
   ico(kind) { return iconSrc(kind); },
   render() {
     const F = Save.files(), grid = $('fgrid'), esc = this.esc, ICON = this.icons || (this.icons = { hp: this.ico('heart'), sp: this.ico('sp'), gold: this.ico('coin'), exp: this.ico('exp'), arena: this.ico('arena'), time: this.ico('clock') });
-    const me = this.portrait || '/static/showcase/grug.webp', any = F.some(Boolean);
+    const me = this.portrait || '/static/arcade/grug.webp', any = F.some(Boolean);
     $('fsub').textContent = any ? 'Pick up where you left off, or start a new tale. Saved in this browser.' : 'Three save files, kept in this browser. Pick one to start.';
+    if (this.portrait) { $('fMePic').src = this.portrait; $('fCrowdMe').src = this.portrait; }
+    $('fMeName').textContent = Save.name || 'Grug';
     grid.innerHTML = F.map((f, i) => {
-      if (!f) return `<div class="card empty${this.delMode ? '' : ''}"><div class="pic"><img class="bg" alt="" src="${this.shots.village || ''}"><img class="fg" alt="" src="${me}"><span class="badge">File ${i + 1}</span></div>
-        <div class="body"><h3>Empty file</h3><p>A new tale starts in Willowbrook.</p><div class="go"><button class="fbtn" data-new="${i}" type="button">Start a new tale</button></div><a class="tiny" href="/character/">Change how you look in the Avatar Studio</a></div></div>`;
+      if (!f) return `<div class="tile empty"><a class="thumb" data-new="${i}"><img class="bg" alt="" src="${this.shots.village || ''}"><img class="fg" alt="" src="${me}"><span class="num">File ${i + 1}</span></a>
+        <div class="nm">Empty file</div><div class="pc">New game</div><div class="blurb">A new tale starts in Willowbrook. Meet Pip at the well, then head right.</div>
+        ${this.delMode ? '<button class="pbtn" type="button" disabled style="opacity:.5">Nothing to delete</button>' : `<button class="pbtn" data-new="${i}" type="button">Start a new tale ›</button>`}<a class="tiny" href="/character/">Change how you look »</a></div>`;
       const cp = CHECKS.find(c => c.id === f.cp) || CHECKS[0], Z = zoneAt(cp.x), st = Object.assign({ str: 1, mag: 1, def: 1, agi: 1 }, f.stats);
-      const row = (k, n, v) => `<li><img src="${ICON[k]}" alt="" width="18" height="18" style="image-rendering:pixelated">${n}<b>${v}</b></li>`;
-      return `<div class="card${this.delMode ? ' del' : ''}"><div class="pic"><img class="bg" alt="" src="${this.shots[Z.id] || ''}"><img class="fg" alt="" src="${me}"><span class="badge">File ${i + 1}</span><span class="lvl">Lv. ${f.lvl || 1}</span></div>
-        <div class="body"><h3>${esc(Z.name)}</h3><p>${esc(cp.name)}${f.boss ? ' · Grimgut beaten!' : ''}</p>
-        <ul class="stats">${row('hp', 'HP', 90 + 12 * st.def)}${row('sp', 'SP', 36 + 8 * st.mag)}${row('gold', 'Gold', f.gold || 0)}${row('exp', 'EXP', f.xp || 0)}${row('arena', 'Arenas', Object.keys(f.cleared || {}).length + '/' + ARENAS.length)}${row('time', 'Time', this.hms(f.time))}</ul>
-        <div class="go">${this.delMode ? `<button class="fbtn danger" data-del="${i}" type="button">Delete File ${i + 1}</button>` : `<button class="fbtn" data-go="${i}" type="button">Continue</button>`}</div></div></div>`;
+      const row = (k, n, v) => `<li><img src="${ICON[k]}" alt="" width="16" height="16">${n}<b>${v}</b></li>`;
+      return `<div class="tile"><a class="thumb" ${this.delMode ? '' : `data-go="${i}"`}><img class="bg" alt="" src="${this.shots[Z.id] || ''}"><img class="fg" alt="" src="${me}"><span class="num">File ${i + 1}</span><span class="lv">Lv. ${f.lvl || 1}</span></a>
+        <div class="nm">${esc(Z.name)}</div><div class="pc">${esc(cp.name)}${f.boss ? ' · Grimgut beaten!' : ''}</div>
+        <ul class="st">${row('hp', 'HP', 90 + 12 * st.def)}${row('sp', 'SP', 36 + 8 * st.mag)}${row('gold', 'Gold', f.gold || 0)}${row('exp', 'EXP', f.xp || 0)}${row('arena', 'Arenas', Object.keys(f.cleared || {}).length + '/' + ARENAS.length)}${row('time', 'Time', this.hms(f.time))}</ul>
+        ${this.delMode ? `<button class="pbtn del" data-del="${i}" type="button">Delete File ${i + 1}</button>` : `<button class="pbtn" data-go="${i}" type="button">Continue ›</button>`}</div>`;
     }).join('');
     for (const b of grid.querySelectorAll('[data-go]')) b.onclick = () => this.play(+b.dataset.go);
     for (const b of grid.querySelectorAll('[data-new]')) b.onclick = () => this.play(+b.dataset.new);
     for (const b of grid.querySelectorAll('[data-del]')) b.onclick = () => {
-      if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = 'Click again: delete it for good'; return; }
-      Save.wipe(+b.dataset.del); this.delMode = false; $('fDel').classList.remove('on'); Snd.play('break'); this.render();
+      if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = 'Click again to delete'; return; }
+      Save.wipe(+b.dataset.del); Snd.play('break'); this.tab(Save.files().some(Boolean) ? 'del' : 'files');
     };
     $('fDel').style.display = any ? '' : 'none';
   },
+  // the tabs over the grey box: Select a File, Delete a File, Credits
+  tab(t) {
+    this.delMode = t === 'del';
+    $('fTabFiles').classList.toggle('on', t === 'files'); $('fDel').classList.toggle('on', t === 'del'); $('fCred').classList.toggle('on', t === 'cred');
+    $('fgray').classList.toggle('cred', t === 'cred'); $('fcredits').classList.toggle('on', t === 'cred');
+    this.render();
+  },
+  // behind the column: slow pans across this game's zones, crossfading, like the arcade page
+  backdrop() {
+    const root = $('fbg'), ids = ['village', 'meadow', 'forest', 'keep']; root.textContent = '';
+    const el = ids.map(id => { const d = document.createElement('div'); d.className = 'sh'; d.style.backgroundImage = `url(${this.shots[id]})`; root.appendChild(d); return d; });
+    let k = 0; const go = () => { el.forEach((d, i) => { if (i !== k) d.classList.remove('on'); }); const d = el[k]; d.classList.remove('go'); void d.offsetWidth; d.classList.add('on', 'go'); k = (k + 1) % el.length; };
+    go(); this.bgTimer = setInterval(() => { if (!G.started) go(); }, 9000);
+  },
+  // phones: the 920px column is scaled down to fit, like a desktop page zoomed out
+  fit() { const k = Math.min(1, innerWidth / 940); $('fwrap').style.zoom = k < 1 ? k : ''; },
   // the hero: the site's character pre-renders drifting over pictures of this game's zones
   slideshow() {
     const D = [
@@ -2535,29 +2639,29 @@ const Files = {
     const root = $('fshow'), esc = this.esc; root.textContent = '';
     this.slides = D.map(d => {
       const s = document.createElement('div'); s.className = 's' + (d.left ? ' left' : '');
-      s.innerHTML = `<img class="bg" alt="" src="${this.shots[d.zone] || ''}"><img class="fg" alt="" src="/static/showcase/${d.id}.webp" onerror="this.style.display='none'"><div class="who"><b>${esc(d.name)}</b><span>${esc(d.from)}</span></div><div class="cap"><small>Brickbound</small><p>${esc(d.cap)}</p></div>`;
+      s.innerHTML = `<img class="bg" alt="" src="${this.shots[d.zone] || ''}"><img class="fg" alt="" src="/static/arcade/${d.id}.webp" onerror="this.style.display='none'"><div class="who">${esc(d.name)}<span>${esc(d.from)}</span></div><div class="cap"><small>TIP</small>${esc(d.cap)}</div>`;
       root.appendChild(s); return s;
     });
-    const go = i => { const prev = this.slides[this.cur]; if (prev) prev.classList.remove('on'); this.cur = (i + this.slides.length) % this.slides.length; const s = this.slides[this.cur]; s.classList.remove('go'); void s.offsetWidth; s.classList.add('on', 'go'); };
+    const dots = document.createElement('div'); dots.className = 'dots'; dots.innerHTML = D.map(() => '<i></i>').join(''); root.appendChild(dots);
+    const go = i => { const prev = this.slides[this.cur]; if (prev) prev.classList.remove('on'); this.cur = (i + this.slides.length) % this.slides.length; const s = this.slides[this.cur]; s.classList.remove('go'); void s.offsetWidth; s.classList.add('on', 'go'); [...dots.children].forEach((d, j) => d.classList.toggle('on', j === this.cur)); };
     go(0); this.timer = setInterval(() => { if (!G.started) go(this.cur + 1); }, 7000);
     root.onclick = e => { const r = root.getBoundingClientRect(); go(this.cur + (e.clientX < r.left + r.width / 2 ? -1 : 1)); };
   },
   init() {
-    try { if (localStorage.getItem('grug.home.mode') === 'dark') document.documentElement.classList.add('dark'); } catch (e) { }
-    this.render();
+    this.render(); this.fit(); addEventListener('resize', () => this.fit());
     // wait for the stud and sky textures to decode, then take the pictures
     const ready = () => [STUD_A, STUD_N, STUD_I, skyTex].every(t => t.image && t.image.complete && t.image.naturalWidth);
-    const go = () => { if (!ready()) return setTimeout(go, 60); this.takeShots(); this.slideshow(); this.render(); };
+    const go = () => { if (!ready()) return setTimeout(go, 60); this.takeShots(); this.slideshow(); this.backdrop(); this.render(); this.fit(); };
     go();
-    $('fMine').onclick = () => { location.href = '/character/'; };
-    $('fDel').onclick = () => { this.delMode = !this.delMode; $('fDel').classList.toggle('on', this.delMode); this.render(); };
-    $('fCred').onclick = () => $('fcredits').classList.add('on'); $('fCredX').onclick = () => $('fcredits').classList.remove('on');
+    $('fMine').onclick = () => { location.href = '/character/?outfits'; };
+    $('fTabFiles').onclick = () => this.tab('files'); $('fDel').onclick = () => this.tab(this.delMode ? 'files' : 'del');
+    $('fCred').onclick = () => this.tab('cred'); $('fCredX').onclick = () => this.tab('files');
   },
   // your outfit loaded: re-take the portrait for the cards
   onDressed() { try { this.takePortrait(); this.render(); } catch (e) { console.warn('portrait', e); } },
   play(slot) {
     if (G.started) return; Snd.init(); Snd.play('confirm');
-    clearInterval(this.timer); $('files').classList.add('gone'); setTimeout(() => { $('files').style.display = 'none'; }, 520);
+    clearInterval(this.timer); clearInterval(this.bgTimer); $('files').classList.add('gone'); setTimeout(() => { $('files').style.display = 'none'; }, 520);
     Game.start(slot);
     if (touchMode) Mobile.landscape();
   },
