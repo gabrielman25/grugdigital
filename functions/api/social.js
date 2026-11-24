@@ -27,6 +27,7 @@ const json = (body, extra = {}) => new Response(JSON.stringify(body), {
   headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'public, max-age=30', 'access-control-allow-origin': '*', ...extra },
 });
 
+const FAILED = {};   // a part that just failed (Discord answers 429 to busy servers): don't ask again for 2 minutes
 async function cached(key, fresh, load, ctx) {
   const cache = typeof caches !== 'undefined' ? caches.default : null, K = 'https://grugdigital.com/__cache/social/' + key;
   let hit = null, age = Infinity;
@@ -38,7 +39,8 @@ async function cached(key, fresh, load, ctx) {
   };
   if (hit && age < fresh) return hit.json();
   if (hit) { ctx.waitUntil(store().catch(() => {})); return hit.json(); }   // serve the old copy now, refresh behind the scenes
-  try { return await store(); } catch (e) { return { error: String(e.message || e).slice(0, 200) }; }
+  if (FAILED[key] && Date.now() - FAILED[key].t < 120e3) return { error: FAILED[key].e };
+  try { return await store(); } catch (e) { FAILED[key] = { t: Date.now(), e: String(e.message || e).slice(0, 200) }; return { error: FAILED[key].e }; }
 }
 
 async function loadDiscord() {

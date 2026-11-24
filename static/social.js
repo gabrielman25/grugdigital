@@ -9,12 +9,25 @@
   const LINKS = { discord: 'https://discord.gg/3ENePvNGJy', instagram: 'https://www.instagram.com/grugdigital', youtube: 'https://www.youtube.com/@PolySwitchOfficial' };
   const EMPTY = { links: LINKS, discord: { name: 'Grug Discord', icon: '', members: 0, online: 0, widget: false, avatars: [] }, youtube: { url: LINKS.youtube, videos: [] } };
   const KEY = 'grug.social.v1';
+  const wait = (ms, pr) => Promise.race([pr, new Promise((_, no) => setTimeout(() => no(new Error('timeout')), ms))]);
+  async function discordDirect() {   // the same two public Discord endpoints the server uses, straight from this browser
+    const inv = await wait(6000, fetch('https://discord.com/api/v10/invites/3ENePvNGJy?with_counts=true').then(r => r.ok ? r.json() : Promise.reject(r.status)));
+    const g = inv.guild || {}, out = { id: g.id || '', name: g.name || 'Grug Discord', icon: g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png?size=128` : '',
+      members: inv.approximate_member_count || 0, online: inv.approximate_presence_count || 0, widget: false, avatars: [] };
+    if (g.id) try {
+      const w = await wait(6000, fetch(`https://discord.com/api/guilds/${g.id}/widget.json`).then(r => r.ok ? r.json() : Promise.reject(r.status)));
+      out.widget = true; if (w.presence_count) out.online = Math.max(out.online, w.presence_count);
+      out.avatars = (w.members || []).slice(0, 40).map(m => ({ name: m.username || '', avatar: m.avatar_url || '', status: m.status || 'online', game: (m.game && m.game.name) || '' }));
+    } catch (e) { }
+    return out;
+  }
   let p = null;
   function get() {
     if (p) return p;
     try { const c = JSON.parse(sessionStorage.getItem(KEY) || 'null'); if (c && Date.now() - c.t < 60e3) return (p = Promise.resolve(c.d)); } catch (e) { }
-    return (p = fetch('/api/social', { headers: { accept: 'application/json' } }).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
+    return (p = fetch('/api/social', { headers: { accept: 'application/json' } }).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(async d => {
       d = Object.assign({}, EMPTY, d); d.links = Object.assign({}, LINKS, d.links || {});
+      if (!d.discord || d.discord.error || !(d.discord.members || d.discord.online)) d.discord = await discordDirect().catch(() => d.discord);   // Discord often rate-limits our server: ask from the browser instead
       d.discord = Object.assign({}, EMPTY.discord, d.discord && !d.discord.error ? d.discord : {});
       d.youtube = Object.assign({}, EMPTY.youtube, d.youtube && !d.youtube.error ? d.youtube : {}); if (!Array.isArray(d.youtube.videos)) d.youtube.videos = [];
       try { sessionStorage.setItem(KEY, JSON.stringify({ t: Date.now(), d })); } catch (e) { }
