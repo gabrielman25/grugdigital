@@ -136,7 +136,7 @@ const SFX = {
   ok() { return ctx && ctx.state === 'running' && $('sfxOn').checked; },
   tone(type, f0, f1, dur, v) { if (!this.ok()) return; const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur); o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.02); },
   hiss(f0, f1, dur, v, q = 1) { if (!this.ok()) return; const t = ctx.currentTime, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = this.noise; f.type = 'bandpass'; f.Q.value = q; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur); s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + dur); },
-  swing() { this.hiss(900, 2400, 0.12, 0.18, 2); }, hit() { this.tone('square', 260, 120, 0.09, 0.12); }, jump() { this.tone('sine', 300, 520, 0.08, 0.05); },
+  swing() { this.hiss(900, 2400, 0.12, 0.18, 2); }, hit() { this.tone('square', 260, 120, 0.09, 0.12); },
   roll() { this.hiss(600, 1500, 0.2, 0.12, 1.5); }, crumble() { this.hiss(500, 120, 0.3, 0.3, 0.8); }, zap() { this.tone('sawtooth', 600, 80, 0.25, 0.08); },
 };
 
@@ -373,7 +373,7 @@ function act(c, input, dt) {
   if (c.roll > 0) { c.roll -= dt; c.vx = c.rollDir * 560; }
   else if (c.hurtT > 0.35) { /* knocked back */ }
   else c.vx += ((want * 270) - c.vx) * Math.min(1, dt * (c.ground ? 18 : 6));
-  if (input.jump && c.ground && c.roll <= 0) { c.vy = -680; c.ground = false; SFX.jump(); say(c, 'jump'); }
+  if (input.jump && c.ground && c.roll <= 0) { c.vy = -1000; c.ground = false; say(c, 'jump'); }
   if (input.dodge && c.ground && c.rollCd <= 0 && c.roll <= 0) { c.roll = 0.3; c.rollCd = 0.9; c.rollDir = want || c.face; c.face = c.rollDir; SFX.roll(); say(c, 'dodge'); }
   if (input.attack && c.swingCd <= 0 && c.roll <= 0) { c.swing = 0.28; c.swingCd = 0.45; c.struck = false; SFX.swing(); say(c, 'attack'); }
   if (c.swing > 0) { c.swing -= dt; if (!c.struck && c.swing < 0.18) { c.struck = true; strike(c); } }
