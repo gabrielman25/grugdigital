@@ -1,6 +1,7 @@
 /* The Grug Arcade's shared data and page furniture, used by the games list (/arcade/) and the game pages (/arcade/place/?id=<slug>).
    GAMES: one entry per game in arcade/<slug>/ (with its cover, <slug>-grug-arcade.jpg). added / updated are the dates in the repo's history; "tag" is the
-   red line under the name; "about" and "controls" fill the game's page (coop: true adds the Local Multiplayer box: static/local-mp.js is wired in). Plays and favourites are kept per browser
+   red line under the name; "about" and "controls" fill the game's page (coop: true adds the Local Multiplayer box: static/local-mp.js is wired in; motion: true marks a game that plays with Motion Controls,
+   which puts a MOTION badge on its tile, a Motion Controls box on its page and lists it on /arcade/motion/). Plays and favourites are kept per browser
    (localStorage 'grug.arcade.v1'), like the rest of Grug: there's no server, so there are no global visit counts. */
 (() => {
   const $ = id => document.getElementById(id), O = window.GrugOutfits, P = window.GrugPearls;
@@ -66,7 +67,7 @@
     const href = place(g.slug);
     return `<div class="Cell" title="${esc(g.name)}"><div class="GameItem">
       <div class="AlwaysShown">
-        <a class="thumb" href="${href}"><img src="/arcade/${g.slug}/${g.slug}-grug-arcade.jpg" alt="${esc(g.name)}, a free game in the Grug Arcade: ${esc(g.alt)}" loading="lazy" width="160" height="100"></a>
+        <a class="thumb" href="${href}"><img src="/arcade/${g.slug}/${g.slug}-grug-arcade.jpg" alt="${esc(g.name)}, a free game in the Grug Arcade: ${esc(g.alt)}" loading="lazy" width="160" height="100">${g.motion ? '<span class="mbadge">MOTION</span>' : ''}</a>
         <div class="GameName"><a href="${href}">${esc(g.name)}</a></div>
         <div class="PlayerCount">${esc(g.tag)}</div>
       </div>
@@ -105,6 +106,36 @@
       <div class="HoverShown"><p>A console family built for indie culture: web and native engines are equals, and you buy once and play everywhere.</p></div></div></div>`,
   };
 
+  /* Motion Controls (coming soon, /arcade/motion/): prop a phone under the TV, its camera sees you move, your Grug moves too.
+     Our own ads for it: the 728x90 banner and the 300x250 box (a quarter of the time each, from the page's own half; never on
+     the Motion page itself), a skyscraper on each side (in the rotation below) and a tile in the Arcade's games list.
+     mtv() is the little TV + propped-up phone + camera beam they all share (sized in em: set font-size to scale it). */
+  const MO = '/arcade/motion/', onMotion = () => location.pathname.indexOf(MO) === 0;
+  const mtv = (fig = 'grug', cover = 'slide-999') => `<span class="mtv" aria-hidden="true"><span class="beam"></span><span class="tv"><span class="scr" style="background-image:url(/arcade/${cover}/${cover}-grug-arcade.jpg)"><img src="/static/arcade/${fig}.webp" alt=""></span></span><span class="ph"><i></i></span></span>`;
+  const moSoon = '<span class="soon">COMING SOON</span>';
+  const moA = (cls, html, label) => `<a class="${cls} mo" href="${MO}" aria-label="${esc(label)}"><span class="confetti"></span>${moSoon}${html}</a>`;
+  const MOAD = {
+    leader: () => moA('lb', `${mtv('grug', 'slide-999')}<img class="fig j1" src="/static/arcade/skater.webp" alt=""><img class="fig j2" src="/static/arcade/racer.webp" alt="">
+      <span class="t"><b>Move to play!</b><span>Prop your phone under the TV and jump in:</span><span class="exp"><i class="k">No controller</i><i class="k">Any TV</i><i>Party games</i><i>Grug Arcade</i></span></span>
+      <span class="go">See how ›</span>`, 'Motion Controls, coming soon to the Grug Arcade: your phone is the controller'),
+    rect: () => moA('rect', `<span class="t">Move to play!<span class="s">Your phone is the controller. Coming soon to the Grug Arcade.</span></span>
+      ${mtv('racer', 'grug-city')}<img class="fig j1" src="/static/arcade/medic.webp" alt="" style="left:14px"><img class="fig j2" src="/static/arcade/snow-rider.webp" alt="" style="right:14px">
+      <span class="bar"><span class="go">See how it works ›</span></span>`, 'Motion Controls, coming soon to the Grug Arcade: your phone is the controller'),
+    skyA: () => moA('ad', `<div class="k">Grug Arcade</div><div class="h">Motion<br>Controls</div>
+      <div class="sub">Prop your phone under the TV. Jump, dance and dodge!</div>${mtv('grug', 'zone-royale')}
+      <div class="figs"><img class="j1" src="/static/arcade/skater.webp" alt="" style="left:-6px"><img class="j2" src="/static/arcade/ranger.webp" alt="" style="right:-6px"></div>
+      <div class="cta">See how ›</div>`, 'Motion Controls, coming soon to the Grug Arcade'),
+    skyB: () => moA('ad', `<div class="h" style="margin-top:34px">Party at your place?</div>
+      <div class="sub" style="margin-top:8px">Any TV becomes a Grug console. No controller to buy: just your phone.</div>${mtv('medic', 'brickbound')}
+      <div class="figs"><img class="j2" src="/static/arcade/snow-rider.webp" alt="" style="left:-4px"><img class="j1" src="/static/arcade/grug.webp" alt="" style="right:-14px"></div>
+      <div class="cta">Find out ›</div>`, 'Any TV becomes a Grug console: Motion Controls, coming soon'),
+    tile: () => `<div class="Cell mot" title="Motion Controls (coming soon)"><div class="GameItem"><div class="AlwaysShown">
+        <a class="thumb mo" href="${MO}" aria-label="Motion Controls, coming soon to the Grug Arcade"><span class="confetti"></span>${mtv('grug', 'slide-999')}<span class="new">SOON</span></a>
+        <div class="GameName"><a href="${MO}">Motion Controls</a></div>
+        <div class="PlayerCount">Coming soon · move to play</div></div>
+      <div class="HoverShown"><p>Prop your phone under the TV and play with your whole body: jump, duck, dance. See how it works.</p></div></div></div>`,
+  };
+
   /* the header, background, side ads, Pearls button, footer and "Playing as" box, the same on every Arcade page */
   function chrome() {
     const onList = !!$('PlayTabs');
@@ -119,8 +150,11 @@
     if ($('Banner') && !$('Stamps')) $('Banner').insertAdjacentHTML('beforeend', `<div id="Stamps">${stamps}</div>`);
     const lg = document.querySelector('#Footer .Legalese'); if (lg && !document.querySelector('#Footer .Stamps')) lg.insertAdjacentHTML('beforebegin', `<div class="FooterNav Stamps">${stamps}</div>`);
     /* our partner in the 728x90 banner and the 300x250 box about half the time (the page's own ad the rest) */
-    const lbBox = $('Leaderboard'); if (lbBox && Math.random() < 0.5) lbBox.innerHTML = WDAD.leader();
-    const rect = document.querySelector('#GamePageAdDiv .rect'); if (rect && Math.random() < 0.5) { rect.outerHTML = WDAD.rect(); const n = document.querySelector('#GamePageAdDiv .rect-note'); if (n) n.textContent = 'Our partner: an indie console family'; }
+    /* and our own Motion Controls ad a quarter of the time (from the page's own half), except on the Motion page */
+    const lbBox = $('Leaderboard'), r1 = Math.random(); if (lbBox) { if (r1 < 0.5) lbBox.innerHTML = WDAD.leader(); else if (r1 < 0.75 && !onMotion()) lbBox.innerHTML = MOAD.leader(); }
+    const rect = document.querySelector('#GamePageAdDiv .rect'), r2 = Math.random(), note = t => { const n = document.querySelector('#GamePageAdDiv .rect-note'); if (n) n.textContent = t; };
+    if (rect && r2 < 0.5) { rect.outerHTML = WDAD.rect(); note('Our partner: an indie console family'); }
+    else if (rect && r2 < 0.75 && !onMotion()) { rect.outerHTML = MOAD.rect(); note('Coming soon to the Grug Arcade'); }
     const drop = $('dropNav'), tog = $('gamesMenuToggle');
     const setDrop = on => { drop.classList.toggle('open', on); tog.setAttribute('aria-expanded', on); };
     tog.addEventListener('click', e => { e.stopPropagation(); setDrop(!drop.classList.contains('open')); });
@@ -191,7 +225,8 @@
             <div class="sub" style="margin-top:10px;color:#3a3a6a">Roblox UGC for your avatar</div>
             <div class="figs" style="height:120px"><img src="${R6('grug')}" alt="" style="left:50%;translate:-50% 0;height:116px"></div>
             <div class="cta">Shop on Roblox ›</div>`, 'KimiLand on Roblox (sponsor)');
-        return { L: [ads.discordLive, WDAD.skyA(), ads.igGrid, kimiA, ads.ytLatest], R: [ads.ytStack, ads.discordWho, WDAD.skyB(), ads.igChars, kimiB] };
+        const moL = onMotion() ? [] : [MOAD.skyA()], moR = onMotion() ? [] : [MOAD.skyB()];   // Motion Controls (coming soon)
+        return { L: [ads.discordLive, WDAD.skyA(), ...moL, ads.igGrid, kimiA, ads.ytLatest], R: [ads.ytStack, ...moR, ads.discordWho, WDAD.skyB(), ads.igChars, kimiB] };
       }
       function run(box, list, delay) {
         box.innerHTML = list.join(''); const els = [...box.children]; let i = 0; els[0].classList.add('on');
@@ -202,7 +237,7 @@
       // "Users online" over the games list: the Grug Discord's live count (hidden until there is one), a link to join
       const uo = $('UsersOnline'), online = d => { const n = d && d.discord && d.discord.online; if (!uo) return; uo.href = (d.links && d.links.discord) || uo.href; if (n) { uo.querySelector('b').textContent = S.n(n); uo.hidden = false; } };
       S.get().then(online); setInterval(() => S.get().then(online), 90000);
-      for (const box of [L, R]) box.addEventListener('click', e => { if (!e.target.closest('a.ad') || e.target.closest('a.sp') || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return; e.preventDefault(); S.popup(); });   // a banner opens every social, side by side
+      for (const box of [L, R]) box.addEventListener('click', e => { if (!e.target.closest('a.ad') || e.target.closest('a.sp,a.mo') || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return; e.preventDefault(); S.popup(); });   // a banner opens every social, side by side
     })();
     /* Pearls (the small green button where the classic page had Login) */
     function pearls() { if (!P) return; $('pearls').hidden = false; $('pearlN').textContent = P.balance().toLocaleString(); }
@@ -225,5 +260,5 @@
     if ($('mePic')) { $('meSel').addEventListener('change', e => { if (O) O.setActive(e.target.value); }); addEventListener('grug:outfits', me); me(); }
   }
 
-  window.GrugArcade = { GENRES, GAMES, gname, esc, ago, tile, place, rec, saveRec, chrome, WDAD };
+  window.GrugArcade = { GENRES, GAMES, gname, esc, ago, tile, place, rec, saveRec, chrome, WDAD, MOAD, mtv };
 })();

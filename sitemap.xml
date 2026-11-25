@@ -43,6 +43,14 @@
     <image:image><image:loc>https://grugdigital.com/static/arcade/racer.webp</image:loc></image:image>
   </url>
   <url>
+    <loc>https://grugdigital.com/arcade/motion/</loc>
+    <lastmod>2026-11-25</lastmod>
+    <image:image><image:loc>https://grugdigital.com/static/og/grug-arcade-free-blocky-games.jpg</image:loc></image:image>
+    <image:image><image:loc>https://grugdigital.com/static/showcase/grug-digital-avatar-racer.webp</image:loc></image:image>
+    <image:image><image:loc>https://grugdigital.com/static/showcase/grug-digital-avatar-snow-rider.webp</image:loc></image:image>
+    <image:image><image:loc>https://grugdigital.com/static/showcase/grug-digital-avatar-grug.webp</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://grugdigital.com/arcade/grug-studio/</loc>
     <lastmod>2026-11-25</lastmod>
     <image:image><image:loc>https://grugdigital.com/arcade/grug-studio/grug-studio-grug-arcade.jpg</image:loc></image:image>

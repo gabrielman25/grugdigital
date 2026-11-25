@@ -256,6 +256,81 @@ img{border:0}
 .wdt .thumb.wd .wdw{font-size:17px}
 .wdt .thumb.wd .spn{top:4px;left:4px;right:auto;font-size:9px}
 
+/* ===== Motion Controls (coming soon, /arcade/motion/): our own ads for it, teal with confetti and a yellow button =====
+   .mtv is the little TV + propped-up phone + camera beam (sized in em: set its font-size to scale it); .j1/.j2 hop */
+.mo{position:relative;overflow:hidden;color:#fff;text-decoration:none!important;background:linear-gradient(160deg,#14c6d0 0,#0a8fb8 45%,#0b4f8f 100%)}
+.mo .confetti{position:absolute;inset:0;pointer-events:none;background:
+  radial-gradient(2px 2px at 8% 20%,#ffe14d 70%,transparent 75%),radial-gradient(2px 2px at 27% 78%,#ff7ac3 70%,transparent 75%),
+  radial-gradient(1.6px 1.6px at 44% 14%,#fff 70%,transparent 75%),radial-gradient(2px 2px at 63% 62%,#b6ff6b 70%,transparent 75%),
+  radial-gradient(1.6px 1.6px at 79% 26%,#fff 70%,transparent 75%),radial-gradient(2px 2px at 93% 80%,#ffe14d 70%,transparent 75%),
+  radial-gradient(1.6px 1.6px at 15% 55%,#fff 70%,transparent 75%),radial-gradient(2px 2px at 86% 48%,#ff7ac3 70%,transparent 75%),
+  radial-gradient(130% 60% at 50% 120%,rgba(255,225,77,.25),transparent 60%)}
+.mo .soon{position:absolute;top:5px;right:5px;z-index:4;font:bold 9px/1 Arial,Helvetica,sans-serif;letter-spacing:.08em;padding:3px 5px;border-radius:3px;background:#ffe14d;color:#6a4500;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.mo .go,.mo .cta{background:linear-gradient(#fff6a8,#ffe14d 50%,#ffcc1a 51%,#ffe14d)!important;border:1px solid #b88a00!important;color:#3a2600!important;text-shadow:0 1px 0 rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+.mo .fig,.mo .figs img{z-index:2}
+.mtv{position:relative;display:block;width:10em;height:7.9em;font-size:10px;z-index:1}
+.mtv .tv{position:absolute;left:0;top:0;width:10em;height:6em;padding:.35em;box-sizing:border-box;border-radius:.45em;background:linear-gradient(#4a4a4a,#151515);
+  box-shadow:0 .25em .6em rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.25)}
+.mtv .scr{position:relative;display:block;width:100%;height:100%;overflow:hidden;border-radius:.15em;background:#000 center/cover no-repeat}
+.mtv .scr img{position:absolute;left:50%;bottom:-.3em;height:82%;width:auto;margin-left:-.4em;transform:translateX(-50%);filter:drop-shadow(0 .1em .2em rgba(0,0,0,.6));animation:mo-hop-c 1.6s ease-in-out infinite}
+.mtv .ph{position:absolute;left:50%;top:6.15em;width:2.4em;height:1.25em;margin-left:-1.2em;box-sizing:border-box;border-radius:.28em;background:linear-gradient(#3b3b3b,#111);border:.1em solid #8a8a8a;z-index:2}
+.mtv .ph::after{content:"";position:absolute;left:50%;bottom:-.5em;width:1.2em;height:.38em;margin-left:-.6em;background:#1b1b1b;border-radius:0 0 .2em .2em}
+.mtv .ph i{position:absolute;left:50%;top:50%;width:.38em;height:.38em;margin:-.19em 0 0 -.19em;border-radius:50%;background:#d8fbff;box-shadow:0 0 .35em .14em #5de8ff}
+.mtv .beam{position:absolute;left:50%;top:6.8em;width:16em;height:7em;margin-left:-8em;pointer-events:none;
+  background:linear-gradient(rgba(200,252,255,.6),rgba(200,252,255,0));clip-path:polygon(47% 0,53% 0,100% 100%,0 100%);animation:mo-scan 2.4s ease-in-out infinite}
+.j1{animation:mo-hop 1.6s ease-in-out infinite} .j2{animation:mo-hop 1.6s ease-in-out .8s infinite}
+@keyframes mo-hop{0%,100%{transform:translateY(0)}40%,55%{transform:translateY(-14%)}}
+@keyframes mo-hop-c{0%,100%{transform:translateX(-50%) translateY(0)}40%,55%{transform:translateX(-50%) translateY(-14%)}}
+@keyframes mo-scan{0%,100%{opacity:.55}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.mtv *,.j1,.j2{animation:none!important}}
+/* the 728x90 banner */
+.lb.mo .mtv{position:absolute;left:68px;top:8px;font-size:6.2px}
+.lb.mo .fig{height:64px;bottom:-6px}
+.lb.mo .fig.j1{left:4px} .lb.mo .fig.j2{left:136px}
+.lb.mo .t b{font-size:24px}
+.lb.mo .t>span{color:#e4fbff}
+.lb.mo .exp i{background:rgba(255,255,255,.16)} .lb.mo .exp i.k{background:#fff;color:#0a6f99}
+/* the 300x250 box */
+.rect.mo .t{text-shadow:0 2px 0 #0a4f86;font-size:24px}
+.rect.mo .s{color:#eafcff;padding:0 22px;line-height:1.3}
+.rect.mo .mtv{position:absolute;left:50%;top:84px;margin-left:-5em;font-size:10px}
+.rect.mo .fig{position:absolute;bottom:56px;height:92px;width:auto}
+.rect.mo .bar{background:rgba(5,40,80,.82);border-top:1px solid rgba(255,255,255,.15)}
+/* the side skyscrapers */
+.sky .mo .k{color:#ffe14d;opacity:1;position:relative;margin-top:26px}
+.sky .mo .figs img{height:108px}
+.sky .mo .h,.sky .mo .sub{position:relative}
+.sky .mo .mtv{margin-top:22px;font-size:12px}
+.sky .mo .beam{height:13em}
+/* the tile in the Arcade's games list */
+.mot .thumb.mo{position:relative;overflow:hidden;background:linear-gradient(160deg,#14c6d0 0,#0a8fb8 45%,#0b4f8f 100%)}
+.mot .thumb.mo .mtv{position:absolute;left:50%;top:7px;margin-left:-5em;font-size:6.4px}
+.mot .thumb.mo .new,.mbadge{position:absolute;z-index:4;padding:2px 6px;border-radius:3px;font:bold 10px/1.3 Arial,Helvetica,sans-serif;letter-spacing:.04em}
+.mot .thumb.mo .new{left:4px;top:4px;background:#d8281f;color:#fff}
+.mot .thumb.mo .soon{display:none}
+.mot .HoverShown p{margin:0;line-height:14px}
+/* MOTION on a game's tile when it plays with Motion Controls (motion: true in GAMES) */
+.AlwaysShown .thumb{position:relative}
+.mbadge{right:4px;bottom:4px;background:#ffe14d;color:#3a2600;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+/* the Motion Controls box on the games list (under the Spotlight) */
+#Motion{margin:8px 0 2px;overflow:hidden;clear:both}
+#Motion .StandardBoxHeader{width:auto;display:inline-block;padding-right:28px}
+#Motion .box{clear:both;position:relative;top:-2px;display:flex;gap:16px;align-items:flex-start;padding:10px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 120px) no-repeat}
+#Motion .stage{flex:none;display:block;width:300px;height:206px;border:1px solid #0a4f86;border-radius:3px}
+#Motion .stage .mtv{position:absolute;left:50%;top:14px;margin-left:-5em;font-size:13px}
+#Motion .stage .fig{position:absolute;bottom:-4px;height:104px;width:auto}
+#Motion .txt{flex:1;min-width:0;font:13px/1.45 Arial,Helvetica,sans-serif;color:#333}
+#Motion .tag{margin:0 0 6px;font:bold 15px Arial,Helvetica,sans-serif;color:#c00}
+#Motion .lead{margin:0 0 6px;font-size:14px;color:#222}
+#Motion ol{margin:0 0 8px;padding-left:20px} #Motion li{margin:2px 0}
+#Motion .games{margin:0 0 8px} #Motion .games a{color:#00f}
+#Motion .acts{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+#Motion .see{display:inline-block;padding:0 22px;height:38px;line-height:38px;border-radius:6px;font:bold 17px/38px Arial,Helvetica,sans-serif;color:#1e1b16;text-decoration:none;
+  background:linear-gradient(#c6f57a,#9be338 50%,#86cf27 51%,#9be338);border:1px solid #5f9a18;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+#Motion .see:hover{filter:brightness(1.06)}
+#Motion .fine{margin-top:6px;font-size:11px;color:#888}
+@media (max-width:920px){#Motion .box{flex-direction:column}#Motion .stage{width:100%;max-width:340px;align-self:center}}
+
 /* ===== the 88x31 stamps: top right of the banner, and a row in the footer ===== */
 #Stamps{position:absolute;right:3px;top:3px;z-index:3;display:flex;gap:1px}   /* (3 x 88 + 2: clear of the logo) */
 #Stamps a,.Stamps a{display:block;width:88px;height:31px;line-height:0;text-decoration:none!important}

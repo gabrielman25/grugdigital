@@ -99,6 +99,12 @@ house ad zoomed to fit); each page adds its own phone rules next to its styles. 
   300x250 box (each Warpdrive about half the time, the page's own ad otherwise), a tile on the home catalog's first page.
   Pre-orders aren't open: the ads send people to see it, never "buy". Every link: `target=_blank rel="noopener sponsored"`.
 - **KimiLand** (Roblox UGC sponsor): a skyscraper each side, the home catalog's 300x250 box.
+- **Motion Controls (coming soon, `/arcade/motion/`)**: our own ads for it are `MOAD` in `arcade/arcade.js` (styles: the Motion block in
+  `arcade/arcade.css`, `.mo` + the little TV/phone `.mtv`): the 728x90 banner and the 300x250 box a quarter of the time each (out of
+  the page's own half, so Warpdrive keeps its half), a skyscraper each side, a tile at the end of the Arcade list's first page, and
+  the box under the Spotlight. Never shown on the Motion page itself. `motion: true` on a game in `GAMES` adds a MOTION badge to its
+  tile, a Motion Controls box on its page, and lists it on `/arcade/motion/` and in the Arcade's Motion box. The page's camera/privacy
+  answer is a placeholder: replace it with the real one before launch.
 - **The 88x31 stamps** (`static/stamps/`: Warpdrive → their site, YouTube and Discord → ours): `GrugArcade.chrome()` puts them
   top right of the banner and in the footer of every classic page; the small card pages have them as `.site-stamps`.
 

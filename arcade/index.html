@@ -68,6 +68,7 @@
           <a href="/arcade/" data-sort="newest">Newest</a>
           <a href="/arcade/" data-sort="featured">Featured Games</a>
           <a href="/arcade/" data-search>Search Games</a>
+          <a href="/arcade/motion/">Motion Controls</a>
         </div>
       </div>
       <ul>
@@ -88,6 +89,7 @@
   <div id="Announcement">
     <div class="SystemAlertText"><svg aria-hidden="true"><use href="#claude"/></svg>New: make your character with Claude! <a href="/character/?view=paint">Make it with Claude</a></div>
     <div class="SystemAlertText">New: local multiplayer! Plug in Xbox Wireless Controllers and play together on one screen. <a href="#CoOp">How it works</a></div>
+    <div class="SystemAlertText">Coming soon: Motion Controls! Prop your phone under the TV and play with your whole body. <a href="/arcade/motion/">See how</a></div>
   </div>
 
   <div id="Body">
@@ -108,6 +110,24 @@
           </ul>
           <a class="play" href="/arcade/place/?id=zone-royale">Play</a>
           <div class="fine">Free, in your browser. Mouse and keyboard recommended.</div>
+        </div>
+      </div>
+    </section>
+    <section id="Motion" aria-labelledby="motionTitle">
+      <div class="StandardBoxHeader"><span><h2 id="motionTitle">Motion Controls</h2></span></div>
+      <div class="box">
+        <a class="stage mo" href="/arcade/motion/" aria-label="Motion Controls, coming soon to the Grug Arcade"><span class="confetti"></span><span class="soon">COMING SOON</span><span id="motionTV"></span>
+          <img class="fig j1" src="/static/arcade/skater.webp" alt="" style="left:8px"><img class="fig j2" src="/static/arcade/medic.webp" alt="" style="right:8px"></a>
+        <div class="txt">
+          <div class="tag">Coming soon · your phone is the controller · no extra gear</div>
+          <p class="lead">Turn any TV into a Grug console. Your phone's camera watches you move, and your Grug moves with you: jump, duck, dodge and dance your way through select Arcade games.</p>
+          <ol>
+            <li>Open a motion game on the big screen.</li>
+            <li>Prop your phone up under the TV, camera facing the room, and scan the code on screen.</li>
+            <li>Step back and move. Bring friends: it's made for parties and sleepovers.</li>
+          </ol>
+          <div class="games" id="motionGames">The first motion games are on the way. Until then, every game here works with a keyboard, touch or an Xbox controller.</div>
+          <div class="acts"><a class="see" href="/arcade/motion/">See how it works</a><a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener">Hear first on the Grug Discord ›</a></div>
         </div>
       </div>
     </section>
@@ -241,7 +261,8 @@
     const L = list(), pages = Math.max(1, Math.ceil(L.length / PAGE));
     state.page = Math.min(state.page, pages);
     const show = L.slice((state.page - 1) * PAGE, state.page * PAGE);
-    $('GamesContent').innerHTML = show.length ? show.map(tile).join('') :
+    const moTile = state.page === 1 && !state.q && state.genre === 'all' && state.sort !== 'featured' && show.length ? A.MOAD.tile() : '';   // Motion Controls (coming soon)
+    $('GamesContent').innerHTML = show.length ? show.map(tile).join('') + moTile :
       `<div class="Empty">No ${state.genre === 'all' ? '' : esc(gname(state.genre)) + ' '}games ${state.q ? 'match "' + esc(state.q) + '"' : state.time === 'day' || state.time === 'week' ? 'were updated in that time' : 'yet'}.
         More are on the way. <a href="#all" data-genre="all">See all games</a>, or <a href="/character/">make a character</a> to play as.</div>`;
     $('pageNum').textContent = state.page; $('pageCount').textContent = pages;
@@ -275,6 +296,11 @@
   $('nextPage').addEventListener('click', () => { state.page++; draw(); });
   addEventListener('hashchange', () => { fromHash(); if (!location.hash) state.genre = 'all'; draw(); });
   draw();
+
+  // the Motion Controls box: the little TV, and the games that already play with motion (motion: true in GAMES)
+  $('motionTV').outerHTML = A.mtv('grug', 'slide-999');
+  const MG = GAMES.filter(g => g.motion);
+  if (MG.length) $('motionGames').innerHTML = 'Play with motion in ' + MG.map(g => `<a href="${A.place(g.slug)}">${esc(g.name)}</a>`).join(', ') + '.';
 
   A.chrome();
 })();

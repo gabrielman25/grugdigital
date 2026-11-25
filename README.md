@@ -96,6 +96,8 @@ is `arcade/arcade.css`.
 - Pearls in games: `GrugPearls.reward(game, n, cooldown)` (Slide 999 KM's Rebirth: 2 Pearls, once per 24 hours) and
   `static/pearl-popup.js` (`window.GrugPearlPopup`: the "You got X Pearls" pop-up and the "Buy for X Pearls?" box for
   in-game cash). Games never show a Pearl balance on screen.
+- Motion Controls (coming soon): `/arcade/motion/` is the placeholder page; `motion: true` on a game in `GAMES` marks it as
+  playable with motion (badge, game-page box, listed on the Motion page). The ads for it are `MOAD` in `arcade/arcade.js`.
 - `arcade/claude.md` is the guide for Claude sessions building a game for the site ("push it to the site").
 
 ## Grug Studio (`/arcade/grug-studio/`)

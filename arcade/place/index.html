@@ -52,6 +52,9 @@
 #Place .bx p{margin:0 0 8px} #Place .bx p:last-child{margin:0}
 #Place .bx.coop{display:flex;gap:12px;align-items:center} #Place .bx.coop img{flex:none;width:110px;height:auto} #Place .bx.coop a{color:#00f}
 @media (max-width:600px){#Place .bx.coop{flex-direction:column;align-items:flex-start}}
+#Place .bx.motion{display:flex;gap:12px;align-items:center} #Place .bx.motion a{color:#00f}
+#Place .bx.motion .stage{flex:none;display:block;width:120px;height:92px;border-radius:3px} #Place .bx.motion .stage .mtv{position:absolute;left:50%;top:7px;margin-left:-5em;font-size:8.6px}
+@media (max-width:600px){#Place .bx.motion{flex-direction:column;align-items:flex-start}}
 #Place table.keys{border-collapse:collapse;width:100%}
 #Place table.keys td{padding:3px 4px;vertical-align:top;border-top:1px solid #eee} #Place table.keys tr:first-child td{border-top:0}
 #Place table.keys td:first-child{width:150px;white-space:nowrap}
@@ -119,6 +122,7 @@
           <a href="/arcade/" data-sort="newest">Newest</a>
           <a href="/arcade/" data-sort="featured">Featured Games</a>
           <a href="/arcade/" data-search>Search Games</a>
+          <a href="/arcade/motion/">Motion Controls</a>
         </div>
       </div>
       <ul>
@@ -138,6 +142,7 @@
 
   <div id="Announcement">
     <div class="SystemAlertText"><svg aria-hidden="true"><use href="#claude"/></svg>New: make your character with Claude! <a href="/character/?view=paint">Make it with Claude</a></div>
+    <div class="SystemAlertText">Coming soon: Motion Controls! Prop your phone under the TV and play with your whole body. <a href="/arcade/motion/">See how</a></div>
   </div>
 
   <div id="Body">
@@ -212,6 +217,8 @@
       <div class="bx"><table class="keys">${g.controls.map(([k, v]) => `<tr><td>${k.split(' / ').map(x => `<kbd>${esc(x)}</kbd>`).join(' / ')}</td><td>${esc(v)}</td></tr>`).join('')}</table></div>` : ''}
       ${g.coop ? `<div class="StandardBoxHeader"><span><h2>Local Multiplayer</h2></span></div>
       <div class="bx coop"><img src="/static/arcade/xbox-controller.webp" alt="A black Xbox Wireless Controller" width="110" height="101"><p><b>Play together on one screen: works with Xbox Wireless Controllers.</b> Connect one, press any button in the game and pick Player 1 or Player 2. Every controller after that joins as the next player. <a href="/arcade/#CoOp">How it works</a></p></div>` : ''}
+      ${g.motion ? `<div class="StandardBoxHeader"><span><h2>Motion Controls</h2></span></div>
+      <div class="bx motion"><a class="stage mo" href="/arcade/motion/" aria-label="How Motion Controls work"><span class="confetti"></span>${A.mtv('grug', g.slug)}</a><p><b>Play this one with your whole body.</b> Prop your phone up under the TV, camera facing the room, scan the code in the game and step back: jump, duck and dodge, and your Grug does too. <a href="/arcade/motion/">How it works</a></p></div>` : ''}
     </div>
     <div class="R">
       <div class="StandardBoxHeader"><span><h2>Game</h2></span></div>

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Motion Controls (coming soon): the placeholder page the Motion ads in arcade/arcade.js (MOAD) link to. The classic Arcade look;
+     the motion games listed here are the ones with motion: true in GAMES (arcade/arcade.js). -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion Controls · Coming soon to the Grug Arcade</title>
+<!-- seo: written by src/seo/seo_head.py (re-run it, don't edit by hand) -->
+<meta property="og:site_name" content="Grug Digital">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Motion Controls · Coming soon to the Grug Arcade">
+<meta property="og:description" content="Coming soon to the Grug Arcade: Motion Controls. Prop your phone under the TV and play free blocky games with your whole body. No controller and no console: just your phone and any screen.">
+<meta property="og:url" content="https://grugdigital.com/arcade/motion/">
+<meta property="og:image" content="https://grugdigital.com/static/og/grug-arcade-free-blocky-games.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Grug Digital characters Medic and Racer over Zone Royale">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Motion Controls · Coming soon to the Grug Arcade">
+<meta name="twitter:description" content="Coming soon to the Grug Arcade: Motion Controls. Prop your phone under the TV and play free blocky games with your whole body. No controller and no console: just your phone and any screen.">
+<meta name="twitter:image" content="https://grugdigital.com/static/og/grug-arcade-free-blocky-games.jpg">
+<meta name="twitter:image:alt" content="Grug Digital characters Medic and Racer over Zone Royale">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://grugdigital.com/#org","name":"Grug Digital","alternateName":"Grug","url":"https://grugdigital.com/","logo":{"@type":"ImageObject","url":"https://grugdigital.com/static/arcade/grug-digital-logo.png"},"sameAs":["https://www.youtube.com/@PolySwitchOfficial","https://www.instagram.com/grugdigital","https://discord.gg/3ENePvNGJy","https://polysw.itch.io/"]},{"@type":"WebPage","url":"https://grugdigital.com/arcade/motion/","name":"Motion Controls · Coming soon to the Grug Arcade","publisher":{"@id":"https://grugdigital.com/#org"},"keywords":"motion controls, motion games, phone camera, party games, Grug Digital, custom avatar, Roblox alternative, Roblox asset creator, free 3D game assets, Roblox avatar maker, R6 avatar, blocky games, browser games, low poly","primaryImageOfPage":{"@type":"ImageObject","contentUrl":"https://grugdigital.com/static/og/grug-arcade-free-blocky-games.jpg","url":"https://grugdigital.com/static/og/grug-arcade-free-blocky-games.jpg","name":"Grug Arcade: free blocky games by Grug Digital","caption":"Medic and Racer from Grug Digital over Zone Royale: free blocky browser games in the Grug Arcade, played as the character you make.","description":"Medic and Racer from Grug Digital over Zone Royale: free blocky browser games in the Grug Arcade, played as the character you make.","creator":{"@id":"https://grugdigital.com/#org"},"creditText":"Grug Digital","copyrightNotice":"© 2026 Grug Digital. All rights reserved.","copyrightHolder":{"@id":"https://grugdigital.com/#org"},"license":"https://grugdigital.com/terms.html","acquireLicensePage":"https://grugdigital.com/terms.html","keywords":"Grug Arcade, browser games, Zone Royale, Grug Digital"}}]}</script>
+<!-- /seo -->
+<meta name="description" content="Coming soon to the Grug Arcade: Motion Controls. Prop your phone under the TV and play free blocky games with your whole body. No controller and no console: just your phone and any screen.">
+<link rel="icon" href="/favicon.png">
+<link rel="canonical" href="https://grugdigital.com/arcade/motion/">
+<script src="/static/pearls.js"></script>
+<script src="/static/outfits.js"></script>
+<script src="/static/social.js"></script>
+<link rel="stylesheet" href="/arcade/arcade.css">
+<link rel="stylesheet" href="/static/classic.css">
+<style>
+/* the hero: a big Motion scene (the shared .mo/.mtv from arcade.css) beside the pitch */
+#MHero .box{display:flex;gap:18px;align-items:center}
+#MHero .stage{flex:none;position:relative;width:500px;height:330px;border:1px solid #0a4f86;border-radius:3px}
+#MHero .stage .mtv{position:absolute;left:50%;top:18px;margin-left:-5em;font-size:24px}
+#MHero .stage .fig{position:absolute;bottom:-8px;height:180px;width:auto}
+#MHero .txt{flex:1;min-width:0}
+#MHero .pill{display:inline-block;padding:4px 9px;border-radius:3px;background:#ffe14d;color:#5a3c00;font:bold 11px/1 Arial,Helvetica,sans-serif;letter-spacing:.06em;text-transform:uppercase;box-shadow:inset 0 0 0 1px #d9b100}
+#MHero h1{display:block;margin:8px 0 0;font:bold 32px/1.08 Arial,Helvetica,sans-serif;color:#111}
+#MHero .tag{margin:6px 0 10px;font:bold 14px Arial,Helvetica,sans-serif;color:#c00}
+#MHero p{margin:0 0 8px;font-size:14px;line-height:1.5}
+.Sec .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+/* how it works: three steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;list-style:none;margin:0;padding:0}
+.steps .pic{position:relative;height:140px;border:1px solid #0a4f86;border-radius:3px;display:flex;align-items:center;justify-content:center}
+.steps .pic .mtv{font-size:11px;margin-top:-6px}
+.steps .pic img{position:relative;z-index:2;height:128px;width:auto;margin-top:12px}
+.steps b{display:flex;align-items:center;gap:7px;margin:10px 0 4px;font:bold 16px Arial,Helvetica,sans-serif;color:#111}
+.steps .n{flex:none;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;font:bold 14px/1 Arial,Helvetica,sans-serif;color:#3a2600;
+  background:linear-gradient(#fff6a8,#ffe14d 50%,#ffcc1a 51%,#ffe14d);border:1px solid #b88a00}
+.steps p{margin:0;font-size:13px}
+.bigphone{position:relative;z-index:2;display:block;width:132px;height:70px;box-sizing:border-box;border-radius:12px;background:linear-gradient(#3b3b3b,#111);border:2px solid #8a8a8a;box-shadow:0 6px 14px rgba(0,0,0,.35)}
+.bigphone::after{content:"";position:absolute;left:50%;bottom:-14px;width:60px;height:12px;margin-left:-30px;background:#1b1b1b;border-radius:0 0 6px 6px}
+.bigphone .cam{position:absolute;left:10px;top:50%;width:9px;height:9px;margin-top:-4.5px;border-radius:50%;background:#d8fbff;box-shadow:0 0 8px 3px #5de8ff}
+.bigphone .qr{position:absolute;right:12px;top:9px;width:48px;height:48px;background:#fff repeating-conic-gradient(#111 0 25%,#fff 0 50%) 0 0/12px 12px;box-shadow:0 0 0 3px #fff}
+/* a console on the go / made for moving */
+.Sec .lead{margin:0 0 10px;font-size:14px;color:#222}
+.spots,.ideas{display:grid;gap:8px;list-style:none;margin:0;padding:0}
+.spots{grid-template-columns:repeat(3,1fr)}
+.ideas{grid-template-columns:repeat(4,1fr)}
+.spots li{padding:9px 10px;border:1px solid #c9c9c9;border-radius:3px;background:linear-gradient(#fff,#f1f1f1)}
+.spots b,.ideas b{display:block;font:bold 15px Arial,Helvetica,sans-serif;color:#1d7a0c}
+.spots span,.ideas span{display:block;margin-top:2px;font-size:12px;color:#555}
+.ideas li{position:relative;overflow:hidden;padding:12px 11px 13px;border-radius:3px}
+.ideas b{position:relative;color:#fff;font-size:17px;text-shadow:0 1px 0 rgba(0,40,80,.4)}
+.ideas span{position:relative;color:#eafcff;font-size:12.5px}
+.who{margin:12px 0 0;font-size:13px}
+.Sec .box a{color:#00f} .Sec .box a.gbtn{color:#1e1b16} .Sec .box a.gbtn.gray{color:#333} .Sec .box a.gbtn.blue{color:#fff}
+#moGames{margin-top:12px;font-size:13px;color:#555}
+#moGames .list{overflow:hidden;margin-top:6px}
+/* questions */
+#FAQ details{border-bottom:1px solid #ddd;padding:8px 2px}
+#FAQ details:last-child{border-bottom:0}
+#FAQ summary{cursor:pointer;font:bold 14px Arial,Helvetica,sans-serif;color:#111}
+#FAQ details p{margin:6px 0 2px 16px;font-size:13px}
+.mb{display:inline-block;padding:1px 5px;border-radius:3px;background:#ffe14d;color:#3a2600;font:bold 10px/1.3 Arial,Helvetica,sans-serif;letter-spacing:.04em;vertical-align:1px}
+/* get your Grug ready */
+#Ready .box{display:flex;gap:22px;align-items:center}
+#Ready .me{flex:none;width:170px}
+#Ready .rt{flex:1;font-size:14px}
+#Ready .rt p{margin:0}
+@media (max-width:939px){
+  #MHero .box,#Ready .box{flex-direction:column;align-items:stretch}
+  #MHero .stage{width:100%;height:270px}
+  #MHero .stage .mtv{font-size:18px;top:14px}
+  #MHero .stage .fig{height:140px}
+  #MHero h1{font-size:26px}
+  .steps{grid-template-columns:1fr}
+  .spots,.ideas{grid-template-columns:1fr 1fr}
+  #Ready .me{width:auto}
+}
+@media (max-width:420px){ .spots{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="pearl" viewBox="0 0 16 16"><path fill="#d16be8" d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></symbol>
+  <symbol id="claude" viewBox="0 0 100 100"><path fill="#fff" d="M26.2 0.5 23.1 4.7 24.1 10.2 33.0 25.1 39.1 36.1 39.1 36.6 38.4 37.0 15.0 19.2 10.3 18.7 7.6 21.7 8.3 25.9 10.0 27.9 18.1 33.7 38.5 47.3 39.8 48.4 39.6 49.0 37.8 49.1 28.1 48.0 2.3 46.3 0.3 47.6 0.0 49.0 2.2 52.0 4.5 52.5 39.2 53.9 39.6 54.7 39.1 55.6 19.4 66.6 11.8 71.8 10.7 72.8 10.5 75.9 12.5 77.9 17.1 77.3 43.5 60.1 43.8 60.2 43.9 60.8 40.0 65.3 22.4 88.3 22.1 91.0 25.1 92.5 26.7 91.9 34.0 84.1 48.8 64.0 49.6 63.6 47.9 74.3 43.5 94.9 44.8 98.0 47.4 99.9 50.3 98.8 51.7 97.2 54.5 67.0 55.1 66.6 63.4 80.1 71.5 91.8 74.4 92.3 76.9 91.3 77.5 90.1 77.0 85.8 65.3 68.1 65.5 67.3 66.3 67.6 79.0 78.4 86.7 84.2 88.1 84.3 89.4 82.6 88.9 80.1 65.5 58.3 65.5 57.8 66.3 57.8 94.3 64.6 99.6 62.1 99.7 59.8 97.8 57.3 94.6 55.2 83.2 54.4 72.4 54.2 66.2 53.6 65.9 53.3 79.7 49.9 90.0 47.9 98.3 45.6 99.6 42.5 99.2 41.0 95.7 39.2 81.8 41.7 69.0 44.3 68.7 43.9 72.1 37.9 85.3 20.6 86.7 15.8 83.6 11.1 79.3 11.1 77.0 12.9 70.2 20.5 59.6 34.0 58.4 35.2 57.6 35.2 61.4 15.1 62.8 5.4 60.8 2.5 58.5 1.4 55.6 3.3 53.7 7.5 51.0 38.1 50.3 38.1 48.9 33.5 40.3 16.9 33.8 2.1 32.0 0.5 28.4 0.0Z"/></symbol>
+  <symbol id="search" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.8" fill="none" stroke="#555" stroke-width="2"/><path d="M10 10l4.5 4.5" stroke="#555" stroke-width="2.4" stroke-linecap="round"/></symbol>
+</svg>
+
+<div class="bgfx" id="bgfx" aria-hidden="true"></div>
+<div class="sky l" id="skyL" aria-label="Grug on Discord, Instagram and YouTube"></div><div class="sky r" id="skyR" aria-label="Grug on YouTube, Discord and Instagram"></div>
+<div id="Container">
+  <div id="Leaderboard">
+    <a class="lb" href="/character/" aria-label="Make a character in the Grug Avatar Studio">
+      <span class="bgk"></span>
+      <img class="fig" src="/static/arcade/ranger.webp" alt="" style="left:14px">
+      <img class="fig" src="/static/arcade/grug.webp" alt="" style="left:78px;z-index:1">
+      <img class="fig" src="/static/arcade/snow-rider.webp" alt="" style="left:160px">
+      <span class="t"><b>One character. Every engine.</b><span>Make it free, then export a rigged model to:</span><span class="exp"><i class="k">Roblox</i><i class="k">Unity</i><i class="k">itch.io</i><i>Godot</i><i>Blender</i></span></span>
+      <span class="go">Make a character ›</span>
+    </a>
+  </div>
+
+  <div id="Header">
+    <div id="Banner">
+      <div id="Options"><a id="pearls" href="/character/pearls/" title="Your Pearls" hidden><svg aria-hidden="true"><use href="#pearl"/></svg><span id="pearlN">0</span> Pearls</a></div>
+      <img class="crowd" src="/static/arcade/medic.webp" alt="" style="left:96px">
+      <img class="crowd" src="/static/arcade/racer.webp" alt="" style="left:170px;height:98px">
+      <a id="Logo" href="/" title="Grug Digital home"><img src="/static/arcade/grug-digital-logo.png" alt="Grug Digital"></a>
+      <img class="crowd" src="/static/arcade/skater.webp" alt="" style="left:640px;height:98px">
+      <img class="crowd" src="/static/arcade/ranger.webp" alt="" style="left:712px">
+    </div>
+    <div class="Navigation">
+      <div class="dropdown" id="dropNav">
+        <div class="col gen" id="dropGenres"></div>
+        <div class="col more">
+          <a href="/arcade/"><b>Most Popular</b></a>
+          <a href="/arcade/">Newest</a>
+          <a href="/arcade/">Featured Games</a>
+          <a href="/arcade/">Search Games</a>
+          <a href="/arcade/motion/">Motion Controls</a>
+        </div>
+      </div>
+      <ul>
+        <li><a href="/character/?outfits">My Grug</a></li>
+        <li><a href="/arcade/" title="Games">Games</a><button id="gamesMenuToggle" type="button" aria-label="Show game genres" aria-expanded="false"></button></li>
+        <li><a href="/#assets">Catalog</a></li>
+        <li><a href="/character/">Avatar Studio</a></li>
+        <li><a href="/build/">Building Studio</a></li>
+        <li><a href="/arcade/grug-studio/">Grug Studio</a></li>
+        <li><a href="/character/pearls/">Pearls</a></li>
+        <li><a href="/">Home</a></li>
+        <li><a href="/legacy">Legacy</a></li>
+        <li><a href="/support.html">Help</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="Announcement">
+    <div class="SystemAlertText"><svg aria-hidden="true"><use href="#claude"/></svg>New: make your character with Claude! <a href="/character/?view=paint">Make it with Claude</a></div>
+  </div>
+
+  <div id="Body">
+    <section class="Sec" id="MHero" aria-labelledby="mTitle">
+      <div class="StandardBoxHeader"><span>Motion Controls</span></div>
+      <div class="box">
+        <div class="stage mo" role="img" aria-label="Two Grug characters jumping in front of a TV, with a phone propped up under it watching them move">
+          <span class="confetti"></span><span class="soon">COMING SOON</span><span id="heroTV"></span>
+          <img class="fig j1" src="/static/showcase/grug-digital-avatar-racer.webp" alt="" style="left:-6px">
+          <img class="fig j2" src="/static/showcase/grug-digital-avatar-snow-rider.webp" alt="" style="right:-2px">
+        </div>
+        <div class="txt">
+          <div class="pill">Coming soon to the Grug Arcade</div>
+          <h1 id="mTitle">Turn any TV into a Grug console.</h1>
+          <div class="tag">Your phone is the controller · nothing else to buy</div>
+          <p>Set your phone down under the TV, step back and play with your whole body. Jump, duck, dodge and dance: your phone's camera sees you move, and the Grug you made moves with you on the big screen.</p>
+          <p>It's a console you can take anywhere. Bring it to a sleepover, a birthday party or family game night, and the whole room can play.</p>
+          <div class="acts">
+            <a class="gbtn blue lg" href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener">Hear first on Discord</a>
+            <a class="gbtn gray lg" href="/arcade/">Play the Arcade now</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="Sec" id="How" aria-labelledby="howTitle">
+      <div class="StandardBoxHeader"><span><h2 id="howTitle">How it works</h2></span></div>
+      <div class="box">
+        <ol class="steps">
+          <li>
+            <div class="pic mo"><span class="confetti"></span><span id="stepTV"></span></div>
+            <b><span class="n">1</span>Open it on the big screen</b>
+            <p>Go to grugdigital.com on a smart TV, or on a laptop or computer hooked up to the TV, and pick a motion game.</p>
+          </li>
+          <li>
+            <div class="pic mo"><span class="confetti"></span><span class="bigphone" aria-hidden="true"><i class="cam"></i><span class="qr"></span></span></div>
+            <b><span class="n">2</span>Prop up your phone</b>
+            <p>Stand your phone under the TV with the camera facing the room, then scan the code on the screen. That links the two together.</p>
+          </li>
+          <li>
+            <div class="pic mo"><span class="confetti"></span><img class="j1" src="/static/showcase/grug-digital-avatar-grug.webp" alt="" loading="lazy"></div>
+            <b><span class="n">3</span>Step back and move</b>
+            <p>Jump, duck, wave and dodge, and your Grug copies you. Grab your friends and take turns.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="Sec" id="Go" aria-labelledby="goTitle">
+      <div class="StandardBoxHeader"><span><h2 id="goTitle">A console on the go</h2></span></div>
+      <div class="box">
+        <p class="lead">No console to set up, no controllers to charge, no cables to find. If there's a screen and you've got your phone, you've got a game night.</p>
+        <ul class="spots">
+          <li><b>Sleepovers</b><span>Set it up in two minutes, play till lights out.</span></li>
+          <li><b>Birthday parties</b><span>Everyone gets a turn, and everyone can watch.</span></li>
+          <li><b>Family game night</b><span>Grown-ups, kids and grandparents, all on one screen.</span></li>
+          <li><b>Holidays away</b><span>Grandma's TV works too. Just bring your phone.</span></li>
+          <li><b>Rainy days</b><span>Get the wiggles out without leaving the house.</span></li>
+          <li><b>Clubs and hangouts</b><span>Any room with a screen becomes the game room.</span></li>
+        </ul>
+        <p class="who"><b>For everyone.</b> You don't have to be good at games: if you can jump, you can play. Kids, teens and grown-ups can all join in, and you play as the Grug you made in the <a href="/character/">Avatar Studio</a>.</p>
+      </div>
+    </section>
+
+    <section class="Sec" id="Play" aria-labelledby="playTitle">
+      <div class="StandardBoxHeader"><span><h2 id="playTitle">Made for moving</h2></span></div>
+      <div class="box">
+        <p class="lead">Motion Controls are coming to select Arcade games, starting with ones built for moving. Some of the ideas we're playing with:</p>
+        <ul class="ideas">
+          <li class="mo"><b>Dodge it</b><span>Duck, lean and jump out of the way of whatever's flying at you.</span></li>
+          <li class="mo"><b>Dance-offs</b><span>Hit the moves on the beat and out-dance your friends.</span></li>
+          <li class="mo"><b>Jump the obby</b><span>Jump for real to clear the gaps, crouch to slide under.</span></li>
+          <li class="mo"><b>Sports day</b><span>Bowl, block shots in goal and race on the spot.</span></li>
+        </ul>
+        <div class="games" id="moGames"></div>
+      </div>
+    </section>
+
+    <section class="Sec" id="FAQ" aria-labelledby="faqTitle">
+      <div class="StandardBoxHeader"><span><h2 id="faqTitle">Questions</h2></span></div>
+      <div class="box">
+        <details open><summary>What do I need?</summary><p>A phone with a camera and a web browser, and a big screen that can open grugdigital.com: a smart TV, or a laptop or computer hooked up to one.</p></details>
+        <details><summary>Do I have to buy anything?</summary><p>No controller, camera or console to buy. That's the whole idea: you already have the gear.</p></details>
+        <details><summary>How much room do I need?</summary><p>Enough to jump and swing your arms without bumping into anything. Move the coffee table, keep drinks away from where you play, and make sure pets and little brothers and sisters aren't right next to you.</p></details>
+        <details><summary>Does the camera record me?</summary><p>Motion Controls are still being built. Before they launch, this page will explain exactly what the camera sees and where it goes, in plain words. Younger players: ask a grown-up before you turn on the camera.</p></details>
+        <details><summary>Which games will work with it?</summary><p>Select Arcade games, starting with ones built for moving. They'll wear a <span class="mb">MOTION</span> badge in the <a href="/arcade/">Arcade</a>, and they'll be listed on this page.</p></details>
+        <details><summary>When can I play?</summary><p>Soon! Join the <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener">Grug Discord</a> to hear the moment it's ready.</p></details>
+      </div>
+    </section>
+
+    <section class="Sec" id="Ready" aria-labelledby="readyTitle">
+      <div class="StandardBoxHeader"><span><h2 id="readyTitle">Get your Grug ready</h2></span></div>
+      <div class="box">
+        <div class="me">
+          <div class="pic" id="mePic"></div>
+          <div>
+            <b id="meT">Grug</b>
+            <select id="meSel" aria-label="Play as" hidden></select>
+            <p id="meP">Make a character and save it for the games to play as yourself.</p>
+          </div>
+        </div>
+        <div class="rt">
+          <p>When Motion Controls arrive, the character you play as is the one who jumps and dances on the big screen. Make yours now, and it'll be ready.</p>
+          <div class="acts"><a class="gbtn lg" href="/character/?outfits">Make your Grug</a><a class="gbtn gray" href="/arcade/">Play the Arcade</a></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="Footer">
+    <div class="FooterNav">
+      <a href="/privacy.html"><b>Privacy Policy</b></a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Advertise with Us</a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Press</a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Contact Us</a>
+      &nbsp;|&nbsp;
+      <a href="/">About Us</a>
+      &nbsp;|&nbsp;
+      <a href="/arcade/">Free Games</a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Jobs</a>
+    </div>
+    <div class="FooterNav">Follow Grug: <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener"><b>Discord</b></a>&nbsp;|&nbsp;<a href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener"><b>Instagram</b></a>&nbsp;|&nbsp;<a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener"><b>YouTube</b></a></div>
+    <div class="FooterNav" id="seoGenres"></div>
+    <p class="Legalese">
+      Grug, Grug Digital, Pearls, characters, logos, names, and all related indicia are trademarks of <a href="/">Grug Digital</a>, ©2026.
+      <br>
+      Grug is not sponsored, authorized or endorsed by Roblox Corporation, Anthropic or Google. Roblox is a trademark of Roblox Corporation,<br>
+      Claude of Anthropic and Gemini of Google, and no affiliation with these companies is intended.<br>Use of this site signifies your acceptance of the <a href="/terms.html">Terms and Conditions</a>.
+      <br>
+    </p>
+  </div>
+</div>
+
+<script src="/arcade/arcade.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id), A = window.GrugArcade;
+  $('heroTV').outerHTML = A.mtv('racer', 'zone-royale');
+  $('stepTV').outerHTML = A.mtv('grug', 'slide-999');
+  // the games that already play with Motion Controls (motion: true in GAMES), else a holding line
+  const MG = A.GAMES.filter(g => g.motion);
+  $('moGames').innerHTML = MG.length ? `<b>Play with motion now:</b><div class="list">${MG.map(A.tile).join('')}</div>`
+    : 'The first motion games will show up right here. Until then, every <a href="/arcade/">Arcade game</a> works with a keyboard, touch or Xbox controllers.';
+  A.chrome();
+})();
+</script>
+</body>
+</html>

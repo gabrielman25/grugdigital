@@ -76,6 +76,10 @@ def build_pages(G):
                          + [f'static/arcade/{c}.webp' for c in ['grug', 'ranger', 'skater', 'medic', 'snow-rider', 'racer']]))
     P.append(dict(file='arcade/place/index.html', url=SITE + '/arcade/place/', title=None, desc=None, og=OG['arcade'], og_alt='Grug Digital characters Medic and Racer over Zone Royale',
                   og_title='Grug Arcade · Free blocky games by Grug Digital', graph=None, images=[], nositemap=True, nocanon=True))   # each game's own address, data and title are set by the page's script
+    P.append(dict(file='arcade/motion/index.html', url=SITE + '/arcade/motion/', title=None, desc=None, og=OG['arcade'], og_alt='Grug Digital characters Medic and Racer over Zone Royale',
+                  graph=[{'@type': 'WebPage', 'url': SITE + '/arcade/motion/', 'name': 'Motion Controls · Coming soon to the Grug Arcade', 'publisher': {'@id': SITE + '/#org'},
+                          'keywords': 'motion controls, motion games, phone camera, party games, ' + KEYWORDS, 'primaryImageOfPage': img(OG['arcade'])}],
+                  images=[OG['arcade']] + [f'static/showcase/grug-digital-avatar-{c}.webp' for c in ['racer', 'snow-rider', 'grug']]))   # Motion Controls (coming soon)
     for g in G:
         cover = f'arcade/{g["slug"]}/{g["slug"]}-grug-arcade.jpg'
         url = f'{SITE}/arcade/{g["slug"]}/'
