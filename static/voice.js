@@ -25,20 +25,37 @@
     'laugh-1': 'Devious laugh',
   };
 
+  // tuned by the owner in the Voice Lab (Nov 25 2026)
   const DEFAULTS = {
     version: 1,
-    master: { volume: 0.9, pitchMode: 'independent', oneAtATime: true, noRepeat: true },
+    master: { volume: 1, pitchMode: "independent", oneAtATime: true, noRepeat: true },
     others: { enabled: true, volume: 0.75, range: 90 },
     avatar: { pitchMin: -4, pitchMax: 4, pitchDefault: 0, speedMin: 0.92, speedMax: 1.1, speedDefault: 1, botSpread: 0.85 },
-    clips: Object.fromEntries(Object.keys(CLIPS).map(k => [k, { gain: 1 }])),
+    clips: {
+      'jump-1': { gain: 1 },
+      'jump-2': { gain: 1 },
+      'jump-3': { gain: 1 },
+      'jump-4': { gain: 1 },
+      'jumpdodge-1': { gain: 1 },
+      'dodge-1': { gain: 1 },
+      'dodge-2': { gain: 1 },
+      'dodge-3': { gain: 1 },
+      'dodge-4': { gain: 1 },
+      'attack-1': { gain: 1 },
+      'death-1': { gain: 1 },
+      'death-2': { gain: 1 },
+      'death-3': { gain: 1 },
+      'death-4': { gain: 1 },
+      'laugh-1': { gain: 1 },
+    },
     events: {
-      jump:   { label: 'Jump', on: true, chance: 0.35, cooldown: 1.2, delay: 0, priority: 1, volume: [0.55, 0.7], speed: [0.97, 1.05], pitch: [-0.5, 0.5], clips: ['jump-1', 'jump-2', 'jump-3', 'jump-4', 'jumpdodge-1'] },
-      dodge:  { label: 'Dodge roll', on: true, chance: 0.7, cooldown: 0.8, delay: 0, priority: 1, volume: [0.65, 0.8], speed: [0.97, 1.05], pitch: [-0.5, 0.5], clips: ['dodge-1', 'dodge-2', 'dodge-3', 'dodge-4', 'jumpdodge-1'] },
-      attack: { label: 'Axe swing', on: true, chance: 0.45, cooldown: 0.9, delay: 0, priority: 1, volume: [0.55, 0.75], speed: [0.95, 1.08], pitch: [-1, 1], clips: ['attack-1'] },
-      hurt:   { label: 'Hurt (took damage)', on: false, chance: 0.5, cooldown: 1.5, delay: 0, priority: 1, volume: [0.4, 0.5], speed: [1.12, 1.2], pitch: [0, 1], clips: ['death-1', 'death-2'] },
-      death:  { label: 'Death', on: true, chance: 1, cooldown: 0, delay: 0, priority: 3, volume: [0.85, 0.95], speed: [0.98, 1.02], pitch: [-0.3, 0.3], clips: ['death-1', 'death-2', 'death-3', 'death-4'] },
-      fall:   { label: 'Fell off / fell to death', on: true, chance: 1, cooldown: 0, delay: 0, priority: 3, volume: [0.9, 0.95], speed: [0.9, 0.95], pitch: [-0.5, 0], clips: ['death-4', 'death-3'] },
-      laugh:  { label: 'Got an elimination', on: true, chance: 0.5, cooldown: 6, delay: 0.35, priority: 2, volume: [0.7, 0.8], speed: [0.98, 1.04], pitch: [-0.3, 0.3], clips: ['laugh-1'] },
+      jump: { label: "Jump", on: true, chance: 1, cooldown: 0, delay: 0, priority: 1, volume: [0.05, 0.11], speed: [1.67, 2], pitch: [-1.8, 1], clips: ['jump-2', 'jump-1', 'jump-3', 'attack-1'] },
+      dodge: { label: "Dodge roll", on: true, chance: 1, cooldown: 0, delay: 0, priority: 1, volume: [0.05, 0.22], speed: [0.97, 1.05], pitch: [-1.8, 1.3], clips: ['dodge-1', 'dodge-2', 'dodge-3', 'jumpdodge-1'] },
+      attack: { label: "Axe swing", on: true, chance: 1, cooldown: 0, delay: 0, priority: 1, volume: [0.02, 0.14], speed: [1.24, 1.5], pitch: [-1, 1], clips: ['jump-3', 'jump-4'] },
+      hurt: { label: "Hurt (took damage)", on: true, chance: 0.5, cooldown: 1.5, delay: 0, priority: 1, volume: [0.4, 0.5], speed: [1.12, 1.2], pitch: [0, 1], clips: ['death-1', 'death-2', 'jumpdodge-1', 'dodge-2'] },
+      death: { label: "Death", on: true, chance: 1, cooldown: 0, delay: 0, priority: 3, volume: [0.44, 0.59], speed: [0.5, 0.62], pitch: [-2.4, -0.2], clips: ['death-1', 'death-2', 'death-3', 'death-4', 'dodge-4'] },
+      fall: { label: "Fell off / fell to death", on: true, chance: 1, cooldown: 0, delay: 0, priority: 3, volume: [0.9, 0.95], speed: [0.9, 0.95], pitch: [-0.5, 0], clips: ['death-3', 'death-4'] },
+      laugh: { label: "Got an elimination", on: true, chance: 0.5, cooldown: 6, delay: 0.35, priority: 2, volume: [0.08, 0.19], speed: [0.98, 1.04], pitch: [0.8, 2.2], clips: ['laugh-1'] },
     },
   };
 
