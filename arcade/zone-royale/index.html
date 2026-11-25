@@ -487,6 +487,7 @@
 <script src="/static/outfits.js"></script>
 <script src="/static/outfit-rig.js"></script>
 <script src="/static/pearl-popup.js"></script>
+<script src="/static/local-mp.js"></script>  <!-- window.GrugLocalMP: local multiplayer on gamepads -->
 <script src="/static/yt480.js"></script>     <!-- window.GrugYT480: the "480p YouTube mode" setting -->
 <script id="ambient-npc">
 /* =====================================================================
@@ -3001,9 +3002,10 @@ function updateUse(f, dt) {
 // ---------------------------------------------------------------- game state, the pop-up feed, damage numbers, billboards
 const Game = { clock: 0 };
 let player = null, SEQ = 0;
-const BOTS = [];   // the other players who are real characters right now (near you)
+const BOTS = [], MATES = [];   // the other players who are real characters right now (near you); MATES: the local players on controllers (j_main)
 const alive = f => !!f && !f.dead;
-const FIGHTERS = () => player && !player.dead && !player.inPlane ? [player, ...BOTS] : BOTS;
+const FIGHTERS = () => { const L = player && !player.dead && !player.inPlane ? [player, ...BOTS] : MATES.length ? [...BOTS] : BOTS; for (const m of MATES) if (!m.dead && !m.parked) L.push(m); return L; };
+const simFighters = () => { const L = player ? [player, ...BOTS] : [...BOTS]; for (const m of MATES) if (!m.parked) L.push(m); return L; };
 const Pts = { rows: [],
   add(n, label, kind) {
     let r = this.rows.find(q => q.label === label && q.age < 1.4 && n !== null);
@@ -3069,6 +3071,7 @@ const headOf = f => f.ch.y + 1.0;   // anything above this on a body is a headsh
 
 // ---------------------------------------------------------------- damage: shield first, then health. The storm and falls skip the shield
 function hurt(s, amt, by, o = {}) {
+  if (s.isMate) return mateHurt(s, amt, by, o);   // a local player on a controller (j_main)
   if (!alive(s) || s.inPlane || (s.protect > 0 && !o.storm)) return 0;
   if (by && !o.storm && !o.fall && ally(by, s)) return 0;   // no friendly fire
   amt = Math.max(0, amt); let shD = 0;
@@ -3142,7 +3145,7 @@ function updateBurst(f, dt) {
 }
 // one bullet (or pellet): the wall it would stop at, every body in front of that, and through as many as the gun pierces
 function fireRay(f, G, ox, oy, oz, dx, dy, dz, maxT, mul, seen) {
-  const wr = W.raycast(ox, oy, oz, dx, dy, dz, maxT, shotFilter), wallT = G.pierce ? Math.min(maxT, wr.part && wr.part.ground ? wr.t : maxT) : wr.t, hits = [];
+  const wr = f.isMate ? { t: maxT, part: null } : W.raycast(ox, oy, oz, dx, dy, dz, maxT, shotFilter), wallT = G.pierce ? Math.min(maxT, wr.part && wr.part.ground ? wr.t : maxT) : wr.t, hits = [];
   for (const s of FIGHTERS()) { if (s === f || s.dead || ally(f, s)) continue; const t = rayBody(ox, oy, oz, dx, dy, dz, s.ch, wallT, 1); if (t >= 0 && t < wallT) hits.push([t, s]); }
   hits.sort((a, b) => a[0] - b[0]);
   const cap = 1 + (G.pierce || 0), n = Math.min(hits.length, cap), stop = n === cap, endT = stop ? hits[n - 1][0] : wallT;
@@ -3906,6 +3909,7 @@ function computeAim() {
 function walkDir() {
   let fw = (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0), st = (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0);
   if (TT.stick) { const R = 50, l = Math.hypot(TT.stick.dx, TT.stick.dy); if (l > R * 0.15) { const k = Math.min(1, l / R) / l; st = TT.stick.dx * k; fw = -TT.stick.dy * k; } }
+  if (PAD1) { st = PAD1[0]; fw = -PAD1[1]; }   // Player 1 on a controller
   const mx = -Math.sin(cam.yaw) * fw + Math.cos(cam.yaw) * st, mz = -Math.cos(cam.yaw) * fw - Math.sin(cam.yaw) * st, l = Math.hypot(mx, mz);
   return l > 0.01 ? (l > 1 ? [mx / l, mz / l] : [mx, mz]) : null;
 }
@@ -3941,7 +3945,7 @@ function playerInput(dt) {
   if (f.inPlane) { if (edge.has('Space') && PLANE.t > PLANE.open) jumpOut(f); return; }
   if (f.dead) { if (lmbTap) { const list = BOTS.filter(b => !b.dead); if (list.length) spec.t = list[(list.indexOf(spec.t) + 1) % list.length]; } lmbTap = false; return; }
   const w = walkDir();
-  if (f.air) { f.airIn = { mx: w ? w[0] : 0, mz: w ? w[1] : 0, dive: keys.has('KeyW') || (TT.stick && TT.stick.dy < -20), deploy: edge.has('Space') || TT.jump }; return; }
+  if (f.air) { f.airIn = { mx: w ? w[0] : 0, mz: w ? w[1] : 0, dive: keys.has('KeyW') || (TT.stick && TT.stick.dy < -20) || (PAD1 && PAD1[1] < -0.5), deploy: edge.has('Space') || TT.jump }; return; }
   inp.mx = w ? w[0] : 0; inp.mz = w ? w[1] : 0; inp.jump = keys.has('Space') || TT.jump;
   const it = curItem(f), G = it && it.t === 'gun' ? GUNS[it.k] : null;
   f.ads = !!(rmb && G && !f.use && !f.reload);
@@ -4248,13 +4252,13 @@ function sim(dt) {
   }
   if (player && !player.dead && player.air) { const I = player.airIn || { mx: 0, mz: 0 }; updateAir(player, dt, I.mx, I.mz, I.dive, I.deploy); }
   chars.length = 0; const live = [];
-  for (const f of player ? [player, ...BOTS] : BOTS) if (!f.dead && !f.air && !f.inPlane) { chars.push(f.ch); live.push(f); }
+  for (const f of simFighters()) if (!f.dead && !f.air && !f.inPlane) { chars.push(f.ch); live.push(f); }
   stepChars(chars, dt);
   for (const f of live) {
     for (const e of f.ch.events) if (e === 'jump' && (f.isPlayer || nearCam(f.ch, 60))) Snd.play('jump', f.ch.x, f.ch.y, f.ch.z);
     f.ch.events.length = 0; fallCheck(f);
   }
-  for (const f of player ? [player, ...BOTS] : BOTS) if (!f.dead) tickFighter(f, dt);
+  for (const f of simFighters()) if (!f.dead) tickFighter(f, dt);
 }
 
 // ---------------------------------------------------------------- start
@@ -4302,11 +4306,13 @@ addEventListener('resize', resize); resize();
 let last = performance.now(); const fogC = new THREE.Color();
 function frameStep(now) {
   const dt = Math.min((now - last) / 1000, 0.1); last = now;
+  if (window.GrugLocalMP) GrugLocalMP.frame(dt);   // controllers: Player 1's, and the extra players'
   if (player && Match.state !== 'menu' && playing()) playerInput(dt); else if (player) { player.ch.input.mx = player.ch.input.mz = 0; player.ch.input.jump = false; lmbTap = false; }
   sim(dt); edge.clear();
   updateDebris(dt); updateTracers(dt); FX.update(dt); Pts.update(dt); DmgNum.update(dt); Feed.update(dt); updateLoot(dt); FakeJump.update(dt);
   if (player && !player.dead && !player.inPlane) { animateFighter(player, dt); const fp = cam.dist < 1.5; player.rig.g.visible = !fp; }
   for (const b of BOTS) if (!b.dead) { const v = nearCam(b.ch, 520); b.rig.g.visible = v; if (v) animateFighter(b, dt); }
+  for (const m of MATES) if (!m.dead && !m.parked) animateFighter(m, dt);
   placeCamera(dt); computeAim(); computeInteract(); autoPickup();
   // fog: far off when you're up high, thick and purple in the storm
   const cy = camera.position.y, inS = player && !player.dead && !player.inPlane && inStorm(player);
@@ -4317,6 +4323,7 @@ function frameStep(now) {
   sky.position.copy(camera.position); sun.position.set(F.x + SUN_DIR.x * 260, F.y + SUN_DIR.y * 260, F.z + SUN_DIR.z * 260); sun.target.position.set(F.x, F.y, F.z);
   if (Snd.ctx) { Snd.setLoop('storm', inS ? 0.5 : 0); Snd.setLoop('wind', player && !player.dead && player.air ? (player.air.mode === 'fall' ? 0.35 : 0.15) : 0); Snd.setLoop('plane', player && player.inPlane ? 0.12 : 0); }
   updateHouseView(focusPoint()); updateTags(dt); Bills.update(dt); Waypoints.update(); updateHud(dt); updateMinimap(); Snd.listen(); DmgInd.update(dt);
+  if (window.GrugLocalMP) GrugLocalMP.draw();
   plasticSweep(); renderer.render(scene, camera);
 }
 /* The frame loop. The next frame is asked for first, and one frame's error is caught and logged, so nothing that goes
@@ -4332,6 +4339,140 @@ function frame(now) {
     try { renderer.render(scene, camera); } catch (x) {}
   }
 }
+// ---------------------------------------------------------------- LOCAL MULTIPLAYER (static/local-mp.js): more players on gamepads, on this screen.
+// Player 1 keeps the keyboard / mouse / touch (or takes a controller: then the left stick moves, the right stick turns the
+// camera). Every other controller is a teammate (team 0, no friendly fire) standing next to you: they walk relative to your
+// camera, have your abilities (guns, the pickaxe, healing, chests, the dodge roll, sprint), and aim with their own crosshair
+// (right stick). Their bullets go through walls, since they can't move the camera. Far away (or stuck in the storm alone)
+// they're brought back to you. They sit out the plane and the drop, and land next to you. Down: back next to you in 4 s.
+const MATE_SPOT = s => { const a = (s - 2) * 1.9 + 2.2, r = 4.5; return [Math.cos(a) * r, Math.sin(a) * r]; };
+const mateOn = () => !!player && !player.dead && !player.inPlane && !player.air && (Match.state === 'island' || Match.state === 'live') && $('results').style.display !== 'block';
+let PAD1 = null;   // Player 1 on a controller: the left stick (read by walkDir)
+function mateKit(m) { m.inv = newInv(); m.ammoR = newAmmo(); m.sel = 0; m.lastSel = 1; if (Match.state === 'island') { islandKit(m); m.sel = 1; } }
+function matePlace(m) {
+  const [ox, oz] = MATE_SPOT(m.slot), P = player.ch; let x = P.x + ox, z = P.z + oz;
+  if (!clear(P.x, P.y, P.z, x, P.y, z)) { x = P.x + ox * 0.3; z = P.z + oz * 0.3; }
+  resetFighter(m, x, P.y + 0.2, z); m.ch.faceYaw = P.faceYaw; m.protect = 1.5; m.parked = false; m.rig.g.visible = true;
+}
+function matePark(m) { if (m.parked) return; m.parked = true; m.rig.g.visible = false; m.ch.input.mx = m.ch.input.mz = 0; m.ch.input.jump = false; m.opening = null; }
+// a teammate's damage: shield first, then health. Down, they drop nothing and come back next to you
+function mateHurt(s, amt, by, o) {
+  if (s.dead || s.parked || (s.protect > 0 && !o.storm)) return 0;
+  if (by && !o.storm && !o.fall && ally(by, s)) return 0;
+  amt = Math.max(0, amt); let shD = 0;
+  if (!o.storm && !o.fall && s.sh > 0) { shD = Math.min(s.sh, amt); s.sh -= shD; amt -= shD; }
+  const hpD = Math.min(s.hp, amt); s.hp -= amt; s.hurtT = 0; s.hitFx = 0.22;
+  if (by && by !== s && !o.storm) { s.lastHitBy = by; by.dmg = (by.dmg || 0) + shD + hpD; }
+  if (nearCam(s.ch, 120) && !o.storm) Snd.play('hit', s.ch.x, s.ch.y, s.ch.z);
+  if (s.pad) GrugLocalMP.rumble(s.pad, 0.5, 120);
+  if (s.hp <= 0) {
+    s.dead = true; s.hp = 0; s.use = s.reload = s.whip = s.burst = null; s.respawnT = 4; s.opening = null;
+    breakApart(s.rig); Snd.play('oof', s.ch.x, s.ch.y, s.ch.z); s.rig.g.visible = false;
+    Feed.add(by && by !== s ? `${feedName(by)} <span class="fx">knocked</span> <b style="color:${s.color}">${s.name}</b>` : `<b style="color:${s.color}">${s.name}</b> <span class="fx">is down</span>`);
+  }
+  return shD + hpD;
+}
+const mateTmp = { o: null };
+function mateAim(m, S) {   // where this player's crosshair points: the first enemy along it (walls don't count), or what's behind it
+  const ch = m.ch, R = GrugLocalMP.ray(S, camera), o = R.o, d = R.d;
+  if (!S.hasRight) {   // a controller with no right stick: the crosshair follows the nearest enemy in reach
+    let best = null, bd = 160; for (const s of BOTS) { if (s.dead || ally(m, s)) continue; const dd = Math.hypot(s.ch.x - ch.x, s.ch.z - ch.z); if (dd < bd) { bd = dd; best = s; } }
+    if (best) GrugLocalMP.aimAt(S, camera, best.ch.x, best.ch.y, best.ch.z); else GrugLocalMP.aimAt(S, camera, ch.x - Math.sin(ch.faceYaw) * 30, ch.y, ch.z - Math.cos(ch.faceYaw) * 30);
+  }
+  let best = 1200, hit = null;
+  for (const s of BOTS) { if (s.dead || ally(m, s)) continue; const t = rayBody(o.x, o.y, o.z, d.x, d.y, d.z, s.ch, best, 1.15); if (t >= 0 && t < best) { best = t; hit = s; } }
+  if (!hit) {   // a little help: a body right next to the crosshair counts
+    let bd = 46; for (const s of BOTS) { if (s.dead || ally(m, s)) continue; tv.set(s.ch.x, s.ch.y - 0.4, s.ch.z).project(camera); if (tv.z > 1) continue; const dd = Math.hypot((tv.x * 0.5 + 0.5) * innerWidth - S.cursor.x, (-tv.y * 0.5 + 0.5) * innerHeight - S.cursor.y); if (dd < bd) { bd = dd; hit = s; } }
+  }
+  let tx, ty, tz;
+  if (hit) { tx = hit.ch.x; ty = hit.ch.y - 0.2; tz = hit.ch.z; }
+  else { const wr = W.raycast(o.x, o.y, o.z, d.x, d.y, d.z, 1200, camFilter); const t = wr.part ? wr.t : 400; tx = o.x + d.x * t; ty = o.y + d.y * t; tz = o.z + d.z * t; }
+  const px = tx - ch.x, py = ty - (ch.y + 1.5), pz = tz - ch.z, l = Math.hypot(px, py, pz) || 1;
+  return [px / l, py / l, pz / l];
+}
+function mateInput(m, S, dt) {
+  const ch = m.ch, inp = ch.input, w = GrugLocalMP.move(S, cam.yaw);
+  inp.mx = w ? w[0] : 0; inp.mz = w ? w[1] : 0; inp.jump = S.down('a');
+  const it = curItem(m), G = it && it.t === 'gun' ? GUNS[it.k] : null, d = mateAim(m, S), aimYaw = Math.atan2(-d[0], -d[2]);
+  m.ads = !!(S.down('lt') && G && !m.use && !m.reload);
+  const wet = groundH(ch.x, ch.z) < 0;
+  ch.speedMul = S.down('ls') && w && !m.ads && !m.use ? RULES.sprint : m.ads ? 0.7 : 1; if (wet) ch.speedMul *= 0.62;
+  ch.lockYaw = G || m.whip || m.ads ? aimYaw : null; m.aimPitch = Math.asin(clamp(d[1], -1, 1)) + 0.1;
+  if (S.hit('b')) { const r = w ? [w[0] / (Math.hypot(...w) || 1), w[1] / (Math.hypot(...w) || 1)] : [-Math.sin(ch.faceYaw), -Math.cos(ch.faceYaw)]; dodgeRoll(m, r); }
+  if (S.hit('lb')) cycleSlot(m, -1); if (S.hit('rb')) cycleSlot(m, 1); if (S.hit('up')) setSlot(m, 0);
+  if (S.hit('x')) startReload(m);
+  // Y: the nearest chest, ammo box or pile in reach (no need to face it)
+  if (S.hit('y') && !m.opening) {
+    let best = null, bs = RULES.interactR, kind = '';
+    for (const B of BOXES) if (!B.open) { const dd = Math.hypot(B.x - ch.x, B.z - ch.z); if (dd < bs && Math.abs(B.y - (ch.y - 3)) < 4) { bs = dd; best = B; kind = 'box'; } }
+    for (const L of lootNear(ch.x, ch.z, RULES.interactR, mateTmp.q || (mateTmp.q = []))) if (!L.fly) { const dd = Math.hypot(L.x - ch.x, L.z - ch.z); if (dd < bs && Math.abs(L.y - (ch.y - 3)) < 4) { bs = dd; best = L; kind = 'loot'; } }
+    if (kind === 'loot') { if (pickup(m, best, true)) mateGunUp(m); } else if (kind === 'box') { m.opening = { B: best, t: 0 }; Snd.tone('triangle', 500, 700, 0.1, 0.06); }
+  }
+  if (m.opening) { const B = m.opening.B; if (B.open || Math.hypot(B.x - ch.x, B.z - ch.z) > RULES.interactR + 1) m.opening = null; else if ((m.opening.t += dt) >= (B.ammo ? 0.3 : 0.45)) { openBox(B, m); m.opening = null; } }
+  // walking over a pile takes what fits
+  for (const L of lootNear(ch.x, ch.z, RULES.pickupR, mateTmp.q || (mateTmp.q = []))) {
+    if (L.fly || (L.nb === m && Game.clock < L.nbT) || Math.abs(L.y - (ch.y - 3)) > 3) continue;
+    if (L.items.some(q => q.t === 'ammo' || (q.t === 'heal' && (emptySlot(m) > 0 || m.inv.some(s => s && s.t === 'heal' && s.k === q.k && s.n < HEALS[q.k].stack))) || (q.t === 'gun' && emptySlot(m) > 0))) if (pickup(m, L, false)) mateGunUp(m);
+  }
+  const fire = S.down('rt'), tap = S.hit('rt'), since = Game.clock - m.lastShot;
+  if (!it) return;
+  if (it.t === 'pick') { if (fire) swing(m, d); }
+  else if (it.t === 'heal') { if (fire && !m.use) startUse(m); }
+  else if (G) {
+    if (m.reload || m.burst) return;
+    if (it.mag <= 0 && tap) { startReload(m); return; }
+    if (((tap && since >= G.cd) || (fire && G.auto && since >= G.cd)) && m.equipT <= 0) { m.shotYaw = aimYaw; m.armYaw = 0; shoot(m, d[0], d[1], d[2]); }
+  }
+}
+function mateGunUp(m) { if (m.sel === 0) { const g = m.inv.findIndex((s, j) => j && s && s.t === 'gun'); if (g > 0) setSlot(m, g); } }
+function mateList() { return MATES.filter(m => !m.dead && !m.parked && !m.air); }
+if (window.GrugLocalMP) GrugLocalMP.init({
+  labels: { move: 'Move', aim: 'Crosshair (Player 1: camera)', a: 'Jump', b: 'Dodge roll', x: 'Reload', y: 'Open / pick up', lb: 'Previous item', rb: 'Next item', lt: 'Aim down sights', rt: 'Fire / swing / use', back: 'Map', start: 'Game Menu', ls: 'Sprint', up: 'Pickaxe' },
+  help: '<b>Left stick</b> move (relative to the camera) · <b>Right stick</b> your crosshair (Player 1: the camera)<br><b>A</b> jump · <b>B</b> dodge roll · <b>X</b> reload · <b>Y</b> open chests, pick up<br><b>RT</b> fire / swing / use · <b>LT</b> aim · <b>LB / RB</b> switch item · <b>D-pad up</b> pickaxe · <b>Left stick click</b> sprint · <b>Start</b> menu<br>Extra players are on your team, start next to Player 1 and come back to them if they wander off. Their bullets go through walls.',
+  camera: () => camera,
+  hidden: () => !mateOn(),
+  uiRoot: () => document.body.classList.contains('menu') ? $('gm') : $('results').style.display === 'block' ? $('results') : $('bigmap').classList.contains('on') ? $('bigmap') : null,
+  back: () => { if ($('bigmap').classList.contains('on')) toggleMap(false); else toggleMenu(false); },
+  menu: () => toggleMenu(true),
+  spawn(S) {
+    const m = makeFighter('Player ' + S.slot, playerLook(), {}); m.isBot = false; m.isMate = true; m.team = 0; m.slot = S.slot; m.color = S.color; m.pad = S; m.parked = true; m.rig.g.visible = false;
+    mateKit(m); MATES.push(m);
+    if (window.GrugOutfitRig) { const L = OUTFITS.others.length ? OUTFITS.others : OUTFITS.kit, o = L.length ? L[(S.slot - 2) % L.length] : null; if (o) try { GrugOutfitRig.dress(m.rig, o); dressRig(m.rig, m.look); } catch (e) { } }
+    if (mateOn()) matePlace(m);
+    return m;
+  },
+  despawn(m) { const i = MATES.indexOf(m); if (i >= 0) MATES.splice(i, 1); scene.remove(m.rig.g); },
+  update(m, S, dt, ui) {
+    if (m.matchStart !== Match.start + '|' + Match.state) { m.matchStart = Match.start + '|' + Match.state; mateKit(m); matePark(m); }
+    if (!mateOn()) { matePark(m); return; }
+    if (m.parked) { matePlace(m); return; }
+    if (m.dead) { if ((m.respawnT -= dt) <= 0) { const inv = m.inv, am = m.ammoR, sel = m.sel; matePlace(m); m.inv = inv; m.ammoR = am; m.sel = sel; } return; }
+    const P = player.ch, far = Math.hypot(m.ch.x - P.x, m.ch.z - P.z);
+    if (far > 75 || Math.abs(m.ch.y - P.y) > 30 || m.ch.y < -40 || (m.air && far > 40)) { const inv = m.inv, am = m.ammoR, sel = m.sel, hp = m.hp, sh = m.sh; matePlace(m); Object.assign(m, { inv, ammoR: am, sel, hp, sh }); FX.rollEnd(m.ch.x, m.ch.y - 3, m.ch.z); return; }
+    if (m.air) { const w = GrugLocalMP.move(S, cam.yaw); updateAir(m, dt, w ? w[0] : 0, w ? w[1] : 0, false, true); return; }
+    if (ui) { m.ch.input.mx = m.ch.input.mz = 0; m.ch.input.jump = false; return; }
+    mateInput(m, S, dt);
+  },
+  headPos: m => m.parked || m.dead ? null : { x: m.ch.x, y: m.ch.y + 3.4, z: m.ch.z },
+  hp: m => (m.hp + m.sh) / 200,
+  dead: m => m.dead,
+  crosshairFor: m => !m.parked,
+  // Player 1 on a controller: the same keys the keyboard presses
+  p1(S, dt, ui) {
+    if (ui) { PAD1 = null; return; }
+    PAD1 = S.lx || S.ly ? [S.lx, S.ly] : null;
+    const k = (SENS_K[Save.sens] || 0.0042) / 0.0042 * (player && player.ads ? (curGun(player) && GUNS[curGun(player).k].scope ? 0.3 : 0.6) : 1);
+    cam.yaw -= S.rx * 3.4 * k * dt; cam.pitch = clamp(cam.pitch + S.ry * 2.4 * k * dt, -PITCH_LIMIT, PITCH_LIMIT);
+    GrugLocalMP.hold(S, 'a', 'Space'); GrugLocalMP.hold(S, 'ls', 'ShiftLeft');
+    if (S.hit('b')) GrugLocalMP.tap('KeyC'); if (S.hit('x')) GrugLocalMP.tap('KeyR'); if (S.hit('y')) GrugLocalMP.tap('KeyE'); if (S.hit('back')) GrugLocalMP.tap('KeyM'); if (S.hit('up')) GrugLocalMP.tap('KeyF');
+    if (player && !player.dead && playing()) { if (S.hit('lb')) cycleSlot(player, -1); if (S.hit('rb')) cycleSlot(player, 1); }
+    if (S.hit('rt')) { lmb = true; lmbTap = true; } else if (S.up('rt')) lmb = false;
+    if (S.hit('lt')) rmb = true; else if (S.up('lt')) rmb = false;
+    $('xh').style.display = '';
+  },
+  p1Grab() { Snd.init(); },
+  p1Release() { PAD1 = null; lmb = rmb = false; keys.clear(); },
+});
 window.GrugLoopErrors = loopErrs;
 requestAnimationFrame(frame);
 // for testing from the console

@@ -379,6 +379,7 @@
 <script src="/static/outfits.js"></script>
 <script src="/static/outfit-rig.js"></script>
 <script src="/static/pearl-popup.js"></script>
+<script src="/static/local-mp.js"></script>  <!-- window.GrugLocalMP: local multiplayer on gamepads -->
 <script src="/static/yt480.js"></script>     <!-- window.GrugYT480: the "480p YouTube mode" setting -->
 <script id="ambient-npc">
 /* =====================================================================
@@ -2710,7 +2711,8 @@ function makePlayer(t) {
   startAmmo(player);
   player.rig = makeRig(playerLook(t), { guns: true });
 }
-const PLAYERS = () => player ? [player, ...bots] : bots;   // zombies chase the nearest of these
+const MATES = [];   // the local players on controllers (see LOCAL MULTIPLAYER near the end)
+const PLAYERS = () => { if (!MATES.length) return player ? [player, ...bots] : bots; const L = player ? [player, ...bots] : [...bots]; for (const m of MATES) if (!m.parked) L.push(m); return L; };   // zombies chase the nearest of these
 const SURV = PLAYERS;
 function hurtPlayer(p, amt, from) {
   if (!p || p.ch.dead || p.protect > 0 || Round.state !== 'play') return false;
@@ -2952,7 +2954,7 @@ let pkT = 0;
 const byZone = new Map();
 function updatePickups(dt) {
   byZone.clear(); const add = o => { const k = o.zone; if (!byZone.has(k)) byZone.set(k, []); byZone.get(k).push(o); };
-  if (player && !player.ch.dead) add(player); for (const b of bots) if (!b.ch.dead) add(b);
+  if (player && !player.ch.dead) add(player); for (const b of bots) if (!b.ch.dead) add(b); for (const m of MATES) if (!m.parked && !m.ch.dead) add(m);
   if ((pkT -= dt) <= 0) {   // restock empty spots (if the house or shelf isn't full, and nobody is standing next to it)
     pkT = 0.5;
     for (const sp of SPOTS) {
@@ -3073,7 +3075,7 @@ function zStatus(z, dt) {
 }
 // one bullet (or pellet): the wall it would stop at, every body in front of that, and through as many as the gun pierces
 function fireRay(f, G, ox, oy, oz, dx, dy, dz, maxT, mul, hot, seen, sk) {
-  const wr = W.raycast(ox, oy, oz, dx, dy, dz, maxT, f.shotF || shotFilter), wallT = wr.t, hits = [];
+  const wr = f.isMate ? { t: maxT, part: null } : W.raycast(ox, oy, oz, dx, dy, dz, maxT, f.shotF || shotFilter), wallT = wr.t, hits = [];   // local players' bullets go through walls
   for (const z of zombies) { if (z.state === 'dead') continue; const t = rayBody(ox, oy, oz, dx, dy, dz, z.ch, wallT, z.K.scale); if (t >= 0 && t < wallT) hits.push([t, z]); }
   for (const s of SURV()) { if (!canShoot(f, s)) continue; const t = rayBody(ox, oy, oz, dx, dy, dz, s.ch, wallT, 1); if (t >= 0 && t < wallT) hits.push([t, s]); }
   hits.sort((a, b) => a[0] - b[0]);
@@ -3243,6 +3245,7 @@ canvas.addEventListener('wheel', e => { e.preventDefault(); const s = Math.sign(
 function walkDir() {
   let fw = (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0), st = (keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0);
   if (TT.stick) { const R = 50, l = Math.hypot(TT.stick.dx, TT.stick.dy); if (l > R * 0.15) { const k = Math.min(1, l / R) / l; st = TT.stick.dx * k; fw = -TT.stick.dy * k; } }
+  if (PAD1) { st = PAD1[0]; fw = -PAD1[1]; }   // Player 1 on a controller
   const mx = -Math.sin(cam.yaw) * fw + Math.cos(cam.yaw) * st, mz = -Math.cos(cam.yaw) * fw - Math.sin(cam.yaw) * st, l = Math.hypot(mx, mz);
   return l > 0.01 ? (l > 1 ? [mx / l, mz / l] : [mx, mz]) : null;   // analog: shorter than 1 when the stick is half pushed
 }
@@ -3378,7 +3381,7 @@ function autoCombat(f, dt, cone) {
     const ix = ch.input.mx, iz = ch.input.mz, il = Math.hypot(ix, iz);
     if (il > 0.3) { const b = blockAhead(ch, ix / il, iz / il); if (b) { bash(f, Math.atan2(-(b.x - ch.x), -(b.z - ch.z))); return; } }
   }
-  if (f.isPlayer) return;   // your shooting is manual: only your melee is automatic
+  if (f.isPlayer || f.isMate) return;   // your shooting is manual (and the local players'): only your melee is automatic
   if (f.startleT > 0) { f.tgt = null; return; }   // a startled fake player hasn't found you yet
   if ((f.tgtT -= dt) <= 0 || (f.tgt && !alive(f.tgt)) || (f.tgt && !f.tgt.zombie && !canShoot(f, f.tgt))) {
     f.tgtT = f.isPlayer ? 0.12 : rnd(0.25, 0.45);
@@ -4211,8 +4214,8 @@ function sim(dt) {
     if (Round.state === 'play') autoCombat(b, dt, null); else b.tgt = null;
     if (!b.ch.dead && Game.clock < b.faceUntil) b.ch.lockYaw = b.shotYaw;
   }
-  chars.length = 0; if (player) chars.push(player.ch); for (const b of bots) chars.push(b.ch); for (const z of zombies) if (liveZ(z)) chars.push(z.ch);
-  stepChars(chars, dt);
+  chars.length = 0; if (player) chars.push(player.ch); for (const b of bots) chars.push(b.ch); for (const m of MATES) if (!m.parked) chars.push(m.ch); for (const z of zombies) if (liveZ(z)) chars.push(z.ch);
+  stepChars(chars, dt); mateSim(dt);
   if (player) {
     const p = player, ch = p.ch;
     for (const e of ch.events) { if (e === 'died') onPlayerDied(p); else if (e === 'respawn') onPlayerRespawn(p); else if (e === 'jump') Snd.play('jump', ch.x, ch.y, ch.z); }
@@ -4306,6 +4309,7 @@ function sparkles(dt) {
 let last = performance.now(), orbit = 0;
 function frameStep(now) {
   const dt = Math.min((now - last) / 1000, 0.1); last = now;
+  if (window.GrugLocalMP) GrugLocalMP.frame(dt);   // controllers: Player 1's, and the extra players'
   if (player) { touchHold(); playerInput(dt); }
   sim(dt);
   updateDebris(dt); updateTracers(dt); FX.update(dt); Pts.update(dt); DmgNum.update(dt); Feed.update(dt); updateAnnounce(dt);
@@ -4313,6 +4317,7 @@ function frameStep(now) {
   fieldMat.opacity = 0.14 + Math.sin(Game.clock * 2.5) * 0.05; barrierTex.offset.x = (Game.clock * 0.15) % 1;
   for (const z of zombies) if (z.state !== 'dead') { const v = nearCam(z.ch, 420); z.rig.g.visible = v; if (v) placeZombie(z, dt); }
   for (const b of bots) if (!b.ch.dead) { const v = nearCam(b.ch, 520); b.rig.g.visible = v; if (!v) continue; if (nearCam(b.ch, 220)) animatePlayer(b, dt); else { b.rig.g.position.set(b.ch.x, b.ch.y - 3, b.ch.z); b.rig.g.rotation.y = b.ch.faceYaw; } }
+  for (const m of MATES) if (!m.parked && !m.ch.dead) animatePlayer(m, dt);
   let fx = 0, fy = 0, fz = 0;
   if (!player) { orbit += dt * 0.05; camera.position.set(Math.sin(orbit) * 340, 150, Math.cos(orbit) * 340); camera.lookAt(0, 0, 0); camera.updateMatrixWorld(true); }
   else {
@@ -4329,6 +4334,7 @@ function frameStep(now) {
   if (xpDirty && (hudSaveT -= dt) <= 0) { hudSaveT = 3; xpDirty = false; Save.save(); if ($('skills').classList.contains('on')) renderSkills(); }
   document.body.classList.toggle('hasRoll', perk('roll'));
   updateHouseView(); updateTags(dt); Bills.update(dt); Waypoints.update(); Arrows.update(dt); updateHud(dt); updateMinimap(); Snd.listen(); DmgInd.update(dt);
+  if (window.GrugLocalMP) GrugLocalMP.draw();
   plasticSweep(); renderer.render(scene, camera);
 }
 /* The frame loop. The next frame is asked for first, and one frame's error is caught and logged, so nothing that goes
@@ -4344,6 +4350,131 @@ function frame(now) {
     try { renderer.render(scene, camera); } catch (x) {}
   }
 }
+// ---------------------------------------------------------------- LOCAL MULTIPLAYER (static/local-mp.js): more players on gamepads, on this screen.
+// Player 1 keeps the mouse / keyboard / touch (or takes a controller: the left stick moves, the right stick turns the camera,
+// and you aim at the middle of the screen). Every other controller is a player on your team standing next to you: they walk
+// relative to your camera, carry your guns, bash automatically like you do, roll, store supply, carry flags, and aim with a
+// crosshair of their own (right stick). Their bullets go through walls, since they can't move the camera. Far away, they're
+// brought back to you; down, they're back next to you in 4 s.
+const MATE_SPOT = s => { const a = (s - 2) * 1.9 + 2.2, r = 4.5; return [Math.cos(a) * r, Math.sin(a) * r]; };
+let PAD1 = null, PAD1lock = false;   // Player 1 on a controller: the left stick (read by walkDir)
+const mateOn = () => !!player && !player.out;
+function mateGuns(m) {   // the guns you own (Player 1's), loaded
+  const own = ownedGuns(); if (!own.includes(m.weapon)) { m.weapon = own.includes(player.weapon) ? player.weapon : own[0]; m.reload = null; }
+  for (const k of own) if (m.ammo[k] === undefined) m.ammo[k] = GUNS[k].mag;
+  m.gunL = Save.guns[m.weapon] || SKIN0;
+}
+function matePlace(m) {
+  const [ox, oz] = MATE_SPOT(m.slot), P = player.ch; let x = P.x + ox, z = P.z + oz;
+  if (!clear(P.x, P.y, P.z, x, P.y, z)) { x = P.x + ox * 0.3; z = P.z + oz * 0.3; }
+  Object.assign(m.ch, { x, y: P.y + 0.2, z, vx: 0, vy: 0, vz: 0, dead: false, deadT: 0, grounded: false, dashT: 0, lockYaw: null, faceYaw: P.faceYaw }); m.ch.events.length = 0;
+  m.parked = false; m.rig.g.visible = true; m.zone = zoneAt(x, z); m.base = baseAt(x, z);
+}
+function matePark(m) { if (m.parked) return; m.parked = true; m.rig.g.visible = false; m.ch.input.mx = m.ch.input.mz = 0; m.ch.input.jump = false; if (m.flag) dropFlag(m.flag); }
+function mateAim(m, S) {   // where this player's crosshair points: the first zombie or enemy along it (walls don't count), or what's behind it
+  const ch = m.ch, R = GrugLocalMP.ray(S, camera), o = R.o, d = R.d, foes = () => [...zombies.filter(liveZ), ...PLAYERS().filter(s => canShoot(m, s))];
+  if (!S.hasRight) {   // no right stick: the crosshair follows the nearest foe in reach
+    let best = null, bd = 120; for (const s of foes()) { const dd = Math.hypot(s.ch.x - ch.x, s.ch.z - ch.z); if (dd < bd) { bd = dd; best = s; } }
+    if (best) GrugLocalMP.aimAt(S, camera, best.ch.x, best.ch.y - 3 + 2.6 * best.K.scale, best.ch.z); else GrugLocalMP.aimAt(S, camera, ch.x - Math.sin(ch.faceYaw) * 30, ch.y, ch.z - Math.cos(ch.faceYaw) * 30);
+  }
+  let best = 900, hit = null;
+  for (const s of foes()) { const t = rayBody(o.x, o.y, o.z, d.x, d.y, d.z, s.ch, best, s.K.scale * 1.15); if (t >= 0 && t < best) { best = t; hit = s; } }
+  if (!hit) { let bd = 46; for (const s of foes()) { tv.set(s.ch.x, s.ch.y - 3 + 2.6 * s.K.scale, s.ch.z).project(camera); if (tv.z > 1) continue; const dd = Math.hypot((tv.x * 0.5 + 0.5) * innerWidth - S.cursor.x, (-tv.y * 0.5 + 0.5) * innerHeight - S.cursor.y); if (dd < bd) { bd = dd; hit = s; } } }
+  let tx, ty, tz;
+  if (hit) { tx = hit.ch.x; ty = hit.ch.y - 3 + 2.6 * hit.K.scale; tz = hit.ch.z; }
+  else { const wr = W.raycast(o.x, o.y, o.z, d.x, d.y, d.z, 900, camFilter); const t = wr.part ? wr.t : 300; tx = o.x + d.x * t; ty = o.y + d.y * t; tz = o.z + d.z * t; }
+  const px = tx - ch.x, py = ty - (ch.y + 1.5), pz = tz - ch.z, l = Math.hypot(px, py, pz) || 1;
+  return [px / l, py / l, pz / l];
+}
+function mateRoll(m, fx, fz) {
+  const RS = rollStats(), ch = m.ch; if (ch.dead || !ch.grounded || Game.clock - m.rollAt < RS.cd) return;
+  m.rollAt = Game.clock; m.roll = { t: 0, fx, fz, trail: 0, dur: RS.time }; FX.rollStart(ch.x, ch.y - 3, ch.z, fx, fz); ch.dashT = RS.time; ch.dashVx = fx * RS.speed; ch.dashVz = fz * RS.speed; Snd.play('swing', ch.x, ch.y, ch.z);
+}
+function mateInput(m, S, dt) {
+  const ch = m.ch, inp = ch.input, w = GrugLocalMP.move(S, cam.yaw);
+  inp.mx = w ? w[0] : 0; inp.mz = w ? w[1] : 0; inp.jump = S.down('a');
+  mateGuns(m);
+  const d = mateAim(m, S), aimYaw = Math.atan2(-d[0], -d[2]);
+  if (S.hit('b')) { const l = w ? Math.hypot(w[0], w[1]) : 0; if (w) mateRoll(m, w[0] / l, w[1] / l); else mateRoll(m, -Math.sin(ch.faceYaw), -Math.cos(ch.faceYaw)); }
+  if (S.hit('lb') || S.hit('rb')) { const own = ownedGuns(), i = own.indexOf(m.weapon); m.weapon = own[(i + (S.hit('rb') ? 1 : own.length - 1)) % own.length]; m.reload = null; mateGuns(m); }
+  const G = GUNS[m.weapon], since = Game.clock - m.lastShot, tap = S.hit('rt');
+  if (S.hit('x')) { if (m.reload) tryActiveReload(m, false); else startReload(m); }
+  if (m.reload) { if (tap) tryActiveReload(m, true); }
+  else if (((tap && since >= G.tapGap) || (S.down('rt') && since >= G.cd)) && m.meleeT > 0.4) {
+    m.shotYaw = aimYaw; m.armYaw = clamp(angDiff(aimYaw, ch.faceYaw), -1.3, 1.3); m.aimPitch = Math.asin(clamp(d[1], -1, 1)); m.faceUntil = Game.clock + 0.5;
+    shoot(m, d[0], d[1], d[2]);
+  }
+  autoCombat(m, dt, null);   // melee is automatic, as it is for you
+  if (S.hit('y') && m.meleeCd <= 0 && (!m.whip || m.whip.done)) { m.armYaw = clamp(angDiff(aimYaw, ch.faceYaw), -1.3, 1.3); bash(m, aimYaw); }
+  ch.lockYaw = S.down('lt') ? aimYaw : Game.clock < m.faceUntil ? m.shotYaw : null;
+}
+// every frame, after the physics step: what happened to them, timers, health coming back, storing supply at your base
+function mateSim(dt) {
+  for (const m of MATES) {
+    const ch = m.ch; if (m.parked) { ch.events.length = 0; continue; }
+    for (const e of ch.events) {
+      if (e === 'died') {
+        onSurvivorDied(m); m.out = false; m.hp = 0; m.roll = null; m.reload = null; m.whip = null; ch.slowMul = 1;
+        ch.deadT = 4; ch.spawn = { x: player.ch.x, y: player.ch.y, z: player.ch.z };
+        if (nearCam(ch, 260)) breakApart(m.rig); m.rig.g.visible = false; Snd.play('oof', ch.x, ch.y, ch.z); GrugLocalMP.rumble(m.pad, 0.7, 250);
+      } else if (e === 'respawn') { m.hp = RULES.hp; m.protect = RULES.spawnProtect; m.reload = null; for (const k of ownedGuns()) m.ammo[k] = GUNS[k].mag; matePlace(m); }
+      else if (e === 'jump' && nearCam(ch, 60)) Snd.play('jump', ch.x, ch.y, ch.z);
+    }
+    ch.events.length = 0;
+    updateReload(m, dt); m.meleeCd -= dt; m.meleeT += dt; m.hurtT += dt; if (m.protect > 0) m.protect -= dt;
+    if (m.whip && !m.whip.done) { if (ch.dead) { m.whip = null; ch.slowMul = 1; } else if (m.meleeT >= RULES.whipWindup) bashStrike(m); }
+    m.zone = zoneAt(ch.x, ch.z); m.base = baseAt(ch.x, ch.z); if (ch.dead) continue;
+    const home = m.base && m.base.team === m.team;
+    if (home) { if (m.supply) storeSupply(m); if (!m.reload) for (const k of ownedGuns()) loadMag(m, k); }
+    if (m.hp < RULES.hp) { if (home && m.hurtT > 1.5) m.hp = Math.min(RULES.hp, m.hp + RULES.baseRegen * dt); else if (m.hurtT > RULES.regenDelay) m.hp = Math.min(RULES.hp, m.hp + RULES.regen * dt); }
+  }
+}
+if (window.GrugLocalMP) GrugLocalMP.init({
+  menuButtonAfter: '#mHelp',
+  labels: { move: 'Move', aim: 'Crosshair (Player 1: camera)', a: 'Jump', b: 'Dodge roll', x: 'Reload (again for an active reload)', y: 'Bash', lb: 'Previous gun', rb: 'Next gun', lt: 'Face the crosshair', rt: 'Fire', back: 'Player list', start: 'Game Menu' },
+  help: '<b>Left stick</b> move (relative to the camera) · <b>Right stick</b> your crosshair (Player 1: the camera)<br><b>A</b> jump · <b>B</b> dodge roll · <b>X</b> reload (press again as the marker crosses for an active reload) · <b>Y</b> bash<br><b>RT</b> fire · <b>LB / RB</b> switch gun · <b>LT</b> face your crosshair · <b>Start</b> menu<br>Melee is automatic. Extra players are on your team, carry your guns, start next to Player 1 and come back to them if they wander off. Their bullets go through walls.',
+  camera: () => camera,
+  hidden: () => !mateOn(),
+  uiRoot: () => $('menu').classList.contains('on') ? $('menu') : pickOpen() ? $('pick') : $('results').style.display === 'block' ? $('results') : $('out').style.display === 'block' ? $('out') : null,
+  back: () => { if ($('menu').classList.contains('on')) toggleMenu(); else if (pickOpen() && player && Round.state === 'play') showPick(false); },
+  menu: () => { if (!$('menu').classList.contains('on')) toggleMenu(); },
+  spawn(S) {
+    if (!player) return null;
+    const P = player.ch, ch = A.makeCharacter(P.x, P.y, P.z, { id: ++SEQ, yaw: P.faceYaw }); ch.spawn = { x: P.x, y: P.y, z: P.z }; ch.wantClimb = false;
+    const m = { ch, isMate: true, isBot: false, team: player.team, name: 'Player ' + S.slot, K: { scale: 1, name: 'Player ' + S.slot }, look: AK.makeLook(), hp: RULES.hp, weapon: player.weapon, gunL: SKIN0, ammo: {}, hot: {}, reload: null, meleeCd: 0, meleeT: 9, whip: null, lastShot: -9, bloom: 0, armYaw: 0, armYawJ: 0, aimPitch: 0, roll: null, rollAt: -9, hitFx: 0, hurtT: 9, supply: 0, flag: null, protect: 2, zone: 0, base: null, tgt: null, tgtT: 0, focus: null, focusT: 0, faceUntil: 0, shotYaw: 0, stats: newStats(), out: false, slot: S.slot, color: S.color, pad: S, parked: true };
+    m.rig = makeRig(Object.assign({}, m.look, { shirt: TEAMS[m.team].shirt, pants: TEAMS[m.team].pants, arms: undefined }), { guns: true }); addHighlight(m.rig); setHighlight(m.rig, true); scene.add(m.rig.g); m.rig.g.visible = false;
+    if (window.GrugOutfitRig) GrugOutfitRig.others(8).then(L => { const o = L[(S.slot - 1) % Math.max(1, L.length)] || L[0]; if (o) { GrugOutfitRig.dress(m.rig, o); dressRig(m.rig, Object.assign({}, m.look, { shirt: TEAMS[m.team].shirt, pants: TEAMS[m.team].pants })); } }).catch(() => { });
+    mateGuns(m); MATES.push(m); if (mateOn()) matePlace(m);
+    return m;
+  },
+  despawn(m) { const i = MATES.indexOf(m); if (i >= 0) MATES.splice(i, 1); if (m.flag) dropFlag(m.flag); scene.remove(m.rig.g); },
+  update(m, S, dt, ui) {
+    if (!mateOn()) { matePark(m); return; }
+    if (m.parked) { matePlace(m); return; }
+    if (m.team !== player.team) { m.team = player.team; dressRig(m.rig, Object.assign({}, m.look, { shirt: TEAMS[m.team].shirt, pants: TEAMS[m.team].pants })); }
+    const ch = m.ch; if (ch.dead) { ch.input.mx = ch.input.mz = 0; ch.input.jump = false; return; }
+    const P = player.ch, far = Math.hypot(ch.x - P.x, ch.z - P.z);
+    if (!P.dead && (far > 75 || Math.abs(ch.y - P.y) > 30)) { matePlace(m); FX.rollEnd(ch.x, ch.y - 3, ch.z); return; }
+    if (ui) { ch.input.mx = ch.input.mz = 0; ch.input.jump = false; return; }
+    mateInput(m, S, dt);
+  },
+  headPos: m => m.parked || m.ch.dead ? null : { x: m.ch.x, y: m.ch.y + 3.6, z: m.ch.z },
+  hp: m => m.hp / RULES.hp,
+  dead: m => m.ch.dead,
+  crosshairFor: m => !m.parked,
+  p1(S, dt, ui) {
+    if (ui) { PAD1 = null; return; }
+    if (!shiftLock && !touchMode) { setMouseLock(true); PAD1lock = true; }   // on a controller you aim at the middle of the screen
+    PAD1 = S.lx || S.ly ? [S.lx, S.ly] : null;
+    cam.yaw -= S.rx * 3.2 * dt; cam.pitch = clamp(cam.pitch + S.ry * 2.2 * dt, -PITCH_LIMIT, PITCH_LIMIT);
+    GrugLocalMP.hold(S, 'a', 'Space'); GrugLocalMP.hold(S, 'y', 'KeyV');
+    if (S.hit('b')) GrugLocalMP.tap('ShiftLeft'); if (S.hit('x')) GrugLocalMP.tap('KeyR'); if (S.hit('back')) GrugLocalMP.tap('Tab');
+    if (S.hit('lb') || S.hit('rb')) { const own = ownedGuns(), i = own.indexOf(player.weapon); setWeapon(own[(i + (S.hit('rb') ? 1 : own.length - 1)) % own.length]); }
+    if (S.down('ls') || S.down('rs')) { if (S.hit('up')) zoomStep(-1); if (S.hit('down')) zoomStep(1); }
+    if (S.hit('rt')) { lmb = true; lmbTap = true; } else if (S.up('rt')) lmb = false;
+  },
+  p1Release() { PAD1 = null; lmb = false; keys.clear(); if (PAD1lock) { PAD1lock = false; setMouseLock(false); } },
+});
 window.GrugLoopErrors = loopErrs;
 requestAnimationFrame(frame);
 // for testing from the console

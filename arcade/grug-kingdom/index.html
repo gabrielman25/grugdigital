@@ -425,6 +425,7 @@
 <script src="/static/outfit-rig.js"></script>
 <script>window.GrugOutfitRig || document.write('<script src="https://grugdigital.com/static/outfit-rig.js"><\/script>');</script>
 <script src="/static/pearl-popup.js"></script>
+<script src="/static/local-mp.js"></script>  <!-- window.GrugLocalMP: local multiplayer on gamepads -->
 <script src="/static/yt480.js"></script>     <!-- window.GrugYT480: the "480p YouTube mode" setting -->
 <script>window.GrugPearlPopup || document.write('<script src="https://grugdigital.com/static/pearl-popup.js"><\/script>');</script>
 <script id="ambient-npc">
@@ -2853,6 +2854,7 @@ const clear = (ax, ay, az, bx, by, bz, filter = shotFilter) => { const dx = bx -
 // =====================================================================
 const Game = { clock: 0 };
 let player = null, SEQ = 0;
+const MATES = [];   // the local players on controllers (see LOCAL MULTIPLAYER near the end)
 const nearCam = (ch, r) => Math.hypot(ch.x - camera.position.x, ch.z - camera.position.z) < r;
 const dist2 = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 function msg(text, t = 1.6) { reloadMsg = { text, t }; }
@@ -2926,7 +2928,7 @@ function swing(f, yaw) {
   Snd.play('swing', f.ch.x, f.ch.y, f.ch.z);
 }
 function strike(f) {
-  const ch = f.ch, yaw = aimCenter() ? cam.yaw : f.whip.yaw; f.whip.done = true; ch.slowMul = 1; let hit = 0;
+  const ch = f.ch, yaw = f.isPlayer && aimCenter() ? cam.yaw : f.whip.yaw; f.whip.done = true; ch.slowMul = 1; let hit = 0;
   for (const m of MOBS_LIVE) {
     if (m.dead || !m.active) continue; const dx = m.ch.x - ch.x, dz = m.ch.z - ch.z, d = Math.hypot(dx, dz), reach = RULES.swingReach + (m.K.scale - 1) * 1.4;
     if (d > reach || Math.abs(m.ch.y - ch.y) > 4 + m.K.scale * 2 || (d > 2 && Math.abs(angDiff(yaw, Math.atan2(-dx, -dz))) > RULES.swingArc)) continue;
@@ -3107,13 +3109,13 @@ function mobRespawn(m) {
 // give up past the leash; wind up and swing when in reach
 const inTown = c => inHub(c.x, c.z);
 function mobBrain(m, dt) {
-  const ch = m.ch, inp = ch.input, p = player, K = m.K; inp.mx = inp.mz = 0; inp.jump = false; ch.lockYaw = null;
+  const ch = m.ch, inp = ch.input, p = mobTarget(m), K = m.K; inp.mx = inp.mz = 0;   // you, or whoever in your party is nearest inp.jump = false; ch.lockYaw = null;
   const pc = p && !p.ch.dead ? p.ch : null, dp = pc ? Math.hypot(pc.x - ch.x, pc.z - ch.z) : 1e9, dh = Math.hypot(ch.x - m.home.x, ch.z - m.home.z);
   if (m.atk) {   // winding up a swing: stand and face you, then strike
     m.atk.t += dt; if (pc) ch.lockYaw = Math.atan2(-(pc.x - ch.x), -(pc.z - ch.z));
     if (m.atk.t >= RULES.mobWindup && !m.atk.done) {
       m.atk.done = true; m.lunge = 1;
-      if (pc && dp < 3.6 + K.scale * 1.5 && Math.abs(pc.y - ch.y) < 4 + K.scale * 2 && !(p.roll && p.roll.t < 0.25)) hurtPlayer(m.dmg * rnd(0.9, 1.1), m);
+      if (pc && dp < 3.6 + K.scale * 1.5 && Math.abs(pc.y - ch.y) < 4 + K.scale * 2 && !(p.roll && p.roll.t < 0.25)) { if (p.isMate) mateHurt(p, m.dmg * rnd(0.9, 1.1), m); else hurtPlayer(m.dmg * rnd(0.9, 1.1), m); }
       Snd.play('swing', ch.x, ch.y, ch.z);
     }
     if (m.atk.t > RULES.mobWindup + 0.25) { m.atk = null; m.atkCd = RULES.mobAtkCd * rnd(0.85, 1.15); }
@@ -3644,6 +3646,7 @@ canvas.addEventListener('wheel', e => { e.preventDefault(); const s = Math.sign(
 function walkDir() {
   let fw = (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0), st = (keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0);
   if (TT.stick) { const R = 50, l = Math.hypot(TT.stick.dx, TT.stick.dy); if (l > R * 0.15) { const k = Math.min(1, l / R) / l; st = TT.stick.dx * k; fw = -TT.stick.dy * k; } }
+  if (PAD1) { st = PAD1[0]; fw = -PAD1[1]; }   // Player 1 on a controller
   const mx = -Math.sin(cam.yaw) * fw + Math.cos(cam.yaw) * st, mz = -Math.cos(cam.yaw) * fw - Math.sin(cam.yaw) * st, l = Math.hypot(mx, mz);
   return l > 0.01 ? (l > 1 ? [mx / l, mz / l] : [mx, mz]) : null;   // analog: shorter than 1 when the stick is half pushed
 }
@@ -4009,20 +4012,22 @@ function sim(dt) {
     try { Hands.drive(b, dt, HC); } catch (e) { b.motor = Hands.fresh(); Hands.direct(b, dt); }
     if (b.wish.precise && Math.hypot(w.mx, w.mz) > 0.1 && bldAt(ch.x, ch.y - 3, ch.z)) { ch.input.mx = w.mx; ch.input.mz = w.mz; }
   }
-  chars.length = 0; if (player) chars.push(player.ch); for (const b of bots) chars.push(b.ch);
+  chars.length = 0; if (player) chars.push(player.ch); for (const b of bots) chars.push(b.ch); for (const m of MATES) if (!m.parked) chars.push(m.ch);
   updateMobs(dt, chars);
-  stepChars(chars, dt);
+  stepChars(chars, dt); mateSim(dt);
   if (player) updatePlayer(dt);
   updateBots(dt);
 }
 let last = performance.now();
 function frameStep(now) {
   const dt = Math.min((now - last) / 1000, 0.1); last = now;
+  if (window.GrugLocalMP) GrugLocalMP.frame(dt);   // controllers: Player 1's, and the extra players'
   if (player) { touchHold(); playerInput(dt); }
   sim(dt);
   updateFps(dt); autoRes(); updateDebris(dt); updateTracers(dt); FX.update(dt); Pts.update(dt); DmgNum.update(dt); Feed.update(dt); updateAnnounce(dt); updateGates(dt); updateChest(dt);
   for (const b of bots) { const v = nearCam(b.ch, LOD.vis); b.rig.g.visible = v; if (!v) continue; if (nearCam(b.ch, LOD.anim)) animateRig(b, dt); else { b.rig.g.position.set(b.ch.x, b.ch.y - 3, b.ch.z); b.rig.g.rotation.y = b.ch.faceYaw; } }
   drawMobs(dt);
+  for (const m of MATES) if (!m.parked && !m.ch.dead) animateRig(m, dt);
   if ((smokeT -= dt) <= 0) {
     smokeT = 0.3; const S = BLD.forge && BLD.forge.smoke; if (S && nearCam(S, 300)) FX.spawn('smoke', S.x + rnd(-1, 1), S.y + 8, S.z + rnd(-1, 1), { fps: 6, size: rnd(5, 8), color: 0x6a6a6a, vy: rnd(5, 8), grow: 1.2, fade: 0.6, opacity: 0.7 });
     for (const F of CAMPFIRES) if (nearCam(F, 160)) { FX.spawn('smoke', F.x + rnd(-0.5, 0.5), F.y + 2.5, F.z + rnd(-0.5, 0.5), { fps: 8, size: rnd(3, 5), color: 0x8a8a8a, vy: rnd(4, 7), grow: 1.2, fade: 0.6, opacity: 0.6 }); FX.spawn('spark', F.x + rnd(-0.6, 0.6), F.y + 0.6, F.z + rnd(-0.6, 0.6), { fps: 20, size: rnd(2.5, 3.5), add: true, color: 0xff8a2a }); }
@@ -4044,6 +4049,7 @@ function frameStep(now) {
   if ((hudSaveT -= dt) <= 0) { hudSaveT = 10; if (player) Save.save(); }
   document.body.classList.toggle('hasRoll', true);
   updateHouseView(); updateMobTags(dt); updateBotTags(dt); Bills.update(dt); Waypoints.update(); updateHud(dt); updateMinimap(); Snd.listen(); DmgInd.update(dt);
+  if (window.GrugLocalMP) GrugLocalMP.draw();
   plasticSweep(); renderer.render(scene, camera);
 }
 /* The frame loop. The next frame is asked for first, and one frame's error is caught and logged, so nothing that goes
@@ -4060,6 +4066,131 @@ function frame(now) {
   }
 }
 window.GrugLoopErrors = loopErrs;
+// ---------------------------------------------------------------- LOCAL MULTIPLAYER (static/local-mp.js): more players on gamepads, on this screen.
+// Player 1 keeps the mouse / keyboard / touch (or takes a controller: the left stick walks, the right stick turns the camera,
+// and you swing at the middle of the screen). Every other controller is a hero in your party next to you: they walk relative
+// to your camera, carry your sword and armour, roll, jump, drink from your potion bag, and aim their swings with a crosshair of
+// their own (right stick). The monsters go for whoever is nearest. Everything the party slays counts for you (gold, XP, chests).
+// Far away, they're brought back to you; knocked out, they're back next to you in 4 s.
+const MATE_SPOT = s => { const a = (s - 2) * 1.9 + 2.2, r = 4.5; return [Math.cos(a) * r, Math.sin(a) * r]; };
+let PAD1 = null, PAD1lock = false;   // Player 1 on a controller: the left stick (read by walkDir)
+const mateOn = () => !!player;
+function matePlace(m) {
+  const [ox, oz] = MATE_SPOT(m.slot), P = player.ch; let x = P.x + ox, z = P.z + oz;
+  if (!clear(P.x, P.y, P.z, x, P.y, z)) { x = P.x + ox * 0.3; z = P.z + oz * 0.3; }
+  Object.assign(m.ch, { x, y: P.y + 0.2, z, vx: 0, vy: 0, vz: 0, dead: false, deadT: 0, grounded: false, dashT: 0, lockYaw: null, faceYaw: P.faceYaw, sit: null }); m.ch.events.length = 0;
+  m.parked = false; m.rig.g.visible = true;
+}
+// the nearest of you and your party: who a monster goes for
+function mobTarget(m) {
+  if (!MATES.length) return player;
+  if ((m.pickT = (m.pickT || 0) - 0.016) > 0 && m.tgtE && !m.tgtE.ch.dead && !m.tgtE.parked) return m.tgtE;
+  m.pickT = 0.5; let best = player && !player.ch.dead ? player : null, bd = best ? dist2(best.ch, m.ch) : 1e9;
+  for (const q of MATES) { if (q.parked || q.ch.dead) continue; const d = dist2(q.ch, m.ch); if (d < bd - 2) { bd = d; best = q; } }
+  return (m.tgtE = best || player);
+}
+function mateHurt(q, amt, by) {
+  if (q.ch.dead || q.parked || amt <= 0) return;
+  amt = Math.max(1, Math.round(amt * (1 - armorCut())));
+  q.hp -= amt; q.hurtT = 0; q.combatT = 0; q.hitFx = 0.22; Snd.play('hit', q.ch.x, q.ch.y, q.ch.z); GrugLocalMP.rumble(q.pad, 0.5, 120);
+  if (q.hp <= 0) { q.killedBy = by; A.kill(q.ch); }
+}
+function mateAim(m, S) {   // which way this player's crosshair points: at the monster under it, or the spot behind it
+  const ch = m.ch, R = GrugLocalMP.ray(S, camera), o = R.o, d = R.d;
+  let near = null, nd = RULES.swingReach + 3;   // a monster right next to them: swing at it, wherever the crosshair is
+  for (const q of MOBS_LIVE) { if (q.dead || !q.active) continue; const dd = dist2(q.ch, ch) - (q.K.scale - 1) * 1.4; if (dd < nd) { nd = dd; near = q; } }
+  if (!S.hasRight) { const t = near || MOBS_LIVE.filter(q => !q.dead && q.active && dist2(q.ch, ch) < 60).sort((a, b) => dist2(a.ch, ch) - dist2(b.ch, ch))[0]; if (t) GrugLocalMP.aimAt(S, camera, t.ch.x, t.ch.y, t.ch.z); else GrugLocalMP.aimAt(S, camera, ch.x - Math.sin(ch.faceYaw) * 20, ch.y, ch.z - Math.cos(ch.faceYaw) * 20); }
+  let best = 600, hit = null;
+  for (const q of MOBS_LIVE) { if (q.dead || !q.active) continue; const t = rayBody(o.x, o.y, o.z, d.x, d.y, d.z, q.ch, best, q.K.scale * 1.15); if (t >= 0 && t < best) { best = t; hit = q; } }
+  let tg;
+  if (hit && dist2(hit.ch, ch) < 14) tg = hit.ch; else if (near) tg = near.ch;
+  else { const wr = W.raycast(o.x, o.y, o.z, d.x, d.y, d.z, 600, camFilter); const t = wr.part ? wr.t : 200; tg = { x: o.x + d.x * t, z: o.z + d.z * t }; }
+  return dist2(tg, ch) > 1 ? Math.atan2(-(tg.x - ch.x), -(tg.z - ch.z)) : ch.faceYaw;
+}
+function mateRoll(m, fx, fz) {
+  const RS = rollStats(), ch = m.ch; if (ch.dead || !ch.grounded || Game.clock - m.rollAt < RS.cd) return;
+  m.rollAt = Game.clock; m.roll = { t: 0, fx, fz, trail: 0, dur: RS.time }; FX.rollStart(ch.x, ch.y - 3, ch.z, fx, fz); ch.dashT = RS.time; ch.dashVx = fx * RS.speed; ch.dashVz = fz * RS.speed; Snd.play('swing', ch.x, ch.y, ch.z);
+}
+function mateDrink(m, i) {   // from your potion bag
+  if (!Save.potions[i]) { msg(`No ${POTIONS[i].name}s: buy them at the Bubbling Cauldron`, 1.8); return; }
+  const max = maxHp(Save.lvl); if (m.hp >= max) return;
+  Save.potions[i]--; Save.save(); const add = Math.round(max * POTIONS[i].heal); m.hp = Math.min(max, m.hp + add);
+  Snd.play('eat', m.ch.x, m.ch.y, m.ch.z); DmgNum.add(m.ch.x, m.ch.y + 2.5, m.ch.z, add, 'heal'); FX.ring(m.ch.x, m.ch.y - 2, m.ch.z, 0x6aff8a); barKey = '';
+}
+function mateInput(m, S, dt) {
+  const ch = m.ch, inp = ch.input, w = GrugLocalMP.move(S, cam.yaw);
+  inp.mx = w ? w[0] : 0; inp.mz = w ? w[1] : 0; inp.jump = S.down('a');
+  holdSword(m.rig, Save.sword);
+  const yaw = mateAim(m, S);
+  if (S.hit('b')) { const l = w ? Math.hypot(w[0], w[1]) : 0; if (w) mateRoll(m, w[0] / l, w[1] / l); else mateRoll(m, -Math.sin(ch.faceYaw), -Math.cos(ch.faceYaw)); }
+  if (S.hit('lb') || S.hit('x')) mateDrink(m, 0); if (S.hit('rb')) mateDrink(m, 1);
+  if ((S.down('rt') || S.down('y')) && m.swingCd <= 0 && (!m.whip || m.whip.done)) { m.armYaw = clamp(angDiff(yaw, ch.faceYaw), -1.3, 1.3); swing(m, yaw); }
+  ch.lockYaw = S.down('lt') ? yaw : Game.clock < m.faceUntil ? m.shotYaw : null;
+}
+function mateSim(dt) {
+  for (const m of MATES) {
+    const ch = m.ch; if (m.parked) { ch.events.length = 0; continue; }
+    for (const e of ch.events) {
+      if (e === 'died') {
+        breakApart(m.rig); m.rig.g.visible = false; Snd.play('oof', ch.x, ch.y, ch.z); ch.deadT = 4; ch.spawn = { x: player.ch.x, y: player.ch.y, z: player.ch.z }; m.whip = null; m.roll = null; GrugLocalMP.rumble(m.pad, 0.7, 250);
+        Feed.add(`<b style="color:${m.color}">${m.name}</b> <span class="fx">was knocked out${m.killedBy ? ' by ' + m.killedBy.K.name : ''}</span>`);
+      } else if (e === 'respawn') { m.hp = maxHp(Save.lvl); m.hurtT = 9; matePlace(m); }
+      else if (e === 'jump' && nearCam(ch, 60)) Snd.play('jump', ch.x, ch.y, ch.z);
+    }
+    ch.events.length = 0;
+    m.swingCd -= dt; m.meleeT += dt; m.hurtT += dt; m.combatT += dt;
+    if (m.whip && !m.whip.done) { if (ch.dead) { m.whip = null; ch.slowMul = 1; } else if (m.meleeT >= RULES.whipWindup) strike(m); }
+    if (ch.dead) continue;
+    const max = maxHp(Save.lvl); if (m.hp > max) m.hp = max;
+    if (m.hp < max && m.hurtT > RULES.regenDelay) m.hp = Math.min(max, m.hp + max * RULES.regen * dt * (inHub(ch.x, ch.z) ? 3 : 1));
+    if (onLava(ch.x, ch.z) && ch.y - 3 < -0.5) { m.lavaT = (m.lavaT || 0) - dt; if (m.lavaT <= 0) { m.lavaT = 0.5; mateHurt(m, maxHp(Save.lvl) * 0.08 / (1 - armorCut()), null); FX.spawn('smoke', ch.x, ch.y - 2, ch.z, { fps: 10, size: 4, color: 0x5a3a2a, vy: 6, grow: 1, fade: 0.6, opacity: 0.8 }); } }
+  }
+}
+if (window.GrugLocalMP) GrugLocalMP.init({
+  menuButtonAfter: '#mHelp',
+  labels: { move: 'Move', aim: 'Crosshair (Player 1: camera)', a: 'Jump', b: 'Dodge roll', x: 'Small potion', y: 'Swing', lb: 'Small potion', rb: 'Big potion', lt: 'Face the crosshair', rt: 'Swing', back: 'Backpack', start: 'Game Menu', rs: 'Use (E)' },
+  help: '<b>Left stick</b> move (relative to the camera) · <b>Right stick</b> your crosshair (Player 1: the camera)<br><b>A</b> jump · <b>B</b> dodge roll · <b>RT</b> or <b>Y</b> swing your sword · <b>LB</b> / <b>X</b> small potion · <b>RB</b> big potion · <b>Start</b> menu<br>Player 1 only: <b>Right stick click</b> use (shops), <b>Back</b> your backpack.<br>Your party carries your sword and armour, shares your potions, and everything they slay counts for you. Monsters go for whoever is nearest. Wander off and you\'re brought back to Player 1.',
+  camera: () => camera,
+  hidden: () => !mateOn(),
+  uiRoot: () => $('menu').classList.contains('on') ? $('menu') : shopOpen() ? $('shop') : packOpen() ? $('pack') : chestBusy() ? $('chestOpen') : null,
+  back: () => { if ($('menu').classList.contains('on')) toggleMenu(); else if (shopOpen()) closeShop(); else if (packOpen()) togglePack(false); else if (chestBusy()) closeChest(); },
+  menu: () => { if (!$('menu').classList.contains('on')) toggleMenu(); },
+  spawn(S) {
+    if (!player) return null;
+    const P = player.ch, ch = A.makeCharacter(P.x, P.y, P.z, { id: ++SEQ, yaw: P.faceYaw }); ch.spawn = { x: P.x, y: P.y, z: P.z }; ch.wantClimb = false;
+    const m = { ch, isMate: true, name: 'Player ' + S.slot, K: { scale: 1, name: 'Player ' + S.slot }, hp: maxHp(Save.lvl), swingCd: 0, meleeT: 9, whip: null, armYaw: 0, armYawJ: 0, aimPitch: 0, roll: null, rollAt: -9,
+      hitFx: 0, hurtT: 9, combatT: 9, faceUntil: 0, shotYaw: 0, lastShot: -9, look: { skin: 0xf5cd30, face: 'smile' }, outfit: null, bubble: 0, killedBy: null, slot: S.slot, color: S.color, pad: S, parked: true };
+    m.rig = makeRig({ skin: 0xf5cd30, shirt: 0x3a6a2a, pants: 0x3a3a4a, face: 'smile' }); holdSword(m.rig, Save.sword); scene.add(m.rig.g); m.rig.g.visible = false;
+    if (window.GrugOutfitRig) GrugOutfitRig.others(8).then(L => { const o = L[(S.slot - 1) % Math.max(1, L.length)] || L[0]; if (o) { m.outfit = o; applyLook(m); } }).catch(() => { });
+    MATES.push(m); if (mateOn()) matePlace(m);
+    return m;
+  },
+  despawn(m) { const i = MATES.indexOf(m); if (i >= 0) MATES.splice(i, 1); scene.remove(m.rig.g); },
+  update(m, S, dt, ui) {
+    if (!mateOn()) return;
+    if (m.parked) { matePlace(m); return; }
+    const ch = m.ch; if (ch.dead) { ch.input.mx = ch.input.mz = 0; ch.input.jump = false; return; }
+    const P = player.ch, far = Math.hypot(ch.x - P.x, ch.z - P.z);
+    if (!P.dead && (far > 75 || Math.abs(ch.y - P.y) > 30 || ch.y < -40)) { matePlace(m); FX.rollEnd(ch.x, ch.y - 3, ch.z); return; }
+    if (ui) { ch.input.mx = ch.input.mz = 0; ch.input.jump = false; return; }
+    mateInput(m, S, dt);
+  },
+  headPos: m => m.parked || m.ch.dead ? null : { x: m.ch.x, y: m.ch.y + 3.6, z: m.ch.z },
+  hp: m => m.hp / maxHp(Save.lvl),
+  dead: m => m.ch.dead,
+  crosshairFor: m => !m.parked,
+  p1(S, dt, ui) {
+    if (ui) { PAD1 = null; if (chestBusy() && (S.hit('a') || S.hit('b'))) GrugLocalMP.tap('Space'); return; }
+    if (!shiftLock && !touchMode) { setMouseLock(true); PAD1lock = true; }   // on a controller you swing at the middle of the screen
+    PAD1 = S.lx || S.ly ? [S.lx, S.ly] : null;
+    cam.yaw -= S.rx * 3.2 * dt; cam.pitch = clamp(cam.pitch + S.ry * 2.2 * dt, -PITCH_LIMIT, PITCH_LIMIT);
+    GrugLocalMP.hold(S, 'a', 'Space'); GrugLocalMP.hold(S, 'y', 'KeyV');
+    if (S.hit('b')) GrugLocalMP.tap('ShiftLeft'); if (S.hit('lb') || S.hit('x')) GrugLocalMP.tap('KeyQ'); if (S.hit('rb')) GrugLocalMP.tap('KeyR');
+    if (S.hit('rs')) GrugLocalMP.tap('KeyE'); if (S.hit('back')) GrugLocalMP.tap('KeyB');
+    if (S.hit('rt')) { lmb = true; lmbTap = true; } else if (S.up('rt')) lmb = false;
+  },
+  p1Release() { PAD1 = null; lmb = false; keys.clear(); vDown = false; if (PAD1lock) { PAD1lock = false; setMouseLock(false); } },
+});
 
 // ---------------------------------------------------------------- start: no title screen, you're in town
 buildKingdom();

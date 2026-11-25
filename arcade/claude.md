@@ -149,6 +149,23 @@ Each game keeps its own save in `localStorage` under its own key (`grug.<slug>.v
 touch `grug.pearls.v1` (the wallet) except through `GrugPearls`, and never `grug.outfit.active` or the
 `grug-outfits` database except through `GrugOutfits`.
 
+## 5b. Local multiplayer on gamepads (`/static/local-mp.js`)
+
+Real-time games get couch co-op from `window.GrugLocalMP` (turn-based ones, like Pet Zones, don't). Player 1 keeps the
+keyboard / mouse / touch; the first controller used asks "Player 1 or Player 2?", every controller after it joins as the next
+player. Extra players spawn next to Player 1, move relative to Player 1's camera (no split screen), have Player 1's abilities,
+aim with their own on-screen crosshair (right stick) if the game aims, their bullets go through walls, and they're brought back
+to Player 1 when far away. Any pad the browser sees works; a non-standard one asks once: default controls or set the buttons up
+(saved per controller in `grug.gamepads.v1`). The module adds **Controllers** to the Game Menu and lets any pad drive the menus.
+
+Wire it in like Zone Royale, Zombie Zones, Grug City RP, Grug Kingdom, Slide 999 KM and Brickbound do (search them for
+`LOCAL MULTIPLAYER`): load the script after `pearl-popup.js`, call `GrugLocalMP.frame(dt)` at the start of each frame and
+`GrugLocalMP.draw()` after the camera is placed, and pass `GrugLocalMP.init({...})`: `spawn(S)` / `despawn(h)` make and remove
+an extra player using the game's own character code, `update(h, S, dt, uiOpen)` drives it (`S.lx/ly/rx/ry`, `S.down/hit/up('a')`,
+`GrugLocalMP.move(S, camYaw)`, `GrugLocalMP.ray(S, camera)` for the crosshair), `p1(S, dt, uiOpen)` feeds Player 1's controller into
+the game's own input, plus `camera`, `headPos`, `hp`, `uiRoot`, `menu`, `back`, `labels` and `help`. Keep the extra players in the
+game's physics, damage and enemy targeting lists, and never let one of them end the game for Player 1.
+
 ## 6. Your game's own outfits (optional)
 
 Outfits made for a game (painted in Gemini through the Avatar Studio, see https://grugdigital.com/character/claude.md)
