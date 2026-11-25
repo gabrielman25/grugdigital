@@ -1,4 +1,4 @@
-/* GrugTab: the Grug Arcade's engine for tab games (https://grugdigital.com/arcade/, the Tab Games category).
+/* GrugTab: the Grug Arcade's engine for games that play in the browser tab (the 'Plays in Your Tab' category; Sunny Patch).
    A tab game lives in the browser tab: the favicon (16x16) and the page title ARE the game. The page itself shows the
    same tab, drawn big, as a 4:3 screen: a tab-shaped strip of 16x16 tiles (the first tile is the favicon, pixel for pixel),
    the title text after it, and the game's shop / settings UI underneath.
@@ -10,7 +10,7 @@
    - never nag: no flashing titles, no "come back!", no sounds, no notifications. A quiet "while you were away" note at most.
 
    Use:
-     const scr = GrugTab.screen(document.getElementById('game'), { tiles: 9, url: 'grugdigital.com/arcade/tiny-tab-farm' });
+     const scr = GrugTab.screen(document.getElementById('game'), { tiles: 9, url: location.host + location.pathname });
        scr.strip: a <canvas> 16*tiles x 16 (draw your tiles on it; tile 0 is the favicon)
        scr.setTitle(text): the text after the strip on the screen (the real tab title is GrugTab.title)
        scr.body: the element under the tab for your shop UI
@@ -44,7 +44,7 @@
   }
 
   /* ---------- pixels ---------- */
-  function canvas(w, h) { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const ctx = cv.getContext('2d'); ctx.imageSmoothingEnabled = false; return { cv, ctx }; }
+  function canvas(w, h) { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; const ctx = cv.getContext('2d', { willReadFrequently: true }); ctx.imageSmoothingEnabled = false; return { cv, ctx }; }
   function outline(ctx, x0, y0, w, h, color) {
     const d = ctx.getImageData(x0, y0, w, h), a = d.data, out = [];
     const on = (x, y) => x >= 0 && y >= 0 && x < w && y < h && a[(y * w + x) * 4 + 3] > 40;
@@ -150,11 +150,11 @@
   }
 
   /* ---------- the loop (keeps going in background tabs; catches up after the page was closed) ---------- */
-  window.GrugLoopErrors = window.GrugLoopErrors || 0;
+  if (!window.GrugLoopErrors) window.GrugLoopErrors = 0;   // (a 3D game replaces it with its own Map of frame errors: both are counted)
   function run(o) {
     const stepSize = o.stepSize || 0.5, tickMs = o.tick || 250, maxOffline = o.maxOffline == null ? 86400 : o.maxOffline;
     const KEY = o.key; let seen = 0, lastErr = '';
-    const fail = (e, where) => { window.GrugLoopErrors++; const m = String(e && e.stack || e); if (m !== lastErr) { lastErr = m; console.error('GrugTab ' + where + ' error (the game keeps running):', e); } };
+    const fail = (e, where) => { const G = window.GrugLoopErrors; if (G instanceof Map) G.set('GrugTab ' + where, (G.get('GrugTab ' + where) || 0) + 1); else window.GrugLoopErrors = (G | 0) + 1; const m = String(e && e.stack || e); if (m !== lastErr) { lastErr = m; console.error('GrugTab ' + where + ' error (the game keeps running):', e); } };
     const simulate = secs => { let left = secs; while (left > 1e-6) { const h = Math.min(stepSize, left); try { o.step(h); } catch (e) { fail(e, 'step'); } left -= h; } };
     const write = () => { try { localStorage.setItem(KEY, JSON.stringify({ at: Date.now(), data: o.save() })); } catch (e) {} };
     let saved = null; try { saved = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}

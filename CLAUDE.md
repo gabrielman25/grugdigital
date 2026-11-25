@@ -121,14 +121,14 @@ button) zooms the camera in on you and opens the real Avatar Studio over the bas
 the sliders change it live, and its settings are the studio's own (`grug.build.v2`), so "Paint it in the Building
 Studio" carries straight on. The game's sky and baseplate match the Avatar Studio's, so the hand-over looks seamless.
 
-## Tab games (`/arcade/tab/`) and the Arcade's categories
+## Games that play in your tab (`/arcade/tab/`) and the Arcade's categories
 
-The Arcade has categories (`CATS` in `arcade/arcade.js`): Tab Games, 3D Games and Nintendo DS Games (under construction,
-no games yet). `/arcade/` opens a pop-up to pick one on arrival, unless the link already names a category or genre
-(`#tab-games`, `#3d-games`, `#ds-games`). Tab games live in the browser tab (favicon + title) on the `GrugTab` engine
-(`arcade/tab/tab.js`); they're idle games aimed at very casual players. Read section 8 of `arcade/claude.md` before
-making one. The flagship is Tiny Tab Farm (`arcade/tiny-tab-farm/`, save `grug.tiny-tab-farm.v1`). The tab line's shown name
-is `TAB_BRAND` in `arcade/arcade.js` (a working name: the owner is choosing the real one).
+The Arcade has categories (`CATS` in `arcade/arcade.js`): Plays in Your Tab (3D games marked `tab: true`), 3D Games and
+Nintendo DS Games (under construction, no games yet). `/arcade/` opens a pop-up to pick one on arrival, unless the link
+already names a category or genre (`#plays-in-your-tab`, `#3d-games`, `#ds-games`). A tab game keeps going in the browser
+tab (favicon + title) on the `GrugTab` engine (`arcade/tab/tab.js`): read section 8 of `arcade/claude.md`. The first is
+**Sunny Patch** (`arcade/sunny-patch/`, a Baseplate game: the farm is `window.FarmCore`, saved in `grug.sunny-patch.v1`;
+the player's settings in `grug.sunny-patch.player.v1`). The category's shown name is `TAB_BRAND` in `arcade/arcade.js`.
 
 ## Grug Arcade (`/arcade/`)
 

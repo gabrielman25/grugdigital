@@ -2,8 +2,8 @@
    GAMES: one entry per game in arcade/<slug>/ (with its cover, <slug>-grug-arcade.jpg). added / updated are the dates in the repo's history; "tag" is the
    red line under the name; "about" and "controls" fill the game's page (coop: true adds the Local Multiplayer box: static/local-mp.js is wired in). Plays and favourites are kept per browser
    (localStorage 'grug.arcade.v1'), like the rest of Grug: there's no server, so there are no global visit counts.
-   CATS: the Arcade's categories (the pop-up on /arcade/ and the Categories filter). Each game has a cat (default '3d').
-   TAB_BRAND is the shown name of the tab-games line (engine: arcade/tab/tab.js); change it here to rename it everywhere. */
+   CATS: the Arcade's categories (the pop-up on /arcade/ and the Categories filter), each with match(game). Games have a cat
+   (default '3d'); tab: true marks a game that also plays in the browser tab (arcade/tab/tab.js), listed under TAB_BRAND. */
 (() => {
   const $ = id => document.getElementById(id), O = window.GrugOutfits, P = window.GrugPearls;
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -14,22 +14,23 @@
     ['pirate', 'Pirate'], ['adventure', 'Adventure'], ['sports', 'Sports'], ['funny', 'Funny'], ['wild-west-cowboy', 'Wild West'], ['war', 'War'],
     ['skatepark', 'Skate Park'], ['gametutorials', 'Tutorial'], ['idle', 'Idle & Cozy']];
 
-  const TAB_BRAND = 'Tab Games';
+  const TAB_BRAND = 'Plays in Your Tab';   // games with tab: true keep going in the browser tab (/arcade/tab/tab.js): the favicon and title show the game
   const CATS = [
-    { id: 'tab', name: TAB_BRAND, hash: 'tab-games', blurb: 'Little games that live in your browser tab. Start one, then go do your thing: they keep playing while you browse.' },
-    { id: '3d', name: '3D Games', hash: '3d-games', blurb: 'Blocky worlds you explore as your own character: dress up, build, adventure and play with friends.' },
-    { id: 'ds', name: 'Nintendo DS Games', hash: 'ds-games', soon: true, blurb: 'Coming soon: DS games you can play right here in your browser.' }];
+    { id: 'tab', name: TAB_BRAND, hash: 'plays-in-your-tab', match: g => !!g.tab, blurb: "3D games that keep going in your browser tab. Start one, then go do your thing: the little picture and title on the tab show how it's going." },
+    { id: '3d', name: '3D Games', hash: '3d-games', match: g => (g.cat || '3d') === '3d', blurb: 'Blocky worlds you explore as your own character: dress up, build, farm, adventure and play with friends.' },
+    { id: 'ds', name: 'Nintendo DS Games', hash: 'ds-games', soon: true, match: g => g.cat === 'ds', blurb: 'Coming soon: DS games you can play right here in your browser.' }];
   const catOf = g => g.cat || '3d';
+  const inCat = (g, id) => { const c = CATS.find(c => c.id === id); return c ? c.match(g) : true; };
   const gname = id => (GENRES.find(g => g[0] === id) || [, 'All'])[1];
 
   const GAMES = [
-    { slug: 'tiny-tab-farm', cat: 'tab', outfit: false, name: 'Tiny Tab Farm', genres: ['idle'], tag: 'A cozy farm that lives in your tab', featured: true,
-      added: '2026-11-25T06:00:00Z', updated: '2026-11-25T06:00:00Z', alt: 'A pixel farmer in a flower crown among sunflowers, strawberries and fruit trees, with her farm in a browser tab',
-      stats: ['She farms while you browse', '47 seeds and a whole wardrobe'], players: '1',
-      about: ['A cozy idle farm that lives in your browser tab. Your farmer is the little picture on the tab, and the tab\'s title shows her garden and your money. She plants and picks everything on her own, from the very first minute.',
-        'Give her orders: what to grow on each plot (or let her pick the best crop), and what to buy when there\'s enough money: new plots, new seeds, upgrades and clothes from her wish list. Unlock 47 vegetables, fruits, flowers and trees and grow up to 8 plots. Fruit trees keep giving fruit without replanting.',
-        'Dress her up in sun hats, flower crowns, bows, dresses, overalls, rain boots, bunny slippers and more. Whatever she wears shows on your tab. There\'s nothing to lose and nothing to rush: leave the tab in the background, or close it, and she keeps farming for up to a day.'],
-      controls: [['Click / tap', 'Everything: there are no keys to learn'], ['Esc', 'Game Menu']] },
+    { slug: 'sunny-patch', tab: true, name: 'Sunny Patch', genres: ['idle', 'town-and-city'], tag: 'Cozy farm · plays in your tab', featured: true,
+      added: '2026-11-25T08:00:00Z', updated: '2026-11-25T08:00:00Z', alt: 'Poppy the farmer in a sun hat beside rows of voxel crops on a fenced blocky farm, with the farm shown in a browser tab above',
+      stats: ['Poppy farms while you browse', '47 seeds and a whole wardrobe'], players: '1 (and Poppy)',
+      about: ['A cozy blocky farm that keeps going in your browser tab. Walk around Sunny Patch as your own character while Poppy, the farmer, plants and picks everything on her own. The little picture on your browser tab is Poppy, and the tab\'s title shows her plots and your money, so you can switch tabs and still see how the farm is doing.',
+        'Give her orders: what to grow on each plot (or let her pick the best crop), and what to buy when there\'s enough money: new plots, new seeds, upgrades and clothes from her wish list. Unlock 47 vegetables, fruits, flowers and trees and grow up to 8 plots. Want to help? Click a plot, or stand on it and press E.',
+        'Dress Poppy up in sun hats, flower crowns, bows, dresses, overalls, rain boots and more: her whole outfit shows on your tab, and her hat shows on her in the farm. There\'s nothing to lose and nothing to rush: leave the tab in the background, or close it, and she keeps farming for up to a day.'],
+      controls: [['WASD / arrows', 'Walk'], ['Click / tap a plot', 'Help Poppy: pick, plant, or buy the plot'], ['E', 'Help at the plot or shop you\'re standing at'], ['1-5', 'The farm window: Garden, Orders, Seeds, Upgrades, Wardrobe'], ['Drag / Q E', 'Turn the camera'], ['Mouse wheel', 'Zoom'], ['Esc', 'Game Menu']] },
     { slug: 'grug-studio', name: 'Grug Studio', genres: ['gametutorials', 'town-and-city'], tag: 'Make your avatar · build at true scale', featured: true,
       added: '2026-11-25T02:00:00Z', updated: '2026-11-25T02:00:00Z', alt: 'A player beside a two-storey building on a studded baseplate, with the Avatar and Building pads',
       stats: ['Create your avatar, then walk around', 'Change a building live, at real size'], players: '1',
@@ -241,5 +242,5 @@
     if ($('mePic')) { $('meSel').addEventListener('change', e => { if (O) O.setActive(e.target.value); }); addEventListener('grug:outfits', me); me(); }
   }
 
-  window.GrugArcade = { GENRES, GAMES, CATS, TAB_BRAND, catOf, gname, esc, ago, tile, place, rec, saveRec, chrome, WDAD };
+  window.GrugArcade = { GENRES, GAMES, CATS, TAB_BRAND, catOf, inCat, gname, esc, ago, tile, place, rec, saveRec, chrome, WDAD };
 })();

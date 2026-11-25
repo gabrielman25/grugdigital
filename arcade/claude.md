@@ -192,23 +192,27 @@ When the owner says "push it to the site":
    (`https://<branch>.grugdigital.pages.dev/arcade/<slug>/`, exact address from the commit's Cloudflare Pages check;
    see `CLAUDE.md`). Merge to `main` only when the owner says so.
 
-## 8. Tab games (`/arcade/tab/tab.js`, the "Tab Games" category)
+## 8. Games that play in your tab (`/arcade/tab/tab.js`, "Plays in Your Tab")
 
-A different kind of Arcade game: **the browser tab is the game**. The favicon (16x16) and the page title are the screen;
-the page shows the same tab drawn big as a 4:3 screen (a tab-shaped strip of 16x16 tiles, the first tile being the
-favicon pixel for pixel, then the title text) with the game's shop / settings underneath. They're idle games for very
-casual players, so the 3D rules above (baseplate, three.js, outfits) don't apply. These do:
+Some 3D games also keep going in the browser tab: the favicon (16x16) and the page title show the game, and the game keeps
+running while the tab is in the background or even closed. They're marked `tab: true` in `GAMES` (`arcade/arcade.js`)
+and listed under the **Plays in Your Tab** category (`TAB_BRAND`, `CATS`). The first one is **Sunny Patch**
+(`arcade/sunny-patch/`): read the comment at the top of it, then copy how it's put together:
 
-- **Use the engine, `window.GrugTab`** (`arcade/tab/tab.js`; its header lists the API): `screen()` for the 4:3 tab
-  screen, `favicon()` / `title()` for the real tab, `run()` for the loop and the save, `menu()` for the Game Menu.
-  `run()` steps the game on `setInterval` by real elapsed time (requestAnimationFrame stops in background tabs), catches
-  every step's errors (`window.GrugLoopErrors`), saves every 5 s and on leaving, and works out progress made while the
-  page was closed (up to 24 hours) when it's opened again.
-- **Idle friendly, always:** no fail states, nothing to rush, no sounds, no notifications, never flash the title or
-  ask the player to come back. When they come back, at most a quiet "while you were away" note in the page.
-- **Cozy and welcoming:** soft flat colours (the engine's pastel palette), friendly words, click / tap only.
-- In `GAMES` (`arcade/arcade.js`): `cat: 'tab'` and `outfit: false` (the game page then skips the Avatar Studio lines
-  and adds a "How tab games work" box). The category's shown name is `TAB_BRAND` there: change it in one place.
-- The cover: render one in the game (Tiny Tab Farm draws its own at `?cover`), screenshot it at 960x540, save it as
-  `<slug>-grug-arcade.jpg`, then `images.json`, `tag_images.py` and `seo_head.py` as usual.
-- The flagship is **Tiny Tab Farm** (`arcade/tiny-tab-farm/`): copy its structure for the next one.
+- **Build the 3D game from the Baseplate as usual** (sections 0-7 all still apply: outfits, the 2010 GUI, the Game Menu, the frame loop).
+- **Put the part that keeps going in its own block**, wrapped so its names can't clash with the engine's (Sunny Patch's
+  `<script id="farm-core">` exposes `window.FarmCore`): its state, its `step(dt)`, its save, and how it draws the tab.
+- **Run that part on `GrugTab.run`** (it steps by real elapsed time on `setInterval`, because requestAnimationFrame stops
+  in background tabs; it catches up on the time the page was closed, up to 24 hours; it saves every 5 s and on leaving).
+  Call its `tick()` from the frame loop too, so things move smoothly while the player watches.
+- **Draw the tab with `GrugTab.favicon(canvas16)` and `GrugTab.title(text)`** (both skip unchanged frames; redraw at most
+  4 times a second). Keep the favicon readable at 16x16: `GrugTab.outline()` adds a 1px outline.
+- **The only modern UI is the tab strip along the top** (`#tabbar` in Sunny Patch): it mirrors the real tab (the favicon
+  tile, then the title) and tells the player their game is in their tab. Everything else stays the classic GUI.
+- **Idle friendly, always:** nothing to lose, nothing to rush, no sounds or effects while hidden, never flash the title or
+  ask the player to come back. When they come back, at most a quiet "while you were away" note.
+- In `GAMES`: `tab: true`. The game page then adds a "Plays in your tab" box. Cover, `images.json`, `tag_images.py` and
+  `seo_head.py` as usual.
+
+`GrugTab.screen()` and `GrugTab.menu()` (a 4:3 tab-shaped page with a shop under it) are there for a game with no 3D
+scene at all, if one is ever wanted.
