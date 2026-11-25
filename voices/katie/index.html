@@ -33,32 +33,20 @@
 .gbtn.kat-ink{color:#efe8dc;text-shadow:0 1px 0 #000;background:linear-gradient(#4a434f,#231f27 50%,#111014 51%,#1d1a21);border-color:#000}
 .gbtn[aria-disabled=true]{cursor:default;filter:saturate(.6) brightness(.92)}
 
-/* ===== the hero: a velvet curtain with a lace hem, her cameo and her name ===== */
-.kat-hero{position:relative;margin:0 0 12px;padding:26px 28px 66px;overflow:hidden;color:var(--bone);border:1px solid #000;
-  background:
-    radial-gradient(120% 90% at 78% 20%,rgba(169,196,230,.16),rgba(169,196,230,0) 55%),
-    radial-gradient(90% 80% at 10% 110%,rgba(123,30,46,.55),rgba(123,30,46,0) 60%),
-    repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 14px,rgba(0,0,0,.12) 14px 30px),
-    linear-gradient(160deg,#241c27,#120f14 55%,#1b0d13)}
-.kat-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:18px;
-  background:radial-gradient(circle at 12px 18px,var(--bone) 9px,transparent 10px) 0 0/24px 18px repeat-x,
-             radial-gradient(circle at 12px 18px,transparent 4px,transparent 5px) 0 0/24px 18px repeat-x}
-.kat-hero .in{position:relative;z-index:1;display:grid;grid-template-columns:200px 1fr;gap:28px;align-items:center}
-.cameo{position:relative;width:200px;height:248px;display:grid;place-items:center}
-.cameo svg{position:absolute;inset:0;width:100%;height:100%}
-.cameo b{position:relative;font:400 64px/1 "Pirata One",serif;color:var(--bone);text-shadow:0 2px 0 #000,0 0 18px rgba(169,196,230,.35)}
-.cameo i{position:absolute;bottom:52px;font:italic 500 15px/1 Cormorant,Georgia,serif;color:var(--ghost);letter-spacing:.08em}
-.kat-hero .eyebrow{font:bold 12px/1 Arial,Helvetica,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--ghost)}
-.kat-hero h1{margin:8px 0 2px;font:400 72px/.95 "Pirata One",serif;color:#fff;text-shadow:0 3px 0 #000,0 0 30px rgba(168,50,74,.45)}
+/* ===== the hero: her name and the store buttons on the left, her portrait fading in on the right ===== */
+.kat-hero{position:relative;margin:0 0 12px;min-height:340px;display:flex;align-items:center;overflow:hidden;color:var(--bone);border-radius:6px;
+  background:radial-gradient(80% 120% at 0% 100%,rgba(123,30,46,.45),rgba(123,30,46,0) 60%),linear-gradient(135deg,#1f1922,#110e13 60%,#150c11);
+  box-shadow:0 6px 20px rgba(14,12,16,.28)}
+.kat-hero .photo{position:absolute;top:0;right:0;bottom:0;width:50%;margin:0}
+.kat-hero .photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%}
+.kat-hero .photo::after{content:"";position:absolute;inset:-1px;background:linear-gradient(90deg,#151116 0%,#151116 4%,rgba(21,17,22,.82) 18%,rgba(21,17,22,.4) 36%,rgba(21,17,22,0) 58%)}
+.kat-hero .in{position:relative;z-index:1;width:58%;padding:34px 0 34px 40px}
+.kat-hero .eyebrow{font:bold 11px/1 Arial,Helvetica,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:var(--ghost)}
+.kat-hero h1{margin:12px 0 4px;font:400 76px/.92 "Pirata One",serif;color:#fff;letter-spacing:.01em}
 .kat-hero .sub{margin:0 0 14px;font:italic 500 24px/1.2 Cormorant,Georgia,serif;color:var(--parch)}
-.kat-hero .blurb{max-width:470px;margin:0 0 16px;font:14px/1.5 Arial,Helvetica,sans-serif;color:#d8cfc2}
+.kat-hero .blurb{max-width:400px;margin:0 0 20px;font:14px/1.55 Arial,Helvetica,sans-serif;color:#cfc6ba}
 .kat-hero .ctas{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.kat-hero .soon{font:italic 500 16px/1.2 Cormorant,Georgia,serif;color:var(--pewter)}
-.kat-hero .chips{margin-top:14px}
-.kat-hero .chips i{background:rgba(239,232,220,.08);box-shadow:inset 0 0 0 1px rgba(239,232,220,.3);color:var(--bone)}
-.bats{position:absolute;right:22px;top:16px;width:150px;height:70px;opacity:.85}
-.wave{position:absolute;left:0;right:0;bottom:16px;width:100%;height:40px;opacity:.28}
-.cross{position:absolute;font:400 22px/1 "Pirata One",serif;color:rgba(239,232,220,.2)}
+.kat-hero .soon{width:100%;margin-top:4px;font:italic 500 16px/1.2 Cormorant,Georgia,serif;color:var(--pewter)}
 
 /* ===== layout: packs on the left, about / demos / contact on the right ===== */
 .kat-cols{display:grid;grid-template-columns:1fr 270px;gap:12px;align-items:start}
@@ -123,15 +111,14 @@
 
 /* phones */
 @media (max-width:939px){
-  .kat-hero{padding:20px 16px 52px}
-  .kat-hero .in{grid-template-columns:1fr;gap:6px;justify-items:center;text-align:center}
-  .cameo{width:150px;height:186px}
-  .cameo b{font-size:48px}.cameo i{bottom:38px;font-size:12px}
-  .kat-hero h1{font-size:54px}
+  .kat-hero{display:block;min-height:0}
+  .kat-hero .photo{position:relative;width:100%;height:360px}
+  .kat-hero .photo::after{background:linear-gradient(0deg,#141016 0%,rgba(20,16,22,.4) 28%,rgba(20,16,22,0) 55%)}
+  .kat-hero .in{width:auto;margin-top:-70px;padding:0 18px 24px;text-align:center}
+  .kat-hero h1{font-size:58px}
   .kat-hero .sub{font-size:20px}
   .kat-hero .blurb{margin-left:auto;margin-right:auto}
-  .kat-hero .ctas,.kat-hero .chips{justify-content:center}
-  .bats{width:90px;right:8px;top:8px}
+  .kat-hero .ctas{justify-content:center}
   .kat-cols{grid-template-columns:1fr}
   .packs{grid-template-columns:repeat(2,1fr)}
   .steps3{grid-template-columns:1fr}
@@ -201,7 +188,6 @@
 
   <div id="Body" class="kat">
     <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-      <symbol id="i-cross" viewBox="0 0 24 24"><path fill="currentColor" d="M10.5 1h3v6h6v3h-6v13h-3V10h-6V7h6z"/></symbol>
       <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M7 4.5v15l12-7.5z"/></symbol>
       <symbol id="i-pause" viewBox="0 0 24 24"><path fill="currentColor" d="M6 4.5h4v15H6zm8 0h4v15h-4z"/></symbol>
       <symbol id="i-mail" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M3 5.5h18v13H3zM3.5 6l8.5 7 8.5-7"/></symbol>
@@ -209,37 +195,18 @@
       <symbol id="i-bag" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" d="M4.5 8h15l-1.2 13H5.7zM8.5 8V6a3.5 3.5 0 0 1 7 0v2"/></symbol>
     </svg>
 
-    <!-- hero: her name, her cameo, the store button -->
+    <!-- hero: her name, the store buttons and her portrait -->
     <section class="kat-hero" aria-labelledby="katName">
-      <svg class="bats" viewBox="0 0 150 70" aria-hidden="true"><g fill="#0b090c" stroke="rgba(169,196,230,.35)" stroke-width=".6">
-        <path transform="translate(70 8) scale(2.4)" d="M0 6C3 2 6 2 8 5c1-2 2-3 3-3l1-2 1 2c1 0 2 1 3 3 2-3 5-3 8 1-3-1-5 0-6 3-2-2-4-1-6 1-2-2-4-3-6-1-1-3-3-4-6-3z"/>
-        <path transform="translate(22 34) scale(1.5) rotate(-12)" d="M0 6C3 2 6 2 8 5c1-2 2-3 3-3l1-2 1 2c1 0 2 1 3 3 2-3 5-3 8 1-3-1-5 0-6 3-2-2-4-1-6 1-2-2-4-3-6-1-1-3-3-4-6-3z"/>
-        <path transform="translate(118 44) scale(1.1) rotate(10)" d="M0 6C3 2 6 2 8 5c1-2 2-3 3-3l1-2 1 2c1 0 2 1 3 3 2-3 5-3 8 1-3-1-5 0-6 3-2-2-4-1-6 1-2-2-4-3-6-1-1-3-3-4-6-3z"/></g></svg>
-      <svg class="wave" viewBox="0 0 330 54" preserveAspectRatio="none" aria-hidden="true" id="heroWave"></svg>
-      <span class="cross" style="left:14px;top:12px">♱</span><span class="cross" style="right:16px;bottom:62px">♱</span>
+      <figure class="photo"><img src="kat.webp" width="720" height="900" alt="Portrait of Katie P. in a black lace veil and headdress"></figure>
       <div class="in">
-        <div class="cameo" aria-hidden="true">
-          <svg viewBox="0 0 200 248">
-            <defs><radialGradient id="cg" cx="50%" cy="38%" r="65%"><stop offset="0" stop-color="#3a3140"/><stop offset=".7" stop-color="#17131a"/><stop offset="1" stop-color="#0b090c"/></radialGradient>
-            <linearGradient id="fr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#efe8dc"/><stop offset=".5" stop-color="#a89c8c"/><stop offset="1" stop-color="#6b6058"/></linearGradient></defs>
-            <g fill="url(#fr)" id="beads"></g>
-            <ellipse cx="100" cy="124" rx="84" ry="108" fill="none" stroke="url(#fr)" stroke-width="7"/>
-            <ellipse cx="100" cy="124" rx="76" ry="100" fill="url(#cg)" stroke="#000" stroke-width="2"/>
-            <ellipse cx="100" cy="124" rx="68" ry="92" fill="none" stroke="rgba(169,196,230,.35)" stroke-width="1" stroke-dasharray="2 5"/>
-            <path d="M100 6l6 10-6 6-6-6z" fill="url(#fr)"/><path d="M100 242l6-10-6-6-6 6z" fill="url(#fr)"/>
-          </svg>
-          <b>KP</b><i>voice ♱ actor</i>
-        </div>
-        <div>
-          <div class="eyebrow">Grug Digital voice talent</div>
-          <h1 id="katName">Katie P.</h1>
-          <p class="sub">Voice actor &amp; original voice packs for games.</p>
-          <p class="blurb">Voice packs recorded by Kat, ready to drop into your game. Buy a pack once and use it in as many of your games as you like.</p>
-          <div class="ctas">
-            <a class="gbtn lg kat-wine" id="shopBtn" href="#packs"><svg aria-hidden="true"><use href="#i-bag"/></svg>Shop voice packs</a>
-            <a class="gbtn lg kat-bone" href="#demos"><svg aria-hidden="true"><use href="#i-play"/></svg>Hear her demos</a>
-            <span class="soon" id="shopSoon">on itch.io, opening soon</span>
-          </div>
+        <div class="eyebrow">Grug Digital voice talent</div>
+        <h1 id="katName">Katie P.</h1>
+        <p class="sub">Voice actor &amp; original voice packs for games.</p>
+        <p class="blurb">Voice packs recorded by Kat, ready to drop into your game. Buy a pack once and use it in as many of your games as you like.</p>
+        <div class="ctas">
+          <a class="gbtn lg kat-wine" id="shopBtn" href="#packs"><svg aria-hidden="true"><use href="#i-bag"/></svg>Shop voice packs</a>
+          <a class="gbtn lg kat-bone" href="#demos"><svg aria-hidden="true"><use href="#i-play"/></svg>Hear her demos</a>
+          <span class="soon" id="shopSoon">on itch.io, opening soon</span>
         </div>
       </div>
     </section>
@@ -328,13 +295,8 @@ const KAT = {
   const $ = s => document.querySelector(s), esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const open = !!KAT.itch;
   if (open) { $('#shopBtn').href = KAT.itch; $('#shopBtn').target = '_blank'; $('#shopBtn').rel = 'noopener'; $('#shopSoon').textContent = 'on itch.io'; }
-
-  /* a made-up waveform, the same every visit */
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   const bars = n => Array.from({ length: n }, (_, i) => `<i style="height:${Math.round(25 + 75 * Math.abs(Math.sin(i * .7 + rnd() * 2)) * (0.5 + rnd() / 2))}%"></i>`).join('');
-  $('#heroWave').innerHTML = Array.from({ length: 66 }, (_, i) => { const h = 6 + 44 * Math.abs(Math.sin(i * .42)) * (0.45 + rnd() * .55); return `<rect x="${i * 5}" y="${27 - h / 2}" width="3" height="${h}" rx="1.5" fill="#a9c4e6"/>`; }).join('');
-  /* the cameo's bead frame */
-  $('#beads').innerHTML = Array.from({ length: 44 }, (_, i) => { const a = i / 44 * Math.PI * 2; return `<circle cx="${100 + 92 * Math.cos(a)}" cy="${124 + 116 * Math.sin(a)}" r="3.4"/>`; }).join('');
 
   $('#packGrid').innerHTML = KAT.packs.map((p, i) => {
     const href = p.url || KAT.itch;
