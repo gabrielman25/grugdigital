@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Katie P. · Voice packs · Grug</title>
+<meta name="description" content="Voice packs by Katie P. (Kat), Grug Digital's voice actor: gothic character voices, narration, whispers and creature sounds for your games.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.png">
+<link rel="canonical" href="https://grugdigital.com/voices/katie/">
+<script src="/static/pearls.js"></script>
+<script src="/static/social.js"></script>
+<link rel="stylesheet" href="/arcade/arcade.css">
+<link rel="stylesheet" href="/static/classic.css">
+<style>
+/* Katie P.'s voice store: the Grug classic page (header, nav, footer stay the house look) with her own colours inside.
+   Palette taken from her Instagram's mood (Victorian goth): ink black, velvet, bone, parchment, dried-rose wine,
+   mahogany, pewter and the ghost-blue of her avatar's blossoms. */
+@font-face{font-family:"Pirata One";src:url(fonts/pirata-one.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"Cormorant";src:url(fonts/cormorant-italic.woff2) format("woff2");font-style:italic;font-weight:500;font-display:swap}
+@font-face{font-family:"Cormorant";src:url(fonts/cormorant-600.woff2) format("woff2");font-weight:600;font-display:swap}
+:root{--ink:#0e0c10;--velvet:#1d1a21;--plum:#2a1f2b;--bone:#efe8dc;--parch:#ddd1bd;--wine:#7b1e2e;--rose:#a8324a;--mahog:#4a2418;--pewter:#8d8a8f;--ghost:#a9c4e6;--moss:#3e4a35}
+
+#Body.kat{background:var(--bone) linear-gradient(#e6ddcd,var(--bone) 260px) no-repeat;color:var(--ink)}
+.kat .Sec>.StandardBoxHeader{background:linear-gradient(#5b2a35,#3a1620 50%,#1c0a10 51%,#2a1119);font-family:"Pirata One",Arial,sans-serif;font-weight:400;font-size:22px;letter-spacing:.02em}
+.kat .Sec>.StandardBoxHeader span{padding-top:5px}
+.kat .Sec>.box{border-color:#9b8f80;background:#fbf8f2 linear-gradient(#ece3d4,#fbf8f2 120px) no-repeat;color:#2b2328}
+.kat a{color:var(--wine)}
+
+/* buttons in her colours, built like the site's shiny ones */
+.gbtn.kat-wine{color:#fff;text-shadow:0 1px 0 rgba(40,0,10,.5);background:linear-gradient(#c0566a,#a8324a 50%,#8c2238 51%,#a32d45);border-color:#5e1222}
+.gbtn.kat-bone{color:#2b1a1f;background:linear-gradient(#fffdf8,#efe8dc 50%,#e2d8c6 51%,#ece4d4);border-color:#8f8170}
+.gbtn.kat-ink{color:#efe8dc;text-shadow:0 1px 0 #000;background:linear-gradient(#4a434f,#231f27 50%,#111014 51%,#1d1a21);border-color:#000}
+.gbtn[aria-disabled=true]{cursor:default;filter:saturate(.6) brightness(.92)}
+
+/* ===== the hero: a velvet curtain with a lace hem, her cameo and her name ===== */
+.kat-hero{position:relative;margin:0 0 12px;padding:26px 28px 66px;overflow:hidden;color:var(--bone);border:1px solid #000;
+  background:
+    radial-gradient(120% 90% at 78% 20%,rgba(169,196,230,.16),rgba(169,196,230,0) 55%),
+    radial-gradient(90% 80% at 10% 110%,rgba(123,30,46,.55),rgba(123,30,46,0) 60%),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 14px,rgba(0,0,0,.12) 14px 30px),
+    linear-gradient(160deg,#241c27,#120f14 55%,#1b0d13)}
+.kat-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:18px;
+  background:radial-gradient(circle at 12px 18px,var(--bone) 9px,transparent 10px) 0 0/24px 18px repeat-x,
+             radial-gradient(circle at 12px 18px,transparent 4px,transparent 5px) 0 0/24px 18px repeat-x}
+.kat-hero .in{position:relative;z-index:1;display:grid;grid-template-columns:200px 1fr;gap:28px;align-items:center}
+.cameo{position:relative;width:200px;height:248px;display:grid;place-items:center}
+.cameo svg{position:absolute;inset:0;width:100%;height:100%}
+.cameo b{position:relative;font:400 64px/1 "Pirata One",serif;color:var(--bone);text-shadow:0 2px 0 #000,0 0 18px rgba(169,196,230,.35)}
+.cameo i{position:absolute;bottom:52px;font:italic 500 15px/1 Cormorant,Georgia,serif;color:var(--ghost);letter-spacing:.08em}
+.kat-hero .eyebrow{font:bold 12px/1 Arial,Helvetica,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--ghost)}
+.kat-hero h1{margin:8px 0 2px;font:400 72px/.95 "Pirata One",serif;color:#fff;text-shadow:0 3px 0 #000,0 0 30px rgba(168,50,74,.45)}
+.kat-hero .sub{margin:0 0 14px;font:italic 500 24px/1.2 Cormorant,Georgia,serif;color:var(--parch)}
+.kat-hero .blurb{max-width:470px;margin:0 0 16px;font:14px/1.5 Arial,Helvetica,sans-serif;color:#d8cfc2}
+.kat-hero .ctas{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.kat-hero .soon{font:italic 500 16px/1.2 Cormorant,Georgia,serif;color:var(--pewter)}
+.kat-hero .chips{margin-top:14px}
+.kat-hero .chips i{background:rgba(239,232,220,.08);box-shadow:inset 0 0 0 1px rgba(239,232,220,.3);color:var(--bone)}
+.bats{position:absolute;right:22px;top:16px;width:150px;height:70px;opacity:.85}
+.wave{position:absolute;left:0;right:0;bottom:16px;width:100%;height:40px;opacity:.28}
+.cross{position:absolute;font:400 22px/1 "Pirata One",serif;color:rgba(239,232,220,.2)}
+
+/* ===== layout: packs on the left, about / demos / contact on the right ===== */
+.kat-cols{display:grid;grid-template-columns:1fr 270px;gap:12px;align-items:start}
+.kat-cols .Sec{margin-top:0}
+.kat .lead{margin:2px 0 10px;font:italic 500 18px/1.3 Cormorant,Georgia,serif;color:#4b3a40}
+
+/* the voice packs: covers drawn in CSS (no photos), one per pack */
+.packs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pack{display:flex;flex-direction:column;border:1px solid #a99c8a;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.pack .cov{position:relative;height:118px;display:grid;place-items:center;overflow:hidden;color:var(--bone);border-bottom:1px solid #000}
+.pack .cov svg{width:54px;height:54px;position:relative;z-index:1;filter:drop-shadow(0 2px 0 rgba(0,0,0,.6))}
+.pack .cov .n{position:absolute;left:8px;bottom:6px;z-index:1;margin:0;font:400 21px/1 "Pirata One",serif;color:var(--bone);text-shadow:0 1px 0 #000}
+.pack .cov .ct{position:absolute;right:6px;top:6px;z-index:1;font:bold 10px/1 Arial,sans-serif;padding:3px 5px;border-radius:3px;background:rgba(0,0,0,.45);box-shadow:inset 0 0 0 1px rgba(239,232,220,.35);letter-spacing:.04em}
+.pack .cov::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 3px,transparent 3px 7px)}
+.c-wine{background:radial-gradient(circle at 70% 30%,#b23c55,#5e1424 70%)}
+.c-ink{background:radial-gradient(circle at 70% 30%,#3d3644,#0e0c10 70%)}
+.c-ghost{background:radial-gradient(circle at 70% 30%,#7e98bd,#253045 75%)}
+.c-mahog{background:radial-gradient(circle at 70% 30%,#7a4430,#2a120b 72%)}
+.c-moss{background:radial-gradient(circle at 70% 30%,#677556,#1c2318 72%)}
+.c-pewter{background:radial-gradient(circle at 70% 30%,#8d8a8f,#2a282d 75%)}
+.pack .bd{flex:1;display:flex;flex-direction:column;padding:9px 9px 9px}
+.pack p{margin:0 0 7px;font:12px/1.4 Arial,Helvetica,sans-serif;color:#5a4d52}
+.pack .meta{margin:auto 0 7px;font:11px/1.3 Arial,Helvetica,sans-serif;color:#7d7276}
+.pack .buy{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.pack .pr{font:400 20px/1 "Pirata One",serif;color:var(--wine)}
+.pack .play{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font:bold 11px/1 Arial,sans-serif;color:#4b3a40;margin:0 0 7px}
+.pack .play svg{width:14px;height:14px}
+.pack .play:hover{color:var(--rose)}
+
+/* the right column */
+.side .box p{margin:0 0 8px;font:13px/1.5 Arial,Helvetica,sans-serif}
+.side .box p:last-child{margin:0}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:8px 0 0;font:12px/1.35 Arial,Helvetica,sans-serif}
+.facts dt{font-weight:bold;color:#4b3a40}
+.facts dd{margin:0;color:#2b2328}
+.trk{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;padding:7px 0;border-top:1px dotted #b7a99a}
+.trk:first-child{border-top:0;padding-top:0}
+.trk button{all:unset;cursor:pointer;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--bone);background:radial-gradient(circle at 40% 30%,#4a434f,#111014);box-shadow:0 1px 2px rgba(0,0,0,.4)}
+.trk button svg{width:13px;height:13px}
+.trk b{display:block;font:bold 12px/1.2 Arial,sans-serif;color:var(--ink)}
+.trk .bars{display:flex;gap:2px;align-items:center;height:16px;margin-top:3px}
+.trk .bars i{flex:1;background:#b9aa9a;border-radius:1px}
+.trk.on .bars i{background:var(--rose)}
+.trk .t{font:11px Arial,sans-serif;color:#7d7276}
+.reach{display:grid;gap:6px}
+.reach a{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:center;padding:7px 8px;border:1px solid #c2b4a2;border-radius:4px;background:linear-gradient(#fff,#f3ede3);text-decoration:none;color:var(--ink);font:bold 13px/1.25 Arial,sans-serif;word-break:break-all}
+.reach a span{display:block;font-weight:normal;font-size:11px;color:#7d7276;word-break:normal}
+.reach a:hover{background:#fff}
+.reach svg{width:20px;height:20px;color:var(--wine)}
+.status{display:inline-block;margin:0 0 8px;padding:3px 8px;border-radius:3px;font:bold 11px/1.2 Arial,sans-serif;color:#fff;background:linear-gradient(#5a6b4b,#3e4a35)}
+
+/* how it works, along the bottom */
+.steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0;padding:0;list-style:none;counter-reset:s}
+.steps3 li{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;font:13px/1.45 Arial,sans-serif;color:#4b3a40}
+.steps3 li::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;font:400 20px/1 "Pirata One",serif;color:var(--bone);background:radial-gradient(circle at 40% 30%,#b23c55,#5e1424)}
+.steps3 b{display:block;color:var(--ink);font-size:14px}
+.kat .chips.lt i{background:linear-gradient(#fff,#efe8dc);color:#4b3a40;box-shadow:inset 0 0 0 1px #b7a99a}
+.fineprint{margin:4px 2px 0;font:11px/1.45 Arial,sans-serif;color:#7d7276}
+
+/* phones */
+@media (max-width:939px){
+  .kat-hero{padding:20px 16px 52px}
+  .kat-hero .in{grid-template-columns:1fr;gap:6px;justify-items:center;text-align:center}
+  .cameo{width:150px;height:186px}
+  .cameo b{font-size:48px}.cameo i{bottom:38px;font-size:12px}
+  .kat-hero h1{font-size:54px}
+  .kat-hero .sub{font-size:20px}
+  .kat-hero .blurb{margin-left:auto;margin-right:auto}
+  .kat-hero .ctas,.kat-hero .chips{justify-content:center}
+  .bats{width:90px;right:8px;top:8px}
+  .kat-cols{grid-template-columns:1fr}
+  .packs{grid-template-columns:repeat(2,1fr)}
+  .steps3{grid-template-columns:1fr}
+}
+@media (max-width:420px){ .pack .cov{height:96px} .pack p{display:none} }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="pearl" viewBox="0 0 16 16"><path fill="#d16be8" d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></symbol>
+  <symbol id="claude" viewBox="0 0 100 100"><path fill="#fff" d="M26.2 0.5 23.1 4.7 24.1 10.2 33.0 25.1 39.1 36.1 39.1 36.6 38.4 37.0 15.0 19.2 10.3 18.7 7.6 21.7 8.3 25.9 10.0 27.9 18.1 33.7 38.5 47.3 39.8 48.4 39.6 49.0 37.8 49.1 28.1 48.0 2.3 46.3 0.3 47.6 0.0 49.0 2.2 52.0 4.5 52.5 39.2 53.9 39.6 54.7 39.1 55.6 19.4 66.6 11.8 71.8 10.7 72.8 10.5 75.9 12.5 77.9 17.1 77.3 43.5 60.1 43.8 60.2 43.9 60.8 40.0 65.3 22.4 88.3 22.1 91.0 25.1 92.5 26.7 91.9 34.0 84.1 48.8 64.0 49.6 63.6 47.9 74.3 43.5 94.9 44.8 98.0 47.4 99.9 50.3 98.8 51.7 97.2 54.5 67.0 55.1 66.6 63.4 80.1 71.5 91.8 74.4 92.3 76.9 91.3 77.5 90.1 77.0 85.8 65.3 68.1 65.5 67.3 66.3 67.6 79.0 78.4 86.7 84.2 88.1 84.3 89.4 82.6 88.9 80.1 65.5 58.3 65.5 57.8 66.3 57.8 94.3 64.6 99.6 62.1 99.7 59.8 97.8 57.3 94.6 55.2 83.2 54.4 72.4 54.2 66.2 53.6 65.9 53.3 79.7 49.9 90.0 47.9 98.3 45.6 99.6 42.5 99.2 41.0 95.7 39.2 81.8 41.7 69.0 44.3 68.7 43.9 72.1 37.9 85.3 20.6 86.7 15.8 83.6 11.1 79.3 11.1 77.0 12.9 70.2 20.5 59.6 34.0 58.4 35.2 57.6 35.2 61.4 15.1 62.8 5.4 60.8 2.5 58.5 1.4 55.6 3.3 53.7 7.5 51.0 38.1 50.3 38.1 48.9 33.5 40.3 16.9 33.8 2.1 32.0 0.5 28.4 0.0Z"/></symbol>
+  <symbol id="claudeO" viewBox="0 0 100 100"><path fill="#D97757" d="M26.2 0.5 23.1 4.7 24.1 10.2 33.0 25.1 39.1 36.1 39.1 36.6 38.4 37.0 15.0 19.2 10.3 18.7 7.6 21.7 8.3 25.9 10.0 27.9 18.1 33.7 38.5 47.3 39.8 48.4 39.6 49.0 37.8 49.1 28.1 48.0 2.3 46.3 0.3 47.6 0.0 49.0 2.2 52.0 4.5 52.5 39.2 53.9 39.6 54.7 39.1 55.6 19.4 66.6 11.8 71.8 10.7 72.8 10.5 75.9 12.5 77.9 17.1 77.3 43.5 60.1 43.8 60.2 43.9 60.8 40.0 65.3 22.4 88.3 22.1 91.0 25.1 92.5 26.7 91.9 34.0 84.1 48.8 64.0 49.6 63.6 47.9 74.3 43.5 94.9 44.8 98.0 47.4 99.9 50.3 98.8 51.7 97.2 54.5 67.0 55.1 66.6 63.4 80.1 71.5 91.8 74.4 92.3 76.9 91.3 77.5 90.1 77.0 85.8 65.3 68.1 65.5 67.3 66.3 67.6 79.0 78.4 86.7 84.2 88.1 84.3 89.4 82.6 88.9 80.1 65.5 58.3 65.5 57.8 66.3 57.8 94.3 64.6 99.6 62.1 99.7 59.8 97.8 57.3 94.6 55.2 83.2 54.4 72.4 54.2 66.2 53.6 65.9 53.3 79.7 49.9 90.0 47.9 98.3 45.6 99.6 42.5 99.2 41.0 95.7 39.2 81.8 41.7 69.0 44.3 68.7 43.9 72.1 37.9 85.3 20.6 86.7 15.8 83.6 11.1 79.3 11.1 77.0 12.9 70.2 20.5 59.6 34.0 58.4 35.2 57.6 35.2 61.4 15.1 62.8 5.4 60.8 2.5 58.5 1.4 55.6 3.3 53.7 7.5 51.0 38.1 50.3 38.1 48.9 33.5 40.3 16.9 33.8 2.1 32.0 0.5 28.4 0.0Z"/></symbol>
+  <symbol id="search" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.8" fill="none" stroke="#555" stroke-width="2"/><path d="M10 10l4.5 4.5" stroke="#555" stroke-width="2.4" stroke-linecap="round"/></symbol>
+</svg>
+
+<div class="bgfx" id="bgfx" aria-hidden="true"></div>
+<div class="sky l" id="skyL" aria-label="Grug on Discord, Instagram and YouTube"></div><div class="sky r" id="skyR" aria-label="Grug on YouTube, Discord and Instagram"></div>
+<div id="Container">
+  <div id="Leaderboard">
+    <a class="lb" href="/arcade/" aria-label="Play free games in the Grug Arcade">
+      <span class="bgk"></span>
+      <img class="fig" src="/static/arcade/racer.webp" alt="" style="left:14px">
+      <img class="fig" src="/static/arcade/grug.webp" alt="" style="left:78px;z-index:1">
+      <img class="fig" src="/static/arcade/medic.webp" alt="" style="left:160px">
+      <span class="t"><b>Play as the character you made.</b><span>Free blocky games in your browser, nothing to install:</span><span class="exp"><i class="k">Zone Royale</i><i class="k">Slide 999 KM</i><i>Pet Zones</i><i>Grug City RP</i></span></span>
+      <span class="go">Play the Arcade ›</span>
+    </a>
+  </div>
+
+  <div id="Header">
+    <div id="Banner">
+      <div id="Options"><a id="pearls" href="/character/pearls/" title="Your Pearls" hidden><svg aria-hidden="true"><use href="#pearl"/></svg><span id="pearlN">0</span> Pearls</a></div>
+      <img class="crowd" src="/static/arcade/medic.webp" alt="" style="left:96px">
+      <img class="crowd" src="/static/arcade/racer.webp" alt="" style="left:170px;height:98px">
+      <a id="Logo" href="/" title="Grug Digital home"><img src="/static/arcade/grug-digital-logo.png" alt="Grug Digital"></a>
+      <img class="crowd" src="/static/arcade/skater.webp" alt="" style="left:640px;height:98px">
+      <img class="crowd" src="/static/arcade/ranger.webp" alt="" style="left:712px">
+    </div>
+    <div class="Navigation">
+      <div class="dropdown" id="dropNav">
+        <div class="col gen" id="dropGenres"></div>
+        <div class="col more">
+          <a href="/arcade/"><b>Most Popular</b></a>
+          <a href="/arcade/">Newest</a>
+          <a href="/arcade/">Featured Games</a>
+          <a href="/arcade/">Search Games</a>
+        </div>
+      </div>
+      <ul>
+        <li><a href="/character/?outfits">My Grug</a></li>
+        <li><a href="/arcade/" title="Games">Games</a><button id="gamesMenuToggle" type="button" aria-label="Show game genres" aria-expanded="false"></button></li>
+        <li><a href="/#assets">Catalog</a></li>
+        <li><a href="/character/">Avatar Studio</a></li>
+        <li><a href="/build/">Building Studio</a></li>
+        <li><a href="/arcade/grug-studio/">Grug Studio</a></li>
+        <li><a href="/character/pearls/">Pearls</a></li>
+        <li><a href="/legacy">Legacy</a></li>
+        <li><a href="/support.html">Help</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="Announcement">
+    <div class="SystemAlertText">New: Katie P. joins Grug as our voice actor! <a href="#packs">Hear her voice packs</a></div>
+  </div>
+
+  <div id="Body" class="kat">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="i-cross" viewBox="0 0 24 24"><path fill="currentColor" d="M10.5 1h3v6h6v3h-6v13h-3V10h-6V7h6z"/></symbol>
+      <symbol id="i-candle" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1c2 3 3 4.4 3 6a3 3 0 0 1-6 0c0-1.6 1-3 3-6zM8.5 11h7v11h-7zM5 21.5h14V23H5z"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 2.5A9.5 9.5 0 1 0 21.5 17 8 8 0 0 1 15.5 2.5z"/></symbol>
+      <symbol id="i-skull" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M12 1.5c5 0 9 3.6 9 8.6 0 2.8-1.3 4.6-3 5.7V19a1 1 0 0 1-1 1h-1.5v-2h-1v2h-1.7v-2h-1.6v2H9.5v-2h-1v2H7a1 1 0 0 1-1-1v-3.2c-1.7-1.1-3-2.9-3-5.7 0-5 4-8.6 9-8.6zM8 9a2.2 2.2 0 1 0 0 4.4A2.2 2.2 0 0 0 8 9zm8 0a2.2 2.2 0 1 0 0 4.4A2.2 2.2 0 0 0 16 9zm-4 4.4-1.3 2.2h2.6z"/></symbol>
+      <symbol id="i-paw" viewBox="0 0 24 24"><g fill="currentColor"><ellipse cx="12" cy="16.5" rx="5" ry="4.5"/><ellipse cx="5" cy="10.5" rx="2.2" ry="2.8"/><ellipse cx="19" cy="10.5" rx="2.2" ry="2.8"/><ellipse cx="9" cy="5.8" rx="2.2" ry="2.9"/><ellipse cx="15" cy="5.8" rx="2.2" ry="2.9"/></g></symbol>
+      <symbol id="i-mic" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.5a3.5 3.5 0 0 1 3.5 3.5v6a3.5 3.5 0 0 1-7 0V5A3.5 3.5 0 0 1 12 1.5zM5.5 10.5H7a5 5 0 0 0 10 0h1.5a6.5 6.5 0 0 1-5.75 6.46V20H16v2H8v-2h3.25v-3.04A6.5 6.5 0 0 1 5.5 10.5z"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M7 4.5v15l12-7.5z"/></symbol>
+      <symbol id="i-pause" viewBox="0 0 24 24"><path fill="currentColor" d="M6 4.5h4v15H6zm8 0h4v15h-4z"/></symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M3 5.5h18v13H3zM3.5 6l8.5 7 8.5-7"/></symbol>
+      <symbol id="i-ig" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></g><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor"/></symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 4.5h16v11H10l-5 4v-4H4z"/></symbol>
+      <symbol id="i-bag" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" d="M4.5 8h15l-1.2 13H5.7zM8.5 8V6a3.5 3.5 0 0 1 7 0v2"/></symbol>
+    </svg>
+
+    <!-- hero: her name, her cameo, the store button -->
+    <section class="kat-hero" aria-labelledby="katName">
+      <svg class="bats" viewBox="0 0 150 70" aria-hidden="true"><g fill="#0b090c" stroke="rgba(169,196,230,.35)" stroke-width=".6">
+        <path transform="translate(70 8) scale(2.4)" d="M0 6C3 2 6 2 8 5c1-2 2-3 3-3l1-2 1 2c1 0 2 1 3 3 2-3 5-3 8 1-3-1-5 0-6 3-2-2-4-1-6 1-2-2-4-3-6-1-1-3-3-4-6-3z"/>
+        <path transform="translate(22 34) scale(1.5) rotate(-12)" d="M0 6C3 2 6 2 8 5c1-2 2-3 3-3l1-2 1 2c1 0 2 1 3 3 2-3 5-3 8 1-3-1-5 0-6 3-2-2-4-1-6 1-2-2-4-3-6-1-1-3-3-4-6-3z"/>
+        <path transform="translate(118 44) scale(1.1) rotate(10)" d="M0 6C3 2 6 2 8 5c1-2 2-3 3-3l1-2 1 2c1 0 2 1 3 3 2-3 5-3 8 1-3-1-5 0-6 3-2-2-4-1-6 1-2-2-4-3-6-1-1-3-3-4-6-3z"/></g></svg>
+      <svg class="wave" viewBox="0 0 330 54" preserveAspectRatio="none" aria-hidden="true" id="heroWave"></svg>
+      <span class="cross" style="left:14px;top:12px">♱</span><span class="cross" style="right:16px;bottom:62px">♱</span>
+      <div class="in">
+        <div class="cameo" aria-hidden="true">
+          <svg viewBox="0 0 200 248">
+            <defs><radialGradient id="cg" cx="50%" cy="38%" r="65%"><stop offset="0" stop-color="#3a3140"/><stop offset=".7" stop-color="#17131a"/><stop offset="1" stop-color="#0b090c"/></radialGradient>
+            <linearGradient id="fr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#efe8dc"/><stop offset=".5" stop-color="#a89c8c"/><stop offset="1" stop-color="#6b6058"/></linearGradient></defs>
+            <g fill="url(#fr)" id="beads"></g>
+            <ellipse cx="100" cy="124" rx="84" ry="108" fill="none" stroke="url(#fr)" stroke-width="7"/>
+            <ellipse cx="100" cy="124" rx="76" ry="100" fill="url(#cg)" stroke="#000" stroke-width="2"/>
+            <ellipse cx="100" cy="124" rx="68" ry="92" fill="none" stroke="rgba(169,196,230,.35)" stroke-width="1" stroke-dasharray="2 5"/>
+            <path d="M100 6l6 10-6 6-6-6z" fill="url(#fr)"/><path d="M100 242l6-10-6-6-6 6z" fill="url(#fr)"/>
+          </svg>
+          <b>KP</b><i>voice ♱ actor</i>
+        </div>
+        <div>
+          <div class="eyebrow">Grug Digital voice talent</div>
+          <h1 id="katName">Katie P.</h1>
+          <p class="sub">Voices for haunted heroines, sweet villains &amp; things that go bump.</p>
+          <p class="blurb">Character lines, narration, whispers and creature sounds, recorded by Kat and ready to drop into your game. Buy a pack once and use it in as many of your games as you like.</p>
+          <div class="ctas">
+            <a class="gbtn lg kat-wine" id="shopBtn" href="#packs"><svg aria-hidden="true"><use href="#i-bag"/></svg>Shop voice packs</a>
+            <a class="gbtn lg kat-bone" href="#demos"><svg aria-hidden="true"><use href="#i-play"/></svg>Hear her demos</a>
+            <span class="soon" id="shopSoon">on itch.io, opening soon</span>
+          </div>
+          <div class="chips"><i>Character voices</i><i>Narration</i><i>Whispers &amp; ASMR</i><i>Creatures</i><i>Custom lines</i></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="kat-cols">
+      <!-- left: the packs -->
+      <div>
+        <div class="Sec" id="packs">
+          <div class="StandardBoxHeader"><span>Voice packs</span></div>
+          <div class="box">
+            <p class="lead">Every pack comes as WAV and MP3, with a few takes of each line. Tap a pack to hear a sample.</p>
+            <div class="packs" id="packGrid"></div>
+          </div>
+        </div>
+
+        <div class="Sec">
+          <div class="StandardBoxHeader"><span>How it works</span></div>
+          <div class="box">
+            <ol class="steps3">
+              <li><div><b>Pick a pack</b>Listen to the samples here and find the voice your game is missing.</div></li>
+              <li><div><b>Buy it on itch.io</b>Checkout happens on Kat's itch.io page, and the download is instant.</div></li>
+              <li><div><b>Drop it in your game</b>Ready for any engine:
+                <div class="chips lt" style="margin-top:5px"><i>Roblox</i><i>Unity</i><i>Godot</i><i>Unreal</i><i>GameMaker</i></div></div></li>
+            </ol>
+            <p class="fineprint">Licence (draft, Kat sets the final terms): royalty-free in your own games and videos, credit appreciated. No reselling the raw files, and no using them to train or clone voices with AI.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- right: about, demos, contact -->
+      <div class="side">
+        <div class="Sec">
+          <div class="StandardBoxHeader"><span>About Kat</span></div>
+          <div class="box">
+            <p>Kat is a voice actor and cosplayer with a soft spot for the dark and the theatrical: sweet villains, haunted heroines, whispering ghosts and things with far too many teeth.</p>
+            <p>She joins Grug Digital to voice our blocky worlds, and sells her packs here so indie devs can use her voice too.</p>
+            <dl class="facts">
+              <dt>Range</dt><dd>Soft &amp; eerie to shrill &amp; feral</dd>
+              <dt>Styles</dt><dd>Gothic, horror, cute, creature</dd>
+              <dt>Studio</dt><dd>Home booth, broadcast quality</dd>
+              <dt>Turnaround</dt><dd>3 to 5 days for custom lines</dd>
+            </dl>
+          </div>
+        </div>
+
+        <div class="Sec" id="demos">
+          <div class="StandardBoxHeader"><span>Demo reels</span></div>
+          <div class="box" id="demoList"></div>
+        </div>
+
+        <div class="Sec" id="contact">
+          <div class="StandardBoxHeader"><span>Contact</span></div>
+          <div class="box">
+            <span class="status">Commissions open</span>
+            <p>Need lines that aren't in a pack? Kat records custom voices for games, trailers and animations.</p>
+            <div class="reach">
+              <a href="mailto:rd.kp24@gmail.com?subject=Voice%20work%20enquiry%20(via%20Grug)"><svg aria-hidden="true"><use href="#i-mail"/></svg><div>rd.kp24@gmail.com<span>Bookings and custom lines</span></div></a>
+              <a href="https://www.instagram.com/kat.ali.m/" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-ig"/></svg><div>@kat.ali.m<span>Instagram</span></div></a>
+              <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-chat"/></svg><div>Grug Discord<span>Say hi in #voice-packs</span></div></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<script>
+/* Katie P.'s store. To open the store, put her itch.io page in KAT.itch (and, once each pack is up, its own page in
+   url); empty means "opening soon". Samples and demos take an audio file path in src; empty shows "coming soon". */
+const KAT = {
+  itch: '',   // e.g. 'https://katiep.itch.io/'
+  packs: [
+    { name: 'Haunted Heroine', cov: 'c-wine',  icon: 'i-cross',  count: '120 lines', price: '$6.99', url: '', src: '',
+      text: 'Battle cries, hurts, deaths, taunts and laughs for a playable gothic heroine.' },
+    { name: 'Velvet Narrator', cov: 'c-ink',   icon: 'i-candle', count: '60 lines',  price: '$4.99', url: '', src: '',
+      text: 'A calm, candlelit storyteller for intros, lore books and menus.' },
+    { name: 'Ghost Girl Whispers', cov: 'c-ghost', icon: 'i-moon', count: '80 sounds', price: '$4.99', url: '', src: '',
+      text: 'Whispers, giggles, hums and breaths for horror games and haunted rooms.' },
+    { name: 'Creature Feature', cov: 'c-mahog', icon: 'i-skull', count: '150 sounds', price: '$7.99', url: '', src: '',
+      text: 'Growls, hisses, shrieks and snarls, voiced from the throat, not a synth.' },
+    { name: 'Pet Companions', cov: 'c-moss',  icon: 'i-paw',    count: '90 sounds', price: '$3.99', url: '', src: '',
+      text: 'Cute and slightly cursed pet noises: yips, purrs, happy sounds, sad sounds.' },
+    { name: 'Game Callouts', cov: 'c-pewter', icon: 'i-mic',    count: '100 lines', price: '$5.99', url: '', src: '',
+      text: '"Level up!", "Game over", "Round start" and more, each read sweet and sinister.' }
+  ],
+  demos: [
+    { name: 'Character reel', time: '0:58', src: '' },
+    { name: 'Narration reel', time: '1:12', src: '' },
+    { name: 'Whispers & creatures', time: '0:45', src: '' }
+  ]
+};
+(function () {
+  const $ = s => document.querySelector(s), esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const open = !!KAT.itch;
+  if (open) { $('#shopBtn').href = KAT.itch; $('#shopBtn').target = '_blank'; $('#shopBtn').rel = 'noopener'; $('#shopSoon').textContent = 'on itch.io'; }
+
+  /* a made-up waveform, the same every visit */
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const bars = n => Array.from({ length: n }, (_, i) => `<i style="height:${Math.round(25 + 75 * Math.abs(Math.sin(i * .7 + rnd() * 2)) * (0.5 + rnd() / 2))}%"></i>`).join('');
+  $('#heroWave').innerHTML = Array.from({ length: 66 }, (_, i) => { const h = 6 + 44 * Math.abs(Math.sin(i * .42)) * (0.45 + rnd() * .55); return `<rect x="${i * 5}" y="${27 - h / 2}" width="3" height="${h}" rx="1.5" fill="#a9c4e6"/>`; }).join('');
+  /* the cameo's bead frame */
+  $('#beads').innerHTML = Array.from({ length: 44 }, (_, i) => { const a = i / 44 * Math.PI * 2; return `<circle cx="${100 + 92 * Math.cos(a)}" cy="${124 + 116 * Math.sin(a)}" r="3.4"/>`; }).join('');
+
+  $('#packGrid').innerHTML = KAT.packs.map((p, i) => {
+    const href = p.url || KAT.itch;
+    return `<article class="pack">
+      <div class="cov ${p.cov}"><span class="ct" aria-hidden="true">${esc(p.count)}</span><svg aria-hidden="true"><use href="#${p.icon}"/></svg><h3 class="n">${esc(p.name)}</h3></div>
+      <div class="bd"><p>${esc(p.text)}</p>
+        <button class="play" type="button" data-pack="${i}"><svg aria-hidden="true"><use href="#i-play"/></svg><span>Play sample</span></button>
+        <div class="meta">WAV + MP3 · ${esc(p.count)}</div>
+        <div class="buy"><span class="pr">${esc(p.price)}</span>${href
+          ? `<a class="gbtn sm kat-wine" href="${esc(href)}" target="_blank" rel="noopener">Get it</a>`
+          : `<span class="gbtn sm kat-ink" aria-disabled="true" title="Coming soon to itch.io">Soon</span>`}</div></div>
+    </article>`;
+  }).join('');
+
+  $('#demoList').innerHTML = KAT.demos.map((d, i) => `<div class="trk" data-demo="${i}">
+      <button type="button" aria-label="Play ${esc(d.name)}"><svg aria-hidden="true"><use href="#i-play"/></svg></button>
+      <div><b>${esc(d.name)}</b><div class="bars" aria-hidden="true">${bars(28)}</div></div><span class="t">${esc(d.time)}</span></div>`).join('')
+    + '<p class="fineprint" id="demoNote" hidden>Demo audio is coming soon.</p>';
+
+  /* one sound at a time; a missing file just says "coming soon" */
+  let audio = null, playing = null;
+  function stop() { if (audio) { audio.pause(); audio = null; } if (playing) { playing.classList.remove('on'); const u = playing.querySelector('button use'); if (u) u.setAttribute('href', '#i-play'); const t = playing.querySelector('.play span'); if (t) t.textContent = 'Play sample'; } playing = null; }
+  function toggle(el, src, label) {
+    const was = playing === el; stop(); if (was) return;
+    if (!src) { const t = el.querySelector('.play span'); if (t) { t.textContent = 'Sample coming soon'; return; } const n = $('#demoNote'); n.hidden = false; n.textContent = label + ': audio coming soon.'; return; }
+    audio = new Audio(src); audio.play().catch(() => {}); audio.onended = stop;
+    playing = el; el.classList.add('on'); el.querySelector('button use').setAttribute('href', '#i-pause');
+    const t = el.querySelector('.play span'); if (t) t.textContent = 'Stop';
+  }
+  document.addEventListener('click', e => {
+    const pb = e.target.closest('.play[data-pack]'); if (pb) { const p = KAT.packs[pb.dataset.pack]; toggle(pb.closest('.pack'), p.src, p.name); return; }
+    const db = e.target.closest('.trk button'); if (db) { const tr = db.closest('.trk'), d = KAT.demos[tr.dataset.demo]; toggle(tr, d.src, d.name); }
+  });
+})();
+</script>
+  </div>
+
+  <div id="Footer">
+    <div class="FooterNav">
+      <a href="/privacy.html"><b>Privacy Policy</b></a>
+      &nbsp;|&nbsp;
+      <a href="/terms.html">Terms</a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Contact Us</a>
+      &nbsp;|&nbsp;
+      <a href="https://polysw.itch.io/" target="_blank" rel="noopener">itch.io Store</a>
+      &nbsp;|&nbsp;
+      <a href="/character/">Avatar Studio</a>
+      &nbsp;|&nbsp;
+      <a href="/build/">Building Studio</a>
+      &nbsp;|&nbsp;
+      <a href="/arcade/">Free Games</a>
+      &nbsp;|&nbsp;
+      <a href="/legacy">Legacy Site</a>
+    </div>
+    <div class="FooterNav">Follow Grug: <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener"><b>Discord</b></a>&nbsp;|&nbsp;<a href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener"><b>Instagram</b></a>&nbsp;|&nbsp;<a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener"><b>YouTube</b></a></div>
+    <div class="FooterNav" id="seoGenres"></div>
+    <p class="Legalese">
+      Grug, Grug Digital, Pearls, characters, logos, names, and all related indicia are trademarks of <a href="/">Grug Digital</a>, ©2026.
+      <br>
+      Grug is not sponsored, authorized or endorsed by Roblox Corporation, Anthropic or Google. Roblox is a trademark of Roblox Corporation,<br>
+      Claude of Anthropic and Gemini of Google, and no affiliation with these companies is intended.<br>Use of this site signifies your acceptance of the <a href="/terms.html">Terms and Conditions</a>.
+    </p>
+  </div>
+</div>
+
+<script src="/arcade/arcade.js"></script>
+<script>window.GrugArcade.chrome();</script>
+</body>
+</html>
