@@ -87,7 +87,7 @@
 
   <div id="Announcement">
     <div class="SystemAlertText"><svg aria-hidden="true"><use href="#claude"/></svg>New: make your character with Claude! <a href="/character/?view=paint">Make it with Claude</a></div>
-    <div class="SystemAlertText">New: <b>Sunny Patch</b>, a cozy farm that keeps going in your browser tab! <a href="/arcade/sunny-patch/">Start farming</a></div>
+    <div class="SystemAlertText">New: FaveCon Games! <b>Sunny Patch</b> is a cozy farm that keeps going in your browser tab. <a href="/arcade/sunny-patch/">Start farming</a></div>
     <div class="SystemAlertText">New: local multiplayer! Plug in Xbox Wireless Controllers and play together on one screen. <a href="#CoOp">How it works</a></div>
   </div>
 
@@ -221,18 +221,6 @@
   </div>
 </div>
 
-<div id="CatPop" role="dialog" aria-modal="true" aria-labelledby="catPopTitle" hidden>
-  <div class="win">
-    <div class="StandardBoxHeader"><span><h2 id="catPopTitle">What do you feel like playing?</h2></span></div>
-    <button class="x" type="button" data-catclose aria-label="Close">✕</button>
-    <div class="box">
-      <p class="hi">Everything here is free and plays right in your browser. Pick a kind of game:</p>
-      <div class="cards" id="catCards"></div>
-      <a class="all" href="#" data-catpick="all">Just show me everything</a>
-    </div>
-  </div>
-</div>
-
 <script src="/arcade/arcade.js"></script>
 <script>
 (() => {
@@ -247,7 +235,7 @@
     if (GENRES.some(g => g[0] === h)) { state.genre = h; return true; }
     return false;
   };
-  const arrivedWithChoice = fromHash();
+  fromHash();
 
   function list() {
     let L = GAMES.slice();
@@ -266,7 +254,7 @@
     if (state.cat === 'ds') {
       $('GamesContent').innerHTML = `<div class="UnderCon"><div class="tape"></div><h3>Under construction</h3>
         <p>We're getting Nintendo DS games ready to play right here in your browser. They're not quite ready yet, so check back soon!</p>
-        <p>In the meantime, <a href="#plays-in-your-tab" data-catpick="tab">try a game that plays in your tab</a> or <a href="#3d-games" data-catpick="3d">a 3D game</a>.</p>
+        <p>In the meantime, <a href="#favecon-games" data-catpick="tab">try a FaveCon game</a> or <a href="#3d-games" data-catpick="3d">a 3D game</a>.</p>
         <p class="fine">Nintendo DS is a trademark of Nintendo. Grug Digital is not affiliated with or endorsed by Nintendo.</p></div>`;
       $('pageNum').textContent = 1; $('pageCount').textContent = 1; $('prevPage').disabled = $('nextPage').disabled = true;
       return;
@@ -313,35 +301,22 @@
   // Categories in the left column
   function drawCats() {
     $('catList').innerHTML = [{ id: 'all', name: 'All', hash: '' }].concat(CATS).map(c =>
-      `<li><a href="#${c.hash}" data-catpick="${c.id}" class="${state.cat === c.id ? 'on' : ''}">${esc(c.name)}</a></li>`).join('') +
-      `<li><a href="#" data-catopen>Pick again…</a></li>`;
+      `<li><a href="#${c.hash}" data-catpick="${c.id}" class="${state.cat === c.id ? 'on' : ''}" title="${esc(c.blurb || '')}">${esc(c.name)}</a></li>`).join('');
   }
-  // the pop-up: opens when you arrive (unless the link already picked a category or genre)
-  const pics = { tab: '/arcade/sunny-patch/sunny-patch-grug-arcade.jpg', '3d': '/arcade/grug-studio/grug-studio-grug-arcade.jpg' };
-  $('catCards').innerHTML = CATS.map(c => `<button type="button" class="card${c.soon ? ' soon' : ''}" data-catpick="${c.id}">
-      ${c.id === 'ds' ? '<span class="pic dsart" aria-hidden="true"><i></i><i></i></span>' : `<span class="pic" style="background-image:url('${pics[c.id]}')" role="img" aria-label="${esc(c.name)}">${c.id === 'tab' ? '<span class="new">NEW</span>' : ''}</span>`}
-      <b>${esc(c.name)}</b><span class="t">${esc(c.blurb)}${c.id === 'tab' ? ' Start with <i>Sunny Patch</i>, a cozy farm with a farmer you dress up.' : ''}</span>
-      <span class="go">${c.soon ? 'Coming soon' : c.id === 'tab' ? 'Show me these' : 'Show me 3D games'}</span></button>`).join('');
-  const pop = $('CatPop');
-  let lastFocus = null;
-  const openPop = () => { lastFocus = document.activeElement; pop.hidden = false; document.body.style.overflow = 'hidden'; const b = pop.querySelector('.card'); if (b) b.focus(); };
-  const closePop = () => { pop.hidden = true; document.body.style.overflow = ''; if (lastFocus && lastFocus.focus) lastFocus.focus(); };
+  // picking a category (the Categories list at the top of the games column)
   function pickCat(id) {
     state.cat = id; state.genre = 'all'; state.page = 1;
     const c = CATS.find(c => c.id === id);
     history.replaceState(null, '', c ? '#' + c.hash : location.pathname);
-    closePop(); draw();
+    draw();
   }
-  pop.addEventListener('click', e => { if (e.target === pop || e.target.closest('[data-catclose]')) closePop(); });
-  addEventListener('keydown', e => { if (e.key === 'Escape' && !pop.hidden) closePop(); });
 
   // the genre list in the left column (the dropdown and the footer are A.chrome's)
   $('genreList').innerHTML = GENRES.map(([id, t]) => `<li><a href="#${id}" data-genre="${id}" title="${esc(t)} Games"><h3>${esc(t)}</h3></a></li>`).join('');
 
   document.addEventListener('click', e => {
     const cp = e.target.closest('[data-catpick]');
-    if (cp) { e.preventDefault(); pickCat(cp.dataset.catpick); if (!cp.closest('#CatPop')) return; document.getElementById('Body').scrollIntoView(); return; }
-    if (e.target.closest('[data-catopen]')) { e.preventDefault(); openPop(); return; }
+    if (cp) { e.preventDefault(); pickCat(cp.dataset.catpick); return; }
     const pl = e.target.closest('[data-play]');
     if (pl) { const r = A.rec(), k = pl.dataset.play; r.plays[k] = (r.plays[k] || 0) + 1; r.last[k] = new Date().toISOString(); A.saveRec(r); }
     const g = e.target.closest('[data-genre]');
@@ -359,7 +334,6 @@
   $('nextPage').addEventListener('click', () => { state.page++; draw(); });
   addEventListener('hashchange', () => { fromHash(); if (!location.hash) { state.genre = 'all'; state.cat = 'all'; } draw(); });
   draw();
-  if (!arrivedWithChoice) openPop();
 
   A.chrome();
 })();

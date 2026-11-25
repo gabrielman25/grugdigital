@@ -2,7 +2,7 @@
    GAMES: one entry per game in arcade/<slug>/ (with its cover, <slug>-grug-arcade.jpg). added / updated are the dates in the repo's history; "tag" is the
    red line under the name; "about" and "controls" fill the game's page (coop: true adds the Local Multiplayer box: static/local-mp.js is wired in). Plays and favourites are kept per browser
    (localStorage 'grug.arcade.v1'), like the rest of Grug: there's no server, so there are no global visit counts.
-   CATS: the Arcade's categories (the pop-up on /arcade/ and the Categories filter), each with match(game). Games have a cat
+   CATS: the Arcade's categories (the Categories list at the top of /arcade/'s games column), each with match(game). Games have a cat
    (default '3d'); tab: true marks a game that also plays in the browser tab (arcade/tab/tab.js), listed under TAB_BRAND. */
 (() => {
   const $ = id => document.getElementById(id), O = window.GrugOutfits, P = window.GrugPearls;
@@ -14,9 +14,9 @@
     ['pirate', 'Pirate'], ['adventure', 'Adventure'], ['sports', 'Sports'], ['funny', 'Funny'], ['wild-west-cowboy', 'Wild West'], ['war', 'War'],
     ['skatepark', 'Skate Park'], ['gametutorials', 'Tutorial'], ['idle', 'Idle & Cozy']];
 
-  const TAB_BRAND = 'Plays in Your Tab';   // games with tab: true keep going in the browser tab (/arcade/tab/tab.js): the favicon and title show the game
+  const TAB_BRAND = 'FaveCon Games';   // games with tab: true keep going in the browser tab (/arcade/tab/tab.js): the favicon and title show the game
   const CATS = [
-    { id: 'tab', name: TAB_BRAND, hash: 'plays-in-your-tab', match: g => !!g.tab, blurb: "3D games that keep going in your browser tab. Start one, then go do your thing: the little picture and title on the tab show how it's going." },
+    { id: 'tab', name: TAB_BRAND, hash: 'favecon-games', match: g => !!g.tab, blurb: "3D games that keep going in your browser tab: the little picture (the favicon) and the title on the tab show how it's going." },
     { id: '3d', name: '3D Games', hash: '3d-games', match: g => (g.cat || '3d') === '3d', blurb: 'Blocky worlds you explore as your own character: dress up, build, farm, adventure and play with friends.' },
     { id: 'ds', name: 'Nintendo DS Games', hash: 'ds-games', soon: true, match: g => g.cat === 'ds', blurb: 'Coming soon: DS games you can play right here in your browser.' }];
   const catOf = g => g.cat || '3d';

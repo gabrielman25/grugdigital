@@ -192,11 +192,11 @@ When the owner says "push it to the site":
    (`https://<branch>.grugdigital.pages.dev/arcade/<slug>/`, exact address from the commit's Cloudflare Pages check;
    see `CLAUDE.md`). Merge to `main` only when the owner says so.
 
-## 8. Games that play in your tab (`/arcade/tab/tab.js`, "Plays in Your Tab")
+## 8. FaveCon Games: games that play in your tab (`/arcade/tab/tab.js`)
 
 Some 3D games also keep going in the browser tab: the favicon (16x16) and the page title show the game, and the game keeps
 running while the tab is in the background or even closed. They're marked `tab: true` in `GAMES` (`arcade/arcade.js`)
-and listed under the **Plays in Your Tab** category (`TAB_BRAND`, `CATS`). The first one is **Sunny Patch**
+and listed under the **FaveCon Games** category (`TAB_BRAND`, `CATS`). The first one is **Sunny Patch**
 (`arcade/sunny-patch/`): read the comment at the top of it, then copy how it's put together:
 
 - **Build the 3D game from the Baseplate as usual** (sections 0-7 all still apply: outfits, the 2010 GUI, the Game Menu, the frame loop).
@@ -211,7 +211,7 @@ and listed under the **Plays in Your Tab** category (`TAB_BRAND`, `CATS`). The f
   tile, then the title) and tells the player their game is in their tab. Everything else stays the classic GUI.
 - **Idle friendly, always:** nothing to lose, nothing to rush, no sounds or effects while hidden, never flash the title or
   ask the player to come back. When they come back, at most a quiet "while you were away" note.
-- In `GAMES`: `tab: true`. The game page then adds a "Plays in your tab" box. Cover, `images.json`, `tag_images.py` and
+- In `GAMES`: `tab: true`. The game page then adds an "A FaveCon game" box. Cover, `images.json`, `tag_images.py` and
   `seo_head.py` as usual.
 
 `GrugTab.screen()` and `GrugTab.menu()` (a 4:3 tab-shaped page with a shop under it) are there for a game with no 3D

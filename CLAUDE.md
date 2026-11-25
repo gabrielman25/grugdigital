@@ -121,11 +121,11 @@ button) zooms the camera in on you and opens the real Avatar Studio over the bas
 the sliders change it live, and its settings are the studio's own (`grug.build.v2`), so "Paint it in the Building
 Studio" carries straight on. The game's sky and baseplate match the Avatar Studio's, so the hand-over looks seamless.
 
-## Games that play in your tab (`/arcade/tab/`) and the Arcade's categories
+## FaveCon Games: games that play in your tab (`/arcade/tab/`), and the Arcade's categories
 
-The Arcade has categories (`CATS` in `arcade/arcade.js`): Plays in Your Tab (3D games marked `tab: true`), 3D Games and
-Nintendo DS Games (under construction, no games yet). `/arcade/` opens a pop-up to pick one on arrival, unless the link
-already names a category or genre (`#plays-in-your-tab`, `#3d-games`, `#ds-games`). A tab game keeps going in the browser
+The Arcade has categories (`CATS` in `arcade/arcade.js`): FaveCon Games (3D games marked `tab: true`), 3D Games and
+Nintendo DS Games (under construction, no games yet). They're the Categories list at the top of `/arcade/`'s games column
+(no pop-up); a link can pick one (`#favecon-games`, `#3d-games`, `#ds-games`). A tab game keeps going in the browser
 tab (favicon + title) on the `GrugTab` engine (`arcade/tab/tab.js`): read section 8 of `arcade/claude.md`. The first is
 **Sunny Patch** (`arcade/sunny-patch/`, a Baseplate game: the farm is `window.FarmCore`, saved in `grug.sunny-patch.v1`;
 the player's settings in `grug.sunny-patch.player.v1`). It has no other players (just you and Poppy), solid black UI

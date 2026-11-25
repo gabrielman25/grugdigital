@@ -209,7 +209,7 @@
       <div class="StandardBoxHeader"><span><h2>Description</h2></span></div>
       <div class="bx">${(g.about || [g.stats.join('. ') + '.']).map(p => `<p>${esc(p)}</p>`).join('')}
         ${g.outfit === false ? '' : `<p>You play as the character you made in the <a href="/character/">Grug Avatar Studio</a>${g.solo ? '.' : ', and your other saved outfits show up as the other players.'}</p>`}</div>
-      ${isTab ? `<div class="StandardBoxHeader"><span><h2>Plays in your tab</h2></span></div>
+      ${isTab ? `<div class="StandardBoxHeader"><span><h2>A FaveCon game</h2></span></div>
       <div class="bx"><p><b>This game keeps going in your browser tab:</b> the little picture on the tab and the tab's title show how it's doing. Play for a bit, then switch to another tab and keep an eye on it while you browse.</p>
         <p>It keeps going in the background, and even for a while after you close it. It never makes noise or asks you to come back. Pin the tab (right-click it, then Pin) to keep it handy.</p></div>` : ''}
       ${g.controls ? `<div class="StandardBoxHeader"><span><h2>Controls</h2></span></div>
@@ -224,7 +224,7 @@
         <dl>
           <dt>Created:</dt><dd>${day(g.added)}</dd>
           <dt>Updated:</dt><dd>${ago(g.updated)}</dd>
-          <dt>Category:</dt><dd><a href="/arcade/#${cat.hash}">${esc(cat.name)}</a>${isTab ? ` · <a href="/arcade/#${tabCat.hash}">plays in your tab</a>` : ''}</dd>
+          <dt>Category:</dt><dd><a href="/arcade/#${cat.hash}">${esc(cat.name)}</a>${isTab ? ` · <a href="/arcade/#${tabCat.hash}">${esc(tabCat.name)}</a>` : ''}</dd>
           <dt>Players:</dt><dd>${esc(g.players || '1')}</dd>
           <dt>Access:</dt><dd>Everyone · free</dd>
           <dt>You played:</dt><dd id="plays">${plays ? plays + ' time' + (plays > 1 ? 's' : '') + (R.last[g.slug] ? ' · last ' + ago(R.last[g.slug]) : '') : 'Not yet'}</dd>

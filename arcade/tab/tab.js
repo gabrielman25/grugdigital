@@ -1,4 +1,4 @@
-/* GrugTab: the Grug Arcade's engine for games that play in the browser tab (the 'Plays in Your Tab' category; Sunny Patch).
+/* GrugTab: the Grug Arcade's engine for games that play in the browser tab (the FaveCon Games category; Sunny Patch).
    A tab game lives in the browser tab: the favicon (16x16) and the page title ARE the game. The page itself shows the
    same tab, drawn big, as a 4:3 screen: a tab-shaped strip of 16x16 tiles (the first tile is the favicon, pixel for pixel),
    the title text after it, and the game's shop / settings UI underneath.
