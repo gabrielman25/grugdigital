@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:,">
+<title>Voice Lab · Zone Royale player voices · Grug</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 13px Arial, Helvetica, sans-serif; color: #222; background: #cfd6dc; }
+  h1 { font-size: 18px; margin: 0; }
+  .top { display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: linear-gradient(#5fae3a, #3d8a21); color: #fff; text-shadow: 0 1px 0 #255a12; border-bottom: 1px solid #2c6a17; flex-wrap: wrap; }
+  .top small { opacity: .9; }
+  .top .sp { flex: 1; }
+  .wrap { display: grid; grid-template-columns: minmax(0, 1fr) 430px; gap: 12px; padding: 12px; max-width: 1500px; margin: 0 auto; }
+  .box { background: linear-gradient(#fbfbfb, #e9ecef); border: 1px solid #9aa3ab; border-radius: 3px; margin-bottom: 12px; }
+  .box > h2 { margin: 0; font-size: 13px; padding: 6px 10px; color: #fff; background: linear-gradient(#5b5f64, #2f3236); border-bottom: 1px solid #222; border-radius: 2px 2px 0 0; display: flex; align-items: center; gap: 8px; }
+  .box > h2 .sp { flex: 1; }
+  .in { padding: 8px 10px; }
+  #game { width: 100%; display: block; background: #9fd2f2; border-bottom: 1px solid #9aa3ab; touch-action: none; cursor: crosshair; }
+  .help { font-size: 12px; color: #333; line-height: 1.5; }
+  kbd { display: inline-block; font: bold 11px Arial; padding: 1px 5px; border: 1px solid #888; border-bottom-width: 2px; border-radius: 3px; background: #fff; }
+  .btn { font: bold 12px Arial; padding: 5px 10px; border: 1px solid #7d858c; border-radius: 3px; background: linear-gradient(#ffffff, #d5dade); color: #222; cursor: pointer; }
+  .btn:hover { background: linear-gradient(#ffffff, #c4cbd1); }
+  .btn.green { background: linear-gradient(#8fd86a, #4f9e2b); border-color: #3c7a1f; color: #fff; text-shadow: 0 1px 0 #2f6516; }
+  .btn.blue { background: linear-gradient(#7fbff2, #2f7bc4); border-color: #24609b; color: #fff; text-shadow: 0 1px 0 #1d4f80; }
+  .btn.small { padding: 2px 7px; font-size: 11px; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  #touch { display: none; gap: 6px; padding: 8px 10px; flex-wrap: wrap; }
+  #touch .btn { flex: 1; min-width: 60px; padding: 12px 4px; font-size: 14px; user-select: none; -webkit-user-select: none; }
+  #log { height: 168px; overflow-y: auto; font: 12px/1.45 Consolas, Menlo, monospace; background: #1c1f22; color: #cfd4d8; padding: 6px 8px; border-radius: 0 0 2px 2px; }
+  #log .p { color: #9ee37c; } #log .s { color: #8c939a; } #log .ev { color: #fff; font-weight: bold; }
+  #stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 4px 10px; font-size: 12px; }
+  #stats b { font-size: 13px; }
+  .panel { max-height: calc(100vh - 70px); overflow-y: auto; position: sticky; top: 12px; }
+  .field { margin: 7px 0 9px; }
+  .field > label { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; margin-bottom: 2px; }
+  .field > label .val { font-weight: normal; color: #444; font-family: Consolas, Menlo, monospace; }
+  .field .hint { font-size: 11px; color: #666; margin-top: 1px; }
+  input[type=range] { width: 100%; margin: 2px 0; accent-color: #3d8a21; }
+  .dual { position: relative; height: 22px; }
+  .dual .track, .dual .fill { position: absolute; top: 9px; height: 5px; border-radius: 3px; }
+  .dual .track { left: 0; right: 0; background: #c3c9ce; }
+  .dual .fill { background: #4f9e2b; }
+  .dual input { position: absolute; left: 0; top: 0; width: 100%; margin: 0; height: 22px; background: none; pointer-events: none; -webkit-appearance: none; appearance: none; }
+  .dual input::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%; background: #fff; border: 2px solid #3d8a21; cursor: pointer; position: relative; z-index: 2; }
+  .dual input::-moz-range-thumb { pointer-events: auto; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 2px solid #3d8a21; cursor: pointer; }
+  .dual input::-webkit-slider-runnable-track { background: none; } .dual input::-moz-range-track { background: none; }
+  .chk { display: flex; align-items: center; gap: 6px; margin: 5px 0; font-weight: bold; font-size: 12px; cursor: pointer; }
+  select { font: 12px Arial; padding: 2px; }
+  details.ev { border: 1px solid #b5bcc2; border-radius: 3px; margin: 7px 0; background: #fff; }
+  details.ev > summary { cursor: pointer; padding: 6px 8px; font-weight: bold; display: flex; align-items: center; gap: 8px; background: linear-gradient(#f4f6f7, #e1e5e8); list-style: none; }
+  details.ev > summary::-webkit-details-marker { display: none; }
+  details.ev > summary .sp { flex: 1; }
+  details.ev > summary .st { font-weight: normal; font-size: 11px; color: #555; }
+  details.ev[open] > summary { border-bottom: 1px solid #ccd2d6; }
+  details.ev .body { padding: 2px 9px 6px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chip { display: inline-flex; align-items: center; gap: 3px; border: 1px solid #a3abb2; border-radius: 12px; padding: 2px 4px 2px 8px; font-size: 11px; background: #eef0f2; cursor: pointer; user-select: none; }
+  .chip.on { background: linear-gradient(#8fd86a, #4f9e2b); color: #fff; border-color: #3c7a1f; text-shadow: 0 1px 0 #2f6516; }
+  .chip i { font-style: normal; font-size: 10px; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 50%; background: rgba(0,0,0,.15); }
+  .clipRow { display: grid; grid-template-columns: 26px 92px 1fr 40px; gap: 6px; align-items: center; margin: 3px 0; font-size: 12px; }
+  .clipRow .val { font-family: Consolas, Menlo, monospace; font-size: 11px; text-align: right; }
+  textarea { width: 100%; font: 11px/1.35 Consolas, Menlo, monospace; border: 1px solid #9aa3ab; border-radius: 3px; padding: 5px; }
+  #pad { display: block; margin: 4px auto 2px; border: 1px solid #7d858c; border-radius: 4px; touch-action: none; cursor: pointer; background: #fff; }
+  .note { font-size: 11px; color: #555; margin: 4px 0; }
+  .flash { animation: fl .9s; } @keyframes fl { 0% { background: #d9f5c9; } 100% { background: transparent; } }
+  @media (max-width: 980px) { .wrap { grid-template-columns: 1fr; } .panel { max-height: none; position: static; } }
+  @media (pointer: coarse) { #touch { display: flex; } }
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>Voice Lab</h1><small>Zone Royale player voices: play, tune, export</small><span class="sp"></span>
+  <button class="btn" id="startAudio">Click to start sound</button>
+</div>
+<div class="wrap">
+  <div>
+    <div class="box">
+      <h2>Playground<span class="sp"></span><label class="chk" style="margin:0;color:#fff"><input type="checkbox" id="sfxOn" checked> Game SFX</label></h2>
+      <canvas id="game" width="960" height="400"></canvas>
+      <div id="touch">
+        <button class="btn" data-k="left">◀</button><button class="btn" data-k="right">▶</button>
+        <button class="btn green" data-k="jump">Jump</button><button class="btn blue" data-k="dodge">Dodge</button>
+        <button class="btn" data-k="attack">Swing</button><button class="btn" data-k="die">Die</button>
+      </div>
+      <div class="in help">
+        <kbd>A</kbd><kbd>D</kbd> / <kbd>←</kbd><kbd>→</kbd> move · <kbd>Space</kbd> / <kbd>W</kbd> jump · <kbd>C</kbd> / <kbd>Shift</kbd> dodge roll ·
+        <kbd>J</kbd> / <kbd>F</kbd> / click swing your axe · <kbd>K</kbd> die on the spot · <kbd>R</kbd> back to the start.<br>
+        Jump on the <b style="color:#c22">red hurt block</b> to die, step on the <b style="color:#c60">spikes</b> to get hurt, run off the edge to fall off the map,
+        chop the dummies (3 hits) or <b>Grug Bot</b> for the elimination laugh. Grug Bot talks too, in his own voice, so you can hear other players' voices and how they fade with distance.
+      </div>
+    </div>
+    <div class="box">
+      <h2>What played<span class="sp"></span><button class="btn small" id="clearLog">Clear</button></h2>
+      <div class="in"><div id="stats"></div></div>
+      <div id="log"></div>
+    </div>
+  </div>
+  <div class="panel" id="panel"></div>
+</div>
+
+<!--VOICE_JS-->
+<script>
+'use strict';
+const CLIP_SRCS = /*CLIP_SRCS*/null;
+const GV = window.GrugVoice, LAB_KEY = 'grug.voice.lab.v1';
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const rnd = (a, b) => a + Math.random() * (b - a);
+const fx = (v, n = 2) => (+v).toFixed(n);
+const sg = v => (v > 0 ? '+' : '') + fx(v, 1);
+try { const saved = JSON.parse(localStorage.getItem(LAB_KEY) || 'null'); if (saved) GV.setConfig(saved); } catch (e) { }
+let notes = ''; try { notes = (JSON.parse(localStorage.getItem(LAB_KEY) || '{}') || {}).notes || ''; } catch (e) { }
+let saveT = 0;
+function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(LAB_KEY, JSON.stringify(Object.assign({}, GV.config, { notes }))); } catch (e) { } refreshJSON(); }, 150); }
+
+// ------------------------------------------------------------ audio
+let ctx = null, master = null;
+function startAudio() {
+  if (!ctx) {
+    ctx = new (window.AudioContext || window.webkitAudioContext)(); master = ctx.createGain(); master.gain.value = 1; master.connect(ctx.destination);
+    GV.attach(ctx, master, CLIP_SRCS || undefined);
+    const n = ctx.sampleRate * 0.5, b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; SFX.noise = b;
+  }
+  if (ctx.state === 'suspended') ctx.resume();
+  $('startAudio').textContent = 'Sound on'; $('startAudio').disabled = true;
+}
+$('startAudio').onclick = startAudio;
+addEventListener('pointerdown', startAudio, true); addEventListener('keydown', startAudio, true);
+
+const SFX = {
+  noise: null,
+  ok() { return ctx && ctx.state === 'running' && $('sfxOn').checked; },
+  tone(type, f0, f1, dur, v) { if (!this.ok()) return; const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur); o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.02); },
+  hiss(f0, f1, dur, v, q = 1) { if (!this.ok()) return; const t = ctx.currentTime, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = this.noise; f.type = 'bandpass'; f.Q.value = q; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur); s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + dur); },
+  swing() { this.hiss(900, 2400, 0.12, 0.18, 2); }, hit() { this.tone('square', 260, 120, 0.09, 0.12); }, jump() { this.tone('sine', 300, 520, 0.08, 0.05); },
+  roll() { this.hiss(600, 1500, 0.2, 0.12, 1.5); }, crumble() { this.hiss(500, 120, 0.3, 0.3, 0.8); }, zap() { this.tone('sawtooth', 600, 80, 0.25, 0.08); },
+};
+
+// ------------------------------------------------------------ the log + counts
+const stats = {}; const statEls = {};
+const REASON = { chance: 'skipped: chance', cooldown: 'skipped: cooldown', 'already talking': 'skipped: already talking', 'event off': 'skipped: event off', 'your voice is off': 'skipped: voice off', 'no clips picked': 'no clips picked', 'clips still loading': 'clips still loading', 'too far': 'skipped: too far away', 'sound not started': 'click to start sound' };
+GV.onplay = info => {
+  const s = stats[info.event] || (stats[info.event] = { tries: 0, played: 0 }); if (!info.forced) { s.tries++; if (info.played) s.played++; }
+  renderStats();
+  const who = info.who === 'me' ? 'You' : 'Grug Bot', E = GV.config.events[info.event] || { label: info.event };
+  const line = document.createElement('div');
+  line.innerHTML = info.played
+    ? `<span class="p">▶</span> <span class="ev">${who}: ${E.label}</span> → ${info.label} · pitch ${sg(info.pitch)} st · speed ${fx(info.speed)}× · vol ${Math.round(info.volume * 100)}%`
+    : `<span class="s">· ${who}: ${E.label} → ${REASON[info.reason] || info.reason}</span>`;
+  const L = $('log'); L.appendChild(line); while (L.children.length > 120) L.firstChild.remove(); L.scrollTop = L.scrollHeight;
+  if (info.played) bubble(info.who, info.label);
+};
+function renderStats() {
+  $('stats').innerHTML = Object.entries(GV.config.events).map(([k, E]) => { const s = stats[k] || { tries: 0, played: 0 }; return `<div>${E.label}<br><b>${s.played}</b> of ${s.tries} actions${s.tries ? ` (${Math.round(s.played / s.tries * 100)}%)` : ''}</div>`; }).join('');
+}
+$('clearLog').onclick = () => { $('log').innerHTML = ''; for (const k in stats) delete stats[k]; renderStats(); };
+
+// ------------------------------------------------------------ the panel
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+function slider(parent, label, obj, key, lo, hi, step, fmt = v => fx(v), hint, onch) {
+  const f = el('div', 'field', `<label>${label}<span class="val"></span></label><input type="range" min="${lo}" max="${hi}" step="${step}">${hint ? `<div class="hint">${hint}</div>` : ''}`);
+  const i = f.querySelector('input'), v = f.querySelector('.val'); i.value = obj[key]; v.textContent = fmt(obj[key]);
+  i.oninput = () => { obj[key] = +i.value; v.textContent = fmt(obj[key]); if (onch) onch(); save(); };
+  parent.appendChild(f); return f;
+}
+function dual(parent, label, arr, lo, hi, step, fmt = v => fx(v), hint, onch) {
+  const f = el('div', 'field', `<label>${label}<span class="val"></span></label><div class="dual"><div class="track"></div><div class="fill"></div><input type="range" min="${lo}" max="${hi}" step="${step}"><input type="range" min="${lo}" max="${hi}" step="${step}"></div>${hint ? `<div class="hint">${hint}</div>` : ''}`);
+  const [a, b] = f.querySelectorAll('input'), v = f.querySelector('.val'), fill = f.querySelector('.fill');
+  a.value = arr[0]; b.value = arr[1];
+  const show = () => { const x = Math.min(+a.value, +b.value), y = Math.max(+a.value, +b.value); arr[0] = x; arr[1] = y; v.textContent = x === y ? fmt(x) + ' (fixed)' : fmt(x) + '  to  ' + fmt(y); fill.style.left = ((x - lo) / (hi - lo) * 100) + '%'; fill.style.width = ((y - x) / (hi - lo) * 100) + '%'; };
+  a.oninput = b.oninput = () => { show(); if (onch) onch(); save(); }; show();
+  parent.appendChild(f); return f;
+}
+function check(parent, label, obj, key, onch) {
+  const l = el('label', 'chk', `<input type="checkbox"> ${label}`), i = l.querySelector('input'); i.checked = !!obj[key];
+  i.onchange = () => { obj[key] = i.checked; if (onch) onch(); save(); }; parent.appendChild(l); return l;
+}
+function box(title, extra = '') { const b = el('div', 'box', `<h2>${title}<span class="sp"></span>${extra}</h2><div class="in"></div>`); $('panel').appendChild(b); return b.querySelector('.in'); }
+
+const pctF = v => Math.round(v * 100) + '%', secF = v => fx(v, 2) + ' s', semF = v => sg(v) + ' st', xF = v => fx(v) + '×';
+let padDraw = () => { };
+function buildPanel() {
+  const P = $('panel'); P.innerHTML = ''; const C = GV.config;
+
+  // export first: it's what comes back to Claude
+  const ex = box('Export for Claude');
+  ex.innerHTML = `<div class="row"><button class="btn green" id="exDl">Download JSON</button><button class="btn" id="exCopy">Copy JSON</button><button class="btn blue" id="exUse">Use in Zone Royale</button></div>
+    <div class="field"><label>Notes for Claude</label><textarea id="notes" rows="3" placeholder="Anything to change: 'Death 3 is too quiet', 'jump plays too often', ..."></textarea></div>
+    <details><summary style="cursor:pointer;font-weight:bold;font-size:12px">The JSON (paste a JSON here to load it)</summary>
+    <textarea id="json" rows="10" spellcheck="false"></textarea>
+    <div class="row"><button class="btn small" id="exLoad">Load this JSON</button><button class="btn small" id="exReset">Reset everything to the defaults</button></div></details>
+    <div class="note" id="exNote"></div>`;
+  $('notes').value = notes; $('notes').oninput = () => { notes = $('notes').value; save(); };
+  $('exDl').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([exportText()], { type: 'application/json' })); a.download = 'grug-voice-tuning.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
+  $('exCopy').onclick = () => { const t = exportText(); (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => note('Copied. Paste it back to Claude.'), () => { $('json').closest('details').open = true; $('json').select(); note('Select-all is on the JSON box: copy it from there.'); }); };
+  $('exUse').onclick = () => {
+    const onSite = /grugdigital/.test(location.hostname) || location.hostname === 'localhost';
+    GV.setConfig(GV.config, true);
+    note(onSite ? 'Saved for Zone Royale in this browser. <a href="../" target="_blank">Open Zone Royale</a> (Game Settings shows "Voice Lab tuning" while it\'s on).' : 'Saved here, but Zone Royale only sees it when this lab is opened from the site (the preview link). Export the JSON instead.');
+  };
+  $('exLoad').onclick = () => { try { const j = JSON.parse($('json').value); if (j.notes) notes = j.notes; if (j.preview) GV.setMine({ pitch: j.preview.myPitch, speed: j.preview.mySpeed }); GV.setConfig(j); GV.cache.clear(); save(); buildPanel(); note('Loaded.'); } catch (e) { note('That isn\'t valid JSON: ' + e.message); } };
+  $('exReset').onclick = () => { if (!confirm('Reset every setting to the defaults?')) return; GV.setConfig(null); GV.cache.clear(); notes = ''; save(); buildPanel(); };
+
+  // global
+  const g = box('Overall');
+  slider(g, 'Voice volume (everything)', C.master, 'volume', 0, 1.5, 0.01, pctF);
+  const pm = el('div', 'field', `<label>Pitch and speed</label><select style="width:100%"><option value="independent">Independent: pitch doesn't change speed (time-stretched)</option><option value="tape">Tape: pitch and speed linked, like a record</option></select>`);
+  const ps = pm.querySelector('select'); ps.value = C.master.pitchMode; ps.onchange = () => { C.master.pitchMode = ps.value; GV.cache.clear(); save(); }; g.appendChild(pm);
+  check(g, 'One line at a time per player (a new line only cuts in if it matters as much or more)', C.master, 'oneAtATime');
+  check(g, 'Never the same clip twice in a row', C.master, 'noRepeat');
+
+  // avatar voice
+  const a = box('Avatar voice (the player\'s pick)');
+  a.appendChild(el('div', 'note', 'Like a Mii: players pick their avatar\'s voice inside the safe zone you set here. Drag the dot to try a pick.'));
+  const pad = el('canvas'); pad.id = 'pad'; pad.width = 200; pad.height = 200; a.appendChild(pad);
+  const padLab = el('div', 'note'); padLab.style.textAlign = 'center'; a.appendChild(padLab);
+  const rowA = el('div', 'row'); rowA.style.justifyContent = 'center';
+  rowA.innerHTML = '<button class="btn small" id="hearMe">Hear my voice</button><button class="btn small" id="mkDef">Make this the default</button><button class="btn small" id="newBot">New Grug Bot voice</button>';
+  a.appendChild(rowA);
+  const A = C.avatar, rangeP = [A.pitchMin, A.pitchMax], rangeS = [A.speedMin, A.speedMax];
+  dual(a, 'Pitch safe zone', rangeP, -12, 12, 0.5, semF, 'How far players can move their pitch (semitones, 12 = an octave).', () => { A.pitchMin = rangeP[0]; A.pitchMax = rangeP[1]; padDraw(); });
+  dual(a, 'Speed safe zone', rangeS, 0.6, 1.6, 0.01, xF, 'How much faster or slower players can make their voice.', () => { A.speedMin = rangeS[0]; A.speedMax = rangeS[1]; padDraw(); });
+  slider(a, 'Other players\' voice spread', A, 'botSpread', 0, 1, 0.05, pctF, 'Other players get a voice from their name, somewhere in the safe zone. 0% = all sound like the default.', () => padDraw());
+  $('hearMe').onclick = () => { startAudio(); GV.play(Math.random() < 0.5 ? 'jump' : 'dodge', { who: 'me', mine: true, force: true }); };
+  $('mkDef').onclick = () => { const m = GV.mine(); A.pitchDefault = m.pitch; A.speedDefault = m.speed; save(); padDraw(); };
+  $('newBot').onclick = () => { BOT.name = 'Grug Bot ' + Math.floor(rnd(100, 999)); startAudio(); GV.play('jump', botOpts(true)); padDraw(); };
+  setupPad(pad, padLab);
+
+  const o = box('Other players');
+  check(o, 'Hear other players\' voices', C.others, 'enabled');
+  slider(o, 'Their volume', C.others, 'volume', 0, 1.5, 0.01, pctF);
+  slider(o, 'Heard up to', C.others, 'range', 10, 300, 5, v => v + ' studs', 'In Zone Royale, bots further away than this stay quiet. Here, Grug Bot is 1 stud per 10 pixels away.');
+
+  // events
+  const ev = box('Actions');
+  ev.appendChild(el('div', 'note', 'Each action: whether it speaks, how often (chance + cooldown), and the volume, speed and pitch it picks at random between the two handles. Your avatar pitch is added on top.'));
+  for (const [k, E] of Object.entries(C.events)) {
+    const d = el('details', 'ev'); d.open = k === 'jump';
+    d.innerHTML = `<summary><input type="checkbox" class="on" title="On"> ${E.label}<span class="sp"></span><span class="st"></span><button class="btn small t1">▶ Test</button><button class="btn small t5">×5</button></summary><div class="body"></div>`;
+    const on = d.querySelector('.on'); on.checked = E.on; on.onclick = e => e.stopPropagation(); on.onchange = () => { E.on = on.checked; save(); upSt(); };
+    const st = d.querySelector('.st'), upSt = () => st.textContent = E.on ? `${Math.round(E.chance * 100)}%${E.cooldown ? ' · ' + fx(E.cooldown, 1) + ' s' : ''}` : 'off';
+    d.querySelector('.t1').onclick = e => { e.preventDefault(); startAudio(); GV.play(k, { who: 'me', mine: true, force: true }); };
+    d.querySelector('.t5').onclick = e => { e.preventDefault(); startAudio(); for (let i = 0; i < 5; i++) setTimeout(() => GV.play(k, { who: 'me', mine: true, force: true }), i * 700); };
+    const b = d.querySelector('.body');
+    const g2 = el('div', 'grid2'); b.appendChild(g2);
+    slider(g2, 'Chance', E, 'chance', 0, 1, 0.01, pctF, 'of the action speaking', upSt);
+    slider(g2, 'Cooldown', E, 'cooldown', 0, 10, 0.1, secF, 'quiet after a line', upSt);
+    slider(g2, 'Delay', E, 'delay', 0, 1, 0.01, secF, 'after the action');
+    const pr = el('div', 'field', `<label>Priority</label><select style="width:100%"><option value="1">1 · small (jump, dodge)</option><option value="2">2 · medium</option><option value="3">3 · big (death)</option></select><div class="hint">cuts off lower ones</div>`);
+    const prs = pr.querySelector('select'); prs.value = E.priority || 1; prs.onchange = () => { E.priority = +prs.value; save(); }; g2.appendChild(pr);
+    dual(b, 'Volume', E.volume, 0, 1.5, 0.01, pctF);
+    dual(b, 'Speed', E.speed, 0.5, 2, 0.01, xF);
+    dual(b, 'Pitch', E.pitch, -12, 12, 0.1, semF);
+    const cf = el('div', 'field', '<label>Clips it picks from<span class="val">click to add/remove · ▶ to hear</span></label><div class="chips"></div>'), ch = cf.querySelector('.chips');
+    for (const id of Object.keys(GV.CLIPS)) {
+      const c = el('span', 'chip' + (E.clips.includes(id) ? ' on' : ''), `${GV.CLIPS[id]} <i>▶</i>`);
+      c.onclick = e => { if (e.target.tagName === 'I') { startAudio(); GV.preview(id); return; } const n = E.clips.indexOf(id); if (n >= 0) E.clips.splice(n, 1); else E.clips.push(id); c.classList.toggle('on', n < 0); save(); };
+      ch.appendChild(c);
+    }
+    b.appendChild(cf); upSt(); ev.appendChild(d);
+  }
+
+  // clips
+  const cl = box('Clips (levelling)');
+  cl.appendChild(el('div', 'note', 'Boost or cut a single take everywhere it\'s used.'));
+  for (const id of Object.keys(GV.CLIPS)) {
+    const r = el('div', 'clipRow', `<button class="btn small">▶</button><span>${GV.CLIPS[id]}</span><input type="range" min="0" max="2" step="0.01"><span class="val"></span>`);
+    const i = r.querySelector('input'), v = r.querySelector('.val'), cg = C.clips[id] || (C.clips[id] = { gain: 1 });
+    i.value = cg.gain; v.textContent = pctF(cg.gain); i.oninput = () => { cg.gain = +i.value; v.textContent = pctF(cg.gain); save(); };
+    r.querySelector('button').onclick = () => { startAudio(); GV.preview(id); }; cl.appendChild(r);
+  }
+  refreshJSON(); renderStats();
+}
+function note(h) { const n = $('exNote'); n.innerHTML = h; n.classList.remove('flash'); void n.offsetWidth; n.classList.add('flash'); }
+function exportText() { const m = GV.mine(); return JSON.stringify(Object.assign({}, GV.config, { preview: { myPitch: m.pitch, mySpeed: m.speed, botVoiceExample: Object.assign({ name: BOT.name }, GV.voiceFor(BOT.name)) }, notes, exported: new Date().toISOString() }), null, 2); }
+function refreshJSON() { const j = $('json'); if (j && document.activeElement !== j) j.value = exportText(); }
+
+// the Mii-style pad: across = speed, up = pitch; the grey square is the safe zone
+function setupPad(cv, lab) {
+  const x = cv.getContext('2d'), W = cv.width, H = cv.height, PR = [-12, 12], SR = [0.6, 1.6];
+  const toX = s => (s - SR[0]) / (SR[1] - SR[0]) * W, toY = p => H - (p - PR[0]) / (PR[1] - PR[0]) * H;
+  const fromX = px => SR[0] + px / W * (SR[1] - SR[0]), fromY = py => PR[0] + (H - py) / H * (PR[1] - PR[0]);
+  padDraw = () => {
+    const A = GV.config.avatar, m = GV.mine(); x.clearRect(0, 0, W, H);
+    x.fillStyle = '#f3f4f5'; x.fillRect(0, 0, W, H);
+    x.strokeStyle = '#e0e3e6'; x.lineWidth = 1; for (let p = -12; p <= 12; p += 3) { x.beginPath(); x.moveTo(0, toY(p) + .5); x.lineTo(W, toY(p) + .5); x.stroke(); }
+    const zx = toX(A.speedMin), zy = toY(A.pitchMax), zw = toX(A.speedMax) - zx, zh = toY(A.pitchMin) - zy;
+    x.fillStyle = '#d6efc8'; x.fillRect(zx, zy, zw, zh); x.strokeStyle = '#4f9e2b'; x.lineWidth = 2; x.strokeRect(zx, zy, zw, zh);
+    x.fillStyle = '#888'; x.font = '10px Arial'; x.fillText('higher', 4, 12); x.fillText('lower', 4, H - 4); x.fillText('slower', W / 2 - 36, H - 4); x.textAlign = 'right'; x.fillText('faster', W - 4, H - 4); x.textAlign = 'left';
+    x.strokeStyle = '#aaa'; x.lineWidth = 1; x.beginPath(); x.arc(toX(A.speedDefault), toY(A.pitchDefault), 5, 0, 7); x.stroke();
+    const b = GV.voiceFor(BOT.name); x.fillStyle = '#2f7bc4'; x.beginPath(); x.arc(toX(b.speed), toY(b.pitch), 4, 0, 7); x.fill();
+    x.fillStyle = '#d33'; x.beginPath(); x.arc(toX(m.speed), toY(m.pitch), 7, 0, 7); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 2; x.stroke();
+    lab.innerHTML = `You: pitch <b>${sg(m.pitch)}</b> st · speed <b>${fx(m.speed)}×</b> &nbsp; <span style="color:#2f7bc4">● ${BOT.name}</span> &nbsp; <span style="color:#888">○ default</span>`;
+  };
+  let drag = false;
+  const set = e => { const r = cv.getBoundingClientRect(), A = GV.config.avatar; const px = (e.clientX - r.left) * W / r.width, py = (e.clientY - r.top) * H / r.height;
+    GV.setMine({ pitch: Math.round(clamp(fromY(py), A.pitchMin, A.pitchMax) * 2) / 2, speed: Math.round(clamp(fromX(px), A.speedMin, A.speedMax) * 100) / 100 }); padDraw(); save(); };
+  cv.onpointerdown = e => { drag = true; cv.setPointerCapture(e.pointerId); set(e); };
+  cv.onpointermove = e => { if (drag) set(e); };
+  cv.onpointerup = () => { if (drag) { drag = false; startAudio(); GV.play(Math.random() < 0.5 ? 'jump' : 'dodge', { who: 'me', mine: true, force: true }); } };
+  padDraw();
+}
+
+// ------------------------------------------------------------ the playground
+const cv = $('game'), X = cv.getContext('2d'), VW = innerWidth < 700 ? 540 : 960, VH = 400, GROUND = 320, WORLD = 2300;
+cv.width = VW;   // phones: a closer view
+const SOLIDS = [
+  [-60, -400, 60, 1000], [0, GROUND, 920, 300], [1180, GROUND, 1120, 300], [WORLD, -400, 60, 1000],
+  [290, 235, 120, 16], [450, 170, 110, 16], [1700, 270, 100, 50], [1800, 220, 100, 100], [1900, 170, 120, 150],
+];
+const SPIKES = [[560, GROUND - 14, 80, 14]], KILLS = [[720, GROUND - 44, 64, 44]];
+const DUMMIES = [{ x: 210, hp: 100, t: 0, hit: 0 }, { x: 1320, hp: 100, t: 0, hit: 0 }];
+const keys = new Set(), press = new Set();
+const P = { x: 60, y: GROUND - 40, w: 24, h: 40, vx: 0, vy: 0, face: 1, ground: false, hp: 100, dead: false, deadT: 0, roll: 0, rollCd: 0, rollDir: 1, swing: 0, swingCd: 0, struck: false, fell: false, hurtT: 0, parts: [] };
+const BOT = { name: 'Grug Bot', x: 1500, y: GROUND - 40, w: 24, h: 40, vx: 0, vy: 0, face: -1, ground: false, hp: 100, dead: false, deadT: 0, roll: 0, rollCd: 0, rollDir: 1, swing: 0, swingCd: 0, struck: false, hurtT: 0, parts: [], goal: 1600, jt: 2, dt: 5, st: 6 };
+const bubbles = [];
+let camX = 0;
+function bubble(who, text) { bubbles.push({ who, text, t: 1.3 }); }
+function botOpts(force) {
+  const C = GV.config, R = C.others.range;
+  return { who: 'bot', voice: GV.voiceFor(BOT.name), others: true, force, dest: () => {
+    if (!ctx) return null; const dx = (BOT.x - P.x) / 10, d = Math.abs(dx); if (d > R && !force) return null;
+    const ref = 9, gain = ref / (ref + 1.3 * Math.max(0, d - ref)), g = ctx.createGain(); g.gain.value = gain;
+    let n = g; if (ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = clamp(dx / 45, -1, 1); g.connect(p); n = p; } n.connect(master); return g;
+  } };
+}
+const say = (who, ev) => who === P ? GV.play(ev, { who: 'me', mine: true }) : (GV.others() ? GV.play(ev, botOpts(false)) : null);
+
+const KEYMAP = { KeyA: 'left', ArrowLeft: 'left', KeyD: 'right', ArrowRight: 'right', Space: 'jump', KeyW: 'jump', ArrowUp: 'jump', KeyC: 'dodge', ShiftLeft: 'dodge', ShiftRight: 'dodge', KeyJ: 'attack', KeyF: 'attack', KeyK: 'die', KeyR: 'reset' };
+const typing = () => { const a = document.activeElement; return a && (a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && a.type !== 'checkbox' && a.type !== 'range') || a.tagName === 'SELECT'); };
+addEventListener('keydown', e => { if (typing()) return; const k = KEYMAP[e.code]; if (!k) return; if (document.activeElement && document.activeElement.type === 'range') document.activeElement.blur(); e.preventDefault(); if (!keys.has(k)) press.add(k); keys.add(k); });
+addEventListener('keyup', e => { const k = KEYMAP[e.code]; if (k) keys.delete(k); });
+addEventListener('blur', () => keys.clear());
+cv.addEventListener('pointerdown', e => { if (document.activeElement) document.activeElement.blur(); if (e.pointerType === 'mouse') press.add('attack'); });
+for (const b of document.querySelectorAll('#touch .btn')) {
+  const k = b.dataset.k;
+  b.addEventListener('pointerdown', e => { e.preventDefault(); startAudio(); press.add(k); keys.add(k); });
+  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, () => keys.delete(k));
+}
+
+const hitRect = (a, r) => a.x < r[0] + r[2] && a.x + a.w > r[0] && a.y < r[1] + r[3] && a.y + a.h > r[1];
+function move(c, dt) {
+  c.x += c.vx * dt;
+  for (const s of SOLIDS) if (hitRect(c, s)) { if (c.vx > 0) c.x = s[0] - c.w; else if (c.vx < 0) c.x = s[0] + s[2]; c.vx = 0; }
+  c.vy = Math.min(c.vy + 1900 * dt, 1400); c.y += c.vy * dt; c.ground = false;
+  for (const s of SOLIDS) if (hitRect(c, s)) { if (c.vy > 0) { c.y = s[1] - c.h; c.ground = true; } else c.y = s[1] + s[3]; c.vy = 0; }
+}
+function breakApart(c, col) {
+  c.parts = [];
+  const cols = col || ['#f5cd30', '#2f7bc4', '#2f7bc4', '#3d8a21', '#3d8a21', '#f5cd30'];
+  for (let i = 0; i < 6; i++) c.parts.push({ x: c.x + c.w / 2, y: c.y + 8 + i * 5, vx: rnd(-220, 220), vy: rnd(-520, -200), r: rnd(0, 6), vr: rnd(-12, 12), s: i === 0 ? 14 : 10, col: cols[i] });
+}
+function die(c, how) {
+  if (c.dead) return; c.dead = true; c.deadT = how === 'fall' ? 1.6 : 1.8; c.roll = 0; c.swing = 0;
+  if (how !== 'fall') { breakApart(c); SFX.crumble(); }
+  say(c, how === 'fall' ? 'fall' : 'death');
+  if (c === BOT && how === 'axe') setTimeout(() => say(P, 'laugh'), 0);
+}
+function respawn(c) { Object.assign(c, { dead: false, hp: 100, vx: 0, vy: 0, roll: 0, swing: 0, fell: false, parts: [] }); if (c === P) { c.x = 60; c.y = GROUND - 40; c.face = 1; } else { c.x = 1600; c.y = GROUND - 40; } }
+function hurt(c, amt, kx) {
+  if (c.dead || c.roll > 0 || c.hurtT > 0) return; c.hp -= amt; c.hurtT = 0.6; c.vy = -420; c.vx = kx; SFX.hit();
+  if (c.hp <= 0) die(c, 'hurt'); else say(c, 'hurt');
+}
+function act(c, input, dt) {
+  c.rollCd -= dt; c.swingCd -= dt; c.hurtT -= dt;
+  if (c.dead) { c.deadT -= dt; for (const p of c.parts) { p.vy += 1900 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt; if (p.y > GROUND - 5 && p.x > 0 && p.x < 920 || p.y > GROUND - 5 && p.x > 1180) { p.y = GROUND - 5; p.vy *= -0.3; p.vx *= 0.7; p.vr *= 0.6; } } if (c.deadT <= 0) respawn(c); if (c.fell) { c.vy = Math.min(c.vy + 1900 * dt, 1400); c.y += c.vy * dt; } return; }
+  const want = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+  if (want) c.face = want;
+  if (c.roll > 0) { c.roll -= dt; c.vx = c.rollDir * 560; }
+  else if (c.hurtT > 0.35) { /* knocked back */ }
+  else c.vx += ((want * 270) - c.vx) * Math.min(1, dt * (c.ground ? 18 : 6));
+  if (input.jump && c.ground && c.roll <= 0) { c.vy = -680; c.ground = false; SFX.jump(); say(c, 'jump'); }
+  if (input.dodge && c.ground && c.rollCd <= 0 && c.roll <= 0) { c.roll = 0.3; c.rollCd = 0.9; c.rollDir = want || c.face; c.face = c.rollDir; SFX.roll(); say(c, 'dodge'); }
+  if (input.attack && c.swingCd <= 0 && c.roll <= 0) { c.swing = 0.28; c.swingCd = 0.45; c.struck = false; SFX.swing(); say(c, 'attack'); }
+  if (c.swing > 0) { c.swing -= dt; if (!c.struck && c.swing < 0.18) { c.struck = true; strike(c); } }
+  move(c, dt);
+  // hazards
+  for (const k of KILLS) if (hitRect(c, k)) { SFX.zap(); die(c, 'block'); return; }
+  for (const s of SPIKES) if (hitRect(c, s)) hurt(c, 25, (c.x + c.w / 2 < s[0] + s[2] / 2 ? -1 : 1) * 260);
+  if (c.y > GROUND + 70 && !c.fell) { c.fell = true; die(c, 'fall'); }
+}
+function strike(c) {
+  const ax = c.face > 0 ? c.x + c.w : c.x - 62, box = { x: ax, y: c.y - 6, w: 62, h: c.h + 12 };
+  let hit = false;
+  for (const d of DUMMIES) if (d.hp > 0 && hitRect(box, [d.x, GROUND - 46, 26, 46])) { d.hp -= 34; d.hit = 0.15; hit = true; if (d.hp <= 0) { d.t = 2.2; SFX.crumble(); if (c === P) say(P, 'laugh'); } }
+  const o = c === P ? BOT : P;
+  if (!o.dead && hitRect(box, [o.x, o.y, o.w, o.h])) { if (c === BOT) { /* Grug Bot's axe is foam */ } else { o.hp -= 34; o.hurtT = 0.25; o.vx = c.face * 200; o.vy = -200; hit = true; if (o.hp <= 0) die(o, 'axe'); else say(o, 'hurt'); } }
+  if (hit) SFX.hit();
+}
+function botBrain(dt) {
+  const b = BOT, I = { left: false, right: false, jump: false, dodge: false, attack: false };
+  if (b.dead) return I;
+  if (Math.abs(b.goal - b.x) < 12) b.goal = rnd(1250, 2150);
+  if (b.goal > b.x + 6) I.right = true; else if (b.goal < b.x - 6) I.left = true;
+  if ((b.jt -= dt) <= 0) { b.jt = rnd(1.5, 4); I.jump = true; }
+  if ((b.dt -= dt) <= 0) { b.dt = rnd(3.5, 7); I.dodge = true; }
+  if ((b.st -= dt) <= 0) { b.st = rnd(3, 7); I.attack = true; }
+  if (b.vx === 0 && b.ground && (I.left || I.right)) I.jump = true;   // a step in the way
+  return I;
+}
+// drawing
+function drawFig(c, col) {
+  if (c.dead) { for (const p of c.parts) { X.save(); X.translate(p.x - camX, p.y); X.rotate(p.r); X.fillStyle = p.col; X.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.8); X.restore(); } return; }
+  X.save(); X.translate(c.x + c.w / 2 - camX, c.y + c.h / 2);
+  if (c.roll > 0) X.rotate((0.3 - c.roll) / 0.3 * Math.PI * 2 * c.rollDir);
+  if (c.hurtT > 0.3 && Math.floor(c.hurtT * 20) % 2) X.globalAlpha = 0.5;
+  X.fillStyle = col.legs; X.fillRect(-11, 4, 10, 16); X.fillRect(1, 4, 10, 16);
+  X.fillStyle = col.body; X.fillRect(-12, -10, 24, 15);
+  X.fillStyle = '#f5cd30'; X.fillRect(-7, -22, 14, 12);
+  X.fillStyle = '#222'; X.fillRect(c.face > 0 ? 1 : -5, -18, 3, 3);
+  // the axe
+  const sw = c.swing > 0 ? 1 - c.swing / 0.28 : 0, ang = c.swing > 0 ? (-2.2 + sw * 3.2) : -0.6;
+  X.save(); X.scale(c.face, 1); X.translate(10, -4); X.rotate(ang);
+  X.fillStyle = '#8a5a2b'; X.fillRect(-2, -26, 4, 28); X.fillStyle = '#c9ced3'; X.fillRect(-2, -28, 12, 9); X.restore();
+  if (c.swing > 0 && c.swing < 0.2) { X.strokeStyle = 'rgba(255,255,255,.7)'; X.lineWidth = 3; X.beginPath(); X.arc(c.face * 10, 0, 40, c.face > 0 ? -1.4 : Math.PI + 1.4, c.face > 0 ? 0.9 : Math.PI - 0.9, c.face < 0); X.stroke(); }
+  X.restore();
+}
+function label(t, x, y, col = '#fff') { X.font = 'bold 12px Arial'; X.textAlign = 'center'; X.lineWidth = 3; X.strokeStyle = '#000'; X.strokeText(t, x - camX, y); X.fillStyle = col; X.fillText(t, x - camX, y); }
+function draw() {
+  X.fillStyle = '#9fd2f2'; X.fillRect(0, 0, VW, VH);
+  X.fillStyle = '#c4e4f7'; for (let i = 0; i < 8; i++) { const cx = ((i * 380 - camX * 0.3) % 1600 + 1600) % 1600 - 200; X.fillRect(cx, 50 + (i % 3) * 30, 110, 26); X.fillRect(cx + 20, 36 + (i % 3) * 30, 60, 20); }
+  for (const s of SOLIDS) { X.fillStyle = s[1] >= GROUND ? '#6c9a45' : '#8b96a0'; X.fillRect(s[0] - camX, s[1], s[2], s[3]); if (s[1] >= GROUND) { X.fillStyle = '#5a8538'; X.fillRect(s[0] - camX, s[1], s[2], 6); X.fillStyle = '#7d6a55'; X.fillRect(s[0] - camX, s[1] + 22, s[2], s[3]); } }
+  for (const s of SPIKES) { X.fillStyle = '#e07a1f'; for (let x = 0; x < s[2]; x += 16) { X.beginPath(); X.moveTo(s[0] + x - camX, s[1] + s[3]); X.lineTo(s[0] + x + 8 - camX, s[1]); X.lineTo(s[0] + x + 16 - camX, s[1] + s[3]); X.fill(); } label('SPIKES -25', s[0] + s[2] / 2, s[1] - 10, '#ffd2a6'); }
+  for (const k of KILLS) { X.fillStyle = '#d62020'; X.fillRect(k[0] - camX, k[1], k[2], k[3]); X.fillStyle = '#ff5a5a'; X.fillRect(k[0] - camX, k[1], k[2], 5); label('HURT BLOCK', k[0] + k[2] / 2, k[1] - 10, '#ffb3b3'); }
+  label('FALL OFF THE MAP', 1050, GROUND - 40); label('↓', 1050, GROUND - 20);
+  for (const d of DUMMIES) {
+    if (d.hp <= 0) continue; const x = d.x - camX + (d.hit > 0 ? rnd(-2, 2) : 0);
+    X.fillStyle = '#b08a5a'; X.fillRect(x + 10, GROUND - 46, 6, 46); X.fillStyle = d.hit > 0 ? '#fff' : '#d8b77f'; X.fillRect(x, GROUND - 42, 26, 24); X.fillRect(x + 5, GROUND - 56, 16, 14);
+    X.fillStyle = '#000'; X.fillRect(x, GROUND - 64, 26, 4); X.fillStyle = '#5fd03a'; X.fillRect(x, GROUND - 64, 26 * d.hp / 100, 4);
+  }
+  drawFig(BOT, { body: '#8a4fc4', legs: '#444' }); if (!BOT.dead) label(BOT.name, BOT.x + BOT.w / 2, BOT.y - 30, '#d7c2ff');
+  drawFig(P, { body: '#2f7bc4', legs: '#3d8a21' });
+  for (const b of bubbles) {
+    const c = b.who === 'me' ? P : BOT; const x = c.x + c.w / 2, y = c.y - (b.who === 'me' ? 30 : 46) - (1.3 - b.t) * 18; X.globalAlpha = clamp(b.t * 2, 0, 1);
+    label('♪ ' + b.text, x, y, b.who === 'me' ? '#fff27a' : '#d7c2ff'); X.globalAlpha = 1;
+  }
+  // HUD
+  X.fillStyle = 'rgba(0,0,0,.45)'; X.fillRect(10, 10, 164, 20); X.fillStyle = P.hp > 30 ? '#5fd03a' : '#e33'; X.fillRect(12, 12, 160 * clamp(P.hp, 0, 100) / 100, 16);
+  X.font = 'bold 12px Arial'; X.textAlign = 'left'; X.lineWidth = 3; X.strokeStyle = '#000'; X.strokeText('HEALTH ' + Math.max(0, P.hp), 16, 25); X.fillStyle = '#fff'; X.fillText('HEALTH ' + Math.max(0, P.hp), 16, 25);
+  if (!ctx || ctx.state !== 'running') { X.fillStyle = 'rgba(0,0,0,.55)'; X.fillRect(0, VH / 2 - 26, VW, 52); X.textAlign = 'center'; X.font = 'bold 18px Arial'; X.fillStyle = '#fff'; X.fillText('Click here (or press any key) to start the sound', VW / 2, VH / 2 + 6); }
+  else if (!GV.ready) { X.textAlign = 'center'; X.font = 'bold 14px Arial'; X.fillStyle = '#000'; X.fillText('Loading the voice clips…', VW / 2, 50); }
+  if (P.dead) { X.textAlign = 'center'; X.font = 'bold 22px Arial'; X.lineWidth = 4; X.strokeStyle = '#000'; const t = P.fell ? 'Fell off the map' : 'Wiped out'; X.strokeText(t, VW / 2, 130); X.fillStyle = '#fff'; X.fillText(t, VW / 2, 130); }
+}
+let last = performance.now();
+function frame(now) {
+  requestAnimationFrame(frame);
+  try {
+    const dt = clamp((now - last) / 1000, 0, 0.05); last = now;
+    const I = { left: keys.has('left'), right: keys.has('right'), jump: press.has('jump') || (keys.has('jump') && P.ground), dodge: press.has('dodge'), attack: press.has('attack') || keys.has('attack') };
+    if (press.has('die') && !P.dead) die(P, 'block');
+    if (press.has('reset')) respawn(P);
+    press.clear();
+    act(P, I, dt); act(BOT, botBrain(dt), dt);
+    for (const d of DUMMIES) { d.hit -= dt; if (d.hp <= 0 && (d.t -= dt) <= 0) d.hp = 100; }
+    for (let i = bubbles.length - 1; i >= 0; i--) if ((bubbles[i].t -= dt) <= 0) bubbles.splice(i, 1);
+    camX += (clamp(P.x - VW * 0.4, 0, WORLD - VW) - camX) * Math.min(1, dt * 6);
+    draw();
+  } catch (e) { console.error(e); }
+}
+buildPanel();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
