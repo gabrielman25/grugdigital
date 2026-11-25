@@ -141,6 +141,7 @@ def head_block(p, s):
     if p.get('graph'):
         data = {'@context': 'https://schema.org', '@graph': [ORG] + p['graph']}
         L.append('<script type="application/ld+json">' + json.dumps(data, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/') + '</script>')
+    L.append('<script src="/static/tabtitle.js" defer></script>')   # short spinner tab title (see the file's header)
     L.append('<!-- /seo -->')
     return '\n'.join(L)
 

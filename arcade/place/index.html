@@ -20,6 +20,7 @@
 <meta name="twitter:description" content="A free game in the Grug Arcade: plays right in your browser, as the character you made in the Grug Avatar Studio.">
 <meta name="twitter:image" content="https://grugdigital.com/static/og/grug-arcade-free-blocky-games.jpg">
 <meta name="twitter:image:alt" content="Grug Digital characters Medic and Racer over Zone Royale">
+<script src="/static/tabtitle.js" defer></script>
 <!-- /seo -->
 <meta name="description" content="A free game in the Grug Arcade: plays right in your browser, as the character you made in the Grug Avatar Studio.">
 <link rel="icon" href="/favicon.png">
@@ -184,6 +185,7 @@
     A.chrome(); return;
   }
   document.title = `${g.name} · Free in the Grug Arcade by Grug Digital`;
+  window.GrugTabLabel = g.name; if (window.GrugTab) GrugTab.setLabel(g.name);
   // for search engines (they run this page's script): its own address, description and structured data (see src/seo/README.md)
   { const url = 'https://grugdigital.com/arcade/place/?id=' + g.slug, cover = `https://grugdigital.com/arcade/${g.slug}/${g.slug}-grug-arcade.jpg`, about = (g.about || [g.tag]).join(' ');
     const link = document.createElement('link'); link.rel = 'canonical'; link.href = url; document.head.appendChild(link);
