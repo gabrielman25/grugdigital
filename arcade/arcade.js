@@ -24,7 +24,7 @@
   const gname = id => (GENRES.find(g => g[0] === id) || [, 'All'])[1];
 
   const GAMES = [
-    { slug: 'sunny-patch', tab: true, name: 'Sunny Patch', genres: ['idle', 'town-and-city'], tag: 'Cozy farm · plays in your tab', featured: true,
+    { slug: 'sunny-patch', tab: true, solo: true, name: 'Sunny Patch', genres: ['idle', 'town-and-city'], tag: 'Cozy farm · plays in your tab', featured: true,
       added: '2026-11-25T08:00:00Z', updated: '2026-11-25T08:00:00Z', alt: 'Poppy the farmer in a sun hat beside rows of voxel crops on a fenced blocky farm, with the farm shown in a browser tab above',
       stats: ['Poppy farms while you browse', '47 seeds and a whole wardrobe'], players: '1 (and Poppy)',
       about: ['A cozy blocky farm that keeps going in your browser tab. Walk around Sunny Patch as your own character while Poppy, the farmer, plants and picks everything on her own. The little picture on your browser tab is Poppy, and the tab\'s title shows her plots and your money, so you can switch tabs and still see how the farm is doing.',

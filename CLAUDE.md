@@ -128,7 +128,9 @@ Nintendo DS Games (under construction, no games yet). `/arcade/` opens a pop-up 
 already names a category or genre (`#plays-in-your-tab`, `#3d-games`, `#ds-games`). A tab game keeps going in the browser
 tab (favicon + title) on the `GrugTab` engine (`arcade/tab/tab.js`): read section 8 of `arcade/claude.md`. The first is
 **Sunny Patch** (`arcade/sunny-patch/`, a Baseplate game: the farm is `window.FarmCore`, saved in `grug.sunny-patch.v1`;
-the player's settings in `grug.sunny-patch.player.v1`). The category's shown name is `TAB_BRAND` in `arcade/arcade.js`.
+the player's settings in `grug.sunny-patch.player.v1`). It has no other players (just you and Poppy), solid black UI
+panels, roofless buildings with interiors (Poppy's home, the Seed Shop, the Upgrade Shed, the Wardrobe) and a 50% default
+3D resolution (a Game Settings button: 50 / 75 / 100%). The category's shown name is `TAB_BRAND` in `arcade/arcade.js`.
 
 ## Grug Arcade (`/arcade/`)
 

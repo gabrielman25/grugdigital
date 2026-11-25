@@ -29,8 +29,9 @@
   SUNNY PATCH: a cozy 3D farm that also plays in your browser tab (the first "Plays in your tab" Grug Arcade game)
 -----------------------------------------------------------------------------------------------------------------------
   Built from the Grug Baseplate (arcade/baseplate/): the same engine, light, plastic, physics, rig, outfits, camera,
-  controls, NPC crowd and 2009-2010 GUI. The Baseplate's stations, blaster, coins, lift and companion are gone; the map is
-  a fenced farm (buildWorld).
+  controls and 2009-2010 GUI (with solid black panels here). The Baseplate's stations, blaster, coins, lift, companion and
+  NPC crowd are gone (just you and Poppy); the map is a fenced farm with roofless buildings (buildWorld). The 3D draws at
+  50% resolution by default (Save.res; Game Settings: 50 / 75 / 100%).
 
   THE FARM is window.FarmCore (the <script id="farm-core"> block): crops, economy, wardrobe, Poppy the auto-farmer and her
   orders, the save (grug.sunny-patch.v1), the 16x16 pixel sprites, the browser tab and the classic farm window. It runs on
@@ -75,8 +76,8 @@
   /* close buttons: a small pure-red square with a white X, hanging a few px off the corner */
   .x { position: absolute !important; top: -12px; right: -14px; background: #ff0000 !important; border: 1px solid #000 !important; border-radius: 0 !important; box-shadow: none !important;
     font: bold 18px Arial, Helvetica, sans-serif !important; width: 22px !important; height: 21px !important; padding: 0 0 0 1px !important; line-height: 24px !important; }
-  /* panels: black at 45%, a 2px black edge */
-  .pn, #stats, #menu, #help, #plist, #announce, #chatLog .ln { background: rgba(0, 0, 0, .45) !important; border: 2px solid #000 !important; color: #fff; }
+  /* panels: solid black (in Sunny Patch: no see-through UI), a 2px black edge */
+  .pn, #stats, #menu, #help, #plist, #announce, #chatLog .ln { background: #000 !important; border: 2px solid #000 !important; color: #fff; }
 
   /* the hint bar along the top: plain black, Arial 14 (a Hint object shows here too, in place of the game's line) */
   #hint { position: fixed; left: 0; right: 0; top: 0; height: 20px; line-height: 20px; background: #000; text-align: center; font: 14px Arial, Helvetica, sans-serif; white-space: nowrap; overflow: hidden; pointer-events: none; z-index: 3; }
@@ -103,11 +104,11 @@
   /* 3D-positioned UI: name tags, chat bubbles, BillboardGuis, damage numbers */
   #tags { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 2; }
   .tag { position: absolute; left: 0; top: 0; text-align: center; white-space: nowrap; transform-origin: 50% 100%; will-change: transform; display: none; }
-  .tag .nm { font-size: 12px; color: #fff; background: rgba(0, 0, 0, .45); padding: 0 3px; display: inline-block; }
+  .tag .nm { font-size: 12px; color: #fff; background: #000; padding: 0 3px; display: inline-block; }
   .tag .hp { display: flex; gap: 2px; justify-content: center; margin: 2px auto 0; } .tag .hp i { width: 9px; height: 6px; background: #00ff00; border: 1px solid #000; } .tag .hp i.off { background: #6a1010; }
   .tag .bub { display: none; width: max-content; max-width: 170px; margin: 0 auto 6px; padding: 3px 8px; background: #fff; color: #111; font: bold 12px Arial, Helvetica, sans-serif; border: 1px solid #000; white-space: normal; }
   .bill { position: absolute; left: 0; top: 0; text-align: center; white-space: nowrap; display: none; }
-  .bill b { display: block; font-size: 18px; background: rgba(0, 0, 0, .45); padding: 0 4px; } .bill small { display: block; font-size: 11px; color: #fff; }
+  .bill b { display: block; font-size: 18px; background: #000; padding: 0 4px; } .bill small { display: block; font-size: 11px; color: #fff; }
   #dnums { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 4; }
   .dn { position: fixed; left: 0; top: 0; display: none; font-size: 24px; color: #fff; white-space: nowrap; will-change: transform; }
   .dn.kill { color: #ff0000; } .dn.gold { color: #ffff00; }
@@ -129,7 +130,7 @@
   #chatLog { position: fixed; left: 3px; bottom: calc(104px + env(safe-area-inset-bottom)); width: 340px; pointer-events: none; z-index: 3; display: flex; flex-direction: column; gap: 1px; }
   #chatLog .ln { font-size: 12px; padding: 1px 4px; border-width: 0 !important; } #chatLog .ln b { color: #ffff00; }
   #chatBar { position: fixed; left: 3px; bottom: calc(76px + env(safe-area-inset-bottom)); width: 340px; box-sizing: border-box; display: none; z-index: 8; }
-  #chatBar input { width: 100%; box-sizing: border-box; font: 14px Arial, Helvetica, sans-serif !important; color: #fff; background: rgba(0, 0, 0, .6); border: 2px solid #000; padding: 3px 5px; outline: none; }
+  #chatBar input { width: 100%; box-sizing: border-box; font: 14px Arial, Helvetica, sans-serif !important; color: #fff; background: #000; border: 2px solid #000; padding: 3px 5px; outline: none; }
   body.chatting #chatBar { display: block; }
 
   /* the classic 2012 Game Menu (Esc / the gear) */
@@ -214,8 +215,8 @@
   #farm .nm { min-width: 0; } #farm .nm small, #farm .frow small { display: block; font-size: 11px; font-weight: normal; }
   #farm .st { text-align: right; max-width: 55%; }
   #farm .sp { flex: 1; }
-  #farm .spr { width: 32px; height: 32px; image-rendering: pixelated; flex: none; background: rgba(255, 255, 255, .12); }
-  #farm .sq.lock { width: 32px; height: 32px; flex: none; background: rgba(255, 255, 255, .08); border: 1px dashed #7d7d7d; box-sizing: border-box; }
+  #farm .spr { width: 32px; height: 32px; image-rendering: pixelated; flex: none; background: #262626; }
+  #farm .sq.lock { width: 32px; height: 32px; flex: none; background: #1a1a1a; border: 1px dashed #7d7d7d; box-sizing: border-box; }
   #farm .money { font-size: 24px; } #farm .money b { color: #00ff00; }
   #farm .ok { color: #00ff00; font-size: 12px; }
   #farm button { font-size: 12px; padding: 3px 8px; }
@@ -229,7 +230,7 @@
   #farm .tip { font-size: 12px; font-weight: normal; margin: 6px 2px 2px; }
   #farm .ward { display: flex; gap: 10px; align-items: flex-start; }
   #farm .me { flex: none; width: 132px; display: flex; flex-direction: column; gap: 4px; align-items: center; }
-  #farm .me canvas { width: 128px; height: 128px; image-rendering: pixelated; background: rgba(255, 255, 255, .14); border: 2px solid #000; }
+  #farm .me canvas { width: 128px; height: 128px; image-rendering: pixelated; background: #262626; border: 2px solid #000; }
   #farm .me input { width: 124px; max-width: none; font-size: 14px; text-align: center; }
   #farm .shelf { flex: 1; min-width: 0; }
   #farm .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 4px; margin-bottom: 4px; }
@@ -276,7 +277,7 @@
   <button id="mHelp">Help</button>
   <div class="lbl">Game Settings</div>
   <button id="mPlastic">Shiny plastic: On</button>
-  <button id="mNpcs">Visitors: On</button>
+  <button id="mRes">3D resolution: 50%</button>
   <button id="mAnim">Poppy moves on the tab: On</button>
   <button id="mMoney">Money in the tab title: On</button>
   <button id="mYT" style="display:none">480p YouTube mode: Off</button>
@@ -1873,7 +1874,9 @@ function finish(t, byHand) {
 function farmer(dt) {
   if (F.carryT > 0) F.carryT -= dt;
   if (!F.task) F.task = pickTask();
-  const t = F.task; if (!t) { F.act = 0; return; }
+  const t = F.task;
+  if (!t) { F.act = 0; F.idleT = (F.idleT || 0) + dt; F.homing = false; if (F.idleT > 3 && F.x > 0) { F.x = Math.max(0, F.x - walkSpeed() * dt); F.dir = -1; F.homing = true; } return; }   // nothing to do: home for a rest
+  F.idleT = 0; F.homing = false;
   if (!taskValid(t)) { F.task = null; F.act = 0; return; }
   const tx = plotX(t.plot), d = tx - F.x;
   if (F.act === 0 && Math.abs(d) > 1e-3) { const mv = walkSpeed() * dt; if (Math.abs(d) <= mv) F.x = tx; else F.x += Math.sign(d) * mv; F.dir = Math.sign(d); return; }
@@ -2169,7 +2172,7 @@ let frameN = 0;
 function farmerPose() {
   if (F.carryT > 0 && F.carry) return 'carry';
   if (F.task && F.act > 0) return 'work';
-  if (F.task) return 'walk';
+  if (F.task || F.homing) return 'walk';
   return 'idle';
 }
 function drawTab(scr) {
@@ -2253,7 +2256,7 @@ const spr = (kind, id, extra = '') => `<canvas class="spr" width="16" height="16
 const cells = (n, k, cls) => { let h = '<span class="cells">'; for (let i = 0; i < n; i++) h += `<i class="cc ${cls}${i < k ? ' on' : ''}"></i>`; return h + '</span>'; };
 const statusText = () => {
   const t = F.task;
-  if (!t) return S.plots.some(p => p.owned && p.crop) ? `${S.name} is resting while everything grows` : `${S.name} is saving up for seeds`;
+  if (!t) return F.homing ? `${S.name} is heading home for a rest` : S.plots.some(p => p.owned && p.crop) ? `${S.name} is resting at home while everything grows` : `${S.name} is saving up for seeds`;
   const p = S.plots[t.plot], c = CROP[p.crop] || planFor(t.plot, true), verb = { harvest: 'picking', plant: 'planting', clear: 'clearing' }[t.kind];
   return `${S.name} is ${F.act > 0 ? '' : 'on her way to '}${verb} ${c ? c.name.toLowerCase() : ''} at plot ${t.plot + 1}`;
 };
@@ -2401,9 +2404,9 @@ const rndi = (a, b) => Math.floor(rnd(a, b + 1));
 // ==================================================================================================== saving
 // Each game keeps its own save under its own key (grug.<slug>.v1), wrapped in try/catch. Never touch the Pearls wallet
 // (grug.pearls.v1) or the saved outfits except through GrugPearls / GrugOutfits.
-const Save = { coins: 0, plastic: true, npcs: true, comp: false, name: '', key: 'grug.sunny-patch.player.v1',
-  load() { try { const s = JSON.parse(localStorage.getItem(this.key) || 'null'); if (s) Object.assign(this, { coins: s.coins | 0, plastic: s.plastic !== false, npcs: s.npcs !== false, comp: !!s.comp, name: typeof s.name === 'string' ? s.name.slice(0, 20) : '' }); } catch (_) { } },
-  save() { try { localStorage.setItem(this.key, JSON.stringify({ coins: this.coins, plastic: this.plastic, npcs: this.npcs, comp: this.comp, name: this.name })); } catch (_) { } },
+const Save = { coins: 0, plastic: true, npcs: true, comp: false, name: '', res: 0.5, key: 'grug.sunny-patch.player.v1',
+  load() { try { const s = JSON.parse(localStorage.getItem(this.key) || 'null'); if (s) Object.assign(this, { coins: s.coins | 0, plastic: s.plastic !== false, npcs: s.npcs !== false, comp: !!s.comp, res: [0.5, 0.75, 1].includes(s.res) ? s.res : 0.5, name: typeof s.name === 'string' ? s.name.slice(0, 20) : '' }); } catch (_) { } },
+  save() { try { localStorage.setItem(this.key, JSON.stringify({ coins: this.coins, plastic: this.plastic, npcs: this.npcs, comp: this.comp, res: this.res, name: this.name })); } catch (_) { } },
   wipe() { try { localStorage.removeItem(this.key); } catch (_) { } },
 };
 Save.load();
@@ -2413,7 +2416,8 @@ const Game = { clock: 0 };
 const canvas = $('c');
 // retro (2010): no anti-aliasing, drawn a little under screen resolution and blown up with hard pixel edges; soft-edged shadows
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
-const RES = Math.min(innerWidth, innerHeight) < 700 ? 1 : 0.85; renderer.setPixelRatio(RES);   // (phones: one game pixel per screen point)
+const BIG = Math.min(innerWidth, innerHeight) >= 700;   // (a big screen: the bigger shadow map)
+let RES = Save.res; renderer.setPixelRatio(RES);   // 3D resolution: 50% by default (Game Settings: 50 / 75 / 100%), blown up with hard pixel edges
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(70, 1, 0.3, 2500);
@@ -2423,7 +2427,7 @@ const sky = new THREE.Mesh(new THREE.SphereGeometry(2300, 48, 24), new THREE.Mes
 sky.renderOrder = -1; scene.add(sky);
 const hemi = new THREE.HemisphereLight(0xfff0e2, 0x8a7a6a, 0.64); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xffe9d2, 0.85);
-const SHADOW_RES = renderer.capabilities.maxTextureSize >= 4096 && RES < 1 ? 4096 : 2048;   // (phones keep 2048)
+const SHADOW_RES = renderer.capabilities.maxTextureSize >= 4096 && BIG ? 4096 : 2048;   // (phones keep 2048)
 sun.castShadow = true; sun.shadow.mapSize.set(SHADOW_RES, SHADOW_RES);
 Object.assign(sun.shadow.camera, { left: -80, right: 80, top: 80, bottom: -80, near: 100, far: 460 });
 sun.shadow.bias = -0.00006; sun.shadow.normalBias = 0.025; scene.add(sun, sun.target);
@@ -2844,15 +2848,16 @@ function placeTag(f, extraY = 3.4, maxD = 220) {
 }
 
 // ==================================================================================================== the map: the farm
-// A fenced farm on a grassy baseplate. North (-Z) is the row of 8 plots with the path Poppy walks along; the farmhouse is
-// at the west end of the row (her home, FarmCore.F.x = 0). South of the path: the Seed Shop, the Orders board, the
-// Upgrades shed and the Wardrobe, facing the gate where you spawn.
+// A fenced farm on a grassy baseplate. North (-Z) is the row of 8 plots with the path Poppy walks along; her home is at
+// the west end of the path (FarmCore.F.x = 0 is inside it). South of the path: the Seed Shop, the Orders board, the
+// Upgrade Shed and the Wardrobe, roofless with their doors facing the gate where you spawn.
 const SPAWN = { x: 0, y: 3.6, z: 32 };
 const STATIONS = [];   // { name, sub, x, z, hw, hd }: what the place label says where you're standing
 const ST = {};          // handles to the parts the game drives (the plots)
 function station(name, sub, x, z, hw, hd, billY = 14) { STATIONS.push({ name, sub, x, z, hw, hd }); if (billY > 0) Bills.add(`<b>${name}</b><small>${sub}</small>`, x, billY, z, 150); }
 // plot i (0-7) sits at x = ROW.x0 + ROW.dx * (i + 1); Poppy's place along the row (FarmCore.F.x, 0 = home) maps the same way
-const ROW = { x0: -72, dx: 16, z: -26, pathZ: -14, workZ: -18.6, size: 12 };
+const ROW = { x0: -56, dx: 16, z: -26, pathZ: -14, workZ: -18.6, size: 12 };
+const HOME = { x: -58 };   // Poppy's home: her place 0 on the row (ROW.x0) is inside it
 const plotX = i => ROW.x0 + ROW.dx * (i + 1);
 const SOIL_C = 0x8a5a38, GRASS_C = 0x8fd06e;
 const SHOPS = [];       // { tab, name, x, z, r }: walk up to one (E) or click it to open that part of the farm window
@@ -2876,8 +2881,8 @@ function buildWorld() {
   // the gate (you start here) and the paths
   part(0, 0.3, SPAWN.z, 10, 0.6, 10, 0xe9dcc2);
   station('FARM GATE', 'welcome to Sunny Patch', 0, SPAWN.z, 8, 8, 0);
-  part(-20, 0.05, ROW.pathZ, 184, 0.1, 6, 0xd9b27a, { deco: true, studs: false });
-  part(0, 0.05, 9, 6, 0.1, 40, 0xd9b27a, { deco: true, studs: false });
+  part(15, 0.05, ROW.pathZ, 130, 0.1, 6, 0xd9b27a, { deco: true, studs: false });
+  part(0, 0.05, 9, 6, 0.1, 40, 0xd9b27a, { deco: true, studs: false });   // (between the Orders board and the Upgrade Shed)
 
   // the 8 plots: soil when it's yours, grass behind a little white fence when it's for sale
   ST.plots = [];
@@ -2893,44 +2898,75 @@ function buildWorld() {
     const bill = Bills.add('<b>PLOT</b>', x, 10, z, 120);
     ST.plots.push({ p, fence, grp, bill, key: null, owned: null, info: '' });
   }
-  station('THE FIELD', 'Poppy plants and picks · click a plot to help', -16, ROW.z, 70, 9, 0);
+  station('THE FIELD', 'Poppy plants and picks · click a plot to help', 16, ROW.z, 64, 9, 0);
 
-  // the farmhouse at the west end of the row: Poppy's home (a stepped roof, flush, nothing overhanging)
-  const HX = -102, HZ = -26;
-  part(HX, 6, HZ, 16, 12, 16, 0xf3e4c8);
-  [16, 12, 8, 4].forEach((w, k) => part(HX, 13 + k * 2, HZ, w, 2, 16, 0x5a6f8a));
-  part(HX + 8.15, 3.5, HZ, 0.3, 7, 4, 0x7a4a2a, { deco: true, studs: false });
-  for (const dz of [-5, 5]) part(HX + 8.15, 7, HZ + dz, 0.3, 3, 3, 0xbfe3ff, { deco: true, studs: false });
-  for (const dz of [-6, 6]) part(HX + 10, 0.6, HZ + dz, 3, 1.2, 3, 0xff9cc3, { deco: true });   // flower boxes
-  station('FARMHOUSE', "Poppy's home", HX, HZ, 9, 9, 0);
+  // ---- the buildings: roofless, like the old games (you look in from above), each with a doorway and a few things inside
+  // room(): a studded floor and four walls 9 studs high, with a doorway (6 wide, 7 high, a lintel resting on the walls) on one side
+  const room = (x, z, w, d, wall, floor, door) => {
+    part(x, 0.15, z, w, 0.3, d, floor);
+    const H = 9, T = 1, DW = 6, seg = (cx, cz, sx, sz) => part(cx, H / 2, cz, sx, H, sz, wall);
+    for (const side of ['n', 's', 'e', 'w']) {
+      const hz = side === 'n' || side === 's', len = hz ? w : d;
+      const cx = side === 'e' ? x + w / 2 - T / 2 : side === 'w' ? x - w / 2 + T / 2 : x, cz = side === 's' ? z + d / 2 - T / 2 : side === 'n' ? z - d / 2 + T / 2 : z;
+      if (side !== door) { seg(cx, cz, hz ? len : T, hz ? T : len); continue; }
+      const s = (len - DW) / 2;
+      if (hz) { seg(x - DW / 2 - s / 2, cz, s, T); seg(x + DW / 2 + s / 2, cz, s, T); part(x, H - 1, cz, DW, 2, T, wall); }
+      else { seg(cx, z - DW / 2 - s / 2, T, s); seg(cx, z + DW / 2 + s / 2, T, s); part(cx, H - 1, z, T, 2, DW, wall); }
+    }
+  };
+  const deco = (x, y, z, sx, sy, sz, c, studs = false) => part(x, y, z, sx, sy, sz, c, { deco: true, studs });
+  const wallSign = (lines, x, z, w, fg) => sign(lines, x, 7.6, z + 0.07, w, 2, 0, 1, '#2a2a2a', fg);   // on the outside of a south wall, over the door
 
-  // the shops, facing the gate (south, +Z)
-  const shop = (tab, name, sub, x, z) => { SHOPS.push({ tab, name, x, z, r: 9 }); station(name.toUpperCase(), sub, x, z, 7, 6, 0); clickBox(x, z - 1, 12, 8, 12, { shop: tab }); };
-  { // the Seed Shop: a counter, crates of seeds, a sign
-    const x = -48, z = 8;
-    part(x, 1.5, z, 10, 3, 3, 0xc9a26b);
-    for (const [dx, c] of [[-3, 0xffd84d], [0, 0xff9cc3], [3, 0x9be38a]]) part(x + dx, 3.5, z, 2.4, 1, 2.4, c, { studs: false });
-    signPost(['SEED SHOP', 'vegetables · fruits · flowers · trees'], x, z - 3, 0, 1, 12, 3.6, '#ffff00', 6.5);
-    shop('seeds', 'Seed Shop', 'new seeds to grow · E or click', x, z);
+  { // Poppy's home: at the west end of the path, which runs in through her door. She goes home to rest between jobs
+    const x = HOME.x, z = ROW.pathZ, w = 18, d = 16;
+    room(x, z, w, d, 0xf3e4c8, 0xc9a26b, 'e');
+    deco(x - 1, 0.35, z, 8, 0.1, 6, 0xffb7cf);                                        // a rug
+    part(x - 5.5, 1, z - 4.5, 5, 2, 6, 0x8a5a38); deco(x - 5.5, 2.2, z - 4, 4.6, 0.4, 5, 0xff9cc3); deco(x - 5.5, 2.5, z - 6.6, 3.6, 0.5, 1.2, 0xffffff);   // her bed
+    part(x + 1, 2, z + 5, 4, 0.5, 3, 0x8a5a38); part(x + 1, 1, z + 5, 1, 2, 1, 0x6e4a2d);   // a little table
+    for (const dx of [-2, 4]) part(x + dx, 0.9, z + 5, 1.6, 1.2, 1.6, 0xda8541);            // two stools
+    deco(x - 3.5, 2.6, z + 5.2, 0.8, 0.8, 0.8, 0xffffff); deco(x + 1, 2.55, z + 5, 0.9, 0.6, 0.9, 0xff4f6e);   // a cup, an apple
+    part(x - 7, 1, z + 5.5, 1.6, 2, 1.6, 0xd9692b); deco(x - 7, 2.8, z + 5.5, 2.2, 1.6, 2.2, 0x6cc35a);   // a pot plant
+    deco(x - 8.1, 4.5, z, 0.8, 0.4, 6, 0x8a5a38); for (const [dz, c] of [[-2, 0xffd84d], [0, 0x9be38a], [2, 0xff9cc3]]) deco(x - 8.1, 5.2, z + dz, 0.6, 1, 0.6, c);   // a shelf of jars
+    sign(["POPPY'S HOME"], x + w / 2 + 0.07, 7.6, z, 10, 2, 1, 0, '#2a2a2a', '#ff9cc3');
+    station("POPPY'S HOME", 'where Poppy rests between jobs', x, z, w / 2, d / 2, 0);
   }
-  { // the Orders board
-    const x = -16, z = 8;
-    signPost(['ORDERS', "tell Poppy what to grow and buy"], x, z, 0, 1, 12, 5, '#ffffff', 2);
-    shop('orders', 'Orders Board', 'what Poppy grows and buys · E or click', x, z);
+  const shop = (tab, name, sub, x, z, w, d) => { SHOPS.push({ tab, name, x, z, r: Math.max(w, d) / 2 + 2 }); station(name.toUpperCase(), sub, x, z, w / 2, d / 2, 0); clickBox(x, z, w + 1, d + 1, 10, { shop: tab }); };
+  { // the Seed Shop: shelves of seed packets, a counter, crates of produce by the door
+    const x = -44, z = 10, w = 18, d = 14;
+    room(x, z, w, d, 0xffe9a8, 0xc9a26b, 's');
+    for (const y of [3.5, 6]) { deco(x, y, z - d / 2 + 1.6, 14, 0.4, 1.2, 0x8a5a38); [0xff9a3c, 0xff4f6e, 0x9be38a, 0xffd84d, 0xb48cf0, 0xff9cc3, 0x6aa8ff].forEach((c, k) => deco(x - 6 + k * 2, y + 0.6, z - d / 2 + 1.6, 1.2, 0.8, 0.4, c)); }
+    part(x, 1.5, z - 1, 10, 3, 2, 0xa0703f); deco(x - 2, 3.2, z - 1, 1.4, 0.4, 1, 0xffffff); deco(x + 3, 3.25, z - 1, 1, 0.5, 1, 0xffd84d);   // the counter, a ledger, a bell
+    for (const [dx, c] of [[-6.5, 0xff9a3c], [6.5, 0x7fd36a]]) { part(x + dx, 1, z + 4, 2.6, 2, 2.6, 0xa0703f); deco(x + dx, 2.2, z + 4, 2.2, 0.4, 2.2, c); }
+    wallSign(['SEED SHOP'], x, z + d / 2, 12, '#ffff00');
+    shop('seeds', 'Seed Shop', 'new seeds to grow · E or click', x, z, w, d);
   }
-  { // the Upgrades shed
-    const x = 18, z = 6;
-    part(x, 4, z - 2, 12, 8, 8, 0x7b9a6a); [12, 8, 4].forEach((w, k) => part(x, 9 + k * 2, z - 2, w, 2, 8, 0x5a6f8a));
-    part(x, 3, z + 2.15, 4, 6, 0.3, 0x7a4a2a, { deco: true, studs: false });
-    signPost(['UPGRADES', 'boots · gloves · compost · farm stand'], x, z + 5, 0, 1, 12, 3, '#00ffff', 1.4);
-    shop('upgrades', 'Upgrade Shed', 'make Poppy faster · E or click', x, z + 2);
+  { // the Orders board, out by the path
+    const x = -14, z = 12;
+    signPost(['ORDERS', 'tell Poppy what to grow and buy'], x, z, 0, 1, 12, 5, '#ffffff', 2);
+    SHOPS.push({ tab: 'orders', name: 'Orders Board', x, z, r: 8 }); station('ORDERS BOARD', 'what Poppy grows and buys · E or click', x, z, 7, 4, 0); clickBox(x, z, 13, 3, 8, { shop: 'orders' });
   }
-  { // the Wardrobe: a big pink wardrobe and a mirror
-    const x = 50, z = 6;
-    part(x - 3, 5, z - 2, 6, 10, 3, 0xffb7cf); part(x - 3, 5, z - 0.4, 0.2, 9, 0.2, 0xd98aa8, { deco: true, studs: false });
-    part(x + 3, 4, z - 2, 4, 8, 1, 0xf3e4c8); part(x + 3, 4.5, z - 1.4, 3, 6, 0.2, 0xcfe8ff, { deco: true, studs: false });
-    signPost(['WARDROBE', 'dress Poppy up'], x, z + 4, 0, 1, 10, 3, '#ff9cc3', 1.4);
-    shop('wardrobe', 'Wardrobe', "Poppy's clothes · E or click", x, z + 1);
+  { // the Upgrade Shed: a workbench with boots and gloves, sacks of compost, a farm-stand basket
+    const x = 20, z = 10, w = 16, d = 14;
+    room(x, z, w, d, 0x7b9a6a, 0x9c9b9e, 's');
+    part(x, 2, z - d / 2 + 2, 10, 0.6, 2.5, 0x8a5a38); for (const dx of [-4.5, 4.5]) part(x + dx, 0.85, z - d / 2 + 2, 0.6, 1.7, 2, 0x6e4a2d);   // the workbench
+    for (const dx of [-3.5, -2.2]) deco(x + dx, 2.7, z - d / 2 + 2, 1, 0.8, 1.6, 0x7a4a2a);   // boots
+    for (const dx of [0.4, 1.6]) deco(x + dx, 2.5, z - d / 2 + 2, 1, 0.4, 0.9, 0xffd84d);     // gloves
+    for (const dz of [0, 2.2]) part(x - 6, 1, z + dz, 2, 2, 1.8, 0x8a6a3a);                    // compost
+    part(x + 5.5, 0.8, z + 2, 2.4, 1.6, 2.4, 0xc9a26b); deco(x + 5.5, 1.8, z + 2, 2, 0.4, 2, 0xff5a4f);   // a basket for the farm stand
+    for (const dz of [-2, -0.5, 1]) deco(x + w / 2 - 1.3, 4, z + dz, 0.3, 5, 0.3, 0x8a5a38);  // tools on the wall
+    wallSign(['UPGRADES'], x, z + d / 2, 10, '#00ffff');
+    shop('upgrades', 'Upgrade Shed', 'make Poppy faster · E or click', x, z, w, d);
+  }
+  { // the Wardrobe: a rack of clothes, a big pink wardrobe, a mirror, a rug
+    const x = 50, z = 10, w = 18, d = 14;
+    room(x, z, w, d, 0xffd1e3, 0xf3e4c8, 's');
+    deco(x, 5, z - 3, 10, 0.3, 0.3, 0x9c9b9e); for (const dx of [-4.8, 4.8]) part(x + dx, 2.5, z - 3, 0.4, 5, 0.4, 0x9c9b9e);   // the rack
+    [0xff9cc3, 0xffe07a, 0xcfe4ff, 0xb48cf0, 0xff5a7a, 0x8fe0c0].forEach((c, k) => deco(x - 4 + k * 1.6, 3.8, z - 3, 1.2, 2, 0.5, c));
+    part(x - w / 2 + 2, 4, z + 1, 2, 8, 5, 0xff9cc3); deco(x - w / 2 + 3.05, 4, z + 1, 0.1, 7, 0.2, 0xd98aa8);   // the wardrobe
+    deco(x + w / 2 - 1.15, 4.5, z + 1, 0.3, 6, 3, 0xcfe8ff); deco(x + w / 2 - 1.05, 4.5, z + 1, 0.2, 6.6, 3.6, 0xffffff);   // the mirror in its frame
+    deco(x, 0.35, z + 2, 6, 0.1, 4, 0xc9a6f5); part(x + 1, 0.9, z + 2, 1.6, 1.2, 1.6, 0xffb7cf);   // a rug and a stool
+    wallSign(['WARDROBE'], x, z + d / 2, 10, '#ff9cc3');
+    shop('wardrobe', 'Wardrobe', "Poppy's clothes · E or click", x, z, w, d);
   }
 
   // trees outside the fence (decoration only)
@@ -3137,7 +3173,7 @@ function updateFarmer(dt) {
   const working = pose === 'work', tz = working ? ROW.workZ : ROW.pathZ;
   f.z += clamp(tz - f.z, -12 * dt, 12 * dt);
   ch.x = ROW.x0 + ROW.dx * F.x; ch.z = f.z; ch.y = 3; ch.grounded = true; ch.vz = 0; ch.vx = pose === 'walk' ? 10 : 0;
-  const yaw = pose === 'walk' ? (F.dir > 0 ? -Math.PI / 2 : Math.PI / 2) : working ? 0 : Math.PI;
+  const yaw = pose === 'walk' ? (F.dir > 0 ? -Math.PI / 2 : Math.PI / 2) : working ? 0 : F.x < 0.05 ? -Math.PI / 2 : Math.PI;   // (at home: facing her door)
   ch.faceYaw += angDiff(ch.faceYaw, yaw) * Math.min(1, dt * 10);
   animateRig(f, dt, pose === 'walk' ? 'walk' : 'idle');
   if (working) { const s = Math.sin(Game.clock * 9); r.root.position.y = 2.3; r.rs.rotation.x = 1.0 + s * 0.35; r.ls.rotation.x = 1.0 - s * 0.35; r.rh.rotation.x = 1.1; r.lh.rotation.x = -0.3; }
@@ -3293,10 +3329,11 @@ $('mHelp').addEventListener('click', toggleHelp);
 $('mReset').addEventListener('click', () => { if (!player) return; toggleMenu(); A.kill(player.ch); });   // Reset Character: you fall apart and respawn
 function setPlasticOpt(on) { Save.plastic = on; Save.save(); $('mPlastic').textContent = 'Shiny plastic: ' + (on ? 'On' : 'Off'); $('mPlastic').classList.toggle('on', on); setPlastic(on); }
 $('mPlastic').addEventListener('click', () => setPlasticOpt(!Save.plastic)); setPlasticOpt(Save.plastic);
-function setNpcs(on) { Save.npcs = on; Save.save(); $('mNpcs').textContent = 'Visitors: ' + (on ? 'On' : 'Off'); $('mNpcs').classList.toggle('on', on); if (crowd) { crowd.setCount(on ? 4 : 0); if (on) wearNpcs(); } hudDirty = true; }
-$('mNpcs').addEventListener('click', () => setNpcs(!Save.npcs));
+// (no other players in Sunny Patch: just you and Poppy, so there's no crowd and no setting for it)
 function setAnim(on) { FC.S.set.anim = on; $('mAnim').textContent = 'Poppy moves on the tab: ' + (on ? 'On' : 'Off'); $('mAnim').classList.toggle('on', on); }
 function setMoneyTitle(on) { FC.S.set.moneyTitle = on; $('mMoney').textContent = 'Money in the tab title: ' + (on ? 'On' : 'Off'); $('mMoney').classList.toggle('on', on); }
+function setRes(r) { RES = Save.res = r; Save.save(); renderer.setPixelRatio(r); $('mRes').textContent = '3D resolution: ' + Math.round(r * 100) + '%'; if (typeof resize === 'function') resize(); }
+$('mRes').addEventListener('click', () => setRes(Save.res === 0.5 ? 0.75 : Save.res === 0.75 ? 1 : 0.5));
 $('mAnim').addEventListener('click', () => { setAnim(!FC.S.set.anim); FarmRun.save(); });
 $('mMoney').addEventListener('click', () => { setMoneyTitle(!FC.S.set.moneyTitle); FarmRun.save(); });
 let wipeArm = -9;
@@ -3376,7 +3413,6 @@ if (window.GrugPearls) GrugPearls.start().then(r => { if (!window.GrugPearlPopup
 // ==================================================================================================== start (no title screen: straight into play)
 buildWorld(); flushStatic();
 makePlayer(); if (!Save.name) { Save.name = AK.makeName(new Set()); Save.save(); } player.name = Save.name;
-makeCrowd(); setNpcs(Save.npcs);
 makeFarmer();
 // the farm: GrugTab.run steps it on a timer (it keeps going in a background tab, where requestAnimationFrame stops) and
 // works out the time the page was closed; while you're looking, the frame loop steps it too, so Poppy moves smoothly
@@ -3394,7 +3430,7 @@ FC.hooks.plant = (i, c, byHand) => { if (document.hidden) return; FX.dust(plotX(
 FC.hooks.log = text => { if (document.hidden || /^While you were away/.test(text)) return; showHint(text, 4); Snd.ding('buy'); };
 FC.hooks.click = () => { Snd.play('click'); renderHotbar(); };
 FC.hooks.closed = () => { farmOpenClass(); renderHotbar(); };
-renderHotbar(); setAnim(FC.S.set.anim !== false); setMoneyTitle(FC.S.set.moneyTitle !== false);
+renderHotbar(); setRes(Save.res); setAnim(FC.S.set.anim !== false); setMoneyTitle(FC.S.set.moneyTitle !== false);
 $('hint').textContent = hintLine();
 wearOutfits();
 function resize() {
