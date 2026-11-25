@@ -7,7 +7,7 @@
 //   - the extra players move relative to Player 1's camera (push up = away from the camera), have the same abilities as
 //     Player 1, and aim with a crosshair of their own on the screen (right stick). A game teleports them back to Player 1
 //     when they get too far away.
-//   - any controller the browser can see is accepted, standard or not. One that isn't a standard layout (a bootleg pad, a
+//   - Xbox Wireless Controllers are the ones we recommend and test with, but any controller the browser can see is accepted, standard or not. One that isn't a standard layout (a bootleg pad, a
 //     USB SNES pad, an arcade stick...) asks once: use the default controls, or set up its buttons one by one. The answer
 //     is kept in this browser (localStorage 'grug.gamepads.v1'); "Controllers" in the Game Menu changes it later.
 //
@@ -196,7 +196,7 @@
     const P = G.queue.shift(); if (!G.pads.has(P.index) || P.slot) return;
     const name = shortName(P.id);
     if (!P.std && !store.pads[P.id]) {
-      openDlg(P, `<div class="lmp-t">New controller</div><p>${esc(name)}</p><p>This controller doesn't use a standard layout. Play with the default controls, or set its buttons up one at a time?</p><p><small>You can change this any time: Game Menu › Controllers.</small></p>`,
+      openDlg(P, `<div class="lmp-t">New controller</div><p>${esc(name)}</p><p>This controller doesn't use a standard layout. Play with the default controls, or set its buttons up one at a time?</p><p><small>Xbox Wireless Controllers work best: they need no setup.</small></p><p><small>You can change this any time: Game Menu › Controllers.</small></p>`,
         ['Use default controls', 'Set up buttons'], i => {
           if (i === 0) { store.pads[P.id] = { choice: 'default' }; save(); G.queue.unshift(P); }
           else remap(P, () => G.queue.unshift(P));
@@ -280,7 +280,7 @@
   function renderPanel() {
     if (!G.panel) return; const box = G.panel.box, L = (G.cfg && G.cfg.help) || '';
     const pads = [...G.pads.values()].filter(P => P.live).sort((a, b) => (a.slot || 99) - (b.slot || 99));
-    box.innerHTML = `<div class="lmp-t">Controllers</div>` + (pads.length ? '' : `<p>No controllers yet. Plug one in (or turn it on) and press any button on it.</p>`);
+    box.innerHTML = `<div class="lmp-t">Controllers</div>` + (pads.length ? '' : `<p>No controllers yet. Connect an Xbox Wireless Controller (USB cable or Bluetooth) and press any button on it.</p>`) + `<p><small>Controller not showing up? Steam can hold on to controllers while it's open: quit Steam, or turn off Steam Input for that controller, then press a button again. Other controllers often work too; Xbox ones work best.</small></p>`;
     for (const P of pads) {
       const d = document.createElement('div'); d.className = 'lmp-pad';
       const kind = P.std ? 'standard layout' : (store.pads[P.id] && store.pads[P.id].choice === 'custom' ? 'your button setup' : 'default controls (unusual layout)');

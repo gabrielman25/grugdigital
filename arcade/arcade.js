@@ -1,6 +1,6 @@
 /* The Grug Arcade's shared data and page furniture, used by the games list (/arcade/) and the game pages (/arcade/place/?id=<slug>).
    GAMES: one entry per game in arcade/<slug>/ (with cover.jpg). added / updated are the dates in the repo's history; "tag" is the
-   red line under the name; "about" and "controls" fill the game's page. Plays and favourites are kept per browser
+   red line under the name; "about" and "controls" fill the game's page (coop: true adds the Local Multiplayer box: static/local-mp.js is wired in). Plays and favourites are kept per browser
    (localStorage 'grug.arcade.v1'), like the rest of Grug: there's no server, so there are no global visit counts. */
 (() => {
   const $ = id => document.getElementById(id), O = window.GrugOutfits, P = window.GrugPearls;
@@ -20,32 +20,32 @@
       about: ['A baseplate for making things for your game. Walk onto the green pad (or press Create an Avatar) and the camera zooms in on you while the Avatar Studio opens: change your hair, face and outfit, press Wear it, and you are back on the baseplate wearing your new look.',
         'Walk onto the blue pad (or press Make a Building) and a building spawns on the plot. Change its size, roof, doors, floors and windows with the sliders while you walk around it. You are the real size of a Roblox character, so you see exactly how big it will be in a game. When it looks right, paint it in the Building Studio and download it.'],
       controls: [['WASD / arrows', 'Walk'], ['Space', 'Jump'], ['Drag', 'Turn the camera'], ['Mouse wheel', 'Zoom'], ['Phone', 'Left side walks, right side turns, pinch to zoom'], ['Esc', 'Game Menu']] },
-    { slug: 'zone-royale', name: 'Zone Royale', genres: ['war', 'adventure'], tag: '100 players · battle royale', featured: true,
+    { slug: 'zone-royale', coop: true, name: 'Zone Royale', genres: ['war', 'adventure'], tag: '100 players · battle royale', featured: true,
       added: '2026-11-24T22:00:00Z', updated: '2026-11-24T23:30:00Z', alt: 'A player gliding down into a blocky city on a big island',
       stats: ['Drop, loot, outlast the storm', 'Solo or squads of four'], players: '100 (you and 99 bots)',
       about: ['A 100-player battle royale on a huge brick island. Warm up on the spawn island, board the plane, then jump and glide down anywhere: 15 named places, from the towers of Pixel Plaza to the barns of Blox Farm.',
         'Loot chests for guns from grey to gold, ammo, bandages, medkits and shield potions. There is no building: your pickaxe breaks through walls instead. The storm closes in every half minute, so keep moving. Be the last one standing for a Victory Royale.',
         'Play Solo, or Squads: you drop with three teammates who follow you, loot beside you and fight for you, against 24 other squads of four. Switch modes in the Game Menu on the spawn island.'],
-      controls: [['WASD', 'Move'], ['Mouse', 'Look (click the game to lock the mouse)'], ['Left click', 'Shoot / swing'], ['Right click', 'Aim down sights'], ['Space', 'Jump · jump out of the plane · open the glider'], ['Shift', 'Sprint'], ['C / Ctrl', 'Dodge roll'], ['E', 'Open a chest, pick up'], ['F', 'Pickaxe'], ['R', 'Reload'], ['1-6 / wheel', 'Pick a slot'], ['M', 'Map'], ['Esc', 'Game Menu'], ['Gamepads', 'Couch co-op: every extra controller is another player next to you (Game Menu › Controllers)']] },
-    { slug: 'slide-999', name: 'Slide 999 KM for FREE ADMIN!!', genres: ['adventure', 'funny'], tag: 'Obby slide · free admin', featured: true,
+      controls: [['WASD', 'Move'], ['Mouse', 'Look (click the game to lock the mouse)'], ['Left click', 'Shoot / swing'], ['Right click', 'Aim down sights'], ['Space', 'Jump · jump out of the plane · open the glider'], ['Shift', 'Sprint'], ['C / Ctrl', 'Dodge roll'], ['E', 'Open a chest, pick up'], ['F', 'Pickaxe'], ['R', 'Reload'], ['1-6 / wheel', 'Pick a slot'], ['M', 'Map'], ['Esc', 'Game Menu']] },
+    { slug: 'slide-999', coop: true, name: 'Slide 999 KM for FREE ADMIN!!', genres: ['adventure', 'funny'], tag: 'Obby slide · free admin', featured: true,
       added: '2026-11-23T10:47:46-06:00', updated: '2026-11-23T11:38:37-06:00', alt: 'A cart flying down a blocky sky slide',
       stats: ['999 km of slide and obbies', 'Rebirth: 2 Pearls a day'], players: '1',
       about: ['Slide all the way down: 999 KM of sky slide. There is a checkpoint every 111 KM, so if you fall off (or touch anything red) you start again from the last one. Yellow arrows boost you, cyan pads bounce you and blue strips push you sideways.',
         'Between slides there are obbies to walk and jump across, each with a green $ ledge that needs a Speed or Gravity Coil. Reach the bottom and walk through the golden door for FREE ADMIN.'],
-      controls: [['A / D or ← / →', 'Steer'], ['W / S', 'Push / brake'], ['Space', 'Jump'], ['On foot: WASD', 'Walk'], ['Shift', 'Dodge roll'], ['Right-drag', 'Turn the camera'], ['E', 'Fire the Rocket Booster'], ['1-3', 'Equip gear'], ['Esc', 'Game Menu'], ['Gamepads', 'Couch co-op: every extra controller is another player next to you (Game Menu › Controllers)']] },
-    { slug: 'zombie-zones', name: 'Zombie Zones', genres: ['scary', 'war'], tag: '4 teams · 4 modes',
+      controls: [['A / D or ← / →', 'Steer'], ['W / S', 'Push / brake'], ['Space', 'Jump'], ['On foot: WASD', 'Walk'], ['Shift', 'Dodge roll'], ['Right-drag', 'Turn the camera'], ['E', 'Fire the Rocket Booster'], ['1-3', 'Equip gear'], ['Esc', 'Game Menu']] },
+    { slug: 'zombie-zones', coop: true, name: 'Zombie Zones', genres: ['scary', 'war'], tag: '4 teams · 4 modes',
       added: '2026-11-23T10:47:46-06:00', updated: '2026-11-23T11:38:37-06:00', alt: 'A blocky survivor with a blaster in a battle',
       stats: ['Supply runs, flags, deathmatch', 'Dodge roll and loot guns'], players: '4 teams',
       about: ['Four teams fight it out in a blocky town, round after round. Play supply runs, capture the flag or deathmatch, change mode or team from the Game Menu, loot better guns and dodge roll out of trouble.'] },
-    { slug: 'grug-city', name: 'Grug City RP', genres: ['town-and-city'], tag: '16 jobs · cops and robbers', featured: true,
+    { slug: 'grug-city', coop: true, name: 'Grug City RP', genres: ['town-and-city'], tag: '16 jobs · cops and robbers', featured: true,
       added: '2026-11-23T13:48:26-06:00', updated: '2026-11-23T14:19:58-06:00', alt: 'A police cruiser at a crossroads in a blocky city',
       stats: ['Cars and free mansions', 'Get caught wanted: jail'], players: 'A city full of roleplayers',
       about: ['A sandbox city to roleplay in. Pick one of 16 jobs, from shopkeeper to police officer, drive the cars, move into a free mansion and shop at the two-floor mall. Play cops and robbers: get caught while wanted and it is off to jail.'] },
-    { slug: 'brickbound', name: 'Brickbound', genres: ['medieval', 'adventure'], tag: 'Side-scrolling brawler · 4 zones', featured: true,
+    { slug: 'brickbound', coop: true, name: 'Brickbound', genres: ['medieval', 'adventure'], tag: 'Side-scrolling brawler · 4 zones', featured: true,
       added: '2026-11-24T12:00:00-06:00', updated: '2026-11-24T12:00:00-06:00', alt: 'A hero and a friend fight goblins and an ogre in a blocky meadow',
       stats: ['Combos, juggles and a companion', 'Rolling HP like EarthBound'], players: '1 (and a companion)',
       about: ['An action RPG brawler across four zones. Fight goblins, archers and ogres with combos and juggles, a magic bubble and a four-spell magic ring, with a companion at your side. Your HP rolls down like in EarthBound, so finish the fight before it hits zero.'] },
-    { slug: 'grug-kingdom', name: 'Grug Kingdom', genres: ['medieval', 'adventure'], tag: '5 zones · 5 bosses', featured: true,
+    { slug: 'grug-kingdom', coop: true, name: 'Grug Kingdom', genres: ['medieval', 'adventure'], tag: '5 zones · 5 bosses', featured: true,
       added: '2026-11-23T23:52:31Z', updated: '2026-11-23T23:52:31Z', alt: 'A hero with a sword faces the giant Goblin King',
       stats: ['12 swords and loot chests', 'Level up at the forge'], players: '1',
       about: ['A blocky sword RPG. Fight through five zones and five bosses, all the way to the giant Goblin King. Find 12 swords in loot chests, keep them in your backpack and level up at the forge back in town.'] },

@@ -34,6 +34,8 @@
 #Place .StandardBoxHeader span{padding-top:5px}
 #Place .bx{clear:both;position:relative;top:-2px;margin:0 0 12px;padding:10px 12px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 90px) no-repeat;font:13px/1.45 Arial,Helvetica,sans-serif;color:#333}
 #Place .bx p{margin:0 0 8px} #Place .bx p:last-child{margin:0}
+#Place .bx.coop{display:flex;gap:12px;align-items:center} #Place .bx.coop img{flex:none;width:160px;height:auto} #Place .bx.coop a{color:#00f}
+@media (max-width:600px){#Place .bx.coop{flex-direction:column;align-items:flex-start}}
 #Place table.keys{border-collapse:collapse;width:100%}
 #Place table.keys td{padding:3px 4px;vertical-align:top;border-top:1px solid #eee} #Place table.keys tr:first-child td{border-top:0}
 #Place table.keys td:first-child{width:150px;white-space:nowrap}
@@ -181,6 +183,8 @@
         <p>You play as the character you made in the <a href="/character/">Grug Avatar Studio</a>, and your other saved outfits show up as the other players.</p></div>
       ${g.controls ? `<div class="StandardBoxHeader"><span><h2>Controls</h2></span></div>
       <div class="bx"><table class="keys">${g.controls.map(([k, v]) => `<tr><td>${k.split(' / ').map(x => `<kbd>${esc(x)}</kbd>`).join(' / ')}</td><td>${esc(v)}</td></tr>`).join('')}</table></div>` : ''}
+      ${g.coop ? `<div class="StandardBoxHeader"><span><h2>Local Multiplayer</h2></span></div>
+      <div class="bx coop"><img src="/static/arcade/coop-pads.svg" alt="Two game controllers, one for Player 1 and one for Player 2" width="160" height="75"><p><b>Play together on one screen: works with Xbox Wireless Controllers.</b> Connect one, press any button in the game and pick Player 1 or Player 2. Every controller after that joins as the next player. <a href="/arcade/#CoOp">How it works</a></p></div>` : ''}
     </div>
     <div class="R">
       <div class="StandardBoxHeader"><span><h2>Game</h2></span></div>
