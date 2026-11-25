@@ -396,6 +396,32 @@
   #gm .setLogo { text-align: center; margin: 2px 0 8px; padding: 8px 0; background: rgba(0, 0, 0, .3); border: 1px solid rgba(255, 255, 255, .15); border-radius: 4px; }
   #gm .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0; font-size: 13px; }
   #gm .row button { width: 112px; margin: 0; padding: 5px; font-size: 12px; }
+  /* the voice cinematic (?cinematic): no HUD, letterbox bars, a title per shot, captions of what played */
+  #cine { display: none; }
+  body.cine > :not(#c):not(#cine):not(script):not(style):not(noscript) { display: none !important; }
+  body.cine #cine { display: block; position: fixed; inset: 0; z-index: 100; pointer-events: none; color: #fff; font-family: Arial, Helvetica, sans-serif; font-weight: bold; }
+  #cine .lb { position: absolute; left: 0; right: 0; height: 0; background: #000; transition: height .9s ease; overflow: hidden; }
+  #cine .lb.top { top: 0; } #cine .lb.bot { bottom: 0; }
+  body.cineplay #cine .lb { height: 11vh; }
+  #cineBar { position: absolute; right: 10px; bottom: 8px; display: flex; gap: 8px; align-items: center; pointer-events: auto; }
+  body.cineend #cineBar { display: none; }
+  #cineBar button { background: rgba(40, 40, 40, .9); color: #fff; border: 2px solid #bbb; border-radius: 3px; font: bold 12px Arial; padding: 4px 10px; cursor: pointer; }
+  #cineBar button:hover { border-color: #e33; }
+  #cineCount { font-size: 12px; color: #ccc; margin-right: 6px; }
+  #cineCap { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; font-size: 15px; line-height: 1.4; }
+  #cineCap small { font-size: 11px; color: #bbb; font-weight: normal; margin-left: 6px; }
+  #cineTitle { position: absolute; left: 4vw; bottom: calc(11vh + 18px); opacity: 0; transition: opacity .4s; }
+  body.cineplay #cineTitle { opacity: 1; } body.cineend #cineTitle { opacity: 0; }
+  #cineTitle b { display: block; font-size: 40px; letter-spacing: 2px; } #cineTitle small { display: block; font-size: 16px; color: #e8e8e8; }
+  #cineTitle.big { left: 0; right: 0; text-align: center; bottom: auto; top: 38%; } #cineTitle.big b { font-size: 58px; letter-spacing: 4px; }
+  #cineTitle.bump { animation: cineIn .6s ease-out; } @keyframes cineIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .cbox { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 340px; max-width: 92vw; box-sizing: border-box; padding: 10px 18px 16px; background: rgba(25, 25, 25, .9); border: 1px solid #8a8a8a; border-radius: 3px; text-align: center; pointer-events: auto; display: none; }
+  body.cine:not(.cineplay) #cineStart, body.cineend #cineEnd { display: block; }
+  .cbox .mt { font-size: 20px; padding: 2px 0 8px; margin-bottom: 8px; border-bottom: 1px solid #555; }
+  .cbox p { font-size: 13px; font-weight: normal; line-height: 1.45; color: #ddd; margin: 0 0 12px; }
+  .cbox button, .cbox a { display: block; width: 100%; box-sizing: border-box; margin: 7px 0 0; padding: 8px; background: rgba(40, 40, 40, .9); color: #fff; border: 2px solid #bbb; border-radius: 3px; font: bold 15px Arial; cursor: pointer; text-decoration: none; }
+  .cbox .focus { border-color: #e33; } .cbox button:hover, .cbox a:hover { border-color: #e33; }
+  @media (max-width: 600px) { #cineTitle b { font-size: 26px; } #cineTitle small { font-size: 12px; } #cineTitle.big b { font-size: 34px; } #cineCap { font-size: 12px; } #cineCap small { display: none; } #cineBar button { padding: 3px 6px; font-size: 11px; } }
   #gm .row #sPitchV { margin-left: auto; font-size: 12px; min-width: 30px; text-align: right; }
   #gm .row input[type=range] { width: 112px; margin: 0; accent-color: #d8d8d8; cursor: pointer; }
   #gm .help { font-size: 12px; font-weight: normal; color: #ddd; line-height: 1.45; } #gm .help b { color: #fff; }
@@ -413,6 +439,13 @@
 </head>
 <body>
 <canvas id="c" tabindex="0"></canvas>
+<div id="cine">
+  <div class="lb top"><div id="cineBar"><span id="cineCount" class="ol"></span><button id="cineCaps" class="ol">Captions: On</button><button id="cineSkip" class="ol">Next shot</button></div></div>
+  <div class="lb bot"><div id="cineCap"></div></div>
+  <div id="cineTitle" class="ol"><b></b><small></small></div>
+  <div id="cineStart" class="cbox"><div class="mt ol">Zone Royale · Player Voices</div><p class="ol">A one-minute showcase of every player voice line: jumps, dodge rolls, axe swings, getting hurt, deaths, the elimination laugh and falls. Each action gets a few takes, in your voice and three other players'.</p><button id="cinePlay" class="ol focus">Play (sound on)</button></div>
+  <div id="cineEnd" class="cbox"><div class="mt ol">That's every line</div><button id="cineReplay" class="ol focus">Watch again</button><a id="cineGame" class="ol" href="./">Play Zone Royale</a><a id="cineLab" class="ol" href="voice-lab/">Open the Voice Lab</a></div>
+</div>
 <div id="stormVig"></div>
 <div id="scope"></div>
 <div id="wps"></div>
@@ -2270,9 +2303,10 @@ Object.assign(Snd, {
 const Voice = {
   say(f, ev) {
     const V = window.GrugVoice; if (!V || !Snd.ctx || !f || !f.ch) return;
-    if (f.isPlayer) return V.play(ev, { who: 'me', mine: true });
-    if (!V.others()) return; const ch = f.ch, R = V.config.others.range; if (!nearCam(ch, R)) return;
-    return V.play(ev, { who: 'f' + (f.id ?? f.name), voice: V.voiceFor(f.name), others: true, dest: () => Snd.chain(ch.x, ch.y + 1.5, ch.z, 1, R, 9) });
+    const cine = Cine.on; if (cine && !Cine.allow(ev)) return;   // the voice cinematic: only the shot's action speaks, every time
+    if (f.isPlayer || f.voiceMine) return V.play(ev, { who: 'me', mine: true, force: cine });
+    if (!V.others() && !cine) return; const ch = f.ch, R = V.config.others.range; if (!nearCam(ch, R)) return;
+    return V.play(ev, { who: 'f' + (f.id ?? f.name), voice: V.voiceFor(f.name), others: true, force: cine, dest: () => Snd.chain(ch.x, ch.y + 1.5, ch.z, 1, R, 9) });
   },
 };
 
@@ -3043,7 +3077,7 @@ let player = null, SEQ = 0;
 const BOTS = [], MATES = [];   // the other players who are real characters right now (near you); MATES: the local players on controllers (j_main)
 const alive = f => !!f && !f.dead;
 const FIGHTERS = () => { const L = player && !player.dead && !player.inPlane ? [player, ...BOTS] : MATES.length ? [...BOTS] : BOTS; for (const m of MATES) if (!m.dead && !m.parked) L.push(m); return L; };
-const simFighters = () => { const L = player ? [player, ...BOTS] : [...BOTS]; for (const m of MATES) if (!m.parked) L.push(m); return L; };
+const simFighters = () => { const L = player ? [player, ...BOTS] : [...BOTS]; for (const m of MATES) if (!m.parked) L.push(m); if (Cine.on) L.push(...Cine.actors); return L; };
 const Pts = { rows: [],
   add(n, label, kind) {
     let r = this.rows.find(q => q.label === label && q.age < 1.4 && n !== null);
@@ -3510,6 +3544,7 @@ const FakeJump = { list: [],
 // the point everything near is measured from: you, whoever you're spectating, or nothing
 const spec = { t: null, next: null };
 function focusPoint() {
+  if (Cine.on && Cine.focus) return Cine.focus;
   if (player && !player.dead && !player.inPlane) return { x: player.ch.x, y: player.ch.y, z: player.ch.z, p: player };
   if (player && player.dead && spec.t && !spec.t.dead) return { x: spec.t.ch.x, y: spec.t.ch.y, z: spec.t.ch.z, p: spec.t };
   return null;
@@ -3877,6 +3912,7 @@ function checkEnd() {
   else if (!T.has(0) && T.size <= 1) { const W1 = ROSTER.find(V => V.alive); Match.state = 'over'; Match.winner = W1 ? (Match.mode === 'squads' ? W1.name + "'s squad" : W1.name) : null; showResults(false); }
 }
 function updateMatch(dt) {
+  if (Cine.on) return;   // the voice cinematic runs its own show
   if (Match.state === 'island') {
     Match.warm -= dt; Match.joinT += dt;
     if (player.dead && (player.respawnT -= dt) <= 0) { const s = islandSpot(); resetFighter(player, s.x, 3.2, s.z); player.protect = 1.5; $('dead').style.display = 'none'; }
@@ -4004,7 +4040,7 @@ function playerInput(dt) {
   }
 }
 // ---------------------------------------------------------------- input
-function tryLock() { if (touchMode) return; try { const p = canvas.requestPointerLock && canvas.requestPointerLock(); if (p && p.catch) p.catch(() => { }); } catch (_) { } }
+function tryLock() { if (touchMode || Cine.on) return; try { const p = canvas.requestPointerLock && canvas.requestPointerLock(); if (p && p.catch) p.catch(() => { }); } catch (_) { } }
 const playing = () => Match.state !== 'menu' && !menuOpen() && $('results').style.display !== 'block';
 const menuOpen = () => document.body.classList.contains('menu') || $('bigmap').classList.contains('on');
 addEventListener('keydown', e => {
@@ -4290,7 +4326,7 @@ function sim(dt) {
   Game.clock += dt;
   updateMatch(dt);
   if (Match.state === 'menu') return;
-  npcTick(dt); actTick(dt);
+  if (!Cine.on) { npcTick(dt); actTick(dt); }
   HC.view.aspect = camera.aspect;
   for (const b of BOTS) { if (b.dead) continue; if (b.air) { updateBotAir(b, dt); continue; } botThink(b, dt); }
   for (const b of BOTS) {
@@ -4347,6 +4383,189 @@ async function wearOutfits() {
   clearTimeout(cap); OUTFITS.ready = true; player.rig.root.visible = true; for (const V of ROSTER) dressV(V);
 }
 wearOutfits();
+// ---------------------------------------------------------------- THE VOICE CINEMATIC (?cinematic, or window.ZR_CINEMATIC): a scripted showcase of the
+// player voice lines on the spawn island. A hero (your voice, your outfit) and three rivals (their own voices, from their
+// names) act out each action a few times: jumps, dodge rolls, axe swings, getting hurt, deaths, the elimination laugh and
+// falls to death, each in its own shot with its own camera. Only the shot's action speaks (Cine.allow), and every line
+// plays (force), so each take gets heard; the volumes, speeds, pitches and clips are GrugVoice's tuning, as in a match.
+// The real game runs underneath (physics, rigs, FX, sounds); updateMatch, the bots and your input sit out.
+const Cine = {
+  on: /[?&]cinematic\b/.test(location.search) || location.hash === '#cinematic' || !!window.ZR_CINEMATIC,
+  actors: [], hero: null, rivals: [], O: { x: 0, z: 0 }, shot: -1, t: 0, fired: 0, playing: false, focus: null, captions: true,
+  camPos: new THREE.Vector3(), camLook: new THREE.Vector3(), lookS: new THREE.Vector3(), built: false,
+  allowed: new Set(),
+  allow(ev) { return this.allowed.has(ev); },
+  L(x, y, z) { return { x: this.O.x + x, y, z: this.O.z + z }; },
+
+  // ------------------------------------------------------------ the set: a clear, flat stretch of the spawn island
+  findStage() {
+    let best = null, bs = 1e9;
+    for (let i = 0; i < 400; i++) {
+      const x = SPX + rnd(-150, 150), z = SPZ + rnd(-160, 120); let bad = 0;
+      for (let a = -55; a <= 55; a += 11) for (let b = -50; b <= 80; b += 13) if (groundH(x + a, z + b) < 0) bad += 50;
+      bad += W.query(x - 50, z - 45, x + 50, z + 78, []).filter(p => p.canCollide && !p.ground && p.maxY > 0.5).length;
+      if (bad < bs) { bs = bad; best = { x, z }; if (!bad) break; }
+    }
+    return best || { x: SPX, z: SPZ };
+  },
+  build() {
+    if (this.built) return; this.built = true;
+    this.O = this.findStage();
+    const C = (x, z, sx, sy, sz, col) => { const p = this.L(x, sy / 2, z); part(p.x, p.y, p.z, sx, sy, sz, col, { material: mat(col) }); };
+    C(0, -36, 6, 6, 3, 0x8a5a2b); C(-8, -36, 6, 6, 3, 0x8a5a2b);   // crates to chop
+    C(0, 46, 10, 90, 10, 0x8d8a82);   // the tower to fall from
+    // the cast: a hero with your voice, three rivals whose names give them a low, a high and an in-between voice
+    const looks = [{ skin: 0xf5cd30, shirt: 0xc4281c, pants: 0x1b2a35, hat: 'cap', hatColor: 0x222222, face: 'smile' }, { skin: 0xd8a070, shirt: 0x3a9b3a, pants: 0x3a3a3a, hat: 'none', hatColor: 0, face: 'smile' }, { skin: 0xf5cd30, shirt: 0x8a4fc4, pants: 0x2a2a44, hat: 'cap', hatColor: 0x2f6fd8, face: 'smile' }];
+    const names = ['Bonk', 'Pebble', 'Mudslide', 'Tusk', 'Flint', 'Moss', 'Zuzu', 'Grit', 'Boulder', 'Twig', 'Crag', 'Sprout', 'Dusty', 'Nugget', 'Rumble', 'Pip'];
+    const GV = window.GrugVoice, byP = GV ? names.map(n => [n, GV.voiceFor(n).pitch]).sort((a, b) => a[1] - b[1]) : names.map(n => [n, 0]);
+    const pickN = [byP[0][0], byP[byP.length - 1][0], byP[Math.floor(byP.length / 2)][0]];
+    this.hero = makeFighter(Save.name || 'You', playerLook()); this.hero.voiceMine = true;
+    this.rivals = pickN.map((n, i) => makeFighter(n, looks[i]));
+    this.actors = [this.hero, ...this.rivals];
+    this.actors.forEach((a, i) => { a.isBot = false; a.team = 10 + i; a.inv[1] = makeGun(i === 0 ? 'ar' : ['ar', 'smg', 'burst'][i - 1], 2 + (i % 2)); a.ammoR.bullets = 999; a.goal = null; a.jumpT = 0; });
+    // outfits: yours on the hero, the game's kit on the rivals (on the site; elsewhere the classic looks)
+    if (window.GrugOutfitRig) {
+      GrugOutfitRig.load().then(l => { if (l) { GrugOutfitRig.dress(this.hero.rig, l); dressRig(this.hero.rig, this.hero.look); } }).catch(() => { });
+      const dressKit = () => { const K = OUTFITS.kit; if (!K.length) return; this.rivals.forEach((r, i) => { try { GrugOutfitRig.dress(r.rig, K[(i * 3 + 1) % K.length]); dressRig(r.rig, r.look); } catch (e) { } }); };
+      if (OUTFITS.ready) dressKit(); else { const w = setInterval(() => { if (OUTFITS.ready) { clearInterval(w); dressKit(); } }, 300); }
+    }
+    for (const a of this.actors) a.rig.g.visible = false;
+  },
+
+  // ------------------------------------------------------------ directing the actors
+  place(a, x, z, yaw, o = {}) {
+    const p = this.L(x, o.y || 0, z); resetFighter(a, p.x, p.y + 3.2, p.z); a.rig.g.parent || scene.add(a.rig.g);
+    a.ch.faceYaw = a.ch.lockYaw = yaw; a.goal = null; a.sel = o.gun ? 1 : 0; a.hp = 100; a.sh = 0; a.meleeCd = 0; a.rollAt = -9; a.speed = 1;
+  },
+  face(a, dx, dz) { a.ch.lockYaw = a.ch.faceYaw = Math.atan2(-dx, -dz); },
+  faceTo(a, b) { this.face(a, b.ch.x - a.ch.x, b.ch.z - a.ch.z); },
+  walk(a, x, z, speed = 1) { a.goal = this.L(x, 0, z); a.speed = speed; },
+  jump(a) { a.jumpT = 0.12; },
+  roll(a, dx, dz) { const l = Math.hypot(dx, dz) || 1; dodgeRoll(a, [dx / l, dz / l]); },
+  chop(a) { const y = a.ch.faceYaw; swing(a, [-Math.sin(y), 0, -Math.cos(y)]); },
+  shoot(a, b, dmg) {
+    this.faceTo(a, b); a.sel = 1; a.equipT = 0; const y = a.ch.faceYaw; a.shotYaw = y; a.lastShot = Game.clock; a.armYaw = 0;
+    const mx = a.ch.x - Math.sin(y) * 2, my = a.ch.y + 1.3, mz = a.ch.z - Math.cos(y) * 2;
+    tracer(mx, my, mz, b.ch.x, b.ch.y + 0.6, b.ch.z, 0xffe08a); Snd.play('shot', mx, my, mz); hurt(b, dmg, a);
+  },
+  sniped(b, dmg) {   // a shot from someone off screen
+    const p = this.L(60, 8, 60); tracer(p.x, p.y, p.z, b.ch.x, b.ch.y + 0.6, b.ch.z, 0xffe08a); Snd.play('shot', b.ch.x + 20, b.ch.y, b.ch.z + 20); hurt(b, dmg, null);
+  },
+  drive(dt) {
+    for (const a of this.actors) {
+      const ch = a.ch; if (a.dead) continue;
+      let mx = 0, mz = 0;
+      if (a.goal) { const dx = a.goal.x - ch.x, dz = a.goal.z - ch.z, d = Math.hypot(dx, dz); if (d > 0.6) { mx = dx / d; mz = dz / d; ch.lockYaw = Math.atan2(-mx, -mz); } else a.goal = null; }
+      ch.input.mx = mx; ch.input.mz = mz; ch.speedMul = a.speed || 1;
+      ch.input.jump = a.jumpT > 0; a.jumpT -= dt;
+    }
+  },
+
+  // ------------------------------------------------------------ the shots. t: seconds into the shot. cam(t): where the camera is and what it looks at
+  SHOTS: null,
+  makeShots() {
+    const H = () => this.hero, R = i => this.rivals[i], L = (x, y, z) => this.L(x, y, z), C = this;
+    const at = (a, y = 2.2) => ({ x: a.ch.x, y: a.ch.y - 3 + y, z: a.ch.z });
+    return [
+      { title: 'ZONE ROYALE', sub: 'Player voices', dur: 5, allow: [], intro: true,
+        setup() { C.place(H(), 0, 0, 0); C.place(R(0), -6, -3, 0); C.place(R(1), 6, -3, 0); C.place(R(2), 0, -7, 0); },
+        ev: [],
+        cam: t => { const k = smooth(t / 5); return { p: lerp3(L(-150, 80, 170), L(-12, 7, 24), k), l: L(0, 3, -2) }; } },
+      { title: 'JUMP', sub: 'Every jump has a line', dur: 9.5, allow: ['jump'],
+        setup() { C.place(H(), -32, 0, Math.PI / 2 * -1); C.place(R(0), 38, -7, Math.PI / 2); C.place(R(1), 44, -2, Math.PI / 2); C.place(R(2), 50, -9, Math.PI / 2); },
+        ev: [[0.2, () => C.walk(H(), 30, 0)], [0.8, () => C.jump(H())], [2.15, () => C.jump(H())], [3.5, () => C.jump(H())],
+          [5.3, () => C.jump(R(0))], [6.3, () => C.jump(R(1))], [7.3, () => C.jump(R(2))], [8.3, () => C.jump(H())]],
+        cam: t => { const h = H().ch.x - C.O.x; return { p: L(clamp(h, -30, 34) - 4, 5, 21), l: L(clamp(h, -30, 34) + 4, 3.5, -2) }; } },
+      { title: 'DODGE ROLL', sub: 'Left, right, and the others too', dur: 9, allow: ['dodge'],
+        setup() { C.place(H(), 0, 0, Math.PI); C.place(R(0), -14, -8, Math.PI); C.place(R(1), 14, -8, Math.PI); C.place(R(2), 0, -16, Math.PI); },
+        ev: [[0.7, () => C.roll(H(), -1, 0)], [2.0, () => C.roll(H(), 1, 0)], [3.3, () => C.roll(H(), 1, 0)], [4.6, () => C.roll(H(), -1, 0)],
+          [5.9, () => C.roll(R(0), 1, 0.3)], [6.9, () => C.roll(R(1), -1, 0.3)], [7.9, () => C.roll(R(2), 0, 1)]],
+        cam: t => ({ p: L(0, 4.8 - t * 0.08, 19 - t * 0.5), l: L(0, 2.6, -4) }) },
+      { title: 'AXE SWING', sub: 'Chop, chop, chop', dur: 9, allow: ['attack'],
+        setup() { C.place(H(), 0, -30, 0); C.place(R(2), -8, -30, 0); C.place(R(0), 12, -22, 0); C.place(R(1), -14, -20, 0); },
+        ev: [[0.6, () => C.chop(H())], [1.5, () => C.chop(H())], [2.4, () => C.chop(H())], [3.3, () => C.chop(H())],
+          [4.8, () => C.chop(R(2))], [5.8, () => C.chop(R(2))], [6.8, () => C.chop(R(2))], [7.9, () => C.chop(H())]],
+        cam: t => { const k = smooth(clamp((t - 4.2) / 1.2, 0, 1)); return { p: lerp3(L(7, 5.5, -22), L(-1, 5.5, -19), k), l: lerp3(L(-0.5, 3, -33), L(-6, 3, -33), k) }; } },
+      { title: 'HURT', sub: 'Taking hits', dur: 9, allow: ['hurt'],
+        setup() { C.place(H(), 0, 0, 0, { gun: true }); C.place(R(0), -22, -6, 0, { gun: true }); C.place(R(1), 20, -4, 0, { gun: true }); C.place(R(2), 30, -20, 0); C.faceTo(R(0), H()); C.faceTo(R(1), H()); C.faceTo(H(), R(1)); },
+        ev: [[1.0, () => C.shoot(R(0), H(), 12)], [2.6, () => C.shoot(R(0), H(), 12)], [4.2, () => C.shoot(R(0), H(), 12)],
+          [5.6, () => C.shoot(H(), R(1), 14)], [7.0, () => C.shoot(H(), R(1), 14)], [8.2, () => C.shoot(H(), R(1), 14)]],
+        cam: t => ({ p: L(1, 5, 17), l: L(0, 2.6, -3) }) },
+      { title: 'DEATH', sub: 'Everyone goes down eventually', dur: 11.5, allow: ['death'],
+        setup() { C.place(H(), 0, 4, 0, { gun: true }); C.place(R(0), -10, -16, Math.PI, { gun: true }); C.place(R(1), 0, -19, Math.PI, { gun: true }); C.place(R(2), 10, -16, Math.PI, { gun: true });
+          for (const r of C.rivals) C.faceTo(r, H()); },
+        ev: [[1.2, () => C.shoot(H(), R(0), 200)], [3.6, () => C.shoot(H(), R(1), 200)], [6.0, () => C.shoot(H(), R(2), 200)], [8.4, () => C.sniped(H(), 200)]],
+        cam: t => { const k = smooth(clamp((t - 7.4) / 0.9, 0, 1)); return { p: lerp3(L(4.5, 6, 15), L(5, 4, 12), k), l: lerp3(L(0, 2, -10), L(0, 2.5, 4), k) }; } },
+      { title: 'ELIMINATION', sub: 'The laugh, after a takedown', dur: 9.5, allow: ['laugh'],
+        setup() { C.place(H(), 0, 0, 0, { gun: true }); C.place(R(0), -12, -14, 0, { gun: true }); C.place(R(1), 10, -18, 0, { gun: true }); C.place(R(2), 18, -6, 0, { gun: true });
+          C.faceTo(R(0), H()); C.faceTo(R(1), R(2)); C.faceTo(R(2), R(1)); C.faceTo(H(), R(0)); },
+        ev: [[1.0, () => C.shoot(H(), R(0), 200)], [3.8, () => C.shoot(R(2), R(1), 200)], [6.4, () => C.shoot(H(), R(2), 200)]],
+        cam: t => { const k = smooth(clamp((t - 2.8) / 1, 0, 1)) - smooth(clamp((t - 5.4) / 1, 0, 1)); return { p: lerp3(L(-7, 4, 9), L(6, 4.5, 6), k), l: lerp3(L(0, 3.2, 0), L(14, 3, -10), k) }; } },
+      { title: 'FALL', sub: 'Falling to your death', dur: 9, allow: ['fall'],
+        setup() { C.place(R(1), -2, 46, -Math.PI / 2, { y: 90 }); C.place(H(), 2, 46, Math.PI / 2, { y: 90 }); C.place(R(0), -30, 20, 0); C.place(R(2), 30, 16, 0); },
+        ev: [[1.0, () => C.walk(R(1), -12, 46, 0.7)], [5.0, () => C.walk(H(), 12, 46)], [5.15, () => C.jump(H())]],
+        cam: t => { const f = t < 4.6 ? R(1) : H(), y = clamp(f.ch.y - 3, 0, 92); return { p: L(30, clamp(y * 0.55 + 6, 6, 60), 82), l: { x: C.O.x + clamp(f.ch.x - C.O.x, -14, 14), y: y + 2, z: C.O.z + 46 } }; } },
+      { title: 'ZONE ROYALE', sub: 'Player voices · tuned in the Voice Lab', dur: 7, allow: ['laugh', 'jump'], outro: true,
+        setup() { C.place(H(), 0, 0, Math.PI); C.place(R(0), -6, -4, Math.PI); C.place(R(1), 6, -4, Math.PI); C.place(R(2), 0, -8, Math.PI); },
+        ev: [[1.0, () => C.jump(R(0))], [1.6, () => C.jump(R(1))], [2.2, () => C.jump(R(2))], [3.2, () => window.GrugVoice && GrugVoice.play('laugh', { who: 'me', mine: true, force: true })]],
+        cam: t => { const a = 0.5 - t * 0.05; return { p: L(Math.sin(a) * 18, 6, Math.cos(a) * 18), l: L(0, 3, -3) }; } },
+    ];
+  },
+
+  // ------------------------------------------------------------ running it
+  start() {
+    this.build(); this.SHOTS = this.SHOTS || this.makeShots();
+    for (const b of [...BOTS]) dropBot(b, true); clearLoot();
+    if (player) { player.dead = true; player.rig.g.visible = false; }
+    document.body.classList.add('cine', 'cineplay'); document.body.classList.remove('cineend');
+    if (window.GrugVoice) GrugVoice.onplay = i => { if (i.played) this.caption(i); };
+    this.playing = true; this.go(0);
+  },
+  go(i) {
+    this.shot = i; this.t = 0; this.fired = 0; const S = this.SHOTS[i];
+    for (const a of this.actors) { a.dead = false; a.rig.g.visible = true; }
+    S.setup(); this.allowed = new Set(S.allow); stepAcc = 0;
+    const c = S.cam(0); this.camPos.set(c.p.x, c.p.y, c.p.z); this.lookS.set(c.l.x, c.l.y, c.l.z);
+    const T = $('cineTitle'); T.querySelector('b').textContent = S.title; T.querySelector('small').textContent = S.sub;
+    T.className = S.intro || S.outro ? 'big' : ''; bump(T);
+    $('cineCount').textContent = S.intro || S.outro ? '' : `${i} / ${this.SHOTS.length - 2}`;
+  },
+  update(dt) {
+    if (!this.playing) return; const S = this.SHOTS[this.shot]; this.t += dt;
+    while (this.fired < S.ev.length && S.ev[this.fired][0] <= this.t) { try { S.ev[this.fired][1](); } catch (e) { console.warn('cine', e); } this.fired++; }
+    this.drive(dt);
+    if (S.outro && this.t > 4.2) document.body.classList.add('cineend');
+    if (this.t >= S.dur) { if (this.shot + 1 < this.SHOTS.length) this.go(this.shot + 1); else { this.playing = false; document.body.classList.add('cineend'); } }
+  },
+  camera(dt) {
+    const S = this.SHOTS && this.SHOTS[Math.max(0, this.shot)];
+    if (!S) { const a = Game.clock * 0.04; camera.position.set(this.O.x + Math.sin(a) * 260, 140, this.O.z + Math.cos(a) * 260); camera.lookAt(this.O.x, 0, this.O.z); camera.updateMatrixWorld(true); return; }
+    const c = S.cam(this.t), k = 1 - Math.exp(-6 * dt);
+    this.camPos.x += (c.p.x - this.camPos.x) * k; this.camPos.y += (c.p.y - this.camPos.y) * k; this.camPos.z += (c.p.z - this.camPos.z) * k;
+    this.lookS.x += (c.l.x - this.lookS.x) * k; this.lookS.y += (c.l.y - this.lookS.y) * k; this.lookS.z += (c.l.z - this.lookS.z) * k;
+    camera.position.copy(this.camPos); camera.lookAt(this.lookS); camera.fov += (60 * baseFovK - camera.fov) * Math.min(1, dt * 4); camera.near = 0.3; camera.updateProjectionMatrix(); camera.updateMatrixWorld(true);
+    this.focus = { x: this.lookS.x, y: Math.max(0, this.lookS.y - 3), z: this.lookS.z };
+  },
+  caption(i) {
+    if (!this.captions) return; const E = GrugVoice.config.events[i.event] || { label: i.event };
+    const who = i.who === 'me' ? 'You' : i.who.replace(/^f/, '');
+    const el = document.createElement('div'); el.className = 'ol';
+    el.innerHTML = `<b>${who}</b> · ${E.label}: ${i.label} <small>pitch ${(i.pitch > 0 ? '+' : '') + i.pitch.toFixed(1)} · speed ${i.speed.toFixed(2)}×</small>`;
+    const box = $('cineCap'); box.appendChild(el); while (box.children.length > 3) box.firstChild.remove(); setTimeout(() => el.remove(), 2600);
+  },
+  animate(dt) { for (const a of this.actors) if (!a.dead && a.rig.g.visible) animateFighter(a, dt); },
+};
+const smooth = k => k * k * (3 - 2 * k);
+const lerp3 = (a, b, k) => ({ x: lerp(a.x, b.x, k), y: lerp(a.y, b.y, k), z: lerp(a.z, b.z, k) });
+if (Cine.on) {
+  document.body.classList.add('cine');
+  const go = () => { Snd.init(); Snd.initLoops(); applySettings(); if (Snd.ctx && Snd.ctx.state === 'suspended') Snd.ctx.resume(); Cine.start(); };
+  $('cinePlay').addEventListener('click', go); $('cineReplay').addEventListener('click', go);
+  $('cineCaps').addEventListener('click', () => { Cine.captions = !Cine.captions; $('cineCaps').textContent = 'Captions: ' + (Cine.captions ? 'On' : 'Off'); if (!Cine.captions) $('cineCap').innerHTML = ''; });
+  $('cineSkip').addEventListener('click', () => { if (Cine.playing && Cine.shot + 1 < Cine.SHOTS.length) Cine.go(Cine.shot + 1); });
+  Cine.build();
+}
+
 addEventListener('grug:outfits', () => { if (window.GrugOutfitRig) GrugOutfitRig.load().then(l => { if (l) GrugOutfitRig.dress(player.rig, l); else GrugOutfitRig.undress(player.rig); player.name = player.K.name = l && !l.starter && !l.isDefault ? l.name.slice(0, 20) : Save.name; dressRig(player.rig, player.look); }); });
 if (window.GrugPearls) GrugPearls.start().then(r => { if (!window.GrugPearlPopup) return; if (r.welcome) GrugPearlPopup.show(r.welcome, { title: 'Welcome to Grug!' }); else if (r.daily) GrugPearlPopup.show(r.daily, { title: 'Daily Pearls' }); }).catch(() => { });
 function resize() {
@@ -4358,13 +4577,14 @@ let last = performance.now(); const fogC = new THREE.Color();
 function frameStep(now) {
   const dt = Math.min((now - last) / 1000, 0.1); last = now;
   if (window.GrugLocalMP) GrugLocalMP.frame(dt);   // controllers: Player 1's, and the extra players'
-  if (player && Match.state !== 'menu' && playing()) playerInput(dt); else if (player) { player.ch.input.mx = player.ch.input.mz = 0; player.ch.input.jump = false; lmbTap = false; }
+  if (Cine.on) Cine.update(dt);
+  if (player && Match.state !== 'menu' && playing() && !Cine.on) playerInput(dt); else if (player) { player.ch.input.mx = player.ch.input.mz = 0; player.ch.input.jump = false; lmbTap = false; }
   sim(dt); edge.clear();
   updateDebris(dt); updateTracers(dt); FX.update(dt); Pts.update(dt); DmgNum.update(dt); Feed.update(dt); updateLoot(dt); FakeJump.update(dt);
   if (player && !player.dead && !player.inPlane) { animateFighter(player, dt); const fp = cam.dist < 1.5; player.rig.g.visible = !fp; }
   for (const b of BOTS) if (!b.dead) { const v = nearCam(b.ch, 520); b.rig.g.visible = v; if (v) animateFighter(b, dt); }
   for (const m of MATES) if (!m.dead && !m.parked) animateFighter(m, dt);
-  placeCamera(dt); computeAim(); computeInteract(); autoPickup();
+  if (Cine.on) { Cine.animate(dt); Cine.camera(dt); } else placeCamera(dt); computeAim(); computeInteract(); autoPickup();
   // fog: far off when you're up high, thick and purple in the storm
   const cy = camera.position.y, inS = player && !player.dead && !player.inPlane && inStorm(player);
   fogC.copy(FOG.c); let fn = FOG.near, ff = FOG.far; if (cy > 120) { const k = clamp((cy - 120) / 400, 0, 1); fn = lerp(FOG.near, 1500, k); ff = lerp(FOG.far, 6000, k); }

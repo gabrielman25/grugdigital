@@ -21,3 +21,17 @@ dest = sys.argv[sys.argv.index('--out') + 1] if '--out' in sys.argv else os.path
 os.makedirs(os.path.dirname(dest), exist_ok=True)
 open(dest, 'w', encoding='utf-8').write(out)
 print('wrote', dest, len(out) // 1024, 'KB,', len(clips), 'clips')
+
+# --cinematic FILE: also a single-file copy of Zone Royale that opens on the voice cinematic (?cinematic), with the voice
+# engine and the clips built in, to send around. Without the site its characters wear the game's classic looks.
+if '--cinematic' in sys.argv:
+    PREVIEW = 'https://voice-lines-zone-royale.grugdigital.pages.dev/arcade/zone-royale/'
+    game = open(os.path.join(ROOT, 'arcade/zone-royale/index.html'), encoding='utf-8').read()
+    tag = '<script src="/static/voice.js"></script>'
+    assert tag in game
+    inline = ('<script>window.ZR_CINEMATIC = true; window.GRUG_VOICE_SRCS = ' + json.dumps(clips) + ';</script>\n<script>\n'
+              + js.replace('</script', '<\\/script') + '\n</script>')
+    game = game.replace(tag, inline, 1).replace('id="cineGame" class="ol" href="./"', 'id="cineGame" class="ol" href="' + PREVIEW + '" target="_blank"').replace('id="cineLab" class="ol" href="voice-lab/"', 'id="cineLab" class="ol" href="' + PREVIEW + 'voice-lab/" target="_blank"')
+    cdest = sys.argv[sys.argv.index('--cinematic') + 1]
+    open(cdest, 'w', encoding='utf-8').write(game)
+    print('wrote', cdest, len(game) // 1024, 'KB')

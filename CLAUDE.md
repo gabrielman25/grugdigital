@@ -154,3 +154,7 @@ pool: all in `DEFAULTS` at the top of the file. Players pick their avatar's pitc
 Zone Royale" saves `grug.voice.tuning.v1`, which overrides `DEFAULTS` in that browser until reset (Game Settings shows it).
 In a game: `GrugVoice.attach(ctx, out)` once the AudioContext exists, then `GrugVoice.play(event, opts)`; see
 `Voice.say` in `arcade/zone-royale/index.html`. Going site-wide means doing the same in each game.
+**The voice cinematic** (`/arcade/zone-royale/?cinematic`): `Cine` in Zone Royale directs a hero (your voice and outfit)
+and three rivals (names picked for a low, a high and a middle voice) through one shot per action on a clear stretch of the
+spawn island; only the shot's action speaks, and every line plays. `python3 src/voice/build.py --cinematic FILE` writes a
+single-file copy (voices built in, classic looks) to send around.

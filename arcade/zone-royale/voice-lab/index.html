@@ -224,7 +224,7 @@
     load(srcs) {   // srcs: { id: url or data: URI }; by default the mp3s next to this script
       const c = this.ctx; if (!c) return Promise.resolve();
       const list = Object.keys(CLIPS).map(id => {
-        const url = (srcs && srcs[id]) || BASE + id + '.mp3';
+        const url = (srcs && srcs[id]) || (window.GRUG_VOICE_SRCS && window.GRUG_VOICE_SRCS[id]) || BASE + id + '.mp3';   // GRUG_VOICE_SRCS: a page with the clips built in
         return fetch(url).then(r => r.arrayBuffer()).then(ab => new Promise((ok, no) => c.decodeAudioData(ab, ok, no))).then(b => { this.buf[id] = b; }).catch(e => console.warn('GrugVoice: could not load', id, e));
       });
       return Promise.all(list).then(() => { this.ready = true; this.cache.clear(); });
