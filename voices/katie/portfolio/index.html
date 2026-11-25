@@ -215,10 +215,10 @@ a.row:hover{transform:translateX(6px)}
 
 /* footer: her name, huge, cropped by the bottom edge */
 footer{position:relative;background:#000;overflow:hidden;padding:60px 0 0;border-top:1px solid var(--hair)}
-footer .meta{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--mute);font-size:13px}
+footer .meta{position:relative;z-index:2;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--mute);font-size:13px}
 footer .meta a{text-decoration:none}
 footer .giant{margin:30px 0 -0.24em;text-align:center;font:400 clamp(140px,26vw,400px)/1 var(--goth);color:transparent;-webkit-text-stroke:1px rgba(247,243,238,.3);
-  background:linear-gradient(180deg,rgba(247,243,238,.2),transparent 75%);-webkit-background-clip:text;background-clip:text;white-space:nowrap;user-select:none}
+  background:linear-gradient(180deg,rgba(247,243,238,.2),transparent 75%);-webkit-background-clip:text;background-clip:text;white-space:nowrap;user-select:none;pointer-events:none;position:relative;z-index:1}
 
 /* reveal on scroll */
 .rv{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
