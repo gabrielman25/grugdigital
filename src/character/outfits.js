@@ -135,7 +135,7 @@ async function openActive(){
 // ---- Try this avatar out in the arcade (bottom left): save it (or find it already saved), play as it, off to the Arcade
 const arc = $q('#toArcade');
 if (arc) {
-  const SLIDES = [['city-icecream', ['skater', 'racer']], ['city-pizza', ['grug', 'ranger']], ['city-salon', ['snow-rider', 'medic']], ['city-aerial', ['racer', 'grug', 'skater']]];
+  const SLIDES = [['grug-city-rp-ice-cream-shop', ['skater', 'racer']], ['grug-city-rp-pizza-shop', ['grug', 'ranger']], ['grug-city-rp-salon', ['snow-rider', 'medic']], ['grug-city-rp-aerial-view', ['racer', 'grug', 'skater']]];
   const POS = [['left:4%', 'right:2%'], ['left:6%', 'right:6%'], ['left:2%', 'right:4%'], ['left:-2%', 'left:31%', 'right:-3%']];
   arc.insertAdjacentHTML('afterbegin', SLIDES.map(([bg, figs], i) => `<span class="sl${i ? '' : ' on'}"><span class="bg" style="background-image:url('/static/arcade/${bg}.jpg')"></span>` +
     figs.map((f, k) => `<img src="/static/arcade/${f}.webp" alt="" style="${POS[i][k]}${figs.length > 2 && k === 1 ? ';height:80%' : ''}" loading="lazy">`).join('') + '</span>').join(''));

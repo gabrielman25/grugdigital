@@ -1,5 +1,5 @@
 /* The Grug Arcade's shared data and page furniture, used by the games list (/arcade/) and the game pages (/arcade/place/?id=<slug>).
-   GAMES: one entry per game in arcade/<slug>/ (with cover.jpg). added / updated are the dates in the repo's history; "tag" is the
+   GAMES: one entry per game in arcade/<slug>/ (with its cover, <slug>-grug-arcade.jpg). added / updated are the dates in the repo's history; "tag" is the
    red line under the name; "about" and "controls" fill the game's page (coop: true adds the Local Multiplayer box: static/local-mp.js is wired in). Plays and favourites are kept per browser
    (localStorage 'grug.arcade.v1'), like the rest of Grug: there's no server, so there are no global visit counts. */
 (() => {
@@ -66,7 +66,7 @@
     const href = place(g.slug);
     return `<div class="Cell" title="${esc(g.name)}"><div class="GameItem">
       <div class="AlwaysShown">
-        <a class="thumb" href="${href}"><img src="/arcade/${g.slug}/cover.jpg" alt="${esc(g.alt)}" loading="lazy" width="160" height="100"></a>
+        <a class="thumb" href="${href}"><img src="/arcade/${g.slug}/${g.slug}-grug-arcade.jpg" alt="${esc(g.name)}, a free game in the Grug Arcade: ${esc(g.alt)}" loading="lazy" width="160" height="100"></a>
         <div class="GameName"><a href="${href}">${esc(g.name)}</a></div>
         <div class="PlayerCount">${esc(g.tag)}</div>
       </div>
@@ -128,9 +128,9 @@
 
     /* the background: each shot pans one way, then crossfades into the next, panning the other way */
     (() => {
-      const box = $('bgfx'), SHOTS = ['aerial', 'icecream', 'salon', 'pizza'], LIFT = [0, -300, -360, -420], HOLD = 11000, PAN = 14000;   // LIFT: raise the street shots so their buildings sit behind the header, not their sky
-      const els = SHOTS.map((n, i) => { const d = document.createElement('div'); d.className = 'sh'; if (i === 0) d.style.backgroundImage = `url(/static/arcade/city-${n}.jpg)`; box.appendChild(d); return d; });
-      const load = i => { const d = els[i]; if (!d.style.backgroundImage) d.style.backgroundImage = `url(/static/arcade/city-${SHOTS[i]}.jpg)`; };
+      const box = $('bgfx'), SHOTS = ['aerial', 'icecream', 'salon', 'pizza'], CITY_SHOT = { aerial: 'grug-city-rp-aerial-view', icecream: 'grug-city-rp-ice-cream-shop', pizza: 'grug-city-rp-pizza-shop', salon: 'grug-city-rp-salon' }, LIFT = [0, -300, -360, -420], HOLD = 11000, PAN = 14000;   // LIFT: raise the street shots so their buildings sit behind the header, not their sky
+      const els = SHOTS.map((n, i) => { const d = document.createElement('div'); d.className = 'sh'; if (i === 0) d.style.backgroundImage = `url(/static/arcade/${CITY_SHOT[n]}.jpg)`; box.appendChild(d); return d; });
+      const load = i => { const d = els[i]; if (!d.style.backgroundImage) d.style.backgroundImage = `url(/static/arcade/${CITY_SHOT[SHOTS[i]]}.jpg)`; };
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) { els[0].classList.add('on'); return; }
       let cur = -1;
       function show(i) {
@@ -171,7 +171,7 @@
             <div class="sub" style="margin-top:10px">${vids.length ? 'Game dev, builds and more' : ''}</div>
             <div class="cta">Subscribe ›</div>`, 'Subscribe to PolySwitch on YouTube'),
           igGrid: ad('ig', LK.instagram, `<div class="k">Instagram</div><div class="h">@grugdigital</div>
-            <div class="grid">${['city-aerial.jpg', 'grug.webp', 'city-icecream.jpg', 'skater.webp', 'city-salon.jpg', 'snow-rider.webp'].map(n => `<span style="background-image:url('/static/arcade/${n}');${n.endsWith('webp') ? 'background-size:contain;background-color:#fff3' : ''}"></span>`).join('')}</div>
+            <div class="grid">${['grug-city-rp-aerial-view.jpg', 'grug.webp', 'grug-city-rp-ice-cream-shop.jpg', 'skater.webp', 'grug-city-rp-salon.jpg', 'snow-rider.webp'].map(n => `<span style="background-image:url('/static/arcade/${n}');${n.endsWith('webp') ? 'background-size:contain;background-color:#fff3' : ''}"></span>`).join('')}</div>
             <div class="sub" style="margin-top:12px">Characters, builds and behind the scenes</div>
             <div class="cta">Follow ›</div>`, 'Follow @grugdigital on Instagram'),
           igChars: ad('cr', LK.instagram, `<div class="k" style="color:#c1357a">Follow along</div><div class="h" style="color:#3a2a4a;text-shadow:none">See what we make next</div>
@@ -214,7 +214,7 @@
       let L = []; try { L = O ? await O.list() : []; } catch (e) {}
       const act = O ? O.active() : '', cur = L.find(o => o.id === act);
       const src = o => { if (!o || !o.preview) return ''; const u = URL.createObjectURL(o.preview); urls.push(u); return u; };
-      $('mePic').innerHTML = `<img src="${src(cur) || '/character/looks/grug/preview.png'}" alt="">`;
+      $('mePic').innerHTML = `<img src="${src(cur) || '/character/looks/grug/preview.png'}" alt="The character you play as, made in the Grug Avatar Studio">`;
       $('meT').textContent = cur ? cur.name : 'Grug (the default)';
       $('meP').textContent = cur ? (L.length > 1 ? `Your ${L.length - 1} other outfit${L.length > 2 ? 's show' : ' shows'} up as other players.` : 'Save more outfits and they show up as the other players.')
         : L.length ? 'Pick one of your outfits to play as it.' : 'Make a character and save it for the games to play as yourself.';

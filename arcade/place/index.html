@@ -5,6 +5,22 @@
 <!-- the classic 920px games page; on phones arcade.css reflows it into one column -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grug Arcade · Game</title>
+<!-- seo: written by src/seo/seo_head.py (re-run it, don't edit by hand) -->
+<meta property="og:site_name" content="Grug Digital">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Grug Arcade · Free blocky games by Grug Digital">
+<meta property="og:description" content="A free game in the Grug Arcade: plays right in your browser, as the character you made in the Grug Avatar Studio.">
+<meta property="og:url" content="https://grugdigital.com/arcade/place/">
+<meta property="og:image" content="https://grugdigital.com/static/og/grug-arcade-free-blocky-games.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Grug Digital characters Medic and Racer over Zone Royale">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Grug Arcade · Free blocky games by Grug Digital">
+<meta name="twitter:description" content="A free game in the Grug Arcade: plays right in your browser, as the character you made in the Grug Avatar Studio.">
+<meta name="twitter:image" content="https://grugdigital.com/static/og/grug-arcade-free-blocky-games.jpg">
+<meta name="twitter:image:alt" content="Grug Digital characters Medic and Racer over Zone Royale">
+<!-- /seo -->
 <meta name="description" content="A free game in the Grug Arcade: plays right in your browser, as the character you made in the Grug Avatar Studio.">
 <link rel="icon" href="/favicon.png">
 <script src="/static/pearls.js"></script>
@@ -167,12 +183,23 @@
     $('Place').innerHTML = `<div class="missing">That game isn't in the Grug Arcade (yet). <a href="/arcade/">See all the games »</a></div>`;
     A.chrome(); return;
   }
-  document.title = `${g.name} · Grug Arcade`;
+  document.title = `${g.name} · Free in the Grug Arcade by Grug Digital`;
+  // for search engines (they run this page's script): its own address, description and structured data (see src/seo/README.md)
+  { const url = 'https://grugdigital.com/arcade/place/?id=' + g.slug, cover = `https://grugdigital.com/arcade/${g.slug}/${g.slug}-grug-arcade.jpg`, about = (g.about || [g.tag]).join(' ');
+    const link = document.createElement('link'); link.rel = 'canonical'; link.href = url; document.head.appendChild(link);
+    const md = document.querySelector('meta[name="description"]'); if (md) md.content = `${g.name}: ${about.slice(0, 220)} Free in your browser, a Grug Arcade game by Grug Digital.`;
+    const org = { '@type': 'Organization', '@id': 'https://grugdigital.com/#org', name: 'Grug Digital', url: 'https://grugdigital.com/', logo: 'https://grugdigital.com/static/arcade/grug-digital-logo.png' };
+    const ld = { '@context': 'https://schema.org', '@graph': [org, { '@type': 'VideoGame', name: g.name, url, sameAs: `https://grugdigital.com/arcade/${g.slug}/`, description: about,
+      image: { '@type': 'ImageObject', contentUrl: cover, caption: `${g.name}, a free game in the Grug Arcade: ${g.alt}`, creator: { '@id': 'https://grugdigital.com/#org' }, creditText: 'Grug Digital', copyrightNotice: '© 2026 Grug Digital. All rights reserved.', license: 'https://grugdigital.com/terms.html', acquireLicensePage: 'https://grugdigital.com/terms.html' },
+      genre: g.genres.map(gname).filter(x => x !== 'All'), gamePlatform: 'Web browser', applicationCategory: 'Game', isAccessibleForFree: true, playMode: g.coop ? ['SinglePlayer', 'CoOp', 'MultiPlayer'] : ['SinglePlayer'],
+      offers: { '@type': 'Offer', price: 0, priceCurrency: 'USD' }, author: { '@id': 'https://grugdigital.com/#org' }, publisher: { '@id': 'https://grugdigital.com/#org' },
+      keywords: `${g.name}, Grug Digital, Roblox alternative, free browser games, custom avatar` }] };
+    const sc = document.createElement('script'); sc.type = 'application/ld+json'; sc.textContent = JSON.stringify(ld); document.head.appendChild(sc); }
   const R = A.rec(), fresh = Date.now() - new Date(g.added) < 7 * 864e5, plays = R.plays[g.slug] || 0;
   $('Place').innerHTML = `
     <div class="ttl"><h1>${esc(g.name)}</h1><div class="sub">A Grug Arcade game · ${esc(g.tag)}</div></div>
     <div class="L">
-      <div class="shot"><img src="/arcade/${g.slug}/cover.jpg" alt="${esc(g.alt)}" width="538" height="303">${fresh ? '<span class="new">NEW</span>' : ''}</div>
+      <div class="shot"><img src="/arcade/${g.slug}/${g.slug}-grug-arcade.jpg" alt="${esc(g.name)}, a free game in the Grug Arcade: ${esc(g.alt)}" width="538" height="303">${fresh ? '<span class="new">NEW</span>' : ''}</div>
       <div class="acts">
         <a class="PlayBig" id="play" href="/arcade/${g.slug}/">Play</a>
         <button class="fav${R.fav[g.slug] ? ' on' : ''}" id="fav" type="button" aria-pressed="${!!R.fav[g.slug]}"><b>★</b> <span>${R.fav[g.slug] ? 'Favorited' : 'Favorite'}</span></button>
@@ -189,7 +216,7 @@
     <div class="R">
       <div class="StandardBoxHeader"><span><h2>Game</h2></span></div>
       <div class="bx">
-        <div class="creator"><div class="av"><img src="/static/arcade/grug.webp" alt=""></div><div class="who">Creator:<a href="/">Grug Digital</a></div></div>
+        <div class="creator"><div class="av"><img src="/static/arcade/grug.webp" alt="Grug, the Grug Digital mascot"></div><div class="who">Creator:<a href="/">Grug Digital</a></div></div>
         <dl>
           <dt>Created:</dt><dd>${day(g.added)}</dd>
           <dt>Updated:</dt><dd>${ago(g.updated)}</dd>

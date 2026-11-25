@@ -1,0 +1,443 @@
+{
+  "_about": "The promotional images that carry Grug Digital's embedded photo metadata (IPTC/XMP), written by src/seo/tag_images.py: game screenshots, character renders, building renders and the logo. Textures, reference sheets, placeholders, sponsor and third-party images are deliberately left out. Each entry: title, description, keywords (the shared defaults are in tag_images.py).",
+  "static/arcade/grug-digital-logo.png": {
+    "title": "Grug Digital logo",
+    "description": "The Grug Digital logo: Grug makes blocky games, game asset packs and the Grug Avatar Studio at grugdigital.com.",
+    "keywords": [
+      "logo"
+    ]
+  },
+  "arcade/zone-royale/zone-royale-grug-arcade.jpg": {
+    "title": "Zone Royale, a free battle royale in the Grug Arcade",
+    "description": "Zone Royale by Grug Digital: a player glides down into a blocky city on a big island in a free 100-player browser battle royale.",
+    "keywords": [
+      "Zone Royale",
+      "battle royale",
+      "browser game"
+    ]
+  },
+  "arcade/slide-999/slide-999-grug-arcade.jpg": {
+    "title": "Slide 999 KM for FREE ADMIN!!, a free obby slide game in the Grug Arcade",
+    "description": "Slide 999 KM by Grug Digital: carts race down a purple sky slide in a free blocky obby game you play in your browser.",
+    "keywords": [
+      "Slide 999 KM",
+      "obby",
+      "slide game",
+      "browser game"
+    ]
+  },
+  "arcade/zombie-zones/zombie-zones-grug-arcade.jpg": {
+    "title": "Zombie Zones, a free team zombie shooter in the Grug Arcade",
+    "description": "Zombie Zones by Grug Digital: a blocky survivor with a blaster holds off a horde of zombies in a free browser team shooter.",
+    "keywords": [
+      "Zombie Zones",
+      "zombie game",
+      "shooter",
+      "browser game"
+    ]
+  },
+  "arcade/grug-city/grug-city-grug-arcade.jpg": {
+    "title": "Grug City RP, a free blocky town roleplay game in the Grug Arcade",
+    "description": "Grug City RP by Grug Digital: a police cruiser at a crossroads in a blocky city with jobs, shops and cops and robbers.",
+    "keywords": [
+      "Grug City RP",
+      "roleplay",
+      "town game",
+      "browser game"
+    ]
+  },
+  "arcade/brickbound/brickbound-grug-arcade.jpg": {
+    "title": "Brickbound, a free side-scrolling brawler in the Grug Arcade",
+    "description": "Brickbound by Grug Digital: a hero and a friend fight goblins and an ogre in a blocky meadow in a free browser action RPG brawler.",
+    "keywords": [
+      "Brickbound",
+      "brawler",
+      "action RPG",
+      "browser game"
+    ]
+  },
+  "arcade/grug-kingdom/grug-kingdom-grug-arcade.jpg": {
+    "title": "Grug Kingdom, a free blocky sword adventure in the Grug Arcade",
+    "description": "Grug Kingdom by Grug Digital: a hero with a sword faces the giant Goblin King in a free blocky browser adventure.",
+    "keywords": [
+      "Grug Kingdom",
+      "sword game",
+      "adventure",
+      "browser game"
+    ]
+  },
+  "arcade/pet-zones/pet-zones-grug-arcade.jpg": {
+    "title": "Pet Zones, a free pet collecting game in the Grug Arcade",
+    "description": "Pet Zones by Grug Digital: a player zaps cube pets on a grassy grid with a deck of move cards in a free browser game.",
+    "keywords": [
+      "Pet Zones",
+      "pet game",
+      "card game",
+      "browser game"
+    ]
+  },
+  "arcade/grug-studio/grug-studio-grug-arcade.jpg": {
+    "title": "Grug Studio, make an avatar and a building on one baseplate",
+    "description": "Grug Studio by Grug Digital: a player beside a two-storey building on a studded baseplate, with the Avatar Studio and Building Studio pads.",
+    "keywords": [
+      "Grug Studio",
+      "baseplate",
+      "avatar maker",
+      "building maker"
+    ]
+  },
+  "static/showcase/grug-digital-avatar-grug.webp": {
+    "title": "Grug in a lime dino hoodie, made in the Grug Avatar Studio",
+    "description": "Grug, a blocky Roblox R6 character in a lime green dino hoodie, made in the Grug Digital Avatar Studio.",
+    "keywords": [
+      "Grug",
+      "Roblox character",
+      "R6 avatar"
+    ]
+  },
+  "static/showcase/grug-digital-avatar-ranger.webp": {
+    "title": "Ranger in woodland camo, made in the Grug Avatar Studio",
+    "description": "Ranger, a blocky Roblox R6 soldier in woodland camo with a tan plate carrier, made in the Grug Digital Avatar Studio.",
+    "keywords": [
+      "Ranger",
+      "Roblox character",
+      "R6 avatar",
+      "soldier"
+    ]
+  },
+  "static/showcase/grug-digital-avatar-skater.webp": {
+    "title": "Skater in a denim jacket, made in the Grug Avatar Studio",
+    "description": "Skater, a blocky Roblox R6 character in a denim jacket and checkerboard shoes, made in the Grug Digital Avatar Studio.",
+    "keywords": [
+      "Skater",
+      "Roblox character",
+      "R6 avatar"
+    ]
+  },
+  "static/showcase/grug-digital-avatar-medic.webp": {
+    "title": "Medic in a navy vest, made in the Grug Avatar Studio",
+    "description": "Medic, a blocky Roblox R6 field medic in a navy vest with a green armband, made in the Grug Digital Avatar Studio.",
+    "keywords": [
+      "Medic",
+      "Roblox character",
+      "R6 avatar"
+    ]
+  },
+  "static/showcase/grug-digital-avatar-snow-rider.webp": {
+    "title": "Snow Rider in a purple ski jacket, made in the Grug Avatar Studio",
+    "description": "Snow Rider, a blocky Roblox R6 snowboarder in a puffy purple ski jacket and a yellow scarf, made in the Grug Digital Avatar Studio.",
+    "keywords": [
+      "Snow Rider",
+      "Roblox character",
+      "R6 avatar",
+      "snowboarder"
+    ]
+  },
+  "static/showcase/grug-digital-avatar-racer.webp": {
+    "title": "Racer in a red and white jumpsuit, made in the Grug Avatar Studio",
+    "description": "Racer, a blocky Roblox R6 driver in a red and white number 7 jumpsuit, made in the Grug Digital Avatar Studio.",
+    "keywords": [
+      "Racer",
+      "Roblox character",
+      "R6 avatar"
+    ]
+  },
+  "static/showcase/slide-999-km-purple-slide-1.jpg": {
+    "title": "The purple sky slide in Slide 999 KM",
+    "description": "The purple studded sky slide in Slide 999 KM, a free blocky obby game in the Grug Arcade by Grug Digital.",
+    "keywords": [
+      "Slide 999 KM",
+      "obby",
+      "game screenshot"
+    ]
+  },
+  "static/showcase/slide-999-km-purple-slide-2.jpg": {
+    "title": "A cart on the purple sky slide in Slide 999 KM",
+    "description": "A cart sliding down the purple sky slide in Slide 999 KM, a free blocky obby game in the Grug Arcade by Grug Digital.",
+    "keywords": [
+      "Slide 999 KM",
+      "obby",
+      "game screenshot"
+    ]
+  },
+  "static/showcase/slide-999-km-purple-slide-3.jpg": {
+    "title": "The purple sky slide in Slide 999 KM",
+    "description": "The purple and blue sky slide winding through the clouds in Slide 999 KM, a free blocky obby game in the Grug Arcade by Grug Digital.",
+    "keywords": [
+      "Slide 999 KM",
+      "obby",
+      "game screenshot"
+    ]
+  },
+  "static/showcase/slide-999-km-purple-slide-4.jpg": {
+    "title": "The purple sky slide in Slide 999 KM",
+    "description": "Looking down the purple sky slide toward the next checkpoint in Slide 999 KM, a free blocky obby game in the Grug Arcade by Grug Digital.",
+    "keywords": [
+      "Slide 999 KM",
+      "obby",
+      "game screenshot"
+    ]
+  },
+  "static/showcase/zombie-zones-desert-houses-1.jpg": {
+    "title": "Desert houses in Zombie Zones",
+    "description": "Roofless brick houses under a dusty sky in Zombie Zones, a free blocky team zombie shooter in the Grug Arcade by Grug Digital.",
+    "keywords": [
+      "Zombie Zones",
+      "game screenshot"
+    ]
+  },
+  "static/showcase/zombie-zones-desert-houses-2.jpg": {
+    "title": "Desert houses in Zombie Zones",
+    "description": "A brown brick house on the studded plain in Zombie Zones, a free blocky team zombie shooter in the Grug Arcade by Grug Digital.",
+    "keywords": [
+      "Zombie Zones",
+      "game screenshot"
+    ]
+  },
+  "static/arcade/grug-city-rp-aerial-view.jpg": {
+    "title": "Grug City from the air, in Grug City RP",
+    "description": "An aerial view of Grug City: blocky streets, shops, parks and the beach in Grug City RP, a free town roleplay game by Grug Digital.",
+    "keywords": [
+      "Grug City RP",
+      "blocky city",
+      "game screenshot"
+    ]
+  },
+  "static/arcade/grug-city-rp-ice-cream-shop.jpg": {
+    "title": "The ice cream shop in Grug City RP",
+    "description": "A taxi passing the pink ice cream shop on a sunny street in Grug City RP, a free blocky town roleplay game by Grug Digital.",
+    "keywords": [
+      "Grug City RP",
+      "blocky city",
+      "game screenshot"
+    ]
+  },
+  "static/arcade/grug-city-rp-pizza-shop.jpg": {
+    "title": "The pizza shop in Grug City RP",
+    "description": "The Leaning Tower pizza shop on a street corner in Grug City RP, a free blocky town roleplay game by Grug Digital.",
+    "keywords": [
+      "Grug City RP",
+      "blocky city",
+      "game screenshot"
+    ]
+  },
+  "static/arcade/grug-city-rp-salon.jpg": {
+    "title": "The salon in Grug City RP",
+    "description": "The pink salon on a tree-lined street in Grug City RP, a free blocky town roleplay game by Grug Digital.",
+    "keywords": [
+      "Grug City RP",
+      "blocky city",
+      "game screenshot"
+    ]
+  },
+  "static/arcade/grug.webp": {
+    "title": "Grug, a Grug Digital character",
+    "description": "Grug in his lime dino hoodie: a blocky Roblox R6 character from Grug Digital.",
+    "keywords": [
+      "Grug",
+      "Roblox character",
+      "R6 avatar"
+    ]
+  },
+  "static/arcade/ranger.webp": {
+    "title": "Ranger, a Grug Digital character",
+    "description": "Ranger in woodland camo: a blocky Roblox R6 character from Grug Digital.",
+    "keywords": [
+      "Ranger",
+      "Roblox character",
+      "R6 avatar"
+    ]
+  },
+  "static/arcade/skater.webp": {
+    "title": "Skater, a Grug Digital character",
+    "description": "Skater in a denim jacket: a blocky Roblox R6 character from Grug Digital.",
+    "keywords": [
+      "Skater",
+      "Roblox character",
+      "R6 avatar"
+    ]
+  },
+  "static/arcade/medic.webp": {
+    "title": "Medic, a Grug Digital character",
+    "description": "Medic in a navy vest: a blocky Roblox R6 character from Grug Digital.",
+    "keywords": [
+      "Medic",
+      "Roblox character",
+      "R6 avatar"
+    ]
+  },
+  "static/arcade/snow-rider.webp": {
+    "title": "Snow Rider, a Grug Digital character",
+    "description": "Snow Rider in a purple ski jacket: a blocky Roblox R6 character from Grug Digital.",
+    "keywords": [
+      "Snow Rider",
+      "Roblox character",
+      "R6 avatar"
+    ]
+  },
+  "static/arcade/racer.webp": {
+    "title": "Racer, a Grug Digital character",
+    "description": "Racer in a red and white jumpsuit: a blocky Roblox R6 character from Grug Digital.",
+    "keywords": [
+      "Racer",
+      "Roblox character",
+      "R6 avatar"
+    ]
+  },
+  "character/looks/grug/preview.png": {
+    "title": "Grug outfit, a ready-made look in the Grug Avatar Studio",
+    "description": "The Grug look: a blocky Roblox R6 character in a lime green dino hoodie and ripped jeans, ready to wear in the Grug Digital Avatar Studio.",
+    "keywords": [
+      "Grug",
+      "Roblox outfit",
+      "R6 avatar"
+    ]
+  },
+  "character/looks/flannel/preview.png": {
+    "title": "Flannel outfit, a ready-made look in the Grug Avatar Studio",
+    "description": "The Flannel look: a blocky Roblox R6 character in a red plaid flannel shirt and jeans, ready to wear in the Grug Digital Avatar Studio.",
+    "keywords": [
+      "Flannel",
+      "Roblox outfit",
+      "R6 avatar"
+    ]
+  },
+  "character/looks/medic/preview.png": {
+    "title": "Medic outfit, a ready-made look in the Grug Avatar Studio",
+    "description": "The Medic look: a blocky Roblox R6 field medic in a navy vest with a green armband, ready to wear in the Grug Digital Avatar Studio.",
+    "keywords": [
+      "Medic",
+      "Roblox outfit",
+      "R6 avatar"
+    ]
+  },
+  "character/looks/racer/preview.png": {
+    "title": "Racer outfit, a ready-made look in the Grug Avatar Studio",
+    "description": "The Racer look: a blocky Roblox R6 driver in a red and white number 7 jumpsuit, ready to wear in the Grug Digital Avatar Studio.",
+    "keywords": [
+      "Racer",
+      "Roblox outfit",
+      "R6 avatar"
+    ]
+  },
+  "character/looks/ranger/preview.png": {
+    "title": "Ranger outfit, a ready-made look in the Grug Avatar Studio",
+    "description": "The Ranger look: a blocky Roblox R6 soldier in woodland camo with a plate carrier, ready to wear in the Grug Digital Avatar Studio.",
+    "keywords": [
+      "Ranger",
+      "Roblox outfit",
+      "R6 avatar"
+    ]
+  },
+  "character/looks/scavenger/preview.png": {
+    "title": "Scavenger outfit, a ready-made look in the Grug Avatar Studio",
+    "description": "The Scavenger look: a blocky Roblox R6 survivor in a worn olive jacket and a yellow bandana, ready to wear in the Grug Digital Avatar Studio.",
+    "keywords": [
+      "Scavenger",
+      "Roblox outfit",
+      "R6 avatar"
+    ]
+  },
+  "character/looks/skater/preview.png": {
+    "title": "Skater outfit, a ready-made look in the Grug Avatar Studio",
+    "description": "The Skater look: a blocky Roblox R6 character in a denim jacket, ripped jeans and checkerboard shoes, ready to wear in the Grug Digital Avatar Studio.",
+    "keywords": [
+      "Skater",
+      "Roblox outfit",
+      "R6 avatar"
+    ]
+  },
+  "character/looks/snow-rider/preview.png": {
+    "title": "Snow Rider outfit, a ready-made look in the Grug Avatar Studio",
+    "description": "The Snow Rider look: a blocky Roblox R6 snowboarder in a puffy purple ski jacket and a yellow scarf, ready to wear in the Grug Digital Avatar Studio.",
+    "keywords": [
+      "Snow Rider",
+      "Roblox outfit",
+      "R6 avatar"
+    ]
+  },
+  "build/examples/cafe-thumb.jpg": {
+    "title": "Corner café, a 3D building made in the Grug Building Studio",
+    "description": "A white two-storey corner café, a retro textured 3D building model made in the Grug Digital Building Studio.",
+    "keywords": [
+      "café",
+      "3D building",
+      "game asset"
+    ]
+  },
+  "build/examples/forge-thumb.jpg": {
+    "title": "Blacksmith's forge, a 3D building made in the Grug Building Studio",
+    "description": "A stone and timber blacksmith's forge with a slate roof, a retro textured 3D building model made in the Grug Digital Building Studio.",
+    "keywords": [
+      "forge",
+      "medieval building",
+      "3D building",
+      "game asset"
+    ]
+  },
+  "build/examples/hab-thumb.jpg": {
+    "title": "Space habitat, a 3D building made in the Grug Building Studio",
+    "description": "A white sci-fi habitat module with a solar panel roof, a retro textured 3D building model made in the Grug Digital Building Studio.",
+    "keywords": [
+      "sci-fi habitat",
+      "3D building",
+      "game asset"
+    ]
+  },
+  "build/examples/house-thumb.jpg": {
+    "title": "Modern house, a 3D building made in the Grug Building Studio",
+    "description": "A two-storey modern house in dark and wood panels, a retro textured 3D building model made in the Grug Digital Building Studio.",
+    "keywords": [
+      "house",
+      "3D building",
+      "game asset"
+    ]
+  },
+  "build/examples/inn-thumb.jpg": {
+    "title": "Tudor inn, a 3D building made in the Grug Building Studio",
+    "description": "A half-timbered Tudor inn with a red tile roof, a retro textured 3D building model made in the Grug Digital Building Studio.",
+    "keywords": [
+      "inn",
+      "medieval building",
+      "3D building",
+      "game asset"
+    ]
+  },
+  "build/examples/tower-thumb.jpg": {
+    "title": "Stone watchtower, a 3D building made in the Grug Building Studio",
+    "description": "A tall stone watchtower with a red heraldic banner, a retro textured 3D building model made in the Grug Digital Building Studio.",
+    "keywords": [
+      "tower",
+      "medieval building",
+      "3D building",
+      "game asset"
+    ]
+  },
+  "static/og/grug-digital-custom-avatars-and-free-games.jpg": {
+    "title": "Grug Digital: custom avatars and free blocky games",
+    "description": "Grug Digital's Ranger, Skater and Grug characters over Grug City: make a custom Roblox R6 avatar in the Grug Avatar Studio and play free blocky games in the Grug Arcade.",
+    "keywords": [
+      "Grug Avatar Studio",
+      "Grug Arcade",
+      "Roblox character"
+    ]
+  },
+  "static/og/grug-arcade-free-blocky-games.jpg": {
+    "title": "Grug Arcade: free blocky games by Grug Digital",
+    "description": "Medic and Racer from Grug Digital over Zone Royale: free blocky browser games in the Grug Arcade, played as the character you make.",
+    "keywords": [
+      "Grug Arcade",
+      "browser games",
+      "Zone Royale"
+    ]
+  },
+  "static/og/grug-avatar-studio-custom-roblox-avatars.jpg": {
+    "title": "Grug Avatar Studio: make a custom Roblox avatar",
+    "description": "Snow Rider, Grug and Skater on the Slide 999 KM sky slide: custom Roblox R6 avatars made in the free Grug Digital Avatar Studio.",
+    "keywords": [
+      "Grug Avatar Studio",
+      "Roblox avatar maker",
+      "R6 avatar"
+    ]
+  }
+}

@@ -53,6 +53,15 @@ free. `character/pearls/` sells the same Stripe packs as the legacy `/pearls.htm
 no server: the wallet is per browser, like the rest of Grug. Claude sessions must ask the person before spending Pearls
 (`downloadR6(null, { spendPearls: true })`) and never buy Pearls for them.
 
+## Search and Google Images (`src/seo/`)
+
+Promotional images (game covers, character and building renders, game scenes, the logo, the share pictures) have
+descriptive file names, alt text and embedded Grug Digital metadata; pages carry share cards and JSON-LD; `sitemap.xml`
+and `robots.txt` list it all. Read `src/seo/README.md` before adding or renaming an image: list new promotional images in
+`src/seo/images.json`, run `python3 src/seo/tag_images.py`, then `python3 src/seo/seo_head.py` (also after rebuilding the
+Avatar Studio or the Building Studio). Renamed images keep their old address through `MOVED` in `functions/_middleware.js`.
+Don't tag textures, placeholders or third-party images.
+
 ## Always send the owner a preview link (not just screenshots)
 
 Work on a branch and push it (not `main`, unless the owner says to). Cloudflare Pages builds every pushed branch at

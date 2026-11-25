@@ -91,10 +91,10 @@
   const img = wrap.querySelector('img'), eng = [...wrap.querySelectorAll('.gza-eng span')];
   let look = Math.floor(Math.random() * LOOKS.length), litT = 0;
   function showLook(pop) {
-    img.src = IMG + LOOKS[look][0] + '.webp'; img.alt = LOOKS[look][1];
+    img.src = IMG + 'grug-digital-avatar-' + LOOKS[look][0] + '.webp'; img.alt = LOOKS[look][1];
     if (pop && !reduce) { img.classList.remove('pop'); void img.offsetWidth; img.classList.add('pop'); }
   }
-  LOOKS.forEach(l => { const i = new Image(); i.src = IMG + l[0] + '.webp'; });   // warm the cache
+  LOOKS.forEach(l => { const i = new Image(); i.src = IMG + 'grug-digital-avatar-' + l[0] + '.webp'; });   // warm the cache
   wrap.querySelector('.gza-stage').addEventListener('click', e => { e.stopPropagation(); look = (look + 1) % LOOKS.length; showLook(true); });
   function lightEngines() {
     clearInterval(litT); eng.forEach(s => s.classList.remove('lit')); let i = 0;

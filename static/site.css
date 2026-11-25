@@ -5,7 +5,7 @@
 html{background:#1f4a10}
 html,body{margin:0}
 body{font:14px/1.45 Arial,Helvetica,sans-serif;color:var(--ink);min-height:100vh;display:grid;place-items:start center;padding:10px 12px 48px;
-  background:linear-gradient(rgba(31,74,16,0) 0,rgba(31,74,16,0) 260px,#1f4a10 760px) no-repeat,#1f4a10 url(/static/arcade/city-aerial.jpg) 50% 0/max(1500px,100%) auto no-repeat}
+  background:linear-gradient(rgba(31,74,16,0) 0,rgba(31,74,16,0) 260px,#1f4a10 760px) no-repeat,#1f4a10 url(/static/arcade/grug-city-rp-aerial-view.jpg) 50% 0/max(1500px,100%) auto no-repeat}
 main{width:100%;max-width:520px;display:grid;gap:12px}
 
 /* logo + nav strip */

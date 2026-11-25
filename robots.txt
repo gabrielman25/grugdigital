@@ -1,0 +1,5 @@
+# Grug Digital (written by src/seo/seo_head.py)
+User-agent: *
+Allow: /
+
+Sitemap: https://grugdigital.com/sitemap.xml

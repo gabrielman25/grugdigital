@@ -14,6 +14,35 @@
 
 const LEGACY_ORIGIN = 'https://legacy.grugdigital.pages.dev';
 
+// images renamed to descriptive names (for Google Images, src/seo/README.md): the old addresses still work (old embeds,
+// the itch.io ads already out there, other sites linking them) with a permanent redirect to the new name
+const MOVED = {
+  '/arcade/brickbound/cover.jpg': '/arcade/brickbound/brickbound-grug-arcade.jpg',
+  '/arcade/grug-city/cover.jpg': '/arcade/grug-city/grug-city-grug-arcade.jpg',
+  '/arcade/grug-kingdom/cover.jpg': '/arcade/grug-kingdom/grug-kingdom-grug-arcade.jpg',
+  '/arcade/grug-studio/cover.jpg': '/arcade/grug-studio/grug-studio-grug-arcade.jpg',
+  '/arcade/pet-zones/cover.jpg': '/arcade/pet-zones/pet-zones-grug-arcade.jpg',
+  '/arcade/slide-999/cover.jpg': '/arcade/slide-999/slide-999-grug-arcade.jpg',
+  '/arcade/zombie-zones/cover.jpg': '/arcade/zombie-zones/zombie-zones-grug-arcade.jpg',
+  '/arcade/zone-royale/cover.jpg': '/arcade/zone-royale/zone-royale-grug-arcade.jpg',
+  '/static/arcade/city-aerial.jpg': '/static/arcade/grug-city-rp-aerial-view.jpg',
+  '/static/arcade/city-icecream.jpg': '/static/arcade/grug-city-rp-ice-cream-shop.jpg',
+  '/static/arcade/city-pizza.jpg': '/static/arcade/grug-city-rp-pizza-shop.jpg',
+  '/static/arcade/city-salon.jpg': '/static/arcade/grug-city-rp-salon.jpg',
+  '/static/showcase/bg-slide-1.jpg': '/static/showcase/slide-999-km-purple-slide-1.jpg',
+  '/static/showcase/bg-slide-2.jpg': '/static/showcase/slide-999-km-purple-slide-2.jpg',
+  '/static/showcase/bg-slide-3.jpg': '/static/showcase/slide-999-km-purple-slide-3.jpg',
+  '/static/showcase/bg-slide-4.jpg': '/static/showcase/slide-999-km-purple-slide-4.jpg',
+  '/static/showcase/bg-zombie-1.jpg': '/static/showcase/zombie-zones-desert-houses-1.jpg',
+  '/static/showcase/bg-zombie-2.jpg': '/static/showcase/zombie-zones-desert-houses-2.jpg',
+  '/static/showcase/grug.webp': '/static/showcase/grug-digital-avatar-grug.webp',
+  '/static/showcase/ranger.webp': '/static/showcase/grug-digital-avatar-ranger.webp',
+  '/static/showcase/skater.webp': '/static/showcase/grug-digital-avatar-skater.webp',
+  '/static/showcase/medic.webp': '/static/showcase/grug-digital-avatar-medic.webp',
+  '/static/showcase/snow-rider.webp': '/static/showcase/grug-digital-avatar-snow-rider.webp',
+  '/static/showcase/racer.webp': '/static/showcase/grug-digital-avatar-racer.webp',
+};
+
 export async function onRequest(ctx) {
   const { request, next, env } = ctx;
   if (request.method !== 'GET' && request.method !== 'HEAD') return next();
@@ -21,6 +50,7 @@ export async function onRequest(ctx) {
   const legacy = new URL((env && env.LEGACY_ORIGIN) || LEGACY_ORIGIN);
   const path = url.pathname;
 
+  if (MOVED[path]) return Response.redirect(url.origin + MOVED[path] + url.search, 301);
   // the old home page
   if (path === '/legacy' || path === '/legacy/index.html') return fromLegacy(ctx, legacy, '/', url, null);
   // /legacy/<page> is just <page> (the old pages stay at their own addresses); /legacy/ is the old home page
