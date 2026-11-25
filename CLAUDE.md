@@ -141,3 +141,16 @@ frame's errors (`frameStep`/`loopStep` + a small wrapper, errors counted in `win
 itself on its last line froze for good on any error while the Game Menu kept working. Keep it that way in new games. Saved outfits are `static/outfits.js` (IndexedDB `grug-outfits`,
 active id `grug.outfit.active`); the studio's My outfits layer is `src/character/outfits.js`, put into
 `character/index.html` by `patch_outfits.py` (also run by `patch_studio.py`/`build.py`).
+
+## Player voices (`static/voice.js`, being tried in Zone Royale)
+
+`window.GrugVoice` plays the voice actress's player lines (`static/voice/player/*.mp3`: jump, dodge, attack, death,
+the laugh) for actions: jump, dodge, attack (axe/pickaxe swing), hurt, death, fall (fell to death / off the map),
+laugh (got an elimination). Each action has a chance, cooldown, delay, priority, volume/speed/pitch ranges and a clip
+pool: all in `DEFAULTS` at the top of the file. Players pick their avatar's pitch (and speed) inside a safe zone
+(`grug.voice.v1`); other players get a voice from their name (`voiceFor`). The owner tunes it in the Voice Lab
+(`arcade/zone-royale/voice-lab/`, built from `src/voice/` by `python3 src/voice/build.py`; rebuild after changing
+`static/voice.js` or the clips) and sends back its exported JSON: put those values into `DEFAULTS`. The lab's "Use in
+Zone Royale" saves `grug.voice.tuning.v1`, which overrides `DEFAULTS` in that browser until reset (Game Settings shows it).
+In a game: `GrugVoice.attach(ctx, out)` once the AudioContext exists, then `GrugVoice.play(event, opts)`; see
+`Voice.say` in `arcade/zone-royale/index.html`. Going site-wide means doing the same in each game.
