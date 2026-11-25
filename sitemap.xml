@@ -23,6 +23,7 @@
     <loc>https://grugdigital.com/arcade/</loc>
     <lastmod>2026-11-25</lastmod>
     <image:image><image:loc>https://grugdigital.com/static/og/grug-arcade-free-blocky-games.jpg</image:loc></image:image>
+    <image:image><image:loc>https://grugdigital.com/arcade/tiny-tab-farm/tiny-tab-farm-grug-arcade.jpg</image:loc></image:image>
     <image:image><image:loc>https://grugdigital.com/arcade/grug-studio/grug-studio-grug-arcade.jpg</image:loc></image:image>
     <image:image><image:loc>https://grugdigital.com/arcade/zone-royale/zone-royale-grug-arcade.jpg</image:loc></image:image>
     <image:image><image:loc>https://grugdigital.com/arcade/slide-999/slide-999-grug-arcade.jpg</image:loc></image:image>
@@ -41,6 +42,16 @@
     <image:image><image:loc>https://grugdigital.com/static/arcade/medic.webp</image:loc></image:image>
     <image:image><image:loc>https://grugdigital.com/static/arcade/snow-rider.webp</image:loc></image:image>
     <image:image><image:loc>https://grugdigital.com/static/arcade/racer.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://grugdigital.com/arcade/tiny-tab-farm/</loc>
+    <lastmod>2026-11-25</lastmod>
+    <image:image><image:loc>https://grugdigital.com/arcade/tiny-tab-farm/tiny-tab-farm-grug-arcade.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://grugdigital.com/arcade/place/?id=tiny-tab-farm</loc>
+    <lastmod>2026-11-25</lastmod>
+    <image:image><image:loc>https://grugdigital.com/arcade/tiny-tab-farm/tiny-tab-farm-grug-arcade.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://grugdigital.com/arcade/grug-studio/</loc>

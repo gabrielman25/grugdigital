@@ -176,7 +176,7 @@
 <script>
 /* /arcade/place/?id=<slug>: one game's page. The data is GrugArcade.GAMES (arcade/arcade.js); Play starts arcade/<slug>/ */
 (() => {
-  const $ = id => document.getElementById(id), A = window.GrugArcade, { GAMES, gname, esc, ago, tile, place } = A;
+  const $ = id => document.getElementById(id), A = window.GrugArcade, { GAMES, CATS, catOf, gname, esc, ago, tile, place } = A;
   const id = new URLSearchParams(location.search).get('id') || (location.hash || '').slice(1), g = GAMES.find(x => x.slug === id);
   const day = iso => new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
   if (!g) {
@@ -195,9 +195,10 @@
       offers: { '@type': 'Offer', price: 0, priceCurrency: 'USD' }, author: { '@id': 'https://grugdigital.com/#org' }, publisher: { '@id': 'https://grugdigital.com/#org' },
       keywords: `${g.name}, Grug Digital, Roblox alternative, free browser games, custom avatar` }] };
     const sc = document.createElement('script'); sc.type = 'application/ld+json'; sc.textContent = JSON.stringify(ld); document.head.appendChild(sc); }
+  const cat = CATS.find(c => c.id === catOf(g)) || { name: '3D Games', hash: '3d-games' }, isTab = catOf(g) === 'tab';
   const R = A.rec(), fresh = Date.now() - new Date(g.added) < 7 * 864e5, plays = R.plays[g.slug] || 0;
   $('Place').innerHTML = `
-    <div class="ttl"><h1>${esc(g.name)}</h1><div class="sub">A Grug Arcade game · ${esc(g.tag)}</div></div>
+    <div class="ttl"><h1>${esc(g.name)}</h1><div class="sub">A Grug Arcade game · <a href="/arcade/#${cat.hash}">${esc(cat.name)}</a> · ${esc(g.tag)}</div></div>
     <div class="L">
       <div class="shot"><img src="/arcade/${g.slug}/${g.slug}-grug-arcade.jpg" alt="${esc(g.name)}, a free game in the Grug Arcade: ${esc(g.alt)}" width="538" height="303">${fresh ? '<span class="new">NEW</span>' : ''}</div>
       <div class="acts">
@@ -207,7 +208,10 @@
       </div>
       <div class="StandardBoxHeader"><span><h2>Description</h2></span></div>
       <div class="bx">${(g.about || [g.stats.join('. ') + '.']).map(p => `<p>${esc(p)}</p>`).join('')}
-        <p>You play as the character you made in the <a href="/character/">Grug Avatar Studio</a>, and your other saved outfits show up as the other players.</p></div>
+        ${g.outfit === false ? '' : '<p>You play as the character you made in the <a href="/character/">Grug Avatar Studio</a>, and your other saved outfits show up as the other players.</p>'}</div>
+      ${isTab ? `<div class="StandardBoxHeader"><span><h2>How tab games work</h2></span></div>
+      <div class="bx"><p><b>The game lives in your browser tab:</b> the little picture on the tab and the tab's title are the game. Press Play, then switch to another tab and keep an eye on it while you browse.</p>
+        <p>It keeps going in the background, and even for a while after you close it. It never makes noise or asks you to come back. Pin the tab (right-click it, then Pin) to keep it handy.</p></div>` : ''}
       ${g.controls ? `<div class="StandardBoxHeader"><span><h2>Controls</h2></span></div>
       <div class="bx"><table class="keys">${g.controls.map(([k, v]) => `<tr><td>${k.split(' / ').map(x => `<kbd>${esc(x)}</kbd>`).join(' / ')}</td><td>${esc(v)}</td></tr>`).join('')}</table></div>` : ''}
       ${g.coop ? `<div class="StandardBoxHeader"><span><h2>Local Multiplayer</h2></span></div>
@@ -220,6 +224,7 @@
         <dl>
           <dt>Created:</dt><dd>${day(g.added)}</dd>
           <dt>Updated:</dt><dd>${ago(g.updated)}</dd>
+          <dt>Category:</dt><dd><a href="/arcade/#${cat.hash}">${esc(cat.name)}</a></dd>
           <dt>Players:</dt><dd>${esc(g.players || '1')}</dd>
           <dt>Access:</dt><dd>Everyone · free</dd>
           <dt>You played:</dt><dd id="plays">${plays ? plays + ' time' + (plays > 1 ? 's' : '') + (R.last[g.slug] ? ' · last ' + ago(R.last[g.slug]) : '') : 'Not yet'}</dd>
@@ -227,14 +232,14 @@
       </div>
       <div class="StandardBoxHeader"><span><h2>Genres</h2></span></div>
       <div class="bx"><div class="gen">${g.genres.map(x => `<a href="/arcade/#${x}">${esc(gname(x))}</a>`).join('')}</div></div>
-      <div class="StandardBoxHeader"><span><h2>Playing as</h2></span></div>
+      ${g.outfit === false ? '' : `<div class="StandardBoxHeader"><span><h2>Playing as</h2></span></div>
       <div class="bx me">
         <div class="pic" id="mePic"></div>
         <b id="meT">Grug</b>
         <select id="meSel" aria-label="Play as" hidden></select>
         <p id="meP"></p>
         <a href="/character/?outfits">Avatar Studio »</a>
-      </div>
+      </div>`}
     </div>
     <div style="clear:both"></div>
     <div id="PlaceTabs" role="tablist"><div class="Tab on" role="tab" data-t="rec"><span><h2>Recommendations</h2></span></div><div class="Tab" role="tab" data-t="new"><span><h2>Newest</h2></span></div><div class="Tab" role="tab" data-t="fav"><span><h2>My Favorites</h2></span></div></div>

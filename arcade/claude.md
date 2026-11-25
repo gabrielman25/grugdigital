@@ -191,3 +191,24 @@ When the owner says "push it to the site":
 5. Commit, push the branch, and send the owner the preview link for the new page
    (`https://<branch>.grugdigital.pages.dev/arcade/<slug>/`, exact address from the commit's Cloudflare Pages check;
    see `CLAUDE.md`). Merge to `main` only when the owner says so.
+
+## 8. Tab games (`/arcade/tab/tab.js`, the "Tab Games" category)
+
+A different kind of Arcade game: **the browser tab is the game**. The favicon (16x16) and the page title are the screen;
+the page shows the same tab drawn big as a 4:3 screen (a tab-shaped strip of 16x16 tiles, the first tile being the
+favicon pixel for pixel, then the title text) with the game's shop / settings underneath. They're idle games for very
+casual players, so the 3D rules above (baseplate, three.js, outfits) don't apply. These do:
+
+- **Use the engine, `window.GrugTab`** (`arcade/tab/tab.js`; its header lists the API): `screen()` for the 4:3 tab
+  screen, `favicon()` / `title()` for the real tab, `run()` for the loop and the save, `menu()` for the Game Menu.
+  `run()` steps the game on `setInterval` by real elapsed time (requestAnimationFrame stops in background tabs), catches
+  every step's errors (`window.GrugLoopErrors`), saves every 5 s and on leaving, and works out progress made while the
+  page was closed (up to 24 hours) when it's opened again.
+- **Idle friendly, always:** no fail states, nothing to rush, no sounds, no notifications, never flash the title or
+  ask the player to come back. When they come back, at most a quiet "while you were away" note in the page.
+- **Cozy and welcoming:** soft flat colours (the engine's pastel palette), friendly words, click / tap only.
+- In `GAMES` (`arcade/arcade.js`): `cat: 'tab'` and `outfit: false` (the game page then skips the Avatar Studio lines
+  and adds a "How tab games work" box). The category's shown name is `TAB_BRAND` there: change it in one place.
+- The cover: render one in the game (Tiny Tab Farm draws its own at `?cover`), screenshot it at 960x540, save it as
+  `<slug>-grug-arcade.jpg`, then `images.json`, `tag_images.py` and `seo_head.py` as usual.
+- The flagship is **Tiny Tab Farm** (`arcade/tiny-tab-farm/`): copy its structure for the next one.

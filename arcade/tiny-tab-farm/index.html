@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tiny Tab Farm · Free in the Grug Arcade by Grug Digital</title>
+<!-- seo: written by src/seo/seo_head.py (re-run it, don't edit by hand) -->
+<meta property="og:site_name" content="Grug Digital">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Tiny Tab Farm · Free in the Grug Arcade by Grug Digital">
+<meta property="og:description" content="Tiny Tab Farm: A cozy idle farm that lives in your browser tab. Your farmer is the little picture on the tab, and the tab&#x27;s title shows her garden and your money. She plants and picks everything on her own, from the very first minute. Free in your browser, a Grug Arcade game by Grug Digital.">
+<meta property="og:url" content="https://grugdigital.com/arcade/tiny-tab-farm/">
+<meta property="og:image" content="https://grugdigital.com/arcade/tiny-tab-farm/tiny-tab-farm-grug-arcade.jpg">
+<meta property="og:image:width" content="960">
+<meta property="og:image:height" content="540">
+<meta property="og:image:alt" content="Tiny Tab Farm, a free game in the Grug Arcade: A pixel farmer in a flower crown among sunflowers, strawberries and fruit trees, with her farm in a browser tab">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tiny Tab Farm · Free in the Grug Arcade by Grug Digital">
+<meta name="twitter:description" content="Tiny Tab Farm: A cozy idle farm that lives in your browser tab. Your farmer is the little picture on the tab, and the tab&#x27;s title shows her garden and your money. She plants and picks everything on her own, from the very first minute. Free in your browser, a Grug Arcade game by Grug Digital.">
+<meta name="twitter:image" content="https://grugdigital.com/arcade/tiny-tab-farm/tiny-tab-farm-grug-arcade.jpg">
+<meta name="twitter:image:alt" content="Tiny Tab Farm, a free game in the Grug Arcade: A pixel farmer in a flower crown among sunflowers, strawberries and fruit trees, with her farm in a browser tab">
+<link rel="canonical" href="https://grugdigital.com/arcade/tiny-tab-farm/">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://grugdigital.com/#org","name":"Grug Digital","alternateName":"Grug","url":"https://grugdigital.com/","logo":{"@type":"ImageObject","url":"https://grugdigital.com/static/arcade/grug-digital-logo.png"},"sameAs":["https://www.youtube.com/@PolySwitchOfficial","https://www.instagram.com/grugdigital","https://discord.gg/3ENePvNGJy","https://polysw.itch.io/"]},{"@type":"VideoGame","@id":"https://grugdigital.com/arcade/tiny-tab-farm/#game","name":"Tiny Tab Farm","url":"https://grugdigital.com/arcade/tiny-tab-farm/","description":"A cozy idle farm that lives in your browser tab. Your farmer is the little picture on the tab, and the tab's title shows her garden and your money. She plants and picks everything on her own, from the very first minute. Give her orders: what to grow on each plot (or let her pick the best crop), and what to buy when there's enough money: new plots, new seeds, upgrades and clothes from her wish list. Unlock 47 vegetables, fruits, flowers and trees and grow up to 8 plots. Fruit trees keep giving fruit without replanting. Dress her up in sun hats, flower crowns, bows, dresses, overalls, rain boots, bunny slippers and more. Whatever she wears shows on your tab. There's nothing to lose and nothing to rush: leave the tab in the background, or close it, and she keeps farming for up to a day.","image":{"@type":"ImageObject","contentUrl":"https://grugdigital.com/arcade/tiny-tab-farm/tiny-tab-farm-grug-arcade.jpg","url":"https://grugdigital.com/arcade/tiny-tab-farm/tiny-tab-farm-grug-arcade.jpg","name":"Tiny Tab Farm, a cozy idle farm game in the Grug Arcade","caption":"Tiny Tab Farm by Grug Digital: a pixel farmer in a flower crown among sunflowers, strawberries and fruit trees, with her farm shown in a browser tab. A free cozy idle game that lives in your tab.","description":"Tiny Tab Farm by Grug Digital: a pixel farmer in a flower crown among sunflowers, strawberries and fruit trees, with her farm shown in a browser tab. A free cozy idle game that lives in your tab.","creator":{"@id":"https://grugdigital.com/#org"},"creditText":"Grug Digital","copyrightNotice":"© 2026 Grug Digital. All rights reserved.","copyrightHolder":{"@id":"https://grugdigital.com/#org"},"license":"https://grugdigital.com/terms.html","acquireLicensePage":"https://grugdigital.com/terms.html","keywords":"Tiny Tab Farm, idle game, cozy game, farm game, tab game, browser game, Grug Digital, Grug Digital"},"genre":["Idle & Cozy"],"gamePlatform":"Web browser","applicationCategory":"Game","operatingSystem":"Any (web browser)","playMode":["SinglePlayer"],"isAccessibleForFree":true,"offers":{"@type":"Offer","price":0,"priceCurrency":"USD","availability":"https://schema.org/InStock","url":"https://grugdigital.com/arcade/tiny-tab-farm/"},"author":{"@id":"https://grugdigital.com/#org"},"publisher":{"@id":"https://grugdigital.com/#org"},"datePublished":"2026-11-25","dateModified":"2026-11-25","keywords":"Tiny Tab Farm, Grug Digital, custom avatar, Roblox alternative, Roblox asset creator, free 3D game assets, Roblox avatar maker, R6 avatar, blocky games, browser games, low poly"}]}</script>
+<!-- /seo -->
+<meta name="description" content="Tiny Tab Farm: A cozy idle farm that lives in your browser tab. Your farmer is the little picture on the tab, and the tab&#x27;s title shows her garden and your money. She plants and picks everything on her own, from the very first minute. Free in your browser, a Grug Arcade game by Grug Digital.">
+<link rel="icon" href="/favicon.png">
+<script src="/static/pearls.js"></script>
+<script src="/static/pearl-popup.js"></script>
+<script src="/arcade/tab/tab.js"></script>
+<style>
+html,body{margin:0;height:100%}
+/* the shop under the tab: soft, flat colours (no gradients), Arial bold, made for a quick look now and then */
+.tf{flex:1;min-height:0;display:flex;flex-direction:column;font-size:max(12px,1.45cqw)}
+.tf-tabs{flex:none;display:flex;gap:4px;padding:8px 10px 0;background:var(--panel2);overflow-x:auto;scrollbar-width:none}
+.tf-tabs::-webkit-scrollbar{display:none}
+.tf-tabs button{flex:none;padding:7px 12px;border:0;border-radius:8px 8px 0 0;background:transparent;color:var(--soft);font:bold max(12px,1.45cqw) Arial,Helvetica,sans-serif;cursor:pointer}
+.tf-tabs button:hover{color:var(--ink);background:#fff3}
+.tf-tabs button.on{background:var(--panel);color:var(--ink)}
+.tf-pane{flex:1;min-height:0;overflow:auto;padding:10px 12px 14px;background:var(--panel)}
+.tf h3{margin:0 0 6px;font-size:1.05em;color:var(--head)}
+.tf p{margin:0 0 8px;font-weight:normal;line-height:1.4}
+.tf .muted{color:var(--soft);font-weight:normal}
+.tf .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tf .spacer{flex:1}
+.tf .money{font-size:1.9em;color:var(--ink)}
+.tf .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.tf .note{margin:0 0 10px;padding:8px 12px;border-radius:10px;background:#fff0f5;border:1px solid #f3c6d8;display:flex;gap:10px;align-items:center}
+.tf .note p{margin:0;flex:1}
+.tf button.b{padding:6px 12px;border:2px solid #e8a9bf;border-radius:8px;background:var(--pink);color:var(--ink);font:bold 1em Arial,Helvetica,sans-serif;cursor:pointer;white-space:nowrap}
+.tf button.b:hover:not(:disabled){filter:brightness(1.04);border-color:#d88aa6}
+.tf button.b.g{background:var(--mint);border-color:#9ccf8f}
+.tf button.b.w{background:#fff;border-color:var(--line)}
+.tf button.b:disabled{opacity:.5;cursor:default}
+.tf button.b.sm{padding:3px 8px;font-size:.9em}
+.tf select,.tf input[type=number],.tf input[type=text]{font:bold 1em Arial,Helvetica,sans-serif;color:var(--ink);padding:4px 6px;border:2px solid var(--line);border-radius:8px;background:#fff;max-width:100%}
+.tf .plots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px}
+.tf .plot{display:flex;flex-direction:column;gap:4px;min-width:0}
+.tf .plot .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tf .plot select{width:100%}
+.tf .bar{height:8px;border-radius:99px;background:#f1e4ec;overflow:hidden}
+.tf .bar i{display:block;height:100%;width:0;background:#9bd88a;border-radius:99px}
+.tf .bar.ripe i{background:#ffb3c9}
+.tf .plot.locked{align-items:flex-start;justify-content:center;background:#fbf6f1;border-style:dashed}
+.tf .chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+.tf .chips button{padding:4px 10px;border:2px solid var(--line);border-radius:99px;background:#fff;color:var(--soft);font:bold .95em Arial,Helvetica,sans-serif;cursor:pointer}
+.tf .chips button.on{background:var(--sky);border-color:#a9c9ef;color:var(--ink)}
+.tf .list{display:flex;flex-direction:column;gap:6px}
+.tf .item{display:flex;align-items:center;gap:10px}
+.tf .item .em{font-size:1.6em;width:1.4em;text-align:center;flex:none}
+.tf .item .txt{flex:1;min-width:0}
+.tf .item .txt b{display:block}
+.tf .item.locked .em{filter:grayscale(1);opacity:.55}
+.tf .ok{color:#4f9a45}
+.tf .rules{display:flex;flex-direction:column;gap:6px}
+.tf .rule{display:flex;align-items:center;gap:8px}
+.tf .rule label{flex:1;display:flex;align-items:center;gap:8px;cursor:pointer}
+.tf .rule input{width:18px;height:18px;accent-color:#d88aa6}
+.tf .orders{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center}
+.tf .ward{display:flex;gap:12px;align-items:flex-start}
+.tf .ward .me{flex:none;display:flex;flex-direction:column;align-items:center;gap:6px;width:max(150px,20cqw)}
+.tf .ward .me canvas{width:100%;aspect-ratio:1;image-rendering:pixelated;background:#fff;border:1px solid var(--line);border-radius:12px}
+.tf .ward .me input{width:100%;text-align:center}
+.tf .ward .shelf{flex:1;min-width:0}
+.tf .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(max(86px,11cqw),1fr));gap:6px}
+.tf .wi{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;border:2px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;font:bold .85em Arial,Helvetica,sans-serif;color:var(--ink);text-align:center}
+.tf .wi canvas{width:60%;aspect-ratio:1;image-rendering:pixelated}
+.tf .wi.sel{border-color:#d88aa6;background:#fff5f9}
+.tf .wi .pr{color:var(--soft)} .tf .wi.own .pr{color:#4f9a45} .tf .wi.worn .pr{color:var(--head)}
+.tf .wi .wish{position:absolute;top:2px;right:5px;color:#e0507f}
+.tf .try{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0 0}
+.tf .log{display:flex;flex-direction:column;gap:4px;font-weight:normal}
+.tf .log div{padding:4px 0;border-bottom:1px solid #f1e4ec}
+.tf .log i{color:var(--soft);font-style:normal;font-size:.9em;margin-right:6px}
+@container (max-width:640px){
+  .tf .plots{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tf .ward{flex-direction:column;align-items:stretch}
+  .tf .ward .me{width:auto;flex-direction:row}
+  .tf .ward .me canvas{width:84px}
+}
+/* the cover picture (/arcade/tiny-tab-farm/?cover): 960x540, for the Arcade */
+body.cover{background:#f4e6ef}
+body.cover canvas{display:block;width:960px;height:540px;image-rendering:pixelated}
+</style>
+</head>
+<body>
+<div id="game"></div>
+<script>
+/* Tiny Tab Farm: a Grug Arcade tab game (engine: /arcade/tab/tab.js).
+   The favicon is your farmer; the tab title is your plots and money. She plants and harvests on her own from the start:
+   you give her orders (what to grow on each plot, what to buy when there's money, how much to keep), unlock seeds
+   (vegetables, fruits, flowers and trees), buy up to 8 plots and dress her up. Progress carries on while the tab is in
+   the background or closed (up to 24 hours). No fail states, no timers to beat, nothing that asks you to come back.
+   Save: localStorage 'grug.tiny-tab-farm.v1'. */
+(() => {
+'use strict';
+const T = window.GrugTab;
+const GAME = 'Tiny Tab Farm';
+const KEY = 'grug.tiny-tab-farm.v1';
+const fmt = T.fmt, esc = T.esc;
+
+/* ================= colours ================= */
+const INK = '#4a3a4f', SKIN = '#f7d35e', SKIN_D = '#e0b43f', EYE = '#3a2a3a', MOUTH = '#c0506a';
+const LEAF = { g: '#6cc35a', G: '#3f9a46', l: '#a6e68f' }, TRUNK = { t: '#a0703f', T: '#6e4a2d' };
+const SOIL = '#b07c52', SOIL_D = '#8a5a38', SOIL_L = '#c99366';
+const hex = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+const mix = (a, b, t) => { const A = hex(a), B = hex(b); return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join(''); };
+const light = c => mix(c, '#ffffff', 0.45), dark = c => mix(c, '#000000', 0.25);
+
+/* ================= crops =================
+   In the order they unlock (each one earns more than the last). kind = how it's drawn. grow = seconds to grow;
+   trees with regrow are perennial (harvest again after regrow seconds); timber trees are cut down. */
+const CAT = { veg: 'Vegetables', fruit: 'Fruits', flower: 'Flowers', tree: 'Trees' };
+const C = (id, name, cat, emoji, kind, grow, o) => Object.assign({ id, name, cat, emoji, kind, grow }, o || {});
+const CROPS = [
+  C('carrot', 'Carrot', 'veg', '🥕', 'root', 20, { a: '#ff9a3c', A: '#e0701f', leaf: 'frond' }),
+  C('lettuce', 'Lettuce', 'veg', '🥬', 'head', 30, { a: '#a6e07a', A: '#6cbf4f' }),
+  C('potato', 'Potato', 'veg', '🥔', 'root', 40, { a: '#d6a96b', A: '#b5854a', leaf: 'bush' }),
+  C('strawberry', 'Strawberry', 'fruit', '🍓', 'strawberry', 50, { a: '#ff4f6e', A: '#d92f50', b: '#ffe27a' }),
+  C('peas', 'Sweet Peas', 'veg', '🫛', 'stake', 60, { a: '#9fe07a', A: '#6cbf4f', fruit: 'pod' }),
+  C('onion', 'Red Onion', 'veg', '🧅', 'root', 75, { a: '#c86aa8', A: '#a04a86', leaf: 'stalk' }),
+  C('daisy', 'Daisy', 'flower', '🌼', 'daisy', 90, { a: '#ffffff', A: '#eadff0', b: '#ffd23f' }),
+  C('cucumber', 'Cucumber', 'veg', '🥒', 'stake', 100, { a: '#4fae46', A: '#2f8a32', fruit: 'long' }),
+  C('tomato', 'Tomato', 'veg', '🍅', 'stake', 120, { a: '#ff5a4f', A: '#d93a33', fruit: 'round' }),
+  C('blueberry', 'Blueberries', 'fruit', '🫐', 'bush', 150, { a: '#6b7cff', A: '#4552c9' }),
+  C('tulip', 'Tulip', 'flower', '🌷', 'tulip', 180, { a: '#ff7aa8', A: '#e0507f' }),
+  C('corn', 'Corn', 'veg', '🌽', 'corn', 210, { a: '#ffd84d', A: '#e0a92e', b: '#d9b45a' }),
+  C('garlic', 'Garlic', 'veg', '🧄', 'root', 240, { a: '#fbf4e6', A: '#e2d3bc', leaf: 'stalk' }),
+  C('apple', 'Apple Tree', 'tree', '🍎', 'tree', 600, { a: '#ff4b5c', A: '#cc2f40', regrow: 240 }),
+  C('pepper', 'Bell Pepper', 'veg', '🫑', 'stake', 270, { a: '#ffcf3f', A: '#e0a21f', fruit: 'bell' }),
+  C('watermelon', 'Watermelon', 'fruit', '🍉', 'melon', 330, { a: '#7fd36a', A: '#3f9a46' }),
+  C('sunflower', 'Sunflower', 'flower', '🌻', 'sunflower', 360, { a: '#ffd23f', A: '#f0a91f', b: '#8a5a3a', B: '#6e4a2d' }),
+  C('broccoli', 'Broccoli', 'veg', '🥦', 'head', 420, { a: '#4fae56', A: '#2f8a3a' }),
+  C('grapes', 'Grapes', 'fruit', '🍇', 'bush', 480, { a: '#a46be0', A: '#7a45b5' }),
+  C('chili', 'Chili Pepper', 'veg', '🌶️', 'stake', 540, { a: '#ff3b3b', A: '#c41f2a', fruit: 'long' }),
+  C('rose', 'Rose', 'flower', '🌹', 'rose', 600, { a: '#ff4f6e', A: '#c92a4a' }),
+  C('peach', 'Peach Tree', 'tree', '🍑', 'tree', 1200, { a: '#ffb08a', A: '#f08a6a', regrow: 480 }),
+  C('sweetpotato', 'Sweet Potato', 'veg', '🍠', 'root', 720, { a: '#c9607a', A: '#a0445e', leaf: 'bush' }),
+  C('honeydew', 'Honeydew', 'fruit', '🍈', 'melon', 780, { a: '#d6efa0', A: '#b5d47a' }),
+  C('lavender', 'Lavender', 'flower', '🪻', 'spike', 900, { a: '#b48cf0', A: '#8f66d6' }),
+  C('eggplant', 'Eggplant', 'veg', '🍆', 'stake', 960, { a: '#8a52c9', A: '#5f3396', fruit: 'egg' }),
+  C('cherry', 'Cherry Tree', 'tree', '🍒', 'tree', 1800, { a: '#e0284f', A: '#a8143a', regrow: 600 }),
+  C('pumpkin', 'Pumpkin', 'veg', '🎃', 'melon', 1200, { a: '#ffa23a', A: '#e07a1f', stem: true }),
+  C('pineapple', 'Pineapple', 'fruit', '🍍', 'pineapple', 1500, { a: '#ffd24f', A: '#d9a02a' }),
+  C('hibiscus', 'Hibiscus', 'flower', '🌺', 'hibiscus', 1500, { a: '#ff6f9f', A: '#e04a7f', b: '#ffe07a' }),
+  C('lemon', 'Lemon Tree', 'tree', '🍋', 'tree', 2400, { a: '#fff06a', A: '#e6c93f', regrow: 900 }),
+  C('ginger', 'Ginger', 'veg', '🫚', 'root', 1800, { a: '#e6c07a', A: '#c49a52', leaf: 'stalk' }),
+  C('kiwi', 'Kiwi Vine', 'fruit', '🥝', 'bush', 2100, { a: '#a07a4a', A: '#7a5a33' }),
+  C('marigold', 'Marigold', 'flower', '🏵️', 'puff', 2400, { a: '#ffb23f', A: '#f08a1f' }),
+  C('orange', 'Orange Tree', 'tree', '🍊', 'tree', 3600, { a: '#ffa02a', A: '#e07a12', regrow: 1200 }),
+  C('banana', 'Banana Plant', 'fruit', '🍌', 'banana', 3000, { a: '#ffe14f', A: '#e0b52a' }),
+  C('mushroom', 'Mushrooms', 'veg', '🍄', 'mushroom', 2700, { a: '#ff5a5a', A: '#d93a3a' }),
+  C('lotus', 'Lotus', 'flower', '🪷', 'lotus', 3600, { a: '#ffbfd9', A: '#f08ab5' }),
+  C('pear', 'Pear Tree', 'tree', '🍐', 'tree', 5400, { a: '#cfe36a', A: '#a8c246', regrow: 1800 }),
+  C('sakura', 'Cherry Blossom', 'tree', '🌸', 'blossom', 5400, { a: '#ffd1e3', A: '#ff9cc3', regrow: 2400 }),
+  C('mango', 'Mango Tree', 'tree', '🥭', 'tree', 7200, { a: '#ffb52e', A: '#f0712a', regrow: 2400 }),
+  C('oak', 'Oak Tree', 'tree', '🌳', 'tree', 9000, { timber: true, g: '#4f9a45', G: '#2f7a35', l: '#7fc46a' }),
+  C('maple', 'Maple Tree', 'tree', '🍁', 'tree', 9000, { a: '#ff7a3a', A: '#e0482a', regrow: 3600, syrup: true }),
+  C('olive', 'Olive Tree', 'tree', '🫒', 'tree', 10800, { a: '#7d8f3a', A: '#5a6a24', regrow: 3600, g: '#9fc08a', G: '#6f966a', l: '#c4dcb2' }),
+  C('coconut', 'Coconut Palm', 'tree', '🥥', 'palm', 14400, { a: '#9a6a43', A: '#6e4a2d', regrow: 4800 }),
+  C('pine', 'Pine Tree', 'tree', '🌲', 'pine', 18000, { timber: true }),
+  C('money', 'Money Tree', 'tree', '💰', 'tree', 21600, { a: '#ffd84d', A: '#e0a92e', regrow: 7200 }),
+];
+const CROP = Object.fromEntries(CROPS.map(c => [c.id, c]));
+/* the economy: each crop earns about 30% more per minute (per plot) than the one before it */
+const nice = n => { if (n < 10) return Math.max(0, Math.round(n)); const p = Math.pow(10, Math.floor(Math.log10(n)) - 1); return Math.round(n / p) * p; };
+CROPS.forEach((c, i) => {
+  const pm = 5 * Math.pow(1.3, i);                          // $ a minute, per plot, before upgrades
+  c.tier = i; c.pm = pm;
+  if (c.regrow) { c.sell = nice(pm * (c.regrow + 3) / 60); c.seed = nice(pm * c.grow / 60 * 0.5); }
+  else if (c.timber) { c.sell = nice(pm * (c.grow + 9) / 60 * 1.2); c.seed = nice(c.sell * 0.15); }
+  else { c.sell = Math.max(2, nice(pm * (c.grow + 5) / 60 * 1.25)); c.seed = i === 0 ? 0 : nice(c.sell * 0.2); }
+  const prevPm = 5 * Math.pow(1.3, i - 1);
+  c.unlock = i === 0 ? 0 : nice(prevPm * (3 + i * 1.6 + 0.045 * i * i) * Math.min(8, 1 + i / 3));   // the later seeds take hours: it's an idle game
+});
+const PLOT_COST = [0, 30, 200, 1200, 8000, 50000, 350000, 2500000];
+const UPS = [
+  { id: 'boots', name: 'Comfy Boots', what: 'walks 25% faster', base: 80, mult: 2.8, max: 10, em: '👢' },
+  { id: 'gloves', name: 'Garden Gloves', what: 'plants and picks 25% faster', base: 120, mult: 2.8, max: 10, em: '🧤' },
+  { id: 'compost', name: 'Compost', what: 'everything grows 10% faster', base: 250, mult: 3, max: 15, em: '🪱' },
+  { id: 'stand', name: 'Farm Stand', what: 'everything sells for 10% more', base: 500, mult: 3.2, max: 15, em: '🧺' },
+];
+const UP = Object.fromEntries(UPS.map(u => [u.id, u]));
+const upCost = (u, lvl) => nice(u.base * Math.pow(u.mult, lvl));
+
+/* ================= the wardrobe =================
+   slot: hat, hair, face, top, bottom, shoes. Price 0 = yours from the start. */
+const W = (slot, id, name, price, o) => Object.assign({ slot, id, name, price }, o || {});
+const WEAR = [
+  W('hat', 'hat-none', 'No hat', 0),
+  W('hat', 'hat-sun', 'Straw Sun Hat', 0, { k: 'sun', a: '#f2cf6b', b: '#ff8fb8' }),
+  W('hat', 'hat-bow', 'Pink Bow', 60, { k: 'bow', a: '#ff7aa8' }),
+  W('hat', 'hat-flowers', 'Flower Crown', 250, { k: 'flowers' }),
+  W('hat', 'hat-beret', 'Beret', 500, { k: 'beret', a: '#e0507f' }),
+  W('hat', 'hat-bucket', 'Mint Bucket Hat', 1200, { k: 'bucket', a: '#a8e0a0' }),
+  W('hat', 'hat-beanie', 'Pompom Beanie', 2500, { k: 'beanie', a: '#b48cf0', b: '#ffffff' }),
+  W('hat', 'hat-cat', 'Cat Ears', 6000, { k: 'cat', a: '#5a4a5f', b: '#ff9cc3' }),
+  W('hat', 'hat-cowboy', 'Cowgirl Hat', 15000, { k: 'cowboy', a: '#c98a5a', b: '#8a5a3a' }),
+  W('hat', 'hat-bunny', 'Bunny Ears', 40000, { k: 'bunny', a: '#ffffff', b: '#ffb3cf' }),
+  W('hat', 'hat-bonnet', 'Sun Bonnet', 120000, { k: 'bonnet', a: '#cfe4ff', b: '#ff9cc3' }),
+  W('hat', 'hat-witch', 'Witch Hat', 400000, { k: 'witch', a: '#6b4fa0', b: '#ffd84d' }),
+  W('hat', 'hat-tiara', 'Tiara', 5e7, { k: 'tiara', a: '#ffd84d', b: '#ff6f9f' }),
+  W('hat', 'hat-crown', 'Golden Crown', 5e10, { k: 'crown', a: '#ffd84d', b: '#ff4f6e' }),
+
+  W('hair', 'hair-long-brown', 'Long Brown', 0, { k: 'long', a: '#7a4a2a' }),
+  W('hair', 'hair-bob-black', 'Black Bob', 0, { k: 'bob', a: '#2e2430' }),
+  W('hair', 'hair-short-brown', 'Short Brown', 0, { k: 'short', a: '#6b4226' }),
+  W('hair', 'hair-curly-ginger', 'Ginger Curls', 0, { k: 'curly', a: '#d9692b' }),
+  W('hair', 'hair-pony', 'Blonde Ponytail', 80, { k: 'pony', a: '#f2cf6b' }),
+  W('hair', 'hair-braids', 'Brown Braids', 200, { k: 'braids', a: '#6b4226' }),
+  W('hair', 'hair-bun', 'Black Top Bun', 400, { k: 'bun', a: '#2e2430' }),
+  W('hair', 'hair-buns', 'Pink Space Buns', 900, { k: 'buns', a: '#ff8fb8' }),
+  W('hair', 'hair-pixie', 'Lilac Pixie', 2500, { k: 'pixie', a: '#b79af0' }),
+  W('hair', 'hair-wavy', 'Strawberry Waves', 7000, { k: 'wavy', a: '#f0a86a' }),
+  W('hair', 'hair-afro', 'Big Curls', 12000, { k: 'afro', a: '#3a2a22' }),
+  W('hair', 'hair-mint', 'Mint Bob', 20000, { k: 'bob', a: '#8fe0c0' }),
+  W('hair', 'hair-blue', 'Ocean Blue Long', 60000, { k: 'long', a: '#6aa8ff' }),
+  W('hair', 'hair-silver', 'Silver Waves', 250000, { k: 'wavy', a: '#dcdce8' }),
+  W('hair', 'hair-rainbow', 'Rainbow Long', 5e8, { k: 'long', a: 'rainbow' }),
+  W('hair', 'hair-bald', 'Bald', 10, { k: 'bald' }),
+
+  W('face', 'face-none', 'Just you', 0),
+  W('face', 'face-blush', 'Rosy Cheeks', 0, { k: 'blush' }),
+  W('face', 'face-freckles', 'Freckles', 80, { k: 'freckles' }),
+  W('face', 'face-gloss', 'Lip Gloss', 300, { k: 'gloss' }),
+  W('face', 'face-glasses', 'Round Glasses', 800, { k: 'glasses' }),
+  W('face', 'face-hearts', 'Heart Sunglasses', 3000, { k: 'hearts' }),
+  W('face', 'face-mustache', 'Mustache', 4000, { k: 'mustache' }),
+  W('face', 'face-stars', 'Star Stickers', 9000, { k: 'stars' }),
+  W('face', 'face-beard', 'Beard', 15000, { k: 'beard' }),
+
+  W('top', 'top-white', 'White Tee', 0, { a: '#ffffff' }),
+  W('top', 'top-pink', 'Pink Tee', 0, { a: '#ffb7cf' }),
+  W('top', 'top-mint', 'Mint Tee', 25, { a: '#a8e0c0' }),
+  W('top', 'top-stripe', 'Striped Top', 200, { a: '#ffffff', b: '#6aa8ff', p: 'stripe' }),
+  W('top', 'top-gingham', 'Gingham Blouse', 600, { a: '#ffffff', b: '#ff8fb8', p: 'check' }),
+  W('top', 'top-sundress', 'Sunny Sundress', 900, { a: '#ffe07a', dress: true }),
+  W('top', 'top-flannel', 'Flannel Shirt', 1500, { a: '#e0507f', b: '#8a2a4a', p: 'check', long: true }),
+  W('top', 'top-raincoat', 'Yellow Raincoat', 4000, { a: '#ffd84d', b: '#e0a92e', p: 'coat', long: true }),
+  W('top', 'top-sweater', 'Cozy Sweater', 8000, { a: '#c9a6f5', long: true }),
+  W('top', 'top-floral', 'Floral Dress', 15000, { a: '#cfe4ff', b: '#ff8fb8', p: 'dots', dress: true }),
+  W('top', 'top-hoodie', 'Mint Hoodie', 30000, { a: '#8fe0c0', b: '#ffffff', p: 'hood', long: true }),
+  W('top', 'top-strawberry', 'Strawberry Dress', 90000, { a: '#ff5a7a', b: '#ffffff', p: 'dots', dress: true }),
+  W('top', 'top-gown', 'Lavender Gown', 5e6, { a: '#c9a6f5', b: '#ffffff', p: 'dots', dress: true, long: true }),
+  W('top', 'top-gold', 'Golden Gown', 2e10, { a: '#ffd84d', b: '#fff6c2', p: 'dots', dress: true, long: true }),
+
+  W('bottom', 'bot-overalls', 'Denim Overalls', 0, { k: 'overalls', a: '#6a8fd6' }),
+  W('bottom', 'bot-jeans', 'Blue Jeans', 0, { k: 'pants', a: '#6a8fd6' }),
+  W('bottom', 'bot-skirt', 'Pink Skirt', 0, { k: 'skirt', a: '#ff9cc3' }),
+  W('bottom', 'bot-trousers', 'Brown Trousers', 300, { k: 'pants', a: '#a0703f' }),
+  W('bottom', 'bot-shorts', 'Denim Shorts', 500, { k: 'shorts', a: '#6a8fd6' }),
+  W('bottom', 'bot-plaid', 'Plaid Skirt', 2500, { k: 'skirt', a: '#e0507f', b: '#8a2a4a', p: 'check' }),
+  W('bottom', 'bot-leggings', 'Black Leggings', 4000, { k: 'pants', a: '#3a3040' }),
+  W('bottom', 'bot-pinkall', 'Pink Overalls', 10000, { k: 'overalls', a: '#ff9cc3' }),
+  W('bottom', 'bot-tulle', 'Tulle Skirt', 80000, { k: 'skirt', a: '#ffd1e3', b: '#ffffff', p: 'dots' }),
+  W('bottom', 'bot-gold', 'Gold Pants', 5e9, { k: 'pants', a: '#ffd84d' }),
+
+  W('shoes', 'shoe-boots', 'Brown Boots', 0, { a: '#7a4a2a' }),
+  W('shoes', 'shoe-rain', 'Yellow Rain Boots', 80, { a: '#ffd84d' }),
+  W('shoes', 'shoe-wellies', 'Pink Wellies', 350, { a: '#ff8fb8' }),
+  W('shoes', 'shoe-sneakers', 'White Sneakers', 900, { a: '#ffffff' }),
+  W('shoes', 'shoe-maryjane', 'Red Mary Janes', 3000, { a: '#e0284f' }),
+  W('shoes', 'shoe-flats', 'Lilac Flats', 12000, { a: '#c9a6f5' }),
+  W('shoes', 'shoe-bunny', 'Bunny Slippers', 60000, { a: '#ffffff', b: '#ff9cc3' }),
+  W('shoes', 'shoe-glass', 'Glass Slippers', 2e7, { a: '#cfe4ff' }),
+  W('shoes', 'shoe-gold', 'Gold Boots', 8e9, { a: '#ffd84d' }),
+];
+const WI = Object.fromEntries(WEAR.map(w => [w.id, w]));
+const SLOTS = [['hat', 'Hats'], ['hair', 'Hair'], ['face', 'Face'], ['top', 'Tops & Dresses'], ['bottom', 'Bottoms'], ['shoes', 'Shoes']];
+const DEFAULT_LOOK = { hat: 'hat-sun', hair: 'hair-long-brown', face: 'face-blush', top: 'top-pink', bottom: 'bot-overalls', shoes: 'shoe-boots' };
+const RULES = { plots: 'new plots', seeds: 'new seeds', upgrades: 'upgrades', wish: 'clothes on her wish list' };
+
+/* ================= the save ================= */
+function fresh() {
+  return {
+    v: 1, money: 5, name: 'Poppy',
+    unlocked: ['carrot'],
+    plots: Array.from({ length: 8 }, (_, i) => ({ owned: i === 0, crop: null, t: 0, phase: 'grow', plan: 'auto' })),
+    up: { boots: 0, gloves: 0, compost: 0, stand: 0 },
+    rules: [{ k: 'plots', on: true }, { k: 'seeds', on: true }, { k: 'upgrades', on: true }, { k: 'wish', on: true }],
+    reserve: 0, goal: '',
+    owned: WEAR.filter(w => !w.price).map(w => w.id), wish: [], look: Object.assign({}, DEFAULT_LOOK),
+    stats: { harvests: 0, earned: 0, time: 0, by: {} },
+    log: [], set: { anim: true, moneyTitle: true }, rate: 0,
+  };
+}
+let S = fresh();
+const F = { x: 1, dir: 1, task: null, act: 0, actLen: 0, carry: null, carryT: 0 };
+
+/* ================= the farm ================= */
+const walkSpeed = () => 2.2 * (1 + 0.25 * S.up.boots);
+const workMult = () => 1 + 0.25 * S.up.gloves;
+const growMult = () => 1 + 0.1 * S.up.compost;
+const sellMult = () => 1 + 0.1 * S.up.stand;
+const WORK = { plant: 1.2, harvest: 1.0, chop: 3.5, clear: 1.5 };
+const isUnlocked = id => S.unlocked.includes(id);
+const need = p => { const c = CROP[p.crop]; return p.phase === 'regrow' ? c.regrow : c.grow; };
+const ripe = p => p.crop && p.t >= need(p);
+const plotX = i => i + 1;                                   // plot i sits at x = i + 1 (the farmer's home is x = 0)
+
+function rateOf(c) {                                         // $ a second for one plot, with today's upgrades
+  const handle = 2 / walkSpeed() + (WORK.plant + WORK.harvest) / workMult(), sm = sellMult(), gm = growMult();
+  if (c.regrow) return c.sell * sm / (c.regrow / gm + WORK.harvest / workMult() + 1.5 / walkSpeed());
+  if (c.timber) return (c.sell * sm - c.seed) / (c.grow / gm + handle + WORK.chop / workMult());
+  return (c.sell * sm - c.seed) / (c.grow / gm + handle);
+}
+function bestCrop(maxSeed) {
+  let best = null, br = -1;
+  for (const id of S.unlocked) { const c = CROP[id]; if (c.seed > maxSeed) continue; const r = rateOf(c); if (r > br) { br = r; best = c; } }
+  return best;
+}
+const anyGrowing = () => S.plots.some(p => p.owned && p.crop);
+function planFor(i, forPlanting) {
+  const p = S.plots[i];
+  if (p.plan !== 'auto' && isUnlocked(p.plan)) {
+    const c = CROP[p.plan];
+    if (!forPlanting || S.money >= c.seed || anyGrowing()) return c;   // she waits for the money, unless nothing at all is growing
+  }
+  return bestCrop(forPlanting ? S.money : Infinity) || CROP.carrot;
+}
+function wantsClear(i) {                                      // a perennial tree whose plot is meant to grow something else now
+  const p = S.plots[i], c = CROP[p.crop];
+  if (!c || !c.regrow || ripe(p)) return false;
+  if (p.plan === 'auto') { const b = bestCrop(Infinity); return b && b.id !== c.id && rateOf(b) > rateOf(c) * 1.15 && S.money >= b.seed; }
+  return p.plan !== c.id && isUnlocked(p.plan);
+}
+function pickTask() {
+  let best = null, bs = Infinity;
+  S.plots.forEach((p, i) => {
+    if (!p.owned) return;
+    let pri = -1, kind = '';
+    if (ripe(p)) { pri = 0; kind = 'harvest'; }
+    else if (!p.crop) { const c = planFor(i, true); if (c && S.money >= c.seed) { pri = 1; kind = 'plant'; } }
+    else if (wantsClear(i)) { pri = 2; kind = 'clear'; }
+    if (pri < 0) return;
+    const score = pri * 100 + Math.abs(plotX(i) - F.x);
+    if (score < bs) { bs = score; best = { kind, plot: i }; }
+  });
+  return best;
+}
+function taskValid(t) {
+  const p = S.plots[t.plot];
+  if (!p.owned) return false;
+  if (t.kind === 'harvest') return ripe(p);
+  if (t.kind === 'plant') return !p.crop;
+  if (t.kind === 'clear') return !!p.crop;
+  return false;
+}
+function finish(t) {
+  const p = S.plots[t.plot];
+  if (t.kind === 'harvest') {
+    const c = CROP[p.crop], earn = c.sell * sellMult();
+    S.money += earn; S.stats.earned += earn; S.stats.harvests++; S.stats.by[c.id] = (S.stats.by[c.id] || 0) + 1; stepEarned += earn;
+    F.carry = c; F.carryT = 0.9;
+    if (c.regrow) { p.phase = 'regrow'; p.t = 0; } else { p.crop = null; p.t = 0; p.phase = 'grow'; }
+  } else if (t.kind === 'plant') {
+    const c = planFor(t.plot, true);
+    if (c && S.money >= c.seed) { S.money -= c.seed; p.crop = c.id; p.t = 0; p.phase = 'grow'; }
+  } else if (t.kind === 'clear') { p.crop = null; p.t = 0; p.phase = 'grow'; }
+  ui.dirtyPlots = true;
+}
+function farmer(dt) {
+  if (F.carryT > 0) F.carryT -= dt;
+  if (!F.task) F.task = pickTask();
+  const t = F.task; if (!t) { F.act = 0; return; }
+  if (!taskValid(t)) { F.task = null; F.act = 0; return; }
+  const tx = plotX(t.plot), d = tx - F.x;
+  if (F.act === 0 && Math.abs(d) > 1e-3) { const mv = walkSpeed() * dt; if (Math.abs(d) <= mv) F.x = tx; else F.x += Math.sign(d) * mv; F.dir = Math.sign(d); return; }
+  if (F.act === 0) { F.actLen = WORK[t.kind] / workMult(); F.act = F.actLen; }
+  F.act -= dt;
+  if (F.act <= 0) { F.act = 0; finish(t); F.task = null; }
+}
+
+/* buying: her orders. She buys the cheapest thing she's allowed to, unless you've told her to save up for one first. */
+function nextBuy(k) {
+  if (k === 'plots') { const i = S.plots.findIndex(p => !p.owned); return i < 0 ? null : { cost: PLOT_COST[i], buy: () => buyPlot(i, true) }; }
+  if (k === 'seeds') { const c = CROPS.find(c => !isUnlocked(c.id)); return c ? { cost: c.unlock, buy: () => unlockCrop(c.id, true) } : null; }
+  if (k === 'upgrades') { let b = null; for (const u of UPS) { const l = S.up[u.id]; if (l >= u.max) continue; const cost = upCost(u, l); if (!b || cost < b.cost) b = { cost, buy: () => buyUp(u.id, true) }; } return b; }
+  if (k === 'wish') { const w = S.wish.map(id => WI[id]).filter(w => w && !S.owned.includes(w.id)).sort((a, b) => a.price - b.price)[0]; return w ? { cost: w.price, buy: () => buyWear(w.id, true) } : null; }
+  return null;
+}
+function autobuy() {
+  if (S.goal) {                                            // "save up for this first"
+    const r = S.rules.find(r => r.k === S.goal), n = r && r.on && nextBuy(S.goal);
+    if (n) { if (S.money - n.cost >= S.reserve) n.buy(); return; }
+  }
+  let pick = null;                                         // otherwise: the cheapest of everything she's allowed to buy
+  for (const r of S.rules) { if (!r.on) continue; const n = nextBuy(r.k); if (n && (!pick || n.cost < pick.cost)) pick = n; }
+  if (pick && S.money - pick.cost >= S.reserve) pick.buy();
+}
+function log(text) { S.log.unshift({ at: Date.now(), text }); S.log.length = Math.min(S.log.length, 60); ui.dirty = true; }
+function buyPlot(i, auto) {
+  const c = PLOT_COST[i]; if (S.plots[i].owned || S.money < c) return;
+  S.money -= c; S.plots[i].owned = true; log(`${auto ? S.name + ' bought' : 'You bought'} plot ${i + 1} for $${fmt(c)}.`); ui.dirty = true;
+}
+function unlockCrop(id, auto) {
+  const c = CROP[id]; if (isUnlocked(id) || S.money < c.unlock) return;
+  S.money -= c.unlock; S.unlocked.push(id); log(`${auto ? S.name + ' got' : 'You got'} ${c.name} seeds ${c.emoji} for $${fmt(c.unlock)}.`); ui.dirty = true;
+}
+function buyUp(id, auto) {
+  const u = UP[id], l = S.up[id]; if (l >= u.max) return; const c = upCost(u, l); if (S.money < c) return;
+  S.money -= c; S.up[id] = l + 1; log(`${auto ? S.name + ' bought' : 'You bought'} ${u.name} level ${l + 1}.`); ui.dirty = true;
+}
+function buyWear(id, auto) {
+  const w = WI[id]; if (S.owned.includes(id) || S.money < w.price) return;
+  S.money -= w.price; S.owned.push(id); S.wish = S.wish.filter(x => x !== id); S.look[w.slot] = id;
+  log(`${auto ? S.name + ' bought' : 'You bought'} the ${w.name} and put it on.`); ui.dirty = true;
+}
+
+let stepEarned = 0;
+function step(dt) {
+  S.stats.time += dt; stepEarned = 0;
+  const gm = growMult();
+  for (const p of S.plots) if (p.owned && p.crop) p.t += dt * gm;
+  farmer(dt);
+  autobuy();
+  S.rate += (stepEarned / dt - S.rate) * Math.min(1, dt / 90);
+}
+
+/* ================= pixels ================= */
+function painter(ctx, ox, oy) {
+  const P = (x, y, c) => { if (!c) return; ctx.fillStyle = c; ctx.fillRect(ox + x, oy + y, 1, 1); };
+  const R = (x, y, w, h, c) => { if (!c) return; ctx.fillStyle = c; ctx.fillRect(ox + x, oy + y, w, h); };
+  return { P, R };
+}
+/* string templates: '.' is empty; letters are colour roles (g G l leaves, t T trunk, a A h the crop's colour, shade and
+   highlight, b B its second colour, w cream, y yellow, k ink). The first entry is the row the drawing starts on. */
+function stamp(ctx, ox, oy, tpl, pal) {
+  const y0 = tpl[0];
+  for (let r = 1; r < tpl.length; r++) { const s = tpl[r]; for (let x = 0; x < s.length; x++) { const ch = s[x]; if (ch === '.' || ch === ' ') continue; const c = pal[ch]; if (c) { ctx.fillStyle = c; ctx.fillRect(ox + x, oy + y0 + r - 1, 1, 1); } } }
+}
+function palOf(c) {
+  const a = c.a || '#ff9cc3', A = c.A || dark(a);
+  return { g: c.g || LEAF.g, G: c.G || LEAF.G, l: c.l || LEAF.l, t: TRUNK.t, T: TRUNK.T, a, A, h: light(a), b: c.b || '#ffd23f', B: c.B || dark(c.b || '#ffd23f'), w: '#fff8ec', y: '#ffd84d', k: INK, s: SOIL_D };
+}
+const TPL = {
+  rootFrond: [4, '.....l....l.....', '...l..g..g...l..', '....g.gGgG.g....', '.....gGgGgg.....', '......gGGg......', '.......gg.......', '.......Gg.......'],
+  rootStalk: [4, '......g.g.g.....', '......g.g.g.....', '.....gG.g.Gg....', '.....g.GgG.g....', '......gGgGg.....', '.......gGg......', '.......gGg......'],
+  rootBush: [5, '.....g.l.g......', '....gGglgGg.....', '...gGgGgGgGg....', '...lgGgGgGgl....', '....gGgGgGg.....', '.....gGgGg......', '......gGg.......'],
+  rootBody: [11, '......aAaa......', '......aaAa......', '......Aaaa......', '.......aA.......'],
+  rootBulb: [11, '......aaha......', '.....aaaaAA.....', '.....aAaaaA.....', '......aaaA......'],
+  rootSpud: [12, '....a.....a.....', '...ah.....ah....', '...aA.....aA....'],
+  rootYoung: [7, '......g..g......', '.....gG.Gg......', '......gGg.......', '.......gg.......', '.......Gg.......', '.......gg.......'],
+  head: [6, '......lgl.......', '....lgaaagl.....', '...gaaAaahag....', '..gaAaaaaaaAg...', '..gaaaAAaaaag...', '..gAaaaaaaAag...', '...ggaaaaagg....', '....GGGGGGG.....'],
+  headYoung: [9, '.....lgl........', '....gaaag.......', '...gaAaaag......', '....gaaag.......'],
+  stake: [1, '.......t........', '......gtg.......', '.....gGtGg......', '....g..t..g.....', '.....g.tg.......', '....gGgtGg......', '......gtgGg.....', '.....g.t..g.....', '....gGgtgg......', '......gtGg......', '.....g.t.g......', '......gtg.......'],
+  stakeYoung: [5, '.......t........', '......gtg.......', '.....gGtGg......', '.......t........', '......gtg.......', '.....g.tGg......', '.......t........', '......gtg.......'],
+  fround: [0, '.a.', 'aha', 'aaA', '.A.'], flong: [0, 'ah', 'aa', 'aA', '.A'], fbell: [0, '.g.', 'aha', 'aaA', 'aAA'], fegg: [0, '.g.', 'aha', 'aaA', 'aAA', '.A.'], fpod: [0, 'l.', 'ah', 'aA', '.A'],
+  corn: [0, '........b.......', '.......b.b......', '........g.......', '......gg.g......', '.....g.Gg.gg....', '....g..gaa......', '......Gaha.g....', '.....gGaaA.g....', '....g.GaAA..g...', '......gGa.g.....', '.....g.gGg......', '......gGg.......', '.......Gg.......'],
+  cornYoung: [4, '........g.......', '.......gg.......', '......g.Gg......', '.....g..gg.g....', '.......gG.......', '......gGg.......', '.......Gg.......', '.......gg.......', '.......Gg.......'],
+  strawberry: [8, '...l...l...l....', '..gGg.gGg.gGg...', '...g...g...g....', '..aha.aha.aha...', '..aya.aya.aya...', '...A...A...A....'],
+  lowYoung: [9, '...l.....l......', '..gGg...gGg.....', '...gGg.gGg......', '....gGgGg.......'],
+  melon: [8, '....l.....l.....', '...gGg...gGg....', '..g.aAaAaAa.....', '...ahAaAaAaA....', '...aAaAaAaAa....', '....aAaAaAa.....'],
+  pineapple: [2, '.......g........', '.....g.g.g......', '......gGg.......', '.....gGgGg......', '......ahA.......', '.....aAaAa......', '.....AaAaA......', '.....aAaAa......', '...g.AaAaA.g....', '..gG..aAa..Gg...'],
+  bush: [3, '......lgl.......', '....lgGgGgl.....', '...gGaGgGaGg....', '..gGgGgaGgGgg...', '..gaGgGgGgaGg...', '..gGgaGgGgGag...', '...gGgGgaGgg....', '....gaGgGgg.....', '.....gGgGg......', '......ttt.......'],
+  bushYoung: [6, '......lgl.......', '.....gGgGg......', '....gGgGgGg.....', '.....gGgGg......', '......gGg.......', '.......t........', '......ttt.......'],
+  banana: [1, '..gg........gg..', '...gGg....gGg...', '....gGg..gGg....', '.....ggtgg......', '......gtGgg.....', '.....aatg..g....', '....aAat........', '.....aAt........', '.......t........', '.......tT.......', '.......tT.......', '......tTtT......'],
+  mushroom: [6, '....aaaa........', '...ahwaha.......', '...aaaAaa..aaa..', '....wwww..awaAa.', '.....ww....ww...', '.....ww....ww...', '....wwww..wwww..'],
+  mushYoung: [10, '.....aa.........', '....awaa........', '.....ww.........'],
+  stem: [5, '.......G........', '.......G........', '.......Gg.......', '....g..G........', '.....g.G..g.....', '......gG.g......', '.......Gg.......', '.......G........'],
+  stemShort: [8, '.......G........', '.......G........', '......gG.g......', '.......Gg.......', '.......G........'],
+  bud: [4, '.......g........', '......gGg.......'],
+  daisy: [1, '......aaa.......', '.....aabaa......', '.....abbba......', '.....aabaa......', '......aaa.......'],
+  tulip: [2, '......a.a.......', '......aaa.......', '......ahA.......', '.......a........'],
+  rose: [2, '......aaa.......', '.....aAaAa......', '.....ahAaa......', '......aAa.......'],
+  sunflower: [0, '.....aaaaa......', '....aabbbaa.....', '....abbBbba.....', '....abBbBba.....', '....aabbbaa.....', '.....aaaaa......'],
+  spike: [1, '......a...a.....', '.....a.a.a.a....', '.....a.A.a.A....', '.....A.a.A.a....', '......g.g.g.....', '.......ggg......'],
+  hibiscus: [1, '.....aa.aa......', '....aaaaaaa.....', '.....aabaa......', '....aaabaaa.....', '.....aa.aa......'],
+  puff: [1, '.....aAaAa......', '....AaAaAaA.....', '....aAahAaa.....', '.....AaAaA......'],
+  lotus: [4, '.......a........', '.....a.a.a......', '....aaAhAaa.....', '.....aaaaa......', '.......g........', '...gggGgGggg....', '..GgggggggggG...'],
+  tree: [0, '.....gggg.......', '...gggGgggg.....', '..ggGgggGggg....', '.gggggGgggGgg...', '.ggGgggggggGg...', '.gggGggGggggg...', '..ggggggGggg....', '...gGgggggg.....', '.....gtTgg......', '......tT........', '......tT........', '......tT........', '.....ttTT.......'],
+  sapling: [5, '......gg........', '.....gGgg.......', '....gggGgg......', '.....gGgg.......', '......t.........', '......t.........', '......t.........', '.....ttT........'],
+  pine: [0, '.......g........', '......ggg.......', '.....gGggg......', '......ggg.......', '.....gggGg......', '....gGggggg.....', '.....gggGg......', '....ggGgggg.....', '...gggggGggg....', '....ggGgggg.....', '...gggggggGgg...', '.......tT.......', '......ttTT......'],
+  palm: [0, '..ggg.....ggg...', '.g...ggggg...g..', '....gGgGgGg.....', '...g..ggtg..g...', '......g.t...g...', '........t.......', '.......tT.......', '.......tT.......', '........tT......', '........tT......', '.......tT.......', '.......tT.......', '......ttTT......'],
+  palmYoung: [5, '...gg...gg......', '....gGgGg.......', '...g..t..g......', '.......t........', '.......tT.......', '.......tT.......', '......ttT.......'],
+};
+const FRUIT_SPOTS_STAKE = [[4, 3], [9, 6], [4, 8]];
+const FRUIT_SPOTS_TREE = [[2, 3], [8, 1], [10, 4], [5, 5], [3, 6]];
+
+function drawSoil(ctx, ox, oy, mound) {
+  const { R, P } = painter(ctx, ox, oy);
+  R(2, 13, 12, 1, SOIL_L); R(1, 14, 14, 2, SOIL);
+  for (let x = 2; x < 14; x += 3) P(x, 15, SOIL_D);
+  if (mound) { R(6, 12, 4, 1, SOIL_L); P(7, 12, SOIL_D); }
+}
+function drawLocked(ctx, ox, oy) {                            // not yours yet: grass behind a little white fence
+  const { R, P } = painter(ctx, ox, oy);
+  R(1, 13, 14, 3, '#b8e3a8'); for (let x = 2; x < 14; x += 3) P(x, 12, '#8fcf7e');
+  for (const x of [2, 6, 10, 13]) { R(x, 8, 1, 6, '#ffffff'); P(x, 7, '#ffffff'); }
+  R(2, 9, 12, 1, '#ffffff'); R(2, 12, 12, 1, '#f1e4ec');
+}
+/* stage: 0 seed, 1 sprout, 2 growing, 3 ready; 4 = a grown tree waiting for its next fruit (f = how far along) */
+function drawPlant(ctx, ox, oy, c, stage, f) {
+  const pal = palOf(c), { R, P } = painter(ctx, ox, oy), S_ = (t) => stamp(ctx, ox, oy, t, pal);
+  drawSoil(ctx, ox, oy, stage === 0);
+  if (stage === 0) return;
+  if (stage === 1) { P(7, 12, LEAF.G); P(7, 11, LEAF.g); P(6, 10, LEAF.g); P(8, 10, LEAF.l); return; }
+  const young = stage === 2;
+  switch (c.kind) {
+    case 'root':
+      if (young) { S_(TPL.rootYoung); return; }
+      S_(c.leaf === 'stalk' ? TPL.rootStalk : c.leaf === 'bush' ? TPL.rootBush : TPL.rootFrond);
+      S_(c.leaf === 'stalk' ? TPL.rootBulb : c.leaf === 'bush' ? TPL.rootSpud : TPL.rootBody); return;
+    case 'head': S_(young ? TPL.headYoung : TPL.head); return;
+    case 'stake':
+      if (young) { S_(TPL.stakeYoung); return; }
+      S_(TPL.stake);
+      for (const [x, y] of FRUIT_SPOTS_STAKE) stamp(ctx, ox + x, oy + y, { round: TPL.fround, long: TPL.flong, bell: TPL.fbell, egg: TPL.fegg, pod: TPL.fpod }[c.fruit] || TPL.fround, pal);
+      return;
+    case 'corn': S_(young ? TPL.cornYoung : TPL.corn); return;
+    case 'strawberry': S_(young ? TPL.lowYoung : TPL.strawberry); return;
+    case 'melon': S_(young ? TPL.lowYoung : TPL.melon); if (!young && c.stem) { P(6, 9, LEAF.G); P(6, 10, LEAF.G); } return;
+    case 'pineapple': if (young) S_(TPL.lowYoung); else S_(TPL.pineapple); return;
+    case 'bush': S_(young ? TPL.bushYoung : TPL.bush); return;
+    case 'banana': if (young) S_(TPL.palmYoung); else S_(TPL.banana); return;
+    case 'mushroom': S_(young ? TPL.mushYoung : TPL.mushroom); return;
+    case 'daisy': case 'tulip': case 'rose': case 'spike': case 'hibiscus': case 'puff': case 'sunflower':
+      if (young) { S_(TPL.stemShort); stamp(ctx, ox, oy + 3, TPL.bud, pal); return; }
+      S_(TPL.stem); if (c.kind === 'sunflower') { P(8, 9, LEAF.g); P(9, 8, LEAF.g); }
+      S_(TPL[c.kind]); return;
+    case 'lotus': if (young) { stamp(ctx, ox, oy + 4, [8, '...gggGgGggg....', '..GgggggggggG...'], pal); return; } S_(TPL.lotus); return;
+    case 'pine': S_(young ? TPL.sapling : TPL.pine); return;
+    case 'palm':
+      if (young) { S_(TPL.palmYoung); return; }
+      S_(TPL.palm); if (stage === 3) { stamp(ctx, ox + 6, oy + 3, [0, 'ah', 'aA'], pal); stamp(ctx, ox + 9, oy + 3, [0, 'ah'], pal); }
+      return;
+    case 'blossom': case 'tree': default: {
+      if (young) { S_(TPL.sapling); return; }
+      const tp = Object.assign({}, pal);
+      if (c.kind === 'blossom') { tp.g = stage === 3 ? '#ffc1d9' : '#bfe3a8'; tp.G = stage === 3 ? '#ff9cc3' : '#8fcf7e'; }
+      if (c.syrup && stage === 3) { tp.g = '#ff9a4f'; tp.G = '#e0602a'; }
+      stamp(ctx, ox, oy, TPL.tree, tp);
+      if (c.kind === 'blossom' && stage === 3) { for (const [x, y] of FRUIT_SPOTS_TREE) P(x + 1, y, '#ffffff'); return; }
+      if (c.timber) return;
+      if (c.syrup) { if (stage === 3) { R(8, 10, 2, 2, '#b8c0cc'); P(8, 10, '#dfe5ee'); } return; }
+      if (stage === 3) for (const [x, y] of FRUIT_SPOTS_TREE) stamp(ctx, ox + x, oy + y, [0, 'ha', 'aA'], pal);
+      else if (stage === 4 && f > 0.55) for (const [x, y] of FRUIT_SPOTS_TREE) P(x + 1, y + 1, '#b8e07a');
+    }
+  }
+}
+function plotStage(p) {
+  if (!p.crop) return { stage: -1, f: 0 };
+  const f = Math.min(1, p.t / need(p));
+  if (p.phase === 'regrow') return { stage: f >= 1 ? 3 : 4, f };
+  return { stage: f >= 1 ? 3 : f < 0.12 ? 0 : f < 0.4 ? 1 : 2, f };
+}
+
+/* the farmer: 16x16, front-on, with her look. pose: idle, walk, work, carry */
+const RAINBOW = ['#ff6b6b', '#ffb23f', '#ffe14f', '#7fd36a', '#6aa8ff', '#b48cf0', '#ff8fb8'];
+function drawFarmer(ctx, look, pose, frame, carry) {
+  ctx.clearRect(0, 0, 16, 16);
+  const { P, R } = painter(ctx, 0, 0);
+  const it = s => WI[look[s]] || {};
+  const top = it('top'), bot = it('bottom'), hair = it('hair'), hat = it('hat'), face = it('face'), shoe = it('shoes');
+  const cr = pose === 'work' ? 2 : 0, hy = 3 + cr, ty = 8 + cr;
+  const tc = top.a || '#ffffff', ts = dark(tc), bc = bot.a || '#6a8fd6', bs = dark(bc), sc = shoe.a || '#7a4a2a';
+  const dress = !!top.dress, skirt = dress || bot.k === 'skirt';
+  const skirtC = dress ? tc : bc, skirtS = dress ? ts : bs, skirtB = dress ? top.b : bot.b, skirtP = dress ? top.p : bot.p;
+  const legC = skirt || bot.k === 'shorts' ? SKIN : bc, legS = skirt || bot.k === 'shorts' ? SKIN_D : bs;
+  /* legs and shoes */
+  let legs, shoes;
+  if (pose === 'walk' && frame % 2 === 0) { legs = [[5, 13, 2, 1], [9, 13, 2, 1], [4, 14, 2, 1], [10, 14, 2, 1]]; shoes = [[3, 15, 3, 1], [10, 15, 3, 1]]; }
+  else if (pose === 'walk') { legs = [[6, 13, 2, 2], [8, 13, 2, 2]]; shoes = [[5, 15, 3, 1], [8, 15, 3, 1]]; }
+  else if (pose === 'work') { legs = [[4, 14, 3, 1], [9, 14, 3, 1]]; shoes = [[3, 15, 4, 1], [9, 15, 4, 1]]; }
+  else { legs = [[5, 13, 2, 2], [9, 13, 2, 2]]; shoes = [[4, 15, 3, 1], [9, 15, 3, 1]]; }
+  R(5, 12 + (cr ? 1 : 0), 6, 1, bot.k === 'shorts' || bot.k === 'pants' || bot.k === 'overalls' ? bc : (skirt ? skirtC : bc));
+  for (const [x, y, w, h] of legs) { R(x, y, w, h, legC); P(x + w - 1, y + h - 1, legS); }
+  if (bot.k === 'shorts' && !dress) for (const [x, y, w] of legs) if (y === 13) R(x, y, w, 1, bc);
+  for (const [x, y, w] of shoes) { R(x, y, w, 1, sc); if (shoe.b) P(x + 1, y, shoe.b); }
+  /* skirt (or the bottom of a dress) */
+  if (skirt) {
+    const y0 = 11 + cr; R(5, y0, 6, 1, skirtC); R(4, y0 + 1, 8, 1, skirtC); R(4, y0 + 2, 8, 1, skirtS);
+    if (skirtP === 'dots' || skirtP === 'check') { P(5, y0 + 1, skirtB); P(8, y0 + 1, skirtB); P(10, y0 + 2, skirtB); P(6, y0 + 2, skirtB); }
+  }
+  /* body */
+  R(5, ty, 6, 4, tc); R(5, ty + 3, 6, 1, ts);
+  if (top.p === 'stripe') { R(5, ty + 1, 6, 1, top.b); R(5, ty + 3, 6, 1, top.b); }
+  if (top.p === 'check') { for (let x = 5; x < 11; x++) for (let y = ty; y < ty + 4; y++) if ((x + y) % 2) P(x, y, top.b); }
+  if (top.p === 'dots') { P(6, ty + 1, top.b); P(9, ty + 2, top.b); P(7, ty + 3, top.b); }
+  if (top.p === 'coat') { P(7, ty + 1, top.b); P(7, ty + 3, top.b); R(5, ty, 6, 1, top.b); }
+  if (top.p === 'hood') { R(6, ty, 4, 1, ts); P(7, ty + 1, top.b); P(8, ty + 1, top.b); }
+  if (bot.k === 'overalls' && !dress) { R(6, ty + 1, 4, 3, bc); P(6, ty, bc); P(9, ty, bc); P(7, ty + 2, bs); }
+  /* arms */
+  const arm = (x, yTop, len) => { R(x, yTop, 1, len, top.long ? tc : SKIN); R(x, yTop, 1, 1, tc); P(x, yTop + len, SKIN); };
+  if (pose === 'work') { const d = frame % 2; arm(4, ty + 1, 3 + d); arm(11, ty + 1, 3 + (1 - d)); }
+  else if (pose === 'carry' && carry) {
+    arm(4, ty, 2); arm(11, ty, 2);
+    const cp = palOf(carry); R(6, ty + 1, 4, 3, cp.a); P(9, ty + 3, cp.A); P(6, ty + 1, cp.h); P(7, ty, LEAF.g); P(8, ty, LEAF.G);
+    P(5, ty + 2, SKIN); P(10, ty + 2, SKIN);
+  }
+  else { const sw = pose === 'walk' ? frame % 2 : 0; arm(4, ty + sw, 3 - sw); arm(11, ty + (1 - sw) * (pose === 'walk' ? 1 : 0), pose === 'walk' ? 2 + sw : 3); }
+  /* head */
+  R(5, hy, 6, 5, SKIN); P(5, hy + 4, SKIN_D); P(10, hy + 4, SKIN_D);
+  const blink = pose === 'idle' && frame % 12 === 11;
+  if (blink) { P(6, hy + 2, SKIN_D); P(9, hy + 2, SKIN_D); } else { P(6, hy + 2, EYE); P(9, hy + 2, EYE); }
+  P(7, hy + 4, MOUTH); P(8, hy + 4, MOUTH);
+  /* face */
+  const hcol = hair.a === 'rainbow' ? RAINBOW[0] : (hair.a || '#6b4226');
+  switch (face.k) {
+    case 'blush': P(5, hy + 3, '#ff9cb5'); P(10, hy + 3, '#ff9cb5'); break;
+    case 'freckles': P(6, hy + 3, '#c98a5a'); P(9, hy + 3, '#c98a5a'); P(5, hy + 3, '#ff9cb5'); P(10, hy + 3, '#ff9cb5'); break;
+    case 'gloss': P(7, hy + 4, '#ff3b6b'); P(8, hy + 4, '#ff6f9f'); P(5, hy + 3, '#ff9cb5'); P(10, hy + 3, '#ff9cb5'); break;
+    case 'glasses': P(5, hy + 2, INK); P(7, hy + 2, INK); P(8, hy + 2, INK); P(10, hy + 2, INK); break;
+    case 'hearts': R(5, hy + 2, 2, 1, '#ff4f8f'); R(9, hy + 2, 2, 1, '#ff4f8f'); P(7, hy + 2, INK); P(8, hy + 2, INK); P(6, hy + 1, '#ff4f8f'); P(9, hy + 1, '#ff4f8f'); break;
+    case 'mustache': R(6, hy + 4, 4, 1, hcol); break;
+    case 'stars': P(5, hy + 1, '#ffd84d'); P(10, hy + 3, '#ffd84d'); P(5, hy + 3, '#ff9cb5'); break;
+    case 'beard': R(5, hy + 3, 1, 2, hcol); R(10, hy + 3, 1, 2, hcol); R(6, hy + 4, 4, 1, hcol); P(7, hy + 4, MOUTH); P(8, hy + 4, MOUTH); break;
+  }
+  /* hair */
+  const hc = y => hair.a === 'rainbow' ? RAINBOW[Math.max(0, y) % RAINBOW.length] : hcol, hs = y => dark(hc(y));
+  const H = (x, y, w, h, shade) => { for (let yy = y; yy < y + h; yy++) R(x, yy, w, 1, shade ? hs(yy) : hc(yy)); };
+  if (hair.k && hair.k !== 'bald') {
+    H(5, hy - 1, 6, 2);
+    const sides = () => { H(5, hy + 1, 1, 1); H(10, hy + 1, 1, 1); };
+    switch (hair.k) {
+      case 'short': sides(); break;
+      case 'pixie': sides(); H(6, hy + 1, 2, 1); break;
+      case 'bob': sides(); H(4, hy, 1, 4); H(11, hy, 1, 4); H(4, hy + 3, 1, 1, 1); H(11, hy + 3, 1, 1, 1); break;
+      case 'long': sides(); H(4, hy, 1, 7); H(11, hy, 1, 7); H(4, hy + 6, 1, 1, 1); H(11, hy + 6, 1, 1, 1); break;
+      case 'wavy': sides(); H(4, hy, 1, 8); H(11, hy, 1, 8); for (let y = hy + 1; y < hy + 8; y += 2) { H(4, y, 1, 1, 1); H(11, y + 1, 1, 1, 1); } break;
+      case 'braids': sides(); for (let y = hy + 1; y < hy + 7; y++) { H(4, y, 1, 1, y % 2); H(11, y, 1, 1, y % 2); } P(4, hy + 7, '#ff8fb8'); P(11, hy + 7, '#ff8fb8'); break;
+      case 'pony': sides(); H(11, hy, 2, 1); H(12, hy + 1, 1, 4); H(12, hy + 4, 1, 1, 1); P(11, hy, '#ff8fb8'); break;
+      case 'bun': sides(); H(6, hy - 3, 4, 2); H(6, hy - 2, 4, 1, 1); break;
+      case 'buns': sides(); H(3, hy - 2, 2, 2); H(11, hy - 2, 2, 2); break;
+      case 'curly': H(4, hy - 1, 8, 2); H(4, hy + 1, 1, 3); H(11, hy + 1, 1, 3); P(5, hy - 1, hs(hy)); P(8, hy, hs(hy)); P(4, hy + 2, hs(hy)); P(11, hy + 1, hs(hy)); break;
+      case 'afro': H(4, hy - 2, 8, 3); H(3, hy - 1, 10, 2); H(3, hy + 1, 2, 3); H(11, hy + 1, 2, 3); P(5, hy - 2, hs(hy)); P(9, hy - 1, hs(hy)); P(3, hy + 2, hs(hy)); P(12, hy + 1, hs(hy)); break;
+    }
+  }
+  /* hat */
+  const a = hat.a, b = hat.b;
+  switch (hat.k) {
+    case 'sun': R(3, hy, 10, 1, a); R(5, hy - 2, 6, 2, a); R(5, hy - 1, 6, 1, b); P(3, hy, dark(a)); P(12, hy, dark(a)); break;
+    case 'bow': P(9, hy - 2, a); P(9, hy - 1, a); P(12, hy - 2, a); P(12, hy - 1, a); P(10, hy - 1, dark(a)); P(11, hy - 1, dark(a)); P(10, hy - 2, a); P(11, hy - 2, a); break;
+    case 'flowers': [['#ff8fb8', 5], ['#ffe14f', 7], ['#ffffff', 9], ['#b48cf0', 10]].forEach(([c, x]) => P(x, hy - 1, c)); P(6, hy - 1, LEAF.g); P(8, hy - 1, LEAF.g); break;
+    case 'beret': R(4, hy - 2, 7, 2, a); P(7, hy - 3, a); P(4, hy - 1, dark(a)); break;
+    case 'bucket': R(5, hy - 2, 6, 2, a); R(4, hy, 8, 1, a); R(5, hy - 1, 6, 1, dark(a)); break;
+    case 'beanie': R(5, hy - 2, 6, 2, a); R(5, hy, 6, 1, b); P(7, hy - 3, b); P(8, hy - 3, b); P(6, hy - 2, dark(a)); P(9, hy - 1, dark(a)); break;
+    case 'cat': P(5, hy - 2, a); R(5, hy - 1, 2, 1, a); P(10, hy - 2, a); R(9, hy - 1, 2, 1, a); P(6, hy - 1, b); P(9, hy - 1, b); break;
+    case 'cowboy': R(2, hy, 12, 1, a); P(2, hy - 1, a); P(13, hy - 1, a); R(5, hy - 3, 6, 3, a); R(5, hy - 1, 6, 1, b); P(7, hy - 3, dark(a)); break;
+    case 'bunny': R(5, hy - 1, 6, 1, b); R(5, 0, 2, hy - 1, a); R(9, 0, 2, hy - 1, a); P(6, 1, b); P(9, 1, b); break;
+    case 'bonnet': R(4, hy - 2, 8, 2, a); R(4, hy, 1, 4, a); R(11, hy, 1, 4, a); P(5, hy + 4, b); P(10, hy + 4, b); R(5, hy - 1, 6, 1, b); break;
+    case 'witch': R(3, hy, 10, 1, a); R(5, hy - 1, 6, 1, b); R(6, hy - 2, 4, 1, a); R(7, hy - 3, 2, 1, a); P(9, 0, a); break;
+    case 'tiara': R(6, hy - 1, 4, 1, a); P(7, hy - 2, a); P(8, hy - 2, b); P(6, hy - 2, a); P(9, hy - 2, a); break;
+    case 'crown': R(5, hy - 1, 6, 1, a); P(5, hy - 2, a); P(7, hy - 2, a); P(8, hy - 2, a); P(10, hy - 2, a); P(7, hy - 3, a); P(7, hy - 1, b); P(9, hy - 1, b); break;
+  }
+}
+const off = T.canvas(16, 16), offFlip = T.canvas(16, 16);
+function farmerSprite(look, pose, frame, carry, dir) {
+  drawFarmer(off.ctx, look, pose, frame, carry);
+  T.outline(off.ctx, 0, 0, 16, 16, INK);
+  if (dir < 0) { offFlip.ctx.clearRect(0, 0, 16, 16); offFlip.ctx.save(); offFlip.ctx.translate(16, 0); offFlip.ctx.scale(-1, 1); offFlip.ctx.drawImage(off.cv, 0, 0); offFlip.ctx.restore(); return offFlip.cv; }
+  return off.cv;
+}
+
+/* ================= the tab ================= */
+const ICON = T.canvas(16, 16);
+let frameN = 0;
+function farmerPose() {
+  if (F.carryT > 0 && F.carry) return 'carry';
+  if (F.task && F.act > 0) return 'work';
+  if (F.task) return 'walk';
+  return 'idle';
+}
+function stripCtx(scr) { return scr.ctx; }
+function drawTab(scr) {
+  frameN++;
+  const pose = S.set.anim ? farmerPose() : 'idle', fr = S.set.anim ? frameN : 0;
+  const sprite = farmerSprite(S.look, pose, fr, F.carry, pose === 'walk' ? F.dir : 1);
+  ICON.ctx.clearRect(0, 0, 16, 16); ICON.ctx.drawImage(sprite, 0, 0);
+  T.favicon(ICON.cv);
+  // the title: one emoji per plot, then the money
+  const em = S.plots.filter(p => p.owned).map(p => {
+    if (!p.crop) return '🟫';
+    const c = CROP[p.crop], { stage } = plotStage(p);
+    if (stage === 3) return c.emoji;
+    if (stage === 4) return c.kind === 'palm' ? '🌴' : '🌳';
+    if (c.cat === 'tree' && stage === 2) return '🌱';
+    return stage <= 1 ? '🌱' : '🌿';
+  }).join('');
+  T.title(em + (S.set.moneyTitle ? ' · $' + fmt(S.money) : '') + ' · ' + GAME);
+  if (!scr) return;
+  const ctx = stripCtx(scr);
+  ctx.clearRect(0, 0, 16 * 9, 16);
+  ctx.drawImage(ICON.cv, 0, 0);
+  S.plots.forEach((p, i) => {
+    const ox = 16 * (i + 1);
+    if (!p.owned) { drawLocked(ctx, ox, 0); return; }
+    if (!p.crop) { drawSoil(ctx, ox, 0, false); return; }
+    const { stage, f } = plotStage(p); drawPlant(ctx, ox, 0, CROP[p.crop], stage, f);
+  });
+  // where she is: a little marker over the plot she's at or walking past
+  const at = Math.round(F.x);
+  if (at >= 1 && at <= 8) { const ox = 16 * at; ctx.fillStyle = INK; ctx.fillRect(ox + 6, 0, 3, 1); ctx.fillRect(ox + 7, 1, 1, 1); }
+  scr.setTitle(`${S.name}'s farm · $${fmt(S.money)}`);
+}
+
+/* ================= the shop under the tab ================= */
+const ui = { tab: 'garden', dirty: true, dirtyPlots: false, filter: 'all', slot: 'hat', tryOn: null, note: null };
+let scr = null, pane = null;
+const statusText = () => {
+  const t = F.task;
+  if (!t) return S.plots.some(p => p.owned && p.crop) ? `${S.name} is resting while everything grows.` : `${S.name} is saving up for seeds.`;
+  const p = S.plots[t.plot], c = CROP[p.crop] || planFor(t.plot, true), verb = { harvest: 'picking', plant: 'planting', clear: 'clearing' }[t.kind];
+  return `${S.name} is ${F.act > 0 ? '' : 'on her way to '}${verb} ${c ? c.name.toLowerCase() : ''} at plot ${t.plot + 1}.`;
+};
+const cropOptions = sel => `<option value="auto"${sel === 'auto' ? ' selected' : ''}>✨ Best pick (auto)</option>` +
+  S.unlocked.map(id => CROP[id]).sort((a, b) => a.tier - b.tier).map(c => `<option value="${c.id}"${sel === c.id ? ' selected' : ''}>${c.emoji} ${esc(c.name)}</option>`).join('');
+function plotCard(p, i) {
+  if (!p.owned) return `<div class="card plot locked"><b>Plot ${i + 1}</b><span class="muted">For sale</span><button class="b g sm" data-buyplot="${i}" data-cost="${PLOT_COST[i]}">Buy · $${fmt(PLOT_COST[i])}</button></div>`;
+  return `<div class="card plot"><div class="row"><b>Plot ${i + 1}</b><span class="spacer"></span><span class="muted" data-live="pst${i}"></span></div>
+    <div class="nm" data-live="pnm${i}"></div><div class="bar" data-live="pbar${i}"><i></i></div>
+    <select data-plan="${i}" aria-label="What to grow on plot ${i + 1}">${cropOptions(p.plan)}</select></div>`;
+}
+const PANES = {
+  garden() {
+    return `${ui.note ? `<div class="note"><p>${ui.note}</p><button class="b w sm" data-dismiss>OK</button></div>` : ''}
+      <div class="row"><div><div class="money" data-live="money"></div><div class="muted" data-live="rate"></div></div><span class="spacer"></span>
+        <div class="muted" style="text-align:right" data-live="status"></div></div>
+      <div class="plots">${S.plots.map(plotCard).join('')}</div>
+      <p class="muted" style="margin-top:10px">${esc(S.name)} looks after everything on her own, even while this tab is in the background or closed. Pick what each plot grows, or leave it on ✨ Best pick.</p>`;
+  },
+  orders() {
+    const keep = [0, 100, 1000, 10000, 100000, 1e6, 1e7, 1e8];
+    return `<h3>${esc(S.name)}'s orders</h3>
+      <p class="muted">She follows these on her own. Change them whenever you like.</p>
+      <div class="card" style="margin-bottom:10px"><b>When there's enough money, buy:</b>
+        <p class="muted" style="margin:4px 0 8px">She buys the cheapest of these first.</p>
+        <div class="rules">${S.rules.map((r, i) => `<div class="rule"><label><input type="checkbox" data-rule="${i}"${r.on ? ' checked' : ''}>${RULES[r.k]}</label></div>`).join('')}</div>
+        <div class="row" style="margin-top:10px"><span>Save up first for</span><select data-goal><option value="">nothing in particular</option>${S.rules.map(r => `<option value="${r.k}"${S.goal === r.k ? ' selected' : ''}>${RULES[r.k]}</option>`).join('')}</select></div>
+        <div class="row" style="margin-top:10px"><span>Always keep at least</span><select data-reserve>${keep.map(k => `<option value="${k}"${S.reserve === k ? ' selected' : ''}>$${fmt(k)}</option>`).join('')}</select></div>
+      </div>
+      <div class="card"><b>What to grow on each plot</b>
+        <div class="orders" style="margin-top:8px">${S.plots.map((p, i) => p.owned ? `<span>Plot ${i + 1}</span><select data-plan="${i}">${cropOptions(p.plan)}</select>` : `<span class="muted">Plot ${i + 1}</span><span class="muted">Not yours yet</span>`).join('')}</div>
+        <div class="row" style="margin-top:8px"><span class="muted">All plots:</span><select data-planall><option value="">Choose…</option>${cropOptions('')}</select></div>
+      </div>`;
+  },
+  seeds() {
+    const L = CROPS.filter(c => ui.filter === 'all' || c.cat === ui.filter);
+    return `<div class="chips">${[['all', 'All'], ...Object.entries(CAT)].map(([k, t]) => `<button data-filter="${k}" class="${ui.filter === k ? 'on' : ''}">${t}</button>`).join('')}</div>
+      <div class="list">${L.map(c => {
+        const own = isUnlocked(c.id), time = c.regrow ? `${T.dur(c.grow)} to grow, then fruit every ${T.dur(c.regrow)}` : `${T.dur(c.grow)} to grow${c.timber ? ', then she cuts it for wood' : ''}`;
+        return `<div class="card item${own ? '' : ' locked'}"><span class="em">${c.emoji}</span><div class="txt"><b>${esc(c.name)}</b>
+          <span class="muted">${CAT[c.cat].replace(/s$/, '')} · ${time} · sells for $${fmt(c.sell)}${c.seed ? ` · ${c.regrow || c.timber ? 'sapling' : 'seeds'} $${fmt(c.seed)}` : ' · free seeds'}</span></div>
+          ${own ? `<span class="ok">Yours ✓</span>` : `<button class="b g" data-unlock="${c.id}" data-cost="${c.unlock}">Get · $${fmt(c.unlock)}</button>`}</div>`;
+      }).join('')}</div>`;
+  },
+  upgrades() {
+    return `<div class="list">${UPS.map(u => {
+      const l = S.up[u.id], max = l >= u.max, c = upCost(u, l);
+      return `<div class="card item"><span class="em">${u.em}</span><div class="txt"><b>${u.name} <span class="muted">level ${l} of ${u.max}</span></b><span class="muted">Each level: ${u.what}.</span></div>
+        ${max ? '<span class="ok">All done ✓</span>' : `<button class="b g" data-upg="${u.id}" data-cost="${c}">Buy · $${fmt(c)}</button>`}</div>`;
+    }).join('')}</div>`;
+  },
+  wardrobe() {
+    const items = WEAR.filter(w => w.slot === ui.slot), t = ui.tryOn && WI[ui.tryOn];
+    let act = '';
+    if (t) {
+      const own = S.owned.includes(t.id), worn = S.look[t.slot] === t.id, wish = S.wish.includes(t.id);
+      act = `<div class="try"><b>${esc(t.name)}</b><span class="spacer"></span>${worn ? '<span class="ok">Wearing it ✓</span>' : own ? `<button class="b g" data-wear="${t.id}">Wear it</button>`
+        : `<button class="b g" data-buywear="${t.id}" data-cost="${t.price}">Buy & wear · $${fmt(t.price)}</button><button class="b w" data-wish="${t.id}">${wish ? '♥ On her wish list' : '♡ Wish list'}</button>`}</div>`;
+    }
+    return `<div class="ward"><div class="me"><canvas id="mePrev" width="16" height="16" aria-label="Your farmer"></canvas>
+        <div><input type="text" maxlength="14" value="${esc(S.name)}" data-name aria-label="Your farmer's name"><div class="muted" style="font-size:.9em;margin-top:4px;text-align:center">${t ? 'Trying on: ' + esc(t.name) : 'This is your tab icon'}</div></div></div>
+      <div class="shelf"><div class="chips">${SLOTS.map(([k, n]) => `<button data-slot="${k}" class="${ui.slot === k ? 'on' : ''}">${n}</button>`).join('')}</div>
+        <div class="grid">${items.map(w => { const own = S.owned.includes(w.id), worn = S.look[w.slot] === w.id;
+          return `<button type="button" class="wi${own ? ' own' : ''}${worn ? ' worn' : ''}${ui.tryOn === w.id ? ' sel' : ''}" data-try="${w.id}"><canvas width="16" height="16" data-thumb="${w.id}"></canvas>${esc(w.name)}<span class="pr">${worn ? 'Wearing' : own ? 'Yours' : '$' + fmt(w.price)}</span>${S.wish.includes(w.id) ? '<span class="wish">♥</span>' : ''}</button>`; }).join('')}</div>
+        ${act}<p class="muted" style="margin-top:8px">Tap something to try it on. Put things on her wish list and she'll buy them herself when there's money (see Orders).</p></div></div>`;
+  },
+  notes() {
+    const st = S.stats, top = Object.entries(st.by).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id, n]) => `${CROP[id].emoji} ${n.toLocaleString()}`).join(' · ');
+    return `<div class="card" style="margin-bottom:10px"><b>${esc(S.name)}'s farm so far</b><p class="muted" style="margin:4px 0 0">${st.harvests.toLocaleString()} harvests · $${fmt(st.earned)} earned · ${T.dur(st.time)} of farming${top ? ' · most picked: ' + top : ''}</p></div>
+      <h3>What happened</h3><div class="log">${S.log.length ? S.log.map(l => `<div><i>${new Date(l.at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</i>${esc(l.text)}</div>`).join('') : '<div class="muted">Nothing yet. Check back any time.</div>'}</div>`;
+  },
+};
+const TABS = [['garden', '🌱 Garden'], ['orders', '📋 Orders'], ['seeds', '🌻 Seeds'], ['upgrades', '🧺 Upgrades'], ['wardrobe', '👒 Wardrobe'], ['notes', '📖 Notes']];
+
+function buildShop() {
+  scr.body.innerHTML = `<div class="tf"><div class="tf-tabs" role="tablist">${TABS.map(([k, t]) => `<button role="tab" data-tab="${k}">${t}</button>`).join('')}</div><div class="tf-pane" id="pane"></div></div>`;
+  pane = scr.body.querySelector('#pane');
+  const root = scr.body;
+  root.addEventListener('click', e => {
+    const d = e.target.closest('button'); if (!d) return; const s = d.dataset;
+    if (s.tab) { ui.tab = s.tab; ui.tryOn = null; ui.dirty = true; }
+    else if (s.buyplot != null) buyPlot(+s.buyplot);
+    else if (s.unlock) unlockCrop(s.unlock);
+    else if (s.upg) buyUp(s.upg);
+    else if (s.filter) { ui.filter = s.filter; ui.dirty = true; }
+    else if (s.slot) { ui.slot = s.slot; ui.tryOn = null; ui.dirty = true; }
+    else if (s.try) { ui.tryOn = ui.tryOn === s.try ? null : s.try; if (ui.tryOn && S.owned.includes(ui.tryOn)) S.look[WI[ui.tryOn].slot] = ui.tryOn; ui.dirty = true; }
+    else if (s.wear) { S.look[WI[s.wear].slot] = s.wear; ui.dirty = true; }
+    else if (s.buywear) buyWear(s.buywear);
+    else if (s.wish) { S.wish = S.wish.includes(s.wish) ? S.wish.filter(x => x !== s.wish) : S.wish.concat(s.wish); ui.dirty = true; }
+    else if (s.dismiss != null) { ui.note = null; ui.dirty = true; }
+    run && run.save();
+  });
+  root.addEventListener('change', e => {
+    const s = e.target.dataset;
+    if (s.plan != null) { S.plots[+s.plan].plan = e.target.value; ui.dirty = true; if (F.task && F.task.plot === +s.plan) F.task = null; }
+    else if (s.planall != null && e.target.value) { S.plots.forEach(p => { if (p.owned) p.plan = e.target.value; }); F.task = null; ui.dirty = true; }
+    else if (s.rule != null) { S.rules[+s.rule].on = e.target.checked; }
+    else if (s.reserve != null) { S.reserve = +e.target.value; }
+    else if (s.goal != null) { S.goal = e.target.value; }
+    run && run.save();
+  });
+  root.addEventListener('input', e => { if (e.target.dataset.name != null) { S.name = (e.target.value.trim() || 'Poppy').slice(0, 14); } });
+  root.addEventListener('focusout', e => { if (e.target.dataset.name != null) { e.target.value = S.name; ui.dirty = true; run && run.save(); } });
+}
+function renderShop() {
+  if (ui.dirty) {
+    const hadFocus = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.name != null;
+    if (hadFocus) return liveUpdate();      // don't rebuild while she's being renamed
+    ui.dirty = false;
+    scr.body.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === ui.tab));
+    const st = pane.scrollTop; pane.innerHTML = PANES[ui.tab](); pane.scrollTop = st;
+    pane.querySelectorAll('canvas[data-thumb]').forEach(cv => {
+      const w = WI[cv.dataset.thumb], look = Object.assign({}, S.look, { [w.slot]: w.id }), ctx = cv.getContext('2d');
+      ctx.drawImage(farmerSprite(look, 'idle', 0, null, 1), 0, 0);
+    });
+  }
+  liveUpdate();
+}
+function liveUpdate() {
+  const set = (k, v) => { const el = pane.querySelector(`[data-live="${k}"]`); if (el && el.textContent !== v) el.textContent = v; };
+  set('money', '$' + fmt(S.money));
+  set('rate', S.rate > 0.01 ? `about $${fmt(S.rate * 60)} a minute` : 'just getting started');
+  set('status', statusText());
+  S.plots.forEach((p, i) => {
+    if (!p.owned) return;
+    const c = p.crop && CROP[p.crop], { stage, f } = plotStage(p);
+    set('pnm' + i, c ? `${c.emoji} ${c.name}` : 'Empty soil');
+    set('pst' + i, !c ? 'waiting' : stage === 3 ? 'ready!' : T.dur((1 - f) * need(p) / growMult()));
+    const bar = pane.querySelector(`[data-live="pbar${i}"]`); if (bar) { bar.firstChild.style.width = (c ? f * 100 : 0) + '%'; bar.classList.toggle('ripe', stage === 3); }
+  });
+  pane.querySelectorAll('[data-cost]').forEach(b => { const off = S.money < +b.dataset.cost; if (b.disabled !== off) b.disabled = off; });
+  const me = pane.querySelector('#mePrev');
+  if (me) { const ctx = me.getContext('2d'); ctx.clearRect(0, 0, 16, 16); const t = ui.tryOn && WI[ui.tryOn]; const look = t ? Object.assign({}, S.look, { [t.slot]: t.id }) : S.look; ctx.drawImage(farmerSprite(look, 'idle', frameN, null, 1), 0, 0); }
+}
+
+/* ================= saving, loading, the away note ================= */
+function load(d) {
+  const f = fresh();
+  S = Object.assign(f, d);
+  S.plots = f.plots.map((p, i) => Object.assign(p, (d.plots || [])[i] || {}));
+  S.plots.forEach(p => { if (p.crop && !CROP[p.crop]) p.crop = null; if (p.plan !== 'auto' && !CROP[p.plan]) p.plan = 'auto'; });
+  S.unlocked = (d.unlocked || ['carrot']).filter(id => CROP[id]); if (!S.unlocked.includes('carrot')) S.unlocked.unshift('carrot');
+  S.up = Object.assign(f.up, d.up || {});
+  S.rules = Array.isArray(d.rules) && d.rules.length === f.rules.length ? d.rules : f.rules;
+  S.owned = Array.from(new Set(f.owned.concat((d.owned || []).filter(id => WI[id]))));
+  S.wish = (d.wish || []).filter(id => WI[id]);
+  S.look = Object.assign({}, DEFAULT_LOOK, d.look || {}); for (const k in S.look) if (!WI[S.look[k]] || !S.owned.includes(S.look[k])) S.look[k] = DEFAULT_LOOK[k];
+  S.stats = Object.assign(f.stats, d.stats || {}); S.set = Object.assign(f.set, d.set || {});
+  if (typeof d.fx === 'number') F.x = d.fx;
+}
+const save = () => Object.assign({}, S, { fx: F.x });
+const snapshot = () => ({ h: S.stats.harvests, e: S.stats.earned, u: S.unlocked.length, o: S.owned.length });
+function away(b, a, secs) {
+  if (!b) return;
+  const h = a.h - b.h, e = a.e - b.e; if (h <= 0) return;
+  const extra = [a.u > b.u ? `got ${a.u - b.u} new seed${a.u - b.u > 1 ? 's' : ''}` : '', a.o > b.o ? `bought ${a.o - b.o} new outfit piece${a.o - b.o > 1 ? 's' : ''}` : ''].filter(Boolean).join(' and ');
+  const text = `While you were away (${T.dur(secs)}), ${S.name} picked ${h.toLocaleString()} crops and earned $${fmt(e)}${extra ? ', and ' + extra : ''}. 🌷`;
+  ui.note = esc(text); log(text); ui.dirty = true;
+}
+
+/* ================= the cover picture (?cover) ================= */
+function cover() {
+  document.body.className = 'cover';
+  const c = T.canvas(320, 180), ctx = c.ctx;
+  c.cv.style.width = '960px'; c.cv.style.height = '540px'; document.body.innerHTML = ''; document.body.appendChild(c.cv);
+  ctx.fillStyle = '#cfe9ff'; ctx.fillRect(0, 0, 320, 180);
+  ctx.fillStyle = '#f2d3e0'; ctx.fillRect(0, 0, 320, 30);
+  ctx.fillStyle = '#fff9f4'; ctx.fillRect(56, 6, 200, 24); ctx.fillRect(0, 30, 320, 2);
+  const look = { hat: 'hat-sun', hair: 'hair-braids', face: 'face-blush', top: 'top-gingham', bottom: 'bot-overalls', shoes: 'shoe-wellies' };
+  const tab = ['strawberry', 'sunflower', 'tomato', 'apple', 'tulip', 'carrot', 'watermelon', 'sakura'];
+  ctx.drawImage(farmerSprite(look, 'idle', 0, null, 1), 62, 10);
+  tab.forEach((id, i) => drawPlant(ctx, 80 + i * 16, 10, CROP[id], 3, 1));
+  ctx.fillStyle = INK; ctx.font = 'bold 9px Arial'; ctx.fillText('$12.3K', 214, 22);
+  ctx.fillStyle = '#b9e3a5'; ctx.fillRect(0, 120, 320, 60);
+  const field = ['sunflower', 'rose', 'strawberry', 'lavender', 'peach', 'tulip', 'pumpkin', 'daisy', 'cherry', 'hibiscus', 'corn', 'lotus'];
+  const big = T.canvas(16, 16);
+  field.forEach((id, i) => { big.ctx.clearRect(0, 0, 16, 16); drawPlant(big.ctx, 0, 0, CROP[id], 3, 1); ctx.drawImage(big.cv, 0, 0, 16, 16, 8 + i * 26, 92 + (i % 2) * 18, 32, 32); });
+  const me = farmerSprite({ hat: 'hat-flowers', hair: 'hair-long-brown', face: 'face-blush', top: 'top-floral', bottom: 'bot-skirt', shoes: 'shoe-maryjane' }, 'idle', 0, null, 1);
+  ctx.drawImage(me, 0, 0, 16, 16, 128, 100, 64, 64);
+  ctx.fillStyle = 'rgba(74,58,79,.85)'; ctx.font = 'bold 22px Arial'; ctx.textAlign = 'center'; ctx.fillText('Tiny Tab Farm', 160, 64);
+  ctx.font = 'bold 10px Arial'; ctx.fillText('a cozy farm that lives in your browser tab', 160, 80);
+}
+
+/* ================= start ================= */
+let run = null;
+if (/[?&]cover\b/.test(location.search)) { cover(); return; }
+scr = T.screen(document.getElementById('game'), { tiles: 9, label: GAME, url: location.host ? location.host + location.pathname : 'grugdigital.com/arcade/tiny-tab-farm/' });
+buildShop();
+T.menu({
+  screen: scr,
+  help: `<p><b>Your farmer is the little icon on this tab</b>, and the tab's title shows her plots and your money. Leave the tab open (in the background is fine) and she keeps farming; she even keeps going for up to a day while it's closed.</p>
+    <p><b>Garden:</b> what's growing. <b>Orders:</b> what she buys on her own and what each plot grows. <b>Seeds:</b> new vegetables, fruits, flowers and trees. <b>Upgrades:</b> make her faster. <b>Wardrobe:</b> dress her up; it shows on the tab.</p>
+    <p>Trees take longer, but fruit trees keep giving fruit without replanting. Nothing can go wrong: there's no way to lose.</p>`,
+  settings: [
+    { label: 'Animate my farmer on the tab', get: () => S.set.anim, set: v => { S.set.anim = v; } },
+    { label: 'Show my money in the tab title', get: () => S.set.moneyTitle, set: v => { S.set.moneyTitle = v; } },
+  ],
+  reset() { run.wipe(); S = fresh(); Object.assign(F, { x: 1, dir: 1, task: null, act: 0, carry: null, carryT: 0 }); ui.note = null; ui.tab = 'garden'; ui.dirty = true; run.save(); },
+});
+run = T.run({
+  key: KEY, step, save, load, snapshot, away, stepSize: 0.5, tick: 250, maxOffline: 86400,
+  render(visible) { drawTab(visible ? scr : null); if (visible) renderShop(); },
+});
+// daily Pearls on grugdigital.com (shown once; never on the tab)
+if (window.GrugPearls) GrugPearls.start().then(r => {
+  if (!window.GrugPearlPopup) return;
+  if (r.welcome) GrugPearlPopup.show(r.welcome, { title: 'Welcome to Grug!' });
+  else if (r.daily) GrugPearlPopup.show(r.daily, { title: 'Daily Pearls' });
+}).catch(() => {});
+window.TinyTabFarm = { get state() { return S; }, farmer: F, CROPS, WEAR, step, run: () => run, drawPlant, farmerSprite };
+})();
+</script>
+</body>
+</html>

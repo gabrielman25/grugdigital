@@ -1,7 +1,9 @@
 /* The Grug Arcade's shared data and page furniture, used by the games list (/arcade/) and the game pages (/arcade/place/?id=<slug>).
    GAMES: one entry per game in arcade/<slug>/ (with its cover, <slug>-grug-arcade.jpg). added / updated are the dates in the repo's history; "tag" is the
    red line under the name; "about" and "controls" fill the game's page (coop: true adds the Local Multiplayer box: static/local-mp.js is wired in). Plays and favourites are kept per browser
-   (localStorage 'grug.arcade.v1'), like the rest of Grug: there's no server, so there are no global visit counts. */
+   (localStorage 'grug.arcade.v1'), like the rest of Grug: there's no server, so there are no global visit counts.
+   CATS: the Arcade's categories (the pop-up on /arcade/ and the Categories filter). Each game has a cat (default '3d').
+   TAB_BRAND is the shown name of the tab-games line (engine: arcade/tab/tab.js); change it here to rename it everywhere. */
 (() => {
   const $ = id => document.getElementById(id), O = window.GrugOutfits, P = window.GrugPearls;
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -10,10 +12,24 @@
   const GENRES = [
     ['all', 'All'], ['town-and-city', 'Town and City'], ['medieval', 'Fantasy'], ['sci-fi', 'Sci-Fi'], ['ninja', 'Ninja'], ['scary', 'Scary'],
     ['pirate', 'Pirate'], ['adventure', 'Adventure'], ['sports', 'Sports'], ['funny', 'Funny'], ['wild-west-cowboy', 'Wild West'], ['war', 'War'],
-    ['skatepark', 'Skate Park'], ['gametutorials', 'Tutorial']];
+    ['skatepark', 'Skate Park'], ['gametutorials', 'Tutorial'], ['idle', 'Idle & Cozy']];
+
+  const TAB_BRAND = 'Tab Games';
+  const CATS = [
+    { id: 'tab', name: TAB_BRAND, hash: 'tab-games', blurb: 'Little games that live in your browser tab. Start one, then go do your thing: they keep playing while you browse.' },
+    { id: '3d', name: '3D Games', hash: '3d-games', blurb: 'Blocky worlds you explore as your own character: dress up, build, adventure and play with friends.' },
+    { id: 'ds', name: 'Nintendo DS Games', hash: 'ds-games', soon: true, blurb: 'Coming soon: DS games you can play right here in your browser.' }];
+  const catOf = g => g.cat || '3d';
   const gname = id => (GENRES.find(g => g[0] === id) || [, 'All'])[1];
 
   const GAMES = [
+    { slug: 'tiny-tab-farm', cat: 'tab', outfit: false, name: 'Tiny Tab Farm', genres: ['idle'], tag: 'A cozy farm that lives in your tab', featured: true,
+      added: '2026-11-25T06:00:00Z', updated: '2026-11-25T06:00:00Z', alt: 'A pixel farmer in a flower crown among sunflowers, strawberries and fruit trees, with her farm in a browser tab',
+      stats: ['She farms while you browse', '47 seeds and a whole wardrobe'], players: '1',
+      about: ['A cozy idle farm that lives in your browser tab. Your farmer is the little picture on the tab, and the tab\'s title shows her garden and your money. She plants and picks everything on her own, from the very first minute.',
+        'Give her orders: what to grow on each plot (or let her pick the best crop), and what to buy when there\'s enough money: new plots, new seeds, upgrades and clothes from her wish list. Unlock 47 vegetables, fruits, flowers and trees and grow up to 8 plots. Fruit trees keep giving fruit without replanting.',
+        'Dress her up in sun hats, flower crowns, bows, dresses, overalls, rain boots, bunny slippers and more. Whatever she wears shows on your tab. There\'s nothing to lose and nothing to rush: leave the tab in the background, or close it, and she keeps farming for up to a day.'],
+      controls: [['Click / tap', 'Everything: there are no keys to learn'], ['Esc', 'Game Menu']] },
     { slug: 'grug-studio', name: 'Grug Studio', genres: ['gametutorials', 'town-and-city'], tag: 'Make your avatar · build at true scale', featured: true,
       added: '2026-11-25T02:00:00Z', updated: '2026-11-25T02:00:00Z', alt: 'A player beside a two-storey building on a studded baseplate, with the Avatar and Building pads',
       stats: ['Create your avatar, then walk around', 'Change a building live, at real size'], players: '1',
@@ -225,5 +241,5 @@
     if ($('mePic')) { $('meSel').addEventListener('change', e => { if (O) O.setActive(e.target.value); }); addEventListener('grug:outfits', me); me(); }
   }
 
-  window.GrugArcade = { GENRES, GAMES, gname, esc, ago, tile, place, rec, saveRec, chrome, WDAD };
+  window.GrugArcade = { GENRES, GAMES, CATS, TAB_BRAND, catOf, gname, esc, ago, tile, place, rec, saveRec, chrome, WDAD };
 })();
