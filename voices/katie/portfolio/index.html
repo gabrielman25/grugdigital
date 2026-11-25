@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Katie P. · Voice Actor</title>
+<meta name="description" content="Katie P. (Kat), voice actor. Demos, credits, resume and booking.">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://grugdigital.com/voices/katie/portfolio/">
+<meta name="theme-color" content="#000000">
+<style>
+@font-face{font-family:"Pirata One";src:url(../fonts/pirata-one.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"Anton";src:url(../fonts/anton.woff2) format("woff2");font-display:swap}
+@font-face{font-family:"Inter";src:url(../fonts/inter-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Inter";src:url(../fonts/inter-500.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Inter";src:url(../fonts/inter-600.woff2) format("woff2");font-weight:600;font-display:swap}
+
+:root{
+  --black:#000;--white:#f7f3ee;--bone:#efe8dc;--soft:rgba(247,243,238,.62);--mute:rgba(247,243,238,.4);--hair:rgba(247,243,238,.12);
+  --wine:#7b1e2e;--rose:#c2405c;--ghost:#a9c4e6;
+  --goth:"Pirata One",Georgia,serif;--disp:"Anton","Impact","Arial Narrow",sans-serif;--sans:"Inter",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  --ease:cubic-bezier(.2,.7,.2,1);color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:90px;background:#000}
+body{margin:0;color:var(--white);font:400 16px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden;background:transparent}
+a{color:inherit}
+img{max-width:100%;display:block}
+.wrap{width:min(1200px,100% - 56px);margin:0 auto}
+::selection{background:var(--rose);color:#fff}
+
+/* ambient light behind the glass: slow-drifting wine and ghost-blue glows on pitch black */
+.ambient{position:fixed;inset:0;z-index:-2;background:#000;overflow:hidden;pointer-events:none}
+.ambient i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;will-change:transform}
+.ambient .a{width:56vw;height:56vw;left:-14vw;top:8vh;background:radial-gradient(circle,#8a1f35,transparent 65%);animation:drift1 26s var(--ease) infinite alternate}
+.ambient .b{width:44vw;height:44vw;right:-10vw;top:38vh;background:radial-gradient(circle,#3a4f72,transparent 65%);opacity:.45;animation:drift2 32s var(--ease) infinite alternate}
+.ambient .c{width:36vw;height:36vw;left:30vw;bottom:-14vw;background:radial-gradient(circle,#5e1424,transparent 65%);animation:drift1 38s var(--ease) infinite alternate-reverse}
+@keyframes drift1{to{transform:translate(8vw,-6vh) scale(1.12)}}
+@keyframes drift2{to{transform:translate(-7vw,5vh) scale(.92)}}
+/* film grain over everything */
+.grain{position:fixed;inset:-50%;z-index:100;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* liquid glass: frosted, saturated, a specular rim on top, a soft sheen that follows the pointer */
+.glass{position:relative;isolation:isolate;border-radius:28px;
+  background:linear-gradient(145deg,rgba(255,255,255,.11),rgba(255,255,255,.035) 45%,rgba(255,255,255,.06));
+  -webkit-backdrop-filter:blur(28px) saturate(170%);backdrop-filter:blur(28px) saturate(170%);
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(255,255,255,.06),inset 0 0 30px rgba(255,255,255,.03),0 24px 60px rgba(0,0,0,.55)}
+.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;pointer-events:none;
+  background:radial-gradient(420px circle at var(--mx,30%) var(--my,0%),rgba(255,255,255,.13),transparent 60%);opacity:.9;transition:opacity .3s}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;padding:1px;
+  background:linear-gradient(160deg,rgba(255,255,255,.55),rgba(255,255,255,0) 30%,rgba(255,255,255,0) 70%,rgba(255,255,255,.18));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:54px;padding:0 28px;border-radius:999px;font:600 15px/1 var(--sans);letter-spacing:.01em;
+  text-decoration:none;cursor:pointer;border:0;transition:transform .25s var(--ease),box-shadow .25s,background .25s;white-space:nowrap}
+.btn:hover{transform:translateY(-2px)}
+.btn svg{width:16px;height:16px}
+.btn.solid{background:var(--white);color:#000;box-shadow:0 10px 30px rgba(255,255,255,.12)}
+.btn.solid:hover{box-shadow:0 14px 40px rgba(255,255,255,.2)}
+.btn.glass{color:var(--white);border-radius:999px}
+.btn.sm{height:42px;padding:0 20px;font-size:14px}
+.btn[aria-disabled=true]{opacity:.55;cursor:default;transform:none}
+
+/* placeholders */
+.ph{display:inline-flex;align-items:center;gap:6px;font:600 10px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--ghost);padding:6px 10px;border:1px dashed rgba(169,196,230,.5);border-radius:999px;white-space:nowrap}
+.pt{color:var(--mute);font-style:italic}
+
+/* nav: a floating glass pill */
+.nav{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:50;width:min(1200px,100% - 32px);height:64px;display:flex;align-items:center;gap:24px;padding:0 10px 0 26px;border-radius:999px}
+.brand{font:400 30px/1 var(--goth);text-decoration:none}
+.nav ul{display:flex;gap:4px;margin:0 0 0 auto;padding:0;list-style:none}
+.nav ul a{display:block;padding:10px 16px;border-radius:999px;font:500 14px/1 var(--sans);color:var(--soft);text-decoration:none;transition:color .2s,background .2s}
+.nav ul a:hover{color:var(--white)}
+.nav ul a.on{color:var(--white);background:rgba(255,255,255,.1)}
+
+/* hero */
+.hero{position:relative;min-height:max(760px,100vh);display:flex;align-items:flex-end;overflow:hidden;background:#000}
+.hero .photo{position:absolute;top:0;right:0;bottom:0;width:62%;margin:0}
+.hero .photo::after{content:"";position:absolute;inset:-1px;background:linear-gradient(90deg,#000 0%,rgba(0,0,0,.85) 12%,rgba(0,0,0,.35) 32%,rgba(0,0,0,0) 52%),linear-gradient(0deg,#000 0%,rgba(0,0,0,.6) 18%,rgba(0,0,0,0) 40%),linear-gradient(180deg,rgba(0,0,0,.55) 0%,rgba(0,0,0,0) 18%)}
+.hero .photo img{width:100%;height:100%;object-fit:cover;object-position:50% 16%;filter:contrast(1.06) saturate(.85)}
+.hero .glow{position:absolute;left:-10%;bottom:-30%;width:70%;height:90%;background:radial-gradient(closest-side,rgba(138,31,53,.55),transparent);filter:blur(40px)}
+.hero .in{position:relative;z-index:1;padding:0 0 64px}
+.pill{display:inline-flex;align-items:center;gap:10px;height:38px;padding:0 16px 0 12px;border-radius:999px;font:500 13px/1 var(--sans);color:var(--soft)}
+.pill b{width:8px;height:8px;border-radius:50%;background:var(--rose);box-shadow:0 0 0 4px rgba(194,64,92,.25)}
+.hero h1{margin:22px 0 0;font:400 clamp(110px,17vw,250px)/.8 var(--goth);letter-spacing:-.01em;text-shadow:0 20px 60px rgba(0,0,0,.6)}
+.hero .role{margin:18px 0 0;font:400 clamp(28px,3.6vw,52px)/1 var(--disp);letter-spacing:.06em;text-transform:uppercase}
+.hero .role span{color:transparent;-webkit-text-stroke:1px rgba(247,243,238,.55)}
+.hero .bar{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:40px;padding:12px 12px 12px 30px;border-radius:999px;max-width:760px}
+.hero .bar p{margin:0;color:var(--soft);font-size:15px}
+.hero .bar .ctas{display:flex;gap:8px;flex:none}
+
+/* marquee band */
+.marquee{position:relative;background:#000;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);overflow:hidden;padding:26px 0}
+.marquee .track{display:flex;gap:40px;width:max-content;animation:roll 38s linear infinite}
+.marquee span{font:400 clamp(56px,8vw,112px)/1 var(--disp);text-transform:uppercase;letter-spacing:.02em;white-space:nowrap}
+.marquee span.o{color:transparent;-webkit-text-stroke:1.2px rgba(247,243,238,.5)}
+.marquee span.x{font-family:var(--goth);color:var(--rose)}
+@keyframes roll{to{transform:translateX(-50%)}}
+
+/* sections */
+.sec{position:relative;padding:140px 0}
+.sec.black{background:#000}
+.label{display:flex;align-items:center;gap:14px;font:600 12px/1 var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
+.label::after{content:"";flex:0 0 48px;height:1px;background:var(--hair)}
+.title{margin:22px 0 0;font:400 clamp(72px,11vw,168px)/.92 var(--disp);text-transform:uppercase;letter-spacing:-.005em}
+.title .o{color:transparent;-webkit-text-stroke:1.5px rgba(247,243,238,.6)}
+.head{display:grid;grid-template-columns:1fr auto;gap:32px;align-items:end;margin-bottom:64px}
+.head p{max-width:340px;margin:0;color:var(--soft)}
+
+/* demos */
+.demos{display:grid;grid-template-columns:1.4fr 1fr;gap:20px}
+.player{padding:38px;display:flex;flex-direction:column;justify-content:space-between;min-height:360px}
+.player .top{display:flex;justify-content:space-between;align-items:center}
+.player h3{margin:26px 0 6px;font:400 54px/.95 var(--disp);text-transform:uppercase;letter-spacing:.01em}
+.player .sub{color:var(--soft)}
+.ctrl{display:flex;align-items:center;gap:22px;margin-top:36px}
+.pbtn{flex:none;width:78px;height:78px;border-radius:50%;border:0;display:grid;place-items:center;cursor:pointer;color:#000;
+  background:radial-gradient(circle at 35% 25%,#fff,#e9e2d8 60%,#cfc6ba);box-shadow:0 12px 34px rgba(0,0,0,.5),inset 0 -3px 6px rgba(0,0,0,.12),inset 0 2px 2px #fff;transition:transform .25s var(--ease)}
+.pbtn:hover{transform:scale(1.06)}
+.pbtn svg{width:24px;height:24px;margin-left:4px}
+.wave{flex:1;display:flex;align-items:center;gap:3px;height:70px}
+.wave i{flex:1;border-radius:3px;background:rgba(247,243,238,.24)}
+.wave i:nth-child(-n+14){background:linear-gradient(var(--white),rgba(247,243,238,.7))}
+.time{font:500 13px/1 var(--sans);color:var(--mute);font-variant-numeric:tabular-nums}
+.list{display:grid;gap:12px;align-content:start}
+.trk{display:grid;grid-template-columns:52px 1fr auto;gap:18px;align-items:center;padding:16px 20px 16px 16px;border-radius:22px;cursor:pointer;transition:transform .25s var(--ease)}
+.trk:hover{transform:translateX(4px)}
+.trk .pb{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.trk .pb svg{width:16px;height:16px;margin-left:2px}
+.trk b{display:block;font:400 24px/1 var(--disp);text-transform:uppercase;letter-spacing:.02em}
+.trk span{font-size:13px;color:var(--mute)}
+.note{margin:16px 0 0 6px;font-size:13px;color:var(--mute);min-height:1.3em}
+
+/* about (pitch black, hairlines) */
+.about{display:grid;grid-template-columns:1.15fr 1fr;gap:80px;align-items:start}
+.about .big{margin:0 0 30px;font:500 clamp(28px,3.2vw,42px)/1.2 var(--sans);letter-spacing:-.02em}
+.about .big em{font-style:normal;color:var(--mute)}
+.about p{margin:0 0 16px;color:var(--soft)}
+.facts{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--hair)}
+.facts div{padding:26px 0 26px;border-bottom:1px solid var(--hair)}
+.facts div:nth-child(odd){padding-right:20px;border-right:1px solid var(--hair)}
+.facts div:nth-child(even){padding-left:24px}
+.facts dt{font:600 11px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--mute);margin-bottom:12px}
+.facts dd{margin:0;font-size:17px}
+
+/* credits */
+.credits{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.credit{padding:14px 14px 24px;transition:transform .35s var(--ease)}
+.credit:hover{transform:translateY(-6px)}
+.credit .art{aspect-ratio:16/10;border-radius:18px;margin-bottom:20px;display:grid;place-items:center;
+  background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,0)),#0b0a0c;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.credit .art span{font:400 64px/1 var(--goth);color:rgba(247,243,238,.08)}
+.credit b{display:block;padding:0 10px;font:400 26px/1.05 var(--disp);text-transform:uppercase;letter-spacing:.02em}
+.credit small{display:flex;justify-content:space-between;gap:10px;padding:8px 10px 0;font-size:13px;color:var(--mute)}
+
+/* resume (pitch black) */
+.resume{display:grid;grid-template-columns:1.2fr 1fr;gap:80px}
+.rcol h3{display:flex;justify-content:space-between;align-items:center;margin:0 0 6px;padding-bottom:18px;border-bottom:1px solid var(--hair);font:400 28px/1 var(--disp);text-transform:uppercase;letter-spacing:.03em}
+.rows{list-style:none;margin:0 0 56px;padding:0}
+.rows li{display:grid;grid-template-columns:110px 1fr;gap:20px;padding:22px 0;border-bottom:1px solid var(--hair)}
+.rows .yr{color:var(--mute);font-variant-numeric:tabular-nums}
+.rows b{display:block;font-weight:600;font-size:17px}
+.rows p{margin:4px 0 0;color:var(--mute);font-style:italic;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;padding:24px 0 56px}
+.chips i{font-style:normal;font-size:14px;padding:10px 18px;border-radius:999px;border:1px dashed rgba(247,243,238,.25);color:var(--soft)}
+.gear{display:grid;grid-template-columns:140px 1fr;margin:0}
+.gear dt,.gear dd{margin:0;padding:16px 0;border-bottom:1px solid var(--hair)}
+.gear dt{color:var(--mute);font-size:14px}
+.gear dd{font-style:italic;color:var(--mute)}
+.dl{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:72px;padding:30px 30px 30px 38px}
+.dl b{display:block;font:400 32px/1 var(--disp);text-transform:uppercase;letter-spacing:.02em}
+.dl span{color:var(--mute);font-size:14px}
+
+/* quotes */
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.quote{margin:0;padding:36px 34px 30px;display:flex;flex-direction:column;justify-content:space-between;min-height:280px}
+.quote .mark{font:400 90px/.6 var(--goth);color:var(--rose);height:44px}
+.quote blockquote{margin:18px 0 28px;font:500 21px/1.45 var(--sans);letter-spacing:-.01em}
+.quote cite{font-style:normal;font-size:13px;color:var(--mute)}
+
+/* voice packs (pitch black band) */
+.packs{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:end}
+.packs h2{margin:0;font:400 clamp(80px,13vw,200px)/.9 var(--disp);text-transform:uppercase}
+.packs h2 .o{color:transparent;-webkit-text-stroke:1.5px rgba(247,243,238,.6)}
+.packs p{max-width:360px;margin:0 0 20px;color:var(--soft)}
+
+/* licence & credit */
+.sec.lic{padding:0 0 140px}
+.licbox{display:grid;grid-template-columns:1.2fr 1fr;gap:48px;align-items:center;padding:44px 46px}
+.licbox h3{margin:18px 0 14px;font:400 clamp(44px,5vw,72px)/.95 var(--disp);text-transform:uppercase}
+.licbox h3 .o{color:transparent;-webkit-text-stroke:1.2px rgba(247,243,238,.6)}
+.licbox p{margin:0;color:var(--soft)}
+.licbox a{color:var(--white)}
+.credit-line{display:grid;gap:14px;padding:22px;border-radius:20px;background:rgba(0,0,0,.45);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.credit-line code{font:13px/1.55 ui-monospace,Menlo,Consolas,monospace;color:var(--bone)}
+.credit-line .btn{justify-self:start}
+footer .meta a{text-decoration:underline;text-decoration-color:rgba(247,243,238,.25);text-underline-offset:3px}
+footer .meta a:hover{color:var(--white)}
+
+/* contact */
+.contact{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;align-items:center}
+.contact .big{margin:22px 0 26px;font:400 clamp(88px,12vw,180px)/.92 var(--disp);text-transform:uppercase}
+.contact .big .o{color:transparent;-webkit-text-stroke:1.5px rgba(247,243,238,.6)}
+.contact p{max-width:420px;margin:0;color:var(--soft)}
+.reach{display:grid;gap:14px}
+.row{display:grid;grid-template-columns:56px 1fr auto;gap:18px;align-items:center;padding:16px 22px 16px 16px;text-decoration:none;border-radius:24px;transition:transform .25s var(--ease)}
+a.row:hover{transform:translateX(6px)}
+.row .ic{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.row .ic svg{width:22px;height:22px}
+.row b{display:block;font-weight:600;font-size:17px;word-break:break-all}
+.row span{font-size:13px;color:var(--mute)}
+.row .arr{width:20px;height:20px;color:var(--soft)}
+
+/* footer: her name, huge, cropped by the bottom edge */
+footer{position:relative;background:#000;overflow:hidden;padding:60px 0 0;border-top:1px solid var(--hair)}
+footer .meta{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--mute);font-size:13px}
+footer .meta a{text-decoration:none}
+footer .giant{margin:30px 0 -0.24em;text-align:center;font:400 clamp(140px,26vw,400px)/1 var(--goth);color:transparent;-webkit-text-stroke:1px rgba(247,243,238,.3);
+  background:linear-gradient(180deg,rgba(247,243,238,.2),transparent 75%);-webkit-background-clip:text;background-clip:text;white-space:nowrap;user-select:none}
+
+/* reveal on scroll */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important}.rv{opacity:1;transform:none;transition:none}}
+
+/* tablets and phones */
+@media (max-width:960px){
+  .nav ul{display:none}
+  .nav .btn{margin-left:auto}
+  .hero{align-items:flex-end;min-height:0;padding-top:0}
+  .hero .photo{position:relative;width:100%;height:68vh;min-height:420px}
+  .hero .photo::after{background:linear-gradient(0deg,#000 0%,rgba(0,0,0,.7) 25%,rgba(0,0,0,0) 55%),linear-gradient(180deg,rgba(0,0,0,.5) 0%,rgba(0,0,0,0) 20%)}
+  .hero{flex-direction:column;align-items:stretch}
+  .hero .in{margin-top:-30vh;padding-bottom:48px}
+  .hero .bar{flex-direction:column;align-items:flex-start;border-radius:28px;padding:22px}
+  .sec{padding:96px 0}
+  .head{grid-template-columns:1fr;margin-bottom:44px}
+  .demos,.about,.resume,.contact,.packs,.licbox{grid-template-columns:1fr;gap:40px}
+  .sec.lic{padding-bottom:96px}
+  .licbox{padding:30px 26px}
+  .credits,.quotes{grid-template-columns:1fr 1fr}
+}
+@media (max-width:600px){
+  .wrap{width:calc(100% - 36px)}
+  .nav{height:58px;padding-left:20px}
+  .hero .in{margin-top:-24vh}
+  .hero .role span{display:none}
+  .hero .bar .ctas{flex-direction:column;width:100%}
+  .hero .bar .ctas .btn{width:100%}
+  .credits,.quotes{grid-template-columns:1fr}
+  .player{padding:26px;min-height:0}
+  .player h3{font-size:42px}
+  .ctrl{gap:14px}.pbtn{width:64px;height:64px}
+  .facts{grid-template-columns:1fr}
+  .facts div:nth-child(odd){border-right:0;padding-right:0}.facts div:nth-child(even){padding-left:0}
+  .rows li{grid-template-columns:1fr;gap:4px}
+  .gear{grid-template-columns:110px 1fr}
+  .dl{flex-direction:column;align-items:flex-start;border-radius:28px}
+  .row{grid-template-columns:48px 1fr auto;gap:14px}.row .ic{width:48px;height:48px}
+}
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i></div>
+<div class="grain" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="play" viewBox="0 0 24 24"><path fill="currentColor" d="M7 4.5v15l12-7.5z"/></symbol>
+  <symbol id="mail" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.7" d="M3 5.5h18v13H3zM3.5 6l8.5 7 8.5-7"/></symbol>
+  <symbol id="ig" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></g><circle cx="17.3" cy="6.7" r="1.2" fill="currentColor"/></symbol>
+  <symbol id="user" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></g></symbol>
+  <symbol id="doc" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M6 2.5h8l4 4v15H6zM14 2.5v4h4M12 10v7m-3-3 3 3 3-3"/></symbol>
+  <symbol id="arrow" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M7 17 17 7M8 7h9v9"/></symbol>
+</svg>
+
+<nav class="nav glass" aria-label="Main">
+  <a class="brand" href="#top">Katie P.</a>
+  <ul>
+    <li><a href="#demos">Demos</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#credits">Credits</a></li>
+    <li><a href="#resume">Resume</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a class="btn solid sm" href="#contact">Book Kat</a>
+</nav>
+
+<header class="hero" id="top">
+  <figure class="photo"><img src="../kat.webp" width="720" height="900" alt="Portrait of Katie P. in a black lace veil and headdress"></figure>
+  <div class="glow" aria-hidden="true"></div>
+  <div class="wrap in">
+    <span class="pill glass">Now booking · <span class="pt">[availability]</span></span>
+    <h1>Katie P.</h1>
+    <p class="role">Voice actor <span>/ Demos · Credits · Booking</span></p>
+    <div class="bar glass">
+      <p>Listen to her reels, or get in touch to book a session.</p>
+      <div class="ctas">
+        <a class="btn solid" href="#demos"><svg aria-hidden="true"><use href="#play"/></svg>Listen</a>
+        <a class="btn glass" href="#contact">Get in touch</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="marquee" aria-hidden="true">
+  <div class="track" id="marq"></div>
+</div>
+
+<main>
+  <section class="sec" id="demos" aria-labelledby="demosT">
+    <div class="wrap">
+      <div class="head rv">
+        <div><div class="label">01 · Listen</div><h2 class="title" id="demosT">Demo <span class="o">reels</span></h2></div>
+        <p>Her demo reels will live here.</p>
+      </div>
+      <div class="demos">
+        <article class="player glass rv">
+          <div class="top"><span class="ph">Placeholder</span><span class="time">0:00 / 0:00</span></div>
+          <div><h3>Main reel</h3><div class="sub">Reel description goes here.</div></div>
+          <div class="ctrl">
+            <button class="pbtn" type="button" data-track="0" aria-label="Play the main reel"><svg aria-hidden="true"><use href="#play"/></svg></button>
+            <div class="wave" id="wave" aria-hidden="true"></div>
+          </div>
+        </article>
+        <div class="rv">
+          <div class="list">
+            <div class="trk glass" data-track="1" role="button" tabindex="0"><div class="pb"><svg aria-hidden="true"><use href="#play"/></svg></div><div><b>Reel 02</b><span>Title and description</span></div><span class="ph">Soon</span></div>
+            <div class="trk glass" data-track="2" role="button" tabindex="0"><div class="pb"><svg aria-hidden="true"><use href="#play"/></svg></div><div><b>Reel 03</b><span>Title and description</span></div><span class="ph">Soon</span></div>
+            <div class="trk glass" data-track="3" role="button" tabindex="0"><div class="pb"><svg aria-hidden="true"><use href="#play"/></svg></div><div><b>Reel 04</b><span>Title and description</span></div><span class="ph">Soon</span></div>
+          </div>
+          <p class="note" id="note" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec black" id="about" aria-labelledby="aboutT">
+    <div class="wrap">
+      <div class="head rv"><div><div class="label">02 · Who</div><h2 class="title" id="aboutT">About <span class="o">Kat</span></h2></div></div>
+      <div class="about">
+        <div class="rv">
+          <p class="big">A short line in Kat's own words <em>that sums up who she is as a performer.</em></p>
+          <p class="pt">[Bio placeholder: two or three short paragraphs about Kat: how she got into voice acting, what she loves about it, and what she brings to a project.]</p>
+          <p class="pt">[Optional: a second paragraph on training, influences or the kinds of projects she's looking for.]</p>
+        </div>
+        <dl class="facts rv">
+          <div><dt>Vocal range</dt><dd class="pt">[Range]</dd></div>
+          <div><dt>Accents</dt><dd class="pt">[Accents]</dd></div>
+          <div><dt>Based in</dt><dd class="pt">[Location]</dd></div>
+          <div><dt>Languages</dt><dd class="pt">[Languages]</dd></div>
+          <div><dt>Union status</dt><dd class="pt">[Union / non-union]</dd></div>
+          <div><dt>Turnaround</dt><dd class="pt">[Typical turnaround]</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="credits" aria-labelledby="credT">
+    <div class="wrap">
+      <div class="head rv">
+        <div><div class="label">03 · Work</div><h2 class="title" id="credT">Selected <span class="o">credits</span></h2></div>
+        <p>Projects she has voiced, each with her role, the studio and the year.</p>
+      </div>
+      <div class="credits" id="creditGrid"></div>
+    </div>
+  </section>
+
+  <section class="sec black" id="resume" aria-labelledby="resT">
+    <div class="wrap">
+      <div class="head rv">
+        <div><div class="label">04 · Experience</div><h2 class="title" id="resT">Re<span class="o">sume</span></h2></div>
+        <p><span class="ph">Placeholder</span><br><br>Kat's experience, training and studio setup go here.</p>
+      </div>
+      <div class="resume">
+        <div class="rcol rv">
+          <h3>Experience</h3>
+          <ol class="rows">
+            <li><div class="yr">[Year]</div><div><b>Role, project title</b><p>[Studio or client · Type of project]</p></div></li>
+            <li><div class="yr">[Year]</div><div><b>Role, project title</b><p>[Studio or client · Type of project]</p></div></li>
+            <li><div class="yr">[Year]</div><div><b>Role, project title</b><p>[Studio or client · Type of project]</p></div></li>
+            <li><div class="yr">[Year]</div><div><b>Role, project title</b><p>[Studio or client · Type of project]</p></div></li>
+          </ol>
+          <h3>Training &amp; education</h3>
+          <ol class="rows">
+            <li><div class="yr">[Year]</div><div><b>Course or workshop</b><p>[School, coach or programme]</p></div></li>
+            <li><div class="yr">[Year]</div><div><b>Course or workshop</b><p>[School, coach or programme]</p></div></li>
+          </ol>
+        </div>
+        <div class="rcol rv">
+          <h3>Skills</h3>
+          <div class="chips"><i>[Skill]</i><i>[Skill]</i><i>[Skill]</i><i>[Skill]</i><i>[Skill]</i><i>[Skill]</i><i>[Skill]</i></div>
+          <h3>Studio</h3>
+          <dl class="gear">
+            <dt>Microphone</dt><dd>[Mic]</dd>
+            <dt>Interface</dt><dd>[Interface]</dd>
+            <dt>Booth</dt><dd>[Booth / treatment]</dd>
+            <dt>Software</dt><dd>[DAW]</dd>
+            <dt>Connection</dt><dd>[Source-Connect, Zoom, etc.]</dd>
+          </dl>
+        </div>
+      </div>
+      <div class="dl glass rv">
+        <div><b>Full resume</b><span>A downloadable PDF of her resume will go here.</span></div>
+        <span class="btn glass sm" aria-disabled="true"><svg aria-hidden="true"><use href="#doc"/></svg>Download PDF</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="praise" aria-labelledby="praiseT">
+    <div class="wrap">
+      <div class="head rv">
+        <div><div class="label">05 · Praise</div><h2 class="title" id="praiseT">Kind <span class="o">words</span></h2></div>
+        <p>Quotes from directors, studios and collaborators she has worked with.</p>
+      </div>
+      <div class="quotes">
+        <figure class="quote glass rv"><div><div class="mark" aria-hidden="true">"</div><blockquote>A short quote from someone Kat has worked with.</blockquote></div><cite class="pt">[Name], [Role, Studio]</cite></figure>
+        <figure class="quote glass rv"><div><div class="mark" aria-hidden="true">"</div><blockquote>A short quote from someone Kat has worked with.</blockquote></div><cite class="pt">[Name], [Role, Studio]</cite></figure>
+        <figure class="quote glass rv"><div><div class="mark" aria-hidden="true">"</div><blockquote>A short quote from someone Kat has worked with.</blockquote></div><cite class="pt">[Name], [Role, Studio]</cite></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec black" aria-labelledby="packsT">
+    <div class="wrap packs rv">
+      <h2 id="packsT">Voice<br><span class="o">packs</span></h2>
+      <div>
+        <p>Ready-made voice packs by Kat for game developers, sold through her store on Grug Digital and itch.io.</p>
+        <a class="btn glass" href="/voices/katie/">See her voice packs<svg aria-hidden="true"><use href="#arrow"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec black lic" aria-labelledby="licT">
+    <div class="wrap">
+      <div class="licbox glass rv">
+        <div>
+          <div class="label">Licence &amp; credit</div>
+          <h3 id="licT">Use them. <span class="o">Credit Kat.</span></h3>
+          <p>Kat's voice packs are licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener license">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>. Use and edit them in free or commercial projects, as long as you credit Katie P. wherever your project lists its credits.</p>
+        </div>
+        <div class="credit-line">
+          <code id="creditLine">Voice acting by Katie P. (Kat), grugdigital.com/voices/katie, licensed under CC BY 4.0</code>
+          <button class="btn solid sm" type="button" id="copyCredit">Copy credit</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="contact" aria-labelledby="contactT">
+    <div class="wrap contact">
+      <div class="rv">
+        <div class="label">06 · Contact</div>
+        <h2 class="big" id="contactT">Let's <span class="o">talk.</span></h2>
+        <p>For bookings, auditions and custom work, email Kat with a little about your project, the role and your timeline.</p>
+      </div>
+      <div class="reach rv">
+        <a class="row glass" href="mailto:rd.kp24@gmail.com?subject=Voice%20work%20enquiry"><span class="ic"><svg aria-hidden="true"><use href="#mail"/></svg></span><div><b>rd.kp24@gmail.com</b><span>Bookings and enquiries</span></div><svg class="arr" aria-hidden="true"><use href="#arrow"/></svg></a>
+        <a class="row glass" href="https://www.instagram.com/kat.ali.m/" target="_blank" rel="noopener"><span class="ic"><svg aria-hidden="true"><use href="#ig"/></svg></span><div><b>@kat.ali.m</b><span>Instagram</span></div><svg class="arr" aria-hidden="true"><use href="#arrow"/></svg></a>
+        <div class="row glass"><span class="ic"><svg aria-hidden="true"><use href="#user"/></svg></span><div><b class="pt">[Agent or representation]</b><span>Name and contact, if she has one</span></div><span class="ph">Placeholder</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap meta"><span>© 2026 Katie P. Voice packs licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener license">CC BY 4.0</a>, credit required.</span><span><a href="/terms.html">Terms of Service</a> · <a href="/privacy.html">Privacy Policy</a> · <a href="mailto:rd.kp24@gmail.com">rd.kp24@gmail.com</a> · <a href="https://www.instagram.com/kat.ali.m/" target="_blank" rel="noopener">Instagram</a></span></div>
+  <div class="giant" aria-hidden="true">Katie P.</div>
+</footer>
+
+<script>
+(function () {
+  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  /* marquee words, doubled for a seamless loop */
+  const W = ['<span>Voice actor</span>', '<span class="x">✝</span>', '<span class="o">Katie P.</span>', '<span class="x">✝</span>', '<span>Demos</span>', '<span class="x">✝</span>', '<span class="o">Booking</span>', '<span class="x">✝</span>'].join('');
+  $('#marq').innerHTML = W + W;
+  /* credit placeholders */
+  $('#creditGrid').innerHTML = Array.from({ length: 6 }, (_, i) => `<article class="credit glass rv"><div class="art" aria-hidden="true"><span>0${i + 1}</span></div><b>Project title</b><small><span class="pt">[Character / role]</span><span class="pt">[Studio] · [Year]</span></small></article>`).join('');
+  /* a made-up waveform */
+  let s = 11; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  $('#wave').innerHTML = Array.from({ length: 58 }, (_, i) => `<i style="height:${Math.round(10 + 90 * Math.abs(Math.sin(i * .36)) * (.4 + r() * .6))}%"></i>`).join('');
+  /* reels: put an audio file in SRC to make one play; empty says "coming soon" */
+  const SRC = ['', '', '', ''], NAMES = ['Main reel', 'Reel 02', 'Reel 03', 'Reel 04'];
+  let audio = null;
+  function play(i) {
+    if (audio) { audio.pause(); audio = null; }
+    if (!SRC[i]) { $('#note').textContent = NAMES[i] + ': audio coming soon.'; return; }
+    audio = new Audio(SRC[i]); audio.play().catch(() => {});
+  }
+  $$('[data-track]').forEach(t => {
+    t.addEventListener('click', () => play(+t.dataset.track));
+    t.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); play(+t.dataset.track); } });
+  });
+  $('#copyCredit').addEventListener('click', e => { const t = $('#creditLine').textContent, b = e.currentTarget;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy credit', 1600); }, () => getSelection().selectAllChildren($('#creditLine'))); });
+  /* the glass sheen follows the pointer */
+  document.addEventListener('pointermove', e => {
+    const g = e.target.closest && e.target.closest('.glass'); if (!g) return;
+    const b = g.getBoundingClientRect(); g.style.setProperty('--mx', (e.clientX - b.left) + 'px'); g.style.setProperty('--my', (e.clientY - b.top) + 'px');
+  }, { passive: true });
+  /* fade sections in as they arrive; highlight the nav link */
+  const rv = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); rv.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
+  $$('.rv').forEach(el => rv.observe(el));
+  const links = $$('.nav ul a');
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id)); }), { rootMargin: '-45% 0px -50% 0px' });
+  $$('section[id]').forEach(sec => io.observe(sec));
+})();
+</script>
+</body>
+</html>
