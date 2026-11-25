@@ -115,6 +115,12 @@
 .kat .chips.lt i{background:linear-gradient(#fff,#efe8dc);color:#4b3a40;box-shadow:inset 0 0 0 1px #b7a99a}
 .fineprint{margin:4px 2px 0;font:11px/1.45 Arial,sans-serif;color:#7d7276}
 
+/* licence & credit */
+.kat .cc,.kat .cc2{margin:0 0 8px;font:13px/1.5 Arial,Helvetica,sans-serif;color:#2b2328}
+.ccmark{display:inline-block;margin:0 8px 0 0;padding:3px 7px;border-radius:3px;font:bold 11px/1.2 Arial,sans-serif;color:var(--bone);background:linear-gradient(#3a3440,#1d1a21);vertical-align:1px}
+.credit{display:flex;gap:8px;align-items:center;padding:8px;border:1px solid #c2b4a2;border-radius:4px;background:#fff}
+.credit code{flex:1;font:12px/1.4 Consolas,Menlo,monospace;color:#2b2328;background:none;border:0;padding:0}
+
 /* phones */
 @media (max-width:939px){
   .kat-hero{padding:20px 16px 52px}
@@ -129,6 +135,7 @@
   .kat-cols{grid-template-columns:1fr}
   .packs{grid-template-columns:repeat(2,1fr)}
   .steps3{grid-template-columns:1fr}
+  .credit{flex-direction:column;align-items:stretch}
 }
 @media (max-width:420px){ .pack .cov{height:96px} .pack p{display:none} }
 </style>
@@ -257,7 +264,15 @@
               <li><div><b>Drop it in your game</b>Ready for any engine:
                 <div class="chips lt" style="margin-top:5px"><i>Roblox</i><i>Unity</i><i>Godot</i><i>Unreal</i><i>GameMaker</i></div></div></li>
             </ol>
-            <p class="fineprint">Licence terms coming soon.</p>
+          </div>
+        </div>
+
+        <div class="Sec" id="licence">
+          <div class="StandardBoxHeader"><span>Licence &amp; credit</span></div>
+          <div class="box">
+            <p class="cc"><span class="ccmark" aria-hidden="true">CC BY 4.0</span>Kat's voice packs are licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener license">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>.</p>
+            <p class="cc2">You can use them in free or commercial games, videos and other projects, and edit them to fit, <b>as long as you credit Katie P.</b> Put the credit where your project lists its credits (in-game credits, the store page, or the video description).</p>
+            <div class="credit"><code id="creditLine">Voice acting by Katie P. (Kat), grugdigital.com/voices/katie, licensed under CC BY 4.0</code><button class="gbtn sm kat-bone" type="button" id="copyCredit">Copy credit</button></div>
           </div>
         </div>
       </div>
@@ -337,6 +352,9 @@ const KAT = {
       <button type="button" aria-label="Play ${esc(d.name)}"><svg aria-hidden="true"><use href="#i-play"/></svg></button>
       <div><b>${esc(d.name)}</b><div class="bars" aria-hidden="true">${bars(28)}</div></div><span class="t">Soon</span></div>`).join('')
     + '<p class="fineprint" id="demoNote" hidden>Demo audio is coming soon.</p>';
+
+  $('#copyCredit').addEventListener('click', e => { const t = $('#creditLine').textContent;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { e.target.textContent = 'Copied'; setTimeout(() => e.target.textContent = 'Copy credit', 1600); }, () => { getSelection().selectAllChildren($('#creditLine')); }); });
 
   /* one sound at a time; a missing file just says "coming soon" */
   let audio = null, playing = null;
