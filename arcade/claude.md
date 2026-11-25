@@ -155,7 +155,7 @@ Real-time games get couch co-op from `window.GrugLocalMP` (turn-based ones, like
 keyboard / mouse / touch; the first controller used asks "Player 1 or Player 2?", every controller after it joins as the next
 player. Extra players spawn next to Player 1, move relative to Player 1's camera (no split screen), have Player 1's abilities,
 aim with their own on-screen crosshair (right stick) if the game aims, their bullets go through walls, and they're brought back
-to Player 1 when far away. Xbox Wireless Controllers are the ones we recommend (the arcade page says so; the Xbox name only in plain text, never their logos or controller images). Any pad the browser sees works; a non-standard one asks once: default controls or set the buttons up
+to Player 1 when far away. Xbox Wireless Controllers are the ones we recommend (the arcade page says so: the Xbox name in plain text, never Microsoft's own logos or press images; the controller photo there is Evan-Amos's public-domain one from Wikimedia Commons). Any pad the browser sees works; a non-standard one asks once: default controls or set the buttons up
 (saved per controller in `grug.gamepads.v1`). The module adds **Controllers** to the Game Menu and lets any pad drive the menus.
 
 Wire it in like Zone Royale, Zombie Zones, Grug City RP, Grug Kingdom, Slide 999 KM and Brickbound do (search them for
