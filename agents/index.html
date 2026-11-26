@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grug for agents · Characters and buildings your AI agent can make</title>
+<meta name="description" content="Grug Avatar Studio and Building Studio are built for AI agents. Copy a prompt, send it to Claude or any agent that can use a browser, and get a rigged Roblox R6 character or a textured building back as a .glb.">
+<link rel="canonical" href="https://grugdigital.com/agents/">
+<link rel="icon" href="/favicon.png">
+<meta name="theme-color" content="#0d0e10">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Grug Digital">
+<meta property="og:title" content="Grug for agents · Characters and buildings your AI agent can make">
+<meta property="og:description" content="Copy a prompt, send it to your agent, get a rigged R6 character or a textured building back as a .glb.">
+<meta property="og:url" content="https://grugdigital.com/agents/">
+<meta property="og:image" content="https://grugdigital.com/static/og/grug-avatar-studio-custom-roblox-avatars.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" href="/static/fredoka.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:Fredoka;src:url(/static/fredoka.woff2) format("woff2");font-weight:300 700;font-display:swap}
+:root{
+  --bg:#0d0e10; --panel:#16181b; --raise:#1e2125; --line:#2b2e33;
+  --text:#ecedef; --mute:#9da1a9;
+  --green:#9be33c; --green-ink:#10200a;
+  /* the Building Studio's reference-sheet colour code */
+  --wall:#c4c6c9; --roof:#d9463b; --trim:#e2b322; --door:#3a5be0; --win:#3cc6d8;
+  --display:Fredoka, "Trebuchet MS", system-ui, sans-serif;
+  --body:system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono:ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --col:1120px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit}
+h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.08;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(2.5rem,6.2vw,4.5rem)}
+h2{font-size:clamp(1.9rem,3.6vw,2.75rem)}
+h3{font-size:1.25rem;line-height:1.25}
+p{margin:0}
+.wrap{max-width:var(--col);margin:0 auto;padding:0 24px}
+.mute{color:var(--mute)}
+:focus-visible{outline:2px solid var(--green);outline-offset:3px;border-radius:6px}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:20;background:rgba(13,14,16,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:28px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:600 1.15rem var(--display)}
+.brand img{height:30px;width:auto}
+.brand span{color:var(--mute);font-weight:500}
+.nav nav{display:flex;gap:22px;margin-left:8px;font-size:.94rem}
+.nav nav a{text-decoration:none;color:var(--mute)}
+.nav nav a:hover{color:var(--text)}
+.nav .right{margin-left:auto;display:flex;gap:10px;align-items:center}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--raise);color:var(--text);font:600 .97rem var(--body);text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:#454950}
+.btn.go{background:var(--green);border-color:var(--green);color:var(--green-ink)}
+.btn.go:hover{background:#aef053;border-color:#aef053}
+.btn.sm{height:36px;padding:0 13px;font-size:.88rem;border-radius:10px}
+.btn svg{width:18px;height:18px;flex:none}
+
+/* hero */
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:32px;align-items:end;padding-top:72px}
+.hero-copy{padding-bottom:72px}
+.news{display:inline-flex;gap:10px;align-items:center;padding:6px 12px 6px 6px;border:1px solid var(--line);border-radius:999px;font-size:.88rem;color:var(--mute);text-decoration:none;margin-bottom:26px}
+.news b{background:var(--raise);color:var(--text);padding:2px 9px;border-radius:999px;font-weight:600}
+.news:hover{border-color:#454950;color:var(--text)}
+.hero p.lead{font-size:1.16rem;color:var(--mute);max-width:33em;margin-top:20px}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.paste{margin-top:30px;max-width:520px}
+.tabs{display:inline-flex;gap:2px;padding:3px;background:var(--panel);border:1px solid var(--line);border-radius:11px}
+.tabs button{border:0;background:none;color:var(--mute);font:600 .88rem var(--body);padding:6px 12px;border-radius:8px;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--raise);color:var(--text);box-shadow:inset 0 0 0 1px #3a3e45}
+.copyrow{display:flex;align-items:center;gap:8px;margin-top:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 6px 6px 14px}
+.copyrow code{flex:1;font:.9rem var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.paste small{display:block;margin-top:8px;color:var(--mute);font-size:.86rem}
+
+/* the baseplate: a studded floor the cast stands on */
+.stage{position:relative;align-self:end;height:560px}
+.stage::before{content:"";position:absolute;left:-12%;right:-40%;bottom:0;height:210px;
+  background:
+    radial-gradient(circle at 50% 50%,#2c3036 0 5.5px,transparent 6.5px) 0 0/34px 34px,
+    linear-gradient(#1a1d21,#131518);
+  transform:perspective(520px) rotateX(58deg);transform-origin:50% 100%;border-top:1px solid #33373d}
+.stage img{position:absolute;bottom:44px;height:auto;filter:drop-shadow(0 18px 14px rgba(0,0,0,.55))}
+.stage .c1{left:-14%;width:60%;bottom:70px}
+.stage .c2{left:22%;width:68%;z-index:2}
+.stage .c3{right:-16%;width:58%;bottom:76px}
+
+/* sections */
+.sec{padding:96px 0;border-bottom:1px solid var(--line)}
+.sec-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:end;margin-bottom:44px}
+.sec-head p{color:var(--mute);font-size:1.06rem;max-width:34em}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+
+.cast{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.cast figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 8px 12px;text-align:center}
+.cast img{height:150px;width:100%;object-fit:contain}
+.cast figcaption{margin-top:10px;font:500 .95rem var(--display);color:var(--mute)}
+
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:36px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.facts>div{padding:22px 24px;border-left:1px solid var(--line)}
+.facts>div:first-child{border-left:0}
+.facts.two{grid-template-columns:repeat(2,1fr);margin-top:0}
+.facts h3{margin-bottom:6px}
+.facts p{color:var(--mute);font-size:.96rem}
+
+.sheet{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center}
+.sheet figure{margin:0}
+.sheet img{border-radius:14px;border:1px solid var(--line);width:100%}
+.sheet figcaption{margin-top:10px;color:var(--mute);font-size:.92rem}
+.sheet .to{font:600 1.6rem var(--display);color:var(--mute)}
+.code{display:flex;flex-wrap:wrap;gap:8px 22px;margin:22px 0 40px;padding:0;list-style:none;font-size:.93rem;color:var(--mute)}
+.code li{display:flex;align-items:center;gap:8px}
+.code i{width:14px;height:14px;border-radius:3px;display:block}
+.town{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.town a{display:block;text-decoration:none;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel)}
+.town a:hover{border-color:#454950}
+.town img{aspect-ratio:900/640;object-fit:cover;width:100%}
+.town span{display:block;padding:9px 12px 11px;font:500 .92rem var(--display)}
+.town small{display:block;color:var(--mute);font:400 .8rem var(--body)}
+
+/* steps (a real sequence) */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:0;counter-reset:s;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.steps li{counter-increment:s;padding:26px 24px 28px;border-left:1px solid var(--line)}
+.steps li:first-child{border-left:0}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--raise);border:1px solid #3a3e45;font:600 1rem var(--display);margin-bottom:16px;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.07)}
+.steps p{color:var(--mute);font-size:.96rem;margin-top:6px}
+
+/* repo */
+.repo{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:48px;align-items:start}
+.repo p{color:var(--mute);margin-top:16px;max-width:30em}
+.files{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel)}
+.files header{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);font:.92rem var(--mono)}
+.files header svg{width:20px;height:20px}
+.files a{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px;padding:13px 18px;border-top:1px solid var(--line);text-decoration:none;font-size:.93rem}
+.files a:first-of-type{border-top:0}
+.files a:hover{background:var(--raise)}
+.files code{font:.88rem var(--mono);overflow-wrap:anywhere}
+.files span{color:var(--mute)}
+
+.end{padding:104px 0;text-align:center}
+.end p{color:var(--mute);max-width:32em;margin:16px auto 0;font-size:1.06rem}
+.end .cta{justify-content:center}
+
+footer{border-top:1px solid var(--line);padding:44px 0 56px;color:var(--mute);font-size:.88rem}
+footer .cols{display:flex;flex-wrap:wrap;gap:14px 28px;margin-bottom:22px}
+footer a{color:var(--mute)}
+footer a:hover{color:var(--text)}
+footer p{max-width:70em}
+
+/* ask-your-agent dialog */
+dialog{border:1px solid var(--line);border-radius:22px;background:var(--panel);color:var(--text);padding:28px;width:min(580px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+dialog::backdrop{background:rgba(0,0,0,.66)}
+dialog h2{font-size:1.3rem}
+dialog .sub{color:var(--mute);margin:6px 0 18px}
+dialog .x{position:absolute;top:18px;right:18px;width:36px;height:36px;border:0;background:none;color:var(--mute);border-radius:10px;cursor:pointer;font-size:1.3rem;line-height:1}
+dialog .x:hover{color:var(--text);background:var(--raise)}
+dialog pre{margin:14px 0 16px;padding:18px;background:var(--bg);border:1px solid var(--line);border-radius:14px;font:.9rem/1.6 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere}
+dialog .btn{width:100%;justify-content:center;height:48px}
+dialog .hint{margin-top:12px;font-size:.86rem;color:var(--mute);text-align:center}
+
+@media (max-width:940px){
+  .nav nav{display:none}
+  .hero .wrap{grid-template-columns:minmax(0,1fr);padding-top:48px}
+  .hero-copy{padding-bottom:8px}
+  .stage{height:300px;max-width:460px;width:100%;margin:0 auto}
+  .stage::before{height:120px}
+  .stage .c1{left:0;width:46%;bottom:40px}.stage .c2{left:26%;width:52%;bottom:24px}.stage .c3{right:0;width:44%;bottom:44px}
+  .sec{padding:64px 0}
+  .sec-head,.repo{grid-template-columns:1fr;gap:18px}
+  .cast,.town{grid-template-columns:repeat(3,1fr)}
+  .facts,.facts.two,.steps{grid-template-columns:1fr}
+  .facts>div,.steps li{border-left:0;border-top:1px solid var(--line)}
+  .facts>div:first-child,.steps li:first-child{border-top:0}
+  .sheet{grid-template-columns:1fr}
+  .sheet .to{display:none}
+  .files a{grid-template-columns:1fr;gap:2px}
+}
+@media (max-width:520px){
+  .wrap{padding:0 16px}
+  .cast,.town{grid-template-columns:repeat(2,1fr)}
+  .cast img{height:120px}
+  .nav .right .gh{display:none}
+  .cta .btn{flex:1 1 100%;justify-content:center}
+  dialog{padding:22px 18px}
+  dialog pre{font-size:.82rem;padding:14px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="wrap">
+    <a class="brand" href="/agents/"><img src="/favicon.png" alt="" width="30" height="30">Grug <span>for agents</span></a>
+    <nav aria-label="Sections">
+      <a href="#characters">Characters</a>
+      <a href="#buildings">Buildings</a>
+      <a href="#how">How it works</a>
+      <a href="#source">Source</a>
+      <a href="/">grugdigital.com</a>
+    </nav>
+    <div class="right">
+      <a class="btn sm gh" href="https://github.com/gabrielman25/grugdigital" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
+        GitHub
+      </a>
+      <button class="btn sm go" data-ask>Ask your agent</button>
+    </div>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-copy">
+      <a class="news" href="#skills"><b>New</b> A second skill, for buildings</a>
+      <h1>Your agent makes the cast and the town</h1>
+      <p class="lead">Grug Avatar Studio and Building Studio are written for AI agents. Send one prompt to Claude, or any agent that can use a browser, and get back a rigged Roblox R6 character or a textured building as a <code>.glb</code>.</p>
+      <div class="cta">
+        <button class="btn go" data-ask>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+          Ask your agent
+        </button>
+        <a class="btn" href="#skills">Get the skills</a>
+        <a class="btn" href="#source">Read the guides</a>
+      </div>
+      <div class="paste">
+        <div class="tabs" role="tablist" aria-label="Studio link">
+          <button role="tab" aria-selected="true" data-link="https://grugdigital.com/character/">Character</button>
+          <button role="tab" aria-selected="false" data-link="https://grugdigital.com/build/">Building</button>
+        </div>
+        <div class="copyrow">
+          <code id="link">https://grugdigital.com/character/</code>
+          <button class="btn sm" data-copy="#link">Copy link</button>
+        </div>
+        <small>Or paste a studio's link into a chat and say what you want. The page tells the agent what to do.</small>
+      </div>
+    </div>
+    <div class="stage" aria-hidden="true">
+      <img class="c1" src="/static/showcase/grug-digital-avatar-ranger.webp" alt="">
+      <img class="c2" src="/static/showcase/grug-digital-avatar-grug.webp" alt="">
+      <img class="c3" src="/static/showcase/grug-digital-avatar-snow-rider.webp" alt="">
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="sec" id="characters">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Characters that wear what you described</h2>
+      <p>An agent left alone builds a character out of grey boxes. With Avatar Studio it picks hair and a face, has Gemini paint a shirt and pants from your description, and hands you a rigged R6 character.</p>
+    </div>
+    <div class="cast">
+      <figure><img loading="lazy" src="/static/showcase/grug-digital-avatar-grug.webp" alt="Grug, a blocky character in a green dinosaur hoodie, made in Grug Avatar Studio"><figcaption>Grug</figcaption></figure>
+      <figure><img loading="lazy" src="/static/showcase/grug-digital-avatar-ranger.webp" alt="Ranger, a blocky character in camouflage and a tactical vest, made in Grug Avatar Studio"><figcaption>Ranger</figcaption></figure>
+      <figure><img loading="lazy" src="/static/showcase/grug-digital-avatar-skater.webp" alt="Skater, a blocky character in a denim jacket and ripped jeans, made in Grug Avatar Studio"><figcaption>Skater</figcaption></figure>
+      <figure><img loading="lazy" src="/static/showcase/grug-digital-avatar-medic.webp" alt="Medic, a blocky character in a medic uniform, made in Grug Avatar Studio"><figcaption>Medic</figcaption></figure>
+      <figure><img loading="lazy" src="/static/showcase/grug-digital-avatar-snow-rider.webp" alt="Snow Rider, a blocky character in a purple puffer jacket and scarf, made in Grug Avatar Studio"><figcaption>Snow Rider</figcaption></figure>
+      <figure><img loading="lazy" src="/static/showcase/grug-digital-avatar-racer.webp" alt="Racer, a blocky character in a red racing suit, made in Grug Avatar Studio"><figcaption>Racer</figcaption></figure>
+    </div>
+    <div class="facts">
+      <div><h3>A real R6 rig</h3><p>HumanoidRootPart, Torso, Head, arms and legs, so R6 animations and Humanoid movement work once it's set up in Studio.</p></div>
+      <div><h3>A painted outfit</h3><p>Gemini paints the shirt and pants from a description. You also get <code>shirt.png</code> and <code>pants.png</code> classic templates.</p></div>
+      <div><h3>An API for the agent</h3><p><code>window.GrugStudio</code> sets the look, opens the painting steps and exports. Recipe links cover agents with no browser.</p></div>
+    </div>
+    <div class="links">
+      <a class="btn" href="/character/">Open Avatar Studio</a>
+      <a class="btn" href="/character/claude.md">The agent guide</a>
+      <a class="btn" href="/character/roblox-characters.zip" download>Download the skill</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="buildings">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Buildings from a few numbers and one sentence</h2>
+      <p>The agent sets a width, depth, height and roof, then writes what the building is. Building Studio draws a colour-coded sheet, Gemini paints it, and the painting is baked back onto the model.</p>
+    </div>
+    <div class="sheet">
+      <figure><img loading="lazy" src="/build/examples/cafe-reference.png" alt="The Building Studio's colour-coded reference sheet for a two-storey building, back view and front view"><figcaption>The sheet the studio draws</figcaption></figure>
+      <span class="to" aria-hidden="true">to</span>
+      <figure><img loading="lazy" src="/build/examples/cafe-gemini.jpg" alt="The same two views painted by Gemini as a white corner café with timber panels"><figcaption>What Gemini paints from "a modern corner café"</figcaption></figure>
+    </div>
+    <ul class="code" aria-label="The reference sheet's colour code">
+      <li><i style="background:var(--wall)"></i>Walls</li>
+      <li><i style="background:var(--roof)"></i>Roof</li>
+      <li><i style="background:var(--trim)"></i>Trim</li>
+      <li><i style="background:var(--door)"></i>Doors</li>
+      <li><i style="background:var(--win)"></i>Windows</li>
+    </ul>
+    <div class="town">
+      <a href="/build/examples/"><img loading="lazy" src="/build/examples/forge-thumb.jpg" alt="Blacksmith's forge made in Grug Building Studio"><span>Blacksmith's forge<small>Medieval</small></span></a>
+      <a href="/build/examples/"><img loading="lazy" src="/build/examples/inn-thumb.jpg" alt="Tudor inn made in Grug Building Studio"><span>Tudor inn<small>Medieval</small></span></a>
+      <a href="/build/examples/"><img loading="lazy" src="/build/examples/tower-thumb.jpg" alt="Castle watchtower made in Grug Building Studio"><span>Castle watchtower<small>Medieval</small></span></a>
+      <a href="/build/examples/"><img loading="lazy" src="/build/examples/cafe-thumb.jpg" alt="Corner café made in Grug Building Studio"><span>Corner café<small>Modern</small></span></a>
+      <a href="/build/examples/"><img loading="lazy" src="/build/examples/house-thumb.jpg" alt="Modern house made in Grug Building Studio"><span>Modern house<small>Modern</small></span></a>
+      <a href="/build/examples/"><img loading="lazy" src="/build/examples/hab-thumb.jpg" alt="Sci-fi habitat made in Grug Building Studio"><span>Sci-fi habitat<small>Future</small></span></a>
+    </div>
+    <div class="links">
+      <a class="btn" href="/build/">Open Building Studio</a>
+      <a class="btn" href="/build/claude.md">The agent guide</a>
+      <a class="btn" href="/build/game-buildings.zip" download>Download the skill</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>What the agent does with your prompt</h2>
+      <p>Both studios run in the browser, so the agent needs one it can control, such as Claude in Chrome. Yours is best, because it is already signed in to Gemini.</p>
+    </div>
+    <ol class="steps">
+      <li><h3>Reads the guide</h3><p>Each studio has a <code>claude.md</code> with the settings, the API and the exact clicks.</p></li>
+      <li><h3>Sets it up</h3><p>Hair, face and skin for a character. Size, roof, doors and windows for a building.</p></li>
+      <li><h3>Paints in Gemini</h3><p>It copies the studio's picture and prompt into Gemini, then pastes the painting back.</p></li>
+      <li><h3>Hands you the file</h3><p>A <code>.glb</code> for Roblox Studio, Unity, Godot or Blender. It asks before spending Pearls on a character export.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="sec" id="skills">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Install once and stop pasting</h2>
+      <p>A skill tells Claude to reach for the studio on its own whenever a game needs characters or buildings. Add the zip as a skill in Claude, or unzip it into <code>~/.claude/skills/</code> for Claude Code.</p>
+    </div>
+    <div class="facts two">
+      <div>
+        <h3>roblox-characters</h3>
+        <p>Plans the cast, makes each character in Avatar Studio, then imports and rigs them in Roblox Studio or a Rojo project.</p>
+        <div class="links" style="margin-top:18px"><a class="btn sm go" href="/character/roblox-characters.zip" download>Download the skill</a><a class="btn sm" href="https://github.com/gabrielman25/grugdigital/blob/main/src/skill/roblox-characters/SKILL.md" target="_blank" rel="noopener">Read SKILL.md</a></div>
+      </div>
+      <div>
+        <h3>game-buildings</h3>
+        <p>Plans the buildings, makes each one in Building Studio, then brings the files into Roblox Studio, Unity, Godot or Blender.</p>
+        <div class="links" style="margin-top:18px"><a class="btn sm go" href="/build/game-buildings.zip" download>Download the skill</a><a class="btn sm" href="https://github.com/gabrielman25/grugdigital/blob/main/src/skill/game-buildings/SKILL.md" target="_blank" rel="noopener">Read SKILL.md</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="source">
+  <div class="wrap repo">
+    <div>
+      <h2>The guides and skills are on GitHub</h2>
+      <p>Everything an agent reads is a plain file in the site's repository. Read it before you run it, or point an agent with no browser straight at the raw files.</p>
+      <div class="links">
+        <a class="btn" href="https://github.com/gabrielman25/grugdigital" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
+          gabrielman25/grugdigital
+        </a>
+      </div>
+    </div>
+    <div class="files">
+      <header>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 21a2 2 0 0 1 2-2h12v2H6"/></svg>
+        gabrielman25/grugdigital
+      </header>
+      <a href="https://github.com/gabrielman25/grugdigital/blob/main/character/claude.md" target="_blank" rel="noopener"><code>character/claude.md</code><span>The character guide agents follow</span></a>
+      <a href="https://github.com/gabrielman25/grugdigital/blob/main/build/claude.md" target="_blank" rel="noopener"><code>build/claude.md</code><span>The building guide agents follow</span></a>
+      <a href="https://github.com/gabrielman25/grugdigital/tree/main/src/skill" target="_blank" rel="noopener"><code>src/skill/</code><span>Both Claude skills</span></a>
+      <a href="https://github.com/gabrielman25/grugdigital/tree/main/src/character" target="_blank" rel="noopener"><code>src/character/</code><span>Avatar Studio's agent layer and <code>GrugStudio</code></span></a>
+      <a href="https://github.com/gabrielman25/grugdigital/tree/main/src/build" target="_blank" rel="noopener"><code>src/build/</code><span>Building Studio's source and <code>GrugBuild</code></span></a>
+      <a href="https://github.com/gabrielman25/grugdigital/blob/main/llms.txt" target="_blank" rel="noopener"><code>llms.txt</code><span>The index for agents that only fetch pages</span></a>
+    </div>
+  </div>
+</section>
+
+<section class="end">
+  <div class="wrap">
+    <h2>Your game needs a cast and a town</h2>
+    <p>Copy the prompt, fill in what you want, and send it to your agent.</p>
+    <div class="cta">
+      <button class="btn go" data-ask>Ask your agent</button>
+      <a class="btn" href="/">Back to grugdigital.com</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <a href="/character/">Avatar Studio</a>
+      <a href="/build/">Building Studio</a>
+      <a href="/build/examples/">Example buildings</a>
+      <a href="/arcade/">Grug Arcade</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href="https://github.com/gabrielman25/grugdigital" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener">Discord</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+    <p>Grug, Grug Digital, Pearls, characters, logos, names, and all related indicia are trademarks of Grug Digital, ©2026. Grug is not sponsored, authorized or endorsed by Roblox Corporation, Anthropic or Google. Roblox is a trademark of Roblox Corporation, Claude of Anthropic and Gemini of Google, and no affiliation with these companies is intended.</p>
+  </div>
+</footer>
+
+<dialog id="ask" aria-labelledby="ask-t">
+  <button class="x" aria-label="Close" data-close>×</button>
+  <h2 id="ask-t">Ask your agent</h2>
+  <p class="sub">Copy this and send it to your agent.</p>
+  <div class="tabs" role="tablist" aria-label="What to make">
+    <button role="tab" aria-selected="true" data-prompt="character">Character</button>
+    <button role="tab" aria-selected="false" data-prompt="building">Building</button>
+    <button role="tab" aria-selected="false" data-prompt="both">Both</button>
+  </div>
+  <pre id="prompt" tabindex="0"></pre>
+  <button class="btn go" data-copy="#prompt" data-label="Copy prompt">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+    <span>Copy prompt</span>
+  </button>
+  <p class="hint">Replace the part in [brackets] before you send it.</p>
+</dialog>
+
+<script>
+(function(){
+  var PROMPTS = {
+    character:
+'Make a character for my game with Grug Avatar Studio:\n' +
+'1. Read https://grugdigital.com/character/claude.md and follow it.\n' +
+'2. Open https://grugdigital.com/character/ in a browser you control. Choose hair, a face and a skin tone for: [who the character is and what they wear].\n' +
+'3. Paint the outfit in Gemini the way the guide says. If Gemini needs a sign-in, ask me. Never type a password.\n' +
+'4. Tell me the Pearl price and wait for my yes before you export. Then give me the R6 .glb and say where it was saved.\n' +
+'If you can\'t use a browser, send me a recipe link from the guide instead.',
+    building:
+'Make a building for my game with Grug Building Studio:\n' +
+'1. Read https://grugdigital.com/build/claude.md and follow it.\n' +
+'2. Open https://grugdigital.com/build/ in a browser you control. Set the size, roof, doors and windows, and describe: [what the building is and what it is made of].\n' +
+'3. Paint the reference sheet in Gemini the way the guide says. If Gemini needs a sign-in, ask me. Never type a password.\n' +
+'4. Paste the painting back, check the match is 85% or more, bake the textures and download the .glb. Tell me where it was saved.\n' +
+'If you can\'t use a browser, send me a settings link from the guide instead.',
+    both:
+'Add characters and buildings to this game with Grug\'s studios:\n' +
+'1. Read https://grugdigital.com/character/claude.md and https://grugdigital.com/build/claude.md.\n' +
+'2. Look at what this game is and list the characters and buildings it needs: [or name them here]. Show me the list before you start.\n' +
+'3. Make each one in its studio and paint it in Gemini the way the guides say. Keep one art style. If Gemini needs a sign-in, ask me.\n' +
+'4. Tell me the total Pearl price for the characters and wait for my yes before you export them.\n' +
+'5. Put the .glb files in the project, then tell me what you made and anything you could not finish.'
+  };
+  var dlg = document.getElementById('ask'), pre = document.getElementById('prompt');
+  function show(k){ pre.textContent = PROMPTS[k]; }
+  show('character');
+
+  document.querySelectorAll('[data-ask]').forEach(function(b){
+    b.addEventListener('click', function(){ dlg.showModal(); });
+  });
+  dlg.addEventListener('click', function(e){ if (e.target === dlg || e.target.closest('[data-close]')) dlg.close(); });
+
+  document.querySelectorAll('[role=tablist]').forEach(function(list){
+    list.addEventListener('click', function(e){
+      var t = e.target.closest('[role=tab]'); if (!t) return;
+      list.querySelectorAll('[role=tab]').forEach(function(x){ x.setAttribute('aria-selected', x === t); });
+      if (t.dataset.prompt) show(t.dataset.prompt);
+      if (t.dataset.link) document.getElementById('link').textContent = t.dataset.link;
+    });
+  });
+
+  function copy(text){
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+    return new Promise(function(ok, no){
+      var ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      (dlg.open ? dlg : document.body).appendChild(ta); ta.select();
+      try { document.execCommand('copy') ? ok() : no(); } catch (e) { no(e); } ta.remove();
+    });
+  }
+  document.querySelectorAll('[data-copy]').forEach(function(b){
+    var label = b.querySelector('span') || b, was = label.textContent;
+    b.addEventListener('click', function(){
+      copy(document.querySelector(b.dataset.copy).textContent).then(
+        function(){ label.textContent = 'Copied'; },
+        function(){ label.textContent = 'Select the text and copy it'; }
+      ).then(function(){ setTimeout(function(){ label.textContent = was; }, 1600); });
+    });
+  });
+
+  if (location.hash === '#ask') dlg.showModal();
+})();
+</script>
+</body>
+</html>

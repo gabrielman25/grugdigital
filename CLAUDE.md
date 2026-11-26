@@ -62,6 +62,14 @@ and `robots.txt` list it all. Read `src/seo/README.md` before adding or renaming
 Avatar Studio or the Building Studio). Renamed images keep their old address through `MOVED` in `functions/_middleware.js`.
 Don't tag textures, placeholders or third-party images.
 
+## Grug for agents (`/agents/`)
+
+`agents/index.html` is the landing page for people who use AI agents: an "Ask your agent" box with prompts to copy (the
+`PROMPTS` object in its script), both studios, both skills (`src/skill/`) and links to their source on GitHub. It is the
+one page that does **not** wear the classic look, on the owner's request: dark, one self-contained file, Fredoka
+headings, the Building Studio's reference-sheet colours as its legend. Keep its prompts and facts in step with
+`character/claude.md` and `build/claude.md` when the studios or their APIs change.
+
 ## Always send the owner a preview link (not just screenshots)
 
 Work on a branch and push it (not `main`, unless the owner says to). Cloudflare Pages builds every pushed branch at

@@ -19,6 +19,8 @@
   `window.GrugBuild` JavaScript API and settings links (`/build/?w=8&d=6&roof=gable&desc=…`).
 - [Example buildings](https://grugdigital.com/build/examples/): six finished buildings (medieval, modern, future) with
   their reference sheets, Gemini paintings and `.glb` files, each openable as a template.
+- [Claude skill (zip)](https://grugdigital.com/build/game-buildings.zip): install it so Claude uses the studio
+  whenever a game needs buildings, and brings them into the game.
 
 ## Avatar Studio (Roblox characters)
 
@@ -30,3 +32,8 @@
   and recipe links (`/character/?hair=…&outfit=…`) for when you can't use a browser.
 - [Claude skill (zip)](https://grugdigital.com/character/roblox-characters.zip): install it so Claude uses the
   studio whenever a Roblox game needs characters or NPCs, and brings them into the game.
+
+## For agents
+
+- [Grug for agents](https://grugdigital.com/agents/): both studios on one page, with prompts to copy and send to an
+  agent, the two skills and links to their source on GitHub.

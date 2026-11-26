@@ -12,3 +12,12 @@ cd src/skill && rm -f ../../character/roblox-characters.zip && zip -X -r ../../c
 ```
 
 Keep its studio steps in line with `src/character/claude.md.tmpl` and `GrugStudio.steps()`.
+
+# Claude skill: game-buildings
+
+`game-buildings/SKILL.md` does the same for the Building Studio: it's offered at `/build/game-buildings.zip` (linked from
+`/agents/` and `/llms.txt`). Rebuild the zip after editing it, and keep its steps in line with `src/build/guide.md`:
+
+```
+cd src/skill && rm -f ../../build/game-buildings.zip && zip -X -r ../../build/game-buildings.zip game-buildings
+```
