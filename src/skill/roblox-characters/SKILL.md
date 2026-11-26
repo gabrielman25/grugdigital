@@ -77,6 +77,9 @@ For each character:
 then walk the person through the outfit steps. Every `set()` key works as a URL parameter:
 `https://grugdigital.com/character/?name=Sir+Rowan&hair=crop&hairColor=dark-brown&outfit=chainmail+shirt+over+a+deep-red+tabard`
 
+Buildings for the same game: the `game-buildings` skill does the same with Grug Building Studio
+(https://grugdigital.com/build/). Both skills, and prompts for other agents: https://grugdigital.com/agents/.
+
 ## 3. Put the characters in the game
 
 Get the files first. If you can reach the person's Downloads folder (a connected folder), take the `.glb` files from

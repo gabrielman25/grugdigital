@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/fonts/allo.css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="data:,">
 <title>Voice Lab · Zone Royale player voices · Grug</title>
 <style>
   * { box-sizing: border-box; }
-  body { margin: 0; font: 13px Arial, Helvetica, sans-serif; color: #222; background: #cfd6dc; }
+  body { margin: 0; font: 13px Allo, Arial, Helvetica, sans-serif; color: #222; background: #cfd6dc; }
   h1 { font-size: 18px; margin: 0; }
   .top { display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: linear-gradient(#5fae3a, #3d8a21); color: #fff; text-shadow: 0 1px 0 #255a12; border-bottom: 1px solid #2c6a17; flex-wrap: wrap; }
   .top small { opacity: .9; }
@@ -20,8 +22,8 @@
   .in { padding: 8px 10px; }
   #game { width: 100%; display: block; background: #9fd2f2; border-bottom: 1px solid #9aa3ab; touch-action: none; cursor: crosshair; }
   .help { font-size: 12px; color: #333; line-height: 1.5; }
-  kbd { display: inline-block; font: bold 11px Arial; padding: 1px 5px; border: 1px solid #888; border-bottom-width: 2px; border-radius: 3px; background: #fff; }
-  .btn { font: bold 12px Arial; padding: 5px 10px; border: 1px solid #7d858c; border-radius: 3px; background: linear-gradient(#ffffff, #d5dade); color: #222; cursor: pointer; }
+  kbd { display: inline-block; font: bold 11px Allo,Arial; padding: 1px 5px; border: 1px solid #888; border-bottom-width: 2px; border-radius: 3px; background: #fff; }
+  .btn { font: bold 12px Allo,Arial; padding: 5px 10px; border: 1px solid #7d858c; border-radius: 3px; background: linear-gradient(#ffffff, #d5dade); color: #222; cursor: pointer; }
   .btn:hover { background: linear-gradient(#ffffff, #c4cbd1); }
   .btn.green { background: linear-gradient(#8fd86a, #4f9e2b); border-color: #3c7a1f; color: #fff; text-shadow: 0 1px 0 #2f6516; }
   .btn.blue { background: linear-gradient(#7fbff2, #2f7bc4); border-color: #24609b; color: #fff; text-shadow: 0 1px 0 #1d4f80; }
@@ -48,7 +50,7 @@
   .dual input::-moz-range-thumb { pointer-events: auto; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 2px solid #3d8a21; cursor: pointer; }
   .dual input::-webkit-slider-runnable-track { background: none; } .dual input::-moz-range-track { background: none; }
   .chk { display: flex; align-items: center; gap: 6px; margin: 5px 0; font-weight: bold; font-size: 12px; cursor: pointer; }
-  select { font: 12px Arial; padding: 2px; }
+  select { font: 12px Allo,Arial; padding: 2px; }
   details.ev { border: 1px solid #b5bcc2; border-radius: 3px; margin: 7px 0; background: #fff; }
   details.ev > summary { cursor: pointer; padding: 6px 8px; font-weight: bold; display: flex; align-items: center; gap: 8px; background: linear-gradient(#f4f6f7, #e1e5e8); list-style: none; }
   details.ev > summary::-webkit-details-marker { display: none; }
@@ -290,7 +292,7 @@ function setupPad(cv, lab) {
     x.strokeStyle = '#e0e3e6'; x.lineWidth = 1; for (let p = -12; p <= 12; p += 3) { x.beginPath(); x.moveTo(0, toY(p) + .5); x.lineTo(W, toY(p) + .5); x.stroke(); }
     const zx = toX(A.speedMin), zy = toY(A.pitchMax), zw = toX(A.speedMax) - zx, zh = toY(A.pitchMin) - zy;
     x.fillStyle = '#d6efc8'; x.fillRect(zx, zy, zw, zh); x.strokeStyle = '#4f9e2b'; x.lineWidth = 2; x.strokeRect(zx, zy, zw, zh);
-    x.fillStyle = '#888'; x.font = '10px Arial'; x.fillText('higher', 4, 12); x.fillText('lower', 4, H - 4); x.fillText('slower', W / 2 - 36, H - 4); x.textAlign = 'right'; x.fillText('faster', W - 4, H - 4); x.textAlign = 'left';
+    x.fillStyle = '#888'; x.font = '10px Allo, Arial'; x.fillText('higher', 4, 12); x.fillText('lower', 4, H - 4); x.fillText('slower', W / 2 - 36, H - 4); x.textAlign = 'right'; x.fillText('faster', W - 4, H - 4); x.textAlign = 'left';
     x.strokeStyle = '#aaa'; x.lineWidth = 1; x.beginPath(); x.arc(toX(A.speedDefault), toY(A.pitchDefault), 5, 0, 7); x.stroke();
     const b = GV.voiceFor(BOT.name); x.fillStyle = '#2f7bc4'; x.beginPath(); x.arc(toX(b.speed), toY(b.pitch), 4, 0, 7); x.fill();
     x.fillStyle = '#d33'; x.beginPath(); x.arc(toX(m.speed), toY(m.pitch), 7, 0, 7); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 2; x.stroke();
@@ -419,7 +421,7 @@ function drawFig(c, col) {
   if (c.swing > 0 && c.swing < 0.2) { X.strokeStyle = 'rgba(255,255,255,.7)'; X.lineWidth = 3; X.beginPath(); X.arc(c.face * 10, 0, 40, c.face > 0 ? -1.4 : Math.PI + 1.4, c.face > 0 ? 0.9 : Math.PI - 0.9, c.face < 0); X.stroke(); }
   X.restore();
 }
-function label(t, x, y, col = '#fff') { X.font = 'bold 12px Arial'; X.textAlign = 'center'; X.lineWidth = 3; X.strokeStyle = '#000'; X.strokeText(t, x - camX, y); X.fillStyle = col; X.fillText(t, x - camX, y); }
+function label(t, x, y, col = '#fff') { X.font = 'bold 12px Allo,Arial'; X.textAlign = 'center'; X.lineWidth = 3; X.strokeStyle = '#000'; X.strokeText(t, x - camX, y); X.fillStyle = col; X.fillText(t, x - camX, y); }
 function draw() {
   X.fillStyle = '#9fd2f2'; X.fillRect(0, 0, VW, VH);
   X.fillStyle = '#c4e4f7'; for (let i = 0; i < 8; i++) { const cx = ((i * 380 - camX * 0.3) % 1600 + 1600) % 1600 - 200; X.fillRect(cx, 50 + (i % 3) * 30, 110, 26); X.fillRect(cx + 20, 36 + (i % 3) * 30, 60, 20); }
@@ -440,10 +442,10 @@ function draw() {
   }
   // HUD
   X.fillStyle = 'rgba(0,0,0,.45)'; X.fillRect(10, 10, 164, 20); X.fillStyle = P.hp > 30 ? '#5fd03a' : '#e33'; X.fillRect(12, 12, 160 * clamp(P.hp, 0, 100) / 100, 16);
-  X.font = 'bold 12px Arial'; X.textAlign = 'left'; X.lineWidth = 3; X.strokeStyle = '#000'; X.strokeText('HEALTH ' + Math.max(0, P.hp), 16, 25); X.fillStyle = '#fff'; X.fillText('HEALTH ' + Math.max(0, P.hp), 16, 25);
-  if (!ctx || ctx.state !== 'running') { X.fillStyle = 'rgba(0,0,0,.55)'; X.fillRect(0, VH / 2 - 26, VW, 52); X.textAlign = 'center'; X.font = 'bold 18px Arial'; X.fillStyle = '#fff'; X.fillText('Click here (or press any key) to start the sound', VW / 2, VH / 2 + 6); }
-  else if (!GV.ready) { X.textAlign = 'center'; X.font = 'bold 14px Arial'; X.fillStyle = '#000'; X.fillText('Loading the voice clips…', VW / 2, 50); }
-  if (P.dead) { X.textAlign = 'center'; X.font = 'bold 22px Arial'; X.lineWidth = 4; X.strokeStyle = '#000'; const t = P.fell ? 'Fell off the map' : 'Wiped out'; X.strokeText(t, VW / 2, 130); X.fillStyle = '#fff'; X.fillText(t, VW / 2, 130); }
+  X.font = 'bold 12px Allo,Arial'; X.textAlign = 'left'; X.lineWidth = 3; X.strokeStyle = '#000'; X.strokeText('HEALTH ' + Math.max(0, P.hp), 16, 25); X.fillStyle = '#fff'; X.fillText('HEALTH ' + Math.max(0, P.hp), 16, 25);
+  if (!ctx || ctx.state !== 'running') { X.fillStyle = 'rgba(0,0,0,.55)'; X.fillRect(0, VH / 2 - 26, VW, 52); X.textAlign = 'center'; X.font = 'bold 18px Allo,Arial'; X.fillStyle = '#fff'; X.fillText('Click here (or press any key) to start the sound', VW / 2, VH / 2 + 6); }
+  else if (!GV.ready) { X.textAlign = 'center'; X.font = 'bold 14px Allo,Arial'; X.fillStyle = '#000'; X.fillText('Loading the voice clips…', VW / 2, 50); }
+  if (P.dead) { X.textAlign = 'center'; X.font = 'bold 22px Allo,Arial'; X.lineWidth = 4; X.strokeStyle = '#000'; const t = P.fell ? 'Fell off the map' : 'Wiped out'; X.strokeText(t, VW / 2, 130); X.fillStyle = '#fff'; X.fillText(t, VW / 2, 130); }
 }
 let last = performance.now();
 function frame(now) {

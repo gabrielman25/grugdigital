@@ -7,12 +7,12 @@
 <title>Grug Building Studio</title>
 <meta name="description" content="Block out a chunky building, paint it in Gemini (Nano Banana) and get a textured, retro 3D model (.glb). AI agents: read the guide at the top of this page, or call GrugBuild.help() in the page.">
 <style>
-@font-face{font-family:'Fredoka';font-style:normal;font-weight:300 700;font-display:swap;src:url(data:font/woff2;base64,/*FONT*/) format('woff2')}
+/*FONTFACE*/
 :root{--page:#F3F3F5;--card:#FFFFFF;--ink:#1E1B16;--soft:#6B6B73;--line:#E2E2E7;--accent:#9BE338;--accent-lo:#6FB31C;--field:#F3F3F5;--bad:#C2452D;
   --mark:url("/*MARK*/");color-scheme:light}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{font-family:'Fredoka',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--page);color:var(--ink);-webkit-font-smoothing:antialiased;
+body{font-family:Allo,system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--page);color:var(--ink);-webkit-font-smoothing:antialiased;
   display:grid;grid-template-rows:60px 1fr;overflow:hidden}
 button,input,select,textarea{font:inherit;color:inherit}
 [hidden]{display:none!important}
@@ -260,6 +260,7 @@ kbd{font:600 12px ui-monospace,Menlo,monospace;background:var(--field);border-ra
   <ul><li>Drag to orbit, right-drag or <kbd>Shift</kbd>-drag to pan, scroll to zoom, <kbd>F</kbd> to fit.</li></ul>
   <h2>With Claude</h2>
   <p>Paste this page's link into Claude and describe the building. Claude can set it up through <b>GrugBuild</b> in the page, or send you a link with the settings in it.</p>
+  <p>A prompt for any agent, and a Claude skill that makes buildings whenever your game needs them: <a href="https://grugdigital.com/agents/">Grug for agents</a>.</p>
   <div class="row"><button class="btn" id="helpClose">Got it</button></div>
 </div></dialog>
 /*HEADSCRIPTS*/<script>

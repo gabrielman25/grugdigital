@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/fonts/allo.css">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Grug City RP · Free in the Grug Arcade by Grug Digital</title>
 <!-- seo: written by src/seo/seo_head.py (re-run it, don't edit by hand) -->
@@ -27,11 +29,11 @@
 <style>
   /* classic (2012-2014) Roblox look: Arial bold, flat translucent greys, outlined white text */
   html, body { margin: 0; height: 100%; overflow: hidden; background: #8fc6ef; }
-  body { font: bold 13px/1.25 Arial, Helvetica, sans-serif; color: #fff; user-select: none; -webkit-user-select: none; }
+  body { font: bold 13px/1.25 Allo, Arial, Helvetica, sans-serif; color: #fff; user-select: none; -webkit-user-select: none; }
   canvas#c { display: block; width: 100%; height: 100%; outline: none; touch-action: none; }
   body { touch-action: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
   .ol { text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
-  button { font: bold 13px Arial, Helvetica, sans-serif; }
+  button { font: bold 13px Allo, Arial, Helvetica, sans-serif; }
   .cg { color: #ffe36b; } .cz { color: #9be36b; } .cr { color: #ff6a5a; }
 
   #hint { position: fixed; left: 0; right: 0; top: 0; height: 22px; line-height: 22px; background: rgba(0, 0, 0, .55); text-align: center; font-size: 13px; white-space: nowrap; overflow: hidden; pointer-events: none; }
@@ -199,7 +201,7 @@
   .tag.dim { opacity: .45; }
   .tag .nm.pl { color: #fff; font-size: 13px; } .tag .hb { visibility: visible; }
   /* classic bubble chat over a fake player's head */
-  .tag .bub { display: none; width: max-content; max-width: 170px; margin: 0 auto 6px; padding: 3px 8px; background: #fff; color: #111; font: bold 12px Arial, sans-serif; border-radius: 9px; border: 1px solid #999; white-space: normal; position: relative; text-shadow: none; }
+  .tag .bub { display: none; width: max-content; max-width: 170px; margin: 0 auto 6px; padding: 3px 8px; background: #fff; color: #111; font: bold 12px Allo, Arial, sans-serif; border-radius: 9px; border: 1px solid #999; white-space: normal; position: relative; text-shadow: none; }
   .tag .bub::after { content: ''; position: absolute; left: 50%; bottom: -7px; margin-left: -6px; border: 6px solid transparent; border-top-color: #fff; border-bottom: 0; }
 
   /* start screen */
@@ -321,7 +323,7 @@
   #tvWin .hd { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; } #tvWin .hd b { flex: 1; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #tvWin iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; background: #000; }
   #tvWin .row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-  #tvWin button, #tvWin a { background: rgba(255, 255, 255, .08); border: 2px solid rgba(255, 255, 255, .6); color: #fff; font: bold 14px Arial, sans-serif; padding: 6px 12px; cursor: pointer; text-decoration: none; }
+  #tvWin button, #tvWin a { background: rgba(255, 255, 255, .08); border: 2px solid rgba(255, 255, 255, .6); color: #fff; font: bold 14px Allo, Arial, sans-serif; padding: 6px 12px; cursor: pointer; text-decoration: none; }
   #tvWin button:hover, #tvWin a:hover { border-color: #ff4040; }
   #shop { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(380px, 92vw); background: rgba(25, 25, 25, .93); border: 2px solid rgba(255, 255, 255, .4); padding: 10px 14px 12px; display: none; z-index: 30; box-sizing: border-box; }
   #shop .hd { display: flex; align-items: center; gap: 8px; } #shop .hd b { flex: 1; font-size: 18px; } #shop .hd span { color: #8aff8a; font-size: 15px; }
@@ -1939,7 +1941,7 @@ function textCanvas(lines, w, h, bg, fg, size) {
   const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
   if (bg) { x.fillStyle = bg; x.fillRect(0, 0, w, h); }
   x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineJoin = 'round';
-  lines.forEach((l, k) => { let s = k ? size * 0.62 : size; x.font = `bold ${s}px Arial`; const tw = x.measureText(l).width; if (tw > w * 0.92) { s *= w * 0.92 / tw; x.font = `bold ${s}px Arial`; } x.lineWidth = s / 6; x.strokeStyle = '#000'; const y = h / 2 + (k - (lines.length - 1) / 2) * size * 1.05; x.strokeText(l, w / 2, y); x.fillStyle = k ? (typeof fg === 'object' ? fg[k] : '#ddd') : (typeof fg === 'object' ? fg[0] : fg); x.fillText(l, w / 2, y); });
+  lines.forEach((l, k) => { let s = k ? size * 0.62 : size; x.font = `bold ${s}px Allo,Arial`; const tw = x.measureText(l).width; if (tw > w * 0.92) { s *= w * 0.92 / tw; x.font = `bold ${s}px Allo,Arial`; } x.lineWidth = s / 6; x.strokeStyle = '#000'; const y = h / 2 + (k - (lines.length - 1) / 2) * size * 1.05; x.strokeText(l, w / 2, y); x.fillStyle = k ? (typeof fg === 'object' ? fg[k] : '#ddd') : (typeof fg === 'object' ? fg[0] : fg); x.fillText(l, w / 2, y); });
   const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t;
 }
 function sign(lines, x, y, z, w, h, faceX, faceZ, bg = '#2a2a2a', fg = '#fff') {
@@ -4878,9 +4880,9 @@ const Social = (() => {
   const nf = x => Number(x || 0).toLocaleString('en-US'), esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   // ---- drawing
   function rr(x, X, Y, W, H, r) { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + W, Y, X + W, Y + H, r); x.arcTo(X + W, Y + H, X, Y + H, r); x.arcTo(X, Y + H, X, Y, r); x.arcTo(X, Y, X + W, Y, r); x.closePath(); }
-  function txt(x, s, X, Y, size, col, maxW, align = 'left') { let z = size; x.font = `bold ${z}px Arial`; while (maxW && x.measureText(s).width > maxW && z > 12) { z -= 2; x.font = `bold ${z}px Arial`; } x.textAlign = align; x.textBaseline = 'alphabetic'; x.fillStyle = col; x.fillText(s, X, Y); return z; }
+  function txt(x, s, X, Y, size, col, maxW, align = 'left') { let z = size; x.font = `bold ${z}px Allo,Arial`; while (maxW && x.measureText(s).width > maxW && z > 12) { z -= 2; x.font = `bold ${z}px Allo,Arial`; } x.textAlign = align; x.textBaseline = 'alphabetic'; x.fillStyle = col; x.fillText(s, X, Y); return z; }
   function wrapTxt(x, s, X, Y, size, col, maxW, maxLines) {
-    x.font = `bold ${size}px Arial`; x.fillStyle = col; x.textAlign = 'left'; const words = String(s).split(/\s+/); let line = '', n = 0;
+    x.font = `bold ${size}px Allo,Arial`; x.fillStyle = col; x.textAlign = 'left'; const words = String(s).split(/\s+/); let line = '', n = 0;
     for (let i = 0; i < words.length; i++) { const t = line ? line + ' ' + words[i] : words[i]; if (x.measureText(t).width > maxW && line) { if (n === maxLines - 1) { x.fillText(line + '…', X, Y + n * size * 1.15); return; } x.fillText(line, X, Y + n * size * 1.15); n++; line = words[i]; } else line = t; }
     if (line) x.fillText(line, X, Y + n * size * 1.15);
   }
@@ -4888,7 +4890,7 @@ const Social = (() => {
   function fig(x, im, X, Y, h) { if (!im) return; const w = im.width * h / im.height; x.drawImage(im, X - w / 2, Y - h, w, h); }
   function cover(x, im, X, Y, W, H) { if (!im) { x.fillStyle = '#222'; x.fillRect(X, Y, W, H); return; } const s = Math.max(W / im.width, H / im.height), w = im.width * s, h = im.height * s; x.save(); x.beginPath(); x.rect(X, Y, W, H); x.clip(); x.drawImage(im, X + (W - w) / 2, Y + (H - h) / 2, w, h); x.restore(); }
   function play(x, cx, cy, r) { x.fillStyle = 'rgba(0,0,0,.55)'; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill(); x.fillStyle = '#fff'; x.beginPath(); x.moveTo(cx - r * 0.35, cy - r * 0.5); x.lineTo(cx + r * 0.55, cy); x.lineTo(cx - r * 0.35, cy + r * 0.5); x.closePath(); x.fill(); }
-  function hint(x, W, H, s) { x.font = `bold ${H * 0.065}px Arial`; const w = x.measureText(s).width + H * 0.08; x.fillStyle = 'rgba(0,0,0,.45)'; rr(x, W - w - H * 0.04, H * 0.04, w, H * 0.1, H * 0.03); x.fill(); x.fillStyle = '#fff'; x.textAlign = 'center'; x.fillText(s, W - w / 2 - H * 0.04, H * 0.115); }
+  function hint(x, W, H, s) { x.font = `bold ${H * 0.065}px Allo,Arial`; const w = x.measureText(s).width + H * 0.08; x.fillStyle = 'rgba(0,0,0,.45)'; rr(x, W - w - H * 0.04, H * 0.04, w, H * 0.1, H * 0.03); x.fill(); x.fillStyle = '#fff'; x.textAlign = 'center'; x.fillText(s, W - w / 2 - H * 0.04, H * 0.115); }
   const I = {};   // loaded pictures, by key
   const DRAW = {
     discord: [(x, W, H) => {
@@ -4896,7 +4898,7 @@ const Social = (() => {
       txt(x, 'JOIN THE', H * 0.08, H * 0.2, H * 0.09, 'rgba(255,255,255,.8)');
       txt(x, 'GRUG DISCORD', H * 0.08, H * 0.39, H * 0.2, '#fff', W * 0.56);
       const s = 'COME SAY HI';
-      x.font = `bold ${H * 0.1}px Arial`; const pw = x.measureText(s).width + H * 0.12; x.fillStyle = '#3ba55c'; rr(x, H * 0.08, H * 0.48, pw, H * 0.15, H * 0.075); x.fill(); txt(x, s, H * 0.14, H * 0.592, H * 0.1, '#fff');
+      x.font = `bold ${H * 0.1}px Allo,Arial`; const pw = x.measureText(s).width + H * 0.12; x.fillStyle = '#3ba55c'; rr(x, H * 0.08, H * 0.48, pw, H * 0.15, H * 0.075); x.fill(); txt(x, s, H * 0.14, H * 0.592, H * 0.1, '#fff');
       txt(x, data.discord.members ? `${nf(data.discord.members)} members · discord.gg/3ENePvNGJy` : 'discord.gg/3ENePvNGJy', H * 0.08, H * 0.78, H * 0.075, 'rgba(255,255,255,.9)', W * 0.58);
       fig(x, I.medic, W * 0.74, H * 1.02, H * 0.86); fig(x, I.grug, W * 0.88, H * 1.04, H * 0.98); hint(x, W, H, 'Aim here + E to join');
     }, (x, W, H) => {
@@ -5198,7 +5200,7 @@ const Mall = (() => {
     const draw = im => {
       c.fillStyle = g; c.fillRect(0, 0, 1024, H); let x0 = H * 0.12;
       if (im) { const s = H * 0.8; c.drawImage(im, x0, (H - s) / 2, s, s); x0 += s + H * 0.12; }
-      c.fillStyle = fg; c.textBaseline = 'middle'; lines.forEach((t, i) => { const fs = i ? H * 0.2 : H * 0.36; c.font = `bold ${fs}px Fredoka, Arial, sans-serif`; c.fillText(t, x0, H * (lines.length === 1 ? 0.5 : i ? 0.72 : 0.38), 1024 - x0 - H * 0.12); });
+      c.fillStyle = fg; c.textBaseline = 'middle'; lines.forEach((t, i) => { const fs = i ? H * 0.2 : H * 0.36; c.font = `bold ${fs}px Allo, Arial, sans-serif`; c.fillText(t, x0, H * (lines.length === 1 ? 0.5 : i ? 0.72 : 0.38), 1024 - x0 - H * 0.12); });
       tex.needsUpdate = true;
     };
     draw(null); if (logo) img(logo).then(draw);

@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/fonts/allo.css">
 <!-- the classic 920px games page; on phones arcade.css reflows it into one column -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grug Arcade · Game</title>
@@ -32,34 +34,34 @@
    a creator and details column on the right, then Recommendations */
 #Place{overflow:hidden;padding:4px 2px 0}
 #Place .ttl{margin:4px 0 10px}
-#Place .ttl h1{display:block;font:bold 30px/1.05 Arial,Helvetica,sans-serif;color:#111}
-#Place .ttl .sub{font:12px Arial,Helvetica,sans-serif;color:#777;margin-top:3px}
+#Place .ttl h1{display:block;font:bold 30px/1.05 Allo,Arial,Helvetica,sans-serif;color:#111}
+#Place .ttl .sub{font:12px Allo,Arial,Helvetica,sans-serif;color:#777;margin-top:3px}
 #Place .L{float:left;width:540px}
 #Place .R{float:right;width:334px}
 #Place .shot{position:relative;width:538px;height:303px;border:1px solid #888;background:#000;overflow:hidden}
 #Place .shot img{display:block;width:538px;height:303px;object-fit:cover}
-#Place .shot .new{position:absolute;left:8px;top:8px;padding:3px 8px;background:#d8281f;color:#fff;font:bold 13px Arial,Helvetica,sans-serif;border-radius:3px}
+#Place .shot .new{position:absolute;left:8px;top:8px;padding:3px 8px;background:#d8281f;color:#fff;font:bold 13px Allo,Arial,Helvetica,sans-serif;border-radius:3px}
 #Place .acts{display:flex;align-items:center;gap:12px;margin:10px 0 14px}
-#Place .PlayBig{display:inline-block;width:210px;height:46px;line-height:46px;text-align:center;border-radius:6px;font:bold 22px/46px Arial,Helvetica,sans-serif;color:#1e1b16;text-decoration:none;
+#Place .PlayBig{display:inline-block;width:210px;height:46px;line-height:46px;text-align:center;border-radius:6px;font:bold 22px/46px Allo,Arial,Helvetica,sans-serif;color:#1e1b16;text-decoration:none;
   background:linear-gradient(#c6f57a,#9be338 50%,#86cf27 51%,#9be338);border:1px solid #5f9a18;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
 #Place .PlayBig:hover{filter:brightness(1.06);text-decoration:none}
-#Place .fav{height:28px;padding:0 12px;border-radius:4px;border:1px solid #888;cursor:pointer;font:bold 13px Arial,Helvetica,sans-serif;color:#333;background:linear-gradient(#fafafa,#e3e3e3 50%,#d6d6d6 51%,#e6e6e6)}
+#Place .fav{height:28px;padding:0 12px;border-radius:4px;border:1px solid #888;cursor:pointer;font:bold 13px Allo,Arial,Helvetica,sans-serif;color:#333;background:linear-gradient(#fafafa,#e3e3e3 50%,#d6d6d6 51%,#e6e6e6)}
 #Place .fav:hover{filter:brightness(1.04)} #Place .fav b{color:#aaa;font-size:15px} #Place .fav.on b{color:#e0a800}
 #Place .acts .free{font-size:11px;color:#888;line-height:1.35}
 #Place .StandardBoxHeader{width:auto;display:inline-block;padding-right:28px;font-size:17px;height:28px}
 #Place .StandardBoxHeader span{padding-top:5px}
-#Place .bx{clear:both;position:relative;top:-2px;margin:0 0 12px;padding:10px 12px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 90px) no-repeat;font:13px/1.45 Arial,Helvetica,sans-serif;color:#333}
+#Place .bx{clear:both;position:relative;top:-2px;margin:0 0 12px;padding:10px 12px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 90px) no-repeat;font:13px/1.45 Allo,Arial,Helvetica,sans-serif;color:#333}
 #Place .bx p{margin:0 0 8px} #Place .bx p:last-child{margin:0}
 #Place .bx.coop{display:flex;gap:12px;align-items:center} #Place .bx.coop img{flex:none;width:110px;height:auto} #Place .bx.coop a{color:#00f}
 @media (max-width:600px){#Place .bx.coop{flex-direction:column;align-items:flex-start}}
 #Place table.keys{border-collapse:collapse;width:100%}
 #Place table.keys td{padding:3px 4px;vertical-align:top;border-top:1px solid #eee} #Place table.keys tr:first-child td{border-top:0}
 #Place table.keys td:first-child{width:150px;white-space:nowrap}
-#Place kbd{display:inline-block;padding:1px 6px;border:1px solid #aaa;border-bottom-width:2px;border-radius:3px;background:#f4f4f4;font:bold 11px Arial,Helvetica,sans-serif;color:#333}
+#Place kbd{display:inline-block;padding:1px 6px;border:1px solid #aaa;border-bottom-width:2px;border-radius:3px;background:#f4f4f4;font:bold 11px Allo,Arial,Helvetica,sans-serif;color:#333}
 #Place .creator{display:flex;gap:10px;align-items:center}
 #Place .creator .av{flex:none;width:64px;height:64px;border:1px solid #ccc;background:#fff;display:grid;place-items:center}
 #Place .creator .av{overflow:hidden;align-items:end}#Place .creator .av img{width:auto;height:60px}
-#Place .creator .who{font-size:12px;color:#777} #Place .creator .who a{display:block;font:bold 16px Arial,Helvetica,sans-serif}
+#Place .creator .who{font-size:12px;color:#777} #Place .creator .who a{display:block;font:bold 16px Allo,Arial,Helvetica,sans-serif}
 #Place dl{display:grid;grid-template-columns:96px 1fr;gap:4px 8px;margin:10px 0 0;font-size:12px}
 #Place dt{color:#777;font-weight:bold} #Place dd{margin:0;color:#222}
 #Place .gen{display:flex;flex-wrap:wrap;gap:6px}
@@ -128,6 +130,7 @@
         <li><a href="/character/">Avatar Studio</a></li>
         <li><a href="/build/">Building Studio</a></li>
         <li><a href="/arcade/grug-studio/">Grug Studio</a></li>
+        <li><a href="/agents/">Agents</a></li>
         <li><a href="/character/pearls/">Pearls</a></li>
         <li><a href="/">Home</a></li>
         <li><a href="/legacy">Legacy</a></li>
@@ -157,6 +160,8 @@
       <a href="/">About Us</a>
       &nbsp;|&nbsp;
       <a href="/arcade/">Free Games</a>
+      &nbsp;|&nbsp;
+      <a href="/agents/">For AI agents</a>
       &nbsp;|&nbsp;
       <a href="/support.html">Jobs</a>
     </div>

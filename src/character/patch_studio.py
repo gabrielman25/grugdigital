@@ -22,7 +22,14 @@ sub('<title>Grug Avatar Studio · Grug Digital</title>',
     '<link rel="canonical" href="https://grugdigital.com/character/">\n'
     '<script src="/static/pearls.js"></script>\n'
     '<link rel="alternate" type="text/markdown" href="/character/claude.md" title="How AI agents (Claude) use this studio">\n'
-    '<link rel="help" href="/character/claude.md">')
+    '<link rel="help" href="/character/claude.md">\n'
+    '<link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>\n'
+    '<link rel="stylesheet" href="/static/fonts/allo.css">')
+
+# ---- Allo, the site's font (static/fonts/allo.css), first in the studio's own font stacks (classic.css sets --g-font too)
+sub("--g-font:'Fredoka',ui-rounded,", "--g-font:Allo,'Fredoka',ui-rounded,")
+sub("x.font = '700 22px system-ui, Arial, sans-serif'", "x.font = '700 22px Allo, system-ui, Arial, sans-serif'")
+sub("x.font = 'bold 11px system-ui'", "x.font = 'bold 11px Allo, system-ui'")
 
 # ---- styles for the topbar button and the sheet
 CSS = r"""
@@ -33,7 +40,7 @@ CSS = r"""
   .cg-wrap.open{display:grid}
   .cg{position:relative;width:min(35rem,100%);max-height:100%;overflow:auto;padding:1.6rem 1.6rem 1.3rem;border-radius:1.25rem}
   .cg .cg-tag{display:inline-flex;align-items:center;gap:.4rem;font-weight:600;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--g-muted,#6E6B66);margin-bottom:.35rem}
-  .cg h2{margin:0 0 .45rem;font:600 1.55rem/1.15 var(--g-font,'Fredoka',system-ui,sans-serif);padding-right:2.4rem}
+  .cg h2{margin:0 0 .45rem;font:600 1.55rem/1.15 var(--g-font,Allo,system-ui,sans-serif);padding-right:2.4rem}
   .cg p{margin:0 0 1rem;line-height:1.45;color:var(--g-text-2,#47443F)}
   .cg-x{position:absolute;top:.9rem;right:.9rem}
   .cg label.cg-field{display:block;font-weight:600;font-size:.9rem;color:var(--g-text-2,#47443F);margin-bottom:.35rem}
@@ -68,7 +75,7 @@ CSS = r"""
   .sk-dl{width:100%;justify-content:center;gap:.5rem;min-height:3.1rem;font-size:1.02rem}
   .sk-file{margin:.45rem 0 0 !important;text-align:center;font-size:.82rem;color:var(--g-muted,#6E6B66) !important}
   .sk-tabs{display:flex;gap:.3rem;margin:1rem 0 .2rem;padding:.25rem;border-radius:.8rem;background:var(--g-surface-2,#F0F0EC)}
-  .sk-tabs button{flex:1;min-height:2.3rem;border:0;border-radius:.6rem;background:transparent;font:600 .92rem var(--g-font,'Fredoka',system-ui,sans-serif);color:var(--g-text-2,#47443F);cursor:pointer}
+  .sk-tabs button{flex:1;min-height:2.3rem;border:0;border-radius:.6rem;background:transparent;font:600 .92rem var(--g-font,Allo,system-ui,sans-serif);color:var(--g-text-2,#47443F);cursor:pointer}
   .sk-tabs button[aria-selected=true]{background:var(--g-surface,#fff);color:var(--g-ink,#1F1A17);box-shadow:0 1px 3px rgba(0,0,0,.08)}
   .cg-how code{font-size:.82rem;background:var(--g-surface-2,#F0F0EC);padding:.05rem .3rem;border-radius:.3rem;word-break:break-all}
   .cg-fabs{display:none}
@@ -126,6 +133,8 @@ SHEET = f'''<body class="g-root flat" data-cat="head">
         <button type="button" class="g-btn" id="cgSkillHow">How to install</button>
       </div>
     </div>
+    <p class="cg-need">Using a different agent, or need buildings too? <a href="/agents/">Grug for agents</a> has a prompt for any
+      agent that can use a browser, and both Claude skills.</p>
     <details>
       <summary>Instructions for Claude and other AI agents</summary>
       <div class="cg-agent" id="forAgents">
@@ -195,6 +204,7 @@ SHEET = f'''<body class="g-root flat" data-cat="head">
     <div class="cg-row"><button type="button" class="g-btn" id="skCopy"><i data-g-icon="clipboard"></i>Copy this prompt</button></div>
     <p class="cg-need">Claude needs a browser it can use (Claude in Chrome) to run the studio, and you signed in to Gemini there for
       the outfits. Each R6 export costs 25 Pearls, and Claude asks you before spending any.</p>
+    <p class="cg-need">Buildings too? The <a href="/agents/#skills">game-buildings skill</a> does the same with the Building Studio.</p>
   </div>
 </section>'''
 sub('<body class="g-root flat" data-cat="head">', SHEET)

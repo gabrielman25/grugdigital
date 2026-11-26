@@ -112,6 +112,12 @@ def build_pages(G):
                   og_desc='Free 3D game assets from Grug Digital: a café, a forge, a habitat, a house, an inn and a tower, each made in the Grug Building Studio.',
                   graph=[{'@type': 'CollectionPage', 'url': SITE + '/build/examples/', 'name': 'Example buildings · Grug Building Studio', 'publisher': {'@id': SITE + '/#org'}, 'keywords': KEYWORDS, 'image': [img(t) for t in thumbs]}],
                   images=thumbs))
+    P.append(dict(file='agents/index.html', url=SITE + '/agents/', title=None, desc=None, og=OG['studio'],
+                  og_alt='Custom Roblox avatars made in the Grug Avatar Studio', og_title='Grug for agents · Characters and buildings your AI agent can make',
+                  og_desc='Copy a prompt, send it to Claude or any agent that can use a browser, and get a rigged Roblox R6 character or a textured building back as a .glb.',
+                  graph=[{'@type': 'WebPage', 'url': SITE + '/agents/', 'name': 'Grug for agents', 'publisher': {'@id': SITE + '/#org'}, 'keywords': KEYWORDS,
+                          'image': [img(f'static/showcase/grug-digital-avatar-{c}.webp') for c in ['grug', 'ranger', 'snow-rider']] + [img(t) for t in thumbs]}],
+                  images=[f'static/showcase/grug-digital-avatar-{c}.webp' for c in ['grug', 'ranger', 'snow-rider']] + thumbs))
     for f, u, t, og in [('character/pearls/index.html', '/character/pearls/', 'Pearls · Grug Avatar Studio', OG['studio']), ('privacy.html', '/privacy.html', 'Privacy policy · Grug Digital', OG['home']),
                         ('terms.html', '/terms.html', 'Terms of service · Grug Digital', OG['home'])]:
         P.append(dict(file=f, url=SITE + u, title=None, desc=None, og=og, og_alt='Grug Digital', og_title=t, graph=[{'@type': 'WebPage', 'url': SITE + u, 'name': t, 'publisher': {'@id': SITE + '/#org'}}], images=[]))

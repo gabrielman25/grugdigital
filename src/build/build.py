@@ -13,6 +13,17 @@ import base64, html, json, pathlib, sys
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 OUTFITS = '<script src="/static/outfits.js"></script>\n'
+# Allo (static/fonts/allo.css). On the site the page links the shared files; a standalone copy carries the Latin cut inline.
+ALLO_LINK = ('</style>\n<link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>\n'
+             '<link rel="stylesheet" href="/static/fonts/allo.css">\n<style>')
+
+
+def fontface(site):
+    if site:
+        return ALLO_LINK
+    data = base64.b64encode((ROOT / 'static' / 'fonts' / 'allo-latin.woff2').read_bytes()).decode()
+    return ("@font-face{font-family:Allo;font-style:normal;font-weight:100 900;font-display:swap;"
+            f"src:url(data:font/woff2;base64,{data}) format('woff2')}}")
 
 
 def fill(page, pairs):
@@ -26,7 +37,7 @@ def studio(site):
     js = '\n'.join((HERE / f).read_text() for f in ['core.js', 'gl.js', 'reference.js', 'bake.js', 'app.js', 'api.js'])
     assert '</script' not in js
     return fill((HERE / 'page.html').read_text(), [
-        ('/*FONT*/', (HERE / 'font.b64').read_text().strip()), ('/*MARK*/', (HERE / 'mark.txt').read_text().strip()),
+        ('/*FONTFACE*/', fontface(site)), ('/*MARK*/', (HERE / 'mark.txt').read_text().strip()),
         ('/*GUIDE*/', html.escape((HERE / 'guide.md').read_text())), ('/*HEADSCRIPTS*/', OUTFITS if site else ''), ('/*JS*/', js),
         ('/*CLASSIC*/', (HERE / 'classic.css').read_text())])
 
@@ -51,7 +62,7 @@ def gallery(site):
         data.append(e)
     assert '</script' not in math + gljs
     return fill((HERE / 'gallery.html').read_text(), [
-        ('/*FONT*/', (HERE / 'font.b64').read_text().strip()), ('/*MARK*/', (HERE / 'mark.txt').read_text().strip()),
+        ('/*FONTFACE*/', fontface(site)), ('/*MARK*/', (HERE / 'mark.txt').read_text().strip()),
         ('/*HEADSCRIPTS*/', OUTFITS if site else ''), ('/*MATH*/', math), ('/*GL*/', gljs),
         ('/*STUDIO*/', "'/build/' || " if site else ''), ('/*DATA*/', json.dumps(data).replace('<', '\\u003c')),
         ('/*CLASSIC*/', (HERE / 'classic.css').read_text())])

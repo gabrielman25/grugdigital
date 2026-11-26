@@ -19,8 +19,9 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const css = `
+  @font-face{font-family:Allo;src:url(https://grugdigital.com/static/fonts/allo-latin.woff2) format('woff2');font-weight:100 900;font-display:swap}
   .gza-pill{position:fixed;right:12px;top:12px;z-index:5;display:flex;align-items:center;gap:7px;padding:6px 12px 6px 6px;border-radius:999px;
-    background:#9BE338;color:#1E1B16;font:700 13px/1 Fredoka,system-ui,sans-serif;text-decoration:none;box-shadow:0 3px 0 rgba(0,0,0,.35);
+    background:#9BE338;color:#1E1B16;font:700 13px/1 Allo,system-ui,sans-serif;text-decoration:none;box-shadow:0 3px 0 rgba(0,0,0,.35);
     animation:gza-nudge 4s ease-in-out infinite}
   .gza-pill:hover{filter:brightness(1.06)}
   .gza-pearl{flex:none;border-radius:50%;background:radial-gradient(circle at 34% 30%,#fff 0 9%,#f3c4ff 16%,#d16be8 42%,#9b36b8 78%,#6d1f86 100%)}
@@ -31,7 +32,7 @@
     backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .25s}
   .gza.on{opacity:1;pointer-events:auto}
   .gza-card{position:relative;width:min(640px,100%);max-height:100%;display:grid;grid-template-columns:minmax(150px,.8fr) 1.2fr;align-items:center;
-    gap:8px;padding:22px 24px;border-radius:22px;background:#1E1B16;color:#F4F4F6;font-family:Fredoka,system-ui,sans-serif;
+    gap:8px;padding:22px 24px;border-radius:22px;background:#1E1B16;color:#F4F4F6;font-family:Allo,system-ui,sans-serif;
     box-shadow:0 18px 40px rgba(0,0,0,.5);overflow:hidden;transform:translateX(60px) scale(.96);transition:transform .35s cubic-bezier(.2,1.4,.4,1)}
   .gza.on .gza-card{transform:none}
   .gza-ad{position:absolute;left:14px;top:10px;font-size:11px;font-weight:600;color:#6b6b73;letter-spacing:.06em}
@@ -42,7 +43,7 @@
   @keyframes gza-bob{50%{transform:translateY(-7px)}}
   @keyframes gza-pop{0%{transform:scale(.2) translateY(60px)}100%{transform:none}}
   .gza-shuf{position:absolute;left:50%;bottom:0;transform:translateX(-50%);white-space:nowrap;border:0;border-radius:10px;padding:6px 12px;
-    background:#2c2c31;color:#F4F4F6;font:600 13px/1 Fredoka,system-ui,sans-serif;cursor:pointer}
+    background:#2c2c31;color:#F4F4F6;font:600 13px/1 Allo,system-ui,sans-serif;cursor:pointer}
   .gza-shuf:hover{background:#3a3a40}
   .gza-k{font-size:12px;font-weight:700;letter-spacing:.08em;color:#9BE338;text-transform:uppercase}
   .gza-h{font-size:30px;line-height:1.05;font-weight:700;margin:4px 0 8px}
@@ -58,7 +59,7 @@
   .gza-cta small{display:block;font-size:12px;font-weight:600;opacity:.75}
   @keyframes gza-pulse{50%{transform:scale(1.04)}}
   .gza-skip{display:block;margin-top:10px;font-size:12px;color:#8a8a93}
-  .gza-x{position:absolute;right:10px;top:8px;width:28px;height:28px;border:0;border-radius:8px;background:none;color:#8a8a93;font:400 20px/1 system-ui;cursor:pointer}
+  .gza-x{position:absolute;right:10px;top:8px;width:28px;height:28px;border:0;border-radius:8px;background:none;color:#8a8a93;font:400 20px/1 Allo,system-ui;cursor:pointer}
   .gza-x:hover{background:#2c2c31;color:#fff}
   @media (max-width:560px),(max-height:380px){.gza{padding:58px 62px 54px}.gza-card{grid-template-columns:1fr;padding:26px 16px 16px}.gza-stage{display:none}.gza-h{font-size:24px}}
   @media (max-width:700px){.gza-pill{top:auto;bottom:74px;right:10px}}

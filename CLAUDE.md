@@ -66,9 +66,36 @@ Don't tag textures, placeholders or third-party images.
 
 `agents/index.html` is the landing page for people who use AI agents: an "Ask your agent" box with prompts to copy (the
 `PROMPTS` object in its script), both studios, both skills (`src/skill/`) and links to their source on GitHub. It is the
-one page that does **not** wear the classic look, on the owner's request: dark, one self-contained file, Fredoka
-headings, the Building Studio's reference-sheet colours as its legend. Keep its prompts and facts in step with
+one page that does **not** wear the classic look, on the owner's request: dark, one self-contained file, Allo throughout, the Building Studio's reference-sheet colours as its legend. Keep its prompts and facts in step with
 `character/claude.md` and `build/claude.md` when the studios or their APIs change.
+
+**Links to it:** every page that has the green nav has an **Agents** item (the classic pages and the small card pages:
+keep it in step with the rest of the nav), the classic footers have "For AI agents", the orange strip on the home page and
+the Arcade ends "or ask your own agent", and it's linked from the home page's tools list, Free tools box and Claude slop
+box, both studios' Claude panels (`src/character/patch_studio.py`, `src/build/page.html` and `gallery.html`), Grug
+Studio's building panel and help, and both skills. Link it from new pages where an agent could do the work.
+
+## The font: Allo (`static/fonts/`)
+
+The whole site is set in **Allo** (https://github.com/joshpuckett/allo, SIL Open Font License 1.1: keep
+`static/fonts/OFL.txt` next to the files). Every page links it in `<head>`, right after `<meta charset>`:
+
+```html
+<link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/fonts/allo.css">
+```
+
+and every font stack starts with it, the old font kept as the fallback: `font:bold 14px Allo,Arial,Helvetica,sans-serif`,
+including canvas text (`ctx.font = 'bold 20px Allo,Arial'`). Monospace stays monospace. A new page or game does the same.
+
+- `allo-latin.woff2` (187 KB, cached for a year) is the variable font cut down to Latin, punctuation, arrows, maths and the
+  symbols the site uses (✓ ✕ ★ ▶ ◀ ● ⚠ ⌘ ♥ ↻); `allo.woff2` is the whole font and loads only for characters outside that
+  range. If a page starts loading `allo.woff2`, add its character to the range: `static/fonts/allo.css` says how.
+- The studios: the Building Studio's pages link the shared files and its `--standalone` copies carry the Latin file inline
+  (`src/build/build.py`); the Avatar Studio gets the link and its own font stacks from `src/character/patch_studio.py`
+  (and `classic.css`). The legacy banner (`functions/_middleware.js`) adds the stylesheet to the page, since a shadow
+  root ignores `@font-face`; the itch.io zoo ad (`static/ads/zoo-ad.js`) loads the Latin file from grugdigital.com
+  (`_headers` allows that). `src/ads/` renders its GIFs with it too (copy `allo-latin.woff2` next to the sources).
 
 ## Always send the owner a preview link (not just screenshots)
 
@@ -82,8 +109,8 @@ and link straight to the pages that changed. A preview also falls back to the le
 
 Every page wears the Grug Arcade's classic look (a 2011-style games site): a 920px column over slow pans of Grug City
 (`.bgfx`), the 728x90 house ad, the logo banner with the R6 crowd, the shiny green nav bar, the orange announcement strip,
-dark shiny box tabs (`.StandardBoxHeader`) over light gradient boxes, shiny gradient buttons, Arial, the social
-skyscrapers in the gutters, and the grey Verdana footer. No dark mode. No coloured dots next to text and no coloured
+dark shiny box tabs (`.StandardBoxHeader`) over light gradient boxes, shiny gradient buttons, Allo (with Arial as
+the fallback, see below), the social skyscrapers in the gutters, and the grey footer. No dark mode. No coloured dots next to text and no coloured
 accent lines or lips (the owner finds them ugly). **Phones matter:** the pages use `width=device-width`, and under 940px
 `arcade/arcade.css` (bottom block) reflows the column into one (scrolling nav, stacked columns, a 2-up tile grid, the
 house ad zoomed to fit); each page adds its own phone rules next to its styles. Check new pages at 390px wide.

@@ -167,6 +167,19 @@
     <image:image><image:loc>https://grugdigital.com/build/examples/tower-thumb.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://grugdigital.com/agents/</loc>
+    <lastmod>2026-11-25</lastmod>
+    <image:image><image:loc>https://grugdigital.com/static/showcase/grug-digital-avatar-grug.webp</image:loc></image:image>
+    <image:image><image:loc>https://grugdigital.com/static/showcase/grug-digital-avatar-ranger.webp</image:loc></image:image>
+    <image:image><image:loc>https://grugdigital.com/static/showcase/grug-digital-avatar-snow-rider.webp</image:loc></image:image>
+    <image:image><image:loc>https://grugdigital.com/build/examples/cafe-thumb.jpg</image:loc></image:image>
+    <image:image><image:loc>https://grugdigital.com/build/examples/forge-thumb.jpg</image:loc></image:image>
+    <image:image><image:loc>https://grugdigital.com/build/examples/hab-thumb.jpg</image:loc></image:image>
+    <image:image><image:loc>https://grugdigital.com/build/examples/house-thumb.jpg</image:loc></image:image>
+    <image:image><image:loc>https://grugdigital.com/build/examples/inn-thumb.jpg</image:loc></image:image>
+    <image:image><image:loc>https://grugdigital.com/build/examples/tower-thumb.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://grugdigital.com/character/pearls/</loc>
     <lastmod>2026-11-25</lastmod>
   </url>

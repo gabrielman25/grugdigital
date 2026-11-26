@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/fonts/allo.css">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <link rel="icon" href="/favicon.png">
 <title>Sunny Patch · Free in the Grug Arcade by Grug Digital</title>
@@ -57,8 +59,8 @@
      Red means danger: keep floors and safe parts in cool or neutral colours so red stands out.
      =================================================================================================================== */
   html, body { margin: 0; height: 100%; overflow: hidden; background: #8fc6ef; }
-  body { font: bold 13px/1.25 Arial, Helvetica, sans-serif; color: #fff; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
-  body, button, input, select, textarea { font-family: Arial, Helvetica, sans-serif !important; }
+  body { font: bold 13px/1.25 Allo, Arial, Helvetica, sans-serif; color: #fff; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+  body, button, input, select, textarea { font-family: Allo, Arial, Helvetica, sans-serif !important; }
   canvas#c { display: block; width: 100%; height: 100%; outline: none; touch-action: none; image-rendering: pixelated; image-rendering: crisp-edges; }
   body { -webkit-font-smoothing: none; -moz-osx-font-smoothing: unset; font-smooth: never; }
   body *:not(canvas) { text-shadow: none !important; animation: none !important; transition: none !important; }
@@ -69,18 +71,18 @@
 
   /* the two button styles */
   button, .slot, #gear, #jumpBtn, #rollBtn {
-    background: #000 !important; color: #fff !important; border: 3px solid #8f1f20 !important; border-radius: 4px !important; font: bold 14px Arial, Helvetica, sans-serif;
+    background: #000 !important; color: #fff !important; border: 3px solid #8f1f20 !important; border-radius: 4px !important; font: bold 14px Allo, Arial, Helvetica, sans-serif;
     box-shadow: inset 0 0 0 1px #3d0202, inset 0 0 5px 2px #1c0000, 0 0 1px rgba(140, 40, 30, .55) !important; cursor: pointer; }
   button:disabled { color: #7d7d7d !important; }
   #gear, .slot { border-color: #7d7d7d !important; box-shadow: inset 0 0 0 1px #2a2a2a, inset 0 0 4px 1px #111 !important; }
   /* close buttons: a small pure-red square with a white X, hanging a few px off the corner */
   .x { position: absolute !important; top: -12px; right: -14px; background: #ff0000 !important; border: 1px solid #000 !important; border-radius: 0 !important; box-shadow: none !important;
-    font: bold 18px Arial, Helvetica, sans-serif !important; width: 22px !important; height: 21px !important; padding: 0 0 0 1px !important; line-height: 24px !important; }
+    font: bold 18px Allo, Arial, Helvetica, sans-serif !important; width: 22px !important; height: 21px !important; padding: 0 0 0 1px !important; line-height: 24px !important; }
   /* panels: solid black (in Sunny Patch: no see-through UI), a 2px black edge */
   .pn, #stats, #menu, #help, #plist, #announce, #chatLog .ln { background: #000 !important; border: 2px solid #000 !important; color: #fff; }
 
   /* the hint bar along the top: plain black, Arial 14 (a Hint object shows here too, in place of the game's line) */
-  #hint { position: fixed; left: 0; right: 0; top: 0; height: 20px; line-height: 20px; background: #000; text-align: center; font: 14px Arial, Helvetica, sans-serif; white-space: nowrap; overflow: hidden; pointer-events: none; z-index: 3; }
+  #hint { position: fixed; left: 0; right: 0; top: 0; height: 20px; line-height: 20px; background: #000; text-align: center; font: 14px Allo, Arial, Helvetica, sans-serif; white-space: nowrap; overflow: hidden; pointer-events: none; z-index: 3; }
 
   /* top left: the gear, the place label (Studio's default grey), the stats sheet */
   #gear { position: fixed; top: 24px; left: 3px; width: 30px; height: 31px; padding: 0; display: flex; align-items: center; justify-content: center; z-index: 3; }
@@ -106,7 +108,7 @@
   .tag { position: absolute; left: 0; top: 0; text-align: center; white-space: nowrap; transform-origin: 50% 100%; will-change: transform; display: none; }
   .tag .nm { font-size: 12px; color: #fff; background: #000; padding: 0 3px; display: inline-block; }
   .tag .hp { display: flex; gap: 2px; justify-content: center; margin: 2px auto 0; } .tag .hp i { width: 9px; height: 6px; background: #00ff00; border: 1px solid #000; } .tag .hp i.off { background: #6a1010; }
-  .tag .bub { display: none; width: max-content; max-width: 170px; margin: 0 auto 6px; padding: 3px 8px; background: #fff; color: #111; font: bold 12px Arial, Helvetica, sans-serif; border: 1px solid #000; white-space: normal; }
+  .tag .bub { display: none; width: max-content; max-width: 170px; margin: 0 auto 6px; padding: 3px 8px; background: #fff; color: #111; font: bold 12px Allo, Arial, Helvetica, sans-serif; border: 1px solid #000; white-space: normal; }
   .bill { position: absolute; left: 0; top: 0; text-align: center; white-space: nowrap; display: none; }
   .bill b { display: block; font-size: 18px; background: #000; padding: 0 4px; } .bill small { display: block; font-size: 11px; color: #fff; }
   #dnums { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 4; }
@@ -119,7 +121,7 @@
   #announce { position: fixed; left: 50%; top: 26%; transform: translateX(-50%); text-align: center; pointer-events: none; display: none; white-space: nowrap; padding: 4px 14px 6px; z-index: 6; }
   #announce b { display: block; font-size: 36px; } #announce small { display: block; font-size: 18px; color: #fff; }
   #message { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(200, 200, 205, .45); pointer-events: none; z-index: 38; }
-  #message b { font: normal 24px Arial, Helvetica, sans-serif; color: #fff; text-shadow: -1px -1px 0 #3a3a3a, 1px -1px 0 #3a3a3a, -1px 1px 0 #3a3a3a, 1px 1px 0 #3a3a3a !important; max-width: 80vw; text-align: center; }
+  #message b { font: normal 24px Allo, Arial, Helvetica, sans-serif; color: #fff; text-shadow: -1px -1px 0 #3a3a3a, 1px -1px 0 #3a3a3a, -1px 1px 0 #3a3a3a, 1px 1px 0 #3a3a3a !important; max-width: 80vw; text-align: center; }
 
   /* bottom: the hotbar (tools, 2010 backpack) and chat */
   #hotbar { position: fixed; left: 50%; bottom: calc(8px + env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; gap: 4px; z-index: 5; }
@@ -130,7 +132,7 @@
   #chatLog { position: fixed; left: 3px; bottom: calc(104px + env(safe-area-inset-bottom)); width: 340px; pointer-events: none; z-index: 3; display: flex; flex-direction: column; gap: 1px; }
   #chatLog .ln { font-size: 12px; padding: 1px 4px; border-width: 0 !important; } #chatLog .ln b { color: #ffff00; }
   #chatBar { position: fixed; left: 3px; bottom: calc(76px + env(safe-area-inset-bottom)); width: 340px; box-sizing: border-box; display: none; z-index: 8; }
-  #chatBar input { width: 100%; box-sizing: border-box; font: 14px Arial, Helvetica, sans-serif !important; color: #fff; background: #000; border: 2px solid #000; padding: 3px 5px; outline: none; }
+  #chatBar input { width: 100%; box-sizing: border-box; font: 14px Allo, Arial, Helvetica, sans-serif !important; color: #fff; background: #000; border: 2px solid #000; padding: 3px 5px; outline: none; }
   body.chatting #chatBar { display: block; }
 
   /* the classic 2012 Game Menu (Esc / the gear) */
@@ -177,7 +179,7 @@
   :root { --tb: 64px; }
   #tabbar { position: fixed; left: 0; right: 0; top: 0; height: var(--tb); z-index: 12; display: flex; align-items: flex-end; gap: 14px; padding: 0 14px; box-sizing: border-box; overflow: hidden;
     background: #f6dbe6 !important; border-bottom: 1px solid #ecc7d6 !important; color: #4a3a4f; pointer-events: none; }
-  #tabbar, #tabbar * { font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important; -webkit-font-smoothing: antialiased !important; }
+  #tabbar, #tabbar * { font-family: Allo, ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !important; -webkit-font-smoothing: antialiased !important; }
   #tabbar .tb-tab { display: flex; align-items: center; gap: 10px; height: calc(var(--tb) - 12px); padding: 0 14px; background: #fffaf6; border-radius: 12px 12px 0 0 !important; box-shadow: 0 -2px 10px rgba(122, 72, 98, .14) !important; min-width: 0; flex: 0 1 auto; }
   #tbStrip { height: 32px; width: 288px; image-rendering: pixelated; image-rendering: crisp-edges; flex: none; }
   #tbTitle { font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #4a3a4f; }
@@ -220,7 +222,7 @@
   #farm .money { font-size: 24px; } #farm .money b { color: #00ff00; }
   #farm .ok { color: #00ff00; font-size: 12px; }
   #farm button { font-size: 12px; padding: 3px 8px; }
-  #farm select, #farm input { font: bold 12px Arial, Helvetica, sans-serif; color: #fff; background: #000; border: 2px solid #7d7d7d; padding: 2px 3px; max-width: 46%; }
+  #farm select, #farm input { font: bold 12px Allo, Arial, Helvetica, sans-serif; color: #fff; background: #000; border: 2px solid #7d7d7d; padding: 2px 3px; max-width: 46%; }
   #farm .cells { display: inline-flex; gap: 2px; margin: 0; } #farm .cc { width: 12px; height: 12px; }
   .cc.on.g { background: #00ff00; } .cc.on.r { background: #ffff00; } .cc.on.u { background: #00ffff; }
   #farm .fh { font-size: 14px; color: #ffff00; margin: 8px 0 3px; }
@@ -2517,7 +2519,7 @@ function textCanvas(lines, w, h, bg, fg, size) {
   const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
   if (bg) { x.fillStyle = bg; x.fillRect(0, 0, w, h); }
   x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineJoin = 'round';
-  lines.forEach((l, k) => { let s = k ? size * 0.62 : size; x.font = `bold ${s}px Arial`; const tw = x.measureText(l).width; if (tw > w * 0.92) { s *= w * 0.92 / tw; x.font = `bold ${s}px Arial`; } x.lineWidth = s / 6; x.strokeStyle = '#000'; const y = h / 2 + (k - (lines.length - 1) / 2) * size * 1.05; x.strokeText(l, w / 2, y); x.fillStyle = k ? '#ddd' : fg; x.fillText(l, w / 2, y); });
+  lines.forEach((l, k) => { let s = k ? size * 0.62 : size; x.font = `bold ${s}px Allo,Arial`; const tw = x.measureText(l).width; if (tw > w * 0.92) { s *= w * 0.92 / tw; x.font = `bold ${s}px Allo,Arial`; } x.lineWidth = s / 6; x.strokeStyle = '#000'; const y = h / 2 + (k - (lines.length - 1) / 2) * size * 1.05; x.strokeText(l, w / 2, y); x.fillStyle = k ? '#ddd' : fg; x.fillText(l, w / 2, y); });
   const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t;
 }
 function sign(lines, x, y, z, w, h, faceX, faceZ, bg = '#2a2a2a', fg = '#fff') {

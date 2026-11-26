@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/fonts/allo.css">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Slide 999 KM for FREE ADMIN!! · Free in the Grug Arcade by Grug Digital</title>
 <!-- seo: written by src/seo/seo_head.py (re-run it, don't edit by hand) -->
@@ -27,10 +29,10 @@
 <style>
   /* classic (2008-2012) Roblox look: Arial bold, flat translucent greys, outlined white text */
   html, body { margin: 0; height: 100%; overflow: hidden; background: #8fc6ef; }
-  body { font: bold 13px/1.25 Arial, Helvetica, sans-serif; color: #fff; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+  body { font: bold 13px/1.25 Allo, Arial, Helvetica, sans-serif; color: #fff; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
   canvas#c { display: block; width: 100%; height: 100%; outline: none; touch-action: none; }
   .ol { text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
-  button { font: bold 13px Arial, Helvetica, sans-serif; color: #fff; cursor: pointer; }
+  button { font: bold 13px Allo, Arial, Helvetica, sans-serif; color: #fff; cursor: pointer; }
   .hide { display: none !important; }
 
   /* top hint bar (the classic Hint object) */
@@ -51,7 +53,7 @@
   #chat div { font-size: 13px; margin: 1px 0; }
   #chatBar { position: fixed; top: 60px; left: 6px; width: min(380px, 70vw); display: none; z-index: 20; }
   #chatBar.on { display: block; }
-  #chatIn { width: 100%; box-sizing: border-box; font: bold 13px Arial; padding: 5px 7px; color: #fff; background: rgba(0, 0, 0, .65); border: 1px solid rgba(255, 255, 255, .6); outline: none; }
+  #chatIn { width: 100%; box-sizing: border-box; font: bold 13px Allo,Arial; padding: 5px 7px; color: #fff; background: rgba(0, 0, 0, .65); border: 1px solid rgba(255, 255, 255, .6); outline: none; }
   #chatTip { font-size: 11px; color: #ddd; margin-top: 2px; }
 
   /* leaderboard (top right) */
@@ -98,7 +100,7 @@
   #tags { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 2; }
   .tag { position: absolute; left: 0; top: 0; text-align: center; white-space: nowrap; transform-origin: 50% 100%; will-change: transform; }
   .tag .nm { font-size: 12px; } .tag .nm.adm { color: #ffd24a; }
-  .tag .bub { display: none; width: max-content; max-width: 180px; margin: 0 auto 6px; padding: 3px 8px; background: #fff; color: #111; font: bold 12px Arial, sans-serif; border-radius: 9px; border: 1px solid #999; white-space: normal; position: relative; text-shadow: none; }
+  .tag .bub { display: none; width: max-content; max-width: 180px; margin: 0 auto 6px; padding: 3px 8px; background: #fff; color: #111; font: bold 12px Allo, Arial, sans-serif; border-radius: 9px; border: 1px solid #999; white-space: normal; position: relative; text-shadow: none; }
   .tag .bub::after { content: ''; position: absolute; left: 50%; bottom: -7px; margin-left: -6px; border: 6px solid transparent; border-top-color: #fff; border-bottom: 0; }
 
   /* classic panels (shop, admin) */
@@ -535,8 +537,8 @@ function textTex(lines, bg, fg = '#fff', w = 512, h = 128, img) {
   x.fillStyle = bg; x.fillRect(0, 0, w, h); x.strokeStyle = 'rgba(0,0,0,.35)'; x.lineWidth = 8; x.strokeRect(4, 4, w - 8, h - 8);
   x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineJoin = 'round';
   const n = lines.length;
-  lines.forEach((ln, i) => { const sz = i === 0 ? Math.min(h / (n + 0.4), n === 1 ? h * 0.62 : 64) : Math.min(h / (n + 1.2), 34); x.font = `bold ${sz}px Arial`; const y = h * (i + 0.5) / n + (n > 1 && i === 0 ? 4 : 0);
-    let fs = sz; while (x.measureText(ln).width > w - 30 && fs > 10) { fs -= 2; x.font = `bold ${fs}px Arial`; }
+  lines.forEach((ln, i) => { const sz = i === 0 ? Math.min(h / (n + 0.4), n === 1 ? h * 0.62 : 64) : Math.min(h / (n + 1.2), 34); x.font = `bold ${sz}px Allo,Arial`; const y = h * (i + 0.5) / n + (n > 1 && i === 0 ? 4 : 0);
+    let fs = sz; while (x.measureText(ln).width > w - 30 && fs > 10) { fs -= 2; x.font = `bold ${fs}px Allo, Arial`; }
     x.lineWidth = Math.max(3, fs / 7); x.strokeStyle = '#000'; x.strokeText(ln, w / 2, y); x.fillStyle = fg; x.fillText(ln, w / 2, y); });
   const t = new THREE.CanvasTexture(c); t.anisotropy = 4;
   if (img) { const im = new Image(); im.onload = () => { x.drawImage(im, w - h * 0.62 - 10, h - h * 0.62 - 8, h * 0.62, h * 0.62); t.needsUpdate = true; }; im.src = img; }
@@ -1084,7 +1086,7 @@ function icon(kind) {
   const coil = cc => { x.strokeStyle = '#000'; x.lineWidth = 9; const path = () => { x.beginPath(); for (let i = 0; i <= 6; i++) { const y = 10 + i * 8; x.lineTo(i % 2 ? 48 : 16, y); } x.stroke(); }; path(); x.strokeStyle = cc; x.lineWidth = 5; path(); };
   if (kind === 'speed') coil('#e8352b'); else if (kind === 'grav') coil('#3a8dff');
   else if (kind === 'rocket') { x.fillStyle = '#ff9a2a'; x.beginPath(); x.moveTo(14, 50); x.lineTo(4, 56); x.lineTo(12, 42); x.fill(); x.fillStyle = '#9a9a9a'; x.strokeStyle = '#000'; x.lineWidth = 3; x.beginPath(); x.moveTo(12, 50); x.lineTo(44, 18); x.lineTo(58, 6); x.lineTo(50, 22); x.lineTo(18, 54); x.closePath(); x.fill(); x.stroke(); x.fillStyle = '#c4281c'; x.beginPath(); x.arc(40, 25, 4, 0, 7); x.fill(); }
-  else if (kind === 'crate') { x.fillStyle = '#8a5428'; x.strokeStyle = '#000'; x.lineWidth = 3; x.fillRect(8, 16, 48, 40); x.strokeRect(8, 16, 48, 40); x.fillStyle = '#6b3f1d'; x.fillRect(8, 16, 48, 9); x.strokeRect(8, 16, 48, 9); x.fillStyle = '#ffd24a'; x.font = 'bold 26px Arial'; x.textAlign = 'center'; x.fillText('?', 32, 50); }
+  else if (kind === 'crate') { x.fillStyle = '#8a5428'; x.strokeStyle = '#000'; x.lineWidth = 3; x.fillRect(8, 16, 48, 40); x.strokeRect(8, 16, 48, 40); x.fillStyle = '#6b3f1d'; x.fillRect(8, 16, 48, 9); x.strokeRect(8, 16, 48, 9); x.fillStyle = '#ffd24a'; x.font = 'bold 26px Allo,Arial'; x.textAlign = 'center'; x.fillText('?', 32, 50); }
   else { x.fillStyle = '#f5cd30'; x.strokeStyle = '#000'; x.lineWidth = 3; x.beginPath(); x.moveTo(6, 40); x.lineTo(50, 40); x.quadraticCurveTo(62, 38, 58, 24); x.lineTo(52, 26); x.quadraticCurveTo(54, 34, 48, 34); x.lineTo(6, 34); x.closePath(); x.fill(); x.stroke(); x.fillStyle = '#fff6b0'; x.fillRect(12, 36, 20, 2); }
   return c.toDataURL();
 }

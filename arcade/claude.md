@@ -23,7 +23,8 @@ key and the title, delete the stations you don't need in `buildWorld`, and build
 - **One self-contained HTML file**: `arcade/<slug>/index.html` in the repo `gabrielman25/grugdigital` (static files on
   Cloudflare Pages). Inline the CSS, JS, sounds and textures (data: URIs) like the existing games do. `<slug>` is short,
   lower case, hyphens (`slide-999`, `zombie-zones`). Plus its cover, `<slug>-grug-arcade.jpg` (16:9, about 960×540, no HUD), next to it: a descriptive file name, and tag it with `python3 src/seo/tag_images.py` (see `src/seo/README.md`).
-- **The look:** classic 2008–2012 blocky-game style. Arial bold with a black outline, flat translucent grey panels,
+- **The look:** classic 2008–2012 blocky-game style. Allo bold (the site's font, Arial as the fallback: link
+  `/static/fonts/allo.css` in `<head>` and start every font stack, canvas ones too, with `Allo,`; see CLAUDE.md) with a black outline, flat translucent grey panels,
   studded bricks, **flat colours only, no gradients**, simple boxes. Builds are clean: arches are two pillars plus a
   header that sits on them, signs stand on posts, nothing overhangs. One stud size everywhere (see the studded material
   in the existing games: one texture tile = 2 studs, on every part, moving parts included).

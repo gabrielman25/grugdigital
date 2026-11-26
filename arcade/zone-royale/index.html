@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/fonts/allo.css">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Zone Royale · Free in the Grug Arcade by Grug Digital</title>
 <!-- seo: written by src/seo/seo_head.py (re-run it, don't edit by hand) -->
@@ -27,11 +29,11 @@
 <style>
   /* classic (2012-2014) Roblox look: Arial bold, flat translucent greys, outlined white text */
   html, body { margin: 0; height: 100%; overflow: hidden; background: #8fc6ef; }
-  body { font: bold 13px/1.25 Arial, Helvetica, sans-serif; color: #fff; user-select: none; -webkit-user-select: none; }
+  body { font: bold 13px/1.25 Allo, Arial, Helvetica, sans-serif; color: #fff; user-select: none; -webkit-user-select: none; }
   canvas#c { display: block; width: 100%; height: 100%; outline: none; touch-action: none; }
   body { touch-action: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
   .ol { text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
-  button { font: bold 13px Arial, Helvetica, sans-serif; }
+  button { font: bold 13px Allo, Arial, Helvetica, sans-serif; }
   .cg { color: #ffe36b; } .cz { color: #9be36b; } .cr { color: #ff6a5a; }
 
   #hint { position: fixed; left: 0; right: 0; top: 0; height: 22px; line-height: 22px; background: rgba(0, 0, 0, .55); text-align: center; font-size: 13px; white-space: nowrap; overflow: hidden; pointer-events: none; }
@@ -199,7 +201,7 @@
   .tag.dim { opacity: .45; }
   .tag .nm.pl { color: #fff; font-size: 13px; } .tag .hb { visibility: visible; }
   /* classic bubble chat over a fake player's head */
-  .tag .bub { display: none; width: max-content; max-width: 170px; margin: 0 auto 6px; padding: 3px 8px; background: #fff; color: #111; font: bold 12px Arial, sans-serif; border-radius: 9px; border: 1px solid #999; white-space: normal; position: relative; text-shadow: none; }
+  .tag .bub { display: none; width: max-content; max-width: 170px; margin: 0 auto 6px; padding: 3px 8px; background: #fff; color: #111; font: bold 12px Allo, Arial, sans-serif; border-radius: 9px; border: 1px solid #999; white-space: normal; position: relative; text-shadow: none; }
   .tag .bub::after { content: ''; position: absolute; left: 50%; bottom: -7px; margin-left: -6px; border: 6px solid transparent; border-top-color: #fff; border-bottom: 0; }
 
   /* start screen */
@@ -355,7 +357,7 @@
   #ring svg { width: 64px; height: 64px; transform: rotate(-90deg); } #ring circle { fill: none; stroke-width: 6; } #ring .bg { stroke: rgba(255, 255, 255, .25); } #ring .fg { stroke: #fff; }
   #ring span { position: absolute; left: 50%; top: 72px; transform: translateX(-50%); font-size: 12px; white-space: nowrap; }
   #prompt { position: fixed; left: 50%; top: calc(50% + 70px); transform: translateX(-50%); font-size: 15px; display: none; pointer-events: none; white-space: nowrap; background: rgba(0, 0, 0, .45); padding: 4px 10px; border-radius: 4px; }
-  #prompt kbd { display: inline-block; min-width: 18px; padding: 0 5px; margin-right: 6px; background: #fff; color: #111; border-radius: 3px; font: bold 13px Arial; text-shadow: none; text-align: center; }
+  #prompt kbd { display: inline-block; min-width: 18px; padding: 0 5px; margin-right: 6px; background: #fff; color: #111; border-radius: 3px; font: bold 13px Allo,Arial; text-shadow: none; text-align: center; }
   #prompt small { color: #ccc; }
   #struct { position: fixed; left: 50%; top: calc(50% + 30px); width: 120px; height: 9px; margin-left: -60px; background: rgba(0, 0, 0, .6); border: 1px solid #000; display: none; pointer-events: none; }
   #struct i { display: block; height: 100%; background: #6ad0ff; } #struct span { position: absolute; left: 0; right: 0; top: 10px; text-align: center; font-size: 11px; }
@@ -382,13 +384,13 @@
   body.touch #hint { display: none; }
 
   /* the classic Game Menu (as in Slide 999 KM) */
-  #menuBtn { position: fixed; top: 10px; left: 10px; height: 26px; padding: 0 12px; background: #1b1b1b; border: 2px solid #d0d0d0; border-radius: 3px; z-index: 6; color: #fff; font: bold 13px Arial, sans-serif; cursor: pointer; }
+  #menuBtn { position: fixed; top: 10px; left: 10px; height: 26px; padding: 0 12px; background: #1b1b1b; border: 2px solid #d0d0d0; border-radius: 3px; z-index: 6; color: #fff; font: bold 13px Allo, Arial, sans-serif; cursor: pointer; }
   #menuBtn:hover { border-color: #d8281f; }
   #veil { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); display: none; z-index: 39; }
-  #gm { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 290px; max-height: 94vh; overflow-y: auto; box-sizing: border-box; padding: 8px 16px 12px; background: rgba(25, 25, 25, .88); border: 1px solid #8a8a8a; border-radius: 3px; z-index: 40; display: none; color: #fff; font: bold 14px Arial, sans-serif; }
+  #gm { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 290px; max-height: 94vh; overflow-y: auto; box-sizing: border-box; padding: 8px 16px 12px; background: rgba(25, 25, 25, .88); border: 1px solid #8a8a8a; border-radius: 3px; z-index: 40; display: none; color: #fff; font: bold 14px Allo, Arial, sans-serif; }
   body.menu #gm, body.menu #veil { display: block; }
   #gm .mt { text-align: center; font-size: 20px; padding: 2px 0 8px; margin-bottom: 6px; border-bottom: 1px solid #555; }
-  #gm button { display: block; width: 100%; text-align: center; margin: 7px 0; padding: 7px 6px; font: bold 14px Arial, sans-serif; color: #fff; border-radius: 3px; background: #1b1b1b; border: 2px solid #d0d0d0; cursor: pointer; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+  #gm button { display: block; width: 100%; text-align: center; margin: 7px 0; padding: 7px 6px; font: bold 14px Allo, Arial, sans-serif; color: #fff; border-radius: 3px; background: #1b1b1b; border: 2px solid #d0d0d0; cursor: pointer; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
   #gm button:hover { background: #4a1010; border-color: #d8281f; } #gm button.focus { background: #3a0c0c; border-color: #d8281f; } #gm button.focus:hover { background: #5a1414; }
   #gm .page { display: none; } #gm .page.on { display: block; }
   #gm .brand { margin-top: 10px; padding-top: 9px; border-top: 1px solid #555; text-align: center; }
@@ -399,13 +401,13 @@
   /* the voice cinematic (?cinematic): no HUD, letterbox bars, a title per shot, captions of what played */
   #cine { display: none; }
   body.cine > :not(#c):not(#cine):not(script):not(style):not(noscript) { display: none !important; }
-  body.cine #cine { display: block; position: fixed; inset: 0; z-index: 100; pointer-events: none; color: #fff; font-family: Arial, Helvetica, sans-serif; font-weight: bold; }
+  body.cine #cine { display: block; position: fixed; inset: 0; z-index: 100; pointer-events: none; color: #fff; font-family: Allo, Arial, Helvetica, sans-serif; font-weight: bold; }
   #cine .lb { position: absolute; left: 0; right: 0; height: 0; background: #000; transition: height .9s ease; overflow: hidden; }
   #cine .lb.top { top: 0; } #cine .lb.bot { bottom: 0; }
   body.cineplay #cine .lb { height: 11vh; }
   #cineBar { position: absolute; right: 10px; bottom: 8px; display: flex; gap: 8px; align-items: center; pointer-events: auto; }
   body.cineend #cineBar { display: none; }
-  #cineBar button { background: rgba(40, 40, 40, .9); color: #fff; border: 2px solid #bbb; border-radius: 3px; font: bold 12px Arial; padding: 4px 10px; cursor: pointer; }
+  #cineBar button { background: rgba(40, 40, 40, .9); color: #fff; border: 2px solid #bbb; border-radius: 3px; font: bold 12px Allo,Arial; padding: 4px 10px; cursor: pointer; }
   #cineBar button:hover { border-color: #e33; }
   #cineCount { font-size: 12px; color: #ccc; margin-right: 6px; }
   #cineCap { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; font-size: 15px; line-height: 1.4; }
@@ -419,7 +421,7 @@
   body.cine:not(.cineplay) #cineStart, body.cineend #cineEnd { display: block; }
   .cbox .mt { font-size: 20px; padding: 2px 0 8px; margin-bottom: 8px; border-bottom: 1px solid #555; }
   .cbox p { font-size: 13px; font-weight: normal; line-height: 1.45; color: #ddd; margin: 0 0 12px; }
-  .cbox button, .cbox a { display: block; width: 100%; box-sizing: border-box; margin: 7px 0 0; padding: 8px; background: rgba(40, 40, 40, .9); color: #fff; border: 2px solid #bbb; border-radius: 3px; font: bold 15px Arial; cursor: pointer; text-decoration: none; }
+  .cbox button, .cbox a { display: block; width: 100%; box-sizing: border-box; margin: 7px 0 0; padding: 8px; background: rgba(40, 40, 40, .9); color: #fff; border: 2px solid #bbb; border-radius: 3px; font: bold 15px Allo,Arial; cursor: pointer; text-decoration: none; }
   .cbox .focus { border-color: #e33; } .cbox button:hover, .cbox a:hover { border-color: #e33; }
   @media (max-width: 600px) { #cineTitle b { font-size: 26px; } #cineTitle small { font-size: 12px; } #cineTitle.big b { font-size: 34px; } #cineCap { font-size: 12px; } #cineCap small { display: none; } #cineBar button { padding: 3px 6px; font-size: 11px; } }
   #gm .row #sPitchV { margin-left: auto; font-size: 12px; min-width: 30px; text-align: right; }
@@ -427,7 +429,7 @@
   #gm .help { font-size: 12px; font-weight: normal; color: #ddd; line-height: 1.45; } #gm .help b { color: #fff; }
   #results .rb { background: #1b1b1b; border: 2px solid #d0d0d0; color: #fff; } #results .rb:hover { background: #4a1010; border-color: #d8281f; } #results #resAgain { background: #2f7a22; }
 
-  #squad { position: fixed; top: 44px; left: 10px; z-index: 5; display: none; font: bold 12px Arial, sans-serif; color: #fff; }
+  #squad { position: fixed; top: 44px; left: 10px; z-index: 5; display: none; font: bold 12px Allo, Arial, sans-serif; color: #fff; }
   body.squads #squad { display: block; }
   #squad .m { width: 150px; margin-bottom: 5px; padding: 3px 6px 4px; background: rgba(0, 0, 0, .45); border: 1px solid rgba(0, 0, 0, .6); border-radius: 3px; }
   #squad .m.out { opacity: .45; } #squad .m .n { color: #7dff6a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2080,7 +2082,7 @@ function textCanvas(lines, w, h, bg, fg, size) {
   const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
   if (bg) { x.fillStyle = bg; x.fillRect(0, 0, w, h); }
   x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineJoin = 'round';
-  lines.forEach((l, k) => { let s = k ? size * 0.62 : size; x.font = `bold ${s}px Arial`; const tw = x.measureText(l).width; if (tw > w * 0.92) { s *= w * 0.92 / tw; x.font = `bold ${s}px Arial`; } x.lineWidth = s / 6; x.strokeStyle = '#000'; const y = h / 2 + (k - (lines.length - 1) / 2) * size * 1.05; x.strokeText(l, w / 2, y); x.fillStyle = k ? (typeof fg === 'object' ? fg[k] : '#ddd') : (typeof fg === 'object' ? fg[0] : fg); x.fillText(l, w / 2, y); });
+  lines.forEach((l, k) => { let s = k ? size * 0.62 : size; x.font = `bold ${s}px Allo,Arial`; const tw = x.measureText(l).width; if (tw > w * 0.92) { s *= w * 0.92 / tw; x.font = `bold ${s}px Allo,Arial`; } x.lineWidth = s / 6; x.strokeStyle = '#000'; const y = h / 2 + (k - (lines.length - 1) / 2) * size * 1.05; x.strokeText(l, w / 2, y); x.fillStyle = k ? (typeof fg === 'object' ? fg[k] : '#ddd') : (typeof fg === 'object' ? fg[0] : fg); x.fillText(l, w / 2, y); });
   const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t;
 }
 function sign(lines, x, y, z, w, h, faceX, faceZ, bg = '#2a2a2a', fg = '#fff') {
@@ -4213,7 +4215,7 @@ function drawBigMap() {
   const px = c.width, x = c.getContext('2d'), s = px / (2 * MAPE), P = (wx, wz) => [(wx + MAPE) * s, (wz + MAPE) * s];
   x.drawImage(MAPIMG, 0, 0, px, px); drawStorm(x, P, s); drawPlanePath(x, P);
   x.textAlign = 'center'; x.textBaseline = 'middle';
-  for (const Q of POIS) { const [a, b] = P(Q.x, Q.z); x.font = `bold ${Math.round(12 * dpr)}px Arial`; x.lineWidth = 3 * dpr; x.strokeStyle = '#000'; x.strokeText(Q.name.toUpperCase(), a, b); x.fillStyle = '#fff'; x.fillText(Q.name.toUpperCase(), a, b); }
+  for (const Q of POIS) { const [a, b] = P(Q.x, Q.z); x.font = `bold ${Math.round(12 * dpr)}px Allo,Arial`; x.lineWidth = 3 * dpr; x.strokeStyle = '#000'; x.strokeText(Q.name.toUpperCase(), a, b); x.fillStyle = '#fff'; x.fillText(Q.name.toUpperCase(), a, b); }
   if (MARK) { const [a, b] = P(MARK.x, MARK.z); x.fillStyle = '#ff5ad0'; x.strokeStyle = '#000'; x.lineWidth = 2; x.beginPath(); x.arc(a, b, 7 * dpr, 0, 7); x.fill(); x.stroke(); }
   drawMates(x, P, 5 * dpr); drawMe(x, P, cam.yaw, 9 * dpr);
   c.onclick = e => { const r = c.getBoundingClientRect(), wx = (e.clientX - r.left) / r.width * 2 * MAPE - MAPE, wz = (e.clientY - r.top) / r.height * 2 * MAPE - MAPE; MARK = MARK && Math.hypot(MARK.x - wx, MARK.z - wz) < 60 ? null : { x: wx, z: wz }; drawBigMap(); };

@@ -1,7 +1,7 @@
 # Ad sources
 
 `ad.html` (800×400) and `banner.html` (960×200) draw one frame for any time `t` with `render(t)`. To make the GIFs, put
-these next to the images they use (`fredoka.woff2`, the `static/showcase/*.webp` renders as PNGs, the arcade covers,
+these next to the images they use (`allo-latin.woff2` from `static/fonts/`, the `static/showcase/*.webp` renders as PNGs, the arcade covers,
 and Avatar Studio screenshots `s01.jpg`…`s12.jpg` taken with `GrugStudio.set`/`wearTop`/`wearBottom`), then:
 
     ./mkgif.sh ad.html itch-ad.gif 15 15 13.25 800 400 256 60        # fps, seconds, start (the offer first), size, colours, lossy

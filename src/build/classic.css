@@ -1,10 +1,10 @@
 /* ===== the site's classic look (src/build/classic.css, put into both pages by build.py) =====
-   Arial; the shiny green nav bar with the Grug Digital logo; dark shiny title bars over light gradient boxes on the
+   Allo,Arial; the shiny green nav bar with the Grug Digital logo; dark shiny title bars over light gradient boxes on the
    site's grey body; shiny gradient buttons (green for the main action, grey for the rest); the baseplate's sky behind the 3D. */
 :root{--page:#f2f2f2;--card:#fff;--ink:#111;--soft:#555;--line:#aaa;--field:#f4f4f4;--accent:#9BE338;--accent-lo:#3f8a10;
   --cl-green:linear-gradient(#c6f57a,#9be338 50%,#86cf27 51%,#9be338);--cl-gray:linear-gradient(#fafafa,#e3e3e3 50%,#d6d6d6 51%,#e6e6e6);
   --cl-dark:linear-gradient(#5a5a5a,#2b2b2b 50%,#111 51%,#1d1d1d);--cl-nav:linear-gradient(#8fdc4c 0,#5cb41e 45%,#3f9612 50%,#3a8c10 100%)}
-body,button,input,select,textarea{font-family:Arial,Helvetica,sans-serif}
+body,button,input,select,textarea{font-family:Allo,Arial,Helvetica,sans-serif}
 body{-webkit-font-smoothing:auto}
 .bar{background:var(--cl-nav);border-bottom:1px solid #2a6c08;box-shadow:0 2px 6px rgba(0,0,0,.25);color:#fff}
 .brand{gap:8px;color:#fff!important;font-weight:bold;text-shadow:0 1px 0 rgba(0,40,0,.45)}

@@ -22,7 +22,7 @@ The site is being rebuilt from scratch on `main`. The old site is kept, unchange
   crafthouse create for games labs links make managers me partners play profile restaurant rewards rodeo shop showcase
   site soluna teahouse tools work`, and `sw.js`, `offline.html`, `pearls.html`, `privacy.html`, `terms.html`,
   `support.html`, `credits.html`. `managers/` is printed on business cards: keep it working.
-- The new site's own files so far live in `static/` (the Fredoka font, the Pearls wallet, the itch fallback list).
+- The new site's own files so far live in `static/` (the Allo font in `static/fonts/`, the Pearls wallet, the itch fallback list).
 
 ## Asset packs from itch.io (home page)
 

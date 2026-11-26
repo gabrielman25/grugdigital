@@ -70,7 +70,7 @@ function buildReference(force){
   const clear = cnv(RW, RH), cx = clear.getContext('2d'); cx.imageSmoothingQuality = 'high'; cx.drawImage(REF.c, 0, 0, RW, RH);
   REF.clear = clear;
   const white = cnv(RW, RH), wx = white.getContext('2d'); wx.fillStyle = '#000'; wx.fillRect(0,0,RW,RH); wx.drawImage(clear, 0, 0);   // black: any edge pixel that slips through reads as a shadow, not a white seam
-  wx.textAlign = 'center'; wx.textBaseline = 'middle'; wx.fillStyle = '#bbb'; wx.font = '700 24px system-ui, Arial, sans-serif';
+  wx.textAlign = 'center'; wx.textBaseline = 'middle'; wx.fillStyle = '#bbb'; wx.font = '700 24px Allo, system-ui, Arial, sans-serif';
   VIEWS.forEach(V => wx.fillText(V.label, V.cx, 34));
   REF.white = white;
   REF.alpha = cx.getImageData(0, 0, RW, RH).data;

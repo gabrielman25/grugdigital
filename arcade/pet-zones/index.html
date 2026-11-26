@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/fonts/allo.css">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='3' y='5' width='10' height='8' fill='%237ccf3a' stroke='%23000'/%3E%3Crect x='5' y='2' width='6' height='4' fill='%233d7a1a' stroke='%23000'/%3E%3Crect x='6' y='3' width='1' height='1' fill='%23fff'/%3E%3Crect x='9' y='3' width='1' height='1' fill='%23fff'/%3E%3C/svg%3E">
 <title>Pet Zones · Free in the Grug Arcade by Grug Digital</title>
@@ -27,11 +29,11 @@
 <style>
   /* classic (2012-2014) Roblox look, as in Zombie Zones: Arial bold, flat translucent greys, outlined white text */
   html, body { margin: 0; height: 100%; overflow: hidden; background: #8fc6ef; }
-  body { font: bold 13px/1.25 Arial, Helvetica, sans-serif; color: #fff; user-select: none; -webkit-user-select: none; }
+  body { font: bold 13px/1.25 Allo, Arial, Helvetica, sans-serif; color: #fff; user-select: none; -webkit-user-select: none; }
   canvas#c { display: block; width: 100%; height: 100%; outline: none; touch-action: none; }
   body { touch-action: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
   .ol { text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
-  button { font: bold 13px Arial, Helvetica, sans-serif; }
+  button { font: bold 13px Allo, Arial, Helvetica, sans-serif; }
   .cg { color: #ffe36b; } .cz { color: #9be36b; } .cr { color: #ff6a5a; } .cb { color: #7cc0ff; }
   .mvC { color: #7cc0ff; } .atC { color: #ff7a6a; } .utC { color: #ffd24a; }
 
@@ -153,7 +155,7 @@
   .tag { position: absolute; left: 0; top: 0; text-align: center; white-space: nowrap; transform-origin: 50% 100%; will-change: transform; }
   .tag .nm { font-size: 12px; color: #fff; } .tag .st { font-size: 10px; margin-top: 1px; }
   .tag .hp { display: flex; gap: 2px; justify-content: center; margin: 2px auto 0; } .tag .hp i { width: 9px; height: 6px; background: #23d12a; border: 1px solid #000; } .tag .hp i.off { background: #6a1010; } .tag .hp i.sh { background: #b9a8ff; }
-  .tag .bub { display: none; width: max-content; max-width: 170px; margin: 0 auto 6px; padding: 3px 8px; background: #fff; color: #111; font: bold 12px Arial, sans-serif; border-radius: 9px; border: 1px solid #999; white-space: normal; position: relative; text-shadow: none; }
+  .tag .bub { display: none; width: max-content; max-width: 170px; margin: 0 auto 6px; padding: 3px 8px; background: #fff; color: #111; font: bold 12px Allo, Arial, sans-serif; border-radius: 9px; border: 1px solid #999; white-space: normal; position: relative; text-shadow: none; }
   .tag .bub::after { content: ''; position: absolute; left: 50%; bottom: -7px; margin-left: -6px; border: 6px solid transparent; border-top-color: #fff; border-bottom: 0; }
   .bill { position: absolute; left: 0; top: 0; text-align: center; white-space: nowrap; display: none; }
   .bill b { display: block; font-size: 18px; } .bill small { display: block; font-size: 11px; color: #eee; }
@@ -521,13 +523,13 @@
   @media (max-width: 520px) { #shopBtn { width: 170px; } #shopBtn b { font-size: 21px; letter-spacing: 1px; } }
 
   /* ===================================================================================================================
-     2009-2010 Roblox game GUI, hobbyist-built (the owner's reference sheet, "amateur" view). Engine limits: Arial / Arial
+     2009-2010 Roblox game GUI, hobbyist-built (the owner's reference sheet, "amateur" view). Engine limits: Arial / Allo, Arial
      Bold only, text sizes 8 9 10 11 12 14 18 24 36 48, no gradients, shadows, glows, blur or animation, no hover on the
      black buttons, only the built-in button keeps its slight rounding. Main buttons: black, 2px dark red border fading in.
      Secondary: grey border. Panels: black at 45% or Studio's default grey. Pure bright colours. The careless bits are
      deliberate (odd offsets, uneven gaps, a title off centre, a close X hanging off a corner): don't tidy them up.
      =================================================================================================================== */
-  body, button, input, select, textarea { font-family: Arial, Helvetica, sans-serif !important; }
+  body, button, input, select, textarea { font-family: Allo, Arial, Helvetica, sans-serif !important; }
   body *:not(canvas) { text-shadow: none !important; animation: none !important; transition: none !important; }
   :where(body *:not(canvas, .egg, .qegg, #stick, #stick i)) { border-radius: 0 !important; box-shadow: none !important; }   /* (zero specificity: the buttons below keep their rounding) */
   .pp i, .cb.buy i { border-radius: 50% !important; }
@@ -543,7 +545,7 @@
   /* close buttons: a small pure-red square with a white X, hanging a few px off the corner, the X sitting a touch low */
   .pth button, .stClose, #slClose, #pvBack, #cosClose, #gaClose {
     background: #ff0000 !important; border: 1px solid #000 !important; border-radius: 0 !important; box-shadow: none !important; color: #fff !important;
-    font: bold 18px Arial, Helvetica, sans-serif !important; width: 22px !important; height: 21px !important; min-width: 0 !important; min-height: 0 !important;
+    font: bold 18px Allo, Arial, Helvetica, sans-serif !important; width: 22px !important; height: 21px !important; min-width: 0 !important; min-height: 0 !important;
     padding: 0 0 0 1px !important; line-height: 24px !important; overflow: visible; }
   .pth { position: relative; } .pth button { position: absolute !important; top: -12px; right: -14px; }
   /* panels: black at 45%, a 2px black edge */
@@ -553,12 +555,12 @@
   #reel { background: rgba(0, 0, 0, .55) !important; }
   /* the enemy turn: an old-style full-screen Message, a pale grey wash over everything and plain white words in the middle */
   #eturn { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(200, 200, 205, .45); pointer-events: none; z-index: 38; }
-  #eturn b { font: normal 24px Arial, Helvetica, sans-serif !important; color: #fff !important; letter-spacing: 0 !important; text-shadow: -1px -1px 0 #3a3a3a, 1px -1px 0 #3a3a3a, -1px 1px 0 #3a3a3a, 1px 1px 0 #3a3a3a !important; }
+  #eturn b { font: normal 24px Allo, Arial, Helvetica, sans-serif !important; color: #fff !important; letter-spacing: 0 !important; text-shadow: -1px -1px 0 #3a3a3a, 1px -1px 0 #3a3a3a, -1px 1px 0 #3a3a3a, 1px 1px 0 #3a3a3a !important; }
   #preview { background: none !important; border: 0 !important; }
   /* no scroll bars anywhere: lists still scroll (wheel, drag, touch), the bars are just never drawn */
   html, body { overflow: hidden; } * { scrollbar-width: none !important; -ms-overflow-style: none; } *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }   /* the item preview fills the screen: no dark veil over the showcase */
   /* the hint bar along the top: plain black, Arial 14 */
-  #hint { top: 0; height: 20px; line-height: 20px; background: #000 !important; font: 14px Arial, Helvetica, sans-serif !important; }
+  #hint { top: 0; height: 20px; line-height: 20px; background: #000 !important; font: 14px Allo, Arial, Helvetica, sans-serif !important; }
   /* top left: the gear, and the one label left in Studio's default grey */
   #gear { top: 24px; left: 3px; width: 30px; height: 31px; }
   #zoneBadge { top: 25px; left: 37px; height: 27px; padding: 0 !important; gap: 4px; background: #a3a2a5 !important; border: 1px solid #1b2a35 !important; color: #000 !important; }
@@ -603,7 +605,7 @@
   /* over people and places: plain text on a see-through black strip */
   .bill b { font-size: 18px !important; background: rgba(0, 0, 0, .45); padding: 0 4px; } .bill small { font-size: 11px !important; }
   .tag .nm { font-size: 12px !important; background: rgba(0, 0, 0, .45); padding: 0 3px; }
-  .tag .bub { border-radius: 0 !important; border: 1px solid #000 !important; font: bold 12px Arial, Helvetica, sans-serif !important; } .tag .bub::after { display: none; }
+  .tag .bub { border-radius: 0 !important; border: 1px solid #000 !important; font: bold 12px Allo, Arial, Helvetica, sans-serif !important; } .tag .bub::after { display: none; }
   .stg { font-size: 10px !important; border: 1px solid #000 !important; color: #000 !important; } .stg.l { background: #00ff00 !important; } .stg.a { background: #ffff00 !important; } .stg.e { background: #ff0000 !important; color: #fff !important; } .stg.f { background: #00ffff !important; }
   /* the game menu */
   #menu { padding: 6px 12px 10px !important; } #menu .mt { font-size: 24px !important; border-bottom: 0 !important; text-align: left !important; padding-left: 41px !important; }
@@ -2275,7 +2277,7 @@ function textCanvas(lines, w, h, bg, fg, size) {
   const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
   if (bg) { x.fillStyle = bg; x.fillRect(0, 0, w, h); }
   x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineJoin = 'round';
-  lines.forEach((l, k) => { let s = k ? size * 0.62 : size; x.font = `bold ${s}px Arial`; const tw = x.measureText(l).width; if (tw > w * 0.92) { s *= w * 0.92 / tw; x.font = `bold ${s}px Arial`; } x.lineWidth = s / 6; x.strokeStyle = '#000'; const y = h / 2 + (k - (lines.length - 1) / 2) * size * 1.05; x.strokeText(l, w / 2, y); x.fillStyle = k ? (typeof fg === 'object' ? fg[k] : '#ddd') : (typeof fg === 'object' ? fg[0] : fg); x.fillText(l, w / 2, y); });
+  lines.forEach((l, k) => { let s = k ? size * 0.62 : size; x.font = `bold ${s}px Allo,Arial`; const tw = x.measureText(l).width; if (tw > w * 0.92) { s *= w * 0.92 / tw; x.font = `bold ${s}px Allo,Arial`; } x.lineWidth = s / 6; x.strokeStyle = '#000'; const y = h / 2 + (k - (lines.length - 1) / 2) * size * 1.05; x.strokeText(l, w / 2, y); x.fillStyle = k ? (typeof fg === 'object' ? fg[k] : '#ddd') : (typeof fg === 'object' ? fg[0] : fg); x.fillText(l, w / 2, y); });
   const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t;
 }
 function sign(lines, x, y, z, w, h, faceX, faceZ, bg = '#2a2a2a', fg = '#fff') {

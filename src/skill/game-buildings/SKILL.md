@@ -106,4 +106,5 @@ Show the person each building in the game next to a character for scale. If a do
 per floor is under 2.5 m; raise `h` or lower `floors` and paint it again.
 
 Characters for the same game: Grug Avatar Studio, https://grugdigital.com/character/ (guide:
-https://grugdigital.com/character/claude.md).
+https://grugdigital.com/character/claude.md), or the `roblox-characters` skill. Both skills, and prompts for other
+agents: https://grugdigital.com/agents/.

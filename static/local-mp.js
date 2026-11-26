@@ -131,10 +131,10 @@
 
   // ---------------------------------------------------------------- the classic-look boxes: dialogs, the Controllers panel, toasts
   const CSS = `
-  .lmp-box { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 9000; width: min(360px, 92vw); max-height: 90vh; overflow-y: auto; box-sizing: border-box; padding: 8px 16px 12px; background: rgba(25,25,25,.92); border: 1px solid #8a8a8a; border-radius: 3px; color: #fff; font: bold 13px/1.35 Arial, Helvetica, sans-serif; text-align: center; user-select: none; }
+  .lmp-box { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 9000; width: min(360px, 92vw); max-height: 90vh; overflow-y: auto; box-sizing: border-box; padding: 8px 16px 12px; background: rgba(25,25,25,.92); border: 1px solid #8a8a8a; border-radius: 3px; color: #fff; font: bold 13px/1.35 Allo, Arial, Helvetica, sans-serif; text-align: center; user-select: none; }
   .lmp-box .lmp-t { font-size: 19px; padding: 2px 0 8px; margin-bottom: 6px; border-bottom: 1px solid #555; }
   .lmp-box p { margin: 6px 0; font-size: 13px; color: #ddd; } .lmp-box p small { color: #aaa; font-size: 11px; }
-  .lmp-box button { display: block; width: 100%; margin: 7px 0; padding: 7px 6px; font: bold 14px Arial, sans-serif; color: #fff; border-radius: 3px; background: #1b1b1b; border: 2px solid #d0d0d0; cursor: pointer; }
+  .lmp-box button { display: block; width: 100%; margin: 7px 0; padding: 7px 6px; font: bold 14px Allo, Arial, sans-serif; color: #fff; border-radius: 3px; background: #1b1b1b; border: 2px solid #d0d0d0; cursor: pointer; }
   .lmp-box button:hover, .lmp-box button.lmp-f, .lmp-nav { background: #4a1010 !important; border-color: #d8281f !important; }
   .lmp-box .lmp-row { display: flex; gap: 6px; } .lmp-box .lmp-row button { flex: 1; }
   .lmp-box .lmp-pad { text-align: left; margin: 8px 0; padding: 6px 8px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.2); }
@@ -143,14 +143,14 @@
   .lmp-box .lmp-help { text-align: left; font-size: 12px; font-weight: normal; color: #ddd; line-height: 1.5; } .lmp-box .lmp-help b { color: #fff; }
   .lmp-big { font-size: 22px; margin: 10px 0; color: #ffe36b; }
   .lmp-ol { text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
-  .lmp-toast { position: fixed; left: 50%; top: 30%; transform: translateX(-50%); z-index: 8999; padding: 6px 14px; background: rgba(0,0,0,.6); color: #fff; font: bold 16px Arial, sans-serif; pointer-events: none; white-space: nowrap; transition: opacity .4s; }
+  .lmp-toast { position: fixed; left: 50%; top: 30%; transform: translateX(-50%); z-index: 8999; padding: 6px 14px; background: rgba(0,0,0,.6); color: #fff; font: bold 16px Allo, Arial, sans-serif; pointer-events: none; white-space: nowrap; transition: opacity .4s; }
   .lmp-xh { position: fixed; left: 0; top: 0; width: 0; height: 0; z-index: 30; pointer-events: none; }
   .lmp-xh i { position: absolute; left: -13px; top: -13px; width: 22px; height: 22px; border: 2px solid currentColor; border-radius: 50%; box-shadow: 0 0 0 1px #000, inset 0 0 0 1px #000; }
   .lmp-xh i::before, .lmp-xh i::after { content: ''; position: absolute; background: currentColor; box-shadow: 0 0 0 1px #000; }
   .lmp-xh i::before { left: 10px; top: 4px; width: 2px; height: 14px; } .lmp-xh i::after { top: 10px; left: 4px; height: 2px; width: 14px; }
-  .lmp-xh b { position: absolute; left: 14px; top: 8px; font: bold 13px Arial, sans-serif; }
+  .lmp-xh b { position: absolute; left: 14px; top: 8px; font: bold 13px Allo, Arial, sans-serif; }
   .lmp-xh.off { opacity: .35; }
-  .lmp-tag { position: fixed; left: 0; top: 0; z-index: 29; pointer-events: none; font: bold 15px Arial, sans-serif; white-space: nowrap; }
+  .lmp-tag { position: fixed; left: 0; top: 0; z-index: 29; pointer-events: none; font: bold 15px Allo, Arial, sans-serif; white-space: nowrap; }
   .lmp-tag { text-align: center; } .lmp-tag.edge span::after { content: ' \\25B2'; }
   .lmp-tag i { display: block; width: 44px; height: 5px; margin: 1px auto 0; background: rgba(0,0,0,.55); border: 1px solid #000; } .lmp-tag i u { display: block; height: 100%; background: #5ad15a; }
   .lmp-tag i.lo u { background: #ff5a4a; }

@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/fonts/allo.css">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Brickbound · Free in the Grug Arcade by Grug Digital</title>
 <!-- seo: written by src/seo/seo_head.py (re-run it, don't edit by hand) -->
@@ -27,10 +29,10 @@
 <style>
   /* classic (2010-2012) Roblox look, from Zombie Zones: Arial bold, flat translucent greys, outlined white text */
   html, body { margin: 0; height: 100%; overflow: hidden; background: #8fc6ef; }
-  body { font: bold 13px/1.25 Arial, Helvetica, sans-serif; color: #fff; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+  body { font: bold 13px/1.25 Allo, Arial, Helvetica, sans-serif; color: #fff; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
   canvas#c { display: block; width: 100%; height: 100%; outline: none; touch-action: none; }
   .ol { text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
-  button { font: bold 13px Arial, Helvetica, sans-serif; }
+  button { font: bold 13px Allo, Arial, Helvetica, sans-serif; }
   .cg { color: #ffe36b; } .cz { color: #9be36b; } .cr { color: #ff6a5a; } .cb { color: #9fd8ff; } .cp { color: #c9a8ff; }
 
   #hint { position: fixed; left: 0; right: 0; top: 0; height: 22px; line-height: 22px; background: rgba(0, 0, 0, .55); text-align: center; font-size: 13px; white-space: nowrap; overflow: hidden; pointer-events: none; z-index: 3; }
@@ -106,7 +108,7 @@
   #magic::before { content: ''; position: absolute; left: calc(-1 * var(--r)); top: calc(-1 * var(--r)); width: calc(2 * var(--r)); height: calc(2 * var(--r)); border-radius: 50%; border: 2px dashed rgba(255, 255, 255, .4); box-sizing: border-box; animation: ringIn .14s ease-out; }
   #magic > .bt { background: none; border: 0; } #magic .mrow { position: relative; } #magic .md { display: none; }
   @keyframes ringIn { from { opacity: 0; transform: scale(.6); } }
-  .mc { width: 76px; text-align: center; cursor: pointer; padding: 0; background: none; border: 0; color: #fff; font: bold 11px Arial, sans-serif; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+  .mc { width: 76px; text-align: center; cursor: pointer; padding: 0; background: none; border: 0; color: #fff; font: bold 11px Allo, Arial, sans-serif; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
   #magic .mc { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); pointer-events: auto; animation: cardIn .14s ease-out; }
   @keyframes cardIn { from { opacity: 0; transform: translate(-50%, -50%) scale(.5); } }
   #magic .mc.d-up { top: calc(-1 * var(--r)); } #magic .mc.d-down { top: var(--r); } #magic .mc.d-left { left: calc(-1 * var(--r)); } #magic .mc.d-right { left: var(--r); }
@@ -140,7 +142,7 @@
   #tags { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
   .bill { position: absolute; left: 0; top: 0; text-align: center; white-space: nowrap; display: none; }
   .bill b { display: block; font-size: 16px; } .bill small { display: block; font-size: 11px; color: #eee; }
-  .bill .bub { display: block; width: max-content; max-width: 190px; margin: 0 auto 6px; padding: 3px 8px; background: #fff; color: #111; font: bold 12px Arial, sans-serif; border-radius: 9px; border: 1px solid #999; white-space: normal; position: relative; text-shadow: none; }
+  .bill .bub { display: block; width: max-content; max-width: 190px; margin: 0 auto 6px; padding: 3px 8px; background: #fff; color: #111; font: bold 12px Allo, Arial, sans-serif; border-radius: 9px; border: 1px solid #999; white-space: normal; position: relative; text-shadow: none; }
   .bill .bub::after { content: ''; position: absolute; left: 50%; bottom: -7px; margin-left: -6px; border: 6px solid transparent; border-top-color: #fff; border-bottom: 0; }
   .bill .key { display: inline-block; background: rgba(0, 0, 0, .6); border: 1px solid #fff; padding: 1px 6px; font-size: 12px; margin-top: 2px; }
   .tag { position: absolute; left: 0; top: 0; text-align: center; white-space: nowrap; transform-origin: 50% 100%; display: none; }
@@ -174,7 +176,7 @@
   #help { width: min(460px, 94vw); } #help div { margin: 3px 0; color: #ddd; font-weight: normal; font-size: 12px; } #help b { color: #fff; }
 
   /* controller buttons (Xbox colours), the on-screen legend, toasts, turn-your-phone */
-  .pg { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 3px; box-sizing: border-box; border-radius: 9px; background: #444; color: #fff; font: bold 10px Arial, sans-serif; font-style: normal; text-shadow: none; border: 1px solid #000; vertical-align: -3px; }
+  .pg { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 3px; box-sizing: border-box; border-radius: 9px; background: #444; color: #fff; font: bold 10px Allo, Arial, sans-serif; font-style: normal; text-shadow: none; border: 1px solid #000; vertical-align: -3px; }
   .pg { background: rgba(20, 20, 20, .8); border: 1px solid rgba(255, 255, 255, .7); } .pg.pL, .pg.pR { border-radius: 4px; }
   #padkeys { position: fixed; right: 10px; bottom: calc(92px + env(safe-area-inset-bottom)); display: none; padding: 6px 9px; z-index: 3; pointer-events: none; font-size: 12px; }
   #padkeys div { display: flex; align-items: center; gap: 6px; margin: 2px 0; } #padkeys span { white-space: nowrap; }
@@ -188,7 +190,7 @@
   /* ---- the file select: laid out like the Grug Arcade page (a classic 2011 games page): a 900px column on green,
      panning zone shots behind it, a banner with the logo and a crowd, the green nav bar, an orange alert strip,
      a grey 140px left column and boxed file tiles, a Verdana footer ---- */
-  #files { position: fixed; inset: 0; z-index: 25; overflow-x: hidden; overflow-y: auto; background: #1f4a10; color: #000; font: 12px Arial, Helvetica, sans-serif; text-shadow: none; user-select: none; -webkit-user-select: none; touch-action: pan-y; transition: opacity .5s; }
+  #files { position: fixed; inset: 0; z-index: 25; overflow-x: hidden; overflow-y: auto; background: #1f4a10; color: #000; font: 12px Allo, Arial, Helvetica, sans-serif; text-shadow: none; user-select: none; -webkit-user-select: none; touch-action: pan-y; transition: opacity .5s; }
   #files.gone { opacity: 0; pointer-events: none; }
   #files *, #files *::before, #files *::after { box-sizing: content-box; }
   #files a { color: #1d7a0c; text-decoration: none; } #files a:hover { text-decoration: underline; }
@@ -206,23 +208,23 @@
   #FBanner .crowd.me { height: 96px; }
   #FLogo { position: absolute; left: 275px; top: 6px; width: 350px; display: flex; flex-direction: column; align-items: center; z-index: 2; }
   #FLogo img { width: 330px; height: auto; filter: drop-shadow(0 2px 0 #0a2f72) drop-shadow(0 0 6px rgba(5, 25, 70, .55)); }
-  #FLogo span { margin-top: -2px; font: bold 15px/1 Arial, Helvetica, sans-serif; letter-spacing: .32em; text-transform: uppercase; color: #fff; text-shadow: 0 2px 0 #0a2f72, 0 0 6px rgba(5, 25, 70, .8); }
+  #FLogo span { margin-top: -2px; font: bold 15px/1 Allo, Arial, Helvetica, sans-serif; letter-spacing: .32em; text-transform: uppercase; color: #fff; text-shadow: 0 2px 0 #0a2f72, 0 0 6px rgba(5, 25, 70, .8); }
   #FOptions { position: absolute; left: 0; top: 0; z-index: 3; }
-  #FOptions a { display: inline-block; margin: 6px 5px 0 12px; padding: 4px 9px; font: bold 14px/16px Arial, Helvetica, sans-serif; color: #fff; border-radius: 4px; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); background: linear-gradient(#7fcf43, #45a116 50%, #38900e 51%, #44a015); border: 1px solid #2a6c08; text-decoration: none; cursor: pointer; }
+  #FOptions a { display: inline-block; margin: 6px 5px 0 12px; padding: 4px 9px; font: bold 14px/16px Allo, Arial, Helvetica, sans-serif; color: #fff; border-radius: 4px; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); background: linear-gradient(#7fcf43, #45a116 50%, #38900e 51%, #44a015); border: 1px solid #2a6c08; text-decoration: none; cursor: pointer; }
   #FOptions a:hover { filter: brightness(1.07); text-decoration: none; }
   #files .fnav { position: relative; height: 30px; font-size: 16px; line-height: 20px; background: linear-gradient(#8fdc4c 0, #5cb41e 45%, #3f9612 50%, #3a8c10 100%); }
   #files .fnav ul { list-style: none; margin: 0 5px; padding: 0; display: flex; }
   #files .fnav li { padding: 6px 0 4px; }
-  #files .fnav li > a, #files .fnav li > button { display: inline-block; padding: 0 8px; font: bold 16px/20px Arial, Helvetica, sans-serif; color: #fff; text-decoration: none; text-shadow: 0 1px 0 rgba(0, 40, 0, .35); background: none; border: 0; cursor: pointer; }
+  #files .fnav li > a, #files .fnav li > button { display: inline-block; padding: 0 8px; font: bold 16px/20px Allo, Arial, Helvetica, sans-serif; color: #fff; text-decoration: none; text-shadow: 0 1px 0 rgba(0, 40, 0, .35); background: none; border: 0; cursor: pointer; }
   #files .fnav li > a:hover, #files .fnav li > button:hover { text-decoration: underline; }
   #files .fnav li.r { margin-left: auto; }
   #FAnnouncement { margin: 3px; }
-  #files .alert { position: relative; height: 18px; padding: 2px; background: #ffa500; color: #fff; font: bold 16px/18px Arial, Helvetica, sans-serif; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #files .alert { position: relative; height: 18px; padding: 2px; background: #ffa500; color: #fff; font: bold 16px/18px Allo, Arial, Helvetica, sans-serif; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* body */
   #FBody { width: 890px; padding: 5px; background: #f2f2f2; overflow: hidden; }
   #files .col1 { float: left; width: 140px; margin-top: 10px; }
   #files .col2 { float: left; width: 740px; margin: 10px 0 0 10px; position: relative; }
-  #files .bxh { height: 33px; padding: 0 7px 0 5px; width: 126px; color: #fff; font: bold 20px/1 Arial, Helvetica, sans-serif; background: linear-gradient(#5a5a5a, #2b2b2b 50%, #111 51%, #1d1d1d); clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%); border-radius: 4px 0 0 0; }
+  #files .bxh { height: 33px; padding: 0 7px 0 5px; width: 126px; color: #fff; font: bold 20px/1 Allo, Arial, Helvetica, sans-serif; background: linear-gradient(#5a5a5a, #2b2b2b 50%, #111 51%, #1d1d1d); clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%); border-radius: 4px 0 0 0; }
   #files .bxh span { display: block; padding: 6px 5px 0 2px; white-space: nowrap; }
   #files .bx { width: 126px; padding: 14px 5px; margin: 0 0 8px; border: 1px solid #aaa; background: #fff linear-gradient(#e9e9e9, #fff 90px) no-repeat; }
   #files .me { text-align: center; }
@@ -234,7 +236,7 @@
   #files .keys li { display: flex; justify-content: space-between; gap: 4px; margin: 0 0 3px; } #files .keys li b { color: #000; }
   /* tabs over the grey box */
   #files .tabs { height: 31px; display: flex; }
-  #files .tab { position: relative; height: 31px; margin-left: 4px; cursor: pointer; font: bold 16px Arial, Helvetica, sans-serif; color: #333; border: 0; padding: 0; clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%); border-radius: 4px 0 0 0; background: linear-gradient(#e3e3e3, #c9c9c9); box-shadow: inset 1px 1px 0 #aaa, inset -1px 0 0 #aaa; }
+  #files .tab { position: relative; height: 31px; margin-left: 4px; cursor: pointer; font: bold 16px Allo, Arial, Helvetica, sans-serif; color: #333; border: 0; padding: 0; clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%); border-radius: 4px 0 0 0; background: linear-gradient(#e3e3e3, #c9c9c9); box-shadow: inset 1px 1px 0 #aaa, inset -1px 0 0 #aaa; }
   #files .tab span { display: block; padding: 6px 20px 0 8px; height: 25px; white-space: nowrap; }
   #files .tab.on { background: linear-gradient(#fff, #f7f7f7); z-index: 2; }
   #files .tab:not(.on):hover { background: linear-gradient(#ececec, #d4d4d4); }
@@ -251,15 +253,15 @@
   @keyframes fdriftBg { from { transform: translateX(2.5%); } to { transform: translateX(-2.5%); } }
   @keyframes fdriftFg { from { transform: translateX(26px); } to { transform: translateX(-8px); } }
   @keyframes fdriftFgL { from { transform: translateX(-26px); } to { transform: translateX(8px); } }
-  #fshow .who { position: absolute; top: 12px; left: 16px; color: #fff; font: bold 24px/1.1 Arial, Helvetica, sans-serif; text-shadow: 0 2px 0 #0b3b7c, 0 0 8px rgba(5, 25, 70, .6); }
+  #fshow .who { position: absolute; top: 12px; left: 16px; color: #fff; font: bold 24px/1.1 Allo, Arial, Helvetica, sans-serif; text-shadow: 0 2px 0 #0b3b7c, 0 0 8px rgba(5, 25, 70, .6); }
   #fshow .s.left .who { left: auto; right: 16px; text-align: right; }
   #fshow .who span { display: block; margin-top: 3px; font-size: 13px; font-weight: normal; color: #eef6ff; }
-  #fshow .cap { position: absolute; left: 0; right: 0; bottom: 0; height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 14px; background: #0b2350; color: #fff; font: bold 14px/1.2 Arial, Helvetica, sans-serif; box-sizing: border-box; width: 100%; }
+  #fshow .cap { position: absolute; left: 0; right: 0; bottom: 0; height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 14px; background: #0b2350; color: #fff; font: bold 14px/1.2 Allo, Arial, Helvetica, sans-serif; box-sizing: border-box; width: 100%; }
   #fshow .cap small { flex: none; padding: 3px 6px; border-radius: 3px; background: #fff; color: #0b3d8f; font-size: 11px; }
   #fshow .dots { position: absolute; right: 14px; bottom: 16px; display: flex; gap: 5px; z-index: 2; }
   #fshow .dots i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, .35); }
   #fshow .dots i.on { background: #9BE338; }
-  #files .fhead { padding: 12px 4px 2px; font: bold 18px Arial, Helvetica, sans-serif; color: #333; } #files .fhead small { margin-left: 8px; font-size: 12px; font-weight: normal; color: #888; }
+  #files .fhead { padding: 12px 4px 2px; font: bold 18px Allo, Arial, Helvetica, sans-serif; color: #333; } #files .fhead small { margin-left: 8px; font-size: 12px; font-weight: normal; color: #888; }
   /* the three files, as classic game tiles */
   #fgrid { overflow: hidden; padding: 4px 0 2px; }
   #files .tile { float: left; width: 220px; margin: 4px 0 6px 6px; padding: 6px; border: 1px solid transparent; border-radius: 5px; }
@@ -268,15 +270,15 @@
   #files .tile .thumb .bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   #files .tile .thumb .fg { position: absolute; left: 50%; bottom: 0; height: 128px; width: auto; max-width: none; translate: -50% 0; }
   #files .tile.empty .thumb .fg { filter: grayscale(.9); opacity: .6; }
-  #files .tile .num { position: absolute; top: 0; left: 0; padding: 3px 7px; background: #ffa500; color: #fff; font: bold 12px Arial, Helvetica, sans-serif; }
-  #files .tile .lv { position: absolute; top: 0; right: 0; padding: 3px 7px; background: rgba(0, 0, 0, .6); color: #fff; font: bold 12px Arial, Helvetica, sans-serif; }
+  #files .tile .num { position: absolute; top: 0; left: 0; padding: 3px 7px; background: #ffa500; color: #fff; font: bold 12px Allo, Arial, Helvetica, sans-serif; }
+  #files .tile .lv { position: absolute; top: 0; right: 0; padding: 3px 7px; background: rgba(0, 0, 0, .6); color: #fff; font: bold 12px Allo, Arial, Helvetica, sans-serif; }
   #files .tile .nm { margin-top: 4px; font-weight: bold; font-size: 13px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   #files .tile .pc { color: red; line-height: 14px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   #files .tile .st { list-style: none; margin: 5px 0 6px; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1px 10px; font-size: 11px; color: #888; }
   #files .tile .st li { display: flex; align-items: center; gap: 4px; } #files .tile .st li b { margin-left: auto; color: #333; }
   #files .tile .st img { width: 16px; height: 16px; image-rendering: pixelated; }
   #files .tile .blurb { margin: 5px 0 8px; font-size: 11px; color: #888; line-height: 14px; min-height: 48px; }
-  #files .pbtn { display: block; box-sizing: border-box; width: 100%; padding: 0; height: 32px; border-radius: 6px; font: bold 15px/30px Arial, Helvetica, sans-serif; color: #1e1b16; text-align: center; cursor: pointer; background: linear-gradient(#c6f57a, #9be338 50%, #86cf27 51%, #9be338); border: 1px solid #5f9a18; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6); }
+  #files .pbtn { display: block; box-sizing: border-box; width: 100%; padding: 0; height: 32px; border-radius: 6px; font: bold 15px/30px Allo, Arial, Helvetica, sans-serif; color: #1e1b16; text-align: center; cursor: pointer; background: linear-gradient(#c6f57a, #9be338 50%, #86cf27 51%, #9be338); border: 1px solid #5f9a18; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6); }
   #files .pbtn:hover { filter: brightness(1.06); }
   #files .pbtn.del { color: #fff; background: linear-gradient(#ff8a7a, #e5483d 50%, #c4281c 51%, #d63a2e); border-color: #8a1a10; text-shadow: 0 1px 0 rgba(0, 0, 0, .3); }
   #files .tiny { display: block; margin-top: 5px; text-align: center; font-size: 11px; }
@@ -284,12 +286,12 @@
   #files .note b { color: #000; }
   /* credits, in the same grey box */
   #fcredits { display: none; padding: 10px 12px 14px; font-size: 13px; line-height: 1.5; }
-  #fcredits.on { display: block; } #fcredits h3 { display: block; font: bold 18px Arial, Helvetica, sans-serif; margin-bottom: 6px; }
+  #fcredits.on { display: block; } #fcredits h3 { display: block; font: bold 18px Allo, Arial, Helvetica, sans-serif; margin-bottom: 6px; }
   #fcredits ul { margin: 0 0 12px; padding-left: 18px; color: #555; } #fcredits li b { color: #000; }
   #fcredits .pbtn { width: 160px; }
   #files .gray.cred #fmain { display: none; }
   /* footer */
-  #FFooter { width: 860px; padding: 28px 20px 30px; background: #e6e6e6; font: 13px Verdana, sans-serif; color: #aaa; text-align: center; }
+  #FFooter { width: 860px; padding: 28px 20px 30px; background: #e6e6e6; font: 13px Allo, Verdana, sans-serif; color: #aaa; text-align: center; }
   #FFooter .fn { color: #bbb; margin-bottom: 10px; }
   #FFooter .lg { margin: 8px 0 0; font-size: 10px; color: #555; line-height: 1.35; }
   #err { position: fixed; inset: 0; display: none; place-items: center; background: #14161a; text-align: center; font-size: 15px; z-index: 60; }
@@ -713,7 +715,7 @@ function textCanvas(lines, w, h, bg, fg, size) {
   const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
   if (bg) { x.fillStyle = bg; x.fillRect(0, 0, w, h); }
   x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineJoin = 'round';
-  lines.forEach((l, k) => { let s = k ? size * 0.62 : size; x.font = `bold ${s}px Arial`; const tw = x.measureText(l).width; if (tw > w * 0.92) { s *= w * 0.92 / tw; x.font = `bold ${s}px Arial`; } x.lineWidth = s / 6; x.strokeStyle = '#000'; const y = h / 2 + (k - (lines.length - 1) / 2) * size * 1.05; x.strokeText(l, w / 2, y); x.fillStyle = k ? '#ddd' : fg; x.fillText(l, w / 2, y); });
+  lines.forEach((l, k) => { let s = k ? size * 0.62 : size; x.font = `bold ${s}px Allo,Arial`; const tw = x.measureText(l).width; if (tw > w * 0.92) { s *= w * 0.92 / tw; x.font = `bold ${s}px Allo,Arial`; } x.lineWidth = s / 6; x.strokeStyle = '#000'; const y = h / 2 + (k - (lines.length - 1) / 2) * size * 1.05; x.strokeText(l, w / 2, y); x.fillStyle = k ? '#ddd' : fg; x.fillText(l, w / 2, y); });
   const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t;
 }
 // a sign's face: a plane a hair in front of a part's face (planes have no volume, so they aren't parts)

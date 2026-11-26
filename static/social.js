@@ -45,7 +45,7 @@
 #grugSoc .box{position:relative;width:min(760px,100%);max-height:100%;overflow:auto;background:#1b1d22;color:#fff;border:2px solid rgba(255,255,255,.35);border-radius:14px;padding:22px 22px 20px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 #grugSoc h2{margin:0 0 4px;font-size:24px;font-weight:bold}
 #grugSoc p.s{margin:0 0 16px;color:#b9bbbe;font-size:14px}
-#grugSoc .x{position:absolute;right:12px;top:10px;width:36px;height:36px;border:0;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;font:bold 20px/36px Arial,sans-serif;cursor:pointer}
+#grugSoc .x{position:absolute;right:12px;top:10px;width:36px;height:36px;border:0;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;font:bold 20px/36px Allo,Arial,sans-serif;cursor:pointer}
 #grugSoc .x:hover{background:rgba(255,255,255,.18)}
 #grugSoc .row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 #grugSoc a.c{display:flex;flex-direction:column;gap:6px;min-height:200px;padding:16px;border-radius:12px;color:#fff;text-decoration:none;transition:transform .12s}

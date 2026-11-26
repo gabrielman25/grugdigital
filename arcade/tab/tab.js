@@ -76,7 +76,7 @@
 .tb-wrap{position:fixed;inset:0;display:grid;place-items:center;background:#f4e6ef;overflow:hidden}
 .tb-screen{--ink:#4a3a4f;--soft:#8a7590;--line:#e6cfdc;--panel:#fff9f4;--panel2:#fcefe6;--head:#9b6b93;--pink:#ffc2d4;--mint:#bfe8b4;--sky:#cfe4ff;--sun:#ffe7a3;
   position:relative;width:min(100vw,133.333vh,1100px);aspect-ratio:4/3;display:flex;flex-direction:column;background:var(--panel);color:var(--ink);
-  font:bold 14px Arial,Helvetica,sans-serif;container-type:size;box-shadow:0 0 0 1px #d9bfcf;overflow:hidden;user-select:none;-webkit-user-select:none}
+  font:bold 14px Allo,Arial,Helvetica,sans-serif;container-type:size;box-shadow:0 0 0 1px #d9bfcf;overflow:hidden;user-select:none;-webkit-user-select:none}
 .tb-screen *{box-sizing:border-box}
 .tb-tabbar{flex:none;display:flex;align-items:flex-end;gap:6px;padding:8px 10px 0;background:#f2d3e0}
 .tb-tab{position:relative;display:flex;align-items:center;gap:max(6px,1.2cqw);min-width:0;padding:max(6px,1.1cqw) max(10px,1.6cqw);background:var(--panel);border-radius:10px 10px 0 0;flex:0 1 auto}
@@ -86,17 +86,17 @@
 .tb-plus{flex:none;align-self:center;margin-bottom:6px;font-size:max(14px,2cqw);color:#b08aa8}
 .tb-bar{flex:none;display:flex;align-items:center;gap:10px;padding:5px 10px;background:var(--panel);border-bottom:1px solid var(--line);font-size:max(11px,1.5cqw);color:var(--soft)}
 .tb-bar .tb-nav{letter-spacing:6px} .tb-url{flex:1;min-width:0;padding:4px 12px;border-radius:999px;background:var(--panel2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:normal}
-.tb-menu{flex:none;padding:4px 12px;border:2px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);font:bold max(11px,1.5cqw) Arial,Helvetica,sans-serif;cursor:pointer}
+.tb-menu{flex:none;padding:4px 12px;border:2px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);font:bold max(11px,1.5cqw) Allo,Arial,Helvetica,sans-serif;cursor:pointer}
 .tb-menu:hover{border-color:#d88aa6}
 .tb-body{flex:1;min-height:0;position:relative;display:flex;flex-direction:column}
 /* the Game Menu (2012 style, in the game's soft colours) */
 .tb-gm{position:absolute;inset:0;z-index:50;display:none;place-items:center;background:rgba(74,58,79,.45)}
 .tb-gm.on{display:grid}
 .tb-gm .box{width:min(92%,380px);max-height:94%;overflow:auto;padding:14px 18px 12px;background:rgba(58,44,62,.94);color:#fff;text-align:center;border-radius:4px}
-.tb-gm h2{margin:0 0 12px;font:bold 22px Arial,Helvetica,sans-serif}
-.tb-gm button{display:block;width:100%;margin:0 0 8px;padding:9px;border:2px solid #e9dcea;border-radius:4px;background:transparent;color:#fff;font:bold 15px Arial,Helvetica,sans-serif;cursor:pointer}
+.tb-gm h2{margin:0 0 12px;font:bold 22px Allo,Arial,Helvetica,sans-serif}
+.tb-gm button{display:block;width:100%;margin:0 0 8px;padding:9px;border:2px solid #e9dcea;border-radius:4px;background:transparent;color:#fff;font:bold 15px Allo,Arial,Helvetica,sans-serif;cursor:pointer}
 .tb-gm button:hover,.tb-gm button.first{border-color:#ff6b6b}
-.tb-gm .pane{display:none;text-align:left;font:13px/1.45 Arial,Helvetica,sans-serif;margin:0 0 10px}
+.tb-gm .pane{display:none;text-align:left;font:13px/1.45 Allo,Arial,Helvetica,sans-serif;margin:0 0 10px}
 .tb-gm .pane.on{display:block}
 .tb-gm .pane label{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.15);font-weight:bold}
 .tb-gm .logo{display:block;width:150px;margin:10px auto 0;opacity:.9}
