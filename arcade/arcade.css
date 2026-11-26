@@ -87,7 +87,7 @@ img{border:0}
 .Navigation{position:relative;height:30px;font-size:16px;line-height:20px;background:linear-gradient(#8fdc4c 0,#5cb41e 45%,#3f9612 50%,#3a8c10 100%);z-index:5}
 .Navigation ul{list-style:none;margin:0 5px;padding:0;display:flex}
 .Navigation li{padding:6px 0 4px}
-.Navigation li>a{display:inline-block;padding:0 8px;font-weight:bold;color:#fff;text-decoration:none;text-shadow:0 1px 0 rgba(0,40,0,.35)}
+.Navigation li>a{display:inline-block;padding:0 6px;white-space:nowrap;font-weight:bold;color:#fff;text-decoration:none;text-shadow:0 1px 0 rgba(0,40,0,.35)}
 .Navigation li>a:hover{text-decoration:underline}
 #gamesMenuToggle{display:inline-block;width:10px;height:6px;margin:0 0 3px -6px;padding:0 6px 0 0;cursor:pointer;vertical-align:middle;border:0;background:none}
 #gamesMenuToggle::after{content:"";display:block;width:0;height:0;border:5px solid transparent;border-top:6px solid #fff;border-bottom:0}
