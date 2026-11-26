@@ -10,15 +10,18 @@ The site is three places for three audiences, and the home page (`index.html`) i
 them: three doors, then every page listed by section. Put a new page in the section it belongs to, link it from that
 section's nav and from the directory, and don't cross-sell another section's tools inside it.
 
-| Section | Who | Pages | Nav bar |
+| Section | Who | Pages | Look |
 | --- | --- | --- | --- |
-| **Players** | people who want to play and dress an avatar | `/arcade/` (and every game), `/character/` (the players' Avatar Studio), `/character/pearls/` | green |
-| **Game developers** | people whose AI agent makes characters for their game | `/agents/` (dark, its own look), `/agents/studio/` (the agents' Avatar Studio), `/packs/` (the itch.io asset packs) | graphite (`.Navigation.dev`) |
-| **Restaurants** | owners and managers | `/restaurants/`, and the tools it opens on the legacy deploy | tomato (`.Navigation.rest`) |
+| **Players** | people who want to play and dress an avatar | `/arcade/` (and every game), `/character/` (the players' Avatar Studio), `/character/pearls/`, the promo pages | **classic** (the 2011 games site, green nav) |
+| **Game developers** | people whose AI agent makes characters for their game | `/agents/`, `/agents/studio/` (the agents' Avatar Studio), `/packs/` (the itch.io asset packs) | **modern**, dark (`data-theme="dev"`) |
+| **Restaurants** | owners and managers | `/restaurants/`, and the tools it opens on the legacy deploy | **modern**, white and tomato (`data-theme="rest"`) |
+| the directory | everyone | `/` (home), `privacy.html`, `terms.html`, `404.html`, `build/` | **modern**, light grey and Grug's green |
 
-- Every section's bar starts with the section's name (`<li class="sect">`) and ends with **Grug home** (`<li class="end">`).
-  The home page, `privacy.html`, `terms.html` and `404.html` carry the directory's own short nav (Players, Game developers,
-  Restaurants, Help). The colours are in `static/classic.css`; `.sect` and `.end` are in `arcade/arcade.css`.
+- **Only the Arcade side is classic** (the games, and the players' studio and Pearls pages that go with them). Everything
+  that isn't about the Arcade wears the modern look (see "The look").
+- Every section's top bar names the section and has a way back to **Grug home**. On the Arcade's classic pages that is
+  `<li class="sect">` at the start and `<li class="end">` at the end of the green bar (`arcade/arcade.css`); on the modern
+  pages it is the brand ("Grug for restaurants", "Grug for agents") and a "Grug home" link in the bar.
 - **The only agentic tool is the Avatar Studio.** The Building Studio was retired (below): don't link it, and don't add
   another agent tool without the owner asking.
 - The Avatar Studio comes in **two versions built from one file** (below): never add agent or Claude panels to the
@@ -100,12 +103,12 @@ Don't tag textures, placeholders or third-party images.
 
 `agents/index.html` is the landing page for people who use AI agents: an "Ask your agent" box with prompts to copy (the
 `PROMPTS` object in its script), the agents' studio next to the players' one (screenshots in `static/agents/`: retake them
-when either changes), the Claude skill (`src/skill/`) and links to the source on GitHub. It is the one section that does
-**not** wear the classic look, on the owner's request: dark, one self-contained file, Allo throughout. Keep its prompts
+when either changes), the Claude skill (`src/skill/`) and links to the source on GitHub. It set the modern look the rest of the non-Arcade site now wears (`static/modern.css` was drawn from it): dark, Allo
+throughout. It is still one self-contained file with its own copy of those styles, so keep the two in step. Keep its prompts
 and facts in step with `agents/studio/claude.md` when the studio or its API changes.
 
-`/packs/` is the section's other page: the itch.io asset pack catalog (it used to be on the home page), in the classic
-look with the graphite nav. See "The itch.io asset list" below.
+`/packs/` is the section's other page: the itch.io asset pack catalog (it used to be on the home page), in the same dark
+look as `/agents/` (`static/modern.css`, `data-theme="dev"`). See "The itch.io asset list" below.
 
 **Links to it:** the home page's Game developers door and directory, the footers ("Game developers"), `/packs/`, the last
 page of the players' studio ("Making a game with an AI agent?"), `llms.txt` and the skill. The players' pages don't
@@ -113,10 +116,10 @@ advertise it beyond that.
 
 ## Grug for restaurants (`/restaurants/`): the restaurants' section
 
-`restaurants/index.html` is the front door for owners and managers, in the classic look with the tomato nav: the one-tap
-setup, the three free tools (rewards card, website, dashboard), how it works, the managers' tour, custom games for
-restaurants near Katy, and the number to text. Its pictures are drawn in CSS with a made-up shop ("Rosa's Tacos"): no
-real business's name, logo or photos (see "Frozen" in the legacy branch's CLAUDE.md, which still applies).
+`restaurants/index.html` is the front door for owners and managers, in the modern look (`data-theme="rest"`: white, warm
+ink, tomato): a stamp card you can stamp in the opener, the one-tap setup, the three free tools (rewards card, website,
+dashboard), how it works, the managers' tour, custom games for restaurants near Katy, and the number to text. Its
+pictures are drawn in CSS with a made-up shop ("Rosa's Tacos"): no real business's name, logo or photos (see "Frozen" in the legacy branch's CLAUDE.md, which still applies).
 
 **The tools themselves still live on the legacy deploy** (`/restaurant/`, `/rewards/`, `/business/`, `/managers/`,
 `/for/managers/`, `/partners/`), because printed QR codes, NFC tags and the installed Daypart, Bubble Tea and Café apps
@@ -154,39 +157,59 @@ characters). Get the exact addresses from the commit's **Cloudflare Pages** chec
 `gh api repos/gabrielman25/grugdigital/commits/$(git rev-parse HEAD)/check-runs --jq '.check_runs[] | select(.name=="Cloudflare Pages") | {status, conclusion, summary: .output.summary}'`
 and link straight to the pages that changed. A preview also falls back to the legacy site, so old pages work there too.
 
-## The look
+## The look: classic for the Arcade, modern for everything else
 
-Every page wears the Grug Arcade's classic look (a 2011-style games site): a 920px column over slow pans of Grug City
-(`.bgfx`), the 728x90 house ad, the logo banner with the R6 crowd, the shiny green nav bar, the orange announcement strip,
-dark shiny box tabs (`.StandardBoxHeader`) over light gradient boxes, shiny gradient buttons, Allo (with Arial as
-the fallback, see below), the social skyscrapers in the gutters, and the grey footer. No dark mode. No coloured dots next to text and no coloured
-accent lines or lips (the owner finds them ugly). **Phones matter:** the pages use `width=device-width`, and under 940px
-`arcade/arcade.css` (bottom block) reflows the column into one (scrolling nav, stacked columns, a 2-up tile grid, the
-house ad zoomed to fit); each page adds its own phone rules next to its styles. Check new pages at 390px wide.
+**The Arcade side is the only part of the site in the classic look.** Everything that isn't about the Arcade is modern
+(the owner's call, November 2026). The players' Avatar Studio and the Pearls pages were left classic with the Arcade
+they feed into; ask the owner before changing that.
 
-- `arcade/arcade.css` + `GrugArcade.chrome()` (`arcade/arcade.js`) are the shared header, background, side ads, Pearls
-  button and footer. The home page, `packs/`, `restaurants/`, `privacy.html` and `terms.html` use them too, with the same
-  header/footer markup copied in. Keep each section's nav in step across its pages: the players' (`arcade/index.html`,
-  `arcade/place/index.html`: Games with its genre menu, My Avatar, My Outfits, Grug Studio, Pearls, Help), the
-  directory's (`index.html`, `privacy.html`, `terms.html`), the developers' (`packs/index.html`) and the restaurants'
-  (`restaurants/index.html`). `chrome()` copes with a page that has no Games menu.
-- `static/classic.css`: the pieces those pages add on top (`.gbtn` buttons: green, `.gray`, `.claude`, `.blue`, `.red` for
-  the restaurants, `.dark` for the developers; `.Sec` tabbed boxes of any width; `.chips`; the section nav colours). `static/legal.css`: the privacy/terms document inside its box.
-- `static/site.css`: the same look for the small card pages (`character/pearls/`, `tizzy/`, `itch/`, `404.html`): the city
+**Modern** (`static/modern.css`): the home directory, `/restaurants/`, `/packs/`, `privacy.html`, `terms.html`, `404.html`,
+`build/index.html`, plus `/agents/` and `/agents/studio/`, which carry their own copies. One system, three palettes set
+with `data-theme` on `<html>`: none (light grey, ink, Grug's green: the directory and company pages), `dev` (near-black:
+the developers), `rest` (white, warm ink, tomato: the restaurants). A sticky top bar (`.nav`: the mark, the section's
+name, its links, one button), full-width bands on a 1120px column (`.sec`, `.sec-head`), left-aligned type in Allo,
+bordered strips rather than rows of floating cards (`.facts`, `.steps`), flat buttons (`.btn`, `.btn.go` for the one main
+action), the footer (`.foot`). On light pages the brand mark is `.mark` (the lime tile with the dino cut out). Numbered
+steps only for a real sequence. Pictures of the restaurants' tools are drawn in CSS. The 88x31 stamps sit in the modern
+footers. New non-Arcade pages use this file and add only their own pieces in a `<style>`.
+
+**Classic** (a 2011-style games site): the Arcade (`/arcade/`, its game page and every game), the players' Avatar Studio
+(`/character/`), and the Pearls and promo pages (`character/pearls/`, `tizzy/`, `itch/`). A 920px column over slow pans
+of Grug City (`.bgfx`), the 728x90 house ad, the logo banner with the R6 crowd, the shiny green nav bar, the orange
+announcement strip, dark shiny box tabs (`.StandardBoxHeader`) over light gradient boxes, shiny gradient buttons, the
+social skyscrapers in the gutters, and the grey footer. No dark mode there.
+
+In both looks: Allo (with Arial as the fallback, see above), **no coloured dots next to text and no coloured accent lines
+or lips** (the owner finds them ugly), and **phones matter**: check every page at 390px wide. Under 940px
+`arcade/arcade.css` (bottom block) reflows the classic column into one (scrolling nav, stacked columns, a 2-up tile grid,
+the house ad zoomed to fit), and `modern.css` stacks its grids and hides the bar's links (the footer and the page carry them).
+
+- `arcade/arcade.css` + `GrugArcade.chrome()` (`arcade/arcade.js`) are the classic header, background, side ads, Pearls
+  button and footer. Keep the players' nav in step across `arcade/index.html` and `arcade/place/index.html` (Games with
+  its genre menu, My Avatar, My Outfits, Grug Studio, Pearls, Help, Grug home). `chrome()` copes with a page that has no
+  Games menu.
+- The modern pages copy their top bar and footer in by hand too: keep the directory's (`index.html`, `privacy.html`,
+  `terms.html`, `404.html`, `build/index.html`), the developers' (`agents/index.html`, `packs/index.html`) and the
+  restaurants' (`restaurants/index.html`) in step with each other.
+- `static/classic.css`: classic pieces outside the Arcade's own stylesheet (`.gbtn` buttons: green, `.gray`, `.claude`,
+  `.blue`; `.Sec` tabbed boxes of any width; `.chips`). `static/legal.css`: the privacy/terms document, in the modern look.
+- `static/site.css`: the classic look for the players' small card pages (`character/pearls/`, `tizzy/`, `itch/`): the city
   background fading into green, a `.site-top` logo + nav strip, boxes whose first `h2` becomes a dark shiny title bar.
 - The players' Avatar Studio's theme is `src/character/classic.css` (the green nav as its top bar, with the logo; two
   rows on phones), put in by `patch_outfits.py`. Rebuild after changing it.
-- Keep the nav in step on the small pages too (`.site-top` in `404.html`, `build/index.html`, `tizzy/`, `itch/`, `character/pearls/`).
+- Keep the nav in step on the small pages too (`.site-top` in `tizzy/`, `itch/`, `character/pearls/`).
 
 ## Partners, sponsors and the stamps
 
 - **Warpdrive** (https://warpdrive.team/, an indie console family; our partner): `WDAD` in `arcade/arcade.js` builds their ads
   (styles: the Warpdrive block in `arcade/arcade.css`): a skyscraper on each side (in the rotation), the 728x90 banner and the
-  300x250 box (each Warpdrive about half the time, the page's own ad otherwise), a tile on the home catalog's first page.
+  300x250 box (each Warpdrive about half the time, the page's own ad otherwise) on the Arcade's classic pages, and a tile
+  among the packs on `/packs/` (modern, written in that page's script).
   Pre-orders aren't open: the ads send people to see it, never "buy". Every link: `target=_blank rel="noopener sponsored"`.
-- **KimiLand** (Roblox UGC sponsor): a skyscraper each side, the home catalog's 300x250 box.
+- **KimiLand** (Roblox UGC sponsor): a skyscraper each side on the classic pages, and the sponsor box under the packs on `/packs/`.
 - **The 88x31 stamps** (`static/stamps/`: Warpdrive → their site, YouTube and Discord → ours): `GrugArcade.chrome()` puts them
-  top right of the banner and in the footer of every classic page; the small card pages have them as `.site-stamps`.
+  top right of the banner and in the footer of every classic page; the small card pages have them as `.site-stamps`, and
+  the modern pages have them in their footer (`.foot .stamps`).
 
 ## The itch.io asset list (`/packs/`)
 

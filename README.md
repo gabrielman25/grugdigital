@@ -8,7 +8,8 @@ The site is being rebuilt from scratch on `main`. The old site is kept, unchange
 
 - **`main`** is the new site, in three sections with the home page (`index.html`) as their directory:
   **players** (`arcade/`, `character/`), **game developers** (`agents/`, `agents/studio/`, `packs/`) and **restaurants**
-  (`restaurants/`, whose tools are still served from the legacy deploy). See CLAUDE.md, "Three sections, one directory".
+  (`restaurants/`, whose tools are still served from the legacy deploy). Only the Arcade side keeps the classic 2011
+  look; everything else is modern (`static/modern.css`). See CLAUDE.md, "Three sections, one directory" and "The look".
 - **`legacy`** is the old site exactly as it was. Cloudflare deploys it to https://legacy.grugdigital.pages.dev.
 - **`functions/_middleware.js`** joins them: any address that `main` doesn't have a file for is served from the legacy
   deploy, at the same address, with a banner on top saying it's the legacy version (linking to the new site). So every

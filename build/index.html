@@ -9,33 +9,34 @@
 <meta name="robots" content="noindex">
 <meta name="description" content="Grug's Building Studio has been retired. The Avatar Studio for AI agents, the asset packs and the Grug Arcade are still here.">
 <link rel="icon" href="/favicon.png">
-<link rel="stylesheet" href="/static/site.css">
-<style>
-main{max-width:460px}
-.card{text-align:center}
-.card p{margin:8px 0 16px}
-.figs{display:flex;justify-content:center;align-items:flex-end;gap:0;height:120px;margin:4px 0 6px}
-.figs img{height:110px;width:auto}
-.figs img:nth-child(2){height:120px}
-.row{justify-content:center}
-</style>
+<meta name="theme-color" content="#f3f4f6">
+<link rel="stylesheet" href="/static/modern.css">
 </head>
 <body>
 <!-- The Building Studio lived here until November 2026 (see src/build/build.py). Its other addresses (examples, guide,
      skill) are sent to this page by functions/_middleware.js. build/core.js stays: the Grug Studio game uses it. -->
-<header class="site-top">
-  <a class="logo" href="/" title="Grug Digital home"><img src="/static/arcade/grug-digital-logo.png" alt="Grug Digital"></a>
-  <nav aria-label="Main"><a href="/">Home</a><a href="/arcade/">Players</a><a href="/agents/">Game developers</a><a href="/restaurants/">Restaurants</a></nav>
-</header>
-<main>
-  <section class="card">
-    <h2>Building Studio</h2>
-    <div class="figs" aria-hidden="true"><img src="/static/arcade/ranger.webp" alt=""><img src="/static/arcade/grug.webp" alt=""><img src="/static/arcade/medic.webp" alt=""></div>
+<div class="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><i class="mark" aria-hidden="true"></i>Grug Digital</a>
+    <nav aria-label="Sections">
+      <a href="/arcade/">Players</a>
+      <a href="/agents/">Game developers</a>
+      <a href="/restaurants/">Restaurants</a>
+    </nav>
+    <div class="right">
+      <a class="btn sm" href="/support.html">Help</a>
+    </div>
+  </div>
+</div>
+
+<main class="solo">
+  <div class="in">
+    <div class="crowd" aria-hidden="true"><img src="/static/arcade/ranger.webp" alt=""><img src="/static/arcade/grug.webp" alt=""><img src="/static/arcade/medic.webp" alt=""></div>
     <h1>The Building Studio has been retired</h1>
     <p>We took it down to put the work into the Avatar Studio. Characters for your game are still here, and so is the block builder inside the Grug Studio game.</p>
-    <div class="row"><a class="btn" href="/agents/">Characters for your game</a><a class="btn btn--ghost" href="/arcade/grug-studio/">Play Grug Studio</a></div>
-  </section>
-  <p class="fine" style="text-align:center">AI agents: there is no building tool here any more. The Avatar Studio for agents is at <a href="/agents/studio/">grugdigital.com/agents/studio/</a>.</p>
+    <div class="cta"><a class="btn go" href="/agents/">Characters for your game</a><a class="btn" href="/arcade/grug-studio/">Play Grug Studio</a></div>
+    <p class="fine mute">AI agents: there is no building tool here any more. The Avatar Studio for agents is at <a href="/agents/studio/">grugdigital.com/agents/studio/</a>.</p>
+  </div>
 </main>
 </body>
 </html>

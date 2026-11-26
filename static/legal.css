@@ -1,28 +1,23 @@
-/* The privacy policy and terms of service (privacy.html, terms.html), inside the classic page (arcade.css + classic.css):
-   the document sits in one tabbed box, in plain Allo, Arial, easy to read. */
-.Sec.doc-sec>.box{padding:18px 26px 22px}
-.doc{font:14px/1.6 Allo,Arial,Helvetica,sans-serif;color:#222}
-#Body .doc h1{display:block;margin:0 0 6px;font:bold 30px/1.1 Allo,Arial,Helvetica,sans-serif;color:#111}
-.doc .lede{font-size:15px;color:#333;margin:0;max-width:640px}
-.doc .date{margin:6px 0 0;font:bold 12px Allo,Arial,Helvetica,sans-serif;color:#c00}
-#Body .doc h2{display:block;margin:26px 0 8px;padding:0 0 4px;font:bold 19px/1.2 Allo,Arial,Helvetica,sans-serif;color:#111;border-bottom:1px solid #ccc}
-#Body .doc h3{display:block;margin:18px 0 4px;font:bold 15px/1.3 Allo,Arial,Helvetica,sans-serif;color:#111}
-.doc p{margin:0 0 9px}
-.doc ul{padding-left:22px;margin:6px 0 12px}
-.doc li{margin:4px 0}
-.doc a{color:#1d7a0c;font-weight:bold}
-.doc b{color:#111}
-/* "the short version": a classic yellow notice box */
-.short{margin-top:18px;padding:12px 16px;background:#ffffd6;border:1px solid #e0cf6a}
-.short>b{display:block;font-size:15px;margin-bottom:4px}
+/* The privacy policy and terms of service (privacy.html, terms.html), in the modern look (static/modern.css): one readable
+   column, the short version in a panel, the contents as a two-column list. */
+.doc{max-width:46rem;padding:64px 0 88px;font-size:1.02rem;line-height:1.65}
+.doc h1{font-size:clamp(2.2rem,5vw,3.4rem);margin-bottom:14px}
+.doc .lede{font-size:1.16rem;color:var(--mute);max-width:34em}
+.doc .date{margin-top:12px;font-size:.92rem;color:var(--mute)}
+.doc h2{margin:52px 0 12px;font-size:1.55rem;scroll-margin-top:84px}
+.doc h3{margin:28px 0 6px;font-size:1.12rem}
+.doc p{margin:0 0 12px}
+.doc ul{padding-left:1.2em;margin:8px 0 16px}
+.doc li{margin:6px 0}
+.doc a{text-underline-offset:3px;font-weight:500}
+.doc b{font-weight:600}
+/* "the short version" */
+.short{margin-top:32px;padding:22px 26px 20px;border-radius:16px;background:var(--panel);border:1px solid var(--line)}
+.short>b{display:block;font:600 1.15rem/1.2 var(--display);margin-bottom:8px}
 .short ul{margin-bottom:0}
-/* contents: a light grey box in two columns */
-.doc .toc{columns:2;column-gap:28px;margin:16px 0 0;padding:10px 14px;list-style:none;border:1px solid #ccc;background:#f6f6f6 linear-gradient(#fff,#efefef)}
-.toc li{margin:0 0 3px;font-size:13px;break-inside:avoid}
-.toc a{font-weight:normal!important;color:#00f!important}
-@media (max-width:939px){
-  .Sec.doc-sec>.box{padding:12px 12px 16px}
-  #Body .doc h1{font-size:24px}
-  .doc .toc{columns:1}
-  .doc{font-size:14px}
-}
+/* contents */
+.doc .toc{columns:2;column-gap:32px;margin:28px 0 0;padding:18px 0 0;list-style:none;border-top:1px solid var(--line);font-size:.95rem}
+.toc li{margin:0 0 7px;break-inside:avoid}
+.toc a{font-weight:400;color:var(--mute);text-decoration:none}
+.toc a:hover{color:var(--text);text-decoration:underline}
+@media (max-width:940px){ .doc{padding:40px 0 60px} .doc .toc{columns:1} .short{padding:18px 18px 16px} }

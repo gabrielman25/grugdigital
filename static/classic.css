@@ -30,19 +30,3 @@
 
 .cl{color:#d97757}
 svg.cl{width:16px;height:16px;flex:none}
-
-/* ===== the three sections of the site (players, game developers, restaurants) =====
-   Each section has its own nav bar: players keep the green one, the developers' classic pages wear .Navigation.dev
-   (graphite, like /agents/), the restaurants' pages wear .Navigation.rest (tomato). The home page is the directory.
-   The section's name at the start of the bar (.sect) and the way back to the directory at its end (li.end) are in arcade.css. */
-.Navigation.dev{background:linear-gradient(#6a6f78 0,#3d4149 45%,#24272d 50%,#1b1d22 100%)}
-.Navigation.dev li>a{text-shadow:0 1px 0 rgba(0,0,0,.5)}
-.Navigation.rest{background:linear-gradient(#f4826c 0,#dc4a34 45%,#c5321f 50%,#b92a18 100%)}
-.Navigation.rest li>a{text-shadow:0 1px 0 rgba(90,10,0,.45)}
-.SystemAlertText.dev{background:#3d4149}
-.SystemAlertText.rest{background:#8a1f10}
-
-/* tomato and graphite buttons, for the restaurants' and developers' main actions */
-.gbtn.red{color:#fff;text-shadow:0 1px 0 rgba(90,10,0,.45);background:linear-gradient(#f4826c,#dc4a34 50%,#c5321f 51%,#d84430);border-color:#8f2212}
-.gbtn.dark{color:#fff;text-shadow:0 1px 0 #000;background:linear-gradient(#6a6f78,#3d4149 50%,#24272d 51%,#33363d);border-color:#111}
-.chips.lt i.r{background:linear-gradient(#fdebe6,#f8d3ca);color:#8a1f10;box-shadow:inset 0 0 0 1px #dfa497}

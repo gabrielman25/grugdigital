@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/static/fonts/allo.css">
-<!-- the classic 920px page, like the Arcade; on phones arcade.css reflows it into one column -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grug Digital · Free games, an avatar studio for AI agents, and free tools for restaurants</title>
 <!-- seo: written by src/seo/seo_head.py (re-run it, don't edit by hand) -->
@@ -27,7 +26,7 @@
 <meta name="description" content="Grug Digital has three homes: free blocky games and an avatar maker for players, an avatar studio AI agents can drive for game developers, and a free rewards card, website and dashboard for restaurants.">
 <link rel="icon" href="/favicon.png">
 <link rel="canonical" href="https://grugdigital.com/">
-<script src="/static/pearls.js"></script>
+<meta name="theme-color" content="#f3f4f6">
 <script src="/static/social.js"></script>
 <script>
 /* Someone browsing the legacy site who taps its Home button or logo lands here (the legacy pages all point at "/").
@@ -43,340 +42,281 @@
   } catch (e) {}
 })();
 </script>
-<link rel="stylesheet" href="/arcade/arcade.css">
-<link rel="stylesheet" href="/static/classic.css">
+<link rel="stylesheet" href="/static/modern.css">
 <style>
-/* The home page is the site's directory: three doors (players, game developers, restaurants), then every page by section.
-   It wears the Arcade's classic look (arcade.css, GrugArcade.chrome); the section colours are in static/classic.css. */
-html{scroll-behavior:smooth}
-#Body h1,#Body h2,#Body h3{display:block}
-#Welcome{margin:8px 4px 12px;text-align:center}
-#Welcome h1{margin:0 0 4px;font:bold 30px/1.08 Allo,Arial,Helvetica,sans-serif;color:#111}
-#Welcome p{margin:0;font-size:14px;color:#444}
+/* The home page is the site's directory, in the modern look (static/modern.css): three doors, then every page by section.
+   Each door wears its own section's colours, so you can tell where you're going before you get there: the Arcade's green
+   over Grug City, the developers' near-black, the restaurants' white and tomato. */
+.top{padding:64px 0 28px}
+.top h1{max-width:12em}
+.top .lead{margin-top:18px;max-width:36em}
 
-/* ---------- the three doors ---------- */
-.Doors{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 12px}
-.Door{display:flex;flex-direction:column;min-width:0}
-.Door>.StandardBoxHeader{width:auto;align-self:flex-start;padding-right:30px}
-.Door>.StandardBoxHeader h2{margin:0;font:inherit;color:inherit}
-.Door>.box{flex:1;display:flex;flex-direction:column;position:relative;top:-2px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 120px) no-repeat;
-  font:13px/1.45 Allo,Arial,Helvetica,sans-serif;color:#333}
-.Door .art{position:relative;display:block;height:158px;margin:8px 8px 0;overflow:hidden;border:1px solid #888;text-decoration:none!important}
-.Door .who{position:absolute;left:6px;top:6px;z-index:3;padding:3px 7px;border-radius:3px;font:bold 11px/1 Allo,Arial,Helvetica,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.62)}
-.Door .in{flex:1;display:flex;flex-direction:column;padding:10px 12px 12px}
-.Door h3{margin:0 0 5px;font:bold 21px/1.1 Allo,Arial,Helvetica,sans-serif;color:#111}
-.Door p{margin:0 0 9px}
-.Door ul{margin:0 0 12px;padding-left:18px}
-.Door li{margin:2px 0}
-.Door .acts{margin-top:auto;display:flex;flex-direction:column;gap:7px}
-.Door .gbtn.lg{font-size:18px;padding:0 12px}
-.Door .also{margin:9px 0 0;font-size:12px;color:#666}
+.doors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding-bottom:88px}
+.door{position:relative;display:flex;flex-direction:column;border-radius:22px;overflow:hidden;min-height:600px;isolation:isolate}
+.door .art{position:relative;height:250px;flex:none;overflow:hidden}
+.door .body{flex:1;display:flex;flex-direction:column;padding:22px 24px 24px}
+.door h2{font-size:clamp(1.9rem,2.6vw,2.35rem)}
+.door p{margin-top:10px;font-size:1.02rem;line-height:1.5}
+.door .more{list-style:none;margin:18px 0 22px;padding:0;font-size:.96rem}
+.door .more li{margin:7px 0}
+.door .more a{position:relative;z-index:2;text-underline-offset:3px}
+.door .btn{margin-top:auto;align-self:flex-start}
+/* the whole door opens its section; the smaller links sit above that */
+.door .btn::after{content:"";position:absolute;inset:0;z-index:1}
+.door:focus-within{outline:2px solid var(--text);outline-offset:3px}
+.door .btn:focus-visible{outline:0}
+.door .art img{transition:transform .35s cubic-bezier(.2,.8,.2,1)}
 
-/* players: the city, with the crowd */
-.art.play{background:#2a4a1a url(/static/arcade/grug-city-rp-aerial-view.jpg) 50% 38%/cover}
-.art.play img{position:absolute;bottom:-12px;height:128px;width:auto;filter:drop-shadow(0 3px 4px rgba(0,0,0,.4));transition:transform .25s}
-.art.play:hover img{transform:translateY(-4px)}
-/* game developers: the agent's side of the studio, as a little console */
-.art.dev{background:#141518;color:#d7dae0;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-.art.dev pre{position:absolute;left:10px;top:30px;margin:0;font:inherit;white-space:pre}
-.art.dev pre b{color:#9be338;font-weight:normal}
-.art.dev pre i{color:#8b909b;font-style:normal}
-.art.dev img{position:absolute;right:-6px;bottom:-12px;height:132px;width:auto}
-/* restaurants: a stamp card and today's list */
-.art.rest{background:linear-gradient(160deg,#fff4e8,#ffd9bd)}
-.stampcard{position:absolute;left:12px;top:30px;width:138px;padding:9px 10px 10px;border-radius:7px;background:#fff;box-shadow:0 0 0 1px #d9b8a6,0 5px 12px rgba(120,50,20,.25);transform:rotate(-4deg);color:#3a1d14}
-.stampcard b{display:block;font:bold 14px/1.1 Allo,Arial,Helvetica,sans-serif}
-.stampcard small{display:block;margin:2px 0 7px;font:11px/1.2 Allo,Arial,Helvetica,sans-serif;color:#8a5a48}
-.stampcard .st{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
-.stampcard .st i{aspect-ratio:1;border-radius:50%;box-shadow:inset 0 0 0 2px #e6c9bb}
-.stampcard .st i.on{background:#dc4a34;box-shadow:none;position:relative}
-.stampcard .st i.on::after{content:"";position:absolute;left:32%;top:20%;width:26%;height:46%;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
-.today{position:absolute;right:8px;top:52px;width:96px;padding:7px 8px 8px;border-radius:5px;background:#2b1a14;color:#fff;box-shadow:0 5px 12px rgba(120,50,20,.3);transform:rotate(3deg);font:11px/1.25 Allo,Arial,Helvetica,sans-serif}
-.today b{display:block;margin-bottom:4px;font:bold 12px/1 Allo,Arial,Helvetica,sans-serif}
-.today span{display:block;padding-left:14px;position:relative;margin-top:3px;color:#f1ddd4}
-.today span::before{content:"";position:absolute;left:0;top:2px;width:8px;height:8px;border-radius:2px;box-shadow:inset 0 0 0 1.5px #c9a596}
-.today span.ok::after{content:"";position:absolute;left:2.5px;top:2px;width:2.5px;height:5px;border:solid #fff;border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+/* players: Grug City fading into the Arcade's green */
+.door.play{background:#1f4a10;color:#fff}
+.door.play .art{background:#2a4a1a url(/static/arcade/grug-city-rp-aerial-view.jpg) 50% 30%/cover}
+.door.play .art::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(31,74,16,0) 45%,#1f4a10)}
+.door.play .art img{position:absolute;bottom:-18px;width:auto;z-index:1;filter:drop-shadow(0 10px 10px rgba(0,0,0,.35))}
+.door.play:hover .art img{transform:translateY(-6px)}
+.door.play p,.door.play .more{color:#d6ebc8}
+.door.play .btn{background:#9be33c;border-color:#9be33c;color:#10200a}
+.door.play .btn:hover{background:#aef053;border-color:#aef053}
+/* game developers: the agents' console */
+.door.dev{background:#0d0e10;color:#ecedef}
+.door.dev .art{border-bottom:1px solid #2b2e33;font:.8rem/1.75 var(--mono);color:#9da1a9}
+.door.dev pre{position:absolute;left:24px;top:26px;margin:0;font:inherit;white-space:pre}
+.door.dev pre b{color:#ecedef;font-weight:400}
+.door.dev pre i{color:#9be33c;font-style:normal}
+.door.dev .art img{position:absolute;right:-46px;bottom:-26px;height:214px;width:auto;filter:drop-shadow(0 14px 12px rgba(0,0,0,.55))}
+.door.dev:hover .art img{transform:translateY(-6px)}
+.door.dev p,.door.dev .more{color:#9da1a9}
+.door.dev .btn{background:#9be33c;border-color:#9be33c;color:#10200a}
+.door.dev .btn:hover{background:#aef053;border-color:#aef053}
+.door.dev:focus-within{outline-color:#9be33c}
+/* restaurants: a stamp card on the counter */
+.door.rest{background:#fff;color:#1f1613;box-shadow:inset 0 0 0 1px var(--line)}
+.door.rest .art{background:#fbe5df}
+.door.rest p,.door.rest .more{color:#6c5f57}
+.door.rest .btn{background:#e0452f;border-color:#e0452f;color:#fff}
+.door.rest .btn:hover{background:#ea5a45;border-color:#ea5a45}
+.stampcard{position:absolute;left:20px;top:26px;width:186px;padding:14px 14px 16px;border-radius:14px;background:#fff;color:#1f1613;transform:rotate(-4deg);box-shadow:0 14px 26px rgba(120,40,20,.18);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.door.rest:hover .stampcard{transform:rotate(-2deg) translateY(-4px)}
+.stampcard b{display:block;font:600 1.1rem/1.1 var(--display)}
+.stampcard small{display:block;margin:3px 0 12px;font-size:.82rem;color:#6c5f57}
+.stampcard .st{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stampcard .st i{aspect-ratio:1;border-radius:50%;box-shadow:inset 0 0 0 2px #ecdcd5}
+.stampcard .st i.on{background:#e0452f;box-shadow:none;position:relative}
+.stampcard .st i.on::after{content:"";position:absolute;left:34%;top:22%;width:26%;height:44%;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+.today{position:absolute;right:12px;bottom:12px;width:140px;padding:13px 14px 14px;border-radius:12px;background:#1f1613;color:#fff;transform:rotate(3deg);font-size:.84rem;line-height:1.3;box-shadow:0 14px 26px rgba(120,40,20,.22)}
+.today b{display:block;margin-bottom:6px;font:600 .95rem/1 var(--display)}
+.today span{display:block;margin-top:5px;color:#e9dcd6}
+.today span.done{color:#9c8d85;text-decoration:line-through}
 
-/* ---------- the directory: every page, by section ---------- */
-#directory .cols{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 18px}
-#directory h3{margin:0 0 4px;font:bold 15px/1.2 Allo,Arial,Helvetica,sans-serif;color:#111}
-#directory ul{list-style:none;margin:0;padding:0}
-#directory li{margin:3px 0;line-height:1.3}
-#directory li small{display:block;font-size:11px;color:#777}
+/* ---------- the directory ---------- */
+.dir{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:36px 28px}
+.dir h3{margin-bottom:12px}
+.dir ul{list-style:none;margin:0;padding:0}
+.dir li{margin:0 0 12px;line-height:1.35}
+.dir a{font-weight:500;text-underline-offset:3px}
+.dir small{display:block;margin-top:1px;font-size:.88rem;color:var(--mute)}
 
 /* ---------- community ---------- */
-.soc{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.soc a{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-height:158px;padding:12px 14px 14px;color:#fff;text-decoration:none!important;overflow:hidden;
-  box-shadow:0 0 0 1px rgba(0,0,0,.35),0 3px 8px rgba(0,0,0,.2)}
-.soc a:hover .cta{filter:brightness(1.06)}
-.soc small{font:bold 11px/1 Allo,Arial,Helvetica,sans-serif;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
-.soc b{margin-top:5px;font:bold 22px/1.05 Allo,Arial,Helvetica,sans-serif;text-shadow:0 2px 0 rgba(0,0,0,.25)}
-.soc span{margin-top:5px;font-size:12px;line-height:1.3;opacity:.92;max-width:230px}
-.soc .cta{margin-top:auto;padding:0 14px;height:30px;line-height:30px;border-radius:5px;background:linear-gradient(#fff,#f7f7f7 50%,#ececec 51%,#f5f5f5);font:bold 13px/30px Allo,Arial,Helvetica,sans-serif;text-shadow:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
-.soc .dc{background:linear-gradient(#6d78f5,#4752c4)} .soc .dc .cta{color:#4752c4}
-.soc .ig{background:linear-gradient(200deg,#f9a03f 0%,#e1306c 45%,#833ab4 100%)} .soc .ig .cta{color:#c1357a}
-.soc .yt{background:linear-gradient(#ff3d3d,#c4120c)} .soc .yt .cta{color:#c4120c}
-.soc .yt .vid{position:absolute;right:12px;top:12px;width:112px;height:63px;background:#000 center/cover no-repeat;box-shadow:0 2px 6px rgba(0,0,0,.4)}
-.soc .yt .vid:empty{display:none}
-.soc .yt .vid:not(:empty)~span,.soc .yt .vid:not(:empty)~b{max-width:140px}
-.soc .figs{position:absolute;right:-6px;bottom:-6px;height:96px;pointer-events:none}
-.soc .figs img{height:96px;width:auto}
+.soc b{display:block;font:600 1.15rem/1.2 var(--display)}
+.soc p{margin:4px 0 16px;min-height:2.9em}
 
-/* ---------- phones (arcade.css reflows the header and footer; these are the home page's own sections) ---------- */
-@media (max-width:939px){
-  #Welcome h1{font-size:24px}
-  .Doors{grid-template-columns:1fr;gap:12px}
-  .Door .art{height:170px}
-  .Door .acts{flex-direction:row;flex-wrap:wrap}
-  .Door .acts .gbtn{flex:1 1 150px}
-  #directory .cols{grid-template-columns:1fr 1fr;gap:14px 16px}
-  .soc{grid-template-columns:1fr}
-  .soc a{min-height:130px}
+.foot .row{display:flex;flex-wrap:wrap;gap:8px 22px;margin-bottom:22px}
+.foot .row a{color:var(--text)}
+
+@media (max-width:940px){
+  .top{padding:40px 0 22px}
+  .doors{grid-template-columns:1fr;padding-bottom:60px}
+  .door{min-height:0}
+  .door .art{height:220px}
+  .dir{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .soc p{min-height:0}
 }
-@media (prefers-reduced-motion:reduce){.art.play img{transition:none}}
+@media (max-width:520px){ .door .btn{align-self:stretch} }
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="pearl" viewBox="0 0 16 16"><path fill="#d16be8" d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></symbol>
-</svg>
 
-<div class="bgfx" id="bgfx" aria-hidden="true"></div>
-<div class="sky l" id="skyL" aria-label="Grug on Discord, Instagram and YouTube"></div><div class="sky r" id="skyR" aria-label="Grug on YouTube, Discord and Instagram"></div>
-<div id="Container">
-  <div id="Leaderboard">
-    <a class="lb" href="/arcade/" aria-label="Play free games in the Grug Arcade">
-      <span class="bgk"></span>
-      <img class="fig" src="/static/arcade/racer.webp" alt="" style="left:14px">
-      <img class="fig" src="/static/arcade/grug.webp" alt="" style="left:78px;z-index:1">
-      <img class="fig" src="/static/arcade/medic.webp" alt="" style="left:160px">
-      <span class="t"><b>Play as the character you made.</b><span>Free blocky games in your browser, nothing to install:</span><span class="exp"><i class="k">Zone Royale</i><i class="k">Slide 999 KM</i><i>Pet Zones</i><i>Grug City RP</i></span></span>
-      <span class="go">Play the Arcade ›</span>
-    </a>
-  </div>
-
-  <div id="Header">
-    <div id="Banner">
-      <div id="Options"><a id="pearls" href="/character/pearls/" title="Your Pearls" hidden><svg aria-hidden="true"><use href="#pearl"/></svg><span id="pearlN">0</span> Pearls</a></div>
-      <img class="crowd" src="/static/arcade/medic.webp" alt="" style="left:96px">
-      <img class="crowd" src="/static/arcade/racer.webp" alt="" style="left:170px;height:98px">
-      <a id="Logo" href="/" title="Grug Digital home"><img src="/static/arcade/grug-digital-logo.png" alt="Grug Digital"></a>
-      <img class="crowd" src="/static/arcade/skater.webp" alt="" style="left:640px;height:98px">
-      <img class="crowd" src="/static/arcade/ranger.webp" alt="" style="left:712px">
+<div class="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><i class="mark" aria-hidden="true"></i>Grug Digital</a>
+    <nav aria-label="Sections">
+      <a href="/arcade/">Players</a>
+      <a href="/agents/">Game developers</a>
+      <a href="/restaurants/">Restaurants</a>
+      <a href="#directory">Site directory</a>
+    </nav>
+    <div class="right">
+      <a class="btn sm" href="/support.html">Help</a>
     </div>
-    <div class="Navigation">
-      <ul>
-        <li><a href="/arcade/">Players</a></li>
-        <li><a href="/agents/">Game developers</a></li>
-        <li><a href="/restaurants/">Restaurants</a></li>
-        <li><a href="#directory">Site directory</a></li>
-        <li><a href="/support.html">Help</a></li>
-      </ul>
-    </div>
-  </div>
-
-  <div id="Announcement">
-    <div class="SystemAlertText">Grug has three homes now: one for players, one for game developers, one for restaurants. Pick yours below.</div>
-  </div>
-
-  <div id="Body">
-    <div id="Welcome">
-      <h1>What brings you to Grug?</h1>
-      <p>Pick the door that fits. Each one opens its own part of the site.</p>
-    </div>
-
-    <div class="Doors">
-      <section class="Door" id="players" aria-labelledby="doorPlay">
-        <div class="StandardBoxHeader"><span><h2 id="doorPlay">Players</h2></span></div>
-        <div class="box">
-          <a class="art play" href="/arcade/" aria-label="Open the Grug Arcade">
-            <span class="who">I want to play</span>
-            <img src="/static/arcade/racer.webp" alt="" style="left:6%">
-            <img src="/static/arcade/grug.webp" alt="" style="left:34%;height:140px;z-index:1">
-            <img src="/static/arcade/snow-rider.webp" alt="" style="left:64%">
-          </a>
-          <div class="in">
-            <h3>Play free games as your own character</h3>
-            <p>Blocky games that run in your browser, with nothing to install. Make an avatar and it shows up in every one of them.</p>
-            <ul>
-              <li>Zone Royale, Slide 999 KM, Sunny Patch, Grug City RP and more</li>
-              <li>Make your own avatar: hair, face and outfits</li>
-              <li>Play together on one screen with controllers</li>
-            </ul>
-            <div class="acts">
-              <a class="gbtn lg" href="/arcade/">Play games ›</a>
-              <a class="gbtn gray" href="/character/">Make my avatar</a>
-            </div>
-            <p class="also">Also: <a href="/character/?outfits">My outfits</a> · <a href="/arcade/grug-studio/">Grug Studio</a> · <a href="/character/pearls/">Pearls</a></p>
-          </div>
-        </div>
-      </section>
-
-      <section class="Door" id="developers" aria-labelledby="doorDev">
-        <div class="StandardBoxHeader"><span><h2 id="doorDev">Game developers</h2></span></div>
-        <div class="box">
-          <a class="art dev" href="/agents/" aria-label="Open Grug for agents">
-            <span class="who">I'm building a game</span>
-            <pre aria-hidden="true"><i>&gt;</i> Make a castle guard
-<i>&gt;</i> in chainmail
-<b>GrugStudio.set({…})</b>
-<b>GrugStudio.wear(img)</b>
-<i>saved</i> Guard.glb</pre>
-            <img src="/static/arcade/ranger.webp" alt="">
-          </a>
-          <div class="in">
-            <h3>Characters your AI agent can make</h3>
-            <p>An avatar studio stripped down for agents: no sliders, just the steps and the API. Send one prompt and get a rigged Roblox R6 character back.</p>
-            <ul>
-              <li>Works with Claude or any agent that can use a browser</li>
-              <li>Painted outfits on a real R6 rig, exported as <code>.glb</code></li>
-              <li>A Claude skill for whole casts of NPCs</li>
-            </ul>
-            <div class="acts">
-              <a class="gbtn lg dark" href="/agents/">Grug for agents ›</a>
-              <a class="gbtn gray" href="/agents/studio/">Open the agent studio</a>
-            </div>
-            <p class="also">Also: <a href="/packs/">Asset packs</a> · <a href="/agents/studio/claude.md">Agent guide</a> · <a href="https://github.com/gabrielman25/grugdigital" target="_blank" rel="noopener">GitHub</a></p>
-          </div>
-        </div>
-      </section>
-
-      <section class="Door" id="restaurants" aria-labelledby="doorRest">
-        <div class="StandardBoxHeader"><span><h2 id="doorRest">Restaurants</h2></span></div>
-        <div class="box">
-          <a class="art rest" href="/restaurants/" aria-label="Open Grug for restaurants">
-            <span class="who">I run a restaurant</span>
-            <span class="stampcard" aria-hidden="true"><b>Rosa's Tacos</b><small>9th taco plate is on us</small><span class="st"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></span>
-            <span class="today" aria-hidden="true"><b>Today</b><span class="ok">Open checklist</span><span class="ok">Fridge temps</span><span>Close out</span></span>
-          </a>
-          <div class="in">
-            <h3>Bring guests back, and run the back office</h3>
-            <p>A stamp card guests scan at the table, a website made from it, and a dashboard for your team. Free, and ready in about a minute.</p>
-            <ul>
-              <li>Rewards card: no app, no hardware, no sign-up</li>
-              <li>Schedule, temperature log, checklists and recipe costs</li>
-              <li>Near Katy, Texas? We build custom games too</li>
-            </ul>
-            <div class="acts">
-              <a class="gbtn lg red" href="/restaurants/">Grug for restaurants ›</a>
-              <a class="gbtn gray" href="/restaurant/">Set up my restaurant</a>
-            </div>
-            <p class="also">Also: <a href="/managers/">For managers</a> · <a href="/rewards/create/">Rewards card</a> · <a href="/partners/">Custom games</a></p>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <section class="Sec" id="directory" aria-labelledby="dirTitle">
-      <div class="StandardBoxHeader"><span><h2 id="dirTitle">Site directory</h2></span></div>
-      <div class="box">
-        <div class="cols">
-          <div>
-            <h3>Players</h3>
-            <ul>
-              <li><a href="/arcade/">Grug Arcade</a><small>Every game, by genre</small></li>
-              <li><a href="/character/">Avatar Studio</a><small>Make your own character</small></li>
-              <li><a href="/character/?outfits">My outfits</a><small>Pick who you play as</small></li>
-              <li><a href="/arcade/grug-studio/">Grug Studio</a><small>Dress up and build on a baseplate</small></li>
-              <li><a href="/arcade/#plays-in-your-tab">Games in your tab</a><small>They keep going while you browse</small></li>
-              <li><a href="/character/pearls/">Pearls</a><small>The site's currency</small></li>
-            </ul>
-          </div>
-          <div>
-            <h3>Game developers</h3>
-            <ul>
-              <li><a href="/agents/">Grug for agents</a><small>Prompts to send your agent</small></li>
-              <li><a href="/agents/studio/">Agent Avatar Studio</a><small>The studio without the sliders</small></li>
-              <li><a href="/agents/studio/claude.md">Agent guide</a><small>The steps and the API, as text</small></li>
-              <li><a href="/agents/#skills">Claude skill</a><small>Whole casts of NPCs</small></li>
-              <li><a href="/packs/">Asset packs</a><small>Low-poly 3D models on itch.io</small></li>
-              <li><a href="https://github.com/gabrielman25/grugdigital" target="_blank" rel="noopener">Source on GitHub</a></li>
-            </ul>
-          </div>
-          <div>
-            <h3>Restaurants</h3>
-            <ul>
-              <li><a href="/restaurants/">Grug for restaurants</a><small>Everything in one place</small></li>
-              <li><a href="/restaurant/">Set up my restaurant</a><small>Card, website and dashboard in a minute</small></li>
-              <li><a href="/rewards/create/">Rewards card</a><small>A stamp card with a QR to print</small></li>
-              <li><a href="/business/">Dashboard</a><small>Schedule, checklists, temperatures</small></li>
-              <li><a href="/managers/">For managers</a><small>A two-minute walkthrough</small></li>
-              <li><a href="/partners/">Custom games</a><small>For restaurants near Katy, Texas</small></li>
-            </ul>
-          </div>
-          <div>
-            <h3>Grug Digital</h3>
-            <ul>
-              <li><a href="/support.html">Help and contact</a></li>
-              <li><a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener">Discord</a></li>
-              <li><a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener">YouTube</a></li>
-              <li><a href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener">Instagram</a></li>
-              <li><a href="https://polysw.itch.io/" target="_blank" rel="noopener">itch.io store</a></li>
-              <li><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></li>
-              <li><a href="/legacy">The old site</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="Sec" aria-labelledby="socTitle" style="clear:both">
-      <div class="StandardBoxHeader"><span><h2 id="socTitle">Join the Grug community</h2></span></div>
-      <div class="box">
-        <div class="soc">
-          <a class="dc" href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener"><small>Discord</small><b id="socDc">Join the Grug Discord</b><span id="socDcSub">Players, builders and creators. Come say hi.</span>
-            <span class="figs" aria-hidden="true"><img src="/static/arcade/grug.webp" alt=""></span><span class="cta">Join server ›</span></a>
-          <a class="ig" href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener"><small>Instagram</small><b>@grugdigital</b><span>Characters, builds and behind the scenes.</span>
-            <span class="figs" aria-hidden="true"><img src="/static/arcade/snow-rider.webp" alt=""></span><span class="cta">Follow ›</span></a>
-          <a class="yt" id="socYt" href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener"><small>YouTube</small><i class="vid" id="socVid"></i><b>PolySwitch</b><span id="socYtSub">Game dev, Roblox builds and the making of Grug.</span><span class="cta">Watch ›</span></a>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <div id="Footer">
-    <div class="FooterNav">
-      <a href="/arcade/"><b>Players</b></a>
-      &nbsp;|&nbsp;
-      <a href="/agents/"><b>Game developers</b></a>
-      &nbsp;|&nbsp;
-      <a href="/restaurants/"><b>Restaurants</b></a>
-      &nbsp;|&nbsp;
-      <a href="/privacy.html">Privacy Policy</a>
-      &nbsp;|&nbsp;
-      <a href="/terms.html">Terms</a>
-      &nbsp;|&nbsp;
-      <a href="/support.html">Contact Us</a>
-      &nbsp;|&nbsp;
-      <a href="https://polysw.itch.io/" target="_blank" rel="noopener">itch.io Store</a>
-      &nbsp;|&nbsp;
-      <a href="/legacy">Legacy Site</a>
-    </div>
-    <div class="FooterNav">Follow Grug: <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener"><b>Discord</b></a>&nbsp;|&nbsp;<a href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener"><b>Instagram</b></a>&nbsp;|&nbsp;<a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener"><b>YouTube</b></a></div>
-    <div class="FooterNav" id="seoGenres"></div>
-    <p class="Legalese">
-      Grug, Grug Digital, Pearls, characters, logos, names, and all related indicia are trademarks of <a href="/">Grug Digital</a>, ©2026.
-      <br>
-      Grug is not sponsored, authorized or endorsed by Roblox Corporation, Anthropic or Google. Roblox is a trademark of Roblox Corporation,<br>
-      Claude of Anthropic and Gemini of Google, and no affiliation with these companies is intended.<br>Use of this site signifies your acceptance of the <a href="/terms.html">Terms and Conditions</a>.
-    </p>
   </div>
 </div>
 
-<script src="/arcade/arcade.js"></script>
-<script>
-/* the header, background, side ads, Pearls button and footer: the same as the Arcade's (arcade/arcade.js) */
-window.GrugArcade.chrome();
+<main>
+<header class="top">
+  <div class="wrap">
+    <h1>What brings you to Grug?</h1>
+    <p class="lead">Free games to play, an avatar studio your AI agent can drive, and free tools for restaurants. Each one has its own part of the site.</p>
+  </div>
+</header>
 
+<div class="wrap">
+  <div class="doors">
+    <section class="door play" id="players" aria-labelledby="doorPlay">
+      <div class="art" aria-hidden="true">
+        <img src="/static/showcase/grug-digital-avatar-racer.webp" alt="" style="left:-3%;height:170px">
+        <img src="/static/showcase/grug-digital-avatar-grug.webp" alt="" style="left:50%;margin-left:-84px;height:196px;z-index:2">
+        <img src="/static/showcase/grug-digital-avatar-snow-rider.webp" alt="" style="right:-3%;height:174px">
+      </div>
+      <div class="body">
+        <h2 id="doorPlay">Players</h2>
+        <p>Free blocky games that run in your browser. Make an avatar and it shows up in every one of them.</p>
+        <ul class="more">
+          <li><a href="/character/">Make my avatar</a></li>
+          <li><a href="/character/?outfits">My outfits</a></li>
+          <li><a href="/arcade/grug-studio/">Grug Studio</a></li>
+        </ul>
+        <a class="btn lg" href="/arcade/">Play games</a>
+      </div>
+    </section>
+
+    <section class="door dev" id="developers" aria-labelledby="doorDev">
+      <div class="art" aria-hidden="true">
+        <pre><b>Make a castle guard</b>
+<b>in chainmail.</b>
+
+GrugStudio.set({…})
+GrugStudio.wear(img)
+<i>saved Guard.glb</i></pre>
+        <img src="/static/showcase/grug-digital-avatar-ranger.webp" alt="">
+      </div>
+      <div class="body">
+        <h2 id="doorDev">Game developers</h2>
+        <p>An avatar studio with the sliders taken out, for AI agents. Send one prompt, get a rigged Roblox R6 character back.</p>
+        <ul class="more">
+          <li><a href="/agents/studio/">Open the agent studio</a></li>
+          <li><a href="/agents/#skills">Get the Claude skill</a></li>
+          <li><a href="/packs/">Browse asset packs</a></li>
+        </ul>
+        <a class="btn lg" href="/agents/">Grug for agents</a>
+      </div>
+    </section>
+
+    <section class="door rest" id="restaurants" aria-labelledby="doorRest">
+      <div class="art" aria-hidden="true">
+        <span class="stampcard"><b>Rosa's Tacos</b><small>9th plate is on us</small><span class="st"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></span>
+        <span class="today"><b>Today</b><span class="done">Opening checklist</span><span class="done">Fridge temps</span><span>Count the drawer</span></span>
+      </div>
+      <div class="body">
+        <h2 id="doorRest">Restaurants</h2>
+        <p>A stamp card guests scan, a website made from it, and a dashboard for your team. Free, and ready in about a minute.</p>
+        <ul class="more">
+          <li><a href="/restaurant/">Set up my restaurant</a></li>
+          <li><a href="/managers/">Tour the dashboard</a></li>
+          <li><a href="/partners/">Custom games near Katy, Texas</a></li>
+        </ul>
+        <a class="btn lg" href="/restaurants/">Grug for restaurants</a>
+      </div>
+    </section>
+  </div>
+</div>
+
+<section class="sec" id="directory" style="border-top:1px solid var(--line)">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Site directory</h2>
+      <p>Every page, sorted by who it's for.</p>
+    </div>
+    <div class="dir">
+      <div>
+        <h3>Players</h3>
+        <ul>
+          <li><a href="/arcade/">Grug Arcade</a><small>Every game, by genre</small></li>
+          <li><a href="/character/">Avatar Studio</a><small>Make your own character</small></li>
+          <li><a href="/character/?outfits">My outfits</a><small>Pick who you play as</small></li>
+          <li><a href="/arcade/grug-studio/">Grug Studio</a><small>Dress up and build on a baseplate</small></li>
+          <li><a href="/arcade/#plays-in-your-tab">Games in your tab</a><small>They keep going while you browse</small></li>
+          <li><a href="/character/pearls/">Pearls</a><small>The site's currency</small></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Game developers</h3>
+        <ul>
+          <li><a href="/agents/">Grug for agents</a><small>Prompts to send your agent</small></li>
+          <li><a href="/agents/studio/">Agent Avatar Studio</a><small>The studio without the sliders</small></li>
+          <li><a href="/agents/studio/claude.md">Agent guide</a><small>The steps and the API, as text</small></li>
+          <li><a href="/agents/#skills">Claude skill</a><small>Whole casts of NPCs</small></li>
+          <li><a href="/packs/">Asset packs</a><small>Low-poly 3D models on itch.io</small></li>
+          <li><a href="https://github.com/gabrielman25/grugdigital" target="_blank" rel="noopener">Source on GitHub</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Restaurants</h3>
+        <ul>
+          <li><a href="/restaurants/">Grug for restaurants</a><small>Everything in one place</small></li>
+          <li><a href="/restaurant/">Set up my restaurant</a><small>Card, website and dashboard in a minute</small></li>
+          <li><a href="/rewards/create/">Rewards card</a><small>A stamp card with a QR to print</small></li>
+          <li><a href="/business/">Dashboard</a><small>Schedule, checklists, temperatures</small></li>
+          <li><a href="/managers/">For managers</a><small>A two-minute tour</small></li>
+          <li><a href="/partners/">Custom games</a><small>For restaurants near Katy, Texas</small></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Grug Digital</h3>
+        <ul>
+          <li><a href="/support.html">Help and contact</a></li>
+          <li><a href="https://polysw.itch.io/" target="_blank" rel="noopener">itch.io store</a></li>
+          <li><a href="/privacy.html">Privacy policy</a></li>
+          <li><a href="/terms.html">Terms</a></li>
+          <li><a href="/legacy">The old site</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="socTitle">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 id="socTitle">Come say hi</h2>
+      <p>Players, builders and creators hang out on the Discord. New games and characters show up on YouTube and Instagram first.</p>
+    </div>
+    <div class="facts soc">
+      <div><b>Discord</b><p id="socDcSub">Players, builders and creators.</p><a class="btn sm" href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener">Join the server</a></div>
+      <div><b>YouTube</b><p id="socYtSub">Game dev, Roblox builds and the making of Grug, on PolySwitch.</p><a class="btn sm" id="socYt" href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener">Watch</a></div>
+      <div><b>Instagram</b><p>Characters, builds and behind the scenes at @grugdigital.</p><a class="btn sm" href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener">Follow</a></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="row">
+      <a href="/arcade/">Players</a>
+      <a href="/agents/">Game developers</a>
+      <a href="/restaurants/">Restaurants</a>
+      <a href="/support.html">Help</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/legacy">Legacy site</a>
+    </div>
+    <div class="stamps">
+      <a href="https://warpdrive.team/" target="_blank" rel="noopener sponsored" title="Warpdrive: release your dream game on it (our partner)"><img src="/static/stamps/warpdrive.gif" alt="Release your dream game on Warpdrive" width="88" height="31"></a>
+      <a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener" title="Grug on YouTube (PolySwitch)"><img src="/static/stamps/youtube.gif" alt="YouTube: subscribe" width="88" height="31"></a>
+      <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener" title="Join the Grug Discord"><img src="/static/stamps/discord.gif" alt="Discord: join now" width="88" height="31"></a>
+    </div>
+    <p class="legal">Grug, Grug Digital, Pearls, characters, logos, names, and all related indicia are trademarks of Grug Digital, ©2026. Grug is not sponsored, authorized or endorsed by Roblox Corporation, Anthropic or Google. Roblox is a trademark of Roblox Corporation, Claude of Anthropic and Gemini of Google, and no affiliation with these companies is intended. "Rosa's Tacos" is a made-up example, not a real business. Use of this site signifies your acceptance of the <a href="/terms.html">Terms and Conditions</a>.</p>
+  </div>
+</footer>
+
+<script>
 /* the community strip: the Discord's member count and the newest video (static/social.js) */
 (function () {
   const S = window.GrugSocial; if (!S) return;
   S.get().then(d => {
     const D = d.discord, v = d.youtube.videos[0];
-    if (D.members) document.getElementById('socDcSub').textContent = `Join ${S.n(D.members)} players, builders and creators on the Grug Discord.`;
-    if (v) { const a = document.getElementById('socYt'); a.href = S.watch(v.id); document.getElementById('socVid').style.backgroundImage = `url('${S.thumbDirect(v.id)}')`; document.getElementById('socVid').textContent = ' ';
-      if (v.title) document.getElementById('socYtSub').textContent = 'New: ' + v.title; }
-  });
+    if (D.members) document.getElementById('socDcSub').textContent = `${S.n(D.members)} players, builders and creators.`;
+    if (v) { document.getElementById('socYt').href = S.watch(v.id); if (v.title) { document.getElementById('socYtSub').textContent = 'New: ' + v.title; document.getElementById('socYt').textContent = 'Watch it'; } }
+  }).catch(() => {});
 })();
 </script>
 </body>

@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dev">
 <head>
 <meta charset="utf-8">
 <link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/static/fonts/allo.css">
-<!-- the classic 920px page, like the Arcade; on phones arcade.css reflows it into one column -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Asset packs · Low-poly 3D models for Roblox, Unity and Godot · Grug Digital</title>
 <!-- seo: written by src/seo/seo_head.py (re-run it, don't edit by hand) -->
@@ -27,255 +26,165 @@
 <meta name="description" content="Grug Digital's low-poly 3D asset packs for Roblox, Unity, Godot and other engines: characters, pets, hats and props, live from the itch.io store.">
 <link rel="icon" href="/favicon.png">
 <link rel="canonical" href="https://grugdigital.com/packs/">
+<meta name="theme-color" content="#0d0e10">
 <link rel="preconnect" href="https://img.itch.zone">
-<script src="/static/pearls.js"></script>
-<script src="/static/social.js"></script>
-<link rel="stylesheet" href="/arcade/arcade.css">
-<link rel="stylesheet" href="/static/classic.css">
+<link rel="stylesheet" href="/static/modern.css">
 <style>
-/* The asset pack catalog: the developers' section in the classic look (the Arcade's games list, as a catalog). */
-html{scroll-behavior:smooth}
-#Body h2,#Body h3{display:block}
-#Intro .box{display:flex;align-items:center;justify-content:space-between;gap:14px}
-#Intro h1{margin:0 0 3px;font:bold 26px/1.08 Allo,Arial,Helvetica,sans-serif;color:#111}
-#Intro p{margin:0;max-width:560px}
-#Intro .acts{display:flex;gap:8px;flex:none}
+/* The asset pack catalog: the developers' section's other page, in the same dark look as /agents/ (static/modern.css,
+   data-theme="dev"). The packs come live from itch.io (the script at the bottom). Two sponsor placements live here, as
+   they did when the catalog was on the home page: our partner Warpdrive's tile on the first screen of packs, and
+   KimiLand's box under them. */
+.top{padding:64px 0 36px}
+.top .wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:end}
+.top .lead{margin-top:16px}
 
-/* ---------- the asset pack catalog (the Arcade's games list, as a catalog) ---------- */
-#assets{overflow:hidden;padding-bottom:4px}
-#assets .StandardBox ul a{color:#00f}
-#PackTabs{float:left;height:31px;display:flex}
-.Tools a{display:flex;align-items:center;gap:7px;margin:0 0 9px;font:bold 13px/1.15 Allo,Arial,Helvetica,sans-serif}
-.Tools a img{flex:none;width:34px;height:40px;object-fit:contain;object-position:50% 100%;background:#fff;border:1px solid #ccc}
-.Tools .StandardBox{padding-top:14px}
-#Cat .Cell{height:176px}
-#Cat .GameItem{height:156px}
-#Cat .AlwaysShown .thumb,#Cat .AlwaysShown .thumb img{height:127px}
-#Cat .thumb{position:relative;overflow:hidden}
-#Cat .thumb .new{position:absolute;left:4px;top:4px;padding:2px 5px;background:#d8281f;color:#fff;font:bold 10px Allo,Arial,Helvetica,sans-serif;border-radius:2px}
-#Cat .thumb .free{background:#1d7a0c}
-#Cat .PlayerCount b{color:#1d7a0c}
-#Cat .PlayerCount span{color:#888}
-#Cat .HoverShown{padding-top:182px;color:#555}
-#Cat .HoverShown p{margin:0 0 4px;line-height:14px}
-#Cat .HoverShown .chips{margin-top:2px}
-#Cat .adt .thumb{background:#2a2621}
-#Cat .adt .thumb .bgi{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.08)}
-#Cat .adt .thumb .fgi{position:absolute;left:50%;bottom:3px;height:118px;width:auto;translate:-50% 0;transition:transform .3s}
-#Cat .adt:hover .fgi{transform:scale(1.05)}
-#Cat .skel .thumb{background:#ddd;animation:shimmer 1.2s ease-in-out infinite}
-#Cat .skel .GameName,#Cat .skel .PlayerCount{background:#e6e6e6;color:transparent;margin-top:3px}
-@keyframes shimmer{50%{opacity:.55}}
-#Cat .rect.kimi{background:linear-gradient(160deg,#ffd6ea,#cfe6ff);color:#3a3a6a}
-.rect.kimi .logo{position:absolute;left:50%;top:14px;width:124px;translate:-50% 0;filter:drop-shadow(0 4px 8px rgba(209,77,139,.25))}
-.rect.kimi .t{top:auto;bottom:66px;color:#3a3a6a;text-shadow:none;font-size:19px}
-.rect.kimi .t .s{color:#5a5a7a;text-shadow:none}
-.rect.kimi .figs{top:18px;bottom:auto;height:96px}
-.rect.kimi .spn{position:absolute;top:6px;right:6px;font:bold 9px/1 Allo,Arial,Helvetica,sans-serif;letter-spacing:.08em;padding:3px 5px;border-radius:3px;background:rgba(255,255,255,.75);color:#d14d8b}
-.rect.kimi .bar{background:linear-gradient(90deg,#ff9cc8,#8cc4ff)}
-.rect.kimi .go{color:#d14d8b;background:linear-gradient(#fff,#f7f7f7 50%,#ececec 51%,#f5f5f5);border-color:#d9a6c0}
-#GenreDescriptionPanel{font-size:11px;color:#333}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-bottom:22px}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pills button,.seg button{border:1px solid var(--line);background:none;color:var(--mute);font:600 .9rem var(--body);height:36px;padding:0 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.pills button:hover,.seg button:hover{color:var(--text);border-color:var(--line-hi)}
+.pills button[aria-pressed=true]{background:var(--text);border-color:var(--text);color:var(--bg)}
+.seg{display:inline-flex;gap:2px;padding:3px;background:var(--panel);border:1px solid var(--line);border-radius:11px;margin-left:auto}
+.seg button{border:0;border-radius:8px;height:30px;padding:0 11px;font-size:.86rem}
+.seg button[aria-pressed=true]{background:var(--raise);color:var(--text);box-shadow:inset 0 0 0 1px #3a3e45}
+.find{position:relative}
+.find input{width:230px;height:36px;padding:0 12px 0 34px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font:.92rem var(--body)}
+.find input:focus{outline:0;border-color:var(--accent)}
+.find svg{position:absolute;left:11px;top:10px;width:16px;height:16px;color:var(--mute);pointer-events:none}
 
-/* ---------- phones (arcade.css reflows the header, columns and footer; these are the home page's own sections) ---------- */
-@media (max-width:939px){
-  #Intro .box{flex-direction:column;align-items:stretch}
-  #Intro .acts{flex-wrap:wrap}
-  #Cat .Cell,#Cat .GameItem{height:auto}
-  #Cat .AlwaysShown .thumb,#Cat .AlwaysShown .thumb img{height:auto;aspect-ratio:315/250}
-  #Cat .adt .thumb .fgi{height:92%}
-  .Tools .StandardBox{display:flex;flex-wrap:wrap;gap:8px 16px}
-  .Tools a{margin:0}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.pack{display:flex;flex-direction:column;text-decoration:none;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel)}
+.pack:hover{border-color:var(--line-hi)}
+.pack .cover{position:relative;aspect-ratio:315/250;background:var(--raise);overflow:hidden}
+.pack .cover img{width:100%;height:100%;object-fit:cover}
+.pack .tag{position:absolute;left:10px;top:10px;padding:3px 8px;border-radius:999px;background:var(--bg);color:var(--text);font:600 .74rem/1.3 var(--body)}
+.pack .info{padding:12px 14px 14px}
+.pack b{display:block;font:500 1rem/1.3 var(--display);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pack small{display:block;margin-top:3px;font-size:.88rem;color:var(--mute)}
+.pack small strong{color:var(--text);font-weight:600}
+/* our own tile (a character from the studio) and our partner's */
+.pack.own .cover img.bg{position:absolute;inset:0}
+.pack.own .cover img.fg{position:absolute;left:50%;bottom:-4%;width:auto;height:96%;transform:translateX(-50%);object-fit:contain}
+.pack.wd .cover{display:grid;place-items:center;background:#170c2e}
+.pack.wd .cover img{width:62%;height:auto;image-rendering:pixelated}
+.skel .cover,.skel b,.skel small{animation:pulse 1.2s ease-in-out infinite}
+.skel b,.skel small{background:var(--raise);color:transparent;border-radius:4px}
+@keyframes pulse{50%{opacity:.5}}
+.none{grid-column:1/-1;padding:40px 0;color:var(--mute)}
+.none a{color:var(--text)}
+.count{margin:18px 2px 0;font-size:.9rem;color:var(--mute)}
+
+.kimi{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:22px;align-items:center;margin-top:44px;padding:20px 24px;border:1px solid var(--line);border-radius:16px;background:var(--panel);text-decoration:none}
+.kimi:hover{border-color:var(--line-hi)}
+.kimi img{width:76px;height:76px}
+.kimi b{display:block;font:600 1.15rem/1.2 var(--display)}
+.kimi span{display:block;margin-top:2px;color:var(--mute);font-size:.95rem}
+
+@media (max-width:940px){
+  .top{padding:40px 0 26px}
+  .top .wrap{grid-template-columns:1fr;gap:18px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .seg{margin-left:0}
+  .find,.find input{width:100%}
+  .kimi{grid-template-columns:auto minmax(0,1fr)}
+  .kimi .btn{grid-column:1/-1}
 }
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="pearl" viewBox="0 0 16 16"><path fill="#d16be8" d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></symbol>
-  <symbol id="claude" viewBox="0 0 100 100"><path fill="#fff" d="M26.2 0.5 23.1 4.7 24.1 10.2 33.0 25.1 39.1 36.1 39.1 36.6 38.4 37.0 15.0 19.2 10.3 18.7 7.6 21.7 8.3 25.9 10.0 27.9 18.1 33.7 38.5 47.3 39.8 48.4 39.6 49.0 37.8 49.1 28.1 48.0 2.3 46.3 0.3 47.6 0.0 49.0 2.2 52.0 4.5 52.5 39.2 53.9 39.6 54.7 39.1 55.6 19.4 66.6 11.8 71.8 10.7 72.8 10.5 75.9 12.5 77.9 17.1 77.3 43.5 60.1 43.8 60.2 43.9 60.8 40.0 65.3 22.4 88.3 22.1 91.0 25.1 92.5 26.7 91.9 34.0 84.1 48.8 64.0 49.6 63.6 47.9 74.3 43.5 94.9 44.8 98.0 47.4 99.9 50.3 98.8 51.7 97.2 54.5 67.0 55.1 66.6 63.4 80.1 71.5 91.8 74.4 92.3 76.9 91.3 77.5 90.1 77.0 85.8 65.3 68.1 65.5 67.3 66.3 67.6 79.0 78.4 86.7 84.2 88.1 84.3 89.4 82.6 88.9 80.1 65.5 58.3 65.5 57.8 66.3 57.8 94.3 64.6 99.6 62.1 99.7 59.8 97.8 57.3 94.6 55.2 83.2 54.4 72.4 54.2 66.2 53.6 65.9 53.3 79.7 49.9 90.0 47.9 98.3 45.6 99.6 42.5 99.2 41.0 95.7 39.2 81.8 41.7 69.0 44.3 68.7 43.9 72.1 37.9 85.3 20.6 86.7 15.8 83.6 11.1 79.3 11.1 77.0 12.9 70.2 20.5 59.6 34.0 58.4 35.2 57.6 35.2 61.4 15.1 62.8 5.4 60.8 2.5 58.5 1.4 55.6 3.3 53.7 7.5 51.0 38.1 50.3 38.1 48.9 33.5 40.3 16.9 33.8 2.1 32.0 0.5 28.4 0.0Z"/></symbol>
-  <symbol id="claudeO" viewBox="0 0 100 100"><path fill="#D97757" d="M26.2 0.5 23.1 4.7 24.1 10.2 33.0 25.1 39.1 36.1 39.1 36.6 38.4 37.0 15.0 19.2 10.3 18.7 7.6 21.7 8.3 25.9 10.0 27.9 18.1 33.7 38.5 47.3 39.8 48.4 39.6 49.0 37.8 49.1 28.1 48.0 2.3 46.3 0.3 47.6 0.0 49.0 2.2 52.0 4.5 52.5 39.2 53.9 39.6 54.7 39.1 55.6 19.4 66.6 11.8 71.8 10.7 72.8 10.5 75.9 12.5 77.9 17.1 77.3 43.5 60.1 43.8 60.2 43.9 60.8 40.0 65.3 22.4 88.3 22.1 91.0 25.1 92.5 26.7 91.9 34.0 84.1 48.8 64.0 49.6 63.6 47.9 74.3 43.5 94.9 44.8 98.0 47.4 99.9 50.3 98.8 51.7 97.2 54.5 67.0 55.1 66.6 63.4 80.1 71.5 91.8 74.4 92.3 76.9 91.3 77.5 90.1 77.0 85.8 65.3 68.1 65.5 67.3 66.3 67.6 79.0 78.4 86.7 84.2 88.1 84.3 89.4 82.6 88.9 80.1 65.5 58.3 65.5 57.8 66.3 57.8 94.3 64.6 99.6 62.1 99.7 59.8 97.8 57.3 94.6 55.2 83.2 54.4 72.4 54.2 66.2 53.6 65.9 53.3 79.7 49.9 90.0 47.9 98.3 45.6 99.6 42.5 99.2 41.0 95.7 39.2 81.8 41.7 69.0 44.3 68.7 43.9 72.1 37.9 85.3 20.6 86.7 15.8 83.6 11.1 79.3 11.1 77.0 12.9 70.2 20.5 59.6 34.0 58.4 35.2 57.6 35.2 61.4 15.1 62.8 5.4 60.8 2.5 58.5 1.4 55.6 3.3 53.7 7.5 51.0 38.1 50.3 38.1 48.9 33.5 40.3 16.9 33.8 2.1 32.0 0.5 28.4 0.0Z"/></symbol>
-  <symbol id="search" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.8" fill="none" stroke="#555" stroke-width="2"/><path d="M10 10l4.5 4.5" stroke="#555" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="search" viewBox="0 0 16 16"><circle cx="6.5" cy="6.5" r="4.8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 10l4.5 4.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
 </svg>
 
-<div class="bgfx" id="bgfx" aria-hidden="true"></div>
-<div class="sky l" id="skyL" aria-label="Grug on Discord, Instagram and YouTube"></div><div class="sky r" id="skyR" aria-label="Grug on YouTube, Discord and Instagram"></div>
-<div id="Container">
-  <div id="Leaderboard">
-    <a class="lb" href="/agents/studio/" aria-label="Open the Avatar Studio for agents">
-      <span class="bgk"></span>
-      <img class="fig" src="/static/arcade/racer.webp" alt="" style="left:14px">
-      <img class="fig" src="/static/arcade/grug.webp" alt="" style="left:78px;z-index:1">
-      <img class="fig" src="/static/arcade/medic.webp" alt="" style="left:160px">
-      <span class="t"><b>One character. Every engine.</b><span>Your agent makes it, then exports a rigged model to:</span><span class="exp"><i class="k">Roblox</i><i class="k">Unity</i><i class="k">itch.io</i><i>Godot</i><i>Blender</i></span></span>
-      <span class="go">Agent studio ›</span>
-    </a>
-  </div>
-
-  <div id="Header">
-    <div id="Banner">
-      <div id="Options"><a id="pearls" href="/character/pearls/" title="Your Pearls" hidden><svg aria-hidden="true"><use href="#pearl"/></svg><span id="pearlN">0</span> Pearls</a></div>
-      <img class="crowd" src="/static/arcade/medic.webp" alt="" style="left:96px">
-      <img class="crowd" src="/static/arcade/racer.webp" alt="" style="left:170px;height:98px">
-      <a id="Logo" href="/" title="Grug Digital home"><img src="/static/arcade/grug-digital-logo.png" alt="Grug Digital"></a>
-      <img class="crowd" src="/static/arcade/skater.webp" alt="" style="left:640px;height:98px">
-      <img class="crowd" src="/static/arcade/ranger.webp" alt="" style="left:712px">
+<div class="nav">
+  <div class="wrap">
+    <a class="brand" href="/agents/"><img src="/favicon.png" alt="" width="30" height="30">Grug <span>for agents</span></a>
+    <nav aria-label="Sections">
+      <a href="/agents/#characters">Characters</a>
+      <a href="/agents/studio/">Agent Studio</a>
+      <a href="/agents/#how">How it works</a>
+      <a href="/agents/#skills">Skill</a>
+      <a href="/packs/" aria-current="page">Asset packs</a>
+      <a href="/">Grug home</a>
+    </nav>
+    <div class="right">
+      <a class="btn sm hide-sm" href="https://polysw.itch.io/" target="_blank" rel="noopener">Store on itch.io</a>
+      <a class="btn sm go" href="/agents/#ask">Ask your agent</a>
     </div>
-    <div class="Navigation dev">
-      <ul>
-        <li class="sect">Game developers</li>
-        <li><a href="/agents/">Grug for agents</a></li>
-        <li><a href="/agents/studio/">Agent Studio</a></li>
-        <li><a href="/agents/#skills">Claude skill</a></li>
-        <li><a href="/packs/">Asset packs</a></li>
-        <li><a href="https://github.com/gabrielman25/grugdigital" target="_blank" rel="noopener">GitHub</a></li>
-        <li class="end"><a href="/">Grug home</a></li>
-      </ul>
-    </div>
-  </div>
-
-  <div id="Announcement">
-    <div class="SystemAlertText dev">Need characters for your game? Your AI agent can make them in the <a href="/agents/studio/">Agent Avatar Studio</a>.</div>
-  </div>
-
-  <div id="Body">
-    <section class="Sec" id="Intro">
-      <div class="StandardBoxHeader"><span>For game developers</span></div>
-      <div class="box">
-        <div>
-          <h1>Asset packs</h1>
-          <p>Low-poly 3D models for Roblox, Unity, Godot and other engines: characters, pets, hats and props. Each pack opens on our itch.io store.</p>
-        </div>
-        <div class="acts">
-          <a class="gbtn dark" href="/agents/">Grug for agents ›</a>
-          <a class="gbtn gray" href="https://polysw.itch.io/" target="_blank" rel="noopener">Store on itch.io</a>
-        </div>
-      </div>
-    </section>
-
-    <section id="assets" aria-labelledby="assetsTitle">
-      <div class="Column1e">
-        <div class="StandardBoxHeader"><span><h2 id="assetsTitle">Catalog</h2></span></div>
-        <div class="StandardBox">
-          <div class="GameFilter">
-            <div>Categories:</div>
-            <ul id="catList"><li><a href="#assets" class="on">All</a></li></ul>
-          </div>
-        </div>
-        <div class="Tools">
-          <div class="StandardBoxHeader"><span><h2>Free tools</h2></span></div>
-          <div class="StandardBox">
-            <a href="/agents/"><img src="/static/arcade/snow-rider.webp" alt="">Grug for agents</a>
-            <a href="/agents/studio/"><img src="/static/arcade/ranger.webp" alt="">Agent Avatar Studio</a>
-            <a href="/agents/#skills"><img src="/static/arcade/medic.webp" alt="">Claude skill</a>
-            <a href="/character/"><img src="/static/arcade/grug.webp" alt="">Avatar Studio (by hand)</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="Column2e" id="Cat">
-        <div id="PackTabs" role="tablist">
-          <div class="Tab on" role="tab" data-sort="featured"><span>Featured</span></div><div class="Tab" role="tab" data-sort="newest"><span>Newest</span></div><div class="Tab" role="tab" data-sort="price"><span>Lowest price</span></div>
-        </div>
-        <div class="Search"><input id="searchbox" type="text" placeholder="Search packs" aria-label="Search asset packs"><button class="SearchIconButton" type="button" aria-label="Search"><svg width="16" height="16"><use href="#search"/></svg></button></div>
-        <div class="StandardBoxGray">
-          <div id="GamePageAdDiv">
-            <a class="rect kimi" href="https://www.roblox.com/communities/5835899/KimiLand#!/store" target="_blank" rel="noopener sponsored" aria-label="KimiLand: Roblox UGC from our official sponsor">
-              <span class="spn">SPONSOR</span>
-              <img class="logo" src="/static/sponsor/kimiland-logo.png" alt="KimiLand">
-              <span class="figs"><img src="/static/arcade/snow-rider.webp" alt="" style="left:6px;height:92px"><img src="/static/arcade/skater.webp" alt="" style="right:6px;height:96px"></span>
-              <span class="t">KimiLand on Roblox<span class="s">UGC from our official Roblox sponsor</span></span>
-              <span class="bar"><span class="go">Shop KimiLand ›</span></span>
-            </a>
-            <span class="rect-note">Our official Roblox UGC sponsor</span>
-          </div>
-          <div id="GamesContent" aria-live="polite"><noscript><div class="Empty">See every pack at <a href="https://polysw.itch.io/">polysw.itch.io</a>.</div></noscript></div>
-          <div class="Paging">
-            <button class="Arrow prev" id="prevPage" type="button" aria-label="Previous page" disabled></button>
-            <span style="margin:0 5px"><span id="pageNum">1</span> of <span id="pageCount">1</span></span>
-            <button class="Arrow next" id="nextPage" type="button" aria-label="Next page" disabled></button>
-          </div>
-          <div id="GenreDescriptionPanel">Grug's asset packs are low-poly 3D models for Roblox, Unity, Godot and other engines: characters, pets, hats and props, straight from our
-            itch.io store. New uploads show up here on their own. <a href="https://polysw.itch.io/" target="_blank" rel="noopener"><b>Visit the store on itch.io »</b></a></div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <div id="Footer">
-    <div class="FooterNav">
-      <a href="/"><b>Grug home</b></a>
-      &nbsp;|&nbsp;
-      <a href="/agents/"><b>Game developers</b></a>
-      &nbsp;|&nbsp;
-      <a href="/arcade/">Players</a>
-      &nbsp;|&nbsp;
-      <a href="/restaurants/">Restaurants</a>
-      &nbsp;|&nbsp;
-      <a href="/privacy.html">Privacy Policy</a>
-      &nbsp;|&nbsp;
-      <a href="/terms.html">Terms</a>
-      &nbsp;|&nbsp;
-      <a href="/support.html">Contact Us</a>
-      &nbsp;|&nbsp;
-      <a href="https://polysw.itch.io/" target="_blank" rel="noopener">itch.io Store</a>
-    </div>
-    <div class="FooterNav">Follow Grug: <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener"><b>Discord</b></a>&nbsp;|&nbsp;<a href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener"><b>Instagram</b></a>&nbsp;|&nbsp;<a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener"><b>YouTube</b></a></div>
-    <p class="Legalese">
-      Grug, Grug Digital, Pearls, characters, logos, names, and all related indicia are trademarks of <a href="/">Grug Digital</a>, ©2026.
-      <br>
-      Grug is not sponsored, authorized or endorsed by Roblox Corporation, Anthropic or Google. Roblox is a trademark of Roblox Corporation,<br>
-      Claude of Anthropic and Gemini of Google, and no affiliation with these companies is intended.<br>Use of this site signifies your acceptance of the <a href="/terms.html">Terms and Conditions</a>.
-    </p>
   </div>
 </div>
 
-<script src="/arcade/arcade.js"></script>
-<script>
-/* the header, background, side ads, Pearls button and footer: the same as the Arcade's (arcade/arcade.js) */
-window.GrugArcade.chrome();
+<main>
+<header class="top">
+  <div class="wrap">
+    <div>
+      <h1>Asset packs</h1>
+      <p class="lead">Low-poly 3D models for Roblox, Unity, Godot and other engines: characters, pets, hats and props. Each pack opens on our itch.io store.</p>
+    </div>
+    <label class="find"><svg aria-hidden="true"><use href="#search"/></svg><input id="searchbox" type="search" placeholder="Search packs" aria-label="Search asset packs"></label>
+  </div>
+</header>
 
+<section class="sec tight" id="assets" style="padding-top:0">
+  <div class="wrap">
+    <div class="bar">
+      <div class="pills" id="catList" role="group" aria-label="Category"><button type="button" data-cat="all" aria-pressed="true">All</button></div>
+      <div class="seg" id="sortList" role="group" aria-label="Sort by">
+        <button type="button" data-sort="featured" aria-pressed="true">Featured</button><button type="button" data-sort="newest" aria-pressed="false">Newest</button><button type="button" data-sort="price" aria-pressed="false">Lowest price</button>
+      </div>
+    </div>
+    <div class="grid" id="packs" aria-live="polite"><noscript><p class="none">See every pack at <a href="https://polysw.itch.io/">polysw.itch.io</a>.</p></noscript></div>
+    <p class="count" id="count"></p>
+
+    <a class="kimi" href="https://www.roblox.com/communities/5835899/KimiLand#!/store" target="_blank" rel="noopener sponsored" aria-label="KimiLand: Roblox UGC from our official sponsor">
+      <img src="/static/sponsor/kimiland-logo.png" alt="KimiLand" width="76" height="76">
+      <div><b>KimiLand on Roblox</b><span>Sponsor. UGC from our official Roblox sponsor.</span></div>
+      <span class="btn sm">Shop KimiLand</span>
+    </a>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="cols">
+      <div><h3>Game developers</h3><ul><li><a href="/agents/">Grug for agents</a></li><li><a href="/agents/studio/">Agent Avatar Studio</a></li><li><a href="/agents/studio/claude.md">Agent guide</a></li><li><a href="/agents/#skills">Claude skill</a></li><li><a href="https://github.com/gabrielman25/grugdigital" target="_blank" rel="noopener">GitHub</a></li></ul></div>
+      <div><h3>Players</h3><ul><li><a href="/arcade/">Grug Arcade</a></li><li><a href="/character/">Avatar Studio</a></li></ul></div>
+      <div><h3>Restaurants</h3><ul><li><a href="/restaurants/">Grug for restaurants</a></li></ul></div>
+      <div><h3>Grug Digital</h3><ul><li><a href="/">Grug home</a></li><li><a href="/support.html">Help and contact</a></li><li><a href="/privacy.html">Privacy policy</a></li><li><a href="/terms.html">Terms</a></li></ul></div>
+    </div>
+    <div class="stamps">
+      <a href="https://warpdrive.team/" target="_blank" rel="noopener sponsored" title="Warpdrive: release your dream game on it (our partner)"><img src="/static/stamps/warpdrive.gif" alt="Release your dream game on Warpdrive" width="88" height="31"></a>
+      <a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener" title="Grug on YouTube (PolySwitch)"><img src="/static/stamps/youtube.gif" alt="YouTube: subscribe" width="88" height="31"></a>
+      <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener" title="Join the Grug Discord"><img src="/static/stamps/discord.gif" alt="Discord: join now" width="88" height="31"></a>
+    </div>
+    <p class="legal">Grug, Grug Digital, Pearls, characters, logos, names, and all related indicia are trademarks of Grug Digital, ©2026. Grug is not sponsored, authorized or endorsed by Roblox Corporation, Anthropic or Google. Roblox is a trademark of Roblox Corporation, Claude of Anthropic and Gemini of Google, and no affiliation with these companies is intended.</p>
+  </div>
+</footer>
+
+<script>
 /* Asset packs: live from itch.io via /api/itch-assets (functions/api/itch-assets.js, src/itch/itch.js), falling back to
-   the copy in static/itch-assets.json. Laid out like the Arcade's games list: the itch collections are the categories on
-   the left (plus "Just added": packs not in a collection yet, and new ones), tabs sort, the search box filters, 16 tiles a
-   page beside the sponsor box. One "Make a character" tile sits among the packs on every page, like an ad: it opens the developers' Agent Avatar Studio. */
+   the copy in static/itch-assets.json. The itch collections are the category pills (plus "Just added": packs not in a
+   collection yet, and new ones); the three buttons sort; the search box filters. Every pack that matches is shown. Two
+   tiles that aren't packs sit among them when nothing is being searched: one of our own characters, which opens the
+   Agent Avatar Studio, and our partner Warpdrive's (pre-orders aren't open: it sends people to see it, never "buy"). */
 (function () {
   const $ = id => document.getElementById(id);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-  const SHOW_NAME = { grug: 'Grug', ranger: 'Ranger', skater: 'Skater', medic: 'Medic', 'snow-rider': 'Snow Rider', racer: 'Racer' };
-  const sceneAlt = b => /^slide/.test(b) ? 'The purple sky slide in Slide 999 KM, a free game in the Grug Arcade' : 'Desert houses in Zombie Zones, a free game in the Grug Arcade';
-  const PAGE = 16, rnd = n => Math.floor(Math.random() * n), seed = rnd(97);
-  const ADS = [
-    { id: 'grug', bg: 'slide-999-km-purple-slide-1', h: 'Have your agent make a character', p: 'It paints an outfit, then exports a rigged model for your game.' },
-    { id: 'ranger', bg: 'zombie-zones-desert-houses-1', h: 'Your game needs a hero', p: 'Make one in a few minutes and drop it into any engine.' },
-    { id: 'skater', bg: 'slide-999-km-purple-slide-2', h: 'One character, every engine', p: 'A rigged .glb that works in Roblox, Unity, Godot and Blender.' },
-    { id: 'medic', bg: 'zombie-zones-desert-houses-2', h: 'NPCs that look the part', p: 'Real painted clothes on a rigged model, ready to export.' },
-    { id: 'snow-rider', bg: 'slide-999-km-purple-slide-3', h: 'Ship it in your itch.io game', p: 'Export your character and use it in games you sell.' },
-    { id: 'racer', bg: 'slide-999-km-purple-slide-4', h: 'Make a character with Claude', p: 'Copy one prompt, send it to Claude, get the .glb back.', claude: true }
+  const OWN = [
+    { id: 'ranger', bg: 'zombie-zones-desert-houses-1', h: 'Have your agent make a character', p: 'Free tool' },
+    { id: 'skater', bg: 'slide-999-km-purple-slide-2', h: 'One character, every engine', p: 'Free tool' },
+    { id: 'snow-rider', bg: 'slide-999-km-purple-slide-3', h: 'NPCs that look the part', p: 'Free tool' }
   ];
-  const state = { cat: 'all', sort: 'featured', q: '', page: 1 };
+  const own = OWN[Math.floor(Math.random() * OWN.length)];
+  const state = { cat: 'all', sort: 'featured', q: '' };
   let data = null, cats = [];
 
-  function ad(page) {
-    const a = ADS[(seed + page) % ADS.length], href = a.claude ? '/agents/' : '/agents/studio/';
-    return `<div class="Cell adt" title="${esc(a.h)}"><div class="GameItem">
-      <div class="AlwaysShown">
-        <a class="thumb" href="${href}" aria-label="${esc(a.h)}: make a character in the Agent Avatar Studio"><img class="bgi" src="/static/showcase/${a.bg}.jpg" alt="${esc(sceneAlt(a.bg))}" loading="lazy"><img class="fgi" src="/static/showcase/grug-digital-avatar-${a.id}.webp" alt="${esc(SHOW_NAME[a.id])}, a character made in the Grug Digital Avatar Studio" loading="lazy"><span class="new free">FREE TOOL</span></a>
-        <div class="GameName"><a href="${href}">${esc(a.h)}</a></div>
-        <div class="PlayerCount"><b>Free</b> <span>· Agent Studio</span></div>
-      </div>
-      <div class="HoverShown"><p>${esc(a.p)}</p><div class="chips lt"><i class="k">Roblox</i><i class="k">Unity</i><i>itch.io</i><i>Godot</i></div></div>
-    </div></div>`;
-  }
-  function tile(it) {
-    const img = it.cover ? `<img src="${esc(it.cover)}" alt="" loading="lazy" decoding="async" width="160" height="127"${it.gif ? ` data-gif="${esc(it.gif)}"` : ''}>` : '';
-    return `<div class="Cell" title="${esc(it.title)}"><div class="GameItem">
-      <div class="AlwaysShown">
-        <a class="thumb" href="${esc(it.url)}" target="_blank" rel="noopener">${img}${it.new ? '<span class="new">NEW</span>' : ''}</a>
-        <div class="GameName"><a href="${esc(it.url)}" target="_blank" rel="noopener">${esc(it.title)}</a></div>
-        <div class="PlayerCount"><b>${esc(it.price || 'Free')}</b> <span>· on itch.io</span></div>
-      </div>
-      <div class="HoverShown">${it.text ? `<p>${esc(it.text)}</p>` : ''}<p>Opens on itch.io</p></div>
-    </div></div>`;
-  }
+  const ownTile = () => `<a class="pack own" href="/agents/studio/"><span class="cover"><img class="bg" src="/static/showcase/${own.bg}.jpg" alt="" loading="lazy"><img class="fg" src="/static/showcase/grug-digital-avatar-${own.id}.webp" alt="A character made in the Grug Avatar Studio" loading="lazy"><span class="tag">Free tool</span></span>
+    <span class="info"><b>${esc(own.h)}</b><small><strong>Free</strong> in the Agent Avatar Studio</small></span></a>`;
+  const wdTile = () => `<a class="pack wd" href="https://warpdrive.team/" target="_blank" rel="noopener sponsored" aria-label="Warpdrive, an indie console family (sponsor)"><span class="cover"><img src="/static/stamps/warpdrive.gif" alt="Release your dream game on Warpdrive" width="176" height="62"><span class="tag">Sponsor</span></span>
+    <span class="info"><b>Warpdrive: an indie console family</b><small><strong>90% to devs</strong> at warpdrive.team</small></span></a>`;
+  const tile = it => `<a class="pack" href="${esc(it.url)}" target="_blank" rel="noopener" title="${esc(it.text || it.title)}"><span class="cover">${it.cover ? `<img src="${esc(it.cover)}" alt="" loading="lazy" decoding="async" width="315" height="250"${it.gif ? ` data-gif="${esc(it.gif)}"` : ''}>` : ''}${it.new ? '<span class="tag">New</span>' : ''}</span>
+    <span class="info"><b>${esc(it.title)}</b><small><strong>${esc(it.price || 'Free')}</strong> on itch.io</small></span></a>`;
   const price = it => parseFloat(String(it.price || '0').replace(/[^0-9.]/g, '')) || 0;
 
   function list() {
@@ -287,47 +196,40 @@ window.GrugArcade.chrome();
     return L;
   }
   function draw() {
-    const L = list(), per = PAGE - 1, pages = Math.max(1, Math.ceil(L.length / per));
-    state.page = Math.min(state.page, pages);
-    const show = L.slice((state.page - 1) * per, state.page * per).map(tile);
-    if (show.length) show.splice((seed + state.page * 5) % (Math.min(show.length, 6) + 1), 0, ad(state.page));
-    const A = window.GrugArcade; if (A && A.WDAD && state.page === 1 && !state.q && show.length > 3) show.splice(Math.min(show.length, 7), 0, A.WDAD.tile());   // our partner, Warpdrive
-    $('GamesContent').innerHTML = show.length ? show.join('') :
-      `<div class="Empty">No packs ${state.q ? 'match "' + esc(state.q) + '"' : 'here yet'}. <a href="#assets" data-cat="all">See all packs</a>, or <a href="/agents/studio/">make a character</a> for free.</div>`;
-    $('pageNum').textContent = state.page; $('pageCount').textContent = pages;
-    $('prevPage').disabled = state.page <= 1; $('nextPage').disabled = state.page >= pages;
-    document.querySelectorAll('#catList a').forEach(a => a.classList.toggle('on', a.dataset.cat === state.cat));
-    document.querySelectorAll('#PackTabs .Tab').forEach(t => t.classList.toggle('on', t.dataset.sort === state.sort));
+    const L = list(), show = L.map(tile);
+    if (!state.q && show.length > 2) { show.splice(Math.min(show.length, 3), 0, ownTile()); if (state.cat === 'all') show.splice(Math.min(show.length, 7), 0, wdTile()); }
+    $('packs').innerHTML = show.length ? show.join('') :
+      `<p class="none">No packs ${state.q ? 'match "' + esc(state.q) + '"' : 'here yet'}. <a href="#assets" data-cat="all">See all packs</a>, or <a href="/agents/studio/">have your agent make a character</a>.</p>`;
+    $('count').textContent = L.length ? L.length + (L.length === 1 ? ' pack' : ' packs') + '. New uploads to the itch.io store show up here on their own.' : '';
+    document.querySelectorAll('#catList button').forEach(b => b.setAttribute('aria-pressed', b.dataset.cat === state.cat));
+    document.querySelectorAll('#sortList button').forEach(b => b.setAttribute('aria-pressed', b.dataset.sort === state.sort));
   }
   function load(d) {
     data = d;
     const col = d.collections.map(c => ({ id: 'c' + c.id, title: c.title, items: c.items.map(id => d.items.find(i => i.id === id)).filter(Boolean) })).filter(c => c.items.length);
     const fresh = d.items.filter(i => i.new || !i.cats || !i.cats.length);
     cats = [{ id: 'all', title: 'All', items: d.items }].concat(fresh.length ? [{ id: 'new', title: 'Just added', items: fresh }] : [], col);
-    $('catList').innerHTML = cats.map(c => `<li><a href="#assets" data-cat="${c.id}" title="${c.items.length} pack${c.items.length === 1 ? '' : 's'}">${esc(c.title)}</a></li>`).join('');
+    $('catList').innerHTML = cats.map(c => `<button type="button" data-cat="${c.id}" aria-pressed="${c.id === state.cat}">${esc(c.title)}</button>`).join('');
     draw();
   }
 
   document.addEventListener('click', e => {
     const c = e.target.closest('[data-cat]');
-    if (c) { e.preventDefault(); state.cat = c.dataset.cat; state.page = 1; draw(); return; }
-    const s = e.target.closest('#PackTabs [data-sort]');
-    if (s) { state.sort = s.dataset.sort; state.page = 1; draw(); }
+    if (c) { e.preventDefault(); state.cat = c.dataset.cat; if (c.tagName === 'A') { state.q = ''; $('searchbox').value = ''; } draw(); return; }
+    const s = e.target.closest('#sortList [data-sort]');
+    if (s) { state.sort = s.dataset.sort; draw(); }
   });
-  $('searchbox').addEventListener('input', e => { state.q = e.target.value.trim(); state.page = 1; if (data) draw(); });
-  document.querySelector('#Cat .SearchIconButton').addEventListener('click', () => $('searchbox').focus());
-  $('prevPage').addEventListener('click', () => { state.page--; draw(); $('assets').scrollIntoView(); });
-  $('nextPage').addEventListener('click', () => { state.page++; draw(); $('assets').scrollIntoView(); });
+  $('searchbox').addEventListener('input', e => { state.q = e.target.value.trim(); if (data) draw(); });
 
   // GIF covers play on hover
-  const box = $('GamesContent');
-  box.addEventListener('mouseover', e => { const t = e.target.closest('.Cell'), img = t && t.querySelector('img[data-gif]'); if (img && !img.dataset.still) { img.dataset.still = img.src; img.src = img.dataset.gif; } });
-  box.addEventListener('mouseout', e => { const t = e.target.closest('.Cell'); if (!t || t.contains(e.relatedTarget)) return; const img = t.querySelector('img[data-still]'); if (img) { img.src = img.dataset.still; delete img.dataset.still; } });
+  const box = $('packs');
+  box.addEventListener('mouseover', e => { const t = e.target.closest('.pack'), img = t && t.querySelector('img[data-gif]'); if (img && !img.dataset.still) { img.dataset.still = img.src; img.src = img.dataset.gif; } });
+  box.addEventListener('mouseout', e => { const t = e.target.closest('.pack'); if (!t || t.contains(e.relatedTarget)) return; const img = t.querySelector('img[data-still]'); if (img) { img.src = img.dataset.still; delete img.dataset.still; } });
 
-  box.innerHTML = Array.from({ length: 8 }, () => '<div class="Cell skel"><div class="GameItem"><div class="AlwaysShown"><span class="thumb"></span><div class="GameName">Loading pack</div><div class="PlayerCount">Loading</div></div></div></div>').join('');
+  box.innerHTML = Array.from({ length: 8 }, () => '<div class="pack skel"><span class="cover"></span><span class="info"><b>Loading pack</b><small>Loading</small></span></div>').join('');
   const get = u => fetch(u, { headers: { accept: 'application/json' } }).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(j => (j && Array.isArray(j.items) && j.items.length) ? j : Promise.reject('empty'));
   get('/api/itch-assets').catch(() => get('/static/itch-assets.json')).then(load).catch(() => {
-    box.innerHTML = '<div class="Empty">The packs couldn\'t load right now. See them all at <a href="https://polysw.itch.io/" target="_blank" rel="noopener">polysw.itch.io</a>.</div>';
+    box.innerHTML = '<p class="none">The packs couldn\'t load right now. See them all at <a href="https://polysw.itch.io/" target="_blank" rel="noopener">polysw.itch.io</a>.</p>';
   });
 })();
 </script>

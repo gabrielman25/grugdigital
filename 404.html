@@ -5,35 +5,35 @@
 <link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/static/fonts/allo.css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Grug · Page not found</title>
+<title>Page not found · Grug Digital</title>
 <link rel="icon" href="/favicon.png">
-<link rel="stylesheet" href="/static/site.css">
-<style>
-main{max-width:440px}
-.card{text-align:center}
-.card p{margin:8px 0 16px}
-.figs{display:flex;justify-content:center;align-items:flex-end;gap:0;height:120px;margin:4px 0 6px}
-.figs img{height:110px;width:auto}
-.figs img:nth-child(2){height:120px}
-.row{justify-content:center}
-</style>
+<meta name="theme-color" content="#f3f4f6">
+<link rel="stylesheet" href="/static/modern.css">
 </head>
 <body>
-<header class="site-top">
-  <a class="logo" href="/" title="Grug Digital home"><img src="/static/arcade/grug-digital-logo.png" alt="Grug Digital"></a>
-  <nav aria-label="Main"><a href="/">Home</a><a href="/arcade/">Players</a><a href="/agents/">Game developers</a><a href="/restaurants/">Restaurants</a></nav>
-  <div class="site-stamps top"><a href="https://warpdrive.team/" target="_blank" rel="noopener sponsored" title="Warpdrive: release your dream game on it (our partner)"><img src="/static/stamps/warpdrive.gif" alt="Release your dream game on Warpdrive" width="88" height="31"></a><a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener" title="Grug on YouTube (PolySwitch)"><img src="/static/stamps/youtube.gif" alt="YouTube: subscribe" width="88" height="31"></a><a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener" title="Join the Grug Discord"><img src="/static/stamps/discord.gif" alt="Discord: join now" width="88" height="31"></a></div>
-</header>
-<main>
-  <section class="card">
-    <h2>Page not found</h2>
-    <div class="figs" aria-hidden="true"><img src="/static/arcade/medic.webp" alt=""><img src="/static/arcade/grug.webp" alt=""><img src="/static/arcade/skater.webp" alt=""></div>
-    <h1>That page isn't here</h1>
-    <p>It may have moved, or the site is being rebuilt.</p>
-    <div class="row"><a class="btn" href="/">Go to the home page</a><a class="btn btn--ghost" href="/arcade/">Play the arcade</a></div>
-  </section>
-</main>
-<div class="site-stamps"><a href="https://warpdrive.team/" target="_blank" rel="noopener sponsored" title="Warpdrive: release your dream game on it (our partner)"><img src="/static/stamps/warpdrive.gif" alt="Release your dream game on Warpdrive" width="88" height="31"></a><a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener" title="Grug on YouTube (PolySwitch)"><img src="/static/stamps/youtube.gif" alt="YouTube: subscribe" width="88" height="31"></a><a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener" title="Join the Grug Discord"><img src="/static/stamps/discord.gif" alt="Discord: join now" width="88" height="31"></a></div>
+<!-- main must keep this file: without a 404.html Cloudflare Pages answers unknown paths with the home page, and the
+     middleware (functions/_middleware.js) would never fall back to the legacy site. -->
+<div class="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><i class="mark" aria-hidden="true"></i>Grug Digital</a>
+    <nav aria-label="Sections">
+      <a href="/arcade/">Players</a>
+      <a href="/agents/">Game developers</a>
+      <a href="/restaurants/">Restaurants</a>
+    </nav>
+    <div class="right">
+      <a class="btn sm" href="/support.html">Help</a>
+    </div>
+  </div>
+</div>
 
+<main class="solo">
+  <div class="in">
+    <div class="crowd" aria-hidden="true"><img src="/static/arcade/medic.webp" alt=""><img src="/static/arcade/grug.webp" alt=""><img src="/static/arcade/skater.webp" alt=""></div>
+    <h1>That page isn't here</h1>
+    <p>It may have moved when the site was split into sections. The home page lists every page there is.</p>
+    <div class="cta"><a class="btn go" href="/">Go to the home page</a><a class="btn" href="/arcade/">Play the Arcade</a></div>
+  </div>
+</main>
 </body>
 </html>

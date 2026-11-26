@@ -1,0 +1,140 @@
+/* The modern look: every page that isn't the Arcade.
+   The Arcade, its games, the players' Avatar Studio and the Pearls pages keep the classic 2011 look (arcade/arcade.css,
+   static/classic.css, static/site.css). Everything else wears this: the home directory, /restaurants/, /packs/, the
+   privacy policy and terms, 404 and the retired /build/ note. /agents/ is the page this was drawn from: it carries its
+   own copy of these pieces in one self-contained file, so keep the two in step when a shared piece changes.
+
+   One system, three palettes, set with data-theme on <html>:
+     (none)  the directory and the company pages: light grey, ink, Grug's green
+     dev     the developers' section: near-black, like /agents/
+     rest    the restaurants' section: white, warm ink, tomato
+   The type is Allo throughout. Sections are full-width bands on a 1120px column, left-aligned. No coloured dots next to
+   text and no coloured accent lines or lips (the owner finds them ugly): colour goes on buttons, pictures and whole panels. */
+:root{
+  --bg:#f3f4f6; --panel:#fff; --raise:#e9ebee; --line:#dcdfe4; --line-hi:#b9bec6;
+  --text:#15171a; --mute:#5b616a;
+  --accent:#9be33c; --accent-hi:#aef053; --accent-ink:#10200a;
+  --display:Allo, system-ui, sans-serif;
+  --body:Allo, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --mono:ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --col:1120px;
+  color-scheme:light;
+}
+[data-theme=dev]{
+  --bg:#0d0e10; --panel:#16181b; --raise:#1e2125; --line:#2b2e33; --line-hi:#454950;
+  --text:#ecedef; --mute:#9da1a9;
+  color-scheme:dark;
+}
+[data-theme=rest]{
+  --bg:#fff; --panel:#f6f3f0; --raise:#ece7e1; --line:#e4ddd5; --line-hi:#c4b8ab;
+  --text:#1f1613; --mute:#6c5f57;
+  --accent:#e0452f; --accent-hi:#ea5a45; --accent-ink:#fff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit}
+h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.08;margin:0;letter-spacing:-.015em}
+h1{font-size:clamp(2.4rem,5.6vw,4.1rem)}
+h2{font-size:clamp(1.8rem,3.4vw,2.6rem)}
+h3{font-size:1.25rem;line-height:1.25;letter-spacing:-.005em}
+p{margin:0}
+code{font-family:var(--mono);font-size:.9em}
+.wrap{max-width:var(--col);margin:0 auto;padding:0 24px}
+.mute{color:var(--mute)}
+:focus-visible{outline:2px solid var(--text);outline-offset:3px;border-radius:6px}
+[data-theme=dev] :focus-visible{outline-color:var(--accent)}
+
+/* ---------- the top bar ---------- */
+.nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:28px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:600 1.15rem var(--display);white-space:nowrap}
+.brand span{color:var(--mute);font-weight:500}
+.brand img{height:30px;width:auto}
+/* the Grug mark: the lime tile with the dino cut out of it (favicon.png is the dino in white, so it's used as a mask) */
+.mark{flex:none;width:30px;height:30px;border-radius:8px;background:#9be33c;position:relative}
+.mark::after{content:"";position:absolute;inset:4px;background:#10200a;-webkit-mask:url(/favicon.png) center/contain no-repeat;mask:url(/favicon.png) center/contain no-repeat}
+.nav nav{display:flex;gap:22px;margin-left:8px;font-size:.94rem}
+.nav nav a{text-decoration:none;color:var(--mute);white-space:nowrap}
+.nav nav a:hover,.nav nav a[aria-current]{color:var(--text)}
+.nav .right{margin-left:auto;display:flex;gap:10px;align-items:center}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid var(--line-hi);background:var(--panel);color:var(--text);
+  font:600 .97rem var(--body);text-decoration:none;cursor:pointer;white-space:nowrap}
+[data-theme=dev] .btn{border-color:var(--line);background:var(--raise)}
+.btn:hover{border-color:var(--text)}
+[data-theme=dev] .btn:hover{border-color:var(--line-hi)}
+.btn.go{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.go:hover{background:var(--accent-hi);border-color:var(--accent-hi)}
+.btn.lg{height:52px;padding:0 24px;font-size:1.06rem;border-radius:14px}
+.btn.sm{height:36px;padding:0 13px;font-size:.88rem;border-radius:10px}
+.btn svg{width:18px;height:18px;flex:none}
+.cta{display:flex;flex-wrap:wrap;gap:10px}
+
+/* ---------- sections ---------- */
+.sec{padding:88px 0;border-bottom:1px solid var(--line)}
+.sec.tight{padding:56px 0}
+.sec-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:end;margin-bottom:40px}
+.sec-head p{color:var(--mute);font-size:1.06rem;max-width:34em}
+.lead{font-size:1.16rem;color:var(--mute);max-width:33em}
+.links{display:flex;flex-wrap:wrap;gap:10px}
+
+/* a row of facts in one bordered strip */
+.facts{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel)}
+.facts>*{padding:22px 24px;border-left:1px solid var(--line);min-width:0}
+.facts>*:first-child{border-left:0}
+.facts.two{grid-template-columns:repeat(2,1fr)}
+.facts h3{margin-bottom:6px}
+.facts p{color:var(--mute);font-size:.96rem}
+
+/* numbered steps: only for a real sequence */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);counter-reset:s;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel)}
+.steps li{counter-increment:s;padding:26px 24px 28px;border-left:1px solid var(--line)}
+.steps li:first-child{border-left:0}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--raise);font:600 1rem var(--display);margin-bottom:16px}
+.steps p{color:var(--mute);font-size:.96rem;margin-top:6px}
+
+/* ---------- the footer ---------- */
+footer.foot{padding:48px 0 56px;color:var(--mute);font-size:.9rem}
+.foot .cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;margin-bottom:32px}
+.foot h3{font:600 .95rem var(--display);color:var(--text);margin-bottom:10px;letter-spacing:0}
+.foot ul{list-style:none;margin:0;padding:0}
+.foot li{margin:6px 0}
+.foot a{color:var(--mute);text-decoration:none}
+.foot a:hover{color:var(--text);text-decoration:underline}
+.foot .stamps{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.foot .stamps img{width:88px;height:31px}
+.foot .legal{max-width:72em;font-size:.84rem;line-height:1.55}
+
+/* ---------- small pages: one message in the middle (404, a retired page) ---------- */
+.solo{min-height:calc(100vh - 61px);display:grid;place-items:center;padding:48px 24px}
+.solo .in{max-width:34rem;text-align:left}
+.solo h1{font-size:clamp(2rem,5vw,3rem);margin-bottom:14px}
+.solo p{color:var(--mute);font-size:1.08rem;margin-bottom:26px}
+.solo .crowd{display:flex;align-items:flex-end;height:150px;margin:0 0 26px -10px}
+.solo .crowd img{height:130px;width:auto}
+.solo .crowd img:nth-child(2){height:150px;margin:0 -14px;position:relative;z-index:1}
+.solo .fine{margin:26px 0 0;font-size:.9rem}
+
+@media (max-width:940px){
+  .nav nav{display:none}
+  .sec{padding:60px 0}
+  .sec.tight{padding:44px 0}
+  .sec-head{grid-template-columns:1fr;gap:16px;margin-bottom:28px}
+  .facts,.facts.two,.steps{grid-template-columns:1fr}
+  .facts>*,.steps li{border-left:0;border-top:1px solid var(--line)}
+  .facts>*:first-child,.steps li:first-child{border-top:0}
+  .foot .cols{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:520px){
+  .wrap{padding:0 16px}
+  .cta .btn{flex:1 1 100%}
+  .nav .wrap{gap:12px}
+  .nav .right .hide-sm{display:none}
+  .solo .crowd{height:116px;margin-left:-6px}
+  .solo .crowd img{height:98px}
+  .solo .crowd img:nth-child(2){height:116px;margin:0 -12px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
