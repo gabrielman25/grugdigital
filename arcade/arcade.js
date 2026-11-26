@@ -34,8 +34,8 @@
     { slug: 'grug-studio', name: 'Grug Studio', genres: ['gametutorials', 'town-and-city'], tag: 'Make your avatar · build at true scale', featured: true,
       added: '2026-11-25T02:00:00Z', updated: '2026-11-25T02:00:00Z', alt: 'A player beside a two-storey building on a studded baseplate, with the Avatar and Building pads',
       stats: ['Create your avatar, then walk around', 'Change a building live, at real size'], players: '1',
-      about: ['A baseplate for making things for your game. Walk onto the green pad (or press Create an Avatar) and the camera zooms in on you while the Avatar Studio opens: change your hair, face and outfit, press Wear it, and you are back on the baseplate wearing your new look.',
-        'Walk onto the blue pad (or press Make a Building) and a building spawns on the plot. Change its size, roof, doors, floors and windows with the sliders while you walk around it. You are the real size of a Roblox character, so you see exactly how big it will be in a game. When it looks right, paint it in the Building Studio and download it.'],
+      about: ['A baseplate for trying things out. Walk onto the green pad (or press Create an Avatar) and the camera zooms in on you while the Avatar Studio opens: change your hair, face and outfit, press Wear it, and you are back on the baseplate wearing your new look.',
+        'Walk onto the blue pad (or press Make a Building) and a building spawns on the plot. Change its size, roof, doors, floors and windows with the sliders while you walk around it. You are the real size of a Roblox character, so you see exactly how big it will be in a game.'],
       controls: [['WASD / arrows', 'Walk'], ['Space', 'Jump'], ['Drag', 'Turn the camera'], ['Mouse wheel', 'Zoom'], ['Phone', 'Left side walks, right side turns, pinch to zoom'], ['Esc', 'Game Menu']] },
     { slug: 'zone-royale', coop: true, name: 'Zone Royale', genres: ['war', 'adventure'], tag: '100 players · battle royale', featured: true,
       added: '2026-11-24T22:00:00Z', updated: '2026-11-24T23:30:00Z', alt: 'A player gliding down into a blocky city on a big island',
@@ -125,9 +125,10 @@
   /* the header, background, side ads, Pearls button, footer and "Playing as" box, the same on every Arcade page */
   function chrome() {
     const onList = !!$('PlayTabs');
-    $('dropGenres').innerHTML = GENRES.map(([id, t]) => `<a href="/arcade/#${id}" data-genre="${id}">${esc(t)}</a>`).join('');
+    // pages outside the players' section (the home directory, the developers' and restaurants' pages) have no Games menu
+    if ($('dropGenres')) $('dropGenres').innerHTML = GENRES.map(([id, t]) => `<a href="/arcade/#${id}" data-genre="${id}">${esc(t)}</a>`).join('');
     if (!onList) document.querySelectorAll('.dropdown [data-sort],.dropdown [data-search]').forEach(a => { a.removeAttribute('data-sort'); a.removeAttribute('data-search'); a.href = '/arcade/'; });
-    $('seoGenres').innerHTML = GENRES.slice(1).map(([id, t]) => `<a href="/arcade/#${id}" data-genre="${id}" title="${esc(t)} Games">${esc(t)}</a>`).join('&nbsp;|&nbsp;');
+    if ($('seoGenres')) $('seoGenres').innerHTML = GENRES.slice(1).map(([id, t]) => `<a href="/arcade/#${id}" data-genre="${id}" title="${esc(t)} Games">${esc(t)}</a>`).join('&nbsp;|&nbsp;');
     /* the 88x31 stamps: top right of the banner, and in the footer */
     const STAMPS = [[WD, 'warpdrive', 'Warpdrive: release your dream game on it (our partner)', 'noopener sponsored'],
       ['https://www.youtube.com/@PolySwitchOfficial', 'youtube', 'Grug on YouTube (PolySwitch): subscribe', 'noopener'],
@@ -139,9 +140,11 @@
     const lbBox = $('Leaderboard'); if (lbBox && Math.random() < 0.5) lbBox.innerHTML = WDAD.leader();
     const rect = document.querySelector('#GamePageAdDiv .rect'); if (rect && Math.random() < 0.5) { rect.outerHTML = WDAD.rect(); const n = document.querySelector('#GamePageAdDiv .rect-note'); if (n) n.textContent = 'Our partner: an indie console family'; }
     const drop = $('dropNav'), tog = $('gamesMenuToggle');
-    const setDrop = on => { drop.classList.toggle('open', on); tog.setAttribute('aria-expanded', on); };
-    tog.addEventListener('click', e => { e.stopPropagation(); setDrop(!drop.classList.contains('open')); });
-    document.addEventListener('click', e => { if (!drop.contains(e.target) || e.target.closest('a')) setDrop(false); });
+    if (drop && tog) {
+      const setDrop = on => { drop.classList.toggle('open', on); tog.setAttribute('aria-expanded', on); };
+      tog.addEventListener('click', e => { e.stopPropagation(); setDrop(!drop.classList.contains('open')); });
+      document.addEventListener('click', e => { if (!drop.contains(e.target) || e.target.closest('a')) setDrop(false); });
+    }
 
     /* the background: each shot pans one way, then crossfades into the next, panning the other way */
     (() => {

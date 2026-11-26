@@ -22,7 +22,7 @@ and to look right when a link is shared on Discord, X, iMessage and other sites.
   `--check` shows what each file carries.
 - **Share cards and structured data** in each page's `<head>`, between `<!-- seo -->` and `<!-- /seo -->`: Open Graph +
   Twitter cards, and JSON-LD (Grug Digital as the Organization with its logo and socials, the games as `VideoGame`,
-  the two studios as `WebApplication`, and the promotional images as `ImageObject`s with creator, credit and copyright).
+  the Avatar Studio's two versions as `WebApplication`, and the promotional images as `ImageObject`s with creator, credit and copyright).
   The game page (`/arcade/place/?id=…`) adds its own canonical address and `VideoGame` data from its script.
 - **`sitemap.xml`** (every page, with its images) and **`robots.txt`** pointing to it.
 
@@ -34,8 +34,8 @@ and to look right when a link is shared on Discord, X, iMessage and other sites.
   `seo_head.py` (it reads `GAMES` from `arcade/arcade.js`).
 - **add or replace a promotional image:** give it a descriptive file name, add it to `images.json`, run `tag_images.py`
   (and `seo_head.py` if a page should list it).
-- **rebuild the Avatar Studio or the Building Studio** (`src/character/build.py`, `src/build/build.py`): run
-  `seo_head.py` again afterwards, since those pages are regenerated without the block.
+- **rebuild the Avatar Studio** (`src/character/build.py`, which writes both `/character/` and `/agents/studio/`): run
+  `seo_head.py` again afterwards, since the agents' page is regenerated without the block.
 
 After a deploy: submit `https://grugdigital.com/sitemap.xml` in Google Search Console, and check a page with the Rich
 Results Test. Google re-crawls on its own schedule, so new images can take days to weeks to appear in Google Images.

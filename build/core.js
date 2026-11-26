@@ -1,5 +1,5 @@
-/* generated from src/build/core.js by src/build/build.py: the Building Studio's building, used by the
-   Grug Studio game (/arcade/grug-studio/) as window.GrugBuildCore. App.onChange runs after every change. */
+/* generated from src/build/core.js by src/build/build.py: the block builder kept from the retired Building Studio,
+   used by the Grug Studio game (/arcade/grug-studio/) as window.GrugBuildCore. App.onChange runs after every change. */
 window.GrugBuildCore = (() => {
 const App = {}, LOOKS = { realistic: 1 };
 'use strict';

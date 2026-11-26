@@ -4,10 +4,31 @@
 The **old** site is on the `legacy` branch, unchanged, with its own long CLAUDE.md: read that one only when working on
 the legacy branch. See `README.md` for how the two fit together.
 
+## Three sections, one directory (keep them apart)
+
+The site is three places for three audiences, and the home page (`index.html`) is the directory that sends people to
+them: three doors, then every page listed by section. Put a new page in the section it belongs to, link it from that
+section's nav and from the directory, and don't cross-sell another section's tools inside it.
+
+| Section | Who | Pages | Nav bar |
+| --- | --- | --- | --- |
+| **Players** | people who want to play and dress an avatar | `/arcade/` (and every game), `/character/` (the players' Avatar Studio), `/character/pearls/` | green |
+| **Game developers** | people whose AI agent makes characters for their game | `/agents/` (dark, its own look), `/agents/studio/` (the agents' Avatar Studio), `/packs/` (the itch.io asset packs) | graphite (`.Navigation.dev`) |
+| **Restaurants** | owners and managers | `/restaurants/`, and the tools it opens on the legacy deploy | tomato (`.Navigation.rest`) |
+
+- Every section's bar starts with the section's name (`<li class="sect">`) and ends with **Grug home** (`<li class="end">`).
+  The home page, `privacy.html`, `terms.html` and `404.html` carry the directory's own short nav (Players, Game developers,
+  Restaurants, Help). The colours are in `static/classic.css`; `.sect` and `.end` are in `arcade/arcade.css`.
+- **The only agentic tool is the Avatar Studio.** The Building Studio was retired (below): don't link it, and don't add
+  another agent tool without the owner asking.
+- The Avatar Studio comes in **two versions built from one file** (below): never add agent or Claude panels to the
+  players' one, and never add pickers or sliders to the agents' one.
+
 ## The legacy pass-through (don't break it)
 
 `functions/_middleware.js` serves every address `main` has no file for from the legacy deploy
-(https://legacy.grugdigital.pages.dev), at the same address, with a "legacy version" banner. That keeps every old link,
+(https://legacy.grugdigital.pages.dev), at the same address, with a "legacy version" banner (the restaurants' tools get a
+"Grug for restaurants" bar instead: see that section). That keeps every old link,
 printed QR code (`managers/`), NFC tag and installed app working, and keeps people's saved data (it is tied to the address).
 
 - `main` must keep a `404.html`: without one Cloudflare Pages answers unknown paths with the home page (status 200), and the
@@ -18,25 +39,38 @@ printed QR code (`managers/`), NFC tag and installed app working, and keeps peop
 - A file on `main` takes over the old page at the same path. Avoid the old top-level names (listed in README.md) until you
   mean to replace them.
 
-## Avatar Studio (`/character/`)
+## Avatar Studio: two versions of one studio (`/character/` and `/agents/studio/`)
 
-`character/index.html` is generated from the owner's Grug Avatar Studio file plus the Claude layer in `src/character/`
-(the "Make with Claude" sheet, the agent instructions, `window.GrugStudio`, recipe links). Edit the sources there and run
-`python3 src/character/build.py <studio.html>`; read `src/character/README.md` first. `character/claude.md` is the guide
-other Claude sessions follow when someone pastes the studio's link into a chat, so keep it accurate when the studio or
-the API changes, and test the whole flow headless (set → wear an image → downloadR6) before pushing.
+Both pages are generated from the owner's Grug Avatar Studio file plus the layers in `src/character/`. Never hand-edit
+them: change the sources and run `python3 src/character/build.py` (add the path to a new studio file when the owner
+sends one; without it the layers are refreshed in place). Read `src/character/README.md` first, and run
+`python3 src/seo/seo_head.py` afterwards.
 
-## Building Studio (`/build/`)
+- **`/character/`, the players' studio: made for kids and hobbyists.** The owner's studio in the classic look, with the
+  My outfits and Wardrobe layers, and `players.css` / `players.js` on top: words under the tab icons, a Back / Next bar
+  that walks the tabs in order and ends on "Play in the Arcade", a short hello for first-timers, plain-words copy, and a
+  note that the Gemini step needs a grown-up for under-13s. It has **no** "Make with Claude" sheet, skill panel or agent
+  instructions (`patch_studio.py` no longer adds them, and `patch_outfits.py` strips them from an older build). Old
+  `?claude` and `?skill` links go to `/agents/`.
+- **`/agents/studio/`, the agents' studio: clean and minimal.** `agent_studio.py` copies the players' page, sets
+  `body.agent`, hides every picker, slider and tab (`agent_studio.css`) and adds one console (`agent_studio.js`): the
+  agent's instructions first in `<body>` (an AI that only fetches the link reads them), a **Next** box, and three steps
+  that open one at a time: the look as JSON, the Gemini round trip, the export. It wears the `/agents/` look (dark, one
+  green), not the classic one. The alignment sheet keeps only the picture, the match and Wear it.
+- **`window.GrugStudio` (`agent.js`) is the same on both**, with the same saved characters and Pearls (same address).
+  It announces every change as a `grug:studio` event, which the console redraws from. Old prompts and installed skills
+  that open `/character/` keep working.
+- **The guide** is `claude.md.tmpl`, written by `build.py` to `agents/studio/claude.md` and to `character/claude.md` (the
+  address older prompts and skills fetch). Keep it accurate when the studio, the console or the API changes, and test
+  the whole flow headless on both pages (set → wear an image → downloadR6) before pushing.
 
-`build/index.html`, `build/examples/index.html` and `build/claude.md` are generated from `src/build/` by
-`python3 src/build/build.py` (add `--standalone DIR` for single-file copies with everything embedded). Read the
-docstring there first. The pipeline: one building mass + one roof, flush (no overhangs, so nothing hides a wall),
-doors and windows as colour-coded guides; a black two-view reference sheet (back view left, front view right, 45°,
-25° down); Gemini's painting is lined up by silhouette (border flood fill, one fit per view) and projected back
-through a face-id buffer, with a wider margin at the silhouette that the inpaint bleeds over; then the Avatar Studio's
-retro looks (Grug PS1 by default, with vibrance) and a bevel normal map. Keep `build/claude.md` accurate when the
-settings or `window.GrugBuild` change, and test headless (set → wear an image → bake → glbBase64) before pushing.
-New examples: paint them, put the files in `build/examples/`, add them to `designs.json` + `stats.json`, rebuild.
+## Building Studio: retired (November 2026)
+
+`/build/` shows a short "retired" page, and `functions/_middleware.js` sends its other old addresses (examples, guide,
+skill zip) there. The pages, the example buildings, `build/claude.md`, the `game-buildings` skill and most of `src/build/`
+are gone from `main`; the last commit with them is `100f36c`. **`build/core.js` stays**: the Grug Studio game's "Make a
+Building" pad uses it (generated from `src/build/core.js` by `python3 src/build/build.py`). Don't link the Building
+Studio from anywhere, and don't describe the site as making buildings.
 
 ## Pearls on the new site (`static/pearls.js`)
 
@@ -59,21 +93,37 @@ Promotional images (game covers, character and building renders, game scenes, th
 descriptive file names, alt text and embedded Grug Digital metadata; pages carry share cards and JSON-LD; `sitemap.xml`
 and `robots.txt` list it all. Read `src/seo/README.md` before adding or renaming an image: list new promotional images in
 `src/seo/images.json`, run `python3 src/seo/tag_images.py`, then `python3 src/seo/seo_head.py` (also after rebuilding the
-Avatar Studio or the Building Studio). Renamed images keep their old address through `MOVED` in `functions/_middleware.js`.
+Avatar Studio). Renamed images keep their old address through `MOVED` in `functions/_middleware.js`.
 Don't tag textures, placeholders or third-party images.
 
-## Grug for agents (`/agents/`)
+## Grug for agents (`/agents/`): the developers' section
 
 `agents/index.html` is the landing page for people who use AI agents: an "Ask your agent" box with prompts to copy (the
-`PROMPTS` object in its script), both studios, both skills (`src/skill/`) and links to their source on GitHub. It is the
-one page that does **not** wear the classic look, on the owner's request: dark, one self-contained file, Allo throughout, the Building Studio's reference-sheet colours as its legend. Keep its prompts and facts in step with
-`character/claude.md` and `build/claude.md` when the studios or their APIs change.
+`PROMPTS` object in its script), the agents' studio next to the players' one (screenshots in `static/agents/`: retake them
+when either changes), the Claude skill (`src/skill/`) and links to the source on GitHub. It is the one section that does
+**not** wear the classic look, on the owner's request: dark, one self-contained file, Allo throughout. Keep its prompts
+and facts in step with `agents/studio/claude.md` when the studio or its API changes.
 
-**Links to it:** every page that has the green nav has an **Agents** item (the classic pages and the small card pages:
-keep it in step with the rest of the nav), the classic footers have "For AI agents", the orange strip on the home page and
-the Arcade ends "or ask your own agent", and it's linked from the home page's tools list, Free tools box and Claude slop
-box, both studios' Claude panels (`src/character/patch_studio.py`, `src/build/page.html` and `gallery.html`), Grug
-Studio's building panel and help, and both skills. Link it from new pages where an agent could do the work.
+`/packs/` is the section's other page: the itch.io asset pack catalog (it used to be on the home page), in the classic
+look with the graphite nav. See "The itch.io asset list" below.
+
+**Links to it:** the home page's Game developers door and directory, the footers ("Game developers"), `/packs/`, the last
+page of the players' studio ("Making a game with an AI agent?"), `llms.txt` and the skill. The players' pages don't
+advertise it beyond that.
+
+## Grug for restaurants (`/restaurants/`): the restaurants' section
+
+`restaurants/index.html` is the front door for owners and managers, in the classic look with the tomato nav: the one-tap
+setup, the three free tools (rewards card, website, dashboard), how it works, the managers' tour, custom games for
+restaurants near Katy, and the number to text. Its pictures are drawn in CSS with a made-up shop ("Rosa's Tacos"): no
+real business's name, logo or photos (see "Frozen" in the legacy branch's CLAUDE.md, which still applies).
+
+**The tools themselves still live on the legacy deploy** (`/restaurant/`, `/rewards/`, `/business/`, `/managers/`,
+`/for/managers/`, `/partners/`), because printed QR codes, NFC tags and the installed Daypart, Bubble Tea and Café apps
+open those addresses. The middleware serves them there with a **"Grug for restaurants" bar** linking back to
+`/restaurants/` instead of the "legacy version" banner (`REST` and `BAR_REST` in `functions/_middleware.js`), and the pages
+a shop's own guests open (`/site/`, `/rewards/card/`: `GUEST`) get no bar at all. Keep this page's facts in step with those
+pages, and don't promise a price, a plan or a membership here: send people to `/partners/` or the phone number.
 
 ## The font: Allo (`static/fonts/`)
 
@@ -91,9 +141,8 @@ including canvas text (`ctx.font = 'bold 20px Allo,Arial'`). Monospace stays mon
 - `allo-latin.woff2` (187 KB, cached for a year) is the variable font cut down to Latin, punctuation, arrows, maths and the
   symbols the site uses (✓ ✕ ★ ▶ ◀ ● ⚠ ⌘ ♥ ↻); `allo.woff2` is the whole font and loads only for characters outside that
   range. If a page starts loading `allo.woff2`, add its character to the range: `static/fonts/allo.css` says how.
-- The studios: the Building Studio's pages link the shared files and its `--standalone` copies carry the Latin file inline
-  (`src/build/build.py`); the Avatar Studio gets the link and its own font stacks from `src/character/patch_studio.py`
-  (and `classic.css`). The legacy banner (`functions/_middleware.js`) adds the stylesheet to the page, since a shadow
+- The Avatar Studio (both versions) gets the link and its own font stacks from `src/character/patch_studio.py`
+  (and `classic.css`; the agents' console sets Allo in `agent_studio.css`). The legacy banner (`functions/_middleware.js`) adds the stylesheet to the page, since a shadow
   root ignores `@font-face`; the itch.io zoo ad (`static/ads/zoo-ad.js`) loads the Latin file from grugdigital.com
   (`_headers` allows that). `src/ads/` renders its GIFs with it too (copy `allo-latin.woff2` next to the sources).
 
@@ -116,16 +165,18 @@ accent lines or lips (the owner finds them ugly). **Phones matter:** the pages u
 house ad zoomed to fit); each page adds its own phone rules next to its styles. Check new pages at 390px wide.
 
 - `arcade/arcade.css` + `GrugArcade.chrome()` (`arcade/arcade.js`) are the shared header, background, side ads, Pearls
-  button and footer. The home page, `privacy.html` and `terms.html` use them too, with the same header/footer markup
-  copied in (keep the nav in step across `index.html`, `arcade/index.html`, `arcade/place/index.html`, `privacy.html`, `terms.html`).
-- `static/classic.css`: the pieces those pages add on top (`.gbtn` buttons: green, `.gray`, `.claude`, `.blue`; `.Sec`
-  tabbed boxes of any width; `.chips`). `static/legal.css`: the privacy/terms document inside its box.
+  button and footer. The home page, `packs/`, `restaurants/`, `privacy.html` and `terms.html` use them too, with the same
+  header/footer markup copied in. Keep each section's nav in step across its pages: the players' (`arcade/index.html`,
+  `arcade/place/index.html`: Games with its genre menu, My Avatar, My Outfits, Grug Studio, Pearls, Help), the
+  directory's (`index.html`, `privacy.html`, `terms.html`), the developers' (`packs/index.html`) and the restaurants'
+  (`restaurants/index.html`). `chrome()` copes with a page that has no Games menu.
+- `static/classic.css`: the pieces those pages add on top (`.gbtn` buttons: green, `.gray`, `.claude`, `.blue`, `.red` for
+  the restaurants, `.dark` for the developers; `.Sec` tabbed boxes of any width; `.chips`; the section nav colours). `static/legal.css`: the privacy/terms document inside its box.
 - `static/site.css`: the same look for the small card pages (`character/pearls/`, `tizzy/`, `itch/`, `404.html`): the city
   background fading into green, a `.site-top` logo + nav strip, boxes whose first `h2` becomes a dark shiny title bar.
-- The Avatar Studio's theme is `src/character/classic.css` (the green nav as its top bar, with the logo; two rows on
-  phones), put in by `patch_outfits.py`; the Building Studio's is `src/build/classic.css`, put in by `build.py`. Rebuild
-  after changing either.
-- Keep the nav in step on the small pages too (`.site-top` in `404.html`, `tizzy/`, `itch/`, `character/pearls/`).
+- The players' Avatar Studio's theme is `src/character/classic.css` (the green nav as its top bar, with the logo; two
+  rows on phones), put in by `patch_outfits.py`. Rebuild after changing it.
+- Keep the nav in step on the small pages too (`.site-top` in `404.html`, `build/index.html`, `tizzy/`, `itch/`, `character/pearls/`).
 
 ## Partners, sponsors and the stamps
 
@@ -137,24 +188,24 @@ house ad zoomed to fit); each page adds its own phone rules next to its styles. 
 - **The 88x31 stamps** (`static/stamps/`: Warpdrive → their site, YouTube and Discord → ours): `GrugArcade.chrome()` puts them
   top right of the banner and in the footer of every classic page; the small card pages have them as `.site-stamps`.
 
-## The itch.io asset list (home page)
+## The itch.io asset list (`/packs/`)
 
 `/api/itch-assets` (`functions/api/itch-assets.js` + `src/itch/itch.js`) reads https://polysw.itch.io/ and four itch
 collections (the categories, by number in `ITCH.COLLECTIONS`). itch answers 429 to bursts: keep the requests one at a
 time and cached, never fan out. `static/itch-assets.json` is the fallback; see README.md. itch cover URLs are signed per
 size, so only the `315x250` covers itch gives us work: don't rewrite them to other sizes.
 
-## Grug Studio (`/arcade/grug-studio/`): both studios on one baseplate
+## Grug Studio (`/arcade/grug-studio/`): the Avatar Studio and a block builder on one baseplate
 
 An Arcade game built from the Grug Baseplate template (same engine, light, plastic, camera, controls, GUI and NPC players;
 the zoo stations swapped for two pads and a plot). You walk around a studded baseplate as your saved outfit. **Create an Avatar** (the green pad, or the top
 button) zooms the camera in on you and opens the real Avatar Studio over the baseplate in a frame (`/character/?embed`,
 `src/character/embed.js`): it opens the outfit you play as, and its **Wear it** button saves it
 (`GrugStudio.saveAndPlay`, the same save as the arcade card) and messages the game, which dresses you and zooms out.
-**Make a Building** (the blue pad) spawns the Building Studio's own building (`build/core.js`, generated from
-`src/build/core.js` by `build.py`, wrapped as `window.GrugBuildCore` so its names don't clash with the game's), scaled by the studio's figure (1.8 m = 5.2 studs) so it's true to size next to you;
-the sliders change it live, and its settings are the studio's own (`grug.build.v2`), so "Paint it in the Building
-Studio" carries straight on. The game's sky and baseplate match the Avatar Studio's, so the hand-over looks seamless.
+**Make a Building** (the blue pad) spawns the block builder kept from the retired Building Studio (`build/core.js`, generated from
+`src/build/core.js` by `build.py`, wrapped as `window.GrugBuildCore` so its names don't clash with the game's), scaled by its figure (1.8 m = 5.2 studs) so it's true to size next to you;
+the sliders change it live, and its settings are saved as `grug.build.v2`. The building stays in the game: there is no
+painting or download step any more. The game's sky and baseplate match the Avatar Studio's, so the hand-over looks seamless.
 
 ## Games that play in your tab (`/arcade/tab/`) and the Arcade's categories
 

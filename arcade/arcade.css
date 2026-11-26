@@ -89,6 +89,9 @@ img{border:0}
 .Navigation li{padding:6px 0 4px}
 .Navigation li>a{display:inline-block;padding:0 6px;white-space:nowrap;font-weight:bold;color:#fff;text-decoration:none;text-shadow:0 1px 0 rgba(0,40,0,.35)}
 .Navigation li>a:hover{text-decoration:underline}
+/* every section's bar starts with its name (not a link) and ends with the way back to the directory (the home page) */
+.Navigation .sect{padding:6px 8px 4px 6px;font-weight:bold;color:rgba(255,255,255,.75);white-space:nowrap;text-shadow:0 1px 0 rgba(0,0,0,.25)}
+.Navigation li.end{margin-left:auto}
 #gamesMenuToggle{display:inline-block;width:10px;height:6px;margin:0 0 3px -6px;padding:0 6px 0 0;cursor:pointer;vertical-align:middle;border:0;background:none}
 #gamesMenuToggle::after{content:"";display:block;width:0;height:0;border:5px solid transparent;border-top:6px solid #fff;border-bottom:0}
 .dropdown{display:none;position:absolute;left:121px;top:30px;z-index:20;font-weight:normal;box-shadow:0 4px 10px rgba(0,0,30,.4)}
@@ -323,6 +326,8 @@ img{border:0}
   .Navigation ul::-webkit-scrollbar{display:none}
   .Navigation li{flex:none;padding:6px 0 5px}
   .Navigation li>a{font-size:15px;padding:0 7px;white-space:nowrap}
+  .Navigation .sect{padding:6px 4px 5px 8px;font-size:15px}
+  .Navigation li.end{margin-left:0}
   .dropdown{left:0;right:0;top:100%;flex-direction:column}
   .dropdown .gen{width:auto} .dropdown .more{width:auto;display:flex;flex-wrap:wrap} .dropdown .more a{width:50%}
   .SystemAlertText{height:auto;font-size:13px;line-height:17px;padding:4px 6px}

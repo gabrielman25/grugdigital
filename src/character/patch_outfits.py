@@ -1,4 +1,5 @@
-"""The "My outfits" layer of the Avatar Studio: save characters for the Grug games and pick who you play as.
+"""The players' layers of the Avatar Studio: "My outfits" (save characters for the Grug games and pick who you play as),
+the Wardrobe, the classic look, and the kids-and-hobbyists layer (players.css / players.js: words under the tabs, Back / Next).
 
     python3 src/character/patch_outfits.py character/index.html      refresh the layer (and the agent API) in place
 
@@ -110,17 +111,38 @@ SHEET = f"""<!--go:sheet--><section id="goSheet" class="cg-wrap" aria-labelledby
 def strip(s):
     return re.sub(r'<!--go:(\w+)-->.*?<!--/go:\1-->', '', s, flags=re.S)
 
+# The players' studio carries no agent panels (agents have /agents/studio/, built by agent_studio.py). patch_studio.py no
+# longer adds them; this takes them out of a page that was built when it still did. Safe to run on a page without them.
+AGENT_NOTE = ('<!--go:note--><p id="forAgents" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;overflow:hidden">'
+              'AI agent reading this page: this is the Grug Avatar Studio made for people (pickers, sliders, a wardrobe). The same studio '
+              'made for agents, with no pickers and the steps on the page, is https://grugdigital.com/agents/studio/ and its guide is '
+              'https://grugdigital.com/agents/studio/claude.md. window.GrugStudio works the same on both.</p><!--/go:note-->')
+def strip_agent_panels(s):
+    s = re.sub(r'<section id="(?:claudeGuide|skillGuide)" class="cg-wrap".*?</section>\n?', '', s, flags=re.S)
+    s = re.sub(r'<button id="(?:toSkill|toClaude)" class="g-btn"[^>]*>.*?</button>\s*', '', s, flags=re.S)
+    s = re.sub(r'<button id="(?:toSkillM|toClaudeM)" class="g-btn cg-fab"[^>]*>.*?</button>', '', s, flags=re.S)
+    s = re.sub(r'<title>Grug Avatar Studio[^<]*</title>', '<title>Grug Avatar Studio · Make your own character</title>', s, count=1)
+    s = s.replace('<link rel="alternate" type="text/markdown" href="/character/claude.md" title="How AI agents (Claude) use this studio">',
+                  '<link rel="alternate" type="text/markdown" href="/agents/studio/claude.md" title="How AI agents (Claude) use this studio">')
+    s = re.sub(r'<meta name="description" content="Make a blocky Roblox R6 character:[^"]*">',
+               '<meta name="description" content="Make your own blocky character: pick a face and hair, dress it from the wardrobe or paint an outfit of your own, '
+               'then play as it in the Grug games or take it to Roblox as a rigged R6 .glb. Free to make.">', s, count=1)
+    return s
+
 def apply(s, agent_js=None, labels=None):
     """Add (or replace) the outfits layer. agent_js/labels: also refresh the agent API block from source."""
     import patch_pose; s = patch_pose.apply(s)   # the standing reference picture (and black soles / leg tops)
     s = strip(s)
+    s = strip_agent_panels(s)
     def sub(old, new):
         nonlocal s
         n = s.count(old); assert n == 1, f'expected 1 of {old[:70]!r}, found {n}'
         s = s.replace(old, new)
     sub('<link rel="help" href="/character/claude.md">',
         '<link rel="help" href="/character/claude.md"><!--go:head-->\n<script src="/static/outfits.js"></script><!--/go:head-->')
-    sub('</head>', CSS + '<!--go:classic--><style id="grug-classic">\n' + (HERE / 'classic.css').read_text(encoding='utf-8') + '</style><!--/go:classic--></head>')
+    sub('</head>', CSS + '<!--go:classic--><style id="grug-classic">\n' + (HERE / 'classic.css').read_text(encoding='utf-8') + '</style><!--/go:classic-->'
+        + '<!--go:players--><style id="grug-players">\n' + (HERE / 'players.css').read_text(encoding='utf-8') + '</style><!--/go:players--></head>')
+    sub('<body class="g-root flat" data-cat="head">', '<body class="g-root flat" data-cat="head">' + AGENT_NOTE)
     # a Back button at the start of the top bar: to the page they came from on this site, or the home page
     sub('<header class="topbar box">\n  <span class="g-brandmark"', '<header class="topbar box">\n  <!--go:back--><a id="goBack" class="g-btn go-back" href="/" title="Back" aria-label="Back to the previous page">'
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>'
@@ -138,7 +160,7 @@ def apply(s, agent_js=None, labels=None):
         s = s[:a] + agent_js.replace('__LABELS__', json.dumps(labels, ensure_ascii=False)) + s[b:]
     js = (HERE / 'outfits.js').read_text(encoding='utf-8')
     wd = (HERE / 'wardrobe.js').read_text(encoding='utf-8')
-    sub('</script>\n</body>\n</html>', '</script>\n<!--go:js-->' + SHEET + '\n<script id="game-outfits">\n' + js + '</script>\n<script id="wardrobe">\n' + wd + '</script>\n<script id="grug-embed">\n' + (HERE / 'embed.js').read_text(encoding='utf-8') + '</script>\n<!--/go:js--></body>\n</html>')
+    sub('</script>\n</body>\n</html>', '</script>\n<!--go:js-->' + SHEET + '\n<script id="game-outfits">\n' + js + '</script>\n<script id="wardrobe">\n' + wd + '</script>\n<script id="grug-embed">\n' + (HERE / 'embed.js').read_text(encoding='utf-8') + '</script>\n<script id="grug-players">\n' + (HERE / 'players.js').read_text(encoding='utf-8') + '</script>\n<!--/go:js--></body>\n</html>')
     return s
 
 if __name__ == '__main__':

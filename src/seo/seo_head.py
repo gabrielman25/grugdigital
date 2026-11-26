@@ -6,15 +6,15 @@
 For each page in PAGES it writes one block in <head>, between <!-- seo --> and <!-- /seo -->: Open Graph and Twitter
 cards (the picture other sites, Discord and chats show for a link), and JSON-LD structured data (Grug Digital as the
 organisation, the games, the studios, and the promotional images with their creator, credit and copyright). Running it
-again replaces the block, so it's safe to re-run, and it must be re-run after src/character/build.py or src/build/build.py
-regenerates those pages. The games come from GAMES in arcade/arcade.js (read with node), the image texts from images.json.
+again replaces the block, so it's safe to re-run, and it must be re-run after src/character/build.py regenerates the two
+studio pages (/character/ and /agents/studio/). The games come from GAMES in arcade/arcade.js (read with node), the image texts from images.json.
 See src/seo/README.md.
 """
 import html, json, os, re, subprocess
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SITE = 'https://grugdigital.com'
-TODAY = '2026-11-25'
+TODAY = '2026-11-26'
 IMAGES = {k: v for k, v in json.load(open(os.path.join(ROOT, 'src/seo/images.json'), encoding='utf-8')).items() if not k.startswith('_')}
 COPYRIGHT = '© 2026 Grug Digital. All rights reserved.'
 KEYWORDS = 'Grug Digital, custom avatar, Roblox alternative, Roblox asset creator, free 3D game assets, Roblox avatar maker, R6 avatar, blocky games, browser games, low poly'
@@ -51,17 +51,17 @@ def first_sentences(paras, n=300):
 
 def build_pages(G):
     P = []
-    P.append(dict(file='index.html', url=SITE + '/', title='Grug Digital · Custom avatars, free 3D game assets and blocky games',
-                  desc='Grug Digital makes custom avatars, free 3D game assets and blocky games: the free Grug Avatar Studio (a Roblox asset creator for R6 characters), the Building Studio, low-poly asset packs and the Grug Arcade.',
+    HOME_T = 'Grug Digital · Free games, an avatar studio for AI agents, and free tools for restaurants'
+    P.append(dict(file='index.html', url=SITE + '/', title=HOME_T,
+                  desc='Grug Digital has three homes: free blocky games and an avatar maker for players, an avatar studio AI agents can drive for game developers, and a free rewards card, website and dashboard for restaurants.',
                   og=OG['home'], og_alt='Grug Digital characters Ranger, Skater and Grug over Grug City',
                   graph=[{'@type': 'WebSite', '@id': SITE + '/#site', 'url': SITE + '/', 'name': 'Grug Digital', 'alternateName': 'Grug', 'publisher': {'@id': SITE + '/#org'}, 'inLanguage': 'en'},
-                         {'@type': 'WebPage', 'url': SITE + '/', 'name': 'Grug Digital · Custom avatars, free 3D game assets and blocky games', 'isPartOf': {'@id': SITE + '/#site'}, 'about': {'@id': SITE + '/#org'},
+                         {'@type': 'WebPage', 'url': SITE + '/', 'name': HOME_T, 'isPartOf': {'@id': SITE + '/#site'}, 'about': {'@id': SITE + '/#org'},
                           'keywords': KEYWORDS, 'primaryImageOfPage': img(OG['home']),
-                          'image': [img(f'static/showcase/grug-digital-avatar-{c}.webp') for c in ['grug', 'ranger', 'skater', 'medic', 'snow-rider', 'racer']]
-                                   + [img(f'static/showcase/slide-999-km-purple-slide-{i}.jpg') for i in range(1, 5)] + [img(f'static/showcase/zombie-zones-desert-houses-{i}.jpg') for i in range(1, 3)]}],
-                  images=[OG['home']] + [f'static/showcase/grug-digital-avatar-{c}.webp' for c in ['grug', 'ranger', 'skater', 'medic', 'snow-rider', 'racer']]
-                         + [f'static/showcase/slide-999-km-purple-slide-{i}.jpg' for i in range(1, 5)] + [f'static/showcase/zombie-zones-desert-houses-{i}.jpg' for i in range(1, 3)]
-                         + ['static/arcade/grug-digital-logo.png']))
+                          'hasPart': [{'@type': 'WebPage', 'name': 'Players: the Grug Arcade', 'url': SITE + '/arcade/'}, {'@type': 'WebPage', 'name': 'Game developers: Grug for agents', 'url': SITE + '/agents/'},
+                                      {'@type': 'WebPage', 'name': 'Restaurants: Grug for restaurants', 'url': SITE + '/restaurants/'}],
+                          'image': [img(f'static/arcade/{c}.webp') for c in ['grug', 'racer', 'snow-rider', 'ranger']]}],
+                  images=[OG['home']] + [f'static/arcade/{c}.webp' for c in ['grug', 'racer', 'snow-rider', 'ranger']] + ['static/arcade/grug-digital-logo.png']))
     listed = [g for g in G]
     P.append(dict(file='arcade/index.html', url=SITE + '/arcade/', title='Grug Arcade · Free blocky games by Grug Digital',
                   desc='Free blocky games in your browser from Grug Digital, a Roblox alternative with nothing to download: Zone Royale, Slide 999 KM, Zombie Zones, Grug City RP, Brickbound, Grug Kingdom and Pet Zones. Play as your own custom avatar, with friends on one screen.',
@@ -92,32 +92,37 @@ def build_pages(G):
         P.append(dict(sitemap_only=True, url=f'{SITE}/arcade/place/?id={g["slug"]}', images=[cover]))
     P.append(dict(file='character/index.html', url=SITE + '/character/', title=None,
                   desc=None, og=OG['studio'], og_alt='Custom Roblox R6 avatars Snow Rider, Grug and Skater, made in the Grug Avatar Studio',
-                  og_title='Grug Avatar Studio · Make a custom Roblox avatar, free',
-                  og_desc='The free custom avatar maker from Grug Digital: a Roblox asset creator for R6 characters. Pick hair and a face, paint a shirt and pants with AI, and download the rigged .glb for Roblox, Unity, Godot or Blender.',
+                  og_title='Grug Avatar Studio · Make your own character, free',
+                  og_desc='The free custom avatar maker from Grug Digital: pick a face and hair, dress up from the wardrobe or paint an outfit of your own, then play as your character in the Grug games or take it to Roblox as a rigged R6 .glb.',
                   graph=[{'@type': 'WebApplication', 'name': 'Grug Avatar Studio', 'url': SITE + '/character/', 'applicationCategory': 'DesignApplication', 'operatingSystem': 'Any (web browser)',
                           'description': 'A free custom avatar maker and Roblox asset creator: make blocky Roblox R6 characters, paint custom shirts and pants, and export a rigged .glb.',
                           'offers': {'@type': 'Offer', 'price': 0, 'priceCurrency': 'USD'}, 'publisher': {'@id': SITE + '/#org'}, 'keywords': KEYWORDS, 'image': [img(OG['studio'])]
                           + [img(f'character/looks/{n}/preview.png') for n in ['grug', 'flannel', 'medic', 'racer', 'ranger', 'scavenger', 'skater', 'snow-rider']]}],
                   images=[OG['studio']] + [f'character/looks/{n}/preview.png' for n in ['grug', 'flannel', 'medic', 'racer', 'ranger', 'scavenger', 'skater', 'snow-rider']]))
-    thumbs = [f'build/examples/{n}-thumb.jpg' for n in ['cafe', 'forge', 'hab', 'house', 'inn', 'tower']]
-    P.append(dict(file='build/index.html', url=SITE + '/build/', title=None, desc=None, og='build/examples/inn-thumb.jpg', og_w=None, og_h=None,
-                  og_alt='A Tudor inn, a 3D building made in the Grug Building Studio', og_title='Grug Building Studio · Free 3D game assets from Grug Digital',
-                  og_desc='Block out a chunky building, paint it with AI and download a textured, retro 3D model (.glb): free 3D game assets from Grug Digital.',
-                  graph=[{'@type': 'WebApplication', 'name': 'Grug Building Studio', 'url': SITE + '/build/', 'applicationCategory': 'DesignApplication', 'operatingSystem': 'Any (web browser)',
-                          'description': 'Make free 3D game assets: block out a building, paint it with AI and export a textured low-poly .glb.', 'offers': {'@type': 'Offer', 'price': 0, 'priceCurrency': 'USD'},
-                          'publisher': {'@id': SITE + '/#org'}, 'keywords': KEYWORDS, 'image': [img(t) for t in thumbs]}],
-                  images=thumbs))
-    P.append(dict(file='build/examples/index.html', url=SITE + '/build/examples/', title=None, desc=None, og='build/examples/tower-thumb.jpg',
-                  og_alt='A stone watchtower, a 3D building made in the Grug Building Studio', og_title='Example buildings · Grug Building Studio',
-                  og_desc='Free 3D game assets from Grug Digital: a café, a forge, a habitat, a house, an inn and a tower, each made in the Grug Building Studio.',
-                  graph=[{'@type': 'CollectionPage', 'url': SITE + '/build/examples/', 'name': 'Example buildings · Grug Building Studio', 'publisher': {'@id': SITE + '/#org'}, 'keywords': KEYWORDS, 'image': [img(t) for t in thumbs]}],
-                  images=thumbs))
+    cast = [f'static/showcase/grug-digital-avatar-{c}.webp' for c in ['grug', 'ranger', 'skater', 'medic', 'snow-rider', 'racer']]
     P.append(dict(file='agents/index.html', url=SITE + '/agents/', title=None, desc=None, og=OG['studio'],
-                  og_alt='Custom Roblox avatars made in the Grug Avatar Studio', og_title='Grug for agents · Characters and buildings your AI agent can make',
-                  og_desc='Copy a prompt, send it to Claude or any agent that can use a browser, and get a rigged Roblox R6 character or a textured building back as a .glb.',
-                  graph=[{'@type': 'WebPage', 'url': SITE + '/agents/', 'name': 'Grug for agents', 'publisher': {'@id': SITE + '/#org'}, 'keywords': KEYWORDS,
-                          'image': [img(f'static/showcase/grug-digital-avatar-{c}.webp') for c in ['grug', 'ranger', 'snow-rider']] + [img(t) for t in thumbs]}],
-                  images=[f'static/showcase/grug-digital-avatar-{c}.webp' for c in ['grug', 'ranger', 'snow-rider']] + thumbs))
+                  og_alt='Custom Roblox avatars made in the Grug Avatar Studio', og_title='Grug for agents · Roblox characters your AI agent can make',
+                  og_desc='Grug Avatar Studio has a version built for AI agents: no sliders, just the steps and an API. Copy a prompt, send it to Claude or any agent that can use a browser, and get a rigged Roblox R6 character back as a .glb.',
+                  graph=[{'@type': 'WebPage', 'url': SITE + '/agents/', 'name': 'Grug for agents', 'publisher': {'@id': SITE + '/#org'}, 'keywords': KEYWORDS, 'image': [img(c) for c in cast]}],
+                  images=cast + ['static/agents/agent-avatar-studio-for-ai-agents.webp', 'static/agents/grug-avatar-studio-for-players.webp']))
+    P.append(dict(file='agents/studio/index.html', url=SITE + '/agents/studio/', title=None, desc=None, og=OG['studio'],
+                  og_alt='Custom Roblox avatars made in the Grug Avatar Studio', og_title='Grug Avatar Studio for agents · Roblox R6 characters from one prompt',
+                  og_desc='The Grug Avatar Studio with the hand controls taken away, for AI agents: set a look with window.GrugStudio, paint a shirt and pants in Gemini, and export a rigged Roblox R6 .glb.',
+                  graph=[{'@type': 'WebApplication', 'name': 'Grug Avatar Studio for agents', 'url': SITE + '/agents/studio/', 'applicationCategory': 'DeveloperApplication', 'operatingSystem': 'Any (web browser)',
+                          'description': 'The Grug Avatar Studio for AI agents: no pickers or sliders, a JavaScript API (window.GrugStudio) and the steps on the page. Makes rigged Roblox R6 characters with painted outfits.',
+                          'offers': {'@type': 'Offer', 'price': 0, 'priceCurrency': 'USD'}, 'publisher': {'@id': SITE + '/#org'}, 'keywords': KEYWORDS, 'image': [img(OG['studio'])]}],
+                  images=[OG['studio'], 'static/agents/agent-avatar-studio-for-ai-agents.webp']))
+    P.append(dict(file='packs/index.html', url=SITE + '/packs/', title=None, desc=None, og=OG['home'], og_alt='Grug Digital characters Ranger, Skater and Grug over Grug City',
+                  og_title='Asset packs · Low-poly 3D models for Roblox, Unity and Godot · Grug Digital',
+                  graph=[{'@type': 'CollectionPage', 'url': SITE + '/packs/', 'name': 'Grug Digital asset packs', 'publisher': {'@id': SITE + '/#org'}, 'keywords': KEYWORDS,
+                          'description': 'Low-poly 3D asset packs for Roblox, Unity, Godot and other engines: characters, pets, hats and props, from the Grug Digital store on itch.io.'}],
+                  images=[]))
+    P.append(dict(file='restaurants/index.html', url=SITE + '/restaurants/', title=None, desc=None, og=OG['home'], og_alt='Grug Digital',
+                  og_title='Grug for restaurants · A free rewards card, website and dashboard',
+                  graph=[{'@type': 'WebPage', 'url': SITE + '/restaurants/', 'name': 'Grug for restaurants', 'publisher': {'@id': SITE + '/#org'},
+                          'description': 'Free tools for cafés, bars and restaurants: a stamp card guests scan, a website made from it, and a dashboard for schedules, checklists and temperatures.',
+                          'audience': {'@type': 'BusinessAudience', 'name': 'Restaurant, café and bar owners and managers'}}],
+                  images=[]))
     for f, u, t, og in [('character/pearls/index.html', '/character/pearls/', 'Pearls · Grug Avatar Studio', OG['studio']), ('privacy.html', '/privacy.html', 'Privacy policy · Grug Digital', OG['home']),
                         ('terms.html', '/terms.html', 'Terms of service · Grug Digital', OG['home'])]:
         P.append(dict(file=f, url=SITE + u, title=None, desc=None, og=og, og_alt='Grug Digital', og_title=t, graph=[{'@type': 'WebPage', 'url': SITE + u, 'name': t, 'publisher': {'@id': SITE + '/#org'}}], images=[]))
@@ -133,7 +138,6 @@ def head_block(p, s):
     m = re.search(r'<title>([^<]*)</title>', s); title = p.get('og_title') or p.get('title') or (html.unescape(m.group(1)) if m else 'Grug Digital')
     d = re.search(r'<meta name="description" content="([^"]*)"', s); desc = p.get('og_desc') or p.get('desc') or (html.unescape(d.group(1)) if d else '')
     og = p['og']; w, h = p.get('og_w', 1200), p.get('og_h', 630)
-    if og.startswith('build/'): w = h = None
     L = ['<!-- seo: written by src/seo/seo_head.py (re-run it, don\'t edit by hand) -->',
          '<meta property="og:site_name" content="Grug Digital">', '<meta property="og:type" content="website">',
          f'<meta property="og:title" content="{esc(title)}">', f'<meta property="og:description" content="{esc(desc)}">', f'<meta property="og:url" content="{p["url"]}">',

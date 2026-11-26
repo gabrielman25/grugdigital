@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/fonts/allo.css">
+<!-- the classic 920px page, like the Arcade; on phones arcade.css reflows it into one column -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grug for restaurants · A free rewards card, website and dashboard</title>
+<!-- seo: written by src/seo/seo_head.py (re-run it, don't edit by hand) -->
+<meta property="og:site_name" content="Grug Digital">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Grug for restaurants · A free rewards card, website and dashboard">
+<meta property="og:description" content="Free tools for cafés, bars and restaurants from Grug Digital: a stamp card guests scan, a website made from it, and a dashboard for schedules, checklists and temperatures. Ready in about a minute, with no sign-up.">
+<meta property="og:url" content="https://grugdigital.com/restaurants/">
+<meta property="og:image" content="https://grugdigital.com/static/og/grug-digital-custom-avatars-and-free-games.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Grug Digital">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Grug for restaurants · A free rewards card, website and dashboard">
+<meta name="twitter:description" content="Free tools for cafés, bars and restaurants from Grug Digital: a stamp card guests scan, a website made from it, and a dashboard for schedules, checklists and temperatures. Ready in about a minute, with no sign-up.">
+<meta name="twitter:image" content="https://grugdigital.com/static/og/grug-digital-custom-avatars-and-free-games.jpg">
+<meta name="twitter:image:alt" content="Grug Digital">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://grugdigital.com/#org","name":"Grug Digital","alternateName":"Grug","url":"https://grugdigital.com/","logo":{"@type":"ImageObject","url":"https://grugdigital.com/static/arcade/grug-digital-logo.png"},"sameAs":["https://www.youtube.com/@PolySwitchOfficial","https://www.instagram.com/grugdigital","https://discord.gg/3ENePvNGJy","https://polysw.itch.io/"]},{"@type":"WebPage","url":"https://grugdigital.com/restaurants/","name":"Grug for restaurants","publisher":{"@id":"https://grugdigital.com/#org"},"description":"Free tools for cafés, bars and restaurants: a stamp card guests scan, a website made from it, and a dashboard for schedules, checklists and temperatures.","audience":{"@type":"BusinessAudience","name":"Restaurant, café and bar owners and managers"}}]}</script>
+<!-- /seo -->
+<meta name="description" content="Free tools for cafés, bars and restaurants from Grug Digital: a stamp card guests scan, a website made from it, and a dashboard for schedules, checklists and temperatures. Ready in about a minute, with no sign-up.">
+<link rel="icon" href="/favicon.png">
+<link rel="canonical" href="https://grugdigital.com/restaurants/">
+<script src="/static/pearls.js"></script>
+<link rel="stylesheet" href="/arcade/arcade.css">
+<link rel="stylesheet" href="/static/classic.css">
+<style>
+/* Grug for restaurants: the restaurants' section of the site, in the classic look with its own tomato nav bar
+   (.Navigation.rest in static/classic.css). The tools themselves still live on the legacy deploy (the one-tap setup, the
+   rewards card builder, the dashboards, the managers' walkthrough, the custom games pitch): functions/_middleware.js serves
+   them at their old addresses with a "Grug for restaurants" bar that links back here. Keep the facts on this page in step
+   with those pages (legacy branch: restaurant/, rewards/, business/, for/managers/, partners/). */
+html{scroll-behavior:smooth;scroll-padding-top:8px}
+#Body h1,#Body h2,#Body h3{display:block}
+.lb.rest .bgk{background:linear-gradient(90deg,#5a1409 0,#a52a16 55%,#dc4a34 100%)}
+.lb.rest .t{left:150px;width:400px}
+.lb.rest .t b{text-shadow:0 2px 0 #3d0c04}
+.lb.rest .t>span{color:#ffe1d8}
+.lb.rest .mini{position:absolute;left:22px;top:13px;width:104px;padding:7px 8px 8px;border-radius:5px;background:#fff;color:#3a1d14;transform:rotate(-5deg);box-shadow:0 4px 10px rgba(0,0,0,.35)}
+.lb.rest .mini b{display:block;font:bold 11px/1.1 Allo,Arial,Helvetica,sans-serif;margin-bottom:5px}
+
+/* ---------- the opener ---------- */
+#Open .box{display:flex;gap:16px;align-items:stretch;padding:14px}
+#Open .txt{flex:1;min-width:0;display:flex;flex-direction:column}
+#Open h1{margin:2px 0 6px;font:bold 32px/1.05 Allo,Arial,Helvetica,sans-serif;color:#111}
+#Open .lead{margin:0 0 10px;font-size:15px;line-height:1.45;color:#333}
+#Open ul{margin:0 0 12px;padding-left:18px}
+#Open li{margin:3px 0}
+#Open .acts{margin-top:auto;display:flex;flex-wrap:wrap;gap:8px}
+#Open .fine{margin:8px 0 0;font-size:11px;color:#777}
+.table{position:relative;flex:none;width:400px;min-height:270px;border:1px solid #888;overflow:hidden;background:linear-gradient(160deg,#fff4e8,#ffd3b3)}
+
+/* the little pictures: a stamp card, a phone with the shop's site, today's list (all drawn here, no photos) */
+.stamp{position:absolute;padding:11px 12px 12px;border-radius:8px;background:#fff;color:#3a1d14;box-shadow:0 0 0 1px #d9b8a6,0 6px 14px rgba(120,50,20,.25)}
+.stamp b{display:block;font:bold 16px/1.1 Allo,Arial,Helvetica,sans-serif}
+.stamp small{display:block;margin:2px 0 8px;font:12px/1.2 Allo,Arial,Helvetica,sans-serif;color:#8a5a48}
+.stamp .st{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.stamp .st i{aspect-ratio:1;border-radius:50%;box-shadow:inset 0 0 0 2px #e6c9bb}
+.stamp .st i.on{background:#dc4a34;box-shadow:none;position:relative}
+.stamp .st i.on::after{content:"";position:absolute;left:33%;top:20%;width:26%;height:46%;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.qr{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;width:42px;height:42px}
+.qr i{background:#3a1d14}.qr i.o{background:transparent}
+.phone{position:absolute;width:118px;padding:9px 7px 10px;border-radius:14px;background:#2b1a14;box-shadow:0 8px 16px rgba(120,50,20,.35)}
+.phone .scr{display:block;border-radius:8px;overflow:hidden;background:#fff;color:#3a1d14;font:10px/1.3 Allo,Arial,Helvetica,sans-serif}
+.phone .top{padding:12px 8px 10px;background:#dc4a34;color:#fff;font:bold 14px/1.1 Allo,Arial,Helvetica,sans-serif}
+.phone .top small{display:block;margin-top:2px;font:10px/1.2 Allo,Arial,Helvetica,sans-serif;opacity:.9}
+.phone .row{padding:6px 8px;border-top:1px solid #f0dfd6;display:flex;justify-content:space-between}
+.phone .row b{font-weight:bold}
+.list{position:absolute;width:132px;padding:9px 10px 10px;border-radius:6px;background:#2b1a14;color:#fff;box-shadow:0 6px 14px rgba(120,50,20,.3);font:12px/1.25 Allo,Arial,Helvetica,sans-serif}
+.list b{display:block;margin-bottom:5px;font:bold 13px/1 Allo,Arial,Helvetica,sans-serif}
+.list span{display:block;padding-left:16px;position:relative;margin-top:4px;color:#f1ddd4}
+.list span::before{content:"";position:absolute;left:0;top:2px;width:9px;height:9px;border-radius:2px;box-shadow:inset 0 0 0 1.5px #c9a596}
+.list.plain span{padding-left:0;color:#3a1d14}.list.plain span::before{display:none}
+.list span.ok::after{content:"";position:absolute;left:3px;top:2px;width:3px;height:6px;border:solid #fff;border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+
+/* ---------- the three free tools ---------- */
+.Trio{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 12px}
+.Tool{display:flex;flex-direction:column;min-width:0}
+.Tool>.StandardBoxHeader{width:auto;align-self:flex-start;padding-right:30px}
+.Tool>.StandardBoxHeader h2{margin:0;font:inherit;color:inherit}
+.Tool>.box{flex:1;display:flex;flex-direction:column;position:relative;top:-2px;padding:0 0 12px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 120px) no-repeat;font:13px/1.45 Allo,Arial,Helvetica,sans-serif;color:#333}
+.Tool .pic{position:relative;height:150px;margin:8px 8px 0;border:1px solid #888;overflow:hidden;background:linear-gradient(160deg,#fff4e8,#ffd9bd)}
+.Tool h3{margin:10px 12px 4px;font:bold 19px/1.1 Allo,Arial,Helvetica,sans-serif;color:#111}
+.Tool p{margin:0 12px 8px}
+.Tool ul{margin:0 12px 12px;padding-left:18px}
+.Tool li{margin:2px 0}
+.Tool .gbtn{margin:auto 12px 0;align-self:stretch}
+.Tool .also{margin:8px 12px 0;font-size:12px;color:#666}
+
+/* ---------- how it works, managers, custom games, contact ---------- */
+.Steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;counter-reset:s}
+.Steps li{counter-increment:s;position:relative;padding:10px 12px 12px 52px;border:1px solid #bbb;background:linear-gradient(#fff,#f1f1f1)}
+.Steps li::before{content:counter(s);position:absolute;left:10px;top:10px;width:32px;height:32px;border-radius:4px;display:grid;place-items:center;color:#fff;font:bold 18px/1 Allo,Arial,Helvetica,sans-serif;
+  background:linear-gradient(#5a5a5a,#2b2b2b 50%,#111 51%,#1d1d1d)}
+.Steps b{display:block;font:bold 15px/1.2 Allo,Arial,Helvetica,sans-serif;color:#111}
+.Steps span{display:block;margin-top:2px}
+.Facts{margin:10px 2px 0;font-size:12px;color:#666}
+.Two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}
+.Two .Sec{margin:0;display:flex;flex-direction:column}
+.Two .Sec>.box{flex:1;display:flex;flex-direction:column;padding:12px 14px 14px}
+.Two h3{margin:0 0 6px;font:bold 22px/1.1 Allo,Arial,Helvetica,sans-serif;color:#111}
+.Two p{margin:0 0 8px}
+.Two ul{margin:0 0 12px;padding-left:18px}
+.Two li{margin:3px 0}
+.Two .acts{margin-top:auto;display:flex;flex-wrap:wrap;gap:8px}
+.Two .note{margin:10px 0 0;font-size:11px;line-height:1.4;color:#777}
+#contact .box{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px}
+#contact h3{margin:0 0 3px;font:bold 22px/1.1 Allo,Arial,Helvetica,sans-serif;color:#111}
+#contact p{margin:0;max-width:520px}
+#contact .tel{font:bold 26px/1 Allo,Arial,Helvetica,sans-serif;color:#111;white-space:nowrap}
+#contact .acts{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:none}
+
+@media (max-width:939px){
+  #Open .box{flex-direction:column}
+  #Open h1{font-size:26px}
+  .table{width:auto;height:230px;min-height:0}
+  .table .list{display:none}
+  .Trio,.Steps,.Two{grid-template-columns:1fr}
+  .Tool .pic{height:160px}
+  .Two .Sec{margin:0}
+  #contact .box{flex-direction:column;align-items:stretch}
+  #contact .acts{align-items:stretch}
+  #contact .tel{font-size:24px}
+  .lb.rest .mini{display:none}.lb.rest .t{left:22px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="pearl" viewBox="0 0 16 16"><path fill="#d16be8" d="M8 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1m-.343 2.414c-.78-.781-2.364-.464-3.536.707-1.171 1.172-1.488 2.755-.707 3.536s2.365.465 3.536-.707c1.172-1.171 1.488-2.755.707-3.536"/></symbol>
+</svg>
+
+<div class="bgfx" id="bgfx" aria-hidden="true"></div>
+<div class="sky l" id="skyL" aria-label="Grug on Discord, Instagram and YouTube"></div><div class="sky r" id="skyR" aria-label="Grug on YouTube, Discord and Instagram"></div>
+<div id="Container">
+  <div id="Leaderboard">
+    <a class="lb rest" href="/restaurant/" aria-label="Set up your restaurant on Grug for free">
+      <span class="bgk"></span>
+      <span class="mini" aria-hidden="true"><b>Rosa's Tacos</b><span class="stamp" style="position:static;padding:0;box-shadow:none;background:none"><span class="st"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></span></span>
+      <span class="t"><b>Your restaurant, ready in about a minute.</b><span>A rewards card, a website and a dashboard. No sign-up, no hardware:</span><span class="exp"><i class="k">Cafés</i><i class="k">Bars</i><i>Bakeries</i><i>Boba &amp; tea</i></span></span>
+      <span class="go">Set it up free ›</span>
+    </a>
+  </div>
+
+  <div id="Header">
+    <div id="Banner">
+      <div id="Options"><a id="pearls" href="/character/pearls/" title="Your Pearls" hidden><svg aria-hidden="true"><use href="#pearl"/></svg><span id="pearlN">0</span> Pearls</a></div>
+      <img class="crowd" src="/static/arcade/medic.webp" alt="" style="left:96px">
+      <img class="crowd" src="/static/arcade/racer.webp" alt="" style="left:170px;height:98px">
+      <a id="Logo" href="/" title="Grug Digital home"><img src="/static/arcade/grug-digital-logo.png" alt="Grug Digital"></a>
+      <img class="crowd" src="/static/arcade/skater.webp" alt="" style="left:640px;height:98px">
+      <img class="crowd" src="/static/arcade/ranger.webp" alt="" style="left:712px">
+    </div>
+    <div class="Navigation rest">
+      <ul>
+        <li class="sect">Restaurants</li>
+        <li><a href="#free">Free tools</a></li>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#managers">For managers</a></li>
+        <li><a href="#custom">Custom games</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li class="end"><a href="/">Grug home</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="Announcement">
+    <div class="SystemAlertText rest">Already set up? <a href="/business/">Open your dashboard</a> or <a href="/rewards/">see your rewards cards</a></div>
+  </div>
+
+  <div id="Body">
+    <section class="Sec" id="Open" aria-labelledby="openTitle">
+      <div class="StandardBoxHeader"><span>Grug for restaurants</span></div>
+      <div class="box">
+        <div class="txt">
+          <h1 id="openTitle">Bring guests back, and run the back office. Free.</h1>
+          <p class="lead">Name your restaurant and pick what it serves. One tap makes a rewards card, a website and a dashboard for your team.</p>
+          <ul>
+            <li>For cafés, bars, bakeries, boba shops and restaurants</li>
+            <li>No app for guests, no hardware, no sign-up</li>
+            <li>Everything stays on your own phone or computer</li>
+          </ul>
+          <div class="acts">
+            <a class="gbtn lg red" href="/restaurant/">Set up my restaurant ›</a>
+            <a class="gbtn gray" href="/managers/">See the dashboard first</a>
+          </div>
+          <p class="fine">The pictures show an example shop. Yours uses your own name, colours and reward.</p>
+        </div>
+        <div class="table" aria-hidden="true">
+          <span class="stamp" style="left:22px;top:28px;width:176px;transform:rotate(-4deg)"><b>Rosa's Tacos</b><small>Your 9th taco plate is on us</small><span class="st"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></span>
+          <span class="phone" style="right:26px;top:22px;transform:rotate(4deg)"><span class="scr"><span class="top" style="display:block">Rosa's Tacos<small>Open today 11 to 9</small></span><span class="row"><span>Tacos al pastor</span><b>$4</b></span><span class="row"><span>Elote</span><b>$5</b></span><span class="row"><span>Horchata</span><b>$3</b></span></span></span>
+          <span class="list" style="left:128px;bottom:18px;transform:rotate(2deg)"><b>Today</b><span class="ok">Opening checklist</span><span class="ok">Walk-in at 38°F</span><span>Count the drawer</span></span>
+        </div>
+      </div>
+    </section>
+
+    <div class="Trio" id="free">
+      <section class="Tool" aria-labelledby="t1">
+        <div class="StandardBoxHeader"><span><h2 id="t1">Rewards card</h2></span></div>
+        <div class="box">
+          <div class="pic" aria-hidden="true">
+            <span class="stamp" style="left:16px;top:22px;width:150px;transform:rotate(-3deg)"><b>Rosa's Tacos</b><small>9th plate is on us</small><span class="st"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></span></span>
+            <span class="stamp" style="right:14px;bottom:14px;padding:8px;transform:rotate(5deg)"><span class="qr"><i></i><i></i><i></i><i class="o"></i><i></i><i></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i><i></i><i></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i class="o"></i><i></i><i></i><i></i><i></i><i class="o"></i><i></i><i></i><i class="o"></i><i></i><i></i></span></span>
+          </div>
+          <h3>Turn first-time guests into regulars</h3>
+          <p>A stamp card for your shop. Guests scan a QR by the register and collect a stamp every visit.</p>
+          <ul>
+            <li>Pick your colours, lettering, stamps and reward</li>
+            <li>Ends with a print-ready PDF</li>
+            <li>Works with an NFC sticker too</li>
+          </ul>
+          <a class="gbtn red" href="/rewards/create/">Make my rewards card</a>
+          <p class="also">Made one before? <a href="/rewards/">See your cards</a></p>
+        </div>
+      </section>
+
+      <section class="Tool" aria-labelledby="t2">
+        <div class="StandardBoxHeader"><span><h2 id="t2">Website</h2></span></div>
+        <div class="box">
+          <div class="pic" aria-hidden="true">
+            <span class="phone" style="left:50%;top:14px;margin-left:-59px"><span class="scr"><span class="top" style="display:block">Rosa's Tacos<small>Open today 11 to 9</small></span><span class="row"><span>Tacos al pastor</span><b>$4</b></span><span class="row"><span>Elote</span><b>$5</b></span><span class="row"><span>Horchata</span><b>$3</b></span></span></span>
+          </div>
+          <h3>A one-page site, made from your card</h3>
+          <p>Your name, colours and reward become a simple website you can share the same day.</p>
+          <ul>
+            <li>Edit it from your phone</li>
+            <li>Share its link, or download one file for any host</li>
+            <li>Opens on any phone, with no app</li>
+          </ul>
+          <a class="gbtn red" href="/restaurant/">Make my website</a>
+          <p class="also">Have a card already? <a href="/business/site/">Edit your website</a></p>
+        </div>
+      </section>
+
+      <section class="Tool" aria-labelledby="t3">
+        <div class="StandardBoxHeader"><span><h2 id="t3">Dashboard</h2></span></div>
+        <div class="box">
+          <div class="pic" aria-hidden="true">
+            <span class="list" style="left:16px;top:18px;transform:rotate(-2deg)"><b>Today</b><span class="ok">Opening checklist</span><span class="ok">Walk-in at 38°F</span><span>Count the drawer</span></span>
+            <span class="list plain" style="right:12px;bottom:14px;width:116px;transform:rotate(3deg);background:#fff;color:#3a1d14;box-shadow:0 0 0 1px #d9b8a6,0 6px 14px rgba(120,50,20,.25)"><b>Friday</b><span>Ana · 10 to 4</span><span>Luis · 4 to close</span></span>
+          </div>
+          <h3>Six back-office jobs in one place</h3>
+          <p>The jobs that live on clipboards and sticky notes, on a phone or tablet in the kitchen.</p>
+          <ul>
+            <li>Staff schedule and time clock</li>
+            <li>Temperature log and daily checklists</li>
+            <li>Recipe costs and permit reminders</li>
+          </ul>
+          <a class="gbtn red" href="/business/">Open the dashboard</a>
+          <p class="also">Leaner ones for <a href="/business/tea/">bubble tea shops</a> and <a href="/business/cafe/">cafés</a></p>
+        </div>
+      </section>
+    </div>
+
+    <section class="Sec" id="how" aria-labelledby="howTitle">
+      <div class="StandardBoxHeader"><span><h2 id="howTitle">How it works</h2></span></div>
+      <div class="box">
+        <ol class="Steps">
+          <li><b>Name your restaurant</b><span>Pick what you serve and tap once. Your card, website and dashboard are made in about a minute.</span></li>
+          <li><b>Print the QR</b><span>Put the card by the register, or on your tables. Guests scan it with their phone's camera.</span></li>
+          <li><b>Watch regulars come back</b><span>Each visit is a stamp. A full card is the reward you chose.</span></li>
+        </ol>
+        <p class="Facts">There are no accounts and no server behind this: your shop's setup rides in its link and is saved on your device, so keep a backup from the dashboard's settings.</p>
+      </div>
+    </section>
+
+    <div class="Two">
+      <section class="Sec" id="managers" aria-labelledby="mgrTitle">
+        <div class="StandardBoxHeader"><span><h2 id="mgrTitle">For managers</h2></span></div>
+        <div class="box">
+          <h3>Take the two-minute tour</h3>
+          <p>A walkthrough of the dashboard for the person who runs the floor: what each of the six jobs looks like, with example data, before you show your owner.</p>
+          <ul>
+            <li>Pick Restaurant, Bubble tea or Café</li>
+            <li>Ends with a link to send your owner</li>
+            <li>Add it to your home screen as an app</li>
+          </ul>
+          <div class="acts">
+            <a class="gbtn red" href="/managers/">Start the tour ›</a>
+            <a class="gbtn gray" href="/business/">Skip to the dashboard</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="Sec" id="custom" aria-labelledby="customTitle">
+        <div class="StandardBoxHeader"><span><h2 id="customTitle">Custom games</h2></span></div>
+        <div class="box">
+          <h3>Turn your restaurant into a game</h3>
+          <p>For restaurants near Katy, Texas. Guests play a game starring your food while they wait, collect a stamp every visit, and come back for more.</p>
+          <ul>
+            <li>We visit, take photos and build it in days</li>
+            <li>A QR on your tables, in your colours</li>
+            <li>A report on scans and repeat visits</li>
+          </ul>
+          <div class="acts">
+            <a class="gbtn red" href="/partners/">See the offer and demos ›</a>
+          </div>
+          <p class="note">The demos are demonstrations we built to show owners what's possible. None is a shop's official app, and nothing in them can be earned or redeemed.</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="Sec" id="contact" aria-labelledby="contactTitle">
+      <div class="StandardBoxHeader"><span><h2 id="contactTitle">Contact</h2></span></div>
+      <div class="box">
+        <div>
+          <h3>Ready to start, or have a question?</h3>
+          <p>Text us your restaurant's name and we'll get back to you. Text only, please, no calls. For anything about the site itself, the help page has more ways to reach us.</p>
+        </div>
+        <div class="acts">
+          <a class="tel" href="sms:+19544596301">954-459-6301</a>
+          <a class="gbtn gray" href="/support.html">Help and contact</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="Footer">
+    <div class="FooterNav">
+      <a href="/"><b>Grug home</b></a>
+      &nbsp;|&nbsp;
+      <a href="/restaurants/"><b>Restaurants</b></a>
+      &nbsp;|&nbsp;
+      <a href="/arcade/">Players</a>
+      &nbsp;|&nbsp;
+      <a href="/agents/">Game developers</a>
+      &nbsp;|&nbsp;
+      <a href="/privacy.html">Privacy Policy</a>
+      &nbsp;|&nbsp;
+      <a href="/terms.html">Terms</a>
+      &nbsp;|&nbsp;
+      <a href="/support.html">Contact Us</a>
+    </div>
+    <div class="FooterNav">Follow Grug: <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener"><b>Discord</b></a>&nbsp;|&nbsp;<a href="https://www.instagram.com/grugdigital" target="_blank" rel="noopener"><b>Instagram</b></a>&nbsp;|&nbsp;<a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener"><b>YouTube</b></a></div>
+    <p class="Legalese">
+      Grug, Grug Digital, Pearls, characters, logos, names, and all related indicia are trademarks of <a href="/">Grug Digital</a>, ©2026.
+      <br>
+      "Rosa's Tacos" is a made-up example, not a real business. Use of this site signifies your acceptance of the <a href="/terms.html">Terms and Conditions</a>.
+    </p>
+  </div>
+</div>
+
+<script src="/arcade/arcade.js"></script>
+<script>
+/* the header, background, side ads, Pearls button and footer: the same as the Arcade's (arcade/arcade.js) */
+window.GrugArcade.chrome();
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 {
-  "_about": "The promotional images that carry Grug Digital's embedded photo metadata (IPTC/XMP), written by src/seo/tag_images.py: game screenshots, character renders, building renders and the logo. Textures, reference sheets, placeholders, sponsor and third-party images are deliberately left out. Each entry: title, description, keywords (the shared defaults are in tag_images.py).",
+  "_about": "The promotional images that carry Grug Digital's embedded photo metadata (IPTC/XMP), written by src/seo/tag_images.py: game screenshots, character renders and the logo. Textures, reference sheets, placeholders, sponsor and third-party images are deliberately left out. Each entry: title, description, keywords (the shared defaults are in tag_images.py).",
   "static/arcade/grug-digital-logo.png": {
     "title": "Grug Digital logo",
     "description": "The Grug Digital logo: Grug makes blocky games, game asset packs and the Grug Avatar Studio at grugdigital.com.",
@@ -354,63 +354,6 @@
       "Snow Rider",
       "Roblox outfit",
       "R6 avatar"
-    ]
-  },
-  "build/examples/cafe-thumb.jpg": {
-    "title": "Corner café, a 3D building made in the Grug Building Studio",
-    "description": "A white two-storey corner café, a retro textured 3D building model made in the Grug Digital Building Studio.",
-    "keywords": [
-      "café",
-      "3D building",
-      "game asset"
-    ]
-  },
-  "build/examples/forge-thumb.jpg": {
-    "title": "Blacksmith's forge, a 3D building made in the Grug Building Studio",
-    "description": "A stone and timber blacksmith's forge with a slate roof, a retro textured 3D building model made in the Grug Digital Building Studio.",
-    "keywords": [
-      "forge",
-      "medieval building",
-      "3D building",
-      "game asset"
-    ]
-  },
-  "build/examples/hab-thumb.jpg": {
-    "title": "Space habitat, a 3D building made in the Grug Building Studio",
-    "description": "A white sci-fi habitat module with a solar panel roof, a retro textured 3D building model made in the Grug Digital Building Studio.",
-    "keywords": [
-      "sci-fi habitat",
-      "3D building",
-      "game asset"
-    ]
-  },
-  "build/examples/house-thumb.jpg": {
-    "title": "Modern house, a 3D building made in the Grug Building Studio",
-    "description": "A two-storey modern house in dark and wood panels, a retro textured 3D building model made in the Grug Digital Building Studio.",
-    "keywords": [
-      "house",
-      "3D building",
-      "game asset"
-    ]
-  },
-  "build/examples/inn-thumb.jpg": {
-    "title": "Tudor inn, a 3D building made in the Grug Building Studio",
-    "description": "A half-timbered Tudor inn with a red tile roof, a retro textured 3D building model made in the Grug Digital Building Studio.",
-    "keywords": [
-      "inn",
-      "medieval building",
-      "3D building",
-      "game asset"
-    ]
-  },
-  "build/examples/tower-thumb.jpg": {
-    "title": "Stone watchtower, a 3D building made in the Grug Building Studio",
-    "description": "A tall stone watchtower with a red heraldic banner, a retro textured 3D building model made in the Grug Digital Building Studio.",
-    "keywords": [
-      "tower",
-      "medieval building",
-      "3D building",
-      "game asset"
     ]
   },
   "static/og/grug-digital-custom-avatars-and-free-games.jpg": {

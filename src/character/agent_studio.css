@@ -1,0 +1,95 @@
+  /* ===== the agents' Avatar Studio (/agents/studio/): src/character/agent_studio.css, put in by agent_studio.py =====
+     The same studio as /character/ with every picker, slider and tab taken away. What's left is the 3D view and one
+     quiet console: what to do next, the look as JSON, the outfit round trip, the export. It wears the /agents/ page's
+     look (dark, Allo, one green), not the classic one. */
+  body.agent{--ag-bg:#0d0e10;--ag-panel:#16181b;--ag-raise:#1e2125;--ag-line:#2b2e33;--ag-text:#ecedef;--ag-mute:#9da1a9;--ag-green:#9be33c;--ag-ink:#10200a;
+    --ag-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+  /* everything made for hands is gone */
+  body.agent #say,body.agent #toArcade,body.agent #toOutfits,body.agent .cg-fabs,body.agent #goSheet,body.agent .kid-steps{display:none!important}
+  /* the studio's own panel stays in the layout, unseen, exactly under the console: the camera centres the character in
+     the space the panel leaves free (freeRect in the studio) */
+  body.agent #panel{visibility:hidden!important;pointer-events:none!important;top:1rem;right:1rem;bottom:1rem;left:auto;width:min(28rem,calc(100vw - 2rem));height:auto}
+  body.agent .topbar{visibility:hidden!important;pointer-events:none!important}   /* same reason: it marks the top of the free space, as on the players' page */
+  /* the alignment sheet keeps the picture, the match and two buttons */
+  body.agent #alignCtls,body.agent #overlayCtls,body.agent #overlayMode,body.agent #drop2,body.agent .alignbox .hint,body.agent .alignbox .side .g-card:nth-of-type(2),body.agent #resetAlign{display:none!important}
+  body.agent .alignwrap{background:rgba(13,14,16,.72);padding:1rem;place-items:center start}
+  body.agent .alignbox{width:min(1180px,calc(100vw - 31rem));grid-template-columns:minmax(0,1fr) 17rem;background:var(--ag-panel);border:1px solid var(--ag-line);border-radius:14px;box-shadow:none;color:var(--ag-text)}
+  body.agent .alignbox .g-card{background:var(--ag-raise);border:1px solid var(--ag-line);border-radius:10px}
+  body.agent .alignbox .ttl,body.agent .alignbox .sub{color:var(--ag-text)} body.agent .alignbox .sub{color:var(--ag-mute)}
+  body.agent #alignView{cursor:default!important;pointer-events:none}
+
+  /* (the console itself doesn't scroll: its inner box does, like the studio's own panel. A fixed box that scrolls over the
+     WebGL view left a blank patch in the view on narrow windows.) */
+  #agent{position:fixed;z-index:25;top:1rem;right:1rem;bottom:1rem;width:min(28rem,calc(100vw - 2rem));overflow:hidden;display:flex;flex-direction:column;
+    background:var(--ag-bg);color:var(--ag-text);border:1px solid var(--ag-line);border-radius:14px;font:15px/1.5 Allo,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  #agent *{box-sizing:border-box}
+  #agent a{color:inherit}
+  #agent :focus-visible{outline:2px solid var(--ag-green);outline-offset:2px;border-radius:6px}
+  #agent code,#agent pre,#agent textarea{font-family:var(--ag-mono)}
+  .ag-top{flex:none;display:flex;align-items:center;gap:14px;height:52px;padding:0 16px;border-bottom:1px solid var(--ag-line)}
+  .ag-scroll{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#3a3e45 transparent}
+  .ag-brand{display:flex;align-items:center;gap:8px;font:600 1rem Allo,system-ui,sans-serif;text-decoration:none;white-space:nowrap}
+  .ag-brand img{height:24px;width:auto;display:block}
+  .ag-brand span{color:var(--ag-mute);font-weight:500}
+  .ag-top nav{margin-left:auto;display:flex;gap:14px;font-size:.86rem}
+  .ag-top nav a{text-decoration:none;color:var(--ag-mute);white-space:nowrap} .ag-top nav a:hover{color:var(--ag-text)}
+
+  .ag-brief{padding:16px 16px 2px}
+  .ag-brief h1{margin:0 0 8px;font:600 1.5rem/1.1 Allo,system-ui,sans-serif;letter-spacing:-.01em}
+  .ag-brief p{margin:0;color:var(--ag-mute);font-size:.9rem}
+  .ag-brief p b{color:var(--ag-text);font-weight:600}
+  .ag-brief code{font-size:.82rem;color:var(--ag-text)}
+
+  .ag-next{margin:14px 16px 4px;padding:12px 14px;border:1px solid var(--ag-green);border-radius:12px;background:#12180c}
+  .ag-next small{display:block;font:600 .72rem/1 Allo,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--ag-green);margin-bottom:5px}
+  .ag-next p{margin:0;font-size:.92rem;line-height:1.45}
+
+  /* the three steps: one open at a time by default, each a plain <details> */
+  #agent details.ag-step{margin:10px 16px 0;padding:0;border:1px solid var(--ag-line);border-radius:12px;background:var(--ag-panel)}
+  #agent details.ag-step>summary{display:flex;align-items:baseline;gap:8px;padding:12px 14px;list-style:none;font:600 1.02rem/1.2 Allo,system-ui,sans-serif;color:var(--ag-text)}
+  #agent details.ag-step>summary::-webkit-details-marker{display:none}
+  .ag-step>summary b{flex:none;font:600 .8rem/1 var(--ag-mono);color:var(--ag-mute)}
+  .ag-step>summary code{margin-left:auto;font-size:.72rem;font-weight:400;color:var(--ag-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .ag-step>.in{padding:0 14px 14px}
+  .ag-step.done>summary b{color:var(--ag-green)}
+  .ag-step label{display:block;margin:0 0 5px;font-size:.84rem;color:var(--ag-mute)}
+  #agent textarea,#agent input[type=text]{display:block;width:100%;padding:9px 11px;border:1px solid var(--ag-line);border-radius:9px;background:var(--ag-bg);color:var(--ag-text);font-size:.84rem;line-height:1.5;resize:vertical}
+  #agent input[type=text]{font-family:Allo,system-ui,sans-serif;font-size:.92rem}
+  #agent textarea:focus,#agent input[type=text]:focus{outline:0;border-color:var(--ag-green)}
+  .ag-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .ag-btn{display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 13px;border:1px solid var(--ag-line);border-radius:10px;background:var(--ag-raise);color:var(--ag-text);
+    font:600 .88rem Allo,system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+  .ag-btn:hover{border-color:#454950}
+  .ag-btn.go{background:var(--ag-green);border-color:var(--ag-green);color:var(--ag-ink)}
+  .ag-btn.go:hover{background:#aef053;border-color:#aef053}
+  .ag-btn:disabled{opacity:.45;cursor:default}
+  .ag-msg{margin:10px 0 0;font-size:.86rem;color:var(--ag-mute);min-height:1.2em;overflow-wrap:anywhere}
+  .ag-msg.err{color:#ff9a8a}
+  .ag-msg.ok{color:var(--ag-green)}
+  .ag-how{margin:12px 0 0;padding-left:1.2rem;font-size:.86rem;color:var(--ag-mute)}
+  .ag-how li{margin:3px 0}
+  #agent .in details{margin-top:12px;border-top:1px solid var(--ag-line);padding-top:10px}
+  #agent summary{cursor:pointer;font:600 .86rem Allo,system-ui,sans-serif;color:var(--ag-mute)}
+  #agent summary:hover{color:var(--ag-text)}
+  #agOptions p{margin:8px 0 0;font:.76rem/1.55 var(--ag-mono);color:var(--ag-mute);overflow-wrap:anywhere}
+  #agOptions p b{display:block;color:var(--ag-text);font-weight:600}
+  #agent details.ag-ref{margin:10px 16px 16px;padding:12px 14px;border:1px solid var(--ag-line);border-radius:12px}
+  .ag-ref pre{margin:10px 0 0;white-space:pre-wrap;font-size:.76rem;line-height:1.55;color:var(--ag-mute);overflow-wrap:anywhere}
+
+  /* the site's own dialogs and notes, in the console's look */
+  body.agent .cg-wrap{background:rgba(13,14,16,.72);z-index:40}
+  body.agent .cg.box{background:var(--ag-panel);color:var(--ag-text);border:1px solid var(--ag-line);border-radius:14px;box-shadow:none}
+  body.agent .cg p,body.agent .cg .cg-need,body.agent .cg .cg-tag{color:var(--ag-mute)}
+  body.agent .cg h2,body.agent .pg-head h2{color:var(--ag-text);background:none;clip-path:none;padding:0}
+  body.agent .g-btn,body.agent.flat .g-btn{background:var(--ag-raise);color:var(--ag-text);border:1px solid var(--ag-line);border-radius:10px;box-shadow:none;text-shadow:none;font-weight:600}
+  body.agent .g-btn.g-btn--primary,body.agent.flat .g-btn.g-btn--primary{background:var(--ag-green);border-color:var(--ag-green);color:var(--ag-ink)}
+  body.agent .g-btn.g-btn--ghost,body.agent.flat .g-btn.g-btn--ghost{background:transparent;border-color:var(--ag-line)}
+  body.agent .g-toast{background:var(--ag-raise);color:var(--ag-text);border:1px solid var(--ag-line);border-radius:10px;font-weight:600}
+  body.agent #match{background:var(--ag-bg);color:var(--ag-text);border:1px solid var(--ag-line)}
+
+  @media (max-width:820px){
+    #agent,body.agent #panel{top:auto;left:.5rem;right:.5rem;bottom:.5rem;width:auto;height:58vh}
+    body.agent .alignwrap{place-items:start center;padding:.5rem}
+    body.agent .alignbox{width:100%;grid-template-columns:1fr;max-height:40vh}
+    .ag-step>summary code{display:none}
+  }

@@ -1,11 +1,15 @@
 /* ===== GrugStudio: a small API so Claude (or any browser agent) can drive the studio from code =====
-   The full guide for agents is /character/claude.md. Every call does what the matching button does, so a person
-   watching sees the same thing they'd see if they clicked. Also handles recipe links (?hair=…&outfit=…) and the
-   "Make with Claude" sheet. */
+   The full guide for agents is /agents/studio/claude.md. Every call does what the matching button does, so a person
+   watching sees the same thing they'd see if they clicked. Also handles recipe links (?hair=…&outfit=…).
+   The same file runs in both versions of the studio: the players' one (/character/, hands on) and the agents' one
+   (/agents/studio/, src/character/agent_studio.*: no pickers or sliders, this API and a short console instead). Every
+   change it makes is announced as a 'grug:studio' event on window, which the agents' console redraws itself from. */
 (() => {
 'use strict';
 const C = window.__creator, L = __LABELS__;
 const $q = s => document.querySelector(s);
+const AGENT = document.body.classList.contains('agent');   // the agents' version of the studio (/agents/studio/)
+const ping = type => { try { dispatchEvent(new CustomEvent('grug:studio', { detail: { type } })); } catch (e) {} };
 const slug = s => String(s == null ? '' : s).toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 const SKIN_LIST = SKINS.map(([name, rgb]) => ({ name, hex: rgbHex(rgb) }));
 const HAIR_NAMES = () => C.HAIR.map(h => h.name), HEAD_NAMES = () => C.HEADS.map(h => h.name);
@@ -92,7 +96,7 @@ async function set(r){
   const view = r.view != null ? r.view : null;
   if (view != null){ const v = VIEWS.find(x => slug(x) === slug(view)); if (!v) throw new Error(`Unknown view "${view}". Options: ${VIEWS.join(', ')}.`); C.setCat(v); }
   else { C.aimCamera(); C.drawPanel(); }
-  syncWarn();
+  syncWarn(); ping('set');
   return Object.assign(get(), { next: status().next });
 }
 async function wearLook(name){
@@ -119,13 +123,13 @@ async function wear(src, o){
   o = o || {};
   const img = await toImage(src);
   setImage(img, img.naturalWidth || img.width, img.naturalHeight || img.height);   // auto-aligns and opens the alignment sheet
-  const m = match();
+  const m = match(); ping('image');
   if (o.review) return { match: m, wearing: false, next: 'Check the outlines on the alignment sheet, then click "Wear it" (or call GrugStudio.wearIt()).' };
   return wearIt();
 }
 function wearIt(){
   if (!state.img) throw new Error('No painted image yet. Paste the Gemini image into the page first (or call GrugStudio.wear(image)).');
-  const m = match(); build(); outfit.worn = outfit.source === 'pasted'; syncWarn();
+  const m = match(); build(); outfit.worn = outfit.source === 'pasted'; syncWarn(); ping('wear');
   return { match: m, wearing: true, customOutfit: outfit.worn, note: m != null && m < 0.85 ? 'The silhouette match is low: the outfit may be shifted. Check the 3D view; if it looks wrong, ask Gemini again for the same picture with nothing moved, or line it up by hand on the alignment sheet.' : 'Looks lined up.' };
 }
 async function r6Blob(){ if (!state.shirt) throw new Error('No outfit yet.'); return buildCharacterGLB(); }
@@ -140,7 +144,7 @@ async function downloadR6(name, o){
   needOutfit(o);
   if (name != null){ const n = $q('#setName'); n.value = String(name).slice(0, 24); n.dispatchEvent(new Event('input')); }
   const paidNow = await payFromApi(o);
-  const b = await r6Blob(), f = fileName(); GRUG.download(f, b);
+  const b = await r6Blob(), f = fileName(); GRUG.download(f, b); ping('download');
   return { file: f, bytes: b.size, pearls: paidNow, note: 'Saved to the browser\'s downloads folder. Import it into Roblox Studio with the 3D Importer and add a Humanoid (R6). If the parts arrive wrapped in Models or without joints, run r6Script() in the Command Bar.' };
 }
 async function r6Base64(o){ needOutfit(o); await payFromApi(o); const b = await r6Blob(); const u = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(b); }); return u.slice(u.indexOf(',') + 1); }
@@ -169,7 +173,7 @@ const STEPS = [
 function paintOutfit(desc){
   if (desc != null){ $q('#outfit').value = String(desc); }
   buildPrompt(); C.setCat('paint');
-  const b = $q('#clCopyRef'); b.scrollIntoView({ block: 'center' });
+  const b = $q('#agCopyPic') || $q('#clCopyRef'); b.scrollIntoView({ block: 'center' }); ping('paint');
   return { outfit: $q('#outfit').value || '(empty: pass a description)', steps: STEPS.slice(1).map((t, i) => `${i + 1}. ${t}`),
     note: 'The custom outfit is the point of this studio. Do every step; don\'t download before the painted outfit is worn.' };
 }
@@ -224,7 +228,7 @@ function payDialog(){
 const GLB_RAW = $q('#dlGLB').onclick, ZIP_RAW = $q('#dlSet').onclick;
 $q('#dlGLB').onclick = async e => { if (!state.shirt) return; if (await payDialog()) return GLB_RAW.call($q('#dlGLB'), e); };
 $q('#dlSet').onclick = async e => { if (!state.shirt) return; if (await payDialog()) return ZIP_RAW.call($q('#dlSet'), e); };
-function paintPearls(){ const n = $q('#pearlNum'); if (n && P()) n.textContent = P().balance().toLocaleString(); }
+function paintPearls(){ const n = $q('#pearlNum'); if (n && P()) n.textContent = P().balance().toLocaleString(); ping('pearls'); }
 addEventListener('grug:pearls', paintPearls);
 function startPearls(){
   if (!P()) return;
@@ -237,7 +241,7 @@ function startPearls(){
 }
 
 const api = window.GrugStudio = {
-  version: 1, ready: false, guide: '/character/claude.md',
+  version: 1, ready: false, agent: AGENT, guide: '/agents/studio/claude.md',
   options, get, set, random: () => set({ random: true }),
   prompt, copyPrompt, copyTemplate, templateDataURL: () => refWhite.toDataURL('image/png'),
   downloadTemplate: () => { download(refWhite, 'roblox-clothing-reference.png'); return 'roblox-clothing-reference.png'; },
@@ -245,7 +249,7 @@ const api = window.GrugStudio = {
   wear, wearIt, match, finish: () => { C.setCat('finish'); return status(); },
   downloadR6, r6Base64, downloadZip: async o => { needOutfit(o); await payFromApi(o); return ZIP_RAW(); }, r6Script: () => R6_SETUP_LUA,
   _outfitWorn: custom => { outfit.source = custom ? 'pasted' : 'starter'; outfit.worn = !!custom; syncWarn(); },   // used by the outfits layer (src/character/outfits.js)
-  status, help: () => `Grug Avatar Studio agent API v2. Guide: ${location.origin}/character/claude.md\n` +
+  status, help: () => `Grug Avatar Studio agent API v2. Guide: ${location.origin}/agents/studio/claude.md\n` +
     'A character is finished only when it wears a custom shirt and pants painted in Gemini.\n' +
     '1. await GrugStudio.set({name, skin, head, hair, hairColor, eyes, brows, mouth})   (GrugStudio.options() lists the choices)\n' +
     '2. await GrugStudio.paintOutfit("<garments, colours, materials, shoes>") and follow the steps it returns (Gemini round trip)\n' +
@@ -255,9 +259,10 @@ const api = window.GrugStudio = {
 /* which outfit is on: the starter tee, a demo, or a picture pasted back from an image editor */
 const outfit = { source: 'starter', worn: false, demoClick: false };
 const _setImage = window.setImage;
-window.setImage = function(){ outfit.source = outfit.demoClick ? 'demo' : 'pasted'; outfit.demoClick = false; outfit.worn = false; return _setImage.apply(this, arguments); };
+window.setImage = function(){ outfit.source = outfit.demoClick ? 'demo' : 'pasted'; outfit.demoClick = false; outfit.worn = false; const r = _setImage.apply(this, arguments); ping('image'); return r; };
 $q('#demo').addEventListener('click', () => { outfit.demoClick = true; }, true);
-$q('#build').addEventListener('click', () => { outfit.worn = outfit.source === 'pasted'; syncWarn(); });
+$q('#build').addEventListener('click', () => { outfit.worn = outfit.source === 'pasted'; syncWarn(); ping('wear'); });
+$q('#back1').addEventListener('click', () => setTimeout(() => ping('cancel'), 0));
 $q('#exGrid').addEventListener('click', () => { outfit.worn = false; outfit.source = 'starter'; }, true);
 
 /* finish page: remind (people and agents) when the painted outfit is missing */
@@ -267,7 +272,7 @@ new MutationObserver(syncWarn).observe($q('#s3'), { attributes: true, attributeF
 $q('#noOutfitGo').onclick = () => paintOutfit();
 
 startPearls();
-api.whenReady = (C.sheetsReady || Promise.resolve()).then(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))).then(() => { api.ready = true; return api; });
+api.whenReady = (C.sheetsReady || Promise.resolve()).then(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))).then(() => { api.ready = true; ping('ready'); return api; });
 
 /* the template picture's Copy button (step 1 of painting) */
 $q('#clCopyRef').onclick = copyTemplate;
@@ -279,32 +284,8 @@ qs.forEach((v, k) => { const key = KEYS.find(x => x.toLowerCase() === k.toLowerC
 if (recipe.outfit != null && recipe.view == null) recipe.view = 'paint';
 if (Object.keys(recipe).length) api.whenReady.then(() => set(recipe)).catch(e => { toast(e.message); console.warn('[GrugStudio]', e.message); });
 
-/* ---------- "Make with Claude": the sheet people copy their Claude prompt from ---------- */
-const sheet = $q('#claudeGuide'), idea = $q('#cgIdea'), out = $q('#cgPrompt'), open = $q('#cgOpen');
-const CANON = 'https://grugdigital.com/character/';
-const here = () => location.protocol.startsWith('http') && !/^(grugdigital\.com|www\.grugdigital\.com|grugdigital\.pages\.dev)$/.test(location.hostname) ? location.origin + '/character/' : CANON;
-const words = () => `Use ${here()} to make ${(idea.value.trim() || 'a character wearing a cool outfit').replace(/[.\s]+$/, '')}. Paint the outfit in Gemini, then download the Roblox R6 file for me.`;
-function syncSheet(){ const t = words(); out.textContent = t; open.href = 'https://claude.ai/new?q=' + encodeURIComponent(t); }
-function showSheet(on){ sheet.classList.toggle('open', on); if (on){ syncSheet(); setTimeout(() => idea.focus(), 30); } }
-idea.addEventListener('input', syncSheet);
-$q('#toClaude').onclick = $q('#toClaudeM').onclick = () => showSheet(true);
-$q('#cgClose').onclick = () => showSheet(false);
-sheet.addEventListener('click', e => { if (e.target === sheet) showSheet(false); });
-addEventListener('keydown', e => { if (e.key === 'Escape' && sheet.classList.contains('open')) showSheet(false); });
-$q('#cgCopy').onclick = async () => { try { await navigator.clipboard.writeText(words()); toast('Copied. Paste it into Claude.'); } catch (e) { const r = document.createRange(); r.selectNodeContents(out); getSelection().removeAllRanges(); getSelection().addRange(r); } };
-syncSheet();
-if (location.hash === '#claude' || qs.has('claude')) showSheet(true);
-
-/* ---------- the Claude skill panel: download + how to install ---------- */
-const skill = $q('#skillGuide');
-function showSkill(on){ if (on) showSheet(false); skill.classList.toggle('open', on); if (on) setTimeout(() => $q('#skClose').focus(), 30); }
-function skTab(code){ $q('#skTabApp').setAttribute('aria-selected', String(!code)); $q('#skTabCode').setAttribute('aria-selected', String(code)); $q('#skApp').hidden = code; $q('#skCode').hidden = !code; }
-$q('#toSkill').onclick = $q('#toSkillM').onclick = $q('#cgSkillHow').onclick = () => showSkill(true);
-$q('#skClose').onclick = () => showSkill(false);
-$q('#skTabApp').onclick = () => skTab(false); $q('#skTabCode').onclick = () => skTab(true);
-skill.addEventListener('click', e => { if (e.target === skill) showSkill(false); });
-addEventListener('keydown', e => { if (e.key === 'Escape' && skill.classList.contains('open')) showSkill(false); });
-skill.querySelectorAll('a[download]').forEach(a => a.addEventListener('click', () => toast('Downloading roblox-characters.zip. Next: add it in Claude.')));
-$q('#skCopy').onclick = async () => { try { await navigator.clipboard.writeText($q('#skTry').textContent.trim()); toast('Copied. Paste it into Claude.'); } catch (e) {} };
-if (location.hash === '#skill' || qs.has('skill')) showSkill(true);
+/* ---------- old links: /character/?claude, #claude, ?skill and #skill opened the "Make with Claude" and skill sheets.
+   Those live in the developers' section now: send them there (the players' studio has no agent panels). ---------- */
+if (!AGENT && (location.hash === '#claude' || qs.has('claude'))) location.replace('/agents/');
+else if (!AGENT && (location.hash === '#skill' || qs.has('skill'))) location.replace('/agents/#skills');
 })();

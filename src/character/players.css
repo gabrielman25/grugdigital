@@ -1,0 +1,37 @@
+  /* ===== the players' Avatar Studio: made for kids and hobbyists (src/character/players.css + players.js, put in by
+     patch_outfits.py). The agents' version (/agents/studio/, body.agent) wears agent_studio.css instead. =====
+     What's different from a plain build: words under the tab icons, a Back / Next bar that walks the tabs in order, a
+     short hello for first-timers, plain-words copy, and no agent or Claude panels. */
+  body.players .cat{width:auto;min-width:3.15rem;height:3.05rem;padding:.25rem .3rem .15rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem}
+  body.players .cat svg{width:1.45rem;height:1.45rem;flex:none}
+  body.players .cat span{font:bold .68rem/1 Allo,Arial,Helvetica,sans-serif;letter-spacing:.01em;white-space:nowrap}
+  body.players .topbar{gap:.6rem}
+  body.players #noOutfit{display:none!important}   /* wardrobe outfits are finished outfits here; the reminder is for agents */
+
+  /* the Back / Next bar at the bottom of the panel */
+  .kid-steps{flex:none;display:flex;align-items:center;gap:.5rem;padding:.6rem .8rem;border-top:1px solid #aaa;background:linear-gradient(#f8f8f8,#e6e6e6)}
+  .kid-steps .g-btn{min-height:2.7rem}
+  .kid-steps #kidBack{flex:none;padding-inline:.9rem}
+  .kid-steps #kidNext{flex:1;justify-content:center;font-size:1.08rem;gap:.4rem}
+  .kid-steps #kidNext svg,.kid-steps #kidBack svg{width:1.1rem;height:1.1rem;flex:none}
+  .kid-steps small{flex:none;min-width:3.2rem;text-align:center;font:bold .78rem/1 Allo,Arial,Helvetica,sans-serif;color:#666}
+  body.hairtool .kid-steps{display:none}
+
+  /* the hello for first-timers, at the top of the first page */
+  .kid-hi{position:relative;margin:0;padding:.7rem 2.4rem .75rem .9rem;border:1px solid #d9c55a;border-radius:4px;background:#ffffd6;color:#3d3100;font-size:.92rem;line-height:1.4}
+  .kid-hi b{display:block;font-size:1.02rem;margin-bottom:.15rem}
+  .kid-hi button{position:absolute;top:.3rem;right:.3rem;width:1.9rem;height:1.9rem;border:0;border-radius:4px;background:transparent;color:#6b5a12;font:bold 1.2rem/1 Allo,Arial,Helvetica,sans-serif;cursor:pointer}
+  .kid-hi button:hover{background:rgba(0,0,0,.08)}
+
+  /* the last page: play first, Roblox second */
+  .kid-dev{margin:0;font-size:.82rem;color:#666;text-align:center}
+  .kid-dev a{color:inherit;font-weight:bold}
+  .kid-help{margin:.1rem 0 0;font-size:.82rem;color:#666}
+
+  @media (max-width:1180px){ body.players .cat span{display:none} body.players .cat{min-width:2.75rem;height:2.75rem;padding:0} }
+  @media (max-width:820px){
+    body.players .cat{min-width:2.2rem;width:2.2rem;height:2.3rem}
+    .kid-steps{padding:.4rem .5rem;gap:.35rem} .kid-steps .g-btn{min-height:2.4rem} .kid-steps #kidNext{font-size:.98rem}
+    .kid-hi{font-size:.85rem;padding:.55rem 2.2rem .6rem .7rem}
+  }
+  body.embed .kid-hi{display:none}

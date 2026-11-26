@@ -1,5 +1,9 @@
-"""Build /character/index.html from the Grug Avatar Studio file: add the "Make with Claude" sheet, the agent guide text,
-and the GrugStudio agent API. Usage: python3 patch_studio.py SRC.html OUT.html"""
+"""Build /character/index.html (the players' Avatar Studio) from the Grug Avatar Studio file: the page head, Allo, the Pearls
+chip and price sheet, and the GrugStudio API. Usage: python3 patch_studio.py SRC.html OUT.html
+
+The "Make with Claude" sheet, the skill panel and their top bar buttons used to be added here. They are gone: agents have
+their own version of the studio at /agents/studio/ (agent_studio.py builds it from this file's output), and the players'
+studio carries no agent panels. patch_outfits.py also strips them from a page built before that change."""
 import json, sys, pathlib
 
 src, out = sys.argv[1], sys.argv[2]
@@ -16,12 +20,12 @@ def sub(old, new, count=1):
 # ---- head: title, description, icon, pointer to the agent guide
 sub('<title>Grug Avatar Studio · Grug Digital</title>',
     '<title>Grug Avatar Studio · Make a Roblox character</title>\n'
-    '<meta name="description" content="Make a blocky Roblox R6 character: pick hair and a face, paint a custom shirt and pants with an AI image editor, '
-    'and download the rigged .glb. Works with Claude: paste this page\'s link into a Claude chat and ask for the character you want.">\n'
+    '<meta name="description" content="Make your own blocky character: pick a face and hair, dress it from the wardrobe or paint an outfit of your own, '
+    'then play as it in the Grug games or take it to Roblox as a rigged R6 .glb. Free to make.">\n'
     '<link rel="icon" href="/favicon.png">\n'
     '<link rel="canonical" href="https://grugdigital.com/character/">\n'
     '<script src="/static/pearls.js"></script>\n'
-    '<link rel="alternate" type="text/markdown" href="/character/claude.md" title="How AI agents (Claude) use this studio">\n'
+    '<link rel="alternate" type="text/markdown" href="/agents/studio/claude.md" title="How AI agents (Claude) use this studio">\n'
     '<link rel="help" href="/character/claude.md">\n'
     '<link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>\n'
     '<link rel="stylesheet" href="/static/fonts/allo.css">')
@@ -102,113 +106,6 @@ DOWNLOAD = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-w
 SPARK = ('<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5c.5 4.6 2.4 6.9 7 7.5-4.6.6-6.5 2.9-7 7.5-.5-4.6-2.4-6.9-7-7.5 '
          '4.6-.6 6.5-2.9 7-7.5z"/><path d="M19 15.5c.25 2 1 2.9 3 3.2-2 .3-2.75 1.2-3 3.2-.25-2-1-2.9-3-3.2 2-.3 2.75-1.2 3-3.2z"/></svg>')
 
-# ---- the sheet, first thing in <body> so page-to-text readers (an AI fetching the link) see the agent guide first
-SHEET = f'''<body class="g-root flat" data-cat="head">
-<section id="claudeGuide" class="cg-wrap" aria-labelledby="cgTitle">
-  <div class="cg box" role="dialog" aria-modal="true">
-    <button id="cgClose" class="g-btn g-btn--ghost g-btn--icon g-btn--sm cg-x" aria-label="Close"><i data-g-icon="cross"></i></button>
-    <div class="cg-tag">{SPARK.replace('<svg ', '<svg width="16" height="16" ')}Works with Claude</div>
-    <h2 id="cgTitle">Let Claude make your avatar</h2>
-    <p>Need a character for your Roblox game? Tell Claude what you want. It opens this studio, picks hair and a face,
-      paints the outfit with Gemini (Nano Banana), puts it on your character and hands you the Roblox R6 file.</p>
-    <label class="cg-field" for="cgIdea">Describe your character</label>
-    <input id="cgIdea" class="g-input" type="text" value="a female character wearing a warm fall outfit" autocomplete="off">
-    <div class="cg-quote" id="cgPrompt">Use https://grugdigital.com/character/ to make a female character wearing a warm fall outfit. Paint the outfit in Gemini, then download the Roblox R6 file for me.</div>
-    <div class="cg-row">
-      <button id="cgCopy" class="g-btn g-btn--primary"><i data-g-icon="clipboard"></i>Copy prompt</button>
-      <a id="cgOpen" class="g-btn" href="https://claude.ai/new" target="_blank" rel="noopener">Open Claude<i data-g-icon="arrow_right"></i></a>
-    </div>
-    <ol class="cg-how">
-      <li><b>1</b><span>Paste the prompt into a Claude chat.</span></li>
-      <li><b>2</b><span>Claude builds the character here and paints the outfit in Gemini.</span></li>
-      <li><b>3</b><span>You get a rigged R6 <code>.glb</code>, ready for Roblox Studio's 3D Importer. Exporting costs 25 Pearls; Claude asks you first.</span></li>
-    </ol>
-    <p class="cg-need">Claude needs a browser it can use (Claude in Chrome) to do this for you, and for custom outfits you need to be
-      signed in to Gemini in that browser. Without one, Claude gives you a link that opens this studio with your character already set up.</p>
-    <div class="cg-skill">
-      <div class="cg-skill-h">{PUZZLE}<div><b>Building a Roblox game?</b><span>Add the Grug skill to Claude, and Claude makes your
-        NPCs here whenever your game needs characters.</span></div></div>
-      <div class="cg-row">
-        <a class="g-btn g-btn--primary" href="/character/roblox-characters.zip" download>{DOWNLOAD}Download the skill</a>
-        <button type="button" class="g-btn" id="cgSkillHow">How to install</button>
-      </div>
-    </div>
-    <p class="cg-need">Using a different agent, or need buildings too? <a href="/agents/">Grug for agents</a> has a prompt for any
-      agent that can use a browser, and both Claude skills.</p>
-    <details>
-      <summary>Instructions for Claude and other AI agents</summary>
-      <div class="cg-agent" id="forAgents">
-        <p><b>AI agent reading this page:</b> you were asked to make a Roblox character with this studio. The job has three
-          parts and <b>all three are required</b>: (1) hair and face, (2) a custom shirt and pants painted in Gemini
-          (Nano Banana), (3) the R6 <code>.glb</code> download, which costs Pearls (the site's currency): tell the person the price and ask before spending. A character in the starter tee is not finished, and
-          <code>downloadR6()</code> refuses until a painted outfit is worn. This is a browser app (WebGL): use a real
-          browser (Claude in Chrome, computer use or Playwright), in the person's own Chrome if you can, since that is
-          where they are signed in to Gemini. Full guide: <a href="https://grugdigital.com/character/claude.md">https://grugdigital.com/character/claude.md</a>.</p>
-        <ol>
-          <li>Open this page in a tab and run <code>await GrugStudio.whenReady</code>.</li>
-          <li>Choose a look that fits the request (don't quiz the person):
-            <code>await GrugStudio.set({{name, skin, head, hair, hairColor, eyes, brows, mouth}})</code>.
-            <code>GrugStudio.options()</code> lists every choice.</li>
-          <li>Turn the request into a concrete outfit and open the painting steps:
-            <code>await GrugStudio.paintOutfit('rust-orange chunky knit sweater, mustard plaid scarf, dark-wash jeans, brown suede ankle boots')</code>.</li>
-          <li><b>Click</b> the studio's <b>Copy picture</b> button (a real click: copying from code doesn't work).</li>
-          <li>Open <code>https://gemini.google.com/app</code> in a new tab, click the message box and press Ctrl+V (Cmd+V on a Mac).
-            A thumbnail of two grey blocky avatars appears.</li>
-          <li>Back in the studio, <b>click Copy prompt</b>. In Gemini, click the message box and press Ctrl+V.
-            Don't type the prompt: it has line breaks and Enter would send it early.</li>
-          <li>Click Gemini's Send button and wait 20 to 60 seconds for the painted picture.</li>
-          <li>Hover the painted picture in Gemini and click its <b>Copy image</b> button.</li>
-          <li>Back in the studio, click the 3D view and press Ctrl+V. The alignment sheet opens;
-            <code>GrugStudio.status().match</code> should be 0.85 or more.</li>
-          <li>Click <b>Wear it</b> and take a screenshot to check.</li>
-          <li>Exporting costs Pearls (25; re-downloading the same character is free). <code>GrugStudio.status().pearls</code>
-            has the price and their balance. <b>Tell the person the price and ask before spending.</b> Then
-            <code>await GrugStudio.downloadR6(null, {{ spendPearls: true }})</code> saves <code>&lt;Name&gt;.glb</code>.
-            Give it to the person (it lands in their Downloads folder). Short of Pearls? Tell them; they get free Pearls
-            every day or can buy more at <code>/character/pearls/</code>. Never buy Pearls for them.</li>
-        </ol>
-        <p>No browser at all? Send the person a recipe link instead, e.g.
-          <code>https://grugdigital.com/character/?name=Maple&amp;hair=wavy-long&amp;hairColor=chestnut&amp;eyes=lashes&amp;outfit=cozy+fall+sweater</code>,
-          and walk them through steps 4 to 11.</p>
-      </div>
-    </details>
-  </div>
-</section>
-<section id="skillGuide" class="cg-wrap" aria-labelledby="skTitle">
-  <div class="cg box" role="dialog" aria-modal="true">
-    <button id="skClose" class="g-btn g-btn--ghost g-btn--icon g-btn--sm cg-x" aria-label="Close"><i data-g-icon="cross"></i></button>
-    <div class="cg-tag">{PUZZLE.replace('<svg ', '<svg width="16" height="16" ')}Claude skill</div>
-    <h2 id="skTitle">Add the Grug skill to Claude</h2>
-    <p>With this skill, Claude knows to come here whenever your Roblox game needs characters. Ask for a castle full of
-      guards or a town of shopkeepers, and Claude plans the cast, makes each one in this studio, paints their outfits in
-      Gemini, and helps you bring the R6 files into Roblox Studio.</p>
-    <a class="g-btn g-btn--primary sk-dl" href="/character/roblox-characters.zip" download>{DOWNLOAD}Download the skill</a>
-    <p class="sk-file">roblox-characters.zip · a small zip with one SKILL.md inside</p>
-    <div class="sk-tabs" role="tablist">
-      <button type="button" role="tab" id="skTabApp" aria-selected="true">Claude app</button>
-      <button type="button" role="tab" id="skTabCode" aria-selected="false">Claude Code</button>
-    </div>
-    <ol class="cg-how" id="skApp">
-      <li><b>1</b><span>Download the skill above. Keep it zipped.</span></li>
-      <li><b>2</b><span>In Claude (web or desktop), open <strong>Customize › Skills</strong>.</span></li>
-      <li><b>3</b><span>Click <strong>+</strong>, then <strong>Create skill › Upload a skill</strong>, and choose <code>roblox-characters.zip</code>.</span></li>
-      <li><b>4</b><span>Make sure it's switched on. Claude uses it by itself when your game needs characters.</span></li>
-    </ol>
-    <ol class="cg-how" id="skCode" hidden>
-      <li><b>1</b><span>Download the skill above.</span></li>
-      <li><b>2</b><span>Unzip it into <code>~/.claude/skills/</code> (or your project's <code>.claude/skills/</code>), so you have <code>~/.claude/skills/roblox-characters/SKILL.md</code>.</span></li>
-      <li><b>3</b><span>Start a new Claude Code session. It picks the skill up automatically.</span></li>
-    </ol>
-    <label class="cg-field" style="margin-top:1rem">Then try asking Claude</label>
-    <div class="cg-quote" id="skTry">I'm making a medieval castle-building game in Roblox. Make me a king, two castle guards and a blacksmith as NPCs.</div>
-    <div class="cg-row"><button type="button" class="g-btn" id="skCopy"><i data-g-icon="clipboard"></i>Copy this prompt</button></div>
-    <p class="cg-need">Claude needs a browser it can use (Claude in Chrome) to run the studio, and you signed in to Gemini there for
-      the outfits. Each R6 export costs 25 Pearls, and Claude asks you before spending any.</p>
-    <p class="cg-need">Buildings too? The <a href="/agents/#skills">game-buildings skill</a> does the same with the Building Studio.</p>
-  </div>
-</section>'''
-sub('<body class="g-root flat" data-cat="head">', SHEET)
-
 # ---- clearer label on the template picture's copy button
 sub('<button id="clCopyRef" class="g-btn"><i data-g-icon="clipboard"></i>Copy</button>',
     '<button id="clCopyRef" class="g-btn"><i data-g-icon="clipboard"></i>Copy picture</button>')
@@ -222,10 +119,9 @@ sub('<div class="pg-head"><h2 id="doneTitle">All done!</h2><p>Download everythin
 # ---- topbar button
 sub('<button id="toFinish" class="g-btn g-btn--primary">',
     f'<a id="pearlChip" class="g-btn pearl-chip" href="/character/pearls/" title="Your Pearls: tap for more">{PEARL}<span id="pearlNum">0</span></a>\n  '
-    f'<button id="toSkill" class="g-btn" title="Get the Claude skill for your Roblox game">{PUZZLE}Claude skill</button>\n  '
-    f'<button id="toClaude" class="g-btn" title="Let Claude make your avatar">{SPARK}Make with Claude</button>\n  <button id="toFinish" class="g-btn g-btn--primary">')
-sub('<div id="say" class="say box" hidden></div>',
-    f'<div id="say" class="say box" hidden></div>\n<div class="cg-fabs"><button id="toSkillM" class="g-btn cg-fab" title="Get the Claude skill">{PUZZLE}Skill</button><button id="toClaudeM" class="g-btn cg-fab" title="Let Claude make your avatar">{SPARK}Claude</button></div>')
+    '<button id="toFinish" class="g-btn g-btn--primary">')
+# (the phone row of floating buttons: patch_outfits.py puts the My outfits button in it)
+sub('<div id="say" class="say box" hidden></div>', '<div id="say" class="say box" hidden></div>\n<div class="cg-fabs"></div>')
 
 # ---- share a few more of the creator's internals with the agent API
 sub('window.__creator = { CH, HAIR, HEADS, PT, get FACE(){ return FACE; }, setCat,',

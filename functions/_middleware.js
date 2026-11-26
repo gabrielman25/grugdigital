@@ -10,7 +10,12 @@
    3. `/` is the new home page. The old home page is at `/legacy`. The installed apps open `/?pwa=…`, which still gets
       the old home page so they keep working.
 
-   To retire an old page, make a page at the same path on main: it takes over that address. */
+   To retire an old page, make a page at the same path on main: it takes over that address.
+
+   The restaurants' section (/restaurants/ on main) is the front door to tools that still live on the legacy deploy: the
+   one-tap setup, the rewards card builder, the dashboards, the managers' walkthrough and the custom games pitch (REST
+   below). Those pages get a "Grug for restaurants" bar instead of the legacy one, and the pages a shop's own guests open
+   (GUEST: the shop's website and its stamp card) get no bar at all. */
 
 const LEGACY_ORIGIN = 'https://legacy.grugdigital.pages.dev';
 
@@ -43,6 +48,10 @@ const MOVED = {
   '/static/showcase/racer.webp': '/static/showcase/grug-digital-avatar-racer.webp',
 };
 
+// the restaurants' own pages on the legacy deploy, and the ones their guests open
+const REST = /^\/(restaurant|business|rewards|managers|for|partners)(\/|$)/;
+const GUEST = /^\/(site|rewards\/card)(\/|$)/;
+
 export async function onRequest(ctx) {
   const { request, next, env } = ctx;
   if (request.method !== 'GET' && request.method !== 'HEAD') return next();
@@ -61,6 +70,10 @@ export async function onRequest(ctx) {
   // promo links get typed by hand: /Tizzy, /TIZZY/, /ITCH… all land on /tizzy/ or /itch/
   const promo = /^\/(tizzy|itch)\/?$/i.exec(path);
   if (promo && path !== '/' + promo[1].toLowerCase() + '/' && path !== '/' + promo[1].toLowerCase()) return Response.redirect(url.origin + '/' + promo[1].toLowerCase() + '/' + url.search, 302);
+
+  // the Building Studio was retired (November 2026): its other old addresses (examples, guide, skill) land on the short
+  // note at /build/. build/core.js stays: the Grug Studio game uses it.
+  if (path.startsWith('/build/') && path !== '/build/' && path !== '/build/index.html' && path !== '/build/core.js') return Response.redirect(url.origin + '/build/', 302);
 
   const res = await next();
   if (res.status !== 404) return res;
@@ -89,13 +102,18 @@ async function fromLegacy(ctx, legacy, path, url, fallback) {
   }
   const type = out.headers.get('content-type') || '';
   if (!/text\/html/i.test(type) || request.method === 'HEAD' || (out.status >= 300 && out.status < 400)) return out;
-  return addBanner(out);
+  if (GUEST.test(path)) return out;
+  return addBanner(out, REST.test(path) ? BAR_REST : BAR_LEGACY);
 }
 
 /* ---------- the banner on legacy pages ---------- */
 // One inline script, drawn in a shadow root so the old pages' styles can't touch it and it can't touch them. It only
 // shows on the outer page (games run in a frame), and × hides it for the rest of the visit (this tab).
-const BANNER = `<script data-grug-legacy>(function(){
+const BAR_LEGACY = { key: 'grug.legacy.bar', label: 'Legacy site notice', long: 'You\\u2019re using the legacy version of Grug. It\\u2019s no longer supported.', short: 'Legacy version \\u00b7 no longer supported',
+  cta: 'Go to the new site', ctaShort: 'New site', href: '/', accent: '#9BE338', lip: '#6FB31C', ink: '#1E1B16', stripe: true };
+const BAR_REST = { key: 'grug.rest.bar', label: 'Grug for restaurants', long: 'Grug for restaurants \\u00b7 free tools for your shop', short: 'Grug for restaurants',
+  cta: 'All restaurant tools', ctaShort: 'All tools', href: '/restaurants/', accent: '#F4826C', lip: '#B92A18', ink: '#3A0F08', stripe: false };
+const banner = B => `<script data-grug-legacy>(function(){
   var ss; try { ss = sessionStorage; } catch (e) {}
   function get(k) { try { return ss && ss.getItem(k); } catch (e) { return null; } }
   function set(k, v) { try { ss && ss.setItem(k, v); } catch (e) {} }
@@ -103,7 +121,7 @@ const BANNER = `<script data-grug-legacy>(function(){
   // the new home page sends anyone who taps an old Home button or logo back to /legacy: it needs the page they left
   function note() { set('grug.legacy.from', location.href.split('#')[0]); }
   note(); addEventListener('pagehide', note); addEventListener('beforeunload', note);
-  if (get('grug.legacy.bar') === 'hidden') return;
+  if (get('${B.key}') === 'hidden') return;
   // the old site's own pages place their top bar below var(--sat) (the phone's notch): grow it by the banner's height so
   // the banner sits above their top bar instead of over it. Pages that don't use it get the banner on top, with ×.
   var H = 38;
@@ -128,29 +146,30 @@ const BANNER = `<script data-grug-legacy>(function(){
     root.innerHTML = '<style>'
       + ':host{all:initial}'
       + '.bar{box-sizing:border-box;display:flex;align-items:center;gap:10px;height:calc(' + H + 'px + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) 6px 0 14px;'
-      + 'background:#1E1B16;color:#F3F3F5;font:500 14px/1.2 Allo,system-ui,-apple-system,"Segoe UI",sans-serif;box-shadow:0 2px 0 #9BE338;-webkit-font-smoothing:antialiased}'
-      + '.stripe{flex:none;width:14px;height:14px;border-radius:4px;background:repeating-linear-gradient(45deg,#1E1B16 0 3px,#9BE338 3px 6px);border:1px solid #9BE338}'
+      + 'background:#1E1B16;color:#F3F3F5;font:500 14px/1.2 Allo,system-ui,-apple-system,"Segoe UI",sans-serif;box-shadow:0 2px 0 ${B.accent};-webkit-font-smoothing:antialiased}'
+      + '.stripe{flex:none;width:14px;height:14px;border-radius:4px;background:repeating-linear-gradient(45deg,#1E1B16 0 3px,${B.accent} 3px 6px);border:1px solid ${B.accent}}'
       + '.msg{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.short{display:none}'
-      + 'a{flex:none;display:inline-flex;align-items:center;height:27px;padding:0 12px;border-radius:9px;background:#9BE338;color:#1E1B16;font:600 13px/1 Allo,system-ui,sans-serif;text-decoration:none;box-shadow:0 2px 0 #6FB31C;white-space:nowrap}'
+      + 'a{flex:none;display:inline-flex;align-items:center;height:27px;padding:0 12px;border-radius:9px;background:${B.accent};color:${B.ink};font:600 13px/1 Allo,system-ui,sans-serif;text-decoration:none;box-shadow:0 2px 0 ${B.lip};white-space:nowrap}'
       + 'a:hover{filter:brightness(1.05)}a:focus-visible,button:focus-visible{outline:2px solid #fff;outline-offset:2px}'
       + 'button{flex:none;width:28px;height:28px;border:0;border-radius:8px;background:transparent;color:#A3A3AD;font:400 20px/1 Allo,system-ui,sans-serif;cursor:pointer;padding:0}'
       + 'button:hover{background:#2E2A24;color:#fff}'
       + '@media (max-width:600px){.long{display:none}.short{display:inline}.bar{font-size:13px;gap:8px;padding-left:10px}a{padding:0 10px}}'
       + '</style>'
-      + '<div class="bar" role="region" aria-label="Legacy site notice"><span class="stripe" aria-hidden="true"></span>'
-      + '<span class="msg"><span class="long">You\\u2019re using the legacy version of Grug. It\\u2019s no longer supported.</span>'
-      + '<span class="short">Legacy version \\u00b7 no longer supported</span></span>'
-      + '<a href="/"><span class="long">Go to the new site</span><span class="short">New site</span></a>'
+      + '<div class="bar" role="region" aria-label="${B.label}">${B.stripe ? '<span class="stripe" aria-hidden="true"></span>' : ''}'
+      + '<span class="msg"><span class="long">${B.long}</span>'
+      + '<span class="short">${B.short}</span></span>'
+      + '<a href="${B.href}"><span class="long">${B.cta}</span><span class="short">${B.ctaShort}</span></a>'
       + '<button type="button" aria-label="Hide this notice" title="Hide">\\u00d7</button></div>';
     root.querySelector('a').addEventListener('click', function () { set('grug.legacy.leaving', '1'); });
-    root.querySelector('button').addEventListener('click', function () { set('grug.legacy.bar', 'hidden'); offset(false); host.remove(); });
+    root.querySelector('button').addEventListener('click', function () { set('${B.key}', 'hidden'); offset(false); host.remove(); });
     document.body.appendChild(host);
   }
   offset(true);
   if (document.body) draw(); else document.addEventListener('DOMContentLoaded', function () { offset(true); draw(); });
 })();</script>`;
 
-function addBanner(res) {
+function addBanner(res, bar) {
+  const BANNER = banner(bar);
   let done = false;
   const put = (el, how) => { if (done) return; done = true; el[how](BANNER, { html: true }); };
   return new HTMLRewriter()

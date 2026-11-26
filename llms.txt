@@ -1,39 +1,39 @@
 # Grug Digital
 
-> Grug Digital makes game asset packs, playful web tools and games, and is building a new gaming platform and engine.
+> Grug Digital has three sections: free browser games and an avatar maker for players, an avatar studio that AI agents
+> can drive for game developers, and free tools for restaurants. The home page (https://grugdigital.com/) is the directory.
 > The old site is still served at its old paths.
 
-## Asset packs
+## For game developers and their AI agents
 
-- [Asset packs on itch.io](https://polysw.itch.io/): low-poly 3D packs (avatar accessories, characters, pets, game kits).
-- [The list as JSON](https://grugdigital.com/api/itch-assets): every pack with its price, description, cover and itch link,
-  grouped into categories.
+- [Avatar Studio for agents](https://grugdigital.com/agents/studio/): a browser app (WebGL) that makes a blocky Roblox
+  R6 character: hair, a face, a custom shirt and pants painted with an AI image editor (Gemini / Nano Banana), and a
+  rigged `.glb` download. This version has no pickers or sliders: the page shows the three steps and what to do next, and
+  `window.GrugStudio` does everything from code.
+- [Guide for Claude and other AI agents](https://grugdigital.com/agents/studio/claude.md): how to make a character for
+  someone who pasted the studio's link into a chat, step by step, including the `window.GrugStudio` JavaScript API and
+  recipe links (`/agents/studio/?hair=…&outfit=…`) for when you can't use a browser.
+- [Grug for agents](https://grugdigital.com/agents/): prompts to copy and send to an agent, the Claude skill and links
+  to the source on GitHub.
+- [Claude skill (zip)](https://grugdigital.com/character/roblox-characters.zip): install it so Claude uses the studio
+  whenever a Roblox game needs characters or NPCs, and brings them into the game.
+- [Asset packs](https://grugdigital.com/packs/): low-poly 3D packs (avatar accessories, characters, pets, game kits),
+  sold on [itch.io](https://polysw.itch.io/). [The list as JSON](https://grugdigital.com/api/itch-assets): every pack with
+  its price, description, cover and itch link, grouped into categories.
 
-## Building Studio (textured buildings)
+## For players
 
-- [Building Studio](https://grugdigital.com/build/): a browser app (WebGL) that makes a chunky building (width, depth,
-  wall height, foundation, a flat/gable/hip/shed roof, floors, a door and windows per wall), has Gemini (Nano Banana)
-  paint a colour-coded two-view reference sheet of it, lines the painting back up and bakes it into a retro-textured
-  `.glb` with a bevel normal map. One unit is one metre; doors are sized for a 1.8 m figure.
-- [Guide for Claude and other AI agents](https://grugdigital.com/build/claude.md): the settings, the
-  `window.GrugBuild` JavaScript API and settings links (`/build/?w=8&d=6&roof=gable&desc=…`).
-- [Example buildings](https://grugdigital.com/build/examples/): six finished buildings (medieval, modern, future) with
-  their reference sheets, Gemini paintings and `.glb` files, each openable as a template.
-- [Claude skill (zip)](https://grugdigital.com/build/game-buildings.zip): install it so Claude uses the studio
-  whenever a game needs buildings, and brings them into the game.
+- [Grug Arcade](https://grugdigital.com/arcade/): free blocky games that run in the browser.
+- [Avatar Studio](https://grugdigital.com/character/): the same studio made for people (kids and hobbyists): tabs, a
+  wardrobe, Back and Next. A character saved here is the one they play as in the games. `window.GrugStudio` works here
+  too, but agents should use the agents' version above.
 
-## Avatar Studio (Roblox characters)
+## For restaurants
 
-- [Avatar Studio](https://grugdigital.com/character/): a browser app (WebGL) that makes a blocky Roblox R6
-  character: hair, face, a custom shirt and pants painted with an AI image editor (Gemini / Nano Banana), and a rigged
-  `.glb` download.
-- [Guide for Claude and other AI agents](https://grugdigital.com/character/claude.md): how to make a character
-  for someone who pasted the studio's link into a chat, step by step, including the `window.GrugStudio` JavaScript API
-  and recipe links (`/character/?hair=…&outfit=…`) for when you can't use a browser.
-- [Claude skill (zip)](https://grugdigital.com/character/roblox-characters.zip): install it so Claude uses the
-  studio whenever a Roblox game needs characters or NPCs, and brings them into the game.
+- [Grug for restaurants](https://grugdigital.com/restaurants/): a free rewards (stamp) card, a one-page website made
+  from it, and a dashboard for schedules, checklists, temperatures and recipe costs.
 
-## For agents
+## Retired
 
-- [Grug for agents](https://grugdigital.com/agents/): both studios on one page, with prompts to copy and send to an
-  agent, the two skills and links to their source on GitHub.
+- The Building Studio (`/build/`), its guide and its `game-buildings` skill were retired in November 2026. There is no
+  building tool on the site.
