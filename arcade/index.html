@@ -269,6 +269,8 @@
     $('GamesContent').innerHTML = show.length ? show.map(tile).join('') :
       `<div class="Empty">No ${state.cat === 'all' ? '' : esc(catName(state.cat)) + ' '}${state.genre === 'all' ? '' : esc(gname(state.genre)) + ' '}games ${state.q ? 'match "' + esc(state.q) + '"' : state.time === 'day' || state.time === 'week' ? 'were updated in that time' : 'yet'}.
         More are on the way. <a href="#all" data-genre="all">See all games</a>, or <a href="/character/">make a character</a> to play as.</div>`;
+    const curCat = CATS.find(c => c.id === state.cat);
+    if (curCat && curCat.experimental) $('GamesContent').insertAdjacentHTML('afterbegin', `<div class="ExpNote"><b>⚠ Experimental section.</b> ${esc(GrugArcade.EXPERIMENTAL_NOTE.replace(/^Experimental: /, ''))}</div>`);
     if (state.cat === 'n64' && show.length) $('GamesContent').insertAdjacentHTML('beforeend', `<div class="CatNote"><b>Real Nintendo 64 games, made by Grug.</b> Each one plays here in an emulator, and its page has a <b>Download ROM</b> button so you can play it on a real console from a flash cartridge.
       <span class="fine">Nintendo 64 is a trademark of Nintendo. Grug Digital is not affiliated with or endorsed by Nintendo.</span></div>`);
     $('pageNum').textContent = state.page; $('pageCount').textContent = pages;
@@ -307,7 +309,7 @@
   // Categories in the left column
   function drawCats() {
     $('catList').innerHTML = [{ id: 'all', name: 'All', hash: '' }].concat(CATS).map(c =>
-      `<li><a href="#${c.hash}" data-catpick="${c.id}" class="${state.cat === c.id ? 'on' : ''}">${esc(c.name)}</a></li>`).join('');
+      `<li><a href="#${c.hash}" data-catpick="${c.id}" class="${state.cat === c.id ? 'on' : ''}">${esc(c.name)}${c.experimental ? ' <span class="Exp">Experimental</span>' : ''}</a></li>`).join('');
   }
   function pickCat(id) {
     state.cat = id; state.genre = 'all'; state.page = 1;

@@ -209,7 +209,7 @@
   const R = A.rec(), fresh = Date.now() - new Date(g.added) < 7 * 864e5, plays = R.plays[g.slug] || 0;
   const rom = g.rom ? `/arcade/${g.slug}/${g.rom}` : '';   // a Nintendo 64 game: its ROM, to download and play on a real console
   $('Place').innerHTML = `
-    <div class="ttl"><h1>${esc(g.name)}</h1><div class="sub">A Grug Arcade game · <a href="/arcade/#${cat.hash}">${esc(cat.name)}</a>${isTab ? ` · <a href="/arcade/#${tabCat.hash}">${esc(tabCat.name)}</a>` : ''} · ${esc(g.tag)}</div></div>
+    <div class="ttl"><h1>${esc(g.name)}</h1><div class="sub">A Grug Arcade game · <a href="/arcade/#${cat.hash}">${esc(cat.name)}</a>${cat.experimental ? ' <span class="Exp">Still under development</span>' : ''}${isTab ? ` · <a href="/arcade/#${tabCat.hash}">${esc(tabCat.name)}</a>` : ''} · ${esc(g.tag)}</div></div>
     <div class="L">
       <div class="shot"><img src="/arcade/${g.slug}/${g.slug}-grug-arcade.jpg" alt="${esc(g.name)}, a free game in the Grug Arcade: ${esc(g.alt)}" width="538" height="303">${fresh ? '<span class="new">NEW</span>' : ''}</div>
       <div class="acts">
@@ -222,7 +222,7 @@
       <div class="bx">${(g.about || [g.stats.join('. ') + '.']).map(p => `<p>${esc(p)}</p>`).join('')}
         ${g.outfit === false ? '' : `<p>You play as the character you made in the <a href="/character/">Grug Avatar Studio</a>${g.solo ? '.' : ', and your other saved outfits show up as the other players.'}</p>`}</div>
       ${rom ? `<div class="StandardBoxHeader"><span><h2>Play it on a real Nintendo 64</h2></span></div>
-      <div class="bx"><p><b>This is a real Nintendo 64 game.</b> Play starts it right here in an emulator. <a href="${rom}" download="${esc(g.rom)}">Download the ROM</a> (<span id="romSize">a .z64 file</span>) to play the very same game on a real console: copy it to a flash cartridge (an EverDrive 64 or a SummerCart64, for example) and pick it from the cartridge's menu. It runs in other Nintendo 64 emulators too.<span id="romWear"></span></p>
+      ${cat.experimental ? `<div class="ExpNote"><b>⚠ ${esc(GrugArcade.EXPERIMENTAL_NOTE)}</b></div>` : ''}<div class="bx"><p><b>This is a real Nintendo 64 game.</b> Play starts it right here in an emulator. <a href="${rom}" download="${esc(g.rom)}">Download the ROM</a> (<span id="romSize">a .z64 file</span>) to play the very same game on a real console: copy it to a flash cartridge (an EverDrive 64 or a SummerCart64, for example) and pick it from the cartridge's menu. It runs in other Nintendo 64 emulators too.<span id="romWear"></span></p>
         <p>On a console you play with the controller: the Control Stick moves, A jumps, Z rolls, B swings, the C buttons turn and tilt the camera, R and L zoom, and START opens the Game Menu. Plug in a second controller and its Control Stick turns the camera smoothly. If the picture ever looks wrong, hold Z while the console starts.</p>
         <p class="fine">Nintendo 64 is a trademark of Nintendo. Grug Digital is not affiliated with or endorsed by Nintendo.</p></div>` : ''}
       ${isTab ? `<div class="StandardBoxHeader"><span><h2>Plays in your tab</h2></span></div>

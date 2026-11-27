@@ -251,6 +251,11 @@ site's games, and in time for those to be the main ones. The first is **Grug Bas
 Baseplate's physics, stations, voices and sounds, in C. **Read `src/n64/README.md` before making or changing one**: how
 to start a game, what is already there, and the rules.
 
+- **The section is experimental** (the owner's call, November 2026): `experimental: true` on its `CATS` entry labels
+  it "Experimental" in the Arcade's category list and puts `EXPERIMENTAL_NOTE` (`arcade/arcade.js`: still under
+  development, expect bugs, not tried on a console) at the top of the category, on each game's page, and in each play
+  page's sidebar (copied by `new-game.py`). Take the flag and the sidebar note off only when the owner says the games
+  are stable.
 - **A game is the kit plus one file.** `src/n64/kit/` is the engine every game shares (physics, renderer, sound, the
   outfit slot, the console and PC ends, the tools; `kit/README.md` is its reference). A game is `src/n64/<slug>/`:
   `game.c`, a test script, a three-line Makefile. **`python3 src/n64/kit/tools/new-game.py <slug> "<Name>"` starts

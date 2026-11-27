@@ -274,6 +274,8 @@ img{border:0}
 .UnderCon p{margin:0 14px 8px}
 .UnderCon .fine{font-size:11px;color:#888}
 /* a note under a category's games (Nintendo 64 Games) */
+.Exp{display:inline-block;margin-left:5px;padding:0 4px;border:1px solid #999;border-radius:2px;font:bold 10px/14px Allo,Arial,Helvetica,sans-serif;color:#555;background:#fff;vertical-align:1px}
+.ExpNote{clear:both;margin:6px 6px 8px;padding:8px 10px;border:1px solid #b9a24a;background:#fff6cc;font:13px/1.45 Allo,Arial,Helvetica,sans-serif;color:#333}
 .CatNote{clear:both;margin:10px 6px 0;padding:8px 10px;border:1px solid #aaa;background:#fff;font:13px/1.45 Allo,Arial,Helvetica,sans-serif;color:#333}
 .CatNote .fine{display:block;margin-top:4px;font-size:11px;color:#888}
 #Cats{margin-bottom:20px}

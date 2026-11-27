@@ -94,6 +94,7 @@
   #stage { position: fixed; left: var(--side); top: 0; right: 0; bottom: 0; background: #8fc6ef center / cover no-repeat; image-rendering: pixelated; }
   #start { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
   #start button { width: 240px; min-height: 58px; font-size: 26px; line-height: 50px; }
+  #side .exp { margin: 8px 0 10px; padding: 7px 9px; border: 1px solid #6b5a12; background: #2a2508; color: #f1e3a0; font-size: 12px; line-height: 1.35; }
   #wear { display: none; margin: 8px 0 0; font-size: 12px; line-height: 1.35; color: #cfd3cf; }
   #game { position: absolute; inset: 0; display: none; background: #000; }
   body.playing #start { display: none; }
@@ -116,6 +117,7 @@
   <a class="back" href="/arcade/">‹ Back to the Arcade</a>
   <h1>Grug Baseplate 64</h1>
   <div class="sub">A real Nintendo 64 game. Play it here, or on a real console.</div>
+  <div class="exp"><b>⚠ Experimental.</b> Nintendo 64 games are still under development: expect bugs, missing features and changes from week to week. Not tried on a real console yet.</div>
   <a class="btn rom" id="rom" download>Download ROM<small id="romSize">.z64, for a real console</small></a>
   <div id="wear"></div>
   <div id="msg" role="status"></div>

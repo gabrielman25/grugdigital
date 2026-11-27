@@ -20,8 +20,11 @@
   const CATS = [
     { id: 'tab', name: TAB_BRAND, hash: 'plays-in-your-tab', match: g => !!g.tab, blurb: "3D games that keep going in your browser tab. Start one, then go do your thing: the little picture and title on the tab show how it's going." },
     { id: '3d', name: '3D Games', hash: '3d-games', match: g => (g.cat || '3d') === '3d', blurb: 'Blocky worlds you explore as your own character: dress up, build, farm, adventure and play with friends.' },
-    { id: 'n64', name: 'Nintendo 64 Games', hash: 'n64-games', match: g => g.cat === 'n64', blurb: 'Real Nintendo 64 games made by Grug: play them here in your browser, or download the ROM and play on a real console.' },
+    { id: 'n64', name: 'Nintendo 64 Games', hash: 'n64-games', experimental: true, match: g => g.cat === 'n64', blurb: 'Experimental, still under development: real Nintendo 64 games made by Grug. Play them here in your browser, or download the ROM for a real console.' },
     { id: 'ds', name: 'Nintendo DS Games', hash: 'ds-games', soon: true, match: g => g.cat === 'ds', blurb: 'Coming soon: DS games you can play right here in your browser.' }];
+  // experimental: true marks a section that is still under development: it is labelled in the category list, and its games'
+  // pages and play pages carry EXPERIMENTAL_NOTE (the owner's call, November 2026, for the Nintendo 64 games)
+  const EXPERIMENTAL_NOTE = 'Experimental: Nintendo 64 games are still under development. Expect bugs, missing features and changes from one week to the next, and they have not been tried on a real console yet.';
   const catOf = g => g.cat || '3d';
   const inCat = (g, id) => { const c = CATS.find(c => c.id === id); return c ? c.match(g) : true; };
   const gname = id => (GENRES.find(g => g[0] === id) || [, 'All'])[1];
@@ -73,7 +76,7 @@
       added: '2026-11-24T16:06:59Z', updated: '2026-11-24T17:38:06Z', alt: 'A player zapping cube pets on a grassy grid with a deck of move cards',
       stats: ['Drive a car or boat between huge zones', 'Build a 15-card deck, grab provisions'], players: '1 (and your pets)',
       about: ['Turn-based pet catching on a grid. Build a 15-card deck of moves, grab provisions, and zap wild cube pets until they join you. Drive a car or a boat between huge zones and towns full of shops, side quests, loot crates and trades.'] },
-    { slug: 'grug-64', cat: 'n64', rom: 'grug-baseplate-64.z64', solo: true, name: 'Grug Baseplate 64', genres: ['gametutorials', 'adventure'], tag: 'A real Nintendo 64 game · play here or on a console',
+    { slug: 'grug-64', cat: 'n64', rom: 'grug-baseplate-64.z64', solo: true, name: 'Grug Baseplate 64', genres: ['gametutorials', 'adventure'], tag: 'Experimental · a real Nintendo 64 game',
       added: '2026-11-26T18:00:00Z', updated: '2026-11-27T06:00:00Z', alt: 'Grug in his lime hoodie on a grey checked baseplate in front of blue jump blocks, drawn in chunky Nintendo 64 pixels',
       stats: ['A real N64 ROM, running in your browser', 'Download it and play on a real console'], players: '1',
       about: ['The Grug Baseplate, rebuilt as a real Nintendo 64 game. It plays right here in an emulator, and the very same ROM can be downloaded and played on a real console from a flash cartridge.',
@@ -257,5 +260,5 @@
     if ($('mePic')) { $('meSel').addEventListener('change', e => { if (O) O.setActive(e.target.value); }); addEventListener('grug:outfits', me); me(); }
   }
 
-  window.GrugArcade = { GENRES, GAMES, CATS, TAB_BRAND, catOf, inCat, gname, esc, ago, tile, place, rec, saveRec, chrome, WDAD };
+  window.GrugArcade = { GENRES, GAMES, CATS, TAB_BRAND, EXPERIMENTAL_NOTE, catOf, inCat, gname, esc, ago, tile, place, rec, saveRec, chrome, WDAD };
 })();
