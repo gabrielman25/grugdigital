@@ -233,8 +233,9 @@ painting or download step any more. The game's sky and baseplate match the Avata
 ## Games that play in your tab (`/arcade/tab/`) and the Arcade's categories
 
 The Arcade has categories (`CATS` in `arcade/arcade.js`): Plays in Your Tab (3D games marked `tab: true`), 3D Games and
-Nintendo DS Games (under construction, no games yet). `/arcade/` opens a pop-up to pick one on arrival, unless the link
-already names a category or genre (`#plays-in-your-tab`, `#3d-games`, `#ds-games`). A tab game keeps going in the browser
+Nintendo DS Games (under construction, no games yet). They're listed in the left column of `/arcade/`, and a link
+can open one directly (`#plays-in-your-tab`, `#3d-games`, `#ds-games`). (The "What do you feel like playing?" pop-up that
+asked on arrival was taken off in November 2026 at the owner's request: don't bring it back unasked.) A tab game keeps going in the browser
 tab (favicon + title) on the `GrugTab` engine (`arcade/tab/tab.js`): read section 8 of `arcade/claude.md`. The first is
 **Sunny Patch** (`arcade/sunny-patch/`, a Baseplate game: the farm is `window.FarmCore`, saved in `grug.sunny-patch.v1`;
 the player's settings in `grug.sunny-patch.player.v1`). It has no other players (just you and Poppy), solid black UI
