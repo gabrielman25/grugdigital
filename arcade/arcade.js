@@ -84,6 +84,15 @@
         'You play as the character you made: its shirt, its pants, its face and the shape of its head are shrunk to console size and written into the ROM just before it starts, and into the ROM you download. (Hair comes later: for now everyone is bald.) A door by the spawn leads to a second area, the Brick Yard.',
         'Your character speaks with the same voice as in the rest of the Arcade when it jumps, rolls, swings, gets hurt and falls apart: every clip is squeezed down to fit on a cartridge.'],
       controls: [['W A S D', 'Move (Control Stick)'], ['Space', 'Jump (A button)'], ['Shift', 'Dodge roll, in the air too (Z)'], ['F / Click', 'Swing (B button)'], ['Mouse', 'Look around: click the game first, Esc lets the mouse go'],
+        ['\u2190 \u2191 \u2193 \u2192 / Q / E', 'Turn and tilt the camera (C buttons)'], ['Wheel / I / O', 'Zoom in and out (R and L)'], ['Enter', 'Game Menu (START)']] },
+    { slug: 'zombie-zones-64', cat: 'n64', rom: 'zombie-zones-64.z64', solo: true, name: 'Zombie Zones 64', genres: ['scary', 'war'], tag: 'Experimental · a real Nintendo 64 game',
+      added: '2026-11-27T17:00:00Z', updated: '2026-11-27T17:00:00Z', alt: 'Grug in his lime hoodie in a blocky town street with green zombies coming at him and red supply crates on the road, drawn in chunky Nintendo 64 pixels',
+      stats: ['The Supply Run, as a real N64 ROM', 'Download it and play on a real console'], players: '1',
+      about: ['The Nintendo 64 version of Zombie Zones: its Supply Run, rebuilt as a real Nintendo 64 game. It plays right here in an emulator, and the very same ROM can be downloaded and played on a real console from a flash cartridge.',
+        'You are on the Blue team. Head out of your base into Zone 1, a town full of zombies, grab the red supply crates (walk near one and it flies to you, ten at most), bring them home and walk onto your pad to store them. The team with the most supply when the five minutes are up wins, and the next round starts.',
+        'Your rifle never runs out; up close it is a bash that shoves a zombie back. Walkers shamble, Runners are faster than you, and Tanks take a lot of putting down. Zombies can\'t get into your base, and you heal fast in there. Go down and you drop what you carry.',
+        'Zone 1 comes in two parts, the Old Town and the Market (deeper in, with Tanks), each through its own door. You play as the character you made, and speak with the same voice as in the rest of the Arcade.'],
+      controls: [['W A S D', 'Move (Control Stick)'], ['Space', 'Jump (A button)'], ['Shift', 'Dodge roll, in the air too (Z)'], ['F / Click', 'Shoot, hold to keep firing; up close it is a bash (B button)'], ['Mouse', 'Look around: click the game first, Esc lets the mouse go'],
         ['\u2190 \u2191 \u2193 \u2192 / Q / E', 'Turn and tilt the camera (C buttons)'], ['Wheel / I / O', 'Zoom in and out (R and L)'], ['Enter', 'Game Menu (START)']] }
   ];
 
