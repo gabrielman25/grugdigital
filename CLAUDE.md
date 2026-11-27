@@ -249,7 +249,9 @@ Real Nintendo 64 ROMs made by Grug, listed in the Arcade under **Nintendo 64 Gam
 an emulator and can be downloaded to play on a real console. The owner's plan is a simple N64 version of each of the
 site's games, and in time for those to be the main ones. The first is **Grug Baseplate 64** (`arcade/grug-64/`): the
 Baseplate's physics, stations, voices and sounds, in C. **Read `src/n64/README.md` before making or changing one**: how
-to start a game, what is already there, and the rules.
+to start a game, what is already there, and the rules. **Asked to make an N64 version of a game on the site, follow its
+"Porting a game from the site: step by step"** (toolchain setup, which needs the owner's OK to download the first time;
+reading the web game; planning the areas; building; `make check`; `kit/tools/play-test.py`; listing it; the preview link).
 
 - **The section is experimental** (the owner's call, November 2026): `experimental: true` on its `CATS` entry labels
   it "Experimental" in the Arcade's category list and puts `EXPERIMENTAL_NOTE` (`arcade/arcade.js`: still under

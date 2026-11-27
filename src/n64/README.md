@@ -14,10 +14,12 @@ rules it keeps to. (`kit/README.md` is the reference for the engine: how it work
 ## Starting a game
 
 ```sh
+bash src/n64/kit/tools/setup-toolchain.sh                           # once: the console's compiler and libdragon, into ~/n64
 python3 src/n64/kit/tools/new-game.py slide-64 "Slide 999 KM 64"    # makes src/n64/slide-64/ and arcade/slide-64/index.html
 cd src/n64/slide-64
 make check                                   # builds it for a PC, plays its test script, writes pictures to build/shots/
-export N64_INST=/path/to/libdragon && make install      # the ROM, into arcade/slide-64/ (commit it: it isn't built on deploy)
+export N64_INST=~/n64/toolchain/opt/libdragon && make install   # the ROM, into arcade/slide-64/ (commit it: it isn't built on deploy)
+python3 ../kit/tools/play-test.py slide-64   # plays the real page in the Arcade's emulator, headless, and reports
 ```
 
 The script prints what is left to do by hand (the Arcade's list, the cover). What you get is the whole of Grug
@@ -25,6 +27,62 @@ Baseplate 64 with one small area in place of the zoo: it already runs, and alrea
 **The game is what you write between the two marks in `game.c`** (`THIS GAME'S AREAS` ... `END`): a function that
 builds each area out of parts. Outside the marks is the same in every game; change it only for something the game
 really needs, and if it would help every game, change `grug-64/game.c` too so the next game starts with it.
+
+## Porting a game from the site: step by step
+
+This is what to do when asked to "make a Nintendo 64 version of <a game on the site>". Work on a branch, as always.
+
+1. **Set up the tools.** `make check` needs only a C compiler. Building the ROM needs libdragon and its MIPS
+   toolchain: `bash src/n64/kit/tools/setup-toolchain.sh` puts both in `~/n64` (no root, about a minute) and prints the
+   `export N64_INST=...` line. It downloads about 105 MB from GitHub (libdragon's own releases and source), so **ask the
+   owner before running it** the first time in a session. The headless play test needs `pip install playwright` and
+   Chrome (the cloud sessions have both).
+2. **Read the web game.** It is one file, `arcade/<slug>/index.html`, built on the same engine as the Baseplate. Find
+   (a) how its world is built: the `part(...)` / `addPart` calls, the map or level functions, the sizes and colours;
+   (b) the one thing you do in it: the loop of play, how you win or score; (c) what else it has (enemies, vehicles,
+   shops, rounds). Its entry in `GAMES` (`arcade/arcade.js`) and its section in `arcade/claude.md` or `CLAUDE.md` say
+   what it is for. Play it if you can (serve the repo root, open `/arcade/<slug>/`).
+3. **Plan it on paper before building.** Write in the new game's README: the heart you are keeping, what you are
+   leaving out (and why), and the areas with a rough part count each. A web map bigger than 250 parts becomes several
+   areas joined by doors: its spawn or lobby, then a door to each region or level. Count the doors (4 parts each) and
+   every character on screen (40 each) in the area's 250.
+4. **Start it.** `python3 src/n64/kit/tools/new-game.py <slug>-64 "<Name> 64"` (the slug and name of the web game
+   with 64 on the end, so the two can live side by side in the Arcade). It runs straight away.
+5. **Build the world, area by area**, between the marks in `game.c` (`THIS GAME'S AREAS`). Copy sizes and colours
+   from the web game, then merge and drop parts until each area is under 250. `make check` after each area: it prints
+   the counts, and a picture of each shot lands in `build/shots/` (look at them: the Read tool shows a `.ppm` once it is
+   converted, `python3 -c "from PIL import Image; Image.open('x.ppm').save('x.png')"`).
+6. **Add the game's own rules** (a score, a timer, a goal, a simple enemy) in `game.c`, outside the marks if they
+   need code: `game_update` is where everything moves, `draw_hud` the 2010 GUI, `station(...)` the bar along the
+   bottom. Copy how the zoo does a thing before inventing a new way (the dummy is an enemy that doesn't move; the lift
+   is anything that does). Any text that names a control needs both wordings (`KB(...)`). If something would help every
+   game (an enemy that walks, a timer on the HUD), put it in the kit and in `grug-64/game.c`, and say so in the commit.
+7. **Check what it does.** Add checks to `host/main.c` for the game's own rules (can each area be reached, does the
+   goal count, does each door lead where it should), plus a shot called `cover`. `make check` must say
+   "all checks passed".
+8. **Build the ROM and play it.** `make install`, then
+   `python3 src/n64/kit/tools/play-test.py <slug>-64 --outfit starter-racer`: it plays the real page in the Arcade's
+   emulator and prints frames a second, polygons, parts, whether the outfit was worn and whether sound came out. Stand
+   in the busiest spot (`?view=x,z,turn,tilt,distance` on the page starts you there) and aim for 20 frames a second or
+   better. Write the number in the README.
+9. **Put it in the Arcade.** Its `GAMES` entry in `arcade/arcade.js` (copy `grug-64`'s: `cat: 'n64'`, `rom`, the
+   `controls` list, a `tag`, an `about` that says it is the Nintendo 64 version of the web game), `sitemap.xml`, the
+   cover (`make cover`, then `src/seo/images.json`, `python3 src/seo/tag_images.py`, `python3 src/seo/seo_head.py`).
+   It lands in the experimental section with its warning on its own.
+10. **Push the branch and send the owner the preview link** to the play page (`/arcade/<slug>-64/`), with what was
+    kept, what was left out, the frames a second, and that it has not been tried on a real console.
+
+### What the kit doesn't have yet
+
+Enemies that walk and chase, other players or NPCs that move, projectiles, vehicles, pets, shops, saving, multiplayer.
+A port that needs one of these builds a simple version in its `game.c` (an enemy is a few boxes drawn with
+`draw_rig` that moves towards you and calls the damage code the kill brick uses). Keep it small, and say in the
+README what it does and doesn't do. Saving and Pearls stay out of ROMs.
+
+### A prompt the owner can use
+
+> Make a Nintendo 64 version of <game> from the Grug site. Follow "Porting a game from the site" in src/n64/README.md
+> step by step. You may run the toolchain setup. Push a branch and send me the preview link.
 
 ## What is already there (don't rebuild it)
 
@@ -77,8 +135,7 @@ rule are in `kit/README.md` ("The stress test").
    it changes (`snprintf` into a `static` buffer), never every frame.
 9. **Fixed memory.** Static arrays with a count, as the kit does. No `malloc` in a game, and no new sounds without
    `kit/tools/mkaudio.py` (the ROM has about 150 KB of them, shared by every game).
-10. **Measure, then say what you measured.** Play it in the Arcade's emulator (headless is fine: `kit/README.md` says
-    how), stand in the busiest spot with studs on, and read the Game Menu's FPS row: aim for 20 frames a second or
+10. **Measure, then say what you measured.** Play it in the Arcade's emulator (`kit/tools/play-test.py`), stand in the busiest spot with studs on, and read the Game Menu's FPS row: aim for 20 frames a second or
     better there, and put the number in the game's README. `?stress=500` on the play page shows what more parts would
     cost on the same machine.
 

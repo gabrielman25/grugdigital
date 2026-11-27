@@ -246,7 +246,8 @@ scene at all, if one is ever wanted.
 The Arcade also has real Nintendo 64 ROMs, written in C (`src/n64/`), that play in the browser in an emulator and can
 be downloaded for a real console. The plan is a simple N64 version of each game here, and in time for those to be the
 main ones. They are not built like the games above: **read `src/n64/README.md` first** (how to start one, what is
-already there, the rules) and the "Nintendo 64 games" section of `CLAUDE.md`.
+already there, the rules) and the "Nintendo 64 games" section of `CLAUDE.md`. To make the N64 version of a game
+here, follow "Porting a game from the site: step by step" in that README.
 
 - **Starting one:** `python3 src/n64/kit/tools/new-game.py <slug> "<Name>"` makes the game's source (`src/n64/<slug>/`,
   a copy of Grug Baseplate 64 with one small area in place of its zoo) and its play page (`arcade/<slug>/index.html`),

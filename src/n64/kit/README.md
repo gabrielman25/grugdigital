@@ -22,7 +22,7 @@ kit itself: how it works, what was measured, and why things are the way they are
 | `host/harness.h` | A game on a PC, driven by the game's own script (`../<game>/host/main.c`), for tests: `make check`. |
 | `kit.mk` | The makefile every game includes. |
 | `starter/` | What `tools/new-game.py` puts in a new game: one small area and a test script. |
-| `tools/` | `new-game.py` (starts a game), `mkaudio.py`, `mkfont.py`, `mkcover.py`, `physdiff.cjs`, `mkoutfit.cjs` (the ROM's own outfit), `mkslot.py` (puts the slot in the ROM file). |
+| `tools/` | `setup-toolchain.sh` (libdragon and its compiler, into ~/n64), `new-game.py` (starts a game), `play-test.py` (plays a game's page headless and reports), `mkaudio.py`, `mkfont.py`, `mkcover.py`, `physdiff.cjs`, `mkoutfit.cjs` (the ROM's own outfit), `mkslot.py` (puts the slot in the ROM file). |
 | `assets/outfit-default.fit` | The slot the ROM is built with: Grug, from `arcade/outfits/grug.glb`. |
 | `../../../static/outfit64.js` | Makes a slot from any saved outfit and writes it into a ROM: used by the Arcade's pages and by `mkoutfit.cjs`. |
 | `../boot/` | The boot stage every Grug ROM starts with: libdragon's, patched for the browser emulator. |
@@ -69,13 +69,15 @@ In a game's folder (`../grug-64/`, say). `kit.mk` has the full list.
 ```sh
 make check                                  # the PC build (needs only a C compiler), the game's test script (pictures in
                                             # build/shots/, the sound in audio.wav), and phys.c against the site's own
-export N64_INST=/path/to/libdragon          # the ROM: needs libdragon (https://libdragon.dev) and its MIPS toolchain
+export N64_INST=~/n64/toolchain/opt/libdragon   # the ROM: needs libdragon and its MIPS toolchain (tools/setup-toolchain.sh)
 make install                                # builds the ROM and copies it to arcade/<game>/
 make cover                                  # the Arcade's cover from the test's "cover" shot
 ```
 
 A ROM is built on Grug's patched boot stage, `../boot/ipl3_dev_grug.z64` (`make N64_ROM_HEADER=` uses libdragon's own).
-Grug Baseplate 64 was last built with libdragon trunk at `e356bf3` and GCC 16.2. After a build, open `/arcade/grug-64/` from a local
+Grug Baseplate 64 was last built with libdragon trunk at `e356bf3` and GCC 16.2 (what `tools/setup-toolchain.sh` sets
+up; change the commit there when moving to a newer libdragon). The ROM file carries the build folder's path in its debug
+names, so a build from another folder differs in those bytes only. After a build, open `/arcade/grug-64/` from a local
 server at the repo root and play it: the page is the test.
 
 `make assets` re-bakes `sounds.c` / `sounds.h`, `font.h` and `assets/outfit-default.fit` (needs node). Run it after the
