@@ -16,6 +16,7 @@ typedef struct Input {
     float cx, cy;            /* the camera stick, -1..1: a second controller's stick on a console, the mouse in the Arcade */
 } Input;
 
+void game_slot(const uint8_t *slot, int size);   /* the ROM's outfit slot (outfit.h), before game_init: what you wear, and the test settings. It must stay in memory. */
 void game_init(uint32_t seed);
 void game_update(const Input *in, float dt);
 void game_draw(Frame *f);
@@ -27,8 +28,19 @@ extern bool  game_kbd;        /* played on a keyboard and mouse (the Arcade's pa
 extern float game_fps;        /* measured by the platform, shown when the menu's FPS row is on */
 extern uint32_t (*game_clock_us)(void);   /* the platform's clock, if it has one: the FPS row then also shows where a frame's time goes */
 
+/* The numbers a test reads out of a running game. In the Arcade the emulator's memory is the page's to look at, and this
+   block is found by its first two words ("GRUG", "STA1", written when the game starts so that they are nowhere in the ROM file). */
+typedef struct GameStat {
+    uint32_t m0, m1, frames, fps100, parts, polys, ms10[4];      /* ms10: tenths of a millisecond in update, world, characters, HUD */
+    uint32_t outfit, stress, sweepAt, sweepDone;                 /* outfit: 1 when the slot's outfit is worn; sweepAt: the step the sweep is on */
+    uint32_t sweepFps[32], sweepPolys[32], sweepMs[32];          /* per step: frames a second x 100, polygons, tenths of a ms drawing the world */
+} GameStat;
+extern GameStat game_stat;
+#define SWEEP_COUNTS 7     /* the sweep: the zoo as it is, then 100 to 4000 bricks, each from two places and with studs on and off */
+
 /* for the host test harness */
-typedef struct GameDebug { float x, y, z, vy, camYaw, camPitch, camDist; int hp, coins; bool grounded, dead, menu; float lastHeight, lastDist; } GameDebug;
+typedef struct GameDebug { float x, y, z, vy, camYaw, camPitch, camDist; int hp, coins; bool grounded, dead, menu; float lastHeight, lastDist; int parts, stress; bool outfit; } GameDebug;
+void game_stress(int bricks);   /* the stress test's world with this many bricks (0: the zoo) */
 void game_debug(GameDebug *d);
 void game_teleport(float x, float y, float z, float camYaw);
 void game_camera(float yaw, float pitch, float dist);

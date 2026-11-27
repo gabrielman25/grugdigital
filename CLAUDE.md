@@ -270,9 +270,9 @@ from `src/n64/grug-64/`: read its `README.md`): the Baseplate's physics, station
   which is what a browser emulator gets. Sound is mixed by the CPU. Holding Z at start forces software. **The
   hardware path and real consoles are untested** (November 2026): say so until someone has tried ares or a console.
 - **Speed in the browser is the software renderer on an interpreted CPU**: keep `rast.c` and the HUD lean (the FPS row
-  in the Game Menu shows where a frame goes), and keep the play page's `OPTIONS` (`CountPerOp` 1: about 38 frames a
-  second in the console's time, against 19 at the core's default). **Studs cost about a third of that** (24 against
-  38): the Game Menu can turn them off. Test a change by playing the page headless (Playwright + Chrome through the
+  in the Game Menu shows where a frame goes), and keep the play page's `OPTIONS` (`CountPerOp` 1: about 35 frames a
+  second in the console's time, against half that at the core's default). **Studs cost about a quarter of that** (26
+  against 35): the Game Menu can turn them off. Test a change by playing the page headless (Playwright + Chrome through the
   proxy, as for the other games) and reading that row.
 - **Sound: the ROM queues its own audio buffers, by physical address** (`snd_feed` in `n64/main.c`). libdragon's audio
   queue is silent with a callback until something queues the first buffer, and the address it gives the hardware
@@ -281,8 +281,20 @@ from `src/n64/grug-64/`: read its `README.md`): the Baseplate's physics, station
 - **Same physics as the web games**: `phys.c` is AmbientCore ported line for line, and `tools/physdiff.cjs` checks it
   against the Baseplate's own script. Voices and sounds are baked from `static/voice.js`, `static/sfx.js` and the clips
   by `tools/mkaudio.py`: re-run it (`make assets`) after new Voice Lab numbers, then rebuild the ROM.
+- **You wear the outfit you play as on the site, through the ROM's outfit slot**: 128 KB at a fixed place in the ROM
+  file (1 MB in) with the shirt, pants and face as small 256-colour pictures and the head's shape as a few rings of
+  points. The file on the site has Grug in it (`assets/outfit-default.fit`, made by `make assets`); the play page and the
+  game's page write the player's own over it in a copy in the tab (`GrugOutfit64.wear`, `arcade/grug-64/outfit64.js`),
+  and that copy is what plays and what **Download ROM** gives. No other outfit goes into a ROM, and the head is measured
+  from the outfit's own `.glb`, so there is no list of shapes to keep. The slot's layout is in two places that must
+  match (`outfit64.js`, `outfit.h` / `outfit.c`): change them together and bump the version. **Hair isn't drawn yet**
+  (a plain cap in the hair colour stands in), and the hardware path draws one colour a face.
+- **The Game Menu's Stress test** swaps the zoo for a world of 100 to 4000 bricks to see what the machine can take
+  (`?stress=N` or `?stress=sweep` on the play page; a test reads `game_stat` out of the emulator's memory). In the
+  browser a polygon costs about 45 microseconds: 250 parts plays like the zoo, 500 at about 20 frames a second, 1000 at
+  about 13. The table is in the game's README: measure again before promising a bigger world.
 - The usual Arcade rules still hold inside the ROM: no title screen, the 2010 GUI, red means danger, a Game Menu.
-  What can't apply on a console is left out: saved outfits (you play as Grug, `outfit: false`), Pearls, saving.
+  What can't apply on a console is left out: Pearls, saving.
 - "Nintendo 64" is written in plain text with the trademark line, never Nintendo's logos or artwork, and every
   character, sound and picture in a ROM is Grug's own.
 

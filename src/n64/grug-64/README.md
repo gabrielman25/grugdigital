@@ -9,7 +9,9 @@ a download for real hardware. See CLAUDE.md, "Nintendo 64 games".
 A platformer zoo, to prove the idea: jump blocks from 1 to 10 studs, gap jumps, an obby over a red floor, a damage pad
 and a kill brick (health, falling apart, respawning), jump pads, a lift, a truss to climb, a training dummy, coins,
 the orbit camera (into first person), the HEALTH squares and the Game Menu, the player voices and the soft sounds.
-Left for later: the other players, seats, the button and door, the blaster, saved outfits (you play as Grug), saving.
+You wear an outfit (shirt, pants, face, head shape): Grug's in the ROM as built, the player's own in the Arcade (below).
+The Game Menu has a stress test: a world of nothing but bricks, as many as you ask for.
+Left for later: the other players, seats, the button and door, the blaster, the outfit's hair, saving.
 
 ## How it is put together
 
@@ -17,14 +19,17 @@ Left for later: the other players, seats, the button and door, the blaster, save
 | --- | --- |
 | `phys.c` | The physics: a port of AmbientCore from `arcade/baseplate/index.html` (walk 16, jump 7.2, gravity 196.2, 240 Hz), line for line. |
 | `game.c` | The world (`build_world`), the player, the rig and its animations, the camera, the HUD, the Game Menu. |
-| `render.c` | The 3D pipeline: the Grug light per face, clipping, projection. Ends in flat polygons with a depth. |
-| `rast.c` | Those polygons drawn by the CPU (a z-buffered span filler). Works on any emulator. |
+| `render.c` | The 3D pipeline: the Grug light per face, clipping, projection, boxes that wear pictures, heads. Ends in polygons with a depth. |
+| `rast.c` | Those polygons drawn by the CPU (a z-buffered span filler: flat, studded or textured). Works on any emulator. |
+| `outfit.c`, `outfit.h` | The outfit slot: what you wear, read from a fixed place in the ROM file. `outfit.h` has the layout. |
 | `n64/hw.c` | Those polygons drawn by the console's own rasterizer (libdragon's rdpq). Fast on a real console. |
 | `n64/main.c` | The console: picture, controller, sound, clock. Picks `rast.c` or `hw.c` at boot. |
 | `ui.c`, `font.h` | Boxes and outlined text, drawn by the CPU on the finished picture. |
 | `audio.c`, `sounds.c` | A software mixer and the voice rules from `static/voice.js`; the baked sounds. |
 | `host/` | The same game on a PC, driven by a script, for tests. |
-| `tools/` | `mkaudio.py`, `mkfont.py`, `mkcover.py`, `physdiff.cjs`. |
+| `tools/` | `mkaudio.py`, `mkfont.py`, `mkcover.py`, `physdiff.cjs`, `mkoutfit.cjs` (the ROM's own outfit), `mkslot.py` (puts the slot in the ROM file). |
+| `assets/outfit-default.fit` | The slot the ROM is built with: Grug, from `arcade/outfits/grug.glb`. |
+| `../../../arcade/grug-64/outfit64.js` | Makes a slot from any saved outfit and writes it into a ROM: used by the Arcade's pages and by `mkoutfit.cjs`. |
 | `../boot/` | The boot stage every Grug ROM starts with: libdragon's, patched for the browser emulator. |
 
 Nothing outside `n64/` knows it is on a console, so almost everything is tested on a PC.
@@ -40,7 +45,8 @@ the hardware tests altogether: the way out if the hardware path ever misbehaves.
 
 - **Tested:** the game logic and the software renderer on a PC (`host/`), the physics against the site's own, and the
   ROM itself in the Arcade's emulator through `arcade/grug-64/index.html` in headless Chrome: it boots, draws, takes
-  the keyboard and the mouse's camera stick, and sound comes out (measured at the emulator's output, not listened to).
+  the keyboard and the mouse's camera stick, sound comes out (measured at the emulator's output, not listened to),
+  it reads its outfit slot from the cartridge, and it wears another saved outfit when the page writes one in.
 - **Not tested: anything on a real console.** That means the hardware drawing path (`n64/hw.c`: the browser emulator
   has no low-level RSP or RDP, so the ROM always chooses software there), the boot stage on real memory chips
   (`../boot/README.md`), the audio driver, a second controller as the camera stick, the sound to the ear, and the speed. Test in ares (https://ares-emu.net, an accurate
@@ -56,7 +62,7 @@ The Arcade's emulator (EmulatorJS's mupen64plus-next core) is why three things a
   at a time. The FPS row in the Game Menu shows where a frame's time goes (game, world, you, HUD).
 - **The page sets the core's `CountPerOp` to 1** (`OPTIONS` in the play page). The core paces an unknown ROM's CPU at 2
   counts an instruction, which is half speed for this game: about 19 frames a second in the console's own time, against
-  about 38 at 1 (with studs off; about 24 with them on). It costs the visitor's computer more; on one that can't keep up the game runs slow rather than
+  about 35 at 1 (with studs off; about 26 with them on). It costs the visitor's computer more; on one that can't keep up the game runs slow rather than
   dropping frames. `?cpo=2` on the play page puts the core's default back to compare, `?oc=1` overclocks further.
   EmulatorJS only passes saved settings to the core at start-up, so the page seeds them (see the comment there).
 
@@ -75,8 +81,12 @@ The ROM is built on Grug's patched boot stage, `../boot/ipl3_dev_grug.z64` (`mak
 It was last built with libdragon trunk at `e356bf3` and GCC 16.2. After a build, open `/arcade/grug-64/` from a local
 server at the repo root and play it: the page is the test.
 
-`make assets` re-bakes `sounds.c` / `sounds.h` and `font.h`. Run it after the owner sends new Voice Lab numbers
-(`static/voice.js`, `static/sfx.js`) or new voice clips, then rebuild the ROM.
+`make assets` re-bakes `sounds.c` / `sounds.h`, `font.h` and `assets/outfit-default.fit` (needs node). Run it after the
+owner sends new Voice Lab numbers (`static/voice.js`, `static/sfx.js`), new voice clips or a new look for Grug, then
+rebuild the ROM.
+
+`make` ends with `tools/mkslot.py`: the ROM file is padded to 1 MB and the 128 KB outfit slot goes after it, so the
+file is 1,179,648 bytes whatever the program's size (until the program passes 1 MB: the tool says so).
 
 ## The sounds, squeezed
 
@@ -130,9 +140,72 @@ line at a steady pace (`r_row` in `render.c`), and each pixel is one lookup in a
 up close, soft half-moons further off, plain beyond. Parts get them with `PF_STUDS` (`part()` gives it to everything
 but thin things on the ground).
 
-They are not free. In the browser about two thirds of the screen is studded ground: roughly **24 frames a second with
-them against 38 without** (console time, `CountPerOp` 1). So the baseplate looks the pattern up once per two pixels,
+They are not free. In the browser about two thirds of the screen is studded ground: roughly **26 frames a second with
+them against 35 without** (console time, `CountPerOp` 1). So the baseplate looks the pattern up once per two pixels,
 and the Game Menu has **Studs: On / Off (faster)**. The hardware path (`n64/hw.c`) draws plain tops for now.
+
+## What you wear: the outfit slot
+
+The character is the site's R6 rig, and what it wears comes from **one 128 KB block at a fixed place in the ROM file**
+(1 MB in; `outfit.h` has the layout). The ROM reads it from the cartridge when it starts (`read_slot` in `n64/main.c`)
+and wears what it finds; with no valid slot it falls back to plain colours.
+
+- **The handshake.** `assets/outfit-default.fit` (Grug) is in the file on the site. Before the game starts, the Arcade's
+  page reads the outfit the player plays as (`GrugOutfits`, the same store every Grug game dresses you from), makes a
+  slot from its `.glb` and writes it over Grug's in a copy of the ROM in the tab (`GrugOutfit64.wear` in
+  `arcade/grug-64/outfit64.js`). The emulator plays that copy, and the **Download ROM** buttons hand out the same copy,
+  so a real console gets the outfit too. No outfit is shipped in the ROM but the default; nothing is sent anywhere.
+- **Body.** Torso, arms and legs are boxes; each face's picture is cut out of the outfit's own textures by reading the
+  `.glb`'s mesh (no template is assumed) into a 256 x 160 atlas with 256 colours: 64 texels across a torso, half the
+  studio's detail. Torso and arms use the shirt's atlas, legs the pants'. Each atlas has two smaller copies, and a
+  face picks the copy that suits its distance (`tex_level`), so a far-off character doesn't shimmer.
+- **Head.** The studio's head is 512 smooth triangles with the hair merged in. The hair is left out (it is told apart
+  by where it sits in the texture) and the head is measured again as **up to 8 rings of 8 points**: rays from its axis
+  find how wide it is at each height and angle, and the rings that hold the shape best are kept. About 100 triangles,
+  any head shape and size, and no list of shapes in the ROM. The face is the front half of the head's texture,
+  128 x 80, on the four faces either side of the nose.
+- **Hair: not yet.** `r_head(..., R_HEAD_HAIR)` draws a cap in the outfit's hair colour over the top and back of the
+  head as a stand-in.
+- **Drawing.** `r_obox_tex` and `r_head` (`render.c`) hand `rast.c` a face and three lines across the screen that say
+  where the picture lies on it; the span filler works the picture out exactly at both ends of every 32 pixels and
+  steps straight in between. Pictures are lit per face like flat colours, from 32 ready-made palettes each.
+  **The hardware path draws one colour a face for now** (`hw_tex` in `n64/hw.c`).
+- **Checking it.** `./build/host/grug64-host OUT [SLOT]` wears a slot on the PC build (shots 20 to 25 are the outfit
+  close up). `node tools/mkoutfit.cjs some.glb Name out.fit --pictures DIR` makes a slot from any character file and
+  writes its atlases as pictures.
+
+Change the layout in `outfit64.js` and `outfit.c` / `outfit.h` together, bump the version in both, and re-run
+`make assets`: a ROM ignores a slot of another version, and the page refuses to write into one.
+
+## The stress test: how many bricks?
+
+Game Menu, **Stress test**: the zoo is swapped for a world of bricks (4 x 4 studs, 1 to 6 tall, studded, solid, spread
+evenly over the plate; past 900 they stack) and the FPS row comes on. Each press is more: 100, 250, 500, 1000, 2000,
+4000. `?stress=500` on the play page starts there, and `?stress=sweep` runs every count from two places with studs on
+and off and leaves the results in `game_stat`, which a test reads out of the emulator's memory (`GameStat` in `game.h`).
+
+Measured in the Arcade's emulator (software renderer, `CountPerOp` 1, frames a second in the console's own time):
+
+| Bricks on the plate | From the spawn, studs on | studs off | From high above, studs on | studs off |
+| ---: | ---: | ---: | ---: | ---: |
+| the zoo (114 parts) | 26 | 35 | 33 | 36 |
+| 100 | 32 | 48 | 38 | 45 |
+| 250 | 26 | 35 | 26 | 29 |
+| 500 | 20 | 25 | 17 | 18 |
+| 1000 | 13 | 16 | 10 | 10 |
+| 2000 | 8 | 9 | 6 | 6 |
+| 4000 | 5 | 5 | 3 | 3 |
+
+- **What it costs is what is on the screen.** A frame costs about 20 ms before any brick (sky and baseplate, you, the
+  HUD) and then about 45 microseconds for every polygon drawn, and a brick in view is two or three. Bricks out of view
+  cost almost nothing to draw (a few comparisons each).
+- **So, in the browser:** a place the size of the zoo (100 to 250 parts) plays at the zoo's speed; 500 parts is about
+  20 frames a second; past 1000 it is a slideshow. A bigger world is fine if most of it is out of sight at any moment.
+- **Other ceilings, all far off:** `MAX_PARTS` is 4224 (68 bytes a part; raise it and the console's 4 MB would hold
+  tens of thousands); the physics looks at the 192 parts nearest you (`NEAR_MAX`: more than that within about 20 studs
+  and some are missed); raycasts for the camera and the shadows touch every part, about 1 ms a frame per 1000.
+- **A real console is another question.** There the graphics chip draws, not the CPU. That path has never been run
+  (see above), so there is no number for it yet.
 
 ## Sound on the console
 

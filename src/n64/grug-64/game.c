@@ -9,8 +9,11 @@
    THE STATIONS (build_world): Spawn - Walk & Run track - Jump heights - Gap jumps - Obby (red = danger) - Danger
    (damage pad, kill brick) - Dummy - Sky deck (lift, truss, jump pads) - coins everywhere.
 
+   You wear an outfit: its shirt, pants and face as pictures and the shape of its head (outfit.h). The ROM has Grug's in
+   it, and the Arcade's page swaps in the one the player picked on the site before the game starts.
+
    Left for later (they are in the Baseplate): the other players, seats, the button and door, the blaster, the
-   companion, chat, saved outfits (you play as Grug), Pearls and saving.
+   companion, chat, the outfit's hair (a plain cap stands in for it), Pearls and saving.
 
    No title screen: the game starts straight in play, like every Grug game.
    ===================================================================================================================== */
@@ -20,12 +23,17 @@
 #include "game.h"
 #include "phys.h"
 #include "audio.h"
+#include "outfit.h"
 
 #define PI_F 3.14159265358979f
 static inline float clampf(float v, float a, float b) { return v < a ? a : v > b ? b : v; }
 static inline float approach(float v, float t, float step) { return v + clampf(t - v, -step, step); }
 
 bool game_hw_ok, game_use_hw, game_hide_hud, game_kbd;
+GameStat game_stat;
+static Outfit fit;            /* what you wear (the ROM's outfit slot) */
+static SlotConfig cfg;
+void game_slot(const uint8_t *slot, int size) { slot_read(slot, size, &fit, &cfg); r_tex_reset(); }
 float game_fps;
 uint32_t (*game_clock_us)(void);
 static uint32_t prof[4], profT;   /* ms x 10: update, world, characters, HUD */
@@ -34,7 +42,7 @@ static uint32_t prof[4], profT;   /* ms x 10: update, world, characters, HUD */
 
 /* ---------------------------------------------------------------- the world */
 enum { T_NONE = 0, T_BASE, T_HURT, T_LIFT, T_FINISH, T_SPAWN };
-#define MAX_PARTS 176
+#define MAX_PARTS 4224     /* (the zoo uses about 175; the rest is room for the stress test's bricks) */
 static Part parts[MAX_PARTS];
 static World W;
 #define BP 256.0f          /* the baseplate: 256 x 256 studs (the web one is 512), in 32-stud checks */
@@ -154,8 +162,32 @@ static void build_world(void) {
     }
 }
 
+/* ---------------------------------------------------------------- the stress test: how many bricks can there be?
+   A world of nothing but bricks: 4 x 4 studs each, 1 to 6 tall, studs on top, solid, on an 8-stud grid over the whole
+   plate, spread evenly however many there are (the next 900 stack on the first). The Game Menu picks how many and the FPS
+   row says what it costs. */
+static int stressN; static char stressSub[48];
+static const int STRESS_STEPS[SWEEP_COUNTS] = { 0, 100, 250, 500, 1000, 2000, 4000 };
+static void build_stress(int n) {
+    world_init(&W, parts, MAX_PARTS); nStations = nBills = nCoins = 0; lift.part = 0; hurtPad = finish = 0;
+    Part *b = world_add(&W, 0, -1, 0, BP, 2, BP, 0xa3a2a5, K_SOLID, PF_COLLIDE | PF_NOCAM); b->tag = T_BASE;
+    world_add(&W, 0, -30, 0, 8000, 20, 8000, 0, K_KILL, PF_COLLIDE | PF_NOCAM | PF_HIDDEN);
+    { Part *sp = part(0, 0.3f, 0, 12, 0.6f, 12, 0x6e6e72); sp->tag = T_SPAWN; sp->flags |= PF_STUDS; }
+    if (n > MAX_PARTS - 8) n = MAX_PARTS - 8;
+    snprintf(stressSub, sizeof stressSub, "%d bricks - Game Menu: more or fewer", n);
+    station("STRESS TEST", stressSub, 0, 0, 0, 400, 400, 0);
+    static const uint32_t COLS[8] = { 0x0d69ac, 0x4b974b, 0xf5cd30, 0xc4281c, 0xda8541, 0x6b327c, 0xf2f3f3, 0x1b2a35 };
+    static uint8_t top[900]; memset(top, 0, sizeof top);
+    for (int k = 0, put = 0; put < n && k < 900 * 12; k++) {
+        const int cell = (k % 900) * 577 % 900, cx = cell % 30, cz = cell / 30; const float x = -116 + cx * 8.0f, z = -116 + cz * 8.0f;
+        if (fabsf(x) < 14 && fabsf(z) < 14) continue;   /* room to stand at the spawn */
+        const uint32_t hsh = (uint32_t)(k * 2654435761u) >> 8; const int h = 1 + hsh % 6;
+        part(x, top[cell] + h * 0.5f, z, 4, h, 4, COLS[(hsh >> 5) % 8]); top[cell] += h; put++;
+    }
+}
+
 static void update_lift(float dt) {
-    Part *p = lift.part;
+    Part *p = lift.part; if (!p) return;
     if (lift.phase == 0 || lift.phase == 2) { p->vy = 0; lift.t -= dt; if (lift.t <= 0) lift.phase = lift.phase == 0 ? 1 : 3; }   /* waiting at an end */
     else {
         int dir = lift.phase == 1 ? 1 : -1; p->vy = dir * lift.speed;
@@ -167,9 +199,9 @@ static void update_lift(float dt) {
 /* ---------------------------------------------------------------- characters: the classic Grug rig, in flat colours
    root (the torso centre) > torso 2x2x1, head at y 1.6, shoulder pivots (+-1.5, 0.5), hip pivots (+-0.5, -1); facing -Z, right arm on +X.
    You play as Grug (character/looks: the lime hoodie, charcoal jeans, white sneakers, a brown crop). */
-typedef struct { uint32_t skin, shirt, pants, shoes, hair; } Look;
-static const Look GRUG = { 0xeab892, 0x9ccb3b, 0x3d3d42, 0xf2f3f3, 0x4a2c1a };
-static const Look DUMMY_LOOK = { 0xf5cd30, 0x0d69ac, 0x27466a, 0x1b2a35, 0x1b2a35 };
+typedef struct { uint32_t skin, shirt, pants, shoes, hair; const Outfit *fit; } Look;   /* fit: the outfit it wears (0: the plain colours) */
+static Look GRUG = { 0xeab892, 0x9ccb3b, 0x3d3d42, 0xf2f3f3, 0x4a2c1a, 0 };
+static const Look DUMMY_LOOK = { 0xf5cd30, 0x0d69ac, 0x27466a, 0x1b2a35, 0x1b2a35, 0 };
 typedef struct { float rs, ls, rh, lh; } Joints;
 typedef struct { Joints j; float walkT; } Rig;
 
@@ -185,7 +217,7 @@ static const struct { float T, V, CD; } DASH = { 0.3f, 42, 0.75f };            /
 static const struct { float T, CD, REACH; int DMG; } SWING = { 0.32f, 0.5f, 7.5f, 34 };
 
 /* falling apart (the classic death): every body part comes off and tumbles */
-typedef struct { float p[3], v[3], e[3], w[3], h[3], t, floor; Mat3 m0; uint32_t color; } Piece;
+typedef struct { float p[3], v[3], e[3], w[3], h[3], t, floor; Mat3 m0; uint32_t color; const Tex *tex; const TexRect *rects; const Outfit *head; } Piece;
 static Piece pieces[12]; static int nPieces;
 
 /* damage numbers, announcements */
@@ -211,21 +243,57 @@ static void place_camera(float dt) {
 }
 
 /* ---------------------------------------------------------------- the Game Menu (the 2012 one, in miniature) */
-enum { MI_RESUME, MI_RESET, MI_VOICES, MI_PITCH, MI_STUDS, MI_RENDER, MI_FPS, MI_HELP, MI_COUNT };
+enum { MI_RESUME, MI_RESET, MI_VOICES, MI_PITCH, MI_STUDS, MI_RENDER, MI_FPS, MI_STRESS, MI_HELP, MI_COUNT };
 static struct { bool open, help, fps; int sel; float rep; } menu;
 static bool menu_item_shown(int i) { return i != MI_RENDER || game_hw_ok; }
 
 /* ---------------------------------------------------------------- start */
-void game_init(uint32_t seed) {
-    rng_seed(seed);
-    build_world();
+static void announce(const char *big, const char *small, uint16_t color, float t);
+/* a world to play in: the zoo, or the stress test's bricks. You start at the spawn. */
+static bool dummyOn;
+static void enter_world(int bricks) {
+    stressN = bricks; if (bricks > 0) build_stress(bricks); else build_world();
+    dummyOn = bricks == 0;
     memset(&player, 0, sizeof player);
     char_init(&player.ch, SPAWN.x, SPAWN.y, SPAWN.z, 0); player.hp = MAXHP; player.hurtAcc = 0.6f;
-    dummy.x = 32; dummy.y = 3; dummy.z = -6; dummy.yaw = PI_F / 2; dummy.hp = 100; dummy.t = 0; dummy.hitFx = 0;   /* it faces the spawn */
-    nPieces = 0; memset(dmg, 0, sizeof dmg); ann.t = 0; hintT = 9; gclock = 0;
+    dummy.x = 32; dummy.y = 3; dummy.z = -6; dummy.yaw = PI_F / 2; dummy.hp = dummyOn ? 100 : 0; dummy.t = 0; dummy.hitFx = 0;   /* it faces the spawn */
+    nPieces = 0; memset(dmg, 0, sizeof dmg); ann.t = 0;
     cam.yaw = 0; cam.pitch = 0.32f; cam.dist = cam.tdist = 22; cam.init = false;
-    memset(&menu, 0, sizeof menu);
+    game_stat.parts = (uint32_t)W.n; game_stat.stress = (uint32_t)bricks;
+}
+void game_stress(int bricks) { enter_world(bricks); }
+
+/* the sweep (a test asks for it through the outfit slot): every brick count, from the spawn and from high above, with studs
+   and without. Each step settles for a second, then counts frames for three; the results go in game_stat. */
+static struct { bool on; int step; float t, time; int frames; uint32_t polys, ms; } sweep;
+#define SWEEP_STEPS (SWEEP_COUNTS * 4)
+static void sweep_step(void) {
+    const int i = sweep.step, n = STRESS_STEPS[i % SWEEP_COUNTS], view = (i / SWEEP_COUNTS) & 1, plain = i / (SWEEP_COUNTS * 2);
+    enter_world(n); r_studs = !plain; menu.fps = true;
+    if (view) { cam.pitch = 1.1f; cam.dist = cam.tdist = 90; }
+    sweep.t = 0; sweep.time = 0; sweep.frames = 0; sweep.polys = 0; sweep.ms = 0; game_stat.sweepAt = (uint32_t)i;
+}
+static void sweep_update(float rawDt) {
+    sweep.t += rawDt; if (sweep.t < 1) return;
+    sweep.time += rawDt; sweep.frames++; sweep.polys += (uint32_t)r_polys; sweep.ms += prof[1];
+    if (sweep.time < 3) return;
+    game_stat.sweepFps[sweep.step] = (uint32_t)(sweep.frames / sweep.time * 100 + 0.5f); game_stat.sweepPolys[sweep.step] = sweep.polys / (uint32_t)sweep.frames; game_stat.sweepMs[sweep.step] = sweep.ms / (uint32_t)sweep.frames;
+    if (++sweep.step >= SWEEP_STEPS) { sweep.on = false; game_stat.sweepDone = 1; r_studs = true; enter_world(0); } else sweep_step();
+}
+
+/* ---------------------------------------------------------------- start */
+void game_init(uint32_t seed) {
+    rng_seed(seed);
+    GRUG.fit = fit.ok ? &fit : 0; if (fit.ok) { GRUG.skin = fit.skin; GRUG.hair = fit.hair; }
+    memset(&menu, 0, sizeof menu); memset(&sweep, 0, sizeof sweep);
+    hintT = 9; gclock = 0;
+    enter_world(cfg.stress);
+    if (cfg.view) { player.ch.x = player.ch.spawnX = cfg.x; player.ch.z = player.ch.spawnZ = cfg.z; cam.yaw = cfg.yaw; cam.pitch = clampf(cfg.pitch, -1.2f, 1.396f); if (cfg.dist > 0) cam.dist = cam.tdist = clampf(cfg.dist, 0.5f, 90); }
+    if (cfg.stress || cfg.sweep) menu.fps = true;
+    if (cfg.sweep) { sweep.on = true; sweep_step(); }
+    game_stat.m0 = 0x47525547; game_stat.m1 = 0x53544131; game_stat.outfit = fit.ok; game_stat.frames = 0; game_stat.sweepDone = 0;
     aud_init();
+    if (fit.ok && strcmp(fit.name, "Grug") != 0) { static char as[48]; snprintf(as, sizeof as, "Playing as %s", fit.name); announce(0, as, 0, 5); }
 }
 
 static void announce(const char *big, const char *small, uint16_t color, float t) { ann.big = big; ann.small = small; ann.color = color; ann.t = t; }
@@ -242,7 +310,7 @@ static void world_sound(int snd, float x, float y, float z, float vol) {
 }
 
 /* ---------------------------------------------------------------- the rig: where every block is, for drawing and for falling apart */
-typedef struct { float c[3]; Mat3 m; float h[3]; uint32_t color; int group; } Block;   /* group: 0 torso, 1 head, 2 right arm, 3 left arm, 4 right leg, 5 left leg */
+typedef struct { float c[3]; Mat3 m; float h[3]; uint32_t color; int group; const Tex *tex; const TexRect *rects; const Outfit *head; } Block;   /* group: 0 torso, 1 head, 2 right arm, 3 left arm, 4 right leg, 5 left leg. tex + rects: the picture it wears; head: it is this outfit's head */
 static int rig_blocks(Block *out, float x, float y, float z, float yaw, const Rig *r, const Look *L, bool rolling, float rollK, float rollFx, float rollFz, bool detail) {
     Mat3 root; m3_rot_y(&root, yaw); float ry = y; int n = 0;
     if (rolling) {   /* the dodge roll: a tucked somersault the way you're rolling */
@@ -251,10 +319,12 @@ static int rig_blocks(Block *out, float x, float y, float z, float yaw, const Ri
         ry = y - 1.3f * sinf(PI_F * rollK);
     }
 #define BLK(lx_, ly_, lz_, M, hx_, hy_, hz_, col, grp) do { float l_[3] = { lx_, ly_, lz_ }, w_[3]; m3_apply(&root, l_, w_); Block *b_ = &out[n++]; \
-        b_->c[0] = x + w_[0]; b_->c[1] = ry + w_[1]; b_->c[2] = z + w_[2]; b_->m = (M); b_->h[0] = hx_; b_->h[1] = hy_; b_->h[2] = hz_; b_->color = col; b_->group = grp; } while (0)
-    BLK(0, 0, 0, root, 1, 1, 0.5f, L->shirt, 0);
-    BLK(0, 1.6f, 0, root, 0.6f, 0.6f, 0.6f, L->skin, 1);
-    if (detail) {
+        b_->c[0] = x + w_[0]; b_->c[1] = ry + w_[1]; b_->c[2] = z + w_[2]; b_->m = (M); b_->h[0] = hx_; b_->h[1] = hy_; b_->h[2] = hz_; b_->color = col; b_->group = grp; b_->tex = 0; b_->rects = 0; b_->head = 0; } while (0)
+    const Outfit *o = L->fit;
+    BLK(0, 0, 0, root, 1, 1, 0.5f, L->shirt, 0); if (o) { out[n - 1].tex = &o->shirt; out[n - 1].rects = FIT_TORSO; }
+    if (o && detail) { BLK(0, o->headY, 0, root, 0.7f, 0.7f, 0.7f, L->skin, 1); out[n - 1].head = o; }   /* the outfit's own head (far off: a block, below) */
+    else BLK(0, 1.6f, 0, root, 0.6f, 0.6f, 0.6f, L->skin, 1);
+    if (detail && !o) {
         BLK(0, 2.13f, 0.03f, root, 0.66f, 0.15f, 0.66f, L->hair, 1); BLK(0, 1.78f, 0.56f, root, 0.66f, 0.42f, 0.12f, L->hair, 1);
         BLK(0.22f, 1.68f, -0.61f, root, 0.07f, 0.11f, 0.02f, 0x1d1d1f, 1); BLK(-0.22f, 1.68f, -0.61f, root, 0.07f, 0.11f, 0.02f, 0x1d1d1f, 1); BLK(0, 1.4f, -0.61f, root, 0.2f, 0.04f, 0.02f, 0x1d1d1f, 1);
     }
@@ -262,6 +332,11 @@ static int rig_blocks(Block *out, float x, float y, float z, float yaw, const Ri
     for (int i = 0; i < 4; i++) {
         Mat3 lr, m; m3_rot_x(&lr, ang[i]); m3_mul(&m, &root, &lr);
         const bool arm = i < 2; const float top = arm ? 0.5f : 0, split = arm ? -1.1f : -1.55f, bot = arm ? -1.5f : -2;   /* sleeve + hand, jeans + shoe */
+        if (o) {   /* one block a limb: the picture has the hand and the shoe on it */
+            float lc[3] = { 0, (top + bot) / 2, 0 }, q[3]; m3_apply(&lr, lc, q);
+            BLK(px[i] + q[0], py[i] + q[1], q[2], m, 0.5f, (top - bot) / 2, 0.5f, arm ? L->shirt : L->pants, 2 + i); out[n - 1].tex = arm ? &o->shirt : &o->pants; out[n - 1].rects = (i & 1) ? FIT_LIMB_B : FIT_LIMB_A;
+            continue;
+        }
         for (int s = 0; s < 2; s++) {
             float a = s ? split : top, b2 = s ? bot : split, lc[3] = { 0, (a + b2) / 2, 0 }, o[3]; m3_apply(&lr, lc, o);
             BLK(px[i] + o[0], py[i] + o[1], o[2], m, 0.5f, (a - b2) / 2, 0.5f, s ? (arm ? L->skin : L->shoes) : (arm ? L->shirt : L->pants), 2 + i);
@@ -282,9 +357,9 @@ static void animate_rig(Rig *r, int pose, int climbDir, float dt) {
 }
 static float ground_below(float x, float y, float z) { const Part *h; float t = world_raycast(&W, x, y, z, 0, -1, 0, 200, 0, &h); return h ? y - t : 0; }
 static void break_apart(float x, float y, float z, float yaw, const Rig *r, const Look *L, float fling) {
-    Block b[16]; int n = rig_blocks(b, x, y, z, yaw, r, L, false, 0, 0, 0, false);
+    Block b[16]; int n = rig_blocks(b, x, y, z, yaw, r, L, false, 0, 0, 0, L->fit != 0);
     for (int i = 0; i < n && nPieces < 12; i++) {
-        Piece *p = &pieces[nPieces++]; memcpy(p->p, b[i].c, sizeof p->p); memcpy(p->h, b[i].h, sizeof p->h); p->m0 = b[i].m; p->color = b[i].color;
+        Piece *p = &pieces[nPieces++]; memcpy(p->p, b[i].c, sizeof p->p); memcpy(p->h, b[i].h, sizeof p->h); p->m0 = b[i].m; p->color = b[i].color; p->tex = b[i].tex; p->rects = b[i].rects; p->head = b[i].head;
         float dx = b[i].c[0] - x, dz = b[i].c[2] - z, d = sqrtf(dx * dx + dz * dz); if (d < 1e-3f) { dx = frange(-1, 1); dz = frange(-1, 1); d = sqrtf(dx * dx + dz * dz) + 1e-3f; }
         p->v[0] = dx / d * frange(4, 10) * fling + frange(-3, 3); p->v[1] = frange(8, 18) * fling; p->v[2] = dz / d * frange(4, 10) * fling + frange(-3, 3);
         for (int k = 0; k < 3; k++) { p->w[k] = frange(-6, 6); p->e[k] = 0; }
@@ -343,6 +418,10 @@ static void menu_update(const Input *in, float dt) {
     if (dir) { do { menu.sel = (menu.sel + dir + MI_COUNT) % MI_COUNT; } while (!menu_item_shown(menu.sel)); aud_tap(S_TAP_SELECT); }
     int lr = ((in->pressed & (BTN_DR | BTN_CR)) ? 1 : 0) - ((in->pressed & (BTN_DL | BTN_CL)) ? 1 : 0);
     if (in->pressed & (BTN_B | BTN_START)) { menu.open = false; aud_tap(S_TAP_CLOSE); return; }
+    if (menu.sel == MI_STRESS && (lr || (in->pressed & BTN_A))) {   /* more or fewer bricks (the menu stays open: the FPS row is the answer) */
+        int at = 0; for (int i = 0; i < SWEEP_COUNTS; i++) if (STRESS_STEPS[i] == stressN) at = i;
+        at = (at + (lr < 0 ? SWEEP_COUNTS - 1 : 1)) % SWEEP_COUNTS; enter_world(STRESS_STEPS[at]); menu.fps = true; aud_tap(S_TAP_SELECT); return;
+    }
     if (menu.sel == MI_PITCH && lr) { aud_voice_pitch = clampf(aud_voice_pitch + lr, VOICE_PITCH_MIN, VOICE_PITCH_MAX); float c = VOICE_EVENTS[VE_JUMP].chance; (void)c; aud_voices_on = true; aud_say(VE_JUMP); }
     if (in->pressed & BTN_A) {
         switch (menu.sel) {
@@ -359,7 +438,10 @@ static void menu_update(const Input *in, float dt) {
 }
 
 void game_update(const Input *inRaw, float dt) {
-    if (dt > 0.1f) dt = 0.1f; if (dt <= 0) return;
+    if (dt <= 0) return;
+    if (sweep.on) sweep_update(dt);
+    game_stat.frames++; game_stat.fps100 = (uint32_t)(game_fps * 100); game_stat.polys = (uint32_t)r_polys; for (int i = 0; i < 4; i++) game_stat.ms10[i] = prof[i];
+    if (dt > 0.1f) dt = 0.1f;
     PROF_BEGIN();
     gclock += dt;
     Input in = *inRaw; Character *ch = &player.ch;
@@ -415,7 +497,8 @@ void game_update(const Input *inRaw, float dt) {
     }
     if (player.hitFx > 0) player.hitFx -= dt;
     /* the dummy */
-    if (dummy.hp <= 0) { dummy.t -= dt; if (dummy.t <= 0) { dummy.hp = 100; memset(&dummy.rig, 0, sizeof dummy.rig); } }
+    if (!dummyOn) dummy.hp = 0;
+    else if (dummy.hp <= 0) { dummy.t -= dt; if (dummy.t <= 0) { dummy.hp = 100; memset(&dummy.rig, 0, sizeof dummy.rig); } }
     else animate_rig(&dummy.rig, 0, 0, dt);
     if (dummy.hitFx > 0) dummy.hitFx -= dt;
     update_pieces(dt);
@@ -433,10 +516,16 @@ void game_update(const Input *inRaw, float dt) {
 }
 
 /* ---------------------------------------------------------------- drawing */
+/* one block of a character: its head, a box wearing a picture, or a plain box. white: the flash when it is hit */
+static void draw_block(const float c[3], const Mat3 *m, const float h[3], uint32_t color, const Tex *tex, const TexRect *rects, const Outfit *head, bool white) {
+    if (head) { r_head(c, m, &head->head, &head->face, head->skin, white ? R_HEAD_WHITE : R_HEAD_SKIN); if (head->hasHair && !white) r_head(c, m, &head->head, 0, head->hair, R_HEAD_HAIR); }
+    else if (tex && !white) r_obox_tex(c, m, h[0], h[1], h[2], tex, rects);
+    else r_obox(c, m, h[0], h[1], h[2], color, white);
+}
 static void draw_rig(float x, float y, float z, float yaw, const Rig *r, const Look *L, bool rolling, float rollK, float fx, float fz, bool white) {
     float dx = x - cam.px, dy = y - cam.py, dz = z - cam.pz; bool detail = dx * dx + dy * dy + dz * dz < 60 * 60;
     Block b[16]; int n = rig_blocks(b, x, y, z, yaw, r, L, rolling, rollK, fx, fz, detail);
-    for (int i = 0; i < n; i++) r_obox(b[i].c, &b[i].m, b[i].h[0], b[i].h[1], b[i].h[2], b[i].color, white);
+    for (int i = 0; i < n; i++) draw_block(b[i].c, &b[i].m, b[i].h, b[i].color, b[i].tex, b[i].rects, b[i].head, white);
 }
 static void draw_world(void) {
     /* the baseplate: big grey studded checks on top, a plain slab underneath. Seen from above its top can't hide anything
@@ -484,6 +573,7 @@ static const char *MENU_LABEL(int i, char *buf) {
         case MI_STUDS: return r_studs ? "Studs: On" : "Studs: Off (faster)";
         case MI_RENDER: return game_use_hw ? "Drawn by: the console" : "Drawn by: software";
         case MI_FPS: return menu.fps ? "Show FPS: On" : "Show FPS: Off";
+        case MI_STRESS: if (!stressN) return "Stress test: Off"; snprintf(buf, 32, "Stress test: %d bricks", stressN); return buf;
         default: return "Help";
     }
 }
@@ -499,6 +589,8 @@ static void draw_hud(void) {
     /* labels: damage numbers and the dummy first, then the signs from the nearest out (never under the HUD) */
     nTaken = 0; box_take(X - 2, Y - 2, X + 118, Y + 47); box_take(14, SCREEN_H - 46, SCREEN_W - 14, SCREEN_H - 14);
     if (hintT > 0 && !menu.open) box_take(40, SCREEN_H - 64 - FH, SCREEN_W - 40, SCREEN_H - 46);
+    const bool note = ann.t > 0 && !ann.big && ann.small && !menu.open; const int noteY = SCREEN_H - 66 - FH * 2;   /* a one-line note ("Playing as ..."): above the hints, and no sign is drawn under it */
+    if (note) box_take(60, noteY - 1, SCREEN_W - 60, noteY + FH + 1);
     if (menu.open) box_take(40, 30, SCREEN_W - 40, SCREEN_H - 30);
     for (int i = 0; i < 6; i++) if (dmg[i].t > 0) { int sx, sy; float d; if (r_project(dmg[i].x, dmg[i].y, dmg[i].z, &sx, &sy, &d)) ui_text(sx, sy - FH, dmg[i].s, RED, UI_CENTER); }
     if (dummy.hp > 0) { int sx, sy; float d; if (r_project(dummy.x, dummy.y + 4.2f, dummy.z, &sx, &sy, &d) && d < 70 && box_free(sx - 18, sy - FH - 6, sx + 18, sy)) { box_take(sx - 18, sy - FH - 6, sx + 18, sy); ui_text(sx, sy - FH - 5, "Dummy", WHITE, UI_CENTER); ui_rect(sx - 16, sy - 4, 32, 4, BLACK); ui_rect(sx - 15, sy - 3, 30 * dummy.hp / 100, 2, RED); } }
@@ -518,14 +610,19 @@ static void draw_hud(void) {
       if (ch->hasLast && ch->lastHeight > 0.5f && (ch->lastHeight != jh || ch->lastDist != jd)) { jh = ch->lastHeight; jd = ch->lastDist; int a = (int)(jh * 10 + 0.5f), b = (int)(jd * 10 + 0.5f); snprintf(jump, sizeof jump, "Jump %d.%d up %d.%d far", a / 10, a % 10, b / 10, b % 10); }
       ui_text(X + 5, Y + 2 + (FH + 1) * 2, ch->climbing ? KB("Climbing: A lets go", "Climbing: Space lets go") : jump, WHITE, 0); }
     /* the place bar along the bottom */
-    ui_dim(16, SCREEN_H - 44, SCREEN_W - 32, 28); ui_frame(16, SCREEN_H - 44, SCREEN_W - 32, 28, BLACK, 1);
-    ui_text(SCREEN_W / 2, SCREEN_H - 43, pname, YEL, UI_CENTER); ui_text(SCREEN_W / 2, SCREEN_H - 43 + FH, psub, WHITE, UI_CENTER);
+    if (!menu.open) {   /* (the Game Menu is tall enough to reach it) */
+        ui_dim(16, SCREEN_H - 44, SCREEN_W - 32, 28); ui_frame(16, SCREEN_H - 44, SCREEN_W - 32, 28, BLACK, 1);
+        ui_text(SCREEN_W / 2, SCREEN_H - 43, pname, YEL, UI_CENTER); ui_text(SCREEN_W / 2, SCREEN_H - 43 + FH, psub, WHITE, UI_CENTER);
+    }
     if (hintT > 0 && !menu.open) { ui_text(SCREEN_W / 2, SCREEN_H - 62 - FH, KB("Stick move - A jump - Z roll - B swing", "W A S D move - Space jump - Shift roll - F swing"), WHITE, UI_CENTER); ui_text(SCREEN_W / 2, SCREEN_H - 62, KB("C buttons: camera - START: Game Menu", "Mouse: look around - Enter: Game Menu"), WHITE, UI_CENTER); }
     if (ann.t > 0 && ann.big) { ui_text(SCREEN_W / 2, 70, ann.big, ann.color, UI_CENTER | UI_X2); if (ann.small) ui_text(SCREEN_W / 2, 70 + FH * 2 + 2, ann.small, WHITE, UI_CENTER); }
+    else if (note) ui_text(SCREEN_W / 2, noteY, ann.small, YEL, UI_CENTER);
     if (ch->dead) ui_text(SCREEN_W / 2, 96, "You fell apart!", WHITE, UI_CENTER);
     if (menu.fps) {
         snprintf(buf, sizeof buf, "%d fps %s", (int)(game_fps + 0.5f), gfx->name); ui_text(SCREEN_W - 18, 14, buf, WHITE, UI_RIGHT);
-        if (game_clock_us) { char buf[112]; snprintf(buf, sizeof buf, "ms: game %d world %d you %d hud %d (%d polys)", (int)prof[0] / 10, (int)prof[1] / 10, (int)prof[2] / 10, (int)prof[3] / 10, r_polys); ui_text(SCREEN_W - 18, 14 + FH, buf, WHITE, UI_RIGHT); }
+        if (game_clock_us) { snprintf(buf, sizeof buf, "ms: game %d world %d", (int)prof[0] / 10, (int)prof[1] / 10); ui_text(SCREEN_W - 18, 14 + FH, buf, WHITE, UI_RIGHT);
+            snprintf(buf, sizeof buf, "you %d hud %d", (int)prof[2] / 10, (int)prof[3] / 10); ui_text(SCREEN_W - 18, 14 + FH * 2, buf, WHITE, UI_RIGHT); }
+        snprintf(buf, sizeof buf, "%d polys %d parts", r_polys, W.n); ui_text(SCREEN_W - 18, 14 + FH * (game_clock_us ? 3 : 1), buf, WHITE, UI_RIGHT);
     }
     /* the Game Menu: a centred dark box, Resume Game first */
     if (menu.open && !menu.help) {
@@ -561,7 +658,7 @@ void game_draw(Frame *f) {
     const bool fp = cam.dist < 1.4f;   /* first person: zoomed all the way in, your body's hidden (as in Roblox) */
     if (!ch->dead) { draw_shadow(ch->x, ch->y - 1, ch->z, 1.5f); if (!fp) draw_rig(ch->x, ch->y, ch->z, ch->faceYaw, &player.rig, &GRUG, player.rolling, player.rollT / DASH.T, player.rollFx, player.rollFz, player.hitFx > 0.08f); }
     if (dummy.hp > 0) { draw_shadow(dummy.x, dummy.y - 1, dummy.z, 1.5f); draw_rig(dummy.x, dummy.y, dummy.z, dummy.yaw, &dummy.rig, &DUMMY_LOOK, false, 0, 0, 0, dummy.hitFx > 0.04f); }
-    for (int i = 0; i < nPieces; i++) { Piece *p = &pieces[i]; Mat3 e, m; m3_euler(&e, p->e[0], p->e[1], p->e[2]); m3_mul(&m, &e, &p->m0); r_obox(p->p, &m, p->h[0], p->h[1], p->h[2], p->color, false); }
+    for (int i = 0; i < nPieces; i++) { Piece *p = &pieces[i]; Mat3 e, m; m3_euler(&e, p->e[0], p->e[1], p->e[2]); m3_mul(&m, &e, &p->m0); draw_block(p->p, &m, p->h, p->color, p->tex, p->rects, p->head, false); }
     for (int i = 0; i < nCoins; i++) {   /* coins: they spin and bob */
         const Coin *c = &coins[i]; if (c->t > 0) continue;
         float dx = c->x - cam.px, dz = c->z - cam.pz; if (dx * dx + dz * dz > 150 * 150) continue;
@@ -576,7 +673,7 @@ void game_draw(Frame *f) {
 
 void game_debug(GameDebug *d) {
     const Character *ch = &player.ch;
-    *d = (GameDebug){ ch->x, ch->y, ch->z, ch->vy, cam.yaw, cam.pitch, cam.dist, player.hp, player.coinCount, ch->grounded, ch->dead, menu.open, ch->lastHeight, ch->lastDist };
+    *d = (GameDebug){ ch->x, ch->y, ch->z, ch->vy, cam.yaw, cam.pitch, cam.dist, player.hp, player.coinCount, ch->grounded, ch->dead, menu.open, ch->lastHeight, ch->lastDist, W.n, stressN, GRUG.fit != 0 };
 }
 void game_teleport(float x, float y, float z, float camYaw) { Character *ch = &player.ch; ch->x = x; ch->y = y; ch->z = z; ch->vx = ch->vy = ch->vz = 0; ch->grounded = false; cam.yaw = camYaw; cam.init = false; }
 void game_camera(float yaw, float pitch, float dist) { cam.yaw = yaw; cam.pitch = pitch; cam.dist = cam.tdist = dist; cam.init = false; }

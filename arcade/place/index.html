@@ -222,7 +222,7 @@
       <div class="bx">${(g.about || [g.stats.join('. ') + '.']).map(p => `<p>${esc(p)}</p>`).join('')}
         ${g.outfit === false ? '' : `<p>You play as the character you made in the <a href="/character/">Grug Avatar Studio</a>${g.solo ? '.' : ', and your other saved outfits show up as the other players.'}</p>`}</div>
       ${rom ? `<div class="StandardBoxHeader"><span><h2>Play it on a real Nintendo 64</h2></span></div>
-      <div class="bx"><p><b>This is a real Nintendo 64 game.</b> Play starts it right here in an emulator. <a href="${rom}" download="${esc(g.rom)}">Download the ROM</a> (<span id="romSize">a .z64 file</span>) to play the very same game on a real console: copy it to a flash cartridge (an EverDrive 64 or a SummerCart64, for example) and pick it from the cartridge's menu. It runs in other Nintendo 64 emulators too.</p>
+      <div class="bx"><p><b>This is a real Nintendo 64 game.</b> Play starts it right here in an emulator. <a href="${rom}" download="${esc(g.rom)}">Download the ROM</a> (<span id="romSize">a .z64 file</span>) to play the very same game on a real console: copy it to a flash cartridge (an EverDrive 64 or a SummerCart64, for example) and pick it from the cartridge's menu. It runs in other Nintendo 64 emulators too.<span id="romWear"></span></p>
         <p>On a console you play with the controller: the Control Stick moves, A jumps, Z rolls, B swings, the C buttons turn and tilt the camera, R and L zoom, and START opens the Game Menu. Plug in a second controller and its Control Stick turns the camera smoothly. If the picture ever looks wrong, hold Z while the console starts.</p>
         <p class="fine">Nintendo 64 is a trademark of Nintendo. Grug Digital is not affiliated with or endorsed by Nintendo.</p></div>` : ''}
       ${isTab ? `<div class="StandardBoxHeader"><span><h2>Plays in your tab</h2></span></div>
@@ -262,6 +262,16 @@
     <div class="wide"><div id="More"></div></div>`;
 
   // the ROM's size, next to its download link
+  // a Nintendo 64 game wears the outfit you play as: the ROM you download gets it too (arcade/grug-64/outfit64.js)
+  if (rom) { let worn = null, turn = 0;
+    const dressRom = async () => { const my = ++turn; let d = null;
+      try { if (!window.GrugOutfit64) await new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = '/arcade/grug-64/outfit64.js'; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
+        d = await window.GrugOutfit64.wear(rom); } catch (e) { d = null; }
+      if (my !== turn) { if (d) URL.revokeObjectURL(d.url); return; }
+      if (worn) URL.revokeObjectURL(worn.url); worn = d;
+      document.querySelectorAll('a[download]').forEach(a => { if (a.getAttribute('download') === g.rom) a.href = d ? d.url : rom; });
+      const n = $('romWear'); if (n) n.textContent = d && d.name ? ` The ROM you download has the outfit you play as (${d.name}) in it.` : ''; };
+    dressRom(); addEventListener('grug:outfits', dressRom); }
   if (rom) fetch(rom, { method: 'HEAD' }).then(r => { const n = +r.headers.get('content-length'); if (r.ok && n) $('romSize').textContent = `a .z64 file, ${n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.round(n / 1024) + ' KB'}`; }).catch(() => {});
   // Play: count it for this browser, then go
   $('play').addEventListener('click', () => { const r = A.rec(); r.plays[g.slug] = (r.plays[g.slug] || 0) + 1; r.last[g.slug] = new Date().toISOString(); A.saveRec(r); });

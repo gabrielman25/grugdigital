@@ -4,11 +4,15 @@
 #   make install    the ROM, copied to where the Arcade serves it (arcade/grug-64/grug-baseplate-64.z64)
 #   make host       the same game for a PC, for testing: build/host/grug64-host OUTDIR writes pictures and sound, and
 #                   node tools/physdiff.cjs checks the physics against the site's own (arcade/baseplate/index.html)
-#   make assets     re-bake sounds.c / sounds.h (from static/voice.js, static/sfx.js, the voice clips) and font.h
+#   make assets     re-bake sounds.c / sounds.h (from static/voice.js, static/sfx.js, the voice clips), font.h, and the
+#                   ROM's own outfit, assets/outfit-default.fit (Grug, from arcade/outfits/grug.glb: needs node)
+#
+# The ROM file is padded to 1 MB and the outfit slot put after it (tools/mkslot.py): what you wear, which the Arcade's
+# page swaps for the player's own outfit (arcade/grug-64/outfit64.js).
 BUILD_DIR = build
 ROM = grug-baseplate-64
 SITE = ../../../arcade/grug-64
-CORE = game.c phys.c render.c rast.c ui.c audio.c sounds.c
+CORE = game.c phys.c render.c rast.c ui.c audio.c sounds.c outfit.c
 HOSTCC ?= cc
 
 ifneq ($(N64_INST),)
@@ -16,14 +20,16 @@ include $(N64_INST)/include/n64.mk
 N64_CFLAGS += -O2 -Wno-misleading-indentation -Wno-missing-field-initializers
 src = n64/main.c n64/hw.c $(CORE)
 
-all: $(ROM).z64
+all: $(ROM).z64 slot
+slot: $(ROM).z64
+	python3 tools/mkslot.py $(ROM).z64 assets/outfit-default.fit
 $(BUILD_DIR)/$(ROM).elf: $(src:%.c=$(BUILD_DIR)/%.o)
 # the boot stage: libdragon's, patched so the ROM also boots in the browser emulator (see ../boot/README.md)
 N64_ROM_HEADER ?= ../boot/ipl3_dev_grug.z64
 $(ROM).z64: N64_ROM_TITLE = "GRUG BASEPLATE 64"
 $(ROM).z64: N64_ROM_REGIONFREE = true
 
-install: $(ROM).z64
+install: all
 	mkdir -p $(SITE) && cp $(ROM).z64 $(SITE)/$(ROM).z64
 -include $(wildcard $(BUILD_DIR)/*.d) $(wildcard $(BUILD_DIR)/n64/*.d)
 else
@@ -39,8 +45,9 @@ host:
 assets:
 	python3 tools/mkaudio.py
 	python3 tools/mkfont.py /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf 9
+	node tools/mkoutfit.cjs
 
 clean:
 	rm -rf $(BUILD_DIR) $(ROM).z64
 
-.PHONY: all host assets clean install
+.PHONY: all host assets clean install slot

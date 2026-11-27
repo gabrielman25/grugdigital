@@ -1,12 +1,14 @@
 /* Grug Baseplate 64 on a PC: the same game code, driven by a script, writing pictures and sound to files.
- * For checking the physics and the picture without a console:  make -C src/n64/grug-64 host && ./build/host/grug64-host OUTDIR
- * It writes OUTDIR/NAME.ppm for each shot, OUTDIR/audio.wav, and prints the measurements the tests check. */
+ * For checking the physics and the picture without a console:  make -C src/n64/grug-64 host && ./build/host/grug64-host OUTDIR [SLOT]
+ * It writes OUTDIR/NAME.ppm for each shot, OUTDIR/audio.wav, and prints the measurements the tests check.
+ * SLOT is the outfit slot to wear (assets/outfit-default.fit if not given: what the ROM carries). */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "../game.h"
 #include "../audio.h"
+#include "../outfit.h"
 
 static uint16_t fb[SCREEN_W * SCREEN_H], zb[SCREEN_W * SCREEN_H];
 static Frame frame = { fb, zb, SCREEN_W, SCREEN_H, SCREEN_W };
@@ -45,7 +47,11 @@ int main(int argc, char **argv) {
     if (argc > 1) outdir = argv[1];
     char path[512]; snprintf(path, sizeof path, "%s/audio.wav", outdir); wav = fopen(path, "wb"); if (!wav) { perror(path); return 1; } wav_header(wav, 0);
     GameDebug d;
+    static uint8_t slot[SLOT_SIZE];
+    { const char *sp = argc > 2 ? argv[2] : "assets/outfit-default.fit"; FILE *sf = fopen(sp, "rb"); size_t got = sf ? fread(slot, 1, SLOT_SIZE, sf) : 0; if (sf) fclose(sf);
+      if (got == SLOT_SIZE) game_slot(slot, SLOT_SIZE); else printf("  (no outfit slot at %s: plain colours)\n", sp); }
     game_init(64);
+    game_debug(&d); check("the slot's outfit is worn", d.outfit, 1, 1);
     run(0.6f, 0, 0, 0); shot("01-spawn");
     game_debug(&d); check("standing: root height over the spawn plate", d.y, 3.59f, 3.61f); check("standing: grounded", d.grounded, 1, 1);
 
@@ -104,6 +110,23 @@ int main(int argc, char **argv) {
     game_kbd = true; run(0.1f, 0, 0, BTN_START); run(0.3f, 0, 0, 0); shot("17b-menu-keyboard"); run(0.1f, 0, 0, BTN_START); run(0.3f, 0, 0, 0); game_kbd = false;
     /* first person */
     for (int i = 0; i < 30; i++) { run(0.04f, 0, 0, BTN_R); run(0.04f, 0, 0, 0); } run(0.5f, 0, 0, 0); shot("18-first-person");
+
+    /* the outfit, close up: front, back, each side, from above, and falling apart */
+    game_init(64); game_hide_hud = true;
+    game_teleport(0, 3.6f, 20, 0); run(0.4f, 0, 0, 0);
+    game_camera(3.14159f, 0.12f, 7); run(0.2f, 0, 0, 0); shot("20-outfit-front");
+    game_camera(0, 0.12f, 7); run(0.2f, 0, 0, 0); shot("21-outfit-back");
+    game_camera(1.5708f + 0.5f, 0.25f, 7); run(0.2f, 0, 0, 0); shot("22-outfit-side");
+    game_camera(3.14159f - 0.6f, 0.6f, 5); run(0.2f, 0, 0, 0); shot("23-outfit-above");
+    game_camera(3.14159f + 0.5f, 0.05f, 3.2f); run(0.2f, 0, 0, 0); shot("24-outfit-face");
+    game_camera(3.14159f - 0.4f, 0.2f, 16); run(0.1f, 0, 0, 0); run(0.5f, 0.3f, -1, 0); shot("25-outfit-walking");
+    game_hide_hud = false;
+    /* the stress test: 1000 bricks, from the spawn and from above; you can stand on one */
+    game_stress(1000); run(0.5f, 0, 0, 0); game_debug(&d); check("stress test: parts in the world", d.parts, 1003, 1003); shot("30-stress-1000");
+    game_camera(0, 1.1f, 90); run(0.3f, 0, 0, 0); shot("31-stress-1000-above");
+    game_stress(4000); run(0.5f, 0, 0, 0); game_debug(&d); check("stress test: 4000 bricks", d.parts, 4003, 4003); game_camera(0.6f, 0.5f, 60); run(0.3f, 0, 0, 0); shot("32-stress-4000");
+    game_teleport(20, 40, 4, 0); run(2.0f, 0, 0, 0); game_debug(&d); check("stress test: landed on a brick, not through it (root y)", d.y, 3.9f, 40); check("stress test: standing", d.grounded, 1, 1);
+    game_stress(0); run(0.3f, 0, 0, 0); game_debug(&d); check("back to the zoo", d.stress, 0, 0);
 
     /* the Arcade's cover picture: Grug mid-jump in front of the jump heights, no HUD (tools/mkcover.py crops and enlarges it) */
     game_init(64); game_hide_hud = true;

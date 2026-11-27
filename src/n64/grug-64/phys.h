@@ -58,7 +58,7 @@ typedef struct Part {
 #define EV_RESPAWN   0x020
 #define EV_GRAB      0x040
 
-#define NEAR_MAX 64
+#define NEAR_MAX 192   /* parts close enough to a character to matter this frame (more than this near it and the rest are missed) */
 
 typedef struct Character {
     float x, y, z, vx, vy, vz;
@@ -79,8 +79,10 @@ typedef struct Character {
     const Part *near[NEAR_MAX]; int nNear;
 } Character;
 
+#define DYN_MAX 16       /* parts that move (lifts, platforms): stepped 240 times a second, so they are kept on a list of their own */
 typedef struct World {
     Part *parts; int n, cap;
+    Part *dyn[DYN_MAX]; int nDyn;
 } World;
 
 void  world_init(World *w, Part *storage, int cap);

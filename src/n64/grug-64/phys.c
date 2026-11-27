@@ -13,7 +13,7 @@ float ang_diff(float a, float b) { float d = fmodf(b - a, PI_F * 2); if (d > PI_
 static inline float clampf(float v, float a, float b) { return v < a ? a : v > b ? b : v; }
 
 /* ---------------------------------------------------------------- the world: axis-aligned parts */
-void world_init(World *w, Part *storage, int cap) { w->parts = storage; w->n = 0; w->cap = cap; }
+void world_init(World *w, Part *storage, int cap) { w->parts = storage; w->n = 0; w->cap = cap; w->nDyn = 0; }
 
 Part *world_add(World *w, float cx, float cy, float cz, float sx, float sy, float sz, uint32_t color, uint8_t kind, uint8_t flags) {
     static Part overflow;
@@ -21,13 +21,14 @@ Part *world_add(World *w, float cx, float cy, float cz, float sx, float sy, floa
     memset(p, 0, sizeof *p);
     p->minX = cx - sx / 2; p->maxX = cx + sx / 2; p->minY = cy - sy / 2; p->maxY = cy + sy / 2; p->minZ = cz - sz / 2; p->maxZ = cz + sz / 2;
     p->color = color; p->kind = kind; p->flags = flags;
+    if ((flags & PF_DYNAMIC) && p != &overflow && w->nDyn < DYN_MAX) w->dyn[w->nDyn++] = p;
     return p;
 }
 
 void world_move_dynamic(World *w, float dt) {
-    for (int i = 0; i < w->n; i++) {
-        Part *p = &w->parts[i];
-        if (!(p->flags & PF_DYNAMIC) || (p->vx == 0 && p->vy == 0 && p->vz == 0)) continue;
+    for (int i = 0; i < w->nDyn; i++) {
+        Part *p = w->dyn[i];
+        if (p->vx == 0 && p->vy == 0 && p->vz == 0) continue;
         p->minX += p->vx * dt; p->maxX += p->vx * dt; p->minY += p->vy * dt; p->maxY += p->vy * dt; p->minZ += p->vz * dt; p->maxZ += p->vz * dt;
     }
 }
@@ -35,8 +36,11 @@ void world_move_dynamic(World *w, float dt) {
 float world_raycast(const World *w, float ox, float oy, float oz, float dx, float dy, float dz, float maxT, uint8_t skipFlags, const Part **hit) {
     float best = maxT; const Part *h = 0;
     const float o[3] = { ox, oy, oz }, d[3] = { dx, dy, dz };
+    /* the box the whole ray lies in: a part outside it can't be hit (most of a big world, at the cost of six comparisons each) */
+    const float ex = ox + dx * maxT, ey = oy + dy * maxT, ez = oz + dz * maxT, lox = ox < ex ? ox : ex, hix = ox < ex ? ex : ox, loy = oy < ey ? oy : ey, hiy = oy < ey ? ey : oy, loz = oz < ez ? oz : ez, hiz = oz < ez ? ez : oz;
     for (int i = 0; i < w->n; i++) {
         const Part *p = &w->parts[i];
+        if (p->minX > hix || p->maxX < lox || p->minZ > hiz || p->maxZ < loz || p->minY > hiy || p->maxY < loy) continue;
         if (!(p->flags & PF_COLLIDE) || (p->flags & skipFlags) || p->kind == K_LADDER) continue;
         const float mn[3] = { p->minX, p->minY, p->minZ }, mx[3] = { p->maxX, p->maxY, p->maxZ };
         float t0 = 0, t1 = best; bool ok = true;

@@ -92,6 +92,7 @@
   #stage { position: fixed; left: var(--side); top: 0; right: 0; bottom: 0; background: #8fc6ef center / cover no-repeat; image-rendering: pixelated; }
   #start { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
   #start button { width: 240px; min-height: 58px; font-size: 26px; line-height: 50px; }
+  #wear { display: none; margin: 8px 0 0; font-size: 12px; line-height: 1.35; color: #cfd3cf; }
   #game { position: absolute; inset: 0; display: none; background: #000; }
   body.playing #start { display: none; }
   body.playing #game { display: block; }
@@ -114,6 +115,7 @@
   <h1>Grug Baseplate 64</h1>
   <div class="sub">A real Nintendo 64 game. Play it here, or on a real console.</div>
   <a class="btn rom" id="rom" download>Download ROM<small id="romSize">.z64, for a real console</small></a>
+  <div id="wear"></div>
   <div id="msg" role="status"></div>
   <div class="keysbox">
     <h2>Controls</h2>
@@ -127,6 +129,8 @@
   <div id="start"><button id="play" type="button">Play</button></div>
   <div id="game"></div>
 </main>
+<script src="/static/outfits.js"></script>
+<script src="/arcade/grug-64/outfit64.js"></script>
 <script>
 (() => {
   'use strict';
@@ -180,6 +184,22 @@
     if (!r.ok) { say('The ROM is not on the site yet: it has to be built first (src/n64/grug-64).'); $('play').disabled = true; rom.removeAttribute('href'); }
   }).catch(() => {});
 
+  // ==================================================================================================== your outfit, in the ROM
+  // The ROM has an outfit slot (shirt, pants, face, head shape: outfit64.js), with Grug in it. Before the game starts, the
+  // outfit you play as on the site (GrugOutfits) is cut down to console size and written over it, in a copy of the ROM in
+  // this tab: that copy is what the emulator plays, and what Download ROM gives you. If anything here fails, the ROM plays
+  // as it comes, with Grug.
+  // For testing: ?stress=500 (or sweep) starts in the stress test, ?view=x,z,turn,tilt,distance starts somewhere else
+  // (degrees and studs; the Game Menu has the stress test too).
+  const TEST = {}; if (QS.get('stress')) TEST.stress = QS.get('stress') === 'sweep' ? 'sweep' : +QS.get('stress') || 0;
+  if (QS.get('view')) { const v = QS.get('view').split(',').map(Number); TEST.view = { x: v[0], z: v[1], yaw: v[2], pitch: v[3], dist: v[4] }; }
+  let dressed = null;
+  const dress = () => dressed || (dressed = window.GrugOutfit64.wear(ROM, TEST).catch(e => { console.warn('outfit', e); return null; }));
+  const showWorn = () => dress().then(d => { const w = $('wear'), mine = d && d.name;
+    rom.href = mine ? d.url : ROM; w.textContent = mine ? `You play as ${d.name}. The ROM you download has your outfit in it too.` : ''; w.style.display = mine ? 'block' : 'none'; });
+  showWorn();
+  addEventListener('grug:outfits', () => { if (started) return; if (dressed) dressed.then(d => { if (d) URL.revokeObjectURL(d.url); }); dressed = null; showWorn(); });   // picked another outfit (in another tab, say)
+
   // ==================================================================================================== Play
   const desk = matchMedia('(pointer: fine)').matches && !matchMedia('(max-width: 760px)').matches;   // a keyboard and a mouse, most likely
   let started = false, running = false;
@@ -187,11 +207,11 @@
   async function play() {
     if (started || romOK === false) return; started = true;
     $('play').disabled = true; $('play').textContent = 'Loading...';
-    const data = await pickData();
+    const [data, worn] = await Promise.all([pickData(), dress()]);
     const controls = { 0: {}, 1: {}, 2: {}, 3: {} };
     for (const k of KEYS) for (const [btn, key] of k[3]) controls[0][btn] = { value: key };
     Object.assign(window, {
-      EJS_player: '#game', EJS_core: EMU.core, EJS_gameName: GAME.name, EJS_gameUrl: ROM, EJS_pathtodata: data,
+      EJS_player: '#game', EJS_core: EMU.core, EJS_gameName: GAME.name, EJS_gameUrl: worn ? worn.url : ROM, EJS_pathtodata: data,
       EJS_startOnLoaded: true, EJS_color: '#4b974b', EJS_backgroundColor: '#000', EJS_defaultControls: controls, EJS_defaultOptions: OPTIONS,
       EJS_Buttons: { saveState: false, loadState: false, quickSave: false, quickLoad: false, cheat: false, saveSavFiles: false, loadSavFiles: false, netplay: false, cacheManager: false, screenRecord: false },
       EJS_onGameStart: () => { running = true; say(''); },

@@ -51,12 +51,14 @@ static void make_studs(void) {
     }
     studsMade = true;
 }
-/* texel straight to colour, kept for the last few colours drawn (the baseplate's two, the blocks' handful): one lookup a pixel, not two */
+/* texel straight to colour, kept for the colours in use (the baseplate's two, the blocks' handful): one lookup a pixel, not two */
 typedef struct { uint16_t key[5]; bool used; uint16_t near[256], far[256]; } StudTab;
-static StudTab studTab[8]; static int studTurn;
+#define STUD_TABS 32   /* (a place for each colour by its number: a world with more colours of studded part than this in view re-makes tables as it draws) */
+static StudTab studTab[STUD_TABS];
 static const StudTab *stud_tab(const StudFace *sf) {
-    for (int i = 0; i < 8; i++) if (studTab[i].used && !memcmp(studTab[i].key, sf->pal, sizeof sf->pal)) return &studTab[i];
-    StudTab *t = &studTab[studTurn]; studTurn = (studTurn + 1) & 7; t->used = true; memcpy(t->key, sf->pal, sizeof sf->pal);
+    StudTab *t = &studTab[(sf->pal[0] ^ (sf->pal[0] >> 5) ^ (sf->pal[0] >> 10)) & (STUD_TABS - 1)];
+    if (t->used && !memcmp(t->key, sf->pal, sizeof sf->pal)) return t;
+    t->used = true; memcpy(t->key, sf->pal, sizeof sf->pal);
     for (int i = 0; i < 256; i++) { t->near[i] = sf->pal[studNear[i]]; t->far[i] = sf->pal[studFar[i]]; }
     return t;
 }
@@ -66,7 +68,9 @@ static const StudTab *stud_tab(const StudFace *sf) {
 /* where each scanline of the polygon being drawn starts and ends: x on the row of pixel centres, 16.16 fixed point */
 static int32_t spanL[SCREEN_H], spanR[SCREEN_H];
 
-static void raster(const SVert *v, int n, uint16_t color, int mode, const StudFace *sf) {
+/* the polygon's scanlines: which rows it covers (y0..y1), where each starts and ends (spanL, spanR), and how its depth
+   changes across the screen (a plane: d = d(v[0]) + ddx (x - v[0].x) + ddy (y - v[0].y)). False: nothing to draw. */
+static bool scan(const SVert *v, int n, int *py0, int *py1, float *pddx, float *pddy) {
     Frame *f = gfx_frame;
     /* the top and bottom of the polygon */
     float ymin = v[0].y, ymax = v[0].y;
@@ -74,7 +78,7 @@ static void raster(const SVert *v, int n, uint16_t color, int mode, const StudFa
     int y0 = iceil(ymin - 0.5f), y1 = iceil(ymax - 0.5f) - 1;
     if (y0 < 0) y0 = 0;
     if (y1 >= f->h) y1 = f->h - 1;
-    if (y0 > y1) return;
+    if (y0 > y1) return false;
     /* depth is a plane over the screen: d = d0 + ddx (x - x0) + ddy (y - y0). Take the widest triangle of the fan. */
     float ddx = 0, ddy = 0, best = 0;
     for (int i = 1; i + 1 < n; i++) {
@@ -82,7 +86,7 @@ static void raster(const SVert *v, int n, uint16_t color, int mode, const StudFa
         float area = ax * by - ay * bx, aa = area < 0 ? -area : area, ab = best < 0 ? -best : best;
         if (aa > ab) { best = area; float inv = 1.0f / area; ddx = (ad * by - ay * bd) * inv; ddy = (ax * bd - ad * bx) * inv; }
     }
-    if (best < 0.01f && best > -0.01f) return;
+    if (best < 0.01f && best > -0.01f) return false;
     /* every edge once, stepped down its scanlines: the leftmost and rightmost x on each */
     for (int y = y0; y <= y1; y++) { spanL[y] = 0x7fffffff; spanR[y] = -0x7fffffff; }
     for (int i = 0; i < n; i++) {
@@ -99,6 +103,13 @@ static void raster(const SVert *v, int n, uint16_t color, int mode, const StudFa
         int32_t xf = (int32_t)(x * 65536.0f); const int32_t sf = (int32_t)(slope * 65536.0f);
         for (int y = ya; y <= yb; y++, xf += sf) { if (xf < spanL[y]) spanL[y] = xf; if (xf > spanR[y]) spanR[y] = xf; }
     }
+    *py0 = y0; *py1 = y1; *pddx = ddx; *pddy = ddy;
+    return true;
+}
+
+static void raster(const SVert *v, int n, uint16_t color, int mode, const StudFace *sf) {
+    Frame *f = gfx_frame; int y0, y1; float ddx, ddy;
+    if (!scan(v, n, &y0, &y1, &ddx, &ddy)) return;
     const StudTab *tab = 0;
     const int32_t iddx = (int32_t)(ddx * 65536.0f);
     const bool steep = ddx > 16.0f || ddx < -16.0f;          /* depth changes fast along a line: watch the 16-bit range */
@@ -160,8 +171,47 @@ static void raster(const SVert *v, int n, uint16_t color, int mode, const StudFa
 }
 
 #undef TEXEL
+
+/* a face wearing a picture. Where the picture lies is worked out exactly at both ends of every run of up to 32 pixels (two
+   divisions) and stepped straight in between: close enough that the eye can't tell, at a fraction of the cost. */
+#define TEX_RUN 32
+static void raster_tex(const SVert *v, int n, const TexFace *tf) {
+    Frame *f = gfx_frame; int y0, y1; float ddx, ddy;
+    if (!scan(v, n, &y0, &y1, &ddx, &ddy)) return;
+    const uint8_t *tex = tf->tex; const uint16_t *pal = tf->pal; const int shift = tf->shift;
+    const int32_t iddx = (int32_t)(ddx * 65536.0f);
+    const bool steep = ddx > 16.0f || ddx < -16.0f;
+    float drow = v[0].d + ddy * (y0 + 0.5f - v[0].y) - ddx * v[0].x;
+    float urow = tf->ub * y0 + tf->uc, vrow = tf->vb * y0 + tf->vc, wrow = tf->wb * y0 + tf->wc;
+    for (int y = y0; y <= y1; y++, drow += ddy, urow += tf->ub, vrow += tf->vb, wrow += tf->wb) {
+        int xs = (spanL[y] + 0x7fff) >> 16, xe = (spanR[y] + 0x7fff) >> 16;
+        if (xs < 0) xs = 0;
+        if (xe > f->w) xe = f->w;
+        if (xs >= xe) continue;
+        float ds = drow + ddx * (xs + 0.5f);
+        if (ds < 1) ds = 1; else if (ds > 65534) ds = 65534;
+        int32_t step = iddx;
+        if (steep && xe - xs > 1) { float de = ds + ddx * (xe - 1 - xs); if (de < 1 || de > 65534) { de = de < 1 ? 1 : 65534; step = (int32_t)((de - ds) / (xe - 1 - xs) * 65536.0f); } }
+        uint32_t d = (uint32_t)(int32_t)(ds * 32768.0f) << 1;
+        uint16_t *px = f->fb + y * f->stride + xs, *pz = f->zb + y * f->stride + xs;
+        /* the picture at the start of the row */
+#define AT(x_, u_, v_) do { const float w_ = tf->wa * (x_) + wrow, i_ = (w_ > 1e-12f || w_ < -1e-12f) ? 1.0f / w_ : 0; float a_ = (tf->ua * (x_) + urow) * i_, b_ = (tf->va * (x_) + vrow) * i_; \
+            a_ = a_ < tf->umin ? tf->umin : a_ > tf->umax ? tf->umax : a_; b_ = b_ < tf->vmin ? tf->vmin : b_ > tf->vmax ? tf->vmax : b_; u_ = (int32_t)(a_ * 65536.0f); v_ = (int32_t)(b_ * 65536.0f); } while (0)
+        int32_t u, vv; AT(xs, u, vv);
+        for (int x = xs; x < xe; ) {
+            int run = xe - x; if (run > TEX_RUN) run = TEX_RUN;
+            int32_t u1, v1, du = 0, dv = 0;
+            if (run > 1) { AT(x + run - 1, u1, v1); du = (u1 - u) / (run - 1); dv = (v1 - vv) / (run - 1); } else { u1 = u; v1 = vv; }
+            uint16_t *pe = px + run; int32_t uu = u, vt = vv;
+            for (; px < pe; px++, pz++, uu += du, vt += dv) { const uint16_t dz = (uint16_t)(d >> 16); if (dz >= *pz) { *pz = dz; *px = pal[tex[((vt >> 16) << shift) + (uu >> 16)]]; } d += step; }
+            x += run; if (x < xe) AT(x, u, vv);
+        }
+#undef AT
+    }
+}
+static void soft_tex(const SVert *v, int n, const TexFace *tf) { raster_tex(v, n, tf); }
 static void soft_poly(const SVert *v, int n, uint16_t color, int mode) { raster(v, n, color, mode, 0); }
 static void soft_studs(const SVert *v, int n, const StudFace *sf, int mode) { if (!studsMade) make_studs(); raster(v, n, sf->pal[0], mode, sf); }
 static void soft_end3d(void) {}
 
-const GfxBackend gfx_soft = { "Software", soft_begin, soft_poly, soft_studs, soft_end3d };
+const GfxBackend gfx_soft = { "Software", soft_begin, soft_poly, soft_studs, soft_tex, soft_end3d };

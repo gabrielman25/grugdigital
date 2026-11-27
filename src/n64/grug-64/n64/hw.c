@@ -73,11 +73,12 @@ static void hw_poly(const SVert *v, int n, uint16_t color, int mode) {
     if (mode == GM_SHADOW) { if (!have_color) { rdpq_set_prim_color(RGBA32(0, 0, 0, 64)); have_color = true; } }
     else if (!have_color || color != cur_color) { rdpq_set_prim_color(unpack(color)); cur_color = color; have_color = true; }
     /* the RDP's depth: 0 is nearest, 1 is furthest (ours is the other way up, in 16 bits) */
-    float p[12][3]; if (n > 12) n = 12;
+    float p[24][3]; if (n > 24) n = 24;
     for (int i = 0; i < n; i++) { p[i][0] = v[i].x; p[i][1] = v[i].y; float z = 1.0f - v[i].d * (1.0f / 65535.0f); p[i][2] = z < 0 ? 0 : z > 1 ? 1 : z; }
     for (int i = 1; i + 1 < n; i++) rdpq_triangle(&TRIFMT_ZBUF, p[0], p[i], p[i + 1]);
 }
 static void hw_studs(const SVert *v, int n, const StudFace *sf, int mode) { hw_poly(v, n, sf->pal[0], mode); }   /* (plain tops for now: the stud pattern is the software renderer's) */
+static void hw_tex(const SVert *v, int n, const TexFace *tf) { hw_poly(v, n, tf->flat, GM_OPAQUE); }   /* (one colour a face for now: the pictures are the software renderer's too) */
 static void hw_end3d(void) { rdpq_detach_wait(); }   /* the picture is in memory: the CPU draws the HUD on it */
 
-const GfxBackend gfx_hw = { "Console", hw_begin, hw_poly, hw_studs, hw_end3d };
+const GfxBackend gfx_hw = { "Console", hw_begin, hw_poly, hw_studs, hw_tex, hw_end3d };

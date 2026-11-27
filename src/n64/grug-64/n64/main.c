@@ -9,6 +9,7 @@
 #include <libdragon.h>
 #include "../game.h"
 #include "../audio.h"
+#include "../outfit.h"
 #include "hw.h"
 
 static uint16_t zb[SCREEN_W * SCREEN_H];
@@ -49,6 +50,15 @@ static void snd_init(void) {
 }
 static uint32_t clock_us(void) { return (uint32_t)get_ticks_us(); }
 
+/* the outfit slot: read from its fixed place in the cartridge (tools/mkslot.py puts it there; the Arcade's page writes the
+   player's outfit over it). The game uses the pictures where they are, so it stays. */
+static uint8_t slot[SLOT_SIZE] __attribute__((aligned(16)));
+static void read_slot(void) {
+    data_cache_hit_writeback_invalidate(slot, SLOT_SIZE);
+    dma_read(slot, 0x10000000 + SLOT_ROM_OFFSET, SLOT_SIZE);
+    game_slot(slot, SLOT_SIZE);
+}
+
 static void read_input(Input *in) {
     joypad_poll();
     joypad_inputs_t j = joypad_get_inputs(JOYPAD_PORT_1);
@@ -88,6 +98,7 @@ int main(void) {
     game_use_hw = game_hw_ok;
 
     game_clock_us = clock_us;
+    read_slot();
     game_init((uint32_t)TICKS_READ() | 1);
     snd_init();
 

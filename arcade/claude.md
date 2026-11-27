@@ -246,6 +246,12 @@ scene at all, if one is ever wanted.
 The Arcade also has real Nintendo 64 ROMs, written in C (`src/n64/`), that play in the browser in an emulator and can
 be downloaded for a real console. They are not built like the games above: read `src/n64/grug-64/README.md` and the
 "Nintendo 64 games" section of `CLAUDE.md`. In `GAMES`: `cat: 'n64'`, `rom: '<file>.z64'` (in `arcade/<slug>/`),
-`outfit: false`, and `controls` listing the keyboard keys with the console's buttons. The game's page then adds the
+and `controls` listing the keyboard keys with the console's buttons. The game's page then adds the
 **Download ROM** button and the "Play it on a real Nintendo 64" box; `arcade/<slug>/index.html` is the page that plays
 the ROM (copy `arcade/grug-64/index.html`). The Download ROM button must always be there before the game goes full screen.
+
+**The player wears their saved outfit there too**, without `GrugOutfitRig`: a ROM has an outfit slot, and the page
+writes the outfit they play as into a copy of the ROM before it starts (`GrugOutfit64.wear(romUrl)` in
+`arcade/grug-64/outfit64.js`; the game's page does the same for its Download ROM links). A new ROM gets this by keeping
+the slot (`outfit.c`, `tools/mkslot.py`) and calling `wear` from its play page. Set `outfit: false` in `GAMES` only for
+a ROM with no slot, so its page doesn't say "you play as the character you made".
