@@ -2,10 +2,12 @@
 
     python3 src/voice/build.py [--out FILE]
 
-It takes src/voice/voice-lab.html and puts in the voice engine (static/voice.js) and every clip in
+It takes src/voice/voice-lab.html and puts in the voice engine (static/voice.js), the soft game sounds (static/sfx.js:
+the menu tap and the falling-apart thud, tuned in the same lab) and every clip in
 static/voice/player/ (as data: URIs), so the same file works on the site and opened straight from a disk.
-Rebuild after changing static/voice.js, the clips, or the lab. The lab's "Use in Zone Royale" button only reaches the
-game when the lab is opened from the site (same address: localStorage 'grug.voice.tuning.v1').
+Rebuild after changing static/voice.js, static/sfx.js, the clips, or the lab. The lab's "Use in the games" button only
+reaches the games when the lab is opened from the site (same address: localStorage 'grug.voice.tuning.v1' and
+'grug.sfx.tuning.v1').
 """
 import base64, json, os, sys
 
@@ -16,6 +18,8 @@ clipdir = os.path.join(ROOT, 'static/voice/player')
 clips = {f[:-4]: 'data:audio/mpeg;base64,' + base64.b64encode(open(os.path.join(clipdir, f), 'rb').read()).decode()
          for f in sorted(os.listdir(clipdir)) if f.endswith('.mp3')}
 out = src.replace('<!--VOICE_JS-->', '<script>\n' + js.replace('</script', '<\\/script') + '\n</script>', 1)
+sfx = open(os.path.join(ROOT, 'static/sfx.js'), encoding='utf-8').read()
+out = out.replace('<!--SFX_JS-->', '<script>\n' + sfx.replace('</script', '<\\/script') + '\n</script>', 1)
 out = out.replace('/*CLIP_SRCS*/null', json.dumps(clips), 1)
 dest = sys.argv[sys.argv.index('--out') + 1] if '--out' in sys.argv else os.path.join(ROOT, 'arcade/zone-royale/voice-lab/index.html')
 os.makedirs(os.path.dirname(dest), exist_ok=True)
@@ -31,6 +35,9 @@ if '--cinematic' in sys.argv:
     assert tag in game
     inline = ('<script>window.ZR_CINEMATIC = true; window.GRUG_VOICE_SRCS = ' + json.dumps(clips) + ';</script>\n<script>\n'
               + js.replace('</script', '<\\/script') + '\n</script>')
+    stag = '<script src="/static/sfx.js"></script>'
+    assert stag in game
+    game = game.replace(stag, '<script>\n' + sfx.replace('</script', '<\\/script') + '\n</script>', 1)
     game = game.replace(tag, inline, 1).replace('id="cineGame" class="ol" href="./"', 'id="cineGame" class="ol" href="' + PREVIEW + '" target="_blank"').replace('id="cineLab" class="ol" href="voice-lab/"', 'id="cineLab" class="ol" href="' + PREVIEW + 'voice-lab/" target="_blank"')
     cdest = sys.argv[sys.argv.index('--cinematic') + 1]
     open(cdest, 'w', encoding='utf-8').write(game)

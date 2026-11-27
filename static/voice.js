@@ -1,9 +1,12 @@
 /* window.GrugVoice: the player voice lines (jump, dodge roll, axe swing, death, falling off, the elimination laugh).
  *
- * Being tried in Zone Royale first; any game can use it the same way:
+ * First tried in Zone Royale, now in every Arcade game. A game uses it like this:
  *   GrugVoice.attach(audioContext, outputNode)   // once the game's AudioContext exists (loads the clips)
- *   GrugVoice.play('jump', { who: 'me', mine: true })                       // you: your own avatar voice, not positional
- *   GrugVoice.play('death', { who: bot.name, voice: GrugVoice.voiceFor(bot.name), dest: () => makePannerGain() })
+ *   GrugVoice.say('jump', { mine: true })                                   // you: your own avatar voice, not positional
+ *   GrugVoice.say('death', { name: bot.name, id: bot.id, dest: () => makePannerGain() })   // someone else, from where they stand
+ *   GrugVoice.menuButton(buttonElement)          // the Game Menu's "Voices: On / Just mine / Off" button
+ * (say() is play() with the usual choices made; play() takes everything: see below.) Each game keeps a small Voice
+ * object that turns its own characters into those calls. The actions: jump, dodge, attack, hurt, death, fall, laugh.
  *
  * Tuning (volumes, speed, pitch ranges, how often each line plays, which clips each action uses, the avatar pitch safe
  * zone) is DEFAULTS below. The Voice Lab (/arcade/zone-royale/voice-lab/) edits it and exports it as JSON; on this site
@@ -199,6 +202,26 @@
       this.last[ck] = now;
       Object.assign(info, { played: true, clip: id, label: CLIPS[id], pitch: semis, speed, volume: vol, duration: dur });
       return done('');
+    },
+    // ---------------------------------------------------------- what a game calls: who is speaking, and from where
+    // o.mine: you (your own avatar voice, straight to the output). Otherwise someone else: o.name gives them a voice of
+    // their own (the same name always sounds the same), o.id keeps their cooldowns apart, and o.dest is a node to play
+    // into (or a function returning one, or null when they're out of earshot). o.force: ignore chance and cooldown.
+    say(ev, o = {}) {
+      if (o.mine) return this.play(ev, { who: 'me', mine: true, force: o.force, gain: o.gain });
+      if (!this.others() && !o.force) return { event: ev, played: false, reason: "others' voices are off" };
+      return this.play(ev, { who: 'f' + (o.id ?? o.name ?? ''), voice: this.voiceFor(o.name), others: true, force: o.force, gain: o.gain, dest: o.dest });
+    },
+    // the Game Menu's button: one press steps through everyone's voices on, just your own, and off (kept for every game)
+    menuLabel() { const m = this.mine(); return 'Voices: ' + (!m.on ? 'Off' : m.others ? 'On' : 'Just mine'); },
+    menuButton(el, after) {
+      if (!el) return; el.style.display = ''; el.textContent = this.menuLabel();
+      el.addEventListener('click', e => {
+        e.stopPropagation(); const m = this.mine();
+        this.setMine(m.on && m.others ? { on: true, others: false } : m.on ? { on: false, others: false } : { on: true, others: true });
+        el.textContent = this.menuLabel(); if (this.mine().on) this.play('jump', { who: 'me', mine: true, force: true });
+        if (after) after();
+      });
     },
     // just hear a clip (the Voice Lab's clip list)
     preview(id, semis = 0, speed = 1, vol = 0.9) {

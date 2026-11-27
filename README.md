@@ -22,8 +22,9 @@ The site is being rebuilt from scratch on `main`. The old site is kept, unchange
   page at an old path (say `games/`) replaces the old one there.
 - Until you mean to replace them, avoid the old site's top-level names: `alchemy app assets avatar business coco community
   crafthouse create for games labs links make managers me partners play profile restaurant rewards rodeo shop showcase
-  site soluna teahouse tools work`, and `sw.js`, `offline.html`, `pearls.html`, `privacy.html`, `terms.html`,
-  `support.html`, `credits.html`. `managers/` is printed on business cards: keep it working.
+  site soluna teahouse tools work`, and `sw.js`, `offline.html`, `pearls.html`, `credits.html`. (`privacy.html`,
+  `terms.html` and `support.html` are on `main` now, in the modern look: they took the old pages' addresses over.)
+  `managers/` is printed on business cards: keep it working.
 - The new site's own files so far live in `static/` (the Allo font in `static/fonts/`, the Pearls wallet, the itch fallback list).
 
 ## Asset packs from itch.io (`/packs/`)

@@ -123,7 +123,8 @@ def build_pages(G):
                           'description': 'Free tools for cafés, bars and restaurants: a stamp card guests scan, a website made from it, and a dashboard for schedules, checklists and temperatures.',
                           'audience': {'@type': 'BusinessAudience', 'name': 'Restaurant, café and bar owners and managers'}}],
                   images=[]))
-    for f, u, t, og in [('character/pearls/index.html', '/character/pearls/', 'Pearls · Grug Avatar Studio', OG['studio']), ('privacy.html', '/privacy.html', 'Privacy policy · Grug Digital', OG['home']),
+    for f, u, t, og in [('character/pearls/index.html', '/character/pearls/', 'Pearls · Grug Avatar Studio', OG['studio']), ('support.html', '/support.html', 'Help and contact · Grug Digital', OG['home']),
+                        ('privacy.html', '/privacy.html', 'Privacy policy · Grug Digital', OG['home']),
                         ('terms.html', '/terms.html', 'Terms of service · Grug Digital', OG['home'])]:
         P.append(dict(file=f, url=SITE + u, title=None, desc=None, og=og, og_alt='Grug Digital', og_title=t, graph=[{'@type': 'WebPage', 'url': SITE + u, 'name': t, 'publisher': {'@id': SITE + '/#org'}}], images=[]))
     for f, u in [('tizzy/index.html', '/tizzy/'), ('itch/index.html', '/itch/')]:   # promo landing pages (noindex): just the share card

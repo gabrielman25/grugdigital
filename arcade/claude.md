@@ -5,18 +5,41 @@ this is how the game goes into the **Grug Arcade** at `https://grugdigital.com/a
 building, so the game is ready for the site from the beginning. The live copy of this guide is
 https://grugdigital.com/arcade/claude.md.
 
-## 0. Start from the Grug Baseplate
+## 0. Start from the Grug Starter
 
-**Every new game starts as a copy of `arcade/baseplate/index.html`** (live: https://grugdigital.com/arcade/baseplate/).
-It's a walk-around zoo of everything Grug games share, already built the Grug way: the renderer and the Grug light,
-shiny plastic, studded parts and the physics world (AmbientCore: a classic R6 Humanoid at 240 Hz, with kill bricks, jump
-pads, seats, buttons, ladders and moving platforms), the classic rig and its hand-made animations (walk, jump, sit, climb,
-the dodge roll, holding a tool, falling apart on death), outfits on everyone, NPC players (the Ambient crowd: they
-wander, explore, follow you, sit, run the obby, ride the lift, chat), a companion that mirrors your moves, the Roblox orbit
-camera (into first person), touch controls, sound, VFX, the 2009-2010 GUI (Game Menu, hint bar, name tags, chat bubbles,
-BillboardGuis, damage numbers, the full-screen Message, a player list, a hotbar, chat, HEALTH squares), Pearls and saving.
-The comment at the top of that file lists where everything is. Copy it to `arcade/<slug>/index.html`, change the save
-key and the title, delete the stations you don't need in `buildWorld`, and build your game on top.
+**Every new game starts as a copy of `arcade/starter/index.html`** (live: https://grugdigital.com/arcade/starter/): a
+bare baseplate with everything Grug games share already working, built the Grug way. You, three other players, a damage
+pad, a kill brick and a training dummy, and nothing else: the renderer and the Grug light, shiny plastic, studded parts
+and the physics world (AmbientCore: a classic R6 Humanoid at 240 Hz), the classic rig and its hand-made animations (walk,
+jump, the dodge roll, a swing, falling apart on death), outfits on everyone, NPC players (the Ambient crowd), the Roblox
+orbit camera (into first person), touch controls, the sounds, **the player voices**, VFX, the 2009-2010 GUI (Game Menu,
+hint bar, name tags, chat bubbles, BillboardGuis, damage numbers, a player list, a hotbar, chat, HEALTH squares), Pearls
+and saving. The comment at the top of that file lists where everything is. Copy it to `arcade/<slug>/index.html`, change
+the title, the hint line and the save key, and build your game in `buildWorld` and the frame loop.
+
+The Starter is built from the **Grug Baseplate** (`arcade/baseplate/index.html`, live:
+https://grugdigital.com/arcade/baseplate/): the walk-around zoo of every station (an obby, seats, a truss to climb, jump
+pads, an elevator, a button and a door, coins, a blaster and dummies, the full-screen Message and the Hint, a companion
+that mirrors you). When your game wants one of those, copy its code from the Baseplate. Engine changes go into the
+Baseplate, then `python3 src/starter/build.py` (never hand-edit `arcade/starter/index.html`).
+`python3 src/starter/build.py --single FILE` also writes a single file with three.js, the voices, the sounds and the font
+built in, which plays opened straight from a disk (to send to someone, or to start a game outside the repo).
+
+### Voices and the two soft sounds (every game has them)
+
+- **Voices** (`/static/voice.js`, `window.GrugVoice`; the game's small `Voice` object sits just above `Snd`): call
+  `Voice.say(who, line)` every time the thing happens, for the player and for anyone else with a `.ch` and a `.name`:
+  `'jump'`, `'dodge'` (the roll), `'attack'` (a swing), `'hurt'` (took damage, still alive), `'death'`, `'fall'` (fell off
+  the world), `'laugh'` (got an elimination). `Voice.died(who, killer)` picks death or fall and plays the killer's laugh.
+  The player speaks in their own avatar voice; everyone else in a voice picked from their name, from where they stand.
+  How often each line plays, and its volume, speed and pitch, are GrugVoice's own settings, which the owner tunes in the
+  Voice Lab (`/arcade/zone-royale/voice-lab/`): **don't add chances, cooldowns or volumes in the game** (the one exception is there already: the
+  Ambient crowd hop about constantly, so only `Voice.crowdJump` of their jumps speak). Keep the Game
+  Menu's `#mVoice` button (`GrugVoice.menuButton`: On / Just mine / Off), and say nothing in a hidden tab.
+- **The soft tap and the soft thud** (`/static/sfx.js`, `window.GrugSfx`): menus, buttons and countdowns play the tap
+  (`Snd.play('click')`, or `'open'`, `'close'`, `'count'`), and a character falling apart plays the thud
+  (`Snd.play('oof', x, y, z)`). They replaced a loud ping and a loud plop (the old `tick` and `fall` sound files): **never
+  bring those back, and never add a loud beep for a menu or a death**. Both are tuned in the Voice Lab too.
 
 ## 1. What a Grug Arcade game is
 
@@ -200,7 +223,7 @@ running while the tab is in the background or even closed. They're marked `tab: 
 and listed under the **Plays in Your Tab** category (`TAB_BRAND`, `CATS`). The first one is **Sunny Patch**
 (`arcade/sunny-patch/`): read the comment at the top of it, then copy how it's put together:
 
-- **Build the 3D game from the Baseplate as usual** (sections 0-7 all still apply: outfits, the 2010 GUI, the Game Menu, the frame loop).
+- **Build the 3D game from the Starter as usual** (sections 0-7 all still apply: outfits, the 2010 GUI, the Game Menu, the frame loop).
 - **Put the part that keeps going in its own block**, wrapped so its names can't clash with the engine's (Sunny Patch's
   `<script id="farm-core">` exposes `window.FarmCore`): its state, its `step(dt)`, its save, and how it draws the tab.
 - **Run that part on `GrugTab.run`** (it steps by real elapsed time on `setInterval`, because requestAnimationFrame stops

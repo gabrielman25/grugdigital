@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="preload" href="/static/fonts/allo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/fonts/allo.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Help and contact · Grug Digital</title>
+<!-- seo: written by src/seo/seo_head.py (re-run it, don't edit by hand) -->
+<meta property="og:site_name" content="Grug Digital">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Help and contact · Grug Digital">
+<meta property="og:description" content="Help with Grug Digital&#x27;s games, the Avatar Studio, Pearls, asset packs and the restaurant tools: how to reach us, answers to common questions, and the refund policy.">
+<meta property="og:url" content="https://grugdigital.com/support.html">
+<meta property="og:image" content="https://grugdigital.com/static/og/grug-digital-custom-avatars-and-free-games.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Grug Digital">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Help and contact · Grug Digital">
+<meta name="twitter:description" content="Help with Grug Digital&#x27;s games, the Avatar Studio, Pearls, asset packs and the restaurant tools: how to reach us, answers to common questions, and the refund policy.">
+<meta name="twitter:image" content="https://grugdigital.com/static/og/grug-digital-custom-avatars-and-free-games.jpg">
+<meta name="twitter:image:alt" content="Grug Digital">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://grugdigital.com/#org","name":"Grug Digital","alternateName":"Grug","url":"https://grugdigital.com/","logo":{"@type":"ImageObject","url":"https://grugdigital.com/static/arcade/grug-digital-logo.png"},"sameAs":["https://www.youtube.com/@PolySwitchOfficial","https://www.instagram.com/grugdigital","https://discord.gg/3ENePvNGJy","https://polysw.itch.io/"]},{"@type":"WebPage","url":"https://grugdigital.com/support.html","name":"Help and contact · Grug Digital","publisher":{"@id":"https://grugdigital.com/#org"}}]}</script>
+<!-- /seo -->
+<meta name="description" content="Help with Grug Digital's games, the Avatar Studio, Pearls, asset packs and the restaurant tools: how to reach us, answers to common questions, and the refund policy.">
+<link rel="icon" href="/favicon.png">
+<link rel="canonical" href="https://grugdigital.com/support.html">
+<meta name="theme-color" content="#f3f4f6">
+<link rel="stylesheet" href="/static/modern.css">
+<style>
+/* Help and contact: the customer support page, in the modern look (static/modern.css). It replaces the legacy
+   support.html at the same address, so every old "Contact us" link lands here. The refund policy is the one the terms
+   point to: keep its wording in step with terms.html ("Pearls and other in-game purchases") and with what the Pearls
+   pages say. The questions are sorted by the site's three sections. */
+.top{padding:64px 0 40px}
+.top .lead{margin-top:18px}
+.reach{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:36px}
+.way{display:flex;flex-direction:column;align-items:flex-start;padding:26px 28px 28px;border-radius:20px;background:var(--panel);border:1px solid var(--line)}
+.way h2{font-size:1.5rem}
+.way p{margin:8px 0 22px;color:var(--mute)}
+.way .btn{margin-top:auto}
+.way.dark{background:var(--text);border-color:var(--text);color:#fff}
+.way.dark p{color:#c3c7ce}
+.tel{display:block;margin:10px 0 4px;font:600 clamp(1.9rem,4vw,2.6rem)/1 var(--display);letter-spacing:-.02em;text-decoration:none;white-space:nowrap}
+
+.write{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:start}
+.write p{color:var(--mute);font-size:1.06rem;max-width:34em}
+.write p+p{margin-top:12px}
+.write code{padding:2px 7px;border-radius:6px;background:var(--raise);color:var(--text)}
+.write a{color:var(--text);text-underline-offset:3px}
+
+/* the questions: three groups, each a list that opens one answer at a time on its own */
+.qa{display:grid;grid-template-columns:minmax(0,15rem) minmax(0,1fr);gap:20px 48px;padding:34px 0;border-top:1px solid var(--line)}
+.qa:first-of-type{border-top:0;padding-top:0}
+.qa h3{font-size:1.4rem}
+.qa>div>p{margin-top:6px;color:var(--mute);font-size:.96rem}
+.qa details{border-bottom:1px solid var(--line)}
+.qa details:first-child{border-top:1px solid var(--line)}
+.qa summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 2px;cursor:pointer;list-style:none;font:500 1.06rem/1.35 var(--display)}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary::after{content:"";flex:none;width:10px;height:10px;margin-right:4px;border:solid var(--mute);border-width:0 2px 2px 0;transform:rotate(45deg) translate(-2px,-2px);transition:transform .15s}
+.qa details[open] summary::after{transform:rotate(225deg) translate(-2px,-2px)}
+.qa summary:hover{color:var(--text)}
+.qa .a{padding:0 2px 18px;color:var(--mute);max-width:44em}
+.qa .a p+p{margin-top:10px}
+.qa .a a{color:var(--text);text-underline-offset:3px}
+
+.policy{max-width:46rem;margin:0;padding-left:1.2em;font-size:1.04rem}
+.policy li{margin:10px 0}
+.about p{color:var(--mute);font-size:1.06rem;max-width:40em}
+.about a{color:var(--text);text-underline-offset:3px}
+
+@media (max-width:940px){
+  .top{padding:40px 0 30px}
+  .reach,.write,.qa{grid-template-columns:1fr}
+  .write{gap:14px}
+  .qa{gap:14px;padding:26px 0}
+}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="wrap">
+    <a class="brand" href="/"><i class="mark" aria-hidden="true"></i>Grug Digital</a>
+    <nav aria-label="Sections">
+      <a href="/arcade/">Players</a>
+      <a href="/agents/">Game developers</a>
+      <a href="/restaurants/">Restaurants</a>
+      <a href="#questions">Questions</a>
+      <a href="#refunds">Refunds</a>
+    </nav>
+    <div class="right">
+      <a class="btn sm" href="/">Grug home</a>
+    </div>
+  </div>
+</div>
+
+<main>
+<header class="top">
+  <div class="wrap">
+    <h1>Help and contact</h1>
+    <p class="lead">Help with Grug's games, the Avatar Studio, Pearls, asset packs and the restaurant tools. We're a small team in Katy, Texas, and we read every message.</p>
+    <div class="reach">
+      <div class="way dark">
+        <h2>Chat with us on Discord</h2>
+        <p>The fastest way to reach us if you need help right away.</p>
+        <a class="btn go" href="https://discord.gg/s5tRnH4UEv" target="_blank" rel="noopener">Join our Discord</a>
+      </div>
+      <div class="way">
+        <h2>Text us</h2>
+        <a class="tel" href="sms:+19544596301">954-459-6301</a>
+        <p>Text only, please, no calls.</p>
+        <a class="btn" href="sms:+19544596301">Open in Messages</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="sec tight" style="border-top:1px solid var(--line)">
+  <div class="wrap write">
+    <h2>When you write to us</h2>
+    <div>
+      <p>Tell us which game or page you were using, and what you were doing when it went wrong.</p>
+      <p>For a purchase, include your purchase code. Open the <a href="/character/pearls/">Pearls page</a> and look at the bottom: it looks like <code>GR-ABCD1234</code> and lets us find your payment quickly.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="questions">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Common questions</h2>
+      <p>Sorted by what you came to Grug for. If yours isn't here, message us.</p>
+    </div>
+
+    <div class="qa">
+      <div><h3>Players</h3><p>The Arcade, your avatar and Pearls</p></div>
+      <div>
+        <details>
+          <summary>I paid but my Pearls didn't show up</summary>
+          <div class="a"><p>Stripe sends you back to the site after paying, and the Pearls are added then. If you closed the page first or ended up in a different browser, message us with your purchase code and we'll add them for you.</p></div>
+        </details>
+        <details>
+          <summary>My Pearls, characters or game saves disappeared</summary>
+          <div class="a"><p>Pearls, saved outfits, game saves and settings are kept in the browser on your device, not on our servers. They're removed if you clear your browser data, use private browsing, or switch devices or browsers.</p><p>Message us with your purchase code and we'll restore Pearls you bought. We can't bring back characters or game saves, so download any character you want to keep.</p></div>
+        </details>
+        <details>
+          <summary>Who processes my payment?</summary>
+          <div class="a"><p>Pearl packs are processed securely by Stripe, and the Grug Gold membership by Gumroad. Your receipt email shows the name that will appear on your statement. We never see or store your card number.</p></div>
+        </details>
+        <details>
+          <summary>What does it cost to download my avatar?</summary>
+          <div class="a"><p>Making and saving characters is free, and so is playing as them in the Arcade. Downloading one as a rigged Roblox R6 file costs 25 Pearls, once per character: downloading the same character again later is free. The shirt, pants and face pictures are always free.</p><p>Everyone gets free Pearls for visiting each day, and new players start with some. The price is shown before you confirm.</p></div>
+        </details>
+        <details>
+          <summary>How do I cancel Grug Gold, or use it on another device?</summary>
+          <div class="a"><p>Grug Gold is a monthly membership on Gumroad. Cancel any time from the "Manage membership" link in your Gumroad receipt email. To switch on your perks on a device, paste the license key from that email into the <a href="/character/pearls/">Pearls page</a> in the browser you play in. A key works on up to two devices.</p></div>
+        </details>
+        <details>
+          <summary>A game won't load, or runs slowly</summary>
+          <div class="a"><p>The games are 3D and run in your browser, so they need a recent version of Chrome, Edge, Safari or Firefox. Close other tabs, and if a game has a Game Settings button, try a lower 3D resolution. If it still won't load, tell us the game, your device and your browser.</p></div>
+        </details>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div><h3>Game developers</h3><p>The agent studio and asset packs</p></div>
+      <div>
+        <details>
+          <summary>My AI agent couldn't finish the character</summary>
+          <div class="a"><p>The <a href="/agents/studio/">Avatar Studio for agents</a> runs in a browser, so the agent needs one it can control, such as Claude in Chrome. The outfit is painted in Google Gemini, so you need to be signed in to Gemini in that same browser. An agent that can only fetch pages can send you a link that opens the studio with your character set up, and you finish the last steps by hand.</p><p>The <a href="/agents/studio/claude.md">agent guide</a> has every step. Claude, Gemini and other AI tools are run by their own companies, so we can't see or fix what happens inside them.</p></div>
+        </details>
+        <details>
+          <summary>The export says I don't have enough Pearls</summary>
+          <div class="a"><p>Exporting a character costs 25 Pearls, kept in your own browser. Agents are told to ask you before spending them, and never to buy them for you. You can get more on the <a href="/character/pearls/">Pearls page</a>.</p></div>
+        </details>
+        <details>
+          <summary>I bought an asset pack and need help</summary>
+          <div class="a"><p>Our <a href="/packs/">asset packs</a> are sold on itch.io, and that's where you download your files. Each pack's page says what's included and how you may use it. For a problem with a pack, or a refund, message us with the pack's name and the email you used on itch.io.</p></div>
+        </details>
+        <details>
+          <summary>Where did the Building Studio go?</summary>
+          <div class="a"><p>We retired it in November 2026 to put the work into the Avatar Studio. Buildings you already downloaded are yours to keep using.</p></div>
+        </details>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div><h3>Restaurants</h3><p>Stamp cards, websites and the dashboard</p></div>
+      <div>
+        <details>
+          <summary>I saw a page with a restaurant's name on it. Is that their app?</summary>
+          <div class="a"><p>No. Pages that carry a local business's name are demonstrations we made to show the owners. They aren't the business's official pages, the business hasn't endorsed them, and no rewards are earned or redeemed on them. If it's your business and you'd like the page changed or removed, message us and we'll do it promptly.</p></div>
+        </details>
+        <details>
+          <summary>A stamp card promised me a reward. Who gives it to me?</summary>
+          <div class="a"><p>The business or person who made the card. Stamp cards, link pages and shop websites are made by other people with our free tools. We don't write or review them and can't make anyone honor a reward.</p></div>
+        </details>
+        <details>
+          <summary>I lost my dashboard, card or website</summary>
+          <div class="a"><p>The <a href="/restaurants/">restaurant tools</a> have no accounts and no server: everything you enter is saved in the browser on the device you used, and your card and website ride in their own links. If that browser's data was cleared, we can't bring it back. Save a backup file from the dashboard, and keep your card's and website's links somewhere safe.</p></div>
+        </details>
+        <details>
+          <summary>How do I report a page made with your tools?</summary>
+          <div class="a"><p>Message us with its link and what's wrong with it. We can block a page from loading on our site if it breaks our <a href="/terms.html">terms</a>.</p></div>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="refunds">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Refund policy</h2>
+      <p>For Pearls and other things bought on our site. Asset packs are sold on itch.io: message us for a refund on a pack.</p>
+    </div>
+    <ul class="policy">
+      <li>Pearls and other in-game items are digital and are added to your browser as soon as you pay.</li>
+      <li>If a purchase never arrived, you were charged twice, or you bought something by mistake and haven't used it, contact us within 30 days and we'll either add what you paid for or refund you in full.</li>
+      <li>Items you've already used, such as Pearls spent on boosts, aren't refundable, except where the law requires.</li>
+      <li>Refunds go back to your original payment method through Stripe and usually take 5–10 business days to appear.</li>
+      <li>Pearls and in-game items have no cash value and can't be exchanged for food, drinks, merchandise or money.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec tight about">
+  <div class="wrap">
+    <div class="sec-head" style="margin-bottom:0">
+      <h2>About us</h2>
+      <p>Grug Digital makes free web games, an avatar studio for players and for AI agents, low-poly asset packs, and free tools for local restaurants, in Katy, Texas. See our <a href="/privacy.html">privacy policy</a> for how we handle your information, and the <a href="/terms.html">terms</a> for the rules of the site.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="cols">
+      <div><h3>Players</h3><ul><li><a href="/arcade/">Grug Arcade</a></li><li><a href="/character/">Avatar Studio</a></li><li><a href="/character/pearls/">Pearls</a></li></ul></div>
+      <div><h3>Game developers</h3><ul><li><a href="/agents/">Grug for agents</a></li><li><a href="/agents/studio/">Agent Avatar Studio</a></li><li><a href="/packs/">Asset packs</a></li></ul></div>
+      <div><h3>Restaurants</h3><ul><li><a href="/restaurants/">Grug for restaurants</a></li><li><a href="/restaurant/">Set up my restaurant</a></li></ul></div>
+      <div><h3>Grug Digital</h3><ul><li><a href="/">Grug home</a></li><li><a href="/privacy.html">Privacy policy</a></li><li><a href="/terms.html">Terms</a></li><li><a href="/credits.html">Credits</a></li><li><a href="/legacy">Legacy site</a></li></ul></div>
+    </div>
+    <div class="stamps">
+      <a href="https://warpdrive.team/" target="_blank" rel="noopener sponsored" title="Warpdrive: release your dream game on it (our partner)"><img src="/static/stamps/warpdrive.gif" alt="Release your dream game on Warpdrive" width="88" height="31"></a>
+      <a href="https://www.youtube.com/@PolySwitchOfficial" target="_blank" rel="noopener" title="Grug on YouTube (PolySwitch)"><img src="/static/stamps/youtube.gif" alt="YouTube: subscribe" width="88" height="31"></a>
+      <a href="https://discord.gg/3ENePvNGJy" target="_blank" rel="noopener" title="Join the Grug Discord"><img src="/static/stamps/discord.gif" alt="Discord: join now" width="88" height="31"></a>
+    </div>
+    <p class="legal">© 2026 Grug Digital, Katy, Texas. Grug, Grug Digital, Pearls, characters, logos, names, and all related indicia are trademarks of Grug Digital. Grug is not sponsored, authorized or endorsed by Roblox Corporation, Anthropic or Google.</p>
+  </div>
+</footer>
+</body>
+</html>

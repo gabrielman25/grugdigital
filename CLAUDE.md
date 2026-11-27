@@ -15,7 +15,7 @@ section's nav and from the directory, and don't cross-sell another section's too
 | **Players** | people who want to play and dress an avatar | `/arcade/` (and every game), `/character/` (the players' Avatar Studio), `/character/pearls/`, the promo pages | **classic** (the 2011 games site, green nav) |
 | **Game developers** | people whose AI agent makes characters for their game | `/agents/`, `/agents/studio/` (the agents' Avatar Studio), `/packs/` (the itch.io asset packs) | **modern**, dark (`data-theme="dev"`) |
 | **Restaurants** | owners and managers | `/restaurants/`, and the tools it opens on the legacy deploy | **modern**, white and tomato (`data-theme="rest"`) |
-| the directory | everyone | `/` (home), `privacy.html`, `terms.html`, `404.html`, `build/` | **modern**, light grey and Grug's green |
+| the directory | everyone | `/` (home), `support.html` (Help and contact), `privacy.html`, `terms.html`, `404.html`, `build/` | **modern**, light grey and Grug's green |
 
 - **Only the Arcade side is classic** (the games, and the players' studio and Pearls pages that go with them). Everything
   that isn't about the Arcade wears the modern look (see "The look").
@@ -163,7 +163,7 @@ and link straight to the pages that changed. A preview also falls back to the le
 (the owner's call, November 2026). The players' Avatar Studio and the Pearls pages were left classic with the Arcade
 they feed into; ask the owner before changing that.
 
-**Modern** (`static/modern.css`): the home directory, `/restaurants/`, `/packs/`, `privacy.html`, `terms.html`, `404.html`,
+**Modern** (`static/modern.css`): the home directory, `/restaurants/`, `/packs/`, `support.html`, `privacy.html`, `terms.html`, `404.html`,
 `build/index.html`, plus `/agents/` and `/agents/studio/`, which carry their own copies. One system, three palettes set
 with `data-theme` on `<html>`: none (light grey, ink, Grug's green: the directory and company pages), `dev` (near-black:
 the developers), `rest` (white, warm ink, tomato: the restaurants). A sticky top bar (`.nav`: the mark, the section's
@@ -188,7 +188,7 @@ the house ad zoomed to fit), and `modern.css` stacks its grids and hides the bar
   button and footer. Keep the players' nav in step across `arcade/index.html` and `arcade/place/index.html` (Games with
   its genre menu, My Avatar, My Outfits, Grug Studio, Pearls, Help, Grug home). `chrome()` copes with a page that has no
   Games menu.
-- The modern pages copy their top bar and footer in by hand too: keep the directory's (`index.html`, `privacy.html`,
+- The modern pages copy their top bar and footer in by hand too: keep the directory's (`index.html`, `support.html`, `privacy.html`,
   `terms.html`, `404.html`, `build/index.html`), the developers' (`agents/index.html`, `packs/index.html`) and the
   restaurants' (`restaurants/index.html`) in step with each other.
 - `static/classic.css`: classic pieces outside the Arcade's own stylesheet (`.gbtn` buttons: green, `.gray`, `.claude`,
@@ -251,19 +251,61 @@ itself on its last line froze for good on any error while the Game Menu kept wor
 active id `grug.outfit.active`); the studio's My outfits layer is `src/character/outfits.js`, put into
 `character/index.html` by `patch_outfits.py` (also run by `patch_studio.py`/`build.py`).
 
-## Player voices (`static/voice.js`, being tried in Zone Royale)
+## Player voices (`static/voice.js`): in every Arcade game
 
 `window.GrugVoice` plays the voice actress's player lines (`static/voice/player/*.mp3`: jump, dodge, attack, death,
-the laugh) for actions: jump, dodge, attack (axe/pickaxe swing), hurt, death, fall (fell to death / off the map),
+the laugh) for actions: jump, dodge, attack (a swing), hurt, death, fall (fell to death / off the map),
 laugh (got an elimination). Each action has a chance, cooldown, delay, priority, volume/speed/pitch ranges and a clip
 pool: all in `DEFAULTS` at the top of the file. Players pick their avatar's pitch (and speed) inside a safe zone
-(`grug.voice.v1`); other players get a voice from their name (`voiceFor`). The owner tunes it in the Voice Lab
-(`arcade/zone-royale/voice-lab/`, built from `src/voice/` by `python3 src/voice/build.py`; rebuild after changing
-`static/voice.js` or the clips) and sends back its exported JSON: put those values into `DEFAULTS`. The lab's "Use in
-Zone Royale" saves `grug.voice.tuning.v1`, which overrides `DEFAULTS` in that browser until reset (Game Settings shows it).
-In a game: `GrugVoice.attach(ctx, out)` once the AudioContext exists, then `GrugVoice.play(event, opts)`; see
-`Voice.say` in `arcade/zone-royale/index.html`. Going site-wide means doing the same in each game.
+(`grug.voice.v1`); other players get a voice from their name (`voiceFor`).
+
+**Every game has them** (November 2026; they started in Zone Royale). A game loads `/static/voice.js`, calls
+`GrugVoice.attach(ctx, out)` once its AudioContext exists, and has a small `Voice` object just above `Snd`:
+`Voice.say(who, line)` (you: your avatar voice; anyone else: `GrugVoice.say(line, { name, id, dest })`, from where they
+stand) and, in most games, `Voice.died(who, killer)` (death or fall, and the killer's laugh). Monsters, zombies, bugs and
+dummies don't speak. The Game Menu has a **Voices: On / Just mine / Off** button (`#mVoice`, `GrugVoice.menuButton`; a
+`#sVoice` row in Slide 999; Zone Royale keeps its own voice settings rows), kept in `grug.voice.v1` for every game.
+A new game gets all of this from the Starter (below): call `Voice.say` where the thing happens and leave the chances,
+cooldowns and volumes to `DEFAULTS`.
+
+The owner tunes it in the Voice Lab (`arcade/zone-royale/voice-lab/`, built from `src/voice/` by
+`python3 src/voice/build.py`; rebuild after changing `static/voice.js`, `static/sfx.js` or the clips) and sends back its
+exported JSON: put those values into `DEFAULTS` (and its `sfx` part into `static/sfx.js`, below). The lab's "Use in the
+games" saves `grug.voice.tuning.v1` (and `grug.sfx.tuning.v1`), which override the defaults in that browser until reset
+(Zone Royale's Game Settings shows a "Voice Lab tuning" row with the button).
 **The voice cinematic** (`/arcade/zone-royale/?cinematic`): `Cine` in Zone Royale directs a hero (your voice and outfit)
 and three rivals (names picked for a low, a high and a middle voice) through one shot per action on a clear stretch of the
 spawn island; only the shot's action speaks, and every line plays. `python3 src/voice/build.py --cinematic FILE` writes a
 single-file copy (voices built in, classic looks) to send around.
+
+## The soft tap and the soft thud (`static/sfx.js`): the menu and falling-apart sounds
+
+Every game used to share two loud sound files: `tick` (a ringing ping, played for menus, buttons and countdowns) and
+`fall` (a plop, played when a character fell apart and when you respawned). The owner found them too loud: **both files
+are gone from every game** (November 2026), replaced by `window.GrugSfx`, a small synth: `GrugSfx.tap(ctx, dest,
+{ kind })` (a short, soft "tok"; kinds `select`, `open`, `close`, `count`, `deny`, `hover` are the same sound at another
+pitch and length) and `GrugSfx.thud(ctx, dest)` (a low, soft thump with a puff of air; the voices carry the death
+itself). In the games they are `Snd.play('tick' | 'click' | 'open' | 'close' | 'count')` and `Snd.play('oof', x, y, z)`
+(`Snd.tap()` / `Snd.thud(v)` in Slide 999). Everything about how they sound is `DEFAULTS` at the top of the file
+(volume, note, length, how far the note falls, brightness, the puff), tuned by ear in the Voice Lab's "Menu tap and
+falling-apart thud" box, or from the console (`GrugSfx.setConfig({ tap: { volume: 0.06 } })`). Never bring the old files
+back, and don't add a loud beep for a menu or a death in a new game.
+
+## The Grug Starter (`/arcade/starter/`): the bare baseplate new games start from
+
+`arcade/starter/index.html` is **generated** by `python3 src/starter/build.py` from the Grug Baseplate
+(`arcade/baseplate/index.html`, the zoo of every station): the same engine with the stations taken out, so it is just
+the baseplate, you, three other players (`NPCS`), a damage pad, a kill brick and a training dummy to swing at (F, a
+click or a tap), which between them play every voice line and both soft sounds. Never hand-edit it: change the Baseplate
+(the engine) or `src/starter/build.py` (what the Starter leaves out and adds) and run the build; it stops if the
+Baseplate no longer matches what it expects. `--single FILE` also writes one self-contained file (three.js, the voices,
+the sounds and the font built in; the Pearls wallet and saved outfits left out, so everyone wears the classic looks)
+that plays opened from a disk: that is the file to send the owner when they ask for "the template". New games copy the
+Starter (see `arcade/claude.md`, section 0); neither it nor the Baseplate is listed in the Arcade.
+
+## Help and contact (`support.html`)
+
+The modern customer support page (the directory's look), which took over the legacy `/support.html`: where to reach us
+(Discord, text 954-459-6301), what to send (the purchase code from the bottom of `/character/pearls/`), common questions
+by section (players, game developers, restaurants), the refund policy (`#refunds`: `terms.html` links to it; keep its
+wording in step with the terms) and who we are. Every "Help" link on the site goes here.
