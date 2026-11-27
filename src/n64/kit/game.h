@@ -39,7 +39,14 @@ extern GameStat game_stat;
 #define SWEEP_COUNTS 7     /* the sweep: the zoo as it is, then 100 to 4000 bricks, each from two places and with studs on and off */
 
 /* for the host test harness */
-typedef struct GameDebug { float x, y, z, vy, camYaw, camPitch, camDist; int hp, coins; bool grounded, dead, menu; float lastHeight, lastDist; int parts, stress; bool outfit; } GameDebug;
+typedef struct GameDebug { float x, y, z, vy, camYaw, camPitch, camDist; int hp, coins; bool grounded, dead, menu; float lastHeight, lastDist; int parts, stress; bool outfit; int area, over; } GameDebug;
+int  game_areas(void);                       /* how many areas the game has */
+const char *game_area_name(int a);
+void game_area(int a);                       /* go to an area (as if through a door: you arrive at its start) */
+/* How many parts one area may have. Aim for the goal: in the Arcade's emulator that is what plays at the speed of the first
+   game. A little over is allowed when something that has to be there needs it; past the limit, parts are left out. */
+#define PART_GOAL  250
+#define PART_LIMIT 300
 void game_stress(int bricks);   /* the stress test's world with this many bricks (0: the zoo) */
 void game_debug(GameDebug *d);
 void game_teleport(float x, float y, float z, float camYaw);

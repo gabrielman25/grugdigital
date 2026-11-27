@@ -13,11 +13,11 @@ float ang_diff(float a, float b) { float d = fmodf(b - a, PI_F * 2); if (d > PI_
 static inline float clampf(float v, float a, float b) { return v < a ? a : v > b ? b : v; }
 
 /* ---------------------------------------------------------------- the world: axis-aligned parts */
-void world_init(World *w, Part *storage, int cap) { w->parts = storage; w->n = 0; w->cap = cap; w->nDyn = 0; }
+void world_init(World *w, Part *storage, int cap) { w->parts = storage; w->n = 0; w->cap = cap; w->nDyn = 0; w->over = 0; }
 
 Part *world_add(World *w, float cx, float cy, float cz, float sx, float sy, float sz, uint32_t color, uint8_t kind, uint8_t flags) {
     static Part overflow;
-    Part *p = w->n < w->cap ? &w->parts[w->n++] : &overflow;
+    Part *p = w->n < w->cap ? &w->parts[w->n++] : &overflow; if (p == &overflow) w->over++;
     memset(p, 0, sizeof *p);
     p->minX = cx - sx / 2; p->maxX = cx + sx / 2; p->minY = cy - sy / 2; p->maxY = cy + sy / 2; p->minZ = cz - sz / 2; p->maxZ = cz + sz / 2;
     p->color = color; p->kind = kind; p->flags = flags;

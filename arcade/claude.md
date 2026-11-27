@@ -244,14 +244,31 @@ scene at all, if one is ever wanted.
 ## 9. Nintendo 64 games (`cat: 'n64'`)
 
 The Arcade also has real Nintendo 64 ROMs, written in C (`src/n64/`), that play in the browser in an emulator and can
-be downloaded for a real console. They are not built like the games above: read `src/n64/grug-64/README.md` and the
-"Nintendo 64 games" section of `CLAUDE.md`. In `GAMES`: `cat: 'n64'`, `rom: '<file>.z64'` (in `arcade/<slug>/`),
-and `controls` listing the keyboard keys with the console's buttons. The game's page then adds the
-**Download ROM** button and the "Play it on a real Nintendo 64" box; `arcade/<slug>/index.html` is the page that plays
-the ROM (copy `arcade/grug-64/index.html`). The Download ROM button must always be there before the game goes full screen.
+be downloaded for a real console. The plan is a simple N64 version of each game here, and in time for those to be the
+main ones. They are not built like the games above: **read `src/n64/README.md` first** (how to start one, what is
+already there, the rules) and the "Nintendo 64 games" section of `CLAUDE.md`.
+
+- **Starting one:** `python3 src/n64/kit/tools/new-game.py <slug> "<Name>"` makes the game's source (`src/n64/<slug>/`,
+  a copy of Grug Baseplate 64 with one small area in place of its zoo) and its play page (`arcade/<slug>/index.html`),
+  and prints the rest: build it (`make check`, `make install`), the cover (`make cover`), and its `GAMES` entry
+  (`cat: 'n64'`, `rom: '<file>.z64'`, `controls` listing the keyboard keys with the console's buttons). The game's page
+  then adds the **Download ROM** button and the "Play it on a real Nintendo 64" box. The Download ROM button must
+  always be there before the game goes full screen.
+- **What you port is the heart of the web game**, made simpler: the one thing you do in it, fewer enemies, one mode,
+  smaller maps. The physics, the rig, the voices and sounds, the HUD, the Game Menu and the player's outfit are already
+  in the kit and are the same as here: don't rebuild them.
+- **250 parts an area.** That is the goal, and it keeps a game playable in a browser, where the ROM draws every pixel
+  on an emulated CPU. A few more are allowed when something that has to be there needs them (300 at most): say what in
+  the game's README. `make check` prints each area's count.
+- **A big game is several areas joined by doors**, each with its own 250 parts: a lobby with a doorway to each level,
+  rooms off a corridor, a course in stages. `door(...)` is a doorway you walk into; the other area is built as you
+  arrive. Never one big world.
+- **Keep it light:** one part for the work of several, nothing under a stud across, studs only on tops you stand on,
+  flat colours, a character on screen counts as 40 parts, text written only when it changes. Then play it in the
+  emulator, read the Game Menu's FPS row at the busiest spot (aim for 20 or better) and write the number down.
 
 **The player wears their saved outfit there too**, without `GrugOutfitRig`: a ROM has an outfit slot, and the page
 writes the outfit they play as into a copy of the ROM before it starts (`GrugOutfit64.wear(romUrl)` in
-`arcade/grug-64/outfit64.js`; the game's page does the same for its Download ROM links). A new ROM gets this by keeping
-the slot (`outfit.c`, `tools/mkslot.py`) and calling `wear` from its play page. Set `outfit: false` in `GAMES` only for
-a ROM with no slot, so its page doesn't say "you play as the character you made".
+`static/outfit64.js`; the game's page does the same for its Download ROM links). Every N64 character is bald and unlit
+for now. Set `outfit: false` in `GAMES` only for a ROM with no slot, so its page doesn't say "you play as the character
+you made".

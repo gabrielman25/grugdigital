@@ -1,55 +1,11 @@
-/* Grug Baseplate 64 on a PC: the same game code, driven by a script, writing pictures and sound to files.
- * For checking the physics and the picture without a console:  make -C src/n64/grug-64 host && ./build/host/grug64-host OUTDIR [SLOT]
- * It writes OUTDIR/NAME.ppm for each shot, OUTDIR/audio.wav, and prints the measurements the tests check.
- * SLOT is the outfit slot to wear (assets/outfit-default.fit if not given: what the ROM carries). */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "../game.h"
-#include "../audio.h"
-#include "../outfit.h"
-
-static uint16_t fb[SCREEN_W * SCREEN_H], zb[SCREEN_W * SCREEN_H];
-static Frame frame = { fb, zb, SCREEN_W, SCREEN_H, SCREEN_W };
-static const char *outdir = ".";
-static FILE *wav; static long wavBytes; static float audAcc;
-static int fails;
-static float camX, camY;   /* the camera stick, held by the script */
-
-static void shot(const char *name) {
-    char path[512]; snprintf(path, sizeof path, "%s/%s.ppm", outdir, name);
-    game_draw(&frame);
-    FILE *f = fopen(path, "wb"); if (!f) { perror(path); exit(1); }
-    fprintf(f, "P6\n%d %d\n255\n", SCREEN_W, SCREEN_H);
-    for (int i = 0; i < SCREEN_W * SCREEN_H; i++) { uint16_t c = fb[i]; uint8_t rgb[3] = { (uint8_t)(((c >> 11) & 31) * 255 / 31), (uint8_t)(((c >> 6) & 31) * 255 / 31), (uint8_t)(((c >> 1) & 31) * 255 / 31) }; fwrite(rgb, 1, 3, f); }
-    fclose(f);
-}
-/* run the game for a while at 30 frames a second with this input held */
-static void run(float seconds, float sx, float sy, unsigned held) {
-    static unsigned prev = 0; const float dt = 1.0f / 30; int n = (int)(seconds / dt + 0.5f);
-    for (int i = 0; i < n; i++) {
-        Input in = { sx, sy, (uint16_t)held, (uint16_t)(held & ~prev), camX, camY }; prev = held;
-        game_update(&in, dt);
-        audAcc += dt * AUD_RATE; int fr = (int)audAcc; audAcc -= fr;
-        static int16_t buf[4096 * 2]; if (fr > 4096) fr = 4096; aud_mix(buf, fr); fwrite(buf, 4, fr, wav); wavBytes += fr * 4;
-    }
-}
-static void check(const char *what, float got, float lo, float hi) { bool ok = got >= lo && got <= hi; printf("  %-44s %8.3f  (want %g..%g)  %s\n", what, (double)got, (double)lo, (double)hi, ok ? "ok" : "FAIL"); if (!ok) fails++; }
-static void wav_header(FILE *f, long bytes) {
-    unsigned char h[44] = "RIFF"; unsigned v;
-#define PUT(o, x, n) do { v = (unsigned)(x); memcpy(h + (o), &v, n); } while (0)
-    PUT(4, 36 + bytes, 4); memcpy(h + 8, "WAVEfmt ", 8); PUT(16, 16, 4); PUT(20, 1, 2); PUT(22, 2, 2); PUT(24, AUD_RATE, 4); PUT(28, AUD_RATE * 4, 4); PUT(32, 4, 2); PUT(34, 16, 2); memcpy(h + 36, "data", 4); PUT(40, bytes, 4);
-    fseek(f, 0, SEEK_SET); fwrite(h, 1, 44, f);
-}
+/* Grug Baseplate 64 on a PC: its test script (the harness is ../kit/host/harness.h).   make check
+ * It plays every station, checks the physics the players feel against the numbers the web games have, takes the pictures
+ * the README talks about and the Arcade's cover, and checks every area against the part limit. */
+#include "harness.h"
 
 int main(int argc, char **argv) {
-    if (argc > 1) outdir = argv[1];
-    char path[512]; snprintf(path, sizeof path, "%s/audio.wav", outdir); wav = fopen(path, "wb"); if (!wav) { perror(path); return 1; } wav_header(wav, 0);
     GameDebug d;
-    static uint8_t slot[SLOT_SIZE];
-    { const char *sp = argc > 2 ? argv[2] : "assets/outfit-default.fit"; FILE *sf = fopen(sp, "rb"); size_t got = sf ? fread(slot, 1, SLOT_SIZE, sf) : 0; if (sf) fclose(sf);
-      if (got == SLOT_SIZE) game_slot(slot, SLOT_SIZE); else printf("  (no outfit slot at %s: plain colours)\n", sp); }
+    harness_begin(argc, argv);
     game_init(64);
     game_debug(&d); check("the slot's outfit is worn", d.outfit, 1, 1);
     run(0.6f, 0, 0, 0); shot("01-spawn");
@@ -128,12 +84,17 @@ int main(int argc, char **argv) {
     game_teleport(20, 40, 4, 0); run(2.0f, 0, 0, 0); game_debug(&d); check("stress test: landed on a brick, not through it (root y)", d.y, 3.9f, 40); check("stress test: standing", d.grounded, 1, 1);
     game_stress(0); run(0.3f, 0, 0, 0); game_debug(&d); check("back to the zoo", d.stress, 0, 0);
 
+    /* areas: the door by the spawn leads to the Brick Yard, and its door leads back; every area is inside the part limit */
+    game_init(64); game_teleport(20, 3.3f, 16, 3.14159f); run(0.3f, 0, 0, 0); shot("40-door"); run(1.0f, 0, 1, 0); game_debug(&d);
+    check("walked through the door: in area 1", d.area, 1, 1); check("...standing where the door puts you (x)", d.x, -0.5f, 0.5f); run(0.5f, 0, 0, 0); shot("41-brick-yard");
+    game_debug(&d); check("...on the ground there", d.grounded, 1, 1);
+    game_teleport(-9, 3.3f, 0, 1.5708f); run(0.3f, 0, 0, 0); run(1.0f, 0, 1, 0); game_debug(&d); check("and back through its door: area 0", d.area, 0, 0); check("...by the zoo's door (z: you arrive at 16, still walking)", d.z, 15.5f, 16.5f);
+    harness_areas();
+
     /* the Arcade's cover picture: Grug mid-jump in front of the jump heights, no HUD (tools/mkcover.py crops and enlarges it) */
     game_init(64); game_hide_hud = true;
     game_teleport(-8, 3.3f, -29, 0); game_camera(-0.55f, 0.1f, 10.5f); run(0.5f, 0, 0, 0); run(0.45f, -0.2f, -1, 0); run(0.1f, -0.2f, -1, BTN_A); run(0.17f, -0.2f, -1, 0); shot("cover");
     game_hide_hud = false;
 
-    wav_header(wav, wavBytes); fclose(wav);
-    printf("%s\n", fails ? "SOME CHECKS FAILED" : "all checks passed");
-    return fails ? 1 : 0;
+    return harness_end();
 }

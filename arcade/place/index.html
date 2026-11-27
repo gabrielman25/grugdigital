@@ -262,10 +262,10 @@
     <div class="wide"><div id="More"></div></div>`;
 
   // the ROM's size, next to its download link
-  // a Nintendo 64 game wears the outfit you play as: the ROM you download gets it too (arcade/grug-64/outfit64.js)
+  // a Nintendo 64 game wears the outfit you play as: the ROM you download gets it too (static/outfit64.js)
   if (rom) { let worn = null, turn = 0;
     const dressRom = async () => { const my = ++turn; let d = null;
-      try { if (!window.GrugOutfit64) await new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = '/arcade/grug-64/outfit64.js'; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
+      try { if (!window.GrugOutfit64) await new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = '/static/outfit64.js'; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
         d = await window.GrugOutfit64.wear(rom); } catch (e) { d = null; }
       if (my !== turn) { if (d) URL.revokeObjectURL(d.url); return; }
       if (worn) URL.revokeObjectURL(worn.url); worn = d;

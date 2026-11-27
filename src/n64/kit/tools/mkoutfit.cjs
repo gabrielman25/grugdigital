@@ -1,12 +1,12 @@
 /* The ROM's own outfit: Grug, made from the same file the site's games dress him from (arcade/outfits/grug.glb), by the
- * same code the Arcade's page uses to put a player's outfit into the ROM (arcade/grug-64/outfit64.js).
+ * same code the Arcade's page uses to put a player's outfit into the ROM (static/outfit64.js).
  *
  *   node tools/mkoutfit.cjs [character.glb] [name] [out.fit] [--pictures DIR]
  *
  * Writes assets/outfit-default.fit: the whole 128 KB slot, which tools/mkslot.py puts into the ROM. --pictures also
  * writes the atlases as .ppm files, to look at. Run it again (make assets) when Grug's look changes. */
 const fs = require('fs'), path = require('path'), zlib = require('zlib');
-const ROOT = path.join(__dirname, '..', '..', '..', '..'), O = require(path.join(ROOT, 'arcade', 'grug-64', 'outfit64.js'));
+const ROOT = path.join(__dirname, '..', '..', '..', '..'), O = require(path.join(ROOT, 'static', 'outfit64.js'));
 
 // a PNG as pixels: 8 bits a channel, not interlaced, which is what a browser's canvas writes
 function decodePNG(buf) {

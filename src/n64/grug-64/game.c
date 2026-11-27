@@ -13,7 +13,7 @@
    it, and the Arcade's page swaps in the one the player picked on the site before the game starts.
 
    Left for later (they are in the Baseplate): the other players, seats, the button and door, the blaster, the
-   companion, chat, the outfit's hair (a plain cap stands in for it), Pearls and saving.
+   companion, chat, hair (every character is bald for now), Pearls and saving.
 
    No title screen: the game starts straight in play, like every Grug game.
    ===================================================================================================================== */
@@ -42,7 +42,7 @@ static uint32_t prof[4], profT;   /* ms x 10: update, world, characters, HUD */
 
 /* ---------------------------------------------------------------- the world */
 enum { T_NONE = 0, T_BASE, T_HURT, T_LIFT, T_FINISH, T_SPAWN };
-#define MAX_PARTS 4224     /* (the zoo uses about 175; the rest is room for the stress test's bricks) */
+#define MAX_PARTS 4224     /* (room for the stress test's bricks. An area of the game itself has PART_GOAL, at most PART_LIMIT: game.h) */
 static Part parts[MAX_PARTS];
 static World W;
 #define BP 256.0f          /* the baseplate: 256 x 256 studs (the web one is 512), in 32-stud checks */
@@ -55,7 +55,6 @@ typedef struct { const char *name, *sub, *subK; float x, z, hw, hd; } Station;  
 static Station stations[12]; static int nStations;
 typedef struct { const char *a, *b, *bK; float x, y, z, range; int st; } Bill;   /* st: the station it names (-1: none) */
 static Bill bills[40]; static int nBills;
-static char numText[16][4];
 
 static struct { Part *part; float bottom, top, t, speed; int phase; } lift;   /* phase: 0 down, 1 rising, 2 up, 3 falling */
 static Part *hurtPad, *finish;
@@ -75,11 +74,47 @@ typedef struct { float x, y, z, t; } Coin;
 static Coin coins[24]; static int nCoins;
 static void coin(float x, float y, float z) { if (nCoins < 24) coins[nCoins++] = (Coin){ x, y + 2.4f, z, 0 }; }
 
-static void build_world(void) {
-    world_init(&W, parts, MAX_PARTS); nStations = nBills = nCoins = 0;
-    /* the baseplate (drawn as grey checks: cool colours, so the red bits stand out), and far below it, where you fall to your death */
+/* ---------------------------------------------------------------- areas and doors
+   A game is one or more AREAS. Each is a world of its own with its own part budget (PART_GOAL), built by its own function
+   when you walk in, so a big game is several small places rather than one big one: only the area you are in is in memory
+   or on the screen. You go between them through doors: a doorway you walk into, which puts you down in another area. */
+typedef struct { const char *name; void (*build)(void); } Area;
+typedef struct { float minX, maxX, minZ, maxZ, minY, maxY; int to; float tx, tz, tyaw; } Door;
+static Door doors[8]; static int nDoors, area;
+static struct { float x, z, yaw; bool on; } dummyAt;
+/* every area starts with these two: the baseplate (drawn as grey checks: cool colours, so the red bits stand out), and far
+   below it, where you fall to your death */
+static void base_plate(void) {
     Part *b = world_add(&W, 0, -1, 0, BP, 2, BP, 0xa3a2a5, K_SOLID, PF_COLLIDE | PF_NOCAM); b->tag = T_BASE;
     world_add(&W, 0, -30, 0, 8000, 20, 8000, 0, K_KILL, PF_COLLIDE | PF_NOCAM | PF_HIDDEN);
+}
+/* a doorway standing on the ground at (cx, cz): two posts, a header and a dark opening 6 studs wide and 8 tall (4 parts).
+   alongX: the doorway runs along x (you walk through it along z). Walking into the opening takes you to area `to`, standing at
+   (tx, tz) and facing tyaw (0: towards -z, like the spawn; the camera comes round behind you). Put the arrival so that the
+   door back is beside it, not behind it: the camera sits 22 studs behind you, and would be looking through the doorway. */
+static void door(float cx, float cz, bool alongX, const char *label, int to, float tx, float tz, float tyaw) {
+    const float px = alongX ? 3.5f : 0, pz = alongX ? 0 : 3.5f;
+    part(cx - px, 4.5f, cz - pz, 1, 9, 1, 0x3a3a3e); part(cx + px, 4.5f, cz + pz, 1, 9, 1, 0x3a3a3e);
+    part(cx, 9.5f, cz, alongX ? 8 : 1, 1, alongX ? 1 : 8, 0x3a3a3e);
+    deco(cx, 4, cz, alongX ? 6 : 0.4f, 8, alongX ? 0.4f : 6, 0x101014);
+    bill(label, "walk in", cx, 12.5f, cz, 110);
+    if (nDoors < 8) doors[nDoors++] = (Door){ cx - (alongX ? 3 : 1.4f), cx + (alongX ? 3 : 1.4f), cz - (alongX ? 1.4f : 3), cz + (alongX ? 1.4f : 3), 0, 8, to, tx, tz, tyaw };
+}
+
+/* =====================================================================================================================
+   THIS GAME'S AREAS: from here to the END mark below is the game itself: what is in each area. Everything outside these
+   marks is the same in every Grug 64 game (kit/tools/new-game.py copies this file and swaps what is between the marks for
+   a starter's: a spawn, a damage pad, a kill brick, a block, a coin and a dummy).
+
+   The helpers: part(cx, cy, cz, sx, sy, sz, colour) a solid block (studs on top unless it is thin and on the ground);
+   deco(...) the same, with nothing to bump into; world_add(&W, ..., K_KILL / K_PAD / K_LADDER, flags) for the other kinds;
+   station(name, line, line for a keyboard, x, z, half width, half depth, sign height) names a place for the bar along the
+   bottom; bill(line, small line, x, y, z, range) a sign in the air; coin(x, y, z); door(...) to another area.
+   An area sets hurtPad, finish, lift.part and dummyAt if it has them. Count the parts: PART_GOAL (game.h) is 250 an area.
+   ===================================================================================================================== */
+static void build_world(void) {
+    static char numText[16][4];   /* the numbers on the jump blocks and the gaps */
+    base_plate();
 
     /* spawn: a SpawnLocation (grey, a plate on top) */
     { Part *sp = part(0, 0.3f, 0, 12, 0.6f, 12, 0x6e6e72); sp->tag = T_SPAWN; sp->flags |= PF_STUDS; } deco(0, 0.65f, 0, 6, 0.1f, 6, 0xf2f3f3)->flags |= PF_FLAT;
@@ -155,12 +190,37 @@ static void build_world(void) {
     coin(0, 0, -20); coin(10, 0, -20); coin(-10, 0, -20); coin(-16.5f, 4, -40); coin(16.5f, 7, -40);
     coin(TX, 0, 40); coin(TX, 0, 0); coin(TX, 0, -40); coin(40, 0, 20); coin(-30, 0, 40); coin(20, 0, -60);
 
+    /* a door to the second area (the Brick Yard, below), and the dummy */
+    door(20, 26, true, "BRICK YARD", 1, 0, 0, 0);
+    dummyAt.on = true; dummyAt.x = 32; dummyAt.z = -6; dummyAt.yaw = PI_F / 2;   /* it faces the spawn */
     /* decoration: trees round the edge (no collision) */
     for (int k = 0; k < 10; k++) {
         float a = k / 10.0f * PI_F * 2 + 0.3f, r = 118, x = cosf(a) * r, z = sinf(a) * r, s = 0.9f + (k * 37 % 10) * 0.06f;
         deco(x, 4 * s, z, 2 * s, 8 * s, 2 * s, 0x6b4a2c); deco(x, 11 * s, z, 8 * s, 7 * s, 8 * s, 0x3f7f3a); deco(x, 16 * s, z, 5 * s, 4 * s, 5 * s, 0x4b974b);
     }
 }
+
+/* the second area: a small yard of bricks to climb, with a door back. It is here to show how a game is split into areas:
+   a bigger game has more of these, each under PART_GOAL parts. */
+static void build_yard(void) {
+    base_plate();
+    part(0, 0.3f, 0, 12, 0.6f, 12, 0x6e6e72)->flags |= PF_STUDS;   /* where you arrive */
+    station("BRICK YARD", "a second area: its own 250 parts - the door goes back", 0, 0, 0, 60, 60, 0);
+    /* a spiral of steps up a tower, a coin on each landing */
+    static const uint32_t COLS[4] = { 0x0d69ac, 0x4b974b, 0xf5cd30, 0xda8541 };
+    part(0, 10, -40, 10, 20, 10, 0x7b7d80);
+    for (int k = 0; k < 20; k++) {
+        const float a = k * (PI_F / 5), r = 10, x = cosf(a) * r, z = -40 + sinf(a) * r, h = 1 + k;
+        part(x, h * 0.5f, z, 5, h, 5, COLS[k % 4]); if (k % 5 == 4) coin(x, h, z);
+    }
+    coin(0, 20, -40);
+    for (int k = 0; k < 6; k++) part(-30 + k * 12, 2, 24, 4, 4, 4, COLS[(k + 1) % 4]);   /* a row to hop along */
+    door(-18, 0, false, "BACK TO THE ZOO", 0, 20, 16, PI_F / 2);   /* (beside where you arrive, not behind it: the camera sits behind you) */
+}
+static const Area AREAS[] = { { "BASEPLATE", build_world }, { "BRICK YARD", build_yard } };
+#define N_AREAS ((int)(sizeof AREAS / sizeof AREAS[0]))
+
+/* ======================================================= END of this game's areas ======================================= */
 
 /* ---------------------------------------------------------------- the stress test: how many bricks can there be?
    A world of nothing but bricks: 4 x 4 studs each, 1 to 6 tall, studs on top, solid, on an 8-stud grid over the whole
@@ -169,9 +229,8 @@ static void build_world(void) {
 static int stressN; static char stressSub[48];
 static const int STRESS_STEPS[SWEEP_COUNTS] = { 0, 100, 250, 500, 1000, 2000, 4000 };
 static void build_stress(int n) {
-    world_init(&W, parts, MAX_PARTS); nStations = nBills = nCoins = 0; lift.part = 0; hurtPad = finish = 0;
-    Part *b = world_add(&W, 0, -1, 0, BP, 2, BP, 0xa3a2a5, K_SOLID, PF_COLLIDE | PF_NOCAM); b->tag = T_BASE;
-    world_add(&W, 0, -30, 0, 8000, 20, 8000, 0, K_KILL, PF_COLLIDE | PF_NOCAM | PF_HIDDEN);
+    world_init(&W, parts, MAX_PARTS); nStations = nBills = nCoins = nDoors = 0; lift.part = 0; hurtPad = finish = 0; dummyAt.on = false;
+    base_plate();
     { Part *sp = part(0, 0.3f, 0, 12, 0.6f, 12, 0x6e6e72); sp->tag = T_SPAWN; sp->flags |= PF_STUDS; }
     if (n > MAX_PARTS - 8) n = MAX_PARTS - 8;
     snprintf(stressSub, sizeof stressSub, "%d bricks - Game Menu: more or fewer", n);
@@ -251,16 +310,36 @@ static bool menu_item_shown(int i) { return i != MI_RENDER || game_hw_ok; }
 static void announce(const char *big, const char *small, uint16_t color, float t);
 /* a world to play in: the zoo, or the stress test's bricks. You start at the spawn. */
 static bool dummyOn;
-static void enter_world(int bricks) {
-    stressN = bricks; if (bricks > 0) build_stress(bricks); else build_world();
-    dummyOn = bricks == 0;
-    memset(&player, 0, sizeof player);
-    char_init(&player.ch, SPAWN.x, SPAWN.y, SPAWN.z, 0); player.hp = MAXHP; player.hurtAcc = 0.6f;
-    dummy.x = 32; dummy.y = 3; dummy.z = -6; dummy.yaw = PI_F / 2; dummy.hp = dummyOn ? 100 : 0; dummy.t = 0; dummy.hitFx = 0;   /* it faces the spawn */
-    nPieces = 0; memset(dmg, 0, sizeof dmg); ann.t = 0;
-    cam.yaw = 0; cam.pitch = 0.32f; cam.dist = cam.tdist = 22; cam.init = false;
+/* build an area (or the stress test's bricks) in place of the world there was. Whoever is in it must be put somewhere after. */
+static float doorCd;
+static void load_area(int a, int bricks) {
+    area = a; stressN = bricks;
+    if (bricks > 0) build_stress(bricks);
+    else { world_init(&W, parts, PART_LIMIT); nStations = nBills = nCoins = nDoors = 0; lift.part = 0; hurtPad = finish = 0; dummyAt.on = false; AREAS[a].build(); }
+    dummyOn = dummyAt.on; dummy.x = dummyAt.x; dummy.y = 3; dummy.z = dummyAt.z; dummy.yaw = dummyAt.yaw; dummy.hp = dummyOn ? 100 : 0; dummy.t = 0; dummy.hitFx = 0; memset(&dummy.rig, 0, sizeof dummy.rig);
+    Character *ch = &player.ch; ch->ground = 0; ch->ladder = 0; ch->climbing = false; ch->grounded = false; ch->nNear = 0;   /* (they pointed into the old world) */
+    nPieces = 0; memset(dmg, 0, sizeof dmg);
     game_stat.parts = (uint32_t)W.n; game_stat.stress = (uint32_t)bricks;
 }
+/* through a door: the other area is built and you are stood in it, as you were (health, coins), and respawn there from now on */
+static float ground_below(float x, float y, float z);
+static void go_area(int a, float x, float z, float yaw) {
+    if (a < 0 || a >= N_AREAS) return;
+    load_area(a, 0);
+    Character *ch = &player.ch; ch->x = ch->spawnX = x; ch->z = ch->spawnZ = z; ch->y = ch->spawnY = ground_below(x, 200, z) + BODY_ROOT_TO_FEET + 0.05f;
+    ch->vx = ch->vy = ch->vz = 0; ch->dashT = 0; ch->faceYaw = yaw; player.rolling = false; player.onFinish = false;
+    cam.yaw = yaw; cam.init = false; doorCd = 0.6f; aud_tap(S_TAP_OPEN);
+}
+static void enter_world(int bricks) {
+    load_area(0, bricks);
+    memset(&player, 0, sizeof player);
+    char_init(&player.ch, SPAWN.x, SPAWN.y, SPAWN.z, 0); player.hp = MAXHP; player.hurtAcc = 0.6f;
+    ann.t = 0;
+    cam.yaw = 0; cam.pitch = 0.32f; cam.dist = cam.tdist = 22; cam.init = false;
+}
+int game_areas(void) { return N_AREAS; }
+const char *game_area_name(int a) { return a >= 0 && a < N_AREAS ? AREAS[a].name : ""; }
+void game_area(int a) { go_area(a, SPAWN.x, SPAWN.z, 0); }
 void game_stress(int bricks) { enter_world(bricks); }
 
 /* the sweep (a test asks for it through the outfit slot): every brick count, from the spawn and from high above, with studs
@@ -325,7 +404,6 @@ static int rig_blocks(Block *out, float x, float y, float z, float yaw, const Ri
     if (o && detail) { BLK(0, o->headY, 0, root, 0.7f, 0.7f, 0.7f, L->skin, 1); out[n - 1].head = o; }   /* the outfit's own head (far off: a block, below) */
     else BLK(0, 1.6f, 0, root, 0.6f, 0.6f, 0.6f, L->skin, 1);
     if (detail && !o) {
-        BLK(0, 2.13f, 0.03f, root, 0.66f, 0.15f, 0.66f, L->hair, 1); BLK(0, 1.78f, 0.56f, root, 0.66f, 0.42f, 0.12f, L->hair, 1);
         BLK(0.22f, 1.68f, -0.61f, root, 0.07f, 0.11f, 0.02f, 0x1d1d1f, 1); BLK(-0.22f, 1.68f, -0.61f, root, 0.07f, 0.11f, 0.02f, 0x1d1d1f, 1); BLK(0, 1.4f, -0.61f, root, 0.2f, 0.04f, 0.02f, 0x1d1d1f, 1);
     }
     const float ang[4] = { r->j.rs, r->j.ls, r->j.rh, r->j.lh }, px[4] = { 1.5f, -1.5f, 0.5f, -0.5f }, py[4] = { 0.5f, 0.5f, -1, -1 };
@@ -476,6 +554,10 @@ void game_update(const Input *inRaw, float dt) {
         player.wasDead = true; player.rolling = false; break_apart(ch->x, ch->y, ch->z, ch->faceYaw, &player.rig, &GRUG, 1);
         world_sound(S_THUD, ch->x, ch->y, ch->z, 1); aud_say(ch->y < -10 ? VE_FALL : VE_DEATH); player.hp = 0;
     } else if (!ch->dead && player.wasDead) { player.wasDead = false; player.hp = MAXHP; cam.init = false; }
+    /* doors: walk into the opening and you are in the other area */
+    if (doorCd > 0) doorCd -= dt;
+    else if (!ch->dead) for (int i = 0; i < nDoors; i++) { const Door *d = &doors[i];
+        if (ch->x > d->minX && ch->x < d->maxX && ch->z > d->minZ && ch->z < d->maxZ && ch->y - BODY_ROOT_TO_FEET < d->maxY && ch->y > d->minY) { go_area(d->to, d->tx, d->tz, d->tyaw); break; } }
     /* the damage pad: one square of health a second while you stand on it */
     if (!ch->dead && ch->grounded && ch->ground == hurtPad) { player.hurtAcc += dt; if (player.hurtAcc >= 1) { player.hurtAcc -= 1; hurt(1); } } else player.hurtAcc = 0.6f;
     /* the end of the obby */
@@ -517,10 +599,15 @@ void game_update(const Input *inRaw, float dt) {
 
 /* ---------------------------------------------------------------- drawing */
 /* one block of a character: its head, a box wearing a picture, or a plain box. white: the flash when it is hit */
+/* Characters are drawn unlit (CHAR_HOW): every face in its own colour whichever way it points. Lit, each flat face of a
+   head and each side of a limb is a different shade, and at this size that reads as facets, not as a shape. The pictures
+   they wear have their own painted shading, and the blob shadow under them says where they stand. R_LIT puts the light back. */
+#define CHAR_HOW R_UNLIT
 static void draw_block(const float c[3], const Mat3 *m, const float h[3], uint32_t color, const Tex *tex, const TexRect *rects, const Outfit *head, bool white) {
-    if (head) { r_head(c, m, &head->head, &head->face, head->skin, white ? R_HEAD_WHITE : R_HEAD_SKIN); if (head->hasHair && !white) r_head(c, m, &head->head, 0, head->hair, R_HEAD_HAIR); }
-    else if (tex && !white) r_obox_tex(c, m, h[0], h[1], h[2], tex, rects);
-    else r_obox(c, m, h[0], h[1], h[2], color, white);
+    const int how = white ? R_WHITE : CHAR_HOW;
+    if (head) r_head(c, m, &head->head, &head->face, head->skin, how);
+    else if (tex && !white) r_obox_tex(c, m, h[0], h[1], h[2], tex, rects, how);
+    else r_obox(c, m, h[0], h[1], h[2], color, how);
 }
 static void draw_rig(float x, float y, float z, float yaw, const Rig *r, const Look *L, bool rolling, float rollK, float fx, float fz, bool white) {
     float dx = x - cam.px, dy = y - cam.py, dz = z - cam.pz; bool detail = dx * dx + dy * dy + dz * dz < 60 * 60;
@@ -584,7 +671,7 @@ static void draw_hud(void) {
     /* where you are (the station's rectangle you stand in) */
     const Station *P = 0; float ba = 1e9f;
     for (int i = 0; i < nStations; i++) { const Station *s = &stations[i]; if (fabsf(ch->x - s->x) > s->hw + 4 || fabsf(ch->z - s->z) > s->hd + 4) continue; float a = s->hw * s->hd; if (a < ba) { ba = a; P = s; } }
-    const char *pname = P ? P->name : "BASEPLATE", *psub = P ? KB(P->sub, P->subK) : "walk to a sign";
+    const char *pname = P ? P->name : stressN ? "STRESS TEST" : AREAS[area].name, *psub = P ? KB(P->sub, P->subK) : "walk to a sign";
     const int X = 16, Y = 14;
     /* labels: damage numbers and the dummy first, then the signs from the nearest out (never under the HUD) */
     nTaken = 0; box_take(X - 2, Y - 2, X + 118, Y + 47); box_take(14, SCREEN_H - 46, SCREEN_W - 14, SCREEN_H - 14);
@@ -622,7 +709,7 @@ static void draw_hud(void) {
         snprintf(buf, sizeof buf, "%d fps %s", (int)(game_fps + 0.5f), gfx->name); ui_text(SCREEN_W - 18, 14, buf, WHITE, UI_RIGHT);
         if (game_clock_us) { snprintf(buf, sizeof buf, "ms: game %d world %d", (int)prof[0] / 10, (int)prof[1] / 10); ui_text(SCREEN_W - 18, 14 + FH, buf, WHITE, UI_RIGHT);
             snprintf(buf, sizeof buf, "you %d hud %d", (int)prof[2] / 10, (int)prof[3] / 10); ui_text(SCREEN_W - 18, 14 + FH * 2, buf, WHITE, UI_RIGHT); }
-        snprintf(buf, sizeof buf, "%d polys %d parts", r_polys, W.n); ui_text(SCREEN_W - 18, 14 + FH * (game_clock_us ? 3 : 1), buf, WHITE, UI_RIGHT);
+        if (W.over) snprintf(buf, sizeof buf, "%d parts, %d LEFT OUT", W.n, W.over); else snprintf(buf, sizeof buf, "%d polys %d parts", r_polys, W.n); ui_text(SCREEN_W - 18, 14 + FH * (game_clock_us ? 3 : 1), buf, WHITE, UI_RIGHT);
     }
     /* the Game Menu: a centred dark box, Resume Game first */
     if (menu.open && !menu.help) {
@@ -663,7 +750,7 @@ void game_draw(Frame *f) {
         const Coin *c = &coins[i]; if (c->t > 0) continue;
         float dx = c->x - cam.px, dz = c->z - cam.pz; if (dx * dx + dz * dz > 150 * 150) continue;
         Mat3 m; m3_rot_y(&m, gclock * 3 + c->x); const float p[3] = { c->x, c->y + sinf(gclock * 2 + c->x) * 0.3f, c->z };
-        r_obox(p, &m, 0.95f, 0.95f, 0.16f, 0xffd23a, false);
+        r_obox(p, &m, 0.95f, 0.95f, 0.16f, 0xffd23a, R_LIT);
     }
     gfx->end3d();
     PROF_END(2);
@@ -673,7 +760,7 @@ void game_draw(Frame *f) {
 
 void game_debug(GameDebug *d) {
     const Character *ch = &player.ch;
-    *d = (GameDebug){ ch->x, ch->y, ch->z, ch->vy, cam.yaw, cam.pitch, cam.dist, player.hp, player.coinCount, ch->grounded, ch->dead, menu.open, ch->lastHeight, ch->lastDist, W.n, stressN, GRUG.fit != 0 };
+    *d = (GameDebug){ ch->x, ch->y, ch->z, ch->vy, cam.yaw, cam.pitch, cam.dist, player.hp, player.coinCount, ch->grounded, ch->dead, menu.open, ch->lastHeight, ch->lastDist, W.n, stressN, GRUG.fit != 0, area, W.over };
 }
 void game_teleport(float x, float y, float z, float camYaw) { Character *ch = &player.ch; ch->x = x; ch->y = y; ch->z = z; ch->vx = ch->vy = ch->vz = 0; ch->grounded = false; cam.yaw = camYaw; cam.init = false; }
 void game_camera(float yaw, float pitch, float dist) { cam.yaw = yaw; cam.pitch = pitch; cam.dist = cam.tdist = dist; cam.init = false; }

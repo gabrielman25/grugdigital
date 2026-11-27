@@ -81,7 +81,7 @@ typedef struct Character {
 
 #define DYN_MAX 16       /* parts that move (lifts, platforms): stepped 240 times a second, so they are kept on a list of their own */
 typedef struct World {
-    Part *parts; int n, cap;
+    Part *parts; int n, cap, over;      /* over: parts asked for after the world was full (they are not in it) */
     Part *dyn[DYN_MAX]; int nDyn;
 } World;
 

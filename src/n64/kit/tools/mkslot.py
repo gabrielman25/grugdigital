@@ -4,7 +4,7 @@
     python3 tools/mkslot.py ROM.z64 SLOT.fit
 
 Run by `make` after the ROM is linked; running it again just writes the slot again. The ROM reads the slot from this fixed
-place when it starts, and arcade/grug-64/outfit64.js writes a player's outfit to the same place."""
+place when it starts, and static/outfit64.js writes a player's outfit to the same place."""
 import sys
 OFFSET, SIZE = 0x100000, 0x20000
 rom_path, slot_path = sys.argv[1], sys.argv[2]

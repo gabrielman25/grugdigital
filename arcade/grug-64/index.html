@@ -49,12 +49,14 @@
         its hints, its Help and its signs instead of controller buttons. (Not on a phone: there EmulatorJS shows its
         own on-screen N64 pad, so the ROM keeps the button names.)
   · The ROM draws itself two ways and picks at boot: on the console's own graphics chip when it answers, or all in
-    software, which is what a browser emulator gets (src/n64/grug-64/n64/hw.c). So here the emulated CPU draws every
+    software, which is what a browser emulator gets (src/n64/kit/n64/hw.c). So here the emulated CPU draws every
     pixel, and OPTIONS below sets how fast the core runs it (CountPerOp 1: twice the core's default for a ROM it
     doesn't know, and twice the frames). The ROM's own FPS row (Game Menu) shows the result.
   · A stock libdragon ROM does not boot in this emulator: the ROM uses Grug's patched boot stage (src/n64/boot/).
-  · A new Nintendo 64 game: copy this file to arcade/<slug>/, change GAME below, add it to GAMES with cat: 'n64' and
-    rom: '<file>.z64'. See CLAUDE.md, "Nintendo 64 games".
+  · The player's outfit: the ROM has an outfit slot, and this page writes the outfit they play as into a copy of the ROM
+    before it starts (static/outfit64.js; see "your outfit, in the ROM" below).
+  · A new Nintendo 64 game: python3 src/n64/kit/tools/new-game.py <slug> "<Name>" makes its source and its copy of this
+    page. Read src/n64/README.md first.
 =======================================================================================================================
 -->
 <style>
@@ -130,7 +132,7 @@
   <div id="game"></div>
 </main>
 <script src="/static/outfits.js"></script>
-<script src="/arcade/grug-64/outfit64.js"></script>
+<script src="/static/outfit64.js"></script>
 <script>
 (() => {
   'use strict';

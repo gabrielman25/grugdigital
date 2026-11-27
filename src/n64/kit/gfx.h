@@ -51,8 +51,8 @@ typedef struct TexFace {
     uint16_t flat;                                            /* one colour for the whole face: what a backend with no textures draws */
 } TexFace;
 
-/* a head: rings of points round an upright axis, measured from the studio's own head shape (arcade/grug-64/outfit64.js) */
-#define HEAD_RINGS 8
+/* a head: rings of points round an upright axis, measured from the studio's own head shape (static/outfit64.js) */
+#define HEAD_RINGS 9
 #define HEAD_SEGS 16
 typedef struct HeadMesh { int rings, segs; float y[HEAD_RINGS], t[HEAD_RINGS], r[HEAD_RINGS][HEAD_SEGS]; } HeadMesh;   /* y: from the head's middle; t: the face picture's row there, 0..1; r: how far out, from the front round towards +x */
 
@@ -93,10 +93,10 @@ void  r_box(float minX, float minY, float minZ, float maxX, float maxY, float ma
 enum { R_TOP_PLAIN = 0, R_TOP_NONE, R_TOP_STUDS };
 void  r_top(float minX, float minZ, float maxX, float maxZ, float y, uint32_t color, int mode);   /* a studded top on its own (the baseplate's checks) */
 bool  r_row(float planeY, int sy, float *x0, float *z0, float *dx, float *dz);   /* where screen row sy meets a level plane: world x, z at the first pixel, and the step per pixel */
-void  r_obox(const float c[3], const Mat3 *m, float hx, float hy, float hz, uint32_t color, bool white);
-void  r_obox_tex(const float c[3], const Mat3 *m, float hx, float hy, float hz, const Tex *t, const TexRect face[6]);   /* the same box wearing a picture: face[] in the order +x -x +y -y +z -z */
-enum { R_HEAD_SKIN = 0, R_HEAD_WHITE, R_HEAD_HAIR };
-void  r_head(const float c[3], const Mat3 *m, const HeadMesh *h, const Tex *face, uint32_t color, int how);   /* a head; how: R_HEAD_* (HAIR: a cap of `color` over the top and back) */
+enum { R_LIT = 0, R_WHITE, R_UNLIT };   /* how a part of a character is coloured: by the light on each face, flat white (the flash when it is hit), or its own colour whichever way it faces */
+void  r_obox(const float c[3], const Mat3 *m, float hx, float hy, float hz, uint32_t color, int how);
+void  r_obox_tex(const float c[3], const Mat3 *m, float hx, float hy, float hz, const Tex *t, const TexRect face[6], int how);   /* the same box wearing a picture: face[] in the order +x -x +y -y +z -z */
+void  r_head(const float c[3], const Mat3 *m, const HeadMesh *h, const Tex *face, uint32_t color, int how);   /* a head (bald: the ROM has no hair yet); how: R_LIT, R_WHITE or R_UNLIT */
 void  r_tex_reset(void);                             /* the pictures changed: forget their lit palettes */
 void  r_quad(const float p[4][3], uint16_t color, int mode, float bias);     /* any world-space convex quad */
 void  r_ngon_flat(float cx, float y, float cz, float radius, int sides, uint16_t color, int mode);

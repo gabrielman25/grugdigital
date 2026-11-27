@@ -246,12 +246,27 @@ panels, roofless buildings with interiors (Poppy's home, the Seed Shop, the Upgr
 ## Nintendo 64 games (`cat: 'n64'`, `src/n64/`)
 
 Real Nintendo 64 ROMs made by Grug, listed in the Arcade under **Nintendo 64 Games**. Each one plays in the browser in
-an emulator and can be downloaded to play on a real console. The first is **Grug Baseplate 64** (`arcade/grug-64/`, built
-from `src/n64/grug-64/`: read its `README.md`): the Baseplate's physics, stations, voices and sounds, in C.
+an emulator and can be downloaded to play on a real console. The owner's plan is a simple N64 version of each of the
+site's games, and in time for those to be the main ones. The first is **Grug Baseplate 64** (`arcade/grug-64/`): the
+Baseplate's physics, stations, voices and sounds, in C. **Read `src/n64/README.md` before making or changing one**: how
+to start a game, what is already there, and the rules.
 
+- **A game is the kit plus one file.** `src/n64/kit/` is the engine every game shares (physics, renderer, sound, the
+  outfit slot, the console and PC ends, the tools; `kit/README.md` is its reference). A game is `src/n64/<slug>/`:
+  `game.c`, a test script, a three-line Makefile. **`python3 src/n64/kit/tools/new-game.py <slug> "<Name>"` starts
+  one** from Grug Baseplate 64 (its source and its play page) and prints what is left to do. The game itself goes
+  between the marks in `game.c` (`THIS GAME'S AREAS`).
+- **250 parts an area** (the owner's rule, November 2026: `PART_GOAL` in `kit/game.h`). A few more are allowed when
+  something that has to be there needs them (up to 300, `PART_LIMIT`; past that parts are left out and `make check`
+  fails): say what needed them in the game's README. **A big game is several areas joined by doors** (`door(...)`: a
+  doorway you walk into, which builds the other area and puts you in it), each with its own 250, never one big world.
+  The rest of the rules (one part for the work of several, studs only where they show, a character counts as 40 parts,
+  measure in the emulator and write the number down) are in `src/n64/README.md`: keep to them, they are what keeps the
+  games playable in a browser.
 - **The ROM** is `arcade/<slug>/<name>.z64`, named by `rom` in the game's `GAMES` entry. `make install` in the game's
-  source folder builds it and copies it there (needs libdragon; `make host` and the tests need only a C compiler).
+  source folder builds it and copies it there (needs libdragon; `make check`, the tests, needs only a C compiler).
   Commit the rebuilt ROM with the source change that made it: the site serves the file, it isn't built on deploy.
+  A change in the kit reaches a game when that game is rebuilt: rebuild and commit every game's ROM after one.
 - **The boot stage is Grug's patched one** (`src/n64/boot/`, read its `README.md`): a stock libdragon ROM does not
   boot in the browser emulator (black screen, `couldn't allocate memory for cached interpreter` in the console). Don't
   switch back to libdragon's default without testing the page.
@@ -269,30 +284,32 @@ from `src/n64/grug-64/`: read its `README.md`): the Baseplate's physics, station
 - **One ROM, two ways to draw**: on the console's graphics chip when it answers at boot, otherwise all in software,
   which is what a browser emulator gets. Sound is mixed by the CPU. Holding Z at start forces software. **The
   hardware path and real consoles are untested** (November 2026): say so until someone has tried ares or a console.
-- **Speed in the browser is the software renderer on an interpreted CPU**: keep `rast.c` and the HUD lean (the FPS row
+- **Speed in the browser is the software renderer on an interpreted CPU**: keep `kit/rast.c` and the HUD lean (the FPS row
   in the Game Menu shows where a frame goes), and keep the play page's `OPTIONS` (`CountPerOp` 1: about 35 frames a
   second in the console's time, against half that at the core's default). **Studs cost about a quarter of that** (26
   against 35): the Game Menu can turn them off. Test a change by playing the page headless (Playwright + Chrome through the
   proxy, as for the other games) and reading that row.
-- **Sound: the ROM queues its own audio buffers, by physical address** (`snd_feed` in `n64/main.c`). libdragon's audio
+- **Sound: the ROM queues its own audio buffers, by physical address** (`snd_feed` in `kit/n64/main.c`). libdragon's audio
   queue is silent with a callback until something queues the first buffer, and the address it gives the hardware
   crashes the browser emulator's core. Measure sound at the emulator's output when testing (an AnalyserNode on what
   connects to the AudioContext's destination): "the AudioContext is running" proved nothing the first time.
-- **Same physics as the web games**: `phys.c` is AmbientCore ported line for line, and `tools/physdiff.cjs` checks it
+- **Same physics as the web games**: `kit/phys.c` is AmbientCore ported line for line, and `kit/tools/physdiff.cjs` checks it
   against the Baseplate's own script. Voices and sounds are baked from `static/voice.js`, `static/sfx.js` and the clips
-  by `tools/mkaudio.py`: re-run it (`make assets`) after new Voice Lab numbers, then rebuild the ROM.
+  by `kit/tools/mkaudio.py`: re-run it (`make assets`) after new Voice Lab numbers, then rebuild the ROM.
 - **You wear the outfit you play as on the site, through the ROM's outfit slot**: 128 KB at a fixed place in the ROM
   file (1 MB in) with the shirt, pants and face as small 256-colour pictures and the head's shape as a few rings of
-  points. The file on the site has Grug in it (`assets/outfit-default.fit`, made by `make assets`); the play page and the
-  game's page write the player's own over it in a copy in the tab (`GrugOutfit64.wear`, `arcade/grug-64/outfit64.js`),
+  points. The file on the site has Grug in it (`kit/assets/outfit-default.fit`, made by `make assets`); the play page and the
+  game's page write the player's own over it in a copy in the tab (`GrugOutfit64.wear`, `static/outfit64.js`),
   and that copy is what plays and what **Download ROM** gives. No other outfit goes into a ROM, and the head is measured
   from the outfit's own `.glb`, so there is no list of shapes to keep. The slot's layout is in two places that must
-  match (`outfit64.js`, `outfit.h` / `outfit.c`): change them together and bump the version. **Hair isn't drawn yet**
-  (a plain cap in the hair colour stands in), and the hardware path draws one colour a face.
+  match (`static/outfit64.js`, `kit/outfit.h` / `kit/outfit.c`): change them together and bump the version (it is 2).
+  **Every character is bald and drawn unlit** (the owner's call, November 2026: no hair until it can be done well, and
+  no per-face light on characters, which made heads look faceted; `CHAR_HOW` in `game.c`). The hardware path draws one
+  colour a face.
 - **The Game Menu's Stress test** swaps the zoo for a world of 100 to 4000 bricks to see what the machine can take
   (`?stress=N` or `?stress=sweep` on the play page; a test reads `game_stat` out of the emulator's memory). In the
   browser a polygon costs about 45 microseconds: 250 parts plays like the zoo, 500 at about 20 frames a second, 1000 at
-  about 13. The table is in the game's README: measure again before promising a bigger world.
+  about 13. The table is in `src/n64/kit/README.md`: it is where the 250-part rule comes from.
 - The usual Arcade rules still hold inside the ROM: no title screen, the 2010 GUI, red means danger, a Game Menu.
   What can't apply on a console is left out: Pearls, saving.
 - "Nintendo 64" is written in plain text with the trademark line, never Nintendo's logos or artwork, and every

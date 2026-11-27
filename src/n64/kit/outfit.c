@@ -18,7 +18,7 @@ static const uint8_t *picture(Tex *t, const uint8_t *p, const uint8_t *pal, int 
 
 bool slot_read(const uint8_t *s, int size, Outfit *o, SlotConfig *cfg) {
     memset(o, 0, sizeof *o); memset(cfg, 0, sizeof *cfg);
-    if (!s || size < SLOT_SIZE || memcmp(s, "GRUGFIT1", 8) != 0 || be16(s + 12) != 1) return false;
+    if (!s || size < SLOT_SIZE || memcmp(s, "GRUGFIT1", 8) != 0 || be16(s + 12) != 2) return false;
     const int stress = be16(s + 16);
     cfg->sweep = stress == 0xFFFF; cfg->stress = cfg->sweep ? 0 : stress;
     if (be16(s + 18) & 1) { cfg->view = true; cfg->x = be16s(s + 20); cfg->z = be16s(s + 22); cfg->yaw = be16s(s + 24) * (3.14159265f / 180); cfg->pitch = be16s(s + 26) * (3.14159265f / 180); cfg->dist = be16s(s + 28); }

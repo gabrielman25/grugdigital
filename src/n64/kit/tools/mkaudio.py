@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Bake Grug 64's sounds into sounds.c / sounds.h (run from anywhere; needs ffmpeg, node, numpy, scipy).
 
-    python3 src/n64/grug-64/tools/mkaudio.py
+    python3 src/n64/kit/tools/mkaudio.py   (or make assets in any game)
 
 Everything comes from the site, squeezed down for a cartridge:
   · the player voices: static/voice/player/*.mp3, with the tuning in static/voice.js (DEFAULTS: which clips each action

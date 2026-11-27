@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Is phys.c still the same physics as the site? Runs the real AmbientCore (cut out of arcade/baseplate/index.html) and
  * the C port (build/host/physdiff) on the same scripted scenarios and compares where the character is, frame by frame.
- *   make -C src/n64/grug-64 host && node src/n64/grug-64/tools/physdiff.cjs                                           */
+ *   make -C src/n64/grug-64 check     (or: make host there, then node src/n64/kit/tools/physdiff.cjs)                                           */
 const fs = require('fs'), vm = require('vm'), path = require('path'), { execFileSync } = require('child_process');
 const HERE = __dirname, ROOT = path.join(HERE, '..', '..', '..', '..');
 const html = fs.readFileSync(path.join(ROOT, 'arcade', 'baseplate', 'index.html'), 'utf8');

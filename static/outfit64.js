@@ -6,7 +6,7 @@
    .glb the Avatar Studio exports: static/outfits.js) and writes it into a copy of the ROM, so the game in the Arcade, and
    the ROM you download for a real console, start with the outfit you play as. Nothing else in the ROM changes.
 
-   It runs in the page (arcade/grug-64/index.html) and in node (src/n64/grug-64/tools/mkoutfit.cjs, which makes the
+   It runs in the page (an N64 game's play page, and its page in the Arcade) and in node (src/n64/kit/tools/mkoutfit.cjs, which makes the
    ROM's own default from arcade/outfits/grug.glb): one piece of code, so the two can't drift apart.
 
      const worn = await GrugOutfit64.wear('/arcade/grug-64/x.z64')      // in a page: { name, url } = a copy of the ROM wearing the
@@ -17,21 +17,22 @@
 
    decode(bytes, mime) -> { w, h, data: RGBA } turns a picture file into pixels. In a browser it's built in.
 
-   WHAT IS MADE (the ROM's side of this is src/n64/grug-64/outfit.h; keep the two in step)
+   WHAT IS MADE (the ROM's side of this is src/n64/kit/outfit.h; keep the two in step)
    · Body: the torso, arms and legs are boxes, and each of their faces is cut out of the outfit's own textures by reading
      the .glb's mesh (so it follows whatever layout the studio uses) and packed into a 256 x 160 atlas, 64 texels across a
      torso: half the studio's detail. Torso and arms come from the shirt's texture, legs from the pants'. Each atlas has
      256 colours of its own and two smaller copies (128 x 80, 64 x 40) for when the character is further off.
    · Head: the studio's head is a smooth 512-triangle shape with the hair merged in. The hair is left out (it has its own
-     colour swatch in the texture: that is how it is told apart), and the head is measured again as a few rings of 8
-     points: rays from its axis find how wide it is at each height and angle, and the rings that matter most are kept.
-     About 100 triangles, any head shape or size, with no list of shapes in the ROM.
+     colour swatch in the texture: that is how it is told apart; the ROM's characters are bald for now), and the head is
+     measured again as a few rings of 8 points, up to a point at the crown: rays from its axis find how wide it is at each
+     height and angle, and the rings that matter most are kept. About 100 triangles, any head shape or size, with no list
+     of shapes in the ROM.
    · Face: the front half of the head's texture, 128 x 80 with 256 colours and three smaller copies. */
 (function (root, factory) { if (typeof module === 'object' && module.exports) module.exports = factory(); else root.GrugOutfit64 = factory(); })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  const SLOT = { offset: 0x100000, size: 0x20000, magic: 'GRUGFIT1', version: 1, name: 32, outfit: 64 };
+  const SLOT = { offset: 0x100000, size: 0x20000, magic: 'GRUGFIT1', version: 2, name: 32, outfit: 64 };
   const BODY = { w: 256, h: 160, levels: 3 }, FACE = { w: 128, h: 80, levels: 4 };
-  const RINGS = 8, SEGS = 8;   // the most rings a head keeps, and the points round each
+  const RINGS = 9, SEGS = 8;   // the most rings a head keeps (the last is the crown: a point), and the points round each
   // where a box's faces go in the atlas: [x, y, w, h], faces in the order +x -x +y -y +z -z (the character faces -z, its right arm is on +x)
   const TILES = {
     torso: [[128, 0, 32, 64], [160, 0, 32, 64], [192, 0, 64, 32], [192, 32, 64, 32], [64, 0, 64, 64], [0, 0, 64, 64]],
@@ -200,7 +201,10 @@
     const N = 72, ang = k => k * 2 * Math.PI / SEGS, rows = [];
     for (let i = 0; i < N; i++) { const y = y0 + (y1 - y0) * (i + 0.5) / N, hits = []; for (let k = 0; k < SEGS; k++) hits.push(ray(y, ang(k))); rows.push({ y, hits, r: hits.map(h => h.r) }); }
     const widest = Math.max(...rows.map(w => Math.max(...w.r))), wide = w => Math.min(...w.r) >= 0.45 * widest;
-    let lo = rows.findIndex(wide), hi = rows.length - 1 - rows.slice().reverse().findIndex(wide); if (lo < 0 || hi <= lo) throw new Error('the head is too thin to measure');
+    // from the lowest ring that is wide (under it is the neck's flat end, on the torso) right up to the crown, which is a point:
+    // the head is round on top, not cut off flat
+    rows.push({ y: y1, hits: rows[N - 1].hits.map(h => Object.assign({}, h)), r: new Array(SEGS).fill(0) });
+    const lo = rows.findIndex(wide), hi = rows.length - 1; if (lo < 0 || hi <= lo) throw new Error('the head is too thin to measure');
     const keep = [lo, hi];
     while (keep.length < RINGS) {
       let worst = 0, wi = -1;
@@ -211,7 +215,7 @@
     const rings = keep.map(i => rows[i]);
     // the face: the front half of the head's texture. Round the head the picture runs from the right arm's side (the left of
     // the crop) to the other; down the head it runs from the top of the head's side to the bottom of it.
-    const mid = rings[rings.length >> 1], uR = mid.hits[SEGS / 4].u, uL = mid.hits[SEGS * 3 / 4].u, uF = mid.hits[0].u, onFace = w => Math.abs(w.hits[0].u - uF) < 0.02 && w.hits[0].r > 0;   // (the crown has its own patch of the texture)
+    const mid = rows[(lo + N) >> 1], uR = mid.hits[SEGS / 4].u, uL = mid.hits[SEGS * 3 / 4].u, uF = mid.hits[0].u, onFace = w => Math.abs(w.hits[0].u - uF) < 0.02 && w.hits[0].r > 0;   // (the crown has its own patch of the texture)
     const vs = rows.filter(onFace).map(w => w.hits[0].v), v0 = Math.min(...vs), v1 = Math.max(...vs);
     if (!(Math.abs(uL - uR) > 0.05) || !(v1 - v0 > 0.02)) throw new Error('the face is not where it was expected in the head\'s texture');
     const L = newLevels(FACE.w, FACE.h, FACE.levels), col = [0, 0, 0];

@@ -239,7 +239,8 @@ void r_box(float minX, float minY, float minZ, float maxX, float maxY, float max
 }
 
 /* a box at any angle: centre c, rotation m, half sizes. white: drawn flat white (the flash when something is hit) */
-void r_obox(const float c[3], const Mat3 *m, float hx, float hy, float hz, uint32_t color, bool white) {
+void r_obox(const float c[3], const Mat3 *m, float hx, float hy, float hz, uint32_t color, int how) {
+    const uint16_t plain = how == R_WHITE ? rgb5551(255, 242, 242) : hex5551(color);
     float cv[8][3], cw[8][3];
     for (int i = 0; i < 8; i++) {
         float l[3] = { (i & 1) ? hx : -hx, (i & 2) ? hy : -hy, (i & 4) ? hz : -hz }, w[3]; m3_apply(m, l, w);
@@ -251,7 +252,7 @@ void r_obox(const float c[3], const Mat3 *m, float hx, float hy, float hz, uint3
         if (n[0] * (C.px - p[0]) + n[1] * (C.py - p[1]) + n[2] * (C.pz - p[2]) <= 0) continue;
         float v[MAXV][3];
         for (int k = 0; k < 4; k++) { const float *s = cv[FACE[f][k]]; v[k][0] = s[0]; v[k][1] = s[1]; v[k][2] = s[2]; }
-        emit(v, 4, white ? rgb5551(255, 242, 242) : r_shade(color, n[0], n[1], n[2]), GM_OPAQUE, 0, 0, 0);
+        emit(v, 4, how == R_LIT ? r_shade(color, n[0], n[1], n[2]) : plain, GM_OPAQUE, 0, 0, 0);
     }
 }
 
@@ -305,9 +306,9 @@ static bool tex_plane(TexFace *tf, const float O[3], const float Su[3], const fl
 }
 
 /* which corners of a box a face's picture hangs from: its top-left, the end of its top edge, the corner under the first
-   (the same table as CORNERS in arcade/grug-64/outfit64.js, which cuts the pictures out) */
+   (the same table as CORNERS in static/outfit64.js, which cuts the pictures out) */
 static const uint8_t TEXC[6][3] = { { 7, 3, 5 }, { 2, 6, 0 }, { 7, 6, 3 }, { 1, 0, 5 }, { 6, 7, 4 }, { 3, 2, 1 } };
-void r_obox_tex(const float c[3], const Mat3 *m, float hx, float hy, float hz, const Tex *t, const TexRect face[6]) {
+void r_obox_tex(const float c[3], const Mat3 *m, float hx, float hy, float hz, const Tex *t, const TexRect face[6], int how) {
     float cv[8][3], cw[8][3], vc[3];
     for (int i = 0; i < 8; i++) {
         float l[3] = { (i & 1) ? hx : -hx, (i & 2) ? hy : -hy, (i & 4) ? hz : -hz }, w[3]; m3_apply(m, l, w);
@@ -322,7 +323,7 @@ void r_obox_tex(const float c[3], const Mat3 *m, float hx, float hy, float hz, c
         for (int k = 0; k < 4; k++) { const float *s = cv[FACE[f][k]]; v[k][0] = s[0]; v[k][1] = s[1]; v[k][2] = s[2]; }
         const float *O = cv[TEXC[f][0]], *U = cv[TEXC[f][1]], *V = cv[TEXC[f][2]], Su[3] = { U[0] - O[0], U[1] - O[1], U[2] - O[2] }, Sv[3] = { V[0] - O[0], V[1] - O[1], V[2] - O[2] };
         const float x = (float)(face[f].x >> lv), y = (float)(face[f].y >> lv), w = (float)(face[f].w >> lv), h = (float)(face[f].h >> lv);
-        TexFace tf; tf.tex = t->lv[lv]; tf.shift = t->wshift - lv; tf.pal = lit_palette(t, n[0], n[1], n[2]);
+        TexFace tf; tf.tex = t->lv[lv]; tf.shift = t->wshift - lv; tf.pal = how == R_LIT ? lit_palette(t, n[0], n[1], n[2]) : t->pal;
         tf.umin = x; tf.umax = x + w - 0.02f; tf.vmin = y; tf.vmax = y + h - 0.02f;
         tf.flat = tf.pal[tf.tex[((int)(y + h * 0.5f) << tf.shift) + (int)(x + w * 0.5f)]];
         if (!tex_plane(&tf, O, Su, Sv, x, w, y, h)) continue;
@@ -330,35 +331,31 @@ void r_obox_tex(const float c[3], const Mat3 *m, float hx, float hy, float hz, c
     }
 }
 
-/* a head: bands of flat faces between its rings, a flat top and bottom. The faces across the front wear the face picture.
-   (R_HEAD_HAIR draws a cap instead: the same shape a little bigger, over the top, down the back and half down the sides,
-   in one colour. It stands in for the outfit's real hair, which the ROM doesn't have yet.) */
+/* a head: bands of flat faces between its rings, up to a point at the crown, and a flat end underneath. The faces across
+   the front wear the face picture. Unlit (how the game draws characters), every face is the same skin colour whichever
+   way it points, so the head reads as one smooth shape and the flat faces it is made of don't show. */
 void r_head(const float c[3], const Mat3 *m, const HeadMesh *h, const Tex *face, uint32_t color, int how) {
     static float sn[HEAD_SEGS + 1], cs[HEAD_SEGS + 1]; static int trig;
     const int R = h->rings, S = h->segs; if (R < 2 || S < 3 || S > HEAD_SEGS) return;
     if (trig != S) { trig = S; for (int k = 0; k <= S; k++) { sn[k] = sinf(k * 6.2831853f / S); cs[k] = cosf(k * 6.2831853f / S); } }
-    const bool hair = how == R_HEAD_HAIR; const float bot = h->y[0], tall = h->y[R - 1] - bot;
-    int hem[HEAD_SEGS + 1];   /* hair: the lowest ring it reaches at each point round the head (the fringe stops above the brows) */
-    if (hair) for (int k = 0; k <= S; k++) { const int kk = k % S, off = kk * 8 > S * 4 ? S - kk : kk; const float want = off * 8 <= S ? 0.86f : off * 8 <= S * 2 ? 0.6f : 0.25f;
-        float best = 9; hem[k] = R - 2; for (int r = 0; r < R - 1; r++) { float d = (h->y[r] - bot) - want * tall; if (d < 0) d = -d; if (d < best) { best = d; hem[k] = r; } } }   /* (the ring nearest that height) */
     float pw[HEAD_RINGS][HEAD_SEGS + 1][3], pv[HEAD_RINGS][HEAD_SEGS + 1][3];
     for (int r = 0; r < R; r++) {
         for (int k = 0; k < S; k++) {
-            const float rad = h->r[r][k] * (hair ? (r <= hem[k] ? 1.02f : 1.1f) : 1.0f), l[3] = { sn[k] * rad, h->y[r] + (hair ? 0.05f : 0), -cs[k] * rad }; float w[3]; m3_apply(m, l, w);
+            const float rad = h->r[r][k], l[3] = { sn[k] * rad, h->y[r], -cs[k] * rad }; float w[3]; m3_apply(m, l, w);
             pw[r][k][0] = w[0] + c[0]; pw[r][k][1] = w[1] + c[1]; pw[r][k][2] = w[2] + c[2]; to_view(pw[r][k], pv[r][k]);
         }
         for (int i = 0; i < 3; i++) { pw[r][S][i] = pw[r][0][i]; pv[r][S][i] = pv[r][0][i]; }
     }
     float vc[3]; to_view(c, vc);
-    const bool pic = face && how == R_HEAD_SKIN; const int lv = pic ? tex_level(face, vc[2]) : 0;
+    const bool pic = face && how != R_WHITE; const int lv = pic ? tex_level(face, vc[2]) : 0;
     const float tw = pic ? (float)(face->w >> lv) : 0, th = pic ? (float)(face->h >> lv) : 0;
-    const uint16_t WHITE = rgb5551(255, 242, 242);
+    const uint16_t plain = how == R_WHITE ? rgb5551(255, 242, 242) : hex5551(color);
     float fwd[3]; { const float f0[3] = { 0, 0, -1.3f }; m3_apply(m, f0, fwd); }
     for (int r = 0; r + 1 < R; r++) for (int k = 0; k < S; k++) {
-        if (hair && (r < hem[k] || r < hem[k + 1])) continue;
-        const float *A = pw[r][k], *B = pw[r][k + 1], *D = pw[r + 1][k];
-        const float e1[3] = { D[0] - A[0], D[1] - A[1], D[2] - A[2] }, e2[3] = { B[0] - A[0], B[1] - A[1], B[2] - A[2] };
-        float n[3] = { e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0] };   /* outwards */
+        const float *A = pw[r][k], *B = pw[r][k + 1], *D = pw[r + 1][k], *Cc = pw[r + 1][k + 1];
+        /* outwards: across the face's two diagonals, which still works where the ring above is the crown's single point */
+        const float e1[3] = { Cc[0] - A[0], Cc[1] - A[1], Cc[2] - A[2] }, e2[3] = { B[0] - D[0], B[1] - D[1], B[2] - D[2] };
+        float n[3] = { e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0] };
         if (n[0] * (C.px - A[0]) + n[1] * (C.py - A[1]) + n[2] * (C.pz - A[2]) <= 0) continue;
         const float nl = sqrtf(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]); if (nl < 1e-9f) continue; n[0] /= nl; n[1] /= nl; n[2] /= nl;
         const float *q[4] = { pv[r][k], pv[r][k + 1], pv[r + 1][k + 1], pv[r + 1][k] };
@@ -366,16 +363,16 @@ void r_head(const float c[3], const Mat3 *m, const HeadMesh *h, const Tex *face,
         const bool front = pic && (k * 4 < S || k * 4 >= S * 3);   /* the quarter either side of the front */
         if (!front) {
             for (int i = 0; i < 4; i++) { v[i][0] = q[i][0]; v[i][1] = q[i][1]; v[i][2] = q[i][2]; }
-            emit(v, 4, how == R_HEAD_WHITE ? WHITE : r_shade(color, n[0], n[1], n[2]), GM_OPAQUE, 0, 0, 0); continue;
+            emit(v, 4, how == R_LIT ? r_shade(color, n[0], n[1], n[2]) : plain, GM_OPAQUE, 0, 0, 0); continue;
         }
         /* the picture runs from the right arm's side (the left of the picture) round the front to the other side */
         const float a0 = (k * 4 < S ? k : k - S) / (float)S, a1 = a0 + 1.0f / S, u[4] = { (0.5f - a0 * 2) * tw, (0.5f - a1 * 2) * tw, (0.5f - a1 * 2) * tw, (0.5f - a0 * 2) * tw }, t[4] = { h->t[r] * th, h->t[r] * th, h->t[r + 1] * th, h->t[r + 1] * th };
-        /* lit as if it faced a little more to the front than it does: the face is one picture across four flat faces, and
-           lit each by its own angle it would be in four shades, with a crease down the nose */
+        /* lit (when it is): as if it faced a little more to the front than it does, or the one picture across four flat
+           faces would be in four shades, with a crease down the nose */
         float ln[3] = { n[0] + fwd[0], n[1] + fwd[1], n[2] + fwd[2] }; const float ll = sqrtf(ln[0] * ln[0] + ln[1] * ln[1] + ln[2] * ln[2]); if (ll > 1e-6f) { ln[0] /= ll; ln[1] /= ll; ln[2] /= ll; }
-        TexFace tf; tf.tex = face->lv[lv]; tf.shift = face->wshift - lv; tf.pal = lit_palette(face, ln[0], ln[1], ln[2]);
+        TexFace tf; tf.tex = face->lv[lv]; tf.shift = face->wshift - lv; tf.pal = how == R_LIT ? lit_palette(face, ln[0], ln[1], ln[2]) : face->pal;
         tf.umin = u[1] < 0 ? 0 : u[1]; tf.umax = u[0] > tw - 0.02f ? tw - 0.02f : u[0]; tf.vmin = t[2] < t[0] ? t[2] : t[0]; tf.vmax = t[2] < t[0] ? t[0] : t[2]; if (tf.vmax > th - 0.02f) tf.vmax = th - 0.02f;
-        tf.flat = r_shade(color, ln[0], ln[1], ln[2]);
+        tf.flat = how == R_LIT ? r_shade(color, ln[0], ln[1], ln[2]) : plain;
         /* two triangles: a band that narrows is not a slanted rectangle, and each triangle carries the picture exactly */
         for (int tri = 0; tri < 2; tri++) {
             const int i0 = 0, i1 = tri ? 2 : 1, i2 = tri ? 3 : 2;
@@ -384,16 +381,16 @@ void r_head(const float c[3], const Mat3 *m, const HeadMesh *h, const Tex *face,
             if (det > -1e-6f && det < 1e-6f) { emit(v, 3, tf.flat, GM_OPAQUE, 0, 0, 0); continue; }   /* (a band of no height in the picture) */
             float Su[3], Sv[3], O[3];
             for (int i = 0; i < 3; i++) { const float e1v = q[i1][i] - q[i0][i], e2v = q[i2][i] - q[i0][i]; Su[i] = (e1v * dv2 - e2v * dv1) / det; Sv[i] = (e2v * du1 - e1v * du2) / det; O[i] = q[i0][i] - u[i0] * Su[i] - t[i0] * Sv[i]; }
-            if (!tex_plane(&tf, O, Su, Sv, 0, 1, 0, 1)) continue;
+            if (!tex_plane(&tf, O, Su, Sv, 0, 1, 0, 1)) { emit(v, 3, tf.flat, GM_OPAQUE, 0, 0, 0); continue; }   /* (a sliver) */
             emit(v, 3, tf.flat, GM_OPAQUE, 0, 0, &tf);
         }
     }
-    /* the top and the bottom */
+    /* the flat end underneath (the top comes to a point, or is the last ring's flat if the head was measured that way) */
     for (int end = 0; end < 2; end++) {
-        if (hair && !end) continue;
-        const int r = end ? R - 1 : 0; float up[3] = { 0, end ? 1.0f : -1.0f, 0 }, n[3]; m3_apply(m, up, n);
+        const int r = end ? R - 1 : 0; if (h->r[r][0] < 0.01f) continue;
+        float up[3] = { 0, end ? 1.0f : -1.0f, 0 }, n[3]; m3_apply(m, up, n);
         const float *A = pw[r][0]; if (n[0] * (C.px - A[0]) + n[1] * (C.py - A[1]) + n[2] * (C.pz - A[2]) <= 0) continue;
         float v[MAXV][3]; for (int k = 0; k < S; k++) { const float *s = pv[r][end ? S - 1 - k : k]; v[k][0] = s[0]; v[k][1] = s[1]; v[k][2] = s[2]; }
-        emit(v, S, how == R_HEAD_WHITE ? WHITE : r_shade(color, n[0], n[1], n[2]), GM_OPAQUE, 0, 0, 0);
+        emit(v, S, how == R_LIT ? r_shade(color, n[0], n[1], n[2]) : plain, GM_OPAQUE, 0, 0, 0);
     }
 }
