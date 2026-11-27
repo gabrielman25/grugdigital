@@ -79,7 +79,8 @@
       about: ['The Grug Baseplate, rebuilt as a real Nintendo 64 game. It plays right here in an emulator, and the very same ROM can be downloaded and played on a real console from a flash cartridge.',
         'It is a small platformer zoo with the same jumping physics as the other Grug games: blocks from 1 to 10 studs to jump onto, gaps to clear (roll in the air to go further), an obby over a red floor, a damage pad and a kill brick, jump pads, a lift, a truss to climb, a training dummy to swing at and coins to grab.',
         'Grug speaks with the same voice as in the rest of the Arcade when he jumps, rolls, swings, gets hurt and falls apart: every clip is squeezed down to fit on a cartridge.'],
-      controls: [['W A S D', 'Move (Control Stick)'], ['Space', 'Jump (A button)'], ['Shift', 'Dodge roll, in the air too (Z)'], ['F', 'Swing (B button)'], ['Q / E', 'Turn the camera (C left / right)'], ['\u2191 / \u2193', 'Tilt the camera (C up / down)'], ['I / O', 'Zoom in / out (R / L)'], ['Enter', 'Game Menu (START)']] }
+      controls: [['W A S D', 'Move (Control Stick)'], ['Space', 'Jump (A button)'], ['Shift', 'Dodge roll, in the air too (Z)'], ['F / Click', 'Swing (B button)'], ['Mouse', 'Look around: click the game first, Esc lets the mouse go'],
+        ['\u2190 \u2191 \u2193 \u2192 / Q / E', 'Turn and tilt the camera (C buttons)'], ['Wheel / I / O', 'Zoom in and out (R and L)'], ['Enter', 'Game Menu (START)']] }
   ];
 
   const ago = iso => {

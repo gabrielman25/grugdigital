@@ -25,7 +25,7 @@
 static inline float clampf(float v, float a, float b) { return v < a ? a : v > b ? b : v; }
 static inline float approach(float v, float t, float step) { return v + clampf(t - v, -step, step); }
 
-bool game_hw_ok, game_use_hw, game_hide_hud;
+bool game_hw_ok, game_use_hw, game_hide_hud, game_kbd;
 float game_fps;
 uint32_t (*game_clock_us)(void);
 static uint32_t prof[4], profT;   /* ms x 10: update, world, characters, HUD */
@@ -42,9 +42,10 @@ static World W;
 
 static const struct { float x, y, z; } SPAWN = { 0, 3.6f, 0 };
 
-typedef struct { const char *name, *sub; float x, z, hw, hd; } Station;
+typedef struct { const char *name, *sub, *subK; float x, z, hw, hd; } Station;   /* subK: the same line for a keyboard (0: the same) */
+#define KB(n64, kbd) (game_kbd && (kbd) ? (kbd) : (n64))
 static Station stations[12]; static int nStations;
-typedef struct { const char *a, *b; float x, y, z, range; int st; } Bill;   /* st: the station it names (-1: none) */
+typedef struct { const char *a, *b, *bK; float x, y, z, range; int st; } Bill;   /* st: the station it names (-1: none) */
 static Bill bills[40]; static int nBills;
 static char numText[16][4];
 
@@ -52,13 +53,14 @@ static struct { Part *part; float bottom, top, t, speed; int phase; } lift;   /*
 static Part *hurtPad, *finish;
 
 #define SOLID (PF_COLLIDE)
-static Part *part(float cx, float cy, float cz, float sx, float sy, float sz, uint32_t col) { return world_add(&W, cx, cy, cz, sx, sy, sz, col, K_SOLID, PF_COLLIDE | (sy <= 0.6f && cy < 1 ? PF_FLAT : 0)); }
+/* a solid part: studs on top unless it is a thin thing lying on the ground (the track, the pads: plain, as on the web) */
+static Part *part(float cx, float cy, float cz, float sx, float sy, float sz, uint32_t col) { const bool flat = sy <= 0.6f && cy < 1; return world_add(&W, cx, cy, cz, sx, sy, sz, col, K_SOLID, PF_COLLIDE | (flat ? PF_FLAT : PF_STUDS)); }
 static Part *deco(float cx, float cy, float cz, float sx, float sy, float sz, uint32_t col) { return world_add(&W, cx, cy, cz, sx, sy, sz, col, K_SOLID, PF_DECO | (sy <= 0.6f && cy < 1 ? PF_FLAT : 0)); }
-static void station(const char *name, const char *sub, float x, float z, float hw, float hd, float billY) {
-    if (nStations < 12) stations[nStations++] = (Station){ name, sub, x, z, hw, hd };
-    if (billY > 0 && nBills < 40) bills[nBills++] = (Bill){ name, sub, x, billY, z, 130, nStations - 1 };
+static void station(const char *name, const char *sub, const char *subK, float x, float z, float hw, float hd, float billY) {
+    if (nStations < 12) stations[nStations++] = (Station){ name, sub, subK, x, z, hw, hd };
+    if (billY > 0 && nBills < 40) bills[nBills++] = (Bill){ name, sub, subK, x, billY, z, 130, nStations - 1 };
 }
-static void bill(const char *a, const char *b, float x, float y, float z, float range) { if (nBills < 40) bills[nBills++] = (Bill){ a, b, x, y, z, range, -1 }; }
+static void bill(const char *a, const char *b, float x, float y, float z, float range) { if (nBills < 40) bills[nBills++] = (Bill){ a, b, 0, x, y, z, range, -1 }; }
 
 /* ---------------------------------------------------------------- coins: pickups */
 typedef struct { float x, y, z, t; } Coin;
@@ -72,15 +74,15 @@ static void build_world(void) {
     world_add(&W, 0, -30, 0, 8000, 20, 8000, 0, K_KILL, PF_COLLIDE | PF_NOCAM | PF_HIDDEN);
 
     /* spawn: a SpawnLocation (grey, a plate on top) */
-    part(0, 0.3f, 0, 12, 0.6f, 12, 0x6e6e72)->tag = T_SPAWN; deco(0, 0.65f, 0, 6, 0.1f, 6, 0xf2f3f3)->flags |= PF_FLAT;
-    station("SPAWN", "everyone starts here", 0, 0, 8, 8, 0);
+    { Part *sp = part(0, 0.3f, 0, 12, 0.6f, 12, 0x6e6e72); sp->tag = T_SPAWN; sp->flags |= PF_STUDS; } deco(0, 0.65f, 0, 6, 0.1f, 6, 0xf2f3f3)->flags |= PF_FLAT;
+    station("SPAWN", "everyone starts here", 0, 0, 0, 8, 8, 0);
     bill("GRUG BASEPLATE 64", "a zoo of what every Grug game does", 0, 9, -18, 120);
 
     /* the walk & run track: 16 studs a second, white lines every 16 studs */
     const float TX = -100;
     part(TX, 0.1f, 0, 12, 0.2f, 180, 0x27466a);
     for (int k = 0; k <= 10; k++) deco(TX, 0.21f, 80 - k * 16, 12, 0.02f, 0.6f, 0xf2f3f3);
-    station("WALK & RUN", "16 studs a second - Z: dodge roll", TX, 0, 8, 92, 0);
+    station("WALK & RUN", "16 studs a second - Z: dodge roll", "16 studs a second - Shift: dodge roll", TX, 0, 8, 92, 0);
     bill("WALK & RUN", "lines every 16 studs = a second of walking", TX, 10, 84, 150);
 
     /* jump heights: blocks 1 to 10 studs tall. A jump lifts your feet 7.2 studs, and R6 legs don't collide, so the torso
@@ -91,7 +93,7 @@ static void build_world(void) {
         part(x, h / 2.0f, z, 8, h, 8, h == 10 ? 0x6b327c : 0x0d69ac);
         snprintf(numText[h], 4, "%d", h); bill(numText[h], h == 10 ? "too high!" : "studs", x, h + 3.5f, z, 60);
     }
-    station("JUMP HEIGHTS", "A: jump 7.2 studs, legs clear 9 - 10 is too high", 0, -40, 56, 10, 17);
+    station("JUMP HEIGHTS", "A: jump 7.2 studs, legs clear 9 - 10 is too high", "Space: jump 7.2 studs, legs clear 9 - 10 is too high", 0, -40, 56, 10, 17);
     /* gap jumps: two ledges 4 studs up with gaps from 4 to 16 studs (a running jump crosses about 9; roll in the air for more) */
     static const int GAPS[5] = { 4, 7, 10, 13, 16 };
     for (int k = 0; k < 5; k++) {
@@ -99,7 +101,7 @@ static void build_world(void) {
         part(x0, 2, -74, 6, 4, 8, 0x4b974b); part(x0 + 6 + g, 2, -74, 6, 4, 8, 0x4b974b);
         snprintf(numText[11 + k], 4, "%d", GAPS[k]); bill(numText[11 + k], "stud gap", x0 + 3 + g / 2, 7.5f, -74, 60);
     }
-    station("GAP JUMPS", "jump at the edge - roll in the air to go further", 0, -74, 72, 10, 13);
+    station("GAP JUMPS", "jump at the edge - roll in the air to go further", 0, 0, -74, 72, 10, 13);
 
     /* the obby: red is danger (kill bricks): a run of platforms over a red floor, a finish at the end */
     const float OX = -40, OZ = -108;
@@ -109,19 +111,19 @@ static void build_world(void) {
     for (int i = 0; i < 11; i++) part(OX - 30 + STEPS[i][0], STEPS[i][2] / 2 + 0.5f, OZ + STEPS[i][1], 4, STEPS[i][2], 4, 0x0d69ac);
     finish = part(OX + 84, 2.5f, OZ, 10, 5, 10, 0xf5cd30); finish->tag = T_FINISH;
     part(OX + 41, 1.5f, OZ - 13.5f, 76, 3, 1, 0x3a3a3e); part(OX + 41, 1.5f, OZ + 13.5f, 76, 3, 1, 0x3a3a3e);   /* side rails */
-    station("OBBY", "red kills you - reach the yellow block", OX + 42, OZ, 52, 15, 13);
+    station("OBBY", "red kills you - reach the yellow block", 0, OX + 42, OZ, 52, 15, 13);
     coin(OX + 84, 5, OZ);
 
     /* danger: a damage pad (one square of health a second) and a kill brick */
     const float KX = -50, KZ = 26;
     hurtPad = part(KX - 8, 0.2f, KZ, 10, 0.4f, 10, 0xff0000); hurtPad->tag = T_HURT;
-    world_add(&W, KX + 9, 1, KZ, 6, 2, 6, 0xff0000, K_KILL, PF_COLLIDE);
+    world_add(&W, KX + 9, 1, KZ, 6, 2, 6, 0xff0000, K_KILL, PF_COLLIDE | PF_STUDS);
     bill("DAMAGE", "-1 health a second", KX - 8, 5.5f, KZ, 90); bill("KILL BRICK", "touch it and you fall apart", KX + 9, 6.5f, KZ, 90);
-    station("DANGER", "red hurts - health is the red squares", KX, KZ, 17, 10, 0);
+    station("DANGER", "red hurts - health is the red squares", 0, KX, KZ, 17, 10, 0);
 
     /* the training dummy: something to swing at */
     deco(32, 0.1f, -6, 10, 0.2f, 10, 0x27466a);
-    station("DUMMY", "B: swing - three hits break it", 32, -6, 8, 8, 0);
+    station("DUMMY", "B: swing - three hits break it", "F or click: swing - three hits break it", 32, -6, 8, 8, 0);
 
     /* the sky deck: a lift (west side), a truss to climb (east side), jump pads in front */
     const float DX = 84, DZ = 62, DH = 30;
@@ -129,7 +131,7 @@ static void build_world(void) {
     part(DX, DH + 0.75f, DZ - 14.5f, 30, 1.5f, 1, 0x3a3a3e); part(DX, DH + 0.75f, DZ + 14.5f, 30, 1.5f, 1, 0x3a3a3e);   /* railings (gaps where the lift and the truss arrive) */
     part(DX - 14.5f, DH + 0.75f, DZ + 6, 1, 1.5f, 18, 0x3a3a3e); part(DX + 14.5f, DH + 0.75f, DZ - 8, 1, 1.5f, 14, 0x3a3a3e);
     const float EX = DX - 19;
-    lift.part = world_add(&W, EX, 0.5f, DZ - 6, 8, 1, 8, 0xf5cd30, K_SOLID, PF_COLLIDE | PF_DYNAMIC); lift.part->tag = T_LIFT;
+    lift.part = world_add(&W, EX, 0.5f, DZ - 6, 8, 1, 8, 0xf5cd30, K_SOLID, PF_COLLIDE | PF_DYNAMIC | PF_STUDS); lift.part->tag = T_LIFT;
     lift.bottom = 1; lift.top = DH; lift.t = 2; lift.speed = 9; lift.phase = 0;
     deco(EX - 5, DH / 2 + 1, DZ - 11, 1, DH + 2, 1, 0x3a3a3e); deco(EX - 5, DH / 2 + 1, DZ - 1, 1, DH + 2, 1, 0x3a3a3e);   /* the shaft's posts */
     const float LX = DX + 15, LZ = DZ + 8;
@@ -137,7 +139,7 @@ static void build_world(void) {
     deco(LX + 0.8f, DH / 2, LZ - 1.6f, 0.6f, DH, 0.6f, 0x8a8a8a); deco(LX + 0.8f, DH / 2, LZ + 1.6f, 0.6f, DH, 0.6f, 0x8a8a8a);
     for (int y = 1; y < DH; y += 2) deco(LX + 0.8f, y, LZ, 0.5f, 0.4f, 3.2f, 0x8a8a8a)->flags &= ~PF_FLAT;
     for (int k = -1; k <= 1; k++) { Part *p = world_add(&W, DX + k * 9, 0.2f, DZ - 26, 6, 0.4f, 6, 0x00ff00, K_PAD, PF_COLLIDE | PF_FLAT); p->power = 120; }   /* about 37 studs up */
-    station("SKY DECK", "ride the lift - climb the truss - or take a jump pad", DX, DZ - 6, 28, 34, DH + 7);
+    station("SKY DECK", "ride the lift - climb the truss - or take a jump pad", 0, DX, DZ - 6, 28, 34, DH + 7);
     bill("JUMP PADS", "steer while you fly", DX, 6, DZ - 26, 90); bill("LIFT", 0, EX, DH + 5, DZ - 6, 150); bill("TRUSS", "walk into it to climb", LX + 3, 9, LZ, 90);
     coin(DX, DH, DZ); coin(DX - 6, DH, DZ - 7); coin(DX + 6, DH, DZ + 7);
 
@@ -194,6 +196,7 @@ static float hintT = 9, gclock;
 
 /* ---------------------------------------------------------------- the camera: the Roblox orbit cam */
 static struct { float yaw, pitch, dist, tdist, fx, fy, fz; bool init; float px, py, pz; float zoomRep; } cam = { 0, 0.32f, 22, 22, 0, 4, 0, false, 0, 0, 0, 0 };
+#define CAM_STICK 6.0f   /* radians a second with the camera stick right over (keep CAM_STICK in arcade/grug-64/index.html the same) */
 static void zoom_step(int out) { cam.tdist *= out ? 1.18f : 1 / 1.18f; if (!out && cam.tdist < 1.6f) cam.tdist = 0.5f; if (out && cam.tdist < 1.6f) cam.tdist = 1.6f; cam.tdist = clampf(cam.tdist, 0.5f, 90); }
 static void place_camera(float dt) {
     const Character *ch = &player.ch; float ax = ch->x, ay = ch->y + 1.5f, az = ch->z;
@@ -208,7 +211,7 @@ static void place_camera(float dt) {
 }
 
 /* ---------------------------------------------------------------- the Game Menu (the 2012 one, in miniature) */
-enum { MI_RESUME, MI_RESET, MI_VOICES, MI_PITCH, MI_RENDER, MI_FPS, MI_HELP, MI_COUNT };
+enum { MI_RESUME, MI_RESET, MI_VOICES, MI_PITCH, MI_STUDS, MI_RENDER, MI_FPS, MI_HELP, MI_COUNT };
 static struct { bool open, help, fps; int sel; float rep; } menu;
 static bool menu_item_shown(int i) { return i != MI_RENDER || game_hw_ok; }
 
@@ -347,6 +350,7 @@ static void menu_update(const Input *in, float dt) {
             case MI_RESET: menu.open = false; aud_tap(S_TAP_CLOSE); char_kill(&player.ch); break;
             case MI_VOICES: aud_voices_on = !aud_voices_on; aud_tap(S_TAP_SELECT); if (aud_voices_on) aud_say(VE_JUMP); break;
             case MI_PITCH: aud_voice_pitch = aud_voice_pitch >= VOICE_PITCH_MAX ? VOICE_PITCH_MIN : aud_voice_pitch + 1; aud_voices_on = true; aud_say(VE_JUMP); break;
+            case MI_STUDS: r_studs = !r_studs; aud_tap(S_TAP_SELECT); break;
             case MI_RENDER: game_use_hw = !game_use_hw; aud_tap(S_TAP_SELECT); break;
             case MI_FPS: menu.fps = !menu.fps; aud_tap(S_TAP_SELECT); break;
             case MI_HELP: menu.help = true; aud_tap(S_TAP_OPEN); break;
@@ -367,6 +371,8 @@ void game_update(const Input *inRaw, float dt) {
     /* ---- the camera: C left / right turn it, C up / down tilt it, R / L zoom (all the way in = first person) */
     if (in.held & BTN_CL) cam.yaw += 300 * 0.0055f * dt; if (in.held & BTN_CR) cam.yaw -= 300 * 0.0055f * dt;
     if (in.held & BTN_CU) cam.pitch = clampf(cam.pitch + 1.3f * dt, -1.2f, 1.396f); if (in.held & BTN_CD) cam.pitch = clampf(cam.pitch - 1.3f * dt, -1.2f, 1.396f);
+    /* ...and the camera stick turns and tilts it by how far it is pushed (the mouse, in the Arcade: the page turns its movement into this) */
+    cam.yaw -= in.cx * CAM_STICK * dt; cam.pitch = clampf(cam.pitch - in.cy * CAM_STICK * dt, -1.2f, 1.396f);
     if (in.held & (BTN_L | BTN_R)) { cam.zoomRep -= dt; if (cam.zoomRep <= 0) { zoom_step((in.held & BTN_L) != 0); cam.zoomRep = (in.pressed & (BTN_L | BTN_R)) ? 0.3f : 0.09f; } } else cam.zoomRep = 0;
 
     /* ---- input -> the physics, then the world steps */
@@ -433,19 +439,20 @@ static void draw_rig(float x, float y, float z, float yaw, const Rig *r, const L
     for (int i = 0; i < n; i++) r_obox(b[i].c, &b[i].m, b[i].h[0], b[i].h[1], b[i].h[2], b[i].color, white);
 }
 static void draw_world(void) {
-    /* the baseplate: big grey checks on top, a plain slab underneath. Seen from above its top can't hide anything (whatever is
-       behind it is under it), so it is painted with no depth at all: the cheapest pixels there are, and it is half the screen. */
-    const uint16_t ca = r_shade(0xa3a2a5, 0, 1, 0), cb = r_shade(0x9c9b9e, 0, 1, 0); const int N = (int)(BP / BT);
+    /* the baseplate: big grey studded checks on top, a plain slab underneath. Seen from above its top can't hide anything
+       (whatever is behind it is under it), so it is painted with no depth at all: the cheapest pixels there are, and it is
+       half the screen. */
+    const int N = (int)(BP / BT);
     if (cam.py > 0) for (int i = 0; i < N; i++) for (int j = 0; j < N; j++) {
-        float x0 = -BP / 2 + BT * i, z0 = -BP / 2 + BT * j; const float p[4][3] = { { x0, 0, z0 }, { x0 + BT, 0, z0 }, { x0 + BT, 0, z0 + BT }, { x0, 0, z0 + BT } };
-        r_quad(p, (i + j) % 2 ? ca : cb, GM_BACK, 0);
+        float x0 = -BP / 2 + BT * i, z0 = -BP / 2 + BT * j;
+        r_top(x0, z0, x0 + BT, z0 + BT, 0, (i + j) % 2 ? 0xa3a2a5 : 0x9c9b9e, GM_BACK);
     }
-    r_box(-BP / 2, -2, -BP / 2, BP / 2, 0, BP / 2, 0x9c9b9e, 1);
+    r_box(-BP / 2, -2, -BP / 2, BP / 2, 0, BP / 2, 0x9c9b9e, R_TOP_NONE);
     /* thin things lying on the ground first (they win ties with the plate), then everything else */
     for (int pass = 0; pass < 2; pass++) for (int i = 0; i < W.n; i++) {
         const Part *p = &W.parts[i];
         if ((p->flags & PF_HIDDEN) || p->tag == T_BASE || ((p->flags & PF_FLAT) != 0) != (pass == 0)) continue;
-        r_box(p->minX, p->minY, p->minZ, p->maxX, p->maxY, p->maxZ, p->color, 0);
+        r_box(p->minX, p->minY, p->minZ, p->maxX, p->maxY, p->maxZ, p->color, (p->flags & PF_STUDS) ? R_TOP_STUDS : R_TOP_PLAIN);
     }
 }
 static void draw_shadow(float x, float y, float z, float r) {
@@ -474,6 +481,7 @@ static const char *MENU_LABEL(int i, char *buf) {
         case MI_RESET: return "Reset Character";
         case MI_VOICES: return aud_voices_on ? "Voices: On" : "Voices: Off";
         case MI_PITCH: snprintf(buf, 32, "Voice pitch: %+d", (int)aud_voice_pitch); return buf;
+        case MI_STUDS: return r_studs ? "Studs: On" : "Studs: Off (faster)";
         case MI_RENDER: return game_use_hw ? "Drawn by: the console" : "Drawn by: software";
         case MI_FPS: return menu.fps ? "Show FPS: On" : "Show FPS: Off";
         default: return "Help";
@@ -486,7 +494,7 @@ static void draw_hud(void) {
     /* where you are (the station's rectangle you stand in) */
     const Station *P = 0; float ba = 1e9f;
     for (int i = 0; i < nStations; i++) { const Station *s = &stations[i]; if (fabsf(ch->x - s->x) > s->hw + 4 || fabsf(ch->z - s->z) > s->hd + 4) continue; float a = s->hw * s->hd; if (a < ba) { ba = a; P = s; } }
-    const char *pname = P ? P->name : "BASEPLATE", *psub = P ? P->sub : "walk to a sign";
+    const char *pname = P ? P->name : "BASEPLATE", *psub = P ? KB(P->sub, P->subK) : "walk to a sign";
     const int X = 16, Y = 14;
     /* labels: damage numbers and the dummy first, then the signs from the nearest out (never under the HUD) */
     nTaken = 0; box_take(X - 2, Y - 2, X + 118, Y + 47); box_take(14, SCREEN_H - 46, SCREEN_W - 14, SCREEN_H - 14);
@@ -500,7 +508,7 @@ static void draw_hud(void) {
           float dx = bills[i].x - cam.px, dy = bills[i].y - cam.py, dz = bills[i].z - cam.pz, d = dx * dx + dy * dy + dz * dz; if (d > bills[i].range * bills[i].range) continue;
           int k = n++; while (k > 0 && dist[k - 1] > d) { dist[k] = dist[k - 1]; order[k] = order[k - 1]; k--; } dist[k] = d; order[k] = i;
       }
-      for (int k = 0; k < n; k++) { const Bill *b = &bills[order[k]]; label(b->x, b->y, b->z, b->range, b->a, b->b, WHITE); } }
+      for (int k = 0; k < n; k++) { const Bill *b = &bills[order[k]]; label(b->x, b->y, b->z, b->range, b->a, KB(b->b, b->bK), WHITE); } }
     /* the stats panel: HEALTH = red squares, coins, the last jump (inside the TV-safe area) */
     ui_dim(X, Y, 116, 45); ui_frame(X, Y, 116, 45, BLACK, 1);
     ui_text(X + 5, Y + 2, "HEALTH", WHITE, 0);
@@ -508,11 +516,11 @@ static void draw_hud(void) {
     { static char coinsT[16] = "COINS 0"; static int coinsN; if (coinsN != player.coinCount) { coinsN = player.coinCount; snprintf(coinsT, sizeof coinsT, "COINS %d", coinsN); } ui_text(X + 5, Y + 2 + FH + 1, coinsT, YEL, 0); }
     { static char jump[40] = "Jump: how high?"; static float jh = -1, jd = -1;   /* (written only when it changes: printing decimals is slow on a console) */
       if (ch->hasLast && ch->lastHeight > 0.5f && (ch->lastHeight != jh || ch->lastDist != jd)) { jh = ch->lastHeight; jd = ch->lastDist; int a = (int)(jh * 10 + 0.5f), b = (int)(jd * 10 + 0.5f); snprintf(jump, sizeof jump, "Jump %d.%d up %d.%d far", a / 10, a % 10, b / 10, b % 10); }
-      ui_text(X + 5, Y + 2 + (FH + 1) * 2, ch->climbing ? "Climbing: A lets go" : jump, WHITE, 0); }
+      ui_text(X + 5, Y + 2 + (FH + 1) * 2, ch->climbing ? KB("Climbing: A lets go", "Climbing: Space lets go") : jump, WHITE, 0); }
     /* the place bar along the bottom */
     ui_dim(16, SCREEN_H - 44, SCREEN_W - 32, 28); ui_frame(16, SCREEN_H - 44, SCREEN_W - 32, 28, BLACK, 1);
     ui_text(SCREEN_W / 2, SCREEN_H - 43, pname, YEL, UI_CENTER); ui_text(SCREEN_W / 2, SCREEN_H - 43 + FH, psub, WHITE, UI_CENTER);
-    if (hintT > 0 && !menu.open) { ui_text(SCREEN_W / 2, SCREEN_H - 62 - FH, "Stick move - A jump - Z roll - B swing", WHITE, UI_CENTER); ui_text(SCREEN_W / 2, SCREEN_H - 62, "C buttons: camera - START: Game Menu", WHITE, UI_CENTER); }
+    if (hintT > 0 && !menu.open) { ui_text(SCREEN_W / 2, SCREEN_H - 62 - FH, KB("Stick move - A jump - Z roll - B swing", "W A S D move - Space jump - Shift roll - F swing"), WHITE, UI_CENTER); ui_text(SCREEN_W / 2, SCREEN_H - 62, KB("C buttons: camera - START: Game Menu", "Mouse: look around - Enter: Game Menu"), WHITE, UI_CENTER); }
     if (ann.t > 0 && ann.big) { ui_text(SCREEN_W / 2, 70, ann.big, ann.color, UI_CENTER | UI_X2); if (ann.small) ui_text(SCREEN_W / 2, 70 + FH * 2 + 2, ann.small, WHITE, UI_CENTER); }
     if (ch->dead) ui_text(SCREEN_W / 2, 96, "You fell apart!", WHITE, UI_CENTER);
     if (menu.fps) {
@@ -522,17 +530,21 @@ static void draw_hud(void) {
     /* the Game Menu: a centred dark box, Resume Game first */
     if (menu.open && !menu.help) {
         int rows = 0; for (int i = 0; i < MI_COUNT; i++) if (menu_item_shown(i)) rows++;
-        const int w = 168, rh = FH + 6, h = 26 + rows * rh + 8, x = (SCREEN_W - w) / 2, y = (SCREEN_H - h) / 2; int ry = y + 24;
+        const int w = 216, rh = FH + 6, h = 26 + rows * rh + 8 + FH + 2, x = (SCREEN_W - w) / 2, y = (SCREEN_H - h) / 2; int ry = y + 24;   /* (the last line: how to work it) */
         ui_rect(x, y, w, h, rgb5551(34, 34, 38)); ui_frame(x, y, w, h, BLACK, 2); ui_text(SCREEN_W / 2, y + 6, "Game Menu", WHITE, UI_CENTER);
         for (int i = 0; i < MI_COUNT; i++) {
             if (!menu_item_shown(i)) continue; const bool sel = i == menu.sel;
             ui_rect(x + 12, ry, w - 24, rh - 2, sel ? rgb5551(170, 30, 30) : BLACK); ui_frame(x + 12, ry, w - 24, rh - 2, sel ? rgb5551(255, 80, 80) : rgb5551(200, 200, 200), 1);
             ui_text(SCREEN_W / 2, ry + 2, MENU_LABEL(i, buf), WHITE, UI_CENTER); ry += rh;
         }
+        ui_text(SCREEN_W / 2, y + h - FH - 5, KB("Stick: choose - A: pick - START: close", "W / S choose - Space pick - Enter close"), rgb5551(200, 200, 200), UI_CENTER | UI_NOLINE);
     } else if (menu.open) {
-        static const char *HELP[] = { "Control Stick  move", "A  jump (hold to keep hopping)", "Z  dodge roll (in the air too)", "B  swing", "C left / right  turn the camera", "C up / down  tilt the camera",
-                                      "R / L  zoom in / out", "START  Game Menu", "", "Red means danger.", "Walk into the truss to climb it." };
-        const int n = sizeof HELP / sizeof *HELP, w = 216, h = 26 + n * (FH + 1) + 8, x = (SCREEN_W - w) / 2, y = (SCREEN_H - h) / 2;
+        static const char *HELP_PAD[] = { "Control Stick  move", "A  jump (hold to keep hopping)", "Z  dodge roll (in the air too)", "B  swing", "C left / right  turn the camera", "C up / down  tilt the camera",
+                                          "2nd controller's stick  camera", "R / L  zoom in / out", "START  Game Menu", "", "Red means danger.", "Walk into the truss to climb it." };
+        static const char *HELP_KEYS[] = { "W A S D  move", "Space  jump (hold to keep hopping)", "Shift  dodge roll (in the air too)", "F or click  swing", "Mouse  look around (click the game)", "Arrows or Q / E  camera",
+                                           "Wheel or I / O  zoom in / out", "Enter  Game Menu", "Esc  let the mouse go", "", "Red means danger.", "Walk into the truss to climb it." };
+        const char **HELP = game_kbd ? HELP_KEYS : HELP_PAD;
+        const int n = 12, w = 232, h = 26 + n * (FH + 1) + 8, x = (SCREEN_W - w) / 2, y = (SCREEN_H - h) / 2;
         ui_rect(x, y, w, h, rgb5551(34, 34, 38)); ui_frame(x, y, w, h, BLACK, 2); ui_text(SCREEN_W / 2, y + 6, "Help", YEL, UI_CENTER);
         for (int i = 0; i < n; i++) ui_text(x + 14, y + 24 + i * (FH + 1), HELP[i], WHITE, 0);
     }

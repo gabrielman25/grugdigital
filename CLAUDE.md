@@ -255,18 +255,29 @@ from `src/n64/grug-64/`: read its `README.md`): the Baseplate's physics, station
 - **The boot stage is Grug's patched one** (`src/n64/boot/`, read its `README.md`): a stock libdragon ROM does not
   boot in the browser emulator (black screen, `couldn't allocate memory for cached interpreter` in the console). Don't
   switch back to libdragon's default without testing the page.
-- **`arcade/<slug>/index.html` is the page that plays it**, not the game: a start screen (Play, Download ROM, the keys),
-  then EmulatorJS (GPL-3.0) full window, loaded from its CDN at a pinned version unless a copy is at
-  `/static/vendor/emulatorjs/data/`.
+- **`arcade/<slug>/index.html` is the page that plays it**, not the game: the game on the right in EmulatorJS
+  (GPL-3.0, loaded from its CDN at a pinned version unless a copy is at `/static/vendor/emulatorjs/data/`), and a
+  **sidebar on the left with the keys** (the owner's layout: nothing over the picture), Download ROM in it. On a phone
+  the keys go and the game takes the screen.
+- **Players there have a keyboard and a mouse, not an N64 controller.** The sidebar says which key is which button; the
+  mouse is the camera (the page drives a second controller's stick with it: click the game to lock the pointer), the
+  arrows and Q / E turn it too, a click swings, the wheel zooms. The page also tells the ROM it is a keyboard, and the
+  ROM then names keys, not buttons, in its own hints, signs, Help and menu. Any text in a ROM that names a control needs
+  both wordings (`KB()` in `game.c`).
 - **The Download ROM button is required before the game goes full screen** (the owner's rule): it is on the game's page
-  (`arcade/place/`, for any game with `rom`) and on the play page's start screen. Don't remove either.
+  (`arcade/place/`, for any game with `rom`) and in the play page's sidebar. Don't remove either.
 - **One ROM, two ways to draw**: on the console's graphics chip when it answers at boot, otherwise all in software,
   which is what a browser emulator gets. Sound is mixed by the CPU. Holding Z at start forces software. **The
   hardware path and real consoles are untested** (November 2026): say so until someone has tried ares or a console.
 - **Speed in the browser is the software renderer on an interpreted CPU**: keep `rast.c` and the HUD lean (the FPS row
   in the Game Menu shows where a frame goes), and keep the play page's `OPTIONS` (`CountPerOp` 1: about 38 frames a
-  second in the console's time, against 19 at the core's default). Test a change by playing the page headless
-  (Playwright + Chrome through the proxy, as for the other games) and reading that row.
+  second in the console's time, against 19 at the core's default). **Studs cost about a third of that** (24 against
+  38): the Game Menu can turn them off. Test a change by playing the page headless (Playwright + Chrome through the
+  proxy, as for the other games) and reading that row.
+- **Sound: the ROM queues its own audio buffers, by physical address** (`snd_feed` in `n64/main.c`). libdragon's audio
+  queue is silent with a callback until something queues the first buffer, and the address it gives the hardware
+  crashes the browser emulator's core. Measure sound at the emulator's output when testing (an AnalyserNode on what
+  connects to the AudioContext's destination): "the AudioContext is running" proved nothing the first time.
 - **Same physics as the web games**: `phys.c` is AmbientCore ported line for line, and `tools/physdiff.cjs` checks it
   against the Baseplate's own script. Voices and sounds are baked from `static/voice.js`, `static/sfx.js` and the clips
   by `tools/mkaudio.py`: re-run it (`make assets`) after new Voice Lab numbers, then rebuild the ROM.

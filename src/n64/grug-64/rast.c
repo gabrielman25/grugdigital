@@ -34,10 +34,39 @@ static void soft_begin(Frame *f, uint16_t sky, uint16_t ground, int horizon) {
     }
 }
 
+/* ---------------------------------------------------------------- studs
+   One tile is one stud (2 studs of width on a part), 16 x 16 texels of: 0 the face's colour, 1 its lit edge, 2 its shaded
+   edge. An embossed circle, lit from where the sun is (SUN in render.c: from -x, +z). Two versions: a crisp rim for up
+   close, and soft half-moons (3, 4: a gentler lit and shaded) for further off, where a thin rim would only shimmer and a
+   strong one would be busy. Beyond that a top is plain. */
+static uint8_t studNear[256], studFar[256]; static bool studsMade;
+static void make_studs(void) {
+    for (int tv = 0; tv < 16; tv++) for (int tu = 0; tu < 16; tu++) {
+        float ex = tu - 7.5f, ez = tv - 7.5f, d2 = ex * ex + ez * ez, lit = ex * -0.876f + ez * 0.482f;   /* (lit: not divided by d: compared against k d below) */
+        float d = 0; for (int k = 0; k < 9 && d * d < d2; k++) d += 1.0f;   /* a whole-number root is enough here */
+        uint8_t n = 0, f = 0;
+        if (d2 >= 3.4f * 3.4f && d2 <= 6.1f * 6.1f) n = lit > 0.3f * d ? 1 : lit < -0.3f * d ? 2 : 0;
+        if (d2 <= 5.6f * 5.6f) f = lit > 0.3f * d ? 3 : lit < -0.3f * d ? 4 : 0;   /* (3, 4: the softer pair) */
+        studNear[tv * 16 + tu] = n; studFar[tv * 16 + tu] = f;
+    }
+    studsMade = true;
+}
+/* texel straight to colour, kept for the last few colours drawn (the baseplate's two, the blocks' handful): one lookup a pixel, not two */
+typedef struct { uint16_t key[5]; bool used; uint16_t near[256], far[256]; } StudTab;
+static StudTab studTab[8]; static int studTurn;
+static const StudTab *stud_tab(const StudFace *sf) {
+    for (int i = 0; i < 8; i++) if (studTab[i].used && !memcmp(studTab[i].key, sf->pal, sizeof sf->pal)) return &studTab[i];
+    StudTab *t = &studTab[studTurn]; studTurn = (studTurn + 1) & 7; t->used = true; memcpy(t->key, sf->pal, sizeof sf->pal);
+    for (int i = 0; i < 256; i++) { t->near[i] = sf->pal[studNear[i]]; t->far[i] = sf->pal[studFar[i]]; }
+    return t;
+}
+#define STUD_NEAR 0.17f   /* studs of world to a pixel along a row: under this the crisp rim, */
+#define STUD_FAR  0.34f   /* under this the half-moons, over it nothing */
+
 /* where each scanline of the polygon being drawn starts and ends: x on the row of pixel centres, 16.16 fixed point */
 static int32_t spanL[SCREEN_H], spanR[SCREEN_H];
 
-static void soft_poly(const SVert *v, int n, uint16_t color, int mode) {
+static void raster(const SVert *v, int n, uint16_t color, int mode, const StudFace *sf) {
     Frame *f = gfx_frame;
     /* the top and bottom of the polygon */
     float ymin = v[0].y, ymax = v[0].y;
@@ -70,6 +99,7 @@ static void soft_poly(const SVert *v, int n, uint16_t color, int mode) {
         int32_t xf = (int32_t)(x * 65536.0f); const int32_t sf = (int32_t)(slope * 65536.0f);
         for (int y = ya; y <= yb; y++, xf += sf) { if (xf < spanL[y]) spanL[y] = xf; if (xf > spanR[y]) spanR[y] = xf; }
     }
+    const StudTab *tab = 0;
     const int32_t iddx = (int32_t)(ddx * 65536.0f);
     const bool steep = ddx > 16.0f || ddx < -16.0f;          /* depth changes fast along a line: watch the 16-bit range */
     float drow = v[0].d + ddy * (y0 + 0.5f - v[0].y) - ddx * v[0].x;   /* the depth at x = 0 on this line */
@@ -79,7 +109,35 @@ static void soft_poly(const SVert *v, int n, uint16_t color, int mode) {
         if (xe > f->w) xe = f->w;
         if (xs >= xe) continue;
         uint16_t *px = f->fb + y * f->stride + xs, *pe = px + (xe - xs);
-        if (mode == GM_BACK) { fill16(px, color, xe - xs); continue; }
+        /* a studded top: where this row lies on the face. One tile is 16 texels, so the fraction of a tile, 16 bits of it, is
+           the texel in 4.12, and it wraps by itself. Across in the low half of one word and along in the high half: one add
+           a pixel moves both. (A carry from the low half nudges the high one by a 4096th of a texel: nothing.) */
+        const uint16_t *tex = 0; uint32_t uv = 0, duv = 0;
+        if (sf) {
+            float wx, wz, wdx, wdz;
+            if (r_row(sf->y, y, &wx, &wz, &wdx, &wdz)) {
+                float step2 = wdx * wdx + wdz * wdz;
+                if (step2 < STUD_FAR * STUD_FAR) {
+                    if (!tab) tab = stud_tab(sf);
+                    tex = step2 < STUD_NEAR * STUD_NEAR ? tab->near : tab->far;
+                    const int32_t uu = (int32_t)((wx + wdx * xs - sf->ox) * sf->su * 65536.0f), du = (int32_t)(wdx * sf->su * 65536.0f);
+                    const int32_t vv = (int32_t)((wz + wdz * xs - sf->oz) * sf->sv * 65536.0f), dv = (int32_t)(wdz * sf->sv * 65536.0f);
+                    uv = ((uint32_t)vv << 16) | ((uint32_t)uu & 0xffff); duv = ((uint32_t)dv << 16) + ((uint32_t)du & 0xffff);
+                }
+            }
+        }
+#define TEXEL() tex[((uv >> 24) & 0xF0) | ((uv >> 12) & 0x0F)]
+        if (mode == GM_BACK) {
+            if (tex) {
+                /* the baseplate: most of the screen, so the pattern is looked up once for every two pixels and both written
+                   at once (half the work; the studs come out a little chunkier, which suits the machine) */
+                if (((uintptr_t)px & 2) && px < pe) { *px++ = TEXEL(); uv += duv; }
+                uint32_t *q = (uint32_t *)(void *)px, *qe = q + ((pe - px) >> 1); const uint32_t duv2 = duv << 1;
+                for (; q < qe; q++, uv += duv2) { const uint32_t c = TEXEL(); *q = (c << 16) | c; }
+                px = (uint16_t *)(void *)q; if (px < pe) *px = TEXEL();
+            } else fill16(px, color, xe - xs);
+            continue;
+        }
         float ds = drow + ddx * (xs + 0.5f);
         if (ds < 1) ds = 1; else if (ds > 65534) ds = 65534;
         int32_t step = iddx;
@@ -89,7 +147,9 @@ static void soft_poly(const SVert *v, int n, uint16_t color, int mode) {
         }
         uint32_t d = (uint32_t)(int32_t)(ds * 32768.0f) << 1;   /* (through a signed conversion: the FPU has no unsigned one) */
         uint16_t *pz = f->zb + y * f->stride + xs;
-        if (mode == GM_OPAQUE) {
+        if (mode == GM_OPAQUE && tex) {
+            for (; px < pe; px++, pz++, uv += duv) { const uint16_t dz = (uint16_t)(d >> 16); if (dz >= *pz) { *pz = dz; *px = TEXEL(); } d += step; }
+        } else if (mode == GM_OPAQUE) {
             for (; px < pe; px++, pz++) { const uint16_t dz = (uint16_t)(d >> 16); if (dz >= *pz) { *pz = dz; *px = color; } d += step; }
         } else if (mode == GM_BASE) {   /* the first thing drawn: nothing to test against */
             for (; px < pe; px++, pz++) { *pz = (uint16_t)(d >> 16); *px = color; d += step; }
@@ -99,6 +159,9 @@ static void soft_poly(const SVert *v, int n, uint16_t color, int mode) {
     }
 }
 
+#undef TEXEL
+static void soft_poly(const SVert *v, int n, uint16_t color, int mode) { raster(v, n, color, mode, 0); }
+static void soft_studs(const SVert *v, int n, const StudFace *sf, int mode) { if (!studsMade) make_studs(); raster(v, n, sf->pal[0], mode, sf); }
 static void soft_end3d(void) {}
 
-const GfxBackend gfx_soft = { "Software", soft_begin, soft_poly, soft_end3d };
+const GfxBackend gfx_soft = { "Software", soft_begin, soft_poly, soft_studs, soft_end3d };

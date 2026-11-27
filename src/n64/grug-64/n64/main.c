@@ -13,7 +13,40 @@
 
 static uint16_t zb[SCREEN_W * SCREEN_H];
 
-static void audio_fill(short *buffer, size_t numsamples) { aud_mix(buffer, (int)numsamples); }
+/* ---------------------------------------------------------------- sound: straight to the audio interface
+   libdragon's own audio queue gives the AI the buffer's uncached address (0xA0......). A console only looks at the low
+   24 bits; the browser emulator's core uses all of it as an index into memory and crashes. So this queues the buffers
+   itself, by physical address. Two can be queued at once: the audio interrupt comes as each one ends, and mixes the next
+   (so the sound never waits for a slow frame). */
+#define AI_ADDR    (*(volatile uint32_t *)0xA4500000)
+#define AI_LEN     (*(volatile uint32_t *)0xA4500004)
+#define AI_CTRL    (*(volatile uint32_t *)0xA4500008)
+#define AI_STATUS  (*(volatile uint32_t *)0xA450000C)
+#define AI_DACRATE (*(volatile uint32_t *)0xA4500010)
+#define AI_BITRATE (*(volatile uint32_t *)0xA4500014)
+#define AI_FULL    0x80000000u
+#define SND_FRAMES 736                    /* a thirtieth of a second (x4 bytes: a multiple of 8, as the AI wants) */
+#define SND_BUFS   3                      /* one playing, one queued, one being mixed */
+static int16_t *sndbuf[SND_BUFS]; static int sndnext;
+static void snd_feed(void) {
+    for (int i = 0; i < 2 && !(AI_STATUS & AI_FULL); i++) {
+        int16_t *b = sndbuf[sndnext]; sndnext = (sndnext + 1) % SND_BUFS;
+        aud_mix(b, SND_FRAMES);
+        AI_ADDR = PhysicalAddr(b); AI_LEN = SND_FRAMES * 4; AI_CTRL = 1;
+    }
+}
+static void snd_init(void) {
+    const int clock = get_tv_type() == TV_PAL ? 49656530 : get_tv_type() == TV_MPAL ? 48628316 : 48681812;
+    int dacrate = ((2 * clock / AUD_RATE) + 1) / 2, bitrate = dacrate / 66; if (bitrate > 16) bitrate = 16;
+    AI_DACRATE = dacrate - 1; AI_BITRATE = bitrate - 1;
+    for (int i = 0; i < SND_BUFS; i++) {
+        uint8_t *p = malloc_uncached_aligned(16, SND_FRAMES * 4 + 16);
+        if ((((uint32_t)p + SND_FRAMES * 4) & 0x1FFF) == 0) p += 16;   /* (a buffer that ends on an 8 KB boundary trips a fault in the AI's address counter) */
+        sndbuf[i] = (int16_t *)p;
+    }
+    register_AI_handler(snd_feed); set_AI_interrupt(1);
+    disable_interrupts(); snd_feed(); enable_interrupts();   /* the interrupt only comes when a buffer ends: queue the first two */
+}
 static uint32_t clock_us(void) { return (uint32_t)get_ticks_us(); }
 
 static void read_input(Input *in) {
@@ -26,6 +59,13 @@ static void read_input(Input *in) {
 #define MAP(J) ((J.a ? BTN_A : 0) | (J.b ? BTN_B : 0) | (J.z ? BTN_Z : 0) | (J.start ? BTN_START : 0) | (J.c_left ? BTN_CL : 0) | (J.c_right ? BTN_CR : 0) | (J.c_up ? BTN_CU : 0) | (J.c_down ? BTN_CD : 0) | \
                 (J.l ? BTN_L : 0) | (J.r ? BTN_R : 0) | (J.d_up ? BTN_DU : 0) | (J.d_down ? BTN_DD : 0) | (J.d_left ? BTN_DL : 0) | (J.d_right ? BTN_DR : 0))
     in->held = MAP(h); in->pressed = MAP(p);
+    /* the camera stick: a second controller's Control Stick (the C buttons still work without one) */
+    joypad_inputs_t j2 = joypad_get_inputs(JOYPAD_PORT_2);
+    float cx = j2.stick_x / 80.0f, cy = j2.stick_y / 80.0f;
+    in->cx = cx > 1 ? 1 : cx < -1 ? -1 : cx; in->cy = cy > 1 ? 1 : cy < -1 ? -1 : cy;
+    /* the Arcade's page holds L + R + Z on a fourth controller to say "this is a keyboard": the game then names keys */
+    joypad_buttons_t h4 = joypad_get_buttons(JOYPAD_PORT_4);
+    if (h4.l && h4.r && h4.z) game_kbd = true;
 #undef MAP
 }
 
@@ -49,8 +89,7 @@ int main(void) {
 
     game_clock_us = clock_us;
     game_init((uint32_t)TICKS_READ() | 1);
-    audio_init(AUD_RATE, 4);
-    audio_set_buffer_callback(audio_fill);   /* mixed from the audio interrupt: the sound never waits for a slow frame */
+    snd_init();
 
     uint64_t last = get_ticks_us(); float fpsAcc = 0; int fpsN = 0;
     while (1) {

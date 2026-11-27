@@ -37,6 +37,7 @@ enum { K_SOLID = 0, K_KILL, K_PAD, K_LADDER, K_BUTTON };
 #define PF_HIDDEN   0x08   /* in the physics world, never drawn */
 #define PF_FLAT     0x10   /* a thin thing lying on the ground: drawn right after the baseplate (see render.c) */
 #define PF_DECO     0x20   /* drawn, but not in the physics world */
+#define PF_STUDS    0x40   /* studs on top (the classic look: one stud every 2 studs of width, whole studs edge to edge) */
 
 typedef struct Part {
     float minX, maxX, minY, maxY, minZ, maxZ;

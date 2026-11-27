@@ -77,6 +77,7 @@ static void hw_poly(const SVert *v, int n, uint16_t color, int mode) {
     for (int i = 0; i < n; i++) { p[i][0] = v[i].x; p[i][1] = v[i].y; float z = 1.0f - v[i].d * (1.0f / 65535.0f); p[i][2] = z < 0 ? 0 : z > 1 ? 1 : z; }
     for (int i = 1; i + 1 < n; i++) rdpq_triangle(&TRIFMT_ZBUF, p[0], p[i], p[i + 1]);
 }
+static void hw_studs(const SVert *v, int n, const StudFace *sf, int mode) { hw_poly(v, n, sf->pal[0], mode); }   /* (plain tops for now: the stud pattern is the software renderer's) */
 static void hw_end3d(void) { rdpq_detach_wait(); }   /* the picture is in memory: the CPU draws the HUD on it */
 
-const GfxBackend gfx_hw = { "Console", hw_begin, hw_poly, hw_end3d };
+const GfxBackend gfx_hw = { "Console", hw_begin, hw_poly, hw_studs, hw_end3d };

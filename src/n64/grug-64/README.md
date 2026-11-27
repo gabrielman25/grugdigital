@@ -40,10 +40,10 @@ the hardware tests altogether: the way out if the hardware path ever misbehaves.
 
 - **Tested:** the game logic and the software renderer on a PC (`host/`), the physics against the site's own, and the
   ROM itself in the Arcade's emulator through `arcade/grug-64/index.html` in headless Chrome: it boots, draws, takes
-  the keyboard, and the audio runs.
+  the keyboard and the mouse's camera stick, and sound comes out (measured at the emulator's output, not listened to).
 - **Not tested: anything on a real console.** That means the hardware drawing path (`n64/hw.c`: the browser emulator
   has no low-level RSP or RDP, so the ROM always chooses software there), the boot stage on real memory chips
-  (`../boot/README.md`), the sound to the ear, and the speed. Test in ares (https://ares-emu.net, an accurate
+  (`../boot/README.md`), the audio driver, a second controller as the camera stick, the sound to the ear, and the speed. Test in ares (https://ares-emu.net, an accurate
   emulator) first, then on a console. If the picture is wrong, hold Z at start and tell us what "Drawn by" said.
 
 ## In the browser
@@ -56,7 +56,7 @@ The Arcade's emulator (EmulatorJS's mupen64plus-next core) is why three things a
   at a time. The FPS row in the Game Menu shows where a frame's time goes (game, world, you, HUD).
 - **The page sets the core's `CountPerOp` to 1** (`OPTIONS` in the play page). The core paces an unknown ROM's CPU at 2
   counts an instruction, which is half speed for this game: about 19 frames a second in the console's own time, against
-  about 38 at 1. It costs the visitor's computer more; on one that can't keep up the game runs slow rather than
+  about 38 at 1 (with studs off; about 24 with them on). It costs the visitor's computer more; on one that can't keep up the game runs slow rather than
   dropping frames. `?cpo=2` on the play page puts the core's default back to compare, `?oc=1` overclocks further.
   EmulatorJS only passes saved settings to the core at start-up, so the page seeds them (see the comment there).
 
@@ -98,16 +98,46 @@ say so.
 
 ## Controls
 
-| Console | Keyboard (in the Arcade) | |
+| Console | Keyboard and mouse (in the Arcade) | |
 | --- | --- | --- |
 | Control Stick | W A S D | Move |
 | A | Space | Jump (hold to keep hopping) |
 | Z | Shift | Dodge roll, in the air too |
-| B | F | Swing |
-| C left / right | Q / E | Turn the camera |
-| C up / down | Up / Down | Tilt the camera |
-| R / L | I / O | Zoom in / out |
+| B | F, or a click | Swing |
+| A second controller's Control Stick | The mouse (click the game to lock it, Esc lets go) | Look around, as far and as fast as you push |
+| C buttons | Arrows, or Q / E | Turn and tilt the camera |
+| R / L | The wheel, or I / O | Zoom in / out |
 | START | Enter | Game Menu |
+
+**The camera stick.** The ROM turns its camera by how far the stick of the controller in **port 2** is pushed
+(`CAM_STICK` in `game.c`: 6 radians a second right over). On a console that is a second controller held as a camera
+stick; the C buttons still work without one. In the Arcade the page drives that stick from the mouse: every movement
+adds to what is still to be turned, and each frame the stick is pushed just hard enough to turn it away (`the mouse` in
+`arcade/grug-64/index.html`; its `CAM_STICK` must match). That is why the core's stick dead zone is set to 0 there.
+
+**Keys or buttons in the game's own words.** The page holds L + R + Z on the controller in port 4; the ROM takes that
+to mean a keyboard (`game_kbd`) and names keys in its hints, its signs, its Help and under the Game Menu. `KB(n64, kbd)`
+in `game.c` picks the wording. Not on a phone, where EmulatorJS shows its own N64 pad.
 
 The keyboard column is `KEYS` in `arcade/grug-64/index.html`; keep it, `controls` in `arcade/arcade.js` and the Help
 text in `game.c` in step.
+
+## Studs
+
+Studded tops as on the web (one stud every 2 studs of width, whole studs edge to edge, lit from the sun's side), without
+a texture unit: the camera never rolls, so along a screen row a level face moves through the stud grid in a straight
+line at a steady pace (`r_row` in `render.c`), and each pixel is one lookup in a 16 x 16 pattern (`rast.c`). A crisp rim
+up close, soft half-moons further off, plain beyond. Parts get them with `PF_STUDS` (`part()` gives it to everything
+but thin things on the ground).
+
+They are not free. In the browser about two thirds of the screen is studded ground: roughly **24 frames a second with
+them against 38 without** (console time, `CountPerOp` 1). So the baseplate looks the pattern up once per two pixels,
+and the Game Menu has **Studs: On / Off (faster)**. The hardware path (`n64/hw.c`) draws plain tops for now.
+
+## Sound on the console
+
+`n64/main.c` queues its own buffers on the audio interface (`snd_feed`, from the audio interrupt) rather than using
+libdragon's audio queue, for two reasons found the hard way: with a fill callback libdragon never queues the first
+buffer, so there is silence; and it gives the hardware the buffer's uncached address (`0xA0......`), which a console
+masks to 24 bits and the browser emulator's core does not: it indexes memory with it and crashes. Keep the address
+physical.

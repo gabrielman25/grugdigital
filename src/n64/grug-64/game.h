@@ -13,6 +13,7 @@ enum { BTN_A = 0x0001, BTN_B = 0x0002, BTN_Z = 0x0004, BTN_START = 0x0008,
 typedef struct Input {
     float sx, sy;            /* the stick, -1..1 (up is +y) */
     uint16_t held, pressed;  /* BTN_*: down now, went down this frame */
+    float cx, cy;            /* the camera stick, -1..1: a second controller's stick on a console, the mouse in the Arcade */
 } Input;
 
 void game_init(uint32_t seed);
@@ -22,6 +23,7 @@ void game_draw(Frame *f);
 /* the platform tells the game what it found; the Game Menu lets the player switch */
 extern bool  game_hw_ok;      /* the console's own rasterizer answered at boot */
 extern bool  game_use_hw;     /* which one to draw with (the platform swaps gfx when this changes) */
+extern bool  game_kbd;        /* played on a keyboard and mouse (the Arcade's page says so): name keys, not controller buttons */
 extern float game_fps;        /* measured by the platform, shown when the menu's FPS row is on */
 extern uint32_t (*game_clock_us)(void);   /* the platform's clock, if it has one: the FPS row then also shows where a frame's time goes */
 

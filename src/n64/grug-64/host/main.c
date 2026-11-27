@@ -13,6 +13,7 @@ static Frame frame = { fb, zb, SCREEN_W, SCREEN_H, SCREEN_W };
 static const char *outdir = ".";
 static FILE *wav; static long wavBytes; static float audAcc;
 static int fails;
+static float camX, camY;   /* the camera stick, held by the script */
 
 static void shot(const char *name) {
     char path[512]; snprintf(path, sizeof path, "%s/%s.ppm", outdir, name);
@@ -26,7 +27,7 @@ static void shot(const char *name) {
 static void run(float seconds, float sx, float sy, unsigned held) {
     static unsigned prev = 0; const float dt = 1.0f / 30; int n = (int)(seconds / dt + 0.5f);
     for (int i = 0; i < n; i++) {
-        Input in = { sx, sy, (uint16_t)held, (uint16_t)(held & ~prev) }; prev = held;
+        Input in = { sx, sy, (uint16_t)held, (uint16_t)(held & ~prev), camX, camY }; prev = held;
         game_update(&in, dt);
         audAcc += dt * AUD_RATE; int fr = (int)audAcc; audAcc -= fr;
         static int16_t buf[4096 * 2]; if (fr > 4096) fr = 4096; aud_mix(buf, fr); fwrite(buf, 4, fr, wav); wavBytes += fr * 4;
@@ -98,6 +99,9 @@ int main(int argc, char **argv) {
     /* the Game Menu */
     run(0.1f, 0, 0, BTN_START); run(0.2f, 0, 0, 0); shot("17-game-menu"); run(0.1f, 0, -1, 0); run(0.2f, 0, 0, 0); run(0.1f, 0, -1, 0); run(0.2f, 0, 0, 0); run(0.1f, 0, 0, BTN_A); run(0.3f, 0, 0, 0);
     run(0.1f, 0, 0, BTN_START); run(0.3f, 0, 0, 0); game_debug(&d); check("START closes the menu", d.menu, 0, 0);
+    /* the camera stick: right over for half a second turns the camera 3 radians (6 a second) */
+    game_debug(&d); float yaw0 = d.camYaw; camX = 1; run(0.5f, 0, 0, 0); camX = 0; game_debug(&d); check("camera stick: radians turned in half a second", yaw0 - d.camYaw, 2.9f, 3.1f);
+    game_kbd = true; run(0.1f, 0, 0, BTN_START); run(0.3f, 0, 0, 0); shot("17b-menu-keyboard"); run(0.1f, 0, 0, BTN_START); run(0.3f, 0, 0, 0); game_kbd = false;
     /* first person */
     for (int i = 0; i < 30; i++) { run(0.04f, 0, 0, BTN_R); run(0.04f, 0, 0, 0); } run(0.5f, 0, 0, 0); shot("18-first-person");
 
