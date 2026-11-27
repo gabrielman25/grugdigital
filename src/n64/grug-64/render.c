@@ -140,6 +140,13 @@ bool r_project(float x, float y, float z, int *sx, int *sy, float *dist) {
     return true;
 }
 
+/* the horizon: a level ray is this far up the screen (the camera never rolls, so it is a straight line across) */
+int r_horizon(void) {
+    float h = sqrtf(1 - C.fy * C.fy); if (h < 0.02f) return C.fy < 0 ? -1 : SCREEN_H + 1;
+    float y = SCREEN_H * 0.5f + C.ky * (C.fy / h);
+    return y < -1 ? -1 : y > SCREEN_H + 1 ? SCREEN_H + 1 : (int)y;
+}
+
 /* corner i of a box: bit 0 = +x, bit 1 = +y, bit 2 = +z. The faces, wound so they read the same from outside. */
 static const uint8_t FACE[6][4] = { { 1, 3, 7, 5 }, { 0, 4, 6, 2 }, { 2, 6, 7, 3 }, { 0, 1, 5, 4 }, { 4, 5, 7, 6 }, { 0, 2, 3, 1 } };   /* +x -x +y -y +z -z */
 static const float FN[6][3] = { { 1, 0, 0 }, { -1, 0, 0 }, { 0, 1, 0 }, { 0, -1, 0 }, { 0, 0, 1 }, { 0, 0, -1 } };

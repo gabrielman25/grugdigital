@@ -251,14 +251,22 @@ from `src/n64/grug-64/`: read its `README.md`): the Baseplate's physics, station
 
 - **The ROM** is `arcade/<slug>/<name>.z64`, named by `rom` in the game's `GAMES` entry. `make install` in the game's
   source folder builds it and copies it there (needs libdragon; `make host` and the tests need only a C compiler).
+  Commit the rebuilt ROM with the source change that made it: the site serves the file, it isn't built on deploy.
+- **The boot stage is Grug's patched one** (`src/n64/boot/`, read its `README.md`): a stock libdragon ROM does not
+  boot in the browser emulator (black screen, `couldn't allocate memory for cached interpreter` in the console). Don't
+  switch back to libdragon's default without testing the page.
 - **`arcade/<slug>/index.html` is the page that plays it**, not the game: a start screen (Play, Download ROM, the keys),
   then EmulatorJS (GPL-3.0) full window, loaded from its CDN at a pinned version unless a copy is at
   `/static/vendor/emulatorjs/data/`.
 - **The Download ROM button is required before the game goes full screen** (the owner's rule): it is on the game's page
   (`arcade/place/`, for any game with `rom`) and on the play page's start screen. Don't remove either.
 - **One ROM, two ways to draw**: on the console's graphics chip when it answers at boot, otherwise all in software,
-  which is what a browser emulator gets. Sound is mixed by the CPU. Keep both working: test in the page and, when you
-  can, in an accurate emulator (ares) or on a console.
+  which is what a browser emulator gets. Sound is mixed by the CPU. Holding Z at start forces software. **The
+  hardware path and real consoles are untested** (November 2026): say so until someone has tried ares or a console.
+- **Speed in the browser is the software renderer on an interpreted CPU**: keep `rast.c` and the HUD lean (the FPS row
+  in the Game Menu shows where a frame goes), and keep the play page's `OPTIONS` (`CountPerOp` 1: about 38 frames a
+  second in the console's time, against 19 at the core's default). Test a change by playing the page headless
+  (Playwright + Chrome through the proxy, as for the other games) and reading that row.
 - **Same physics as the web games**: `phys.c` is AmbientCore ported line for line, and `tools/physdiff.cjs` checks it
   against the Baseplate's own script. Voices and sounds are baked from `static/voice.js`, `static/sfx.js` and the clips
   by `tools/mkaudio.py`: re-run it (`make assets`) after new Voice Lab numbers, then rebuild the ROM.

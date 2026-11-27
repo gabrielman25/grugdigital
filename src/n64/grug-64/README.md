@@ -25,6 +25,7 @@ Left for later: the other players, seats, the button and door, the blaster, save
 | `audio.c`, `sounds.c` | A software mixer and the voice rules from `static/voice.js`; the baked sounds. |
 | `host/` | The same game on a PC, driven by a script, for tests. |
 | `tools/` | `mkaudio.py`, `mkfont.py`, `mkcover.py`, `physdiff.cjs`. |
+| `../boot/` | The boot stage every Grug ROM starts with: libdragon's, patched for the browser emulator. |
 
 Nothing outside `n64/` knows it is on a console, so almost everything is tested on a PC.
 
@@ -32,7 +33,32 @@ Nothing outside `n64/` knows it is on a console, so almost everything is tested 
 microcode. Most browser emulators only imitate Nintendo's standard microcodes and can't run that, so the ROM also
 carries a software renderer. At boot `n64/hw.c` runs four instructions on the RSP by hand and fills a small surface
 with the RDP; only if both really happened does it use the hardware. The Game Menu shows "Drawn by" when both work.
-The sound is mixed by the CPU for the same reason.
+The sound is mixed by the CPU for the same reason. **Hold Z while the console starts** to stay in software and skip
+the hardware tests altogether: the way out if the hardware path ever misbehaves.
+
+## What has been tested, and what has not
+
+- **Tested:** the game logic and the software renderer on a PC (`host/`), the physics against the site's own, and the
+  ROM itself in the Arcade's emulator through `arcade/grug-64/index.html` in headless Chrome: it boots, draws, takes
+  the keyboard, and the audio runs.
+- **Not tested: anything on a real console.** That means the hardware drawing path (`n64/hw.c`: the browser emulator
+  has no low-level RSP or RDP, so the ROM always chooses software there), the boot stage on real memory chips
+  (`../boot/README.md`), the sound to the ear, and the speed. Test in ares (https://ares-emu.net, an accurate
+  emulator) first, then on a console. If the picture is wrong, hold Z at start and tell us what "Drawn by" said.
+
+## In the browser
+
+The Arcade's emulator (EmulatorJS's mupen64plus-next core) is why three things are the way they are:
+
+- **The boot stage is patched** (`../boot/`): a stock libdragon ROM does not boot in that core.
+- **Everything is drawn in software there**, on an interpreted CPU. `rast.c` is written for that: edges stepped in
+  fixed point, no library calls per polygon, the baseplate's top painted with no depth work, panels dimmed two pixels
+  at a time. The FPS row in the Game Menu shows where a frame's time goes (game, world, you, HUD).
+- **The page sets the core's `CountPerOp` to 1** (`OPTIONS` in the play page). The core paces an unknown ROM's CPU at 2
+  counts an instruction, which is half speed for this game: about 19 frames a second in the console's own time, against
+  about 38 at 1. It costs the visitor's computer more; on one that can't keep up the game runs slow rather than
+  dropping frames. `?cpo=2` on the play page puts the core's default back to compare, `?oc=1` overclocks further.
+  EmulatorJS only passes saved settings to the core at start-up, so the page seeds them (see the comment there).
 
 ## Building
 
@@ -44,6 +70,10 @@ node tools/physdiff.cjs                     # phys.c against the site's own Ambi
 export N64_INST=/path/to/libdragon          # the ROM: needs libdragon (https://libdragon.dev) and its MIPS toolchain
 make install                                # builds grug-baseplate-64.z64 and copies it to arcade/grug-64/
 ```
+
+The ROM is built on Grug's patched boot stage, `../boot/ipl3_dev_grug.z64` (`make N64_ROM_HEADER=` uses libdragon's own).
+It was last built with libdragon trunk at `e356bf3` and GCC 16.2. After a build, open `/arcade/grug-64/` from a local
+server at the repo root and play it: the page is the test.
 
 `make assets` re-bakes `sounds.c` / `sounds.h` and `font.h`. Run it after the owner sends new Voice Lab numbers
 (`static/voice.js`, `static/sfx.js`) or new voice clips, then rebuild the ROM.

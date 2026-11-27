@@ -27,6 +27,10 @@ static inline float approach(float v, float t, float step) { return v + clampf(t
 
 bool game_hw_ok, game_use_hw, game_hide_hud;
 float game_fps;
+uint32_t (*game_clock_us)(void);
+static uint32_t prof[4], profT;   /* ms x 10: update, world, characters, HUD */
+#define PROF_BEGIN() do { if (game_clock_us) profT = game_clock_us(); } while (0)
+#define PROF_END(i) do { if (game_clock_us) { uint32_t n_ = game_clock_us(); prof[i] = (prof[i] * 7 + (n_ - profT) / 100) / 8; profT = n_; } } while (0)
 
 /* ---------------------------------------------------------------- the world */
 enum { T_NONE = 0, T_BASE, T_HURT, T_LIFT, T_FINISH, T_SPAWN };
@@ -352,6 +356,7 @@ static void menu_update(const Input *in, float dt) {
 
 void game_update(const Input *inRaw, float dt) {
     if (dt > 0.1f) dt = 0.1f; if (dt <= 0) return;
+    PROF_BEGIN();
     gclock += dt;
     Input in = *inRaw; Character *ch = &player.ch;
     if (in.pressed & BTN_START && !menu.open) { menu.open = true; menu.help = false; menu.sel = MI_RESUME; aud_tap(S_TAP_OPEN); in.pressed = 0; }
@@ -418,6 +423,7 @@ void game_update(const Input *inRaw, float dt) {
     if (ann.t > 0) ann.t -= dt;
     place_camera(dt);
     aud_update(dt);
+    PROF_END(0);
 }
 
 /* ---------------------------------------------------------------- drawing */
@@ -427,13 +433,12 @@ static void draw_rig(float x, float y, float z, float yaw, const Rig *r, const L
     for (int i = 0; i < n; i++) r_obox(b[i].c, &b[i].m, b[i].h[0], b[i].h[1], b[i].h[2], b[i].color, white);
 }
 static void draw_world(void) {
-    /* far below, the ground that goes on for ever (no depth: it is behind everything) */
-    { const float G = 3000, p[4][3] = { { -G, -30, -G }, { G, -30, -G }, { G, -30, G }, { -G, -30, G } }; r_quad(p, r_shade(0x6f8a48, 0, 1, 0), GM_BACK, 0); }
-    /* the baseplate: big grey checks on top, a plain slab underneath */
+    /* the baseplate: big grey checks on top, a plain slab underneath. Seen from above its top can't hide anything (whatever is
+       behind it is under it), so it is painted with no depth at all: the cheapest pixels there are, and it is half the screen. */
     const uint16_t ca = r_shade(0xa3a2a5, 0, 1, 0), cb = r_shade(0x9c9b9e, 0, 1, 0); const int N = (int)(BP / BT);
     if (cam.py > 0) for (int i = 0; i < N; i++) for (int j = 0; j < N; j++) {
         float x0 = -BP / 2 + BT * i, z0 = -BP / 2 + BT * j; const float p[4][3] = { { x0, 0, z0 }, { x0 + BT, 0, z0 }, { x0 + BT, 0, z0 + BT }, { x0, 0, z0 + BT } };
-        r_quad(p, (i + j) % 2 ? ca : cb, GM_OPAQUE, 0);
+        r_quad(p, (i + j) % 2 ? ca : cb, GM_BACK, 0);
     }
     r_box(-BP / 2, -2, -BP / 2, BP / 2, 0, BP / 2, 0x9c9b9e, 1);
     /* thin things lying on the ground first (they win ties with the plate), then everything else */
@@ -500,16 +505,20 @@ static void draw_hud(void) {
     ui_dim(X, Y, 116, 45); ui_frame(X, Y, 116, 45, BLACK, 1);
     ui_text(X + 5, Y + 2, "HEALTH", WHITE, 0);
     for (int k = 0; k < MAXHP; k++) { ui_rect(X + 52 + k * 11, Y + 4, 9, 9, BLACK); ui_rect(X + 53 + k * 11, Y + 5, 7, 7, k < player.hp ? RED : rgb5551(70, 20, 20)); }
-    snprintf(buf, sizeof buf, "COINS %d", player.coinCount); ui_text(X + 5, Y + 2 + FH + 1, buf, YEL, 0);
-    if (ch->hasLast && ch->lastHeight > 0.5f) snprintf(buf, sizeof buf, "Jump %.1f up %.1f far", (double)ch->lastHeight, (double)ch->lastDist); else snprintf(buf, sizeof buf, "Jump: how high?");
-    ui_text(X + 5, Y + 2 + (FH + 1) * 2, ch->climbing ? "Climbing: A lets go" : buf, WHITE, 0);
+    { static char coinsT[16] = "COINS 0"; static int coinsN; if (coinsN != player.coinCount) { coinsN = player.coinCount; snprintf(coinsT, sizeof coinsT, "COINS %d", coinsN); } ui_text(X + 5, Y + 2 + FH + 1, coinsT, YEL, 0); }
+    { static char jump[40] = "Jump: how high?"; static float jh = -1, jd = -1;   /* (written only when it changes: printing decimals is slow on a console) */
+      if (ch->hasLast && ch->lastHeight > 0.5f && (ch->lastHeight != jh || ch->lastDist != jd)) { jh = ch->lastHeight; jd = ch->lastDist; int a = (int)(jh * 10 + 0.5f), b = (int)(jd * 10 + 0.5f); snprintf(jump, sizeof jump, "Jump %d.%d up %d.%d far", a / 10, a % 10, b / 10, b % 10); }
+      ui_text(X + 5, Y + 2 + (FH + 1) * 2, ch->climbing ? "Climbing: A lets go" : jump, WHITE, 0); }
     /* the place bar along the bottom */
     ui_dim(16, SCREEN_H - 44, SCREEN_W - 32, 28); ui_frame(16, SCREEN_H - 44, SCREEN_W - 32, 28, BLACK, 1);
     ui_text(SCREEN_W / 2, SCREEN_H - 43, pname, YEL, UI_CENTER); ui_text(SCREEN_W / 2, SCREEN_H - 43 + FH, psub, WHITE, UI_CENTER);
     if (hintT > 0 && !menu.open) { ui_text(SCREEN_W / 2, SCREEN_H - 62 - FH, "Stick move - A jump - Z roll - B swing", WHITE, UI_CENTER); ui_text(SCREEN_W / 2, SCREEN_H - 62, "C buttons: camera - START: Game Menu", WHITE, UI_CENTER); }
     if (ann.t > 0 && ann.big) { ui_text(SCREEN_W / 2, 70, ann.big, ann.color, UI_CENTER | UI_X2); if (ann.small) ui_text(SCREEN_W / 2, 70 + FH * 2 + 2, ann.small, WHITE, UI_CENTER); }
     if (ch->dead) ui_text(SCREEN_W / 2, 96, "You fell apart!", WHITE, UI_CENTER);
-    if (menu.fps) { snprintf(buf, sizeof buf, "%d fps %s", (int)(game_fps + 0.5f), gfx->name); ui_text(SCREEN_W - 18, 14, buf, WHITE, UI_RIGHT); }
+    if (menu.fps) {
+        snprintf(buf, sizeof buf, "%d fps %s", (int)(game_fps + 0.5f), gfx->name); ui_text(SCREEN_W - 18, 14, buf, WHITE, UI_RIGHT);
+        if (game_clock_us) { char buf[112]; snprintf(buf, sizeof buf, "ms: game %d world %d you %d hud %d (%d polys)", (int)prof[0] / 10, (int)prof[1] / 10, (int)prof[2] / 10, (int)prof[3] / 10, r_polys); ui_text(SCREEN_W - 18, 14 + FH, buf, WHITE, UI_RIGHT); }
+    }
     /* the Game Menu: a centred dark box, Resume Game first */
     if (menu.open && !menu.help) {
         int rows = 0; for (int i = 0; i < MI_COUNT; i++) if (menu_item_shown(i)) rows++;
@@ -531,9 +540,12 @@ static void draw_hud(void) {
 
 void game_draw(Frame *f) {
     const Character *ch = &player.ch;
-    gfx->begin(f, hex5551(0x8fc6ef));
+    PROF_BEGIN();
     r_camera(cam.px, cam.py, cam.pz, cam.fx, cam.fy, cam.fz, 70);
+    /* the sky, and far below the plate the ground that goes on for ever: its edge is the horizon */
+    gfx->begin(f, hex5551(0x8fc6ef), r_shade(0x6f8a48, 0, 1, 0), cam.py > -30 ? r_horizon() : SCREEN_H);
     draw_world();
+    PROF_END(1);
     const bool fp = cam.dist < 1.4f;   /* first person: zoomed all the way in, your body's hidden (as in Roblox) */
     if (!ch->dead) { draw_shadow(ch->x, ch->y - 1, ch->z, 1.5f); if (!fp) draw_rig(ch->x, ch->y, ch->z, ch->faceYaw, &player.rig, &GRUG, player.rolling, player.rollT / DASH.T, player.rollFx, player.rollFz, player.hitFx > 0.08f); }
     if (dummy.hp > 0) { draw_shadow(dummy.x, dummy.y - 1, dummy.z, 1.5f); draw_rig(dummy.x, dummy.y, dummy.z, dummy.yaw, &dummy.rig, &DUMMY_LOOK, false, 0, 0, 0, dummy.hitFx > 0.04f); }
@@ -545,7 +557,9 @@ void game_draw(Frame *f) {
         r_obox(p, &m, 0.95f, 0.95f, 0.16f, 0xffd23a, false);
     }
     gfx->end3d();
+    PROF_END(2);
     if (!game_hide_hud) draw_hud();
+    PROF_END(3);
 }
 
 void game_debug(GameDebug *d) {

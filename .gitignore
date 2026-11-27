@@ -6,3 +6,4 @@ __pycache__/
 # Nintendo 64 games: build output (the ROM the site serves is arcade/<slug>/<name>.z64)
 src/n64/*/build/
 src/n64/*/*.z64
+!src/n64/boot/*.z64

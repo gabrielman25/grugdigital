@@ -18,6 +18,8 @@ src = n64/main.c n64/hw.c $(CORE)
 
 all: $(ROM).z64
 $(BUILD_DIR)/$(ROM).elf: $(src:%.c=$(BUILD_DIR)/%.o)
+# the boot stage: libdragon's, patched so the ROM also boots in the browser emulator (see ../boot/README.md)
+N64_ROM_HEADER ?= ../boot/ipl3_dev_grug.z64
 $(ROM).z64: N64_ROM_TITLE = "GRUG BASEPLATE 64"
 $(ROM).z64: N64_ROM_REGIONFREE = true
 

@@ -61,12 +61,14 @@ static void set_mode(int mode) {
     else if (mode == GM_BACK) rdpq_mode_zbuf(false, false);
     else { rdpq_mode_zbuf(true, false); rdpq_mode_blender(RDPQ_BLENDER_MULTIPLY); }   /* GM_SHADOW: three quarters of what is there */
 }
-static void hw_begin(Frame *f, uint16_t sky) {
+static void hw_begin(Frame *f, uint16_t sky, uint16_t ground, int horizon) {
     gfx_frame = f; cur_mode = -1;
     rdpq_attach(csurf, &zsurf);
     rdpq_clear(unpack(sky)); rdpq_clear_z(ZBUF_MAX);
+    if (horizon < SCREEN_H) { rdpq_set_mode_fill(unpack(ground)); rdpq_fill_rectangle(0, horizon < 0 ? 0 : horizon, SCREEN_W, SCREEN_H); }
 }
 static void hw_poly(const SVert *v, int n, uint16_t color, int mode) {
+    if (mode == GM_BASE) mode = GM_OPAQUE;
     set_mode(mode);
     if (mode == GM_SHADOW) { if (!have_color) { rdpq_set_prim_color(RGBA32(0, 0, 0, 64)); have_color = true; } }
     else if (!have_color || color != cur_color) { rdpq_set_prim_color(unpack(color)); cur_color = color; have_color = true; }

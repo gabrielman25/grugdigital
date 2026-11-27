@@ -1,0 +1,63 @@
+--- a/boot/rdram.c
++++ b/boot/rdram.c
+@@ -350,17 +350,27 @@
+ 
+     // Follow the init procedure specified in the datasheet.
+     // First, put all of them to a fixed high ID (we use RDRAM_MAX_DEVICE_ID).
+-    enum { 
+-        INITIAL_ID = RDRAM_MAX_DEVICE_ID,
+-        INVALID_ID = RDRAM_MAX_DEVICE_ID - 2,
+-    };
++    //
++    // Grug: these two IDs are variables now, because the procedure may run twice.
++    // The mupen64plus-next core that browser emulators ship decodes a stored
++    // device ID from the wrong byte for IDs of 64 and above, so after parking the
++    // chips at 511 it never finds one again and this loop counts zero chips
++    // (then boots into memory that isn't there). A console always has at least
++    // two chips, so zero means that emulator: only then, do it again with
++    // parking IDs under 64, which it and the hardware decode alike. On a real
++    // console the first pass succeeds and this is exactly the stock sequence.
++    int INITIAL_ID = RDRAM_MAX_DEVICE_ID;
++    int INVALID_ID = RDRAM_MAX_DEVICE_ID - 2;
++    int total_memory;
++    int chip_id;
++retry:
+     rdram_reg_w_deviceid(RDRAM_BROADCAST, INITIAL_ID);
+     rdram_reg_w(RDRAM_BROADCAST, RDRAM_REG_MODE, (1<<6)|(1<<2));
+     rdram_reg_w(RDRAM_BROADCAST, RDRAM_REG_REF_ROW, 0);
+ 
+     // Initialization loop
+-    int total_memory = 0;
+-    int chip_id = 0; 
++    total_memory = 0;
++    chip_id = 0;
+     while (1) {
+         // Change the device ID to chip_id, which is our progressive ID. All chips
+         // now are mapped to INITIAL_ID, but only the first one in the chain will
+@@ -394,6 +404,12 @@
+             if (!cc) break;
+             weighted_cc += cc;
+         }
++        if (!weighted_cc && INITIAL_ID != RDRAM_MAX_DEVICE_ID) {
++            // Grug: second pass, so this is that emulator (see above). Its memory
++            // reads back perfectly at every current, lowest included, which the
++            // calibration takes for a failure. Any value will do there.
++            weighted_cc = 0x20 * NUM_CALIBRATION_ATTEMPTS;
++        }
+         if (!weighted_cc) {
+             debugf("error: current calibration failed for chip_id ", chip_id);
+             rdram_reg_w_deviceid(chip_id, INVALID_ID);
+@@ -458,6 +474,13 @@
+         total_memory += 2*1024*1024;
+     }
+ 
++    if (total_memory == 0 && INITIAL_ID == RDRAM_MAX_DEVICE_ID) {
++        debugf("no chips found: retrying with low parking IDs (emulator)");
++        INITIAL_ID = 62;
++        INVALID_ID = 60;
++        goto retry;
++    }
++
+     // Setup now the RI refresh register, so that RDRAM chips get refreshed
+     // at each HSYNC.
+     // This register contains a bitmask that indicates which RDRAM chips are

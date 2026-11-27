@@ -20,7 +20,8 @@ typedef struct { float x, y, d; } SVert;          /* screen pixels; d: depth, bi
 
 enum { GM_OPAQUE = 0,   /* z-tested, z-written */
        GM_SHADOW,       /* z-tested, darkens what is there (blob shadows) */
-       GM_BACK };       /* no z at all: the far ground, drawn first */
+       GM_BACK,         /* no z at all */
+       GM_BASE };       /* z-written without a test: the baseplate's top, the first thing drawn */
 
 /* depth = DEPTH_SCALE * NEAR / viewZ + DEPTH_BIAS, kept inside 16 bits with room either side for rounding */
 #define DEPTH_SCALE 64000.0f
@@ -34,7 +35,7 @@ typedef struct Frame {
 
 typedef struct GfxBackend {
     const char *name;
-    void (*begin)(Frame *f, uint16_t sky);                       /* clear colour and depth */
+    void (*begin)(Frame *f, uint16_t sky, uint16_t ground, int horizon);   /* clear depth; sky above the horizon line, far ground below */
     void (*poly)(const SVert *v, int n, uint16_t color, int mode);
     void (*end3d)(void);                                         /* the 3D picture is finished: the CPU may draw on fb */
 } GfxBackend;
@@ -62,6 +63,7 @@ void  r_obox(const float c[3], const Mat3 *m, float hx, float hy, float hz, uint
 void  r_quad(const float p[4][3], uint16_t color, int mode, float bias);     /* any world-space convex quad */
 void  r_ngon_flat(float cx, float y, float cz, float radius, int sides, uint16_t color, int mode);
 bool  r_project(float x, float y, float z, int *sx, int *sy, float *dist);   /* a world point on the screen */
+int   r_horizon(void);                               /* the screen line where the far ground meets the sky */
 uint16_t r_shade(uint32_t color, float nx, float ny, float nz);
 extern int r_polys;                                  /* polygons sent to the backend this frame */
 

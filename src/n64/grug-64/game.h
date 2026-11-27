@@ -23,6 +23,7 @@ void game_draw(Frame *f);
 extern bool  game_hw_ok;      /* the console's own rasterizer answered at boot */
 extern bool  game_use_hw;     /* which one to draw with (the platform swaps gfx when this changes) */
 extern float game_fps;        /* measured by the platform, shown when the menu's FPS row is on */
+extern uint32_t (*game_clock_us)(void);   /* the platform's clock, if it has one: the FPS row then also shows where a frame's time goes */
 
 /* for the host test harness */
 typedef struct GameDebug { float x, y, z, vy, camYaw, camPitch, camDist; int hp, coins; bool grounded, dead, menu; float lastHeight, lastDist; } GameDebug;

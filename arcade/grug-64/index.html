@@ -43,7 +43,10 @@
   · KEYS maps the keyboard to the console's buttons so the game plays like the other Grug games (WASD, Space, Shift,
     F, Q/E). Keep it in step with `controls` in GAMES (arcade/arcade.js) and with the HELP text in src/n64/grug-64/game.c.
   · The ROM draws itself two ways and picks at boot: on the console's own graphics chip when it answers, or all in
-    software, which is what a browser emulator gets (src/n64/grug-64/n64/hw.c). Nothing here needs to know which.
+    software, which is what a browser emulator gets (src/n64/grug-64/n64/hw.c). So here the emulated CPU draws every
+    pixel, and OPTIONS below sets how fast the core runs it (CountPerOp 1: twice the core's default for a ROM it
+    doesn't know, and twice the frames). The ROM's own FPS row (Game Menu) shows the result.
+  · A stock libdragon ROM does not boot in this emulator: the ROM uses Grug's patched boot stage (src/n64/boot/).
   · A new Nintendo 64 game: copy this file to arcade/<slug>/, change GAME below, add it to GAMES with cat: 'n64' and
     rom: '<file>.z64'. See CLAUDE.md, "Nintendo 64 games".
 =======================================================================================================================
@@ -112,9 +115,16 @@
 
   // ==================================================================================================== the emulator (EmulatorJS)
   // Its files come from EmulatorJS's CDN, pinned to a version, unless a copy is on this site (then that one is used).
-  const EMU = { core: 'n64', version: '4.2.3', local: '/static/vendor/emulatorjs/data/' };
+  const QS = new URLSearchParams(location.search);   // for testing: ?core=parallel_n64 tries EmulatorJS's other N64 core, ?emu=nightly another build of it
+  const EMU = { core: QS.get('core') || 'n64', version: QS.get('emu') || '4.2.3', local: '/static/vendor/emulatorjs/data/' };
   EMU.cdn = `https://cdn.emulatorjs.org/${EMU.version}/data/`;
   const pickData = () => fetch(EMU.local + 'loader.js', { method: 'HEAD' }).then(r => r.ok ? EMU.local : EMU.cdn).catch(() => EMU.cdn);
+
+  // The emulator's settings for this game. In a browser the ROM draws every pixel on the emulated CPU (see the comment at the top), and
+  // the core paces that CPU slowly for a ROM it doesn't know (2 counts an instruction). 1 count an instruction is the pace the game
+  // was tuned at: about twice the frames. (?cpo=2 puts the default back, to compare.)
+  const OPTIONS = { 'mupen64plus-CountPerOp': QS.get('cpo') || '1' };
+  if (QS.get('oc')) OPTIONS['mupen64plus-CountPerOpDenomPot'] = QS.get('oc');
 
   // the keyboard, like the other Grug games. [what it does, the keys shown, the console's button, EmulatorJS's button number, its key name]
   // (EmulatorJS numbers an N64 pad: 0 A, 1 B, 3 START, 4-7 D-pad up/down/left/right, 10 L, 11 R, 12 Z, 16-19 stick right/left/down/up,
@@ -152,10 +162,17 @@
     for (const k of KEYS) for (const [btn, key] of k[3]) controls[0][btn] = { value: key };
     Object.assign(window, {
       EJS_player: '#game', EJS_core: EMU.core, EJS_gameName: GAME.name, EJS_gameUrl: ROM, EJS_pathtodata: data,
-      EJS_startOnLoaded: true, EJS_color: '#4b974b', EJS_backgroundColor: '#000', EJS_defaultControls: controls,
+      EJS_startOnLoaded: true, EJS_color: '#4b974b', EJS_backgroundColor: '#000', EJS_defaultControls: controls, EJS_defaultOptions: OPTIONS,
       EJS_Buttons: { saveState: false, loadState: false, quickSave: false, quickLoad: false, cheat: false, saveSavFiles: false, loadSavFiles: false, netplay: false, cacheManager: false, screenRecord: false },
       EJS_onGameStart: () => { say(''); },
     });
+    // EmulatorJS only puts its saved settings in the core's start-up file, and CountPerOp is read at start-up: on a first visit,
+    // with nothing saved, EJS_defaultOptions arrives too late. So leave our options where it looks (a player's own choices win).
+    try {
+      const key = `ejs-1-n64-${GAME.name}-settings`, rec = JSON.parse(localStorage.getItem(key) || 'null') || {};
+      rec.settings = Object.assign({}, OPTIONS, rec.settings instanceof Object ? rec.settings : {});
+      localStorage.setItem(key, JSON.stringify(rec));
+    } catch (e) { }
     document.body.classList.add('playing');
     // full screen while we still have the click (a browser only allows it from one)
     const el = document.documentElement; try { await (el.requestFullscreen || el.webkitRequestFullscreen || (() => {})).call(el); } catch (e) { }
