@@ -240,3 +240,12 @@ and listed under the **Plays in Your Tab** category (`TAB_BRAND`, `CATS`). The f
 
 `GrugTab.screen()` and `GrugTab.menu()` (a 4:3 tab-shaped page with a shop under it) are there for a game with no 3D
 scene at all, if one is ever wanted.
+
+## 9. Nintendo 64 games (`cat: 'n64'`)
+
+The Arcade also has real Nintendo 64 ROMs, written in C (`src/n64/`), that play in the browser in an emulator and can
+be downloaded for a real console. They are not built like the games above: read `src/n64/grug-64/README.md` and the
+"Nintendo 64 games" section of `CLAUDE.md`. In `GAMES`: `cat: 'n64'`, `rom: '<file>.z64'` (in `arcade/<slug>/`),
+`outfit: false`, and `controls` listing the keyboard keys with the console's buttons. The game's page then adds the
+**Download ROM** button and the "Play it on a real Nintendo 64" box; `arcade/<slug>/index.html` is the page that plays
+the ROM (copy `arcade/grug-64/index.html`). The Download ROM button must always be there before the game goes full screen.

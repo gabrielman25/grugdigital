@@ -3,7 +3,9 @@
    red line under the name; "about" and "controls" fill the game's page (coop: true adds the Local Multiplayer box: static/local-mp.js is wired in). Plays and favourites are kept per browser
    (localStorage 'grug.arcade.v1'), like the rest of Grug: there's no server, so there are no global visit counts.
    CATS: the Arcade's categories (the pop-up on /arcade/ and the Categories filter), each with match(game). Games have a cat
-   (default '3d'); tab: true marks a game that also plays in the browser tab (arcade/tab/tab.js), listed under TAB_BRAND. */
+   (default '3d'); tab: true marks a game that also plays in the browser tab (arcade/tab/tab.js), listed under TAB_BRAND.
+   cat: 'n64' is a Nintendo 64 game (src/n64/): rom is its ROM file in arcade/<slug>/, which the game's page offers as a
+   download and arcade/<slug>/index.html plays in an emulator (see CLAUDE.md, "Nintendo 64 games"). */
 (() => {
   const $ = id => document.getElementById(id), O = window.GrugOutfits, P = window.GrugPearls;
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -18,6 +20,7 @@
   const CATS = [
     { id: 'tab', name: TAB_BRAND, hash: 'plays-in-your-tab', match: g => !!g.tab, blurb: "3D games that keep going in your browser tab. Start one, then go do your thing: the little picture and title on the tab show how it's going." },
     { id: '3d', name: '3D Games', hash: '3d-games', match: g => (g.cat || '3d') === '3d', blurb: 'Blocky worlds you explore as your own character: dress up, build, farm, adventure and play with friends.' },
+    { id: 'n64', name: 'Nintendo 64 Games', hash: 'n64-games', match: g => g.cat === 'n64', blurb: 'Real Nintendo 64 games made by Grug: play them here in your browser, or download the ROM and play on a real console.' },
     { id: 'ds', name: 'Nintendo DS Games', hash: 'ds-games', soon: true, match: g => g.cat === 'ds', blurb: 'Coming soon: DS games you can play right here in your browser.' }];
   const catOf = g => g.cat || '3d';
   const inCat = (g, id) => { const c = CATS.find(c => c.id === id); return c ? c.match(g) : true; };
@@ -69,7 +72,14 @@
     { slug: 'pet-zones', name: 'Pet Zones', genres: ['sci-fi', 'adventure'], tag: 'Catch pets on a grid · endless zones', featured: true,
       added: '2026-11-24T16:06:59Z', updated: '2026-11-24T17:38:06Z', alt: 'A player zapping cube pets on a grassy grid with a deck of move cards',
       stats: ['Drive a car or boat between huge zones', 'Build a 15-card deck, grab provisions'], players: '1 (and your pets)',
-      about: ['Turn-based pet catching on a grid. Build a 15-card deck of moves, grab provisions, and zap wild cube pets until they join you. Drive a car or a boat between huge zones and towns full of shops, side quests, loot crates and trades.'] }
+      about: ['Turn-based pet catching on a grid. Build a 15-card deck of moves, grab provisions, and zap wild cube pets until they join you. Drive a car or a boat between huge zones and towns full of shops, side quests, loot crates and trades.'] },
+    { slug: 'grug-64', cat: 'n64', rom: 'grug-baseplate-64.z64', solo: true, outfit: false, name: 'Grug Baseplate 64', genres: ['gametutorials', 'adventure'], tag: 'A real Nintendo 64 game · play here or on a console',
+      added: '2026-11-26T18:00:00Z', updated: '2026-11-26T18:00:00Z', alt: 'Grug in his lime hoodie on a grey checked baseplate in front of blue jump blocks, drawn in chunky Nintendo 64 pixels',
+      stats: ['A real N64 ROM, running in your browser', 'Download it and play on a real console'], players: '1',
+      about: ['The Grug Baseplate, rebuilt as a real Nintendo 64 game. It plays right here in an emulator, and the very same ROM can be downloaded and played on a real console from a flash cartridge.',
+        'It is a small platformer zoo with the same jumping physics as the other Grug games: blocks from 1 to 10 studs to jump onto, gaps to clear (roll in the air to go further), an obby over a red floor, a damage pad and a kill brick, jump pads, a lift, a truss to climb, a training dummy to swing at and coins to grab.',
+        'Grug speaks with the same voice as in the rest of the Arcade when he jumps, rolls, swings, gets hurt and falls apart: every clip is squeezed down to fit on a cartridge.'],
+      controls: [['W A S D', 'Move (Control Stick)'], ['Space', 'Jump (A button)'], ['Shift', 'Dodge roll, in the air too (Z)'], ['F', 'Swing (B button)'], ['Q / E', 'Turn the camera (C left / right)'], ['\u2191 / \u2193', 'Tilt the camera (C up / down)'], ['I / O', 'Zoom in / out (R / L)'], ['Enter', 'Game Menu (START)']] }
   ];
 
   const ago = iso => {

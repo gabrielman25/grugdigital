@@ -232,15 +232,40 @@ painting or download step any more. The game's sky and baseplate match the Avata
 
 ## Games that play in your tab (`/arcade/tab/`) and the Arcade's categories
 
-The Arcade has categories (`CATS` in `arcade/arcade.js`): Plays in Your Tab (3D games marked `tab: true`), 3D Games and
-Nintendo DS Games (under construction, no games yet). They're listed in the left column of `/arcade/`, and a link
-can open one directly (`#plays-in-your-tab`, `#3d-games`, `#ds-games`). (The "What do you feel like playing?" pop-up that
+The Arcade has categories (`CATS` in `arcade/arcade.js`): Plays in Your Tab (3D games marked `tab: true`), 3D Games,
+Nintendo 64 Games (`cat: 'n64'`: see "Nintendo 64 games" below) and Nintendo DS Games (under construction, no games yet).
+They're listed in the left column of `/arcade/`, and a link can open one directly (`#plays-in-your-tab`, `#3d-games`,
+`#n64-games`, `#ds-games`). (The "What do you feel like playing?" pop-up that
 asked on arrival was taken off in November 2026 at the owner's request: don't bring it back unasked.) A tab game keeps going in the browser
 tab (favicon + title) on the `GrugTab` engine (`arcade/tab/tab.js`): read section 8 of `arcade/claude.md`. The first is
 **Sunny Patch** (`arcade/sunny-patch/`, a Baseplate game: the farm is `window.FarmCore`, saved in `grug.sunny-patch.v1`;
 the player's settings in `grug.sunny-patch.player.v1`). It has no other players (just you and Poppy), solid black UI
 panels, roofless buildings with interiors (Poppy's home, the Seed Shop, the Upgrade Shed, the Wardrobe) and a 50% default
 3D resolution (a Game Settings button: 50 / 75 / 100%). The category's shown name is `TAB_BRAND` in `arcade/arcade.js`.
+
+## Nintendo 64 games (`cat: 'n64'`, `src/n64/`)
+
+Real Nintendo 64 ROMs made by Grug, listed in the Arcade under **Nintendo 64 Games**. Each one plays in the browser in
+an emulator and can be downloaded to play on a real console. The first is **Grug Baseplate 64** (`arcade/grug-64/`, built
+from `src/n64/grug-64/`: read its `README.md`): the Baseplate's physics, stations, voices and sounds, in C.
+
+- **The ROM** is `arcade/<slug>/<name>.z64`, named by `rom` in the game's `GAMES` entry. `make install` in the game's
+  source folder builds it and copies it there (needs libdragon; `make host` and the tests need only a C compiler).
+- **`arcade/<slug>/index.html` is the page that plays it**, not the game: a start screen (Play, Download ROM, the keys),
+  then EmulatorJS (GPL-3.0) full window, loaded from its CDN at a pinned version unless a copy is at
+  `/static/vendor/emulatorjs/data/`.
+- **The Download ROM button is required before the game goes full screen** (the owner's rule): it is on the game's page
+  (`arcade/place/`, for any game with `rom`) and on the play page's start screen. Don't remove either.
+- **One ROM, two ways to draw**: on the console's graphics chip when it answers at boot, otherwise all in software,
+  which is what a browser emulator gets. Sound is mixed by the CPU. Keep both working: test in the page and, when you
+  can, in an accurate emulator (ares) or on a console.
+- **Same physics as the web games**: `phys.c` is AmbientCore ported line for line, and `tools/physdiff.cjs` checks it
+  against the Baseplate's own script. Voices and sounds are baked from `static/voice.js`, `static/sfx.js` and the clips
+  by `tools/mkaudio.py`: re-run it (`make assets`) after new Voice Lab numbers, then rebuild the ROM.
+- The usual Arcade rules still hold inside the ROM: no title screen, the 2010 GUI, red means danger, a Game Menu.
+  What can't apply on a console is left out: saved outfits (you play as Grug, `outfit: false`), Pearls, saving.
+- "Nintendo 64" is written in plain text with the trademark line, never Nintendo's logos or artwork, and every
+  character, sound and picture in a ROM is Grug's own.
 
 ## Grug Arcade (`/arcade/`)
 

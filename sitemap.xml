@@ -24,6 +24,7 @@
     <image:image><image:loc>https://grugdigital.com/arcade/brickbound/brickbound-grug-arcade.jpg</image:loc></image:image>
     <image:image><image:loc>https://grugdigital.com/arcade/grug-kingdom/grug-kingdom-grug-arcade.jpg</image:loc></image:image>
     <image:image><image:loc>https://grugdigital.com/arcade/pet-zones/pet-zones-grug-arcade.jpg</image:loc></image:image>
+    <image:image><image:loc>https://grugdigital.com/arcade/grug-64/grug-64-grug-arcade.jpg</image:loc></image:image>
     <image:image><image:loc>https://grugdigital.com/static/arcade/grug-city-rp-aerial-view.jpg</image:loc></image:image>
     <image:image><image:loc>https://grugdigital.com/static/arcade/grug-city-rp-ice-cream-shop.jpg</image:loc></image:image>
     <image:image><image:loc>https://grugdigital.com/static/arcade/grug-city-rp-pizza-shop.jpg</image:loc></image:image>
@@ -124,6 +125,16 @@
     <loc>https://grugdigital.com/arcade/place/?id=pet-zones</loc>
     <lastmod>2026-11-26</lastmod>
     <image:image><image:loc>https://grugdigital.com/arcade/pet-zones/pet-zones-grug-arcade.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://grugdigital.com/arcade/grug-64/</loc>
+    <lastmod>2026-11-26</lastmod>
+    <image:image><image:loc>https://grugdigital.com/arcade/grug-64/grug-64-grug-arcade.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://grugdigital.com/arcade/place/?id=grug-64</loc>
+    <lastmod>2026-11-26</lastmod>
+    <image:image><image:loc>https://grugdigital.com/arcade/grug-64/grug-64-grug-arcade.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://grugdigital.com/character/</loc>

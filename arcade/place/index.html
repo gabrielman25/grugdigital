@@ -48,6 +48,11 @@
 #Place .fav{height:28px;padding:0 12px;border-radius:4px;border:1px solid #888;cursor:pointer;font:bold 13px Allo,Arial,Helvetica,sans-serif;color:#333;background:linear-gradient(#fafafa,#e3e3e3 50%,#d6d6d6 51%,#e6e6e6)}
 #Place .fav:hover{filter:brightness(1.04)} #Place .fav b{color:#aaa;font-size:15px} #Place .fav.on b{color:#e0a800}
 #Place .acts .free{font-size:11px;color:#888;line-height:1.35}
+/* a Nintendo 64 game (g.rom): the ROM to download, next to Play */
+#Place .RomBtn{display:inline-block;height:46px;padding:0 16px;border-radius:6px;font:bold 15px/46px Allo,Arial,Helvetica,sans-serif;color:#fff;text-decoration:none;white-space:nowrap;
+  background:linear-gradient(#6aa7e6,#3f85d2 50%,#2f74c2 51%,#4388d6);border:1px solid #1f5596;box-shadow:inset 0 1px 0 rgba(255,255,255,.45)}
+#Place .RomBtn:hover{filter:brightness(1.08);text-decoration:none}
+#Place .bx .fine{font-size:11px;color:#888}
 #Place .StandardBoxHeader{width:auto;display:inline-block;padding-right:28px;font-size:17px;height:28px}
 #Place .StandardBoxHeader span{padding-top:5px}
 #Place .bx{clear:both;position:relative;top:-2px;margin:0 0 12px;padding:10px 12px;border:1px solid #aaa;background:#fff linear-gradient(#e9e9e9,#fff 90px) no-repeat;font:13px/1.45 Allo,Arial,Helvetica,sans-serif;color:#333}
@@ -76,6 +81,7 @@
   #Place .shot,#Place .shot img{width:100%;height:auto;aspect-ratio:16/9}
   #Place .acts{flex-wrap:wrap}
   #Place .PlayBig{width:100%}
+  #Place .RomBtn{flex:1 1 auto;text-align:center}
   #Place table.keys td:first-child{width:auto;white-space:normal}
   #Place .me select{width:100%;max-width:240px}
   #More{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px 8px;padding:4px}
@@ -195,24 +201,30 @@
     const org = { '@type': 'Organization', '@id': 'https://grugdigital.com/#org', name: 'Grug Digital', url: 'https://grugdigital.com/', logo: 'https://grugdigital.com/static/arcade/grug-digital-logo.png' };
     const ld = { '@context': 'https://schema.org', '@graph': [org, { '@type': 'VideoGame', name: g.name, url, sameAs: `https://grugdigital.com/arcade/${g.slug}/`, description: about,
       image: { '@type': 'ImageObject', contentUrl: cover, caption: `${g.name}, a free game in the Grug Arcade: ${g.alt}`, creator: { '@id': 'https://grugdigital.com/#org' }, creditText: 'Grug Digital', copyrightNotice: '© 2026 Grug Digital. All rights reserved.', license: 'https://grugdigital.com/terms.html', acquireLicensePage: 'https://grugdigital.com/terms.html' },
-      genre: g.genres.map(gname).filter(x => x !== 'All'), gamePlatform: 'Web browser', applicationCategory: 'Game', isAccessibleForFree: true, playMode: g.coop ? ['SinglePlayer', 'CoOp', 'MultiPlayer'] : ['SinglePlayer'],
+      genre: g.genres.map(gname).filter(x => x !== 'All'), gamePlatform: g.rom ? ['Web browser', 'Nintendo 64'] : 'Web browser', applicationCategory: 'Game', isAccessibleForFree: true, playMode: g.coop ? ['SinglePlayer', 'CoOp', 'MultiPlayer'] : ['SinglePlayer'],
       offers: { '@type': 'Offer', price: 0, priceCurrency: 'USD' }, author: { '@id': 'https://grugdigital.com/#org' }, publisher: { '@id': 'https://grugdigital.com/#org' },
       keywords: `${g.name}, Grug Digital, Roblox alternative, free browser games, custom avatar` }] };
     const sc = document.createElement('script'); sc.type = 'application/ld+json'; sc.textContent = JSON.stringify(ld); document.head.appendChild(sc); }
   const cat = CATS.find(c => c.id === catOf(g)) || { name: '3D Games', hash: '3d-games' }, isTab = !!g.tab, tabCat = CATS.find(c => c.id === 'tab');
   const R = A.rec(), fresh = Date.now() - new Date(g.added) < 7 * 864e5, plays = R.plays[g.slug] || 0;
+  const rom = g.rom ? `/arcade/${g.slug}/${g.rom}` : '';   // a Nintendo 64 game: its ROM, to download and play on a real console
   $('Place').innerHTML = `
     <div class="ttl"><h1>${esc(g.name)}</h1><div class="sub">A Grug Arcade game · <a href="/arcade/#${cat.hash}">${esc(cat.name)}</a>${isTab ? ` · <a href="/arcade/#${tabCat.hash}">${esc(tabCat.name)}</a>` : ''} · ${esc(g.tag)}</div></div>
     <div class="L">
       <div class="shot"><img src="/arcade/${g.slug}/${g.slug}-grug-arcade.jpg" alt="${esc(g.name)}, a free game in the Grug Arcade: ${esc(g.alt)}" width="538" height="303">${fresh ? '<span class="new">NEW</span>' : ''}</div>
       <div class="acts">
         <a class="PlayBig" id="play" href="/arcade/${g.slug}/">Play</a>
+        ${rom ? `<a class="RomBtn" id="rom" href="${rom}" download="${esc(g.rom)}">Download ROM</a>` : ''}
         <button class="fav${R.fav[g.slug] ? ' on' : ''}" id="fav" type="button" aria-pressed="${!!R.fav[g.slug]}"><b>★</b> <span>${R.fav[g.slug] ? 'Favorited' : 'Favorite'}</span></button>
-        <div class="free">Free, in your browser.<br>Nothing to install.</div>
+        <div class="free">Free, in your browser.<br>${rom ? 'Or on a real console.' : 'Nothing to install.'}</div>
       </div>
       <div class="StandardBoxHeader"><span><h2>Description</h2></span></div>
       <div class="bx">${(g.about || [g.stats.join('. ') + '.']).map(p => `<p>${esc(p)}</p>`).join('')}
         ${g.outfit === false ? '' : `<p>You play as the character you made in the <a href="/character/">Grug Avatar Studio</a>${g.solo ? '.' : ', and your other saved outfits show up as the other players.'}</p>`}</div>
+      ${rom ? `<div class="StandardBoxHeader"><span><h2>Play it on a real Nintendo 64</h2></span></div>
+      <div class="bx"><p><b>This is a real Nintendo 64 game.</b> Play starts it right here in an emulator. <a href="${rom}" download="${esc(g.rom)}">Download the ROM</a> (<span id="romSize">a .z64 file</span>) to play the very same game on a real console: copy it to a flash cartridge (an EverDrive 64 or a SummerCart64, for example) and pick it from the cartridge's menu. It runs in other Nintendo 64 emulators too.</p>
+        <p>On a console you play with the controller: the Control Stick moves, A jumps, Z rolls, B swings, the C buttons turn and tilt the camera, R and L zoom, and START opens the Game Menu.</p>
+        <p class="fine">Nintendo 64 is a trademark of Nintendo. Grug Digital is not affiliated with or endorsed by Nintendo.</p></div>` : ''}
       ${isTab ? `<div class="StandardBoxHeader"><span><h2>Plays in your tab</h2></span></div>
       <div class="bx"><p><b>This game keeps going in your browser tab:</b> the little picture on the tab and the tab's title show how it's doing. Play for a bit, then switch to another tab and keep an eye on it while you browse.</p>
         <p>It keeps going in the background, and even for a while after you close it. It never makes noise or asks you to come back. Pin the tab (right-click it, then Pin) to keep it handy.</p></div>` : ''}
@@ -249,6 +261,8 @@
     <div id="PlaceTabs" role="tablist"><div class="Tab on" role="tab" data-t="rec"><span><h2>Recommendations</h2></span></div><div class="Tab" role="tab" data-t="new"><span><h2>Newest</h2></span></div><div class="Tab" role="tab" data-t="fav"><span><h2>My Favorites</h2></span></div></div>
     <div class="wide"><div id="More"></div></div>`;
 
+  // the ROM's size, next to its download link
+  if (rom) fetch(rom, { method: 'HEAD' }).then(r => { const n = +r.headers.get('content-length'); if (r.ok && n) $('romSize').textContent = `a .z64 file, ${n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.round(n / 1024) + ' KB'}`; }).catch(() => {});
   // Play: count it for this browser, then go
   $('play').addEventListener('click', () => { const r = A.rec(); r.plays[g.slug] = (r.plays[g.slug] || 0) + 1; r.last[g.slug] = new Date().toISOString(); A.saveRec(r); });
   $('fav').addEventListener('click', e => {

@@ -395,5 +395,17 @@
       "browser game",
       "Grug Digital"
     ]
+  },
+  "arcade/grug-64/grug-64-grug-arcade.jpg": {
+    "title": "Grug Baseplate 64, a Nintendo 64 game in the Grug Arcade",
+    "description": "Grug Baseplate 64 by Grug Digital: Grug in his lime hoodie jumps on a grey checked baseplate in front of blue jump blocks, drawn in chunky Nintendo 64 pixels. A real N64 ROM that plays free in your browser or on a console.",
+    "keywords": [
+      "Grug Baseplate 64",
+      "Nintendo 64 homebrew",
+      "N64 ROM",
+      "platformer",
+      "browser game",
+      "Grug Digital"
+    ]
   }
 }
