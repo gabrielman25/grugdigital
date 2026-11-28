@@ -75,6 +75,15 @@ export async function onRequest(ctx) {
   // note at /build/. build/core.js stays: the Grug Studio game uses it.
   if (path.startsWith('/build/') && path !== '/build/' && path !== '/build/index.html' && path !== '/build/core.js') return Response.redirect(url.origin + '/build/', 302);
 
+  // the 3D store: /store/<itch username> is one page (store/index.html) for every creator. Not for search engines:
+  // there's a page for every itch.io username whether its creator asked for one or not.
+  if (/^\/store\/[A-Za-z0-9_-]+\/?$/.test(path) && env && env.ASSETS) {
+    const page = await env.ASSETS.fetch(new URL('/store/', url.origin));
+    const out = new Response(page.body, page);
+    out.headers.set('x-robots-tag', 'noindex');
+    return out;
+  }
+
   const res = await next();
   if (res.status !== 404) return res;
   return fromLegacy(ctx, legacy, path, url, res);

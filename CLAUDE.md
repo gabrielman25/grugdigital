@@ -13,7 +13,7 @@ section's nav and from the directory, and don't cross-sell another section's too
 | Section | Who | Pages | Look |
 | --- | --- | --- | --- |
 | **Players** | people who want to play and dress an avatar | `/arcade/` (and every game), `/character/` (the players' Avatar Studio), `/character/pearls/`, the promo pages | **classic** (the 2011 games site, green nav) |
-| **Game developers** | people whose AI agent makes characters for their game | `/agents/`, `/agents/studio/` (the agents' Avatar Studio), `/packs/` (the itch.io asset packs) | **modern**, dark (`data-theme="dev"`) |
+| **Game developers** | people whose AI agent makes characters for their game, and itch.io creators | `/agents/`, `/agents/studio/` (the agents' Avatar Studio), `/packs/` (the itch.io asset packs), `/store/` (the 3D Store) | **modern**, dark (`data-theme="dev"`) |
 | **Restaurants** | owners and managers | `/restaurants/`, and the tools it opens on the legacy deploy | **modern**, white and tomato (`data-theme="rest"`) |
 | the directory | everyone | `/` (home), `support.html` (Help and contact), `privacy.html`, `terms.html`, `404.html`, `build/` | **modern**, light grey and Grug's green |
 
@@ -113,6 +113,36 @@ look as `/agents/` (`static/modern.css`, `data-theme="dev"`). See "The itch.io a
 **Links to it:** the home page's Game developers door and directory, the footers ("Game developers"), `/packs/`, the last
 page of the players' studio ("Making a game with an AI agent?"), `llms.txt` and the skill. The players' pages don't
 advertise it beyond that.
+
+## The 3D Store (`/store/`): an itch.io page as a shop you walk round (developers' section)
+
+`/store/<itch username>` turns any creator's public itch.io page into a little 3D shop built from Kenney's Mini Shop
+and Mini Arcade (`static/store/kenney/`, CC0: keep each pack's `License.txt`, credit Kenney on the page). One page,
+`store/index.html`, serves every username (`functions/_middleware.js` routes `/store/<user>` to it, with
+`x-robots-tag: noindex`); `/store/` itself is the landing page (the owner's store, polysw, as the example, and the
+"Make yours" panel). It's built for a phone held upright first: check 390x844, a landscape phone and a desktop.
+
+- **Data**: `/api/itch-store?user=` (`functions/api/itch-store.js` + `src/store/itch-store.js`) reads the profile
+  page and itch's per-category feeds (four requests, one at a time, cached 10 minutes per creator; itch 429s
+  bursts). `/api/itch-img?u=` passes img.itch.zone pictures through with CORS (WebGL needs it for the covers on
+  the displays); only that host, only images.
+- **The scene** (`static/store/store.js`): you walk as Kenney's gamer (thumb stick on touch screens, WASD, or tap /
+  click the floor or a display). Every product has a booth by type: asset packs a box on a plinth (cover on the box,
+  name on its side, a price tag), games an arcade cabinet (cover on the screen, name on the marquee) with a poster
+  stand, tools a vending machine. Next to one, the bar at the bottom opens its itch.io page (E on a keyboard).
+  `window.GrugStoreDebug` exposes the player and the mall for headless tests.
+- **The mall** (`static/store/mall.js` + `functions/api/mall.js`): out the front door, a corridor of other creators'
+  storefronts. itch has no random-creator lookup, so the pool is the creators in itch's featured, top-rated and new
+  lists (`POOL_FEEDS`, an hour's cache), shuffled by the store's username and the day. **polysw always takes the
+  fifth spot** (`HOUSE`, `HOUSE_SPOT`) in every mall but its own. Each storefront is checked with `/api/itch-store`
+  as you walk up (a gone one shutters). On the site you walk in through the door; inside an itch.io embed other
+  stores open in a new tab, so the creator's page stays put. `?mall=0` leaves the mall out.
+- **Embeds** (`static/store/export.js`): "Make yours" downloads a tiny zip (one `index.html` framing
+  `/store/<user>?embed=1&spawn=<slug>`) per itch.io page, or a zip of them all. It never needs re-uploading. If the
+  store doesn't answer in 15 seconds the zip shows a link to the creator's itch page. `?spawn=` starts you in front
+  of that product with "You are here"; `?ref=` (the itch page's address, when itch passes it) does the same.
+- Phase 2 (not built yet, needs the owner's accounts): saved custom layouts (a Cloudflare KV or D1 binding),
+  "Log in with itch.io" (an itch OAuth app), and a paid unlock checked against itch download keys.
 
 ## Grug for restaurants (`/restaurants/`): the restaurants' section
 

@@ -117,6 +117,12 @@ def build_pages(G):
                   graph=[{'@type': 'CollectionPage', 'url': SITE + '/packs/', 'name': 'Grug Digital asset packs', 'publisher': {'@id': SITE + '/#org'}, 'keywords': KEYWORDS,
                           'description': 'Low-poly 3D asset packs for Roblox, Unity, Godot and other engines: characters, pets, hats and props, from the Grug Digital store on itch.io.'}],
                   images=[]))
+    P.append(dict(file='store/index.html', url=SITE + '/store/', title=None, desc=None, og=OG['home'], og_alt='Grug Digital',
+                  og_title='3D Store · Turn your itch.io page into a 3D shop · Grug Digital',
+                  graph=[{'@type': 'WebApplication', 'name': 'Grug 3D Store', 'url': SITE + '/store/', 'applicationCategory': 'DeveloperApplication', 'operatingSystem': 'Any (web browser)',
+                          'description': 'Turns an itch.io creator page into a 3D shop customers walk around, with live prices and sales, and an embed for every itch.io page.',
+                          'offers': {'@type': 'Offer', 'price': 0, 'priceCurrency': 'USD'}, 'publisher': {'@id': SITE + '/#org'}, 'keywords': KEYWORDS}],
+                  images=[]))
     P.append(dict(file='restaurants/index.html', url=SITE + '/restaurants/', title=None, desc=None, og=OG['home'], og_alt='Grug Digital',
                   og_title='Grug for restaurants · A free rewards card, website and dashboard',
                   graph=[{'@type': 'WebPage', 'url': SITE + '/restaurants/', 'name': 'Grug for restaurants', 'publisher': {'@id': SITE + '/#org'},

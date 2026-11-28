@@ -42,6 +42,13 @@ The site is being rebuilt from scratch on `main`. The old site is kept, unchange
 - `static/itch-assets.json` is the fallback copy the page uses if the live feed can't be reached. Refresh it with
   `NODE_USE_ENV_PROXY=1 node src/itch/snapshot.mjs` (Node 18+; drop the variable if you're not behind a proxy).
 
+## 3D Store (`/store/`)
+
+`/store/<itch username>` is any itch.io creator's public page as a 3D shop you walk round, with a mall of other
+creators outside the door, and a zip per itch.io page that embeds it there. Files: `store/index.html`,
+`static/store/` (`store.js`, `mall.js`, `export.js`, Kenney's models in `kenney/`), `functions/api/itch-store.js`,
+`itch-img.js`, `mall.js`, `src/store/itch-store.js`. See the 3D Store section of CLAUDE.md.
+
 ## Building Studio (retired)
 
 `/build/` was a studio for painting textured buildings. It was retired in November 2026: the address shows a short note,
