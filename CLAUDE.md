@@ -162,7 +162,10 @@ studded style with furniture from Kenney's Mini Shop and Mini Arcade (`static/st
 - **The itch.io version** (`python3 src/store/build_itch.py`, a zip to upload as "played in the browser"): the same
   page run as the embed, with three.js, the models, textures, font and the Grug avatars (`/arcade/outfits/`) built
   in (`window.GRUG_STORE`: `api`, `site`, `assets`, `avatars`). Everyone there wears the built-in avatars and the
-  changing room is a picker of them (`Looks`); the live data still comes from `--api`. Rebuild it after changing the
+  changing room is a picker of them (`Looks`); the live data still comes from `--api`.
+  It opens with a big "See YOUR store" box (`CFG.tryIt`, `setupTry()`): a visitor types or pastes their itch.io
+  username or page address, the page reloads with `?u=<them>` and their store, and it hands them their store's link
+  (`/store/<them>` on `--site`) to copy, plus the way to get their own embed zips. Rebuild it after changing the
   store, and with the default `--api` once the 3D Store is on `main`.
 - Phase 2 (not built yet, needs the owner's accounts): saved custom layouts (a Cloudflare KV or D1 binding),
   "Log in with itch.io" (an itch OAuth app), and a paid unlock checked against itch download keys.

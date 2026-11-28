@@ -110,7 +110,7 @@ def main():
     html = html.replace('<script src="/static/vendor/three-r128-GLTFLoader.js"></script>', '<script src="vendor/three-r128-GLTFLoader.js"></script>')
     html = html.replace('<script src="/static/outfits.js"></script>\n', '')
     html = html.replace('<script src="/static/outfit-rig.js"></script>', '<script src="outfit-rig.js"></script>')
-    cfg = {'embed': True, 'user': a.user, 'api': a.api, 'site': site, 'assets': '', 'avatars': avatars}
+    cfg = {'embed': True, 'tryIt': True, 'user': a.user, 'api': a.api, 'site': site, 'assets': '', 'avatars': avatars}
     html = html.replace('<script src="/static/store/store.js"></script>', '<script>window.GRUG_STORE = ' + json.dumps(cfg) + ';</script>\n<script src="store.js"></script>')
     html = re.sub(r'<title>.*?</title>', '<title>Grug 3D Store</title>', html)
     for bad in ('/static/', '/api/'):

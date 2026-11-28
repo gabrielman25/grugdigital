@@ -31,7 +31,10 @@
   const API = CFG.api || '', SITE = CFG.site || '', ASSETS = CFG.assets != null ? CFG.assets : '/static/store/';
   const AVATARS = CFG.avatars || null;   // the Grug avatars built into the itch.io version (no saved outfits there)
   const EMBED = Q.has('embed') || !!CFG.embed;
-  const PATH_USER = CFG.user || (location.pathname.match(/^\/store\/([A-Za-z0-9_-]+)\/?$/) || [])[1] || Q.get('u') || '';
+  // CFG.tryIt (the itch.io version): a big "see your own store" box, and ?u=<username> shows that creator's store instead
+  const TRYIT = !!CFG.tryIt;
+  const TRIED = TRYIT && /^[a-z0-9][a-z0-9_-]{0,62}$/i.test(Q.get('u') || '') ? Q.get('u').toLowerCase() : '';
+  const PATH_USER = TRIED || CFG.user || (location.pathname.match(/^\/store\/([A-Za-z0-9_-]+)\/?$/) || [])[1] || Q.get('u') || '';
   const DEMO = 'polysw';
   const USER = (PATH_USER || DEMO).toLowerCase();
   const LANDING = !PATH_USER && !EMBED;
@@ -64,11 +67,11 @@
       $('#prog').hidden = true;
       const a = $('#veilActs');
       a.hidden = false;
-      a.innerHTML = (withForm && !EMBED ? '<button class="btn go big wide" id="vMake" type="button">Try another username</button>' : '') +
+      a.innerHTML = (withForm && (!EMBED || TRYIT) ? '<button class="btn go big wide" id="vMake" type="button">Try another username</button>' : '') +
         '<button class="btn wide" id="vRetry" type="button">Try again</button>' +
         (EMBED ? '<a class="btn wide" target="_blank" rel="noopener" href="https://' + esc(USER) + '.itch.io/">Open the itch.io page</a>' : '');
       $('#vRetry').onclick = () => location.reload();
-      if ($('#vMake')) $('#vMake').onclick = () => { $('#veil').classList.add('gone'); Panels.open('make'); $('#userIn').focus(); };
+      if ($('#vMake')) $('#vMake').onclick = () => { if (TRYIT) { location.search = ''; return; } $('#veil').classList.add('gone'); Panels.open('make'); $('#userIn').focus(); };
     },
     done() { $('#veil').classList.add('gone'); },
   };
@@ -950,6 +953,47 @@
     $('#dlOne').onclick = () => exporter().then(x => x.one(USER, creator.name, items.find(i => i.slug === $('#spawnSel').value) || null, opts()));
     $('#dlAll').onclick = () => exporter().then(x => x.all(USER, creator.name, items, opts()));
   }
+  /* ---------------- the itch.io version: "see your own store" ---------------- */
+  // A big box over the store: type or paste your itch.io username (or your page's address) and the store rebuilds
+  // around your own products, right there on the page; then it gives you your store's link to copy, and the way to get
+  // the zips for your own pages.
+  const cleanUser = v => String(v || '').trim().toLowerCase().replace(/^@/, '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\.itch\.io.*$/, '').replace(/^itch\.io\/profile\//, '').replace(/[/?#].*$/, '');
+  const yourLink = u => (SITE || 'https://grugdigital.com') + '/store/' + u;
+  function setupTry() {
+    if (!TRYIT) return;
+    $('#tryBtn').hidden = false;
+    $('#tryBtn').onclick = () => Panels.cur === 'tryit' ? Panels.closeAll() : Panels.open('tryit');
+    const done = !!TRIED;
+    $('#tAsk').hidden = done; $('#tDone').hidden = !done;
+    if (done) {
+      $('#tName').textContent = creator.name;
+      $('#tLink').value = yourLink(USER);
+      $('#tSite').href = yourLink(USER);
+      $('#tryBtn span').textContent = 'Your store link';
+    }
+    $('#tForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const u = cleanUser($('#tIn').value), err = $('#tErr');
+      if (!/^[a-z0-9][a-z0-9_-]{0,62}$/.test(u)) { err.hidden = false; err.textContent = 'Type your itch.io username: the part before .itch.io in your page’s address.'; return; }
+      $('#veilTitle').textContent = 'Building ' + u + '’s store';
+      $('#veilText').textContent = 'Stocking the shelves from itch.io…';
+      $('#prog').hidden = true; $('#veil').classList.remove('gone');
+      location.search = '?u=' + encodeURIComponent(u);
+    });
+    $('#tCopy').onclick = async () => {
+      const t = $('#tLink').value, btn = $('#tCopy');
+      let ok = false;
+      try { await navigator.clipboard.writeText(t); ok = true; } catch (e) {}
+      if (!ok) { const i = $('#tLink'); i.focus(); i.select(); try { ok = document.execCommand('copy'); } catch (e) {} }
+      btn.textContent = ok ? 'Copied!' : 'Select the link and copy it';
+      setTimeout(() => { btn.textContent = 'Copy link'; }, 2200);
+    };
+    $('#tAgain').onclick = () => { $('#tAsk').hidden = false; $('#tDone').hidden = true; $('#tIn').value = ''; $('#tIn').focus(); };
+    $('#tBack').onclick = () => { location.search = ''; };
+    // it opens by itself: straight away after you've made yours, and a moment after the store appears otherwise
+    setTimeout(() => { if (!Panels.cur) Panels.open('tryit'); }, done ? 900 : 1800);
+  }
+
   let exp = null;
   function exporter() {
     if (!exp) exp = new Promise((res, rej) => { const s = document.createElement('script'); s.src = '/static/store/export.js'; s.onload = () => res(window.GrugStoreExport); s.onerror = rej; document.head.appendChild(s); });
@@ -1133,6 +1177,7 @@
     wearOutfits();
     setupBrowse();
     setupMake();
+    setupTry();
 
     // covers: the ones nearest where you start first, four at a time
     const sp = booths.find(b => b.item.slug.toLowerCase() === SPAWN);
