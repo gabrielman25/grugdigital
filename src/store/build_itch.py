@@ -18,6 +18,37 @@ ROOT = Path(__file__).resolve().parents[2]
 AVATARS = ['grug', 'ranger', 'skater', 'medic', 'racer', 'snow-rider', 'scavenger', 'flannel']
 
 
+def slim_glb(data, normal_max=256, color_max=1024):
+    """The avatar .glb with its pictures made smaller (the store draws characters small): fabric normal maps down to
+    normal_max, the rest to color_max. Everything else in the file is kept byte for byte."""
+    import struct
+    from PIL import Image
+    jl = struct.unpack('<I', data[12:16])[0]
+    j = json.loads(data[20:20 + jl])
+    b0 = 20 + jl + 8
+    blen = struct.unpack('<I', data[20 + jl:24 + jl])[0]
+    binc = data[b0:b0 + blen]
+    views = j['bufferViews']
+    chunks = [binc[v.get('byteOffset', 0):v.get('byteOffset', 0) + v['byteLength']] for v in views]
+    for im in j.get('images', []):
+        if 'bufferView' not in im: continue
+        i = Image.open(io.BytesIO(chunks[im['bufferView']]))
+        cap = normal_max if 'normal' in (im.get('name') or '').lower() else color_max
+        if max(i.size) <= cap: continue
+        i.thumbnail((cap, cap), Image.LANCZOS)
+        out = io.BytesIO(); i.save(out, 'PNG', optimize=True)
+        chunks[im['bufferView']] = out.getvalue(); im['mimeType'] = 'image/png'
+    body = b''
+    for v, c in zip(views, chunks):
+        body += b'\0' * (-len(body) % 4)
+        v['byteOffset'] = len(body); v['byteLength'] = len(c); body += c
+    body += b'\0' * (-len(body) % 4)
+    j['buffers'][0]['byteLength'] = len(body)
+    js = json.dumps(j, separators=(',', ':')).encode(); js += b' ' * (-len(js) % 4)
+    total = 12 + 8 + len(js) + 8 + len(body)
+    return struct.pack('<III', 0x46546C67, 2, total) + struct.pack('<II', len(js), 0x4E4F534A) + js + struct.pack('<II', len(body), 0x004E4942) + body
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--user', default='polysw')
@@ -58,7 +89,8 @@ def main():
     except ImportError:
         Image = None
     for id_ in AVATARS:
-        add(f'arcade/outfits/{id_}.glb', f'avatars/{id_}.glb')
+        raw = (ROOT / f'arcade/outfits/{id_}.glb').read_bytes()
+        files[f'avatars/{id_}.glb'] = slim_glb(raw) if Image else raw
         pic = ROOT / f'character/looks/{id_}/preview.png'
         if Image and pic.exists():
             im = Image.open(pic).convert('RGBA'); im.thumbnail((192, 192))
