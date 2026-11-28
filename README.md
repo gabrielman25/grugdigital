@@ -44,9 +44,9 @@ The site is being rebuilt from scratch on `main`. The old site is kept, unchange
 
 ## 3D Store (`/store/`)
 
-`/store/<itch username>` is any itch.io creator's public page as a 3D shop you walk round, with a mall of other
-creators outside the door, and a zip per itch.io page that embeds it there. Files: `store/index.html`,
-`static/store/` (`store.js`, `mall.js`, `export.js`, Kenney's models in `kenney/`), `functions/api/itch-store.js`,
+`/store/<itch username>` is any itch.io creator's public page as a 3D shop you walk round as your own character, in
+the Arcade's 2010 studded style, with shoppers, a changing room (the Avatar Studio) and a mall of other creators outside, and a zip per itch.io page that embeds it there. Files: `store/index.html`,
+`static/store/` (`store.js`, `mall.js`, `export.js`, Kenney's models in `kenney/`, the Arcade's sky and stud textures in `look/`), `functions/api/itch-store.js`,
 `itch-img.js`, `mall.js`, `src/store/itch-store.js`. See the 3D Store section of CLAUDE.md.
 
 ## Building Studio (retired)

@@ -116,8 +116,9 @@ advertise it beyond that.
 
 ## The 3D Store (`/store/`): an itch.io page as a shop you walk round (developers' section)
 
-`/store/<itch username>` turns any creator's public itch.io page into a little 3D shop built from Kenney's Mini Shop
-and Mini Arcade (`static/store/kenney/`, CC0: keep each pack's `License.txt`, credit Kenney on the page). One page,
+`/store/<itch username>` turns any creator's public itch.io page into a 3D shop you walk round, in the Arcade's 2010
+studded style with furniture from Kenney's Mini Shop and Mini Arcade (`static/store/kenney/`, CC0: keep each pack's
+`License.txt`, credit Kenney on the page). One page,
 `store/index.html`, serves every username (`functions/_middleware.js` routes `/store/<user>` to it, with
 `x-robots-tag: noindex`); `/store/` itself is the landing page (the owner's store, polysw, as the example, and the
 "Make yours" panel). It's built for a phone held upright first: check 390x844, a landscape phone and a desktop.
@@ -126,13 +127,26 @@ and Mini Arcade (`static/store/kenney/`, CC0: keep each pack's `License.txt`, cr
   page and itch's per-category feeds (four requests, one at a time, cached 10 minutes per creator; itch 429s
   bursts). `/api/itch-img?u=` passes img.itch.zone pictures through with CORS (WebGL needs it for the covers on
   the displays); only that host, only images.
-- **The scene** (`static/store/store.js`): you walk as Kenney's gamer (thumb stick on touch screens, WASD, or tap /
-  click the floor or a display). Every product has a booth by type: asset packs a box on a plinth (cover on the box,
-  name on its side, a price tag), games an arcade cabinet (cover on the screen, name on the marquee) with a poster
-  stand, tools a vending machine. Next to one, the bar at the bottom opens its itch.io page (E on a keyboard).
-  `window.GrugStoreDebug` exposes the player and the mall for headless tests.
-- **The mall** (`static/store/mall.js` + `functions/api/mall.js`): out the front door, a corridor of other creators'
-  storefronts. itch has no random-creator lookup, so the pool is the creators in itch's featured, top-rated and new
+- **The look: the Arcade's 2010 style in the 3D world, the modern dark look for the panels** (the owner's call,
+  November 2026). The world uses the Arcade's sky, light, shiny plastic, retro resolution and studded bricks (the
+  stud textures are copied from the Starter into `static/store/look/`; `brick()` + `flushBricks()` are the
+  Starter's `part()` / `flushStatic()` in the store's units, one stud = 0.19), with Kenney's furniture converted to
+  the same plastic and scaled up (`FURN`). Name tags and chat bubbles are the Arcade's. Buttons, bars and panels stay
+  modern (`data-theme="dev"` colours). Keep it spacious (`CELL_X`, `CELL_Z`, `ENTRY`; the mall's `CZ`).
+- **The scene** (`static/store/store.js`): you walk as your own saved character on the classic Grug rig dressed by
+  `GrugOutfitRig` (as in every Arcade game: nobody is shown as the plain blocky rig). Thumb stick on touch screens,
+  WASD, or tap / click the floor or a display; Space hops. Every product has a booth by type: asset packs a box on a
+  studded plinth (cover on the box, name on its side, a price tag), games an arcade cabinet (cover on the screen, name
+  on the marquee) with a poster stand, tools a vending machine. Next to one, the bar opens its itch.io page (E).
+  Shoppers in outfits (the player's other saved outfits, then `/arcade/outfits/`) wander, look at displays, hop and
+  chat; a shopkeeper waves you in. `window.GrugStoreDebug` exposes the player, the shoppers and the mall for tests.
+- **"Your character" and the changing room** open the players' Avatar Studio over the store (`/character/?embed`,
+  the same protocol as the Grug Studio game: `src/character/embed.js`); Wear it dresses you on the spot. **This is
+  the one place the developers' section points at the players' studio, at the owner's request** (it's part of the
+  store's world: you are your character). Inside an itch.io embed the studio and the outfits live in itch's
+  partitioned storage, so a character made there stays in that embed.
+- **The mall** (`static/store/mall.js` + `functions/api/mall.js`): out the front door, a wide corridor of other
+  creators' studded storefronts, with planters, benches and its own shoppers. itch has no random-creator lookup, so the pool is the creators in itch's featured, top-rated and new
   lists (`POOL_FEEDS`, an hour's cache), shuffled by the store's username and the day. **polysw always takes the
   fifth spot** (`HOUSE`, `HOUSE_SPOT`) in every mall but its own. Each storefront is checked with `/api/itch-store`
   as you walk up (a gone one shutters). On the site you walk in through the door; inside an itch.io embed other
