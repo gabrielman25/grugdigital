@@ -25,8 +25,13 @@
   'use strict';
   const $ = s => document.querySelector(s);
   const Q = new URLSearchParams(location.search);
-  const EMBED = Q.has('embed');
-  const PATH_USER = (location.pathname.match(/^\/store\/([A-Za-z0-9_-]+)\/?$/) || [])[1] || Q.get('u') || '';
+  // window.GRUG_STORE: set by the itch.io build (src/store/build_itch.py), which runs on itch's own servers:
+  //   { embed, user, api: where /api/... lives, site: the Grug site, assets: where the models are, avatars: [...] }
+  const CFG = window.GRUG_STORE || {};
+  const API = CFG.api || '', SITE = CFG.site || '', ASSETS = CFG.assets != null ? CFG.assets : '/static/store/';
+  const AVATARS = CFG.avatars || null;   // the Grug avatars built into the itch.io version (no saved outfits there)
+  const EMBED = Q.has('embed') || !!CFG.embed;
+  const PATH_USER = CFG.user || (location.pathname.match(/^\/store\/([A-Za-z0-9_-]+)\/?$/) || [])[1] || Q.get('u') || '';
   const DEMO = 'polysw';
   const USER = (PATH_USER || DEMO).toLowerCase();
   const LANDING = !PATH_USER && !EMBED;
@@ -47,7 +52,7 @@
   try { if (window.parent !== window) window.parent.postMessage({ grugStore: 'ready', user: USER }, '*'); } catch (e) {}
 
   if (TOUCH) document.body.classList.add('touch');
-  if (EMBED) { $('#madeWith').hidden = false; if (document.fullscreenEnabled) $('#fullBtn').hidden = false; }
+  if (EMBED) { $('#madeWith').hidden = false; if (SITE) $('#madeWith').href = SITE + '/store/'; if (document.fullscreenEnabled) $('#fullBtn').hidden = false; }
   else { $('#sbar').hidden = false; document.body.classList.add('has-bar'); }
 
   /* ---------------- loading veil ---------------- */
@@ -72,23 +77,25 @@
   // retro (2010), as in the Arcade games: no anti-aliasing, drawn a little under screen resolution with hard pixel edges
   const stage = $('#stage');
   const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
-  const RES = Math.min(innerWidth, innerHeight) < 700 ? 1 : 0.85;
+  // 3D resolution: 50% by default, as in Sunny Patch (the % button: 50 / 75 / 100%), blown up with hard pixel edges
+  const RES_KEY = 'grug.store.res';
+  let RES = 0.5; try { const r = +localStorage.getItem(RES_KEY); if ([0.5, 0.75, 1].includes(r)) RES = r; } catch (e) {}
   renderer.setPixelRatio(RES);
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = TOUCH ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   stage.appendChild(renderer.domElement);
   const scene = new THREE.Scene();
   const cam = new THREE.PerspectiveCamera(50, 1, 0.1, 900);
   scene.fog = new THREE.Fog(0xf3d2bc, 90, 420);
   const texL = new THREE.TextureLoader();
-  const skyTex = texL.load('/static/store/look/sky.jpg'); skyTex.wrapS = THREE.RepeatWrapping; skyTex.repeat.x = -1;
+  const skyTex = texL.load(ASSETS + 'look/sky.jpg'); skyTex.wrapS = THREE.RepeatWrapping; skyTex.repeat.x = -1;
   const sky = new THREE.Mesh(new THREE.SphereGeometry(440, 48, 24), new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide, depthWrite: false, fog: false }));
   sky.renderOrder = -1; scene.add(sky);
   scene.add(new THREE.HemisphereLight(0xfff0e2, 0x8a7a6a, 0.64));
   const SUN_DIR = (() => { const phi = 2 * Math.PI * (1 - 0.92), el = 0.88; return new THREE.Vector3(-Math.cos(phi) * Math.cos(el), Math.sin(el), Math.sin(phi) * Math.cos(el)).normalize(); })();
   const sun = new THREE.DirectionalLight(0xffe9d2, 0.85);
   sun.castShadow = true;
-  const SHADOW_RES = renderer.capabilities.maxTextureSize >= 4096 && RES < 1 ? 4096 : 2048;
+  const SHADOW_RES = TOUCH ? 1024 : 2048;
   sun.shadow.mapSize.set(SHADOW_RES, SHADOW_RES);
   Object.assign(sun.shadow.camera, { left: -16, right: 16, top: 16, bottom: -16, near: 5, far: 120 });
   sun.shadow.bias = -0.0002; sun.shadow.normalBias = 0.012;
@@ -98,7 +105,7 @@
   // One stud is S units (an R6 character is 5 studs tall, about one unit here). One texture tile = 2 studs, as in the games.
   const S = 0.19;
   function studTex(u) { const t = texL.load(u); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t; }
-  const STUD_A = studTex('/static/store/look/studAlbedo.png'), STUD_N = studTex('/static/store/look/studNormal.png'), STUD_I = studTex('/static/store/look/studInlet.png');
+  const STUD_A = studTex(ASSETS + 'look/studAlbedo.png'), STUD_N = studTex(ASSETS + 'look/studNormal.png'), STUD_I = studTex(ASSETS + 'look/studInlet.png');
   const SHINE = { shininess: 40, specular: 0x6a6a6a };
   const MATC = {};
   function brickMat(color, studs) {
@@ -123,8 +130,8 @@
     yellow: 0xf5cd30, orange: 0xda8541, purple: 0x6b327c, teal: 0x008f9c, pink: 0xff98dc, navy: 0x27466a, brown: 0x7c5c46 };
   const BRIGHT = [PAL.blue, PAL.green, PAL.yellow, PAL.orange, PAL.purple, PAL.teal, PAL.navy, PAL.pink];
   function brick(cx, cy, cz, sx, sy, sz, color, o = {}) {
-    const studs = o.studs !== false, key = (o.group || '') + '|' + color + '|' + studs;
-    let B = BATCH.get(key); if (!B) BATCH.set(key, B = { color, studs, group: o.group || '', boxes: [] });
+    const studs = o.studs !== false, cast = o.cast !== false, key = (o.group || '') + '|' + color + '|' + studs + '|' + cast;
+    let B = BATCH.get(key); if (!B) BATCH.set(key, B = { color, studs, cast, group: o.group || '', boxes: [] });
     B.boxes.push([cx, cy, cz, sx, sy, sz]);
   }
   function groupOf(name) { let g = GROUPS.get(name); if (!g) { g = new THREE.Group(); g.name = name; scene.add(g); GROUPS.set(name, g); } return g; }
@@ -141,7 +148,8 @@
       const pos = [], nor = [], uv = [], geo = new THREE.BufferGeometry(); let at = 0;
       per.forEach((q, mi) => { if (!q.p.length) return; for (let i = 0; i < q.p.length; i++) pos.push(q.p[i]); for (let i = 0; i < q.n.length; i++) nor.push(q.n[i]); for (let i = 0; i < q.u.length; i++) uv.push(q.u[i]); const c = q.p.length / 3; if (B.studs) geo.addGroup(at, c, mi); at += c; });
       geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-      const m = new THREE.Mesh(geo, brickMat(B.color, B.studs)); m.receiveShadow = true; m.castShadow = true;
+      const m = new THREE.Mesh(geo, brickMat(B.color, B.studs)); m.receiveShadow = true; m.castShadow = B.cast;
+      m.matrixAutoUpdate = false; m.updateMatrix();
       (B.group ? groupOf(B.group) : scene).add(m);
     }
     BATCH.clear();
@@ -168,13 +176,15 @@
   function loadModels(onStep) {
     const names = Object.keys(PACK); let n = 0;
     return Promise.all(names.map(name => new Promise((res, rej) => {
-      loader.load('/static/store/kenney/' + PACK[name] + '/' + name + '.glb', g => {
+      loader.load(ASSETS + 'kenney/' + PACK[name] + '/' + name + '.glb', g => {
         g.scene.traverse(o => { if (o.isMesh) o.material = Array.isArray(o.material) ? o.material.map(plastic) : plastic(o.material); });
         models[name] = g; onStep(++n / names.length); res();
       }, undefined, rej);
     })));
   }
   const mixers = [];
+  // things that never move: work their matrices out once, not every frame
+  function freeze(o) { o.updateMatrixWorld(true); o.traverse(c => { c.matrixAutoUpdate = false; c.updateMatrix(); }); }
   const FURN = 1.3;   // Kenney's mini furniture, scaled up to sit right next to R6 characters
   function place(name, x, z, rotY = 0, opts = {}) {
     const g = models[name];
@@ -185,7 +195,7 @@
     o.traverse(m => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
     if (opts.anim && g.animations && g.animations.length) {
       const mx = new THREE.AnimationMixer(o); mx.clipAction(g.animations[0]).play(); mx.update(Math.random() * 3); mixers.push(mx);
-    }
+    } else if (name !== 'wall-door-rotate') freeze(o);
     (opts.parent || scene).add(o);
     return o;
   }
@@ -273,7 +283,7 @@
       if (!url) return res(null);
       const img = new Image(); img.crossOrigin = 'anonymous'; img.decoding = 'async';
       img.onload = () => res(img); img.onerror = () => res(null);
-      img.src = '/api/itch-img?u=' + encodeURIComponent(url);
+      img.src = API + '/api/itch-img?u=' + encodeURIComponent(url);
     });
   }
   function loadCover(it) {
@@ -360,14 +370,14 @@
     items = []; booths = []; solids = []; walls = []; spots = [];
 
     // the baseplate everything stands on (classic grey, studded), with the shop's own floor on it
-    brick(0, -0.25, zBack / 2 + 5, W + 90, 0.5, D + 90, PAL.grey);
+    brick(0, -0.25, zBack / 2 + 5, W + 90, 0.5, D + 90, PAL.grey, { cast: false });
     const gameRow = rows.findIndex(r => r.type === 'game');
     const arcadeZ = gameRow < 0 ? zBack : -(ENTRY + gameRow * CELL_Z) + 0.3;
-    brick(0, 0, arcadeZ / 2, W, 0.08, -arcadeZ, PAL.sand);
+    brick(0, 0, arcadeZ / 2, W, 0.08, -arcadeZ, PAL.sand, { cast: false });
     if (gameRow >= 0) {   // the arcade: a checked floor
       for (let z0 = arcadeZ, r = 0; z0 > zBack + 0.01; z0 -= 1, r++) {
         const z1 = Math.max(zBack, z0 - 1);
-        for (let i = 0; i < W; i++) brick(xL + i + 0.5, 0, (z0 + z1) / 2, 1, 0.08, z0 - z1, (i + r) % 2 ? PAL.black : PAL.dark);
+        for (let i = 0; i < W; i++) brick(xL + i + 0.5, 0, (z0 + z1) / 2, 1, 0.08, z0 - z1, (i + r) % 2 ? PAL.black : PAL.dark, { cast: false });
       }
     }
 
@@ -445,6 +455,7 @@
     // a few open spots for shoppers to wander to
     for (let i = 0; i < 6; i++) spots.push({ x: rnd(xL + 1.6, xR - 1.6), z: rnd(zBack + 1.5, -2.6) });
     flushBricks();
+    for (const b of booths) { freeze(b.root); b.extra.forEach(freeze); }
   }
   let door = null, keeperSpot = null, room = null;
   // the changing room: a booth with a mirror and a sign. Walk up to it to change your character
@@ -532,7 +543,8 @@
       if (d < bd) { bd = d; best = [cx, cz]; }
     }
     f.x = best[0]; f.z = best[1];
-    for (const s of solids.concat(Mall.solids)) {
+    for (let i = 0, n = solids.length + Mall.solids.length; i < n; i++) {
+      const s = i < solids.length ? solids[i] : Mall.solids[i - solids.length];
       const cx = Math.max(s.minX, Math.min(s.maxX, f.x)), cz = Math.max(s.minZ, Math.min(s.maxZ, f.z));
       const dx = f.x - cx, dz = f.z - cz, d = Math.hypot(dx, dz);
       if (d < R_ME) {
@@ -598,16 +610,20 @@
   /* ---------------- dressing everyone ---------------- */
   const KIT = ['ranger', 'skater', 'grug', 'medic', 'racer', 'snow-rider', 'scavenger', 'flannel'];
   const GUEST_NAMES = ['Builderman42', 'PixelPal', 'noob_master', 'CoolKid2010', 'BrickFan', 'Shopaholic', 'LuckyStud', 'GameHunter', 'Cubey', 'ObbyQueen'];
-  const kitOutfits = () => Promise.all(KIT.map(n => GrugOutfitRig.fromURL('/arcade/outfits/' + n + '.glb', n.replace('-', ' ')))).then(a => a.filter(Boolean));
+  const kitOutfits = () => Promise.all(AVATARS ? AVATARS.map(a => GrugOutfitRig.fromURL(a.url, a.name)) : KIT.map(n => GrugOutfitRig.fromURL('/arcade/outfits/' + n + '.glb', n.replace('-', ' ')))).then(a => a.filter(Boolean));
+  // the itch.io version: you wear one of the built-in Grug avatars (the one you picked last time, Grug at first)
+  const LOOK_KEY = 'grug.store.look';
+  const myAvatar = () => { let id = 'grug'; try { id = localStorage.getItem(LOOK_KEY) || id; } catch (e) {} return AVATARS.find(a => a.id === id) || AVATARS[0]; };
+  async function wearAvatar(a) { const o = await GrugOutfitRig.fromURL(a.url, a.name); if (o) { GrugOutfitRig.dress(me.rig, o); me.rig.root.visible = true; } }
   async function wearOutfits() {
     const all = [me, ...npcs];
     const cap = setTimeout(() => all.forEach(c => { c.rig.root.visible = true; }), 8000);
     if (!window.GrugOutfitRig) { clearTimeout(cap); all.forEach(c => { c.rig.root.visible = true; }); return; }
     try {
-      const look = await GrugOutfitRig.load();
-      if (look) GrugOutfitRig.dress(me.rig, look);
+      if (AVATARS) await wearAvatar(myAvatar());
+      else { const look = await GrugOutfitRig.load(); if (look) GrugOutfitRig.dress(me.rig, look); }
       me.rig.root.visible = true;
-      const [others, kit] = await Promise.all([GrugOutfitRig.others(npcs.length), kitOutfits()]);
+      const [others, kit] = await Promise.all([AVATARS ? [] : GrugOutfitRig.others(npcs.length), kitOutfits()]);
       const pool = others.concat(kit.sort(() => Math.random() - 0.5));
       npcs.forEach((n, i) => {
         const o = pool[i % Math.max(1, pool.length)];
@@ -623,7 +639,7 @@
     list.forEach(n => { n.tag.nm.textContent = pick(GUEST_NAMES); n.tag.nm.style.display = ''; });
     if (!window.GrugOutfitRig) { list.forEach(n => { n.rig.root.visible = true; }); return; }
     try {
-      const [others, kit] = await Promise.all([GrugOutfitRig.others(list.length + 8), kitOutfits()]);
+      const [others, kit] = await Promise.all([AVATARS ? [] : GrugOutfitRig.others(list.length + 8), kitOutfits()]);
       const pool = others.slice(4).concat(kit.sort(() => Math.random() - 0.5));
       list.forEach((n, i) => { const o = pool[i % Math.max(1, pool.length)]; if (o) GrugOutfitRig.dress(n.rig, o); n.rig.root.visible = true; });
     } catch (e) { list.forEach(n => { n.rig.root.visible = true; }); }
@@ -634,6 +650,7 @@
   const Studio = {
     el: null, frame: null, loaded: false,
     open() {
+      if (AVATARS) { Looks.open(); return; }
       if (!this.el) { this.el = $('#studio'); this.frame = this.el.querySelector('iframe'); this.frame.src = '/character/?embed'; }
       else if (this.loaded) try { this.frame.contentWindow.postMessage({ grug: 'studio', type: 'open' }, location.origin); } catch (e) {}
       this.el.hidden = false; document.body.classList.add('studio-open');
@@ -650,6 +667,22 @@
       if (window.GrugOutfitRig) { const l = await GrugOutfitRig.load(); if (l) { GrugOutfitRig.dress(me.rig, l); me.rig.root.visible = true; } }
       me.wave = 1.4; hint.show('Looking good! That’s you now, all over Grug.', 4500);
     }
+  });
+  // the itch.io version's changing room: the built-in Grug avatars to pick from, and a link to make your own on the site
+  const Looks = {
+    open() {
+      const g = $('#lGrid'), cur = myAvatar();
+      g.innerHTML = AVATARS.map(a => `<button class="tile look" type="button" data-id="${esc(a.id)}" aria-pressed="${a.id === cur.id}"><div class="im"><img loading="lazy" src="${esc(a.thumb)}" alt=""></div><div class="tx"><b>${esc(a.name)}</b></div></button>`).join('');
+      $('#lMake').href = (SITE || 'https://grugdigital.com') + '/character/';
+      Panels.open('looks');
+    },
+  };
+  if (AVATARS) $('#lGrid').addEventListener('click', async e => {
+    const b = e.target.closest('[data-id]'); if (!b) return;
+    const a = AVATARS.find(x => x.id === b.dataset.id); if (!a) return;
+    try { localStorage.setItem(LOOK_KEY, a.id); } catch (e) {}
+    for (const x of $('#lGrid').children) x.setAttribute('aria-pressed', x === b);
+    await wearAvatar(a); me.wave = 1.4; Panels.closeAll(); hint.show('Looking good, ' + a.name + '!', 3000);
   });
   $('#meBtn').onclick = () => Studio.open();
   $('#studioClose').onclick = () => Studio.close();
@@ -837,8 +870,8 @@
       $('#nearLabel').innerHTML = 'Go in' + (TOUCH ? '' : ' <kbd>E</kbd>');
     } else {
       $('#nearTitle').textContent = 'Change your look';
-      $('#nearMeta').textContent = 'Make this character yours';
-      go.href = '/character/'; go.target = '_self';
+      $('#nearMeta').textContent = AVATARS ? 'Pick who you shop as' : 'Make this character yours';
+      go.href = AVATARS ? '#' : '/character/'; go.target = '_self';
       $('#nearLabel').innerHTML = 'Customize' + (TOUCH ? '' : ' <kbd>E</kbd>');
     }
     bar.hidden = false;
@@ -898,6 +931,9 @@
   $('#bGrid').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (!b) return; Panels.closeAll(); teleport(+b.dataset.k); });
   $('#openBrowse').onclick = () => Panels.cur === 'browse' ? Panels.closeAll() : Panels.open('browse');
   $('#viewBtn').onclick = () => { if (mode === 'overview') follow(800); else { mode = 'overview'; tweenTo(overviewView(insetForPanels()), 800); } };
+  function setRes(r) { RES = r; try { localStorage.setItem(RES_KEY, String(r)); } catch (e) {} renderer.setPixelRatio(r); resize(); $('#resBtn').textContent = Math.round(r * 100) + '%'; }
+  $('#resBtn').textContent = Math.round(RES * 100) + '%';
+  $('#resBtn').onclick = () => { setRes(RES === 0.5 ? 0.75 : RES === 0.75 ? 1 : 0.5); hint.show('3D resolution: ' + Math.round(RES * 100) + '%' + (RES === 0.5 ? ' (fastest)' : RES === 1 ? ' (sharpest)' : ''), 2200); };
   $('#fullBtn').onclick = () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (e) {} };
   $('#nearGo').addEventListener('click', e => { if (nearThing && (nearThing.room || (nearThing.front != null && !EMBED))) { e.preventDefault(); activate(); } });
 
@@ -934,12 +970,12 @@
   };
 
   /* ---------------- the mall: filled in by static/store/mall.js once the store is up ---------------- */
-  const Mall = { ready: false, bounds: null, solids: [], fronts: [], spot: () => ({ x: 0, z: 3 }), storeUrl: u => '/store/' + u + '?from=door' };
-  window.GrugStoreDebug = { me, Mall, view, npcs, get bounds() { return bounds; } };
+  const Mall = { ready: false, bounds: null, solids: [], fronts: [], spot: () => ({ x: 0, z: 3 }), storeUrl: u => SITE + '/store/' + u + '?from=door' };
+  const DBG = window.GrugStoreDebug = { me, Mall, view, npcs, draws: 0, get bounds() { return bounds; } };
 
   /* ---------------- the loop ---------------- */
   const clock = new THREE.Clock();
-  let lastZone = '', hereSign = null;
+  let lastZone = '', hereSign = null, lastDraw = 0;
   function frame(now) {
     requestAnimationFrame(frame);
     try { loopStep(now); } catch (e) { window.GrugLoopErrors = (window.GrugLoopErrors || 0) + 1; if (window.GrugLoopErrors < 5) console.error(e); }
@@ -947,6 +983,8 @@
   function loopStep(now) {
     if (!me.rig) { if (bounds) renderer.render(scene, cam); return; }
     if (document.body.classList.contains('studio-open')) return;   // the studio covers everything: nothing to draw
+    if (TOUCH && now - lastDraw < 31) return;                        // phones: 30 frames a second is plenty, and the battery lasts
+    lastDraw = now;
     const dt = Math.min(0.05, clock.getDelta());
 
     // where you want to go: the stick or keys (relative to the camera), else the spot you tapped
@@ -984,7 +1022,13 @@
       if (Math.abs(d) < 2.2) view.th += d * Math.min(1, dt * 1.5);
     }
     animateRig(me, dt);
-    for (const n of npcs) { updateNpc(n, dt); animateRig(n, dt); }
+    for (const n of npcs) {
+      updateNpc(n, dt);
+      // shoppers far from you aren't drawn (they keep walking about)
+      const far = Math.abs(n.x - view.tx) + Math.abs(n.z - view.tz) > 24;
+      if (n.rig.g.visible === far) n.rig.g.visible = !far;
+      if (!far) animateRig(n, dt);
+    }
 
     // what's in reach: a product, the changing room, or a storefront's door
     let best = null, bd = 1.3;
@@ -995,7 +1039,7 @@
 
     if (door && door.act) {
       const w = (Math.abs(me.x - door.x) < 1.6 && Math.abs(me.z) < 1.8) || npcs.some(n => Math.abs(n.x - door.x) < 1.2 && Math.abs(n.z) < 1.4) ? 1 : 0;
-      door.open += (w - door.open) * Math.min(1, dt * 6); door.act.time = door.open * door.dur * 0.999; door.mx.update(0);
+      if (Math.abs(w - door.open) > 0.002) { door.open += (w - door.open) * Math.min(1, dt * 6); door.act.time = door.open * door.dur * 0.999; door.mx.update(0); }
     }
     Mall.step && Mall.step(now, dt, me);
     const zone = me.z > 0.4 ? 'mall' : 'store';
@@ -1008,7 +1052,7 @@
     sun.position.set(sx + SUN_DIR.x * 60, SUN_DIR.y * 60, sz + SUN_DIR.z * 60); sun.target.position.set(sx, 0, sz);
     for (const m of mixers) m.update(dt);
     if (hereSign) { hereSign.rotation.set(-view.ph * 0.6, view.th, 0, 'YXZ'); hereSign.position.y = hereSign.userData.y + Math.sin(now / 420) * 0.03; }
-    for (const n of npcs) placeTag(n);
+    for (const n of npcs) if (n.rig.g.visible || n.tag.on) placeTag(n);
 
     // the store's walls between the camera and you step aside (only while you're inside)
     const inside = me.z < 0;
@@ -1020,6 +1064,7 @@
     }
     Mall.walls && Mall.walls(blocks, me);
     renderer.render(scene, cam);
+    DBG.draws++;
   }
   // does a wall along z = z0 (about 2 high) stand between the camera and you?
   function blocks(z0) {
@@ -1056,7 +1101,7 @@
     requestAnimationFrame(frame);
     let data;
     try {
-      const r = await fetch('/api/itch-store?user=' + encodeURIComponent(USER));
+      const r = await fetch(API + '/api/itch-store?user=' + encodeURIComponent(USER));
       data = await r.json().catch(() => ({}));
       if (r.status === 404 || r.status === 400) return veil.fail('No itch.io page called “' + USER + '”', 'Check the spelling: it’s the part before .itch.io in the page’s address.', true);
       if (!r.ok) throw new Error(data.error || 'status ' + r.status);
@@ -1083,7 +1128,7 @@
     // the shopkeeper and the shoppers: more in a bigger store
     const keeper = makeNpc('store'); keeper.where = 'keeper'; keeper.keeper = true; keeper.home = keeperSpot;
     keeper.x = keeperSpot.x; keeper.z = keeperSpot.z; keeper.rot = keeperSpot.face;
-    const shoppers = Math.max(3, Math.min(7, Math.round(items.length / 3)));
+    const shoppers = Math.max(3, Math.min(TOUCH ? 4 : 6, Math.round(items.length / 4)));
     for (let i = 0; i < shoppers; i++) makeNpc('store');
     wearOutfits();
     setupBrowse();
@@ -1117,8 +1162,8 @@
     setTimeout(() => { if (!Panels.cur && !document.body.classList.contains('studio-open')) hint.show('Tip: make this character yours. Tap “Your character”, or try the changing room by the door.', 7000); }, 26000);
 
     // the mall outside the door
-    const s = document.createElement('script'); s.src = '/static/store/mall.js';
-    s.onload = () => window.GrugMall && window.GrugMall({ THREE, scene, cam, models, place, brick, flushBricks, groupOf, PAL, BRIGHT, signBoard, loadImage, makeNpc, wearMore, Mall, USER, doorX, DOOR_W, WALL_H, WALL_T, bounds, EMBED });
+    const s = document.createElement('script'); s.src = ASSETS + 'mall.js';
+    s.onload = () => window.GrugMall && window.GrugMall({ THREE, scene, cam, API, models, place, brick, flushBricks, groupOf, PAL, BRIGHT, signBoard, loadImage, makeNpc, wearMore, Mall, USER, doorX, DOOR_W, WALL_H, WALL_T, bounds, EMBED });
     document.head.appendChild(s);
   }
   start();

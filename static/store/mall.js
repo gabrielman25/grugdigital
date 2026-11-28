@@ -10,7 +10,7 @@
    into that store; inside an itch.io embed other stores open in a new tab instead. ?mall=0 leaves the mall out. */
 window.GrugMall = function (G) {
   'use strict';
-  const { THREE, place, brick, flushBricks, groupOf, PAL, BRIGHT, signBoard, loadImage, makeNpc, wearMore, Mall, USER, EMBED, models, DOOR_W, WALL_H, WALL_T } = G;
+  const { THREE, API, place, brick, flushBricks, groupOf, PAL, BRIGHT, signBoard, loadImage, makeNpc, wearMore, Mall, USER, EMBED, models, DOOR_W, WALL_H, WALL_T } = G;
   if (new URLSearchParams(location.search).get('mall') === '0') return;
   const CZ = 8, FW = 8, GAP = 1, DEEP = 5;
   const W = G.bounds.maxX - G.bounds.minX;
@@ -19,7 +19,7 @@ window.GrugMall = function (G) {
   const rnd = (a, b) => a + Math.random() * (b - a);
   const pick = a => a[Math.floor(Math.random() * a.length)];
 
-  fetch('/api/mall?user=' + encodeURIComponent(USER)).then(r => r.ok ? r.json() : null).then(d => { if (d && d.neighbours) build(d.neighbours); }).catch(() => {});
+  fetch(API + '/api/mall?user=' + encodeURIComponent(USER)).then(r => r.ok ? r.json() : null).then(d => { if (d && d.neighbours) build(d.neighbours); }).catch(() => {});
 
   function build(neighbours) {
     // the spots, nearest the door first: across the corridor, then along this side
@@ -31,7 +31,7 @@ window.GrugMall = function (G) {
     Mall.bounds = { minX: -maxX, maxX, minZ: 0, maxZ: CZ };
 
     // the corridor: a light floor on the baseplate, the end walls, planters and benches down the middle
-    brick(0, 0, CZ / 2, maxX * 2, 0.08, CZ, 0xc4c6cc);
+    brick(0, 0, CZ / 2, maxX * 2, 0.08, CZ, 0xc4c6cc, { cast: false });
     for (const sx of [-1, 1]) brick(sx * maxX, WALL_H / 2, CZ / 2, WALL_T, WALL_H, CZ + WALL_T, PAL.grey);
     for (let px = -maxX + 4.5, k = 0; px < maxX - 3; px += (FW + GAP) / 2, k++) {
       if (Math.abs(px - doorX) < 2.5) continue;
@@ -50,7 +50,7 @@ window.GrugMall = function (G) {
     for (const f of fronts) for (const o of [-2.6, 2.6]) wander.push({ x: f.dx + o, z: f.line + f.dir * 1.1, face: f.dir > 0 ? Math.PI : 0 });
     Mall.spot = () => pick(wander);
     Mall.ready = true;
-    const crowd = []; for (let i = 0; i < 6; i++) crowd.push(makeNpc('mall'));
+    const crowd = []; for (let i = 0; i < 4; i++) crowd.push(makeNpc('mall'));
     wearMore(crowd);
   }
 
@@ -118,7 +118,7 @@ window.GrugMall = function (G) {
   let busy = false;
   function check(f) {
     busy = true; f.state = 'checking';
-    fetch('/api/itch-store?user=' + encodeURIComponent(f.user)).then(r => r.ok ? r.json() : null).then(d => {
+    fetch(API + '/api/itch-store?user=' + encodeURIComponent(f.user)).then(r => r.ok ? r.json() : null).then(d => {
       const list = d && (d.items || []).filter(x => x.type !== 'other');
       if (!list || !list.length) { shutter(f); return; }
       f.state = 'open'; f.name = d.name || f.user; f.count = list.length;
@@ -144,7 +144,7 @@ window.GrugMall = function (G) {
       const d = Math.hypot(me.x - f.dx, me.z - f.dz);
       if (d < 18) for (const p of f.posters) if (p.userData.cover && !p.userData.done) { p.userData.done = true; loadImage(p.userData.cover).then(img => img && p.userData.fill(img)); }
       if (d < 10 && f.state === 'new' && !busy) check(f);
-      if (f.act) { const want = d < 2 ? 1 : 0; f.open += (want - f.open) * Math.min(1, dt * 6); f.act.time = f.open * f.act.dur * 0.999; f.act.mx.update(0); }
+      if (f.act) { const want = d < 2 ? 1 : 0; if (Math.abs(want - f.open) > 0.002) { f.open += (want - f.open) * Math.min(1, dt * 6); f.act.time = f.open * f.act.dur * 0.999; f.act.mx.update(0); } }
     }
     // walking into an open door takes you in (on the site; inside an itch.io embed, use the bar's Go in)
     if (EMBED) return;

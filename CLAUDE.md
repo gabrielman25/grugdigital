@@ -155,6 +155,15 @@ studded style with furniture from Kenney's Mini Shop and Mini Arcade (`static/st
   `/store/<user>?embed=1&spawn=<slug>`) per itch.io page, or a zip of them all. It never needs re-uploading. If the
   store doesn't answer in 15 seconds the zip shows a link to the creator's itch page. `?spawn=` starts you in front
   of that product with "You are here"; `?ref=` (the itch page's address, when itch passes it) does the same.
+- **Speed**: 3D resolution 50% by default (the % button: 50 / 75 / 100%, `grug.store.res`, as in Sunny Patch); phones
+  draw at most 30 frames a second with 1024 shadows; static things freeze their matrices (`freeze()`); floors don't
+  cast shadows; shoppers far from you aren't drawn. Measure with `GrugStoreDebug.draws` (frames drawn) before and
+  after a change.
+- **The itch.io version** (`python3 src/store/build_itch.py`, a zip to upload as "played in the browser"): the same
+  page run as the embed, with three.js, the models, textures, font and the Grug avatars (`/arcade/outfits/`) built
+  in (`window.GRUG_STORE`: `api`, `site`, `assets`, `avatars`). Everyone there wears the built-in avatars and the
+  changing room is a picker of them (`Looks`); the live data still comes from `--api`. Rebuild it after changing the
+  store, and with the default `--api` once the 3D Store is on `main`.
 - Phase 2 (not built yet, needs the owner's accounts): saved custom layouts (a Cloudflare KV or D1 binding),
   "Log in with itch.io" (an itch OAuth app), and a paid unlock checked against itch download keys.
 
